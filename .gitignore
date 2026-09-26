@@ -1,0 +1,29 @@
+# Throwaway feasibility spike (kept locally until S1 is done, never committed)
+spikes/
+
+# Dependencies and build output
+node_modules/
+dist/
+.astro/
+coverage/
+
+# Local data and secrets
+*.db
+*.db-shm
+*.db-wal
+.wrangler/
+.env
+.env.*
+!.env.example
+.dev.vars
+uploads/
+
+# Test artefacts
+test-results/
+playwright-report/
+.seeded-bug-backup/
+
+# Tooling caches
+.fallow/
+*.tsbuildinfo
+.DS_Store
