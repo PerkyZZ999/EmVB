@@ -4,6 +4,7 @@ import {
   CaretDownIcon,
   CaretRightIcon,
   ImageIcon,
+  StarIcon,
   SquaresFourIcon,
   TextHIcon,
   WarningCircleIcon,
@@ -36,6 +37,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
   container: SquaresFourIcon,
   image: ImageIcon,
+  icon: StarIcon,
 };
 
 const withStyle = (node: LayoutNode, patch: Partial<StyleProps>): LayoutNode => {

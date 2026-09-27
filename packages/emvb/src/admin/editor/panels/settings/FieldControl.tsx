@@ -8,6 +8,7 @@ import {
 } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
+import { IconPicker } from "./IconPicker.tsx";
 import { MediaPicker } from "./MediaPicker.tsx";
 
 const propsOf = (node: LayoutNode): Record<string, unknown> =>
@@ -50,6 +51,10 @@ export function FieldControl({
     }
     setError(null);
   }, [node.id, field.key, field.kind, raw]);
+
+  if (field.kind === "icon") {
+    return <IconPicker key={field.key} node={node} onChange={onChange} />;
+  }
 
   if (field.kind === "media") {
     if (!fetcher) {
@@ -267,5 +272,6 @@ export const IMPLEMENTED_FIELD_KINDS = [
   "boolean",
   "href",
   "media",
+  "icon",
   "list-items",
 ] as const;

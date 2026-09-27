@@ -14,6 +14,7 @@ export {
   ButtonNode,
   ListNode,
   ImageNode,
+  IconNode,
   NodeId,
   CONTAINER_TAGS,
   TEXT_TAGS,
@@ -102,3 +103,10 @@ export {
   type Place,
   type Refusal,
 } from "./arrange.ts";
+export {
+  BUNDLED_ICONS,
+  BUNDLED_ICON_IDS,
+  getBundledIcon,
+  type BundledIcon,
+  type IconPrimitive,
+} from "./icons/catalog.ts";

@@ -1733,6 +1733,51 @@
         "share one EmDash media endpoint"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-025/remote-url-icon",
+      "requirement": "R-032",
+      "description": "unknown icon ids are loaded as remote <img> URLs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    if (!bundled) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
+          "replace": "    if (!bundled) {\n      return {\n        tag: \"img\",\n        attrs: {\n          ...attrs,\n          src: node.props.iconId,\n          alt: \"\",\n        },\n        children: [],\n      };\n    }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/icons/icons.test.ts",
+        "-t",
+        "unknown icon ids"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-025/unknown-id-raw-html",
+      "requirement": "R-033",
+      "description": "unknown icon ids inject a script element into the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "  \"g\",\n]);",
+          "replace": "  \"g\",\n  \"script\",\n]);"
+        },
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    if (!bundled) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
+          "replace": "    if (!bundled) {\n      return {\n        tag: \"script\",\n        attrs: {},\n        children: [\"alert(1)\"],\n      };\n    }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/icons/icons.test.ts",
+        "-t",
+        "unknown icon ids"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

@@ -10,6 +10,7 @@ import {
   ListBulletsIcon,
   CursorClickIcon,
   ImageIcon,
+  StarIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
 import { ELEMENT_DESCRIPTORS, type ElementType } from "../../../core/index.ts";
@@ -27,6 +28,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   button: CursorClickIcon,
   list: ListBulletsIcon,
   image: ImageIcon,
+  icon: StarIcon,
 };
 
 const GROUPS = [

@@ -3,6 +3,7 @@ import type {
   ContainerNode,
   DividerNode,
   HeadingNode,
+  IconNode,
   ImageNode,
   LabelNode,
   LinkNode,
@@ -14,6 +15,7 @@ import { CONTAINER_TAGS, TEXT_TAGS } from "../schema/layout.ts";
 import type { ElementDescriptor } from "../schema/descriptors.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
+import { getBundledIcon } from "../icons/catalog.ts";
 import type { VNode } from "../render/vnode.ts";
 
 type Build<N> = (node: N, attrs: Record<string, string>, children: VNode[]) => VNode;
@@ -310,6 +312,83 @@ const image: ElementDefinition<ImageNode> = {
   },
 };
 
+const icon: ElementDefinition<IconNode> = {
+  baseCss:
+    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon svg{display:block;width:1em;height:1em}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
+  defaults: () => ({
+    type: "icon",
+    props: { iconId: "star", title: "Star", decorative: false, size: 24 },
+  }),
+  descriptor: {
+    type: "icon",
+    name: "Icon",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "iconId", kind: "icon", label: "Icon" },
+      { key: "title", kind: "text", label: "Title" },
+      {
+        key: "decorative",
+        kind: "boolean",
+        label: "Decorative (hide from assistive tech)",
+        optional: true,
+      },
+      {
+        key: "size",
+        kind: "int",
+        label: "Size (px)",
+        optional: true,
+        message: "Size must be a positive whole number.",
+      },
+    ],
+  },
+  build: (node, attrs) => {
+    const bundled = getBundledIcon(node.props.iconId);
+    if (!bundled) {
+      // Never treat iconId as a URL or raw HTML (R-032 / R-033).
+      return {
+        tag: "span",
+        attrs: {
+          ...attrs,
+          class: `${attrs.class ?? ""} emvb-icon-missing`.trim(),
+          "aria-hidden": "true",
+        },
+        children: [],
+      };
+    }
+    const decorative = node.props.decorative === true;
+    const size = node.props.size ?? 24;
+    const svgAttrs: Record<string, string> = {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: String(size),
+      height: String(size),
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      "stroke-width": "2",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      focusable: "false",
+    };
+    if (decorative) {
+      svgAttrs["aria-hidden"] = "true";
+    } else {
+      svgAttrs.role = "img";
+      if (node.props.title) svgAttrs["aria-label"] = node.props.title;
+    }
+    const children: VNode[] = bundled.children.map((child) => ({
+      tag: child.tag,
+      attrs: { ...child.attrs },
+      children: [],
+    }));
+    return {
+      tag: "span",
+      attrs,
+      children: [{ tag: "svg", attrs: svgAttrs, children }],
+    };
+  },
+};
+
 export const ELEMENTS = {
   heading,
   container,
@@ -321,6 +400,7 @@ export const ELEMENTS = {
   button,
   list,
   image,
+  icon,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;

@@ -128,4 +128,10 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-media-card:hover { background: var(--color-kumo-tint); }
 .emvb-media-card img { display: block; width: 100%; height: 72px; object-fit: cover; border-radius: 4px; background: var(--color-kumo-canvas); }
 .emvb-media-card span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.emvb-icon-grid { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; max-height: 280px; overflow: auto; }
+.emvb-icon-tile { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; padding: 8px 4px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; background: var(--color-kumo-base); color: var(--text-color-kumo-default); font: inherit; font-size: 11px; line-height: 14px; cursor: pointer; }
+.emvb-icon-tile:hover { background: var(--color-kumo-tint); }
+.emvb-icon-tile[data-selected="true"] { border-color: var(--color-kumo-brand); background: var(--color-kumo-tint); }
+.emvb-icon-tile span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 `;

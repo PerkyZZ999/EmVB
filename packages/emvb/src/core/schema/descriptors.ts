@@ -8,6 +8,7 @@ export type FieldKind =
   | "boolean"
   | "href"
   | "media"
+  | "icon"
   | "list-items";
 
 export type FieldOption = { value: string | number | boolean; label: string };

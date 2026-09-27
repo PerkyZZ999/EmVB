@@ -121,6 +121,26 @@ export const ListNode = z.strictObject({
   htmlId: HtmlId.optional(),
 });
 
+/** Bundled Lucide icon by id (W-025 / A-04). Unknown ids stay on save; renderer shows a placeholder. */
+export const IconNode = z
+  .strictObject({
+    id: NodeId,
+    type: z.literal("icon"),
+    props: z.strictObject({
+      iconId: z.string().min(1).max(64),
+      size: z.number().int().positive().max(512).optional(),
+      decorative: z.boolean().optional(),
+      title: z.string().max(200).optional(),
+    }),
+    style: StyleProps.optional(),
+    classes: ClassIds.optional(),
+    htmlId: HtmlId.optional(),
+  })
+  .refine((node) => node.props.decorative === true || (node.props.title?.length ?? 0) > 0, {
+    message: "Title is required unless the icon is marked decorative.",
+    path: ["props", "title"],
+  });
+
 /** Image from the media library or a URL (W-024 / R-007). Alt required unless decorative. */
 export const ImageNode = z
   .strictObject({
@@ -169,6 +189,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "button",
   "list",
   "image",
+  "icon",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -204,6 +225,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   ButtonNode,
   ListNode,
   ImageNode,
+  IconNode,
 ]);
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
@@ -215,6 +237,7 @@ export type LinkNode = z.infer<typeof LinkNode>;
 export type ButtonNode = z.infer<typeof ButtonNode>;
 export type ListNode = z.infer<typeof ListNode>;
 export type ImageNode = z.infer<typeof ImageNode>;
+export type IconNode = z.infer<typeof IconNode>;
 
 type StyleOf = z.infer<typeof StyleProps>;
 type ClassesOf = z.infer<typeof ClassIds>;
@@ -253,6 +276,7 @@ export type LayoutNode =
   | ButtonNode
   | ListNode
   | ImageNode
+  | IconNode
   | UnknownNode;
 
 /**

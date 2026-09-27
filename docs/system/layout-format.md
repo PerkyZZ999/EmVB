@@ -47,6 +47,7 @@ How EmVB stores a page and its site-wide design, as implemented through S2 (W-01
 | `button` | `text`, optional `href` and `newTab` | none | `<a href>` when `href` is safe, else `<button type="button">` |
 | `list` | `items` (string[], ≤ 200), optional `ordered` | none | `<ul>` or `<ol>` with `<li>` |
 | `image` | `src`, `alt`, optional `decorative`, `width`, `height`, `mediaId` | none | `<img loading="lazy">` (decorative → empty `alt` + `role="presentation"`) |
+| `icon` | `iconId` (bundled Lucide id), optional `size`, `decorative`, `title` | none | Inline Lucide `<svg>` (unknown id → placeholder; never a remote URL) |
 
 Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `classes` (unused until S4).
 
