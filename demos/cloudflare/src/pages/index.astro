@@ -14,7 +14,7 @@ const { siteTitle, siteTagline } = resolveStarterSiteIdentity(
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 ---
 
-<Base title={siteTitle} description={siteTagline}>
+<Base title={siteTitle} description={siteTagline} isFront>
 	<h1>Recent Posts</h1>
 
 	{

@@ -3,6 +3,12 @@ import { getMenuWithCacheHint, getSiteSettingsWithCacheHint } from "emdash";
 import { EmDashHead, EmDashBodyStart, EmDashBodyEnd } from "emdash/ui";
 import { createPublicPageContext } from "emdash/page";
 import LiveSearch from "emdash/ui/search";
+import {
+	resolveThemeParts,
+	themeContext404,
+	themeContextFrom,
+	themeContextFront,
+} from "emvb/astro";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
 interface Props {
@@ -13,9 +19,13 @@ interface Props {
 	canonical?: string | null;
 	/** Pass content reference for plugin page contributions on content pages */
 	content?: { collection: string; id: string; slug?: string | null };
+	/** When true, theme conditions treat this as the 404 route. */
+	is404?: boolean;
+	/** When true, theme conditions treat this as the site front page. */
+	isFront?: boolean;
 }
 
-const { title, pageTitle, description, image, canonical, content } =
+const { title, pageTitle, description, image, canonical, content, is404, isFront } =
 	Astro.props;
 const [settingsResult, menuResult] = await Promise.all([
 	getSiteSettingsWithCacheHint(),
@@ -49,6 +59,13 @@ const pageCtx = createPublicPageContext({
 	content,
 	siteName: siteTitle,
 });
+
+const themeCtx = is404
+	? themeContext404(Astro.url.pathname)
+	: isFront
+		? themeContextFront()
+		: themeContextFrom(Astro.url, { content: content ?? null });
+const theme = await resolveThemeParts(Astro, themeCtx);
 ---
 
 <!doctype html>
@@ -58,43 +75,52 @@ const pageCtx = createPublicPageContext({
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>{fullTitle}</title>
 		<EmDashHead page={pageCtx} />
+		{theme.css && <style set:html={theme.css} />}
 	</head>
 	<body>
 		<EmDashBodyStart page={pageCtx} />
 
-		<header>
-			<nav>
-				<a href="/">
-					{
-						siteLogo ? (
-							<img
-								src={siteLogo.url}
-								alt={siteLogo.alt || siteTitle}
-								style="height:48px;width:auto;margin:-8px 0;display:block;"
-							/>
-						) : (
-							siteTitle
-						)
-					}
-				</a>
-				{
-					menu?.items.map((item) => (
-						<a
-							href={item.url}
-							target={item.target}
-							rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
-						>
-							{item.label}
+		{
+			theme.header ? (
+				<Fragment set:html={theme.header.html} />
+			) : (
+				<header>
+					<nav>
+						<a href="/">
+							{
+								siteLogo ? (
+									<img
+										src={siteLogo.url}
+										alt={siteLogo.alt || siteTitle}
+										style="height:48px;width:auto;margin:-8px 0;display:block;"
+									/>
+								) : (
+									siteTitle
+								)
+							}
 						</a>
-					))
-				}
-				<LiveSearch placeholder="Search..." collections={["posts", "pages"]} />
-			</nav>
-		</header>
+						{
+							menu?.items.map((item) => (
+								<a
+									href={item.url}
+									target={item.target}
+									rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+								>
+									{item.label}
+								</a>
+							))
+						}
+						<LiveSearch placeholder="Search..." collections={["posts", "pages"]} />
+					</nav>
+				</header>
+			)
+		}
 
 		<main>
 			<slot />
 		</main>
+
+		{theme.footer && <Fragment set:html={theme.footer.html} />}
 
 		<EmDashBodyEnd page={pageCtx} />
 	</body>
