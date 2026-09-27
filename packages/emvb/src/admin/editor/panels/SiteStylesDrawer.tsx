@@ -1,9 +1,16 @@
 import { Button, Input, Tabs } from "@cloudflare/kumo";
-import { PlusIcon, TrashIcon, WarningCircleIcon, XIcon } from "@phosphor-icons/react";
+import {
+  CopySimpleIcon,
+  PlusIcon,
+  TrashIcon,
+  WarningCircleIcon,
+  XIcon,
+} from "@phosphor-icons/react";
 import * as React from "react";
 import {
   clearClassRefs,
   deleteVariable,
+  duplicateClass,
   findClassUsages,
   findVariableUsages,
   findVariableUsagesInDesign,
@@ -35,9 +42,20 @@ const CLASS_STYLE_KEYS = [
   "paddingLeft",
   "fontSize",
   "fontFamily",
+  "fontWeight",
   "gap",
   "borderRadius",
+  "flexDirection",
+  "justifyContent",
+  "alignItems",
 ] as const satisfies ReadonlyArray<keyof StyleProps>;
+
+const VAR_TOKEN: Record<VariableKind, (id: string) => string> = {
+  color: (id) => `--emvb-c-${id}`,
+  font: (id) => `--emvb-f-${id}`,
+  fontSize: (id) => `--emvb-fs-${id}`,
+  spacing: (id) => `--emvb-s-${id}`,
+};
 
 const uniqueVarId = (design: DesignSystem, kind: VariableKind, name: string) => {
   const base = slugify(name).slice(0, 34) || kind;
@@ -73,8 +91,8 @@ function InlineError({ children }: { children: string }) {
 }
 
 /**
- * Site styles drawer (W-032): Variables and Classes for the design system.
- * Saves via onDesignChange (immediate CAS); optional layout clear on delete.
+ * Site styles drawer — Variables Manager and Classes Manager (W-032 / W-071).
+ * Elementor v4–inspired workflow on EmVB tokens; saves via CAS (D-013 / D-EV4-03).
  */
 export function SiteStylesDrawer({
   design,
@@ -103,7 +121,12 @@ export function SiteStylesDrawer({
   return (
     <div className="emvb-panel-body emvb-site-styles" data-emvb-site-styles="">
       <div className="emvb-site-styles-head">
-        <h2 className="emvb-panel-title">Site styles</h2>
+        <div className="emvb-site-styles-titles">
+          <h2 className="emvb-panel-title">Site styles</h2>
+          <p className="emvb-helper emvb-site-styles-subtitle" data-emvb-manager-label="">
+            {tab === "variables" ? "Variables Manager" : "Classes Manager"}
+          </p>
+        </div>
         <Button
           type="button"
           variant="ghost"
@@ -287,10 +310,21 @@ function VariableSection({
           : "spacings";
   const items = design.variables[listKey] ?? [];
   const [creating, setCreating] = React.useState(false);
+  const [filter, setFilter] = React.useState("");
   const [name, setName] = React.useState("");
   const [value, setValue] = React.useState(
     kind === "color" ? "#0055ff" : kind === "font" ? "Noto Sans, sans-serif" : "16",
   );
+
+  const q = filter.trim().toLowerCase();
+  const visible = q
+    ? items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(q) ||
+          item.id.toLowerCase().includes(q) ||
+          VAR_TOKEN[kind](item.id).toLowerCase().includes(q),
+      )
+    : items;
 
   const create = async () => {
     const trimmed = name.trim();
@@ -331,9 +365,14 @@ function VariableSection({
   };
 
   return (
-    <section className="emvb-site-section" data-emvb-var-kind={kind}>
+    <section className="emvb-site-section emvb-site-card" data-emvb-var-kind={kind}>
       <div className="emvb-site-section-head">
-        <h3 className="emvb-field-label">{title}</h3>
+        <h3 className="emvb-field-label">
+          {title}
+          <span className="emvb-site-count" data-emvb-var-count="">
+            {items.length}
+          </span>
+        </h3>
         <Button
           type="button"
           variant="ghost"
@@ -345,74 +384,114 @@ function VariableSection({
           New
         </Button>
       </div>
+      {items.length > 3 && (
+        <div data-emvb-var-filter={kind}>
+          <Input
+            label="Filter"
+            className={FIELD}
+            value={filter}
+            placeholder="Search name or token…"
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
+      )}
       {items.length === 0 && !creating && <p className="emvb-helper">None yet.</p>}
+      {items.length > 0 && visible.length === 0 && <p className="emvb-helper">No matches.</p>}
       <ul className="emvb-site-list">
-        {items.map((item) => (
-          <li key={item.id} className="emvb-site-row" data-emvb-var-id={item.id}>
-            <Input
-              label="Name"
-              className={FIELD}
-              value={item.name}
-              onChange={(event) => {
-                const nextName = event.target.value;
-                void onSave(renameVariable(design, item.id, kind, nextName));
-              }}
-            />
-            {kind === "color" || kind === "font" ? (
-              <Input
-                label="Value"
-                className={FIELD}
-                value={"value" in item && typeof item.value === "string" ? item.value : ""}
-                onChange={(event) => {
-                  const nextValue = event.target.value;
-                  const list = (design.variables[listKey] ?? []).map((entry) =>
-                    entry.id === item.id ? Object.assign({}, entry, { value: nextValue }) : entry,
-                  );
-                  void onSave({
-                    ...design,
-                    variables: { ...design.variables, [listKey]: list },
-                  });
-                }}
+        {visible.map((item) => {
+          const token = VAR_TOKEN[kind](item.id);
+          const colorValue =
+            kind === "color" && "value" in item && typeof item.value === "string"
+              ? item.value
+              : null;
+          return (
+            <li
+              key={item.id}
+              className="emvb-site-row emvb-site-elevated"
+              data-emvb-var-id={item.id}
+            >
+              {colorValue && (
+                <span
+                  className="emvb-swatch emvb-site-swatch"
+                  style={{ background: colorValue }}
+                  aria-hidden="true"
+                  data-emvb-var-swatch=""
+                />
+              )}
+              <div className="emvb-site-row-fields">
+                <Input
+                  label="Name"
+                  className={FIELD}
+                  value={item.name}
+                  onChange={(event) => {
+                    const nextName = event.target.value;
+                    void onSave(renameVariable(design, item.id, kind, nextName));
+                  }}
+                />
+                {kind === "color" || kind === "font" ? (
+                  <Input
+                    label="Value"
+                    className={FIELD}
+                    value={"value" in item && typeof item.value === "string" ? item.value : ""}
+                    onChange={(event) => {
+                      const nextValue = event.target.value;
+                      const list = (design.variables[listKey] ?? []).map((entry) =>
+                        entry.id === item.id
+                          ? Object.assign({}, entry, { value: nextValue })
+                          : entry,
+                      );
+                      void onSave({
+                        ...design,
+                        variables: { ...design.variables, [listKey]: list },
+                      });
+                    }}
+                  />
+                ) : (
+                  <Input
+                    label="Value (px)"
+                    className={FIELD}
+                    type="number"
+                    value={
+                      typeof item.value === "object" && item.value && "value" in item.value
+                        ? String((item.value as { value: number }).value)
+                        : ""
+                    }
+                    onChange={(event) => {
+                      const num = Number(event.target.value);
+                      if (!Number.isFinite(num) || num < 0) return;
+                      const list = (design.variables[listKey] ?? []).map((entry) =>
+                        entry.id === item.id
+                          ? Object.assign({}, entry, {
+                              value: { value: num, unit: "px" as const },
+                            })
+                          : entry,
+                      );
+                      void onSave({
+                        ...design,
+                        variables: { ...design.variables, [listKey]: list },
+                      });
+                    }}
+                  />
+                )}
+                <p className="emvb-mono emvb-site-token" title={token}>
+                  {token}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className={BUTTON}
+                aria-label={`Delete ${item.name}`}
+                icon={<TrashIcon aria-hidden="true" />}
+                onClick={() => onAskDelete(item.id, item.name)}
               />
-            ) : (
-              <Input
-                label="Value (px)"
-                className={FIELD}
-                type="number"
-                value={
-                  typeof item.value === "object" && item.value && "value" in item.value
-                    ? String((item.value as { value: number }).value)
-                    : ""
-                }
-                onChange={(event) => {
-                  const num = Number(event.target.value);
-                  if (!Number.isFinite(num) || num < 0) return;
-                  const list = (design.variables[listKey] ?? []).map((entry) =>
-                    entry.id === item.id
-                      ? Object.assign({}, entry, { value: { value: num, unit: "px" as const } })
-                      : entry,
-                  );
-                  void onSave({
-                    ...design,
-                    variables: { ...design.variables, [listKey]: list },
-                  });
-                }}
-              />
-            )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className={BUTTON}
-              aria-label={`Delete ${item.name}`}
-              icon={<TrashIcon aria-hidden="true" />}
-              onClick={() => onAskDelete(item.id, item.name)}
-            />
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
       {creating && (
-        <div className="emvb-site-create" data-emvb-var-create={kind}>
+        <div className="emvb-site-create emvb-site-elevated" data-emvb-var-create={kind}>
           <Input
             label="Name"
             className={FIELD}
@@ -465,6 +544,17 @@ function ClassesSection({
   const [creating, setCreating] = React.useState(false);
   const [name, setName] = React.useState("");
   const [editing, setEditing] = React.useState<string | null>(null);
+  const [filter, setFilter] = React.useState("");
+
+  const q = filter.trim().toLowerCase();
+  const visible = q
+    ? classes.filter(
+        (cls) =>
+          cls.name.toLowerCase().includes(q) ||
+          cls.id.toLowerCase().includes(q) ||
+          `emvb-k-${cls.id}`.includes(q),
+      )
+    : classes;
 
   const create = async () => {
     const trimmed = name.trim();
@@ -479,8 +569,15 @@ function ClassesSection({
 
   return (
     <section className="emvb-site-section" data-emvb-classes="">
+      <p className="emvb-helper emvb-site-cascade" data-emvb-cascade-help="">
+        Cascade: variables → classes (applied order on the element; later wins) → local styles.
+        Editing a class updates every element that uses it.
+      </p>
       <div className="emvb-site-section-head">
-        <h3 className="emvb-field-label">Classes</h3>
+        <h3 className="emvb-field-label">
+          Classes
+          <span className="emvb-site-count">{classes.length}</span>
+        </h3>
         <Button
           type="button"
           variant="ghost"
@@ -492,29 +589,47 @@ function ClassesSection({
           New
         </Button>
       </div>
+      {classes.length > 3 && (
+        <Input
+          label="Filter"
+          className={FIELD}
+          value={filter}
+          placeholder="Search class…"
+          onChange={(e) => setFilter(e.target.value)}
+        />
+      )}
       {classes.length === 0 && !creating && <p className="emvb-helper">None yet.</p>}
       <ul className="emvb-site-list">
-        {classes.map((cls) => {
+        {visible.map((cls) => {
           const count = layout ? findClassUsages(layout, cls.id).length : 0;
           const open = editing === cls.id;
+          const token = `emvb-k-${cls.id}`;
           return (
-            <li key={cls.id} className="emvb-site-class" data-emvb-class-def={cls.id}>
+            <li
+              key={cls.id}
+              className={`emvb-site-class emvb-site-elevated${open ? " emvb-site-class-active" : ""}`}
+              data-emvb-class-def={cls.id}
+              data-emvb-class-editing={open ? "" : undefined}
+            >
               <div className="emvb-site-row">
-                <Input
-                  label="Name"
-                  className={FIELD}
-                  value={cls.name}
-                  onChange={(event) => {
-                    const nextName = event.target.value;
-                    void onSave({
-                      ...design,
-                      classes: classes.map((c) =>
-                        c.id === cls.id ? Object.assign({}, c, { name: nextName }) : c,
-                      ),
-                    });
-                  }}
-                />
-                <span className="emvb-helper">{count} used</span>
+                <div className="emvb-site-row-fields">
+                  <Input
+                    label="Name"
+                    className={FIELD}
+                    value={cls.name}
+                    onChange={(event) => {
+                      const nextName = event.target.value;
+                      void onSave({
+                        ...design,
+                        classes: classes.map((c) =>
+                          c.id === cls.id ? Object.assign({}, c, { name: nextName }) : c,
+                        ),
+                      });
+                    }}
+                  />
+                  <p className="emvb-mono emvb-site-token">{token}</p>
+                </div>
+                <span className="emvb-helper emvb-site-usage">{count} used</span>
                 <Button
                   type="button"
                   variant="ghost"
@@ -529,6 +644,15 @@ function ClassesSection({
                   variant="ghost"
                   size="sm"
                   className={BUTTON}
+                  aria-label={`Duplicate ${cls.name}`}
+                  icon={<CopySimpleIcon aria-hidden="true" />}
+                  onClick={() => void onSave(duplicateClass(design, cls.id))}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={BUTTON}
                   aria-label={`Delete ${cls.name}`}
                   icon={<TrashIcon aria-hidden="true" />}
                   onClick={() => onAskDelete(cls.id, cls.name)}
@@ -536,6 +660,7 @@ function ClassesSection({
               </div>
               {open && (
                 <div className="emvb-site-class-styles">
+                  <p className="emvb-helper">Editing class styles (site-wide).</p>
                   {CLASS_STYLE_KEYS.map((key) => (
                     <StyleRow
                       key={key}
@@ -564,7 +689,7 @@ function ClassesSection({
         })}
       </ul>
       {creating && (
-        <div className="emvb-site-create" data-emvb-class-create="">
+        <div className="emvb-site-create emvb-site-elevated" data-emvb-class-create="">
           <Input
             label="Name"
             className={FIELD}

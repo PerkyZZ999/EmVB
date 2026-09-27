@@ -1,5 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { addClassId, moveClassId, removeClassId } from "./classes.ts";
+import { emptyDesign } from "../schema/design.ts";
+import type { Layout } from "../schema/layout.ts";
+import {
+  addClassId,
+  clearClassRefs,
+  duplicateClass,
+  findClassUsages,
+  moveClassId,
+  removeClassId,
+} from "./classes.ts";
 
 describe("class id list helpers (W-031)", () => {
   test("add, remove, and reorder persist order", () => {
@@ -12,9 +21,6 @@ describe("class id list helpers (W-031)", () => {
     expect(removeClassId(ids, "card")).toEqual(["accent"]);
   });
 });
-
-import type { Layout } from "../schema/layout.ts";
-import { clearClassRefs, findClassUsages } from "./classes.ts";
 
 describe("findClassUsages / clearClassRefs (W-032)", () => {
   test("finds and clears class ids across the tree", () => {
@@ -48,5 +54,24 @@ describe("findClassUsages / clearClassRefs (W-032)", () => {
     expect(findClassUsages(cleared, "card")).toEqual([]);
     expect(cleared.root.children[0]?.classes).toEqual(["accent"]);
     expect(cleared.root.children[1]?.classes).toBeUndefined();
+  });
+});
+
+describe("duplicateClass (W-071)", () => {
+  test("copies style under a new id and name", () => {
+    const design = {
+      ...emptyDesign(),
+      classes: [{ id: "card", name: "Card", style: { color: "#112233" } }],
+    };
+    const next = duplicateClass(design, "card", "x");
+    expect(next.classes).toHaveLength(2);
+    expect(next.classes?.[1]?.name).toBe("Card copy");
+    expect(next.classes?.[1]?.style).toEqual({ color: "#112233" });
+    expect(next.classes?.[1]?.id).not.toBe("card");
+  });
+
+  test("missing id is a no-op", () => {
+    const design = emptyDesign();
+    expect(duplicateClass(design, "nope")).toBe(design);
   });
 });

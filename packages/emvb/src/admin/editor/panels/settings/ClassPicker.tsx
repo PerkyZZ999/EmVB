@@ -35,6 +35,9 @@ export function ClassPicker({
   return (
     <div className="emvb-class-picker" data-emvb-class-picker="">
       <p className="emvb-field-label">Classes</p>
+      <p className="emvb-helper" data-emvb-cascade-caption="">
+        Applied order sets cascade (later overrides earlier). Local styles always win.
+      </p>
       {ids.length === 0 ? (
         <p className="emvb-helper">No classes applied. Add one from the site design.</p>
       ) : (
@@ -43,6 +46,9 @@ export function ClassPicker({
             const name = byId.get(id)?.name ?? id;
             return (
               <li key={`${id}-${index}`} className="emvb-class-row" data-emvb-class-id={id}>
+                <span className="emvb-class-order" aria-hidden="true">
+                  {index + 1}
+                </span>
                 <span className="emvb-class-name">{name}</span>
                 <span className="emvb-mono emvb-class-token">emvb-k-{id}</span>
                 <div className="emvb-class-actions">

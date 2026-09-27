@@ -121,3 +121,68 @@ describe("SiteStylesDrawer (W-032)", () => {
     expect(saves.at(-1)?.classes?.[0]?.name).toBe("Card 2");
   });
 });
+
+describe("SiteStylesDrawer managers (W-071)", () => {
+  test("shows Variables Manager label and CSS tokens", async () => {
+    const design: DesignSystem = {
+      ...emptyDesign(),
+      variables: {
+        ...emptyDesign().variables,
+        colors: [{ id: "brand", name: "Brand", value: "#112233" }],
+      },
+    };
+    await mount(
+      <SiteStylesDrawer
+        design={design}
+        layout={layout}
+        onDesignChange={async () => undefined}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    expect(document.querySelector("[data-emvb-manager-label]")?.textContent).toContain(
+      "Variables Manager",
+    );
+    expect(document.querySelector('[data-emvb-var-id="brand"]')?.textContent).toContain(
+      "--emvb-c-brand",
+    );
+    expect(document.querySelector("[data-emvb-var-swatch]")).toBeTruthy();
+  });
+
+  test("Classes Manager shows cascade help, token, and duplicate", async () => {
+    let design: DesignSystem = {
+      ...emptyDesign(),
+      classes: [{ id: "card", name: "Card", style: { color: "#112233" } }],
+    };
+    const saves: DesignSystem[] = [];
+    await mount(
+      <SiteStylesDrawer
+        design={design}
+        layout={layout}
+        onDesignChange={async (next) => {
+          design = next;
+          saves.push(next);
+        }}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    const classesTab = [...document.querySelectorAll('[role="tab"]')].find(
+      (tab) => tab.textContent === "Classes",
+    ) as HTMLElement | undefined;
+    await act(async () => classesTab?.click());
+    expect(document.querySelector("[data-emvb-manager-label]")?.textContent).toContain(
+      "Classes Manager",
+    );
+    expect(document.querySelector("[data-emvb-cascade-help]")?.textContent).toMatch(/Cascade/);
+    expect(document.querySelector('[data-emvb-class-def="card"]')?.textContent).toContain(
+      "emvb-k-card",
+    );
+    const dup = document.querySelector(
+      '[data-emvb-class-def="card"] button[aria-label="Duplicate Card"]',
+    ) as HTMLButtonElement | null;
+    expect(dup).toBeTruthy();
+    await act(async () => dup?.click());
+    expect(saves.at(-1)?.classes?.length).toBe(2);
+  });
+});

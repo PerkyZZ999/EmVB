@@ -1,5 +1,7 @@
+import type { DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
-import { nodeChildren, updateNode } from "../tree-ops.ts";
+import type { StyleProps } from "../schema/style.ts";
+import { nodeChildren, slugify, updateNode } from "../tree-ops.ts";
 
 /** Reorder an applied class-id list. Out-of-range moves are no-ops. Pure (W-031). */
 export function moveClassId(ids: readonly string[], index: number, delta: -1 | 1): string[] {
@@ -54,4 +56,25 @@ export function clearClassRefs(layout: Layout, classId: string): Layout {
     });
   }
   return next;
+}
+
+/** Duplicate a design class with a new id/name. Pure (W-071). */
+export function duplicateClass(
+  design: DesignSystem,
+  classId: string,
+  randomSuffix?: string,
+): DesignSystem {
+  const classes = design.classes ?? [];
+  const source = classes.find((c) => c.id === classId);
+  if (!source) return design;
+  const baseName = `${source.name} copy`;
+  const base = slugify(baseName).slice(0, 34) || "class";
+  const taken = new Set(classes.map((c) => c.id));
+  let id = randomSuffix ? `${base}-${randomSuffix}`.slice(0, 40) : base;
+  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`.slice(0, 40);
+  const style = { ...(source.style ?? {}) } as StyleProps;
+  return {
+    ...design,
+    classes: [...classes, { id, name: baseName, style }],
+  };
 }

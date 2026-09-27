@@ -86,6 +86,7 @@ describe("ClassPicker (W-031)", () => {
 
     await mount(panel());
     await openStyleTab();
+    expect(document.querySelector("[data-emvb-cascade-caption]")?.textContent).toMatch(/cascade/i);
     expect(
       [...document.querySelectorAll("[data-emvb-class-id]")].map((el) =>
         el.getAttribute("data-emvb-class-id"),
