@@ -47,13 +47,27 @@ How EmVB stores a page and its site-wide design, as implemented through S2 (W-01
 
 Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `classes` (unused until S4).
 
-### Style properties (v1)
+### Style properties (v1, W-017)
+
+Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" }`. Colours are hex or `{ "var": "<id>" }`.
 
 | Key | Value | CSS |
 | --- | --- | --- |
 | `flexDirection` | `row`, `column`, `row-reverse`, `column-reverse` | `flex-direction` |
-| `gap` | `{ "value": 0–10000, "unit": "px" \| "rem" \| "em" \| "%" }` | `gap` |
-| `color` | a hex colour (`#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`) or `{ "var": "<variable id>" }` | `color`, with `var(--emvb-c-<id>)` for a variable |
+| `flexWrap` | `nowrap`, `wrap`, `wrap-reverse` | `flex-wrap` |
+| `justifyContent` | `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, `space-evenly` | `justify-content` |
+| `alignItems` | `stretch`, `flex-start`, `flex-end`, `center`, `baseline` | `align-items` |
+| `gap` | length | `gap` |
+| `width` / `minWidth` / `maxWidth` / `height` / `minHeight` | length | matching size properties |
+| `paddingTop` / `Right` / `Bottom` / `Left` | length | `padding-*` |
+| `marginTop` / `Right` / `Bottom` / `Left` | length | `margin-*` |
+| `fontSize` / `lineHeight` / `letterSpacing` | length | matching type properties |
+| `fontWeight` | `400`–`700`, `normal`, `bold` | `font-weight` |
+| `textAlign` | `left`, `center`, `right`, `justify` | `text-align` |
+| `textTransform` | `none`, `uppercase`, `lowercase`, `capitalize` | `text-transform` |
+| `color` / `backgroundColor` / `borderColor` | colour | matching colour properties |
+| `borderWidth` / `borderRadius` | length | matching border properties |
+| `borderStyle` | `none`, `solid`, `dashed`, `dotted` | `border-style` |
 
 ## Design system document
 

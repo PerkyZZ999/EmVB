@@ -4,6 +4,20 @@ const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const VAR_ID = /^[a-z0-9-]{1,40}$/;
 const UNITS = new Set(["px", "rem", "em", "%"]);
 const FLEX_DIRECTIONS = new Set(["row", "column", "row-reverse", "column-reverse"]);
+const FLEX_WRAPS = new Set(["nowrap", "wrap", "wrap-reverse"]);
+const JUSTIFY = new Set([
+  "flex-start",
+  "flex-end",
+  "center",
+  "space-between",
+  "space-around",
+  "space-evenly",
+]);
+const ALIGN = new Set(["stretch", "flex-start", "flex-end", "center", "baseline"]);
+const TEXT_ALIGN = new Set(["left", "center", "right", "justify"]);
+const TEXT_TRANSFORM = new Set(["none", "uppercase", "lowercase", "capitalize"]);
+const BORDER_STYLE = new Set(["none", "solid", "dashed", "dotted"]);
+const FONT_WEIGHT = new Set(["normal", "bold", "400", "500", "600", "700"]);
 const FORBIDDEN = /[{};<>\\"'`]|\/\*|url\(|expression\(|@import|javascript:/i;
 
 /** Last line of defence on every emitted value, even ones built by the typed validators below. */
@@ -36,13 +50,54 @@ export function cssFlexDirection(value: unknown): string | undefined {
   return typeof value === "string" && FLEX_DIRECTIONS.has(value) ? value : undefined;
 }
 
+const keyword =
+  (allowed: Set<string>) =>
+  (value: unknown): string | undefined =>
+    typeof value === "string" && allowed.has(value) ? value : undefined;
+
+function cssFontWeight(value: unknown): string | undefined {
+  if (typeof value === "number" && FONT_WEIGHT.has(String(value))) return String(value);
+  if (typeof value === "string" && FONT_WEIGHT.has(value)) return value;
+  return undefined;
+}
+
 const PROPERTY_MAP: {
   [K in keyof Required<StyleProps>]: { css: string; toValue: (v: unknown) => string | undefined };
 } = {
   flexDirection: { css: "flex-direction", toValue: cssFlexDirection },
+  flexWrap: { css: "flex-wrap", toValue: keyword(FLEX_WRAPS) },
+  justifyContent: { css: "justify-content", toValue: keyword(JUSTIFY) },
+  alignItems: { css: "align-items", toValue: keyword(ALIGN) },
   gap: { css: "gap", toValue: cssLength },
+  width: { css: "width", toValue: cssLength },
+  minWidth: { css: "min-width", toValue: cssLength },
+  maxWidth: { css: "max-width", toValue: cssLength },
+  height: { css: "height", toValue: cssLength },
+  minHeight: { css: "min-height", toValue: cssLength },
+  paddingTop: { css: "padding-top", toValue: cssLength },
+  paddingRight: { css: "padding-right", toValue: cssLength },
+  paddingBottom: { css: "padding-bottom", toValue: cssLength },
+  paddingLeft: { css: "padding-left", toValue: cssLength },
+  marginTop: { css: "margin-top", toValue: cssLength },
+  marginRight: { css: "margin-right", toValue: cssLength },
+  marginBottom: { css: "margin-bottom", toValue: cssLength },
+  marginLeft: { css: "margin-left", toValue: cssLength },
+  fontSize: { css: "font-size", toValue: cssLength },
+  fontWeight: { css: "font-weight", toValue: cssFontWeight },
+  lineHeight: { css: "line-height", toValue: cssLength },
+  letterSpacing: { css: "letter-spacing", toValue: cssLength },
+  textAlign: { css: "text-align", toValue: keyword(TEXT_ALIGN) },
+  textTransform: { css: "text-transform", toValue: keyword(TEXT_TRANSFORM) },
   color: { css: "color", toValue: cssColor },
+  backgroundColor: { css: "background-color", toValue: cssColor },
+  borderWidth: { css: "border-width", toValue: cssLength },
+  borderStyle: { css: "border-style", toValue: keyword(BORDER_STYLE) },
+  borderColor: { css: "border-color", toValue: cssColor },
+  borderRadius: { css: "border-radius", toValue: cssLength },
 };
+
+/** Exported for table-driven tests (W-017). */
+export const STYLE_PROPERTY_MAP = PROPERTY_MAP;
 
 export type Declaration = { property: string; value: string };
 
