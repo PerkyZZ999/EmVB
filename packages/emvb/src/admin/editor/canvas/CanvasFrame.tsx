@@ -1,6 +1,12 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { canDrop, type Layout, type LayoutNode, type VNode } from "../../../core/index.ts";
+import {
+  isContainerNode,
+  canDrop,
+  type Layout,
+  type LayoutNode,
+  type VNode,
+} from "../../../core/index.ts";
 import {
   dropContainer,
   dropIndex,
@@ -56,10 +62,9 @@ const transferKinds = (transfer: DataTransfer | null) => {
 };
 
 const directionOf = (node: LayoutNode) =>
-  (node.type === "container" ? node.style?.flexDirection : undefined) ?? "column";
+  (isContainerNode(node) ? node.style?.flexDirection : undefined) ?? "column";
 
-const childrenOf = (node: LayoutNode): LayoutNode[] =>
-  node.type === "container" ? node.children : [];
+const childrenOf = (node: LayoutNode): LayoutNode[] => (isContainerNode(node) ? node.children : []);
 
 /** Insertion line for the drop index inside a container (DESIGN: brand accent). */
 export function dropLineBox(

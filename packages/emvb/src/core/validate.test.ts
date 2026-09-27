@@ -25,14 +25,22 @@ const withChild = (child: unknown) => ({
   root: { ...container("root0001"), children: [child] },
 });
 
+describe("unknown element types (W-022)", () => {
+  test("an unknown element type is kept so a newer plugin can reclaim it", () => {
+    const input = withChild({ id: "abcd1234", type: "marquee", props: { speed: 1 } });
+    const result = validateLayout(input);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.layout.root.children[0]).toMatchObject({
+      id: "abcd1234",
+      type: "marquee",
+      props: { speed: 1 },
+    });
+  });
+});
+
 describe("invalid layouts fail with the exact path", () => {
   test.each([
-    [
-      "unknown element type",
-      withChild({ id: "abcd1234", type: "marquee", props: {} }),
-      "root.children[0].type",
-      "invalid_union",
-    ],
     [
       "missing required prop",
       withChild({ id: "abcd1234", type: "heading", props: { text: "x" } }),

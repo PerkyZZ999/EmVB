@@ -168,3 +168,37 @@ test("changing a colour variable changes the published page without re-publishin
     await setColor(variable, null);
   }
 });
+
+test("a published page with an unknown node still renders its other elements with 200", async ({
+  request,
+}) => {
+  const slug = `unk-${unique()}`;
+  const text = `Known ${slug}`;
+  const layout = {
+    schemaVersion: 1,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        { id: "head0001", type: "heading", props: { text, level: 1 } },
+        {
+          id: "car00001",
+          type: "carousel",
+          props: { slides: 2 },
+          children: [{ id: "head0002", type: "heading", props: { text: "Hidden", level: 2 } }],
+        },
+      ],
+    },
+  };
+  const id = await createPage(author, "Unknown check", layout, slug);
+  await publish(id);
+
+  const response = await request.get(`/${slug}`);
+  expect(response.status()).toBe(200);
+  const html = await response.text();
+  expect(html).toContain(`<h1 class="emvb-heading">${text}</h1>`);
+  expect(html).not.toContain("carousel");
+  expect(html).not.toContain("Unknown element");
+  expect(html).not.toContain("Hidden");
+});

@@ -1,7 +1,7 @@
 import { generateCss } from "../css/generate.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import type { DesignSystem } from "../schema/design.ts";
-import type { Layout, LayoutNode } from "../schema/layout.ts";
+import { isContainerNode, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { cssLength, styleDeclarations, type Declaration } from "../sanitize/css.ts";
 import { serialize, type VNode } from "./vnode.ts";
 
@@ -55,7 +55,7 @@ export function renderPage(
     const { declarations, rejected } = styleDeclarations(node.style);
     for (const key of rejected) warnings.push({ nodeId, code: "rejected-style", detail: key });
     if (node.type === "spacer") {
-      const height = cssLength(node.props.height);
+      const height = cssLength((node as { props: { height: unknown } }).props.height);
       if (height) declarations.push({ property: "height", value: height });
     }
     const color = node.style?.color;
@@ -70,8 +70,8 @@ export function renderPage(
     if (mode === "editor" && id) attrs["data-emvb-id"] = id;
     if (node.htmlId && HTML_ID.test(node.htmlId)) attrs.id = node.htmlId;
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
-    if (node.type === "container") {
-      const children = (Array.isArray(node.children) ? node.children : [])
+    if (isContainerNode(node)) {
+      const children = node.children
         .map((child) => visit(child, false))
         .filter((child): child is VNode => child !== undefined);
       return def.build(node as never, attrs, children);

@@ -3,6 +3,7 @@ export {
   LAYOUT_SCHEMA_VERSION,
   Layout,
   type LayoutNode,
+  type UnknownNode,
   ContainerNode,
   HeadingNode,
   SpacerNode,
@@ -15,6 +16,10 @@ export {
   NodeId,
   CONTAINER_TAGS,
   TEXT_TAGS,
+  KNOWN_ELEMENT_TYPES,
+  isContainerNode,
+  isHeadingNode,
+  isUnknownNode,
 } from "./schema/layout.ts";
 export {
   type FieldKind,

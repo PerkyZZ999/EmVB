@@ -130,12 +130,47 @@ export const ContainerNode = z.strictObject({
   style: StyleProps.optional(),
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
-  get children() {
+  get children(): z.ZodType<LayoutNode[]> {
     return z.array(LayoutNode);
   },
 });
 
-const LayoutNode = z.discriminatedUnion("type", [
+/** Known element type strings (everything else is an UnknownNode). */
+export const KNOWN_ELEMENT_TYPES = [
+  "container",
+  "heading",
+  "spacer",
+  "divider",
+  "text",
+  "label",
+  "link",
+  "button",
+  "list",
+] as const;
+
+const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
+
+/**
+ * A node whose `type` EmVB does not implement yet (W-022 / R-033). Kept on save so a newer
+ * plugin version can reclaim it; public pages omit it; the editor shows a placeholder.
+ */
+const UnknownNodeSchema = z.strictObject({
+  id: NodeId,
+  type: z
+    .string()
+    .min(1)
+    .max(64)
+    .refine((value) => !knownTypeSet.has(value), "Unknown element type"),
+  props: z.record(z.string(), z.unknown()),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+  get children(): z.ZodType<LayoutNode[] | undefined> {
+    return z.array(LayoutNode).optional();
+  },
+});
+
+const KnownLayoutNode = z.discriminatedUnion("type", [
   ContainerNode,
   HeadingNode,
   SpacerNode,
@@ -147,11 +182,6 @@ const LayoutNode = z.discriminatedUnion("type", [
   ListNode,
 ]);
 
-export const Layout = z.strictObject({
-  schemaVersion: z.literal(LAYOUT_SCHEMA_VERSION),
-  root: ContainerNode,
-});
-
 export type HeadingNode = z.infer<typeof HeadingNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
@@ -160,6 +190,93 @@ export type LabelNode = z.infer<typeof LabelNode>;
 export type LinkNode = z.infer<typeof LinkNode>;
 export type ButtonNode = z.infer<typeof ButtonNode>;
 export type ListNode = z.infer<typeof ListNode>;
-export type ContainerNode = z.infer<typeof ContainerNode>;
-export type LayoutNode = z.infer<typeof LayoutNode>;
-export type Layout = z.infer<typeof Layout>;
+
+type StyleOf = z.infer<typeof StyleProps>;
+type ClassesOf = z.infer<typeof ClassIds>;
+type HtmlIdOf = z.infer<typeof HtmlId>;
+type IdOf = z.infer<typeof NodeId>;
+
+/** Manual recursive types so UnknownNode does not poison `z.infer` of the tree. */
+export type UnknownNode = {
+  id: IdOf;
+  type: string;
+  props: Record<string, unknown>;
+  style?: StyleOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  children?: LayoutNode[];
+};
+
+export type ContainerNode = {
+  id: IdOf;
+  type: "container";
+  props: { tag?: (typeof CONTAINER_TAGS)[number] };
+  style?: StyleOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  children: LayoutNode[];
+};
+
+export type LayoutNode =
+  | ContainerNode
+  | HeadingNode
+  | SpacerNode
+  | DividerNode
+  | TextNode
+  | LabelNode
+  | LinkNode
+  | ButtonNode
+  | ListNode
+  | UnknownNode;
+
+/**
+ * Prefer the known-type schema when `type` is registered so path-specific Zod issues stay
+ * intact; only fall through to UnknownNode for types EmVB does not implement (W-022 / R-033).
+ * A plain `z.union` would collapse every known-type failure into `invalid_union`.
+ */
+const LayoutNode: z.ZodType<LayoutNode> = z.lazy(() =>
+  z.unknown().transform((input, ctx) => {
+    if (!input || typeof input !== "object" || Array.isArray(input)) {
+      ctx.addIssue({ code: "invalid_type", expected: "object", path: [] });
+      return z.NEVER;
+    }
+    const type = (input as { type?: unknown }).type;
+    if (typeof type !== "string") {
+      ctx.addIssue({ code: "invalid_type", expected: "string", path: ["type"] });
+      return z.NEVER;
+    }
+    const result = knownTypeSet.has(type)
+      ? KnownLayoutNode.safeParse(input)
+      : UnknownNodeSchema.safeParse(input);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        ctx.addIssue({
+          code: "custom",
+          path: issue.path,
+          message: issue.message,
+          params: { zodCode: issue.code },
+        });
+      }
+      return z.NEVER;
+    }
+    return result.data as LayoutNode;
+  }),
+);
+
+export const Layout = z.strictObject({
+  schemaVersion: z.literal(LAYOUT_SCHEMA_VERSION),
+  root: ContainerNode,
+});
+
+export type Layout = {
+  schemaVersion: typeof LAYOUT_SCHEMA_VERSION;
+  root: ContainerNode;
+};
+
+export const isContainerNode = (node: LayoutNode): node is ContainerNode =>
+  node.type === "container";
+
+export const isHeadingNode = (node: LayoutNode): node is HeadingNode => node.type === "heading";
+
+export const isUnknownNode = (node: LayoutNode): node is UnknownNode =>
+  !knownTypeSet.has(node.type);

@@ -89,8 +89,10 @@ function duplicateIds(layout: Layout): LayoutIssue[] {
       }
       htmlIds.add(node.htmlId);
     }
-    if (node.type === "container")
-      node.children.forEach((child, i) => walk(child, `${path}.children[${i}]`));
+    const kids = "children" in node && Array.isArray(node.children) ? node.children : [];
+    kids.forEach((child, i) =>
+      walk(child as Layout["root"]["children"][number], `${path}.children[${i}]`),
+    );
   };
   walk(layout.root, "root");
   return issues;
@@ -165,11 +167,18 @@ export function validateLayout(
       issues: parsed.error.issues.map((issue: z.core.$ZodIssue) => toIssue(issue)),
     };
   }
-  const dupes = duplicateIds(parsed.data);
+  const layout = parsed.data as Layout;
+  const dupes = duplicateIds(layout);
   if (dupes.length > 0) return { ok: false, issues: dupes };
-  return { ok: true, layout: parsed.data, upgradedFrom: upgraded.from };
+  return { ok: true, layout, upgradedFrom: upgraded.from };
 }
 
 function toIssue(issue: z.core.$ZodIssue): LayoutIssue {
-  return { path: formatPath(issue.path), code: issue.code, message: issue.message };
+  // LayoutNode's transform re-emits known-schema failures as `custom` with the original code
+  // in params.zodCode so path-specific messages stay intact (W-022).
+  const params =
+    "params" in issue ? (issue.params as { zodCode?: unknown } | undefined) : undefined;
+  const code =
+    issue.code === "custom" && typeof params?.zodCode === "string" ? params.zodCode : issue.code;
+  return { path: formatPath(issue.path), code, message: issue.message };
 }

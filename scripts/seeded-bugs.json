@@ -1573,6 +1573,46 @@
         "reset clears"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-022/unknown-rendered-publicly",
+      "requirement": "R-033",
+      "description": "unknown types render a public placeholder instead of being omitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      if (mode === \"public\") return undefined;\n      return {\n        tag: \"div\",\n        attrs: { class: \"emvb-unknown\", ...(id ? { \"data-emvb-id\": id } : {}) },\n        children: [`Unknown element \"${type}\"`],\n      };",
+          "replace": "      return {\n        tag: \"div\",\n        attrs: { class: \"emvb-unknown\", ...(id ? { \"data-emvb-id\": id } : {}) },\n        children: [`Unknown element \"${type}\"`],\n      };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/unknown-node.test.ts",
+        "-t",
+        "public render omits"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-022/unknown-refused-on-save",
+      "requirement": "R-033",
+      "description": "schema rejects unknown element types so a page with one cannot be saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    const result = knownTypeSet.has(type)\n      ? KnownLayoutNode.safeParse(input)\n      : UnknownNodeSchema.safeParse(input);",
+          "replace": "    const result = KnownLayoutNode.safeParse(input);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/unknown-node.test.ts",
+        "-t",
+        "keeps unknown nodes"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

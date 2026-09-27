@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { s1Page } from "../../../test/fixtures/layouts.ts";
-import { emptyDesign, findNode } from "../../core/index.ts";
+import { emptyDesign, findNode, isContainerNode } from "../../core/index.ts";
 import { editorReducer, isDirty, type EditorState } from "./store.ts";
 
 const initial = (): EditorState => {
@@ -140,7 +140,7 @@ test("move-node relocates an element and refuses an invalid drop", () => {
     index: 0,
   });
   const box = state.page.layout?.root.children.find((c) => c.id === "box00001");
-  expect(box && box.type === "container" && box.children[0]?.id).toBe(headingId);
+  expect(box && isContainerNode(box) && box.children[0]?.id).toBe(headingId);
   const refused = editorReducer(state, {
     type: "move-node",
     id: "box00001",

@@ -88,6 +88,24 @@ export function ElementPanel({
   onDesignChange,
   onSelect,
 }: Props) {
+  const known = ELEMENT_DESCRIPTORS.some((d) => d.type === node.type);
+  if (!known) {
+    return (
+      <div className="emvb-panel-body" data-emvb-panel="element" data-emvb-element={node.type}>
+        <h2 className="emvb-panel-title">Unknown element</h2>
+        <p className="emvb-helper">
+          Unknown element &quot;{node.type}&quot;. It can be moved or deleted, but not edited.
+        </p>
+        {rejection && (
+          <p className="emvb-inline-error" role="alert">
+            <WarningCircleIcon size={16} aria-hidden="true" />
+            {rejection}
+          </p>
+        )}
+      </div>
+    );
+  }
+
   const descriptor =
     ELEMENT_DESCRIPTORS.find((d) => d.type === node.type) ??
     ({

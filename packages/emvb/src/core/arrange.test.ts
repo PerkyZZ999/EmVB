@@ -20,7 +20,7 @@ import {
   type Arranged,
 } from "./arrange.ts";
 import { MAX_DEPTH, MAX_NODES } from "./limits.ts";
-import type { Layout, LayoutNode } from "./schema/layout.ts";
+import { isContainerNode, type Layout, type LayoutNode } from "./schema/layout.ts";
 import { findNode } from "./tree-ops.ts";
 import { validateLayout } from "./validate.ts";
 
@@ -43,7 +43,7 @@ const page = (): Layout => ({
 });
 
 const ids = (node: LayoutNode | undefined): string[] =>
-  node && node.type === "container" ? node.children.map((child) => child.id) : [];
+  node && isContainerNode(node) ? node.children.map((child) => child.id) : [];
 
 function layoutOf(result: Arranged): Layout {
   if (!result.ok) throw new Error(`refused: ${result.reason}`);
@@ -52,7 +52,7 @@ function layoutOf(result: Arranged): Layout {
 
 const allIds = (node: LayoutNode): string[] => [
   node.id,
-  ...(node.type === "container" ? node.children.flatMap(allIds) : []),
+  ...(isContainerNode(node) ? node.children.flatMap(allIds) : []),
 ];
 
 describe("canDrop (R-003 drop rules)", () => {
@@ -204,7 +204,7 @@ describe("duplicateNode", () => {
     expect(copyIds).toHaveLength(4);
     for (const id of copyIds) expect(allIds(original)).not.toContain(id);
     const strip = (node: LayoutNode): unknown =>
-      node.type === "container"
+      isContainerNode(node)
         ? { ...node, id: "", children: node.children.map(strip) }
         : { ...node, id: "" };
     expect(strip(copy)).toEqual(strip(original));

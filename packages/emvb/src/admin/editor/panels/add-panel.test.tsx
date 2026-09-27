@@ -6,6 +6,7 @@ import {
   emptyDesign,
   firstChild,
   insertionPoint,
+  isContainerNode,
   parentOf,
   type Layout,
 } from "../../../core/index.ts";
@@ -117,9 +118,7 @@ describe("Add panel (W-018)", () => {
     expect(nextLayout).toBeTruthy();
     if (!nextLayout) return;
     const box = nextLayout.root.children.find((c) => c.id === "box00001");
-    expect(box && box.type === "container" && box.children.some((c) => c.id === node.id)).toBe(
-      true,
-    );
+    expect(box && isContainerNode(box) && box.children.some((c) => c.id === node.id)).toBe(true);
     expect(nextLayout.root.children.some((c) => c.id === node.id)).toBe(false);
     expect(next.selectedId).toBe(node.id);
   });

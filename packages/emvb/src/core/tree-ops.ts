@@ -1,4 +1,16 @@
-import type { ContainerNode, Layout, LayoutNode } from "./schema/layout.ts";
+import {
+  isContainerNode,
+  type ContainerNode,
+  type Layout,
+  type LayoutNode,
+} from "./schema/layout.ts";
+
+/** Children of a container, or of an unknown node that carried children (W-022). */
+export const nodeChildren = (node: LayoutNode): LayoutNode[] => {
+  if (isContainerNode(node)) return node.children;
+  if ("children" in node && Array.isArray(node.children)) return node.children as LayoutNode[];
+  return [];
+};
 
 /** Where a removed node was, so it can be put back exactly (the Restore toast, D-025). */
 export type Removed = { node: LayoutNode; parentId: string; index: number };
@@ -6,8 +18,7 @@ export type Removed = { node: LayoutNode; parentId: string; index: number };
 export function findNode(layout: Layout, id: string): LayoutNode | undefined {
   const walk = (node: LayoutNode): LayoutNode | undefined => {
     if (node.id === id) return node;
-    if (node.type !== "container") return undefined;
-    for (const child of node.children) {
+    for (const child of nodeChildren(node)) {
       const found = walk(child);
       if (found) return found;
     }
@@ -18,8 +29,18 @@ export function findNode(layout: Layout, id: string): LayoutNode | undefined {
 
 function mapTree(node: LayoutNode, fn: (node: LayoutNode) => LayoutNode): LayoutNode {
   const mapped = fn(node);
-  if (mapped.type !== "container") return mapped;
-  return { ...mapped, children: mapped.children.map((child) => mapTree(child, fn)) };
+  const kids = nodeChildren(mapped);
+  if (kids.length === 0 && !isContainerNode(mapped)) return mapped;
+  if (isContainerNode(mapped)) {
+    return { ...mapped, children: mapped.children.map((child) => mapTree(child, fn)) };
+  }
+  if ("children" in mapped && Array.isArray(mapped.children)) {
+    return {
+      ...mapped,
+      children: (mapped.children as LayoutNode[]).map((child) => mapTree(child, fn)),
+    };
+  }
+  return mapped;
 }
 
 /** Replaces the node with `id` by `update(node)`. Pure: the input layout is not changed. */
@@ -37,7 +58,7 @@ export function removeNode(layout: Layout, id: string): { layout: Layout; remove
   if (layout.root.id === id) return { layout };
   let removed: Removed | undefined;
   const root = mapTree(layout.root, (node) => {
-    if (node.type !== "container") return node;
+    if (!isContainerNode(node)) return node;
     const index = node.children.findIndex((child) => child.id === id);
     if (index === -1) return node;
     removed = { node: node.children[index] as LayoutNode, parentId: node.id, index };
@@ -54,7 +75,7 @@ export function insertNode(
   node: LayoutNode,
 ): Layout {
   return updateNode(layout, parentId, (parent) => {
-    if (parent.type !== "container") return parent;
+    if (!isContainerNode(parent)) return parent;
     const at = Math.max(0, Math.min(index, parent.children.length));
     return {
       ...parent,
@@ -71,8 +92,9 @@ export function nodeIdAtPath(layout: Layout, path: string): string | undefined {
   if (!path.startsWith("root")) return undefined;
   let node: LayoutNode = layout.root;
   for (const match of path.slice(4).matchAll(/\.children\[(\d+)\]/g)) {
-    if (node.type !== "container") break;
-    const next: LayoutNode | undefined = node.children[Number(match[1])];
+    const kids = nodeChildren(node);
+    if (kids.length === 0 && !isContainerNode(node)) break;
+    const next: LayoutNode | undefined = kids[Number(match[1])];
     if (!next) break;
     node = next;
   }

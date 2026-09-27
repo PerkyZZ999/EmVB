@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { container, heading, randomLayouts, s1Page } from "../../../test/fixtures/layouts.ts";
 import { CSS_INJECTION_CORPUS, XSS_CORPUS } from "../../../test/fixtures/xss.ts";
 import { emptyDesign, type DesignSystem } from "../schema/design.ts";
-import type { Layout, LayoutNode } from "../schema/layout.ts";
+import { isContainerNode, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { renderPage } from "./index.ts";
 import { serialize } from "./vnode.ts";
 
@@ -21,7 +21,7 @@ const parse = (html: string) => {
 };
 
 const countNodes = (node: LayoutNode): number =>
-  1 + (node.type === "container" ? node.children.reduce((n, c) => n + countNodes(c), 0) : 0);
+  1 + (isContainerNode(node) ? node.children.reduce((n, c) => n + countNodes(c), 0) : 0);
 
 describe("markup", () => {
   test.each([1, 2, 3, 4, 5, 6])("heading level %i renders as the matching h1-h6 tag", (level) => {
@@ -51,7 +51,7 @@ describe("markup", () => {
       const check = (node: LayoutNode, parentId: string | undefined) => {
         const el = dom.querySelector(`[data-emvb-id="${node.id}"]`);
         expect(el?.parentElement?.getAttribute("data-emvb-id") ?? undefined).toBe(parentId);
-        if (node.type === "container") for (const child of node.children) check(child, node.id);
+        if (isContainerNode(node)) for (const child of node.children) check(child, node.id);
       };
       check(layout.root, undefined);
     }

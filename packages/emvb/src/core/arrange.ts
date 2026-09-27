@@ -1,6 +1,6 @@
 import { MAX_DEPTH, MAX_NODES } from "./limits.ts";
 import type { ContainerNode, Layout, LayoutNode } from "./schema/layout.ts";
-import { findNode, insertNode, newNodeId, removeNode } from "./tree-ops.ts";
+import { findNode, insertNode, newNodeId, nodeChildren, removeNode } from "./tree-ops.ts";
 
 /** A refused operation, with the reason shown or announced to the user (R-003). */
 export type Refusal = { ok: false; reason: string };
@@ -40,9 +40,17 @@ function locate(layout: Layout, id: string): Located | undefined {
     depth: number,
   ): Located | undefined => {
     if (node.id === id) return { node, parent, index, depth };
-    if (!isContainer(node)) return undefined;
-    for (const [i, child] of node.children.entries()) {
-      const found = walk(child, node, i, depth + 1);
+    // Only real containers are drop/arrange parents. Still descend into unknown
+    // children so nested ids can be found (they are not rearrangeable).
+    if (isContainer(node)) {
+      for (const [i, child] of node.children.entries()) {
+        const found = walk(child, node, i, depth + 1);
+        if (found) return found;
+      }
+      return undefined;
+    }
+    for (const child of nodeChildren(node)) {
+      const found = walk(child, undefined, -1, depth + 1);
       if (found) return found;
     }
     return undefined;
@@ -51,13 +59,15 @@ function locate(layout: Layout, id: string): Located | undefined {
 }
 
 const size = (node: LayoutNode): number =>
-  1 + (isContainer(node) ? node.children.reduce((n, child) => n + size(child), 0) : 0);
+  1 + nodeChildren(node).reduce((n, child) => n + size(child), 0);
 
-const height = (node: LayoutNode): number =>
-  1 + (isContainer(node) ? Math.max(0, ...node.children.map(height)) : 0);
+const height = (node: LayoutNode): number => {
+  const kids = nodeChildren(node);
+  return 1 + (kids.length > 0 ? Math.max(...kids.map(height)) : 0);
+};
 
 const contains = (node: LayoutNode, id: string): boolean =>
-  node.id === id || (isContainer(node) && node.children.some((child) => contains(child, id)));
+  node.id === id || nodeChildren(node).some((child) => contains(child, id));
 
 /** Whether `source` may go into container `parentId` (R-003 invalid drops). */
 export function canDrop(layout: Layout, source: DragSource, parentId: string): Allowed {
@@ -110,17 +120,15 @@ function withNewIds(node: LayoutNode, taken: Set<string>, random: () => number):
   let id = newNodeId(random);
   while (taken.has(id)) id = newNodeId(random);
   taken.add(id);
-  if (!isContainer(node)) return { ...structuredClone(node), id };
-  return {
-    ...structuredClone(node),
-    id,
-    children: node.children.map((child) => withNewIds(child, taken, random)),
-  };
+  const kids = nodeChildren(node);
+  const copy = { ...structuredClone(node), id } as LayoutNode;
+  if (kids.length === 0) return copy;
+  return { ...copy, children: kids.map((child) => withNewIds(child, taken, random)) } as LayoutNode;
 }
 
 function allIds(node: LayoutNode, into = new Set<string>()): Set<string> {
   into.add(node.id);
-  if (isContainer(node)) for (const child of node.children) allIds(child, into);
+  for (const child of nodeChildren(node)) allIds(child, into);
   return into;
 }
 
@@ -193,7 +201,7 @@ function documentOrder(layout: Layout): string[] {
   const ids: string[] = [];
   const walk = (node: LayoutNode) => {
     ids.push(node.id);
-    if (isContainer(node)) node.children.forEach(walk);
+    nodeChildren(node).forEach(walk);
   };
   walk(layout.root);
   return ids;

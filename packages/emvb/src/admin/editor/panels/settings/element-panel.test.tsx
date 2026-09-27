@@ -144,4 +144,30 @@ describe("ElementPanel (W-021)", () => {
     await act(async () => spacing.click());
     expect(sessionStorage.getItem("emvb-style-sections:container")).toContain("spacing");
   });
+
+  test("unknown element panel explains it can be moved or deleted but not edited", async () => {
+    const unknown = {
+      id: "car00001",
+      type: "carousel",
+      props: { slides: 3 },
+    } as LayoutNode;
+    await mount(
+      <ElementPanel
+        node={unknown}
+        layout={{
+          schemaVersion: 1,
+          root: { id: "root0001", type: "container", props: {}, children: [unknown] },
+        }}
+        design={emptyDesign()}
+        rejection={null}
+        onChange={() => undefined}
+        onDesignChange={async () => undefined}
+        onSelect={() => undefined}
+      />,
+    );
+    expect(document.querySelector('[data-emvb-element="carousel"]')?.textContent).toContain(
+      "can be moved or deleted, but not edited",
+    );
+    expect(document.querySelector('[data-emvb-tab="content"]')).toBeNull();
+  });
 });
