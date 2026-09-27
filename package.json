@@ -23,7 +23,8 @@
     "test": "bun test ./packages ./scripts ./test",
     "test:astro": "bun run --cwd packages/emvb test:astro",
     "e2e": "playwright test",
-    "seeded-bugs": "bun scripts/seeded-bug.ts"
+    "seeded-bugs": "bun scripts/seeded-bug.ts",
+    "bench:render": "bun scripts/bench-render.ts"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "20.14.5",

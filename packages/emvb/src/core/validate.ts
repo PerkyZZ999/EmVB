@@ -1,6 +1,12 @@
 import type { z } from "zod";
-import { MAX_DEPTH, MAX_LAYOUT_BYTES, MAX_NODES } from "./limits.ts";
-import { upgradeLayout, type Migration, LAYOUT_MIGRATIONS } from "./migrate/index.ts";
+import { MAX_DEPTH, MAX_DESIGN_BYTES, MAX_LAYOUT_BYTES, MAX_NODES } from "./limits.ts";
+import {
+  upgradeLayout,
+  type Migration,
+  type UpgradeResult,
+  LAYOUT_MIGRATIONS,
+} from "./migrate/index.ts";
+import { DESIGN_SCHEMA_VERSION, DesignSystem } from "./schema/design.ts";
 import { Layout, LAYOUT_SCHEMA_VERSION } from "./schema/layout.ts";
 
 export type LayoutIssue = { path: string; code: string; message: string };
@@ -71,6 +77,54 @@ function duplicateIds(layout: Layout): LayoutIssue[] {
   return issues;
 }
 
+function checkSize(input: unknown, limit: number, what: string): LayoutIssue | undefined {
+  let bytes: number;
+  try {
+    bytes = byteLength(input);
+  } catch (error) {
+    if (!(error instanceof RangeError)) throw error;
+    return {
+      path: "",
+      code: "too_deep",
+      message: `Elements can be nested at most ${MAX_DEPTH} levels deep.`,
+    };
+  }
+  if (bytes <= limit) return undefined;
+  return {
+    path: "",
+    code: "too_large",
+    message: `The ${what} is ${bytes} bytes; the limit is ${limit}.`,
+  };
+}
+
+function upgradeIssue(upgraded: Extract<UpgradeResult, { ok: false }>): LayoutIssue {
+  const messages: Record<typeof upgraded.reason, string> = {
+    "not-an-object": "The document must be an object.",
+    "missing-version": "The document has no valid schemaVersion.",
+    "newer-version": `This was saved by a newer EmVB (schema ${upgraded.version}). Update EmVB to edit it.`,
+    "no-migration": `No migration exists from schema ${upgraded.version}.`,
+  };
+  return { path: "schemaVersion", code: upgraded.reason, message: messages[upgraded.reason] };
+}
+
+export type DesignValidation =
+  | { ok: true; design: DesignSystem; upgradedFrom: number }
+  | { ok: false; issues: LayoutIssue[] };
+
+/** Server-side check for the design document (D-013, N-005): 256 KiB budget, version, schema. */
+export function validateDesign(
+  input: unknown,
+  migrations: Readonly<Record<number, Migration>> = {},
+): DesignValidation {
+  const sizeIssue = checkSize(input, MAX_DESIGN_BYTES, "design system");
+  if (sizeIssue) return { ok: false, issues: [sizeIssue] };
+  const upgraded = upgradeLayout(input, migrations, DESIGN_SCHEMA_VERSION);
+  if (!upgraded.ok) return { ok: false, issues: [upgradeIssue(upgraded)] };
+  const parsed = DesignSystem.safeParse(upgraded.doc);
+  if (!parsed.success) return { ok: false, issues: parsed.error.issues.map(toIssue) };
+  return { ok: true, design: parsed.data, upgradedFrom: upgraded.from };
+}
+
 /**
  * Full server-side check for a stored layout (R-010, N-005): size budget, structure limits,
  * version upgrade, schema, and id uniqueness. Returns path-specific issues.
@@ -79,49 +133,10 @@ export function validateLayout(
   input: unknown,
   migrations: Readonly<Record<number, Migration>> = LAYOUT_MIGRATIONS,
 ): LayoutValidation {
-  let bytes: number;
-  try {
-    bytes = byteLength(input);
-  } catch (error) {
-    if (!(error instanceof RangeError)) throw error;
-    return {
-      ok: false,
-      issues: [
-        {
-          path: "",
-          code: "too_deep",
-          message: `Elements can be nested at most ${MAX_DEPTH} levels deep.`,
-        },
-      ],
-    };
-  }
-  if (bytes > MAX_LAYOUT_BYTES) {
-    return {
-      ok: false,
-      issues: [
-        {
-          path: "",
-          code: "too_large",
-          message: `The page is ${bytes} bytes; the limit is ${MAX_LAYOUT_BYTES}.`,
-        },
-      ],
-    };
-  }
+  const sizeIssue = checkSize(input, MAX_LAYOUT_BYTES, "page");
+  if (sizeIssue) return { ok: false, issues: [sizeIssue] };
   const upgraded = upgradeLayout(input, migrations, LAYOUT_SCHEMA_VERSION);
-  if (!upgraded.ok) {
-    const messages: Record<typeof upgraded.reason, string> = {
-      "not-an-object": "The layout must be an object.",
-      "missing-version": "The layout has no valid schemaVersion.",
-      "newer-version": `This page was saved by a newer EmVB (schema ${upgraded.version}). Update EmVB to edit it.`,
-      "no-migration": `No migration exists from schema ${upgraded.version}.`,
-    };
-    return {
-      ok: false,
-      issues: [
-        { path: "schemaVersion", code: upgraded.reason, message: messages[upgraded.reason] },
-      ],
-    };
-  }
+  if (!upgraded.ok) return { ok: false, issues: [upgradeIssue(upgraded)] };
   const structure = checkStructure(upgraded.doc["root"]);
   if (structure) return { ok: false, issues: [structure] };
   const parsed = Layout.safeParse(upgraded.doc);

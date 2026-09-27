@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { container, heading, layoutOfBytes, nested, s1Page } from "../../test/fixtures/layouts.ts";
-import { MAX_DEPTH, MAX_LAYOUT_BYTES, MAX_NODES } from "./limits.ts";
-import { validateLayout } from "./validate.ts";
+import { MAX_DEPTH, MAX_DESIGN_BYTES, MAX_LAYOUT_BYTES, MAX_NODES } from "./limits.ts";
+import { validateDesign, validateLayout } from "./validate.ts";
 
 const issuesOf = (input: unknown) => {
   const result = validateLayout(input);
@@ -172,5 +172,42 @@ describe("versions", () => {
 
   test("non-objects are refused", () => {
     for (const input of [null, "x", 3, []]) expect(issuesOf(input)[0]?.code).toBe("not-an-object");
+  });
+});
+
+const color = (i: number) => ({ id: `c-${i}`, name: `Colour ${i}`, value: "#123456" });
+const design = (colors: unknown[]) => ({ schemaVersion: 1 as const, variables: { colors } });
+
+describe("design system document (D-013)", () => {
+  test("a valid design parses", () => {
+    expect<unknown>(validateDesign(design([color(1)]))).toEqual({
+      ok: true,
+      design: design([color(1)]),
+      upgradedFrom: 1,
+    });
+  });
+
+  test("invalid colour values and ids fail with their path", () => {
+    const result = validateDesign(design([color(1), { id: "Bad Id", name: "x", value: "red;}" }]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.issues.map((i) => i.path).toSorted()).toEqual([
+      "variables.colors[1].id",
+      "variables.colors[1].value",
+    ]);
+  });
+
+  test("a design over 256 KiB is refused before schema checks", () => {
+    const big = { ...design([]), padding: "x".repeat(MAX_DESIGN_BYTES) };
+    const result = validateDesign(big);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.issues).toEqual([expect.objectContaining({ code: "too_large" })]);
+    expect(result.issues[0]?.message).toContain(`the limit is ${MAX_DESIGN_BYTES}`);
+  });
+
+  test("a newer design version is refused", () => {
+    const result = validateDesign({ ...design([]), schemaVersion: 3 });
+    expect(result.ok ? undefined : result.issues[0]?.code).toBe("newer-version");
   });
 });

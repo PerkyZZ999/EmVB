@@ -15,4 +15,25 @@ export {
   type Migration,
   type UpgradeResult,
 } from "./migrate/index.ts";
-export { validateLayout, byteLength, type LayoutIssue, type LayoutValidation } from "./validate.ts";
+export {
+  validateLayout,
+  validateDesign,
+  byteLength,
+  type LayoutIssue,
+  type LayoutValidation,
+  type DesignValidation,
+} from "./validate.ts";
+export {
+  DESIGN_SCHEMA_VERSION,
+  DesignSystem,
+  ColorVariable,
+  emptyDesign,
+} from "./schema/design.ts";
+export {
+  renderPage,
+  type RenderMode,
+  type RenderResult,
+  type RenderWarning,
+} from "./render/index.ts";
+export { serialize, type VNode } from "./render/vnode.ts";
+export { escapeAttr, escapeText } from "./sanitize/escape.ts";

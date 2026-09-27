@@ -50,8 +50,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/index.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 1;",
-          "replace": "import \"react\";\nexport const LAYOUT_SCHEMA_VERSION = 1;"
+          "search": "export * from \"./limits.ts\";",
+          "replace": "import \"react\";\nexport * from \"./limits.ts\";"
         }
       ],
       "command": ["bun", "run", "lint"],
@@ -64,8 +64,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/index.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 1;",
-          "replace": "import { createPlugin } from \"../server/plugin.ts\";\nexport const LAYOUT_SCHEMA_VERSION = 1;\nexport const leak = createPlugin;"
+          "search": "export * from \"./limits.ts\";",
+          "replace": "import { createPlugin } from \"../server/plugin.ts\";\nexport * from \"./limits.ts\";\nexport const leak = createPlugin;"
         }
       ],
       "command": ["bun", "run", "fallow"],
@@ -193,8 +193,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/validate.ts",
-          "search": "if (bytes > MAX_LAYOUT_BYTES) {",
-          "replace": "if (bytes > MAX_LAYOUT_BYTES * 2) {"
+          "search": "const sizeIssue = checkSize(input, MAX_LAYOUT_BYTES, \"page\");",
+          "replace": "const sizeIssue = checkSize(input, MAX_LAYOUT_BYTES * 2, \"page\");"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core"],
@@ -269,6 +269,132 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*style injection attempt"
+    },
+    {
+      "id": "W-005/text-escaping-disabled",
+      "requirement": "R-032",
+      "description": "escapeText returns its input unchanged",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/escape.ts",
+          "search": "return value.replace(/[&<>]/g, (ch) => TEXT_ENTITIES[ch] ?? ch);",
+          "replace": "return value;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*renders as inert text"
+    },
+    {
+      "id": "W-005/attr-escaping-disabled",
+      "requirement": "R-032",
+      "description": "escapeAttr returns its input unchanged",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/escape.ts",
+          "search": "return value.replace(/[&<>\"']/g, (ch) => ATTR_ENTITIES[ch] ?? ch);",
+          "replace": "return value;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*attributes also escape"
+    },
+    {
+      "id": "W-005/css-validator-bypassed",
+      "requirement": "R-032",
+      "description": "style values reach the stylesheet without per-property validation or the generic guard",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "if (entry && value !== undefined && isSafeCssValue(value)) {\n      declarations.push({ property: entry.css, value });",
+          "replace": "if (entry) {\n      declarations.push({ property: entry.css, value: value ?? String(raw) });"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*never reaches the stylesheet"
+    },
+    {
+      "id": "W-005/colour-validator-accepts-any",
+      "requirement": "R-032",
+      "description": "cssColor accepts any string",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "if (typeof value === \"string\") return HEX_COLOR.test(value) ? value.toLowerCase() : undefined;",
+          "replace": "if (typeof value === \"string\") return value;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*colour rejects"
+    },
+    {
+      "id": "W-005/css-guard-disabled",
+      "requirement": "R-032",
+      "description": "the generic CSS guard accepts everything",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "return value.length > 0 && value.length <= 200 && !FORBIDDEN.test(value) && !/[\\n\\r]/.test(value);",
+          "replace": "return value.length > 0;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*the generic guard rejects"
+    },
+    {
+      "id": "W-005/heading-always-h2",
+      "requirement": "R-011",
+      "description": "every heading renders as h2",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "tag: HEADING_TAGS[node.props.level - 1] ?? \"h2\",",
+          "replace": "tag: \"h2\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*heading level 1 renders"
+    },
+    {
+      "id": "W-005/tag-allowlist-removed",
+      "requirement": "R-032",
+      "description": "the serializer accepts any tag",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "if (!TAGS.has(node.tag)) throw new Error(`EmVB: tag \"${node.tag}\" is not allowed`);",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*refuses tags and attributes"
+    },
+    {
+      "id": "W-005/all-base-css",
+      "requirement": "R-031",
+      "description": "base CSS is emitted for every element type, used or not",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "for (const type of [...usedTypes].toSorted()) parts.push(baseCss.get(type) ?? \"\");",
+          "replace": "for (const css of baseCss.values()) parts.push(css);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*base CSS is emitted only"
+    },
+    {
+      "id": "W-005/slow-render",
+      "requirement": "N-002",
+      "description": "renderPage takes 25 ms per call",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "const mode = opts.mode ?? \"public\";",
+          "replace": "const mode = opts.mode ?? \"public\";\n  const until = performance.now() + 25;\n  while (performance.now() < until);"
+        }
+      ],
+      "command": ["bun", "run", "bench:render"],
+      "expect": "renderPage, 300 nodes, 200 runs: median 2\\d\\.\\d+ ms"
     }
   ]
 }
