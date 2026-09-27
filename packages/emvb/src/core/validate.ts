@@ -1,0 +1,141 @@
+import type { z } from "zod";
+import { MAX_DEPTH, MAX_LAYOUT_BYTES, MAX_NODES } from "./limits.ts";
+import { upgradeLayout, type Migration, LAYOUT_MIGRATIONS } from "./migrate/index.ts";
+import { Layout, LAYOUT_SCHEMA_VERSION } from "./schema/layout.ts";
+
+export type LayoutIssue = { path: string; code: string; message: string };
+export type LayoutValidation =
+  | { ok: true; layout: Layout; upgradedFrom: number }
+  | { ok: false; issues: LayoutIssue[] };
+
+export function byteLength(value: unknown): number {
+  return new TextEncoder().encode(JSON.stringify(value)).length;
+}
+
+function formatPath(path: readonly PropertyKey[]): string {
+  return path.reduce<string>((out, key) => {
+    if (typeof key === "number") return `${out}[${key}]`;
+    return out ? `${out}.${String(key)}` : String(key);
+  }, "");
+}
+
+/** Iterative walk of the raw input, so absurd nesting can't overflow the stack in the schema parser. */
+function checkStructure(root: unknown): LayoutIssue | undefined {
+  const stack: { node: unknown; depth: number; path: string }[] = [
+    { node: root, depth: 1, path: "root" },
+  ];
+  let count = 0;
+  while (stack.length > 0) {
+    const { node, depth, path } = stack.pop() as { node: unknown; depth: number; path: string };
+    count++;
+    if (count > MAX_NODES) {
+      return {
+        path: "root",
+        code: "too_many_nodes",
+        message: `A page can have at most ${MAX_NODES} elements.`,
+      };
+    }
+    if (depth > MAX_DEPTH) {
+      return {
+        path,
+        code: "too_deep",
+        message: `Elements can be nested at most ${MAX_DEPTH} levels deep.`,
+      };
+    }
+    const children = (node as { children?: unknown } | null)?.children;
+    if (Array.isArray(children)) {
+      children.forEach((child, i) =>
+        stack.push({ node: child, depth: depth + 1, path: `${path}.children[${i}]` }),
+      );
+    }
+  }
+  return undefined;
+}
+
+function duplicateIds(layout: Layout): LayoutIssue[] {
+  const seen = new Set<string>();
+  const issues: LayoutIssue[] = [];
+  const walk = (node: Layout["root"] | Layout["root"]["children"][number], path: string) => {
+    if (seen.has(node.id)) {
+      issues.push({
+        path: `${path}.id`,
+        code: "duplicate_id",
+        message: `The id "${node.id}" is used more than once.`,
+      });
+    }
+    seen.add(node.id);
+    if (node.type === "container")
+      node.children.forEach((child, i) => walk(child, `${path}.children[${i}]`));
+  };
+  walk(layout.root, "root");
+  return issues;
+}
+
+/**
+ * Full server-side check for a stored layout (R-010, N-005): size budget, structure limits,
+ * version upgrade, schema, and id uniqueness. Returns path-specific issues.
+ */
+export function validateLayout(
+  input: unknown,
+  migrations: Readonly<Record<number, Migration>> = LAYOUT_MIGRATIONS,
+): LayoutValidation {
+  let bytes: number;
+  try {
+    bytes = byteLength(input);
+  } catch (error) {
+    if (!(error instanceof RangeError)) throw error;
+    return {
+      ok: false,
+      issues: [
+        {
+          path: "",
+          code: "too_deep",
+          message: `Elements can be nested at most ${MAX_DEPTH} levels deep.`,
+        },
+      ],
+    };
+  }
+  if (bytes > MAX_LAYOUT_BYTES) {
+    return {
+      ok: false,
+      issues: [
+        {
+          path: "",
+          code: "too_large",
+          message: `The page is ${bytes} bytes; the limit is ${MAX_LAYOUT_BYTES}.`,
+        },
+      ],
+    };
+  }
+  const upgraded = upgradeLayout(input, migrations, LAYOUT_SCHEMA_VERSION);
+  if (!upgraded.ok) {
+    const messages: Record<typeof upgraded.reason, string> = {
+      "not-an-object": "The layout must be an object.",
+      "missing-version": "The layout has no valid schemaVersion.",
+      "newer-version": `This page was saved by a newer EmVB (schema ${upgraded.version}). Update EmVB to edit it.`,
+      "no-migration": `No migration exists from schema ${upgraded.version}.`,
+    };
+    return {
+      ok: false,
+      issues: [
+        { path: "schemaVersion", code: upgraded.reason, message: messages[upgraded.reason] },
+      ],
+    };
+  }
+  const structure = checkStructure(upgraded.doc["root"]);
+  if (structure) return { ok: false, issues: [structure] };
+  const parsed = Layout.safeParse(upgraded.doc);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      issues: parsed.error.issues.map((issue: z.core.$ZodIssue) => toIssue(issue)),
+    };
+  }
+  const dupes = duplicateIds(parsed.data);
+  if (dupes.length > 0) return { ok: false, issues: dupes };
+  return { ok: true, layout: parsed.data, upgradedFrom: upgraded.from };
+}
+
+function toIssue(issue: z.core.$ZodIssue): LayoutIssue {
+  return { path: formatPath(issue.path), code: issue.code, message: issue.message };
+}

@@ -185,6 +185,90 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*the EmVB plugin is loaded by the host"
+    },
+    {
+      "id": "W-004/size-check-loosened",
+      "requirement": "N-005",
+      "description": "the size budget allows twice the limit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "if (bytes > MAX_LAYOUT_BYTES) {",
+          "replace": "if (bytes > MAX_LAYOUT_BYTES * 2) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*one byte over the limit is refused"
+    },
+    {
+      "id": "W-004/bytes-counted-as-chars",
+      "requirement": "N-005",
+      "description": "the size is measured in UTF-16 code units instead of UTF-8 bytes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "return new TextEncoder().encode(JSON.stringify(value)).length;",
+          "replace": "return JSON.stringify(value).length;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*counts UTF-8 bytes, not characters"
+    },
+    {
+      "id": "W-004/duplicate-ids-ignored",
+      "requirement": "R-010",
+      "description": "duplicate node ids are no longer rejected",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "if (dupes.length > 0) return { ok: false, issues: dupes };",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*duplicate ids are reported"
+    },
+    {
+      "id": "W-004/depth-off-by-one",
+      "requirement": "N-005",
+      "description": "nesting one level past the limit is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "if (depth > MAX_DEPTH) {",
+          "replace": "if (depth > MAX_DEPTH + 1) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*nesting deeper than the limit"
+    },
+    {
+      "id": "W-004/migration-step-skipped",
+      "requirement": "R-010",
+      "description": "the upgrade bumps the version without running the step",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "result = { ...step(result), schemaVersion: v + 1 };",
+          "replace": "result = { ...result, schemaVersion: v + 1 };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*runs the chain from v0"
+    },
+    {
+      "id": "W-004/colour-accepts-any-string",
+      "requirement": "R-032",
+      "description": "colour values accept arbitrary strings (CSS injection)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "z.string().regex(HEX_COLOR, \"Use a hex color such as #1a2b3c\")",
+          "replace": "z.string()"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*style injection attempt"
     }
   ]
 }

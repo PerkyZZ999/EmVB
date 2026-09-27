@@ -3,5 +3,12 @@
   "compilerOptions": {
     "types": ["bun"]
   },
-  "include": ["scripts", "test", "e2e", "playwright.config.ts"]
+  "include": [
+    "scripts",
+    "test",
+    "e2e",
+    "playwright.config.ts",
+    "packages/emvb/src/**/*.test.ts",
+    "packages/emvb/test/fixtures"
+  ]
 }
