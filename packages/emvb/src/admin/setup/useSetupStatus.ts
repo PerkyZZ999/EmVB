@@ -1,4 +1,5 @@
 import * as React from "react";
+import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
 import { planSetup } from "./plan.ts";
 import { readCollection, runSetup } from "./run.ts";
@@ -17,9 +18,12 @@ export function useSetupStatus(fetcher: Fetcher, role: number) {
 
   const refresh = React.useCallback(async () => {
     try {
-      const collection = await readCollection(fetcher);
-      const { steps, conflicts } = planSetup(collection);
-      const state = !collection
+      const [pages, themeParts] = await Promise.all([
+        readCollection(fetcher, PAGES_COLLECTION),
+        readCollection(fetcher, THEME_PARTS_COLLECTION),
+      ]);
+      const { steps, conflicts } = planSetup(pages, themeParts);
+      const state = !pages || !themeParts
         ? "missing"
         : steps.length > 0 || conflicts.length > 0
           ? "outdated"

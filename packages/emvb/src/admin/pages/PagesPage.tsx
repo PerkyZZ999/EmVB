@@ -54,7 +54,7 @@ function PagesHome({ fetcher, role }: { fetcher: Fetcher; role: number }) {
           title="EmVB isn't set up yet"
           description={
             status.isAdmin
-              ? "Setup creates the collection EmVB stores its pages in."
+              ? "Setup creates the collections EmVB stores its pages and theme parts in."
               : "Ask an administrator to set up EmVB."
           }
           contents={action("Set up EmVB")}
@@ -63,7 +63,7 @@ function PagesHome({ fetcher, role }: { fetcher: Fetcher; role: number }) {
       {status.state === "outdated" && (
         <Banner
           variant="alert"
-          title="EmVB needs to update its page collection"
+          title="EmVB needs to update its collections"
           description={
             status.conflicts.length > 0
               ? status.conflicts.join(" ")

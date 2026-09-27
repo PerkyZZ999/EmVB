@@ -20,6 +20,7 @@ import {
   type ElementType,
   type LayoutNode,
 } from "../../core/index.ts";
+import { PAGES_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { loadFormsCapability } from "../forms-api.ts";
 import { previewUrl, saveDesign } from "../content-api.ts";
@@ -190,7 +191,7 @@ function EditorApp({
     } finally {
       setBusy(null);
     }
-    const pattern = await readCollection(fetcher).then(
+    const pattern = await readCollection(fetcher, PAGES_COLLECTION).then(
       (collection) => collection?.urlPattern,
       () => null,
     );
