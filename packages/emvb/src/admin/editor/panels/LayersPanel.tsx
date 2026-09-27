@@ -1,5 +1,6 @@
 import { SquaresFourIcon, TextHIcon } from "@phosphor-icons/react";
 import type { Layout, LayoutNode } from "../../../core/index.ts";
+import { NEW_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { ELEMENT_NAMES } from "./ElementPanel.tsx";
 
 const ICONS: Record<string, typeof TextHIcon> = { heading: TextHIcon, container: SquaresFourIcon };
@@ -9,7 +10,10 @@ const rows = (node: LayoutNode, depth: number): Array<{ node: LayoutNode; depth:
   ...(node.type === "container" ? node.children.flatMap((child) => rows(child, depth + 1)) : []),
 ];
 
-/** The Layers list (IA). The Add tab and drag and drop arrive with S2 (R-003). */
+/**
+ * Layers list (IA). W-015 adds one Heading Add tile for the iframe drag proof; the full Add tab
+ * arrives with W-018.
+ */
 export function LayersPanel({
   layout,
   selectedId,
@@ -21,6 +25,22 @@ export function LayersPanel({
 }) {
   return (
     <div className="emvb-panel-body">
+      <h2 className="emvb-panel-title">Add</h2>
+      <div className="emvb-add-tiles" aria-label="Add elements">
+        <button
+          type="button"
+          className="emvb-element-tile"
+          data-emvb-add-tile="heading"
+          draggable
+          onDragStart={(event) => {
+            event.dataTransfer.setData(NEW_ELEMENT_MIME, "heading");
+            event.dataTransfer.effectAllowed = "copy";
+          }}
+        >
+          <TextHIcon size={20} aria-hidden="true" />
+          <span>Heading</span>
+        </button>
+      </div>
       <h2 className="emvb-panel-title">Layers</h2>
       {layout ? (
         <ul className="emvb-layers" aria-label="Layers">

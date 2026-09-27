@@ -77,4 +77,11 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-shortcuts { width: 100%; border-collapse: collapse; font-size: 13px; }
 .emvb-shortcuts td { padding: 6px 0; border-bottom: 1px solid var(--color-kumo-hairline); }
 .emvb-shortcuts td:last-child { text-align: right; font-family: var(--font-mono); color: var(--text-color-kumo-subtle); }
+
+.emvb-add-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.emvb-element-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 72px; padding: 12px 8px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; background: var(--color-kumo-base); color: var(--text-color-kumo-default); font: inherit; font-size: 12px; line-height: 16px; cursor: grab; }
+.emvb-element-tile:hover { background: var(--color-kumo-tint); }
+.emvb-element-tile:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
+.emvb-element-tile:active { cursor: grabbing; }
+.emvb-drop-line { position: absolute; background: var(--color-kumo-brand); pointer-events: none; z-index: 2; }
 `;

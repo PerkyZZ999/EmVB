@@ -87,3 +87,32 @@ describe("editor store (A-07)", () => {
     expect(state.selectedId).toBe(state.page.layout?.root.id ?? "missing");
   });
 });
+
+test("add-node inserts through arrange.addNode and selects the new element", () => {
+  let state = initial();
+  const rootId = state.page.layout?.root.id;
+  expect(rootId).toBeTruthy();
+  const node = { id: "headNEW1", type: "heading" as const, props: { text: "Heading", level: 2 } };
+  state = editorReducer(state, {
+    type: "add-node",
+    node,
+    parentId: rootId ?? "",
+    index: 0,
+  });
+  expect(state.page.layout?.root.children[0]?.id).toBe("headNEW1");
+  expect(state.selectedId).toBe("headNEW1");
+  expect(isDirty(state)).toBe(true);
+});
+
+test("add-node refuses an invalid drop without changing the layout", () => {
+  const before = initial();
+  const node = { id: "headNEW1", type: "heading" as const, props: { text: "Heading", level: 2 } };
+  const state = editorReducer(before, {
+    type: "add-node",
+    node,
+    parentId: "missing",
+    index: 0,
+  });
+  expect(state.page.layout).toEqual(before.page.layout);
+  expect(isDirty(state)).toBe(false);
+});

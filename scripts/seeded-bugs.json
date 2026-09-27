@@ -1188,6 +1188,59 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*after a delete the selection goes to the next sibling"
+    },
+    {
+      "id": "W-015/drop-index-off-by-one",
+      "requirement": "R-003",
+      "description": "dropIndex inserts one slot too late",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/drop-target.ts",
+          "search": "  return before ?? (group.at(-1) as number) + 1;",
+          "replace": "  return (before ?? (group.at(-1) as number) + 1) + 1;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/dnd"],
+      "expect": "\\(fail\\).*dropIndex"
+    },
+    {
+      "id": "W-015/e2e-drop-index-off-by-one",
+      "requirement": "R-003",
+      "description": "dropIndex is off by one (browser: insert lands after Beta instead of between)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/drop-target.ts",
+          "search": "  return before ?? (group.at(-1) as number) + 1;",
+          "replace": "  return (before ?? (group.at(-1) as number) + 1) + 1;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
+    },
+    {
+      "id": "W-015/e2e-drop-listener-removed",
+      "requirement": "K16",
+      "description": "the canvas drop listeners are not registered, so Add-tile drops do nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "    doc.addEventListener(\"drop\", drop);",
+          "replace": "    // doc.addEventListener(\"drop\", drop);"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "    iframe.addEventListener(\"drop\", drop);",
+          "replace": "    // iframe.addEventListener(\"drop\", drop);"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
     }
   ]
 }

@@ -1,4 +1,5 @@
 import {
+  addNode,
   findNode,
   insertNode,
   newNodeId,
@@ -35,6 +36,7 @@ export type EditorAction =
   | { type: "delete-node"; id: string }
   | { type: "restore" }
   | { type: "add-root-container" }
+  | { type: "add-node"; node: LayoutNode; parentId: string; index: number }
   | { type: "saved"; rev: string; version: number }
   | { type: "published"; rev: string }
   | { type: "set-design"; design: DesignSystem; revision: string | null }
@@ -89,6 +91,18 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
           layout: { schemaVersion: 1, root: { id, type: "container", props: {}, children: [] } },
         }),
         selectedId: id,
+      };
+    }
+    case "add-node": {
+      if (!state.page.layout) return state;
+      const result = addNode(state.page.layout, action.node, {
+        parentId: action.parentId,
+        index: action.index,
+      });
+      if (!result.ok) return state;
+      return {
+        ...edited(state, { ...state.page, layout: result.layout }),
+        selectedId: result.selected,
       };
     }
     case "saved":

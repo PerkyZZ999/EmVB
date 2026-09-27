@@ -18,14 +18,19 @@ export function SelectionOverlay({
   selected,
   selectedId,
   selection,
+  dropLine,
 }: {
   hover: Box | null;
   selected: Box | null;
   selectedId: string | null;
   selection: CanvasSelection;
+  dropLine?: Box | null;
 }) {
   return (
-    <div className="emvb-overlay" aria-hidden={selected ? undefined : true}>
+    <div className="emvb-overlay" aria-hidden={selected || dropLine ? undefined : true}>
+      {dropLine && (
+        <div className="emvb-drop-line" data-emvb-drop-line="" style={place(dropLine)} />
+      )}
       {hover && <div className="emvb-outline-hover" style={place(hover)} />}
       {selected && selectedId && (
         <>

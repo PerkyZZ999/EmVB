@@ -9,6 +9,7 @@ import { CanvasFrame, type CanvasSelection } from "./canvas/CanvasFrame.tsx";
 import { ConflictDialog, LeaveDialog } from "./dialogs.tsx";
 import { EditorOverlay } from "./EditorOverlay.tsx";
 import { exitTarget, PAGES_URL } from "./exit.ts";
+import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES, ElementPanel } from "./panels/ElementPanel.tsx";
 import { LayersPanel } from "./panels/LayersPanel.tsx";
 import { PageSettings } from "./panels/PageSettings.tsx";
@@ -285,7 +286,7 @@ function EditorApp({
               onPublish={() => void publish()}
             />
             <div className="emvb-frame">
-              <aside className="emvb-panel emvb-panel-left" aria-label="Layers">
+              <aside className="emvb-panel emvb-panel-left" aria-label="Add and Layers">
                 <LayersPanel
                   layout={state.page.layout}
                   selectedId={state.selectedId}
@@ -294,7 +295,17 @@ function EditorApp({
               </aside>
               <main className="emvb-canvas">
                 {rendered ? (
-                  <CanvasFrame vnode={rendered.vnode} css={rendered.css} selection={selection} />
+                  <CanvasFrame
+                    vnode={rendered.vnode}
+                    css={rendered.css}
+                    layout={state.page.layout}
+                    selection={selection}
+                    onDropNew={(elementType, parentId, index) => {
+                      const node = newElement(elementType);
+                      if (!node) return;
+                      dispatch({ type: "add-node", node, parentId, index });
+                    }}
+                  />
                 ) : (
                   <div className="emvb-empty-canvas">
                     <button
