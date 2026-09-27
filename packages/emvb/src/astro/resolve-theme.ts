@@ -57,10 +57,10 @@ type StoredPart = {
 async function loadPublishedThemeParts(): Promise<StoredPart[]> {
   let result: Awaited<ReturnType<typeof getEmDashCollection>>;
   try {
+    // Order in JS: D1/SQLite columns are snake_case; camelCase orderBy fails the query.
     result = await getEmDashCollection(THEME_PARTS_COLLECTION, {
       status: "published",
       limit: 50,
-      orderBy: { updatedAt: "desc" },
     });
   } catch {
     return [];
@@ -87,6 +87,7 @@ async function loadPublishedThemeParts(): Promise<StoredPart[]> {
       updatedAt: String(data["updatedAt"] ?? data["updated_at"] ?? ""),
     });
   }
+  parts.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : a.updatedAt > b.updatedAt ? -1 : 0));
   return parts;
 }
 
