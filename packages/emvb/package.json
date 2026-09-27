@@ -12,7 +12,8 @@
     "./core": "./src/core/index.ts",
     "./admin": "./src/admin/index.tsx",
     "./astro": "./src/astro/index.ts",
-    "./astro/forms": "./src/astro/forms/index.ts"
+    "./astro/forms": "./src/astro/forms/index.ts",
+    "./astro/popups": "./src/astro/popups/index.ts"
   },
   "scripts": {
     "test:astro": "bun --bun vitest run"

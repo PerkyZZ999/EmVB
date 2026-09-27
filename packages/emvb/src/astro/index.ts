@@ -3,6 +3,7 @@ export { resolveEmVBPage, type ResolvedEmVBPage } from "./resolve.ts";
 export {
   resolveThemeParts,
   type RenderedThemePart,
+  type RenderedPopup,
   type ResolvedThemeParts,
 } from "./resolve-theme.ts";
 export {

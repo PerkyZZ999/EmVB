@@ -219,6 +219,8 @@ export {
   type TriggersValidation,
 } from "./theme/triggers.ts";
 
+export { POPUP_CHROME_CSS, wrapPopupMarkup, type PopupPublicConfig } from "./theme/popup-markup.ts";
+
 export {
   SAMPLE_POST,
   portableTextToVNodes,

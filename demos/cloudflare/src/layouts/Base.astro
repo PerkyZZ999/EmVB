@@ -10,6 +10,7 @@ import {
 	themeContextFront,
 	themeContextSearch,
 } from "emvb/astro";
+import { EmVBPopupsRuntime } from "emvb/astro/popups";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
 interface Props {
@@ -132,6 +133,13 @@ const theme = await resolveThemeParts(Astro, themeCtx);
 		</main>
 
 		{theme.footer && <Fragment set:html={theme.footer.html} />}
+
+		{
+			theme.popups.map((popup) => (
+				<Fragment set:html={popup.html} />
+			))
+		}
+		{theme.needsPopupsRuntime && <EmVBPopupsRuntime />}
 
 		<EmDashBodyEnd page={pageCtx} />
 	</body>

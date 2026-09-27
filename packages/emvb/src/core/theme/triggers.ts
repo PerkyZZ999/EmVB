@@ -2,10 +2,10 @@ import { z } from "zod";
 
 export const TRIGGERS_SCHEMA_VERSION = 1;
 export const MAX_POPUP_TRIGGERS = 8;
-export const MAX_CLICK_SELECTOR_LENGTH = 200;
-export const MAX_DELAY_MS = 120_000;
-export const MAX_SCROLL_PERCENT = 100;
-export const MAX_SHOW_TIMES = 100;
+const MAX_CLICK_SELECTOR_LENGTH = 200;
+const MAX_DELAY_MS = 120_000;
+const MAX_SCROLL_PERCENT = 100;
+const MAX_SHOW_TIMES = 100;
 
 /** MVP open triggers (Elementor-inspired). Exit-intent / inactivity deferred. */
 const PageLoadTrigger = z.strictObject({ type: z.literal("page_load") });
@@ -22,7 +22,7 @@ const ClickTrigger = z.strictObject({
   selector: z.string().min(1).max(MAX_CLICK_SELECTOR_LENGTH),
 });
 
-export const PopupOpenTriggerSchema = z.discriminatedUnion("type", [
+const PopupOpenTriggerSchema = z.discriminatedUnion("type", [
   PageLoadTrigger,
   DelayTrigger,
   ScrollTrigger,
@@ -114,7 +114,7 @@ export function isSafeClickSelector(selector: string): boolean {
   if (/[<>`]/.test(trimmed)) return false;
   if (/javascript:/i.test(trimmed)) return false;
   // Allow common CSS selector chars only.
-  return /^[a-zA-Z0-9\s\-_.#[\]=,:()>+~*"'|\/]+$/.test(trimmed);
+  return /^[a-zA-Z0-9\s\-_.#[\]=,:()>+~*"'|/]+$/.test(trimmed);
 }
 
 /** Breakpoints aligned with common Elementor/EmVB device tiers. */

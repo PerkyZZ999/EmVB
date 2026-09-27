@@ -4,15 +4,21 @@ import {
   collectLoopItemPartIds,
   contentPartTypeForContext,
   defaultConditions,
+  defaultTriggers,
+  listMatchingThemeParts,
   parseThemePartType,
   pickThemePartWinner,
+  POPUP_CHROME_CSS,
   validateConditions,
+  validateTriggers,
+  wrapPopupMarkup,
   type Layout,
   type ThemeDynamicData,
   type ThemePartCandidate,
   type ThemePartType,
   type ThemePostFields,
   type ThemeRequestContext,
+  type TriggersDoc,
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
@@ -27,6 +33,14 @@ export type RenderedThemePart = {
   css: string;
 };
 
+export type RenderedPopup = {
+  id: string;
+  title: string;
+  html: string;
+  css: string;
+  triggers: TriggersDoc;
+};
+
 export type ResolvedThemeParts = {
   header: RenderedThemePart | null;
   footer: RenderedThemePart | null;
@@ -35,8 +49,12 @@ export type ResolvedThemeParts = {
    * Null when none match — hosts keep their route slot content.
    */
   content: RenderedThemePart | null;
+  /** Matching published popups for this request (S7b). May be more than one. */
+  popups: RenderedPopup[];
   /** Concatenated CSS for all winners (empty when none match). */
   css: string;
+  /** Hosts load `EmVBPopupsRuntime` only when this is true (R-031). */
+  needsPopupsRuntime: boolean;
 };
 
 type AstroLike = {
@@ -51,6 +69,7 @@ type StoredPart = {
   partType: ThemePartType;
   layout: unknown;
   conditions: ReturnType<typeof defaultConditions>;
+  triggers: TriggersDoc;
   updatedAt: string;
 };
 
@@ -78,12 +97,22 @@ async function loadPublishedThemeParts(): Promise<StoredPart[]> {
         : conditionsRaw,
     );
     if (!validated.ok) continue;
+    const triggersRaw = data["triggers"];
+    const triggersValidated = validateTriggers(
+      triggersRaw === undefined || triggersRaw === null || triggersRaw === ""
+        ? defaultTriggers()
+        : triggersRaw,
+    );
+    // Invalid triggers fail closed for popups; other part types ignore triggers.
+    const triggers = triggersValidated.ok ? triggersValidated.triggers : defaultTriggers();
+    if (partType === "popup" && !triggersValidated.ok) continue;
     parts.push({
       id: String(data["id"] ?? entry.id),
       title: typeof data["title"] === "string" ? data["title"] : "",
       partType,
       layout: data["layout"],
       conditions: validated.conditions,
+      triggers,
       updatedAt: String(data["updatedAt"] ?? data["updated_at"] ?? ""),
     });
   }
@@ -180,8 +209,8 @@ async function buildDynamicForContent(
 }
 
 /**
- * Resolve winning published theme parts for this request (R-062 / S7d).
- * Returns plain HTML/CSS only — no EmVB JS (R-031).
+ * Resolve winning published theme parts for this request (R-062 / S7b–S7d).
+ * Returns plain HTML/CSS; popup JS is optional and only when `needsPopupsRuntime`.
  * Single Post / Archive winners substitute post fields server-side.
  */
 export async function resolveThemeParts(
@@ -201,7 +230,9 @@ export async function resolveThemeParts(
     header: null,
     footer: null,
     content: null,
+    popups: [],
     css: "",
+    needsPopupsRuntime: false,
   };
 
   const parts = await loadPublishedThemeParts();
@@ -218,8 +249,11 @@ export async function resolveThemeParts(
   const footerWinner = pickThemePartWinner(candidates, "footer", context);
   const contentType = contentPartTypeForContext(context);
   const contentWinner = contentType ? pickThemePartWinner(candidates, contentType, context) : null;
+  const popupMatches = listMatchingThemeParts(candidates, "popup", context);
 
-  if (!headerWinner && !footerWinner && !contentWinner) return empty;
+  if (!headerWinner && !footerWinner && !contentWinner && popupMatches.length === 0) {
+    return empty;
+  }
 
   const handler = getPublicPluginApiRouteHandler(astro.locals as never);
   const design = await loadDesign(handler, astro.url);
@@ -254,6 +288,33 @@ export async function resolveThemeParts(
   const header = headerWinner ? await renderPart(headerWinner) : null;
   const footer = footerWinner ? await renderPart(footerWinner) : null;
   const content = contentWinner ? await renderPart(contentWinner) : null;
-  const css = [header?.css, content?.css, footer?.css].filter(Boolean).join("\n");
-  return { header, footer, content, css };
+
+  const popups: RenderedPopup[] = [];
+  for (const match of popupMatches) {
+    const stored = parts.find((p) => p.id === match.id);
+    if (!stored) continue;
+    const rendered: RenderedPage = renderStored(stored.layout, design, stored.id);
+    const body = rendered.html
+      ? `<div class="emvb-theme-popup" data-emvb-theme-part="${stored.id}">${rendered.html}</div>`
+      : "";
+    popups.push({
+      id: stored.id,
+      title: stored.title,
+      html: wrapPopupMarkup(stored.id, body, stored.triggers),
+      css: rendered.css,
+      triggers: stored.triggers,
+    });
+  }
+
+  const cssParts = [header?.css, content?.css, footer?.css, ...popups.map((p) => p.css)];
+  if (popups.length > 0) cssParts.push(POPUP_CHROME_CSS);
+  const css = cssParts.filter(Boolean).join("\n");
+  return {
+    header,
+    footer,
+    content,
+    popups,
+    css,
+    needsPopupsRuntime: popups.length > 0,
+  };
 }

@@ -1,0 +1,9 @@
+---
+// Optional popup client (S7b). Hosts render this only when
+// `resolveThemeParts().needsPopupsRuntime` so pages without popups stay zero EmVB JS (R-031).
+---
+
+<script>
+  import { initPopups } from "./runtime.ts";
+  initPopups();
+</script>
