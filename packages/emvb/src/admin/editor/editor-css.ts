@@ -117,4 +117,15 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-reset-btn { flex: 0 0 auto; margin-top: 22px; opacity: 0.4; }
 .emvb-textarea { min-height: 80px; height: auto; padding: 8px; resize: vertical; font: inherit; }
 .emvb-field-label { font-size: 13px; font-weight: 600; }
+
+.emvb-media-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.emvb-media-preview { display: flex; flex-direction: column; gap: 6px; }
+.emvb-media-thumb { display: block; max-width: 100%; max-height: 120px; border-radius: 6px; object-fit: contain; background: var(--color-kumo-canvas); }
+.emvb-media-dialog { display: flex; flex-direction: column; gap: 12px; padding: 12px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; background: var(--color-kumo-elevated); }
+.emvb-media-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.emvb-media-grid { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-height: 280px; overflow: auto; }
+.emvb-media-card { display: flex; flex-direction: column; gap: 4px; width: 100%; padding: 6px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; background: var(--color-kumo-base); color: var(--text-color-kumo-default); font: inherit; font-size: 11px; line-height: 14px; text-align: left; cursor: pointer; }
+.emvb-media-card:hover { background: var(--color-kumo-tint); }
+.emvb-media-card img { display: block; width: 100%; height: 72px; object-fit: cover; border-radius: 4px; background: var(--color-kumo-canvas); }
+.emvb-media-card span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 `;

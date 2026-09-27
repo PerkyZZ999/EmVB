@@ -22,7 +22,8 @@ const SRCDOC =
   '<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0}</style></head><body></body></html>';
 
 /** Canvas-only: empty containers are droppable. Never emitted into the saved page CSS. */
-const EDITOR_CANVAS_CSS = ".emvb-container:empty{min-height:48px}";
+const EDITOR_CANVAS_CSS =
+  ".emvb-container:empty{min-height:48px}.emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}";
 
 const idAt = (target: EventTarget | null): string | null => {
   const element = target as Element | null;

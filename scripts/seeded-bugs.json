@@ -1693,6 +1693,46 @@
         "decorative images"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-024/missing-alt-accepted",
+      "requirement": "N-003",
+      "description": "ImageNode accepts empty alt when not decorative",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": ".refine((node) => node.props.decorative === true || node.props.alt.length > 0, {\n    message: \"Alt text is required unless the image is marked decorative.\",\n    path: [\"props\", \"alt\"],\n  });",
+          "replace": ".refine(() => true, {\n    message: \"Alt text is required unless the image is marked decorative.\",\n    path: [\"props\", \"alt\"],\n  });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/validate.test.ts",
+        "-t",
+        "empty alt without decorative"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-024/upload-path-diverges",
+      "requirement": "R-007",
+      "description": "upload uses a platform-specific media path instead of the shared EmDash endpoint",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": "const response = await fetcher(MEDIA_API_PATH, { method: \"POST\", body });",
+          "replace": "const response = await fetcher(\"/_emdash/api/cf-media\", { method: \"POST\", body });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/media-api.test.ts",
+        "-t",
+        "share one EmDash media endpoint"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

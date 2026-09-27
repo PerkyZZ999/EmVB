@@ -3,9 +3,11 @@ export type FieldKind =
   | "text"
   | "textarea"
   | "number"
+  | "int"
   | "select"
   | "boolean"
   | "href"
+  | "media"
   | "list-items";
 
 export type FieldOption = { value: string | number | boolean; label: string };

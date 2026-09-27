@@ -511,6 +511,7 @@ function EditorApp({
                     layout={state.page.layout}
                     design={state.design}
                     rejection={saver.rejection}
+                    fetcher={fetcher}
                     onChange={(node: LayoutNode) =>
                       dispatch({ type: "update-node", id: node.id, update: () => node })
                     }

@@ -2,7 +2,10 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { emptyDesign, type Layout, type LayoutNode } from "../../../../core/index.ts";
+import type { Fetcher } from "../../../api.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
+
+const stubFetcher: Fetcher = async () => new Response("{}", { status: 200 });
 
 let root: Root | undefined;
 let host: HTMLElement | undefined;
@@ -48,6 +51,7 @@ describe("ElementPanel (W-021)", () => {
         layout={layout}
         design={emptyDesign()}
         rejection={null}
+        fetcher={stubFetcher}
         onChange={(n) => {
           current = n;
         }}
@@ -65,6 +69,7 @@ describe("ElementPanel (W-021)", () => {
         layout={layout}
         design={emptyDesign()}
         rejection={null}
+        fetcher={stubFetcher}
         onChange={() => undefined}
         onDesignChange={async () => undefined}
         onSelect={() => undefined}
@@ -81,6 +86,7 @@ describe("ElementPanel (W-021)", () => {
         layout={layout}
         design={emptyDesign()}
         rejection={null}
+        fetcher={stubFetcher}
         onChange={() => undefined}
         onDesignChange={async () => undefined}
         onSelect={() => undefined}
@@ -112,6 +118,7 @@ describe("ElementPanel (W-021)", () => {
         layout={layout}
         design={emptyDesign()}
         rejection={null}
+        fetcher={stubFetcher}
         onChange={(n) => {
           current = n;
         }}
@@ -135,6 +142,7 @@ describe("ElementPanel (W-021)", () => {
         layout={layout}
         design={emptyDesign()}
         rejection={null}
+        fetcher={stubFetcher}
         onChange={() => undefined}
         onDesignChange={async () => undefined}
         onSelect={() => undefined}
@@ -160,6 +168,7 @@ describe("ElementPanel (W-021)", () => {
         }}
         design={emptyDesign()}
         rejection={null}
+        fetcher={stubFetcher}
         onChange={() => undefined}
         onDesignChange={async () => undefined}
         onSelect={() => undefined}

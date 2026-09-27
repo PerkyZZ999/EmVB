@@ -258,8 +258,8 @@ const image: ElementDefinition<ImageNode> = {
     fields: [
       {
         key: "src",
-        kind: "href",
-        label: "Image URL",
+        kind: "media",
+        label: "Image",
         message:
           "Use a full URL such as https://example.com/photo.jpg or a path such as /uploads/photo.jpg.",
       },
@@ -272,14 +272,14 @@ const image: ElementDefinition<ImageNode> = {
       },
       {
         key: "width",
-        kind: "number",
+        kind: "int",
         label: "Width (px)",
         optional: true,
         message: "Width must be a positive whole number.",
       },
       {
         key: "height",
-        kind: "number",
+        kind: "int",
         label: "Height (px)",
         optional: true,
         message: "Height must be a positive whole number.",

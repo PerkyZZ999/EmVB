@@ -6,7 +6,9 @@ import {
   type FieldDescriptor,
   type LayoutNode,
 } from "../../../../core/index.ts";
+import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
+import { MediaPicker } from "./MediaPicker.tsx";
 
 const propsOf = (node: LayoutNode): Record<string, unknown> =>
   node.props as Record<string, unknown>;
@@ -18,15 +20,18 @@ const withProp = (node: LayoutNode, key: string, value: unknown): LayoutNode => 
   return { ...node, props } as LayoutNode;
 };
 
-/** Content-tab control driven by a FieldDescriptor (W-021). */
+/** Content-tab control driven by a FieldDescriptor (W-021 / W-024). */
 export function FieldControl({
   field,
   node,
   onChange,
+  fetcher,
 }: {
   field: FieldDescriptor;
   node: LayoutNode;
   onChange: (node: LayoutNode) => void;
+  /** Required for media library / upload fields (W-024). */
+  fetcher?: Fetcher;
 }) {
   const props = propsOf(node);
   const raw = props[field.key];
@@ -36,13 +41,26 @@ export function FieldControl({
   React.useEffect(() => {
     if (field.kind === "number" && raw && typeof raw === "object" && "value" in raw) {
       setDraft(String((raw as { value: number }).value));
+    } else if (field.kind === "int" && typeof raw === "number") {
+      setDraft(String(raw));
     } else if (field.kind === "list-items" && Array.isArray(raw)) {
       setDraft(raw.join("\n"));
-    } else if (field.kind !== "boolean" && field.kind !== "select") {
+    } else if (field.kind !== "boolean" && field.kind !== "select" && field.kind !== "media") {
       setDraft(raw === undefined || raw === null ? "" : String(raw));
     }
     setError(null);
   }, [node.id, field.key, field.kind, raw]);
+
+  if (field.kind === "media") {
+    if (!fetcher) {
+      return (
+        <p key={field.key} className="emvb-helper" data-emvb-field={field.key}>
+          Media library needs a signed-in session.
+        </p>
+      );
+    }
+    return <MediaPicker key={field.key} node={node} fetcher={fetcher} onChange={onChange} />;
+  }
 
   if (field.kind === "boolean") {
     return (
@@ -105,6 +123,42 @@ export function FieldControl({
           }}
         />
       </div>
+    );
+  }
+
+  if (field.kind === "int") {
+    const commit = () => {
+      if (draft.trim() === "" && field.optional) {
+        setError(null);
+        onChange(withProp(node, field.key, undefined));
+        return;
+      }
+      const value = Number(draft);
+      if (!Number.isFinite(value) || !Number.isInteger(value) || value < 1) {
+        setError(field.message ?? "Enter a positive whole number.");
+        return;
+      }
+      if (value > 10_000) {
+        setError("Enter a number up to 10000.");
+        return;
+      }
+      setError(null);
+      onChange(withProp(node, field.key, value));
+    };
+    return (
+      <Input
+        label={field.label}
+        className={`${FIELD} emvb-mono`}
+        inputMode="numeric"
+        value={draft}
+        error={error ?? undefined}
+        data-emvb-field={field.key}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") commit();
+        }}
+      />
     );
   }
 
@@ -208,8 +262,10 @@ export const IMPLEMENTED_FIELD_KINDS = [
   "text",
   "textarea",
   "number",
+  "int",
   "select",
   "boolean",
   "href",
+  "media",
   "list-items",
 ] as const;

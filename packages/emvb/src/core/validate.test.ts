@@ -219,3 +219,44 @@ describe("design system document (D-013)", () => {
     expect(result.ok ? undefined : result.issues[0]?.code).toBe("newer-version");
   });
 });
+
+describe("image alt (W-024, N-003)", () => {
+  test("empty alt without decorative is refused", () => {
+    const issues = issuesOf({
+      schemaVersion: 1,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "img00001",
+            type: "image",
+            props: { src: "/uploads/x.jpg", alt: "", decorative: false },
+          },
+        ],
+      },
+    });
+    expect(issues.some((i) => i.message.includes("Alt text") || i.path.includes("alt"))).toBe(true);
+  });
+
+  test("decorative images may use empty alt", () => {
+    expect(
+      validateLayout({
+        schemaVersion: 1,
+        root: {
+          id: "root0001",
+          type: "container",
+          props: {},
+          children: [
+            {
+              id: "img00001",
+              type: "image",
+              props: { src: "/uploads/x.jpg", alt: "", decorative: true },
+            },
+          ],
+        },
+      }).ok,
+    ).toBe(true);
+  });
+});

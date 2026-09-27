@@ -1,7 +1,9 @@
 import { Collapsible, Input, Tabs } from "@cloudflare/kumo";
+import type { Fetcher } from "../../api.ts";
 import {
   CaretDownIcon,
   CaretRightIcon,
+  ImageIcon,
   SquaresFourIcon,
   TextHIcon,
   WarningCircleIcon,
@@ -33,6 +35,7 @@ export const ELEMENT_NAMES: Record<string, string> = Object.fromEntries(
 const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
   container: SquaresFourIcon,
+  image: ImageIcon,
 };
 
 const withStyle = (node: LayoutNode, patch: Partial<StyleProps>): LayoutNode => {
@@ -73,6 +76,7 @@ type Props = {
   layout: Layout | null;
   design: DesignSystem;
   rejection: string | null;
+  fetcher: Fetcher;
   onChange: (node: LayoutNode) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
   onSelect: (id: string | null) => void;
@@ -84,6 +88,7 @@ export function ElementPanel({
   layout,
   design,
   rejection,
+  fetcher,
   onChange,
   onDesignChange,
   onSelect,
@@ -197,7 +202,13 @@ export function ElementPanel({
             </p>
           ) : (
             descriptor.fields.map((field) => (
-              <FieldControl key={field.key} field={field} node={node} onChange={onChange} />
+              <FieldControl
+                key={field.key}
+                field={field}
+                node={node}
+                onChange={onChange}
+                fetcher={fetcher}
+              />
             ))
           )}
         </div>
@@ -214,6 +225,7 @@ export function ElementPanel({
               }}
               node={node}
               onChange={onChange}
+              fetcher={fetcher}
             />
           )}
           {ui.sections.map((section) => {
