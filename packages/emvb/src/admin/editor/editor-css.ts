@@ -33,7 +33,9 @@ export const EDITOR_CSS = `${UI_CSS}
   grid-template-columns: minmax(0, 1fr) auto max-content;
   align-items: center;
   gap: 16px;
+  min-height: 44px;
   height: var(--emvb-topbar);
+  overflow: hidden;
   padding: 8px 16px;
   min-width: 0;
   background: var(--emvb-glass);
@@ -45,9 +47,18 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-topbar-title { min-width: 0; font-size: 14px; line-height: 18px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-topbar-start { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.emvb-topbar-end { display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-width: max-content; flex-shrink: 0; flex-wrap: nowrap; }
-.emvb-topbar-tools { display: flex; align-items: center; gap: 2px; flex-shrink: 0; flex-wrap: nowrap; }
-.emvb-topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--color-kumo-hairline); flex-shrink: 0; flex-wrap: nowrap; }
+.emvb-topbar-end,
+.emvb-topbar-tools,
+.emvb-topbar-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center;
+}
+.emvb-topbar-end { justify-content: flex-end; gap: 6px; min-width: max-content; flex-shrink: 0; }
+.emvb-topbar-tools { gap: 2px; flex-shrink: 0; }
+.emvb-topbar-actions { gap: 8px; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--color-kumo-hairline); flex-shrink: 0; }
+.emvb-topbar-actions > * { flex: 0 0 auto !important; width: auto !important; max-width: none !important; }
 .emvb-save-status { display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); white-space: nowrap; }
 .emvb-danger-icon { color: var(--color-kumo-danger); }
 .emvb-link-button { border: 0; padding: 0; background: none; color: var(--text-color-kumo-default); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }

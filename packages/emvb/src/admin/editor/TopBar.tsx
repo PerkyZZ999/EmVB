@@ -90,8 +90,26 @@ export function TopBar({
         )}
       </div>
       {page ? <SaveStatusText status={status} dirty={dirty} onRetry={onSave} /> : <div />}
-      <div className="emvb-topbar-end">
-        <div className="emvb-topbar-tools">
+      <div
+        className="emvb-topbar-end"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "nowrap",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <div
+          className="emvb-topbar-tools"
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "nowrap",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
           <Button
             variant="ghost"
             shape="square"
@@ -104,16 +122,26 @@ export function TopBar({
           {page && onSiteStyles && (
             <Button
               variant="ghost"
-              className={BUTTON}
+              shape="square"
+              className="emvb-icon-btn"
+              aria-label="Site styles"
+              title="Site styles"
               icon={<PaintBrushIcon aria-hidden="true" />}
               onClick={onSiteStyles}
-            >
-              Site styles
-            </Button>
+            />
           )}
         </div>
         {page && (
-          <div className="emvb-topbar-actions">
+          <div
+            className="emvb-topbar-actions"
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              flexWrap: "nowrap",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
             <Button
               variant="secondary"
               className={BUTTON}
