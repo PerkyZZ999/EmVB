@@ -184,7 +184,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "✘.*\\[node\\].*the EmVB plugin is loaded by the host"
+      "expect": "\u2718.*\\[node\\].*the EmVB plugin is loaded by the host"
     },
     {
       "id": "W-004/size-check-loosened",
@@ -558,7 +558,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/setup.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*read-only widget instead of a JSON input",
+      "expect": "\u2718.*\\[node\\].*read-only widget instead of a JSON input",
       "env": {
         "CI": "1"
       }
@@ -589,7 +589,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*author \\(30\\): no Visual pages link",
+      "expect": "\u2718.*\\[node\\].*author \\(30\\): no Visual pages link",
       "env": {
         "CI": "1"
       }
@@ -606,7 +606,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*editor \\(40\\): sees the link",
+      "expect": "\u2718.*\\[node\\].*editor \\(40\\): sees the link",
       "env": {
         "CI": "1"
       }
@@ -623,7 +623,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*subscriber \\(10\\): no Visual pages link",
+      "expect": "\u2718.*\\[node\\].*subscriber \\(10\\): no Visual pages link",
       "env": {
         "CI": "1"
       }
@@ -682,7 +682,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*a Kumo dialog opened from the editor stacks above it",
+      "expect": "\u2718.*\\[node\\].*a Kumo dialog opened from the editor stacks above it",
       "env": {
         "CI": "1"
       }
@@ -765,7 +765,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*at 1280×720 the overlay covers the admin and the canvas gets the real width",
+      "expect": "\u2718.*\\[node\\].*at 1280\u00d7720 the overlay covers the admin and the canvas gets the real width",
       "env": {
         "CI": "1"
       }
@@ -782,7 +782,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*below 1024 px the small-screen notice replaces the editor",
+      "expect": "\u2718.*\\[node\\].*below 1024 px the small-screen notice replaces the editor",
       "env": {
         "CI": "1"
       }
@@ -813,7 +813,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*a concurrent edit from another browser shows the conflict dialog",
+      "expect": "\u2718.*\\[node\\].*a concurrent edit from another browser shows the conflict dialog",
       "env": {
         "CI": "1"
       }
@@ -830,7 +830,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*a draft save leaves the published page alone",
+      "expect": "\u2718.*\\[node\\].*a draft save leaves the published page alone",
       "env": {
         "CI": "1"
       }
@@ -925,7 +925,7 @@
         "-g",
         "Restore toast"
       ],
-      "expect": "✘.*\\[node\\].*Delete shows a Restore toast above the editor",
+      "expect": "\u2718.*\\[node\\].*Delete shows a Restore toast above the editor",
       "env": {
         "CI": "1"
       }
@@ -942,7 +942,120 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*a duplicate slug is refused inline",
+      "expect": "\u2718.*\\[node\\].*a duplicate slug is refused inline",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-011/design-not-loaded",
+      "requirement": "R-030",
+      "description": "the public render ignores the stored design",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "return result.ok ? result.design : emptyDesign();",
+          "replace": "return emptyDesign();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro"],
+      "expect": "\\(fail\\).*reads the design through the in-process public route"
+    },
+    {
+      "id": "W-011/e2e-design-not-loaded",
+      "requirement": "R-030",
+      "description": "the public render ignores the stored design (production build)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "return result.ok ? result.design : emptyDesign();",
+          "replace": "return emptyDesign();"
+        }
+      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "colour variable"],
+      "expect": "\u2718.*\\[node-public\\].*changing a colour variable changes the published page",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-011/astro-html-escaped",
+      "requirement": "R-030",
+      "description": "EmVBPage prints the core HTML as text instead of emitting it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/EmVBPage.astro",
+          "search": "    <>\n      <style is:inline set:html={page.css} />\n      <Fragment set:html={page.html} />",
+          "replace": "    <>\n      <style is:inline set:html={page.css} />\n      {page.html}"
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "FAIL.*emvb-page\\.vitest\\.ts.*hostile text"
+    },
+    {
+      "id": "W-011/e2e-forms-runtime-always",
+      "requirement": "R-031",
+      "description": "the host route always includes the forms runtime",
+      "edits": [
+        {
+          "file": "demos/node/src/pages/[slug].astro",
+          "search": "<EmVBPage page={emvb}>{emvb.needsFormsRuntime && <EmVBFormsRuntime />}</EmVBPage>",
+          "replace": "<EmVBPage page={emvb}><EmVBFormsRuntime /></EmVBPage>"
+        }
+      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "adds no script"],
+      "expect": "\u2718.*\\[node-public\\].*adds no script",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-011/e2e-blank-uses-site-layout",
+      "requirement": "R-031",
+      "description": "blank canvas pages are wrapped in the site layout",
+      "edits": [
+        {
+          "file": "demos/node/src/pages/[slug].astro",
+          "search": "emvb?.canvasMode === \"blank\" ?",
+          "replace": "emvb?.canvasMode === \"none\" ?"
+        }
+      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "blank-canvas"],
+      "expect": "\u2718.*\\[node-public\\].*a blank-canvas page is a whole document",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-011/e2e-missing-not-404",
+      "requirement": "R-030",
+      "description": "a missing or unpublished page answers 200",
+      "edits": [
+        {
+          "file": "demos/node/src/pages/[slug].astro",
+          "search": "if (!entry) {\n\treturn Astro.rewrite(\"/404\");\n}",
+          "replace": "if (!entry) {\n\treturn new Response(\"Nothing here\");\n}"
+        }
+      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "are 404"],
+      "expect": "\u2718.*\\[node-public\\].*unpublished and missing pages are 404",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-011/e2e-preview-ignored",
+      "requirement": "R-030",
+      "description": "EmVB pages ignore preview tokens",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "if (!entry) return null;",
+          "replace": "if (!entry || found.isPreview) return null;"
+        }
+      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "preview link"],
+      "expect": "\u2718.*\\[node-public\\].*a preview link renders the draft",
       "env": {
         "CI": "1"
       }

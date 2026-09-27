@@ -1,0 +1,9 @@
+---
+// The forms plugin's client (D-015). Hosts render this only when a page `needsFormsRuntime`,
+// so pages without forms stay zero-JS (R-031). Form elements arrive in S5.
+---
+
+<script>
+  import { initForms } from "@emdash-cms/plugin-forms/client";
+  initForms();
+</script>

@@ -1,41 +1,62 @@
 ---
 import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
 import { PortableText } from "emdash/ui";
+import { EmVBPage, resolveEmVBPage } from "emvb/astro";
+import { EmVBFormsRuntime } from "emvb/astro/forms";
 import Base from "../layouts/Base.astro";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
 const slug = decodeSlug(Astro.params.slug);
 
 if (!slug) {
-	return Astro.redirect("/404");
+	return Astro.rewrite("/404");
 }
 
-const { entry: page, cacheHint } = await getEmDashEntry("pages", slug);
+// EmVB pages first, then the site's own pages (R-030).
+const emvb = await resolveEmVBPage(Astro);
+const found = emvb ? null : await getEmDashEntry("pages", slug);
+const page = found?.entry ?? null;
+const entry = emvb?.entry ?? page;
 
-if (!page) {
-	return Astro.redirect("/404");
+if (!entry) {
+	return Astro.rewrite("/404");
 }
 
-if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
+// EmVB pages read the site-wide design on every request, so they aren't route-cached.
+if (found && Astro.cache?.enabled) Astro.cache.set(found.cacheHint);
 const { siteTitle } = resolveStarterSiteIdentity(await getSiteSettings());
 
-const seo = getSeoMeta(page, {
+const seo = getSeoMeta(entry, {
 	siteTitle,
 	siteUrl: Astro.url.origin,
 	path: Astro.url.pathname.replace(/\/$/, ""),
 });
 ---
 
-<Base
-	title={seo.title}
-	pageTitle={seo.ogTitle}
-	description={seo.description}
-	canonical={seo.canonical}
-	content={{ collection: "pages", id: page.data.id, slug }}
->
-	<article>
-		<h1 {...page.edit.title}>{page.data.title}</h1>
+{
+	emvb?.canvasMode === "blank" ? (
+		<EmVBPage page={emvb} standalone title={seo.title} description={seo.description}>
+			{emvb.needsFormsRuntime && <EmVBFormsRuntime />}
+		</EmVBPage>
+	) : (
+		<Base
+			title={seo.title}
+			pageTitle={seo.ogTitle}
+			description={seo.description}
+			canonical={seo.canonical}
+			content={{ collection: emvb ? "emvb_pages" : "pages", id: entry.data.id, slug }}
+		>
+			{emvb ? (
+				<EmVBPage page={emvb}>{emvb.needsFormsRuntime && <EmVBFormsRuntime />}</EmVBPage>
+			) : (
+				page && (
+					<article>
+						<h1 {...page.edit.title}>{page.data.title}</h1>
 
-		<PortableText value={page.data.content} />
-	</article>
-</Base>
+						<PortableText value={page.data.content} />
+					</article>
+				)
+			)}
+		</Base>
+	)
+}

@@ -23,6 +23,7 @@
     "test": "bun test ./packages ./scripts ./test",
     "test:astro": "bun run --cwd packages/emvb test:astro",
     "e2e": "playwright test",
+    "e2e:prod": "playwright test -c playwright.prod.config.ts",
     "seeded-bugs": "bun scripts/seeded-bug.ts",
     "bench:render": "bun scripts/bench-render.ts"
   },

@@ -1,0 +1,37 @@
+---
+import type { RenderedPage } from "./render.ts";
+
+interface Props {
+  page: RenderedPage;
+  /** Blank canvas mode: a whole document, without the site's layout. The slot ends the body. */
+  standalone?: boolean;
+  title?: string;
+  description?: string | null;
+}
+
+const { page, standalone = false, title = "", description } = Astro.props;
+---
+
+{
+  standalone ? (
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{title}</title>
+        {description && <meta name="description" content={description} />}
+        <style is:inline set:html={page.css} />
+      </head>
+      <body>
+        <Fragment set:html={page.html} />
+        <slot />
+      </body>
+    </html>
+  ) : (
+    <>
+      <style is:inline set:html={page.css} />
+      <Fragment set:html={page.html} />
+      <slot />
+    </>
+  )
+}
