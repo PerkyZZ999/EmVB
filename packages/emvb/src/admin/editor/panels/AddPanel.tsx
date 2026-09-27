@@ -44,11 +44,18 @@ const ICONS: Record<string, typeof TextHIcon> = {
   checkbox: CheckSquareIcon,
   radio: RadioButtonIcon,
   submit: PaperPlaneTiltIcon,
+  "post-title": TextHIcon,
+  "post-excerpt": TextAlignLeftIcon,
+  "post-content": NotePencilIcon,
+  "post-image": ImageIcon,
+  "post-link": LinkSimpleIcon,
+  loop: ListBulletsIcon,
 };
 
 const GROUPS = [
   { id: "layout", label: "Layout" },
   { id: "content", label: "Content" },
+  { id: "dynamic", label: "Dynamic" },
   { id: "form", label: "Form" },
 ] as const;
 

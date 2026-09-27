@@ -26,6 +26,9 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "error_404", label: "Error 404" },
   { value: "search_results", label: "Search Results" },
   { value: "single_page", label: "Single Page" },
+  { value: "single_post", label: "Single Post" },
+  { value: "archive", label: "Archive" },
+  { value: "loop_item", label: "Loop Item" },
 ];
 
 /** Theme Builder list: title, type, conditions, status, last edited; New theme part. */
