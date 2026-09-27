@@ -146,7 +146,7 @@ async function press(key: string, init: KeyboardEventInit = {}) {
 const puts = (calls: Call[]) => calls.filter((c) => c.method === "PUT");
 const saveStatus = () => editor()?.querySelector(".emvb-save-status")?.textContent ?? "";
 const layerRow = (name: string) =>
-  [...document.querySelectorAll<HTMLButtonElement>(".emvb-layer-row")].find((row) =>
+  [...document.querySelectorAll<HTMLButtonElement>(".emvb-layer-select")].find((row) =>
     row.textContent?.startsWith(name),
   );
 
@@ -199,7 +199,7 @@ describe("save draft (R-006)", () => {
     const { server, fetcher } = fakeServer({ layout });
     await render(fetcher);
     await openLayers();
-    const rows = document.querySelectorAll(".emvb-layer-row");
+    const rows = document.querySelectorAll(".emvb-layer-select");
     await click(rows[rows.length - 1]);
     const grown = "x".repeat(900) + "y".repeat(300);
     await type(field("Text"), grown);
@@ -343,7 +343,7 @@ describe("Add panel and Layers (W-018)", () => {
     const { server, fetcher } = fakeServer({ layout });
     await render(fetcher);
     await openLayers();
-    await click(document.querySelector('[data-emvb-layer="box00001"]'));
+    await click(document.querySelector('[data-emvb-layer="box00001"] .emvb-layer-select'));
     const addTab = [...document.querySelectorAll('[role="tab"]')].find((el) =>
       (el.textContent ?? "").includes("Add"),
     );
@@ -370,5 +370,82 @@ describe("Add panel and Layers (W-018)", () => {
     await click(button("Add a container to start"));
     await openLayers();
     expect(layerRow("Container")).toBeTruthy();
+  });
+});
+
+describe("keyboard and quick actions (W-020)", () => {
+  test("Alt+ArrowDown moves the selected heading down among siblings", async () => {
+    const layout = {
+      schemaVersion: 1 as const,
+      root: {
+        id: "root0001",
+        type: "container" as const,
+        props: {},
+        children: [
+          { id: "head0001", type: "heading" as const, props: { text: "A", level: 1 } },
+          { id: "head0002", type: "heading" as const, props: { text: "B", level: 2 } },
+        ],
+      },
+    };
+    const { server, fetcher } = fakeServer({ layout });
+    await render(fetcher);
+    await openLayers();
+    await click(document.querySelector('[data-emvb-layer="head0001"] .emvb-layer-select'));
+    await settle();
+    await press("ArrowDown", { altKey: true });
+    await settle();
+    await press("s", { ctrlKey: true });
+    const saved = server.data["layout"] as {
+      root: { children: Array<{ props?: { text?: string } }> };
+    };
+    expect(saved.root.children.map((c) => c.props?.text)).toEqual(["B", "A"]);
+  });
+
+  test("Ctrl+D does not duplicate while a text field is focused", async () => {
+    const { server, fetcher } = fakeServer();
+    await render(fetcher);
+    await openLayers();
+    await click(layerRow("Heading"));
+    const input = field("Text");
+    await act(async () => {
+      input?.focus();
+      input?.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "d", ctrlKey: true, bubbles: true, cancelable: true }),
+      );
+    });
+    await settle();
+    await openLayers();
+    expect(document.querySelectorAll(".emvb-layer-row").length).toBe(2);
+    void server;
+  });
+
+  test("deleting a container with children opens the subtree dialog", async () => {
+    const layout = {
+      schemaVersion: 1 as const,
+      root: {
+        id: "root0001",
+        type: "container" as const,
+        props: {},
+        children: [
+          {
+            id: "box00001",
+            type: "container" as const,
+            props: {},
+            children: [
+              { id: "head0001", type: "heading" as const, props: { text: "In", level: 2 } },
+            ],
+          },
+        ],
+      },
+    };
+    const { fetcher } = fakeServer({ layout });
+    await render(fetcher);
+    await openLayers();
+    await click(document.querySelector('[data-emvb-layer="box00001"] .emvb-layer-select'));
+    await settle();
+    await press("Delete");
+    await settle();
+    expect(document.body.textContent).toContain("Delete Container and the 1 element inside it?");
+    expect(document.querySelector('[data-emvb-dialog="delete-subtree"]')).toBeTruthy();
   });
 });

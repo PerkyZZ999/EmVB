@@ -53,13 +53,14 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-row-actions, .emvb-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .emvb-dialog { display: flex; flex-direction: column; gap: 12px; }
 .emvb-layers { margin: 0; padding: 0; list-style: none; }
-.emvb-layer-row { display: flex; align-items: center; gap: 8px; width: 100%; height: 32px; padding-right: 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
-.emvb-layer-row:hover { background: var(--color-kumo-tint); }
-.emvb-layer-row[aria-current="true"] { background: var(--color-kumo-brand); color: #fff; }
-.emvb-layer-row:focus-visible { outline-offset: -2px; background: var(--color-kumo-base); }
-.emvb-layer-row[aria-current="true"]:focus-visible { outline-color: #fff; background: var(--color-kumo-brand); }
+.emvb-layer-row { display: flex; align-items: center; gap: 8px; width: 100%; height: 32px; padding-right: 8px; border-radius: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
+.emvb-layer-select { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; height: 32px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.emvb-layer-row:hover, .emvb-layer-row:hover .emvb-layer-select { background: var(--color-kumo-tint); }
+.emvb-layer-select[aria-current="true"] { background: var(--color-kumo-brand); color: #fff; }
+.emvb-layer-select:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -2px; }
+.emvb-layer-select[aria-current="true"]:focus-visible { outline-color: #fff; }
 .emvb-layer-preview { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color-kumo-subtle); }
-.emvb-layer-row[aria-current="true"] .emvb-layer-preview { color: inherit; }
+.emvb-layer-select[aria-current="true"] .emvb-layer-preview { color: inherit; }
 .emvb-canvas { min-width: 0; min-height: 0; background: var(--color-kumo-canvas); }
 .emvb-stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
 .emvb-canvas iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
@@ -98,4 +99,11 @@ export const EDITOR_CSS = `${UI_CSS}
 @media (prefers-reduced-motion: reduce) {
   .emvb-drop-line { transition: none !important; }
 }
+
+.emvb-layer-menu { position: relative; margin-left: auto; }
+.emvb-layer-menu-btn { border: 0; background: transparent; color: inherit; cursor: pointer; padding: 0 4px; border-radius: 4px; line-height: 1; }
+.emvb-layer-menu-btn:hover { background: var(--color-kumo-tint); }
+.emvb-layer-menu-list { position: absolute; right: 0; top: 100%; z-index: 5; min-width: 140px; padding: 4px; border-radius: 6px; background: var(--color-kumo-base); box-shadow: 0 4px 16px rgb(0 0 0 / 0.12); display: flex; flex-direction: column; }
+.emvb-layer-menu-list button { border: 0; background: transparent; text-align: left; padding: 6px 8px; border-radius: 4px; font: inherit; font-size: 13px; cursor: pointer; color: var(--text-color-kumo-default); }
+.emvb-layer-menu-list button:hover { background: var(--color-kumo-tint); }
 `;

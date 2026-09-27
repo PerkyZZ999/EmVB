@@ -3,10 +3,17 @@ import {
   findNode,
   insertNode,
   moveNode,
+  selectionAfterDelete,
+  moveOut,
+  moveIn,
+  moveDown,
+  moveUp,
+  duplicateNode,
   newNodeId,
   removeNode,
   updateNode,
   type DesignSystem,
+  type Layout,
   type LayoutNode,
   type Removed,
 } from "../../core/index.ts";
@@ -39,6 +46,9 @@ export type EditorAction =
   | { type: "add-root-container" }
   | { type: "add-node"; node: LayoutNode; parentId: string; index: number }
   | { type: "move-node"; id: string; parentId: string; index: number }
+  | { type: "duplicate-node"; id: string }
+  | { type: "arrange"; id: string; op: "up" | "down" | "in" | "out" }
+  | { type: "apply-arranged"; layout: Layout; selected: string }
   | { type: "saved"; rev: string; version: number }
   | { type: "published"; rev: string }
   | { type: "set-design"; design: DesignSystem; revision: string | null }
@@ -66,11 +76,15 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       });
     case "delete-node": {
       if (!state.page.layout) return state;
+      const nextSelected =
+        state.selectedId === action.id
+          ? selectionAfterDelete(state.page.layout, action.id)
+          : state.selectedId;
       const { layout, removed } = removeNode(state.page.layout, action.id);
       if (!removed) return state;
       return {
         ...edited(state, { ...state.page, layout }),
-        selectedId: state.selectedId === action.id ? null : state.selectedId,
+        selectedId: nextSelected,
         lastDeleted: removed,
       };
     }
@@ -116,6 +130,37 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         selectedId: result.selected,
       };
     }
+    case "duplicate-node": {
+      if (!state.page.layout) return state;
+      const result = duplicateNode(state.page.layout, action.id);
+      if (!result.ok) return state;
+      return {
+        ...edited(state, { ...state.page, layout: result.layout }),
+        selectedId: result.selected,
+      };
+    }
+    case "arrange": {
+      if (!state.page.layout) return state;
+      const run =
+        action.op === "up"
+          ? moveUp
+          : action.op === "down"
+            ? moveDown
+            : action.op === "in"
+              ? moveIn
+              : moveOut;
+      const result = run(state.page.layout, action.id);
+      if (!result.ok) return state;
+      return {
+        ...edited(state, { ...state.page, layout: result.layout }),
+        selectedId: result.selected,
+      };
+    }
+    case "apply-arranged":
+      return {
+        ...edited(state, { ...state.page, layout: action.layout }),
+        selectedId: action.selected,
+      };
     case "saved":
       return { ...state, rev: action.rev, savedVersion: action.version };
     case "published":

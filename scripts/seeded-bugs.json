@@ -1453,6 +1453,66 @@
         "dropLineBox"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-020/alt-down-moves-up",
+      "requirement": "R-003",
+      "description": "Alt+\u2193 calls moveUp instead of moveDown",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      apply(moveDown(layout, selected));",
+          "replace": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      apply(moveUp(layout, selected));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "Alt\\+ArrowDown moves"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-020/cmd-d-in-text-field",
+      "requirement": "R-003",
+      "description": "Ctrl/Cmd+D fires even inside a text field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "    if (isTextField(event.target) || inDialog(event.target)) return;\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {",
+          "replace": "    if (inDialog(event.target)) return;\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "Ctrl\\+D does not duplicate"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-020/subtree-deleted-without-dialog",
+      "requirement": "R-003",
+      "description": "subtree delete skips the confirmation dialog",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "    const count = subtreeSize(layout, id);\n    if (count > 1) {\n      const node = findNode(layout, id);\n      setDeleteAsk({\n        id,\n        label: ELEMENT_NAMES[node?.type ?? \"container\"] ?? \"Element\",\n        count,\n      });\n      return;\n    }\n    finishDelete(id);",
+          "replace": "    const count = subtreeSize(layout, id);\n    if (count > 1) {\n      /* seeded: skip dialog */\n    }\n    finishDelete(id);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "subtree dialog"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

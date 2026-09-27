@@ -44,10 +44,10 @@ describe("editor store (A-07)", () => {
     expect(isDirty(editorReducer(initial(), { type: "select", id: "head0001" }))).toBe(false);
   });
 
-  test("deleting an element clears its selection, and Restore puts it back in place, selected", () => {
+  test("deleting an element selects the next sibling, and Restore puts it back in place, selected", () => {
     let state = editorReducer(initial(), { type: "select", id: "head0001" });
     state = editorReducer(state, { type: "delete-node", id: "head0001" });
-    expect(state.selectedId).toBeNull();
+    expect(state.selectedId).toBe("head0002");
     expect(state.page.layout?.root.children.map((c) => c.id)).toEqual(["head0002"]);
     state = editorReducer(state, { type: "restore" });
     expect(state.page.layout).toEqual(initial().page.layout);

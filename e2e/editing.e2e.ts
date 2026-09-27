@@ -150,7 +150,7 @@ test("growing a page past the size limit shows the size error and saves nothing"
   const before = await getPage(request, id);
   await openEditor(page, id);
   await openLayers(page);
-  await overlay(page).locator(".emvb-layer-row").last().click();
+  await overlay(page).locator(".emvb-layer-select").last().click();
   await overlay(page)
     .getByLabel("Text", { exact: true })
     .fill("x".repeat(900) + "y".repeat(300));

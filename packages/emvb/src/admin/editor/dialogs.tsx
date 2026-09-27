@@ -80,3 +80,43 @@ export function LeaveDialog({
     </Dialog.Root>
   );
 }
+
+/** Confirm deleting an element that has children (W-020). */
+export function DeleteSubtreeDialog({
+  open,
+  onOpenChange,
+  label,
+  count,
+  onConfirm,
+}: OpenProps & { label: string; count: number; onConfirm: () => void }) {
+  const inside = count - 1;
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog size="base" className="p-6">
+        <div data-emvb-dialog="delete-subtree" className="emvb-dialog">
+          <Dialog.Title>
+            Delete {label} and the {inside} element{inside === 1 ? "" : "s"} inside it?
+          </Dialog.Title>
+          <Dialog.Description>This can be undone with Restore after delete.</Dialog.Description>
+          <div className="emvb-dialog-actions">
+            <Dialog.Close
+              render={(props) => (
+                <Button {...props} variant="secondary" className={BUTTON}>
+                  Cancel
+                </Button>
+              )}
+            />
+            <Button
+              variant="destructive"
+              className={BUTTON}
+              style={SOLID_DESTRUCTIVE}
+              onClick={onConfirm}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </Dialog.Root>
+  );
+}

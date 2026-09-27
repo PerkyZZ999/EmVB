@@ -2,10 +2,20 @@ import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@
 import { PlusIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
+  duplicateNode,
   ELEMENT_DESCRIPTORS,
   findNode,
+  firstChild,
   insertionPoint,
+  moveDown,
+  moveIn,
+  moveOut,
+  moveUp,
+  nextInOrder,
+  parentOf,
+  previousInOrder,
   renderPage,
+  subtreeSize,
   type DesignSystem,
   type ElementType,
   type LayoutNode,
@@ -14,7 +24,7 @@ import { ApiError, type Fetcher } from "../api.ts";
 import { previewUrl, saveDesign } from "../content-api.ts";
 import { readCollection } from "../setup/run.ts";
 import { CanvasFrame, type CanvasSelection } from "./canvas/CanvasFrame.tsx";
-import { ConflictDialog, LeaveDialog } from "./dialogs.tsx";
+import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog } from "./dialogs.tsx";
 import { EditorOverlay } from "./EditorOverlay.tsx";
 import { exitTarget, PAGES_URL } from "./exit.ts";
 import { NEW_ELEMENT_MIME } from "./dnd/drop-target.ts";
@@ -128,6 +138,11 @@ function EditorApp({
   const [busy, setBusy] = React.useState<"save" | "publish" | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
+  const [deleteAsk, setDeleteAsk] = React.useState<{
+    id: string;
+    label: string;
+    count: number;
+  } | null>(null);
   const [leaveOpen, setLeaveOpen] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
   const lastToast = React.useRef<string | null>(null);
@@ -188,9 +203,9 @@ function EditorApp({
   const canDelete = (id: string) => !!state.page.layout && state.page.layout.root.id !== id;
   const canMove = canDelete;
 
-  const remove = (id: string) => {
-    if (!canDelete(id)) return;
+  const finishDelete = (id: string) => {
     dispatch({ type: "delete-node", id });
+    setDeleteAsk(null);
     if (lastToast.current) toasts.close(lastToast.current);
     const toastId: string = toasts.add({
       title: "Element deleted",
@@ -209,8 +224,36 @@ function EditorApp({
     lastToast.current = toastId;
   };
 
-  const handlers = React.useRef({ save, remove });
-  handlers.current = { save, remove };
+  const remove = (id: string) => {
+    if (!canDelete(id)) return;
+    const layout = latest.current.page.layout;
+    if (!layout) return;
+    const count = subtreeSize(layout, id);
+    if (count > 1) {
+      const node = findNode(layout, id);
+      setDeleteAsk({
+        id,
+        label: ELEMENT_NAMES[node?.type ?? "container"] ?? "Element",
+        count,
+      });
+      return;
+    }
+    finishDelete(id);
+  };
+
+  const duplicate = (id: string) => {
+    const layout = latest.current.page.layout;
+    if (!layout) return;
+    const result = duplicateNode(layout, id);
+    if (!result.ok) {
+      setAnnouncement(result.reason);
+      return;
+    }
+    dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
+  };
+
+  const handlers = React.useRef({ save, remove, duplicate });
+  handlers.current = { save, remove, duplicate };
   const onKeyDown = React.useCallback((event: KeyboardEvent) => {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
       event.preventDefault();
@@ -218,11 +261,59 @@ function EditorApp({
       return;
     }
     if (isTextField(event.target) || inDialog(event.target)) return;
+    const layout = latest.current.page.layout;
     const selected = latest.current.selectedId;
-    if (event.key === "Escape" && selected) dispatch({ type: "select", id: null });
-    else if ((event.key === "Delete" || event.key === "Backspace") && selected) {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selected) {
+      event.preventDefault();
+      handlers.current.duplicate(selected);
+      return;
+    }
+    if (event.key === "Escape" && selected) {
+      dispatch({ type: "select", id: null });
+      return;
+    }
+    if ((event.key === "Delete" || event.key === "Backspace") && selected) {
       event.preventDefault();
       handlers.current.remove(selected);
+      return;
+    }
+    if (!layout || !selected) return;
+    const apply = (
+      result: { ok: true; layout: typeof layout; selected: string } | { ok: false; reason: string },
+    ) => {
+      if (!result.ok) {
+        setAnnouncement(result.reason);
+        return;
+      }
+      dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
+    };
+    if (event.altKey && event.key === "ArrowUp") {
+      event.preventDefault();
+      apply(moveUp(layout, selected));
+    } else if (event.altKey && event.key === "ArrowDown") {
+      event.preventDefault();
+      apply(moveDown(layout, selected));
+    } else if (event.altKey && event.key === "ArrowLeft") {
+      event.preventDefault();
+      apply(moveOut(layout, selected));
+    } else if (event.altKey && event.key === "ArrowRight") {
+      event.preventDefault();
+      apply(moveIn(layout, selected));
+    } else if (event.key === "ArrowDown") {
+      event.preventDefault();
+      dispatch({ type: "select", id: nextInOrder(layout, selected) });
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      dispatch({ type: "select", id: previousInOrder(layout, selected) });
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      if (event.shiftKey) {
+        const parent = parentOf(layout, selected);
+        if (parent) dispatch({ type: "select", id: parent });
+      } else {
+        const child = firstChild(layout, selected);
+        if (child) dispatch({ type: "select", id: child });
+      }
     }
   }, []);
 
@@ -289,8 +380,10 @@ function EditorApp({
     },
     canDelete,
     canMove,
+    canDuplicate: canDelete,
     onSelect: (id) => dispatch({ type: "select", id }),
     onDelete: remove,
+    onDuplicate: duplicate,
     onKeyDown,
   };
 
@@ -320,6 +413,32 @@ function EditorApp({
                   selectedId={state.selectedId}
                   onSelect={(id) => dispatch({ type: "select", id })}
                   onAdd={addFromPanel}
+                  onDuplicate={duplicate}
+                  onMoveUp={(id) => {
+                    const layout = latest.current.page.layout;
+                    if (!layout) return;
+                    const result = moveUp(layout, id);
+                    if (!result.ok) setAnnouncement(result.reason);
+                    else
+                      dispatch({
+                        type: "apply-arranged",
+                        layout: result.layout,
+                        selected: result.selected,
+                      });
+                  }}
+                  onMoveDown={(id) => {
+                    const layout = latest.current.page.layout;
+                    if (!layout) return;
+                    const result = moveDown(layout, id);
+                    if (!result.ok) setAnnouncement(result.reason);
+                    else
+                      dispatch({
+                        type: "apply-arranged",
+                        layout: result.layout,
+                        selected: result.selected,
+                      });
+                  }}
+                  onDelete={remove}
                 />
                 <div className="emvb-sr-only" aria-live="polite">
                   {announcement}
@@ -412,6 +531,13 @@ function EditorApp({
         ) : (
           <SmallScreenNotice />
         )}
+        <DeleteSubtreeDialog
+          open={!!deleteAsk}
+          onOpenChange={(open) => !open && setDeleteAsk(null)}
+          label={deleteAsk?.label ?? "Element"}
+          count={deleteAsk?.count ?? 0}
+          onConfirm={() => deleteAsk && finishDelete(deleteAsk.id)}
+        />
         <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
         <ConflictDialog
           open={saver.conflict}

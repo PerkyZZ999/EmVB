@@ -12,11 +12,19 @@ export function LeftPanel({
   selectedId,
   onSelect,
   onAdd,
+  onDuplicate,
+  onMoveUp,
+  onMoveDown,
+  onDelete,
 }: {
   layout: Layout | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
   onAdd: (type: ElementType) => void;
+  onDuplicate: (id: string) => void;
+  onMoveUp: (id: string) => void;
+  onMoveDown: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
   const [tab, setTab] = React.useState(() => {
     try {
@@ -48,7 +56,15 @@ export function LeftPanel({
       {tab === "add" ? (
         <AddPanel onAdd={onAdd} />
       ) : (
-        <LayersPanel layout={layout} selectedId={selectedId} onSelect={onSelect} />
+        <LayersPanel
+          layout={layout}
+          selectedId={selectedId}
+          onSelect={onSelect}
+          onDuplicate={onDuplicate}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+          onDelete={onDelete}
+        />
       )}
     </div>
   );

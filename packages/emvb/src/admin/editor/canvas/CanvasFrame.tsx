@@ -92,8 +92,10 @@ export type CanvasSelection = {
   labelFor: (id: string) => string;
   canDelete: (id: string) => boolean;
   canMove: (id: string) => boolean;
+  canDuplicate: (id: string) => boolean;
   onSelect: (id: string | null) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
   onKeyDown: (event: KeyboardEvent) => void;
 };
 

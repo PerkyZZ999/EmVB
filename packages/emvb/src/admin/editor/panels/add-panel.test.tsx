@@ -134,7 +134,17 @@ describe("Add panel (W-018)", () => {
 
 describe("Layers panel (W-018)", () => {
   test("auto-expands collapsed ancestors so the selection is visible", async () => {
-    await mount(<LayersPanel layout={layout} selectedId="head0002" onSelect={() => undefined} />);
+    await mount(
+      <LayersPanel
+        layout={layout}
+        selectedId="head0002"
+        onSelect={() => undefined}
+        onDuplicate={() => undefined}
+        onMoveUp={() => undefined}
+        onMoveDown={() => undefined}
+        onDelete={() => undefined}
+      />,
+    );
     expect(document.querySelector('[data-emvb-layer="head0002"]')).toBeTruthy();
     expect(document.querySelector('[data-emvb-layer="box00001"]')).toBeTruthy();
   });
@@ -151,6 +161,10 @@ describe("Layers panel (W-018)", () => {
         selectedId="box00001"
         onSelect={() => undefined}
         onAdd={() => undefined}
+        onDuplicate={() => undefined}
+        onMoveUp={() => undefined}
+        onMoveDown={() => undefined}
+        onDelete={() => undefined}
       />,
     );
     expect(document.querySelector('[data-emvb-panel="add"]')).toBeTruthy();

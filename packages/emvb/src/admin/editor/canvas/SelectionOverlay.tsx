@@ -1,4 +1,4 @@
-import { DotsSixVerticalIcon, ProhibitIcon, TrashIcon } from "@phosphor-icons/react";
+import { CopyIcon, DotsSixVerticalIcon, ProhibitIcon, TrashIcon } from "@phosphor-icons/react";
 import type { CanvasSelection } from "./CanvasFrame.tsx";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 
@@ -94,6 +94,17 @@ export function SelectionOverlay({
               </button>
             )}
             <span>{selection.labelFor(selectedId)}</span>
+            {selection.canDuplicate(selectedId) && (
+              <button
+                type="button"
+                className="emvb-overlay-action"
+                aria-label="Duplicate element"
+                title="Duplicate element"
+                onClick={() => selection.onDuplicate(selectedId)}
+              >
+                <CopyIcon size={16} aria-hidden="true" />
+              </button>
+            )}
             {selection.canDelete(selectedId) && (
               <button
                 type="button"

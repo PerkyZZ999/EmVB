@@ -32,12 +32,21 @@ export function LayersPanel({
   layout,
   selectedId,
   onSelect,
+  onDuplicate,
+  onMoveUp,
+  onMoveDown,
+  onDelete,
 }: {
   layout: Layout | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onDuplicate: (id: string) => void;
+  onMoveUp: (id: string) => void;
+  onMoveDown: (id: string) => void;
+  onDelete: (id: string) => void;
 }) {
   const [collapsed, setCollapsed] = React.useState<Set<string>>(() => new Set());
+  const [menuId, setMenuId] = React.useState<string | null>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
 
   React.useEffect(() => {
@@ -130,27 +139,10 @@ export function LayersPanel({
               role="treeitem"
               aria-expanded={hasChildren ? !isCollapsed : undefined}
             >
-              <button
-                type="button"
+              <div
                 className="emvb-layer-row"
                 data-emvb-layer={node.id}
-                aria-current={node.id === selectedId ? "true" : undefined}
                 style={{ paddingLeft: 8 + depth * 12 }}
-                draggable={node.id !== layout.root.id}
-                onDragStart={(event) => {
-                  if (node.id === layout.root.id) {
-                    event.preventDefault();
-                    return;
-                  }
-                  event.dataTransfer.setData(EXISTING_ELEMENT_MIME, node.id);
-                  event.dataTransfer.effectAllowed = "move";
-                  try {
-                    sessionStorage.setItem("emvb-drag-id", node.id);
-                    sessionStorage.removeItem("emvb-drag-type");
-                  } catch {
-                    /* private mode */
-                  }
-                }}
                 onClick={() => onSelect(node.id)}
               >
                 {hasChildren ? (
@@ -180,12 +172,99 @@ export function LayersPanel({
                 ) : (
                   <span className="emvb-layer-caret" />
                 )}
-                <Icon size={16} aria-hidden="true" />
-                <span>{name}</span>
-                {node.type === "heading" && node.props.text && (
-                  <span className="emvb-layer-preview">{node.props.text}</span>
+                <button
+                  type="button"
+                  className="emvb-layer-select"
+                  aria-current={node.id === selectedId ? "true" : undefined}
+                  draggable={node.id !== layout.root.id}
+                  onDragStart={(event) => {
+                    if (node.id === layout.root.id) {
+                      event.preventDefault();
+                      return;
+                    }
+                    event.dataTransfer.setData(EXISTING_ELEMENT_MIME, node.id);
+                    event.dataTransfer.effectAllowed = "move";
+                    try {
+                      sessionStorage.setItem("emvb-drag-id", node.id);
+                      sessionStorage.removeItem("emvb-drag-type");
+                    } catch {
+                      /* private mode */
+                    }
+                  }}
+                  onClick={() => onSelect(node.id)}
+                >
+                  <Icon size={16} aria-hidden="true" />
+                  <span>{name}</span>
+                  {node.type === "heading" && node.props.text && (
+                    <span className="emvb-layer-preview">{node.props.text}</span>
+                  )}
+                </button>
+                {node.id !== layout.root.id && (
+                  <span className="emvb-layer-menu">
+                    <button
+                      type="button"
+                      className="emvb-layer-menu-btn"
+                      aria-label={`Actions for ${name}`}
+                      aria-expanded={menuId === node.id}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setMenuId((current) => (current === node.id ? null : node.id));
+                      }}
+                    >
+                      ···
+                    </button>
+                    {menuId === node.id && (
+                      <div className="emvb-layer-menu-list" role="menu">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setMenuId(null);
+                            onDuplicate(node.id);
+                          }}
+                        >
+                          Duplicate
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setMenuId(null);
+                            onMoveUp(node.id);
+                          }}
+                        >
+                          Move up
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setMenuId(null);
+                            onMoveDown(node.id);
+                          }}
+                        >
+                          Move down
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          className="emvb-danger-text"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setMenuId(null);
+                            onDelete(node.id);
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </span>
                 )}
-              </button>
+              </div>
             </li>
           );
         })}
