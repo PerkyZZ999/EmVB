@@ -163,10 +163,13 @@ export {
   CONDITIONS_SCHEMA_VERSION,
   MAX_CONDITION_RULES,
   defaultConditions,
+  defaultConditionsFor,
   validateConditions,
   matchesConditions,
   conditionSpecificity,
   conditionsSpecificity,
+  themePartLocationApplies,
+  contentPartTypeForContext,
   pickThemePartWinner,
   type ConditionRule,
   type ConditionsDoc,
@@ -174,3 +177,14 @@ export {
   type ThemeRequestContext,
   type ThemePartCandidate,
 } from "./theme/conditions.ts";
+
+export {
+  THEME_PART_TYPES,
+  CONTENT_THEME_PART_TYPES,
+  THEME_PART_TYPE_LABELS,
+  isThemePartType,
+  parseThemePartType,
+  isContentThemePartType,
+  type ThemePartType,
+  type ContentThemePartType,
+} from "./theme/part-types.ts";

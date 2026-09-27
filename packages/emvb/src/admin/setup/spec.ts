@@ -1,8 +1,9 @@
 import { PAGES_COLLECTION, PLUGIN_ID, THEME_PARTS_COLLECTION } from "../../constants.ts";
+import { THEME_PART_TYPES } from "../../core/index.ts";
 
 export const LAYOUT_WIDGET = `${PLUGIN_ID}:layout`;
 const CANVAS_MODES = ["site-layout", "blank"] as const;
-const PART_TYPES = ["header", "footer"] as const;
+const PART_TYPES = THEME_PART_TYPES;
 
 /** The `emvb_pages` collection EmVB owns (D-012, D-019). Setup converges the site to exactly this. */
 export const COLLECTION_SPEC = {
@@ -17,8 +18,8 @@ export const COLLECTION_SPEC = {
 } as const;
 
 /**
- * Theme parts (headers/footers). Hidden, no SEO, no public urlPattern so they never become pages
- * (D-TB-03). Popups are deferred (D-TB-02).
+ * Theme parts (headers/footers + S7c content templates). Hidden, no SEO, no public urlPattern
+ * so they never become pages (D-TB-03). Popups are deferred (D-TB-02).
  */
 export const THEME_PARTS_COLLECTION_SPEC = {
   slug: THEME_PARTS_COLLECTION,

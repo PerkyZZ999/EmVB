@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type ContentThemePartType, type ThemePartType } from "./part-types.ts";
 
 export const CONDITIONS_SCHEMA_VERSION = 1;
 export const MAX_CONDITION_RULES = 20;
@@ -123,7 +124,11 @@ export function conditionSpecificity(rule: ConditionRule): number {
   if (!known) return 0;
   let score = known.specificity;
   // taxonomy with a concrete slug is more specific than taxonomy type alone
-  if (rule.group === "archive" && rule.name === "taxonomy" && typeof rule.args["slug"] === "string") {
+  if (
+    rule.group === "archive" &&
+    rule.name === "taxonomy" &&
+    typeof rule.args["slug"] === "string"
+  ) {
     score += 5;
   }
   return score;
@@ -202,33 +207,117 @@ function ruleMatches(rule: ConditionRule, ctx: ThemeRequestContext): boolean {
   }
 }
 
+/**
+ * Location gate for a part type (Elementor-like theme locations).
+ * Headers/footers always compete; content types only on their route class.
+ * Single Page targets EmDash `pages` singular only (not posts, not emvb_pages).
+ */
+export function themePartLocationApplies(
+  partType: ThemePartType,
+  ctx: ThemeRequestContext,
+): boolean {
+  switch (partType) {
+    case "header":
+    case "footer":
+      return true;
+    case "error_404":
+      return ctx.is404;
+    case "search_results":
+      return ctx.isSearch;
+    case "single_page":
+      // Front page is a separate singular location (not Single Page).
+      return !ctx.isFront && ctx.kind === "singular" && ctx.collection === "pages";
+  }
+}
+
+/** Default Include rule(s) when creating a part of this type. */
+export function defaultConditionsFor(partType: ThemePartType): ConditionsDoc {
+  switch (partType) {
+    case "error_404":
+      return {
+        schemaVersion: CONDITIONS_SCHEMA_VERSION,
+        rules: [
+          {
+            id: "default-404",
+            op: "include",
+            group: "singular",
+            name: "not_found",
+            args: {},
+          },
+        ],
+      };
+    case "search_results":
+      return {
+        schemaVersion: CONDITIONS_SCHEMA_VERSION,
+        rules: [
+          {
+            id: "default-search",
+            op: "include",
+            group: "archive",
+            name: "search",
+            args: {},
+          },
+        ],
+      };
+    case "single_page":
+      return {
+        schemaVersion: CONDITIONS_SCHEMA_VERSION,
+        rules: [
+          {
+            id: "default-pages",
+            op: "include",
+            group: "singular",
+            name: "collection",
+            args: { collection: "pages" },
+          },
+        ],
+      };
+    case "header":
+    case "footer":
+      return defaultConditions();
+  }
+}
+
+/**
+ * Which content-template type (if any) should compete for this request's main body.
+ * Mutual exclusivity: 404 > search > single page.
+ */
+export function contentPartTypeForContext(ctx: ThemeRequestContext): ContentThemePartType | null {
+  if (ctx.is404) return "error_404";
+  if (ctx.isSearch) return "search_results";
+  if (!ctx.isFront && ctx.kind === "singular" && ctx.collection === "pages") {
+    return "single_page";
+  }
+  return null;
+}
+
 export type ThemePartCandidate = {
   id: string;
-  partType: "header" | "footer";
+  partType: ThemePartType;
   conditions: ConditionsDoc;
   updatedAt: string;
 };
 
 /**
  * Among matching candidates of one type, pick the highest specificity; ties break by
- * `updatedAt` descending (ISO timestamps).
+ * `updatedAt` descending (ISO timestamps). Content types are also gated by location
+ * so a Single Page never wins on a post route, etc.
  */
 export function pickThemePartWinner(
   candidates: readonly ThemePartCandidate[],
-  partType: "header" | "footer",
+  partType: ThemePartType,
   ctx: ThemeRequestContext,
 ): ThemePartCandidate | null {
   let winner: ThemePartCandidate | null = null;
   let bestScore = -1;
   for (const candidate of candidates) {
     if (candidate.partType !== partType) continue;
+    if (!themePartLocationApplies(candidate.partType, ctx)) continue;
     if (!matchesConditions(candidate.conditions, ctx)) continue;
     const score = conditionsSpecificity(candidate.conditions, ctx);
     if (
       score > bestScore ||
-      (score === bestScore &&
-        winner !== null &&
-        candidate.updatedAt > winner.updatedAt) ||
+      (score === bestScore && winner !== null && candidate.updatedAt > winner.updatedAt) ||
       (score === bestScore && winner === null)
     ) {
       bestScore = score;

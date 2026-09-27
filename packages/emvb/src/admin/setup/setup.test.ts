@@ -80,7 +80,9 @@ function fakeSchemaApi(initial: {
       const field = putField[2] ?? "";
       const current = collections.get(slug);
       if (!current) return json(404, { error: { code: "NOT_FOUND" } });
-      current.fields = current.fields.map((f) => (f.slug === field ? Object.assign({}, f, body) : f));
+      current.fields = current.fields.map((f) =>
+        f.slug === field ? Object.assign({}, f, body) : f,
+      );
       return json(200, { success: true, data: {} });
     }
     return json(400, { error: { code: "UNEXPECTED", message: `${method} ${path}` } });
@@ -145,11 +147,13 @@ describe("planSetup", () => {
     expect(LAYOUT_WIDGET).toBe("emvb:layout");
   });
 
-  test("part_type is header or footer only (popups deferred)", () => {
+  test("part_type includes header, footer, and S7c content templates (popups deferred)", () => {
     expect(THEME_PARTS_FIELD_SPECS.find((f) => f.slug === "part_type")).toMatchObject({
       type: "select",
       required: true,
-      validation: { options: ["header", "footer"] },
+      validation: {
+        options: ["header", "footer", "error_404", "search_results", "single_page"],
+      },
     });
   });
 
@@ -209,9 +213,7 @@ describe("runSetup", () => {
   test("running setup twice gives the same schema, and the second run changes nothing", async () => {
     const api = fakeSchemaApi({ pages: null, themeParts: null });
     const first = await runSetup(api.fetcher);
-    expect(first.applied.length).toBe(
-      1 + FIELD_SPECS.length + 1 + THEME_PARTS_FIELD_SPECS.length,
-    );
+    expect(first.applied.length).toBe(1 + FIELD_SPECS.length + 1 + THEME_PARTS_FIELD_SPECS.length);
     const afterFirst = structuredClone(api.state());
     api.calls.length = 0;
     const second = await runSetup(api.fetcher);
@@ -248,15 +250,15 @@ describe("runSetup", () => {
 
 describe("public URL pattern", () => {
   test("a missing pattern is set to /{slug}, and a host's own pattern is kept", () => {
-    expect(
-      planSetup({ ...upToDatePages(), urlPattern: null }, upToDateThemeParts()).steps,
-    ).toEqual([
-      {
-        kind: "update-collection",
-        collection: PAGES_COLLECTION,
-        body: { urlPattern: "/{slug}" },
-      },
-    ]);
+    expect(planSetup({ ...upToDatePages(), urlPattern: null }, upToDateThemeParts()).steps).toEqual(
+      [
+        {
+          kind: "update-collection",
+          collection: PAGES_COLLECTION,
+          body: { urlPattern: "/{slug}" },
+        },
+      ],
+    );
     expect(
       planSetup({ ...upToDatePages(), urlPattern: "/p/{slug}" }, upToDateThemeParts()).steps,
     ).toEqual([]);
