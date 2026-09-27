@@ -5,7 +5,7 @@ export const MAX_CONDITION_RULES = 20;
 
 const ConditionArgs = z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]));
 
-export const ConditionRule = z.strictObject({
+const ConditionRuleSchema = z.strictObject({
   id: z.string().min(1).max(64),
   op: z.enum(["include", "exclude"]),
   group: z.enum(["general", "singular", "archive"]),
@@ -13,13 +13,13 @@ export const ConditionRule = z.strictObject({
   args: ConditionArgs.default({}),
 });
 
-export const ConditionsDoc = z.strictObject({
+const ConditionsDocSchema = z.strictObject({
   schemaVersion: z.literal(CONDITIONS_SCHEMA_VERSION),
-  rules: z.array(ConditionRule).max(MAX_CONDITION_RULES),
+  rules: z.array(ConditionRuleSchema).max(MAX_CONDITION_RULES),
 });
 
-export type ConditionRule = z.infer<typeof ConditionRule>;
-export type ConditionsDoc = z.infer<typeof ConditionsDoc>;
+export type ConditionRule = z.infer<typeof ConditionRuleSchema>;
+export type ConditionsDoc = z.infer<typeof ConditionsDocSchema>;
 
 export type ThemeRequestContext = {
   path: string;
@@ -62,7 +62,7 @@ export function validateConditions(raw: unknown): ConditionsValidation {
       };
     }
   }
-  const parsed = ConditionsDoc.safeParse(value);
+  const parsed = ConditionsDocSchema.safeParse(value);
   if (!parsed.success) {
     return {
       ok: false,

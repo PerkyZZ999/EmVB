@@ -59,7 +59,7 @@ function fieldMatches(state: FieldState, spec: FieldSpec): boolean {
  * Pure planner for one collection: steps that bring the current state to the spec.
  * An empty plan means up to date. A field whose type differs is a conflict (data safety).
  */
-export function planCollectionSetup(
+function planCollectionSetup(
   current: CollectionState | null,
   collectionSpec: CollectionSpec,
   fieldSpecs: readonly FieldSpec[],

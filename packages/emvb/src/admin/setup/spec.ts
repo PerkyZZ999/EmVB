@@ -2,7 +2,7 @@ import { PAGES_COLLECTION, PLUGIN_ID, THEME_PARTS_COLLECTION } from "../../const
 
 export const LAYOUT_WIDGET = `${PLUGIN_ID}:layout`;
 const CANVAS_MODES = ["site-layout", "blank"] as const;
-export const PART_TYPES = ["header", "footer"] as const;
+const PART_TYPES = ["header", "footer"] as const;
 
 /** The `emvb_pages` collection EmVB owns (D-012, D-019). Setup converges the site to exactly this. */
 export const COLLECTION_SPEC = {
@@ -52,7 +52,7 @@ export const FIELD_SPECS: readonly FieldSpec[] = [
 ];
 
 /** Default conditions: Include → Entire Site (Elementor-like). */
-export const DEFAULT_THEME_CONDITIONS = {
+const DEFAULT_THEME_CONDITIONS = {
   schemaVersion: 1,
   rules: [
     {

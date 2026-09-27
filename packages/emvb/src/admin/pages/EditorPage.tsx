@@ -1,12 +1,10 @@
 import { Empty } from "@cloudflare/kumo";
 import { CursorClickIcon } from "@phosphor-icons/react";
-import { PAGES_COLLECTION, PLUGIN_ID, THEME_PARTS_COLLECTION } from "../../constants.ts";
+import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { RequireEditor } from "../access/RequireEditor.tsx";
 import { defaultFetcher, type Fetcher } from "../api.ts";
 import { Editor } from "../editor/Editor.tsx";
-
-const PAGES_URL = `/_emdash/admin/plugins/${PLUGIN_ID}/pages`;
-const THEME_URL = `/_emdash/admin/plugins/${PLUGIN_ID}/theme`;
+import { PAGES_URL, THEME_URL } from "../editor/exit.ts";
 
 function parseSearch(search: string): { entry: string | null; collection: string } {
   const params = new URLSearchParams(search);

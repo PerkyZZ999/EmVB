@@ -47,7 +47,7 @@ function fakeSchemaApi(initial: {
     const base = "/_emdash/api/schema/collections";
     const getMatch = new RegExp(`^${base}/([a-z_]+)\\?`).exec(path);
     if (method === "GET" && getMatch) {
-      const slug = getMatch[1]!;
+      const slug = getMatch[1] ?? "";
       const collection = collections.get(slug) ?? null;
       return collection
         ? json(200, { success: true, data: { item: collection } })
@@ -60,7 +60,7 @@ function fakeSchemaApi(initial: {
     }
     const putColl = new RegExp(`^${base}/([a-z_]+)$`).exec(path);
     if (method === "PUT" && putColl) {
-      const slug = putColl[1]!;
+      const slug = putColl[1] ?? "";
       const current = collections.get(slug);
       if (!current) return json(404, { error: { code: "NOT_FOUND" } });
       collections.set(slug, { ...current, ...body });
@@ -68,7 +68,7 @@ function fakeSchemaApi(initial: {
     }
     const postField = new RegExp(`^${base}/([a-z_]+)/fields$`).exec(path);
     if (method === "POST" && postField) {
-      const slug = postField[1]!;
+      const slug = postField[1] ?? "";
       const current = collections.get(slug);
       if (!current) return json(404, { error: { code: "NOT_FOUND" } });
       current.fields.push(body as unknown as CollectionState["fields"][number]);
@@ -76,11 +76,11 @@ function fakeSchemaApi(initial: {
     }
     const putField = new RegExp(`^${base}/([a-z_]+)/fields/([a-z_]+)$`).exec(path);
     if (method === "PUT" && putField) {
-      const slug = putField[1]!;
-      const field = putField[2]!;
+      const slug = putField[1] ?? "";
+      const field = putField[2] ?? "";
       const current = collections.get(slug);
       if (!current) return json(404, { error: { code: "NOT_FOUND" } });
-      current.fields = current.fields.map((f) => (f.slug === field ? { ...f, ...body } : f));
+      current.fields = current.fields.map((f) => (f.slug === field ? Object.assign({}, f, body) : f));
       return json(200, { success: true, data: {} });
     }
     return json(400, { error: { code: "UNEXPECTED", message: `${method} ${path}` } });

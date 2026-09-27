@@ -62,7 +62,7 @@ export function themeContextFrom(
       is404: false,
       isSearch: false,
       kind: "archive",
-      taxonomy: { type: "category", slug: decodeURIComponent(category[1]!) },
+      taxonomy: { type: "category", slug: decodeURIComponent(category[1] ?? "") },
     };
   }
 
@@ -74,7 +74,7 @@ export function themeContextFrom(
       is404: false,
       isSearch: false,
       kind: "archive",
-      taxonomy: { type: "tag", slug: decodeURIComponent(tag[1]!) },
+      taxonomy: { type: "tag", slug: decodeURIComponent(tag[1] ?? "") },
     };
   }
 

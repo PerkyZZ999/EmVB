@@ -43,6 +43,30 @@ function partTypeOf(item: RawItem): "header" | "footer" {
   return item.data?.["part_type"] === "footer" ? "footer" : "header";
 }
 
+function conditionRuleLabel(r: unknown): string {
+  const rule = r as { group?: string; name?: string; args?: Record<string, unknown> };
+  if (rule.group === "general" && rule.name === "entire_site") return "Entire site";
+  if (rule.group === "singular" && rule.name === "front") return "Front page";
+  if (rule.group === "singular" && rule.name === "not_found") return "404";
+  if (rule.group === "singular" && rule.name === "collection") {
+    return `Singular: ${String(rule.args?.["collection"] ?? "?")}`;
+  }
+  if (rule.group === "singular" && rule.name === "entry") {
+    return `Entry in ${String(rule.args?.["collection"] ?? "?")}`;
+  }
+  if (rule.group === "archive" && rule.name === "collection") {
+    return `Archive: ${String(rule.args?.["collection"] ?? "?")}`;
+  }
+  if (rule.group === "archive" && rule.name === "taxonomy") {
+    const tax = String(rule.args?.["taxonomy"] ?? "?");
+    const slug = rule.args?.["slug"];
+    return slug ? `${tax}:${slug}` : `All ${tax}`;
+  }
+  if (rule.group === "singular" && rule.name === "all") return "All singular";
+  if (rule.group === "archive" && rule.name === "all") return "All archives";
+  return `${rule.group ?? "?"}/${rule.name ?? "?"}`;
+}
+
 export function summarizeConditions(raw: unknown): string {
   let value = raw;
   if (typeof raw === "string") {
@@ -56,32 +80,9 @@ export function summarizeConditions(raw: unknown): string {
   if (!Array.isArray(rules) || rules.length === 0) return "No conditions";
   const includes = rules.filter((r) => (r as { op?: string }).op === "include");
   const excludes = rules.filter((r) => (r as { op?: string }).op === "exclude");
-  const label = (r: unknown) => {
-    const rule = r as { group?: string; name?: string; args?: Record<string, unknown> };
-    if (rule.group === "general" && rule.name === "entire_site") return "Entire site";
-    if (rule.group === "singular" && rule.name === "front") return "Front page";
-    if (rule.group === "singular" && rule.name === "not_found") return "404";
-    if (rule.group === "singular" && rule.name === "collection") {
-      return `Singular: ${String(rule.args?.["collection"] ?? "?")}`;
-    }
-    if (rule.group === "singular" && rule.name === "entry") {
-      return `Entry in ${String(rule.args?.["collection"] ?? "?")}`;
-    }
-    if (rule.group === "archive" && rule.name === "collection") {
-      return `Archive: ${String(rule.args?.["collection"] ?? "?")}`;
-    }
-    if (rule.group === "archive" && rule.name === "taxonomy") {
-      const tax = String(rule.args?.["taxonomy"] ?? "?");
-      const slug = rule.args?.["slug"];
-      return slug ? `${tax}:${slug}` : `All ${tax}`;
-    }
-    if (rule.group === "singular" && rule.name === "all") return "All singular";
-    if (rule.group === "archive" && rule.name === "all") return "All archives";
-    return `${rule.group ?? "?"}/${rule.name ?? "?"}`;
-  };
   const parts: string[] = [];
-  if (includes.length) parts.push(includes.map(label).join(" · "));
-  if (excludes.length) parts.push(`Exclude: ${excludes.map(label).join(" · ")}`);
+  if (includes.length) parts.push(includes.map(conditionRuleLabel).join(" · "));
+  if (excludes.length) parts.push(`Exclude: ${excludes.map(conditionRuleLabel).join(" · ")}`);
   return parts.join(" · ") || "No conditions";
 }
 
