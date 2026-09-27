@@ -1,6 +1,7 @@
 import { Collapsible, Input, Select } from "@cloudflare/kumo";
 import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
 import * as React from "react";
+import { THEME_PART_TYPE_LABELS } from "../../../core/index.ts";
 import type { PageDraft } from "../../content-api.ts";
 import { FIELD } from "../../ui.ts";
 import type { PagePatch } from "../store.ts";
@@ -36,7 +37,7 @@ export function PageSettings({
         <Input
           label="Type"
           className={FIELD}
-          value={page.partType === "footer" ? "Footer" : "Header"}
+          value={THEME_PART_TYPE_LABELS[page.partType ?? "header"]}
           disabled
           description="Chosen when the part was created."
         />

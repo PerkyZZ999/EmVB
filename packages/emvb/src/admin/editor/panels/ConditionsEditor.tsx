@@ -1,10 +1,6 @@
 import { Button } from "@cloudflare/kumo";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
-import {
-  defaultConditions,
-  type ConditionRule,
-  type ConditionsDoc,
-} from "../../../core/index.ts";
+import { defaultConditions, type ConditionRule, type ConditionsDoc } from "../../../core/index.ts";
 import { BUTTON, FIELD } from "../../ui.ts";
 
 type Props = {
@@ -45,6 +41,7 @@ const GROUP_OPTIONS = [
     name: "collection",
     args: { collection: "posts" },
   },
+  { value: "archive:search", label: "Search results", group: "archive", name: "search" },
   {
     value: "archive:taxonomy:category",
     label: "All categories",

@@ -59,7 +59,7 @@ export function useSave(
                 {
                   title: current.page.title,
                   slug: current.page.slug,
-                  partType: current.page.partType === "footer" ? "footer" : "header",
+                  partType: current.page.partType ?? "header",
                   conditions: current.page.conditions ?? {
                     schemaVersion: 1,
                     rules: [],

@@ -1,8 +1,11 @@
 import {
-  defaultConditions,
+  defaultConditionsFor,
+  parseThemePartType,
   starterLayout,
+  THEME_PART_TYPE_LABELS,
   type ConditionsDoc,
   type Layout,
+  type ThemePartType,
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { requestJson, type Fetcher } from "./api.ts";
@@ -20,7 +23,7 @@ type RawItem = {
 export type ThemePartSummary = {
   id: string;
   title: string;
-  partType: "header" | "footer";
+  partType: ThemePartType;
   status: string;
   updatedAt: string;
   conditionsSummary: string;
@@ -29,7 +32,7 @@ export type ThemePartSummary = {
 export type ThemePartDraft = {
   title: string;
   slug: string;
-  partType: "header" | "footer";
+  partType: ThemePartType;
   conditions: ConditionsDoc;
   layout: Layout | null;
 };
@@ -39,8 +42,12 @@ const titleOf = (item: RawItem) =>
     ? item.data["title"]
     : "Untitled theme part";
 
-function partTypeOf(item: RawItem): "header" | "footer" {
-  return item.data?.["part_type"] === "footer" ? "footer" : "header";
+function partTypeOf(item: RawItem): ThemePartType {
+  return parseThemePartType(item.data?.["part_type"]) ?? "header";
+}
+
+export function partTypeLabel(type: ThemePartType): string {
+  return THEME_PART_TYPE_LABELS[type];
 }
 
 function conditionRuleLabel(r: unknown): string {
@@ -57,6 +64,7 @@ function conditionRuleLabel(r: unknown): string {
   if (rule.group === "archive" && rule.name === "collection") {
     return `Archive: ${String(rule.args?.["collection"] ?? "?")}`;
   }
+  if (rule.group === "archive" && rule.name === "search") return "Search results";
   if (rule.group === "archive" && rule.name === "taxonomy") {
     const tax = String(rule.args?.["taxonomy"] ?? "?");
     const slug = rule.args?.["slug"];
@@ -103,7 +111,7 @@ export async function listThemeParts(fetcher: Fetcher): Promise<ThemePartSummary
 
 export async function createThemePart(
   fetcher: Fetcher,
-  input: { title: string; slug: string; partType: "header" | "footer" },
+  input: { title: string; slug: string; partType: ThemePartType },
 ): Promise<string> {
   const body = await requestJson<{ item: RawItem }>(fetcher, CONTENT, {
     method: "POST",
@@ -112,7 +120,7 @@ export async function createThemePart(
         title: input.title,
         layout: starterLayout(input.title),
         part_type: input.partType,
-        conditions: defaultConditions(),
+        conditions: defaultConditionsFor(input.partType),
       },
       slug: input.slug,
     },

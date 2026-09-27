@@ -1,4 +1,4 @@
-import type { ConditionsDoc, DesignSystem, Layout } from "../core/index.ts";
+import type { ConditionsDoc, DesignSystem, Layout, ThemePartType } from "../core/index.ts";
 import { PAGES_COLLECTION, PLUGIN_ID } from "../constants.ts";
 import { requestJson, type Fetcher } from "./api.ts";
 
@@ -59,7 +59,7 @@ export type PageDraft = {
   seoDescription: string;
   layout: Layout | null;
   /** Theme parts only (emvb_theme_parts). */
-  partType?: "header" | "footer";
+  partType?: ThemePartType;
   conditions?: ConditionsDoc;
 };
 

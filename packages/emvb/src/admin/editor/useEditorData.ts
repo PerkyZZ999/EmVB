@@ -2,12 +2,14 @@ import * as React from "react";
 import {
   defaultConditions,
   emptyDesign,
+  parseThemePartType,
   validateConditions,
   validateDesign,
   validateLayout,
   type ConditionsDoc,
   type DesignSystem,
   type Layout,
+  type ThemePartType,
 } from "../../core/index.ts";
 import { PAGES_COLLECTION, PLUGIN_ID, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, requestJson, type Fetcher } from "../api.ts";
@@ -23,7 +25,7 @@ export type EditorEntry = {
   status: string;
   rev: string | null;
   layout: Layout | null;
-  partType?: "header" | "footer";
+  partType?: ThemePartType;
   conditions?: ConditionsDoc;
 };
 
@@ -81,7 +83,7 @@ export async function loadEntry(
   );
   return {
     ...base,
-    partType: data["part_type"] === "footer" ? "footer" : "header",
+    partType: parseThemePartType(data["part_type"]) ?? "header",
     conditions: validated.ok ? validated.conditions : defaultConditions(),
   };
 }

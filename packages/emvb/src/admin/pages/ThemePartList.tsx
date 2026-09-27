@@ -1,28 +1,38 @@
 import { Banner, Button, Empty, Loader, Table } from "@cloudflare/kumo";
 import { PlusIcon, SquaresFourIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
+import type { ThemePartType } from "../../core/index.ts";
+import { THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
-import { listThemeParts, type ThemePartSummary } from "../theme-api.ts";
+import { listThemeParts, partTypeLabel, type ThemePartSummary } from "../theme-api.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
 import { NewThemePartDialog } from "./NewThemePartDialog.tsx";
-import { THEME_PARTS_COLLECTION } from "../../constants.ts";
 
 type ListState =
   | { state: "loading" }
   | { state: "ready"; parts: ThemePartSummary[] }
   | { state: "error"; message: string };
 
+type Filter = "all" | ThemePartType;
+
 const formatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
 const formatDate = (iso: string) => (iso ? formatter.format(new Date(iso)) : "");
 
-const typeLabel = (type: "header" | "footer") => (type === "header" ? "Header" : "Footer");
+const FILTERS: { value: Filter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "header", label: "Headers" },
+  { value: "footer", label: "Footers" },
+  { value: "error_404", label: "Error 404" },
+  { value: "search_results", label: "Search Results" },
+  { value: "single_page", label: "Single Page" },
+];
 
 /** Theme Builder list: title, type, conditions, status, last edited; New theme part. */
 export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
   const [list, setList] = React.useState<ListState>({ state: "loading" });
   const [creating, setCreating] = React.useState(false);
-  const [filter, setFilter] = React.useState<"all" | "header" | "footer">("all");
+  const [filter, setFilter] = React.useState<Filter>("all");
 
   React.useEffect(() => {
     let active = true;
@@ -59,6 +69,9 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
         : list.parts.filter((p) => p.partType === filter)
       : [];
 
+  const emptyFilterLabel =
+    filter === "all" ? "theme parts" : FILTERS.find((f) => f.value === filter)?.label.toLowerCase();
+
   return (
     <>
       <div className="emvb-list-header">
@@ -67,13 +80,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
       </div>
       {list.state === "ready" && list.parts.length > 0 && (
         <div className="emvb-theme-filters" role="tablist" aria-label="Filter by type">
-          {(
-            [
-              ["all", "All"],
-              ["header", "Headers"],
-              ["footer", "Footers"],
-            ] as const
-          ).map(([value, label]) => (
+          {FILTERS.map(({ value, label }) => (
             <button
               key={value}
               type="button"
@@ -101,8 +108,8 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
         <div className="emvb-surface-card emvb-empty-shell">
           <Empty
             icon={<SquaresFourIcon size={32} aria-hidden="true" />}
-            title="No headers or footers yet"
-            description="Create a Header or Footer and set where it appears on your site."
+            title="No site parts yet"
+            description="Create a Header, Footer, Error 404, Search Results, or Single Page template."
             contents={newPart}
           />
         </div>
@@ -111,7 +118,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
         <div className="emvb-surface-card emvb-empty-shell">
           <Empty
             icon={<SquaresFourIcon size={32} aria-hidden="true" />}
-            title={`No ${filter}s yet`}
+            title={`No ${emptyFilterLabel} yet`}
             description="Create one or choose a different filter."
             contents={newPart}
           />
@@ -133,14 +140,11 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
               {visible.map((part) => (
                 <Table.Row key={part.id} data-emvb-row={part.id}>
                   <Table.Cell>
-                    <a
-                      className="emvb-row-title"
-                      href={editorUrl(part.id, THEME_PARTS_COLLECTION)}
-                    >
+                    <a className="emvb-row-title" href={editorUrl(part.id, THEME_PARTS_COLLECTION)}>
                       {part.title}
                     </a>
                   </Table.Cell>
-                  <Table.Cell>{typeLabel(part.partType)}</Table.Cell>
+                  <Table.Cell>{partTypeLabel(part.partType)}</Table.Cell>
                   <Table.Cell>
                     <span className="emvb-tabular">{part.conditionsSummary}</span>
                   </Table.Cell>

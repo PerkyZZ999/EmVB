@@ -1,6 +1,11 @@
 import { Button, Dialog, Input, Select } from "@cloudflare/kumo";
 import * as React from "react";
-import { slugify } from "../../core/index.ts";
+import {
+  slugify,
+  THEME_PART_TYPES,
+  THEME_PART_TYPE_LABELS,
+  type ThemePartType,
+} from "../../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { createThemePart } from "../theme-api.ts";
@@ -8,10 +13,10 @@ import { editorUrl } from "../editor/exit.ts";
 import { slugTakenMessage } from "../editor/useSave.ts";
 import { BUTTON, FIELD, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 
-const TYPES = [
-  { value: "header", label: "Header" },
-  { value: "footer", label: "Footer" },
-] as const;
+const TYPES = THEME_PART_TYPES.map((value) => ({
+  value,
+  label: THEME_PART_TYPE_LABELS[value],
+}));
 
 /** New theme part: type + title, then open the shared editor. */
 export function NewThemePartDialog({
@@ -23,7 +28,7 @@ export function NewThemePartDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [partType, setPartType] = React.useState<"header" | "footer">("header");
+  const [partType, setPartType] = React.useState<ThemePartType>("header");
   const [title, setTitle] = React.useState("");
   const [slug, setSlug] = React.useState("");
   const [slugEdited, setSlugEdited] = React.useState(false);
@@ -79,7 +84,11 @@ export function NewThemePartDialog({
             label="Type"
             className={FIELD}
             value={partType}
-            onValueChange={(value) => setPartType(value === "footer" ? "footer" : "header")}
+            onValueChange={(value) => {
+              const next = TYPES.find((option) => option.value === value)?.value ?? "header";
+              setPartType(next);
+              if (!slugEdited && title) setSlug(slugify(`${next}-${title}`));
+            }}
             renderValue={(value: unknown) =>
               TYPES.find((option) => option.value === value)?.label ?? String(value)
             }

@@ -15,6 +15,12 @@ describe("ConditionsEditor helpers", () => {
     });
     expect(optionValue(posts)).toBe("singular:collection:posts");
   });
+
+  test("round-trips search results option", () => {
+    const search = ruleFromOption("archive:search", "include", "s");
+    expect(search).toMatchObject({ group: "archive", name: "search" });
+    expect(optionValue(search)).toBe("archive:search");
+  });
 });
 
 describe("summarizeConditions", () => {
@@ -28,5 +34,14 @@ describe("summarizeConditions", () => {
         ],
       }),
     ).toBe("Entire site · Exclude: Front page");
+  });
+
+  test("summarizes search results include", () => {
+    expect(
+      summarizeConditions({
+        schemaVersion: 1,
+        rules: [{ id: "1", op: "include", group: "archive", name: "search", args: {} }],
+      }),
+    ).toBe("Search results");
   });
 });
