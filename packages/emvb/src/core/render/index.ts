@@ -7,9 +7,24 @@ import {
 } from "../forms/definition.ts";
 import { layoutHasForm } from "../forms/binding.ts";
 import type { DesignSystem } from "../schema/design.ts";
-import { isFormNode, isParentNode, type Layout, type LayoutNode } from "../schema/layout.ts";
+import {
+  isFormNode,
+  isLoopNode,
+  isParentNode,
+  type Layout,
+  type LayoutNode,
+} from "../schema/layout.ts";
 import { cssLength, styleClassName, styleDeclarations, type Declaration } from "../sanitize/css.ts";
+import { sanitizeHref } from "../sanitize/href.ts";
+import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
+import {
+  portableTextToVNodes,
+  resolvePostForRender,
+  resolvePostsForLoop,
+  type ThemeDynamicData,
+  type ThemePostFields,
+} from "../theme/dynamic.ts";
 import { serialize, type VNode } from "./vnode.ts";
 
 export type RenderMode = "public" | "editor";
@@ -112,19 +127,101 @@ function withRadioOptions(
  * Renders a validated layout to lean HTML and CSS (R-031, R-032). Walks defensively: unknown types
  * render nothing publicly and a placeholder in the editor (R-033); unsafe style values are dropped.
  */
+const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
+
+function renderDynamicPost(
+  node: LayoutNode,
+  attrs: Record<string, string>,
+  post: ThemePostFields | undefined,
+  mode: RenderMode,
+): VNode | undefined {
+  if (node.type === "post-title") {
+    if (!post) return mode === "editor" ? { tag: "h1", attrs, children: ["Post Title"] } : undefined;
+    const level = (node.props as { level?: number }).level ?? 1;
+    const tag = HEADING_TAGS[Math.min(6, Math.max(1, level)) - 1] ?? "h1";
+    return { tag, attrs, children: [post.title] };
+  }
+  if (node.type === "post-excerpt") {
+    if (!post) {
+      return mode === "editor" ? { tag: "p", attrs, children: ["Post excerpt…"] } : undefined;
+    }
+    if (!post.excerpt) return undefined;
+    return { tag: "p", attrs, children: [post.excerpt] };
+  }
+  if (node.type === "post-content") {
+    if (!post) {
+      return mode === "editor"
+        ? {
+            tag: "div",
+            attrs,
+            children: [{ tag: "p", attrs: {}, children: ["Post content…"] }],
+          }
+        : undefined;
+    }
+    const blocks = portableTextToVNodes(post.content);
+    if (blocks.length === 0) return undefined;
+    return { tag: "div", attrs, children: blocks };
+  }
+  if (node.type === "post-image") {
+    if (!post?.featuredImageUrl) {
+      return mode === "editor"
+        ? {
+            tag: "div",
+            attrs: { ...attrs, class: `${attrs.class ?? ""} emvb-post-image-missing`.trim() },
+            children: ["Featured image"],
+          }
+        : undefined;
+    }
+    const src = sanitizeMediaUrl(post.featuredImageUrl);
+    if (!src) return undefined;
+    const decorative = (node.props as { decorative?: boolean }).decorative === true;
+    const imgAttrs: Record<string, string> = { ...attrs, src };
+    if (decorative) imgAttrs["alt"] = "";
+    else imgAttrs["alt"] = post.featuredImageAlt?.trim() || post.title || "Featured image";
+    return { tag: "img", attrs: imgAttrs, children: [] };
+  }
+  if (node.type === "post-link") {
+    if (!post) {
+      return mode === "editor"
+        ? { tag: "a", attrs: { ...attrs, href: "#" }, children: ["Post link"] }
+        : undefined;
+    }
+    const href = sanitizeHref(post.permalink);
+    if (!href) return undefined;
+    const label =
+      (node.props as { text?: string }).text?.trim() || post.title || post.permalink;
+    const linkAttrs: Record<string, string> = { ...attrs, href };
+    if ((node.props as { newTab?: boolean }).newTab) {
+      linkAttrs.target = "_blank";
+      linkAttrs.rel = "noopener noreferrer";
+    }
+    return { tag: "a", attrs: linkAttrs, children: [label] };
+  }
+  return undefined;
+}
+
 export function renderPage(
   layout: Layout,
   design: DesignSystem,
-  opts: { mode?: RenderMode; formDefinitions?: FormDefinitions } = {},
+  opts: {
+    mode?: RenderMode;
+    formDefinitions?: FormDefinitions;
+    dynamic?: ThemeDynamicData;
+  } = {},
 ): RenderResult {
   const mode = opts.mode ?? "public";
   const definitions = opts.formDefinitions ?? new Map();
+  const baseDynamic = opts.dynamic;
   const warnings: RenderWarning[] = [];
   const usedTypes = new Set<string>();
   const localRules: { id: string; declarations: Declaration[] }[] = [];
   const knownVariables = new Set(design.variables.colors.map((c) => c.id));
 
-  const visit = (node: LayoutNode, isRoot: boolean): VNode | undefined => {
+  const visit = (
+    node: LayoutNode,
+    isRoot: boolean,
+    dynamic: ThemeDynamicData | undefined = baseDynamic,
+  ): VNode | undefined => {
     const id = ID.test(node.id) ? node.id : undefined;
     const nodeId = id ?? "(invalid id)";
     const type: string = node.type;
@@ -180,7 +277,7 @@ export function renderPage(
       const definition = definitions.get(formId);
       const submitLabel = definition?.settings.submitLabel ?? "Submit";
       const children = node.children
-        .map((child) => visit(child, false))
+        .map((child) => visit(child, false, dynamic))
         .filter((child): child is VNode => child !== undefined);
       const page: VNode = {
         tag: "div",
@@ -213,9 +310,53 @@ export function renderPage(
       return built;
     }
 
+    if (isLoopNode(node)) {
+      const posts = resolvePostsForLoop(dynamic, mode);
+      const itemPartId = node.props.itemPartId?.trim() ?? "";
+      const templateLayout =
+        itemPartId && dynamic?.loopTemplates ? dynamic.loopTemplates[itemPartId] : undefined;
+      const templateNodes: LayoutNode[] = templateLayout
+        ? templateLayout.root.children
+        : node.children;
+      if (posts.length === 0) {
+        if (mode === "editor") {
+          return {
+            tag: "div",
+            attrs: { ...attrs, "data-emvb-loop-empty": "" },
+            children: ["Loop — add posts on the public archive to see items."],
+          };
+        }
+        return undefined;
+      }
+      const children: VNode[] = [];
+      for (const post of posts) {
+        const itemDynamic: ThemeDynamicData = { ...dynamic, post };
+        const itemChildren = templateNodes
+          .map((child) => visit(child, false, itemDynamic))
+          .filter((child): child is VNode => child !== undefined);
+        children.push({
+          tag: "div",
+          attrs: { class: "emvb-loop-item", "data-emvb-loop-item": post.id },
+          children: itemChildren,
+        });
+      }
+      return def.build(node as never, attrs, children);
+    }
+
+    if (
+      node.type === "post-title" ||
+      node.type === "post-excerpt" ||
+      node.type === "post-content" ||
+      node.type === "post-image" ||
+      node.type === "post-link"
+    ) {
+      const post = resolvePostForRender(dynamic, mode);
+      return renderDynamicPost(node, attrs, post, mode);
+    }
+
     if (isParentNode(node)) {
       const children = node.children
-        .map((child) => visit(child, false))
+        .map((child) => visit(child, false, dynamic))
         .filter((child): child is VNode => child !== undefined);
       return def.build(node as never, attrs, children);
     }

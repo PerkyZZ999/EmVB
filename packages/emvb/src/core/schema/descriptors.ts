@@ -26,7 +26,7 @@ export type FieldDescriptor = {
 export type ElementDescriptor = {
   type: string;
   name: string;
-  group: "layout" | "content" | "form";
+  group: "layout" | "content" | "form" | "dynamic";
   /** Default right-panel tab when this element is selected. */
   defaultTab: "content" | "style";
   fields: FieldDescriptor[];

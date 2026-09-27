@@ -22,18 +22,25 @@ export {
   KNOWN_ELEMENT_TYPES,
   isContainerNode,
   isFormNode,
+  isLoopNode,
   isParentNode,
   isFormFieldType,
   FORM_FIELD_TYPES,
   isHeadingNode,
   isUnknownNode,
   FormNode,
+  LoopNode,
   TextInputNode,
   TextareaNode,
   SelectNode,
   CheckboxNode,
   RadioNode,
   SubmitNode,
+  PostTitleNode,
+  PostExcerptNode,
+  PostContentNode,
+  PostImageNode,
+  PostLinkNode,
 } from "./schema/layout.ts";
 export {
   type FieldKind,
@@ -191,3 +198,13 @@ export {
   type ContentThemePartType,
   type ItemThemePartType,
 } from "./theme/part-types.ts";
+
+export {
+  SAMPLE_POST,
+  portableTextToVNodes,
+  collectLoopItemPartIds,
+  resolvePostForRender,
+  resolvePostsForLoop,
+  type ThemePostFields,
+  type ThemeDynamicData,
+} from "./theme/dynamic.ts";

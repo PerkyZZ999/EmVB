@@ -5,6 +5,7 @@ import {
   isParentNode,
   type ContainerNode,
   type FormNode,
+  type LoopNode,
   type Layout,
   type LayoutNode,
 } from "./schema/layout.ts";
@@ -22,7 +23,7 @@ export type Place = { parentId: string; index: number };
 
 type Located = {
   node: LayoutNode;
-  parent?: ContainerNode | FormNode;
+  parent?: ContainerNode | FormNode | LoopNode;
   index: number;
   depth: number;
 };
@@ -51,7 +52,7 @@ const isContainer = (node: LayoutNode): node is ContainerNode => node.type === "
 function locate(layout: Layout, id: string): Located | undefined {
   const walk = (
     node: LayoutNode,
-    parent: ContainerNode | FormNode | undefined,
+    parent: ContainerNode | FormNode | LoopNode | undefined,
     index: number,
     depth: number,
   ): Located | undefined => {
@@ -135,7 +136,7 @@ export function canDrop(layout: Layout, source: DragSource, parentId: string): A
 export function moveNode(layout: Layout, id: string, parentId: string, index: number): Arranged {
   const allowed = canDrop(layout, { kind: "existing", id }, parentId);
   if (!allowed.ok) return allowed;
-  const from = locate(layout, id) as Located & { parent: ContainerNode };
+  const from = locate(layout, id) as Located & { parent: ContainerNode | FormNode | LoopNode };
   const sameParent = from.parent.id === parentId;
   const at = sameParent && from.index < index ? index - 1 : index;
   const { layout: without, removed } = removeNode(layout, id);

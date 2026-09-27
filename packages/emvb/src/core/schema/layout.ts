@@ -287,6 +287,82 @@ export const SubmitNode = z.strictObject({
   htmlId: HtmlId.optional(),
 });
 
+/** Dynamic post title from ThemeDynamicData (S7d). */
+export const PostTitleNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("post-title"),
+  props: z.strictObject({
+    level: z.number().int().min(1).max(6).optional(),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+/** Dynamic post excerpt (escaped text). */
+export const PostExcerptNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("post-excerpt"),
+  props: z.strictObject({}),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+/** Dynamic post body from Portable Text / string (sanitized via VNode serialize). */
+export const PostContentNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("post-content"),
+  props: z.strictObject({}),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+/** Dynamic featured image when a URL is available. */
+export const PostImageNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("post-image"),
+  props: z.strictObject({
+    decorative: z.boolean().optional(),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+/** Permalink link; empty text uses the post title. */
+export const PostLinkNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("post-link"),
+  props: z.strictObject({
+    text: z.string().max(MAX_TEXT_LENGTH).optional(),
+    newTab: z.boolean().optional(),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+/**
+ * Repeats its item template for each post in ThemeDynamicData.posts.
+ * When `itemPartId` is set, the host supplies that Loop Item layout in loopTemplates;
+ * otherwise children are the inline item template.
+ */
+export const LoopNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("loop"),
+  props: z.strictObject({
+    itemPartId: z.string().max(128).optional(),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+  get children(): z.ZodType<LayoutNode[]> {
+    return z.array(LayoutNode);
+  },
+});
+
 /** Known element type strings (everything else is an UnknownNode). */
 export const KNOWN_ELEMENT_TYPES = [
   "container",
@@ -308,6 +384,12 @@ export const KNOWN_ELEMENT_TYPES = [
   "checkbox",
   "radio",
   "submit",
+  "post-title",
+  "post-excerpt",
+  "post-content",
+  "post-image",
+  "post-link",
+  "loop",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -352,6 +434,12 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   CheckboxNode,
   RadioNode,
   SubmitNode,
+  PostTitleNode,
+  PostExcerptNode,
+  PostContentNode,
+  PostImageNode,
+  PostLinkNode,
+  LoopNode,
 ]);
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
@@ -371,6 +459,11 @@ export type SelectNode = z.infer<typeof SelectNode>;
 export type CheckboxNode = z.infer<typeof CheckboxNode>;
 export type RadioNode = z.infer<typeof RadioNode>;
 export type SubmitNode = z.infer<typeof SubmitNode>;
+export type PostTitleNode = z.infer<typeof PostTitleNode>;
+export type PostExcerptNode = z.infer<typeof PostExcerptNode>;
+export type PostContentNode = z.infer<typeof PostContentNode>;
+export type PostImageNode = z.infer<typeof PostImageNode>;
+export type PostLinkNode = z.infer<typeof PostLinkNode>;
 
 type StyleOf = z.infer<typeof StyleProps>;
 type ClassesOf = z.infer<typeof ClassIds>;
@@ -408,9 +501,20 @@ export type FormNode = {
   children: LayoutNode[];
 };
 
+export type LoopNode = {
+  id: IdOf;
+  type: "loop";
+  props: { itemPartId?: string };
+  style?: StyleOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  children: LayoutNode[];
+};
+
 export type LayoutNode =
   | ContainerNode
   | FormNode
+  | LoopNode
   | HeadingNode
   | SpacerNode
   | DividerNode
@@ -428,6 +532,11 @@ export type LayoutNode =
   | CheckboxNode
   | RadioNode
   | SubmitNode
+  | PostTitleNode
+  | PostExcerptNode
+  | PostContentNode
+  | PostImageNode
+  | PostLinkNode
   | UnknownNode;
 
 /**
@@ -479,9 +588,11 @@ export const isContainerNode = (node: LayoutNode): node is ContainerNode =>
 
 export const isFormNode = (node: LayoutNode): node is FormNode => node.type === "form";
 
-/** Nodes that may hold children (containers and forms). */
-export const isParentNode = (node: LayoutNode): node is ContainerNode | FormNode =>
-  node.type === "container" || node.type === "form";
+export const isLoopNode = (node: LayoutNode): node is LoopNode => node.type === "loop";
+
+/** Nodes that may hold children (containers, forms, and loops). */
+export const isParentNode = (node: LayoutNode): node is ContainerNode | FormNode | LoopNode =>
+  node.type === "container" || node.type === "form" || node.type === "loop";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

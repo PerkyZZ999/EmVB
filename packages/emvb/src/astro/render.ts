@@ -7,6 +7,7 @@ import {
   type DesignSystem,
   type FormDefinitions,
   type Layout,
+  type ThemeDynamicData,
 } from "../core/index.ts";
 import { PLUGIN_ID } from "../constants.ts";
 
@@ -48,6 +49,7 @@ export function renderStored(
   design: DesignSystem,
   pageId: string,
   formDefinitions?: FormDefinitions,
+  dynamic?: ThemeDynamicData,
 ): RenderedPage {
   const layout = readLayout(raw);
   if (!layout) {
@@ -58,6 +60,6 @@ export function renderStored(
     }
     return { html: "", css: "", needsFormsRuntime: false };
   }
-  const { html, css, needsFormsRuntime } = renderPage(layout, design, { formDefinitions });
+  const { html, css, needsFormsRuntime } = renderPage(layout, design, { formDefinitions, dynamic });
   return { html, css, needsFormsRuntime };
 }

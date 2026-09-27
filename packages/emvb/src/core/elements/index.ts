@@ -10,6 +10,12 @@ import type {
   LabelNode,
   LinkNode,
   ListNode,
+  LoopNode,
+  PostContentNode,
+  PostExcerptNode,
+  PostImageNode,
+  PostLinkNode,
+  PostTitleNode,
   RadioNode,
   SelectNode,
   SpacerNode,
@@ -687,6 +693,113 @@ const submit: ElementDefinition<SubmitNode> = {
   }),
 };
 
+
+const postTitle: ElementDefinition<PostTitleNode> = {
+  baseCss: ".emvb-post-title{margin:0}",
+  defaults: () => ({ type: "post-title", props: { level: 1 } }),
+  descriptor: {
+    type: "post-title",
+    name: "Post Title",
+    group: "dynamic",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "level",
+        kind: "select",
+        label: "Level",
+        optional: true,
+        options: [1, 2, 3, 4, 5, 6].map((n) => ({ value: n, label: `H${n}` })),
+      },
+    ],
+  },
+  // Rendered with ThemeDynamicData in renderPage (placeholder build for typing).
+  build: (_node, attrs) => ({ tag: "h1", attrs, children: ["Post Title"] }),
+};
+
+const postExcerpt: ElementDefinition<PostExcerptNode> = {
+  baseCss: ".emvb-post-excerpt{margin:0}",
+  defaults: () => ({ type: "post-excerpt", props: {} }),
+  descriptor: {
+    type: "post-excerpt",
+    name: "Post Excerpt",
+    group: "dynamic",
+    defaultTab: "style",
+    fields: [],
+  },
+  build: (_node, attrs) => ({ tag: "p", attrs, children: ["Post excerpt…"] }),
+};
+
+const postContent: ElementDefinition<PostContentNode> = {
+  baseCss: ".emvb-post-content{min-width:0}",
+  defaults: () => ({ type: "post-content", props: {} }),
+  descriptor: {
+    type: "post-content",
+    name: "Post Content",
+    group: "dynamic",
+    defaultTab: "style",
+    fields: [],
+  },
+  build: (_node, attrs) => ({
+    tag: "div",
+    attrs,
+    children: [{ tag: "p", attrs: {}, children: ["Post content…"] }],
+  }),
+};
+
+const postImage: ElementDefinition<PostImageNode> = {
+  baseCss: ".emvb-post-image{display:block;max-width:100%;height:auto}",
+  defaults: () => ({ type: "post-image", props: { decorative: false } }),
+  descriptor: {
+    type: "post-image",
+    name: "Post Image",
+    group: "dynamic",
+    defaultTab: "content",
+    fields: [{ key: "decorative", kind: "boolean", label: "Decorative", optional: true }],
+  },
+  build: (_node, attrs) => ({
+    tag: "div",
+    attrs: { ...attrs, class: `${attrs.class ?? ""} emvb-post-image-missing`.trim() },
+    children: ["Featured image"],
+  }),
+};
+
+const postLink: ElementDefinition<PostLinkNode> = {
+  baseCss: ".emvb-post-link{color:inherit}",
+  defaults: () => ({ type: "post-link", props: {} }),
+  descriptor: {
+    type: "post-link",
+    name: "Post Link",
+    group: "dynamic",
+    defaultTab: "content",
+    fields: [
+      { key: "text", kind: "text", label: "Text", optional: true, message: "Leave blank to use the post title." },
+      { key: "newTab", kind: "boolean", label: "Open in new tab", optional: true },
+    ],
+  },
+  build: (_node, attrs) => ({ tag: "a", attrs: { ...attrs, href: "#" }, children: ["Post link"] }),
+};
+
+const loop: ElementDefinition<LoopNode> = {
+  baseCss: ".emvb-loop{display:flex;flex-direction:column;min-width:0;gap:1rem}",
+  defaults: () => ({ type: "loop", props: {}, children: [] }),
+  descriptor: {
+    type: "loop",
+    name: "Loop",
+    group: "dynamic",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "itemPartId",
+        kind: "text",
+        label: "Loop Item part id",
+        optional: true,
+        message: "Optional published Loop Item theme-part id. Leave blank to use nested elements as the item template.",
+      },
+    ],
+  },
+  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
 export const ELEMENTS = {
   heading,
   container,
@@ -707,6 +820,12 @@ export const ELEMENTS = {
   checkbox,
   radio,
   submit,
+  "post-title": postTitle,
+  "post-excerpt": postExcerpt,
+  "post-content": postContent,
+  "post-image": postImage,
+  "post-link": postLink,
+  loop,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;
