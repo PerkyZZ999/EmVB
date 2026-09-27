@@ -11,6 +11,7 @@ import {
   CursorClickIcon,
   ImageIcon,
   StarIcon,
+  YoutubeLogoIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
 import { ELEMENT_DESCRIPTORS, type ElementType } from "../../../core/index.ts";
@@ -29,6 +30,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   list: ListBulletsIcon,
   image: ImageIcon,
   icon: StarIcon,
+  video: YoutubeLogoIcon,
 };
 
 const GROUPS = [

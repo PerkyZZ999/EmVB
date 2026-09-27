@@ -121,6 +121,20 @@ export const ListNode = z.strictObject({
   htmlId: HtmlId.optional(),
 });
 
+/** YouTube/Vimeo privacy embed or media-library video (W-026 / R-013). */
+export const VideoNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("video"),
+  props: z.strictObject({
+    url: z.string().max(2000),
+    title: z.string().min(1).max(200),
+    mediaId: z.string().min(1).max(128).optional(),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
 /** Bundled Lucide icon by id (W-025 / A-04). Unknown ids stay on save; renderer shows a placeholder. */
 export const IconNode = z
   .strictObject({
@@ -190,6 +204,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "list",
   "image",
   "icon",
+  "video",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -226,6 +241,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   ListNode,
   ImageNode,
   IconNode,
+  VideoNode,
 ]);
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
@@ -238,6 +254,7 @@ export type ButtonNode = z.infer<typeof ButtonNode>;
 export type ListNode = z.infer<typeof ListNode>;
 export type ImageNode = z.infer<typeof ImageNode>;
 export type IconNode = z.infer<typeof IconNode>;
+export type VideoNode = z.infer<typeof VideoNode>;
 
 type StyleOf = z.infer<typeof StyleProps>;
 type ClassesOf = z.infer<typeof ClassIds>;
@@ -277,6 +294,7 @@ export type LayoutNode =
   | ListNode
   | ImageNode
   | IconNode
+  | VideoNode
   | UnknownNode;
 
 /**

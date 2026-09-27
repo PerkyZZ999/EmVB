@@ -231,3 +231,41 @@ describe("image element (W-024, R-007, N-003)", () => {
     expect(html).not.toContain("javascript:");
   });
 });
+
+describe("video element (W-026, R-013)", () => {
+  test("YouTube URLs render privacy-enhanced iframes with title and lazy loading", () => {
+    const node = {
+      ...defaultElement("video", "vid00001"),
+      props: {
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1",
+        title: "Demo",
+      },
+    };
+    const html = renderPage(page(node), design).html;
+    expect(html).toContain("youtube-nocookie.com/embed/dQw4w9WgXcQ");
+    expect(html).not.toContain("autoplay");
+    expect(html).toContain('title="Demo"');
+    expect(html).toContain('loading="lazy"');
+    expect(html).toContain("<iframe");
+  });
+
+  test("media-library files render as video controls without autoplay", () => {
+    const node = {
+      ...defaultElement("video", "vid00002"),
+      props: { url: "/_emdash/api/media/file/01.mp4", title: "Clip" },
+    };
+    const html = renderPage(page(node), design).html;
+    expect(html).toContain("<video");
+    expect(html).toContain("controls");
+    expect(html).not.toContain("autoplay");
+    expect(html).toContain('preload="metadata"');
+  });
+
+  test("non-allowlisted URLs render a missing placeholder", () => {
+    const bad = {
+      ...defaultElement("video", "vid00003"),
+      props: { url: "https://evil.example/watch?v=abc", title: "Nope" },
+    };
+    expect(renderPage(page(bad), design).html).toContain("emvb-video-missing");
+  });
+});

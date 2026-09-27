@@ -5,6 +5,7 @@ import type {
   HeadingNode,
   IconNode,
   ImageNode,
+  VideoNode,
   LabelNode,
   LinkNode,
   ListNode,
@@ -16,6 +17,7 @@ import type { ElementDescriptor } from "../schema/descriptors.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { getBundledIcon } from "../icons/catalog.ts";
+import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import type { VNode } from "../render/vnode.ts";
 
 type Build<N> = (node: N, attrs: Record<string, string>, children: VNode[]) => VNode;
@@ -389,6 +391,70 @@ const icon: ElementDefinition<IconNode> = {
   },
 };
 
+const video: ElementDefinition<VideoNode> = {
+  baseCss:
+    ".emvb-video{display:block;max-width:100%;border:0}.emvb-video iframe,.emvb-video video{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}.emvb-video-missing{min-height:48px;background:var(--color-kumo-tint,#eee)}",
+  defaults: () => ({
+    type: "video",
+    props: { url: "", title: "Video" },
+  }),
+  descriptor: {
+    type: "video",
+    name: "Video",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "url",
+        kind: "href",
+        label: "Video URL",
+        message:
+          "Use a YouTube or Vimeo link, or a media file path such as /_emdash/api/media/file/….",
+      },
+      { key: "title", kind: "text", label: "Title" },
+    ],
+  },
+  build: (node, attrs) => {
+    const target = resolveEmbedUrl(node.props.url);
+    if (!target) {
+      return {
+        tag: "span",
+        attrs: {
+          ...attrs,
+          class: `${attrs.class ?? ""} emvb-video-missing`.trim(),
+          "aria-hidden": "true",
+        },
+        children: [],
+      };
+    }
+    if (target.kind === "iframe") {
+      return {
+        tag: "iframe",
+        attrs: {
+          ...attrs,
+          src: target.src,
+          title: node.props.title,
+          loading: "lazy",
+          referrerpolicy: "strict-origin-when-cross-origin",
+          allow: "encrypted-media; picture-in-picture; fullscreen",
+        },
+        children: [],
+      };
+    }
+    return {
+      tag: "video",
+      attrs: {
+        ...attrs,
+        src: target.src,
+        title: node.props.title,
+        controls: "",
+        preload: "metadata",
+      },
+      children: [],
+    };
+  },
+};
+
 export const ELEMENTS = {
   heading,
   container,
@@ -401,6 +467,7 @@ export const ELEMENTS = {
   list,
   image,
   icon,
+  video,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;

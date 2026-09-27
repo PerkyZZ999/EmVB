@@ -5,6 +5,7 @@ import {
   CaretRightIcon,
   ImageIcon,
   StarIcon,
+  YoutubeLogoIcon,
   SquaresFourIcon,
   TextHIcon,
   WarningCircleIcon,
@@ -38,6 +39,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   container: SquaresFourIcon,
   image: ImageIcon,
   icon: StarIcon,
+  video: YoutubeLogoIcon,
 };
 
 const withStyle = (node: LayoutNode, patch: Partial<StyleProps>): LayoutNode => {

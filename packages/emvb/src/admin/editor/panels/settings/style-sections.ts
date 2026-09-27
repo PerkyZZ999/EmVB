@@ -54,6 +54,10 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
       sections: ["layout", "spacing", "typography", "advanced"],
       defaultOpen: "typography",
     },
+    video: {
+      sections: ["layout", "spacing", "border", "advanced"],
+      defaultOpen: "layout",
+    },
   };
 
 export const SECTION_LABELS: Record<StyleSectionId, string> = {

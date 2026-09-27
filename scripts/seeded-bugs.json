@@ -1778,6 +1778,46 @@
         "unknown icon ids"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-026/autoplay-kept",
+      "requirement": "R-013",
+      "description": "YouTube embeds force autoplay=1",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "const src = new URL(`https://www.youtube-nocookie.com/embed/${id}`);\n    stripAutoplay(src);\n    return { kind: \"iframe\", src: src.toString(), provider: \"youtube\" };",
+          "replace": "const src = new URL(`https://www.youtube-nocookie.com/embed/${id}`);\n    src.searchParams.set(\"autoplay\", \"1\");\n    return { kind: \"iframe\", src: src.toString(), provider: \"youtube\" };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/embed-url.test.ts",
+        "-t",
+        "YouTube watch"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-026/non-allowlisted-accepted",
+      "requirement": "R-013",
+      "description": "any https host is accepted as an iframe embed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "if (YT_HOSTS.has(host)) {",
+          "replace": "if (host.endsWith(\"example\") || YT_HOSTS.has(host)) {\n    if (host.endsWith(\"example\")) {\n      return { kind: \"iframe\", src: trimmed, provider: \"youtube\" };\n    }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/elements.test.ts",
+        "-t",
+        "non-allowlisted"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

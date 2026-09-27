@@ -26,6 +26,8 @@ const TAGS = new Set([
   "li",
   "hr",
   "img",
+  "iframe",
+  "video",
   // Lucide icon primitives (W-025 / A-04)
   "svg",
   "path",
@@ -37,8 +39,9 @@ const TAGS = new Set([
   "g",
 ]);
 const VOID = new Set(["hr", "img"]);
+// iframe/video are not void — they need closing tags.
 const ATTR_NAME =
-  /^(?:class|id|href|src|alt|width|height|loading|decoding|role|type|target|rel|aria-hidden|aria-label|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|data-[a-z][a-z0-9-]*)$/;
+  /^(?:class|id|href|src|alt|width|height|loading|decoding|role|type|target|rel|aria-hidden|aria-label|title|allow|referrerpolicy|preload|controls|allowfullscreen|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|data-[a-z][a-z0-9-]*)$/;
 
 export const isAllowedTag = (tag: string) => TAGS.has(tag);
 export const isAllowedAttr = (name: string) => ATTR_NAME.test(name);
