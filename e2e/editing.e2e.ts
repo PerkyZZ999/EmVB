@@ -208,6 +208,22 @@ test("page settings show the SEO section closed until opened", async ({ page, re
   expect(JSON.stringify(stored.json)).toContain("Search title");
 });
 
+test("Site styles opens the Variables drawer", async ({ page, request }) => {
+  const id = await createPage(
+    request,
+    "Site styles check",
+    layoutFor("Styled"),
+    `site-${unique()}`,
+  );
+  await openEditor(page, id, "Styled");
+  await overlay(page).getByRole("button", { name: "Site styles" }).click();
+  await expect(overlay(page).locator("[data-emvb-site-styles]")).toBeVisible();
+  await expect(overlay(page).locator('[data-emvb-site-tab="variables"]')).toBeVisible();
+  await expect(
+    overlay(page).getByText("Changes to site styles apply to all pages immediately."),
+  ).toBeVisible();
+});
+
 test("a colour variable can be created, bound and edited, and the design persists", async ({
   page,
   request,

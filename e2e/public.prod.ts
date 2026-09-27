@@ -37,6 +37,40 @@ const layoutWith = (text: string, color?: string) => ({
   },
 });
 
+const layoutWithSpacing = (text: string, spacingId: string) => ({
+  schemaVersion: 1,
+  root: {
+    id: "root0001",
+    type: "container",
+    props: {},
+    style: { flexDirection: "column", gap: { var: spacingId, from: "spacing" } },
+    children: [{ id: "head0001", type: "heading", props: { text, level: 1 } }],
+  },
+});
+
+const layoutWithClass = (textA: string, textB: string, classId: string) => ({
+  schemaVersion: 1,
+  root: {
+    id: "root0001",
+    type: "container",
+    props: {},
+    children: [
+      {
+        id: "head0001",
+        type: "heading",
+        props: { text: textA, level: 1 },
+        classes: [classId],
+      },
+      {
+        id: "head0002",
+        type: "heading",
+        props: { text: textB, level: 2 },
+        classes: [classId],
+      },
+    ],
+  },
+});
+
 async function publish(id: string) {
   const { rev } = await getPage(author, id);
   const result = await api(author, "POST", `/_emdash/api/content/emvb_pages/${id}/publish`, {
@@ -45,23 +79,64 @@ async function publish(id: string) {
   expect(result.status).toBe(200);
 }
 
-/** Sets one colour variable in the site design, or removes it when `value` is null. */
-async function setColor(variable: string, value: string | null) {
-  const current = await api(author, "GET", "/_emdash/api/plugins/emvb/design");
-  const data = current.json?.["data"] as {
-    design: {
-      schemaVersion: 1;
-      variables: { colors: { id: string; name: string; value: string }[] };
-    };
-    revision: string | null;
+type DesignDoc = {
+  schemaVersion: 1;
+  variables: {
+    colors: { id: string; name: string; value: string }[];
+    fonts?: { id: string; name: string; value: string }[];
+    fontSizes?: { id: string; name: string; value: { value: number; unit: string } }[];
+    spacings?: { id: string; name: string; value: { value: number; unit: string } }[];
   };
-  const colors = data.design.variables.colors.filter((c) => c.id !== variable);
-  if (value !== null) colors.push({ id: variable, name: variable, value });
+  classes?: { id: string; name: string; style: Record<string, unknown> }[];
+};
+
+async function loadDesign() {
+  const current = await api(author, "GET", "/_emdash/api/plugins/emvb/design");
+  return current.json?.["data"] as { design: DesignDoc; revision: string | null };
+}
+
+async function saveDesign(design: DesignDoc, revision: string | null) {
   const saved = await api(author, "POST", "/_emdash/api/plugins/emvb/design/save", {
-    design: { ...data.design, variables: { ...data.design.variables, colors } },
-    revision: data.revision,
+    design,
+    revision,
   });
   expect(saved.status).toBe(200);
+  return saved;
+}
+
+/** Sets one colour variable in the site design, or removes it when `value` is null. */
+async function setColor(variable: string, value: string | null) {
+  const data = await loadDesign();
+  const colors = data.design.variables.colors.filter((c) => c.id !== variable);
+  if (value !== null) colors.push({ id: variable, name: variable, value });
+  await saveDesign(
+    { ...data.design, variables: { ...data.design.variables, colors } },
+    data.revision,
+  );
+}
+
+/** Sets one spacing variable, or removes it when `value` is null. */
+async function setSpacing(variable: string, value: number | null) {
+  const data = await loadDesign();
+  const spacings = (data.design.variables.spacings ?? []).filter((s) => s.id !== variable);
+  if (value !== null) {
+    spacings.push({ id: variable, name: variable, value: { value, unit: "px" } });
+  }
+  await saveDesign(
+    {
+      ...data.design,
+      variables: { ...data.design.variables, spacings },
+    },
+    data.revision,
+  );
+}
+
+/** Upserts or removes a style class by id. */
+async function setClass(id: string, next: { name: string; style: Record<string, unknown> } | null) {
+  const data = await loadDesign();
+  const classes = (data.design.classes ?? []).filter((c) => c.id !== id);
+  if (next !== null) classes.push({ id, name: next.name, style: next.style });
+  await saveDesign({ ...data.design, classes }, data.revision);
 }
 
 const scriptsOf = (html: string) => html.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) ?? [];
@@ -166,6 +241,62 @@ test("changing a colour variable changes the published page without re-publishin
     expect(after).not.toContain(declaration("#112233"));
   } finally {
     await setColor(variable, null);
+  }
+});
+
+test("changing a spacing variable changes the published page without re-publishing", async ({
+  request,
+}) => {
+  const variable = `space-${unique()}`;
+  const declaration = (value: number) => `--emvb-s-${variable}:${value}px`;
+  await setSpacing(variable, 12);
+  try {
+    const slug = `space-${unique()}`;
+    const id = await createPage(
+      author,
+      "Spacing check",
+      layoutWithSpacing(`Space ${slug}`, variable),
+      slug,
+    );
+    await publish(id);
+    expect(await (await request.get(`/${slug}`)).text()).toContain(declaration(12));
+
+    await setSpacing(variable, 32);
+    const after = await (await request.get(`/${slug}`)).text();
+    expect(after).toContain(declaration(32));
+    expect(after).not.toContain(declaration(12));
+  } finally {
+    await setSpacing(variable, null);
+  }
+});
+
+test("editing a class used on two elements updates both on the published page", async ({
+  request,
+}) => {
+  const classId = `card-${unique()}`;
+  await setClass(classId, { name: "Card", style: { color: "#112233" } });
+  try {
+    const slug = `class-${unique()}`;
+    const id = await createPage(
+      author,
+      "Class check",
+      layoutWithClass(`One ${slug}`, `Two ${slug}`, classId),
+      slug,
+    );
+    await publish(id);
+    let html = await (await request.get(`/${slug}`)).text();
+    expect(html).toContain(`emvb-k-${classId}`);
+    expect(html).toContain(`.emvb-k-${classId}{color:#112233}`);
+
+    await setClass(classId, { name: "Card", style: { color: "#abcdef" } });
+    html = await (await request.get(`/${slug}`)).text();
+    expect(html).toContain(`.emvb-k-${classId}{color:#abcdef}`);
+    expect(html).not.toContain("#112233");
+    expect((html.match(new RegExp(`emvb-k-${classId}`, "g")) ?? []).length).toBeGreaterThanOrEqual(
+      2,
+    );
+  } finally {
+    await setClass(classId, null);
   }
 });
 

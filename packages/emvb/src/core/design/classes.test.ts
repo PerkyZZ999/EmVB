@@ -12,3 +12,41 @@ describe("class id list helpers (W-031)", () => {
     expect(removeClassId(ids, "card")).toEqual(["accent"]);
   });
 });
+
+import type { Layout } from "../schema/layout.ts";
+import { clearClassRefs, findClassUsages } from "./classes.ts";
+
+describe("findClassUsages / clearClassRefs (W-032)", () => {
+  test("finds and clears class ids across the tree", () => {
+    const layout: Layout = {
+      schemaVersion: 1,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "head0001",
+            type: "heading",
+            props: { text: "A", level: 1 },
+            classes: ["card", "accent"],
+          },
+          {
+            id: "head0002",
+            type: "heading",
+            props: { text: "B", level: 2 },
+            classes: ["card"],
+          },
+        ],
+      },
+    };
+    expect(findClassUsages(layout, "card")).toEqual([
+      { nodeId: "head0001" },
+      { nodeId: "head0002" },
+    ]);
+    const cleared = clearClassRefs(layout, "card");
+    expect(findClassUsages(cleared, "card")).toEqual([]);
+    expect(cleared.root.children[0]?.classes).toEqual(["accent"]);
+    expect(cleared.root.children[1]?.classes).toBeUndefined();
+  });
+});

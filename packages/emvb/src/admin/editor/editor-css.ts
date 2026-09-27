@@ -141,4 +141,18 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-class-name { flex: 1 1 auto; min-width: 0; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-class-token { font-size: 11px; color: var(--text-color-kumo-subtle); }
 .emvb-class-actions { display: flex; gap: 2px; flex: 0 0 auto; }
+
+.emvb-site-styles { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.emvb-site-styles-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.emvb-site-styles-body { display: flex; flex-direction: column; gap: 16px; overflow: auto; min-height: 0; flex: 1 1 auto; }
+.emvb-site-styles-footer { margin-top: auto; }
+.emvb-site-section { display: flex; flex-direction: column; gap: 8px; }
+.emvb-site-section-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.emvb-site-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.emvb-site-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px; }
+.emvb-site-row > :first-child { flex: 1 1 120px; min-width: 0; }
+.emvb-site-create { display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; }
+.emvb-site-class { display: flex; flex-direction: column; gap: 8px; padding: 8px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; }
+.emvb-site-class-styles { display: flex; flex-direction: column; gap: 8px; }
+.emvb-site-confirm { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; background: var(--color-kumo-elevated); }
 `;

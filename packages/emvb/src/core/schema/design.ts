@@ -35,7 +35,7 @@ export const LengthVariable = z.strictObject({
 });
 
 /** Shared style class (R-021 / W-030). CSS selector is always `.emvb-k-<id>`. */
-export const StyleClass = z.strictObject({
+const StyleClass = z.strictObject({
   id: VariableId,
   name: z.string().min(1).max(60),
   style: StyleProps,
@@ -56,7 +56,6 @@ export const DesignSystem = z.strictObject({
 export type ColorVariable = z.infer<typeof ColorVariable>;
 export type FontVariable = z.infer<typeof FontVariable>;
 export type LengthVariable = z.infer<typeof LengthVariable>;
-export type StyleClass = z.infer<typeof StyleClass>;
 export type DesignSystem = z.infer<typeof DesignSystem>;
 
 export const emptyDesign = (): DesignSystem => ({

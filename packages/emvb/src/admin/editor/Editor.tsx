@@ -35,6 +35,7 @@ import { PageSettings } from "./panels/PageSettings.tsx";
 import { ShortcutsDialog } from "./ShortcutsDialog.tsx";
 import { SmallScreenNotice } from "./SmallScreenNotice.tsx";
 import { editorReducer, isDirty, type EditorState } from "./store.ts";
+import { SiteStylesDrawer } from "./panels/SiteStylesDrawer.tsx";
 import { TopBar } from "./TopBar.tsx";
 import {
   loadEntry,
@@ -136,6 +137,7 @@ function EditorApp({
   const saver = useSave(fetcher, state, dispatch);
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const [busy, setBusy] = React.useState<"save" | "publish" | null>(null);
+  const [siteStylesOpen, setSiteStylesOpen] = React.useState(false);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [deleteAsk, setDeleteAsk] = React.useState<{
@@ -402,6 +404,7 @@ function EditorApp({
               busy={busy}
               onExit={() => (dirty ? setLeaveOpen(true) : exit())}
               onShortcuts={() => setShortcutsOpen(true)}
+              onSiteStyles={() => setSiteStylesOpen(true)}
               onPreview={preview}
               onSave={() => void save()}
               onPublish={() => void publish()}
@@ -502,9 +505,29 @@ function EditorApp({
               </main>
               <aside
                 className="emvb-panel emvb-panel-right"
-                aria-label={selectedNode ? "Element settings" : "Page settings"}
+                aria-label={
+                  siteStylesOpen
+                    ? "Site styles"
+                    : selectedNode
+                      ? "Element settings"
+                      : "Page settings"
+                }
               >
-                {selectedNode ? (
+                {siteStylesOpen ? (
+                  <SiteStylesDrawer
+                    design={state.design}
+                    layout={state.page.layout}
+                    onDesignChange={changeDesign}
+                    onLayoutChange={(layout) =>
+                      dispatch({
+                        type: "apply-arranged",
+                        layout,
+                        selected: latest.current.selectedId ?? layout.root.id,
+                      })
+                    }
+                    onClose={() => setSiteStylesOpen(false)}
+                  />
+                ) : selectedNode ? (
                   <ElementPanel
                     key={selectedNode.id}
                     node={selectedNode}

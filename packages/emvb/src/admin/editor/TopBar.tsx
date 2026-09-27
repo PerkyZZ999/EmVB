@@ -3,6 +3,7 @@ import type * as React from "react";
 import {
   ArrowSquareOutIcon,
   KeyboardIcon,
+  PaintBrushIcon,
   SignOutIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
@@ -51,6 +52,7 @@ export function TopBar({
   busy,
   onExit,
   onShortcuts,
+  onSiteStyles,
   onPreview,
   onSave,
   onPublish,
@@ -61,6 +63,7 @@ export function TopBar({
   busy: "save" | "publish" | null;
   onExit: () => void;
   onShortcuts: () => void;
+  onSiteStyles?: () => void;
   onPreview: () => void;
   onSave: () => void;
   onPublish: () => void;
@@ -97,6 +100,16 @@ export function TopBar({
           icon={<KeyboardIcon aria-hidden="true" />}
           onClick={onShortcuts}
         />
+        {page && onSiteStyles && (
+          <Button
+            variant="ghost"
+            className={BUTTON}
+            icon={<PaintBrushIcon aria-hidden="true" />}
+            onClick={onSiteStyles}
+          >
+            Site styles
+          </Button>
+        )}
         {page && (
           <>
             <Button

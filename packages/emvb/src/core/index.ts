@@ -60,7 +60,6 @@ export {
   emptyDesign,
   FontVariable,
   LengthVariable,
-  StyleClass,
 } from "./schema/design.ts";
 export {
   findVariableUsages,
@@ -74,7 +73,13 @@ export {
   type VariableUsage,
 } from "./design/variables.ts";
 export { resolveCascade } from "./design/cascade.ts";
-export { moveClassId, addClassId, removeClassId } from "./design/classes.ts";
+export {
+  moveClassId,
+  addClassId,
+  removeClassId,
+  findClassUsages,
+  clearClassRefs,
+} from "./design/classes.ts";
 export {
   renderPage,
   type RenderMode,

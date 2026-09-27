@@ -1998,6 +1998,46 @@
         "add, remove, and reorder"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-032/drawer-missing-variables-tab",
+      "requirement": "R-020",
+      "description": "Site styles drawer omits the Variables tab",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "        tabs={[\n          { value: \"variables\", label: \"Variables\" },\n          { value: \"classes\", label: \"Classes\" },\n        ]}\n",
+          "replace": "        tabs={[\n          { value: \"classes\", label: \"Classes\" },\n        ]}\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "Variables tab is default"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-032/class-edit-skips-save",
+      "requirement": "R-021",
+      "description": "renaming a class does not call design/save",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "                    const nextName = event.target.value;\n                    void onSave({\n                      ...design,\n                      classes: classes.map((c) =>\n                        c.id === cls.id ? Object.assign({}, c, { name: nextName }) : c,\n                      ),\n                    });\n",
+          "replace": "                    const nextName = event.target.value;\n                    void nextName;\n                    // seeded: class edit does not hit design/save\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "class edit styles"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
