@@ -1,7 +1,8 @@
 import { decodeSlug, getEmDashEntry } from "emdash";
 import { getPublicPluginApiRouteHandler } from "emdash/plugin-utils";
 import { PAGES_COLLECTION } from "../constants.ts";
-import { loadDesign, renderStored, type RenderedPage } from "./render.ts";
+import { formIdsInLayout, loadFormDefinitions } from "./forms-definitions.ts";
+import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
 
 type EmDashEntry = NonNullable<Awaited<ReturnType<typeof getEmDashEntry>>["entry"]>;
 
@@ -42,8 +43,12 @@ export async function resolveEmVBPage(
   const data = entry.data as Record<string, unknown>;
   const handler = getPublicPluginApiRouteHandler(astro.locals as never);
   const design = await loadDesign(handler, astro.url);
+  const layout = readLayout(data["layout"]);
+  const formDefinitions = layout
+    ? await loadFormDefinitions(handler, astro.url, formIdsInLayout(layout))
+    : undefined;
   return {
-    ...renderStored(data["layout"], design, String(data["id"] ?? slug)),
+    ...renderStored(data["layout"], design, String(data["id"] ?? slug), formDefinitions),
     entry,
     title: typeof data["title"] === "string" ? data["title"] : "",
     canvasMode: data["canvas_mode"] === "blank" ? "blank" : "site-layout",

@@ -85,6 +85,20 @@ export {
 } from "./design/variables.ts";
 export { resolveCascade } from "./design/cascade.ts";
 export {
+  findMissingRequiredFields,
+  layoutHasForm,
+  type MissingRequiredField,
+} from "./forms/binding.ts";
+export {
+  fieldsOf,
+  fieldByName,
+  type PublicFormDefinition,
+  type PublicFormField,
+  type FormDefinitions,
+} from "./forms/definition.ts";
+export { FORMS_SUBMIT_PATH } from "./render/index.ts";
+
+export {
   moveClassId,
   addClassId,
   removeClassId,

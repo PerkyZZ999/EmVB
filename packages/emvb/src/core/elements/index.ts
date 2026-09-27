@@ -463,7 +463,8 @@ const video: ElementDefinition<VideoNode> = {
 };
 
 const form: ElementDefinition<FormNode> = {
-  baseCss: ".emvb-form{display:flex;flex-direction:column;gap:12px;min-width:0}",
+  baseCss:
+    ".emvb-form{display:flex;flex-direction:column;gap:12px;min-width:0}.ec-form-hp{position:absolute;left:-9999px}",
   defaults: () => ({ type: "form", props: { formId: "" }, children: [] }),
   descriptor: {
     type: "form",

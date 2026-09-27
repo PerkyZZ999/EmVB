@@ -2078,6 +2078,66 @@
         "form fields must be placed"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-035/forms-runtime-always-on",
+      "requirement": "R-031",
+      "description": "needsFormsRuntime is always true even without forms",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    needsFormsRuntime: layoutHasForm(layout),",
+          "replace": "    needsFormsRuntime: true,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/forms/binding.test.ts",
+        "-t",
+        "without a form"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-035/missing-data-page-wrapper",
+      "requirement": "R-040",
+      "description": "form children are not wrapped in data-page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        attrs: { \"data-page\": \"0\" },",
+          "replace": "        attrs: { \"data-section\": \"0\" },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/forms/binding.test.ts",
+        "-t",
+        "emits data-ec-form"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-035/required-field-not-flagged",
+      "requirement": "R-040",
+      "description": "missing required fields are not flagged",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/forms/binding.ts",
+          "search": "    for (const field of fieldsOf(definition)) {\n      if (field.required && !bound.has(field.name)) {\n        missing.push({ formNodeId: node.id, formId: node.props.formId, field: field.name });\n      }\n    }\n",
+          "replace": "    for (const field of fieldsOf(definition)) {\n      if (!bound.has(field.name)) {\n        // seeded: ignore required\n      }\n    }\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/forms/binding.test.ts",
+        "-t",
+        "flags required fields"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
