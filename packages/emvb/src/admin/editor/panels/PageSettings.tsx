@@ -4,6 +4,7 @@ import * as React from "react";
 import type { PageDraft } from "../../content-api.ts";
 import { FIELD } from "../../ui.ts";
 import type { PagePatch } from "../store.ts";
+import { ConditionsEditor } from "./ConditionsEditor.tsx";
 
 const LAYOUTS = [
   { value: "site-layout", label: "Site layout" },
@@ -39,10 +40,10 @@ export function PageSettings({
           disabled
           description="Chosen when the part was created."
         />
-        <p className="emvb-helper" data-emvb-conditions-placeholder="">
-          Display conditions editor lands in the next step (W-051). New parts default to Entire
-          site.
-        </p>
+        <ConditionsEditor
+          conditions={page.conditions}
+          onChange={(conditions) => onChange({ conditions })}
+        />
       </div>
     );
   }
