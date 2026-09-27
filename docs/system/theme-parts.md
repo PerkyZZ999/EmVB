@@ -1,6 +1,6 @@
-# Theme parts (Headers & Footers)
+# Theme parts (Headers, Footers & site templates)
 
-Post-MVP slice S7a. Stored in hidden collection `emvb_theme_parts`.
+Post-MVP slices **S7a** (Headers/Footers) and **S7c** (Error 404, Search Results, Single Page). Stored in hidden collection `emvb_theme_parts`.
 
 ## Fields
 
@@ -8,10 +8,22 @@ Post-MVP slice S7a. Stored in hidden collection `emvb_theme_parts`.
 |---|---|---|
 | `title` | string | Required |
 | `layout` | json + `emvb:layout` | Same layout schema as Visual pages |
-| `part_type` | select | `header` \| `footer` (popups deferred) |
+| `part_type` | select | `header` \| `footer` \| `error_404` \| `search_results` \| `single_page` (popups deferred) |
 | `conditions` | json | Conditions doc v1 (see below) |
 
 No SEO. No public `urlPattern` (parts are not catch-all pages).
+
+## Part types
+
+| Type | Role | Location gate (public) |
+|---|---|---|
+| `header` | Replaces host header | Always competes; conditions decide |
+| `footer` | Inserts after `<main>` | Always competes; conditions decide |
+| `error_404` | Replaces `<main>` on 404 | Only when `is404` |
+| `search_results` | Replaces `<main>` on search | Only when `isSearch` (demo `/search`) |
+| `single_page` | Replaces `<main>` on EmDash `pages` singular | `kind=singular`, `collection=pages`, not front; **not** posts or `emvb_pages` |
+
+Default Include on create: Entire Site (header/footer); 404 page (`error_404`); Search results (`search_results`); Pages all (`single_page`).
 
 ## Conditions (schemaVersion 1)
 
@@ -24,10 +36,16 @@ No SEO. No public `urlPattern` (parts are not catch-all pages).
 }
 ```
 
-A part matches when **any include** matches and **no exclude** matches. Among matching published parts of one type, **highest specificity** wins; ties use `updatedAt` descending.
+A part matches when **any include** matches and **no exclude** matches. Among matching published parts of one type, **highest specificity** wins; ties use `updatedAt` descending. Content types are also gated by location (above).
 
 MVP vocabulary: `general/entire_site`, `singular/{all,front,not_found,collection,entry}`, `archive/{all,collection,taxonomy,search}`.
 
 ## Public render
 
-Hosts call `resolveThemeParts(Astro, ctx)` from `emvb/astro`. Demos' `Base.astro` **replace** the starter `<header>` when a header wins, and insert footer HTML after `<main>` when a footer wins. Output is plain HTML + CSS (R-031).
+Hosts call `resolveThemeParts(Astro, ctx)` from `emvb/astro`. Return value:
+
+- `header` / `footer` — chrome (S7a)
+- `content` — body template when Error 404 / Search Results / Single Page wins (S7c)
+- `css` — concatenated CSS for all winners
+
+Demos' `Base.astro` **replace** the starter `<header>` when a header wins, insert footer HTML after `<main>` when a footer wins, and replace `<main>` slot content when `content` wins. Output is plain HTML + CSS (R-031). Helpers: `themeContext404`, `themeContextSearch`, `themeContextFront`, `themeContextFrom`.
