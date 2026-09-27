@@ -12,11 +12,7 @@
           "replace": "export const PACKAGE_NAME = \"emvb\";\nexport const debug = () => console.log(\"x\");"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "lint"
-      ],
+      "command": ["bun", "run", "lint"],
       "expect": "no-console"
     },
     {
@@ -30,11 +26,7 @@
           "replace": "export const   PLUGIN_ID   =  \"emvb\""
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "fmt:check"
-      ],
+      "command": ["bun", "run", "fmt:check"],
       "expect": "Format issues found|constants\\.ts"
     },
     {
@@ -48,11 +40,7 @@
           "replace": "export const PLUGIN_ID: number = \"emvb\";"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "typecheck"
-      ],
+      "command": ["bun", "run", "typecheck"],
       "expect": "TS2322"
     },
     {
@@ -66,11 +54,7 @@
           "replace": "import \"react\";\nexport * from \"./limits.ts\";"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "lint"
-      ],
+      "command": ["bun", "run", "lint"],
       "expect": "no-restricted-imports"
     },
     {
@@ -84,11 +68,7 @@
           "replace": "import { createPlugin } from \"../server/plugin.ts\";\nexport * from \"./limits.ts\";\nexport const leak = createPlugin;"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "fallow"
-      ],
+      "command": ["bun", "run", "fallow"],
       "expect": "Boundary violations"
     },
     {
@@ -102,11 +82,7 @@
           "replace": "export const PACKAGE_NAME = \"emvb\";\nexport const UNUSED_CONSTANT = 1;"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "fallow"
-      ],
+      "command": ["bun", "run", "fallow"],
       "expect": "Unused exports"
     },
     {
@@ -120,11 +96,7 @@
           "replace": "\"dev\": \"bun --bun astro dev"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "check:runtime"
-      ],
+      "command": ["bun", "run", "check:runtime"],
       "expect": "is listed but now runs on Bun"
     },
     {
@@ -138,11 +110,7 @@
           "replace": "\"build\": \"astro build\""
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "check:runtime"
-      ],
+      "command": ["bun", "run", "check:runtime"],
       "expect": "runs on Node .* but is not listed"
     },
     {
@@ -156,11 +124,7 @@
           "replace": "false"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./scripts/check-runtime.test.ts"
-      ],
+      "command": ["bun", "test", "./scripts/check-runtime.test.ts"],
       "expect": "\\(fail\\)"
     },
     {
@@ -174,11 +138,7 @@
           "replace": "preload = [\"./test/setup/emdash-virtual.ts\"]"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./test/setup"
-      ],
+      "command": ["bun", "test", "./test/setup"],
       "expect": "document is not defined|\\(fail\\)"
     },
     {
@@ -192,11 +152,7 @@
           "replace": "<p data-harness set:html={label} />"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "test:astro"
-      ],
+      "command": ["bun", "run", "test:astro"],
       "expect": "AssertionError"
     },
     {
@@ -210,11 +166,7 @@
           "replace": "void originals;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./scripts/seeded-bug.test.ts"
-      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
       "expect": "\\(fail\\)"
     },
     {
@@ -228,13 +180,7 @@
           "replace": "plugins: [formsPlugin()],"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/smoke.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/smoke.e2e.ts", "--project=node"],
       "env": {
         "CI": "1"
       },
@@ -251,11 +197,7 @@
           "replace": "const sizeIssue = checkSize(input, MAX_LAYOUT_BYTES * 2, \"page\");"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*one byte over the limit is refused"
     },
     {
@@ -269,11 +211,7 @@
           "replace": "return JSON.stringify(value).length;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*counts UTF-8 bytes, not characters"
     },
     {
@@ -287,11 +225,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*duplicate ids are reported"
     },
     {
@@ -305,11 +239,7 @@
           "replace": "if (depth > MAX_DEPTH + 1) {"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*nesting deeper than the limit"
     },
     {
@@ -323,11 +253,7 @@
           "replace": "result = { ...result, schemaVersion: v + 1 };"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*runs the chain from v0"
     },
     {
@@ -341,11 +267,7 @@
           "replace": "z.string()"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*style injection attempt"
     },
     {
@@ -359,11 +281,7 @@
           "replace": "return value;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*renders as inert text"
     },
     {
@@ -377,11 +295,7 @@
           "replace": "return value;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*attributes also escape"
     },
     {
@@ -395,11 +309,7 @@
           "replace": "if (entry) {\n      declarations.push({ property: entry.css, value: value ?? String(raw) });"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*never reaches the stylesheet"
     },
     {
@@ -413,11 +323,7 @@
           "replace": "if (typeof value === \"string\") return value;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*colour rejects"
     },
     {
@@ -431,11 +337,7 @@
           "replace": "return value.length > 0;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*the generic guard rejects"
     },
     {
@@ -449,11 +351,7 @@
           "replace": "tag: \"h2\","
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*heading level 1 renders"
     },
     {
@@ -467,11 +365,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*refuses tags and attributes"
     },
     {
@@ -485,11 +379,7 @@
           "replace": "for (const css of baseCss.values()) parts.push(css);"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*base CSS is emitted only"
     },
     {
@@ -503,11 +393,7 @@
           "replace": "const mode = opts.mode ?? \"public\";\n  const until = performance.now() + 25;\n  while (performance.now() < until);"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "bench:render"
-      ],
+      "command": ["bun", "run", "bench:render"],
       "expect": "renderPage, 300 nodes, 200 runs: median 2\\d\\.\\d+ ms"
     },
     {
@@ -521,11 +407,7 @@
           "replace": "if (event.actor && event.actor.role < 0) {"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*a save by role 10 is rejected"
     },
     {
@@ -539,11 +421,7 @@
           "replace": "return;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*an invalid layout is rejected with SAVE_REJECTED"
     },
     {
@@ -557,11 +435,7 @@
           "replace": "ctx.log.warn(\"emvb: page save rejected\", { pageId, code: result.issues[0]?.code ?? \"invalid\", layout: event.content[\"layout\"] });"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*no layout content"
     },
     {
@@ -575,11 +449,7 @@
           "replace": "await (ctx.storage[\"design\"] as unknown as { put(id: string, v: unknown): Promise<void> }).put(DESIGN_KEY, result.design);\n    const write = { applied: true as const, revision: crypto.randomUUID() };"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*a stale revision gets 409"
     },
     {
@@ -593,11 +463,7 @@
           "replace": "if (bytes > MAX_DESIGN_BYTES * 8) {"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*256 KiB \\+ 1 byte gets 413"
     },
     {
@@ -611,12 +477,91 @@
           "replace": "permission: \"content:read\","
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*a role-\\d+ save gets 403"
+    },
+    {
+      "id": "W-007/hidden-omitted",
+      "requirement": "D-019",
+      "description": "setup creates emvb_pages without hidden: true",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/spec.ts",
+          "search": "  hidden: true,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*a missing collection is created hidden"
+    },
+    {
+      "id": "W-007/widget-omitted",
+      "requirement": "D-019",
+      "description": "the layout field is created without the emvb:layout widget",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/spec.ts",
+          "search": "{ slug: \"layout\", label: \"Layout\", type: \"json\", widget: LAYOUT_WIDGET, validation: null },",
+          "replace": "{ slug: \"layout\", label: \"Layout\", type: \"json\", validation: null },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*the layout field is bound to the read-only EmVB widget"
+    },
+    {
+      "id": "W-007/widget-editable",
+      "requirement": "D-019",
+      "description": "the layout widget renders an editable textarea",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/LayoutField.tsx",
+          "search": "export function LayoutField({ value, label, id }: FieldWidgetProps) {",
+          "replace": "export function LayoutField({ value, label, id, onChange }: FieldWidgetProps) {"
+        },
+        {
+          "file": "packages/emvb/src/admin/widgets/LayoutField.tsx",
+          "search": "      <Text>{description}</Text>",
+          "replace": "      <Text>{description}</Text>\n      <textarea id=\"layout-json\" defaultValue={JSON.stringify(value)} onChange={(e) => onChange(e.target.value)} />"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*renders no editable control and never calls onChange"
+    },
+    {
+      "id": "W-007/setup-not-idempotent",
+      "requirement": "R-002",
+      "description": "setup always re-applies the hidden flag",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/plan.ts",
+          "search": "if (current.hidden !== true) update.hidden = true;",
+          "replace": "update.hidden = true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*running setup twice gives the same schema"
+    },
+    {
+      "id": "W-007/e2e-widget-editable",
+      "requirement": "D-019",
+      "description": "the entry editor exposes a JSON textarea for layout (browser check)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/LayoutField.tsx",
+          "search": "export function LayoutField({ value, label, id }: FieldWidgetProps) {",
+          "replace": "export function LayoutField({ value, label, id, onChange }: FieldWidgetProps) {"
+        },
+        {
+          "file": "packages/emvb/src/admin/widgets/LayoutField.tsx",
+          "search": "      <Text>{description}</Text>",
+          "replace": "      <Text>{description}</Text>\n      <textarea id=\"layout-json\" defaultValue={JSON.stringify(value)} onChange={(e) => onChange(e.target.value)} />"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/setup.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*read-only widget instead of a JSON input",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }

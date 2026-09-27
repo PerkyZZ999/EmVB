@@ -1,0 +1,60 @@
+import { Banner, Button, Empty, Loader } from "@cloudflare/kumo";
+import { LayoutIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { defaultFetcher, type Fetcher } from "../api.ts";
+import { useSetupStatus } from "../setup/useSetupStatus.ts";
+
+/** "Visual pages" (`/pages`). W-007 covers the setup states; the page list arrives in W-008. */
+export function PagesPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
+  const { status, running, setup } = useSetupStatus(fetcher);
+
+  if (status.state === "loading") return <Loader />;
+  if (status.state === "error") {
+    return (
+      <Banner
+        variant="error"
+        icon={<WarningCircleIcon aria-hidden="true" />}
+        title="Couldn't load Visual pages"
+        description={status.message}
+      />
+    );
+  }
+  const action = (label: string) =>
+    status.isAdmin ? (
+      <Button variant="primary" loading={running} onClick={() => void setup()}>
+        {label}
+      </Button>
+    ) : undefined;
+
+  return (
+    <section data-emvb-page="pages" className="flex flex-col gap-4">
+      <h1 className="text-2xl font-semibold">Visual pages</h1>
+      {status.state === "missing" && (
+        <Empty
+          icon={<LayoutIcon size={32} aria-hidden="true" />}
+          title="EmVB isn't set up yet"
+          description={
+            status.isAdmin
+              ? "Setup creates the collection EmVB stores its pages in."
+              : "Ask an administrator to set up EmVB."
+          }
+          contents={action("Set up EmVB")}
+        />
+      )}
+      {status.state === "outdated" && (
+        <Banner
+          variant="alert"
+          title="EmVB needs to update its page collection"
+          description={
+            status.conflicts.length > 0
+              ? status.conflicts.join(" ")
+              : status.isAdmin
+                ? "Upgrading adds or corrects EmVB's fields. Existing pages are kept."
+                : "Ask an administrator to upgrade EmVB."
+          }
+          action={status.conflicts.length > 0 ? undefined : action("Upgrade EmVB")}
+        />
+      )}
+      {status.state === "ready" && <p data-emvb-setup="ready">EmVB is set up.</p>}
+    </section>
+  );
+}
