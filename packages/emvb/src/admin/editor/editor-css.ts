@@ -84,4 +84,10 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-element-tile:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 .emvb-element-tile:active { cursor: grabbing; }
 .emvb-drop-line { position: absolute; background: var(--color-kumo-brand); pointer-events: none; z-index: 2; }
+
+.emvb-left-panel { gap: 12px; }
+.emvb-add-group { display: flex; flex-direction: column; gap: 8px; }
+.emvb-add-group-title { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-color-kumo-subtle); text-transform: uppercase; letter-spacing: 0.04em; }
+.emvb-layer-caret { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: 0 0 16px; }
+.emvb-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 `;

@@ -47,7 +47,10 @@ function fakeServer(options: { layout?: unknown; takenSlug?: string; rejectText?
   const calls: Call[] = [];
   const server = {
     rev: 1,
-    data: { title: "Pricing", layout: options.layout ?? s1Page() } as Record<string, unknown>,
+    data: {
+      title: "Pricing",
+      layout: "layout" in options ? options.layout : s1Page(),
+    } as Record<string, unknown>,
     slug: "pricing",
     designRevision: "d1" as string | null,
     calls,
@@ -147,6 +150,14 @@ const layerRow = (name: string) =>
     row.textContent?.startsWith(name),
   );
 
+const openLayers = async () => {
+  if (document.querySelector('[data-emvb-panel="layers"]')) return;
+  const tab = [...document.querySelectorAll('[role="tab"]')].find((el) =>
+    (el.textContent ?? "").includes("Layers"),
+  );
+  await click(tab);
+};
+
 describe("save draft (R-006)", () => {
   test("saves with _rev, the edited page and SEO, and the next save uses the new revision", async () => {
     const { server, fetcher } = fakeServer();
@@ -187,6 +198,7 @@ describe("save draft (R-006)", () => {
     expect(byteLength(layout)).toBeLessThan(MAX_LAYOUT_BYTES);
     const { server, fetcher } = fakeServer({ layout });
     await render(fetcher);
+    await openLayers();
     const rows = document.querySelectorAll(".emvb-layer-row");
     await click(rows[rows.length - 1]);
     const grown = "x".repeat(900) + "y".repeat(300);
@@ -246,6 +258,7 @@ describe("delete and restore (D-025)", () => {
   test("Delete removes the selected element, and Restore puts it back in place, selected", async () => {
     const { fetcher } = fakeServer();
     await render(fetcher);
+    await openLayers();
     await click(layerRow("Heading"));
     await press("Delete");
     expect(layerRow("Heading")).toBeUndefined();
@@ -258,6 +271,7 @@ describe("delete and restore (D-025)", () => {
   test("Delete in a text field edits the text, not the page", async () => {
     const { fetcher } = fakeServer();
     await render(fetcher);
+    await openLayers();
     await click(layerRow("Heading"));
     const input = field("Text");
     await act(async () => {
@@ -269,6 +283,7 @@ describe("delete and restore (D-025)", () => {
   test("the root container can't be deleted", async () => {
     const { fetcher } = fakeServer();
     await render(fetcher);
+    await openLayers();
     await click(layerRow("Container"));
     await press("Delete");
     expect(layerRow("Container")).toBeTruthy();
@@ -279,6 +294,7 @@ describe("colour variables (R-004 partial)", () => {
   test("creating a variable saves the design with its revision and binds the heading to it", async () => {
     const { server, fetcher } = fakeServer();
     await render(fetcher);
+    await openLayers();
     await click(layerRow("Heading"));
     await click(
       [...document.querySelectorAll('[role="tab"]')].find((t) => t.textContent === "Style"),
@@ -303,5 +319,56 @@ describe("colour variables (R-004 partial)", () => {
     await press("s", { ctrlKey: true });
     const layout = puts(server.calls)[0]?.body?.["data"] as { layout: ReturnType<typeof s1Page> };
     expect(layout.layout.root.children[0]?.style?.color).toEqual({ var: "accent-blue" });
+  });
+});
+
+describe("Add panel and Layers (W-018)", () => {
+  test("click-add inserts at the insertion point and announces it", async () => {
+    const layout = {
+      schemaVersion: 1 as const,
+      root: {
+        id: "root0001",
+        type: "container" as const,
+        props: {},
+        children: [
+          {
+            id: "box00001",
+            type: "container" as const,
+            props: {},
+            children: [],
+          },
+        ],
+      },
+    };
+    const { server, fetcher } = fakeServer({ layout });
+    await render(fetcher);
+    await openLayers();
+    await click(document.querySelector('[data-emvb-layer="box00001"]'));
+    const addTab = [...document.querySelectorAll('[role="tab"]')].find((el) =>
+      (el.textContent ?? "").includes("Add"),
+    );
+    await click(addTab);
+    await click(document.querySelector('[data-emvb-add-tile="heading"]'));
+    expect(editor()?.querySelector(".emvb-sr-only")?.textContent).toBe(
+      "Heading added inside Container",
+    );
+    await openLayers();
+    expect(document.querySelector('[data-emvb-layer="box00001"]')).toBeTruthy();
+    // Nested heading should exist under the box after save
+    await press("s", { ctrlKey: true });
+    const saved = server.data["layout"] as {
+      root: { children: Array<{ type: string; children?: Array<{ type: string }> }> };
+    };
+    const box = saved.root.children[0];
+    expect(box?.type === "container" && box.children?.[0]?.type).toBe("heading");
+  });
+
+  test("an empty page shows Add a container to start", async () => {
+    const { fetcher } = fakeServer({ layout: null });
+    await render(fetcher);
+    expect(editor()?.textContent).toContain("Add a container to start");
+    await click(button("Add a container to start"));
+    await openLayers();
+    expect(layerRow("Container")).toBeTruthy();
   });
 });

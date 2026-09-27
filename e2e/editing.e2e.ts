@@ -31,6 +31,11 @@ const overlay = (page: Page) => page.locator("[data-emvb-editor]");
 const canvas = (page: Page) => page.frameLocator("iframe[data-emvb-canvas]");
 const saveStatus = (page: Page) => overlay(page).locator(".emvb-save-status");
 
+async function openLayers(page: Page) {
+  if ((await overlay(page).locator('[data-emvb-panel="layers"]').count()) > 0) return;
+  await overlay(page).getByRole("tab", { name: "Layers" }).click();
+}
+
 async function openEditor(page: Page, id: string, text?: string) {
   await page.goto(`${EDITOR}?entry=${id}`);
   await expect(overlay(page).locator(".emvb-topbar-title")).toBeVisible({ timeout: 20_000 });
@@ -144,6 +149,7 @@ test("growing a page past the size limit shows the size error and saves nothing"
   const id = await createPage(request, "Size check", layout, `size-${unique()}`);
   const before = await getPage(request, id);
   await openEditor(page, id);
+  await openLayers(page);
   await overlay(page).locator(".emvb-layer-row").last().click();
   await overlay(page)
     .getByLabel("Text", { exact: true })

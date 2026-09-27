@@ -1,7 +1,15 @@
 import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@cloudflare/kumo";
 import { PlusIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { findNode, renderPage, type DesignSystem, type LayoutNode } from "../../core/index.ts";
+import {
+  ELEMENT_DESCRIPTORS,
+  findNode,
+  insertionPoint,
+  renderPage,
+  type DesignSystem,
+  type ElementType,
+  type LayoutNode,
+} from "../../core/index.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { previewUrl, saveDesign } from "../content-api.ts";
 import { readCollection } from "../setup/run.ts";
@@ -9,9 +17,10 @@ import { CanvasFrame, type CanvasSelection } from "./canvas/CanvasFrame.tsx";
 import { ConflictDialog, LeaveDialog } from "./dialogs.tsx";
 import { EditorOverlay } from "./EditorOverlay.tsx";
 import { exitTarget, PAGES_URL } from "./exit.ts";
+import { NEW_ELEMENT_MIME } from "./dnd/drop-target.ts";
 import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES, ElementPanel } from "./panels/ElementPanel.tsx";
-import { LayersPanel } from "./panels/LayersPanel.tsx";
+import { LeftPanel } from "./panels/LeftPanel.tsx";
 import { PageSettings } from "./panels/PageSettings.tsx";
 import { ShortcutsDialog } from "./ShortcutsDialog.tsx";
 import { SmallScreenNotice } from "./SmallScreenNotice.tsx";
@@ -118,6 +127,7 @@ function EditorApp({
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const [busy, setBusy] = React.useState<"save" | "publish" | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
+  const [announcement, setAnnouncement] = React.useState("");
   const [leaveOpen, setLeaveOpen] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
   const lastToast = React.useRef<string | null>(null);
@@ -254,6 +264,22 @@ function EditorApp({
     }
   };
 
+  const addFromPanel = (type: ElementType) => {
+    const layout = latest.current.page.layout;
+    if (!layout) {
+      if (type === "container") dispatch({ type: "add-root-container" });
+      return;
+    }
+    const node = newElement(type);
+    if (!node) return;
+    const place = insertionPoint(layout, latest.current.selectedId);
+    const parent = findNode(layout, place.parentId);
+    const parentName = ELEMENT_NAMES[parent?.type ?? "container"] ?? "Container";
+    const label = ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name ?? type;
+    dispatch({ type: "add-node", node, parentId: place.parentId, index: place.index });
+    setAnnouncement(`${label} added inside ${parentName}`);
+  };
+
   const selection: CanvasSelection = {
     selectedId: selectedNode ? state.selectedId : null,
     labelFor: (id) => {
@@ -287,11 +313,15 @@ function EditorApp({
             />
             <div className="emvb-frame">
               <aside className="emvb-panel emvb-panel-left" aria-label="Add and Layers">
-                <LayersPanel
+                <LeftPanel
                   layout={state.page.layout}
                   selectedId={state.selectedId}
                   onSelect={(id) => dispatch({ type: "select", id })}
+                  onAdd={addFromPanel}
                 />
+                <div className="emvb-sr-only" aria-live="polite">
+                  {announcement}
+                </div>
               </aside>
               <main className="emvb-canvas">
                 {rendered ? (
@@ -307,7 +337,34 @@ function EditorApp({
                     }}
                   />
                 ) : (
-                  <div className="emvb-empty-canvas">
+                  <div
+                    className="emvb-empty-canvas"
+                    data-emvb-empty-canvas=""
+                    onDragOver={(event) => {
+                      if (![...event.dataTransfer.types].includes(NEW_ELEMENT_MIME)) return;
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = "copy";
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const type = event.dataTransfer.getData(NEW_ELEMENT_MIME);
+                      if (!type) return;
+                      dispatch({ type: "add-root-container" });
+                      if (type === "container") return;
+                      queueMicrotask(() => {
+                        const layout = latest.current.page.layout;
+                        if (!layout) return;
+                        const node = newElement(type);
+                        if (!node) return;
+                        dispatch({
+                          type: "add-node",
+                          node,
+                          parentId: layout.root.id,
+                          index: 0,
+                        });
+                      });
+                    }}
+                  >
                     <button
                       type="button"
                       className="emvb-empty-prompt"

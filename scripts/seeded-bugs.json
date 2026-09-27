@@ -1339,6 +1339,60 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize"],
       "expect": "\\(fail\\).*colour rejects|colour rejects injection"
+    },
+    {
+      "id": "W-018/click-add-always-root",
+      "requirement": "R-003",
+      "description": "insertionPoint always targets the page root",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "export function insertionPoint(layout: Layout, selectedId: string | null): Place {",
+          "replace": "export function insertionPoint(layout: Layout, selectedId: string | null): Place {\n  if (selectedId !== undefined) return { parentId: layout.root.id, index: layout.root.children.length };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx",
+        "-t",
+        "insertion point"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-018/search-not-filtering",
+      "requirement": "R-004",
+      "description": "Add panel search ignores the query and always shows every tile",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) => d.group !== (\"form\" as string) && (!q || d.name.toLowerCase().includes(q)),\n  );",
+          "replace": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) => d.group !== (\"form\" as string),\n  );"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx"],
+      "expect": "\\(fail\\).*No elements match|search filters"
+    },
+    {
+      "id": "W-018/layers-not-expanding",
+      "requirement": "R-003",
+      "description": "Layers never renders descendants (always collapsed)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  if (node.type !== \"container\" || collapsed.has(node.id) || node.children.length === 0) return self;\n  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));",
+          "replace": "  if (node.type !== \"container\" || true || collapsed.has(node.id) || node.children.length === 0) return self;\n  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx",
+        "-t",
+        "auto-expands"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
