@@ -26,9 +26,7 @@ export async function beforeSave(
   const kind = event.collection === THEME_PARTS_COLLECTION ? "theme part" : "page";
   if (event.actor && event.actor.role < EDITOR_ROLE) {
     ctx.log.warn(`emvb: ${kind} save rejected`, { pageId, code: "role" });
-    throw new ContentSaveRejectedError(
-      `Only editors and administrators can save EmVB ${kind}s.`,
-    );
+    throw new ContentSaveRejectedError(`Only editors and administrators can save EmVB ${kind}s.`);
   }
 
   let next: Record<string, unknown> | undefined;

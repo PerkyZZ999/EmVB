@@ -136,7 +136,8 @@ function renderDynamicPost(
   mode: RenderMode,
 ): VNode | undefined {
   if (node.type === "post-title") {
-    if (!post) return mode === "editor" ? { tag: "h1", attrs, children: ["Post Title"] } : undefined;
+    if (!post)
+      return mode === "editor" ? { tag: "h1", attrs, children: ["Post Title"] } : undefined;
     const level = (node.props as { level?: number }).level ?? 1;
     const tag = HEADING_TAGS[Math.min(6, Math.max(1, level)) - 1] ?? "h1";
     return { tag, attrs, children: [post.title] };
@@ -188,8 +189,7 @@ function renderDynamicPost(
     }
     const href = sanitizeHref(post.permalink);
     if (!href) return undefined;
-    const label =
-      (node.props as { text?: string }).text?.trim() || post.title || post.permalink;
+    const label = (node.props as { text?: string }).text?.trim() || post.title || post.permalink;
     const linkAttrs: Record<string, string> = { ...attrs, href };
     if ((node.props as { newTab?: boolean }).newTab) {
       linkAttrs.target = "_blank";

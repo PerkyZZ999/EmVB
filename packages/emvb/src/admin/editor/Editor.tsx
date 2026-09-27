@@ -52,7 +52,15 @@ import { useSave } from "./useSave.ts";
 const RESTORE_TIMEOUT_MS = 6000;
 
 /** The full-screen editor for one EmVB page or theme part (R-001, R-002, R-060). */
-export function Editor({ fetcher, entryId, collection = PAGES_COLLECTION }: { fetcher: Fetcher; entryId: string; collection?: string }) {
+export function Editor({
+  fetcher,
+  entryId,
+  collection = PAGES_COLLECTION,
+}: {
+  fetcher: Fetcher;
+  entryId: string;
+  collection?: string;
+}) {
   const wideEnough = useMediaQuery(EDITOR_MIN_WIDTH_QUERY);
   const data = useEditorData(fetcher, entryId, collection);
   if (data.state === "ready") {

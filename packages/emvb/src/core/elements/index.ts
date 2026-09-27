@@ -693,7 +693,6 @@ const submit: ElementDefinition<SubmitNode> = {
   }),
 };
 
-
 const postTitle: ElementDefinition<PostTitleNode> = {
   baseCss: ".emvb-post-title{margin:0}",
   defaults: () => ({ type: "post-title", props: { level: 1 } }),
@@ -772,7 +771,13 @@ const postLink: ElementDefinition<PostLinkNode> = {
     group: "dynamic",
     defaultTab: "content",
     fields: [
-      { key: "text", kind: "text", label: "Text", optional: true, message: "Leave blank to use the post title." },
+      {
+        key: "text",
+        kind: "text",
+        label: "Text",
+        optional: true,
+        message: "Leave blank to use the post title.",
+      },
       { key: "newTab", kind: "boolean", label: "Open in new tab", optional: true },
     ],
   },
@@ -793,7 +798,8 @@ const loop: ElementDefinition<LoopNode> = {
         kind: "text",
         label: "Loop Item part id",
         optional: true,
-        message: "Optional published Loop Item theme-part id. Leave blank to use nested elements as the item template.",
+        message:
+          "Optional published Loop Item theme-part id. Leave blank to use nested elements as the item template.",
       },
     ],
   },

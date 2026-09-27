@@ -17,9 +17,7 @@ const page = (...children: Layout["root"]["children"]): Layout => ({
 
 describe("portableTextToVNodes", () => {
   test("plain string becomes a paragraph", () => {
-    expect(portableTextToVNodes("Hello")).toEqual([
-      { tag: "p", attrs: {}, children: ["Hello"] },
-    ]);
+    expect(portableTextToVNodes("Hello")).toEqual([{ tag: "p", attrs: {}, children: ["Hello"] }]);
   });
 
   test("portable text blocks become escaped structure tags", () => {

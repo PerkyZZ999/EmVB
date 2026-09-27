@@ -10,8 +10,7 @@ function parseSearch(search: string): { entry: string | null; collection: string
   const params = new URLSearchParams(search);
   const entry = params.get("entry")?.trim() || null;
   const raw = params.get("collection")?.trim();
-  const collection =
-    raw === THEME_PARTS_COLLECTION ? THEME_PARTS_COLLECTION : PAGES_COLLECTION;
+  const collection = raw === THEME_PARTS_COLLECTION ? THEME_PARTS_COLLECTION : PAGES_COLLECTION;
   return { entry, collection };
 }
 
@@ -38,8 +37,7 @@ function EditorLanding({
 }) {
   if (!entry) {
     const listUrl = collection === THEME_PARTS_COLLECTION ? THEME_URL : PAGES_URL;
-    const listLabel =
-      collection === THEME_PARTS_COLLECTION ? "Theme Builder" : "Visual pages";
+    const listLabel = collection === THEME_PARTS_COLLECTION ? "Theme Builder" : "Visual pages";
     return (
       <section data-emvb-page="editor">
         <Empty
@@ -52,11 +50,7 @@ function EditorLanding({
     );
   }
   return (
-    <section
-      data-emvb-page="editor"
-      data-emvb-entry={entry}
-      data-emvb-collection={collection}
-    >
+    <section data-emvb-page="editor" data-emvb-entry={entry} data-emvb-collection={collection}>
       <Editor fetcher={fetcher} entryId={entry} collection={collection} />
     </section>
   );

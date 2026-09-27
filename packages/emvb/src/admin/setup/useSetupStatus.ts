@@ -23,11 +23,12 @@ export function useSetupStatus(fetcher: Fetcher, role: number) {
         readCollection(fetcher, THEME_PARTS_COLLECTION),
       ]);
       const { steps, conflicts } = planSetup(pages, themeParts);
-      const state = !pages || !themeParts
-        ? "missing"
-        : steps.length > 0 || conflicts.length > 0
-          ? "outdated"
-          : "ready";
+      const state =
+        !pages || !themeParts
+          ? "missing"
+          : steps.length > 0 || conflicts.length > 0
+            ? "outdated"
+            : "ready";
       setStatus({ state, isAdmin: role >= ADMIN_ROLE, conflicts });
     } catch (error) {
       setStatus({

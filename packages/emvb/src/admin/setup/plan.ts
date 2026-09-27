@@ -42,7 +42,12 @@ export type SetupStep =
       body: { hidden?: boolean; supports?: string[]; hasSeo?: boolean; urlPattern?: string };
     }
   | { kind: "create-field"; collection: string; body: FieldSpec }
-  | { kind: "update-field"; collection: string; slug: string; body: Omit<FieldSpec, "slug" | "type"> };
+  | {
+      kind: "update-field";
+      collection: string;
+      slug: string;
+      body: Omit<FieldSpec, "slug" | "type">;
+    };
 
 const sameSet = (a: readonly string[] = [], b: readonly string[] = []) =>
   a.length === b.length && a.every((x) => b.includes(x));
@@ -69,9 +74,7 @@ function planCollectionSetup(
     return {
       steps: [
         { kind: "create-collection", collection, body: collectionSpec },
-        ...fieldSpecs.map(
-          (body): SetupStep => ({ kind: "create-field", collection, body }),
-        ),
+        ...fieldSpecs.map((body): SetupStep => ({ kind: "create-field", collection, body })),
       ],
       conflicts: [],
     };

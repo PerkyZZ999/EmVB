@@ -61,7 +61,7 @@ export function portableTextToVNodes(value: unknown): VNode[] {
   for (const block of value) {
     if (!block || typeof block !== "object") continue;
     const b = block as Record<string, unknown>;
-    if (b._type !== "block") continue;
+    if (b["_type"] !== "block") continue;
     const text = spanText(b.children).trim();
     if (!text) continue;
     const style = typeof b.style === "string" ? b.style : "normal";
