@@ -50,6 +50,10 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
       sections: ["layout", "spacing", "border", "advanced"],
       defaultOpen: "layout",
     },
+    icon: {
+      sections: ["layout", "spacing", "typography", "advanced"],
+      defaultOpen: "typography",
+    },
   };
 
 export const SECTION_LABELS: Record<StyleSectionId, string> = {
