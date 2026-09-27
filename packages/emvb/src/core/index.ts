@@ -241,3 +241,5 @@ export {
   type ThemePostFields,
   type ThemeDynamicData,
 } from "./theme/dynamic.ts";
+
+export { layoutHasTabs } from "./tabs/presence.ts";

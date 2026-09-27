@@ -11,8 +11,8 @@ const DESIGN: DesignSystem = {
 };
 
 const pageOf = (layout: ReturnType<typeof s1Page>) => {
-  const { html, css, needsFormsRuntime } = renderPage(layout, DESIGN);
-  return { html, css, needsFormsRuntime };
+  const { html, css, needsFormsRuntime, needsTabsRuntime } = renderPage(layout, DESIGN);
+  return { html, css, needsFormsRuntime, needsTabsRuntime };
 };
 
 test("EmVBPage emits exactly the core CSS and HTML (A-08, R-031)", async () => {

@@ -368,9 +368,36 @@ describe("tabs (W-074)", () => {
     expect(html).toContain('type="radio"');
     expect(html).toContain('role="tablist"');
     expect(html).toContain('role="tabpanel"');
+    expect(html).toContain('aria-selected="true"');
     expect(html).toContain("One");
     expect(html).toContain("Two");
     expect(css).toContain(":has(> .emvb-tab-input:nth-of-type(1):checked)");
     expect(html).not.toContain("<script");
+  });
+
+  test("needsTabsRuntime when tabs are present", () => {
+    const tabs = defaultElement("tabs", "tabs0001");
+    tabs.children = [
+      {
+        id: "tabp0001",
+        type: "tab-panel",
+        props: { label: "One" },
+        children: [defaultElement("heading", "head0001")],
+      },
+    ];
+    const layout: Layout = {
+      schemaVersion: 1,
+      root: { ...defaultElement("container", "root0001"), children: [tabs] },
+    };
+    expect(renderPage(layout, design).needsTabsRuntime).toBe(true);
+    expect(
+      renderPage(
+        {
+          schemaVersion: 1,
+          root: { ...defaultElement("container", "root0001"), children: [] },
+        },
+        design,
+      ).needsTabsRuntime,
+    ).toBe(false);
   });
 });

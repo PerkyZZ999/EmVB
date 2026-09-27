@@ -11,6 +11,7 @@ import {
 	themeContextSearch,
 } from "emvb/astro";
 import { EmVBPopupsRuntime } from "emvb/astro/popups";
+import { EmVBTabsRuntime } from "emvb/astro/tabs";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
 interface Props {
@@ -140,6 +141,7 @@ const theme = await resolveThemeParts(Astro, themeCtx);
 			))
 		}
 		{theme.needsPopupsRuntime && <EmVBPopupsRuntime />}
+		{theme.needsTabsRuntime && <EmVBTabsRuntime />}
 
 		<EmDashBodyEnd page={pageCtx} />
 	</body>

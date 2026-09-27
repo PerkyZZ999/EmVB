@@ -55,6 +55,8 @@ export type ResolvedThemeParts = {
   css: string;
   /** Hosts load `EmVBPopupsRuntime` only when this is true (R-031). */
   needsPopupsRuntime: boolean;
+  /** Hosts load `EmVBTabsRuntime` only when Tabs appear in a winning part (R-031 / W-078). */
+  needsTabsRuntime: boolean;
 };
 
 type AstroLike = {
@@ -233,6 +235,7 @@ export async function resolveThemeParts(
     popups: [],
     css: "",
     needsPopupsRuntime: false,
+    needsTabsRuntime: false,
   };
 
   const parts = await loadPublishedThemeParts();
@@ -258,6 +261,8 @@ export async function resolveThemeParts(
   const handler = getPublicPluginApiRouteHandler(astro.locals as never);
   const design = await loadDesign(handler, astro.url);
 
+  let needsTabsRuntime = false;
+
   const renderPart = async (winner: ThemePartCandidate): Promise<RenderedThemePart | null> => {
     const stored = parts.find((p) => p.id === winner.id);
     if (!stored) return null;
@@ -273,6 +278,7 @@ export async function resolveThemeParts(
       undefined,
       dynamic,
     );
+    if (rendered.needsTabsRuntime) needsTabsRuntime = true;
     const html = rendered.html
       ? `<div class="emvb-theme-${stored.partType}" data-emvb-theme-part="${stored.id}">${rendered.html}</div>`
       : "";
@@ -294,6 +300,7 @@ export async function resolveThemeParts(
     const stored = parts.find((p) => p.id === match.id);
     if (!stored) continue;
     const rendered: RenderedPage = renderStored(stored.layout, design, stored.id);
+    if (rendered.needsTabsRuntime) needsTabsRuntime = true;
     const body = rendered.html
       ? `<div class="emvb-theme-popup" data-emvb-theme-part="${stored.id}">${rendered.html}</div>`
       : "";
@@ -316,5 +323,6 @@ export async function resolveThemeParts(
     popups,
     css,
     needsPopupsRuntime: popups.length > 0,
+    needsTabsRuntime,
   };
 }

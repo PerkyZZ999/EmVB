@@ -41,13 +41,14 @@ describe("rendering a stored layout (R-031, R-033)", () => {
       html: expected.html,
       css: expected.css,
       needsFormsRuntime: false,
+      needsTabsRuntime: false,
     });
     expect(fromObject.css).toContain("#123456");
     expect(renderStored(JSON.stringify(s1Page()), DESIGN, "01PAGE")).toEqual(fromObject);
   });
 
   test("an unreadable or missing layout renders an empty page", () => {
-    const empty = { html: "", css: "", needsFormsRuntime: false };
+    const empty = { html: "", css: "", needsFormsRuntime: false, needsTabsRuntime: false };
     const logged = spyOn(console, "error").mockImplementation(() => undefined);
     try {
       expect(renderStored("{nope", DESIGN, "01PAGE")).toEqual(empty);

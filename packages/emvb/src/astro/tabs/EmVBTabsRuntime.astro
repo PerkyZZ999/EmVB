@@ -1,0 +1,10 @@
+---
+// Optional Tabs keyboard / ARIA client (W-078). Hosts render this only when
+// `needsTabsRuntime` so pages without Tabs stay zero EmVB JS (R-031).
+// CSS radio + :has() remains the no-JS fallback.
+---
+
+<script>
+  import { initTabs } from "./runtime.ts";
+  initTabs();
+</script>

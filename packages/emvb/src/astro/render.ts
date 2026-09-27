@@ -11,7 +11,12 @@ import {
 } from "../core/index.ts";
 import { PLUGIN_ID } from "../constants.ts";
 
-export type RenderedPage = { html: string; css: string; needsFormsRuntime: boolean };
+export type RenderedPage = {
+  html: string;
+  css: string;
+  needsFormsRuntime: boolean;
+  needsTabsRuntime: boolean;
+};
 
 /** The design document through the in-process public route (no HTTP round trip, D-013). */
 export async function loadDesign(
@@ -58,8 +63,11 @@ export function renderStored(
       // oxlint-disable-next-line no-console
       console.error("emvb: stored layout is unreadable", { pageId });
     }
-    return { html: "", css: "", needsFormsRuntime: false };
+    return { html: "", css: "", needsFormsRuntime: false, needsTabsRuntime: false };
   }
-  const { html, css, needsFormsRuntime } = renderPage(layout, design, { formDefinitions, dynamic });
-  return { html, css, needsFormsRuntime };
+  const { html, css, needsFormsRuntime, needsTabsRuntime } = renderPage(layout, design, {
+    formDefinitions,
+    dynamic,
+  });
+  return { html, css, needsFormsRuntime, needsTabsRuntime };
 }

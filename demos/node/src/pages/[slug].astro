@@ -3,6 +3,7 @@ import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash"
 import { PortableText } from "emdash/ui";
 import { EmVBPage, resolveEmVBPage } from "emvb/astro";
 import { EmVBFormsRuntime } from "emvb/astro/forms";
+import { EmVBTabsRuntime } from "emvb/astro/tabs";
 import Base from "../layouts/Base.astro";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
@@ -37,6 +38,7 @@ const seo = getSeoMeta(entry, {
 	emvb?.canvasMode === "blank" ? (
 		<EmVBPage page={emvb} standalone title={seo.title} description={seo.description}>
 			{emvb.needsFormsRuntime && <EmVBFormsRuntime />}
+			{emvb.needsTabsRuntime && <EmVBTabsRuntime />}
 		</EmVBPage>
 	) : (
 		<Base
@@ -47,7 +49,10 @@ const seo = getSeoMeta(entry, {
 			content={{ collection: emvb ? "emvb_pages" : "pages", id: entry.data.id, slug }}
 		>
 			{emvb ? (
-				<EmVBPage page={emvb}>{emvb.needsFormsRuntime && <EmVBFormsRuntime />}</EmVBPage>
+				<EmVBPage page={emvb}>
+					{emvb.needsFormsRuntime && <EmVBFormsRuntime />}
+					{emvb.needsTabsRuntime && <EmVBTabsRuntime />}
+				</EmVBPage>
 			) : (
 				page && (
 					<article>

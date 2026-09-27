@@ -6,6 +6,7 @@ import {
   type PublicFormDefinition,
 } from "../forms/definition.ts";
 import { layoutHasForm } from "../forms/binding.ts";
+import { layoutHasTabs } from "../tabs/presence.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import {
   isFormNode,
@@ -40,6 +41,7 @@ export type RenderResult = {
   html: string;
   css: string;
   needsFormsRuntime: boolean;
+  needsTabsRuntime: boolean;
   warnings: RenderWarning[];
 };
 
@@ -374,12 +376,18 @@ export function renderPage(
         };
         if (i === 0) inputAttrs.checked = "checked";
         inputs.push({ tag: "input", attrs: inputAttrs, children: [] });
+        const panelDomId = `${group}-panel-${i}`;
+        const tabDomId = `${group}-tab-${i}`;
         labels.push({
           tag: "label",
           attrs: {
             class: "emvb-tab-label",
             for: inputId,
+            id: tabDomId,
             role: "tab",
+            "aria-selected": i === 0 ? "true" : "false",
+            "aria-controls": panelDomId,
+            tabindex: i === 0 ? "0" : "-1",
           },
           children: [panel.props.label],
         });
@@ -388,7 +396,9 @@ export function renderPage(
           .filter((child): child is VNode => child !== undefined);
         const panelAttrs: Record<string, string> = {
           class: "emvb-tab-panel",
+          id: panelDomId,
           role: "tabpanel",
+          "aria-labelledby": tabDomId,
         };
         if (mode === "editor") panelAttrs["data-emvb-id"] = panel.id;
         panelNodes.push({ tag: "div", attrs: panelAttrs, children: body });
@@ -398,7 +408,7 @@ export function renderPage(
         attrs,
         children: [
           ...inputs,
-          { tag: "div", attrs: { class: "emvb-tab-list", role: "tablist" }, children: labels },
+          { tag: "div", attrs: { class: "emvb-tab-list", role: "tablist", "aria-orientation": "horizontal" }, children: labels },
           { tag: "div", attrs: { class: "emvb-tab-panels" }, children: panelNodes },
         ],
       };
@@ -455,6 +465,7 @@ export function renderPage(
     html: serialize(vnode),
     css: generateCss({ design, usedTypes, baseCss, localRules }),
     needsFormsRuntime: layoutHasForm(layout),
+    needsTabsRuntime: layoutHasTabs(layout),
     warnings,
   };
 }
