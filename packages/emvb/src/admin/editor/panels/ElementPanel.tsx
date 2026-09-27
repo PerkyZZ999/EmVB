@@ -23,6 +23,7 @@ import {
 import { FIELD } from "../../ui.ts";
 import { FieldControl } from "./settings/FieldControl.tsx";
 import { StyleRow } from "./settings/StyleRow.tsx";
+import { ClassPicker } from "./settings/ClassPicker.tsx";
 import {
   keysFor,
   SECTION_LABELS,
@@ -219,6 +220,11 @@ export function ElementPanel({
       )}
       {tab === "style" && (
         <div className="emvb-panel-body" data-emvb-tab="style">
+          <ClassPicker
+            applied={node.classes}
+            design={design}
+            onChange={(classes) => onChange({ ...node, classes })}
+          />
           {node.type === "spacer" && (
             <FieldControl
               field={{

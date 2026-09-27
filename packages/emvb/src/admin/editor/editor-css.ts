@@ -134,4 +134,11 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-icon-tile:hover { background: var(--color-kumo-tint); }
 .emvb-icon-tile[data-selected="true"] { border-color: var(--color-kumo-brand); background: var(--color-kumo-tint); }
 .emvb-icon-tile span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+
+.emvb-class-picker { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.emvb-class-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.emvb-class-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; background: var(--color-kumo-base); }
+.emvb-class-name { flex: 1 1 auto; min-width: 0; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-class-token { font-size: 11px; color: var(--text-color-kumo-subtle); }
+.emvb-class-actions { display: flex; gap: 2px; flex: 0 0 auto; }
 `;

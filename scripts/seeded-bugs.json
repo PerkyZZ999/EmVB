@@ -1958,6 +1958,46 @@
         "later class styles"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-031/html-missing-emvb-k-prefix",
+      "requirement": "R-021",
+      "description": "renderer emits raw class ids without the emvb-k- prefix",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    for (const classId of node.classes ?? []) {\n      const name = styleClassName(classId);\n      if (name) classes.push(name);\n    }\n",
+          "replace": "    for (const classId of node.classes ?? []) {\n      classes.push(classId);\n    }\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/cascade.test.ts",
+        "-t",
+        "editing a class style"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-031/reorder-not-persisted",
+      "requirement": "R-021",
+      "description": "moveClassId is a no-op so reorder is not persisted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "export function moveClassId(ids: readonly string[], index: number, delta: -1 | 1): string[] {\n  const next = [...ids];\n  const j = index + delta;\n  if (index < 0 || index >= next.length || j < 0 || j >= next.length) return [...ids];\n",
+          "replace": "export function moveClassId(ids: readonly string[], index: number, delta: -1 | 1): string[] {\n  return [...ids];\n  const next = [...ids];\n  const j = index + delta;\n  if (index < 0 || index >= next.length || j < 0 || j >= next.length) return [...ids];\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/classes.test.ts",
+        "-t",
+        "add, remove, and reorder"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
