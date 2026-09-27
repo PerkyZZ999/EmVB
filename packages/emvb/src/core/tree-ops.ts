@@ -1,13 +1,14 @@
 import {
   isContainerNode,
+  isParentNode,
   type ContainerNode,
   type Layout,
   type LayoutNode,
 } from "./schema/layout.ts";
 
-/** Children of a container, or of an unknown node that carried children (W-022). */
+/** Children of a parent node (container/form), or of an unknown node that carried children (W-022). */
 export const nodeChildren = (node: LayoutNode): LayoutNode[] => {
-  if (isContainerNode(node)) return node.children;
+  if (isParentNode(node)) return node.children;
   if ("children" in node && Array.isArray(node.children)) return node.children as LayoutNode[];
   return [];
 };
@@ -30,8 +31,8 @@ export function findNode(layout: Layout, id: string): LayoutNode | undefined {
 function mapTree(node: LayoutNode, fn: (node: LayoutNode) => LayoutNode): LayoutNode {
   const mapped = fn(node);
   const kids = nodeChildren(mapped);
-  if (kids.length === 0 && !isContainerNode(mapped)) return mapped;
-  if (isContainerNode(mapped)) {
+  if (kids.length === 0 && !isParentNode(mapped)) return mapped;
+  if (isParentNode(mapped)) {
     return { ...mapped, children: mapped.children.map((child) => mapTree(child, fn)) };
   }
   if ("children" in mapped && Array.isArray(mapped.children)) {
@@ -58,7 +59,7 @@ export function removeNode(layout: Layout, id: string): { layout: Layout; remove
   if (layout.root.id === id) return { layout };
   let removed: Removed | undefined;
   const root = mapTree(layout.root, (node) => {
-    if (!isContainerNode(node)) return node;
+    if (!isParentNode(node)) return node;
     const index = node.children.findIndex((child) => child.id === id);
     if (index === -1) return node;
     removed = { node: node.children[index] as LayoutNode, parentId: node.id, index };
@@ -75,7 +76,7 @@ export function insertNode(
   node: LayoutNode,
 ): Layout {
   return updateNode(layout, parentId, (parent) => {
-    if (!isContainerNode(parent)) return parent;
+    if (!isParentNode(parent)) return parent;
     const at = Math.max(0, Math.min(index, parent.children.length));
     return {
       ...parent,

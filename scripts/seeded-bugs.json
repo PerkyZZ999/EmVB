@@ -2038,6 +2038,46 @@
         "class edit styles"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-034/nested-form-allowed",
+      "requirement": "R-040",
+      "description": "nested forms are allowed by canDrop",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  if (isFormNode(node)) {\n    if (isFormNode(target.node) || underForm(layout, parentId)) return refuse(REASONS.nestedForm);\n    if (!isContainer(target.node)) return refuse(REASONS.formIntoField);\n  }\n",
+          "replace": "  if (isFormNode(node)) {\n    if (!isContainer(target.node)) return refuse(REASONS.formIntoField);\n  }\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/arrange-forms.test.ts",
+        "-t",
+        "form may go into a layout container"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-034/field-outside-form-allowed",
+      "requirement": "R-040",
+      "description": "text-input can be dropped on the page container",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  if (isFormFieldType(node.type)) {\n    const okParent = isFormNode(target.node) || underForm(layout, parentId);\n    if (!okParent) return refuse(REASONS.fieldOutsideForm);\n  }\n",
+          "replace": "  // seeded: allow fields outside forms\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/arrange-forms.test.ts",
+        "-t",
+        "form fields must be placed"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

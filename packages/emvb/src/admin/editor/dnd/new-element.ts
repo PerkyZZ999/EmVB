@@ -1,30 +1,13 @@
 import {
   defaultElement,
+  ELEMENTS,
   newNodeId,
   type ElementType,
   type LayoutNode,
 } from "../../../core/index.ts";
 
-/** Default node for an Add-tile drag. W-016 exposes layout and text types; forms arrive later; image is W-024. */
+/** Default node for an Add-tile drag. */
 export function newElement(type: string, random?: () => number): LayoutNode | null {
-  if (
-    !(
-      type in
-      {
-        heading: 1,
-        container: 1,
-        spacer: 1,
-        divider: 1,
-        text: 1,
-        label: 1,
-        link: 1,
-        button: 1,
-        list: 1,
-        image: 1,
-      }
-    )
-  ) {
-    return null;
-  }
+  if (!(type in ELEMENTS)) return null;
   return defaultElement(type as ElementType, newNodeId(random));
 }

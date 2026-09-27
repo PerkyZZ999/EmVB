@@ -1,7 +1,7 @@
 import { generateCss } from "../css/generate.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import type { DesignSystem } from "../schema/design.ts";
-import { isContainerNode, type Layout, type LayoutNode } from "../schema/layout.ts";
+import { isParentNode, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { cssLength, styleClassName, styleDeclarations, type Declaration } from "../sanitize/css.ts";
 import { serialize, type VNode } from "./vnode.ts";
 
@@ -74,7 +74,7 @@ export function renderPage(
     if (mode === "editor" && id) attrs["data-emvb-id"] = id;
     if (node.htmlId && HTML_ID.test(node.htmlId)) attrs.id = node.htmlId;
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
-    if (isContainerNode(node)) {
+    if (isParentNode(node)) {
       const children = node.children
         .map((child) => visit(child, false))
         .filter((child): child is VNode => child !== undefined);

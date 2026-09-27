@@ -2,7 +2,7 @@ import { CaretDownIcon, CaretRightIcon, SquaresFourIcon, TextHIcon } from "@phos
 import * as React from "react";
 import {
   firstChild,
-  isContainerNode,
+  isParentNode,
   isHeadingNode,
   nextInOrder,
   parentOf,
@@ -24,7 +24,7 @@ const rows = (
   collapsed: Set<string>,
 ): Array<{ node: LayoutNode; depth: number }> => {
   const self = [{ node, depth }];
-  if (!isContainerNode(node) || collapsed.has(node.id) || node.children.length === 0) return self;
+  if (!isParentNode(node) || collapsed.has(node.id) || node.children.length === 0) return self;
   return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));
 };
 
@@ -109,7 +109,7 @@ export function LayersPanel({
             const node = items.find((row) => row.node.id === selectedId)?.node;
             if (
               node &&
-              isContainerNode(node) &&
+              isParentNode(node) &&
               !collapsed.has(selectedId) &&
               node.children.length > 0
             ) {
@@ -133,7 +133,7 @@ export function LayersPanel({
         {items.map(({ node, depth }) => {
           const Icon = ICONS[node.type] ?? SquaresFourIcon;
           const name = ELEMENT_NAMES[node.type] ?? node.type;
-          const hasChildren = isContainerNode(node) && node.children.length > 0;
+          const hasChildren = isParentNode(node) && node.children.length > 0;
           const isCollapsed = collapsed.has(node.id);
           return (
             <li

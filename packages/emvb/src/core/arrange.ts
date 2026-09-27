@@ -1,5 +1,13 @@
 import { MAX_DEPTH, MAX_NODES } from "./limits.ts";
-import type { ContainerNode, Layout, LayoutNode } from "./schema/layout.ts";
+import {
+  isFormFieldType,
+  isFormNode,
+  isParentNode,
+  type ContainerNode,
+  type FormNode,
+  type Layout,
+  type LayoutNode,
+} from "./schema/layout.ts";
 import { findNode, insertNode, newNodeId, nodeChildren, removeNode } from "./tree-ops.ts";
 
 /** A refused operation, with the reason shown or announced to the user (R-003). */
@@ -12,11 +20,16 @@ export type DragSource = { kind: "existing"; id: string } | { kind: "new"; node:
 
 export type Place = { parentId: string; index: number };
 
-type Located = { node: LayoutNode; parent?: ContainerNode; index: number; depth: number };
+type Located = {
+  node: LayoutNode;
+  parent?: ContainerNode | FormNode;
+  index: number;
+  depth: number;
+};
 
 export const REASONS = {
   intoItself: "A container can't go inside itself.",
-  notContainer: "Only containers can hold other elements.",
+  notContainer: "Only containers and forms can hold other elements.",
   rootFixed: "The page's outer container can't be moved.",
   rootCopy: "The page's outer container can't be duplicated.",
   missing: "That element is no longer on the page.",
@@ -26,6 +39,9 @@ export const REASONS = {
   last: "It's already last in its container.",
   top: "It's already at the top level.",
   noContainerAbove: "There's no container just above it to move into.",
+  nestedForm: "A form can't go inside another form.",
+  fieldOutsideForm: "Form fields must be placed inside a form.",
+  formIntoField: "A form can only go inside a layout container.",
 } as const;
 
 const refuse = (reason: string): Refusal => ({ ok: false, reason });
@@ -35,16 +51,16 @@ const isContainer = (node: LayoutNode): node is ContainerNode => node.type === "
 function locate(layout: Layout, id: string): Located | undefined {
   const walk = (
     node: LayoutNode,
-    parent: ContainerNode | undefined,
+    parent: ContainerNode | FormNode | undefined,
     index: number,
     depth: number,
   ): Located | undefined => {
     if (node.id === id) return { node, parent, index, depth };
-    // Only real containers are drop/arrange parents. Still descend into unknown
+    // Containers and forms are drop/arrange parents. Still descend into unknown
     // children so nested ids can be found (they are not rearrangeable).
-    if (isContainer(node)) {
+    if (isParentNode(node)) {
       for (const [i, child] of node.children.entries()) {
-        const found = walk(child, node, i, depth + 1);
+        const found = walk(child, node as ContainerNode, i, depth + 1);
         if (found) return found;
       }
       return undefined;
@@ -70,6 +86,18 @@ const contains = (node: LayoutNode, id: string): boolean =>
   node.id === id || nodeChildren(node).some((child) => contains(child, id));
 
 /** Whether `source` may go into container `parentId` (R-003 invalid drops). */
+function underForm(layout: Layout, parentId: string): boolean {
+  let current: string | undefined = parentId;
+  while (current) {
+    const found = locate(layout, current);
+    if (!found) return false;
+    if (isFormNode(found.node)) return true;
+    current = found.parent?.id;
+  }
+  return false;
+}
+
+/** Whether `source` may go into parent `parentId` (R-003 / W-034 form rules). */
 export function canDrop(layout: Layout, source: DragSource, parentId: string): Allowed {
   const target = locate(layout, parentId);
   if (!target) return refuse(REASONS.missing);
@@ -83,7 +111,17 @@ export function canDrop(layout: Layout, source: DragSource, parentId: string): A
   } else {
     node = source.node;
   }
-  if (!isContainer(target.node)) return refuse(REASONS.notContainer);
+  if (!isParentNode(target.node)) return refuse(REASONS.notContainer);
+
+  if (isFormNode(node)) {
+    if (isFormNode(target.node) || underForm(layout, parentId)) return refuse(REASONS.nestedForm);
+    if (!isContainer(target.node)) return refuse(REASONS.formIntoField);
+  }
+  if (isFormFieldType(node.type)) {
+    const okParent = isFormNode(target.node) || underForm(layout, parentId);
+    if (!okParent) return refuse(REASONS.fieldOutsideForm);
+  }
+
   if (target.depth + height(node) > MAX_DEPTH) return refuse(REASONS.tooDeep);
   if (source.kind === "new" && size(layout.root) + size(node) > MAX_NODES)
     return refuse(REASONS.tooMany);
@@ -153,7 +191,7 @@ export function duplicateNode(
 /** Where click-to-add puts a new element: into a selected container, after a selected element, or at the end. */
 export function insertionPoint(layout: Layout, selectedId: string | null): Place {
   const found = selectedId ? locate(layout, selectedId) : undefined;
-  if (found && isContainer(found.node))
+  if (found && isParentNode(found.node))
     return { parentId: found.node.id, index: found.node.children.length };
   if (found?.parent) return { parentId: found.parent.id, index: found.index + 1 };
   return { parentId: layout.root.id, index: layout.root.children.length };

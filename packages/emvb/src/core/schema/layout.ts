@@ -191,6 +191,102 @@ export const ContainerNode = z.strictObject({
   },
 });
 
+/** Field name on a forms-plugin form (D-015). */
+const FieldName = z
+  .string()
+  .min(1)
+  .max(80)
+  .regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, "Field names start with a letter");
+
+export const FORM_FIELD_TYPES = [
+  "text-input",
+  "textarea",
+  "select",
+  "checkbox",
+  "radio",
+  "submit",
+] as const;
+
+export const FormNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("form"),
+  props: z.strictObject({
+    /** Empty until the editor binds a forms-plugin form (W-036). */
+    formId: z.string().max(64),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+  get children(): z.ZodType<LayoutNode[]> {
+    return z.array(LayoutNode);
+  },
+});
+
+const InputFieldProps = z.strictObject({
+  field: FieldName,
+  label: z.string().max(200).optional(),
+  placeholder: z.string().max(200).optional(),
+});
+
+export const TextInputNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("text-input"),
+  props: InputFieldProps,
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+export const TextareaNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("textarea"),
+  props: InputFieldProps,
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+export const SelectNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("select"),
+  props: InputFieldProps,
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+export const CheckboxNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("checkbox"),
+  props: z.strictObject({
+    field: FieldName,
+    label: z.string().max(200).optional(),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+export const RadioNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("radio"),
+  props: InputFieldProps,
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+export const SubmitNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("submit"),
+  props: z.strictObject({
+    label: z.string().min(1).max(80).optional(),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
 /** Known element type strings (everything else is an UnknownNode). */
 export const KNOWN_ELEMENT_TYPES = [
   "container",
@@ -205,6 +301,13 @@ export const KNOWN_ELEMENT_TYPES = [
   "image",
   "icon",
   "video",
+  "form",
+  "text-input",
+  "textarea",
+  "select",
+  "checkbox",
+  "radio",
+  "submit",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -242,6 +345,13 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   ImageNode,
   IconNode,
   VideoNode,
+  FormNode,
+  TextInputNode,
+  TextareaNode,
+  SelectNode,
+  CheckboxNode,
+  RadioNode,
+  SubmitNode,
 ]);
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
@@ -255,6 +365,12 @@ export type ListNode = z.infer<typeof ListNode>;
 export type ImageNode = z.infer<typeof ImageNode>;
 export type IconNode = z.infer<typeof IconNode>;
 export type VideoNode = z.infer<typeof VideoNode>;
+export type TextInputNode = z.infer<typeof TextInputNode>;
+export type TextareaNode = z.infer<typeof TextareaNode>;
+export type SelectNode = z.infer<typeof SelectNode>;
+export type CheckboxNode = z.infer<typeof CheckboxNode>;
+export type RadioNode = z.infer<typeof RadioNode>;
+export type SubmitNode = z.infer<typeof SubmitNode>;
 
 type StyleOf = z.infer<typeof StyleProps>;
 type ClassesOf = z.infer<typeof ClassIds>;
@@ -282,8 +398,19 @@ export type ContainerNode = {
   children: LayoutNode[];
 };
 
+export type FormNode = {
+  id: IdOf;
+  type: "form";
+  props: { formId: string };
+  style?: StyleOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  children: LayoutNode[];
+};
+
 export type LayoutNode =
   | ContainerNode
+  | FormNode
   | HeadingNode
   | SpacerNode
   | DividerNode
@@ -295,6 +422,12 @@ export type LayoutNode =
   | ImageNode
   | IconNode
   | VideoNode
+  | TextInputNode
+  | TextareaNode
+  | SelectNode
+  | CheckboxNode
+  | RadioNode
+  | SubmitNode
   | UnknownNode;
 
 /**
@@ -343,6 +476,15 @@ export type Layout = {
 
 export const isContainerNode = (node: LayoutNode): node is ContainerNode =>
   node.type === "container";
+
+export const isFormNode = (node: LayoutNode): node is FormNode => node.type === "form";
+
+/** Nodes that may hold children (containers and forms). */
+export const isParentNode = (node: LayoutNode): node is ContainerNode | FormNode =>
+  node.type === "container" || node.type === "form";
+
+export const isFormFieldType = (type: string): boolean =>
+  (FORM_FIELD_TYPES as readonly string[]).includes(type);
 
 export const isHeadingNode = (node: LayoutNode): node is HeadingNode => node.type === "heading";
 

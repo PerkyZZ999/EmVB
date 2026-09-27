@@ -36,6 +36,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
 const GROUPS = [
   { id: "layout", label: "Layout" },
   { id: "content", label: "Content" },
+  { id: "form", label: "Form" },
 ] as const;
 
 export function AddPanel({
@@ -48,9 +49,7 @@ export function AddPanel({
 }) {
   const [query, setQuery] = React.useState(defaultQuery);
   const q = query.trim().toLowerCase();
-  const matched = ELEMENT_DESCRIPTORS.filter(
-    (d) => d.group !== ("form" as string) && (!q || d.name.toLowerCase().includes(q)),
-  );
+  const matched = ELEMENT_DESCRIPTORS.filter((d) => !q || d.name.toLowerCase().includes(q));
   return (
     <div className="emvb-panel-body" data-emvb-panel="add">
       <Input

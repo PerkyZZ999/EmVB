@@ -58,6 +58,34 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
       sections: ["layout", "spacing", "border", "advanced"],
       defaultOpen: "layout",
     },
+    form: {
+      sections: ["layout", "spacing", "background", "border", "advanced"],
+      defaultOpen: "layout",
+    },
+    "text-input": {
+      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
+      defaultOpen: "typography",
+    },
+    textarea: {
+      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
+      defaultOpen: "typography",
+    },
+    select: {
+      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
+      defaultOpen: "typography",
+    },
+    checkbox: {
+      sections: ["layout", "spacing", "typography", "advanced"],
+      defaultOpen: "typography",
+    },
+    radio: {
+      sections: ["layout", "spacing", "typography", "advanced"],
+      defaultOpen: "typography",
+    },
+    submit: {
+      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
+      defaultOpen: "background",
+    },
   };
 
 export const SECTION_LABELS: Record<StyleSectionId, string> = {
