@@ -1,9 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import {
   conditionsSpecificity,
+  contentPartTypeForContext,
   defaultConditions,
+  defaultConditionsFor,
   matchesConditions,
   pickThemePartWinner,
+  themePartLocationApplies,
   validateConditions,
   type ConditionsDoc,
   type ThemePartCandidate,
@@ -56,6 +59,34 @@ const notFound: ThemeRequestContext = {
   kind: "other",
 };
 
+const search: ThemeRequestContext = {
+  path: "/search",
+  isFront: false,
+  is404: false,
+  isSearch: true,
+  kind: "archive",
+};
+
+const pageSingular: ThemeRequestContext = {
+  path: "/about",
+  isFront: false,
+  is404: false,
+  isSearch: false,
+  kind: "singular",
+  collection: "pages",
+  entryId: "01PAGE",
+};
+
+const emvbPage: ThemeRequestContext = {
+  path: "/landing",
+  isFront: false,
+  is404: false,
+  isSearch: false,
+  kind: "singular",
+  collection: "emvb_pages",
+  entryId: "01EMVB",
+};
+
 const include = (
   group: ConditionsDoc["rules"][number]["group"],
   name: string,
@@ -66,12 +97,14 @@ const include = (
   rules: [{ id, op: "include", group, name, args }],
 });
 
-const withExclude = (doc: ConditionsDoc, group: ConditionsDoc["rules"][number]["group"], name: string, args: Record<string, string> = {}): ConditionsDoc => ({
+const withExclude = (
+  doc: ConditionsDoc,
+  group: ConditionsDoc["rules"][number]["group"],
+  name: string,
+  args: Record<string, string> = {},
+): ConditionsDoc => ({
   schemaVersion: 1,
-  rules: [
-    ...doc.rules,
-    { id: "ex", op: "exclude", group, name, args },
-  ],
+  rules: [...doc.rules, { id: "ex", op: "exclude", group, name, args }],
 });
 
 describe("validateConditions", () => {
@@ -116,9 +149,7 @@ describe("matchesConditions", () => {
   test("singular entry matches one id", () => {
     const doc = include("singular", "entry", { collection: "posts", id: "01POST" });
     expect(matchesConditions(doc, post)).toBe(true);
-    expect(
-      matchesConditions(doc, { ...post, entryId: "01OTHER" }),
-    ).toBe(false);
+    expect(matchesConditions(doc, { ...post, entryId: "01OTHER" })).toBe(false);
   });
 
   test("404 matches not_found", () => {
@@ -163,12 +194,17 @@ describe("matchesConditions", () => {
 
 describe("specificity and winners", () => {
   test("entry beats collection beats entire site", () => {
-    expect(conditionsSpecificity(include("singular", "entry", { collection: "posts", id: "01POST" }), post)).toBeGreaterThan(
+    expect(
+      conditionsSpecificity(
+        include("singular", "entry", { collection: "posts", id: "01POST" }),
+        post,
+      ),
+    ).toBeGreaterThan(
       conditionsSpecificity(include("singular", "collection", { collection: "posts" }), post),
     );
-    expect(conditionsSpecificity(include("singular", "collection", { collection: "posts" }), post)).toBeGreaterThan(
-      conditionsSpecificity(defaultConditions(), post),
-    );
+    expect(
+      conditionsSpecificity(include("singular", "collection", { collection: "posts" }), post),
+    ).toBeGreaterThan(conditionsSpecificity(defaultConditions(), post));
   });
 
   test("most specific matching header wins; ties use updatedAt desc", () => {
@@ -211,5 +247,100 @@ describe("specificity and winners", () => {
       updatedAt: "2026-09-27T00:00:00.000Z",
     };
     expect(pickThemePartWinner([older, newer], "header", post)?.id).toBe("new");
+  });
+});
+
+describe("S7c content part types", () => {
+  test("archive/search matches search context", () => {
+    const doc = include("archive", "search");
+    expect(matchesConditions(doc, search)).toBe(true);
+    expect(matchesConditions(doc, postsArchive)).toBe(false);
+    expect(matchesConditions(doc, notFound)).toBe(false);
+  });
+
+  test("defaultConditionsFor sets location-appropriate includes", () => {
+    expect(defaultConditionsFor("error_404").rules[0]).toMatchObject({
+      op: "include",
+      group: "singular",
+      name: "not_found",
+    });
+    expect(defaultConditionsFor("search_results").rules[0]).toMatchObject({
+      group: "archive",
+      name: "search",
+    });
+    expect(defaultConditionsFor("single_page").rules[0]).toMatchObject({
+      group: "singular",
+      name: "collection",
+      args: { collection: "pages" },
+    });
+    expect(defaultConditionsFor("header")).toEqual(defaultConditions());
+  });
+
+  test("themePartLocationApplies gates content types to their routes", () => {
+    expect(themePartLocationApplies("error_404", notFound)).toBe(true);
+    expect(themePartLocationApplies("error_404", search)).toBe(false);
+    expect(themePartLocationApplies("search_results", search)).toBe(true);
+    expect(themePartLocationApplies("search_results", pageSingular)).toBe(false);
+    expect(themePartLocationApplies("single_page", pageSingular)).toBe(true);
+    expect(themePartLocationApplies("single_page", front)).toBe(false);
+    expect(themePartLocationApplies("single_page", emvbPage)).toBe(false);
+    expect(themePartLocationApplies("single_page", post)).toBe(false);
+    expect(themePartLocationApplies("header", notFound)).toBe(true);
+  });
+
+  test("contentPartTypeForContext picks 404 then search then single page", () => {
+    expect(contentPartTypeForContext(notFound)).toBe("error_404");
+    expect(contentPartTypeForContext(search)).toBe("search_results");
+    expect(contentPartTypeForContext(pageSingular)).toBe("single_page");
+    expect(contentPartTypeForContext(emvbPage)).toBeNull();
+    expect(contentPartTypeForContext(post)).toBeNull();
+    expect(contentPartTypeForContext(front)).toBeNull();
+  });
+
+  test("error_404 winner only on 404 even with entire-site conditions", () => {
+    const candidates: ThemePartCandidate[] = [
+      {
+        id: "e404",
+        partType: "error_404",
+        conditions: defaultConditions(),
+        updatedAt: "2026-09-27T12:00:00.000Z",
+      },
+      {
+        id: "hdr",
+        partType: "header",
+        conditions: defaultConditions(),
+        updatedAt: "2026-09-27T12:00:00.000Z",
+      },
+    ];
+    expect(pickThemePartWinner(candidates, "error_404", notFound)?.id).toBe("e404");
+    expect(pickThemePartWinner(candidates, "error_404", pageSingular)).toBeNull();
+    expect(pickThemePartWinner(candidates, "header", notFound)?.id).toBe("hdr");
+  });
+
+  test("single_page winner on EmDash pages singular only", () => {
+    const candidates: ThemePartCandidate[] = [
+      {
+        id: "sp",
+        partType: "single_page",
+        conditions: defaultConditionsFor("single_page"),
+        updatedAt: "2026-09-27T12:00:00.000Z",
+      },
+    ];
+    expect(pickThemePartWinner(candidates, "single_page", pageSingular)?.id).toBe("sp");
+    expect(pickThemePartWinner(candidates, "single_page", emvbPage)).toBeNull();
+    expect(pickThemePartWinner(candidates, "single_page", post)).toBeNull();
+  });
+
+  test("search_results winner on search route", () => {
+    const candidates: ThemePartCandidate[] = [
+      {
+        id: "sr",
+        partType: "search_results",
+        conditions: defaultConditionsFor("search_results"),
+        updatedAt: "2026-09-27T12:00:00.000Z",
+      },
+    ];
+    expect(pickThemePartWinner(candidates, "search_results", search)?.id).toBe("sr");
+    expect(pickThemePartWinner(candidates, "search_results", postsArchive)).toBeNull();
   });
 });

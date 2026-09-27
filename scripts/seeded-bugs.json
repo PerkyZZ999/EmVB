@@ -2901,6 +2901,46 @@
         "entry beats collection"
       ],
       "expect": "entry beats|Expected|fail|toBeGreaterThan"
+    },
+    {
+      "id": "W-054/location-gate-ignored",
+      "requirement": "R-061",
+      "description": "error_404 parts win on non-404 routes when location gate is removed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/conditions.ts",
+          "search": "case \"error_404\":\n      return ctx.is404;",
+          "replace": "case \"error_404\":\n      return true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/conditions.test.ts",
+        "-t",
+        "error_404 winner only on 404"
+      ],
+      "expect": "error_404 winner|Expected|fail|toBeNull"
+    },
+    {
+      "id": "W-054/single-page-on-posts",
+      "requirement": "R-061",
+      "description": "single_page location applies to posts singular",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/conditions.ts",
+          "search": "return !ctx.isFront && ctx.kind === \"singular\" && ctx.collection === \"pages\";",
+          "replace": "return ctx.kind === \"singular\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/conditions.test.ts",
+        "-t",
+        "themePartLocationApplies gates"
+      ],
+      "expect": "themePartLocationApplies|Expected|fail|toBe"
     }
   ]
 }
