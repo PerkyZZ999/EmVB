@@ -1,5 +1,10 @@
 import { ContentSaveRejectedError, type ContentHookEvent, type PluginContext } from "emdash";
-import { summarizeIssues, validateConditions, validateLayout } from "../core/index.ts";
+import {
+  summarizeIssues,
+  validateConditions,
+  validateLayout,
+  validateTriggers,
+} from "../core/index.ts";
 import { EDITOR_ROLE, PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../constants.ts";
 
 function parseJsonField(raw: unknown): unknown {
@@ -62,6 +67,23 @@ export async function beforeSave(
       );
     }
     next = { ...(next ?? event.content), conditions: result.conditions };
+  }
+
+  if (event.collection === THEME_PARTS_COLLECTION && event.content["triggers"] !== undefined) {
+    const result = validateTriggers(parseJsonField(event.content["triggers"]));
+    if (!result.ok) {
+      ctx.log.warn("emvb: theme part save rejected", {
+        pageId,
+        code: result.issues[0]?.code ?? "invalid_triggers",
+      });
+      throw new ContentSaveRejectedError(
+        `The theme part triggers are invalid. ${result.issues
+          .slice(0, 3)
+          .map((i) => i.message)
+          .join("; ")}`,
+      );
+    }
+    next = { ...(next ?? event.content), triggers: result.triggers };
   }
 
   return next;

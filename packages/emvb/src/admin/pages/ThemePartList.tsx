@@ -29,6 +29,7 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "single_post", label: "Single Post" },
   { value: "archive", label: "Archive" },
   { value: "loop_item", label: "Loop Item" },
+  { value: "popup", label: "Popups" },
 ];
 
 /** Theme Builder list: title, type, conditions, status, last edited; New theme part. */
@@ -112,7 +113,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
           <Empty
             icon={<SquaresFourIcon size={32} aria-hidden="true" />}
             title="No site parts yet"
-            description="Create a Header, Footer, Error 404, Search Results, or Single Page template."
+            description="Create a Header, Footer, content template, or Popup."
             contents={newPart}
           />
         </div>

@@ -1,4 +1,10 @@
-import type { ConditionsDoc, DesignSystem, Layout, ThemePartType } from "../core/index.ts";
+import type {
+  ConditionsDoc,
+  DesignSystem,
+  Layout,
+  ThemePartType,
+  TriggersDoc,
+} from "../core/index.ts";
 import { PAGES_COLLECTION, PLUGIN_ID } from "../constants.ts";
 import { requestJson, type Fetcher } from "./api.ts";
 
@@ -61,6 +67,8 @@ export type PageDraft = {
   /** Theme parts only (emvb_theme_parts). */
   partType?: ThemePartType;
   conditions?: ConditionsDoc;
+  /** Popups only — open triggers + thin advanced rules. */
+  triggers?: TriggersDoc;
 };
 
 /** Saves the draft with `_rev`, so a concurrent change fails with 409 instead of being overwritten. */

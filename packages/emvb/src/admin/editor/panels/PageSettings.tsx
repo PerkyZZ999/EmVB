@@ -6,6 +6,7 @@ import type { PageDraft } from "../../content-api.ts";
 import { FIELD } from "../../ui.ts";
 import type { PagePatch } from "../store.ts";
 import { ConditionsEditor } from "./ConditionsEditor.tsx";
+import { TriggersEditor } from "./TriggersEditor.tsx";
 
 const LAYOUTS = [
   { value: "site-layout", label: "Site layout" },
@@ -45,6 +46,12 @@ export function PageSettings({
           conditions={page.conditions}
           onChange={(conditions) => onChange({ conditions })}
         />
+        {page.partType === "popup" && (
+          <TriggersEditor
+            triggers={page.triggers}
+            onChange={(triggers) => onChange({ triggers })}
+          />
+        )}
       </div>
     );
   }

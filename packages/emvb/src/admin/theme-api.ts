@@ -1,11 +1,13 @@
 import {
   defaultConditionsFor,
+  defaultTriggers,
   parseThemePartType,
   starterLayout,
   THEME_PART_TYPE_LABELS,
   type ConditionsDoc,
   type Layout,
   type ThemePartType,
+  type TriggersDoc,
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { requestJson, type Fetcher } from "./api.ts";
@@ -34,6 +36,7 @@ export type ThemePartDraft = {
   slug: string;
   partType: ThemePartType;
   conditions: ConditionsDoc;
+  triggers: TriggersDoc;
   layout: Layout | null;
 };
 
@@ -121,6 +124,7 @@ export async function createThemePart(
         layout: starterLayout(input.title),
         part_type: input.partType,
         conditions: defaultConditionsFor(input.partType),
+        triggers: defaultTriggers(),
       },
       slug: input.slug,
     },
@@ -145,6 +149,7 @@ export async function saveThemePart(
           layout: draft.layout,
           part_type: draft.partType,
           conditions: draft.conditions,
+          triggers: draft.triggers,
         },
         slug: draft.slug,
         ...(rev ? { _rev: rev } : {}),

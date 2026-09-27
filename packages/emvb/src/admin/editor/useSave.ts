@@ -64,6 +64,11 @@ export function useSave(
                     schemaVersion: 1,
                     rules: [],
                   },
+                  triggers: current.page.triggers ?? {
+                    schemaVersion: 1,
+                    open: [{ type: "page_load" }],
+                    advanced: {},
+                  },
                   layout: current.page.layout,
                 },
                 rev,

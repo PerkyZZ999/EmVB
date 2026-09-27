@@ -95,6 +95,7 @@ const initialState = (entry: EditorEntry, design: LoadedDesign): EditorState => 
     layout: entry.layout,
     partType: entry.partType,
     conditions: entry.conditions,
+    triggers: entry.triggers,
   },
   status: entry.status,
   rev: entry.rev,
