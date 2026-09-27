@@ -10,17 +10,18 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.3",
-    "@astrojs/react": "^6.0.6",
+    "@astrojs/react": "^7.0.0",
     "@emdash-cms/cloudflare": "0.41.0",
     "@emdash-cms/plugin-forms": "0.2.8",
     "astro": "^7.3.5",
     "emdash": "0.41.0",
     "emvb": "workspace:*",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "oxc-transform-react": "^0.151.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260926.1",
+    "@cloudflare/workers-types": "^5.20260927.1",
     "wrangler": "4.141.0"
   },
   "emdash": {

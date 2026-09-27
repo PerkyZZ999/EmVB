@@ -39,5 +39,6 @@
         "allow": ["core"]
       }
     ]
-  }
+  },
+  "ignoreDependencies": ["oxc-transform-react"]
 }
