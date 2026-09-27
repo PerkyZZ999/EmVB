@@ -9,6 +9,7 @@
     "e2e",
     "playwright.config.ts",
     "packages/emvb/src/**/*.test.ts",
-    "packages/emvb/test/fixtures"
+    "packages/emvb/test/fixtures",
+    "packages/emvb/test/server"
   ]
 }

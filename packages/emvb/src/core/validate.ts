@@ -14,6 +14,14 @@ export type LayoutValidation =
   | { ok: true; layout: Layout; upgradedFrom: number }
   | { ok: false; issues: LayoutIssue[] };
 
+/** A short, user-facing summary of the first few issues, with their paths. */
+export function summarizeIssues(issues: readonly LayoutIssue[], max = 3): string {
+  return issues
+    .slice(0, max)
+    .map((issue) => (issue.path ? `${issue.path}: ${issue.message}` : issue.message))
+    .join("; ");
+}
+
 export function byteLength(value: unknown): number {
   return new TextEncoder().encode(JSON.stringify(value)).length;
 }

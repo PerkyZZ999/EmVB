@@ -18,6 +18,7 @@ export {
 export {
   validateLayout,
   validateDesign,
+  summarizeIssues,
   byteLength,
   type LayoutIssue,
   type LayoutValidation,
