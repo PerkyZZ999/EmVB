@@ -181,10 +181,13 @@ export {
 export {
   THEME_PART_TYPES,
   CONTENT_THEME_PART_TYPES,
+  ITEM_THEME_PART_TYPES,
   THEME_PART_TYPE_LABELS,
   isThemePartType,
   parseThemePartType,
   isContentThemePartType,
+  isItemThemePartType,
   type ThemePartType,
   type ContentThemePartType,
+  type ItemThemePartType,
 } from "./theme/part-types.ts";

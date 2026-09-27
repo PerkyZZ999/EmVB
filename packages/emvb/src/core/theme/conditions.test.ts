@@ -273,6 +273,17 @@ describe("S7c content part types", () => {
       name: "collection",
       args: { collection: "pages" },
     });
+    expect(defaultConditionsFor("single_post").rules[0]).toMatchObject({
+      group: "singular",
+      name: "collection",
+      args: { collection: "posts" },
+    });
+    expect(defaultConditionsFor("archive").rules[0]).toMatchObject({
+      group: "archive",
+      name: "collection",
+      args: { collection: "posts" },
+    });
+    expect(defaultConditionsFor("loop_item")).toEqual(defaultConditions());
     expect(defaultConditionsFor("header")).toEqual(defaultConditions());
   });
 
@@ -285,15 +296,24 @@ describe("S7c content part types", () => {
     expect(themePartLocationApplies("single_page", front)).toBe(false);
     expect(themePartLocationApplies("single_page", emvbPage)).toBe(false);
     expect(themePartLocationApplies("single_page", post)).toBe(false);
+    expect(themePartLocationApplies("single_post", post)).toBe(true);
+    expect(themePartLocationApplies("single_post", pageSingular)).toBe(false);
+    expect(themePartLocationApplies("archive", postsArchive)).toBe(true);
+    expect(themePartLocationApplies("archive", category)).toBe(true);
+    expect(themePartLocationApplies("archive", search)).toBe(false);
+    expect(themePartLocationApplies("loop_item", postsArchive)).toBe(false);
+    expect(themePartLocationApplies("loop_item", post)).toBe(false);
     expect(themePartLocationApplies("header", notFound)).toBe(true);
   });
 
-  test("contentPartTypeForContext picks 404 then search then single page", () => {
+  test("contentPartTypeForContext picks 404 then search then post then page then archive", () => {
     expect(contentPartTypeForContext(notFound)).toBe("error_404");
     expect(contentPartTypeForContext(search)).toBe("search_results");
+    expect(contentPartTypeForContext(post)).toBe("single_post");
     expect(contentPartTypeForContext(pageSingular)).toBe("single_page");
+    expect(contentPartTypeForContext(postsArchive)).toBe("archive");
+    expect(contentPartTypeForContext(category)).toBe("archive");
     expect(contentPartTypeForContext(emvbPage)).toBeNull();
-    expect(contentPartTypeForContext(post)).toBeNull();
     expect(contentPartTypeForContext(front)).toBeNull();
   });
 
@@ -342,5 +362,47 @@ describe("S7c content part types", () => {
     ];
     expect(pickThemePartWinner(candidates, "search_results", search)?.id).toBe("sr");
     expect(pickThemePartWinner(candidates, "search_results", postsArchive)).toBeNull();
+  });
+
+  test("single_post winner on posts singular only", () => {
+    const candidates: ThemePartCandidate[] = [
+      {
+        id: "spost",
+        partType: "single_post",
+        conditions: defaultConditionsFor("single_post"),
+        updatedAt: "2026-09-27T12:00:00.000Z",
+      },
+    ];
+    expect(pickThemePartWinner(candidates, "single_post", post)?.id).toBe("spost");
+    expect(pickThemePartWinner(candidates, "single_post", pageSingular)).toBeNull();
+    expect(pickThemePartWinner(candidates, "single_post", postsArchive)).toBeNull();
+  });
+
+  test("archive winner on posts archive and taxonomy, not search", () => {
+    const candidates: ThemePartCandidate[] = [
+      {
+        id: "arch",
+        partType: "archive",
+        conditions: defaultConditions(),
+        updatedAt: "2026-09-27T12:00:00.000Z",
+      },
+    ];
+    expect(pickThemePartWinner(candidates, "archive", postsArchive)?.id).toBe("arch");
+    expect(pickThemePartWinner(candidates, "archive", category)?.id).toBe("arch");
+    expect(pickThemePartWinner(candidates, "archive", search)).toBeNull();
+    expect(pickThemePartWinner(candidates, "archive", post)).toBeNull();
+  });
+
+  test("loop_item never wins as a page location", () => {
+    const candidates: ThemePartCandidate[] = [
+      {
+        id: "li",
+        partType: "loop_item",
+        conditions: defaultConditions(),
+        updatedAt: "2026-09-27T12:00:00.000Z",
+      },
+    ];
+    expect(pickThemePartWinner(candidates, "loop_item", postsArchive)).toBeNull();
+    expect(pickThemePartWinner(candidates, "loop_item", post)).toBeNull();
   });
 });

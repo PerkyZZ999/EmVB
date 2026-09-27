@@ -147,12 +147,21 @@ describe("planSetup", () => {
     expect(LAYOUT_WIDGET).toBe("emvb:layout");
   });
 
-  test("part_type includes header, footer, and S7c content templates (popups deferred)", () => {
+  test("part_type includes S7c/S7d templates (popups deferred)", () => {
     expect(THEME_PARTS_FIELD_SPECS.find((f) => f.slug === "part_type")).toMatchObject({
       type: "select",
       required: true,
       validation: {
-        options: ["header", "footer", "error_404", "search_results", "single_page"],
+        options: [
+          "header",
+          "footer",
+          "error_404",
+          "search_results",
+          "single_page",
+          "single_post",
+          "archive",
+          "loop_item",
+        ],
       },
     });
   });

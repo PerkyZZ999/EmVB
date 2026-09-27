@@ -227,6 +227,14 @@ export function themePartLocationApplies(
     case "single_page":
       // Front page is a separate singular location (not Single Page).
       return !ctx.isFront && ctx.kind === "singular" && ctx.collection === "pages";
+    case "single_post":
+      return !ctx.isFront && ctx.kind === "singular" && ctx.collection === "posts";
+    case "archive":
+      // Posts index + category/tag archives (not search — that is search_results).
+      return ctx.kind === "archive" && !ctx.isSearch;
+    case "loop_item":
+      // Reusable item template; never selected as a page location.
+      return false;
   }
 }
 
@@ -272,6 +280,35 @@ export function defaultConditionsFor(partType: ThemePartType): ConditionsDoc {
           },
         ],
       };
+    case "single_post":
+      return {
+        schemaVersion: CONDITIONS_SCHEMA_VERSION,
+        rules: [
+          {
+            id: "default-posts",
+            op: "include",
+            group: "singular",
+            name: "collection",
+            args: { collection: "posts" },
+          },
+        ],
+      };
+    case "archive":
+      return {
+        schemaVersion: CONDITIONS_SCHEMA_VERSION,
+        rules: [
+          {
+            id: "default-posts-archive",
+            op: "include",
+            group: "archive",
+            name: "collection",
+            args: { collection: "posts" },
+          },
+        ],
+      };
+    case "loop_item":
+      // Not location-gated; conditions unused for public selection.
+      return defaultConditions();
     case "header":
     case "footer":
       return defaultConditions();
@@ -280,13 +317,19 @@ export function defaultConditionsFor(partType: ThemePartType): ConditionsDoc {
 
 /**
  * Which content-template type (if any) should compete for this request's main body.
- * Mutual exclusivity: 404 > search > single page.
+ * Mutual exclusivity: 404 > search > single_post > single_page > archive.
  */
 export function contentPartTypeForContext(ctx: ThemeRequestContext): ContentThemePartType | null {
   if (ctx.is404) return "error_404";
   if (ctx.isSearch) return "search_results";
+  if (!ctx.isFront && ctx.kind === "singular" && ctx.collection === "posts") {
+    return "single_post";
+  }
   if (!ctx.isFront && ctx.kind === "singular" && ctx.collection === "pages") {
     return "single_page";
+  }
+  if (ctx.kind === "archive" && !ctx.isSearch) {
+    return "archive";
   }
   return null;
 }
