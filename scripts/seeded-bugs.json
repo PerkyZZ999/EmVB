@@ -1800,6 +1800,46 @@
       "expect": "\\(fail\\)"
     },
     {
+      "id": "QA-form-unbound-preview",
+      "requirement": "R-040",
+      "description": "unbound Form still renders a live ec-form shell in the editor",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (isFormNode(node)) {\n      const formId = node.props.formId.trim();\n      // Unbound forms: no live <form>/ec-form shell (avoids broken preview; public stays zero-JS).\n      if (!formId) {\n        if (mode === \"public\") return undefined;\n        return {\n          tag: \"div\",\n          attrs: {\n            ...attrs,\n            class: `${attrs.class} emvb-form-unbound`.trim(),\n            \"data-emvb-form-unbound\": \"\",\n          },\n          children: [\"Bind a form in settings to preview it here.\"],\n        };\n      }",
+          "replace": "    if (isFormNode(node)) {\n      const formId = node.props.formId.trim();\n      if (false && !formId) {\n        if (mode === \"public\") return undefined;\n        return {\n          tag: \"div\",\n          attrs: {\n            ...attrs,\n            class: `${attrs.class} emvb-form-unbound`.trim(),\n            \"data-emvb-form-unbound\": \"\",\n          },\n          children: [\"Bind a form in settings to preview it here.\"],\n        };\n      }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/forms/binding.test.ts",
+        "-t",
+        "empty formId"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "QA-video-editor-preview",
+      "requirement": "R-013",
+      "description": "editor canvas still embeds a live YouTube iframe (sandbox breaks it)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    // Canvas iframe has no allow-scripts (D-011): live YouTube/Vimeo players fail there.\n    if (mode === \"editor\" && node.type === \"video\") {\n      const target = resolveEmbedUrl((node.props as { url: string }).url);\n      if (target?.kind === \"iframe\") {\n        const label =\n          (node.props as { title?: string }).title?.trim() ||\n          (target.provider === \"youtube\" ? \"YouTube video\" : \"Vimeo video\");\n        return {\n          tag: \"div\",\n          attrs: {\n            ...attrs,\n            class: `${attrs.class} emvb-video-preview`.trim(),\n            \"data-emvb-video-preview\": target.provider,\n          },\n          children: [`${label} \u2014 plays on the published page`],\n        };\n      }\n    }",
+          "replace": "    if (false && mode === \"editor\" && node.type === \"video\") {\n      return undefined;\n    }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/elements.test.ts",
+        "-t",
+        "static preview for YouTube"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
       "id": "W-026/autoplay-kept",
       "requirement": "R-013",
       "description": "YouTube embeds force autoplay=1",

@@ -9,6 +9,7 @@ import { layoutHasForm } from "../forms/binding.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import { isFormNode, isParentNode, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { cssLength, styleClassName, styleDeclarations, type Declaration } from "../sanitize/css.ts";
+import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import { serialize, type VNode } from "./vnode.ts";
 
 export type RenderMode = "public" | "editor";
@@ -162,8 +163,21 @@ export function renderPage(
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
 
     if (isFormNode(node)) {
-      const formId = node.props.formId;
-      const definition = formId ? definitions.get(formId) : undefined;
+      const formId = node.props.formId.trim();
+      // Unbound forms: no live <form>/ec-form shell (avoids broken preview; public stays zero-JS).
+      if (!formId) {
+        if (mode === "public") return undefined;
+        return {
+          tag: "div",
+          attrs: {
+            ...attrs,
+            class: `${attrs.class} emvb-form-unbound`.trim(),
+            "data-emvb-form-unbound": "",
+          },
+          children: ["Bind a form in settings to preview it here."],
+        };
+      }
+      const definition = definitions.get(formId);
       const submitLabel = definition?.settings.submitLabel ?? "Submit";
       const children = node.children
         .map((child) => visit(child, false))
@@ -188,7 +202,7 @@ export function renderPage(
         children: [
           page,
           { tag: "input", attrs: { type: "hidden", name: "formId", value: formId }, children: [] },
-          honeypot(formId || "form"),
+          honeypot(formId),
           {
             tag: "div",
             attrs: { class: "ec-form-status", "data-form-status": "", "aria-live": "polite" },
@@ -207,6 +221,24 @@ export function renderPage(
     }
 
     let vnode = def.build(node as never, attrs, []);
+    // Canvas iframe has no allow-scripts (D-011): live YouTube/Vimeo players fail there.
+    if (mode === "editor" && node.type === "video") {
+      const target = resolveEmbedUrl((node.props as { url: string }).url);
+      if (target?.kind === "iframe") {
+        const label =
+          (node.props as { title?: string }).title?.trim() ||
+          (target.provider === "youtube" ? "YouTube video" : "Vimeo video");
+        return {
+          tag: "div",
+          attrs: {
+            ...attrs,
+            class: `${attrs.class} emvb-video-preview`.trim(),
+            "data-emvb-video-preview": target.provider,
+          },
+          children: [`${label} — plays on the published page`],
+        };
+      }
+    }
     if (node.type === "select" || node.type === "radio") {
       const field = (node.props as { field: string }).field;
       for (const definition of definitions.values()) {

@@ -261,6 +261,25 @@ describe("video element (W-026, R-013)", () => {
     expect(html).toContain('preload="metadata"');
   });
 
+  test("editor mode shows a static preview for YouTube instead of a live iframe", () => {
+    const node = {
+      ...defaultElement("video", "vid00004"),
+      props: {
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        title: "Demo clip",
+      },
+    };
+    const editor = renderPage(page(node), design, { mode: "editor" });
+    expect(editor.html).toContain("data-emvb-video-preview");
+    expect(editor.html).toContain("Demo clip — plays on the published page");
+    expect(editor.html).not.toContain("<iframe");
+    expect(editor.html).not.toContain("youtube-nocookie");
+
+    const pub = renderPage(page(node), design);
+    expect(pub.html).toContain("youtube-nocookie.com/embed/dQw4w9WgXcQ");
+    expect(pub.html).toContain("<iframe");
+  });
+
   test("non-allowlisted URLs render a missing placeholder", () => {
     const bad = {
       ...defaultElement("video", "vid00003"),

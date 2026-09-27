@@ -105,3 +105,27 @@ describe("forms submit contract (W-037)", () => {
     expect(needsFormsRuntime).toBe(true);
   });
 });
+
+describe("unbound form preview (QA)", () => {
+  test("empty formId shows an editor placeholder and is omitted publicly", () => {
+    const layout: Layout = {
+      schemaVersion: 1,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [{ id: "form0001", type: "form", props: { formId: "" }, children: [] }],
+      },
+    };
+    const editor = renderPage(layout, emptyDesign(), { mode: "editor" });
+    expect(editor.html).toContain("data-emvb-form-unbound");
+    expect(editor.html).toContain("Bind a form in settings");
+    expect(editor.html).not.toContain("data-ec-form");
+    expect(editor.needsFormsRuntime).toBe(false);
+
+    const pub = renderPage(layout, emptyDesign());
+    expect(pub.html).not.toContain("data-ec-form");
+    expect(pub.html).not.toContain("data-emvb-form-unbound");
+    expect(pub.needsFormsRuntime).toBe(false);
+  });
+});

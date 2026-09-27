@@ -55,7 +55,7 @@ export function findMissingRequiredFields(
 export function layoutHasForm(layout: Layout): boolean {
   let found = false;
   walk(layout.root, (node) => {
-    if (isFormNode(node)) found = true;
+    if (isFormNode(node) && node.props.formId.trim()) found = true;
   });
   return found;
 }

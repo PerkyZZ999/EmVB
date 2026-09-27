@@ -400,7 +400,7 @@ const icon: ElementDefinition<IconNode> = {
 
 const video: ElementDefinition<VideoNode> = {
   baseCss:
-    ".emvb-video{display:block;max-width:100%;border:0}.emvb-video iframe,.emvb-video video{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}.emvb-video-missing{min-height:48px;background:var(--color-kumo-tint,#eee)}",
+    ".emvb-video{display:block;max-width:100%;border:0}.emvb-video iframe,.emvb-video video{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}.emvb-video-missing,.emvb-video-preview{display:flex;align-items:center;justify-content:center;min-height:120px;padding:12px;text-align:center;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({
     type: "video",
     props: { url: "", title: "Video" },
@@ -464,7 +464,7 @@ const video: ElementDefinition<VideoNode> = {
 
 const form: ElementDefinition<FormNode> = {
   baseCss:
-    ".emvb-form{display:flex;flex-direction:column;gap:12px;min-width:0}.ec-form-hp{position:absolute;left:-9999px}",
+    ".emvb-form{display:flex;flex-direction:column;gap:12px;min-width:0}.emvb-form-unbound{min-height:48px;padding:12px;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}.ec-form-hp{position:absolute;left:-9999px}",
   defaults: () => ({ type: "form", props: { formId: "" }, children: [] }),
   descriptor: {
     type: "form",
