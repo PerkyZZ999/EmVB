@@ -1,10 +1,19 @@
-import { expect, test, type Page } from "@playwright/test";
-import { api } from "./support/api.ts";
+import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { api, createPage } from "./support/api.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
 
 const PAGES = "/_emdash/admin/plugins/emvb/pages";
 const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 const NO_ACCESS = "You don't have access to EmVB";
+
+const pageLayout = {
+  schemaVersion: 1,
+  root: { id: "root0001", type: "container", props: {}, children: [] },
+};
+const createAs = (request: APIRequestContext) =>
+  api(request, "POST", "/_emdash/api/content/emvb_pages", {
+    data: { title: "Role check", layout: pageLayout },
+  });
 
 test.describe.configure({ mode: "serial" });
 
@@ -28,7 +37,7 @@ const lower = [
 ] as const;
 
 for (const [name, role] of lower) {
-  test(`${name} (${role}): no Visual pages link, no access on both pages, and 403 from EmVB routes`, async ({
+  test(`${name} (${role}): no Visual pages link, no access on both pages, and EmVB routes and page saves refused`, async ({
     page,
     request,
   }, testInfo) => {
@@ -52,6 +61,11 @@ for (const [name, role] of lower) {
       revision: null,
     });
     expect(save.status).toBe(403);
+
+    // EmDash refuses roles without content permissions (403); EmVB's hook refuses the rest (422).
+    const created = await createAs(request);
+    expect([403, 422]).toContain(created.status);
+    expect(created.json?.["data"]).toBeUndefined();
   });
 }
 
@@ -61,7 +75,7 @@ const allowed = [
 ] as const;
 
 for (const [name, role] of allowed) {
-  test(`${name} (${role}): sees the link, a working page, and opens the editor by URL`, async ({
+  test(`${name} (${role}): sees the link, a working page, opens the editor by URL, and saves pages`, async ({
     page,
     request,
   }, testInfo) => {
@@ -90,5 +104,6 @@ for (const [name, role] of allowed) {
       revision: data.revision,
     });
     expect(save.status).toBe(200);
+    await createPage(request, "Role check", pageLayout);
   });
 }

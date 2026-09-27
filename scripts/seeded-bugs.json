@@ -1059,6 +1059,51 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-012/container-gap-dropped",
+      "requirement": "R-012",
+      "description": "a container's gap never reaches the CSS",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "gap: { css: \"gap\", toValue: cssLength },",
+          "replace": "gap: { css: \"gap\", toValue: () => undefined },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*cascade order"
+    },
+    {
+      "id": "W-012/leave-guard-off",
+      "requirement": "R-001",
+      "description": "leaving with unsaved changes is never guarded",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "if (!dirty) return;",
+          "replace": "if (dirty || !dirty) return;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*guards leaving only while there are unsaved changes"
+    },
+    {
+      "id": "W-012/e2e-page-save-role-check-removed",
+      "requirement": "D-020",
+      "description": "EmVB's hook lets roles below editor save pages over HTTP",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "if (event.actor && event.actor.role < EDITOR_ROLE) {",
+          "replace": "if (event.actor && event.actor.role < 0) {"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node", "-g", "author"],
+      "expect": "\u2718.*\\[node\\].*author \\(30\\)",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }
