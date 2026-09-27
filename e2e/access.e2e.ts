@@ -45,6 +45,7 @@ for (const [name, role] of lower) {
     await page.goto(`${EDITOR}?entry=01ROLECHECK`);
     await expect(page.getByText(NO_ACCESS)).toBeVisible({ timeout: 20_000 });
     await expect(page.locator("[data-emvb-entry]")).toHaveCount(0);
+    await expect(page.locator("[data-emvb-editor]")).toHaveCount(0);
 
     const save = await api(request, "POST", "/_emdash/api/plugins/emvb/design/save", {
       design: { schemaVersion: 1, variables: { colors: [] } },
@@ -75,8 +76,9 @@ for (const [name, role] of allowed) {
 
     // `/editor` isn't declared (D-024): it only renders because the router resolves exported pages.
     await page.goto(`${EDITOR}?entry=01ROLECHECK`);
-    await expect(page.locator('[data-emvb-entry="01ROLECHECK"]')).toBeVisible({ timeout: 20_000 });
-    await expect(sidebarLink(page)).toBeVisible();
+    await expect(page.locator("[data-emvb-editor]")).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('[data-emvb-entry="01ROLECHECK"]')).toHaveCount(1);
+    await expect(page.locator("#emvb-sidebar-shim")).toHaveCount(0);
     await expect(
       page.getByRole("complementary", { name: "Admin navigation" }).locator('a[href*="/editor"]'),
     ).toHaveCount(0);

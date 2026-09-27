@@ -3,6 +3,7 @@ import { CursorClickIcon } from "@phosphor-icons/react";
 import { PLUGIN_ID } from "../../constants.ts";
 import { RequireEditor } from "../access/RequireEditor.tsx";
 import { defaultFetcher, type Fetcher } from "../api.ts";
+import { Editor } from "../editor/Editor.tsx";
 
 const PAGES_URL = `/_emdash/admin/plugins/${PLUGIN_ID}/pages`;
 
@@ -15,12 +16,12 @@ function entryFromSearch(search: string): string | null {
 export function EditorPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
   return (
     <RequireEditor fetcher={fetcher}>
-      {() => <EditorLanding entry={entryFromSearch(window.location.search)} />}
+      {() => <EditorLanding fetcher={fetcher} entry={entryFromSearch(window.location.search)} />}
     </RequireEditor>
   );
 }
 
-function EditorLanding({ entry }: { entry: string | null }) {
+function EditorLanding({ fetcher, entry }: { fetcher: Fetcher; entry: string | null }) {
   if (!entry) {
     return (
       <section data-emvb-page="editor">
@@ -34,9 +35,8 @@ function EditorLanding({ entry }: { entry: string | null }) {
     );
   }
   return (
-    <section data-emvb-page="editor" data-emvb-entry={entry} className="flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold">EmVB editor</h1>
-      <p>Page {entry}</p>
+    <section data-emvb-page="editor" data-emvb-entry={entry}>
+      <Editor fetcher={fetcher} entryId={entry} />
     </section>
   );
 }

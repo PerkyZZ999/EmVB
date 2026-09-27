@@ -36,6 +36,6 @@ export {
   type RenderResult,
   type RenderWarning,
 } from "./render/index.ts";
-export { serialize, type VNode } from "./render/vnode.ts";
+export { serialize, isAllowedTag, isAllowedAttr, type VNode } from "./render/vnode.ts";
 export { escapeAttr, escapeText } from "./sanitize/escape.ts";
 export { summarizeLayout, type LayoutSummary } from "./stats.ts";

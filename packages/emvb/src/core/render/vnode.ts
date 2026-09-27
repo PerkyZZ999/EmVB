@@ -5,6 +5,9 @@ export type VNode = { tag: string; attrs: Record<string, string>; children: (VNo
 const TAGS = new Set(["div", "section", "h1", "h2", "h3", "h4", "h5", "h6", "p", "span"]);
 const ATTR_NAME = /^(?:class|id|data-[a-z][a-z0-9-]*)$/;
 
+export const isAllowedTag = (tag: string) => TAGS.has(tag);
+export const isAllowedAttr = (name: string) => ATTR_NAME.test(name);
+
 /** Serializes a VNode tree. Text and attribute values are always escaped; tags and attribute names are allowlisted. */
 export function serialize(node: VNode | string): string {
   if (typeof node === "string") return escapeText(node);

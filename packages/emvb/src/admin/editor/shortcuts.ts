@@ -1,0 +1,17 @@
+/** The editor's keyboard shortcuts (DESIGN_BRIEF), shown in the Shortcuts dialog. */
+export const SHORTCUTS: readonly { action: string; keys: string }[] = [
+  { action: "Move focus between regions", keys: "Tab / Shift+Tab" },
+  { action: "Next or previous element", keys: "↑ / ↓" },
+  { action: "Select first child / parent", keys: "Enter / Shift+Enter" },
+  { action: "Clear selection", keys: "Esc" },
+  { action: "Expand or collapse (Layers)", keys: "← / →" },
+  { action: "Move up / down", keys: "Alt+↑ / Alt+↓" },
+  { action: "Move out / in", keys: "Alt+← / Alt+→" },
+  { action: "Duplicate", keys: "Ctrl/Cmd+D" },
+  { action: "Delete", keys: "Delete or Backspace" },
+  { action: "Save draft", keys: "Ctrl/Cmd+S" },
+];
+
+/** Ctrl/Cmd+K opens the host command palette, which would stack over the editor (S0-6). */
+export const isPaletteShortcut = (event: KeyboardEvent) =>
+  (event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "k";

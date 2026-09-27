@@ -1,4 +1,4 @@
-import type { APIRequestContext } from "@playwright/test";
+import { expect, type APIRequestContext, type Page } from "@playwright/test";
 
 /** EmDash REST call as the signed-in admin (the storage-state cookies), with the CSRF header. */
 export async function api(
@@ -34,4 +34,25 @@ export function setupFacts(schema: Record<string, unknown> | null) {
     options: (f["validation"] as { options?: string[] } | null)?.options ?? null,
   }));
   return { hidden: item["hidden"], supports: item["supports"], hasSeo: item["hasSeo"], fields };
+}
+
+/** Runs EmVB setup from the Visual pages page if the collection doesn't exist yet. */
+export async function ensureEmvbSetup(page: Page) {
+  await page.goto("/_emdash/admin/plugins/emvb/pages");
+  const setupButton = page.getByRole("button", { name: "Set up EmVB" });
+  const ready = page.getByText("EmVB is set up.");
+  await expect(setupButton.or(ready)).toBeVisible({ timeout: 20_000 });
+  if (await setupButton.isVisible()) await setupButton.click();
+  await expect(ready).toBeVisible();
+}
+
+/** Creates an `emvb_pages` draft over the content API and returns its id. */
+export async function createPage(request: APIRequestContext, title: string, layout: unknown) {
+  const created = await api(request, "POST", "/_emdash/api/content/emvb_pages", {
+    data: { title, layout },
+  });
+  expect(created.status).toBe(201);
+  const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
+  expect(id).toBeTruthy();
+  return id as string;
 }

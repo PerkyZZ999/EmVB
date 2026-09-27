@@ -655,6 +655,137 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*role 30 sees no access instead of the content"
+    },
+    {
+      "id": "W-009/z-index-50",
+      "requirement": "K13",
+      "description": "the overlay uses z-index 50, like core's distraction-free mode",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "style={{ position: \"fixed\", inset: 0, zIndex: \"auto\" }}",
+          "replace": "style={{ position: \"fixed\", inset: 0, zIndex: 50 }}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*is portaled to document.body, fixed, with z-index auto"
+    },
+    {
+      "id": "W-009/e2e-z-index-50",
+      "requirement": "K13",
+      "description": "the overlay uses z-index 50 (browser: dialogs and the palette open underneath)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "style={{ position: \"fixed\", inset: 0, zIndex: \"auto\" }}",
+          "replace": "style={{ position: \"fixed\", inset: 0, zIndex: 50 }}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*a Kumo dialog opened from the editor stacks above it",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-009/palette-block-bubble",
+      "requirement": "K13",
+      "description": "the Ctrl/Cmd+K block listens in the bubble phase, after the host",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "window.addEventListener(\"keydown\", block, true);",
+          "replace": "window.addEventListener(\"keydown\", block);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*mod\\+K never reaches a document listener"
+    },
+    {
+      "id": "W-009/no-portal",
+      "requirement": "D-011",
+      "description": "the overlay renders in place inside the admin page instead of a body portal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "  return createPortal(\n",
+          "replace": "  return (\n"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "    </div>,\n    document.body,\n  );",
+          "replace": "    </div>\n  );"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "import { createPortal } from \"react-dom\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*is portaled to document.body"
+    },
+    {
+      "id": "W-009/canvas-allow-scripts",
+      "requirement": "D-014",
+      "description": "the canvas iframe allows scripts",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "sandbox=\"allow-same-origin\"",
+          "replace": "sandbox=\"allow-same-origin allow-scripts\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*sandboxed canvas without scripts"
+    },
+    {
+      "id": "W-009/canvas-attr-allowlist",
+      "requirement": "R-032",
+      "description": "the canvas passes every VNode attribute to React",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/vnode-react.tsx",
+          "search": "    if (!isAllowedAttr(name)) continue;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*outside the allowlists are dropped"
+    },
+    {
+      "id": "W-009/e2e-canvas-virtual-width",
+      "requirement": "D-025",
+      "description": "the canvas renders a 1280 px virtual page scaled to fit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-canvas iframe { display: block; width: 100%; height: 100%;",
+          "replace": ".emvb-canvas iframe { display: block; width: 1280px; transform: scale(0.53); transform-origin: 0 0; height: 100%;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*at 1280×720 the overlay covers the admin and the canvas gets the real width",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-009/e2e-small-screen-threshold",
+      "requirement": "D-025",
+      "description": "the small-screen notice only shows below 900 px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useMediaQuery.ts",
+          "search": "\"(min-width: 1024px)\"",
+          "replace": "\"(min-width: 900px)\""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*below 1024 px the small-screen notice replaces the editor",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }
