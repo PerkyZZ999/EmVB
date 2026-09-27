@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { layoutOfBytes, s1Page } from "../fixtures/layouts.ts";
 import { MAX_DESIGN_BYTES, MAX_LAYOUT_BYTES } from "../../src/core/index.ts";
+import { createPlugin } from "../../src/server/plugin.ts";
 import { createTestRuntime, ROLES, userWithRole } from "./runtime.ts";
 
 let t: Awaited<ReturnType<typeof createTestRuntime>>;
@@ -205,5 +206,13 @@ describe("design routes", () => {
       status: 200,
       body: { data: { ok: true, plugin: "emvb" } },
     });
+  });
+});
+
+describe("admin declarations (D-024)", () => {
+  test("only Visual pages is declared, so the editor never gets a sidebar or palette entry", () => {
+    expect(createPlugin().admin?.pages).toEqual([
+      { path: "/pages", label: "Visual pages", icon: "layout" },
+    ]);
   });
 });

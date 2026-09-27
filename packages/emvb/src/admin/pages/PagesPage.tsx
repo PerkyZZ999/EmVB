@@ -1,11 +1,20 @@
 import { Banner, Button, Empty, Loader } from "@cloudflare/kumo";
 import { LayoutIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { RequireEditor } from "../access/RequireEditor.tsx";
 import { defaultFetcher, type Fetcher } from "../api.ts";
 import { useSetupStatus } from "../setup/useSetupStatus.ts";
 
-/** "Visual pages" (`/pages`). W-007 covers the setup states; the page list arrives in W-008. */
+/** "Visual pages" (`/pages`): setup states for now; the page list arrives in W-010. */
 export function PagesPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
-  const { status, running, setup } = useSetupStatus(fetcher);
+  return (
+    <RequireEditor fetcher={fetcher}>
+      {(role) => <PagesHome fetcher={fetcher} role={role} />}
+    </RequireEditor>
+  );
+}
+
+function PagesHome({ fetcher, role }: { fetcher: Fetcher; role: number }) {
+  const { status, running, setup } = useSetupStatus(fetcher, role);
 
   if (status.state === "loading") return <Loader />;
   if (status.state === "error") {

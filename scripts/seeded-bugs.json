@@ -562,6 +562,99 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-008/shim-threshold-30",
+      "requirement": "D-024",
+      "description": "the sidebar shim shows the link from role 30 (author)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/sidebar-shim.ts",
+          "search": "if (role !== null && role >= EDITOR_ROLE) {",
+          "replace": "if (role !== null && role >= 30) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*hides the Visual pages link for role 30"
+    },
+    {
+      "id": "W-008/e2e-shim-threshold-30",
+      "requirement": "D-024",
+      "description": "the sidebar shim shows the link from role 30 (browser check)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/sidebar-shim.ts",
+          "search": "if (role !== null && role >= EDITOR_ROLE) {",
+          "replace": "if (role !== null && role >= 30) {"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*author \\(30\\): no Visual pages link",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-008/e2e-route-permission-removed",
+      "requirement": "D-020",
+      "description": "design/save drops its permission, so EmDash falls back to plugins:manage and editors are locked out",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "  permission: \"content:edit_any\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*editor \\(40\\): sees the link",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-008/e2e-editor-not-exported",
+      "requirement": "D-024",
+      "description": "the admin entry no longer exports /editor, so the host falls back to a Block Kit page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/index.tsx",
+          "search": "  \"/editor\": EditorPage,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*subscriber \\(10\\): no Visual pages link",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-008/editor-declared",
+      "requirement": "D-024",
+      "description": "the descriptor declares /editor, so it shows in the sidebar and palette",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "      pages: [{ path: \"/pages\", label: \"Visual pages\", icon: \"layout\" }],",
+          "replace": "      pages: [\n        { path: \"/pages\", label: \"Visual pages\", icon: \"layout\" },\n        { path: \"/editor\", label: \"Editor\" },\n      ],"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
+      "expect": "\\(fail\\).*only Visual pages is declared"
+    },
+    {
+      "id": "W-008/gate-threshold-30",
+      "requirement": "D-020",
+      "description": "the page gate lets authors in",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/role.ts",
+          "search": "export const canUseEmvb = (role: number) => role >= EDITOR_ROLE;",
+          "replace": "export const canUseEmvb = (role: number) => role >= 30;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*role 30 sees no access instead of the content"
     }
   ]
 }
