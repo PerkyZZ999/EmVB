@@ -10,5 +10,11 @@
   "exports": {
     ".": "./src/index.ts",
     "./core": "./src/core/index.ts"
+  },
+  "devDependencies": {
+    "emdash": "0.41.0"
+  },
+  "peerDependencies": {
+    "emdash": "~0.41.0"
   }
 }

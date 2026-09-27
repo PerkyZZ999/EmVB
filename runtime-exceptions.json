@@ -1,0 +1,15 @@
+{
+  "$comment": "Scripts that must run on the Node runtime instead of Bun (D-003, R-051). Checked by scripts/check-runtime.ts.",
+  "node": [
+    {
+      "script": "demos/cloudflare#dev",
+      "reason": "Cloudflare's Vite plugin (miniflare) crashes under the Bun runtime: `this.#runtimeDispatcher?.close is not a function`.",
+      "evidence": "VALIDATION.md S0-3"
+    },
+    {
+      "script": "demos/cloudflare#start",
+      "reason": "`wrangler dev` prints Ready under the Bun runtime but every request hangs.",
+      "evidence": "VALIDATION.md S0-3"
+    }
+  ]
+}

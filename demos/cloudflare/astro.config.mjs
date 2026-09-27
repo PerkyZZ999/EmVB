@@ -1,0 +1,25 @@
+import cloudflare from "@astrojs/cloudflare";
+import react from "@astrojs/react";
+import { d1, r2 } from "@emdash-cms/cloudflare";
+import { defineConfig } from "astro/config";
+import { formsPlugin } from "@emdash-cms/plugin-forms";
+import { emvb } from "emvb";
+import emdash from "emdash/astro";
+
+export default defineConfig({
+  output: "server",
+  adapter: cloudflare(),
+  image: {
+    layout: "constrained",
+    responsiveStyles: true,
+  },
+  integrations: [
+    react(),
+    emdash({
+      database: d1({ binding: "DB", session: "auto" }),
+      storage: r2({ binding: "MEDIA" }),
+      plugins: [formsPlugin(), emvb()],
+    }),
+  ],
+  devToolbar: { enabled: false },
+});

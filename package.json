@@ -2,18 +2,27 @@
   "name": "emvb-workspace",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "demos/*"
   ],
   "type": "module",
   "scripts": {
     "lint": "oxlint --deny-warnings",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "typecheck": "tsc -p packages/emvb --noEmit",
+    "typecheck": "tsc -p packages/emvb && tsc -p .",
     "fallow": "fallow dead-code",
-    "check": "bun run lint && bun run fmt:check && bun run typecheck && bun run fallow"
+    "check": "bun run lint && bun run fmt:check && bun run typecheck && bun run fallow && bun run check:runtime",
+    "demo:node": "bun run --cwd demos/node dev",
+    "demo:node:build": "bun run --cwd demos/node build",
+    "demo:node:prod": "bun run --cwd demos/node start",
+    "demo:cf": "bun run --cwd demos/cloudflare dev",
+    "demo:cf:build": "bun run --cwd demos/cloudflare build",
+    "demo:cf:prod": "bun run --cwd demos/cloudflare start",
+    "check:runtime": "bun scripts/check-runtime.ts"
   },
   "devDependencies": {
+    "@types/bun": "1.4.2",
     "fallow": "3.30.0",
     "oxfmt": "0.70.0",
     "oxlint": "1.85.0",

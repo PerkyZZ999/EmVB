@@ -1,0 +1,30 @@
+{
+  "name": "@emvb/demo-cloudflare",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1 --port 4412",
+    "build": "bun --bun astro build",
+    "start": "wrangler dev --ip 127.0.0.1 --port 4422"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.3.3",
+    "@astrojs/react": "^6.0.6",
+    "@emdash-cms/cloudflare": "0.41.0",
+    "@emdash-cms/plugin-forms": "0.2.8",
+    "astro": "^7.3.5",
+    "emdash": "0.41.0",
+    "emvb": "workspace:*",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260926.1",
+    "wrangler": "4.141.0"
+  },
+  "emdash": {
+    "label": "EmVB demo (Cloudflare, local only)",
+    "seed": "seed/seed.json"
+  }
+}
