@@ -90,3 +90,18 @@ describe("forms markup contract (W-035)", () => {
     expect(result.html).not.toContain("data-ec-form");
   });
 });
+
+describe("forms submit contract (W-037)", () => {
+  test("hidden formId matches the bound form props", () => {
+    const definitions = new Map([["form-1", definition("form-1")]]);
+    const { html } = renderPage(layoutWithForm(true), emptyDesign(), {
+      formDefinitions: definitions,
+    });
+    expect(html).toMatch(/name="formId"[^>]*value="form-1"|value="form-1"[^>]*name="formId"/);
+  });
+
+  test("a page with a form always needs the forms runtime", () => {
+    const { needsFormsRuntime } = renderPage(layoutWithForm(true), emptyDesign());
+    expect(needsFormsRuntime).toBe(true);
+  });
+});

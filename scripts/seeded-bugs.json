@@ -2178,6 +2178,46 @@
         "shows field options from definition"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-037/submit-wrong-formId",
+      "requirement": "R-040",
+      "description": "hidden formId does not match the bound form",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "{ tag: \"input\", attrs: { type: \"hidden\", name: \"formId\", value: formId }, children: [] },",
+          "replace": "{ tag: \"input\", attrs: { type: \"hidden\", name: \"formId\", value: \"wrong-id\" }, children: [] },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/forms/binding.test.ts",
+        "-t",
+        "hidden formId matches"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-037/forms-runtime-omitted",
+      "requirement": "R-031",
+      "description": "page with a form omits forms runtime",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    needsFormsRuntime: layoutHasForm(layout),",
+          "replace": "    needsFormsRuntime: false,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/forms/binding.test.ts",
+        "-t",
+        "a page with a form always needs"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
