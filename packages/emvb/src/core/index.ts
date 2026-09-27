@@ -158,3 +158,19 @@ export {
   type BundledIcon,
   type IconPrimitive,
 } from "./icons/catalog.ts";
+
+export {
+  CONDITIONS_SCHEMA_VERSION,
+  MAX_CONDITION_RULES,
+  ConditionRule,
+  ConditionsDoc,
+  defaultConditions,
+  validateConditions,
+  matchesConditions,
+  conditionSpecificity,
+  conditionsSpecificity,
+  pickThemePartWinner,
+  type ConditionsValidation,
+  type ThemeRequestContext,
+  type ThemePartCandidate,
+} from "./theme/conditions.ts";

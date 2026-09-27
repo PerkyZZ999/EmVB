@@ -1,8 +1,8 @@
 import { ContentSaveRejectedError, type ContentHookEvent, type PluginContext } from "emdash";
-import { summarizeIssues, validateLayout } from "../core/index.ts";
+import { summarizeIssues, validateConditions, validateLayout } from "../core/index.ts";
 import { EDITOR_ROLE, PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../constants.ts";
 
-function parseLayout(raw: unknown): unknown {
+function parseJsonField(raw: unknown): unknown {
   if (typeof raw !== "string") return raw;
   try {
     return JSON.parse(raw) as unknown;
@@ -14,9 +14,8 @@ function parseLayout(raw: unknown): unknown {
 const OWNED = new Set([PAGES_COLLECTION, THEME_PARTS_COLLECTION]);
 
 /**
- * `content:beforeSave` for EmVB pages and theme parts (R-006, D-020, R-060): editors and above
- * only, then upgrade and validate the layout. Logs carry the id and issue code, never layout
- * content.
+ * `content:beforeSave` for EmVB pages and theme parts (R-006, D-020, R-060/R-061): editors and
+ * above only; validate layout (and conditions on theme parts). Logs carry ids and codes only.
  */
 export async function beforeSave(
   event: ContentHookEvent,
@@ -31,18 +30,41 @@ export async function beforeSave(
       `Only editors and administrators can save EmVB ${kind}s.`,
     );
   }
-  if (event.content["layout"] === undefined) return;
-  const result = validateLayout(parseLayout(event.content["layout"]));
-  if (!result.ok) {
-    ctx.log.warn(`emvb: ${kind} save rejected`, {
-      pageId,
-      code: result.issues[0]?.code ?? "invalid",
-    });
-    throw new ContentSaveRejectedError(
-      `The ${kind} layout is invalid. ${summarizeIssues(result.issues)}`,
-    );
+
+  let next: Record<string, unknown> | undefined;
+
+  if (event.content["layout"] !== undefined) {
+    const result = validateLayout(parseJsonField(event.content["layout"]));
+    if (!result.ok) {
+      ctx.log.warn(`emvb: ${kind} save rejected`, {
+        pageId,
+        code: result.issues[0]?.code ?? "invalid",
+      });
+      throw new ContentSaveRejectedError(
+        `The ${kind} layout is invalid. ${summarizeIssues(result.issues)}`,
+      );
+    }
+    if (result.upgradedFrom !== result.layout.schemaVersion) {
+      next = { ...(next ?? event.content), layout: result.layout };
+    }
   }
-  if (result.upgradedFrom !== result.layout.schemaVersion) {
-    return { ...event.content, layout: result.layout };
+
+  if (event.collection === THEME_PARTS_COLLECTION && event.content["conditions"] !== undefined) {
+    const result = validateConditions(parseJsonField(event.content["conditions"]));
+    if (!result.ok) {
+      ctx.log.warn("emvb: theme part save rejected", {
+        pageId,
+        code: result.issues[0]?.code ?? "invalid_conditions",
+      });
+      throw new ContentSaveRejectedError(
+        `The theme part conditions are invalid. ${result.issues
+          .slice(0, 3)
+          .map((i) => i.message)
+          .join("; ")}`,
+      );
+    }
+    next = { ...(next ?? event.content), conditions: result.conditions };
   }
+
+  return next;
 }
