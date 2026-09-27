@@ -508,12 +508,14 @@ function EditorApp({
                   <ElementPanel
                     key={selectedNode.id}
                     node={selectedNode}
+                    layout={state.page.layout}
                     design={state.design}
                     rejection={saver.rejection}
                     onChange={(node: LayoutNode) =>
                       dispatch({ type: "update-node", id: node.id, update: () => node })
                     }
                     onDesignChange={changeDesign}
+                    onSelect={(id) => dispatch({ type: "select", id })}
                   />
                 ) : (
                   <PageSettings

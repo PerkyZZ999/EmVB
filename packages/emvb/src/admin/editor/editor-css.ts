@@ -106,4 +106,15 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-layer-menu-list { position: absolute; right: 0; top: 100%; z-index: 5; min-width: 140px; padding: 4px; border-radius: 6px; background: var(--color-kumo-base); box-shadow: 0 4px 16px rgb(0 0 0 / 0.12); display: flex; flex-direction: column; }
 .emvb-layer-menu-list button { border: 0; background: transparent; text-align: left; padding: 6px 8px; border-radius: 4px; font: inherit; font-size: 13px; cursor: pointer; color: var(--text-color-kumo-default); }
 .emvb-layer-menu-list button:hover { background: var(--color-kumo-tint); }
+
+.emvb-element-header { display: flex; align-items: center; gap: 8px; }
+.emvb-breadcrumb { margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
+.emvb-breadcrumb-part { border: 0; padding: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.emvb-breadcrumb-part:hover { color: var(--text-color-kumo-default); }
+.emvb-style-row { display: flex; align-items: flex-start; gap: 4px; }
+.emvb-style-row > :first-child { flex: 1 1 auto; min-width: 0; }
+.emvb-style-row[data-set="true"] .emvb-reset-btn { opacity: 1; }
+.emvb-reset-btn { flex: 0 0 auto; margin-top: 22px; opacity: 0.4; }
+.emvb-textarea { min-height: 80px; height: auto; padding: 8px; resize: vertical; font: inherit; }
+.emvb-field-label { font-size: 13px; font-weight: 600; }
 `;

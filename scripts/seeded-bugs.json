@@ -1513,6 +1513,66 @@
         "subtree dialog"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-021/descriptor-field-without-control",
+      "requirement": "R-004",
+      "description": "coverage list drops href so a descriptor field has no control",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "  \"href\",\n  \"list-items\",\n] as const;",
+          "replace": "  \"list-items\",\n] as const;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/coverage.test.ts",
+        "-t",
+        "field kind"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-021/negative-gap-accepted",
+      "requirement": "R-004",
+      "description": "parseLengthDraft accepts negative gap",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "  if (!Number.isFinite(n) || n < 0) return { ok: false, message: gapMessage(styleKey) };",
+          "replace": "  if (!Number.isFinite(n)) return { ok: false, message: gapMessage(styleKey) };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "invalid gap"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-021/reset-not-clearing",
+      "requirement": "R-004",
+      "description": "reset button does not clear the style value",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "      onClick={() => onPatch({ [styleKey]: undefined })}",
+          "replace": "      onClick={() => onPatch({})}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "reset clears"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
