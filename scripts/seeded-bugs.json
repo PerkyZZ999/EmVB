@@ -2218,6 +2218,46 @@
         "a page with a form always needs"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-039/editor-attrs-on-public",
+      "requirement": "R-031",
+      "description": "public render still emits editor-only data-emvb attributes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (mode === \"editor\" && id) attrs[\"data-emvb-id\"] = id;",
+          "replace": "    if (id) attrs[\"data-emvb-id\"] = id;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/forms/success-layout.test.ts",
+        "-t",
+        "no editor-only"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-039/form-submit-controls-missing",
+      "requirement": "R-040",
+      "description": "success layout omits form submit control",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/forms/success-layout.ts",
+          "search": "            { id: \"sub00001\", type: \"submit\", props: { label: \"Send\" } },",
+          "replace": "            { id: \"txt00002\", type: \"text\", props: { text: \"No submit\" } },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/forms/success-layout.test.ts",
+        "-t",
+        "form submit control"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
