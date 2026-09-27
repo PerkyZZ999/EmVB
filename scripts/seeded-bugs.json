@@ -2594,6 +2594,66 @@
         "repeats inline children"
       ],
       "expect": "Beta|Expected|fail|toContain"
+    },
+    {
+      "id": "W-065/popup-location-false",
+      "requirement": "R-061",
+      "description": "popup location gate returns false so popups never match",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/conditions.ts",
+          "search": "case \"popup\":\n      // Overlays compete on every route; conditions decide (S7b).\n      return true;",
+          "replace": "case \"popup\":\n      return false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/conditions.test.ts",
+        "-t",
+        "themePartLocationApplies gates"
+      ],
+      "expect": "themePartLocationApplies|Expected|fail|toBe"
+    },
+    {
+      "id": "W-065/unsafe-selector-allowed",
+      "requirement": "R-032",
+      "description": "unsafe click selectors are accepted by validateTriggers",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/triggers.ts",
+          "search": "if (trigger.type === \"click\" && !isSafeClickSelector(trigger.selector)) {",
+          "replace": "if (false && trigger.type === \"click\" && !isSafeClickSelector(trigger.selector)) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/triggers.test.ts",
+        "-t",
+        "rejects unsafe click"
+      ],
+      "expect": "unsafe|Expected|fail|toBe"
+    },
+    {
+      "id": "W-066/popup-config-unescaped",
+      "requirement": "R-032",
+      "description": "popup id with quote is not attribute-escaped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-markup.ts",
+          "search": "const safeId = escapeAttr(id);",
+          "replace": "const safeId = id;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/popup-markup.test.ts",
+        "-t",
+        "embeds escaped"
+      ],
+      "expect": "escaped|Expected|fail|toContain|not.toContain"
     }
   ]
 }
