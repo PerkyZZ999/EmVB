@@ -7,6 +7,7 @@ export {
   ContainerNode,
   DivBlockNode,
   FlexboxNode,
+  SvgNode,
   HeadingNode,
   SpacerNode,
   DividerNode,
@@ -128,6 +129,7 @@ export { serialize, isAllowedTag, isAllowedAttr, type VNode } from "./render/vno
 export { escapeAttr, escapeText } from "./sanitize/escape.ts";
 export { sanitizeHref } from "./sanitize/href.ts";
 export { sanitizeMediaUrl } from "./sanitize/media-url.ts";
+export { sanitizeSvgMarkup, isSafeSvgMarkup } from "./sanitize/svg.ts";
 export { resolveEmbedUrl, type EmbedTarget } from "./sanitize/embed-url.ts";
 export { summarizeLayout, type LayoutSummary } from "./stats.ts";
 export {

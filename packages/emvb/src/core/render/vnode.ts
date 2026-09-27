@@ -40,16 +40,19 @@ const TAGS = new Set([
   "svg",
   "path",
   "circle",
+  "ellipse",
   "line",
   "polyline",
   "polygon",
   "rect",
   "g",
+  "title",
+  "desc",
 ]);
 const VOID = new Set(["hr", "img", "input"]);
 // iframe/video are not void — they need closing tags.
 const ATTR_NAME =
-  /^(?:class|id|href|src|alt|width|height|loading|decoding|role|type|target|rel|aria-hidden|aria-label|aria-live|title|allow|referrerpolicy|preload|controls|allowfullscreen|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|method|action|name|value|placeholder|for|tabindex|autocomplete|data-[a-z][a-z0-9-]*)$/;
+  /^(?:class|id|href|src|alt|width|height|loading|decoding|role|type|target|rel|aria-hidden|aria-label|aria-live|title|allow|referrerpolicy|preload|controls|allowfullscreen|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|stroke-dasharray|stroke-opacity|fill-opacity|opacity|transform|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|method|action|name|value|placeholder|for|tabindex|autocomplete|data-[a-z][a-z0-9-]*)$/;
 
 export const isAllowedTag = (tag: string) => TAGS.has(tag);
 export const isAllowedAttr = (name: string) => ATTR_NAME.test(name);

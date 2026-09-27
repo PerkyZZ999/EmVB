@@ -61,6 +61,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   flexbox: SquaresFourIcon,
   image: ImageIcon,
   icon: StarIcon,
+  svg: StarIcon,
   video: YoutubeLogoIcon,
   form: ClipboardTextIcon,
   "text-input": TextboxIcon,

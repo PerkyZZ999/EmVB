@@ -4,6 +4,7 @@ import type {
   ContainerNode,
   DivBlockNode,
   FlexboxNode,
+  SvgNode,
   DividerNode,
   FormNode,
   HeadingNode,
@@ -30,6 +31,7 @@ import type {
 import { CONTAINER_TAGS, TEXT_TAGS } from "../schema/layout.ts";
 import type { ElementDescriptor } from "../schema/descriptors.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
+import { sanitizeSvgMarkup } from "../sanitize/svg.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { getBundledIcon } from "../icons/catalog.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
@@ -786,6 +788,83 @@ const postLink: ElementDefinition<PostLinkNode> = {
   build: (_node, attrs) => ({ tag: "a", attrs: { ...attrs, href: "#" }, children: ["Post link"] }),
 };
 
+const DEFAULT_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>';
+
+const svgEl: ElementDefinition<SvgNode> = {
+  baseCss:
+    ".emvb-svg{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-svg svg{display:block;width:1em;height:1em}.emvb-svg-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
+  defaults: () => ({
+    type: "svg",
+    props: { markup: DEFAULT_SVG, title: "SVG", decorative: false, size: 48 },
+  }),
+  descriptor: {
+    type: "svg",
+    name: "SVG",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "markup",
+        kind: "textarea",
+        label: "SVG markup",
+        message: "Paste safe SVG only (no scripts or external links).",
+      },
+      { key: "title", kind: "text", label: "Title", optional: true },
+      {
+        key: "decorative",
+        kind: "boolean",
+        label: "Decorative (hide from assistive tech)",
+        optional: true,
+      },
+      {
+        key: "size",
+        kind: "int",
+        label: "Size (px)",
+        optional: true,
+        message: "Size must be a positive whole number.",
+      },
+    ],
+  },
+  build: (node, attrs) => {
+    const tree = sanitizeSvgMarkup(node.props.markup);
+    if (!tree) {
+      return {
+        tag: "span",
+        attrs: {
+          ...attrs,
+          class: `${attrs.class ?? ""} emvb-svg-missing`.trim(),
+          "aria-hidden": "true",
+        },
+        children: [],
+      };
+    }
+    const size = node.props.size ?? 48;
+    const decorative = node.props.decorative === true;
+    const svgAttrs: Record<string, string> = {
+      ...tree.attrs,
+      xmlns: tree.attrs.xmlns ?? "http://www.w3.org/2000/svg",
+      width: String(size),
+      height: String(size),
+      focusable: "false",
+    };
+    if (!svgAttrs.fill && !svgAttrs.stroke) {
+      svgAttrs.fill = "currentColor";
+    }
+    if (decorative) {
+      svgAttrs["aria-hidden"] = "true";
+    } else {
+      svgAttrs.role = "img";
+      if (node.props.title) svgAttrs["aria-label"] = node.props.title;
+    }
+    return {
+      tag: "span",
+      attrs,
+      children: [{ tag: "svg", attrs: svgAttrs, children: tree.children }],
+    };
+  },
+};
+
 const divBlock: ElementDefinition<DivBlockNode> = {
   baseCss: ".emvb-div-block{display:block;min-width:0}",
   defaults: () => ({ type: "div-block", props: {}, children: [] }),
@@ -868,6 +947,7 @@ export const ELEMENTS = {
   loop,
   "div-block": divBlock,
   flexbox,
+  svg: svgEl,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;

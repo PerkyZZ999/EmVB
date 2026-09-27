@@ -16,6 +16,7 @@ import { ELEMENT_NAMES } from "./ElementPanel.tsx";
 const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
   container: SquaresFourIcon,
+  svg: SquaresFourIcon,
   "div-block": SquaresFourIcon,
   flexbox: SquaresFourIcon,
 };

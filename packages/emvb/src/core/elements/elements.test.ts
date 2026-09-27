@@ -316,3 +316,29 @@ describe("div-block and flexbox (W-072)", () => {
     expect(node.style?.flexDirection).toBe("row");
   });
 });
+
+describe("svg element (W-073)", () => {
+  test("renders inline sanitized SVG", () => {
+    const node = defaultElement("svg", "svg00001");
+    const layout: Layout = {
+      schemaVersion: 1,
+      root: { ...defaultElement("container", "root0001"), children: [node] },
+    };
+    const { html } = renderPage(layout, design);
+    expect(html).toContain("<svg");
+    expect(html).toContain("viewBox");
+    expect(html).not.toContain("<script");
+  });
+
+  test("unsafe markup becomes a missing placeholder", () => {
+    const node = defaultElement("svg", "svg00002");
+    node.props.markup = "<svg><script>alert(1)</script></svg>";
+    const layout: Layout = {
+      schemaVersion: 1,
+      root: { ...defaultElement("container", "root0001"), children: [node] },
+    };
+    const { html } = renderPage(layout, design);
+    expect(html).toContain("emvb-svg-missing");
+    expect(html).not.toContain("<script");
+  });
+});

@@ -222,6 +222,21 @@ export const FlexboxNode = z.strictObject({
   },
 });
 
+export const SvgNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("svg"),
+  props: z.strictObject({
+    /** Sanitized SVG markup (allowlisted tags/attrs only). */
+    markup: z.string().max(32768),
+    title: z.string().max(MAX_TEXT_LENGTH).optional(),
+    decorative: z.boolean().optional(),
+    size: z.number().int().positive().max(2048).optional(),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
 export const FORM_FIELD_TYPES = [
   "text-input",
   "textarea",
@@ -416,6 +431,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "loop",
   "div-block",
   "flexbox",
+  "svg",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -444,6 +460,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   ContainerNode,
   DivBlockNode,
   FlexboxNode,
+  SvgNode,
   HeadingNode,
   SpacerNode,
   DividerNode,
@@ -539,6 +556,20 @@ export type FlexboxNode = {
   children: LayoutNode[];
 };
 
+export type SvgNode = {
+  id: IdOf;
+  type: "svg";
+  props: {
+    markup: string;
+    title?: string;
+    decorative?: boolean;
+    size?: number;
+  };
+  style?: StyleOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+};
+
 export type FormNode = {
   id: IdOf;
   type: "form";
@@ -563,6 +594,7 @@ export type LayoutNode =
   | ContainerNode
   | DivBlockNode
   | FlexboxNode
+  | SvgNode
   | FormNode
   | LoopNode
   | HeadingNode
