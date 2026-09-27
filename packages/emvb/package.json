@@ -11,8 +11,13 @@
     ".": "./src/index.ts",
     "./core": "./src/core/index.ts"
   },
+  "scripts": {
+    "test:astro": "bun --bun vitest run"
+  },
   "devDependencies": {
-    "emdash": "0.41.0"
+    "astro": "7.3.5",
+    "emdash": "0.41.0",
+    "vitest": "5.0.2"
   },
   "peerDependencies": {
     "emdash": "~0.41.0"

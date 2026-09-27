@@ -12,18 +12,26 @@
     "fmt:check": "oxfmt --check",
     "typecheck": "tsc -p packages/emvb && tsc -p .",
     "fallow": "fallow dead-code",
-    "check": "bun run lint && bun run fmt:check && bun run typecheck && bun run fallow && bun run check:runtime",
+    "check": "bun run lint && bun run fmt:check && bun run typecheck && bun run fallow && bun run check:runtime && bun run test && bun run test:astro",
     "demo:node": "bun run --cwd demos/node dev",
     "demo:node:build": "bun run --cwd demos/node build",
     "demo:node:prod": "bun run --cwd demos/node start",
     "demo:cf": "bun run --cwd demos/cloudflare dev",
     "demo:cf:build": "bun run --cwd demos/cloudflare build",
     "demo:cf:prod": "bun run --cwd demos/cloudflare start",
-    "check:runtime": "bun scripts/check-runtime.ts"
+    "check:runtime": "bun scripts/check-runtime.ts",
+    "test": "bun test ./packages ./scripts ./test",
+    "test:astro": "bun run --cwd packages/emvb test:astro",
+    "e2e": "playwright test",
+    "seeded-bugs": "bun scripts/seeded-bug.ts"
   },
   "devDependencies": {
+    "@happy-dom/global-registrator": "20.14.5",
+    "@playwright/test": "1.63.0",
     "@types/bun": "1.4.2",
+    "evlog": "2.29.0",
     "fallow": "3.30.0",
+    "happy-dom": "20.14.5",
     "oxfmt": "0.70.0",
     "oxlint": "1.85.0",
     "typescript": "7.0.2"

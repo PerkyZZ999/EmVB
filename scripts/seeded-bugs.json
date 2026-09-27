@@ -1,0 +1,190 @@
+{
+  "$comment": "Seeded bugs (N-001). Each must make its command fail with output matching `expect`. Run: bun run seeded-bugs [--only <id text>]",
+  "seeds": [
+    {
+      "id": "W-001/lint-console",
+      "requirement": "N-007",
+      "description": "console.log in plugin code",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const PACKAGE_NAME = \"emvb\";",
+          "replace": "export const PACKAGE_NAME = \"emvb\";\nexport const debug = () => console.log(\"x\");"
+        }
+      ],
+      "command": ["bun", "run", "lint"],
+      "expect": "no-console"
+    },
+    {
+      "id": "W-001/format",
+      "requirement": "N-007",
+      "description": "badly formatted line",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const PLUGIN_ID = \"emvb\";",
+          "replace": "export const   PLUGIN_ID   =  \"emvb\""
+        }
+      ],
+      "command": ["bun", "run", "fmt:check"],
+      "expect": "Format issues found|constants\\.ts"
+    },
+    {
+      "id": "W-001/type-error",
+      "requirement": "N-007",
+      "description": "wrong type annotation",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const PLUGIN_ID = \"emvb\";",
+          "replace": "export const PLUGIN_ID: number = \"emvb\";"
+        }
+      ],
+      "command": ["bun", "run", "typecheck"],
+      "expect": "TS2322"
+    },
+    {
+      "id": "W-001/core-imports-react",
+      "requirement": "D-021",
+      "description": "framework import in src/core",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/index.ts",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 1;",
+          "replace": "import \"react\";\nexport const LAYOUT_SCHEMA_VERSION = 1;"
+        }
+      ],
+      "command": ["bun", "run", "lint"],
+      "expect": "no-restricted-imports"
+    },
+    {
+      "id": "W-001/core-imports-server",
+      "requirement": "D-021",
+      "description": "src/core importing src/server",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/index.ts",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 1;",
+          "replace": "import { createPlugin } from \"../server/plugin.ts\";\nexport const LAYOUT_SCHEMA_VERSION = 1;\nexport const leak = createPlugin;"
+        }
+      ],
+      "command": ["bun", "run", "fallow"],
+      "expect": "Boundary violations"
+    },
+    {
+      "id": "W-001/unused-export",
+      "requirement": "N-007",
+      "description": "unused export in an internal module",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const PACKAGE_NAME = \"emvb\";",
+          "replace": "export const PACKAGE_NAME = \"emvb\";\nexport const UNUSED_CONSTANT = 1;"
+        }
+      ],
+      "command": ["bun", "run", "fallow"],
+      "expect": "Unused exports"
+    },
+    {
+      "id": "W-002/cf-dev-on-bun",
+      "requirement": "R-051",
+      "description": "Cloudflare dev switched to the Bun runtime without updating the list",
+      "edits": [
+        {
+          "file": "demos/cloudflare/package.json",
+          "search": "\"dev\": \"astro dev",
+          "replace": "\"dev\": \"bun --bun astro dev"
+        }
+      ],
+      "command": ["bun", "run", "check:runtime"],
+      "expect": "is listed but now runs on Bun"
+    },
+    {
+      "id": "W-002/unlisted-node-script",
+      "requirement": "R-051",
+      "description": "a new script that runs on Node without being listed",
+      "edits": [
+        {
+          "file": "demos/node/package.json",
+          "search": "\"build\": \"bun --bun astro build\"",
+          "replace": "\"build\": \"astro build\""
+        }
+      ],
+      "command": ["bun", "run", "check:runtime"],
+      "expect": "runs on Node .* but is not listed"
+    },
+    {
+      "id": "W-003/runtime-check-bunx",
+      "requirement": "R-051",
+      "description": "runsOnNode stops treating bunx as Node",
+      "edits": [
+        {
+          "file": "scripts/check-runtime.ts",
+          "search": "(first === \"bunx\" && words[1] !== \"--bun\")",
+          "replace": "false"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/check-runtime.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-003/happydom-preload-missing",
+      "requirement": "N-001",
+      "description": "the happy-dom preload is removed",
+      "edits": [
+        {
+          "file": "bunfig.toml",
+          "search": "preload = [\"./test/setup/happydom.ts\"]",
+          "replace": "preload = []"
+        }
+      ],
+      "command": ["bun", "test", "./test/setup"],
+      "expect": "document is not defined|\\(fail\\)"
+    },
+    {
+      "id": "W-003/astro-escaping",
+      "requirement": "N-001",
+      "description": "the Astro harness fixture renders its prop as raw HTML",
+      "edits": [
+        {
+          "file": "packages/emvb/test/astro/fixtures/Harness.astro",
+          "search": "<p data-harness>{label}</p>",
+          "replace": "<p data-harness set:html={label} />"
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "AssertionError"
+    },
+    {
+      "id": "W-003/seeded-runner-restores",
+      "requirement": "N-001",
+      "description": "the runner stops restoring mutated files",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "await Promise.all([...originals].map(([path, text]) => writeFile(path, text)));",
+          "replace": "void originals;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-003/e2e-plugin-not-registered",
+      "requirement": "R-050",
+      "description": "the Node demo no longer registers emvb()",
+      "edits": [
+        {
+          "file": "demos/node/astro.config.mjs",
+          "search": "plugins: [formsPlugin(), emvb()],",
+          "replace": "plugins: [formsPlugin()],"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/smoke.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*the EmVB plugin is loaded by the host"
+    }
+  ]
+}

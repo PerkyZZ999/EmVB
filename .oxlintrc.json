@@ -46,6 +46,12 @@
           }
         ]
       }
+    },
+    {
+      "files": ["scripts/**", "e2e/**"],
+      "rules": {
+        "no-await-in-loop": "off"
+      }
     }
   ]
 }
