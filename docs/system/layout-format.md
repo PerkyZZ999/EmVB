@@ -49,8 +49,17 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | `image` | `src`, `alt`, optional `decorative`, `width`, `height`, `mediaId` | none | `<img loading="lazy">` (decorative → empty `alt` + `role="presentation"`) |
 | `icon` | `iconId` (bundled Lucide id), optional `size`, `decorative`, `title` | none | Inline Lucide `<svg>` (unknown id → placeholder; never a remote URL) |
 | `video` | `url`, `title`, optional `mediaId` | none | YouTube/Vimeo privacy `<iframe loading="lazy">` or media `<video controls>` (no autoplay) |
+| `form` | `formId` (forms-plugin id; may be empty until bound) | `children: Node[]` (form fields + submit; no nested forms) | `<form class="emvb-form ec-form" data-ec-form data-form-id method="POST" action="/_emdash/api/plugins/emdash-forms/submit">` wrapping `[data-page="0"]`, hidden `formId`, honeypot `_hp`, and `data-form-status` |
+| `text-input` | `field`, optional `label`, `placeholder` | none | labelled `<input class="ec-form-input">` + `data-error-for` |
+| `textarea` | `field`, optional `label`, `placeholder` | none | labelled `<textarea class="ec-form-input">` + `data-error-for` |
+| `select` | `field`, optional `label`, `placeholder` | none | labelled `<select>` (options from the public form definition when available) |
+| `checkbox` | `field`, optional `label` | none | labelled `<input type="checkbox" value="true">` |
+| `radio` | `field`, optional `label`, `placeholder` | none | `<fieldset>` of radios (options from definition when available) |
+| `submit` | optional `label` | none | `<button type="submit" class="ec-form-submit">` |
 
-Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `classes` (unused until S4).
+Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `classes` (style-class ids from the design system, S4).
+
+**Forms (S5):** form fields are only valid inside a `form` (or under one). Pages with a form set `needsFormsRuntime`; the host route loads `EmVBFormsRuntime` so `initForms` handles AJAX submit. Pages without a form stay zero EmVB JS (R-031).
 
 ### Style properties (v1, W-017)
 

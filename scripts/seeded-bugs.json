@@ -2146,8 +2146,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "      (formsAvailable || d.group !== \"form\") && (!q || d.name.toLowerCase().includes(q)),",
-          "replace": "      (!q || d.name.toLowerCase().includes(q)),"
+          "search": "    (d) => (formsAvailable || d.group !== \"form\") && (!q || d.name.toLowerCase().includes(q)),",
+          "replace": "    (d) => (!q || d.name.toLowerCase().includes(q)),"
         }
       ],
       "command": [
