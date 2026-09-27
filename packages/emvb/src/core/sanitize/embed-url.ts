@@ -29,7 +29,7 @@ function stripAutoplay(url: URL): void {
 function youtubeId(parsed: URL): string | undefined {
   const host = parsed.hostname.toLowerCase();
   if (host === "youtu.be" || host === "www.youtu.be") {
-    const id = parsed.pathname.split("/").filter(Boolean)[0];
+    const id = parsed.pathname.split("/").find(Boolean);
     return id && /^[\w-]{6,}$/.test(id) ? id : undefined;
   }
   if (parsed.pathname.startsWith("/embed/")) {
@@ -52,8 +52,7 @@ function vimeoId(parsed: URL): string | undefined {
     const id = videoIdx >= 0 ? parts[videoIdx + 1] : parts[0];
     return id && /^\d{6,}$/.test(id) ? id : undefined;
   }
-  const parts = parsed.pathname.split("/").filter(Boolean);
-  const id = parts[0];
+  const id = parsed.pathname.split("/").find(Boolean);
   return id && /^\d{6,}$/.test(id) ? id : undefined;
 }
 
