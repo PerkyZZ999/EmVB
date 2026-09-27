@@ -132,7 +132,7 @@ describe("planSetup", () => {
     const themeFields = steps
       .filter((s) => s.kind === "create-field" && s.collection === THEME_PARTS_COLLECTION)
       .map((s) => (s.kind === "create-field" ? s.body.slug : ""));
-    expect(themeFields).toEqual(["title", "layout", "part_type", "conditions"]);
+    expect(themeFields).toEqual(["title", "layout", "part_type", "conditions", "triggers"]);
   });
 
   test("the layout field is bound to the read-only EmVB widget on both collections", () => {
@@ -147,7 +147,7 @@ describe("planSetup", () => {
     expect(LAYOUT_WIDGET).toBe("emvb:layout");
   });
 
-  test("part_type includes S7c/S7d templates (popups deferred)", () => {
+  test("part_type includes S7c/S7d templates and popup (S7b)", () => {
     expect(THEME_PARTS_FIELD_SPECS.find((f) => f.slug === "part_type")).toMatchObject({
       type: "select",
       required: true,
@@ -161,7 +161,16 @@ describe("planSetup", () => {
           "single_post",
           "archive",
           "loop_item",
+          "popup",
         ],
+      },
+    });
+    expect(THEME_PARTS_FIELD_SPECS.find((f) => f.slug === "triggers")).toMatchObject({
+      type: "json",
+      defaultValue: {
+        schemaVersion: 1,
+        open: [{ type: "page_load" }],
+        advanced: {},
       },
     });
   });

@@ -18,8 +18,8 @@ export const COLLECTION_SPEC = {
 } as const;
 
 /**
- * Theme parts (headers/footers + S7c content templates). Hidden, no SEO, no public urlPattern
- * so they never become pages (D-TB-03). Popups are deferred (D-TB-02).
+ * Theme parts (headers/footers + content templates + popups). Hidden, no SEO, no public
+ * urlPattern so they never become pages (D-TB-03).
  */
 export const THEME_PARTS_COLLECTION_SPEC = {
   slug: THEME_PARTS_COLLECTION,
@@ -66,6 +66,13 @@ const DEFAULT_THEME_CONDITIONS = {
   ],
 } as const;
 
+/** Default popup triggers: open on page load (Elementor-like). */
+const DEFAULT_THEME_TRIGGERS = {
+  schemaVersion: 1,
+  open: [{ type: "page_load" }],
+  advanced: {},
+} as const;
+
 export const THEME_PARTS_FIELD_SPECS: readonly FieldSpec[] = [
   { slug: "title", label: "Title", type: "string", required: true, validation: null },
   { slug: "layout", label: "Layout", type: "json", widget: LAYOUT_WIDGET, validation: null },
@@ -82,5 +89,12 @@ export const THEME_PARTS_FIELD_SPECS: readonly FieldSpec[] = [
     type: "json",
     validation: null,
     defaultValue: DEFAULT_THEME_CONDITIONS,
+  },
+  {
+    slug: "triggers",
+    label: "Triggers",
+    type: "json",
+    validation: null,
+    defaultValue: DEFAULT_THEME_TRIGGERS,
   },
 ];

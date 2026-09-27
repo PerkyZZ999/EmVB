@@ -178,6 +178,7 @@ export {
   themePartLocationApplies,
   contentPartTypeForContext,
   pickThemePartWinner,
+  listMatchingThemeParts,
   type ConditionRule,
   type ConditionsDoc,
   type ConditionsValidation,
@@ -189,15 +190,34 @@ export {
   THEME_PART_TYPES,
   CONTENT_THEME_PART_TYPES,
   ITEM_THEME_PART_TYPES,
+  OVERLAY_THEME_PART_TYPES,
   THEME_PART_TYPE_LABELS,
   isThemePartType,
   parseThemePartType,
   isContentThemePartType,
   isItemThemePartType,
+  isOverlayThemePartType,
   type ThemePartType,
   type ContentThemePartType,
   type ItemThemePartType,
+  type OverlayThemePartType,
 } from "./theme/part-types.ts";
+
+export {
+  TRIGGERS_SCHEMA_VERSION,
+  MAX_POPUP_TRIGGERS,
+  defaultTriggers,
+  validateTriggers,
+  isSafeClickSelector,
+  deviceForWidth,
+  matchesPopupDevices,
+  withinShowTimes,
+  type PopupOpenTrigger,
+  type PopupAdvancedRules,
+  type PopupDevice,
+  type TriggersDoc,
+  type TriggersValidation,
+} from "./theme/triggers.ts";
 
 export {
   SAMPLE_POST,

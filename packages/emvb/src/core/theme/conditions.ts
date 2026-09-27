@@ -219,6 +219,8 @@ export function themePartLocationApplies(
   switch (partType) {
     case "header":
     case "footer":
+    case "popup":
+      // Overlays compete on every route; conditions decide (S7b).
       return true;
     case "error_404":
       return ctx.is404;
@@ -312,6 +314,7 @@ export function defaultConditionsFor(partType: ThemePartType): ConditionsDoc {
       return defaultConditions();
     case "header":
     case "footer":
+    case "popup":
       return defaultConditions();
   }
 }
@@ -370,3 +373,24 @@ export function pickThemePartWinner(
   }
   return winner;
 }
+
+/**
+ * All candidates of one type that match location + conditions (S7b popups).
+ * Sorted by updatedAt descending so newest configs win for equal conditions.
+ */
+export function listMatchingThemeParts(
+  candidates: readonly ThemePartCandidate[],
+  partType: ThemePartType,
+  ctx: ThemeRequestContext,
+): ThemePartCandidate[] {
+  const matched: ThemePartCandidate[] = [];
+  for (const candidate of candidates) {
+    if (candidate.partType !== partType) continue;
+    if (!themePartLocationApplies(candidate.partType, ctx)) continue;
+    if (!matchesConditions(candidate.conditions, ctx)) continue;
+    matched.push(candidate);
+  }
+  matched.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : a.updatedAt > b.updatedAt ? -1 : 0));
+  return matched;
+}
+

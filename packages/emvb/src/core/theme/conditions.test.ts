@@ -6,6 +6,7 @@ import {
   defaultConditionsFor,
   matchesConditions,
   pickThemePartWinner,
+  listMatchingThemeParts,
   themePartLocationApplies,
   validateConditions,
   type ConditionsDoc,
@@ -284,6 +285,7 @@ describe("S7c content part types", () => {
     });
     expect(defaultConditionsFor("loop_item")).toEqual(defaultConditions());
     expect(defaultConditionsFor("header")).toEqual(defaultConditions());
+    expect(defaultConditionsFor("popup")).toEqual(defaultConditions());
   });
 
   test("themePartLocationApplies gates content types to their routes", () => {
@@ -300,6 +302,8 @@ describe("S7c content part types", () => {
     expect(themePartLocationApplies("archive", postsArchive)).toBe(true);
     expect(themePartLocationApplies("archive", category)).toBe(true);
     expect(themePartLocationApplies("archive", search)).toBe(false);
+    expect(themePartLocationApplies("popup", post)).toBe(true);
+    expect(themePartLocationApplies("popup", front)).toBe(true);
     expect(themePartLocationApplies("loop_item", postsArchive)).toBe(false);
     expect(themePartLocationApplies("loop_item", post)).toBe(false);
     expect(themePartLocationApplies("header", notFound)).toBe(true);
@@ -403,5 +407,32 @@ describe("S7c content part types", () => {
     ];
     expect(pickThemePartWinner(candidates, "loop_item", postsArchive)).toBeNull();
     expect(pickThemePartWinner(candidates, "loop_item", post)).toBeNull();
+  });
+
+  test("listMatchingThemeParts returns every matching popup", () => {
+    const candidates = [
+      {
+        id: "p1",
+        partType: "popup" as const,
+        conditions: defaultConditions(),
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      },
+      {
+        id: "p2",
+        partType: "popup" as const,
+        conditions: withExclude(defaultConditions(), "singular", "front"),
+        updatedAt: "2026-02-01T00:00:00.000Z",
+      },
+      {
+        id: "hdr",
+        partType: "header" as const,
+        conditions: defaultConditions(),
+        updatedAt: "2026-03-01T00:00:00.000Z",
+      },
+    ];
+    const onPost = listMatchingThemeParts(candidates, "popup", post);
+    expect(onPost.map((c) => c.id)).toEqual(["p2", "p1"]);
+    const onFront = listMatchingThemeParts(candidates, "popup", front);
+    expect(onFront.map((c) => c.id)).toEqual(["p1"]);
   });
 });
