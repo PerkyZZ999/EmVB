@@ -1,4 +1,5 @@
 import { expect, test as setup } from "@playwright/test";
+import { ROLES, setDevRole } from "./support/roles.ts";
 
 setup("sign in as the dev admin and warm up the admin", async ({ page }, testInfo) => {
   setup.setTimeout(180_000);
@@ -9,6 +10,8 @@ setup("sign in as the dev admin and warm up the admin", async ({ page }, testInf
   // The dev bypass only exists in dev mode (VALIDATION.md K20).
   await page.goto("/_emdash/api/setup/dev-bypass?redirect=/_emdash/admin");
   await page.waitForURL("**/_emdash/admin**");
+  // Every spec starts as an admin, even if an interrupted role test left a lower role behind.
+  setDevRole(platform, ROLES.admin);
 
   // The first admin loads after a dev-server start can abort while Vite optimizes dependencies,
   // and under Bun the plugin registry can fail to hydrate once (VALIDATION.md S0-1).

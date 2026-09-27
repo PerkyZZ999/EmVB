@@ -1,5 +1,5 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
-import { api, createPage } from "./support/api.ts";
+import { api, createPage, ensureEmvbSetup } from "./support/api.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
 
 const PAGES = "/_emdash/admin/plugins/emvb/pages";
@@ -25,6 +25,13 @@ function becomeRole(platform: string, role: number) {
 }
 test.afterAll(() => {
   if (changedPlatform) setDevRole(changedPlatform, ROLES.admin);
+});
+
+// Page saves need the `emvb_pages` collection, and a new database has none until setup runs.
+test.beforeAll(async ({ browser }) => {
+  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
+  await ensureEmvbSetup(await context.newPage());
+  await context.close();
 });
 
 const sidebarLink = (page: Page) =>
