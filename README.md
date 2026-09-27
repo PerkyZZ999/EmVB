@@ -25,3 +25,6 @@ The Cloudflare demo runs the same way with `bun run demo:cf` on port 4412.
 - [AGENTS.md](AGENTS.md): commands, tests, code style and project rules.
 - [docs/project/](docs/project/): requirements, decisions, architecture and validation evidence.
 - [docs/system/layout-format.md](docs/system/layout-format.md): how pages and the design system are stored.
+
+
+See [docs/guides/install-in-a-host-site.md](docs/guides/install-in-a-host-site.md).

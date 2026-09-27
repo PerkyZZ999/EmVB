@@ -1,0 +1,84 @@
+# Install EmVB in a host site (R-052)
+
+EmVB is a **native** EmDash plugin: add the package, register it in `astro.config`, and add one public route. There is no EmDash registry one-click install (D-010).
+
+Verified against EmDash `~0.41.0` and the EmVB TypeScript-source package shape (no `bun build` step for the plugin).
+
+## 1. Install the package
+
+From your EmDash site root (Bun):
+
+```bash
+bun add emvb@file:../path/to/emvb-*.tgz
+# or, in a monorepo workspace: "emvb": "workspace:*"
+```
+
+Optional (forms on EmVB pages):
+
+```bash
+bun add @emdash-cms/plugin-forms@0.2.8
+```
+
+## 2. Register the plugin
+
+In `astro.config.mjs` (or `.ts`), add EmVB next to your other plugins:
+
+```js
+import { emvb } from "emvb";
+import { formsPlugin } from "@emdash-cms/plugin-forms"; // optional
+
+export default defineConfig({
+  integrations: [
+    emdash({
+      plugins: [formsPlugin(), emvb()],
+      // …adapters…
+    }),
+  ],
+});
+```
+
+## 3. Public route
+
+Copy the pattern from EmVB’s demos (`demos/node/src/pages/[slug].astro`): try `resolveEmVBPage` first, then fall through to the site’s own pages, and rewrite to `/404` when neither matches.
+
+```astro
+---
+import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
+import { EmVBPage, resolveEmVBPage } from "emvb/astro";
+import { EmVBFormsRuntime } from "emvb/astro/forms";
+// …site layout…
+
+const emvb = await resolveEmVBPage(Astro);
+if (!emvb && !(await getEmDashEntry("pages", decodeSlug(Astro.params.slug)))) {
+  return Astro.rewrite("/404");
+}
+---
+
+{emvb ? (
+  <EmVBPage page={emvb}>{emvb.needsFormsRuntime && <EmVBFormsRuntime />}</EmVBPage>
+) : (
+  /* site page */
+  null
+)}
+```
+
+Blank-canvas EmVB pages use `standalone` on `EmVBPage` (see the demos).
+
+## 4. First-run setup
+
+1. Start the site (`bunx --bun astro dev` or your host’s script).
+2. Sign in as an admin.
+3. Open **Visual pages** → **Set up EmVB** once (creates the hidden `emvb_pages` collection).
+4. Create a page, publish it, open `/{slug}`.
+
+## 5. Package shape check
+
+From the EmVB repo:
+
+```bash
+bun pm pack --cwd packages/emvb
+# Install the tarball into a fresh starter and apply steps 2–4.
+bun run pack:smoke
+```
+
+`pack:smoke` records that the packed package exports `.`, `./astro`, and `./astro/forms` without a build step.
