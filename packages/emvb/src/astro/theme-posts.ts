@@ -1,0 +1,60 @@
+import type { ThemePostFields } from "../core/index.ts";
+
+type MediaLike = {
+  src?: unknown;
+  url?: unknown;
+  previewUrl?: unknown;
+  alt?: unknown;
+};
+
+/** Pull a sanitized-ready image URL + alt from an EmDash media / image field value. */
+export function mediaFieldsFrom(value: unknown): {
+  featuredImageUrl?: string;
+  featuredImageAlt?: string;
+} {
+  if (!value || typeof value !== "object") return {};
+  const media = value as MediaLike;
+  const candidates = [media.src, media.url, media.previewUrl];
+  let featuredImageUrl: string | undefined;
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim()) {
+      featuredImageUrl = candidate.trim();
+      break;
+    }
+  }
+  const featuredImageAlt =
+    typeof media.alt === "string" && media.alt.trim() ? media.alt.trim() : undefined;
+  return { featuredImageUrl, featuredImageAlt };
+}
+
+/**
+ * Normalize an EmDash posts collection entry (or plain data bag) into ThemePostFields.
+ * Permalink defaults to `/posts/{slug}` to match the demo routes.
+ */
+export function themePostFromEntry(
+  entry: { id?: string; data?: Record<string, unknown> } | Record<string, unknown>,
+  options: { permalinkPrefix?: string } = {},
+): ThemePostFields | null {
+  const data =
+    "data" in entry && entry.data && typeof entry.data === "object"
+      ? (entry.data as Record<string, unknown>)
+      : (entry as Record<string, unknown>);
+  const id = String(data["id"] ?? ("id" in entry ? entry.id : "") ?? "");
+  const slug = typeof data["slug"] === "string" ? data["slug"] : id;
+  if (!slug && !id) return null;
+  const title = typeof data["title"] === "string" ? data["title"] : "";
+  const excerpt = typeof data["excerpt"] === "string" ? data["excerpt"] : "";
+  const content = data["content"] ?? "";
+  const prefix = options.permalinkPrefix ?? "/posts";
+  const permalink = `${prefix.replace(/\/$/, "")}/${slug || id}`;
+  const media = mediaFieldsFrom(data["featured_image"]);
+  return {
+    id: id || slug,
+    slug: slug || id,
+    title,
+    excerpt,
+    content,
+    permalink,
+    ...media,
+  };
+}

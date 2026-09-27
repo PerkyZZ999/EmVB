@@ -1,18 +1,23 @@
-import { getEmDashCollection } from "emdash";
+import { getEmDashCollection, getEmDashEntry } from "emdash";
 import { getPublicPluginApiRouteHandler } from "emdash/plugin-utils";
 import {
+  collectLoopItemPartIds,
   contentPartTypeForContext,
   defaultConditions,
   parseThemePartType,
   pickThemePartWinner,
   validateConditions,
+  type Layout,
+  type ThemeDynamicData,
   type ThemePartCandidate,
   type ThemePartType,
+  type ThemePostFields,
   type ThemeRequestContext,
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
-import { loadDesign, renderStored, type RenderedPage } from "./render.ts";
+import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
 import { themeContextFrom } from "./theme-context.ts";
+import { themePostFromEntry } from "./theme-posts.ts";
 
 export type RenderedThemePart = {
   id: string;
@@ -26,7 +31,7 @@ export type ResolvedThemeParts = {
   header: RenderedThemePart | null;
   footer: RenderedThemePart | null;
   /**
-   * Body/main replacement when an Error 404, Search Results, or Single Page part wins.
+   * Body/main replacement when a content theme part wins (404, search, page, post, archive).
    * Null when none match — hosts keep their route slot content.
    */
   content: RenderedThemePart | null;
@@ -85,9 +90,98 @@ async function loadPublishedThemeParts(): Promise<StoredPart[]> {
   return parts;
 }
 
+async function loadLoopTemplates(
+  layout: Layout,
+  parts: StoredPart[],
+): Promise<Record<string, Layout>> {
+  const ids = collectLoopItemPartIds(layout);
+  if (ids.length === 0) return {};
+  const byId = new Map(parts.map((p) => [p.id, p]));
+  const templates: Record<string, Layout> = {};
+  for (const id of ids) {
+    const part = byId.get(id);
+    if (!part || part.partType !== "loop_item") continue;
+    const itemLayout = readLayout(part.layout);
+    if (itemLayout) templates[id] = itemLayout;
+  }
+  return templates;
+}
+
+async function loadSingularPost(ctx: ThemeRequestContext): Promise<ThemePostFields | undefined> {
+  if (ctx.kind !== "singular" || ctx.collection !== "posts") return undefined;
+  const key = ctx.entryId || undefined;
+  // Prefer slug from path `/posts/{slug}` when entry id is missing.
+  const pathSlug = /^\/posts\/([^/]+)$/.exec(ctx.path)?.[1];
+  const lookup = key || (pathSlug ? decodeURIComponent(pathSlug) : undefined);
+  if (!lookup) return undefined;
+  try {
+    const { entry } = await getEmDashEntry("posts", lookup);
+    if (!entry) return undefined;
+    return themePostFromEntry(entry) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function loadArchivePosts(ctx: ThemeRequestContext): Promise<{
+  posts: ThemePostFields[];
+  archiveTitle?: string;
+}> {
+  if (ctx.kind !== "archive" || ctx.isSearch) return { posts: [] };
+  try {
+    const filter: {
+      orderBy: { published_at: "desc" };
+      limit: number;
+      where?: Record<string, string>;
+    } = {
+      orderBy: { published_at: "desc" },
+      limit: 20,
+    };
+    if (ctx.taxonomy?.type === "category") {
+      filter.where = { category: ctx.taxonomy.slug };
+    } else if (ctx.taxonomy?.type === "tag") {
+      filter.where = { tag: ctx.taxonomy.slug };
+    }
+    const result = await getEmDashCollection("posts", filter);
+    if (result.error || !result.entries) return { posts: [] };
+    const posts = result.entries
+      .map((entry) => themePostFromEntry(entry))
+      .filter((p): p is ThemePostFields => p !== null);
+    const archiveTitle = ctx.taxonomy?.slug
+      ? ctx.taxonomy.slug
+      : ctx.collection === "posts"
+        ? "Posts"
+        : undefined;
+    return { posts, archiveTitle };
+  } catch {
+    return { posts: [] };
+  }
+}
+
+async function buildDynamicForContent(
+  partType: ThemePartType,
+  ctx: ThemeRequestContext,
+  layout: Layout,
+  parts: StoredPart[],
+): Promise<ThemeDynamicData | undefined> {
+  const loopTemplates = await loadLoopTemplates(layout, parts);
+  if (partType === "single_post") {
+    const post = await loadSingularPost(ctx);
+    if (!post && Object.keys(loopTemplates).length === 0) return undefined;
+    return { post, loopTemplates };
+  }
+  if (partType === "archive") {
+    const { posts, archiveTitle } = await loadArchivePosts(ctx);
+    return { posts, archiveTitle, loopTemplates };
+  }
+  if (Object.keys(loopTemplates).length > 0) return { loopTemplates };
+  return undefined;
+}
+
 /**
- * Resolve winning published theme parts for this request (R-062 / S7c).
+ * Resolve winning published theme parts for this request (R-062 / S7d).
  * Returns plain HTML/CSS only — no EmVB JS (R-031).
+ * Single Post / Archive winners substitute post fields server-side.
  */
 export async function resolveThemeParts(
   astro: AstroLike,
@@ -129,10 +223,21 @@ export async function resolveThemeParts(
   const handler = getPublicPluginApiRouteHandler(astro.locals as never);
   const design = await loadDesign(handler, astro.url);
 
-  const renderPart = (winner: ThemePartCandidate): RenderedThemePart | null => {
+  const renderPart = async (winner: ThemePartCandidate): Promise<RenderedThemePart | null> => {
     const stored = parts.find((p) => p.id === winner.id);
     if (!stored) return null;
-    const rendered: RenderedPage = renderStored(stored.layout, design, stored.id);
+    const layout = readLayout(stored.layout);
+    const dynamic =
+      layout && contentWinner && winner.id === contentWinner.id
+        ? await buildDynamicForContent(stored.partType, context, layout, parts)
+        : undefined;
+    const rendered: RenderedPage = renderStored(
+      stored.layout,
+      design,
+      stored.id,
+      undefined,
+      dynamic,
+    );
     const html = rendered.html
       ? `<div class="emvb-theme-${stored.partType}" data-emvb-theme-part="${stored.id}">${rendered.html}</div>`
       : "";
@@ -145,9 +250,9 @@ export async function resolveThemeParts(
     };
   };
 
-  const header = headerWinner ? renderPart(headerWinner) : null;
-  const footer = footerWinner ? renderPart(footerWinner) : null;
-  const content = contentWinner ? renderPart(contentWinner) : null;
+  const header = headerWinner ? await renderPart(headerWinner) : null;
+  const footer = footerWinner ? await renderPart(footerWinner) : null;
+  const content = contentWinner ? await renderPart(contentWinner) : null;
   const css = [header?.css, content?.css, footer?.css].filter(Boolean).join("\n");
   return { header, footer, content, css };
 }
