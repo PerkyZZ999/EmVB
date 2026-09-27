@@ -16,6 +16,7 @@ export function LeftPanel({
   onMoveUp,
   onMoveDown,
   onDelete,
+  formsAvailable = true,
 }: {
   layout: Layout | null;
   selectedId: string | null;
@@ -25,6 +26,7 @@ export function LeftPanel({
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
   onDelete: (id: string) => void;
+  formsAvailable?: boolean;
 }) {
   const [tab, setTab] = React.useState(() => {
     try {
@@ -54,7 +56,7 @@ export function LeftPanel({
         onValueChange={changeTab}
       />
       {tab === "add" ? (
-        <AddPanel onAdd={onAdd} />
+        <AddPanel onAdd={onAdd} formsAvailable={formsAvailable} />
       ) : (
         <LayersPanel
           layout={layout}

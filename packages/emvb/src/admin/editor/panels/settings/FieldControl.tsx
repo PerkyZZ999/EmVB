@@ -8,6 +8,8 @@ import {
 } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
+import { FieldBindControl } from "./FieldBindControl.tsx";
+import { FormBindControl } from "./FormBindControl.tsx";
 import { IconPicker } from "./IconPicker.tsx";
 import { MediaPicker } from "./MediaPicker.tsx";
 
@@ -27,12 +29,15 @@ export function FieldControl({
   node,
   onChange,
   fetcher,
+  parentFormId,
 }: {
   field: FieldDescriptor;
   node: LayoutNode;
   onChange: (node: LayoutNode) => void;
   /** Required for media library / upload fields (W-024). */
   fetcher?: Fetcher;
+  /** Enclosing form's formId for field pickers (W-036). */
+  parentFormId?: string;
 }) {
   const props = propsOf(node);
   const raw = props[field.key];
@@ -51,6 +56,29 @@ export function FieldControl({
     }
     setError(null);
   }, [node.id, field.key, field.kind, raw]);
+
+  if (field.key === "formId" && fetcher) {
+    return (
+      <FormBindControl
+        key={field.key}
+        value={typeof raw === "string" ? raw : ""}
+        fetcher={fetcher}
+        onChange={(formId) => onChange(withProp(node, "formId", formId))}
+      />
+    );
+  }
+
+  if (field.key === "field" && fetcher) {
+    return (
+      <FieldBindControl
+        key={field.key}
+        value={typeof raw === "string" ? raw : ""}
+        formId={parentFormId}
+        fetcher={fetcher}
+        onChange={(name) => onChange(withProp(node, "field", name))}
+      />
+    );
+  }
 
   if (field.kind === "icon") {
     return <IconPicker key={field.key} node={node} onChange={onChange} />;

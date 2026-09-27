@@ -21,6 +21,7 @@ import {
   type LayoutNode,
 } from "../../core/index.ts";
 import { ApiError, type Fetcher } from "../api.ts";
+import { loadFormsCapability } from "../forms-api.ts";
 import { previewUrl, saveDesign } from "../content-api.ts";
 import { readCollection } from "../setup/run.ts";
 import { CanvasFrame, type CanvasSelection } from "./canvas/CanvasFrame.tsx";
@@ -150,6 +151,16 @@ function EditorApp({
   const lastToast = React.useRef<string | null>(null);
   const latest = React.useRef(state);
   latest.current = state;
+  const [formsAvailable, setFormsAvailable] = React.useState(true);
+  React.useEffect(() => {
+    let cancelled = false;
+    void loadFormsCapability(fetcher).then((cap) => {
+      if (!cancelled) setFormsAvailable(cap.status !== "missing");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetcher]);
 
   React.useEffect(() => {
     if (leaving) exit();
@@ -416,6 +427,7 @@ function EditorApp({
                   selectedId={state.selectedId}
                   onSelect={(id) => dispatch({ type: "select", id })}
                   onAdd={addFromPanel}
+                  formsAvailable={formsAvailable}
                   onDuplicate={duplicate}
                   onMoveUp={(id) => {
                     const layout = latest.current.page.layout;
@@ -535,6 +547,7 @@ function EditorApp({
                     design={state.design}
                     rejection={saver.rejection}
                     fetcher={fetcher}
+                    formsAvailable={formsAvailable}
                     onChange={(node: LayoutNode) =>
                       dispatch({ type: "update-node", id: node.id, update: () => node })
                     }

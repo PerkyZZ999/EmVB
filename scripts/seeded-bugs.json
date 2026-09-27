@@ -2138,6 +2138,46 @@
         "flags required fields"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-036/form-group-when-forms-missing",
+      "requirement": "R-040",
+      "description": "Form Add group still shown when forms plugin is missing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "      (formsAvailable || d.group !== \"form\") && (!q || d.name.toLowerCase().includes(q)),",
+          "replace": "      (!q || d.name.toLowerCase().includes(q)),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "hides Form group"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-036/field-names-not-from-definition",
+      "requirement": "R-040",
+      "description": "field binder ignores definition and stays manual",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "  if (fields && fields.length > 0) {",
+          "replace": "  if (false && fields && fields.length > 0) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "shows field options from definition"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

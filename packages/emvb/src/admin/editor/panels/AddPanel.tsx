@@ -12,6 +12,12 @@ import {
   ImageIcon,
   StarIcon,
   YoutubeLogoIcon,
+  TextboxIcon,
+  CheckSquareIcon,
+  RadioButtonIcon,
+  PaperPlaneTiltIcon,
+  ClipboardTextIcon,
+  NotePencilIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
 import { ELEMENT_DESCRIPTORS, type ElementType } from "../../../core/index.ts";
@@ -31,6 +37,13 @@ const ICONS: Record<string, typeof TextHIcon> = {
   image: ImageIcon,
   icon: StarIcon,
   video: YoutubeLogoIcon,
+  form: ClipboardTextIcon,
+  "text-input": TextboxIcon,
+  textarea: NotePencilIcon,
+  select: TextboxIcon,
+  checkbox: CheckSquareIcon,
+  radio: RadioButtonIcon,
+  submit: PaperPlaneTiltIcon,
 };
 
 const GROUPS = [
@@ -42,14 +55,19 @@ const GROUPS = [
 export function AddPanel({
   onAdd,
   defaultQuery = "",
+  formsAvailable = true,
 }: {
   onAdd: (type: ElementType) => void;
   /** Test-only initial search string. */
   defaultQuery?: string;
+  /** Hide the Form group when the forms plugin is missing (W-036). */
+  formsAvailable?: boolean;
 }) {
   const [query, setQuery] = React.useState(defaultQuery);
   const q = query.trim().toLowerCase();
-  const matched = ELEMENT_DESCRIPTORS.filter((d) => !q || d.name.toLowerCase().includes(q));
+  const matched = ELEMENT_DESCRIPTORS.filter(
+    (d) => (formsAvailable || d.group !== "form") && (!q || d.name.toLowerCase().includes(q)),
+  );
   return (
     <div className="emvb-panel-body" data-emvb-panel="add">
       <Input

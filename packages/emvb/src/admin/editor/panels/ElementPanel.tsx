@@ -9,11 +9,18 @@ import {
   SquaresFourIcon,
   TextHIcon,
   WarningCircleIcon,
+  TextboxIcon,
+  CheckSquareIcon,
+  RadioButtonIcon,
+  PaperPlaneTiltIcon,
+  ClipboardTextIcon,
+  NotePencilIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   ELEMENT_DESCRIPTORS,
   findNode,
+  isFormNode,
   parentOf,
   type DesignSystem,
   type Layout,
@@ -35,12 +42,29 @@ export const ELEMENT_NAMES: Record<string, string> = Object.fromEntries(
   ELEMENT_DESCRIPTORS.map((d) => [d.type, d.name]),
 );
 
+const enclosingFormId = (layout: Layout, nodeId: string): string | undefined => {
+  let current = parentOf(layout, nodeId);
+  while (current) {
+    const node = findNode(layout, current);
+    if (node && isFormNode(node)) return node.props.formId || undefined;
+    current = parentOf(layout, current);
+  }
+  return undefined;
+};
+
 const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
   container: SquaresFourIcon,
   image: ImageIcon,
   icon: StarIcon,
   video: YoutubeLogoIcon,
+  form: ClipboardTextIcon,
+  "text-input": TextboxIcon,
+  textarea: NotePencilIcon,
+  select: TextboxIcon,
+  checkbox: CheckSquareIcon,
+  radio: RadioButtonIcon,
+  submit: PaperPlaneTiltIcon,
 };
 
 const withStyle = (node: LayoutNode, patch: Partial<StyleProps>): LayoutNode => {
@@ -84,6 +108,8 @@ type Props = {
   fetcher: Fetcher;
   onChange: (node: LayoutNode) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
+  /** False when the forms plugin is not installed (W-036). */
+  formsAvailable?: boolean;
   onSelect: (id: string | null) => void;
 };
 
@@ -94,6 +120,7 @@ export function ElementPanel({
   design,
   rejection,
   fetcher,
+  formsAvailable = true,
   onChange,
   onDesignChange,
   onSelect,
@@ -187,6 +214,19 @@ export function ElementPanel({
           {rejection}
         </p>
       )}
+      {!formsAvailable &&
+        (node.type === "form" ||
+          node.type === "text-input" ||
+          node.type === "textarea" ||
+          node.type === "select" ||
+          node.type === "checkbox" ||
+          node.type === "radio" ||
+          node.type === "submit") && (
+          <p className="emvb-inline-error" role="alert" data-emvb-forms-missing="">
+            <WarningCircleIcon size={16} aria-hidden="true" />
+            The forms plugin is not installed. Form elements can&apos;t submit until it is added.
+          </p>
+        )}
       <Tabs
         variant="segmented"
         className="emvb-tabs"
@@ -213,6 +253,7 @@ export function ElementPanel({
                 node={node}
                 onChange={onChange}
                 fetcher={fetcher}
+                parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
               />
             ))
           )}
