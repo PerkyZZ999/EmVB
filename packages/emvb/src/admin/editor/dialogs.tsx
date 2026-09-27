@@ -1,5 +1,5 @@
 import { Button, Dialog } from "@cloudflare/kumo";
-import { BUTTON, SOLID_DESTRUCTIVE, SOLID_PRIMARY } from "../ui.ts";
+import { BUTTON, SOLID_DESTRUCTIVE, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 
 type OpenProps = { open: boolean; onOpenChange: (open: boolean) => void };
 
@@ -13,6 +13,7 @@ export function ConflictDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6">
+        <style>{UI_CSS}</style>
         <div data-emvb-dialog="conflict" className="emvb-dialog">
           <Dialog.Title>This page was changed somewhere else</Dialog.Title>
           <Dialog.Description>
@@ -48,6 +49,7 @@ export function LeaveDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6">
+        <style>{UI_CSS}</style>
         <div data-emvb-dialog="leave" className="emvb-dialog">
           <Dialog.Title>Leave without saving?</Dialog.Title>
           <Dialog.Description>You have unsaved changes on this page.</Dialog.Description>
@@ -93,6 +95,7 @@ export function DeleteSubtreeDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6">
+        <style>{UI_CSS}</style>
         <div data-emvb-dialog="delete-subtree" className="emvb-dialog">
           <Dialog.Title>
             Delete {label} and the {inside} element{inside === 1 ? "" : "s"} inside it?

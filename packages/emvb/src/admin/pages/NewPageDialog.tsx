@@ -5,7 +5,7 @@ import { ApiError, type Fetcher } from "../api.ts";
 import { createPage } from "../content-api.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { slugTakenMessage } from "../editor/useSave.ts";
-import { BUTTON, FIELD, SOLID_PRIMARY } from "../ui.ts";
+import { BUTTON, FIELD, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 
 /** New page (IA): title, auto-filled editable slug, then straight into the editor. */
 export function NewPageDialog({
@@ -58,6 +58,7 @@ export function NewPageDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6">
+        <style>{UI_CSS}</style>
         <form
           data-emvb-dialog="new-page"
           className="emvb-dialog"

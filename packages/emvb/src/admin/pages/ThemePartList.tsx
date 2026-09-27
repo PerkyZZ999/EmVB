@@ -98,75 +98,70 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
         />
       )}
       {list.state === "ready" && list.parts.length === 0 && (
-        <Empty
-          icon={<SquaresFourIcon size={32} aria-hidden="true" />}
-          title="No headers or footers yet"
-          description="Create a Header or Footer and set where it appears on your site."
-          contents={newPart}
-        />
+        <div className="emvb-surface-card emvb-empty-shell">
+          <Empty
+            icon={<SquaresFourIcon size={32} aria-hidden="true" />}
+            title="No headers or footers yet"
+            description="Create a Header or Footer and set where it appears on your site."
+            contents={newPart}
+          />
+        </div>
       )}
       {list.state === "ready" && list.parts.length > 0 && visible.length === 0 && (
-        <Empty
-          icon={<SquaresFourIcon size={32} aria-hidden="true" />}
-          title={`No ${filter}s yet`}
-          description="Create one or choose a different filter."
-          contents={newPart}
-        />
+        <div className="emvb-surface-card emvb-empty-shell">
+          <Empty
+            icon={<SquaresFourIcon size={32} aria-hidden="true" />}
+            title={`No ${filter}s yet`}
+            description="Create one or choose a different filter."
+            contents={newPart}
+          />
+        </div>
       )}
       {list.state === "ready" && visible.length > 0 && (
-        <Table data-emvb-list="theme-parts">
-          <Table.Header>
-            <Table.Row>
-              <Table.Head>Title</Table.Head>
-              <Table.Head>Type</Table.Head>
-              <Table.Head>Conditions</Table.Head>
-              <Table.Head>Status</Table.Head>
-              <Table.Head>Last edited</Table.Head>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {visible.map((part) => (
-              <Table.Row key={part.id} data-emvb-row={part.id}>
-                <Table.Cell>
-                  <a
-                    className="emvb-row-title"
-                    href={editorUrl(part.id, THEME_PARTS_COLLECTION)}
-                  >
-                    {part.title}
-                  </a>
-                </Table.Cell>
-                <Table.Cell>{typeLabel(part.partType)}</Table.Cell>
-                <Table.Cell>
-                  <span className="emvb-tabular">{part.conditionsSummary}</span>
-                </Table.Cell>
-                <Table.Cell>
-                  <span className="emvb-status" data-status={part.status}>
-                    <span className="emvb-status-dot" aria-hidden="true" />
-                    {part.status === "published" ? "Published" : "Draft"}
-                  </span>
-                </Table.Cell>
-                <Table.Cell>
-                  <time dateTime={part.updatedAt} title={part.updatedAt} className="emvb-tabular">
-                    {formatDate(part.updatedAt)}
-                  </time>
-                </Table.Cell>
+        <div className="emvb-surface-card" data-emvb-list="theme-parts">
+          <Table data-emvb-list="theme-parts">
+            <Table.Header>
+              <Table.Row>
+                <Table.Head>Title</Table.Head>
+                <Table.Head>Type</Table.Head>
+                <Table.Head>Conditions</Table.Head>
+                <Table.Head>Status</Table.Head>
+                <Table.Head>Last edited</Table.Head>
               </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+            </Table.Header>
+            <Table.Body>
+              {visible.map((part) => (
+                <Table.Row key={part.id} data-emvb-row={part.id}>
+                  <Table.Cell>
+                    <a
+                      className="emvb-row-title"
+                      href={editorUrl(part.id, THEME_PARTS_COLLECTION)}
+                    >
+                      {part.title}
+                    </a>
+                  </Table.Cell>
+                  <Table.Cell>{typeLabel(part.partType)}</Table.Cell>
+                  <Table.Cell>
+                    <span className="emvb-tabular">{part.conditionsSummary}</span>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <span className="emvb-status" data-status={part.status}>
+                      <span className="emvb-status-dot" aria-hidden="true" />
+                      {part.status === "published" ? "Published" : "Draft"}
+                    </span>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <time dateTime={part.updatedAt} title={part.updatedAt} className="emvb-tabular">
+                      {formatDate(part.updatedAt)}
+                    </time>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </div>
       )}
       <NewThemePartDialog fetcher={fetcher} open={creating} onOpenChange={setCreating} />
-      <style>{`
-.emvb-theme-filters { display: flex; gap: 4px; }
-.emvb-theme-filter {
-  height: 28px; padding: 0 12px; border-radius: 6px; border: 1px solid var(--color-kumo-hairline);
-  background: var(--color-kumo-base); color: var(--text-color-kumo-default); font-size: 13px; cursor: pointer;
-}
-.emvb-theme-filter[data-active="true"] {
-  background: var(--color-kumo-brand); color: var(--text-color-kumo-inverse, #fff); border-color: transparent;
-}
-.emvb-theme-filter:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
-`}</style>
     </>
   );
 }

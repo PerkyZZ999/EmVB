@@ -180,16 +180,6 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
           Add Exclude
         </Button>
       </div>
-      <style>{`
-.emvb-section-label { margin: 12px 0 4px; font-size: 13px; font-weight: 600; line-height: 1.2; }
-.emvb-condition-list { list-style: none; margin: 8px 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.emvb-condition-row { display: grid; grid-template-columns: 96px 1fr 28px; gap: 6px; align-items: center; }
-.emvb-condition-op, .emvb-condition-where {
-  height: 28px; border-radius: 6px; border: 1px solid var(--color-kumo-hairline);
-  background: var(--color-kumo-base); color: var(--text-color-kumo-default); font-size: 13px;
-}
-.emvb-condition-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-`}</style>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { ApiError, type Fetcher } from "../api.ts";
 import { createThemePart } from "../theme-api.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { slugTakenMessage } from "../editor/useSave.ts";
-import { BUTTON, FIELD, SOLID_PRIMARY } from "../ui.ts";
+import { BUTTON, FIELD, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 
 const TYPES = [
   { value: "header", label: "Header" },
@@ -65,6 +65,7 @@ export function NewThemePartDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6">
+        <style>{UI_CSS}</style>
         <form
           data-emvb-dialog="new-theme-part"
           className="emvb-dialog"

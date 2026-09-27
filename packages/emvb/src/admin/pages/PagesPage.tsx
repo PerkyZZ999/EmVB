@@ -49,16 +49,18 @@ function PagesHome({ fetcher, role }: { fetcher: Fetcher; role: number }) {
       <style>{PAGES_CSS}</style>
       {status.state !== "ready" && <h1 className="emvb-page-title">Visual pages</h1>}
       {status.state === "missing" && (
-        <Empty
-          icon={<LayoutIcon size={32} aria-hidden="true" />}
-          title="EmVB isn't set up yet"
-          description={
-            status.isAdmin
-              ? "Setup creates the collections EmVB stores its pages and theme parts in."
-              : "Ask an administrator to set up EmVB."
-          }
-          contents={action("Set up EmVB")}
-        />
+        <div className="emvb-surface-card emvb-empty-shell">
+          <Empty
+            icon={<LayoutIcon size={32} aria-hidden="true" />}
+            title="EmVB isn't set up yet"
+            description={
+              status.isAdmin
+                ? "Setup creates the collections EmVB stores its pages and theme parts in."
+                : "Ask an administrator to set up EmVB."
+            }
+            contents={action("Set up EmVB")}
+          />
+        </div>
       )}
       {status.state === "outdated" && (
         <Banner

@@ -120,8 +120,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-tabs [role="tab"]:hover { color: var(--text-color-kumo-default); }
 .emvb-panel .emvb-field { width: 100%; }
 .emvb-swatch { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--color-kumo-line); vertical-align: -1px; }
-.emvb-row-actions, .emvb-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
-.emvb-dialog { display: flex; flex-direction: column; gap: 8px; }
+.emvb-row-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .emvb-layers { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1px; }
 .emvb-layer-row { display: flex; align-items: center; gap: 6px; width: 100%; height: var(--emvb-control); padding-right: 4px; border-radius: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
 .emvb-layer-select { display: flex; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0; height: var(--emvb-control); padding: 0 4px 0 0; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }

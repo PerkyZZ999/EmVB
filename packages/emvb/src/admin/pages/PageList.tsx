@@ -64,46 +64,50 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
         />
       )}
       {list.state === "ready" && list.pages.length === 0 && (
-        <Empty
-          icon={<FileIcon size={32} aria-hidden="true" />}
-          title="No visual pages yet"
-          description="Create a page to start building."
-          contents={newPage}
-        />
+        <div className="emvb-surface-card emvb-empty-shell">
+          <Empty
+            icon={<FileIcon size={32} aria-hidden="true" />}
+            title="No visual pages yet"
+            description="Create a page to start building."
+            contents={newPage}
+          />
+        </div>
       )}
       {list.state === "ready" && list.pages.length > 0 && (
-        <Table data-emvb-list="pages">
-          <Table.Header>
-            <Table.Row>
-              <Table.Head>Title</Table.Head>
-              <Table.Head>Status</Table.Head>
-              <Table.Head>Last edited</Table.Head>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {list.pages.map((page) => (
-              <Table.Row key={page.id} data-emvb-row={page.id}>
-                <Table.Cell>
-                  <a className="emvb-row-title" href={editorUrl(page.id)}>
-                    {page.title}
-                  </a>
-                  <div className="emvb-row-slug">/{page.slug}</div>
-                </Table.Cell>
-                <Table.Cell>
-                  <span className="emvb-status" data-status={page.status}>
-                    <span className="emvb-status-dot" aria-hidden="true" />
-                    {page.status === "published" ? "Published" : "Draft"}
-                  </span>
-                </Table.Cell>
-                <Table.Cell>
-                  <time dateTime={page.updatedAt} title={page.updatedAt} className="emvb-tabular">
-                    {formatDate(page.updatedAt)}
-                  </time>
-                </Table.Cell>
+        <div className="emvb-surface-card" data-emvb-list="pages">
+          <Table data-emvb-list="pages">
+            <Table.Header>
+              <Table.Row>
+                <Table.Head>Title</Table.Head>
+                <Table.Head>Status</Table.Head>
+                <Table.Head>Last edited</Table.Head>
               </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+            </Table.Header>
+            <Table.Body>
+              {list.pages.map((page) => (
+                <Table.Row key={page.id} data-emvb-row={page.id}>
+                  <Table.Cell>
+                    <a className="emvb-row-title" href={editorUrl(page.id)}>
+                      {page.title}
+                    </a>
+                    <div className="emvb-row-slug">/{page.slug}</div>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <span className="emvb-status" data-status={page.status}>
+                      <span className="emvb-status-dot" aria-hidden="true" />
+                      {page.status === "published" ? "Published" : "Draft"}
+                    </span>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <time dateTime={page.updatedAt} title={page.updatedAt} className="emvb-tabular">
+                      {formatDate(page.updatedAt)}
+                    </time>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        </div>
       )}
       <NewPageDialog fetcher={fetcher} open={creating} onOpenChange={setCreating} />
     </>
