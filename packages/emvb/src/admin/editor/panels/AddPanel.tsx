@@ -76,6 +76,12 @@ export function AddPanel({
                       onDragStart={(event) => {
                         event.dataTransfer.setData(NEW_ELEMENT_MIME, tile.type);
                         event.dataTransfer.effectAllowed = "copy";
+                        try {
+                          sessionStorage.setItem("emvb-drag-type", tile.type);
+                          sessionStorage.removeItem("emvb-drag-id");
+                        } catch {
+                          /* private mode */
+                        }
                       }}
                       onClick={() => onAdd(tile.type as ElementType)}
                       onKeyDown={(event) => {

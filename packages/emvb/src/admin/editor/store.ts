@@ -2,6 +2,7 @@ import {
   addNode,
   findNode,
   insertNode,
+  moveNode,
   newNodeId,
   removeNode,
   updateNode,
@@ -37,6 +38,7 @@ export type EditorAction =
   | { type: "restore" }
   | { type: "add-root-container" }
   | { type: "add-node"; node: LayoutNode; parentId: string; index: number }
+  | { type: "move-node"; id: string; parentId: string; index: number }
   | { type: "saved"; rev: string; version: number }
   | { type: "published"; rev: string }
   | { type: "set-design"; design: DesignSystem; revision: string | null }
@@ -99,6 +101,15 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         parentId: action.parentId,
         index: action.index,
       });
+      if (!result.ok) return state;
+      return {
+        ...edited(state, { ...state.page, layout: result.layout }),
+        selectedId: result.selected,
+      };
+    }
+    case "move-node": {
+      if (!state.page.layout) return state;
+      const result = moveNode(state.page.layout, action.id, action.parentId, action.index);
       if (!result.ok) return state;
       return {
         ...edited(state, { ...state.page, layout: result.layout }),

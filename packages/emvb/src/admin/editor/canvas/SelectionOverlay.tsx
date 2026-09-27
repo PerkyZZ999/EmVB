@@ -1,7 +1,13 @@
-import { TrashIcon } from "@phosphor-icons/react";
+import { DotsSixVerticalIcon, ProhibitIcon, TrashIcon } from "@phosphor-icons/react";
 import type { CanvasSelection } from "./CanvasFrame.tsx";
+import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 
 export type Box = { top: number; left: number; width: number; height: number };
+
+export type InvalidDrop = {
+  outline: Box;
+  label: { x: number; y: number; reason: string };
+};
 
 const LABEL_HEIGHT = 24;
 
@@ -19,19 +25,39 @@ export function SelectionOverlay({
   selectedId,
   selection,
   dropLine,
+  invalid,
 }: {
   hover: Box | null;
   selected: Box | null;
   selectedId: string | null;
   selection: CanvasSelection;
   dropLine?: Box | null;
+  invalid?: InvalidDrop | null;
 }) {
+  const show = selected || dropLine || invalid;
   return (
-    <div className="emvb-overlay" aria-hidden={selected || dropLine ? undefined : true}>
+    <div className="emvb-overlay" aria-hidden={show ? undefined : true}>
       {dropLine && (
         <div className="emvb-drop-line" data-emvb-drop-line="" style={place(dropLine)} />
       )}
-      {hover && <div className="emvb-outline-hover" style={place(hover)} />}
+      {invalid && (
+        <>
+          <div
+            className="emvb-outline-invalid"
+            data-emvb-invalid-outline=""
+            style={place(invalid.outline)}
+          />
+          <div
+            className="emvb-invalid-label"
+            data-emvb-invalid-label=""
+            style={{ top: invalid.label.y + 12, left: invalid.label.x + 12 }}
+          >
+            <ProhibitIcon size={14} aria-hidden="true" />
+            <span>{invalid.label.reason}</span>
+          </div>
+        </>
+      )}
+      {hover && !invalid && <div className="emvb-outline-hover" style={place(hover)} />}
       {selected && selectedId && (
         <>
           <div
@@ -46,6 +72,27 @@ export function SelectionOverlay({
               left: Math.max(0, selected.left),
             }}
           >
+            {selection.canMove(selectedId) && (
+              <button
+                type="button"
+                className="emvb-overlay-action emvb-overlay-move"
+                aria-label="Move element"
+                title="Move element"
+                draggable
+                onDragStart={(event) => {
+                  event.dataTransfer.setData(EXISTING_ELEMENT_MIME, selectedId);
+                  event.dataTransfer.effectAllowed = "move";
+                  try {
+                    sessionStorage.setItem("emvb-drag-id", selectedId);
+                    sessionStorage.removeItem("emvb-drag-type");
+                  } catch {
+                    /* private mode */
+                  }
+                }}
+              >
+                <DotsSixVerticalIcon size={16} aria-hidden="true" />
+              </button>
+            )}
             <span>{selection.labelFor(selectedId)}</span>
             {selection.canDelete(selectedId) && (
               <button

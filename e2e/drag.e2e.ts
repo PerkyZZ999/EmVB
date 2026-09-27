@@ -93,3 +93,109 @@ test("dragging Heading onto the canvas inserts at the pointed index and saves", 
     second,
   ]);
 });
+
+const nestedLayout = (outer: string, inner: string) => ({
+  schemaVersion: 1,
+  root: {
+    id: "root0001",
+    type: "container",
+    props: {},
+    style: { flexDirection: "column", gap: { value: 16, unit: "px" } },
+    children: [
+      {
+        id: "box00001",
+        type: "container",
+        props: {},
+        style: { flexDirection: "column", gap: { value: 8, unit: "px" } },
+        children: [{ id: "head0001", type: "heading", props: { text: inner, level: 2 } }],
+      },
+      { id: "head0002", type: "heading", props: { text: outer, level: 1 } },
+    ],
+  },
+});
+
+test("moving a heading into another container saves the new tree", async ({ page, request }) => {
+  const id = await createPage(
+    request,
+    "Move check",
+    nestedLayout("Outside", "Inside"),
+    `move-${unique()}`,
+  );
+  await openEditor(page, id, "Inside");
+  await canvas(page).getByRole("heading", { name: "Outside" }).click();
+  await expect(overlay(page).locator(".emvb-overlay-label")).toContainText("Heading");
+  const handle = overlay(page).getByRole("button", { name: "Move element" });
+  await expect(handle).toBeVisible();
+  const target = canvas(page).getByRole("heading", { name: "Inside" });
+  const box = await target.boundingBox();
+  if (!box) throw new Error("Inside heading has no box");
+  const handleBox = await handle.boundingBox();
+  if (!handleBox) throw new Error("Move handle has no box");
+  await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 16 });
+  await page.mouse.up();
+  await overlay(page)
+    .getByRole("button", { name: /Save draft/ })
+    .click();
+  await expect(overlay(page).locator(".emvb-save-status")).toContainText("Saved", {
+    timeout: 15_000,
+  });
+  const stored = parsed((await getPage(request, id)).data["layout"]) as {
+    root: {
+      children: Array<{
+        id: string;
+        type: string;
+        children?: Array<{ props?: { text?: string } }>;
+      }>;
+    };
+  };
+  const boxNode = stored.root.children.find((c) => c.id === "box00001");
+  expect(boxNode?.children?.map((c) => c.props?.text)).toContain("Outside");
+});
+
+test("dropping a container into its own child shows the invalid outline and changes nothing", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(
+    request,
+    "Invalid drop",
+    nestedLayout("Outside", "Inside"),
+    `bad-${unique()}`,
+  );
+  await openEditor(page, id, "Inside");
+  // Select the outer box via Layers
+  if ((await overlay(page).locator('[data-emvb-panel="layers"]').count()) === 0) {
+    await overlay(page).getByRole("tab", { name: "Layers" }).click();
+  }
+  await overlay(page).locator('[data-emvb-layer="box00001"]').click();
+  await expect(overlay(page).locator(".emvb-overlay-label")).toContainText("Container");
+  const handle = overlay(page).getByRole("button", { name: "Move element" });
+  const inside = canvas(page).getByRole("heading", { name: "Inside" });
+  const box = await inside.boundingBox();
+  const handleBox = await handle.boundingBox();
+  if (!box || !handleBox) throw new Error("missing box");
+  await page.mouse.move(handleBox.x + handleBox.width / 2, handleBox.y + handleBox.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 12 });
+  await expect(overlay(page).locator("[data-emvb-invalid-outline]")).toBeVisible({
+    timeout: 5_000,
+  });
+  await expect(overlay(page).locator("[data-emvb-invalid-label]")).toContainText(
+    "A container can't go inside itself",
+  );
+  await page.mouse.up();
+  // dragend on the Move handle (parent doc) clears the invalid outline.
+  await expect(overlay(page).locator("[data-emvb-invalid-outline]")).toHaveCount(0, {
+    timeout: 5_000,
+  });
+  const after = parsed((await getPage(request, id)).data["layout"]) as {
+    root: { children: Array<{ id: string; children?: unknown[] }> };
+  };
+  expect(after.root.children.map((c) => c.id)).toEqual(["box00001", "head0002"]);
+  const outer = after.root.children[0];
+  expect(
+    outer && "children" in outer && Array.isArray(outer.children) ? outer.children.length : -1,
+  ).toBe(1);
+});

@@ -1,8 +1,15 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import type { Layout, LayoutNode, VNode } from "../../../core/index.ts";
-import { dropContainer, dropIndex, NEW_ELEMENT_MIME, type Rect } from "../dnd/drop-target.ts";
-import { SelectionOverlay, type Box } from "./SelectionOverlay.tsx";
+import { canDrop, type Layout, type LayoutNode, type VNode } from "../../../core/index.ts";
+import {
+  dropContainer,
+  dropIndex,
+  EXISTING_ELEMENT_MIME,
+  NEW_ELEMENT_MIME,
+  type Rect,
+} from "../dnd/drop-target.ts";
+import { newElement } from "../dnd/new-element.ts";
+import { SelectionOverlay, type Box, type InvalidDrop } from "./SelectionOverlay.tsx";
 import { vnodeToReact } from "./vnode-react.tsx";
 
 const SRCDOC =
@@ -39,8 +46,14 @@ const sameBox = (a: Box | null, b: Box | null) =>
     a.width === b.width &&
     a.height === b.height);
 
-const acceptsNew = (transfer: DataTransfer | null) =>
-  !!transfer && [...transfer.types].includes(NEW_ELEMENT_MIME);
+const transferKinds = (transfer: DataTransfer | null) => {
+  if (!transfer) return { neu: false, existing: false };
+  const types = new Set(transfer.types);
+  return {
+    neu: types.has(NEW_ELEMENT_MIME),
+    existing: types.has(EXISTING_ELEMENT_MIME),
+  };
+};
 
 const directionOf = (node: LayoutNode) =>
   (node.type === "container" ? node.style?.flexDirection : undefined) ?? "column";
@@ -78,18 +91,15 @@ export type CanvasSelection = {
   selectedId: string | null;
   labelFor: (id: string) => string;
   canDelete: (id: string) => boolean;
+  canMove: (id: string) => boolean;
   onSelect: (id: string | null) => void;
   onDelete: (id: string) => void;
   onKeyDown: (event: KeyboardEvent) => void;
 };
 
 /**
- * The canvas: a sandboxed `srcdoc` iframe without `allow-scripts` (D-011, D-014), so admin CSS
- * stays out, page CSS stays in, and nothing runs inside it. React renders into its document
- * through a portal and listens to it from the parent. It fills the space between the panels,
- * with no zoom or virtual width (D-025). Outlines are drawn above the iframe, never in the page.
- *
- * W-015: Add-tile drops are handled on the iframe document (native HTML5 DnD, K16).
+ * The canvas: a sandboxed `srcdoc` iframe without `allow-scripts` (D-011, D-014).
+ * W-015/W-019: Add-tile and existing-element drops (native HTML5 DnD, K16).
  */
 export function CanvasFrame({
   vnode,
@@ -97,17 +107,20 @@ export function CanvasFrame({
   layout,
   selection,
   onDropNew,
+  onMove,
 }: {
   vnode: VNode | null;
   css: string;
   layout: Layout | null;
   selection: CanvasSelection;
   onDropNew: (elementType: string, parentId: string, index: number) => void;
+  onMove: (id: string, parentId: string, index: number) => void;
 }) {
   const frame = React.useRef<HTMLIFrameElement>(null);
   const [doc, setDoc] = React.useState<Document | null>(null);
   const [hoverId, setHoverId] = React.useState<string | null>(null);
   const [dropLine, setDropLine] = React.useState<Box | null>(null);
+  const [invalid, setInvalid] = React.useState<InvalidDrop | null>(null);
   const [boxes, setBoxes] = React.useState<{ hover: Box | null; selected: Box | null }>({
     hover: null,
     selected: null,
@@ -118,6 +131,14 @@ export function CanvasFrame({
   layoutRef.current = layout;
   const dropRef = React.useRef(onDropNew);
   dropRef.current = onDropNew;
+  const moveRef = React.useRef(onMove);
+  moveRef.current = onMove;
+  const cancelled = React.useRef(false);
+
+  const clearDrag = React.useCallback(() => {
+    setDropLine(null);
+    setInvalid(null);
+  }, []);
 
   const onLoad = React.useCallback(() => {
     const loaded = frame.current?.contentDocument;
@@ -142,9 +163,75 @@ export function CanvasFrame({
         parentId: container.id,
         index,
         line: containerBox ? dropLineBox(direction, containerBox, rects, index) : null,
+        outline: containerBox,
       };
     },
     [],
+  );
+
+  const paintDrag = React.useCallback(
+    (
+      transfer: DataTransfer | null,
+      clientX: number,
+      clientY: number,
+      target: EventTarget | null,
+    ) => {
+      const kinds = transferKinds(transfer);
+      if (!kinds.neu && !kinds.existing) return false;
+      const current = layoutRef.current;
+      if (!current) return false;
+      const next = resolveDrop(clientX, clientY, target);
+      if (!next) {
+        clearDrag();
+        return true;
+      }
+      let source: Parameters<typeof canDrop>[1];
+      if (kinds.existing) {
+        // Chromium may omit getData until drop; types still list the MIME.
+        const id =
+          transfer?.getData(EXISTING_ELEMENT_MIME) ||
+          (transfer as DataTransfer & { emvbId?: string }).emvbId ||
+          "";
+        // During dragover getData is often empty; use a session stash.
+        const stashed = sessionStorage.getItem("emvb-drag-id") ?? id;
+        if (!stashed) {
+          // Still show a provisional line; canDrop checked on drop.
+          setDropLine(next.line);
+          setInvalid(null);
+          return true;
+        }
+        source = { kind: "existing", id: stashed };
+      } else {
+        const type =
+          transfer?.getData(NEW_ELEMENT_MIME) || sessionStorage.getItem("emvb-drag-type") || "";
+        const node = type ? newElement(type) : null;
+        if (!node) {
+          setDropLine(next.line);
+          setInvalid(null);
+          return true;
+        }
+        source = { kind: "new", node };
+      }
+      const allowed = canDrop(current, source, next.parentId);
+      if (!allowed.ok) {
+        setDropLine(null);
+        if (next.outline) {
+          setInvalid({
+            outline: next.outline,
+            label: { x: clientX, y: clientY, reason: allowed.reason },
+          });
+        } else {
+          setInvalid(null);
+        }
+        if (transfer) transfer.dropEffect = "none";
+        return true;
+      }
+      setInvalid(null);
+      setDropLine(next.line);
+      if (transfer) transfer.dropEffect = kinds.existing ? "move" : "copy";
+      return true;
+    },
+    [clearDrag, resolveDrop],
   );
 
   React.useEffect(() => {
@@ -155,28 +242,67 @@ export function CanvasFrame({
     };
     const move = (event: MouseEvent) => setHoverId(idAt(event.target));
     const leave = () => setHoverId(null);
-    const key = (event: KeyboardEvent) => handlers.current.onKeyDown(event);
+    const key = (event: KeyboardEvent) => {
+      if (
+        event.key === "Escape" &&
+        (sessionStorage.getItem("emvb-drag-id") || sessionStorage.getItem("emvb-drag-type"))
+      ) {
+        cancelled.current = true;
+        sessionStorage.removeItem("emvb-drag-id");
+        sessionStorage.removeItem("emvb-drag-type");
+        clearDrag();
+        return;
+      }
+      handlers.current.onKeyDown(event);
+    };
     const dragover = (event: DragEvent) => {
-      if (!acceptsNew(event.dataTransfer)) return;
+      if (!paintDrag(event.dataTransfer, event.clientX, event.clientY, event.target)) return;
       event.preventDefault();
-      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
-      const next = resolveDrop(event.clientX, event.clientY, event.target);
-      setDropLine(next?.line ?? null);
     };
     const dragleave = (event: DragEvent) => {
-      // Leaving the document clears the line; moving between children keeps dragover firing.
-      if (event.target === doc.documentElement || event.target === doc.body) setDropLine(null);
+      if (event.target === doc.documentElement || event.target === doc.body) clearDrag();
     };
     const drop = (event: DragEvent) => {
-      if (!acceptsNew(event.dataTransfer)) return;
+      const kinds = transferKinds(event.dataTransfer);
+      if (!kinds.neu && !kinds.existing) return;
       event.preventDefault();
-      const type = event.dataTransfer?.getData(NEW_ELEMENT_MIME) ?? "";
-      setDropLine(null);
+      const wasCancelled = cancelled.current;
+      cancelled.current = false;
       const next = resolveDrop(event.clientX, event.clientY, event.target);
-      if (!type || !next) return;
-      dropRef.current(type, next.parentId, next.index);
+      clearDrag();
+      const id =
+        event.dataTransfer?.getData(EXISTING_ELEMENT_MIME) ||
+        sessionStorage.getItem("emvb-drag-id") ||
+        "";
+      const type =
+        event.dataTransfer?.getData(NEW_ELEMENT_MIME) ||
+        sessionStorage.getItem("emvb-drag-type") ||
+        "";
+      sessionStorage.removeItem("emvb-drag-id");
+      sessionStorage.removeItem("emvb-drag-type");
+      if (wasCancelled || !next) return;
+      const current = layoutRef.current;
+      if (!current) return;
+      if (kinds.existing && id) {
+        const allowed = canDrop(current, { kind: "existing", id }, next.parentId);
+        if (!allowed.ok) return;
+        moveRef.current(id, next.parentId, next.index);
+        return;
+      }
+      if (kinds.neu && type) {
+        const node = newElement(type);
+        if (!node) return;
+        const allowed = canDrop(current, { kind: "new", node }, next.parentId);
+        if (!allowed.ok) return;
+        dropRef.current(type, next.parentId, next.index);
+      }
     };
-    const dragend = () => setDropLine(null);
+    const dragend = () => {
+      cancelled.current = false;
+      sessionStorage.removeItem("emvb-drag-id");
+      sessionStorage.removeItem("emvb-drag-type");
+      clearDrag();
+    };
     doc.addEventListener("click", click);
     doc.addEventListener("mousemove", move);
     doc.documentElement.addEventListener("mouseleave", leave);
@@ -184,7 +310,6 @@ export function CanvasFrame({
     doc.addEventListener("dragover", dragover);
     doc.addEventListener("dragleave", dragleave);
     doc.addEventListener("drop", drop);
-    // dragend fires on the source in the parent document; also clear if the iframe sees it.
     doc.addEventListener("dragend", dragend);
     return () => {
       doc.removeEventListener("click", click);
@@ -196,10 +321,8 @@ export function CanvasFrame({
       doc.removeEventListener("drop", drop);
       doc.removeEventListener("dragend", dragend);
     };
-  }, [doc, resolveDrop]);
+  }, [doc, resolveDrop, paintDrag, clearDrag]);
 
-  // Some tools (and some Chromium paths) deliver drag events to the <iframe> element in the parent
-  // document instead of the contentDocument. Forward those with coordinates mapped into the frame.
   React.useEffect(() => {
     const iframe = frame.current;
     if (!iframe || !doc) return;
@@ -211,24 +334,47 @@ export function CanvasFrame({
       return { x, y, target };
     };
     const dragover = (event: DragEvent) => {
-      if (!acceptsNew(event.dataTransfer)) return;
-      event.preventDefault();
-      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
       const { x, y, target } = map(event);
-      const next = resolveDrop(x, y, target);
-      setDropLine(next?.line ?? null);
+      if (!paintDrag(event.dataTransfer, x, y, target)) return;
+      event.preventDefault();
     };
     const drop = (event: DragEvent) => {
-      if (!acceptsNew(event.dataTransfer)) return;
+      const kinds = transferKinds(event.dataTransfer);
+      if (!kinds.neu && !kinds.existing) return;
       event.preventDefault();
-      const type = event.dataTransfer?.getData(NEW_ELEMENT_MIME) ?? "";
-      setDropLine(null);
+      const wasCancelled = cancelled.current;
+      cancelled.current = false;
       const { x, y, target } = map(event);
       const next = resolveDrop(x, y, target);
-      if (!type || !next) return;
-      dropRef.current(type, next.parentId, next.index);
+      clearDrag();
+      const id =
+        event.dataTransfer?.getData(EXISTING_ELEMENT_MIME) ||
+        sessionStorage.getItem("emvb-drag-id") ||
+        "";
+      const type =
+        event.dataTransfer?.getData(NEW_ELEMENT_MIME) ||
+        sessionStorage.getItem("emvb-drag-type") ||
+        "";
+      sessionStorage.removeItem("emvb-drag-id");
+      sessionStorage.removeItem("emvb-drag-type");
+      if (wasCancelled || !next) return;
+      const current = layoutRef.current;
+      if (!current) return;
+      if (kinds.existing && id) {
+        const allowed = canDrop(current, { kind: "existing", id }, next.parentId);
+        if (!allowed.ok) return;
+        moveRef.current(id, next.parentId, next.index);
+        return;
+      }
+      if (kinds.neu && type) {
+        const node = newElement(type);
+        if (!node) return;
+        const allowed = canDrop(current, { kind: "new", node }, next.parentId);
+        if (!allowed.ok) return;
+        dropRef.current(type, next.parentId, next.index);
+      }
     };
-    const leave = () => setDropLine(null);
+    const leave = () => clearDrag();
     iframe.addEventListener("dragover", dragover);
     iframe.addEventListener("drop", drop);
     iframe.addEventListener("dragleave", leave);
@@ -237,7 +383,34 @@ export function CanvasFrame({
       iframe.removeEventListener("drop", drop);
       iframe.removeEventListener("dragleave", leave);
     };
-  }, [doc, resolveDrop]);
+  }, [doc, resolveDrop, paintDrag, clearDrag]);
+
+  // Parent-document Esc / dragend while dragging from the Move handle / Layers / Add tile.
+  // dragend fires on the source in the parent document (not the iframe), so clear here too.
+  React.useEffect(() => {
+    const finish = () => {
+      cancelled.current = false;
+      sessionStorage.removeItem("emvb-drag-id");
+      sessionStorage.removeItem("emvb-drag-type");
+      clearDrag();
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (!sessionStorage.getItem("emvb-drag-id") && !sessionStorage.getItem("emvb-drag-type"))
+        return;
+      cancelled.current = true;
+      finish();
+    };
+    const onEnd = () => finish();
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("dragend", onEnd);
+    document.addEventListener("dragend", onEnd);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("dragend", onEnd);
+      document.removeEventListener("dragend", onEnd);
+    };
+  }, [clearDrag]);
 
   const { selectedId } = selection;
   React.useEffect(() => {
@@ -273,6 +446,7 @@ export function CanvasFrame({
         selectedId={selectedId}
         selection={selection}
         dropLine={dropLine}
+        invalid={invalid}
       />
       {doc && createPortal(<style data-emvb-canvas-css="">{css}</style>, doc.head)}
       {doc &&

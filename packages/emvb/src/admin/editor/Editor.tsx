@@ -186,6 +186,7 @@ function EditorApp({
     });
 
   const canDelete = (id: string) => !!state.page.layout && state.page.layout.root.id !== id;
+  const canMove = canDelete;
 
   const remove = (id: string) => {
     if (!canDelete(id)) return;
@@ -287,6 +288,7 @@ function EditorApp({
       return node ? (ELEMENT_NAMES[node.type] ?? node.type) : "Element";
     },
     canDelete,
+    canMove,
     onSelect: (id) => dispatch({ type: "select", id }),
     onDelete: remove,
     onKeyDown,
@@ -335,6 +337,9 @@ function EditorApp({
                       if (!node) return;
                       dispatch({ type: "add-node", node, parentId, index });
                     }}
+                    onMove={(id, parentId, index) =>
+                      dispatch({ type: "move-node", id, parentId, index })
+                    }
                   />
                 ) : (
                   <div

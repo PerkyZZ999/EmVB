@@ -8,6 +8,9 @@ export type Direction = NonNullable<StyleProps["flexDirection"]>;
 /** The MIME type an Add tile puts on `dataTransfer`, carrying the element type. */
 export const NEW_ELEMENT_MIME = "application/x-emvb-new-element";
 
+/** MIME for dragging an existing canvas/Layers element (carries its id). */
+export const EXISTING_ELEMENT_MIME = "application/x-emvb-element-id";
+
 type Span = { start: number; end: number };
 
 const along = (rect: Rect, row: boolean): Span =>

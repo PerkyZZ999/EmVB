@@ -8,6 +8,7 @@ import {
   type Layout,
   type LayoutNode,
 } from "../../../core/index.ts";
+import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { ELEMENT_NAMES } from "./ElementPanel.tsx";
 
 const ICONS: Record<string, typeof TextHIcon> = {
@@ -135,6 +136,21 @@ export function LayersPanel({
                 data-emvb-layer={node.id}
                 aria-current={node.id === selectedId ? "true" : undefined}
                 style={{ paddingLeft: 8 + depth * 12 }}
+                draggable={node.id !== layout.root.id}
+                onDragStart={(event) => {
+                  if (node.id === layout.root.id) {
+                    event.preventDefault();
+                    return;
+                  }
+                  event.dataTransfer.setData(EXISTING_ELEMENT_MIME, node.id);
+                  event.dataTransfer.effectAllowed = "move";
+                  try {
+                    sessionStorage.setItem("emvb-drag-id", node.id);
+                    sessionStorage.removeItem("emvb-drag-type");
+                  } catch {
+                    /* private mode */
+                  }
+                }}
                 onClick={() => onSelect(node.id)}
               >
                 {hasChildren ? (

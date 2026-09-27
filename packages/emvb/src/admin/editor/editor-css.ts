@@ -90,4 +90,12 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-add-group-title { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-color-kumo-subtle); text-transform: uppercase; letter-spacing: 0.04em; }
 .emvb-layer-caret { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: 0 0 16px; }
 .emvb-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+.emvb-outline-invalid { position: absolute; box-shadow: inset 0 0 0 1px var(--color-kumo-danger); outline: 1px dashed var(--color-kumo-danger); outline-offset: -1px; pointer-events: none; }
+.emvb-invalid-label { position: absolute; display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 6px; border-radius: 4px; background: var(--color-kumo-base); color: var(--text-color-kumo-danger); font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.1); pointer-events: none; z-index: 3; }
+.emvb-overlay-move { cursor: grab; }
+.emvb-overlay-move:active { cursor: grabbing; }
+@media (prefers-reduced-motion: reduce) {
+  .emvb-drop-line { transition: none !important; }
+}
 `;

@@ -1393,6 +1393,66 @@
         "auto-expands"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-019/invalid-outline-solid-accent",
+      "requirement": "R-003",
+      "description": "invalid drop outline drawn solid in the brand accent colour",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-outline-invalid { position: absolute; box-shadow: inset 0 0 0 1px var(--color-kumo-danger); outline: 1px dashed var(--color-kumo-danger); outline-offset: -1px; pointer-events: none; }",
+          "replace": ".emvb-outline-invalid { position: absolute; box-shadow: inset 0 0 0 1px var(--color-kumo-brand); outline: 1px solid var(--color-kumo-brand); outline-offset: -1px; pointer-events: none; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/drag-feedback.test.ts",
+        "-t",
+        "invalid outline"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-019/refused-drop-still-applied",
+      "requirement": "R-003",
+      "description": "move-node applies even when canDrop refuses",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "export function moveNode(layout: Layout, id: string, parentId: string, index: number): Arranged {\n  const allowed = canDrop(layout, { kind: \"existing\", id }, parentId);\n  if (!allowed.ok) return allowed;",
+          "replace": "export function moveNode(layout: Layout, id: string, parentId: string, index: number): Arranged {\n  const allowed = canDrop(layout, { kind: \"existing\", id }, parentId);\n  if (!allowed.ok) { /* seeded: ignore refusal */ }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/store.test.ts",
+        "-t",
+        "move-node"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-019/drop-line-wrong-axis",
+      "requirement": "R-003",
+      "description": "drop line uses the column axis inside a row container",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "  const row = direction.startsWith(\"row\");\n  const first = children[0];\n  const last = children.at(-1);\n  const before = index > 0 ? children[index - 1] : undefined;\n  const after = index < children.length ? children[index] : undefined;\n  if (row) {",
+          "replace": "  const row = false;\n  const first = children[0];\n  const last = children.at(-1);\n  const before = index > 0 ? children[index - 1] : undefined;\n  const after = index < children.length ? children[index] : undefined;\n  if (row) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/drag-feedback.test.ts",
+        "-t",
+        "dropLineBox"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

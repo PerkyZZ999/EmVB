@@ -116,3 +116,36 @@ test("add-node refuses an invalid drop without changing the layout", () => {
   expect(state.page.layout).toEqual(before.page.layout);
   expect(isDirty(state)).toBe(false);
 });
+
+test("move-node relocates an element and refuses an invalid drop", () => {
+  let state = initial();
+  const rootId = state.page.layout?.root.id ?? "";
+  const nested = {
+    id: "box00001",
+    type: "container" as const,
+    props: {},
+    children: [] as [],
+  };
+  state = editorReducer(state, {
+    type: "add-node",
+    node: nested,
+    parentId: rootId,
+    index: 1,
+  });
+  const headingId = state.page.layout?.root.children[0]?.id ?? "";
+  state = editorReducer(state, {
+    type: "move-node",
+    id: headingId,
+    parentId: "box00001",
+    index: 0,
+  });
+  const box = state.page.layout?.root.children.find((c) => c.id === "box00001");
+  expect(box && box.type === "container" && box.children[0]?.id).toBe(headingId);
+  const refused = editorReducer(state, {
+    type: "move-node",
+    id: "box00001",
+    parentId: headingId,
+    index: 0,
+  });
+  expect(refused.page.layout).toEqual(state.page.layout);
+});
