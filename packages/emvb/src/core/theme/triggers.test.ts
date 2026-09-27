@@ -30,6 +30,27 @@ describe("validateTriggers", () => {
     expect(result.ok).toBe(true);
   });
 
+  test("accepts exit_intent and inactivity triggers (W-081)", () => {
+    const result = validateTriggers({
+      schemaVersion: 1,
+      open: [
+        { type: "exit_intent" },
+        { type: "inactivity", ms: 15_000 },
+      ],
+      advanced: {},
+    });
+    expect(result.ok).toBe(true);
+  });
+
+  test("rejects inactivity below 1000ms", () => {
+    const result = validateTriggers({
+      schemaVersion: 1,
+      open: [{ type: "inactivity", ms: 50 }],
+      advanced: {},
+    });
+    expect(result.ok).toBe(false);
+  });
+
   test("rejects empty open list", () => {
     const result = validateTriggers({ schemaVersion: 1, open: [], advanced: {} });
     expect(result.ok).toBe(false);

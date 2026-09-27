@@ -7,7 +7,7 @@ const MAX_DELAY_MS = 120_000;
 const MAX_SCROLL_PERCENT = 100;
 const MAX_SHOW_TIMES = 100;
 
-/** MVP open triggers (Elementor-inspired). Exit-intent / inactivity deferred. */
+/** Open triggers (Elementor-inspired). URL rules / scheduling / A/B deferred (W-081). */
 const PageLoadTrigger = z.strictObject({ type: z.literal("page_load") });
 const DelayTrigger = z.strictObject({
   type: z.literal("delay"),
@@ -21,12 +21,19 @@ const ClickTrigger = z.strictObject({
   type: z.literal("click"),
   selector: z.string().min(1).max(MAX_CLICK_SELECTOR_LENGTH),
 });
+const ExitIntentTrigger = z.strictObject({ type: z.literal("exit_intent") });
+const InactivityTrigger = z.strictObject({
+  type: z.literal("inactivity"),
+  ms: z.number().int().min(1_000).max(MAX_DELAY_MS),
+});
 
 const PopupOpenTriggerSchema = z.discriminatedUnion("type", [
   PageLoadTrigger,
   DelayTrigger,
   ScrollTrigger,
   ClickTrigger,
+  ExitIntentTrigger,
+  InactivityTrigger,
 ]);
 
 export type PopupOpenTrigger = z.infer<typeof PopupOpenTriggerSchema>;

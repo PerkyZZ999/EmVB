@@ -3206,6 +3206,26 @@
         "Theme Builder creates"
       ],
       "expect": "New theme part|toBeVisible|Expected|Error|fail|Timeout"
+    },
+    {
+      "id": "W-081/exit-intent-rejected",
+      "requirement": "R-063",
+      "description": "exit_intent trigger fails validation",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/triggers.ts",
+          "search": "  ExitIntentTrigger,\n  InactivityTrigger,\n]);",
+          "replace": "  // seeded: drop exit_intent / inactivity\n]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/triggers.test.ts",
+        "-t",
+        "exit_intent and inactivity"
+      ],
+      "expect": "toBe\\(true\\)|Expected|fail|ok"
     }
   ]
 }

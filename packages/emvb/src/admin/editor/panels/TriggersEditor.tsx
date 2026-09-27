@@ -13,6 +13,8 @@ const TRIGGER_TYPES = [
   { value: "delay", label: "After delay" },
   { value: "scroll", label: "On scroll" },
   { value: "click", label: "On click (selector)" },
+  { value: "exit_intent", label: "Exit intent" },
+  { value: "inactivity", label: "After inactivity" },
 ] as const;
 
 type TriggerType = (typeof TRIGGER_TYPES)[number]["value"];
@@ -27,12 +29,16 @@ function blankTrigger(type: TriggerType): PopupOpenTrigger {
       return { type: "scroll", percent: 50 };
     case "click":
       return { type: "click", selector: "" };
+    case "exit_intent":
+      return { type: "exit_intent" };
+    case "inactivity":
+      return { type: "inactivity", ms: 30_000 };
   }
 }
 
 /**
- * Popup open triggers + thin advanced rules (S7b).
- * Gaps vs Elementor: exit-intent, inactivity, URL rules, scheduling.
+ * Popup open triggers + thin advanced rules (S7b / W-081).
+ * Gaps vs Elementor (deferred): URL rules, scheduling, A/B.
  */
 export function TriggersEditor({ triggers, onChange }: Props) {
   const doc = triggers ?? defaultTriggers();
@@ -121,6 +127,27 @@ export function TriggersEditor({ triggers, onChange }: Props) {
                 }
               />
             )}
+            {trigger.type === "exit_intent" && (
+              <p className="emvb-helper">
+                Opens when the pointer leaves toward the top of the viewport (desktop).
+              </p>
+            )}
+            {trigger.type === "inactivity" && (
+              <Input
+                label="Idle time (ms)"
+                className={FIELD}
+                type="number"
+                min={1000}
+                max={120000}
+                value={String(trigger.ms)}
+                onChange={(event) =>
+                  updateAt(index, {
+                    type: "inactivity",
+                    ms: Math.max(1000, Number(event.target.value) || 1000),
+                  })
+                }
+              />
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -144,7 +171,7 @@ export function TriggersEditor({ triggers, onChange }: Props) {
 
       <h3 className="emvb-section-label">Advanced</h3>
       <p className="emvb-helper">
-        MVP-thin: show limit and devices. Exit-intent and scheduling are later.
+        MVP-thin: show limit and devices. URL rules, scheduling, and A/B are later.
       </p>
       <Input
         label="Show at most (times)"

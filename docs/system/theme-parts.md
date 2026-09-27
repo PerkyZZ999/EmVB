@@ -72,7 +72,7 @@ MVP vocabulary: `general/entire_site`, `singular/{all,front,not_found,collection
 
 **Advanced (MVP-thin):** `showTimes` caps opens per browser via `localStorage`; `devices` filters by viewport (`mobile` &lt;768, `tablet` &lt;1025, else `desktop`). Null/omitted = unlimited / all devices.
 
-**Gaps vs Elementor (documented, out of MVP):** exit-intent, inactivity, URL/query rules, scheduling, A/B, per-session vs per-user distinctions beyond localStorage.
+**Gaps vs Elementor (deferred):** URL/query rules, scheduling, A/B, per-session vs per-user distinctions beyond localStorage. Exit-intent and inactivity shipped in W-081.
 
 Default on create: `{ open: [{ type: "page_load" }], advanced: {} }`.
 

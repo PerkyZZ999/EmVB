@@ -2,16 +2,18 @@
  * Optional public popup runtime (S7b). Hosts load this only when
  * `resolveThemeParts().needsPopupsRuntime` is true (R-031).
  *
- * MVP triggers: page_load, delay, scroll, click selector.
+ * Triggers: page_load, delay, scroll, click, exit_intent, inactivity (W-081).
  * Advanced (thin): showTimes (localStorage), devices (viewport width).
- * Gaps vs Elementor: exit-intent, inactivity, URL/query, scheduling, A/B.
+ * Gaps vs Elementor (deferred): URL/query, scheduling, A/B.
  */
 
 type OpenTrigger =
   | { type: "page_load" }
   | { type: "delay"; ms: number }
   | { type: "scroll"; percent: number }
-  | { type: "click"; selector: string };
+  | { type: "click"; selector: string }
+  | { type: "exit_intent" }
+  | { type: "inactivity"; ms: number };
 
 type Advanced = {
   showTimes?: number | null;
@@ -208,6 +210,28 @@ function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTri
           // invalid selector at runtime — ignore
         }
       });
+      break;
+    }
+    case "exit_intent": {
+      // Desktop: pointer leaves the document toward the top chrome (common exit-intent heuristic).
+      const onLeave = (event: MouseEvent) => {
+        if (event.clientY > 0) return;
+        document.documentElement.removeEventListener("mouseleave", onLeave);
+        openOnce(ctrl, config);
+      };
+      document.documentElement.addEventListener("mouseleave", onLeave);
+      break;
+    }
+    case "inactivity": {
+      const ms = Math.max(1000, Number(trigger.ms) || 30_000);
+      let timer = window.setTimeout(() => openOnce(ctrl, config), ms);
+      const reset = () => {
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => openOnce(ctrl, config), ms);
+      };
+      for (const eventName of ["mousemove", "mousedown", "keydown", "touchstart", "scroll"] as const) {
+        window.addEventListener(eventName, reset, { passive: true });
+      }
       break;
     }
   }
