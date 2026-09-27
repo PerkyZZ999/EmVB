@@ -2,6 +2,8 @@ import type {
   ButtonNode,
   CheckboxNode,
   ContainerNode,
+  DivBlockNode,
+  FlexboxNode,
   DividerNode,
   FormNode,
   HeadingNode,
@@ -784,6 +786,38 @@ const postLink: ElementDefinition<PostLinkNode> = {
   build: (_node, attrs) => ({ tag: "a", attrs: { ...attrs, href: "#" }, children: ["Post link"] }),
 };
 
+const divBlock: ElementDefinition<DivBlockNode> = {
+  baseCss: ".emvb-div-block{display:block;min-width:0}",
+  defaults: () => ({ type: "div-block", props: {}, children: [] }),
+  descriptor: {
+    type: "div-block",
+    name: "Div Block",
+    group: "layout",
+    defaultTab: "style",
+    fields: [],
+  },
+  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
+const flexbox: ElementDefinition<FlexboxNode> = {
+  baseCss:
+    ".emvb-flexbox{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px}",
+  defaults: () => ({
+    type: "flexbox",
+    props: {},
+    style: { flexDirection: "row", flexWrap: "wrap", gap: { value: 16, unit: "px" } },
+    children: [],
+  }),
+  descriptor: {
+    type: "flexbox",
+    name: "Flexbox",
+    group: "layout",
+    defaultTab: "style",
+    fields: [],
+  },
+  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
 const loop: ElementDefinition<LoopNode> = {
   baseCss: ".emvb-loop{display:flex;flex-direction:column;min-width:0;gap:1rem}",
   defaults: () => ({ type: "loop", props: {}, children: [] }),
@@ -832,6 +866,8 @@ export const ELEMENTS = {
   "post-image": postImage,
   "post-link": postLink,
   loop,
+  "div-block": divBlock,
+  flexbox,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;

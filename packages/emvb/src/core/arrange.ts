@@ -3,6 +3,7 @@ import {
   isFormFieldType,
   isFormNode,
   isParentNode,
+  isLayoutParentNode,
   type ContainerNode,
   type FormNode,
   type LoopNode,
@@ -30,7 +31,7 @@ type Located = {
 
 export const REASONS = {
   intoItself: "A container can't go inside itself.",
-  notContainer: "Only containers and forms can hold other elements.",
+  notContainer: "Only layout containers, forms, and loops can hold other elements.",
   rootFixed: "The page's outer container can't be moved.",
   rootCopy: "The page's outer container can't be duplicated.",
   missing: "That element is no longer on the page.",
@@ -116,7 +117,7 @@ export function canDrop(layout: Layout, source: DragSource, parentId: string): A
 
   if (isFormNode(node)) {
     if (isFormNode(target.node) || underForm(layout, parentId)) return refuse(REASONS.nestedForm);
-    if (!isContainer(target.node)) return refuse(REASONS.formIntoField);
+    if (!isLayoutParentNode(target.node)) return refuse(REASONS.formIntoField);
   }
   if (isFormFieldType(node.type)) {
     const okParent = isFormNode(target.node) || underForm(layout, parentId);

@@ -57,6 +57,8 @@ const enclosingFormId = (layout: Layout, nodeId: string): string | undefined => 
 const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
   container: SquaresFourIcon,
+  "div-block": SquaresFourIcon,
+  flexbox: SquaresFourIcon,
   image: ImageIcon,
   icon: StarIcon,
   video: YoutubeLogoIcon,

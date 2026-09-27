@@ -70,7 +70,13 @@ export function dropIndex(direction: Direction, children: Rect[], point: Point):
 export function dropContainer(layout: Layout, hoveredId: string | null): LayoutNode {
   const hovered = hoveredId ? findNode(layout, hoveredId) : undefined;
   if (!hovered) return layout.root;
-  if (hovered.type === "container" || hovered.type === "loop") return hovered;
+  if (
+    hovered.type === "container" ||
+    hovered.type === "div-block" ||
+    hovered.type === "flexbox" ||
+    hovered.type === "loop"
+  )
+    return hovered;
   const parentId = parentOf(layout, hovered.id);
   return (parentId && findNode(layout, parentId)) || layout.root;
 }

@@ -288,3 +288,31 @@ describe("video element (W-026, R-013)", () => {
     expect(renderPage(page(bad), design).html).toContain("emvb-video-missing");
   });
 });
+
+describe("div-block and flexbox (W-072)", () => {
+  test("div-block emits display:block base and wraps children", () => {
+    const node = defaultElement("div-block", "divb0001");
+    node.children = [defaultElement("heading", "head0001")];
+    const layout: Layout = {
+      schemaVersion: 1,
+      root: { ...defaultElement("container", "root0001"), children: [node] },
+    };
+    const { html, css } = renderPage(layout, design);
+    expect(css).toContain(".emvb-div-block{display:block");
+    expect(html).toContain("emvb-div-block");
+    expect(html).toContain("emvb-heading");
+  });
+
+  test("flexbox defaults to row wrap with gap and keeps container column", () => {
+    const node = defaultElement("flexbox", "flex0001");
+    const layout: Layout = {
+      schemaVersion: 1,
+      root: { ...defaultElement("container", "root0001"), children: [node] },
+    };
+    const { css, html } = renderPage(layout, design);
+    expect(css).toContain(".emvb-flexbox{display:flex;flex-direction:row");
+    expect(css).toContain(".emvb-container{display:flex;flex-direction:column");
+    expect(html).toContain("emvb-flexbox");
+    expect(node.style?.flexDirection).toBe("row");
+  });
+});

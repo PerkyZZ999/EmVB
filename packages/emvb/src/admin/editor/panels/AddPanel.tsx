@@ -4,6 +4,7 @@ import {
   MinusIcon,
   RectangleIcon,
   SquareIcon,
+  SquaresFourIcon,
   TextAlignLeftIcon,
   TextHIcon,
   TextTIcon,
@@ -26,6 +27,8 @@ import { FIELD } from "../../ui.ts";
 
 const ICONS: Record<string, typeof TextHIcon> = {
   container: SquareIcon,
+  "div-block": SquareIcon,
+  flexbox: SquaresFourIcon,
   spacer: RectangleIcon,
   divider: MinusIcon,
   heading: TextHIcon,
