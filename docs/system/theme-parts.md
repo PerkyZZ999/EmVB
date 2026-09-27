@@ -1,6 +1,6 @@
-# Theme parts (Headers, Footers & site templates)
+# Theme parts (Headers, Footers, site templates & Popups)
 
-Post-MVP slices **S7a** (Headers/Footers), **S7c** (Error 404, Search Results, Single Page), and **S7d** (Single Post, Archive, Loop Item). Stored in hidden collection `emvb_theme_parts`.
+Post-MVP slices **S7a** (Headers/Footers), **S7c** (Error 404, Search Results, Single Page), **S7d** (Single Post, Archive, Loop Item), and **S7b** (Popups). Stored in hidden collection `emvb_theme_parts`.
 
 ## Fields
 
@@ -8,8 +8,9 @@ Post-MVP slices **S7a** (Headers/Footers), **S7c** (Error 404, Search Results, S
 |---|---|---|
 | `title` | string | Required |
 | `layout` | json + `emvb:layout` | Same layout schema as Visual pages |
-| `part_type` | select | `header` \| `footer` \| `error_404` \| `search_results` \| `single_page` \| `single_post` \| `archive` \| `loop_item` (popups deferred) |
+| `part_type` | select | `header` \| `footer` \| `error_404` \| `search_results` \| `single_page` \| `single_post` \| `archive` \| `loop_item` \| `popup` |
 | `conditions` | json | Conditions doc v1 (see below) |
+| `triggers` | json | Triggers doc v1 — meaningful for `popup` (see below) |
 
 No SEO. No public `urlPattern` (parts are not catch-all pages).
 
@@ -25,8 +26,9 @@ No SEO. No public `urlPattern` (parts are not catch-all pages).
 | `single_post` | Replaces `<main>` on EmDash `posts` singular | `kind=singular`, `collection=posts` (e.g. `/posts/welcome`) |
 | `archive` | Replaces `<main>` on posts archive / category / tag | `kind=archive` and not search |
 | `loop_item` | Reusable item template for Loop elements | **Never** a page location; referenced by `loop.itemPartId` |
+| `popup` | Overlay dialog at body end | Always competes; conditions decide; **not** a content replace |
 
-Default Include on create: Entire Site (header/footer/loop_item); 404 page (`error_404`); Search results (`search_results`); Pages all (`single_page`); Posts all (`single_post`); All archives (`archive` — posts index + category/tag; search excluded by location gate).
+Default Include on create: Entire Site (header/footer/loop_item/popup); 404 page (`error_404`); Search results (`search_results`); Pages all (`single_page`); Posts all (`single_post`); All archives (`archive` — posts index + category/tag; search excluded by location gate).
 
 ## Conditions (schemaVersion 1)
 
@@ -39,13 +41,44 @@ Default Include on create: Entire Site (header/footer/loop_item); 404 page (`err
 }
 ```
 
-A part matches when **any include** matches and **no exclude** matches. Among matching published parts of one type, **highest specificity** wins; ties use `updatedAt` descending. Content types are also gated by location (above).
+A part matches when **any include** matches and **no exclude** matches. Among matching published parts of one type, **highest specificity** wins; ties use `updatedAt` descending. Content types are also gated by location (above). **Popups** use the same Include/Exclude rules but `listMatchingThemeParts` returns **every** matching popup (not a single winner).
 
 MVP vocabulary: `general/entire_site`, `singular/{all,front,not_found,collection,entry}`, `archive/{all,collection,taxonomy,search}`.
 
+## Triggers (schemaVersion 1, S7b)
+
+```json
+{
+  "schemaVersion": 1,
+  "open": [
+    { "type": "page_load" },
+    { "type": "delay", "ms": 3000 },
+    { "type": "scroll", "percent": 50 },
+    { "type": "click", "selector": ".open-promo" }
+  ],
+  "advanced": {
+    "showTimes": 1,
+    "devices": ["desktop", "tablet"]
+  }
+}
+```
+
+| Open trigger | Behaviour |
+|---|---|
+| `page_load` | Opens immediately after the optional runtime inits |
+| `delay` | Opens after `ms` (0–120000) |
+| `scroll` | Opens when scroll depth ≥ `percent` (0–100) |
+| `click` | Opens when an element matching `selector` is clicked (safe CSS selectors only) |
+
+**Advanced (MVP-thin):** `showTimes` caps opens per browser via `localStorage`; `devices` filters by viewport (`mobile` &lt;768, `tablet` &lt;1025, else `desktop`). Null/omitted = unlimited / all devices.
+
+**Gaps vs Elementor (documented, out of MVP):** exit-intent, inactivity, URL/query rules, scheduling, A/B, per-session vs per-user distinctions beyond localStorage.
+
+Default on create: `{ open: [{ type: "page_load" }], advanced: {} }`.
+
 ## Dynamic bindings (S7d)
 
-Public HTML stays JS-free (R-031). When resolving a winning `single_post` or `archive` part, `resolveThemeParts` loads EmDash posts and passes `ThemeDynamicData` into `renderPage`:
+Public HTML stays JS-free (R-031) **except** when a matching popup is present — then hosts load `emvb/astro/popups` (`EmVBPopupsRuntime`), the same optional pattern as Forms. When resolving a winning `single_post` or `archive` part, `resolveThemeParts` loads EmDash posts and passes `ThemeDynamicData` into `renderPage`:
 
 | Element | Public output |
 |---|---|
@@ -64,6 +97,12 @@ Hosts call `resolveThemeParts(Astro, ctx)` from `emvb/astro`. Return value:
 
 - `header` / `footer` — chrome (S7a)
 - `content` — body template when Error 404 / Search / Single Page / Single Post / Archive wins
-- `css` — concatenated CSS for all winners
+- `popups` — array of matching popup HTML (dialog chrome + body) + trigger config (S7b)
+- `css` — concatenated CSS for all winners (includes popup chrome CSS when popups match)
+- `needsPopupsRuntime` — when true, host renders `<EmVBPopupsRuntime />` from `emvb/astro/popups`
 
-Demos' `Base.astro` **replace** the starter `<header>` when a header wins, insert footer HTML after `<main>` when a footer wins, and replace `<main>` slot content when `content` wins. Posts singular (`/posts/[slug]`), posts index, category, and tag routes already pass enough context for S7d; resolve auto-fetches entry/list data. Helpers: `themeContext404`, `themeContextSearch`, `themeContextFront`, `themeContextFrom`.
+Demos' `Base.astro` **replace** the starter `<header>` when a header wins, insert footer HTML after `<main>` when a footer wins, replace `<main>` slot content when `content` wins, and append popup markup before `EmDashBodyEnd` when popups match. Pages without popups load **no** popup JS. Headers/footers/content templates are unchanged by S7b. Helpers: `themeContext404`, `themeContextSearch`, `themeContextFront`, `themeContextFrom`.
+
+### Popup a11y (runtime)
+
+Dialog: `role="dialog"`, `aria-modal="true"`, focus moves into the dialog on open, Tab cycles focusables, Escape and backdrop/close button dismiss and restore focus.
