@@ -25,9 +25,12 @@
     "e2e": "playwright test",
     "e2e:prod": "playwright test -c playwright.prod.config.ts",
     "seeded-bugs": "bun scripts/seeded-bug.ts",
-    "bench:render": "bun scripts/bench-render.ts"
+    "bench:render": "bun scripts/bench-render.ts",
+    "bench:css": "bun scripts/css-budget.ts",
+    "pack:smoke": "bun scripts/pack-smoke.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@happy-dom/global-registrator": "20.14.5",
     "@playwright/test": "1.63.0",
     "@types/bun": "1.4.2",

@@ -1,8 +1,8 @@
 // N-002: renderPage on a 300-node layout must take ≤ 20 ms (median, Bun runtime, measured locally).
 import { renderPage, type DesignSystem, type Layout } from "../packages/emvb/src/core/index.ts";
 
-const BUDGET_MS = 20;
-const ITERATIONS = 200;
+export const BUDGET_MS = 20;
+export const ITERATIONS = 200;
 
 export function benchLayout(nodes = 300): Layout {
   type Node = Layout["root"]["children"][number];
@@ -38,6 +38,19 @@ const design: DesignSystem = {
   schemaVersion: 1,
   variables: { colors: [{ id: "brand", name: "Brand", value: "#0055ff" }] },
 };
+
+export function benchRenderMedian(iterations = 40): number {
+  const layout = benchLayout();
+  for (let i = 0; i < 5; i++) renderPage(layout, design);
+  const times: number[] = [];
+  for (let i = 0; i < iterations; i++) {
+    const start = performance.now();
+    renderPage(layout, design);
+    times.push(performance.now() - start);
+  }
+  const sorted = times.toSorted((a, b) => a - b);
+  return sorted[Math.floor(sorted.length / 2)] ?? Number.NaN;
+}
 
 if (import.meta.main) {
   const layout = benchLayout();

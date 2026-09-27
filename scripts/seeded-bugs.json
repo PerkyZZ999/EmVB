@@ -2258,6 +2258,102 @@
         "form submit control"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-040/bench-budget-raised",
+      "requirement": "N-002",
+      "description": "render budget is so high a slow render still passes",
+      "edits": [
+        {
+          "file": "scripts/bench-render.ts",
+          "search": "export const BUDGET_MS = 20;",
+          "replace": "export const BUDGET_MS = 0.0001;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/css-budget.test.ts", "-t", "under 20 ms"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-040/css-budget-skipped",
+      "requirement": "N-002",
+      "description": "CSS gzip budget always passes",
+      "edits": [
+        {
+          "file": "scripts/css-budget.ts",
+          "search": "export const CSS_GZIP_BUDGET = 15 * 1024;",
+          "replace": "export const CSS_GZIP_BUDGET = 1;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/css-budget.test.ts", "-t", "15 KB gzipped"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-041/heading-as-div",
+      "requirement": "N-003",
+      "description": "headings render as divs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    tag: HEADING_TAGS[node.props.level - 1] ?? \"h2\",",
+          "replace": "    tag: \"div\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/elements.test.ts",
+        "-t",
+        "heading default"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-042/escape-dropped",
+      "requirement": "R-032",
+      "description": "escapeText is a no-op",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/escape.ts",
+          "search": "export function escapeText(value: string): string {\n  return value.replace(/[&<>]/g, (ch) => TEXT_ENTITIES[ch] ?? ch);\n}",
+          "replace": "export function escapeText(value: string): string {\n  return value;\n}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/render.test.ts",
+        "-t",
+        "inert text"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-043/small-screen-threshold",
+      "requirement": "R-001",
+      "description": "small-screen notice only below 900 px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useMediaQuery.ts",
+          "search": "export const EDITOR_MIN_WIDTH_QUERY = \"(min-width: 1024px)\";",
+          "replace": "export const EDITOR_MIN_WIDTH_QUERY = \"(min-width: 900px)\";"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/overlay.e2e.ts", "--project=node", "-g", "below 1024"],
+      "expect": "\\(fail\\)|\u2718"
+    },
+    {
+      "id": "W-044/pack-missing-astro-source",
+      "requirement": "R-052",
+      "description": "pack smoke looks for a missing astro entry file",
+      "edits": [
+        {
+          "file": "scripts/pack-smoke.ts",
+          "search": "      \"package/src/astro/index.ts\",",
+          "replace": "      \"package/src/astro/MISSING.ts\","
+        }
+      ],
+      "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "TypeScript source"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
