@@ -131,3 +131,11 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 
 - Add a migration `LAYOUT_MIGRATIONS[n]` (pure, version n to n + 1) and bump `LAYOUT_SCHEMA_VERSION` in the same change.
 - Add fixtures and tests for the old and new shapes, and update this file.
+
+## S8 additive elements (W-072–W-074)
+
+- **`div-block`**: block container (`display:block`); children like Container.
+- **`flexbox`**: flex container defaulting to row + wrap + gap (Container stays column).
+- **`svg`**: `props.markup` (sanitized allowlist; no scripts/handlers/`use`/`foreignObject`); optional `title`, `decorative`, `size`.
+- **`tabs` / `tab-panel`**: Tabs hold only tab-panels. Public markup is CSS-only (radio + `:has()`); no EmVB public JS (D-EV4-02).
+
