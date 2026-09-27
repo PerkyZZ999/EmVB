@@ -2354,6 +2354,26 @@
       ],
       "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "TypeScript source"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-045/log-includes-layout",
+      "requirement": "N-008",
+      "description": "hook rejection log includes layout payload",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "    ctx.log.warn(\"emvb: page save rejected\", { pageId, code: result.issues[0]?.code ?? \"invalid\" });",
+          "replace": "    ctx.log.warn(\"emvb: page save rejected\", { pageId, code: result.issues[0]?.code ?? \"invalid\", layout: event.content[\"layout\"] });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/server/logging.test.ts",
+        "-t",
+        "never layout"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

@@ -2,7 +2,7 @@
 
 A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 0.41.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS, with no EmVB JavaScript on the public site. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
-**Status:** early development (slice S1: one container and one heading, end to end). Not published yet.
+**Status:** MVP implement slices S1–S6 complete (local). Not published yet (phase 7 / D-007).
 
 ## Quick start
 
@@ -25,6 +25,5 @@ The Cloudflare demo runs the same way with `bun run demo:cf` on port 4412.
 - [AGENTS.md](AGENTS.md): commands, tests, code style and project rules.
 - [docs/project/](docs/project/): requirements, decisions, architecture and validation evidence.
 - [docs/system/layout-format.md](docs/system/layout-format.md): how pages and the design system are stored.
-
 
 See [docs/guides/install-in-a-host-site.md](docs/guides/install-in-a-host-site.md).
