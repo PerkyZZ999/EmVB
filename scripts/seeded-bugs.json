@@ -1104,6 +1104,90 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-014/descendant-check-removed",
+      "requirement": "R-003",
+      "description": "a container can be dropped into its own descendants",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "if (contains(moving.node, parentId)) return refuse(REASONS.intoItself);",
+          "replace": "if (moving.node.id === parentId) return refuse(REASONS.intoItself);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*a container can't go into itself or anything inside it"
+    },
+    {
+      "id": "W-014/duplicate-reuses-ids",
+      "requirement": "R-003",
+      "description": "duplicate keeps an id that is already on the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "while (taken.has(id)) id = newNodeId(random);",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*never reuses an id already on the page"
+    },
+    {
+      "id": "W-014/move-out-before-parent",
+      "requirement": "R-003",
+      "description": "Alt+Left puts the element before its container",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "return moveNode(layout, id, parent.parent.id, parent.index + 1);",
+          "replace": "return moveNode(layout, id, parent.parent.id, parent.index);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*moveOut puts it right after its container"
+    },
+    {
+      "id": "W-014/depth-ignores-subtree",
+      "requirement": "N-005",
+      "description": "the depth check ignores the height of the dropped subtree",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "if (target.depth + height(node) > MAX_DEPTH) return refuse(REASONS.tooDeep);",
+          "replace": "if (target.depth + 1 > MAX_DEPTH) return refuse(REASONS.tooDeep);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*the depth limit counts the whole subtree being dropped"
+    },
+    {
+      "id": "W-014/move-index-not-adjusted",
+      "requirement": "R-003",
+      "description": "a later drop in the same container lands one place too far",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "const at = sameParent && from.index < index ? index - 1 : index;",
+          "replace": "const at = index;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*the index counts the target's children before the move"
+    },
+    {
+      "id": "W-014/delete-selects-previous-first",
+      "requirement": "R-003",
+      "description": "after a delete the previous sibling is selected instead of the next",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "return (siblings[found.index + 1] ?? siblings[found.index - 1] ?? found.parent).id;",
+          "replace": "return (siblings[found.index - 1] ?? siblings[found.index + 1] ?? found.parent).id;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*after a delete the selection goes to the next sibling"
     }
   ]
 }
