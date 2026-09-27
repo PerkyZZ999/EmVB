@@ -62,6 +62,17 @@ export {
   LengthVariable,
 } from "./schema/design.ts";
 export {
+  findVariableUsages,
+  findVariableUsagesInDesign,
+  clearVariableRefs,
+  removeVariable,
+  renameVariable,
+  deleteVariable,
+  refMatchesKind,
+  type VariableKind,
+  type VariableUsage,
+} from "./design/variables.ts";
+export {
   renderPage,
   type RenderMode,
   type RenderResult,

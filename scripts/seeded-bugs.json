@@ -1858,6 +1858,46 @@
         "unsafe font"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-029/delete-leaves-dangling-refs",
+      "requirement": "R-020",
+      "description": "clearVariableRefs is a no-op so delete leaves dangling { var } refs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "/** Drop every `{ var: id }` style binding on the layout (fallback to defaults). Pure. */\nexport function clearVariableRefs(layout: Layout, id: string, kind?: VariableKind): Layout {\n  let next = layout;\n  const usages = findVariableUsages(layout, id, kind);",
+          "replace": "/** Drop every `{ var: id }` style binding on the layout (fallback to defaults). Pure. */\nexport function clearVariableRefs(layout: Layout, id: string, kind?: VariableKind): Layout {\n  return layout;\n  let next = layout;\n  const usages = findVariableUsages(layout, id, kind);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "delete clears refs"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-029/usages-miss-nested",
+      "requirement": "R-020",
+      "description": "findVariableUsages only visits the current node and skips nested children",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "function walkNodes(node: LayoutNode, visit: (node: LayoutNode) => void): void {\n  visit(node);\n  for (const child of nodeChildren(node)) walkNodes(child, visit);\n}",
+          "replace": "function walkNodes(node: LayoutNode, visit: (node: LayoutNode) => void): void {\n  visit(node);\n  // seeded: miss nested nodes\n}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "finds usages across nested"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
