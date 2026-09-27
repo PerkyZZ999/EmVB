@@ -56,6 +56,12 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | `checkbox` | `field`, optional `label` | none | labelled `<input type="checkbox" value="true">` |
 | `radio` | `field`, optional `label`, `placeholder` | none | `<fieldset>` of radios (options from definition when available) |
 | `submit` | optional `label` | none | `<button type="submit" class="ec-form-submit">` |
+| `post-title` | optional `level` (1–6) | none | Dynamic heading from `ThemeDynamicData.post` |
+| `post-excerpt` | (none) | none | Dynamic excerpt paragraph |
+| `post-content` | (none) | none | Dynamic body (Portable Text → safe blocks) |
+| `post-image` | optional `decorative` | none | Dynamic featured image when URL present |
+| `post-link` | optional `text`, `newTab` | none | Dynamic permalink; blank text → title |
+| `loop` | optional `itemPartId` | `children: Node[]` (inline item template when no part id) | Repeats item template for each archive post |
 
 Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `classes` (style-class ids from the design system, S4).
 
