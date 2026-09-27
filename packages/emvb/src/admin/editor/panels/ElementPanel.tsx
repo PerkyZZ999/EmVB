@@ -4,6 +4,8 @@ import {
   CaretDownIcon,
   CaretRightIcon,
   ImageIcon,
+  PaintBrushIcon,
+  PencilSimpleIcon,
   StarIcon,
   YoutubeLogoIcon,
   SquaresFourIcon,
@@ -228,11 +230,27 @@ export function ElementPanel({
           </p>
         )}
       <Tabs
-        variant="segmented"
+        variant="underline"
         className="emvb-tabs"
         tabs={[
-          { value: "content", label: "Content" },
-          { value: "style", label: "Style" },
+          {
+            value: "content",
+            label: (
+              <>
+                <PencilSimpleIcon size={14} aria-hidden="true" />
+                Content
+              </>
+            ),
+          },
+          {
+            value: "style",
+            label: (
+              <>
+                <PaintBrushIcon size={14} aria-hidden="true" />
+                Style
+              </>
+            ),
+          },
         ]}
         value={tab}
         onValueChange={(value) => setTab(value === "style" ? "style" : "content")}

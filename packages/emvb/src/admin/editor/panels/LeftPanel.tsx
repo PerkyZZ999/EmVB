@@ -46,7 +46,7 @@ export function LeftPanel({
   return (
     <div className="emvb-panel-body emvb-left-panel">
       <Tabs
-        variant="segmented"
+        variant="underline"
         className="emvb-tabs"
         tabs={[
           { value: "add", label: "Add" },

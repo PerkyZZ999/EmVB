@@ -25,7 +25,7 @@ export const UI_CSS = `
 .emvb-mono { font-family: var(--font-mono); }
 .emvb-helper { margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
 .emvb-inline-error { display: flex; gap: 4px; align-items: flex-start; margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-danger); }
-.emvb-status { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 8px; border-radius: 9999px; font-size: 12px; line-height: 16px; background: color-mix(in oklab, var(--color-kumo-base) 88%, transparent); box-shadow: inset 0 0 0 1px var(--color-kumo-hairline); white-space: nowrap; }
+.emvb-status { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 8px; border-radius: 9999px; font-size: 12px; line-height: 16px; background: color-mix(in oklab, var(--color-kumo-base) 96%, transparent); box-shadow: inset 0 0 0 1px var(--color-kumo-hairline); white-space: nowrap; }
 .emvb-status-dot { width: 8px; height: 8px; border-radius: 9999px; background: var(--text-color-kumo-subtle); }
 .emvb-status[data-status="published"] .emvb-status-dot { background: var(--color-kumo-success); }
 @media (prefers-reduced-motion: reduce) {

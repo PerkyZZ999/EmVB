@@ -2,8 +2,8 @@
  * Editor chrome styles (DESIGN.md). The admin's Tailwind build is precompiled, so EmVB ships its
  * own rules, scoped to the editor root and built only from Kumo variables. Panels keep their
  * 1 px borders inside their width, so the canvas gets exactly the space between them (D-025).
- * Density is compact (28 px controls, 44 px top bar, 256/288 panels) with restrained glass
- * elevation on chrome; the canvas stage stays clear.
+ * Density is compact (28 px controls, 44 px top bar, 256/288 panels) with crisp elevated
+ * glass chrome (high-opacity Kumo fills, light blur, soft shadows); the canvas stage stays clear.
  */
 import { UI_CSS } from "../ui.ts";
 
@@ -13,12 +13,12 @@ export const EDITOR_CSS = `${UI_CSS}
   --emvb-topbar: 44px;
   --emvb-panel-left: 256px;
   --emvb-panel-right: 288px;
-  --emvb-glass-blur: 12px;
-  --emvb-glass: color-mix(in oklab, var(--color-kumo-base) 78%, transparent);
-  --emvb-glass-strong: color-mix(in oklab, var(--color-kumo-base) 90%, transparent);
-  --emvb-glass-elevated: color-mix(in oklab, var(--color-kumo-elevated) 88%, transparent);
-  --emvb-elevation-s: 0 1px 0 var(--color-kumo-shadow-edge), 0 4px 12px var(--color-kumo-shadow-drop);
-  --emvb-elevation-m: 0 0 0 1px var(--color-kumo-line), 0 1px 2px var(--color-kumo-shadow-edge), 0 8px 24px var(--color-kumo-shadow-drop);
+  --emvb-glass-blur: 8px;
+  --emvb-glass: color-mix(in oklab, var(--color-kumo-base) 94%, transparent);
+  --emvb-glass-strong: color-mix(in oklab, var(--color-kumo-base) 98%, transparent);
+  --emvb-glass-elevated: color-mix(in oklab, var(--color-kumo-elevated) 96%, transparent);
+  --emvb-elevation-s: 0 1px 0 var(--color-kumo-shadow-edge), 0 2px 8px var(--color-kumo-shadow-drop);
+  --emvb-elevation-m: 0 0 0 1px var(--color-kumo-line), 0 1px 2px var(--color-kumo-shadow-edge), 0 6px 16px var(--color-kumo-shadow-drop);
   display: grid;
   grid-template-rows: var(--emvb-topbar) minmax(0, 1fr);
   background: var(--color-kumo-canvas);
@@ -32,8 +32,8 @@ export const EDITOR_CSS = `${UI_CSS}
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: 8px;
-  padding: 8px;
+  gap: 12px;
+  padding: 8px 12px;
   min-width: 0;
   background: var(--emvb-glass);
   -webkit-backdrop-filter: blur(var(--emvb-glass-blur));
@@ -42,7 +42,7 @@ export const EDITOR_CSS = `${UI_CSS}
   box-shadow: var(--emvb-elevation-s);
   z-index: 1;
 }
-.emvb-topbar-title { font-size: 13px; line-height: 18px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-topbar-title { font-size: 14px; line-height: 18px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-topbar-start { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .emvb-topbar-end { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .emvb-save-status { display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); white-space: nowrap; }
@@ -62,21 +62,45 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-panel-left {
   border-right: 1px solid var(--color-kumo-hairline);
-  box-shadow: 2px 0 12px var(--color-kumo-shadow-drop);
+  box-shadow: 2px 0 10px var(--color-kumo-shadow-drop);
 }
 .emvb-panel-right {
   border-left: 1px solid var(--color-kumo-hairline);
-  box-shadow: -2px 0 12px var(--color-kumo-shadow-drop);
+  box-shadow: -2px 0 10px var(--color-kumo-shadow-drop);
 }
 .emvb-panel-title { margin: 0; font-size: 14px; line-height: 18px; font-weight: 600; }
 .emvb-panel-body, .emvb-field-group, .emvb-new-variable, .emvb-section-body { display: flex; flex-direction: column; gap: 8px; }
 .emvb-field-group, .emvb-new-variable { gap: 8px; }
 .emvb-section-header { display: flex; align-items: center; justify-content: space-between; width: 100%; height: var(--emvb-control); padding: 0; border: 0; border-top: 1px solid var(--color-kumo-hairline); background: none; color: var(--text-color-kumo-default); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
 .emvb-section-header:focus-visible, .emvb-layer-row:focus-visible, .emvb-empty-prompt:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
-.emvb-count { font-weight: 400; color: var(--text-color-kumo-subtle); }
-.emvb-section-body { padding-top: 4px; }
-.emvb-tabs, .emvb-tabs [role="tablist"] { width: 100%; min-height: var(--emvb-control); }
-.emvb-tabs [role="tab"] { flex: 1 1 0; justify-content: center; height: var(--emvb-control); min-height: var(--emvb-control); color: var(--text-color-kumo-default); }
+.emvb-count { margin-left: 4px; font-size: 12px; line-height: 16px; font-weight: 400; color: var(--text-color-kumo-subtle); }
+.emvb-section-body { padding-top: 4px; padding-bottom: 4px; }
+.emvb-tabs { width: 100%; }
+.emvb-tabs [role="tablist"] {
+  width: 100%;
+  min-height: var(--emvb-control);
+  gap: 0;
+  padding-bottom: 0;
+  border-bottom: 1px solid var(--color-kumo-hairline);
+}
+.emvb-tabs [role="tab"] {
+  flex: 1 1 0;
+  justify-content: center;
+  gap: 4px;
+  height: var(--emvb-control);
+  min-height: var(--emvb-control);
+  padding: 0 8px;
+  color: var(--text-color-kumo-subtle);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+}
+.emvb-tabs [role="tab"][aria-selected="true"] {
+  color: var(--text-color-kumo-default);
+  font-weight: 600;
+}
+.emvb-tabs [role="tab"][aria-selected="true"] svg { color: var(--color-kumo-brand); }
+.emvb-tabs [role="tab"]:hover { color: var(--text-color-kumo-default); }
 .emvb-panel .emvb-field { width: 100%; }
 .emvb-swatch { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border-radius: 2px; box-shadow: inset 0 0 0 1px var(--color-kumo-line); vertical-align: -1px; }
 .emvb-row-actions, .emvb-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; }
@@ -96,7 +120,23 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-overlay { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .emvb-outline-hover, .emvb-outline-selected { position: absolute; box-shadow: inset 0 0 0 1px var(--color-kumo-brand); }
 .emvb-outline-selected { box-shadow: inset 0 0 0 2px var(--color-kumo-brand); }
-.emvb-overlay-label { position: absolute; display: inline-flex; align-items: center; gap: 4px; height: 24px; padding-left: 4px; border-radius: 4px; background: var(--color-kumo-brand); color: #fff; font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap; box-shadow: 0 0 1px 0.5px var(--color-kumo-shadow-edge), 0 1px 2px var(--color-kumo-shadow-drop); pointer-events: auto; }
+.emvb-overlay-label {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 28px;
+  padding: 2px 2px 2px 8px;
+  border-radius: 6px;
+  background: var(--color-kumo-brand);
+  color: #fff;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 0 1px 0.5px var(--color-kumo-shadow-edge), 0 2px 8px var(--color-kumo-shadow-drop);
+  pointer-events: auto;
+}
 .emvb-overlay-action { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; }
 .emvb-overlay-action:hover { background: var(--color-kumo-brand-hover); }
 .emvb-overlay-action:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
@@ -108,16 +148,37 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-shortcuts td { padding: 6px 0; border-bottom: 1px solid var(--color-kumo-hairline); }
 .emvb-shortcuts td:last-child { text-align: right; font-family: var(--font-mono); color: var(--text-color-kumo-subtle); }
 
-.emvb-add-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.emvb-element-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 64px; padding: 8px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; background: var(--emvb-glass-strong); color: var(--text-color-kumo-default); font: inherit; font-size: 12px; line-height: 16px; cursor: grab; }
-.emvb-element-tile:hover { background: var(--color-kumo-tint); }
+.emvb-add-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.emvb-element-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 56px;
+  padding: 8px 6px;
+  border: 1px solid var(--color-kumo-hairline);
+  border-radius: 6px;
+  background: var(--emvb-glass-strong);
+  color: var(--text-color-kumo-default);
+  font: inherit;
+  font-size: 12px;
+  line-height: 16px;
+  cursor: grab;
+  box-shadow: 0 1px 2px var(--color-kumo-shadow-drop);
+}
+.emvb-element-tile:hover {
+  background: var(--color-kumo-base);
+  border-color: var(--color-kumo-line);
+  box-shadow: var(--emvb-elevation-s);
+}
 .emvb-element-tile:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 .emvb-element-tile:active { cursor: grabbing; }
 .emvb-drop-line { position: absolute; background: var(--color-kumo-brand); pointer-events: none; z-index: 2; }
 
-.emvb-left-panel { gap: 8px; }
-.emvb-add-group { display: flex; flex-direction: column; gap: 8px; }
-.emvb-add-group-title { margin: 0; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-color-kumo-subtle); text-transform: uppercase; letter-spacing: 0.04em; }
+.emvb-left-panel { gap: 10px; }
+.emvb-add-group { display: flex; flex-direction: column; gap: 6px; }
+.emvb-add-group-title { margin: 0; font-size: 11px; line-height: 14px; font-weight: 600; color: var(--text-color-kumo-subtle); text-transform: uppercase; letter-spacing: 0.04em; }
 .emvb-layer-caret { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: 0 0 16px; }
 .emvb-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 

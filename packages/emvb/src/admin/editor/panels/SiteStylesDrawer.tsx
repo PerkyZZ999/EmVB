@@ -115,7 +115,7 @@ export function SiteStylesDrawer({
         />
       </div>
       <Tabs
-        variant="segmented"
+        variant="underline"
         className="emvb-tabs"
         tabs={[
           { value: "variables", label: "Variables" },
