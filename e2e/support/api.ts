@@ -82,3 +82,57 @@ export async function getPage(request: APIRequestContext, id: string): Promise<S
 /** Parses a stored json field, which EmDash may return as a string. */
 export const parsed = (value: unknown) =>
   typeof value === "string" ? (JSON.parse(value) as unknown) : value;
+
+/** Creates an `emvb_theme_parts` draft over the content API and returns its id. */
+export async function createThemePart(
+  request: APIRequestContext,
+  input: {
+    title: string;
+    partType: string;
+    layout?: unknown;
+    slug?: string;
+    conditions?: unknown;
+    triggers?: unknown;
+  },
+) {
+  const created = await api(request, "POST", "/_emdash/api/content/emvb_theme_parts", {
+    data: {
+      title: input.title,
+      layout: input.layout ?? {
+        schemaVersion: 1,
+        root: {
+          id: "root0001",
+          type: "container",
+          props: {},
+          style: { flexDirection: "column", gap: { value: 16, unit: "px" } },
+          children: [
+            { id: "head0001", type: "heading", props: { text: input.title, level: 1 } },
+          ],
+        },
+      },
+      part_type: input.partType,
+      conditions: input.conditions ?? {
+        schemaVersion: 1,
+        rules: [
+          {
+            id: "default-entire",
+            op: "include",
+            group: "general",
+            name: "entire_site",
+            args: {},
+          },
+        ],
+      },
+      triggers: input.triggers ?? {
+        schemaVersion: 1,
+        open: [{ type: "page_load" }],
+        advanced: {},
+      },
+    },
+    ...(input.slug ? { slug: input.slug } : {}),
+  });
+  expect(created.status).toBe(201);
+  const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
+  expect(id).toBeTruthy();
+  return id as string;
+}

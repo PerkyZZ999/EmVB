@@ -3162,6 +3162,50 @@
         "rejects script"
       ],
       "expect": "toBeUndefined|evil|Expected|fail"
+    },
+    {
+      "id": "W-080/e2e-flexbox-tile-hidden",
+      "requirement": "D-EV4-01",
+      "description": "Add panel hides Flexbox tile",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) =>\n      d.type !== \"tab-panel\" &&\n      (formsAvailable || d.group !== \"form\") &&\n      (!q || d.name.toLowerCase().includes(q)),\n  );",
+          "replace": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) =>\n      d.type !== \"tab-panel\" &&\n      d.type !== \"flexbox\" && // seeded: hide flexbox\n      (formsAvailable || d.group !== \"form\") &&\n      (!q || d.name.toLowerCase().includes(q)),\n  );"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/theme-s8.e2e.ts",
+        "--project=node",
+        "-g",
+        "S8 Add panel"
+      ],
+      "expect": "flexbox|toBeVisible|Expected|Error|fail"
+    },
+    {
+      "id": "W-080/e2e-theme-create-label",
+      "requirement": "R-060",
+      "description": "Theme Builder New theme part button renamed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "      New theme part\n    </Button>",
+          "replace": "      New site chrome\n    </Button>"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/theme-s8.e2e.ts",
+        "--project=node",
+        "-g",
+        "Theme Builder creates"
+      ],
+      "expect": "New theme part|toBeVisible|Expected|Error|fail|Timeout"
     }
   ]
 }
