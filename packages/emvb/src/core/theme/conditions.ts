@@ -294,15 +294,16 @@ export function defaultConditionsFor(partType: ThemePartType): ConditionsDoc {
         ],
       };
     case "archive":
+      // Posts index + category/tag (location gate already excludes search).
       return {
         schemaVersion: CONDITIONS_SCHEMA_VERSION,
         rules: [
           {
-            id: "default-posts-archive",
+            id: "default-archive-all",
             op: "include",
             group: "archive",
-            name: "collection",
-            args: { collection: "posts" },
+            name: "all",
+            args: {},
           },
         ],
       };

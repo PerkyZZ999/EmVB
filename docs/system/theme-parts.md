@@ -26,7 +26,7 @@ No SEO. No public `urlPattern` (parts are not catch-all pages).
 | `archive` | Replaces `<main>` on posts archive / category / tag | `kind=archive` and not search |
 | `loop_item` | Reusable item template for Loop elements | **Never** a page location; referenced by `loop.itemPartId` |
 
-Default Include on create: Entire Site (header/footer/loop_item); 404 page (`error_404`); Search results (`search_results`); Pages all (`single_page`); Posts all (`single_post`); Posts archive (`archive`).
+Default Include on create: Entire Site (header/footer/loop_item); 404 page (`error_404`); Search results (`search_results`); Pages all (`single_page`); Posts all (`single_post`); All archives (`archive` — posts index + category/tag; search excluded by location gate).
 
 ## Conditions (schemaVersion 1)
 

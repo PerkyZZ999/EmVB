@@ -280,8 +280,7 @@ describe("S7c content part types", () => {
     });
     expect(defaultConditionsFor("archive").rules[0]).toMatchObject({
       group: "archive",
-      name: "collection",
-      args: { collection: "posts" },
+      name: "all",
     });
     expect(defaultConditionsFor("loop_item")).toEqual(defaultConditions());
     expect(defaultConditionsFor("header")).toEqual(defaultConditions());
