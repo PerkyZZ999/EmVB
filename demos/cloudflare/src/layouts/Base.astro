@@ -8,6 +8,7 @@ import {
 	themeContext404,
 	themeContextFrom,
 	themeContextFront,
+	themeContextSearch,
 } from "emvb/astro";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
@@ -23,9 +24,11 @@ interface Props {
 	is404?: boolean;
 	/** When true, theme conditions treat this as the site front page. */
 	isFront?: boolean;
+	/** When true, theme conditions treat this as the search results route. */
+	isSearch?: boolean;
 }
 
-const { title, pageTitle, description, image, canonical, content, is404, isFront } =
+const { title, pageTitle, description, image, canonical, content, is404, isFront, isSearch } =
 	Astro.props;
 const [settingsResult, menuResult] = await Promise.all([
 	getSiteSettingsWithCacheHint(),
@@ -62,9 +65,11 @@ const pageCtx = createPublicPageContext({
 
 const themeCtx = is404
 	? themeContext404(Astro.url.pathname)
-	: isFront
-		? themeContextFront()
-		: themeContextFrom(Astro.url, { content: content ?? null });
+	: isSearch
+		? themeContextSearch(Astro.url.pathname)
+		: isFront
+			? themeContextFront()
+			: themeContextFrom(Astro.url, { content: content ?? null });
 const theme = await resolveThemeParts(Astro, themeCtx);
 ---
 
@@ -117,7 +122,13 @@ const theme = await resolveThemeParts(Astro, themeCtx);
 		}
 
 		<main>
-			<slot />
+			{
+				theme.content ? (
+					<Fragment set:html={theme.content.html} />
+				) : (
+					<slot />
+				)
+			}
 		</main>
 
 		{theme.footer && <Fragment set:html={theme.footer.html} />}
