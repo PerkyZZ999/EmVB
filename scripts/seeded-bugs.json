@@ -1780,6 +1780,26 @@
       "expect": "\\(fail\\)"
     },
     {
+      "id": "QA-icon-title-sync",
+      "requirement": "W-025",
+      "description": "IconPicker keeps title Star after selecting Heart",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
+          "search": "                  onClick={() => {\n                    const title = propsOf(node).title;\n                    const previous = getBundledIcon(current)?.label;\n                    const patch: Record<string, unknown> = { iconId: icon.id };\n                    // Keep title in sync with the glyph when it still matches the prior\n                    // default/label (defaults ship title \"Star\" with iconId \"star\").\n                    if (\n                      !title ||\n                      title === \"Icon\" ||\n                      (previous !== undefined && title === previous)\n                    ) {\n                      patch.title = icon.label;\n                    }\n                    onChange(withProps(node, patch));\n                  }}",
+          "replace": "                  onClick={() => {\n                    const title = propsOf(node).title;\n                    const patch: Record<string, unknown> = { iconId: icon.id };\n                    if (!title || title === \"Icon\") patch.title = icon.label;\n                    onChange(withProps(node, patch));\n                  }}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-picker.test.tsx",
+        "-t",
+        "picking Heart"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
       "id": "W-026/autoplay-kept",
       "requirement": "R-013",
       "description": "YouTube embeds force autoplay=1",

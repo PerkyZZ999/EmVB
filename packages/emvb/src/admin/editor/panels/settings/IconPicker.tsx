@@ -79,8 +79,17 @@ export function IconPicker({
                   data-selected={selected ? "true" : undefined}
                   onClick={() => {
                     const title = propsOf(node).title;
+                    const previous = getBundledIcon(current)?.label;
                     const patch: Record<string, unknown> = { iconId: icon.id };
-                    if (!title || title === "Icon") patch.title = icon.label;
+                    // Keep title in sync with the glyph when it still matches the prior
+                    // default/label (defaults ship title "Star" with iconId "star").
+                    if (
+                      !title ||
+                      title === "Icon" ||
+                      (previous !== undefined && title === previous)
+                    ) {
+                      patch.title = icon.label;
+                    }
                     onChange(withProps(node, patch));
                   }}
                 >
