@@ -1,0 +1,51 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "warn"
+  },
+  "rules": {
+    "no-console": "error",
+    "eqeqeq": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "error",
+    "import/no-cycle": "error"
+  },
+  "ignorePatterns": ["spikes/**", "**/dist/**", "**/.astro/**"],
+  "overrides": [
+    {
+      "files": ["packages/emvb/src/core/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "react",
+                  "react/*",
+                  "react-dom",
+                  "react-dom/*",
+                  "astro",
+                  "astro/*",
+                  "astro:*",
+                  "emdash",
+                  "emdash/*",
+                  "@emdash-cms/*",
+                  "@cloudflare/*",
+                  "node:*"
+                ],
+                "message": "src/core must stay framework- and runtime-free (D-014, D-021)."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

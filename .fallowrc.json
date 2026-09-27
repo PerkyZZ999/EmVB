@@ -1,0 +1,18 @@
+{
+  "$schema": "https://fallow.tools/schema.json",
+  "ignorePatterns": ["spikes/**"],
+  "boundaries": {
+    "zones": [
+      { "name": "core", "patterns": ["packages/emvb/src/core/**"] },
+      { "name": "server", "patterns": ["packages/emvb/src/server/**"] },
+      { "name": "admin", "patterns": ["packages/emvb/src/admin/**"] },
+      { "name": "astro", "patterns": ["packages/emvb/src/astro/**"] }
+    ],
+    "rules": [
+      { "from": "core", "allow": [] },
+      { "from": "server", "allow": ["core"] },
+      { "from": "admin", "allow": ["core"] },
+      { "from": "astro", "allow": ["core"] }
+    ]
+  }
+}

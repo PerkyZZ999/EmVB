@@ -1,0 +1,22 @@
+{
+  "name": "emvb-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "lint": "oxlint --deny-warnings",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "typecheck": "tsc -p packages/emvb --noEmit",
+    "fallow": "fallow dead-code",
+    "check": "bun run lint && bun run fmt:check && bun run typecheck && bun run fallow"
+  },
+  "devDependencies": {
+    "fallow": "3.30.0",
+    "oxfmt": "0.70.0",
+    "oxlint": "1.85.0",
+    "typescript": "7.0.2"
+  }
+}
