@@ -9,7 +9,7 @@ export type InvalidDrop = {
   label: { x: number; y: number; reason: string };
 };
 
-const LABEL_HEIGHT = 28;
+const LABEL_HEIGHT = 26;
 
 const place = (box: Box) => ({
   top: box.top,

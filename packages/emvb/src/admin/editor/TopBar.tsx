@@ -91,27 +91,29 @@ export function TopBar({
       </div>
       {page ? <SaveStatusText status={status} dirty={dirty} onRetry={onSave} /> : <div />}
       <div className="emvb-topbar-end">
-        <Button
-          variant="ghost"
-          shape="square"
-          className="emvb-icon-btn"
-          aria-label="Keyboard shortcuts"
-          title="Keyboard shortcuts"
-          icon={<KeyboardIcon aria-hidden="true" />}
-          onClick={onShortcuts}
-        />
-        {page && onSiteStyles && (
+        <div className="emvb-topbar-tools">
           <Button
             variant="ghost"
-            className={BUTTON}
-            icon={<PaintBrushIcon aria-hidden="true" />}
-            onClick={onSiteStyles}
-          >
-            Site styles
-          </Button>
-        )}
+            shape="square"
+            className="emvb-icon-btn"
+            aria-label="Keyboard shortcuts"
+            title="Keyboard shortcuts"
+            icon={<KeyboardIcon aria-hidden="true" />}
+            onClick={onShortcuts}
+          />
+          {page && onSiteStyles && (
+            <Button
+              variant="ghost"
+              className={BUTTON}
+              icon={<PaintBrushIcon aria-hidden="true" />}
+              onClick={onSiteStyles}
+            >
+              Site styles
+            </Button>
+          )}
+        </div>
         {page && (
-          <>
+          <div className="emvb-topbar-actions">
             <Button
               variant="secondary"
               className={BUTTON}
@@ -141,7 +143,7 @@ export function TopBar({
             >
               Publish
             </Button>
-          </>
+          </div>
         )}
       </div>
     </header>

@@ -15,16 +15,7 @@ export function PagesPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
   );
 }
 
-const PAGES_CSS = `${UI_CSS}
-.emvb-pages { display: flex; flex-direction: column; gap: 12px; }
-.emvb-list-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.emvb-page-title { margin: 0; font-size: 24px; line-height: 1.25; font-weight: 600; }
-.emvb-row-title { color: var(--text-color-kumo-default); font-size: 14px; line-height: 20px; text-decoration: none; }
-.emvb-row-title:hover { text-decoration: underline; }
-.emvb-row-title:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; border-radius: 4px; }
-.emvb-row-slug { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
-.emvb-tabular { font-variant-numeric: tabular-nums; }
-`;
+const PAGES_CSS = UI_CSS;
 
 function PagesHome({ fetcher, role }: { fetcher: Fetcher; role: number }) {
   const { status, running, setup } = useSetupStatus(fetcher, role);
