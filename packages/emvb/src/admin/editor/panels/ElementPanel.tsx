@@ -13,7 +13,17 @@ import { ColorControl } from "./ColorControl.tsx";
 type HeadingNode = Extract<LayoutNode, { type: "heading" }>;
 type ContainerNode = Extract<LayoutNode, { type: "container" }>;
 
-export const ELEMENT_NAMES: Record<string, string> = { heading: "Heading", container: "Container" };
+export const ELEMENT_NAMES: Record<string, string> = {
+  heading: "Heading",
+  container: "Container",
+  spacer: "Spacer",
+  divider: "Divider",
+  text: "Text",
+  label: "Label",
+  link: "Link",
+  button: "Button",
+  list: "List",
+};
 
 type Props<N extends LayoutNode> = {
   node: N;

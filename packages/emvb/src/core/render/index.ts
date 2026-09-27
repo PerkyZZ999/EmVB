@@ -2,7 +2,7 @@ import { generateCss } from "../css/generate.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
-import { styleDeclarations, type Declaration } from "../sanitize/css.ts";
+import { cssLength, styleDeclarations, type Declaration } from "../sanitize/css.ts";
 import { serialize, type VNode } from "./vnode.ts";
 
 export type RenderMode = "public" | "editor";
@@ -20,6 +20,7 @@ export type RenderResult = {
 };
 
 const ID = /^[A-Za-z0-9_-]{4,24}$/;
+const HTML_ID = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
 
 /**
  * Renders a validated layout to lean HTML and CSS (R-031, R-032). Walks defensively: unknown types
@@ -53,6 +54,10 @@ export function renderPage(
     const classes = [...(isRoot ? ["emvb-root"] : []), `emvb-${type}`];
     const { declarations, rejected } = styleDeclarations(node.style);
     for (const key of rejected) warnings.push({ nodeId, code: "rejected-style", detail: key });
+    if (node.type === "spacer") {
+      const height = cssLength(node.props.height);
+      if (height) declarations.push({ property: "height", value: height });
+    }
     const color = node.style?.color;
     if (typeof color === "object" && !knownVariables.has(color.var)) {
       warnings.push({ nodeId, code: "unknown-variable", detail: color.var });
@@ -63,13 +68,15 @@ export function renderPage(
     }
     const attrs: Record<string, string> = { class: classes.join(" ") };
     if (mode === "editor" && id) attrs["data-emvb-id"] = id;
+    if (node.htmlId && HTML_ID.test(node.htmlId)) attrs.id = node.htmlId;
+    const def = ELEMENTS[type as keyof typeof ELEMENTS];
     if (node.type === "container") {
       const children = (Array.isArray(node.children) ? node.children : [])
         .map((child) => visit(child, false))
         .filter((child): child is VNode => child !== undefined);
-      return ELEMENTS.container.build(node, attrs, children);
+      return def.build(node as never, attrs, children);
     }
-    return ELEMENTS.heading.build(node, attrs, []);
+    return def.build(node as never, attrs, []);
   };
 
   const vnode = visit(layout.root, true) ?? {

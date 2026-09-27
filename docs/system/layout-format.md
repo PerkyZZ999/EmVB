@@ -1,6 +1,6 @@
 # Layout format (schema v1)
 
-How EmVB stores a page and its site-wide design, as implemented in S1. The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
+How EmVB stores a page and its site-wide design, as implemented through S2 (W-016). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
 ## Where it lives
 
@@ -35,8 +35,17 @@ How EmVB stores a page and its site-wide design, as implemented in S1. The sourc
 
 | Type | `props` | Children | Renders as |
 | --- | --- | --- | --- |
-| `container` | `{}` | `children: Node[]` (required, may be empty) | `<div class="emvb-container …">` |
-| `heading` | `text` (string, at most 2000 characters), `level` (integer 1–6) | none | `<h1>`–`<h6>` with `class="emvb-heading …"` |
+| `container` | optional `tag` (`div`, `section`, `header`, `footer`, `main`, `article`, `aside`, `nav`) | `children: Node[]` (required, may be empty) | that tag (default `div`) with `class="emvb-container …"` |
+| `heading` | `text` (≤ 2000), `level` (1–6) | none | `<h1>`–`<h6>` |
+| `spacer` | `height` length | none | `<div aria-hidden="true">` with height in CSS |
+| `divider` | `{}` | none | `<hr>` |
+| `text` | `text`, optional `tag` (`p` \| `div`) | none | `<p>` or `<div>` |
+| `label` | `text` | none | `<span>` |
+| `link` | `text`, `href`, optional `newTab` | none | `<a href>` (+ `target`/`rel` when `newTab`) |
+| `button` | `text`, optional `href` and `newTab` | none | `<a href>` when `href` is safe, else `<button type="button">` |
+| `list` | `items` (string[], ≤ 200), optional `ordered` | none | `<ul>` or `<ol>` with `<li>` |
+
+Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `classes` (unused until S4).
 
 ### Style properties (v1)
 

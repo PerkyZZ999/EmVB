@@ -5,8 +5,29 @@ export {
   type LayoutNode,
   ContainerNode,
   HeadingNode,
+  SpacerNode,
+  DividerNode,
+  TextNode,
+  LabelNode,
+  LinkNode,
+  ButtonNode,
+  ListNode,
   NodeId,
+  CONTAINER_TAGS,
+  TEXT_TAGS,
 } from "./schema/layout.ts";
+export {
+  type FieldKind,
+  type FieldOption,
+  type FieldDescriptor,
+  type ElementDescriptor,
+} from "./schema/descriptors.ts";
+export {
+  ELEMENTS,
+  ELEMENT_DESCRIPTORS,
+  defaultElement,
+  type ElementType,
+} from "./elements/index.ts";
 export { StyleProps, ColorValue, Length, VariableRef } from "./schema/style.ts";
 export {
   upgradeLayout,
@@ -38,6 +59,7 @@ export {
 } from "./render/index.ts";
 export { serialize, isAllowedTag, isAllowedAttr, type VNode } from "./render/vnode.ts";
 export { escapeAttr, escapeText } from "./sanitize/escape.ts";
+export { sanitizeHref } from "./sanitize/href.ts";
 export { summarizeLayout, type LayoutSummary } from "./stats.ts";
 export {
   findNode,

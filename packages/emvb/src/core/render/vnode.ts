@@ -2,8 +2,32 @@ import { escapeAttr, escapeText } from "../sanitize/escape.ts";
 
 export type VNode = { tag: string; attrs: Record<string, string>; children: (VNode | string)[] };
 
-const TAGS = new Set(["div", "section", "h1", "h2", "h3", "h4", "h5", "h6", "p", "span"]);
-const ATTR_NAME = /^(?:class|id|data-[a-z][a-z0-9-]*)$/;
+const TAGS = new Set([
+  "div",
+  "section",
+  "header",
+  "footer",
+  "main",
+  "article",
+  "aside",
+  "nav",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "span",
+  "a",
+  "button",
+  "ul",
+  "ol",
+  "li",
+  "hr",
+]);
+const VOID = new Set(["hr"]);
+const ATTR_NAME = /^(?:class|id|href|type|target|rel|aria-hidden|data-[a-z][a-z0-9-]*)$/;
 
 export const isAllowedTag = (tag: string) => TAGS.has(tag);
 export const isAllowedAttr = (name: string) => ATTR_NAME.test(name);
@@ -17,5 +41,6 @@ export function serialize(node: VNode | string): string {
     if (!ATTR_NAME.test(name)) throw new Error(`EmVB: attribute "${name}" is not allowed`);
     attrs += ` ${name}="${escapeAttr(value)}"`;
   }
+  if (VOID.has(node.tag)) return `<${node.tag}${attrs}>`;
   return `<${node.tag}${attrs}>${node.children.map(serialize).join("")}</${node.tag}>`;
 }

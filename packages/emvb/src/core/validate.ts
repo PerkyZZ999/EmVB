@@ -68,6 +68,7 @@ function checkStructure(root: unknown): LayoutIssue | undefined {
 
 function duplicateIds(layout: Layout): LayoutIssue[] {
   const seen = new Set<string>();
+  const htmlIds = new Set<string>();
   const issues: LayoutIssue[] = [];
   const walk = (node: Layout["root"] | Layout["root"]["children"][number], path: string) => {
     if (seen.has(node.id)) {
@@ -78,6 +79,16 @@ function duplicateIds(layout: Layout): LayoutIssue[] {
       });
     }
     seen.add(node.id);
+    if (node.htmlId) {
+      if (htmlIds.has(node.htmlId)) {
+        issues.push({
+          path: `${path}.htmlId`,
+          code: "duplicate_html_id",
+          message: `The CSS id "${node.htmlId}" is used more than once on this page.`,
+        });
+      }
+      htmlIds.add(node.htmlId);
+    }
     if (node.type === "container")
       node.children.forEach((child, i) => walk(child, `${path}.children[${i}]`));
   };
