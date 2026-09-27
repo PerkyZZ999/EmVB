@@ -13,6 +13,7 @@ export {
   LinkNode,
   ButtonNode,
   ListNode,
+  ImageNode,
   NodeId,
   CONTAINER_TAGS,
   TEXT_TAGS,
@@ -65,6 +66,7 @@ export {
 export { serialize, isAllowedTag, isAllowedAttr, type VNode } from "./render/vnode.ts";
 export { escapeAttr, escapeText } from "./sanitize/escape.ts";
 export { sanitizeHref } from "./sanitize/href.ts";
+export { sanitizeMediaUrl } from "./sanitize/media-url.ts";
 export { summarizeLayout, type LayoutSummary } from "./stats.ts";
 export {
   findNode,

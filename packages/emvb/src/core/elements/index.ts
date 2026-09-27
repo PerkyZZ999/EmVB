@@ -3,6 +3,7 @@ import type {
   ContainerNode,
   DividerNode,
   HeadingNode,
+  ImageNode,
   LabelNode,
   LinkNode,
   ListNode,
@@ -12,6 +13,7 @@ import type {
 import { CONTAINER_TAGS, TEXT_TAGS } from "../schema/layout.ts";
 import type { ElementDescriptor } from "../schema/descriptors.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
+import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import type { VNode } from "../render/vnode.ts";
 
 type Build<N> = (node: N, attrs: Record<string, string>, children: VNode[]) => VNode;
@@ -242,6 +244,72 @@ const list: ElementDefinition<ListNode> = {
   }),
 };
 
+const image: ElementDefinition<ImageNode> = {
+  baseCss: ".emvb-image{display:block;max-width:100%;height:auto}",
+  defaults: () => ({
+    type: "image",
+    props: { src: "", alt: "Image", decorative: false },
+  }),
+  descriptor: {
+    type: "image",
+    name: "Image",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "src",
+        kind: "href",
+        label: "Image URL",
+        message:
+          "Use a full URL such as https://example.com/photo.jpg or a path such as /uploads/photo.jpg.",
+      },
+      { key: "alt", kind: "text", label: "Alt text" },
+      {
+        key: "decorative",
+        kind: "boolean",
+        label: "Decorative (empty alt)",
+        optional: true,
+      },
+      {
+        key: "width",
+        kind: "number",
+        label: "Width (px)",
+        optional: true,
+        message: "Width must be a positive whole number.",
+      },
+      {
+        key: "height",
+        kind: "number",
+        label: "Height (px)",
+        optional: true,
+        message: "Height must be a positive whole number.",
+      },
+    ],
+  },
+  build: (node, attrs) => {
+    const src = sanitizeMediaUrl(node.props.src);
+    if (!src) {
+      return {
+        tag: "span",
+        attrs: { ...attrs, class: `${attrs.class ?? ""} emvb-image-missing`.trim() },
+        children: [],
+      };
+    }
+    const decorative = node.props.decorative === true;
+    const imgAttrs: Record<string, string> = {
+      ...attrs,
+      src,
+      alt: decorative ? "" : node.props.alt,
+      loading: "lazy",
+      decoding: "async",
+    };
+    if (decorative) imgAttrs.role = "presentation";
+    if (node.props.width !== undefined) imgAttrs.width = String(node.props.width);
+    if (node.props.height !== undefined) imgAttrs.height = String(node.props.height);
+    return { tag: "img", attrs: imgAttrs, children: [] };
+  },
+};
+
 export const ELEMENTS = {
   heading,
   container,
@@ -252,6 +320,7 @@ export const ELEMENTS = {
   link,
   button,
   list,
+  image,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;

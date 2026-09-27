@@ -1653,6 +1653,46 @@
         "local flex rules"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-024/media-url-allows-javascript",
+      "requirement": "R-032",
+      "description": "sanitizeMediaUrl allows javascript: URLs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/media-url.ts",
+          "search": "  if (scheme === \"http:\" || scheme === \"https:\") return trimmed;",
+          "replace": "  if (scheme === \"http:\" || scheme === \"https:\" || scheme === \"javascript:\") return trimmed;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/media-url.test.ts",
+        "-t",
+        "refuses"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-024/decorative-keeps-alt",
+      "requirement": "N-003",
+      "description": "decorative images still emit their alt text",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "      alt: decorative ? \"\" : node.props.alt,",
+          "replace": "      alt: node.props.alt,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/elements.test.ts",
+        "-t",
+        "decorative images"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

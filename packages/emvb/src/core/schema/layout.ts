@@ -121,6 +121,28 @@ export const ListNode = z.strictObject({
   htmlId: HtmlId.optional(),
 });
 
+/** Image from the media library or a URL (W-024 / R-007). Alt required unless decorative. */
+export const ImageNode = z
+  .strictObject({
+    id: NodeId,
+    type: z.literal("image"),
+    props: z.strictObject({
+      src: z.string().max(2000),
+      alt: z.string().max(500),
+      decorative: z.boolean().optional(),
+      width: z.number().int().positive().max(10000).optional(),
+      height: z.number().int().positive().max(10000).optional(),
+      mediaId: z.string().min(1).max(128).optional(),
+    }),
+    style: StyleProps.optional(),
+    classes: ClassIds.optional(),
+    htmlId: HtmlId.optional(),
+  })
+  .refine((node) => node.props.decorative === true || node.props.alt.length > 0, {
+    message: "Alt text is required unless the image is marked decorative.",
+    path: ["props", "alt"],
+  });
+
 export const ContainerNode = z.strictObject({
   id: NodeId,
   type: z.literal("container"),
@@ -146,6 +168,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "link",
   "button",
   "list",
+  "image",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -180,6 +203,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   LinkNode,
   ButtonNode,
   ListNode,
+  ImageNode,
 ]);
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
@@ -190,6 +214,7 @@ export type LabelNode = z.infer<typeof LabelNode>;
 export type LinkNode = z.infer<typeof LinkNode>;
 export type ButtonNode = z.infer<typeof ButtonNode>;
 export type ListNode = z.infer<typeof ListNode>;
+export type ImageNode = z.infer<typeof ImageNode>;
 
 type StyleOf = z.infer<typeof StyleProps>;
 type ClassesOf = z.infer<typeof ClassIds>;
@@ -227,6 +252,7 @@ export type LayoutNode =
   | LinkNode
   | ButtonNode
   | ListNode
+  | ImageNode
   | UnknownNode;
 
 /**

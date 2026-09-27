@@ -188,3 +188,46 @@ describe("element renderers (W-016, R-011)", () => {
     }
   });
 });
+
+describe("image element (W-024, R-007, N-003)", () => {
+  test("renders img with alt, dimensions, and lazy loading", () => {
+    const node = {
+      ...defaultElement("image", "img00001"),
+      props: {
+        src: "https://cdn.example/a.png",
+        alt: "A photo",
+        width: 640,
+        height: 480,
+      },
+    };
+    const { html } = renderPage(page(node), design);
+    const el = parse(html).querySelector(".emvb-image");
+    expect(el?.tagName).toBe("IMG");
+    expect(el?.getAttribute("src")).toBe("https://cdn.example/a.png");
+    expect(el?.getAttribute("alt")).toBe("A photo");
+    expect(el?.getAttribute("width")).toBe("640");
+    expect(el?.getAttribute("height")).toBe("480");
+    expect(el?.getAttribute("loading")).toBe("lazy");
+  });
+
+  test("decorative images use empty alt and presentation role", () => {
+    const node = {
+      ...defaultElement("image", "img00002"),
+      props: { src: "/uploads/x.jpg", alt: "should hide", decorative: true },
+    };
+    const { html } = renderPage(page(node), design);
+    const el = parse(html).querySelector(".emvb-image");
+    expect(el?.getAttribute("alt")).toBe("");
+    expect(el?.getAttribute("role")).toBe("presentation");
+  });
+
+  test("unsafe src is not emitted as an img", () => {
+    const node = {
+      ...defaultElement("image", "img00003"),
+      props: { src: "javascript:alert(1)", alt: "x" },
+    };
+    const { html } = renderPage(page(node), design);
+    expect(html).not.toContain("<img");
+    expect(html).not.toContain("javascript:");
+  });
+});

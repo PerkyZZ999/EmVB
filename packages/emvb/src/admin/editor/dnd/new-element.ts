@@ -5,7 +5,7 @@ import {
   type LayoutNode,
 } from "../../../core/index.ts";
 
-/** Default node for an Add-tile drag. W-016 exposes layout and text types; media/forms arrive later. */
+/** Default node for an Add-tile drag. W-016 exposes layout and text types; forms arrive later; image is W-024. */
 export function newElement(type: string, random?: () => number): LayoutNode | null {
   if (
     !(
@@ -20,6 +20,7 @@ export function newElement(type: string, random?: () => number): LayoutNode | nu
         link: 1,
         button: 1,
         list: 1,
+        image: 1,
       }
     )
   ) {

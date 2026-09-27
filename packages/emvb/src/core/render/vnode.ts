@@ -25,9 +25,11 @@ const TAGS = new Set([
   "ol",
   "li",
   "hr",
+  "img",
 ]);
-const VOID = new Set(["hr"]);
-const ATTR_NAME = /^(?:class|id|href|type|target|rel|aria-hidden|data-[a-z][a-z0-9-]*)$/;
+const VOID = new Set(["hr", "img"]);
+const ATTR_NAME =
+  /^(?:class|id|href|src|alt|width|height|loading|decoding|role|type|target|rel|aria-hidden|data-[a-z][a-z0-9-]*)$/;
 
 export const isAllowedTag = (tag: string) => TAGS.has(tag);
 export const isAllowedAttr = (name: string) => ATTR_NAME.test(name);
