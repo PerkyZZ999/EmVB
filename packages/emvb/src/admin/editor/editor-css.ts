@@ -30,9 +30,10 @@ export const EDITOR_CSS = `${UI_CSS}
 [data-emvb-editor] *, [data-emvb-editor] *::before, [data-emvb-editor] *::after { box-sizing: border-box; }
 .emvb-topbar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto max-content;
   align-items: center;
   gap: 16px;
+  height: var(--emvb-topbar);
   padding: 8px 16px;
   min-width: 0;
   background: var(--emvb-glass);
@@ -42,11 +43,11 @@ export const EDITOR_CSS = `${UI_CSS}
   box-shadow: 0 1px 0 var(--color-kumo-shadow-edge), 0 1px 2px var(--color-kumo-shadow-drop);
   z-index: 1;
 }
-.emvb-topbar-title { font-size: 14px; line-height: 18px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-topbar-title { min-width: 0; font-size: 14px; line-height: 18px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-topbar-start { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.emvb-topbar-end { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
-.emvb-topbar-tools { display: flex; align-items: center; gap: 2px; }
-.emvb-topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--color-kumo-hairline); }
+.emvb-topbar-end { display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-width: max-content; flex-shrink: 0; flex-wrap: nowrap; }
+.emvb-topbar-tools { display: flex; align-items: center; gap: 2px; flex-shrink: 0; flex-wrap: nowrap; }
+.emvb-topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--color-kumo-hairline); flex-shrink: 0; flex-wrap: nowrap; }
 .emvb-save-status { display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); white-space: nowrap; }
 .emvb-danger-icon { color: var(--color-kumo-danger); }
 .emvb-link-button { border: 0; padding: 0; background: none; color: var(--text-color-kumo-default); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
