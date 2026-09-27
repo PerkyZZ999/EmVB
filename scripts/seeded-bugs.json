@@ -1898,6 +1898,66 @@
         "finds usages across nested"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-030/unprefixed-class-emitted",
+      "requirement": "R-021",
+      "description": "style class names are emitted without the emvb-k- prefix",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  return `emvb-k-${id}`;",
+          "replace": "  return `${id}`;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/cascade.test.ts",
+        "-t",
+        "emits prefixed"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-030/local-loses-to-class",
+      "requirement": "R-021",
+      "description": "class rules are emitted after local rules so local styles lose",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "  for (const cls of design.classes ?? []) {\n    const className = styleClassName(cls.id);\n    if (!className) continue;\n    const { declarations } = styleDeclarations(cls.style);\n    parts.push(block(`.${className}`, declarations));\n  }\n  for (const rule of localRules) parts.push(block(`.emvb-e-${rule.id}`, rule.declarations));\n",
+          "replace": "  for (const rule of localRules) parts.push(block(`.emvb-e-${rule.id}`, rule.declarations));\n  for (const cls of design.classes ?? []) {\n    const className = styleClassName(cls.id);\n    if (!className) continue;\n    const { declarations } = styleDeclarations(cls.style);\n    parts.push(block(`.${className}`, declarations));\n  }\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/cascade.test.ts",
+        "-t",
+        "local styles win"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-030/cascade-order-reversed",
+      "requirement": "R-021",
+      "description": "resolveCascade applies local before classes so cascade order is reversed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/cascade.ts",
+          "search": "  const out: Record<string, unknown> = {};\n  for (const style of classStylesInAppliedOrder) {\n    if (!style) continue;\n    Object.assign(out, style);\n  }\n  if (local) Object.assign(out, local);\n  return out as StyleProps;\n",
+          "replace": "  const out: Record<string, unknown> = {};\n  if (local) Object.assign(out, local);\n  for (const style of classStylesInAppliedOrder) {\n    if (!style) continue;\n    Object.assign(out, style);\n  }\n  return out as StyleProps;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/cascade.test.ts",
+        "-t",
+        "later class styles"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

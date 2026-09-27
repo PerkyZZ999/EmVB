@@ -41,6 +41,12 @@ export function spacingVariableName(id: string): string | undefined {
   return VAR_ID.test(id) ? `--emvb-s-${id}` : undefined;
 }
 
+/** Public class selector fragment `emvb-k-<id>` (never unprefixed). */
+export function styleClassName(id: string): string | undefined {
+  if (!/^[a-z0-9-]{1,40}$/.test(id)) return undefined;
+  return `emvb-k-${id}`;
+}
+
 type VarFrom = "color" | "font" | "fontSize" | "spacing";
 
 function refOf(value: object): { id: string; from: VarFrom } | undefined {

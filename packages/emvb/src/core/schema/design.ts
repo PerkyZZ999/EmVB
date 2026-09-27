@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { StyleProps } from "./style.ts";
 
 export const DESIGN_SCHEMA_VERSION = 1;
 
@@ -33,7 +34,14 @@ export const LengthVariable = z.strictObject({
   }),
 });
 
-/** Design system document (D-013 / W-028). Classes join in W-030. */
+/** Shared style class (R-021 / W-030). CSS selector is always `.emvb-k-<id>`. */
+export const StyleClass = z.strictObject({
+  id: VariableId,
+  name: z.string().min(1).max(60),
+  style: StyleProps,
+});
+
+/** Design system document (D-013 / W-028 / W-030). */
 export const DesignSystem = z.strictObject({
   schemaVersion: z.literal(DESIGN_SCHEMA_VERSION),
   variables: z.strictObject({
@@ -42,14 +50,17 @@ export const DesignSystem = z.strictObject({
     fontSizes: z.array(LengthVariable).max(50).optional(),
     spacings: z.array(LengthVariable).max(100).optional(),
   }),
+  classes: z.array(StyleClass).max(100).optional(),
 });
 
 export type ColorVariable = z.infer<typeof ColorVariable>;
 export type FontVariable = z.infer<typeof FontVariable>;
 export type LengthVariable = z.infer<typeof LengthVariable>;
+export type StyleClass = z.infer<typeof StyleClass>;
 export type DesignSystem = z.infer<typeof DesignSystem>;
 
 export const emptyDesign = (): DesignSystem => ({
   schemaVersion: DESIGN_SCHEMA_VERSION,
   variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
+  classes: [],
 });

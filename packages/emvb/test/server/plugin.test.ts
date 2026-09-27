@@ -113,6 +113,7 @@ describe("design routes", () => {
           design: {
             schemaVersion: 1,
             variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
+            classes: [],
           },
           revision: null,
           status: "empty",

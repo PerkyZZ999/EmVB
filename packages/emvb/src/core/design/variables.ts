@@ -67,7 +67,7 @@ export function findVariableUsages(
  * Keeps the W-029 API ready for the Site styles delete dialog.
  */
 export function findVariableUsagesInDesign(
-  design: DesignSystem & { classes?: ReadonlyArray<{ id: string; style?: StyleProps }> },
+  design: DesignSystem,
   id: string,
   kind?: VariableKind,
 ): VariableUsage[] {

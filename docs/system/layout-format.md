@@ -84,7 +84,8 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" }`. Colours
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],
     "fontSizes": [{ "id": "lg", "name": "Large", "value": { "value": 24, "unit": "px" } }],
     "spacings": [{ "id": "md", "name": "Medium", "value": { "value": 16, "unit": "px" } }]
-  }
+  },
+  "classes": [{ "id": "card", "name": "Card", "style": { "paddingTop": { "value": 16, "unit": "px" } } }]
 }
 ```
 
@@ -107,6 +108,7 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 
 - The root gets `emvb-root`, each node `emvb-<type>` and, when its style yields at least one valid declaration, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning. Unknown element types render nothing publicly and a placeholder with `data-emvb-id` in the editor (warning `unknown-type`).
 - The CSS is, in order: variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021).
+- **Style classes** (`design.classes[]`): `{ id, name, style }`. Elements list ids in `node.classes`; HTML gets `emvb-k-<id>` in applied order. Cascade merge for computed styles: `resolveCascade(classStyles, local)` (later wins).
 - Length/font style props may use `{ "var": "<id>", "from": "spacing"|"fontSize"|"font" }` (colours keep `{ "var": "<id>" }`).
 - Text and attributes are escaped by the serializer. Public output has no `data-emvb-*` attributes and no scripts.
 

@@ -2,7 +2,7 @@ import { generateCss } from "../css/generate.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import { isContainerNode, type Layout, type LayoutNode } from "../schema/layout.ts";
-import { cssLength, styleDeclarations, type Declaration } from "../sanitize/css.ts";
+import { cssLength, styleClassName, styleDeclarations, type Declaration } from "../sanitize/css.ts";
 import { serialize, type VNode } from "./vnode.ts";
 
 export type RenderMode = "public" | "editor";
@@ -52,6 +52,10 @@ export function renderPage(
     }
     usedTypes.add(type);
     const classes = [...(isRoot ? ["emvb-root"] : []), `emvb-${type}`];
+    for (const classId of node.classes ?? []) {
+      const name = styleClassName(classId);
+      if (name) classes.push(name);
+    }
     const { declarations, rejected } = styleDeclarations(node.style);
     for (const key of rejected) warnings.push({ nodeId, code: "rejected-style", detail: key });
     if (node.type === "spacer") {

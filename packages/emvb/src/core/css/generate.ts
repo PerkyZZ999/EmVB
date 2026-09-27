@@ -5,6 +5,8 @@ import {
   fontVariableName,
   isSafeCssValue,
   spacingVariableName,
+  styleClassName,
+  styleDeclarations,
   type Declaration,
 } from "../sanitize/css.ts";
 
@@ -25,7 +27,10 @@ function lengthCss(value: { value: number; unit: string }): string | undefined {
   return isSafeCssValue(out) ? out : undefined;
 }
 
-/** Cascade order (R-021): variables on `.emvb-root`, base CSS, then local `.emvb-e-<id>` (classes in W-030). */
+/**
+ * Cascade order (R-021 / W-030): variables on `.emvb-root`, base CSS, shared
+ * `.emvb-k-<id>` class rules, then local `.emvb-e-<id>` (local wins).
+ */
 export function generateCss({ design, usedTypes, baseCss, localRules }: CssInput): string {
   const variables: Declaration[] = [];
   for (const color of design.variables.colors) {
@@ -48,6 +53,12 @@ export function generateCss({ design, usedTypes, baseCss, localRules }: CssInput
   }
   const parts = [block(".emvb-root", variables)];
   for (const type of [...usedTypes].toSorted()) parts.push(baseCss.get(type) ?? "");
+  for (const cls of design.classes ?? []) {
+    const className = styleClassName(cls.id);
+    if (!className) continue;
+    const { declarations } = styleDeclarations(cls.style);
+    parts.push(block(`.${className}`, declarations));
+  }
   for (const rule of localRules) parts.push(block(`.emvb-e-${rule.id}`, rule.declarations));
   return parts.join("");
 }
