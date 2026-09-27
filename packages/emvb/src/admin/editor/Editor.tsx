@@ -20,7 +20,7 @@ import {
   type ElementType,
   type LayoutNode,
 } from "../../core/index.ts";
-import { PAGES_COLLECTION } from "../../constants.ts";
+import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { loadFormsCapability } from "../forms-api.ts";
 import { previewUrl, saveDesign } from "../content-api.ts";
@@ -51,10 +51,10 @@ import { useSave } from "./useSave.ts";
 
 const RESTORE_TIMEOUT_MS = 6000;
 
-/** The full-screen editor for one `emvb_pages` entry (R-001, R-002). */
-export function Editor({ fetcher, entryId }: { fetcher: Fetcher; entryId: string }) {
+/** The full-screen editor for one EmVB page or theme part (R-001, R-002, R-060). */
+export function Editor({ fetcher, entryId, collection = PAGES_COLLECTION }: { fetcher: Fetcher; entryId: string; collection?: string }) {
   const wideEnough = useMediaQuery(EDITOR_MIN_WIDTH_QUERY);
-  const data = useEditorData(fetcher, entryId);
+  const data = useEditorData(fetcher, entryId, collection);
   if (data.state === "ready") {
     return (
       <EditorApp
@@ -63,6 +63,7 @@ export function Editor({ fetcher, entryId }: { fetcher: Fetcher; entryId: string
         entry={data.entry}
         design={data.design}
         wideEnough={wideEnough}
+        collection={collection}
       />
     );
   }
@@ -84,6 +85,8 @@ const initialState = (entry: EditorEntry, design: LoadedDesign): EditorState => 
     seoTitle: entry.seoTitle,
     seoDescription: entry.seoDescription,
     layout: entry.layout,
+    partType: entry.partType,
+    conditions: entry.conditions,
   },
   status: entry.status,
   rev: entry.rev,
@@ -126,17 +129,19 @@ function EditorApp({
   entry,
   design,
   wideEnough,
+  collection,
 }: {
   fetcher: Fetcher;
   entry: EditorEntry;
   design: LoadedDesign;
   wideEnough: boolean;
+  collection: string;
 }) {
   const [state, dispatch] = React.useReducer(editorReducer, undefined, () =>
     initialState(entry, design),
   );
   const dirty = isDirty(state);
-  const saver = useSave(fetcher, state, dispatch);
+  const saver = useSave(fetcher, state, dispatch, collection);
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const [busy, setBusy] = React.useState<"save" | "publish" | null>(null);
   const [siteStylesOpen, setSiteStylesOpen] = React.useState(false);
@@ -191,8 +196,12 @@ function EditorApp({
     } finally {
       setBusy(null);
     }
+    if (collection === THEME_PARTS_COLLECTION) {
+      toasts.add({ title: "Published" });
+      return;
+    }
     const pattern = await readCollection(fetcher, PAGES_COLLECTION).then(
-      (collection) => collection?.urlPattern,
+      (coll) => coll?.urlPattern,
       () => null,
     );
     const path = publicPath(pattern, latest.current.page.slug);
@@ -559,6 +568,7 @@ function EditorApp({
                   <PageSettings
                     page={state.page}
                     slugError={saver.slugError}
+                    kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
                     onChange={(patch) => {
                       if (patch.slug !== undefined) saver.clearSlugError();
                       dispatch({ type: "set-page", patch });

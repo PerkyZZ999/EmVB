@@ -1,7 +1,9 @@
 import * as React from "react";
 import { byteLength, MAX_LAYOUT_BYTES, nodeIdAtPath } from "../../core/index.ts";
+import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { publishPage, savePage } from "../content-api.ts";
+import { publishThemePart, saveThemePart } from "../theme-api.ts";
 import type { EditorAction, EditorState } from "./store.ts";
 import { loadEntry } from "./useEditorData.ts";
 
@@ -28,6 +30,7 @@ export function useSave(
   fetcher: Fetcher,
   state: EditorState,
   dispatch: React.Dispatch<EditorAction>,
+  collection: string = PAGES_COLLECTION,
 ) {
   const latest = React.useRef(state);
   latest.current = state;
@@ -48,7 +51,24 @@ export function useSave(
       setSlugError(null);
       setRejection(null);
       try {
-        const next = await savePage(fetcher, current.id, current.page, rev);
+        const next =
+          collection === THEME_PARTS_COLLECTION
+            ? await saveThemePart(
+                fetcher,
+                current.id,
+                {
+                  title: current.page.title,
+                  slug: current.page.slug,
+                  partType: current.page.partType === "footer" ? "footer" : "header",
+                  conditions: current.page.conditions ?? {
+                    schemaVersion: 1,
+                    rules: [],
+                  },
+                  layout: current.page.layout,
+                },
+                rev,
+              )
+            : await savePage(fetcher, current.id, current.page, rev);
         dispatch({ type: "saved", rev: next, version: current.version });
         setStatus({ kind: "saved" });
         return next;
@@ -80,7 +100,7 @@ export function useSave(
         return null;
       }
     },
-    [fetcher, dispatch],
+    [fetcher, dispatch, collection],
   );
 
   const save = React.useCallback(() => write(latest.current.rev), [write]);
@@ -89,12 +109,12 @@ export function useSave(
   const overwrite = React.useCallback(async () => {
     setConflict(false);
     try {
-      const stored = await loadEntry(fetcher, latest.current.id);
+      const stored = await loadEntry(fetcher, latest.current.id, collection);
       await write(stored.rev);
     } catch {
       setStatus({ kind: "error", message: OFFLINE, retry: true });
     }
-  }, [fetcher, write]);
+  }, [fetcher, write, collection]);
 
   const publish = React.useCallback(async (): Promise<boolean> => {
     let rev: string | null = latest.current.rev;
@@ -103,7 +123,10 @@ export function useSave(
       if (!rev) return false;
     }
     try {
-      const result = await publishPage(fetcher, latest.current.id, rev);
+      const result =
+        collection === THEME_PARTS_COLLECTION
+          ? await publishThemePart(fetcher, latest.current.id, rev)
+          : await publishPage(fetcher, latest.current.id, rev);
       dispatch({ type: "published", rev: result.rev });
       setStatus({ kind: "saved" });
       return true;
@@ -121,7 +144,7 @@ export function useSave(
       });
       return false;
     }
-  }, [fetcher, dispatch, write]);
+  }, [fetcher, dispatch, write, collection]);
 
   return {
     status,

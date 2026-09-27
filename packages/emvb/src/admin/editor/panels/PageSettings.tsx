@@ -10,16 +10,43 @@ const LAYOUTS = [
   { value: "blank", label: "Blank" },
 ];
 
-/** Right panel with nothing selected (IA): title, slug, page layout, and a closed SEO section. */
+/** Right panel with nothing selected (IA): page settings or theme-part settings. */
 export function PageSettings({
   page,
   slugError,
   onChange,
+  kind = "page",
 }: {
   page: PageDraft;
   slugError: string | null;
   onChange: (patch: PagePatch) => void;
+  kind?: "page" | "theme-part";
 }) {
+  if (kind === "theme-part") {
+    return (
+      <div className="emvb-panel-body" data-emvb-panel="theme-part-settings">
+        <h2 className="emvb-panel-title">Theme part settings</h2>
+        <Input
+          label="Title"
+          className={FIELD}
+          value={page.title}
+          onChange={(event) => onChange({ title: event.target.value })}
+        />
+        <Input
+          label="Type"
+          className={FIELD}
+          value={page.partType === "footer" ? "Footer" : "Header"}
+          disabled
+          description="Chosen when the part was created."
+        />
+        <p className="emvb-helper" data-emvb-conditions-placeholder="">
+          Display conditions editor lands in the next step (W-051). New parts default to Entire
+          site.
+        </p>
+      </div>
+    );
+  }
+
   const [seoOpen, setSeoOpen] = React.useState(false);
   const seoCount = (page.seoTitle ? 1 : 0) + (page.seoDescription ? 1 : 0);
   return (

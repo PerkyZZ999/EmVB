@@ -1,16 +1,20 @@
 import * as React from "react";
 import {
+  defaultConditions,
   emptyDesign,
+  validateConditions,
   validateDesign,
   validateLayout,
+  type ConditionsDoc,
   type DesignSystem,
   type Layout,
 } from "../../core/index.ts";
-import { PAGES_COLLECTION, PLUGIN_ID } from "../../constants.ts";
+import { PAGES_COLLECTION, PLUGIN_ID, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, requestJson, type Fetcher } from "../api.ts";
 
 export type EditorEntry = {
   id: string;
+  collection: string;
   title: string;
   slug: string;
   canvasMode: string;
@@ -19,6 +23,8 @@ export type EditorEntry = {
   status: string;
   rev: string | null;
   layout: Layout | null;
+  partType?: "header" | "footer";
+  conditions?: ConditionsDoc;
 };
 
 export type LoadedDesign = { design: DesignSystem; revision: string | null };
@@ -44,14 +50,19 @@ type ContentResponse = {
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
 
-export async function loadEntry(fetcher: Fetcher, id: string): Promise<EditorEntry> {
+export async function loadEntry(
+  fetcher: Fetcher,
+  id: string,
+  collection: string = PAGES_COLLECTION,
+): Promise<EditorEntry> {
   const body = await requestJson<ContentResponse>(
     fetcher,
-    `/_emdash/api/content/${PAGES_COLLECTION}/${encodeURIComponent(id)}`,
+    `/_emdash/api/content/${collection}/${encodeURIComponent(id)}`,
   );
   const data = body?.item?.data ?? {};
-  return {
+  const base: EditorEntry = {
     id: body?.item?.id ?? id,
+    collection,
     title: text(data["title"]),
     slug: body?.item?.slug ?? "",
     canvasMode: text(data["canvas_mode"]) || "site-layout",
@@ -60,6 +71,18 @@ export async function loadEntry(fetcher: Fetcher, id: string): Promise<EditorEnt
     status: body?.item?.status ?? "draft",
     rev: body?.["_rev"] ?? null,
     layout: readLayout(data["layout"]),
+  };
+  if (collection !== THEME_PARTS_COLLECTION) return base;
+  const conditionsRaw = data["conditions"];
+  const validated = validateConditions(
+    conditionsRaw === undefined || conditionsRaw === null || conditionsRaw === ""
+      ? defaultConditions()
+      : conditionsRaw,
+  );
+  return {
+    ...base,
+    partType: data["part_type"] === "footer" ? "footer" : "header",
+    conditions: validated.ok ? validated.conditions : defaultConditions(),
   };
 }
 
@@ -90,12 +113,16 @@ async function loadDesign(fetcher: Fetcher): Promise<LoadedDesign> {
   };
 }
 
-export function useEditorData(fetcher: Fetcher, entryId: string): EditorData {
+export function useEditorData(
+  fetcher: Fetcher,
+  entryId: string,
+  collection: string = PAGES_COLLECTION,
+): EditorData {
   const [data, setData] = React.useState<EditorData>({ state: "loading" });
   React.useEffect(() => {
     let active = true;
     setData({ state: "loading" });
-    Promise.all([loadEntry(fetcher, entryId), loadDesign(fetcher)]).then(
+    Promise.all([loadEntry(fetcher, entryId, collection), loadDesign(fetcher)]).then(
       ([entry, design]) => active && setData({ state: "ready", entry, design }),
       (error: unknown) => {
         if (!active) return;
@@ -113,6 +140,6 @@ export function useEditorData(fetcher: Fetcher, entryId: string): EditorData {
     return () => {
       active = false;
     };
-  }, [fetcher, entryId]);
+  }, [fetcher, entryId, collection]);
   return data;
 }

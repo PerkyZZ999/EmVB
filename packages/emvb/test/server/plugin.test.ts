@@ -219,9 +219,10 @@ describe("design routes", () => {
 });
 
 describe("admin declarations (D-024)", () => {
-  test("only Visual pages is declared, so the editor never gets a sidebar or palette entry", () => {
+  test("Visual pages and Theme Builder are declared; the editor stays undeclared", () => {
     expect(createPlugin().admin?.pages).toEqual([
       { path: "/pages", label: "Visual pages", icon: "layout" },
+      { path: "/theme", label: "Theme Builder", icon: "layout" },
     ]);
   });
 });
