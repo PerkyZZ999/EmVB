@@ -36,7 +36,7 @@ export {
   defaultElement,
   type ElementType,
 } from "./elements/index.ts";
-export { StyleProps, ColorValue, Length, VariableRef } from "./schema/style.ts";
+export { StyleProps, ColorValue, Length, LengthValue, VariableRef } from "./schema/style.ts";
 export {
   upgradeLayout,
   isNewerThanSupported,
@@ -58,6 +58,8 @@ export {
   DesignSystem,
   ColorVariable,
   emptyDesign,
+  FontVariable,
+  LengthVariable,
 } from "./schema/design.ts";
 export {
   renderPage,

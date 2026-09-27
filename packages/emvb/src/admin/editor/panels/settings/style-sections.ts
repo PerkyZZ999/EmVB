@@ -94,6 +94,7 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "marginLeft",
   ],
   typography: [
+    "fontFamily",
     "fontSize",
     "fontWeight",
     "lineHeight",
@@ -146,6 +147,7 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   marginRight: "Margin right",
   marginBottom: "Margin bottom",
   marginLeft: "Margin left",
+  fontFamily: "Font family",
   fontSize: "Font size",
   fontWeight: "Weight",
   lineHeight: "Line height",

@@ -6,7 +6,14 @@ import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 
-type Length = NonNullable<StyleProps["gap"]>;
+type LengthValue = NonNullable<StyleProps["gap"]>;
+type LengthLiteral = { value: number; unit: "px" | "rem" | "em" | "%" };
+
+const isLengthLiteral = (value: LengthValue | undefined): value is LengthLiteral =>
+  !!value &&
+  typeof value === "object" &&
+  "value" in value &&
+  typeof (value as LengthLiteral).value === "number";
 
 const LENGTH_KEYS = new Set<StyleKey>([
   "gap",
@@ -88,8 +95,8 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
 export function parseLengthDraft(
   draft: string,
   styleKey: StyleKey,
-  unit: Length["unit"],
-): { ok: true; value: Length | undefined } | { ok: false; message: string } {
+  unit: LengthLiteral["unit"],
+): { ok: true; value: LengthLiteral | undefined } | { ok: false; message: string } {
   if (draft.trim() === "") return { ok: true, value: undefined };
   const n = Number(draft);
   if (!Number.isFinite(n) || n < 0) return { ok: false, message: gapMessage(styleKey) };
@@ -198,12 +205,35 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "fontFamily") {
+    const text = typeof value === "string" ? value : "";
+    return (
+      <div
+        className="emvb-style-row"
+        data-emvb-style={styleKey}
+        data-set={set ? "true" : undefined}
+      >
+        <Input
+          label={label}
+          className={FIELD}
+          value={text}
+          placeholder="Noto Sans, system-ui, sans-serif"
+          onChange={(event) => {
+            const next = event.target.value.trim();
+            onPatch({ fontFamily: next === "" ? undefined : next });
+          }}
+        />
+        {reset}
+      </div>
+    );
+  }
+
   if (LENGTH_KEYS.has(styleKey)) {
     return (
       <LengthRow
         styleKey={styleKey}
         label={label}
-        value={value as Length | undefined}
+        value={value as LengthValue | undefined}
         set={set}
         onPatch={onPatch}
         reset={reset}
@@ -224,20 +254,22 @@ function LengthRow({
 }: {
   styleKey: StyleKey;
   label: string;
-  value: Length | undefined;
+  value: LengthValue | undefined;
   set: boolean;
   onPatch: (patch: Partial<StyleProps>) => void;
   reset: React.ReactNode;
 }) {
-  const [draft, setDraft] = React.useState(value ? String(value.value) : "");
+  const literal = isLengthLiteral(value) ? value : undefined;
+  const [draft, setDraft] = React.useState(literal ? String(literal.value) : "");
   const [error, setError] = React.useState<string | null>(null);
   React.useEffect(() => {
-    setDraft(value ? String(value.value) : "");
+    setDraft(literal ? String(literal.value) : value && "var" in value ? `var:${value.var}` : "");
     setError(null);
-  }, [value]);
+  }, [value, literal]);
 
   const commit = () => {
-    const parsed = parseLengthDraft(draft, styleKey, value?.unit ?? "px");
+    if (draft.startsWith("var:")) return;
+    const parsed = parseLengthDraft(draft, styleKey, literal?.unit ?? "px");
     if (!parsed.ok) {
       setError(parsed.message);
       return;
@@ -249,7 +281,7 @@ function LengthRow({
   return (
     <div className="emvb-style-row" data-emvb-style={styleKey} data-set={set ? "true" : undefined}>
       <Input
-        label={`${label} (${value?.unit ?? "px"})`}
+        label={`${label} (${literal?.unit ?? (value && "var" in value ? "var" : "px")})`}
         className={`${FIELD} emvb-mono`}
         inputMode="numeric"
         value={draft}
@@ -268,5 +300,6 @@ function LengthRow({
 export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   ...LENGTH_KEYS,
   ...COLOR_KEYS,
+  "fontFamily",
   ...(Object.keys(SELECT_OPTIONS) as StyleKey[]),
 ];

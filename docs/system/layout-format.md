@@ -1,11 +1,11 @@
 # Layout format (schema v1)
 
-How EmVB stores a page and its site-wide design, as implemented through S2 (W-016–W-022). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
+How EmVB stores a page and its site-wide design, as implemented through S4 (variables W-028+). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
 ## Where it lives
 
 - **Pages** are entries in the hidden `emvb_pages` collection (D-012, D-019). The layout is the `layout` field (EmDash type `json`, shown with the read-only `emvb:layout` widget). The other fields are `title`, `canvas_mode` (`site-layout` or `blank`) and EmDash's own slug, status, revision and SEO fields. EmDash may hand a `json` field back as a string, so readers accept both (`renderStored` in `src/astro/render.ts`).
-- **The design system** (colour variables in S1) is one document in plugin storage, collection `design`, key `system` (D-013). It is written with compare-and-set on its revision through `POST /_emdash/api/plugins/emvb/design/save` and read through the public `GET /_emdash/api/plugins/emvb/design`.
+- **The design system** (colours, fonts, font sizes, spacings; classes in W-030) is one document in plugin storage, collection `design`, key `system` (D-013). It is written with compare-and-set on its revision through `POST /_emdash/api/plugins/emvb/design/save` and read through the public `GET /_emdash/api/plugins/emvb/design`.
 
 ## Page layout
 
@@ -79,7 +79,12 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" }`. Colours
 ```json
 {
   "schemaVersion": 1,
-  "variables": { "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }] }
+  "variables": {
+    "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
+    "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],
+    "fontSizes": [{ "id": "lg", "name": "Large", "value": { "value": 24, "unit": "px" } }],
+    "spacings": [{ "id": "md", "name": "Medium", "value": { "value": 16, "unit": "px" } }]
+  }
 }
 ```
 
@@ -101,7 +106,8 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 ## Rendered output
 
 - The root gets `emvb-root`, each node `emvb-<type>` and, when its style yields at least one valid declaration, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning. Unknown element types render nothing publicly and a placeholder with `data-emvb-id` in the editor (warning `unknown-type`).
-- The CSS is, in order: variables on `.emvb-root` (`--emvb-c-<id>:<value>`), base CSS for the element types in use, then one `.emvb-e-<id>{…}` rule per styled node (R-021).
+- The CSS is, in order: variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021).
+- Length/font style props may use `{ "var": "<id>", "from": "spacing"|"fontSize"|"font" }` (colours keep `{ "var": "<id>" }`).
 - Text and attributes are escaped by the serializer. Public output has no `data-emvb-*` attributes and no scripts.
 
 ## Changing the format

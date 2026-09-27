@@ -14,7 +14,12 @@ afterEach(async () => {
 
 const design = (value = "#0055ff") => ({
   schemaVersion: 1,
-  variables: { colors: [{ id: "brand", name: "Brand", value }] },
+  variables: {
+    colors: [{ id: "brand", name: "Brand", value }],
+    fonts: [],
+    fontSizes: [],
+    spacings: [],
+  },
 });
 
 describe("content:beforeSave on emvb_pages", () => {
@@ -105,7 +110,10 @@ describe("design routes", () => {
       body: {
         success: true,
         data: {
-          design: { schemaVersion: 1, variables: { colors: [] } },
+          design: {
+            schemaVersion: 1,
+            variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
+          },
           revision: null,
           status: "empty",
         },

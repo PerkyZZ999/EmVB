@@ -1818,6 +1818,46 @@
         "non-allowlisted"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-028/length-var-wrong-prefix",
+      "requirement": "R-020",
+      "description": "fontSize and spacing variable refs swap CSS custom-property prefixes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "if (ref.from === \"fontSize\") {\n      const name = fontSizeVariableName(ref.id);\n      return name ? `var(${name})` : undefined;\n    }\n    if (ref.from === \"spacing\") {\n      const name = spacingVariableName(ref.id);\n      return name ? `var(${name})` : undefined;\n    }",
+          "replace": "if (ref.from === \"fontSize\") {\n      const name = spacingVariableName(ref.id);\n      return name ? `var(${name})` : undefined;\n    }\n    if (ref.from === \"spacing\") {\n      const name = fontSizeVariableName(ref.id);\n      return name ? `var(${name})` : undefined;\n    }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/design-variables.test.ts",
+        "-t",
+        "correct custom-property prefixes"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-028/unsafe-font-emitted",
+      "requirement": "R-032",
+      "description": "unsafe font stacks are emitted into CSS",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "if (name && isSafeCssValue(font.value)) variables.push({ property: name, value: font.value });",
+          "replace": "if (name) variables.push({ property: name, value: font.value });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/design-variables.test.ts",
+        "-t",
+        "unsafe font"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

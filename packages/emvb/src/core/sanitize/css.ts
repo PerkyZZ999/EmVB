@@ -29,10 +29,49 @@ export function colorVariableName(id: string): string | undefined {
   return VAR_ID.test(id) ? `--emvb-c-${id}` : undefined;
 }
 
+export function fontVariableName(id: string): string | undefined {
+  return VAR_ID.test(id) ? `--emvb-f-${id}` : undefined;
+}
+
+export function fontSizeVariableName(id: string): string | undefined {
+  return VAR_ID.test(id) ? `--emvb-fs-${id}` : undefined;
+}
+
+export function spacingVariableName(id: string): string | undefined {
+  return VAR_ID.test(id) ? `--emvb-s-${id}` : undefined;
+}
+
+type VarFrom = "color" | "font" | "fontSize" | "spacing";
+
+function refOf(value: object): { id: string; from: VarFrom } | undefined {
+  if (!("var" in value) || typeof (value as { var?: unknown }).var !== "string") return undefined;
+  const id = (value as { var: string }).var;
+  if (!VAR_ID.test(id)) return undefined;
+  const from = (value as { from?: unknown }).from;
+  if (from === undefined || from === "color") return { id, from: "color" };
+  if (from === "font" || from === "fontSize" || from === "spacing") return { id, from };
+  return undefined;
+}
+
 export function cssColor(value: unknown): string | undefined {
   if (typeof value === "string") return HEX_COLOR.test(value) ? value.toLowerCase() : undefined;
-  if (typeof value === "object" && value !== null && "var" in value) {
-    const name = typeof value.var === "string" ? colorVariableName(value.var) : undefined;
+  if (typeof value === "object" && value !== null) {
+    const ref = refOf(value);
+    if (!ref || ref.from !== "color") return undefined;
+    const name = colorVariableName(ref.id);
+    return name ? `var(${name})` : undefined;
+  }
+  return undefined;
+}
+
+function cssFontFamily(value: unknown): string | undefined {
+  if (typeof value === "string") {
+    return isSafeCssValue(value) && !HEX_COLOR.test(value) ? value : undefined;
+  }
+  if (typeof value === "object" && value !== null) {
+    const ref = refOf(value);
+    if (!ref || ref.from !== "font") return undefined;
+    const name = fontVariableName(ref.id);
     return name ? `var(${name})` : undefined;
   }
   return undefined;
@@ -40,6 +79,18 @@ export function cssColor(value: unknown): string | undefined {
 
 export function cssLength(value: unknown): string | undefined {
   if (typeof value !== "object" || value === null) return undefined;
+  const ref = refOf(value);
+  if (ref) {
+    if (ref.from === "fontSize") {
+      const name = fontSizeVariableName(ref.id);
+      return name ? `var(${name})` : undefined;
+    }
+    if (ref.from === "spacing") {
+      const name = spacingVariableName(ref.id);
+      return name ? `var(${name})` : undefined;
+    }
+    return undefined;
+  }
   const { value: n, unit } = value as { value?: unknown; unit?: unknown };
   if (typeof n !== "number" || !Number.isFinite(n) || n < 0 || n > 10_000) return undefined;
   if (typeof unit !== "string" || !UNITS.has(unit)) return undefined;
@@ -82,6 +133,7 @@ const PROPERTY_MAP: {
   marginRight: { css: "margin-right", toValue: cssLength },
   marginBottom: { css: "margin-bottom", toValue: cssLength },
   marginLeft: { css: "margin-left", toValue: cssLength },
+  fontFamily: { css: "font-family", toValue: cssFontFamily },
   fontSize: { css: "font-size", toValue: cssLength },
   fontWeight: { css: "font-weight", toValue: cssFontWeight },
   lineHeight: { css: "line-height", toValue: cssLength },

@@ -58,7 +58,7 @@ async function setColor(variable: string, value: string | null) {
   const colors = data.design.variables.colors.filter((c) => c.id !== variable);
   if (value !== null) colors.push({ id: variable, name: variable, value });
   const saved = await api(author, "POST", "/_emdash/api/plugins/emvb/design/save", {
-    design: { ...data.design, variables: { colors } },
+    design: { ...data.design, variables: { ...data.design.variables, colors } },
     revision: data.revision,
   });
   expect(saved.status).toBe(200);

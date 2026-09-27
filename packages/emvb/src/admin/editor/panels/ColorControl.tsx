@@ -91,6 +91,7 @@ export function ColorControl({
             await onDesignChange({
               ...design,
               variables: {
+                ...design.variables,
                 colors: colors.map((c) => (c.id === bound.id ? { ...c, value: hex } : c)),
               },
             });
@@ -104,7 +105,7 @@ export function ColorControl({
             const id = uniqueId(design, name);
             await onDesignChange({
               ...design,
-              variables: { colors: [...colors, { id, name, value: hex }] },
+              variables: { ...design.variables, colors: [...colors, { id, name, value: hex }] },
             });
             onChange({ var: id });
             setCreating(false);
