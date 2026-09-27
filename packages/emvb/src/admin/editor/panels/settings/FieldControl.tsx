@@ -10,6 +10,7 @@ import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
 import { FieldBindControl } from "./FieldBindControl.tsx";
 import { FormBindControl } from "./FormBindControl.tsx";
+import { LoopItemBindControl } from "./LoopItemBindControl.tsx";
 import { IconPicker } from "./IconPicker.tsx";
 import { MediaPicker } from "./MediaPicker.tsx";
 
@@ -64,6 +65,17 @@ export function FieldControl({
         value={typeof raw === "string" ? raw : ""}
         fetcher={fetcher}
         onChange={(formId) => onChange(withProp(node, "formId", formId))}
+      />
+    );
+  }
+
+  if (field.key === "itemPartId" && fetcher) {
+    return (
+      <LoopItemBindControl
+        key={field.key}
+        value={typeof raw === "string" ? raw : ""}
+        fetcher={fetcher}
+        onChange={(itemPartId) => onChange(withProp(node, "itemPartId", itemPartId || undefined))}
       />
     );
   }

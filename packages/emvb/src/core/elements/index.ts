@@ -947,10 +947,10 @@ const loop: ElementDefinition<LoopNode> = {
       {
         key: "itemPartId",
         kind: "text",
-        label: "Loop Item part id",
+        label: "Loop Item",
         optional: true,
         message:
-          "Optional published Loop Item theme-part id. Leave blank to use nested elements as the item template.",
+          "Optional published Loop Item theme part. Leave blank to use nested elements as the item template.",
       },
     ],
   },
