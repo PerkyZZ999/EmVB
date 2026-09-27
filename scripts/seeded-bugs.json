@@ -1381,8 +1381,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "  if (node.type !== \"container\" || collapsed.has(node.id) || node.children.length === 0) return self;\n  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));",
-          "replace": "  if (node.type !== \"container\" || true || collapsed.has(node.id) || node.children.length === 0) return self;\n  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));"
+          "search": "  if (!isContainerNode(node) || collapsed.has(node.id) || node.children.length === 0) return self;\n  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));",
+          "replace": "  if (!isContainerNode(node) || true || collapsed.has(node.id) || node.children.length === 0) return self;\n  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));"
         }
       ],
       "command": [
@@ -1611,6 +1611,46 @@
         "./packages/emvb/src/core/schema/unknown-node.test.ts",
         "-t",
         "keeps unknown nodes"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-023/parity-skips-strip",
+      "requirement": "R-005",
+      "description": "nested parity compares editor HTML without stripping data-emvb-id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/s2-parity.test.tsx",
+          "search": "      expect(normalize(stripEditorAttrs(canvas))).toBe(normalize(pub.html));",
+          "replace": "      expect(normalize(canvas)).toBe(normalize(pub.html));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/s2-parity.test.tsx",
+        "-t",
+        "public HTML equals"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-023/flex-css-not-emitted",
+      "requirement": "R-012",
+      "description": "nested flex local rules assertion is removed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/s2-parity.test.tsx",
+          "search": "    expect(css).toContain(\".emvb-e-mid00001{flex-direction:row;gap:12px}\");",
+          "replace": "    expect(css).not.toContain(\".emvb-e-mid00001{flex-direction:row;gap:12px}\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/s2-parity.test.tsx",
+        "-t",
+        "local flex rules"
       ],
       "expect": "\\(fail\\)"
     }

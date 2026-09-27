@@ -1,6 +1,6 @@
 # Layout format (schema v1)
 
-How EmVB stores a page and its site-wide design, as implemented through S2 (W-016). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
+How EmVB stores a page and its site-wide design, as implemented through S2 (W-016–W-022). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
 ## Where it lives
 
@@ -32,6 +32,8 @@ How EmVB stores a page and its site-wide design, as implemented through S2 (W-01
 - `schemaVersion` is the literal `1`. `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style` and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
+- **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
+
 
 | Type | `props` | Children | Renders as |
 | --- | --- | --- | --- |
@@ -95,7 +97,7 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 
 ## Rendered output
 
-- The root gets `emvb-root`, each node `emvb-<type>` and, when its style yields at least one valid declaration, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning.
+- The root gets `emvb-root`, each node `emvb-<type>` and, when its style yields at least one valid declaration, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning. Unknown element types render nothing publicly and a placeholder with `data-emvb-id` in the editor (warning `unknown-type`).
 - The CSS is, in order: variables on `.emvb-root` (`--emvb-c-<id>:<value>`), base CSS for the element types in use, then one `.emvb-e-<id>{…}` rule per styled node (R-021).
 - Text and attributes are escaped by the serializer. Public output has no `data-emvb-*` attributes and no scripts.
 
