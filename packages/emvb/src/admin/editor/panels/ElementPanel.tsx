@@ -189,7 +189,7 @@ export function ElementPanel({
   return (
     <div className="emvb-panel-body" data-emvb-panel="element" data-emvb-element={node.type}>
       <div className="emvb-element-header">
-        <Icon size={20} aria-hidden="true" />
+        <Icon size={16} aria-hidden="true" />
         <h2 className="emvb-panel-title">{descriptor.name}</h2>
       </div>
       {crumbs.length > 0 && (

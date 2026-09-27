@@ -111,7 +111,7 @@ export function AddPanel({
                         if (event.key === "Enter") onAdd(tile.type as ElementType);
                       }}
                     >
-                      <Icon size={20} aria-hidden="true" />
+                      <Icon size={16} aria-hidden="true" />
                       <span>{tile.name}</span>
                     </button>
                   );

@@ -509,7 +509,7 @@ function EditorApp({
                       className="emvb-empty-prompt"
                       onClick={() => dispatch({ type: "add-root-container" })}
                     >
-                      <PlusIcon size={20} aria-hidden="true" />
+                      <PlusIcon size={16} aria-hidden="true" />
                       Add a container to start
                     </button>
                   </div>

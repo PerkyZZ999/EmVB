@@ -16,8 +16,8 @@ export function PagesPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
 }
 
 const PAGES_CSS = `${UI_CSS}
-.emvb-pages { display: flex; flex-direction: column; gap: 16px; }
-.emvb-list-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.emvb-pages { display: flex; flex-direction: column; gap: 12px; }
+.emvb-list-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .emvb-page-title { margin: 0; font-size: 24px; line-height: 1.25; font-weight: 600; }
 .emvb-row-title { color: var(--text-color-kumo-default); font-size: 14px; line-height: 20px; text-decoration: none; }
 .emvb-row-title:hover { text-decoration: underline; }
