@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { themeContext404, themeContextFrom, themeContextFront } from "./theme-context.ts";
+import {
+  themeContext404,
+  themeContextFrom,
+  themeContextFront,
+  themeContextSearch,
+} from "./theme-context.ts";
 
 describe("themeContextFrom", () => {
   test("front page", () => {
@@ -35,4 +40,12 @@ describe("themeContextFrom", () => {
     expect(themeContext404()).toMatchObject({ is404: true });
     expect(themeContextFront()).toMatchObject({ isFront: true });
   });
+});
+
+test("search path and helper", () => {
+  expect(themeContextFrom(new URL("https://example.com/search"))).toMatchObject({
+    isSearch: true,
+    kind: "archive",
+  });
+  expect(themeContextSearch()).toMatchObject({ isSearch: true, kind: "archive" });
 });

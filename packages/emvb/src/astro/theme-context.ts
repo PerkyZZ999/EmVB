@@ -18,8 +18,7 @@ export function themeContextFrom(
   const path = url.pathname.replace(/\/+$/, "") || "/";
   const is404 = options.is404 === true;
   const isFront =
-    options.isFront === true ||
-    (!is404 && !options.content && (path === "/" || path === ""));
+    options.isFront === true || (!is404 && !options.content && (path === "/" || path === ""));
   const isSearch = options.isSearch === true || path === "/search";
 
   if (is404) {
@@ -144,4 +143,14 @@ export function themeContext404(path = "/404"): ThemeRequestContext {
 
 export function themeContextFromContent(content: ContentRef, path: string): ThemeRequestContext {
   return themeContextFrom(new URL(path, "http://local.invalid"), { content });
+}
+
+export function themeContextSearch(path = "/search"): ThemeRequestContext {
+  return {
+    path,
+    isFront: false,
+    is404: false,
+    isSearch: true,
+    kind: "archive",
+  };
 }

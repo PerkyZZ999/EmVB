@@ -1,10 +1,13 @@
 import { getEmDashCollection } from "emdash";
 import { getPublicPluginApiRouteHandler } from "emdash/plugin-utils";
 import {
+  contentPartTypeForContext,
   defaultConditions,
+  parseThemePartType,
   pickThemePartWinner,
   validateConditions,
   type ThemePartCandidate,
+  type ThemePartType,
   type ThemeRequestContext,
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
@@ -14,7 +17,7 @@ import { themeContextFrom } from "./theme-context.ts";
 export type RenderedThemePart = {
   id: string;
   title: string;
-  partType: "header" | "footer";
+  partType: ThemePartType;
   html: string;
   css: string;
 };
@@ -22,7 +25,12 @@ export type RenderedThemePart = {
 export type ResolvedThemeParts = {
   header: RenderedThemePart | null;
   footer: RenderedThemePart | null;
-  /** Concatenated CSS for both winners (empty when neither matches). */
+  /**
+   * Body/main replacement when an Error 404, Search Results, or Single Page part wins.
+   * Null when none match — hosts keep their route slot content.
+   */
+  content: RenderedThemePart | null;
+  /** Concatenated CSS for all winners (empty when none match). */
   css: string;
 };
 
@@ -35,7 +43,7 @@ type AstroLike = {
 type StoredPart = {
   id: string;
   title: string;
-  partType: "header" | "footer";
+  partType: ThemePartType;
   layout: unknown;
   conditions: ReturnType<typeof defaultConditions>;
   updatedAt: string;
@@ -56,8 +64,8 @@ async function loadPublishedThemeParts(): Promise<StoredPart[]> {
   const parts: StoredPart[] = [];
   for (const entry of result.entries) {
     const data = entry.data as Record<string, unknown>;
-    const partType = data["part_type"];
-    if (partType !== "header" && partType !== "footer") continue;
+    const partType = parseThemePartType(data["part_type"]);
+    if (!partType) continue;
     const conditionsRaw = data["conditions"];
     const validated = validateConditions(
       conditionsRaw === undefined || conditionsRaw === null || conditionsRaw === ""
@@ -78,7 +86,7 @@ async function loadPublishedThemeParts(): Promise<StoredPart[]> {
 }
 
 /**
- * Resolve the winning published Header and Footer for this request (R-062).
+ * Resolve winning published theme parts for this request (R-062 / S7c).
  * Returns plain HTML/CSS only — no EmVB JS (R-031).
  */
 export async function resolveThemeParts(
@@ -88,15 +96,21 @@ export async function resolveThemeParts(
   const context =
     ctx ??
     themeContextFrom(astro.url, {
-      content: (astro.props?.["content"] as
-        | { collection: string; id: string; slug?: string | null }
-        | undefined) ?? null,
+      content:
+        (astro.props?.["content"] as
+          | { collection: string; id: string; slug?: string | null }
+          | undefined) ?? null,
     });
 
+  const empty: ResolvedThemeParts = {
+    header: null,
+    footer: null,
+    content: null,
+    css: "",
+  };
+
   const parts = await loadPublishedThemeParts();
-  if (parts.length === 0) {
-    return { header: null, footer: null, css: "" };
-  }
+  if (parts.length === 0) return empty;
 
   const candidates: ThemePartCandidate[] = parts.map((part) => ({
     id: part.id,
@@ -107,24 +121,18 @@ export async function resolveThemeParts(
 
   const headerWinner = pickThemePartWinner(candidates, "header", context);
   const footerWinner = pickThemePartWinner(candidates, "footer", context);
-  if (!headerWinner && !footerWinner) {
-    return { header: null, footer: null, css: "" };
-  }
+  const contentType = contentPartTypeForContext(context);
+  const contentWinner = contentType ? pickThemePartWinner(candidates, contentType, context) : null;
+
+  if (!headerWinner && !footerWinner && !contentWinner) return empty;
 
   const handler = getPublicPluginApiRouteHandler(astro.locals as never);
   const design = await loadDesign(handler, astro.url);
 
-  const renderPart = (
-    winner: ThemePartCandidate,
-  ): RenderedThemePart | null => {
+  const renderPart = (winner: ThemePartCandidate): RenderedThemePart | null => {
     const stored = parts.find((p) => p.id === winner.id);
     if (!stored) return null;
-    const rendered: RenderedPage = renderStored(
-      stored.layout,
-      design,
-      stored.id,
-    );
-    // Marker wrapper only — renderPage already emits .emvb-root with design vars.
+    const rendered: RenderedPage = renderStored(stored.layout, design, stored.id);
     const html = rendered.html
       ? `<div class="emvb-theme-${stored.partType}" data-emvb-theme-part="${stored.id}">${rendered.html}</div>`
       : "";
@@ -139,6 +147,7 @@ export async function resolveThemeParts(
 
   const header = headerWinner ? renderPart(headerWinner) : null;
   const footer = footerWinner ? renderPart(footerWinner) : null;
-  const css = [header?.css, footer?.css].filter(Boolean).join("\n");
-  return { header, footer, css };
+  const content = contentWinner ? renderPart(contentWinner) : null;
+  const css = [header?.css, content?.css, footer?.css].filter(Boolean).join("\n");
+  return { header, footer, content, css };
 }

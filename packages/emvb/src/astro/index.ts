@@ -9,5 +9,6 @@ export {
   themeContextFrom,
   themeContextFront,
   themeContext404,
+  themeContextSearch,
   themeContextFromContent,
 } from "./theme-context.ts";
