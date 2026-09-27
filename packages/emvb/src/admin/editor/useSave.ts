@@ -1,0 +1,138 @@
+import * as React from "react";
+import { byteLength, MAX_LAYOUT_BYTES, nodeIdAtPath } from "../../core/index.ts";
+import { ApiError, type Fetcher } from "../api.ts";
+import { publishPage, savePage } from "../content-api.ts";
+import type { EditorAction, EditorState } from "./store.ts";
+import { loadEntry } from "./useEditorData.ts";
+
+export type SaveStatus =
+  | { kind: "idle" | "saving" | "saved" }
+  | { kind: "error"; message: string; retry: boolean };
+
+const FIX_AND_SAVE = "Couldn't save. Fix the highlighted setting and save again.";
+const OFFLINE = "Couldn't save. Check your connection and try again.";
+
+export const tooLargeMessage = (bytes: number) =>
+  `Couldn't save. This page is ${Math.ceil(bytes / 1024)} KB and the limit is ${
+    MAX_LAYOUT_BYTES / 1024
+  } KB. Remove some content and save again.`;
+
+export const slugTakenMessage = (slug: string) =>
+  `A page with the slug "${slug}" already exists. Choose a different slug.`;
+
+/**
+ * Save, publish and their failure modes (R-006, IA "Save and publish"). Saves send `_rev`, so a
+ * concurrent change surfaces as a conflict instead of being overwritten.
+ */
+export function useSave(
+  fetcher: Fetcher,
+  state: EditorState,
+  dispatch: React.Dispatch<EditorAction>,
+) {
+  const latest = React.useRef(state);
+  latest.current = state;
+  const [status, setStatus] = React.useState<SaveStatus>({ kind: "idle" });
+  const [conflict, setConflict] = React.useState(false);
+  const [slugError, setSlugError] = React.useState<string | null>(null);
+  const [rejection, setRejection] = React.useState<string | null>(null);
+
+  const write = React.useCallback(
+    async (rev: string | null): Promise<string | null> => {
+      const current = latest.current;
+      const bytes = current.page.layout ? byteLength(current.page.layout) : 0;
+      if (bytes > MAX_LAYOUT_BYTES) {
+        setStatus({ kind: "error", message: tooLargeMessage(bytes), retry: false });
+        return null;
+      }
+      setStatus({ kind: "saving" });
+      setSlugError(null);
+      setRejection(null);
+      try {
+        const next = await savePage(fetcher, current.id, current.page, rev);
+        dispatch({ type: "saved", rev: next, version: current.version });
+        setStatus({ kind: "saved" });
+        return next;
+      } catch (error) {
+        if (!(error instanceof ApiError)) {
+          setStatus({ kind: "error", message: OFFLINE, retry: true });
+        } else if (error.status === 409 && error.code === "SLUG_CONFLICT") {
+          setSlugError(slugTakenMessage(current.page.slug));
+          dispatch({ type: "select", id: null });
+          setStatus({ kind: "error", message: FIX_AND_SAVE, retry: false });
+        } else if (error.status === 409) {
+          setConflict(true);
+          setStatus({
+            kind: "error",
+            message: "Couldn't save. This page was changed somewhere else.",
+            retry: false,
+          });
+        } else if (error.status === 400 || error.status === 422) {
+          const path = /\broot(?:\.children\[\d+\])*/.exec(error.message)?.[0];
+          const id = path && current.page.layout ? nodeIdAtPath(current.page.layout, path) : null;
+          if (id) dispatch({ type: "select", id });
+          setRejection(error.message);
+          setStatus({ kind: "error", message: FIX_AND_SAVE, retry: false });
+        } else if (error.status >= 500) {
+          setStatus({ kind: "error", message: OFFLINE, retry: true });
+        } else {
+          setStatus({ kind: "error", message: `Couldn't save. ${error.message}`, retry: false });
+        }
+        return null;
+      }
+    },
+    [fetcher, dispatch],
+  );
+
+  const save = React.useCallback(() => write(latest.current.rev), [write]);
+
+  /** Conflict → Overwrite: take the stored revision and save over it. */
+  const overwrite = React.useCallback(async () => {
+    setConflict(false);
+    try {
+      const stored = await loadEntry(fetcher, latest.current.id);
+      await write(stored.rev);
+    } catch {
+      setStatus({ kind: "error", message: OFFLINE, retry: true });
+    }
+  }, [fetcher, write]);
+
+  const publish = React.useCallback(async (): Promise<boolean> => {
+    let rev: string | null = latest.current.rev;
+    if (latest.current.version !== latest.current.savedVersion) {
+      rev = await write(rev);
+      if (!rev) return false;
+    }
+    try {
+      const result = await publishPage(fetcher, latest.current.id, rev);
+      dispatch({ type: "published", rev: result.rev });
+      setStatus({ kind: "saved" });
+      return true;
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 409) setConflict(true);
+      setStatus({
+        kind: "error",
+        message:
+          error instanceof ApiError && error.status === 403
+            ? "Couldn't publish. Your role can't publish pages."
+            : error instanceof ApiError && error.status === 409
+              ? "Couldn't publish. This page was changed somewhere else."
+              : "Couldn't publish. Check your connection and try again.",
+        retry: false,
+      });
+      return false;
+    }
+  }, [fetcher, dispatch, write]);
+
+  return {
+    status,
+    save,
+    publish,
+    overwrite,
+    conflict,
+    closeConflict: () => setConflict(false),
+    markIdle: () => setStatus({ kind: "idle" }),
+    slugError,
+    clearSlugError: () => setSlugError(null),
+    rejection,
+  };
+}

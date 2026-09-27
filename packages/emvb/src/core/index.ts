@@ -39,3 +39,14 @@ export {
 export { serialize, isAllowedTag, isAllowedAttr, type VNode } from "./render/vnode.ts";
 export { escapeAttr, escapeText } from "./sanitize/escape.ts";
 export { summarizeLayout, type LayoutSummary } from "./stats.ts";
+export {
+  findNode,
+  updateNode,
+  removeNode,
+  insertNode,
+  nodeIdAtPath,
+  newNodeId,
+  starterLayout,
+  slugify,
+  type Removed,
+} from "./tree-ops.ts";

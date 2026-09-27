@@ -11,6 +11,8 @@ export const COLLECTION_SPEC = {
   hidden: true,
   supports: ["drafts", "revisions", "preview"],
   hasSeo: true,
+  /** Where published pages live. Set on creation only, so a host's own pattern is kept on upgrade. */
+  urlPattern: "/{slug}",
 } as const;
 
 export type FieldSpec = {

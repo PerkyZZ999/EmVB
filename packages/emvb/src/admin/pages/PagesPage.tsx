@@ -3,8 +3,10 @@ import { LayoutIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { RequireEditor } from "../access/RequireEditor.tsx";
 import { defaultFetcher, type Fetcher } from "../api.ts";
 import { useSetupStatus } from "../setup/useSetupStatus.ts";
+import { BUTTON, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
+import { PageList } from "./PageList.tsx";
 
-/** "Visual pages" (`/pages`): setup states for now; the page list arrives in W-010. */
+/** "Visual pages" (`/pages`): setup states, then the page list. */
 export function PagesPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
   return (
     <RequireEditor fetcher={fetcher}>
@@ -12,6 +14,17 @@ export function PagesPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
     </RequireEditor>
   );
 }
+
+const PAGES_CSS = `${UI_CSS}
+.emvb-pages { display: flex; flex-direction: column; gap: 16px; }
+.emvb-list-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.emvb-page-title { margin: 0; font-size: 24px; line-height: 1.25; font-weight: 600; }
+.emvb-row-title { color: var(--text-color-kumo-default); font-size: 14px; line-height: 20px; text-decoration: none; }
+.emvb-row-title:hover { text-decoration: underline; }
+.emvb-row-title:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; border-radius: 4px; }
+.emvb-row-slug { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
+.emvb-tabular { font-variant-numeric: tabular-nums; }
+`;
 
 function PagesHome({ fetcher, role }: { fetcher: Fetcher; role: number }) {
   const { status, running, setup } = useSetupStatus(fetcher, role);
@@ -29,14 +42,21 @@ function PagesHome({ fetcher, role }: { fetcher: Fetcher; role: number }) {
   }
   const action = (label: string) =>
     status.isAdmin ? (
-      <Button variant="primary" loading={running} onClick={() => void setup()}>
+      <Button
+        variant="primary"
+        className={BUTTON}
+        style={SOLID_PRIMARY}
+        loading={running}
+        onClick={() => void setup()}
+      >
         {label}
       </Button>
     ) : undefined;
 
   return (
-    <section data-emvb-page="pages" className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">Visual pages</h1>
+    <section data-emvb-page="pages" className="emvb-pages">
+      <style>{PAGES_CSS}</style>
+      {status.state !== "ready" && <h1 className="emvb-page-title">Visual pages</h1>}
       {status.state === "missing" && (
         <Empty
           icon={<LayoutIcon size={32} aria-hidden="true" />}
@@ -63,7 +83,11 @@ function PagesHome({ fetcher, role }: { fetcher: Fetcher; role: number }) {
           action={status.conflicts.length > 0 ? undefined : action("Upgrade EmVB")}
         />
       )}
-      {status.state === "ready" && <p data-emvb-setup="ready">EmVB is set up.</p>}
+      {status.state === "ready" && (
+        <div data-emvb-setup="ready" className="emvb-pages">
+          <PageList fetcher={fetcher} />
+        </div>
+      )}
     </section>
   );
 }

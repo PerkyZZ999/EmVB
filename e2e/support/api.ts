@@ -36,23 +36,49 @@ export function setupFacts(schema: Record<string, unknown> | null) {
   return { hidden: item["hidden"], supports: item["supports"], hasSeo: item["hasSeo"], fields };
 }
 
-/** Runs EmVB setup from the Visual pages page if the collection doesn't exist yet. */
+/** Runs EmVB setup (or upgrade) from the Visual pages page unless it is already current. */
 export async function ensureEmvbSetup(page: Page) {
   await page.goto("/_emdash/admin/plugins/emvb/pages");
-  const setupButton = page.getByRole("button", { name: "Set up EmVB" });
-  const ready = page.getByText("EmVB is set up.");
-  await expect(setupButton.or(ready)).toBeVisible({ timeout: 20_000 });
-  if (await setupButton.isVisible()) await setupButton.click();
+  const action = page.getByRole("button", { name: /^(Set up|Upgrade) EmVB$/ });
+  const ready = page.locator('[data-emvb-setup="ready"]');
+  await expect(action.or(ready)).toBeVisible({ timeout: 20_000 });
+  if (await action.isVisible()) await action.click();
   await expect(ready).toBeVisible();
 }
 
 /** Creates an `emvb_pages` draft over the content API and returns its id. */
-export async function createPage(request: APIRequestContext, title: string, layout: unknown) {
+export async function createPage(
+  request: APIRequestContext,
+  title: string,
+  layout: unknown,
+  slug?: string,
+) {
   const created = await api(request, "POST", "/_emdash/api/content/emvb_pages", {
     data: { title, layout },
+    ...(slug ? { slug } : {}),
   });
   expect(created.status).toBe(201);
   const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
   expect(id).toBeTruthy();
   return id as string;
 }
+
+export type StoredPage = {
+  slug: string;
+  status: string;
+  data: Record<string, unknown>;
+  liveData?: Record<string, unknown>;
+  rev: string;
+};
+
+/** The page as the content API returns it to an admin: the draft in `data`, published in `liveData`. */
+export async function getPage(request: APIRequestContext, id: string): Promise<StoredPage> {
+  const { status, json } = await api(request, "GET", `/_emdash/api/content/emvb_pages/${id}`);
+  expect(status).toBe(200);
+  const body = json?.["data"] as { item: Omit<StoredPage, "rev">; _rev: string };
+  return { ...body.item, rev: body["_rev"] };
+}
+
+/** Parses a stored json field, which EmDash may return as a string. */
+export const parsed = (value: unknown) =>
+  typeof value === "string" ? (JSON.parse(value) as unknown) : value;

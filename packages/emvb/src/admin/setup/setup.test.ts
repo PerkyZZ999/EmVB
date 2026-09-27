@@ -9,6 +9,7 @@ const upToDate = (): CollectionState => ({
   hidden: true,
   supports: ["drafts", "revisions", "preview"],
   hasSeo: true,
+  urlPattern: "/{slug}",
   fields: FIELD_SPECS.map((f) => ({ ...f, widget: f.widget ?? null })),
 });
 
@@ -136,5 +137,14 @@ describe("runSetup", () => {
         { status: 403 },
       );
     await expect(runSetup(failing)).rejects.toThrow("Insufficient permissions");
+  });
+});
+
+describe("public URL pattern", () => {
+  test("a missing pattern is set to /{slug}, and a host's own pattern is kept", () => {
+    expect(planSetup({ ...upToDate(), urlPattern: null }).steps).toEqual([
+      { kind: "update-collection", body: { urlPattern: "/{slug}" } },
+    ]);
+    expect(planSetup({ ...upToDate(), urlPattern: "/p/{slug}" }).steps).toEqual([]);
   });
 });

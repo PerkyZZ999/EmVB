@@ -14,12 +14,16 @@ export type CollectionState = {
   hidden?: boolean;
   supports?: string[];
   hasSeo?: boolean;
+  urlPattern?: string | null;
   fields: FieldState[];
 };
 
 export type SetupStep =
   | { kind: "create-collection"; body: typeof COLLECTION_SPEC }
-  | { kind: "update-collection"; body: { hidden?: boolean; supports?: string[]; hasSeo?: boolean } }
+  | {
+      kind: "update-collection";
+      body: { hidden?: boolean; supports?: string[]; hasSeo?: boolean; urlPattern?: string };
+    }
   | { kind: "create-field"; body: FieldSpec }
   | { kind: "update-field"; slug: string; body: Omit<FieldSpec, "slug" | "type"> };
 
@@ -60,6 +64,7 @@ export function planSetup(current: CollectionState | null): {
     update.supports = [...COLLECTION_SPEC.supports];
   }
   if (current.hasSeo !== true) update.hasSeo = true;
+  if (!current.urlPattern) update.urlPattern = COLLECTION_SPEC.urlPattern;
   if (Object.keys(update).length > 0) steps.push({ kind: "update-collection", body: update });
   for (const spec of FIELD_SPECS) {
     const state = current.fields.find((f) => f.slug === spec.slug);

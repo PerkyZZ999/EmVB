@@ -786,6 +786,166 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-010/save-drops-rev",
+      "requirement": "R-006",
+      "description": "save draft sends no _rev",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "        ...(rev ? { _rev: rev } : {}),\n      },\n    },\n  );\n  return body[\"_rev\"];",
+          "replace": "      },\n    },\n  );\n  return body[\"_rev\"];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*saves with _rev, the edited page and SEO"
+    },
+    {
+      "id": "W-010/e2e-save-drops-rev",
+      "requirement": "R-006",
+      "description": "save draft sends no _rev, so a concurrent edit is overwritten silently",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "        ...(rev ? { _rev: rev } : {}),\n      },\n    },\n  );\n  return body[\"_rev\"];",
+          "replace": "      },\n    },\n  );\n  return body[\"_rev\"];"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*a concurrent edit from another browser shows the conflict dialog",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-010/e2e-draft-saved-as-published",
+      "requirement": "R-006",
+      "description": "save draft also publishes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "  return body[\"_rev\"];\n}\n\nexport async function publishPage",
+          "replace": "  return (await publishPage(fetcher, id, body[\"_rev\"])).rev;\n}\n\nexport async function publishPage"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*a draft save leaves the published page alone",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-010/restore-wrong-index",
+      "requirement": "D-025",
+      "description": "Restore reinserts one position too late",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "removed.parentId, removed.index, removed.node",
+          "replace": "removed.parentId, removed.index + 1, removed.node"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*Restore puts it back in place, selected"
+    },
+    {
+      "id": "W-010/seo-open-by-default",
+      "requirement": "D-025",
+      "description": "the SEO section starts open",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "const [seoOpen, setSeoOpen] = React.useState(false);",
+          "replace": "const [seoOpen, setSeoOpen] = React.useState(true);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*the SEO section is closed by default"
+    },
+    {
+      "id": "W-010/no-client-size-check",
+      "requirement": "R-006",
+      "description": "the client doesn't check the layout size before saving",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "if (bytes > MAX_LAYOUT_BYTES) {",
+          "replace": "if (bytes > Number.POSITIVE_INFINITY) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*a layout grown past the size limit shows the size error"
+    },
+    {
+      "id": "W-010/delete-in-text-field",
+      "requirement": "R-002",
+      "description": "Delete in a text field deletes the selected element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "if (isTextField(event.target) || inDialog(event.target)) return;",
+          "replace": "if (inDialog(event.target)) return;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*Delete in a text field edits the text, not the page"
+    },
+    {
+      "id": "W-010/variable-not-saved",
+      "requirement": "R-004",
+      "description": "a new colour variable is bound but never saved to the design",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "      const revision = await saveDesign(fetcher, next, latest.current.designRevision);",
+          "replace": "      const revision = latest.current.designRevision;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*creating a variable saves the design with its revision"
+    },
+    {
+      "id": "W-010/e2e-toast-under-editor",
+      "requirement": "D-025",
+      "description": "the editor root gets an always-on-top z-index, covering EmVB toasts (Kumo's toast layer is at 10000)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "style={{ position: \"fixed\", inset: 0, zIndex: \"auto\" }}",
+          "replace": "style={{ position: \"fixed\", inset: 0, zIndex: 2147483647 }}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "Restore toast"
+      ],
+      "expect": "✘.*\\[node\\].*Delete shows a Restore toast above the editor",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-010/e2e-slug-conflict-hidden",
+      "requirement": "R-002",
+      "description": "a duplicate slug on New page shows a generic error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "failure.code === \"SLUG_CONFLICT\"",
+          "replace": "failure.code === \"SLUG_TAKEN\""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*a duplicate slug is refused inline",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }

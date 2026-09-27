@@ -11,7 +11,7 @@ test("an admin sets up EmVB, and upgrading an altered schema converges to the sa
 }) => {
   await page.goto(PAGES);
   const setupButton = page.getByRole("button", { name: "Set up EmVB" });
-  const ready = page.getByText("EmVB is set up.");
+  const ready = page.locator('[data-emvb-setup="ready"]');
   await expect(setupButton.or(ready)).toBeVisible({ timeout: 20_000 });
   if (await setupButton.isVisible()) await setupButton.click();
   await expect(ready).toBeVisible();

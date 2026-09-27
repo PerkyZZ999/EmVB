@@ -12,25 +12,39 @@ import { ApiError, requestJson, type Fetcher } from "../api.ts";
 export type EditorEntry = {
   id: string;
   title: string;
+  slug: string;
+  canvasMode: string;
+  seoTitle: string;
+  seoDescription: string;
   status: string;
   rev: string | null;
   layout: Layout | null;
 };
 
+export type LoadedDesign = { design: DesignSystem; revision: string | null };
+
 export type EditorData =
   | { state: "loading" }
-  | { state: "ready"; entry: EditorEntry; design: DesignSystem }
+  | { state: "ready"; entry: EditorEntry; design: LoadedDesign }
   | { state: "not-found" | "forbidden" }
   | { state: "error"; message: string };
 
 const UNREADABLE = "This page's layout can't be read.";
 
 type ContentResponse = {
-  item?: { id?: string; status?: string; data?: Record<string, unknown> };
+  item?: {
+    id?: string;
+    slug?: string | null;
+    status?: string;
+    data?: Record<string, unknown>;
+    seo?: { title?: string | null; description?: string | null } | null;
+  };
   _rev?: string;
 };
 
-async function loadEntry(fetcher: Fetcher, id: string): Promise<EditorEntry> {
+const text = (value: unknown) => (typeof value === "string" ? value : "");
+
+export async function loadEntry(fetcher: Fetcher, id: string): Promise<EditorEntry> {
   const body = await requestJson<ContentResponse>(
     fetcher,
     `/_emdash/api/content/${PAGES_COLLECTION}/${encodeURIComponent(id)}`,
@@ -38,7 +52,11 @@ async function loadEntry(fetcher: Fetcher, id: string): Promise<EditorEntry> {
   const data = body?.item?.data ?? {};
   return {
     id: body?.item?.id ?? id,
-    title: typeof data["title"] === "string" ? data["title"] : "Untitled page",
+    title: text(data["title"]),
+    slug: body?.item?.slug ?? "",
+    canvasMode: text(data["canvas_mode"]) || "site-layout",
+    seoTitle: text(body?.item?.seo?.title),
+    seoDescription: text(body?.item?.seo?.description),
     status: body?.item?.status ?? "draft",
     rev: body?.["_rev"] ?? null,
     layout: readLayout(data["layout"]),
@@ -60,13 +78,16 @@ function readLayout(raw: unknown): Layout | null {
   return result.layout;
 }
 
-async function loadDesign(fetcher: Fetcher): Promise<DesignSystem> {
-  const body = await requestJson<{ design?: unknown }>(
+async function loadDesign(fetcher: Fetcher): Promise<LoadedDesign> {
+  const body = await requestJson<{ design?: unknown; revision?: string | null }>(
     fetcher,
     `/_emdash/api/plugins/${PLUGIN_ID}/design`,
   );
   const result = validateDesign(body?.design);
-  return result.ok ? result.design : emptyDesign();
+  return {
+    design: result.ok ? result.design : emptyDesign(),
+    revision: body?.revision ?? null,
+  };
 }
 
 export function useEditorData(fetcher: Fetcher, entryId: string): EditorData {
