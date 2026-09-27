@@ -8,7 +8,6 @@ export {
   DivBlockNode,
   FlexboxNode,
   SvgNode,
-  TabsNode,
   TabPanelNode,
   HeadingNode,
   SpacerNode,

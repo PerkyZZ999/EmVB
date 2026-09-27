@@ -72,7 +72,7 @@ export function duplicateClass(
   const taken = new Set(classes.map((c) => c.id));
   let id = randomSuffix ? `${base}-${randomSuffix}`.slice(0, 40) : base;
   for (let n = 2; taken.has(id); n++) id = `${base}-${n}`.slice(0, 40);
-  const style = { ...(source.style ?? {}) } as StyleProps;
+  const style = { ...source.style } as StyleProps;
   return {
     ...design,
     classes: [...classes, { id, name: baseName, style }],

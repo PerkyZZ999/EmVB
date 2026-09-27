@@ -8,8 +8,10 @@ describe("sanitizeSvgMarkup (W-073)", () => {
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>';
     const tree = sanitizeSvgMarkup(markup);
     expect(tree?.tag).toBe("svg");
-    expect(serialize(tree!)).toContain("<circle");
-    expect(serialize(tree!)).toContain('d="M8 12h8"');
+    expect(tree).toBeTruthy();
+    if (!tree) throw new Error("expected tree");
+    expect(serialize(tree)).toContain("<circle");
+    expect(serialize(tree)).toContain('d="M8 12h8"');
   });
 
   test("rejects script, handlers, use, and foreignObject", () => {

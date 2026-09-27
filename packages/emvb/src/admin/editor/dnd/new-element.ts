@@ -4,14 +4,13 @@ import {
   newNodeId,
   type ElementType,
   type LayoutNode,
-  type TabsNode,
 } from "../../../core/index.ts";
 
 /** Default node for an Add-tile drag. */
 export function newElement(type: string, random?: () => number): LayoutNode | null {
   if (!(type in ELEMENTS)) return null;
   if (type === "tabs") {
-    const tabs = defaultElement("tabs", newNodeId(random)) as TabsNode;
+    const tabs = defaultElement("tabs", newNodeId(random));
     const panel = (label: string, heading: string): LayoutNode => ({
       id: newNodeId(random),
       type: "tab-panel",

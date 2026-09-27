@@ -251,7 +251,7 @@ export const TabPanelNode = z.strictObject({
   },
 });
 
-export const TabsNode = z.strictObject({
+const TabsNodeSchema = z.strictObject({
   id: NodeId,
   type: z.literal("tabs"),
   props: z.strictObject({}),
@@ -489,7 +489,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   DivBlockNode,
   FlexboxNode,
   SvgNode,
-  TabsNode,
+  TabsNodeSchema,
   TabPanelNode,
   HeadingNode,
   SpacerNode,

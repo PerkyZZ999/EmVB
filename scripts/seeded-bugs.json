@@ -2654,6 +2654,59 @@
         "embeds escaped"
       ],
       "expect": "escaped|Expected|fail|toContain|not.toContain"
+    },
+    {
+      "id": "W-073/svg-script-allowed",
+      "requirement": "R-032",
+      "description": "SVG sanitizer no longer rejects script tags",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "export function sanitizeSvgMarkup(raw: string): VNode | undefined {\n  if (typeof raw !== \"string\") return undefined;\n  const trimmed = raw.trim();\n  if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;\n  if (FORBIDDEN.test(trimmed)) return undefined;",
+          "replace": "export function sanitizeSvgMarkup(raw: string): VNode | undefined {\n  if (typeof raw !== \"string\") return undefined;\n  const trimmed = raw.trim();\n  if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;\n  // seeded: skip FORBIDDEN gate\n  if (false && FORBIDDEN.test(trimmed)) return undefined;"
+        },
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  \"title\",\n  \"desc\",\n]);",
+          "replace": "  \"title\",\n  \"desc\",\n  \"script\",\n]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg.test.ts"],
+      "expect": "toBeUndefined|rejects script|Expected"
+    },
+    {
+      "id": "W-074/tab-panel-in-root",
+      "requirement": "R-003",
+      "description": "Tab panels may drop outside Tabs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  if (node.type === \"tab-panel\" && target.node.type !== \"tabs\")\n    return refuse(REASONS.tabOutsideTabs);\n  if (target.node.type === \"tabs\" && node.type !== \"tab-panel\")\n    return refuse(REASONS.onlyTabPanels);\n",
+          "replace": "  // seeded: skip tab nesting rules\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/arrange-tabs.test.ts"],
+      "expect": "tabOutsideTabs|onlyTabPanels|toEqual"
+    },
+    {
+      "id": "W-072/flexbox-column-base",
+      "requirement": "D-EV4-01",
+      "description": "Flexbox base CSS uses column like Container",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ".emvb-flexbox{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px}",
+          "replace": ".emvb-flexbox{display:flex;flex-direction:column;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/elements.test.ts",
+        "-t",
+        "flexbox defaults"
+      ],
+      "expect": "flex-direction:row|toContain"
     }
   ]
 }

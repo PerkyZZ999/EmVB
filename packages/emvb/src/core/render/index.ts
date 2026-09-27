@@ -363,7 +363,8 @@ export function renderPage(
       const labels: VNode[] = [];
       const panelNodes: VNode[] = [];
       for (let i = 0; i < panels.length; i++) {
-        const panel = panels[i]!;
+        const panel = panels[i];
+        if (!panel) continue;
         const inputId = `${group}-${i}`;
         const inputAttrs: Record<string, string> = {
           type: "radio",
