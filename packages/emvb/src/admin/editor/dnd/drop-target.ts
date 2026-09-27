@@ -74,7 +74,9 @@ export function dropContainer(layout: Layout, hoveredId: string | null): LayoutN
     hovered.type === "container" ||
     hovered.type === "div-block" ||
     hovered.type === "flexbox" ||
-    hovered.type === "loop"
+    hovered.type === "loop" ||
+    hovered.type === "tabs" ||
+    hovered.type === "tab-panel"
   )
     return hovered;
   const parentId = parentOf(layout, hovered.id);

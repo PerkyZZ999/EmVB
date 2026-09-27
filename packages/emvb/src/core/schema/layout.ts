@@ -237,6 +237,32 @@ export const SvgNode = z.strictObject({
   htmlId: HtmlId.optional(),
 });
 
+export const TabPanelNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("tab-panel"),
+  props: z.strictObject({
+    label: z.string().min(1).max(MAX_TEXT_LENGTH),
+  }),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+  get children(): z.ZodType<LayoutNode[]> {
+    return z.array(LayoutNode);
+  },
+});
+
+export const TabsNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("tabs"),
+  props: z.strictObject({}),
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+  get children(): z.ZodType<LayoutNode[]> {
+    return z.array(LayoutNode);
+  },
+});
+
 export const FORM_FIELD_TYPES = [
   "text-input",
   "textarea",
@@ -432,6 +458,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "div-block",
   "flexbox",
   "svg",
+  "tabs",
+  "tab-panel",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -461,6 +489,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   DivBlockNode,
   FlexboxNode,
   SvgNode,
+  TabsNode,
+  TabPanelNode,
   HeadingNode,
   SpacerNode,
   DividerNode,
@@ -570,6 +600,26 @@ export type SvgNode = {
   htmlId?: HtmlIdOf;
 };
 
+export type TabPanelNode = {
+  id: IdOf;
+  type: "tab-panel";
+  props: { label: string };
+  style?: StyleOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  children: LayoutNode[];
+};
+
+export type TabsNode = {
+  id: IdOf;
+  type: "tabs";
+  props: Record<string, never>;
+  style?: StyleOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  children: LayoutNode[];
+};
+
 export type FormNode = {
   id: IdOf;
   type: "form";
@@ -595,6 +645,8 @@ export type LayoutNode =
   | DivBlockNode
   | FlexboxNode
   | SvgNode
+  | TabsNode
+  | TabPanelNode
   | FormNode
   | LoopNode
   | HeadingNode
@@ -677,20 +729,37 @@ export const isDivBlockNode = (node: LayoutNode): node is DivBlockNode => node.t
 export const isFlexboxNode = (node: LayoutNode): node is FlexboxNode => node.type === "flexbox";
 
 /** Layout parents that accept general children (not form-only / tabs-only). */
+export const isTabsNode = (node: LayoutNode): node is TabsNode => node.type === "tabs";
+
+export const isTabPanelNode = (node: LayoutNode): node is TabPanelNode => node.type === "tab-panel";
+
+/** Layout parents that accept general children (forms may land here). */
 export const isLayoutParentNode = (
   node: LayoutNode,
-): node is ContainerNode | DivBlockNode | FlexboxNode =>
-  node.type === "container" || node.type === "div-block" || node.type === "flexbox";
+): node is ContainerNode | DivBlockNode | FlexboxNode | TabPanelNode =>
+  node.type === "container" ||
+  node.type === "div-block" ||
+  node.type === "flexbox" ||
+  node.type === "tab-panel";
 
-/** Nodes that may hold children (layout parents, forms, loops, tabs). */
+/** Nodes that may hold children. */
 export const isParentNode = (
   node: LayoutNode,
-): node is ContainerNode | DivBlockNode | FlexboxNode | FormNode | LoopNode =>
+): node is
+  | ContainerNode
+  | DivBlockNode
+  | FlexboxNode
+  | FormNode
+  | LoopNode
+  | TabsNode
+  | TabPanelNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "flexbox" ||
   node.type === "form" ||
-  node.type === "loop";
+  node.type === "loop" ||
+  node.type === "tabs" ||
+  node.type === "tab-panel";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

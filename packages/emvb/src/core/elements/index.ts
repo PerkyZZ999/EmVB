@@ -5,6 +5,8 @@ import type {
   DivBlockNode,
   FlexboxNode,
   SvgNode,
+  TabsNode,
+  TabPanelNode,
   DividerNode,
   FormNode,
   HeadingNode,
@@ -865,6 +867,42 @@ const svgEl: ElementDefinition<SvgNode> = {
   },
 };
 
+const tabPanel: ElementDefinition<TabPanelNode> = {
+  baseCss: "",
+  defaults: () => ({
+    type: "tab-panel",
+    props: { label: "Tab" },
+    children: [],
+  }),
+  descriptor: {
+    type: "tab-panel",
+    name: "Tab panel",
+    group: "layout",
+    defaultTab: "content",
+    fields: [{ key: "label", kind: "text", label: "Tab label" }],
+  },
+  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
+const tabs: ElementDefinition<TabsNode> = {
+  baseCss:
+    ".emvb-tabs{display:flex;flex-direction:column;min-width:0;gap:0}.emvb-tab-input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}.emvb-tab-list{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid currentColor;margin:0;padding:0}.emvb-tab-label{display:inline-block;padding:8px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}.emvb-tab-panels{min-width:0}.emvb-tab-panel{display:none;padding-top:12px;min-width:0}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(1):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(1){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(1):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(1){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(2):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(2){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(2):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(2){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(3):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(3){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(3):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(3){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(4):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(4){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(4):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(4){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(5):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(5){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(5):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(5){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(6):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(6){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(6):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(6){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(7):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(7){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(7):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(7){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(8):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(8){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(8):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(8){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(9):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(9){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(9):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(9){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(10):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(10){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(10):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(10){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(11):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(11){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(11):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(11){display:block}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(12):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(12){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(12):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(12){display:block}",
+  defaults: () => ({
+    type: "tabs",
+    props: {},
+    children: [],
+  }),
+  descriptor: {
+    type: "tabs",
+    name: "Tabs",
+    group: "layout",
+    defaultTab: "content",
+    fields: [],
+  },
+  // Real markup is assembled in render (needs panel labels from nodes).
+  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
 const divBlock: ElementDefinition<DivBlockNode> = {
   baseCss: ".emvb-div-block{display:block;min-width:0}",
   defaults: () => ({ type: "div-block", props: {}, children: [] }),
@@ -948,6 +986,8 @@ export const ELEMENTS = {
   "div-block": divBlock,
   flexbox,
   svg: svgEl,
+  tabs,
+  "tab-panel": tabPanel,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;

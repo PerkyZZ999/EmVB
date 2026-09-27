@@ -12,6 +12,7 @@ import {
   CursorClickIcon,
   ImageIcon,
   GraphIcon,
+  BrowserIcon,
   StarIcon,
   YoutubeLogoIcon,
   TextboxIcon,
@@ -41,6 +42,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   image: ImageIcon,
   icon: StarIcon,
   svg: GraphIcon,
+  tabs: BrowserIcon,
   video: YoutubeLogoIcon,
   form: ClipboardTextIcon,
   "text-input": TextboxIcon,
@@ -78,7 +80,10 @@ export function AddPanel({
   const [query, setQuery] = React.useState(defaultQuery);
   const q = query.trim().toLowerCase();
   const matched = ELEMENT_DESCRIPTORS.filter(
-    (d) => (formsAvailable || d.group !== "form") && (!q || d.name.toLowerCase().includes(q)),
+    (d) =>
+      d.type !== "tab-panel" &&
+      (formsAvailable || d.group !== "form") &&
+      (!q || d.name.toLowerCase().includes(q)),
   );
   return (
     <div className="emvb-panel-body" data-emvb-panel="add">

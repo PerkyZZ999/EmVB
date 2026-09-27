@@ -11,6 +11,8 @@ import {
   isFormNode,
   isLoopNode,
   isParentNode,
+  isTabsNode,
+  isTabPanelNode,
   type Layout,
   type LayoutNode,
 } from "../schema/layout.ts";
@@ -352,6 +354,53 @@ export function renderPage(
     ) {
       const post = resolvePostForRender(dynamic, mode);
       return renderDynamicPost(node, attrs, post, mode);
+    }
+
+    if (isTabsNode(node)) {
+      const panels = node.children.filter(isTabPanelNode).slice(0, 12);
+      const group = `emvb-tabs-${id ?? "x"}`;
+      const inputs: VNode[] = [];
+      const labels: VNode[] = [];
+      const panelNodes: VNode[] = [];
+      for (let i = 0; i < panels.length; i++) {
+        const panel = panels[i]!;
+        const inputId = `${group}-${i}`;
+        const inputAttrs: Record<string, string> = {
+          type: "radio",
+          name: group,
+          id: inputId,
+          class: "emvb-tab-input",
+        };
+        if (i === 0) inputAttrs.checked = "checked";
+        inputs.push({ tag: "input", attrs: inputAttrs, children: [] });
+        labels.push({
+          tag: "label",
+          attrs: {
+            class: "emvb-tab-label",
+            for: inputId,
+            role: "tab",
+          },
+          children: [panel.props.label],
+        });
+        const body = panel.children
+          .map((child) => visit(child, false, dynamic))
+          .filter((child): child is VNode => child !== undefined);
+        const panelAttrs: Record<string, string> = {
+          class: "emvb-tab-panel",
+          role: "tabpanel",
+        };
+        if (mode === "editor") panelAttrs["data-emvb-id"] = panel.id;
+        panelNodes.push({ tag: "div", attrs: panelAttrs, children: body });
+      }
+      return {
+        tag: "div",
+        attrs,
+        children: [
+          ...inputs,
+          { tag: "div", attrs: { class: "emvb-tab-list", role: "tablist" }, children: labels },
+          { tag: "div", attrs: { class: "emvb-tab-panels" }, children: panelNodes },
+        ],
+      };
     }
 
     if (isParentNode(node)) {

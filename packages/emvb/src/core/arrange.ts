@@ -44,6 +44,8 @@ export const REASONS = {
   nestedForm: "A form can't go inside another form.",
   fieldOutsideForm: "Form fields must be placed inside a form.",
   formIntoField: "A form can only go inside a layout container.",
+  tabOutsideTabs: "Tab panels can only go inside Tabs.",
+  onlyTabPanels: "Tabs can only hold tab panels.",
 } as const;
 
 const refuse = (reason: string): Refusal => ({ ok: false, reason });
@@ -114,6 +116,11 @@ export function canDrop(layout: Layout, source: DragSource, parentId: string): A
     node = source.node;
   }
   if (!isParentNode(target.node)) return refuse(REASONS.notContainer);
+
+  if (node.type === "tab-panel" && target.node.type !== "tabs")
+    return refuse(REASONS.tabOutsideTabs);
+  if (target.node.type === "tabs" && node.type !== "tab-panel")
+    return refuse(REASONS.onlyTabPanels);
 
   if (isFormNode(node)) {
     if (isFormNode(target.node) || underForm(layout, parentId)) return refuse(REASONS.nestedForm);

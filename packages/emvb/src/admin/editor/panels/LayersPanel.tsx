@@ -17,6 +17,8 @@ const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
   container: SquaresFourIcon,
   svg: SquaresFourIcon,
+  tabs: SquaresFourIcon,
+  "tab-panel": SquaresFourIcon,
   "div-block": SquaresFourIcon,
   flexbox: SquaresFourIcon,
 };
