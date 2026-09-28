@@ -4,6 +4,16 @@ import { defineConfig } from "@playwright/test";
 // sign-in) and read back from the production builds, which share the same database.
 const executablePath = process.env["EMVB_CHROMIUM"] ?? "/usr/bin/chromium";
 
+// Astro 7 auto-backgrounds `astro dev` when an AI agent runs it (am-i-vibing), so the webServer
+// process exits immediately ("Process from config.webServer exited early"). Astro's own
+// ASTRO_DEV_BACKGROUND opt-out keeps the dev servers in the foreground where Playwright manages them.
+const foregroundDevEnv = {
+  ...Object.fromEntries(
+    Object.entries(process.env).filter((e): e is [string, string] => e[1] !== undefined),
+  ),
+  ASTRO_DEV_BACKGROUND: "1",
+};
+
 const platforms = [
   { name: "node", script: "demo:node", dev: 4411, prod: 4421 },
   { name: "cloudflare", script: "demo:cf", dev: 4412, prod: 4422 },
@@ -16,6 +26,7 @@ const server = (command: string, port: number, timeout: number) => ({
   timeout,
   stdout: "ignore" as const,
   stderr: "pipe" as const,
+  env: foregroundDevEnv,
 });
 
 export default defineConfig({

@@ -3,6 +3,16 @@ import { defineConfig } from "@playwright/test";
 // A-09: use the system Chromium instead of downloading Playwright's browsers.
 const executablePath = process.env["EMVB_CHROMIUM"] ?? "/usr/bin/chromium";
 
+// Astro 7 auto-backgrounds `astro dev` when an AI agent runs it (am-i-vibing), so the webServer
+// process exits immediately ("Process from config.webServer exited early"). Astro's own
+// ASTRO_DEV_BACKGROUND opt-out keeps the dev servers in the foreground where Playwright manages them.
+const foregroundDevEnv = {
+  ...Object.fromEntries(
+    Object.entries(process.env).filter((e): e is [string, string] => e[1] !== undefined),
+  ),
+  ASTRO_DEV_BACKGROUND: "1",
+};
+
 const platforms = [
   { name: "node", port: 4411, command: "bun run demo:node" },
   { name: "cloudflare", port: 4412, command: "bun run demo:cf" },
@@ -42,5 +52,6 @@ export default defineConfig({
     timeout: 180_000,
     stdout: "ignore" as const,
     stderr: "pipe" as const,
+    env: foregroundDevEnv,
   })),
 });
