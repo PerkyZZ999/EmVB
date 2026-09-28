@@ -84,8 +84,7 @@ export function LoopItemBindControl({
         />
         <p className="emvb-helper">
           Optional published Loop Item theme part. Leave blank to use nested elements as the item
-          template.{" "}
-          <a href="/_emdash/admin/plugins/emvb/theme">Open Theme Builder</a>
+          template. <a href="/_emdash/admin/plugins/emvb/theme">Open Theme Builder</a>
         </p>
       </div>
     );

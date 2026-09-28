@@ -33,10 +33,7 @@ describe("validateTriggers", () => {
   test("accepts exit_intent and inactivity triggers (W-081)", () => {
     const result = validateTriggers({
       schemaVersion: 1,
-      open: [
-        { type: "exit_intent" },
-        { type: "inactivity", ms: 15_000 },
-      ],
+      open: [{ type: "exit_intent" }, { type: "inactivity", ms: 15_000 }],
       advanced: {},
     });
     expect(result.ok).toBe(true);

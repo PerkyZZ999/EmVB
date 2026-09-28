@@ -408,7 +408,11 @@ export function renderPage(
         attrs,
         children: [
           ...inputs,
-          { tag: "div", attrs: { class: "emvb-tab-list", role: "tablist", "aria-orientation": "horizontal" }, children: labels },
+          {
+            tag: "div",
+            attrs: { class: "emvb-tab-list", role: "tablist", "aria-orientation": "horizontal" },
+            children: labels,
+          },
           { tag: "div", attrs: { class: "emvb-tab-panels" }, children: panelNodes },
         ],
       };

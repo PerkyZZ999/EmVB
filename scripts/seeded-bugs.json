@@ -12,11 +12,7 @@
           "replace": "export const PACKAGE_NAME = \"emvb\";\nexport const debug = () => console.log(\"x\");"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "lint"
-      ],
+      "command": ["bun", "run", "lint"],
       "expect": "no-console"
     },
     {
@@ -30,11 +26,7 @@
           "replace": "export const   PLUGIN_ID   =  \"emvb\""
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "fmt:check"
-      ],
+      "command": ["bun", "run", "fmt:check"],
       "expect": "Format issues found|constants\\.ts"
     },
     {
@@ -48,11 +40,7 @@
           "replace": "export const PLUGIN_ID: number = \"emvb\";"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "typecheck"
-      ],
+      "command": ["bun", "run", "typecheck"],
       "expect": "TS2322"
     },
     {
@@ -66,11 +54,7 @@
           "replace": "import \"react\";\nexport * from \"./limits.ts\";"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "lint"
-      ],
+      "command": ["bun", "run", "lint"],
       "expect": "no-restricted-imports"
     },
     {
@@ -84,11 +68,7 @@
           "replace": "import { createPlugin } from \"../server/plugin.ts\";\nexport * from \"./limits.ts\";\nexport const leak = createPlugin;"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "fallow"
-      ],
+      "command": ["bun", "run", "fallow"],
       "expect": "Boundary violations"
     },
     {
@@ -102,11 +82,7 @@
           "replace": "export const PACKAGE_NAME = \"emvb\";\nexport const UNUSED_CONSTANT = 1;"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "fallow"
-      ],
+      "command": ["bun", "run", "fallow"],
       "expect": "Unused exports"
     },
     {
@@ -120,11 +96,7 @@
           "replace": "\"dev\": \"bun --bun astro dev"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "check:runtime"
-      ],
+      "command": ["bun", "run", "check:runtime"],
       "expect": "is listed but now runs on Bun"
     },
     {
@@ -138,11 +110,7 @@
           "replace": "\"build\": \"astro build\""
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "check:runtime"
-      ],
+      "command": ["bun", "run", "check:runtime"],
       "expect": "runs on Node .* but is not listed"
     },
     {
@@ -156,11 +124,7 @@
           "replace": "false"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./scripts/check-runtime.test.ts"
-      ],
+      "command": ["bun", "test", "./scripts/check-runtime.test.ts"],
       "expect": "\\(fail\\)"
     },
     {
@@ -174,11 +138,7 @@
           "replace": "preload = [\"./test/setup/emdash-virtual.ts\"]"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./test/setup"
-      ],
+      "command": ["bun", "test", "./test/setup"],
       "expect": "document is not defined|\\(fail\\)"
     },
     {
@@ -192,11 +152,7 @@
           "replace": "<p data-harness set:html={label} />"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "test:astro"
-      ],
+      "command": ["bun", "run", "test:astro"],
       "expect": "AssertionError"
     },
     {
@@ -210,11 +166,7 @@
           "replace": "void originals;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./scripts/seeded-bug.test.ts"
-      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
       "expect": "\\(fail\\)"
     },
     {
@@ -228,13 +180,7 @@
           "replace": "plugins: [formsPlugin()],"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/smoke.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/smoke.e2e.ts", "--project=node"],
       "env": {
         "CI": "1"
       },
@@ -251,11 +197,7 @@
           "replace": "const sizeIssue = checkSize(input, MAX_LAYOUT_BYTES * 2, \"page\");"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*one byte over the limit is refused"
     },
     {
@@ -269,11 +211,7 @@
           "replace": "return JSON.stringify(value).length;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*counts UTF-8 bytes, not characters"
     },
     {
@@ -287,11 +225,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*duplicate ids are reported"
     },
     {
@@ -305,11 +239,7 @@
           "replace": "if (depth > MAX_DEPTH + 1) {"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*nesting deeper than the limit"
     },
     {
@@ -323,11 +253,7 @@
           "replace": "result = { ...result, schemaVersion: v + 1 };"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*runs the chain from v0"
     },
     {
@@ -341,11 +267,7 @@
           "replace": "z.string()"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*style injection attempt"
     },
     {
@@ -359,11 +281,7 @@
           "replace": "return value;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*renders as inert text"
     },
     {
@@ -377,11 +295,7 @@
           "replace": "return value;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*attributes also escape"
     },
     {
@@ -395,11 +309,7 @@
           "replace": "if (entry) {\n      declarations.push({ property: entry.css, value: value ?? String(raw) });"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*never reaches the stylesheet"
     },
     {
@@ -413,11 +323,7 @@
           "replace": "if (typeof value === \"string\") return value;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*colour rejects"
     },
     {
@@ -431,11 +337,7 @@
           "replace": "return value.length > 0;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*the generic guard rejects"
     },
     {
@@ -449,11 +351,7 @@
           "replace": "tag: \"h2\","
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*heading level 1 renders"
     },
     {
@@ -467,11 +365,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*refuses tags and attributes"
     },
     {
@@ -485,11 +379,7 @@
           "replace": "for (const css of baseCss.values()) parts.push(css);"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*base CSS is emitted only"
     },
     {
@@ -503,11 +393,7 @@
           "replace": "const mode = opts.mode ?? \"public\";\n  const until = performance.now() + 25;\n  while (performance.now() < until);"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "bench:render"
-      ],
+      "command": ["bun", "run", "bench:render"],
       "expect": "renderPage, 300 nodes, 200 runs: median 2\\d\\.\\d+ ms"
     },
     {
@@ -521,11 +407,7 @@
           "replace": "if (event.actor && event.actor.role < 0) {"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*a save by role 10 is rejected"
     },
     {
@@ -539,11 +421,7 @@
           "replace": "return;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*an invalid layout is rejected with SAVE_REJECTED"
     },
     {
@@ -557,11 +435,7 @@
           "replace": "ctx.log.warn(\"emvb: page save rejected\", { pageId, code: result.issues[0]?.code ?? \"invalid\", layout: event.content[\"layout\"] });"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*no layout content"
     },
     {
@@ -575,11 +449,7 @@
           "replace": "await (ctx.storage[\"design\"] as unknown as { put(id: string, v: unknown): Promise<void> }).put(DESIGN_KEY, result.design);\n    const write = { applied: true as const, revision: crypto.randomUUID() };"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*a stale revision gets 409"
     },
     {
@@ -593,11 +463,7 @@
           "replace": "if (bytes > MAX_DESIGN_BYTES * 8) {"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*256 KiB \\+ 1 byte gets 413"
     },
     {
@@ -611,11 +477,7 @@
           "replace": "permission: \"content:read\","
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*a role-\\d+ save gets 403"
     },
     {
@@ -629,11 +491,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*a missing collection is created hidden"
     },
     {
@@ -647,11 +505,7 @@
           "replace": "{ slug: \"layout\", label: \"Layout\", type: \"json\", validation: null },"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*the layout field is bound to the read-only EmVB widget"
     },
     {
@@ -670,11 +524,7 @@
           "replace": "      <Text>{description}</Text>\n      <textarea id=\"layout-json\" defaultValue={JSON.stringify(value)} onChange={(e) => onChange(e.target.value)} />"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*renders no editable control and never calls onChange"
     },
     {
@@ -688,11 +538,7 @@
           "replace": "update.hidden = true;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*running setup twice gives the same schema"
     },
     {
@@ -711,13 +557,7 @@
           "replace": "      <Text>{description}</Text>\n      <textarea id=\"layout-json\" defaultValue={JSON.stringify(value)} onChange={(e) => onChange(e.target.value)} />"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/setup.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/setup.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*read-only widget instead of a JSON input",
       "env": {
         "CI": "1"
@@ -734,11 +574,7 @@
           "replace": "if (role !== null && role >= 30) {"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*hides the Visual pages link for role 30"
     },
     {
@@ -752,13 +588,7 @@
           "replace": "if (role !== null && role >= 30) {"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/access.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*author \\(30\\): no Visual pages link",
       "env": {
         "CI": "1"
@@ -775,13 +605,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/access.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*editor \\(40\\): sees the link",
       "env": {
         "CI": "1"
@@ -798,13 +622,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/access.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*subscriber \\(10\\): no Visual pages link",
       "env": {
         "CI": "1"
@@ -821,11 +639,7 @@
           "replace": "      pages: [\n        { path: \"/pages\", label: \"Visual pages\", icon: \"layout\" },\n        { path: \"/editor\", label: \"Editor\" },\n      ],"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/test/server"
-      ],
+      "command": ["bun", "test", "./packages/emvb/test/server"],
       "expect": "\\(fail\\).*only Visual pages is declared"
     },
     {
@@ -839,11 +653,7 @@
           "replace": "export const canUseEmvb = (role: number) => role >= 30;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*role 30 sees no access instead of the content"
     },
     {
@@ -857,11 +667,7 @@
           "replace": "style={{ position: \"fixed\", inset: 0, zIndex: 50 }}"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*is portaled to document.body, fixed, with z-index auto"
     },
     {
@@ -875,13 +681,7 @@
           "replace": "style={{ position: \"fixed\", inset: 0, zIndex: 50 }}"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/editor.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*a Kumo dialog opened from the editor stacks above it",
       "env": {
         "CI": "1"
@@ -898,11 +698,7 @@
           "replace": "window.addEventListener(\"keydown\", block);"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*mod\\+K never reaches a document listener"
     },
     {
@@ -926,11 +722,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*is portaled to document.body"
     },
     {
@@ -944,11 +736,7 @@
           "replace": "sandbox=\"allow-same-origin allow-scripts\""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*sandboxed canvas without scripts"
     },
     {
@@ -962,11 +750,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*outside the allowlists are dropped"
     },
     {
@@ -980,13 +764,7 @@
           "replace": ".emvb-canvas iframe { display: block; width: 1280px; transform: scale(0.53); transform-origin: 0 0; height: 100%;"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/editor.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*at 1280\u00d7720 the overlay covers the admin and the canvas gets the real width",
       "env": {
         "CI": "1"
@@ -1003,13 +781,7 @@
           "replace": "\"(min-width: 900px)\""
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/editor.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*below 1024 px the small-screen notice replaces the editor",
       "env": {
         "CI": "1"
@@ -1026,11 +798,7 @@
           "replace": "      },\n    },\n  );\n  return body[\"_rev\"];"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*saves with _rev, the edited page and SEO"
     },
     {
@@ -1044,13 +812,7 @@
           "replace": "      },\n    },\n  );\n  return body[\"_rev\"];"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/editing.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*a concurrent edit from another browser shows the conflict dialog",
       "env": {
         "CI": "1"
@@ -1067,13 +829,7 @@
           "replace": "  return (await publishPage(fetcher, id, body[\"_rev\"])).rev;\n}\n\nexport async function publishPage"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/editing.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*a draft save leaves the published page alone",
       "env": {
         "CI": "1"
@@ -1090,11 +846,7 @@
           "replace": "removed.parentId, removed.index + 1, removed.node"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*Restore puts it back in place, selected"
     },
     {
@@ -1108,11 +860,7 @@
           "replace": "const [seoOpen, setSeoOpen] = React.useState(true);"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*the SEO section is closed by default"
     },
     {
@@ -1126,11 +874,7 @@
           "replace": "if (bytes > Number.POSITIVE_INFINITY) {"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*a layout grown past the size limit shows the size error"
     },
     {
@@ -1144,11 +888,7 @@
           "replace": "if (inDialog(event.target)) return;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*Delete in a text field edits the text, not the page"
     },
     {
@@ -1162,11 +902,7 @@
           "replace": "      const revision = latest.current.designRevision;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*creating a variable saves the design with its revision"
     },
     {
@@ -1205,13 +941,7 @@
           "replace": "failure.code === \"SLUG_TAKEN\""
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/editing.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
       "expect": "\u2718.*\\[node\\].*a duplicate slug is refused inline",
       "env": {
         "CI": "1"
@@ -1228,11 +958,7 @@
           "replace": "return emptyDesign();"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/astro"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro"],
       "expect": "\\(fail\\).*reads the design through the in-process public route"
     },
     {
@@ -1246,14 +972,7 @@
           "replace": "return emptyDesign();"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e:prod",
-        "--project=node-public",
-        "-g",
-        "colour variable"
-      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "colour variable"],
       "expect": "\u2718.*\\[node-public\\].*changing a colour variable changes the published page",
       "env": {
         "CI": "1"
@@ -1270,11 +989,7 @@
           "replace": "    <>\n      <style is:inline set:html={page.css} />\n      {page.html}"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "test:astro"
-      ],
+      "command": ["bun", "run", "test:astro"],
       "expect": "FAIL.*emvb-page\\.vitest\\.ts.*hostile text"
     },
     {
@@ -1288,14 +1003,7 @@
           "replace": "<EmVBPage page={emvb}><EmVBFormsRuntime /></EmVBPage>"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e:prod",
-        "--project=node-public",
-        "-g",
-        "adds no script"
-      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "adds no script"],
       "expect": "\u2718.*\\[node-public\\].*adds no script",
       "env": {
         "CI": "1"
@@ -1312,14 +1020,7 @@
           "replace": "emvb?.canvasMode === \"none\" ?"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e:prod",
-        "--project=node-public",
-        "-g",
-        "blank-canvas"
-      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "blank-canvas"],
       "expect": "\u2718.*\\[node-public\\].*a blank-canvas page is a whole document",
       "env": {
         "CI": "1"
@@ -1336,14 +1037,7 @@
           "replace": "if (!entry) {\n\treturn new Response(\"Nothing here\");\n}"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e:prod",
-        "--project=node-public",
-        "-g",
-        "are 404"
-      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "are 404"],
       "expect": "\u2718.*\\[node-public\\].*unpublished and missing pages are 404",
       "env": {
         "CI": "1"
@@ -1360,14 +1054,7 @@
           "replace": "if (!entry || found.isPreview) return null;"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e:prod",
-        "--project=node-public",
-        "-g",
-        "preview link"
-      ],
+      "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "preview link"],
       "expect": "\u2718.*\\[node-public\\].*a preview link renders the draft",
       "env": {
         "CI": "1"
@@ -1384,11 +1071,7 @@
           "replace": "gap: { css: \"gap\", toValue: () => undefined },"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*cascade order"
     },
     {
@@ -1402,11 +1085,7 @@
           "replace": "if (dirty || !dirty) return;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*guards leaving only while there are unsaved changes"
     },
     {
@@ -1420,15 +1099,7 @@
           "replace": "if (event.actor && event.actor.role < 0) {"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/access.e2e.ts",
-        "--project=node",
-        "-g",
-        "author"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node", "-g", "author"],
       "expect": "\u2718.*\\[node\\].*author \\(30\\)",
       "env": {
         "CI": "1"
@@ -1445,11 +1116,7 @@
           "replace": "if (moving.node.id === parentId) return refuse(REASONS.intoItself);"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*a container can't go into itself or anything inside it"
     },
     {
@@ -1463,11 +1130,7 @@
           "replace": ""
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*never reuses an id already on the page"
     },
     {
@@ -1481,11 +1144,7 @@
           "replace": "return moveNode(layout, id, parent.parent.id, parent.index);"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*moveOut puts it right after its container"
     },
     {
@@ -1499,11 +1158,7 @@
           "replace": "if (target.depth + 1 > MAX_DEPTH) return refuse(REASONS.tooDeep);"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*the depth limit counts the whole subtree being dropped"
     },
     {
@@ -1517,11 +1172,7 @@
           "replace": "const at = index;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*the index counts the target's children before the move"
     },
     {
@@ -1535,11 +1186,7 @@
           "replace": "return (siblings[found.index - 1] ?? siblings[found.index + 1] ?? found.parent).id;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core"],
       "expect": "\\(fail\\).*after a delete the selection goes to the next sibling"
     },
     {
@@ -1553,11 +1200,7 @@
           "replace": "  return (before ?? (group.at(-1) as number) + 1) + 1;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin/editor/dnd"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/dnd"],
       "expect": "\\(fail\\).*dropIndex"
     },
     {
@@ -1571,13 +1214,7 @@
           "replace": "  return (before ?? (group.at(-1) as number) + 1) + 1;"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/drag.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node"],
       "env": {
         "CI": "1"
       },
@@ -1599,13 +1236,7 @@
           "replace": "    // iframe.addEventListener(\"drop\", drop);"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/drag.e2e.ts",
-        "--project=node"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node"],
       "env": {
         "CI": "1"
       },
@@ -1622,11 +1253,7 @@
           "replace": "  if (scheme === \"http:\" || scheme === \"https:\" || scheme === \"mailto:\" || scheme === \"tel:\" || scheme === \"javascript:\") {\n    return trimmed;\n  }\n  return undefined;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/sanitize/href.test.ts"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
       "expect": "\\(fail\\).*sanitizeHref"
     },
     {
@@ -1640,11 +1267,7 @@
           "replace": "    const href = undefined;\n    if (href) {\n      return {\n        tag: \"a\","
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/elements"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements"],
       "expect": "\\(fail\\).*button without href is button"
     },
     {
@@ -1658,11 +1281,7 @@
           "replace": "  if (VOID.has(node.tag)) return `<${node.tag}${attrs}>`;\n  if (node.tag === \"li\") return `<${node.tag}${attrs}>${node.children.map((c) => (typeof c === \"string\" ? c : serialize(c))).join(\"\")}</${node.tag}>`;\n  return `<${node.tag}${attrs}>${node.children.map(serialize).join(\"\")}</${node.tag}>`;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/elements"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements"],
       "expect": "\\(fail\\).*XSS corpus"
     },
     {
@@ -1676,11 +1295,7 @@
           "replace": "    const tag = node.props.tag ?? \"div\";\n    return { tag, attrs, children };"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/elements"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements"],
       "expect": "\\(fail\\).*container Advanced tag|EmVB: tag \\\"script\\\" is not allowed"
     },
     {
@@ -1694,11 +1309,7 @@
           "replace": "  justifyContent: { css: \"align-items\", toValue: keyword(JUSTIFY) },"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/sanitize/style-map.test.ts"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/style-map.test.ts"],
       "expect": "\\(fail\\).*justifyContent"
     },
     {
@@ -1712,11 +1323,7 @@
           "replace": "  if (typeof n !== \"number\" || !Number.isFinite(n) || n > 10_000) return undefined;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/sanitize/style-map.test.ts"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/style-map.test.ts"],
       "expect": "\\(fail\\).*negative padding"
     },
     {
@@ -1730,11 +1337,7 @@
           "replace": "  if (typeof value === \"string\") return value.toLowerCase();"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/sanitize"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize"],
       "expect": "\\(fail\\).*colour rejects|colour rejects injection"
     },
     {
@@ -1768,11 +1371,7 @@
           "replace": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) => d.group !== (\"form\" as string),\n  );"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx"],
       "expect": "\\(fail\\).*No elements match|search filters"
     },
     {
@@ -2731,13 +2330,7 @@
           "replace": "export const BUDGET_MS = 0.0001;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./scripts/css-budget.test.ts",
-        "-t",
-        "under 20 ms"
-      ],
+      "command": ["bun", "test", "./scripts/css-budget.test.ts", "-t", "under 20 ms"],
       "expect": "\\(fail\\)"
     },
     {
@@ -2751,13 +2344,7 @@
           "replace": "export const CSS_GZIP_BUDGET = 1;"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./scripts/css-budget.test.ts",
-        "-t",
-        "15 KB gzipped"
-      ],
+      "command": ["bun", "test", "./scripts/css-budget.test.ts", "-t", "15 KB gzipped"],
       "expect": "\\(fail\\)"
     },
     {
@@ -2811,15 +2398,7 @@
           "replace": "export const EDITOR_MIN_WIDTH_QUERY = \"(min-width: 900px)\";"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/overlay.e2e.ts",
-        "--project=node",
-        "-g",
-        "below 1024"
-      ],
+      "command": ["bun", "run", "e2e", "e2e/overlay.e2e.ts", "--project=node", "-g", "below 1024"],
       "expect": "\\(fail\\)|\u2718"
     },
     {
@@ -2833,13 +2412,7 @@
           "replace": "      \"package/src/astro/MISSING.ts\","
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./scripts/pack-smoke.test.ts",
-        "-t",
-        "TypeScript source"
-      ],
+      "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "TypeScript source"],
       "expect": "\\(fail\\)"
     },
     {
@@ -3098,11 +2671,7 @@
           "replace": "  \"text\",\n  \"tspan\",\n  \"script\",\n]);"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/sanitize/svg.test.ts"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg.test.ts"],
       "expect": "toBeUndefined|rejects script|Expected"
     },
     {
@@ -3116,11 +2685,7 @@
           "replace": "  // seeded: skip tab nesting rules\n"
         }
       ],
-      "command": [
-        "bun",
-        "test",
-        "./packages/emvb/src/core/arrange-tabs.test.ts"
-      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/arrange-tabs.test.ts"],
       "expect": "tabOutsideTabs|onlyTabPanels|toEqual"
     },
     {

@@ -228,7 +228,12 @@ function build(tokens: Tok[]): VNode | undefined {
       const child = read();
       if (child === undefined) return undefined;
       if (typeof child === "string") {
-        if (tok.tag === "title" || tok.tag === "desc" || tok.tag === "text" || tok.tag === "tspan") {
+        if (
+          tok.tag === "title" ||
+          tok.tag === "desc" ||
+          tok.tag === "text" ||
+          tok.tag === "tspan"
+        ) {
           children.push(child);
         }
         continue;

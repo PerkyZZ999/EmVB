@@ -80,7 +80,10 @@ test("Site styles Classes Manager tab is reachable", async ({ page, request }) =
   await expect(overlay(page).locator("[data-emvb-classes]")).toBeVisible();
 });
 
-test("API-created Popup theme part loads in the editor with Triggers", async ({ page, request }) => {
+test("API-created Popup theme part loads in the editor with Triggers", async ({
+  page,
+  request,
+}) => {
   const title = `Popup ${unique()}`;
   const id = await createThemePart(request, {
     title,

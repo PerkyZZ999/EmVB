@@ -105,9 +105,7 @@ export async function createThemePart(
           type: "container",
           props: {},
           style: { flexDirection: "column", gap: { value: 16, unit: "px" } },
-          children: [
-            { id: "head0001", type: "heading", props: { text: input.title, level: 1 } },
-          ],
+          children: [{ id: "head0001", type: "heading", props: { text: input.title, level: 1 } }],
         },
       },
       part_type: input.partType,

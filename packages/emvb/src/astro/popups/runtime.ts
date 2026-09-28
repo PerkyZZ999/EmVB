@@ -229,7 +229,13 @@ function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTri
         window.clearTimeout(timer);
         timer = window.setTimeout(() => openOnce(ctrl, config), ms);
       };
-      for (const eventName of ["mousemove", "mousedown", "keydown", "touchstart", "scroll"] as const) {
+      for (const eventName of [
+        "mousemove",
+        "mousedown",
+        "keydown",
+        "touchstart",
+        "scroll",
+      ] as const) {
         window.addEventListener(eventName, reset, { passive: true });
       }
       break;
