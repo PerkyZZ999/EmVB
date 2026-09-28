@@ -47,9 +47,11 @@ async function openEditor(page: Page) {
   await expect(canvas.getByRole("heading", { name: "Canvas heading" })).toBeVisible();
 }
 
+// Canvas width is the viewport minus the DESIGN.md panel tokens (panel-left 256 + panel-right 288,
+// denser chrome since d32ca75).
 for (const [width, height, canvasWidth] of [
-  [1280, 720, 680],
-  [1920, 1080, 1320],
+  [1280, 720, 736],
+  [1920, 1080, 1376],
 ] as const) {
   test(`at ${width}×${height} the overlay covers the admin and the canvas gets the real width between the panels`, async ({
     page,
