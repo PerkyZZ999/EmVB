@@ -1,23 +1,22 @@
 import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@cloudflare/kumo";
-import { PlusIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { findNode, moveDown, moveUp, renderPage, type LayoutNode } from "../../core/index.ts";
+import { findNode, moveDown, moveUp, renderPage } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
 import { loadFormsCapability } from "../forms-api.ts";
 import { CanvasFrame, type CanvasSelection } from "./canvas/CanvasFrame.tsx";
+import { EmptyCanvas } from "./canvas/EmptyCanvas.tsx";
 import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog } from "./dialogs.tsx";
 import { EditorOverlay } from "./EditorOverlay.tsx";
 import { exitTarget, PAGES_URL } from "./exit.ts";
-import { NEW_ELEMENT_MIME } from "./dnd/drop-target.ts";
 import { newElement } from "./dnd/new-element.ts";
-import { ELEMENT_NAMES, ElementPanel } from "./panels/ElementPanel.tsx";
+import { ELEMENT_NAMES } from "./panels/ElementPanel.tsx";
 import { LeftPanel } from "./panels/LeftPanel.tsx";
-import { PageSettings } from "./panels/PageSettings.tsx";
+import { SettingsPanel } from "./panels/SettingsPanel.tsx";
 import { ShortcutsDialog } from "./ShortcutsDialog.tsx";
 import { SmallScreenNotice } from "./SmallScreenNotice.tsx";
 import { editorReducer, isDirty, type EditorState } from "./store.ts";
-import { SiteStylesDrawer } from "./panels/SiteStylesDrawer.tsx";
 import { TopBar } from "./TopBar.tsx";
 import {
   loadEntry,
@@ -243,96 +242,24 @@ function EditorApp({
                     }
                   />
                 ) : (
-                  <div
-                    className="emvb-empty-canvas"
-                    data-emvb-empty-canvas=""
-                    onDragOver={(event) => {
-                      if (![...event.dataTransfer.types].includes(NEW_ELEMENT_MIME)) return;
-                      event.preventDefault();
-                      event.dataTransfer.dropEffect = "copy";
-                    }}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      const type = event.dataTransfer.getData(NEW_ELEMENT_MIME);
-                      if (!type) return;
-                      dispatch({ type: "add-root-container" });
-                      if (type === "container") return;
-                      queueMicrotask(() => {
-                        const layout = latest.current.page.layout;
-                        if (!layout) return;
-                        const node = newElement(type);
-                        if (!node) return;
-                        dispatch({
-                          type: "add-node",
-                          node,
-                          parentId: layout.root.id,
-                          index: 0,
-                        });
-                      });
-                    }}
-                  >
-                    <button
-                      type="button"
-                      className="emvb-empty-prompt"
-                      onClick={() => dispatch({ type: "add-root-container" })}
-                    >
-                      <PlusIcon size={16} aria-hidden="true" />
-                      Add a container to start
-                    </button>
-                  </div>
+                  <EmptyCanvas latest={latest} dispatch={dispatch} />
                 )}
               </main>
-              <aside
-                className="emvb-panel emvb-panel-right"
-                aria-label={
-                  siteStylesOpen
-                    ? "Site styles"
-                    : selectedNode
-                      ? "Element settings"
-                      : "Page settings"
-                }
-              >
-                {siteStylesOpen ? (
-                  <SiteStylesDrawer
-                    design={state.design}
-                    layout={state.page.layout}
-                    onDesignChange={changeDesign}
-                    onLayoutChange={(layout) =>
-                      dispatch({
-                        type: "apply-arranged",
-                        layout,
-                        selected: latest.current.selectedId ?? layout.root.id,
-                      })
-                    }
-                    onClose={() => setSiteStylesOpen(false)}
-                  />
-                ) : selectedNode ? (
-                  <ElementPanel
-                    key={selectedNode.id}
-                    node={selectedNode}
-                    layout={state.page.layout}
-                    design={state.design}
-                    rejection={saver.rejection}
-                    fetcher={fetcher}
-                    formsAvailable={formsAvailable}
-                    onChange={(node: LayoutNode) =>
-                      dispatch({ type: "update-node", id: node.id, update: () => node })
-                    }
-                    onDesignChange={changeDesign}
-                    onSelect={(id) => dispatch({ type: "select", id })}
-                  />
-                ) : (
-                  <PageSettings
-                    page={state.page}
-                    slugError={saver.slugError}
-                    kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
-                    onChange={(patch) => {
-                      if (patch.slug !== undefined) saver.clearSlugError();
-                      dispatch({ type: "set-page", patch });
-                    }}
-                  />
-                )}
-              </aside>
+              <SettingsPanel
+                state={state}
+                latest={latest}
+                dispatch={dispatch}
+                selectedNode={selectedNode}
+                siteStylesOpen={siteStylesOpen}
+                onCloseSiteStyles={() => setSiteStylesOpen(false)}
+                onDesignChange={changeDesign}
+                fetcher={fetcher}
+                formsAvailable={formsAvailable}
+                rejection={saver.rejection}
+                slugError={saver.slugError}
+                onSlugEdit={saver.clearSlugError}
+                kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
+              />
             </div>
           </>
         ) : (
