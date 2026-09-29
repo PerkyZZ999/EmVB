@@ -1249,8 +1249,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/href.ts",
-          "search": "  if (scheme === \"http:\" || scheme === \"https:\" || scheme === \"mailto:\" || scheme === \"tel:\") {\n    return trimmed;\n  }\n  return undefined;",
-          "replace": "  if (scheme === \"http:\" || scheme === \"https:\" || scheme === \"mailto:\" || scheme === \"tel:\" || scheme === \"javascript:\") {\n    return trimmed;\n  }\n  return undefined;"
+          "search": "new Set([\"http:\", \"https:\", \"mailto:\", \"tel:\"])",
+          "replace": "new Set([\"http:\", \"https:\", \"mailto:\", \"tel:\", \"javascript:\"])"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
@@ -1661,8 +1661,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/media-url.ts",
-          "search": "  if (scheme === \"http:\" || scheme === \"https:\") return trimmed;",
-          "replace": "  if (scheme === \"http:\" || scheme === \"https:\" || scheme === \"javascript:\") return trimmed;"
+          "search": "new Set([\"http:\", \"https:\"])",
+          "replace": "new Set([\"http:\", \"https:\", \"javascript:\"])"
         }
       ],
       "command": [
@@ -2798,7 +2798,7 @@
       "description": "sanitizeHref accepts //host and /\\host as relative (pre-EmDash-1.0 behaviour)",
       "edits": [
         {
-          "file": "packages/emvb/src/core/sanitize/href.ts",
+          "file": "packages/emvb/src/core/sanitize/url.ts",
           "search": "    if (/^\\/[/\\\\]/.test(trimmed)) return undefined;\n",
           "replace": ""
         }
@@ -2818,7 +2818,7 @@
       "description": "sanitizeMediaUrl accepts //host and /\\host as same-origin",
       "edits": [
         {
-          "file": "packages/emvb/src/core/sanitize/media-url.ts",
+          "file": "packages/emvb/src/core/sanitize/url.ts",
           "search": "    if (/^\\/[/\\\\]/.test(trimmed)) return undefined;\n",
           "replace": ""
         }
