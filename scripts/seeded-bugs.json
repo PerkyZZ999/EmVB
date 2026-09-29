@@ -184,7 +184,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "\u2718.*\\[node\\].*the EmVB plugin is loaded by the host"
+      "expect": "✘.*\\[node\\].*the EmVB plugin is loaded by the host"
     },
     {
       "id": "W-004/size-check-loosened",
@@ -417,8 +417,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/hooks.ts",
-          "search": "if (event.content[\"layout\"] === undefined) return;",
-          "replace": "return;"
+          "search": "  if (event.content[\"layout\"] !== undefined) {\n    const result = validateLayout(parseJsonField(event.content[\"layout\"]));",
+          "replace": "  if (false as boolean) {\n    const result = validateLayout(parseJsonField(event.content[\"layout\"]));"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server"],
@@ -431,8 +431,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/hooks.ts",
-          "search": "ctx.log.warn(\"emvb: page save rejected\", { pageId, code: result.issues[0]?.code ?? \"invalid\" });",
-          "replace": "ctx.log.warn(\"emvb: page save rejected\", { pageId, code: result.issues[0]?.code ?? \"invalid\", layout: event.content[\"layout\"] });"
+          "search": "      ctx.log.warn(`emvb: ${kind} save rejected`, {\n        pageId,\n        code: result.issues[0]?.code ?? \"invalid\",\n      });",
+          "replace": "      ctx.log.warn(`emvb: ${kind} save rejected`, {\n        pageId,\n        code: result.issues[0]?.code ?? \"invalid\",\n        layout: event.content[\"layout\"],\n      });"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server"],
@@ -487,12 +487,12 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/setup/spec.ts",
-          "search": "  hidden: true,\n",
-          "replace": ""
+          "search": "  slug: PAGES_COLLECTION,\n  label: \"Visual pages\",\n  labelSingular: \"Visual page\",\n  hidden: true,",
+          "replace": "  slug: PAGES_COLLECTION,\n  label: \"Visual pages\",\n  labelSingular: \"Visual page\","
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin"],
-      "expect": "\\(fail\\).*a missing collection is created hidden"
+      "expect": "\\(fail\\).*a missing site creates both pages"
     },
     {
       "id": "W-007/widget-omitted",
@@ -501,8 +501,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/setup/spec.ts",
-          "search": "{ slug: \"layout\", label: \"Layout\", type: \"json\", widget: LAYOUT_WIDGET, validation: null },",
-          "replace": "{ slug: \"layout\", label: \"Layout\", type: \"json\", validation: null },"
+          "search": "  { slug: \"layout\", label: \"Layout\", type: \"json\", widget: LAYOUT_WIDGET, validation: null },\n  {\n    slug: \"canvas_mode\",",
+          "replace": "  { slug: \"layout\", label: \"Layout\", type: \"json\", validation: null },\n  {\n    slug: \"canvas_mode\","
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin"],
@@ -558,7 +558,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/setup.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*read-only widget instead of a JSON input",
+      "expect": "✘.*\\[node\\].*read-only widget instead of a JSON input",
       "env": {
         "CI": "1"
       }
@@ -589,7 +589,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*author \\(30\\): no Visual pages link",
+      "expect": "✘.*\\[node\\].*author \\(30\\): no Visual pages link",
       "env": {
         "CI": "1"
       }
@@ -606,7 +606,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*editor \\(40\\): sees the link",
+      "expect": "✘.*\\[node\\].*editor \\(40\\): sees the link",
       "env": {
         "CI": "1"
       }
@@ -623,7 +623,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*subscriber \\(10\\): no Visual pages link",
+      "expect": "✘.*\\[node\\].*subscriber \\(10\\): no Visual pages link",
       "env": {
         "CI": "1"
       }
@@ -635,12 +635,12 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/plugin.ts",
-          "search": "      pages: [{ path: \"/pages\", label: \"Visual pages\", icon: \"layout\" }],",
-          "replace": "      pages: [\n        { path: \"/pages\", label: \"Visual pages\", icon: \"layout\" },\n        { path: \"/editor\", label: \"Editor\" },\n      ],"
+          "search": "        { path: \"/theme\", label: \"Theme Builder\", icon: \"layout\" },",
+          "replace": "        { path: \"/theme\", label: \"Theme Builder\", icon: \"layout\" },\n        { path: \"/editor\", label: \"Editor\" },"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server"],
-      "expect": "\\(fail\\).*only Visual pages is declared"
+      "expect": "\\(fail\\).*the editor stays undeclared"
     },
     {
       "id": "W-008/gate-threshold-30",
@@ -682,7 +682,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*a Kumo dialog opened from the editor stacks above it",
+      "expect": "✘.*\\[node\\].*a Kumo dialog opened from the editor stacks above it",
       "env": {
         "CI": "1"
       }
@@ -765,7 +765,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*at 1280\u00d7720 the overlay covers the admin and the canvas gets the real width",
+      "expect": "✘.*\\[node\\].*at 1280×720 the overlay covers the admin and the canvas gets the real width",
       "env": {
         "CI": "1"
       }
@@ -782,7 +782,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*below 1024 px the small-screen notice replaces the editor",
+      "expect": "✘.*\\[node\\].*below 1024 px the small-screen notice replaces the editor",
       "env": {
         "CI": "1"
       }
@@ -813,7 +813,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*a concurrent edit from another browser shows the conflict dialog",
+      "expect": "✘.*\\[node\\].*a concurrent edit from another browser shows the conflict dialog",
       "env": {
         "CI": "1"
       }
@@ -830,7 +830,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*a draft save leaves the published page alone",
+      "expect": "✘.*\\[node\\].*a draft save leaves the published page alone",
       "env": {
         "CI": "1"
       }
@@ -925,7 +925,7 @@
         "-g",
         "Restore toast"
       ],
-      "expect": "\u2718.*\\[node\\].*Delete shows a Restore toast above the editor",
+      "expect": "✘.*\\[node\\].*Delete shows a Restore toast above the editor",
       "env": {
         "CI": "1"
       }
@@ -942,7 +942,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "\u2718.*\\[node\\].*a duplicate slug is refused inline",
+      "expect": "✘.*\\[node\\].*a duplicate slug is refused inline",
       "env": {
         "CI": "1"
       }
@@ -973,7 +973,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "colour variable"],
-      "expect": "\u2718.*\\[node-public\\].*changing a colour variable changes the published page",
+      "expect": "✘.*\\[node-public\\].*changing a colour variable changes the published page",
       "env": {
         "CI": "1"
       }
@@ -999,12 +999,12 @@
       "edits": [
         {
           "file": "demos/node/src/pages/[slug].astro",
-          "search": "<EmVBPage page={emvb}>{emvb.needsFormsRuntime && <EmVBFormsRuntime />}</EmVBPage>",
-          "replace": "<EmVBPage page={emvb}><EmVBFormsRuntime /></EmVBPage>"
+          "search": "\t\t\t\t<EmVBPage page={emvb}>\n\t\t\t\t\t{emvb.needsFormsRuntime && <EmVBFormsRuntime />}\n\t\t\t\t\t{emvb.needsTabsRuntime && <EmVBTabsRuntime />}",
+          "replace": "\t\t\t\t<EmVBPage page={emvb}>\n\t\t\t\t\t<EmVBFormsRuntime />\n\t\t\t\t\t{emvb.needsTabsRuntime && <EmVBTabsRuntime />}"
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "adds no script"],
-      "expect": "\u2718.*\\[node-public\\].*adds no script",
+      "expect": "✘.*\\[node-public\\].*adds no script",
       "env": {
         "CI": "1"
       }
@@ -1021,7 +1021,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "blank-canvas"],
-      "expect": "\u2718.*\\[node-public\\].*a blank-canvas page is a whole document",
+      "expect": "✘.*\\[node-public\\].*a blank-canvas page is a whole document",
       "env": {
         "CI": "1"
       }
@@ -1038,7 +1038,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "are 404"],
-      "expect": "\u2718.*\\[node-public\\].*unpublished and missing pages are 404",
+      "expect": "✘.*\\[node-public\\].*unpublished and missing pages are 404",
       "env": {
         "CI": "1"
       }
@@ -1055,7 +1055,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "preview link"],
-      "expect": "\u2718.*\\[node-public\\].*a preview link renders the draft",
+      "expect": "✘.*\\[node-public\\].*a preview link renders the draft",
       "env": {
         "CI": "1"
       }
@@ -1100,7 +1100,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node", "-g", "author"],
-      "expect": "\u2718.*\\[node\\].*author \\(30\\)",
+      "expect": "✘.*\\[node\\].*author \\(30\\)",
       "env": {
         "CI": "1"
       }
@@ -1218,7 +1218,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "\u2718.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
+      "expect": "✘.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
     },
     {
       "id": "W-015/e2e-drop-listener-removed",
@@ -1240,7 +1240,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "\u2718.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
+      "expect": "✘.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
     },
     {
       "id": "W-016/javascript-href-allowed",
@@ -1367,8 +1367,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) => d.group !== (\"form\" as string) && (!q || d.name.toLowerCase().includes(q)),\n  );",
-          "replace": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) => d.group !== (\"form\" as string),\n  );"
+          "search": "      (!q || d.name.toLowerCase().includes(q)),",
+          "replace": "      true,"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx"],
@@ -1381,8 +1381,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "  if (!isContainerNode(node) || collapsed.has(node.id) || node.children.length === 0) return self;\n  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));",
-          "replace": "  if (!isContainerNode(node) || true || collapsed.has(node.id) || node.children.length === 0) return self;\n  return self.concat(node.children.flatMap((child) => rows(child, depth + 1, collapsed)));"
+          "search": "  if (!isParentNode(node) || collapsed.has(node.id) || node.children.length === 0) return self;",
+          "replace": "  if (!isParentNode(node) || true || collapsed.has(node.id) || node.children.length === 0) return self;"
         }
       ],
       "command": [
@@ -1457,7 +1457,7 @@
     {
       "id": "W-020/alt-down-moves-up",
       "requirement": "R-003",
-      "description": "Alt+\u2193 calls moveUp instead of moveDown",
+      "description": "Alt+↓ calls moveUp instead of moveDown",
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
@@ -1521,8 +1521,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
-          "search": "  \"href\",\n  \"list-items\",\n] as const;",
-          "replace": "  \"list-items\",\n] as const;"
+          "search": "  \"href\",\n  \"media\",",
+          "replace": "  \"media\","
         }
       ],
       "command": [
@@ -1761,8 +1761,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/vnode.ts",
-          "search": "  \"g\",\n]);",
-          "replace": "  \"g\",\n  \"script\",\n]);"
+          "search": "  \"tspan\",\n]);",
+          "replace": "  \"tspan\",\n  \"script\",\n]);"
         },
         {
           "file": "packages/emvb/src/core/elements/index.ts",
@@ -1826,7 +1826,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "    // Canvas iframe has no allow-scripts (D-011): live YouTube/Vimeo players fail there.\n    if (mode === \"editor\" && node.type === \"video\") {\n      const target = resolveEmbedUrl((node.props as { url: string }).url);\n      if (target?.kind === \"iframe\") {\n        const label =\n          (node.props as { title?: string }).title?.trim() ||\n          (target.provider === \"youtube\" ? \"YouTube video\" : \"Vimeo video\");\n        return {\n          tag: \"div\",\n          attrs: {\n            ...attrs,\n            class: `${attrs.class} emvb-video-preview`.trim(),\n            \"data-emvb-video-preview\": target.provider,\n          },\n          children: [`${label} \u2014 plays on the published page`],\n        };\n      }\n    }",
+          "search": "    // Canvas iframe has no allow-scripts (D-011): live YouTube/Vimeo players fail there.\n    if (mode === \"editor\" && node.type === \"video\") {\n      const target = resolveEmbedUrl((node.props as { url: string }).url);\n      if (target?.kind === \"iframe\") {\n        const label =\n          (node.props as { title?: string }).title?.trim() ||\n          (target.provider === \"youtube\" ? \"YouTube video\" : \"Vimeo video\");\n        return {\n          tag: \"div\",\n          attrs: {\n            ...attrs,\n            class: `${attrs.class} emvb-video-preview`.trim(),\n            \"data-emvb-video-preview\": target.provider,\n          },\n          children: [`${label} — plays on the published page`],\n        };\n      }\n    }",
           "replace": "    if (false && mode === \"editor\" && node.type === \"video\") {\n      return undefined;\n    }"
         }
       ],
@@ -2086,8 +2086,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
-          "search": "                    const nextName = event.target.value;\n                    void onSave({\n                      ...design,\n                      classes: classes.map((c) =>\n                        c.id === cls.id ? Object.assign({}, c, { name: nextName }) : c,\n                      ),\n                    });\n",
-          "replace": "                    const nextName = event.target.value;\n                    void nextName;\n                    // seeded: class edit does not hit design/save\n"
+          "search": "                    const nextName = event.target.value;\n                      void onSave({\n                        ...design,\n                        classes: classes.map((c) =>\n                          c.id === cls.id ? Object.assign({}, c, { name: nextName }) : c,\n                        ),\n                      });",
+          "replace": "                    const nextName = event.target.value;\n                      void nextName;"
         }
       ],
       "command": [
@@ -2106,8 +2106,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "  if (isFormNode(node)) {\n    if (isFormNode(target.node) || underForm(layout, parentId)) return refuse(REASONS.nestedForm);\n    if (!isContainer(target.node)) return refuse(REASONS.formIntoField);\n  }\n",
-          "replace": "  if (isFormNode(node)) {\n    if (!isContainer(target.node)) return refuse(REASONS.formIntoField);\n  }\n"
+          "search": "  if (isFormNode(node)) {\n    if (isFormNode(target.node) || underForm(layout, parentId)) return refuse(REASONS.nestedForm);\n    if (!isLayoutParentNode(target.node)) return refuse(REASONS.formIntoField);\n  }",
+          "replace": "  if (isFormNode(node)) {\n    if (!isLayoutParentNode(target.node)) return refuse(REASONS.formIntoField);\n  }"
         }
       ],
       "command": [
@@ -2206,8 +2206,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "    (d) => (formsAvailable || d.group !== \"form\") && (!q || d.name.toLowerCase().includes(q)),",
-          "replace": "    (d) => (!q || d.name.toLowerCase().includes(q)),"
+          "search": "      (formsAvailable || d.group !== \"form\") &&\n",
+          "replace": ""
         }
       ],
       "command": [
@@ -2399,7 +2399,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/overlay.e2e.ts", "--project=node", "-g", "below 1024"],
-      "expect": "\\(fail\\)|\u2718"
+      "expect": "\\(fail\\)|✘"
     },
     {
       "id": "W-044/pack-missing-astro-source",
@@ -2422,8 +2422,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/hooks.ts",
-          "search": "    ctx.log.warn(\"emvb: page save rejected\", { pageId, code: result.issues[0]?.code ?? \"invalid\" });",
-          "replace": "    ctx.log.warn(\"emvb: page save rejected\", { pageId, code: result.issues[0]?.code ?? \"invalid\", layout: event.content[\"layout\"] });"
+          "search": "      ctx.log.warn(`emvb: ${kind} save rejected`, {\n        pageId,\n        code: result.issues[0]?.code ?? \"invalid\",\n      });",
+          "replace": "      ctx.log.warn(`emvb: ${kind} save rejected`, {\n        pageId,\n        code: result.issues[0]?.code ?? \"invalid\",\n        layout: event.content[\"layout\"],\n      });"
         }
       ],
       "command": [
