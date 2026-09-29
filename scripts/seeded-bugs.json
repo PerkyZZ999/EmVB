@@ -936,7 +936,7 @@
       "description": "a duplicate slug on New page shows a generic error",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
           "search": "failure.code === \"SLUG_CONFLICT\"",
           "replace": "failure.code === \"SLUG_TAKEN\""
         }
@@ -3204,6 +3204,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/drop-line.test.ts"],
       "expect": "\\(fail\\).*row: before, between and after"
+    },
+    {
+      "id": "W-086/create-slug-conflict-on-form",
+      "requirement": "R-006",
+      "description": "a taken slug on New page / New theme part is shown as a form alert instead of on the slug field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "return { field: \"slug\", message: slugTakenMessage(slug) };",
+          "replace": "return { field: \"form\", message: slugTakenMessage(slug) };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/create-dialogs.test.tsx"],
+      "expect": "\\(fail\\).*a taken slug is reported on the slug field"
+    },
+    {
+      "id": "W-086/create-slug-overwrites-edit",
+      "requirement": "R-006",
+      "description": "typing a title overwrites a slug the user edited",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "if (!slugEdited) setSlug(slugify(",
+          "replace": "setSlug(slugify("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/create-dialogs.test.tsx"],
+      "expect": "\\(fail\\).*the slug follows the title until it is edited"
+    },
+    {
+      "id": "W-086/theme-type-keeps-old-slug",
+      "requirement": "R-006",
+      "description": "changing the theme part type leaves the slug derived from the old type",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "  }, [slugPrefix]);",
+          "replace": "  }, []);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/create-dialogs.test.tsx"],
+      "expect": "\\(fail\\).*re-derives an untouched slug"
     }
   ]
 }
