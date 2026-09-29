@@ -11,6 +11,23 @@ export const NEW_ELEMENT_MIME = "application/x-emvb-new-element";
 /** MIME for dragging an existing canvas/Layers element (carries its id). */
 export const EXISTING_ELEMENT_MIME = "application/x-emvb-element-id";
 
+/** Which EmVB drag payloads a `DataTransfer` carries. */
+export const transferKinds = (transfer: DataTransfer | null) => {
+  if (!transfer) return { neu: false, existing: false };
+  const types = new Set(transfer.types);
+  return {
+    neu: types.has(NEW_ELEMENT_MIME),
+    existing: types.has(EXISTING_ELEMENT_MIME),
+  };
+};
+
+/** The `data-emvb-id` an event target belongs to, if any. */
+export const idAt = (target: EventTarget | null): string | null => {
+  const element = target as Element | null;
+  const hit = element?.closest?.("[data-emvb-id]");
+  return hit?.getAttribute("data-emvb-id") ?? null;
+};
+
 type Span = { start: number; end: number };
 
 const along = (rect: Rect, row: boolean): Span =>

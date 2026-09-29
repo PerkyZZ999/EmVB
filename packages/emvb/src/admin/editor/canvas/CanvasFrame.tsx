@@ -11,10 +11,13 @@ import {
   dropContainer,
   dropIndex,
   EXISTING_ELEMENT_MIME,
+  idAt,
   NEW_ELEMENT_MIME,
+  transferKinds,
   type Rect,
 } from "../dnd/drop-target.ts";
 import { newElement } from "../dnd/new-element.ts";
+import { useCanvasEvents } from "./canvas-events.ts";
 import { SelectionOverlay, type Box, type InvalidDrop } from "./SelectionOverlay.tsx";
 import { vnodeToReact } from "./vnode-react.tsx";
 
@@ -24,12 +27,6 @@ const SRCDOC =
 /** Canvas-only: empty containers are droppable. Never emitted into the saved page CSS. */
 const EDITOR_CANVAS_CSS =
   ".emvb-container:empty{min-height:48px}.emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}";
-
-const idAt = (target: EventTarget | null): string | null => {
-  const element = target as Element | null;
-  const hit = element?.closest?.("[data-emvb-id]");
-  return hit?.getAttribute("data-emvb-id") ?? null;
-};
 
 const boxOf = (doc: Document, id: string | null): Box | null => {
   if (!id) return null;
@@ -52,15 +49,6 @@ const sameBox = (a: Box | null, b: Box | null) =>
     a.left === b.left &&
     a.width === b.width &&
     a.height === b.height);
-
-const transferKinds = (transfer: DataTransfer | null) => {
-  if (!transfer) return { neu: false, existing: false };
-  const types = new Set(transfer.types);
-  return {
-    neu: types.has(NEW_ELEMENT_MIME),
-    existing: types.has(EXISTING_ELEMENT_MIME),
-  };
-};
 
 const directionOf = (node: LayoutNode) =>
   (isParentNode(node) ? node.style?.flexDirection : undefined) ?? "column";
@@ -242,183 +230,19 @@ export function CanvasFrame({
     [clearDrag, resolveDrop],
   );
 
-  React.useEffect(() => {
-    if (!doc) return;
-    const click = (event: MouseEvent) => {
-      event.preventDefault();
-      handlers.current.onSelect(idAt(event.target));
-    };
-    const move = (event: MouseEvent) => setHoverId(idAt(event.target));
-    const leave = () => setHoverId(null);
-    const key = (event: KeyboardEvent) => {
-      if (
-        event.key === "Escape" &&
-        (sessionStorage.getItem("emvb-drag-id") || sessionStorage.getItem("emvb-drag-type"))
-      ) {
-        cancelled.current = true;
-        sessionStorage.removeItem("emvb-drag-id");
-        sessionStorage.removeItem("emvb-drag-type");
-        clearDrag();
-        return;
-      }
-      handlers.current.onKeyDown(event);
-    };
-    const dragover = (event: DragEvent) => {
-      if (!paintDrag(event.dataTransfer, event.clientX, event.clientY, event.target)) return;
-      event.preventDefault();
-    };
-    const dragleave = (event: DragEvent) => {
-      if (event.target === doc.documentElement || event.target === doc.body) clearDrag();
-    };
-    const drop = (event: DragEvent) => {
-      const kinds = transferKinds(event.dataTransfer);
-      if (!kinds.neu && !kinds.existing) return;
-      event.preventDefault();
-      const wasCancelled = cancelled.current;
-      cancelled.current = false;
-      const next = resolveDrop(event.clientX, event.clientY, event.target);
-      clearDrag();
-      const id =
-        event.dataTransfer?.getData(EXISTING_ELEMENT_MIME) ||
-        sessionStorage.getItem("emvb-drag-id") ||
-        "";
-      const type =
-        event.dataTransfer?.getData(NEW_ELEMENT_MIME) ||
-        sessionStorage.getItem("emvb-drag-type") ||
-        "";
-      sessionStorage.removeItem("emvb-drag-id");
-      sessionStorage.removeItem("emvb-drag-type");
-      if (wasCancelled || !next) return;
-      const current = layoutRef.current;
-      if (!current) return;
-      if (kinds.existing && id) {
-        const allowed = canDrop(current, { kind: "existing", id }, next.parentId);
-        if (!allowed.ok) return;
-        moveRef.current(id, next.parentId, next.index);
-        return;
-      }
-      if (kinds.neu && type) {
-        const node = newElement(type);
-        if (!node) return;
-        const allowed = canDrop(current, { kind: "new", node }, next.parentId);
-        if (!allowed.ok) return;
-        dropRef.current(type, next.parentId, next.index);
-      }
-    };
-    const dragend = () => {
-      cancelled.current = false;
-      sessionStorage.removeItem("emvb-drag-id");
-      sessionStorage.removeItem("emvb-drag-type");
-      clearDrag();
-    };
-    doc.addEventListener("click", click);
-    doc.addEventListener("mousemove", move);
-    doc.documentElement.addEventListener("mouseleave", leave);
-    doc.addEventListener("keydown", key);
-    doc.addEventListener("dragover", dragover);
-    doc.addEventListener("dragleave", dragleave);
-    doc.addEventListener("drop", drop);
-    doc.addEventListener("dragend", dragend);
-    return () => {
-      doc.removeEventListener("click", click);
-      doc.removeEventListener("mousemove", move);
-      doc.documentElement.removeEventListener("mouseleave", leave);
-      doc.removeEventListener("keydown", key);
-      doc.removeEventListener("dragover", dragover);
-      doc.removeEventListener("dragleave", dragleave);
-      doc.removeEventListener("drop", drop);
-      doc.removeEventListener("dragend", dragend);
-    };
-  }, [doc, resolveDrop, paintDrag, clearDrag]);
-
-  React.useEffect(() => {
-    const iframe = frame.current;
-    if (!iframe || !doc) return;
-    const map = (event: DragEvent) => {
-      const rect = iframe.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      const target = doc.elementFromPoint(x, y) ?? doc.body;
-      return { x, y, target };
-    };
-    const dragover = (event: DragEvent) => {
-      const { x, y, target } = map(event);
-      if (!paintDrag(event.dataTransfer, x, y, target)) return;
-      event.preventDefault();
-    };
-    const drop = (event: DragEvent) => {
-      const kinds = transferKinds(event.dataTransfer);
-      if (!kinds.neu && !kinds.existing) return;
-      event.preventDefault();
-      const wasCancelled = cancelled.current;
-      cancelled.current = false;
-      const { x, y, target } = map(event);
-      const next = resolveDrop(x, y, target);
-      clearDrag();
-      const id =
-        event.dataTransfer?.getData(EXISTING_ELEMENT_MIME) ||
-        sessionStorage.getItem("emvb-drag-id") ||
-        "";
-      const type =
-        event.dataTransfer?.getData(NEW_ELEMENT_MIME) ||
-        sessionStorage.getItem("emvb-drag-type") ||
-        "";
-      sessionStorage.removeItem("emvb-drag-id");
-      sessionStorage.removeItem("emvb-drag-type");
-      if (wasCancelled || !next) return;
-      const current = layoutRef.current;
-      if (!current) return;
-      if (kinds.existing && id) {
-        const allowed = canDrop(current, { kind: "existing", id }, next.parentId);
-        if (!allowed.ok) return;
-        moveRef.current(id, next.parentId, next.index);
-        return;
-      }
-      if (kinds.neu && type) {
-        const node = newElement(type);
-        if (!node) return;
-        const allowed = canDrop(current, { kind: "new", node }, next.parentId);
-        if (!allowed.ok) return;
-        dropRef.current(type, next.parentId, next.index);
-      }
-    };
-    const leave = () => clearDrag();
-    iframe.addEventListener("dragover", dragover);
-    iframe.addEventListener("drop", drop);
-    iframe.addEventListener("dragleave", leave);
-    return () => {
-      iframe.removeEventListener("dragover", dragover);
-      iframe.removeEventListener("drop", drop);
-      iframe.removeEventListener("dragleave", leave);
-    };
-  }, [doc, resolveDrop, paintDrag, clearDrag]);
-
-  // Parent-document Esc / dragend while dragging from the Move handle / Layers / Add tile.
-  // dragend fires on the source in the parent document (not the iframe), so clear here too.
-  React.useEffect(() => {
-    const finish = () => {
-      cancelled.current = false;
-      sessionStorage.removeItem("emvb-drag-id");
-      sessionStorage.removeItem("emvb-drag-type");
-      clearDrag();
-    };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      if (!sessionStorage.getItem("emvb-drag-id") && !sessionStorage.getItem("emvb-drag-type"))
-        return;
-      cancelled.current = true;
-      finish();
-    };
-    const onEnd = () => finish();
-    window.addEventListener("keydown", onKey);
-    window.addEventListener("dragend", onEnd);
-    document.addEventListener("dragend", onEnd);
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("dragend", onEnd);
-      document.removeEventListener("dragend", onEnd);
-    };
-  }, [clearDrag]);
+  useCanvasEvents({
+    doc,
+    frame,
+    handlers,
+    layoutRef,
+    moveRef,
+    dropRef,
+    cancelled,
+    clearDrag,
+    resolveDrop,
+    paintDrag,
+    setHoverId,
+  });
 
   const { selectedId } = selection;
   React.useEffect(() => {

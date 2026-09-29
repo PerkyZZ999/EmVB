@@ -1226,12 +1226,12 @@
       "description": "the canvas drop listeners are not registered, so Add-tile drops do nothing",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "file": "packages/emvb/src/admin/editor/canvas/canvas-events.ts",
           "search": "    doc.addEventListener(\"drop\", drop);",
           "replace": "    // doc.addEventListener(\"drop\", drop);"
         },
         {
-          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "file": "packages/emvb/src/admin/editor/canvas/canvas-events.ts",
           "search": "    iframe.addEventListener(\"drop\", drop);",
           "replace": "    // iframe.addEventListener(\"drop\", drop);"
         }
