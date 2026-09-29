@@ -1,6 +1,5 @@
 import type {
   ButtonNode,
-  CheckboxNode,
   ContainerNode,
   DivBlockNode,
   FlexboxNode,
@@ -8,25 +7,13 @@ import type {
   TabsNode,
   TabPanelNode,
   DividerNode,
-  FormNode,
   HeadingNode,
   IconNode,
   ImageNode,
   LabelNode,
   LinkNode,
   ListNode,
-  LoopNode,
-  PostContentNode,
-  PostExcerptNode,
-  PostImageNode,
-  PostLinkNode,
-  PostTitleNode,
-  RadioNode,
-  SelectNode,
   SpacerNode,
-  SubmitNode,
-  TextInputNode,
-  TextareaNode,
   TextNode,
   VideoNode,
 } from "../schema/layout.ts";
@@ -39,14 +26,16 @@ import { getBundledIcon } from "../icons/catalog.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import type { VNode } from "../render/vnode.ts";
 
-type Build<N> = (node: N, attrs: Record<string, string>, children: VNode[]) => VNode;
-
-type ElementDefinition<N> = {
-  baseCss: string;
-  build: Build<N>;
-  descriptor: ElementDescriptor;
-  defaults: () => Omit<N, "id">;
-};
+import type { ElementDefinition } from "./definition.ts";
+import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
+import {
+  loop,
+  postContent,
+  postExcerpt,
+  postImage,
+  postLink,
+  postTitle,
+} from "./dynamic-elements.ts";
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
@@ -474,322 +463,6 @@ const video: ElementDefinition<VideoNode> = {
   },
 };
 
-const form: ElementDefinition<FormNode> = {
-  baseCss:
-    ".emvb-form{display:flex;flex-direction:column;gap:12px;min-width:0}.emvb-form-unbound{min-height:48px;padding:12px;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}.ec-form-hp{position:absolute;left:-9999px}",
-  defaults: () => ({ type: "form", props: { formId: "" }, children: [] }),
-  descriptor: {
-    type: "form",
-    name: "Form",
-    group: "form",
-    defaultTab: "content",
-    fields: [
-      { key: "formId", kind: "text", label: "Form id", message: "Paste a forms-plugin form id." },
-    ],
-  },
-  build: (_node, attrs, children) => ({
-    tag: "form",
-    attrs,
-    children,
-  }),
-};
-
-const fieldWrap = (
-  name: string,
-  labelText: string | undefined,
-  control: VNode,
-  attrs: Record<string, string>,
-): VNode => ({
-  tag: "div",
-  attrs: { ...attrs, class: `${attrs.class ?? ""} emvb-form-field`.trim() },
-  children: [
-    ...(labelText
-      ? [
-          {
-            tag: "label",
-            attrs: { class: "emvb-form-label", for: name },
-            children: [labelText],
-          } as VNode,
-        ]
-      : []),
-    control,
-    {
-      tag: "span",
-      attrs: { class: "ec-form-error", "data-error-for": name, "aria-live": "polite" },
-      children: [],
-    },
-  ],
-});
-
-const textInput: ElementDefinition<TextInputNode> = {
-  baseCss: ".emvb-text-input{display:flex;flex-direction:column;gap:4px}",
-  defaults: () => ({ type: "text-input", props: { field: "name", label: "Name" } }),
-  descriptor: {
-    type: "text-input",
-    name: "Text input",
-    group: "form",
-    defaultTab: "content",
-    fields: [
-      { key: "field", kind: "text", label: "Field name" },
-      { key: "label", kind: "text", label: "Label", optional: true },
-      { key: "placeholder", kind: "text", label: "Placeholder", optional: true },
-    ],
-  },
-  build: (node, attrs) => {
-    const name = node.props.field;
-    const control: VNode = {
-      tag: "input",
-      attrs: {
-        type: "text",
-        class: "ec-form-input",
-        id: name,
-        name,
-        ...(node.props.placeholder ? { placeholder: node.props.placeholder } : {}),
-      },
-      children: [],
-    };
-    return fieldWrap(name, node.props.label, control, attrs);
-  },
-};
-
-const textareaEl: ElementDefinition<TextareaNode> = {
-  baseCss: ".emvb-textarea-field{display:flex;flex-direction:column;gap:4px}",
-  defaults: () => ({ type: "textarea", props: { field: "message", label: "Message" } }),
-  descriptor: {
-    type: "textarea",
-    name: "Textarea",
-    group: "form",
-    defaultTab: "content",
-    fields: [
-      { key: "field", kind: "text", label: "Field name" },
-      { key: "label", kind: "text", label: "Label", optional: true },
-      { key: "placeholder", kind: "text", label: "Placeholder", optional: true },
-    ],
-  },
-  build: (node, attrs) => {
-    const name = node.props.field;
-    const control: VNode = {
-      tag: "textarea",
-      attrs: {
-        class: "ec-form-input",
-        id: name,
-        name,
-        ...(node.props.placeholder ? { placeholder: node.props.placeholder } : {}),
-      },
-      children: [],
-    };
-    return fieldWrap(name, node.props.label, control, attrs);
-  },
-};
-
-const selectEl: ElementDefinition<SelectNode> = {
-  baseCss: ".emvb-select{display:flex;flex-direction:column;gap:4px}",
-  defaults: () => ({ type: "select", props: { field: "choice", label: "Choice" } }),
-  descriptor: {
-    type: "select",
-    name: "Select",
-    group: "form",
-    defaultTab: "content",
-    fields: [
-      { key: "field", kind: "text", label: "Field name" },
-      { key: "label", kind: "text", label: "Label", optional: true },
-    ],
-  },
-  build: (node, attrs) => {
-    const name = node.props.field;
-    const control: VNode = {
-      tag: "select",
-      attrs: { class: "ec-form-input", id: name, name },
-      children: [{ tag: "option", attrs: { value: "" }, children: ["Choose…"] }],
-    };
-    return fieldWrap(name, node.props.label, control, attrs);
-  },
-};
-
-const checkbox: ElementDefinition<CheckboxNode> = {
-  baseCss: ".emvb-checkbox{display:flex;align-items:center;gap:8px}",
-  defaults: () => ({ type: "checkbox", props: { field: "agree", label: "I agree" } }),
-  descriptor: {
-    type: "checkbox",
-    name: "Checkbox",
-    group: "form",
-    defaultTab: "content",
-    fields: [
-      { key: "field", kind: "text", label: "Field name" },
-      { key: "label", kind: "text", label: "Label", optional: true },
-    ],
-  },
-  build: (node, attrs) => {
-    const name = node.props.field;
-    const input: VNode = {
-      tag: "input",
-      attrs: { type: "checkbox", id: name, name, value: "true" },
-      children: [],
-    };
-    const labelEl: VNode = {
-      tag: "label",
-      attrs: { class: "emvb-form-checkbox-label" },
-      children: [input, ` ${node.props.label ?? name}`],
-    };
-    const error: VNode = {
-      tag: "span",
-      attrs: { class: "ec-form-error", "data-error-for": name, "aria-live": "polite" },
-      children: [],
-    };
-    return {
-      tag: "div",
-      attrs: { ...attrs, class: `${attrs.class ?? ""} emvb-form-field`.trim() },
-      children: [labelEl, error],
-    };
-  },
-};
-
-const radio: ElementDefinition<RadioNode> = {
-  baseCss: ".emvb-radio{display:flex;flex-direction:column;gap:4px}",
-  defaults: () => ({ type: "radio", props: { field: "option", label: "Option" } }),
-  descriptor: {
-    type: "radio",
-    name: "Radio",
-    group: "form",
-    defaultTab: "content",
-    fields: [
-      { key: "field", kind: "text", label: "Field name" },
-      { key: "label", kind: "text", label: "Label", optional: true },
-    ],
-  },
-  build: (node, attrs) => {
-    const name = node.props.field;
-    // Options filled from definition in W-035; placeholder single option for schema/render smoke.
-    const control: VNode = {
-      tag: "fieldset",
-      attrs: { class: "emvb-radio-group" },
-      children: [
-        {
-          tag: "label",
-          attrs: { class: "emvb-form-radio-label" },
-          children: [
-            { tag: "input", attrs: { type: "radio", name, value: "a" }, children: [] },
-            " Option A",
-          ],
-        },
-      ],
-    };
-    return fieldWrap(name, node.props.label, control, attrs);
-  },
-};
-
-const submit: ElementDefinition<SubmitNode> = {
-  baseCss: ".emvb-submit{display:inline-flex}",
-  defaults: () => ({ type: "submit", props: { label: "Submit" } }),
-  descriptor: {
-    type: "submit",
-    name: "Submit",
-    group: "form",
-    defaultTab: "content",
-    fields: [{ key: "label", kind: "text", label: "Label", optional: true }],
-  },
-  build: (node, attrs) => ({
-    tag: "button",
-    attrs: {
-      ...attrs,
-      type: "submit",
-      class: `${attrs.class ?? ""} ec-form-submit`.trim(),
-    },
-    children: [node.props.label ?? "Submit"],
-  }),
-};
-
-const postTitle: ElementDefinition<PostTitleNode> = {
-  baseCss: ".emvb-post-title{margin:0}",
-  defaults: () => ({ type: "post-title", props: { level: 1 } }),
-  descriptor: {
-    type: "post-title",
-    name: "Post Title",
-    group: "dynamic",
-    defaultTab: "content",
-    fields: [
-      {
-        key: "level",
-        kind: "select",
-        label: "Level",
-        optional: true,
-        options: [1, 2, 3, 4, 5, 6].map((n) => ({ value: n, label: `H${n}` })),
-      },
-    ],
-  },
-  // Rendered with ThemeDynamicData in renderPage (placeholder build for typing).
-  build: (_node, attrs) => ({ tag: "h1", attrs, children: ["Post Title"] }),
-};
-
-const postExcerpt: ElementDefinition<PostExcerptNode> = {
-  baseCss: ".emvb-post-excerpt{margin:0}",
-  defaults: () => ({ type: "post-excerpt", props: {} }),
-  descriptor: {
-    type: "post-excerpt",
-    name: "Post Excerpt",
-    group: "dynamic",
-    defaultTab: "style",
-    fields: [],
-  },
-  build: (_node, attrs) => ({ tag: "p", attrs, children: ["Post excerpt…"] }),
-};
-
-const postContent: ElementDefinition<PostContentNode> = {
-  baseCss: ".emvb-post-content{min-width:0}",
-  defaults: () => ({ type: "post-content", props: {} }),
-  descriptor: {
-    type: "post-content",
-    name: "Post Content",
-    group: "dynamic",
-    defaultTab: "style",
-    fields: [],
-  },
-  build: (_node, attrs) => ({
-    tag: "div",
-    attrs,
-    children: [{ tag: "p", attrs: {}, children: ["Post content…"] }],
-  }),
-};
-
-const postImage: ElementDefinition<PostImageNode> = {
-  baseCss: ".emvb-post-image{display:block;max-width:100%;height:auto}",
-  defaults: () => ({ type: "post-image", props: { decorative: false } }),
-  descriptor: {
-    type: "post-image",
-    name: "Post Image",
-    group: "dynamic",
-    defaultTab: "content",
-    fields: [{ key: "decorative", kind: "boolean", label: "Decorative", optional: true }],
-  },
-  build: (_node, attrs) => ({
-    tag: "div",
-    attrs: { ...attrs, class: `${attrs.class ?? ""} emvb-post-image-missing`.trim() },
-    children: ["Featured image"],
-  }),
-};
-
-const postLink: ElementDefinition<PostLinkNode> = {
-  baseCss: ".emvb-post-link{color:inherit}",
-  defaults: () => ({ type: "post-link", props: {} }),
-  descriptor: {
-    type: "post-link",
-    name: "Post Link",
-    group: "dynamic",
-    defaultTab: "content",
-    fields: [
-      {
-        key: "text",
-        kind: "text",
-        label: "Text",
-        optional: true,
-        message: "Leave blank to use the post title.",
-      },
-      { key: "newTab", kind: "boolean", label: "Open in new tab", optional: true },
-    ],
-  },
-  build: (_node, attrs) => ({ tag: "a", attrs: { ...attrs, href: "#" }, children: ["Post link"] }),
-};
-
 const DEFAULT_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>';
 
@@ -931,28 +604,6 @@ const flexbox: ElementDefinition<FlexboxNode> = {
     group: "layout",
     defaultTab: "style",
     fields: [],
-  },
-  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
-};
-
-const loop: ElementDefinition<LoopNode> = {
-  baseCss: ".emvb-loop{display:flex;flex-direction:column;min-width:0;gap:1rem}",
-  defaults: () => ({ type: "loop", props: {}, children: [] }),
-  descriptor: {
-    type: "loop",
-    name: "Loop",
-    group: "dynamic",
-    defaultTab: "content",
-    fields: [
-      {
-        key: "itemPartId",
-        kind: "text",
-        label: "Loop Item",
-        optional: true,
-        message:
-          "Optional published Loop Item theme part. Leave blank to use nested elements as the item template.",
-      },
-    ],
   },
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
 };
