@@ -3432,6 +3432,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
       "expect": "\\(fail\\).*show times caps"
+    },
+    {
+      "id": "W-086/tabs-end-goes-first",
+      "requirement": "W-078",
+      "description": "End jumps to the first tab",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "End: (_current, count) => count - 1,",
+          "replace": "End: () => 0,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*arrows wrap"
+    },
+    {
+      "id": "W-086/tabs-panel-hidden-inverted",
+      "requirement": "W-078",
+      "description": "the selected panel is marked hidden",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "panels[i]?.setAttribute(\"aria-hidden\", String(!selected));",
+          "replace": "panels[i]?.setAttribute(\"aria-hidden\", String(selected));"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*init links tabs"
+    },
+    {
+      "id": "W-086/tabs-own-id-overwritten",
+      "requirement": "W-078",
+      "description": "a tab's own id is replaced",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "if (!label.id) label.id = `${prefix}-tab-${i}`;",
+          "replace": "label.id = `${prefix}-tab-${i}`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*init links tabs"
     }
   ]
 }

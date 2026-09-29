@@ -4,33 +4,41 @@
  * CSS radio + :has() remains the no-JS fallback.
  */
 
+/** The group's own radios, tab labels and panels; nested groups are left out. */
+function parts(root: HTMLElement) {
+  const all = <T extends HTMLElement>(selector: string) => [
+    ...root.querySelectorAll<T>(`:scope > ${selector}`),
+  ];
+  return {
+    inputs: all<HTMLInputElement>(".emvb-tab-input"),
+    labels: all(".emvb-tab-list > .emvb-tab-label"),
+    panels: all(".emvb-tab-panels > .emvb-tab-panel"),
+  };
+}
+
+/** Where each navigation key moves from tab `current` of `count`. */
+const KEY_TARGETS: Record<string, (current: number, count: number) => number> = {
+  ArrowRight: (current) => current + 1,
+  ArrowLeft: (current) => current - 1,
+  Home: () => 0,
+  End: (_current, count) => count - 1,
+};
+
 function activate(root: HTMLElement, index: number): void {
   if (root.dataset["emvbTabsActivating"] === "1") return;
   root.dataset["emvbTabsActivating"] = "1";
   try {
-    const inputs = [...root.querySelectorAll<HTMLInputElement>(":scope > .emvb-tab-input")];
-    const labels = [
-      ...root.querySelectorAll<HTMLElement>(":scope > .emvb-tab-list > .emvb-tab-label"),
-    ];
-    const panels = [
-      ...root.querySelectorAll<HTMLElement>(":scope > .emvb-tab-panels > .emvb-tab-panel"),
-    ];
+    const { inputs, labels, panels } = parts(root);
     if (inputs.length === 0 || labels.length === 0) return;
     const next = ((index % inputs.length) + inputs.length) % inputs.length;
     const input = inputs[next];
     if (!input) return;
     if (!input.checked) input.checked = true;
-    for (let i = 0; i < labels.length; i++) {
-      const label = labels[i];
-      const panel = panels[i];
+    for (const [i, label] of labels.entries()) {
       const selected = i === next;
-      if (label) {
-        label.setAttribute("aria-selected", selected ? "true" : "false");
-        label.tabIndex = selected ? 0 : -1;
-      }
-      if (panel) {
-        panel.setAttribute("aria-hidden", selected ? "false" : "true");
-      }
+      label.setAttribute("aria-selected", String(selected));
+      label.tabIndex = selected ? 0 : -1;
+      panels[i]?.setAttribute("aria-hidden", String(!selected));
     }
     const focusTarget = labels[next];
     if (focusTarget && document.activeElement !== focusTarget) {
@@ -46,9 +54,23 @@ function activate(root: HTMLElement, index: number): void {
 }
 
 function selectedIndex(root: HTMLElement): number {
-  const inputs = [...root.querySelectorAll<HTMLInputElement>(":scope > .emvb-tab-input")];
-  const checked = inputs.findIndex((el) => el.checked);
+  const checked = parts(root).inputs.findIndex((el) => el.checked);
   return checked >= 0 ? checked : 0;
+}
+
+/** Points each tab at its panel and back, giving either an id when it has none. */
+function linkTabs(root: HTMLElement, labels: HTMLElement[], panels: HTMLElement[]): void {
+  const prefix = root.id || "emvb-tabs";
+  for (const [i, label] of labels.entries()) {
+    const panel = panels[i];
+    const panelId = panel?.id || `${prefix}-panel-${i}`;
+    if (panel && !panel.id) panel.id = panelId;
+    label.setAttribute("aria-controls", panelId);
+    if (panel) {
+      if (!label.id) label.id = `${prefix}-tab-${i}`;
+      panel.setAttribute("aria-labelledby", label.id);
+    }
+  }
 }
 
 function enhance(root: HTMLElement): void {
@@ -57,40 +79,16 @@ function enhance(root: HTMLElement): void {
   const list = root.querySelector<HTMLElement>(":scope > .emvb-tab-list");
   if (!list) return;
   list.setAttribute("aria-orientation", "horizontal");
-  const labels = [
-    ...root.querySelectorAll<HTMLElement>(":scope > .emvb-tab-list > .emvb-tab-label"),
-  ];
-  const panels = [
-    ...root.querySelectorAll<HTMLElement>(":scope > .emvb-tab-panels > .emvb-tab-panel"),
-  ];
-  for (let i = 0; i < labels.length; i++) {
-    const label = labels[i];
-    const panel = panels[i];
-    if (!label) continue;
-    const panelId = panel?.id || `${root.id || "emvb-tabs"}-panel-${i}`;
-    if (panel && !panel.id) panel.id = panelId;
-    label.setAttribute("aria-controls", panelId);
-    if (panel) {
-      const labelId = label.id || `${root.id || "emvb-tabs"}-tab-${i}`;
-      if (!label.id) label.id = labelId;
-      panel.setAttribute("aria-labelledby", labelId);
-    }
-  }
+  const { labels, panels } = parts(root);
+  linkTabs(root, labels, panels);
   activate(root, selectedIndex(root));
 
   list.addEventListener("keydown", (event) => {
-    const key = event.key;
-    if (key !== "ArrowRight" && key !== "ArrowLeft" && key !== "Home" && key !== "End") {
-      return;
-    }
+    const target = KEY_TARGETS[event.key];
+    if (!target) return;
     event.preventDefault();
-    const current = selectedIndex(root);
-    const count = labels.length;
-    if (count === 0) return;
-    if (key === "ArrowRight") activate(root, current + 1);
-    else if (key === "ArrowLeft") activate(root, current - 1);
-    else if (key === "Home") activate(root, 0);
-    else activate(root, count - 1);
+    if (labels.length === 0) return;
+    activate(root, target(selectedIndex(root), labels.length));
   });
 
   // Keep ARIA in sync when the CSS-only radio path is used (click / label).
