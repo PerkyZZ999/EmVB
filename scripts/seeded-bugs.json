@@ -883,7 +883,7 @@
       "description": "Delete in a text field deletes the selected element",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
           "search": "if (isTextField(event.target) || inDialog(event.target)) return;",
           "replace": "if (inDialog(event.target)) return;"
         }
@@ -1460,7 +1460,7 @@
       "description": "Alt+\u2193 calls moveUp instead of moveDown",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
           "search": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      apply(moveDown(layout, selected));",
           "replace": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      apply(moveUp(layout, selected));"
         }
@@ -1480,7 +1480,7 @@
       "description": "Ctrl/Cmd+D fires even inside a text field",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
           "search": "    if (isTextField(event.target) || inDialog(event.target)) return;\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {",
           "replace": "    if (inDialog(event.target)) return;\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {"
         }
