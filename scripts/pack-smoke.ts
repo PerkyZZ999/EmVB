@@ -23,8 +23,7 @@ async function main() {
       pack.exited,
     ]);
     if (code !== 0) {
-      process.stderr.write(out + err);
-      process.exit(code);
+      throw new Error(`bun pm pack failed (exit ${code})\n${out}${err}`);
     }
     const match = (out + err).match(/emvb-[\d.]+(?:-[^\s]+)?\.tgz/);
     // bun pm pack prints the filename; also list staging
@@ -33,8 +32,7 @@ async function main() {
     );
     const tarball = listing[0];
     if (!tarball) {
-      process.stderr.write(`No tarball in ${staging}\n${out}\n${err}\n`);
-      process.exit(1);
+      throw new Error(`No tarball in ${staging}\n${out}\n${err}`);
     }
     // Read package.json from tarball via bun's unzip isn't built-in; use tar
     const tar = Bun.spawn(["tar", "-xOf", tarball, "package/package.json"], {
@@ -47,16 +45,14 @@ async function main() {
       tar.exited,
     ]);
     if (tarCode !== 0) {
-      process.stderr.write(tarErr);
-      process.exit(tarCode);
+      throw new Error(`tar read failed (exit ${tarCode})\n${tarErr}`);
     }
     const pkg = JSON.parse(pkgJsonText) as {
       name?: string;
       exports?: Record<string, string | { import?: string; default?: string }>;
     };
     if (pkg.name !== "emvb") {
-      process.stderr.write(`expected name emvb, got ${pkg.name}\n`);
-      process.exit(1);
+      throw new Error(`expected name emvb, got ${pkg.name}`);
     }
     const exports = pkg.exports ?? {};
     for (const key of [".", "./astro", "./astro/forms", "./admin", "./core"]) {
@@ -76,7 +72,7 @@ async function main() {
       new Response(list.stderr).text(),
       list.exited,
     ]);
-    if (listCode !== 0) process.exit(listCode);
+    if (listCode !== 0) throw new Error(`tar list failed (exit ${listCode})`);
     for (const need of [
       "package/src/index.ts",
       "package/src/astro/index.ts",
@@ -84,8 +80,7 @@ async function main() {
       "package/src/admin/index.tsx",
     ]) {
       if (!names.includes(need)) {
-        process.stderr.write(`tarball missing ${need}\n`);
-        process.exit(1);
+        throw new Error(`tarball missing ${need}`);
       }
     }
     process.stdout.write(
@@ -96,6 +91,13 @@ async function main() {
   }
 }
 
-if (import.meta.main) await main();
+if (import.meta.main) {
+  try {
+    await main();
+  } catch (error) {
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+    process.exit(1);
+  }
+}
 
 export { main as packSmoke };

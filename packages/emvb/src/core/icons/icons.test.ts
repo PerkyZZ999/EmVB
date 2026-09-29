@@ -42,8 +42,8 @@ describe("bundled icons (W-025, A-04)", () => {
     };
     const { html } = renderPage(page(evil), emptyDesign());
     const dom = new DOMParser().parseFromString(html, "text/html");
-    expect(dom.querySelector("script")).toBeNull();
-    expect(dom.querySelector("img")).toBeNull();
+    expect(dom.querySelector("script")?.outerHTML ?? null).toBeNull();
+    expect(dom.querySelector("img")?.outerHTML ?? null).toBeNull();
     expect(html).toContain("emvb-icon-missing");
 
     const remote = {
@@ -56,7 +56,7 @@ describe("bundled icons (W-025, A-04)", () => {
     };
     const remoteHtml = renderPage(page(remote), emptyDesign()).html;
     const remoteDom = new DOMParser().parseFromString(remoteHtml, "text/html");
-    expect(remoteDom.querySelector("img")).toBeNull();
+    expect(remoteDom.querySelector("img")?.outerHTML ?? null).toBeNull();
     expect(remoteHtml).not.toContain("https://evil.example");
     expect(remoteHtml).toContain("emvb-icon-missing");
   });
