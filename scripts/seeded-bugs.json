@@ -2999,6 +2999,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin"],
       "expect": "\\(fail\\).*refuses an invalid drop"
+    },
+    {
+      "id": "W-086/svg-pattern-transform-unchecked",
+      "requirement": "R-032",
+      "description": "patternTransform values skip the transform syntax check",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "new Set([\"transform\", \"gradientTransform\", \"patternTransform\"])",
+          "replace": "new Set([\"transform\", \"gradientTransform\"])"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-golden.test.ts"],
+      "expect": "\\(fail\\).*patternTransform"
+    },
+    {
+      "id": "W-086/svg-stray-text-kept",
+      "requirement": "R-032",
+      "description": "text outside title, desc, text and tspan is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "if (typeof child !== \"string\" || TEXT_TAGS.has(tok.tag)) children.push(child);",
+          "replace": "children.push(child);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-golden.test.ts"],
+      "expect": "\\(fail\\).*<title>Logo"
     }
   ]
 }

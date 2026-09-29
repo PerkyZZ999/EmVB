@@ -1,0 +1,450 @@
+[
+  {
+    "input": "<svg viewBox=\"0 0 24 24\"><path d=\"M0 0h24v24H0z\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {
+        "viewBox": "0 0 24 24"
+      },
+      "children": [
+        {
+          "tag": "path",
+          "attrs": {
+            "d": "M0 0h24v24H0z"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><g fill='red'><circle cx=\"1\" cy=\"2\" r=\"3\" /></g></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {
+            "fill": "red"
+          },
+          "children": [
+            {
+              "tag": "circle",
+              "attrs": {
+                "cx": "1",
+                "cy": "2",
+                "r": "3"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><title>Logo</title><desc>A mark</desc><text x=\"1\">Hi <tspan>there</tspan></text><g>stray text</g></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "title",
+          "attrs": {},
+          "children": ["Logo"]
+        },
+        {
+          "tag": "desc",
+          "attrs": {},
+          "children": ["A mark"]
+        },
+        {
+          "tag": "text",
+          "attrs": {
+            "x": "1"
+          },
+          "children": [
+            "Hi ",
+            {
+              "tag": "tspan",
+              "attrs": {},
+              "children": ["there"]
+            }
+          ]
+        },
+        {
+          "tag": "g",
+          "attrs": {},
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><!-- note --><rect width=\"1\" height=\"1\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "rect",
+          "attrs": {
+            "width": "1",
+            "height": "1"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><!-- unterminated <rect/></svg>",
+    "output": null
+  },
+  {
+    "input": "<!DOCTYPE svg><svg></svg>",
+    "output": null
+  },
+  {
+    "input": "<?xml version=\"1.0\"?><svg></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><blink/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><g></rect></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg></svg><svg></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><g></g></svg>trailing",
+    "output": null
+  },
+  {
+    "input": "<svg data-x=\"1\" fill=\"blue\" unknown=\"z\"></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {
+        "fill": "blue"
+      },
+      "children": []
+    }
+  },
+  {
+    "input": "<svg><g transform=\"translate(1, 2) rotate(45)\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {
+            "transform": "translate(1, 2) rotate(45)"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><g transform=\"url(#x)\"/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><lineargradient gradientTransform=\"scale(2)\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "lineargradient",
+          "attrs": {
+            "gradientTransform": "scale(2)"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><lineargradient gradientTransform=\"expression(x)\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "lineargradient",
+          "attrs": {
+            "gradientTransform": "expression(x)"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><pattern patternTransform=\"skewX(1)\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "pattern",
+          "attrs": {
+            "patternTransform": "skewX(1)"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><pattern patternTransform=\"x;y\"/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><g style=\"fill:red\"/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><g fill=\"&lt;b&gt;\"/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><g fill=\"&amp;amp;\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {
+            "fill": "&amp;"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><use href=\"#icon\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "use",
+          "attrs": {
+            "href": "#icon"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><use href=\"https://evil.example/x.svg#a\"/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><use xlink:href=\"#a.b-c\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "use",
+          "attrs": {
+            "xlink:href": "#a.b-c"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><image href=\"https://example.com/a.png\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "image",
+          "attrs": {
+            "href": "https://example.com/a.png"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><image href=\"/media/a.png\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "image",
+          "attrs": {
+            "href": "/media/a.png"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><image href=\"//evil.example/a.png\"/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><rect href=\"#a\"/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><g clip-path=\"url(#clip)\" mask=\"none\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {
+            "clip-path": "url(#clip)",
+            "mask": "none"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><g clip-path=\"url(https://x/#a)\"/></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><g mask=\"url( #m )\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {
+            "mask": "url( #m )"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg",
+    "output": null
+  },
+  {
+    "input": "<svg><g>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {},
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "text first <svg></svg>",
+    "output": null
+  },
+  {
+    "input": "<g></g>",
+    "output": null
+  },
+  {
+    "input": "<svg>< /g></svg>",
+    "output": null
+  },
+  {
+    "input": "<svg><path d=\"M0 0\"/ ></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "path",
+          "attrs": {
+            "d": "M0 0"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<SVG VIEWBOX=\"0 0 1 1\"></SVG>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": []
+    }
+  },
+  {
+    "input": "<svg><text>a &amp; b</text></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "text",
+          "attrs": {},
+          "children": ["a &amp; b"]
+        }
+      ]
+    }
+  },
+  {
+    "input": "   ",
+    "output": null
+  },
+  {
+    "input": "<svg><g fill=\"red\" fill=\"blue\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {
+            "fill": "blue"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><g id=x/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {},
+          "children": []
+        }
+      ]
+    }
+  }
+]

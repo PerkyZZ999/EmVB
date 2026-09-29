@@ -105,6 +105,12 @@ const ATTR_ALLOW = new Set([
 const FORBIDDEN =
   /<script\b|<\/script\b|\bon[a-z]+\s*=|javascript:|data:|<\s*foreignObject\b|<\s*style\b|<\s*iframe\b|<\s*a\b/i;
 
+/** Transform attributes take only transform-function syntax (no url(), no punctuation). */
+const TRANSFORM_ATTRS = new Set(["transform", "gradientTransform", "patternTransform"]);
+const TRANSFORM_VALUE = /^[a-z0-9.\s,()\-+e]+$/i;
+/** The only elements whose text content is kept. */
+const TEXT_TAGS = new Set(["title", "desc", "text", "tspan"]);
+
 const FRAGMENT_HREF = /^#[A-Za-z_][\w.-]*$/;
 const URL_HASH_REF = /^url\(\s*#[A-Za-z_][\w.-]*\s*\)$/i;
 const MAX_MARKUP = 32_768;
@@ -146,9 +152,7 @@ function parseAttrs(tag: string, raw: string): Record<string, string> | undefine
     if (!ATTR_ALLOW.has(name)) continue;
     const value = decodeAttr(match[2] ?? match[3] ?? "");
     if (/[<>`]|javascript:/i.test(value)) return undefined;
-    if (name === "transform" && !/^[a-z0-9.\s,()\-+e]+$/i.test(value)) return undefined;
-    if (name === "gradientTransform" && !/^[a-z0-9.\s,()\-+e]+$/i.test(value)) return undefined;
-    if (name === "patternTransform" && !/^[a-z0-9.\s,()\-+e]+$/i.test(value)) return undefined;
+    if (TRANSFORM_ATTRS.has(name) && !TRANSFORM_VALUE.test(value)) return undefined;
     if (!isSafeHref(tag, name, value)) return undefined;
     if (!isSafeUrlRefAttr(name, value)) return undefined;
     // Never allow inline style attribute (XSS vector); presentation attrs only.
@@ -160,43 +164,46 @@ function parseAttrs(tag: string, raw: string): Record<string, string> | undefine
   return attrs;
 }
 
+/** One tag's inner text (between `<` and `>`) as a token, or undefined when it isn't allowed. */
+function tagToken(body: string): Tok | undefined {
+  if (body.startsWith("/")) {
+    const tag = body.slice(1).trim().toLowerCase();
+    return SVG_TAGS.has(tag) ? { kind: "close", tag } : undefined;
+  }
+  const selfClosing = body.endsWith("/");
+  const openBody = selfClosing ? body.slice(0, -1).trim() : body;
+  const space = openBody.search(/\s/);
+  const tag = (space < 0 ? openBody : openBody.slice(0, space)).toLowerCase();
+  if (!SVG_TAGS.has(tag)) return undefined;
+  const attrs = parseAttrs(tag, space < 0 ? "" : openBody.slice(space));
+  return attrs ? { kind: "open", tag, attrs, selfClosing } : undefined;
+}
+
 function tokenize(input: string): Tok[] | undefined {
   const tokens: Tok[] = [];
   let i = 0;
   while (i < input.length) {
-    if (input[i] === "<") {
-      if (input.startsWith("<!--", i)) {
-        const end = input.indexOf("-->", i + 4);
-        if (end < 0) return undefined;
-        i = end + 3;
-        continue;
-      }
-      if (input.startsWith("<!", i) || input.startsWith("<?", i)) return undefined;
-      const close = input.indexOf(">", i + 1);
-      if (close < 0) return undefined;
-      const body = input.slice(i + 1, close).trim();
-      i = close + 1;
-      if (body.startsWith("/")) {
-        const tag = body.slice(1).trim().toLowerCase();
-        if (!SVG_TAGS.has(tag)) return undefined;
-        tokens.push({ kind: "close", tag });
-        continue;
-      }
-      const selfClosing = body.endsWith("/");
-      const openBody = selfClosing ? body.slice(0, -1).trim() : body;
-      const space = openBody.search(/\s/);
-      const tag = (space < 0 ? openBody : openBody.slice(0, space)).toLowerCase();
-      if (!SVG_TAGS.has(tag)) return undefined;
-      const attrRaw = space < 0 ? "" : openBody.slice(space);
-      const attrs = parseAttrs(tag, attrRaw);
-      if (!attrs) return undefined;
-      tokens.push({ kind: "open", tag, attrs, selfClosing });
+    if (input[i] !== "<") {
+      const next = input.indexOf("<", i);
+      const end = next < 0 ? input.length : next;
+      const text = input.slice(i, end);
+      if (text.trim()) tokens.push({ kind: "text", value: text });
+      i = end;
       continue;
     }
-    const next = input.indexOf("<", i);
-    const text = input.slice(i, next < 0 ? input.length : next);
-    i = next < 0 ? input.length : next;
-    if (text.trim()) tokens.push({ kind: "text", value: text });
+    if (input.startsWith("<!--", i)) {
+      const end = input.indexOf("-->", i + 4);
+      if (end < 0) return undefined;
+      i = end + 3;
+      continue;
+    }
+    if (input.startsWith("<!", i) || input.startsWith("<?", i)) return undefined;
+    const close = input.indexOf(">", i + 1);
+    if (close < 0) return undefined;
+    const token = tagToken(input.slice(i + 1, close).trim());
+    if (!token) return undefined;
+    tokens.push(token);
+    i = close + 1;
   }
   return tokens;
 }
@@ -227,18 +234,7 @@ function build(tokens: Tok[]): VNode | undefined {
       }
       const child = read();
       if (child === undefined) return undefined;
-      if (typeof child === "string") {
-        if (
-          tok.tag === "title" ||
-          tok.tag === "desc" ||
-          tok.tag === "text" ||
-          tok.tag === "tspan"
-        ) {
-          children.push(child);
-        }
-        continue;
-      }
-      children.push(child);
+      if (typeof child !== "string" || TEXT_TAGS.has(tok.tag)) children.push(child);
     }
     return { tag: tok.tag, attrs: { ...tok.attrs }, children };
   };
