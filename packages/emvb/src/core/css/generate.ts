@@ -22,9 +22,22 @@ const block = (selector: string, declarations: Declaration[]) =>
     ? ""
     : `${selector}{${declarations.map((d) => `${d.property}:${d.value}`).join(";")}}`;
 
-function lengthCss(value: { value: number; unit: string }): string | undefined {
-  const out = `${value.value}${value.unit}`;
-  return isSafeCssValue(out) ? out : undefined;
+const safe = (value: string) => (isSafeCssValue(value) ? value : undefined);
+
+const lengthCss = (length: { value: number; unit: string }) =>
+  safe(`${length.value}${length.unit}`);
+
+/** One custom property per variable whose id and value are both safe to emit. */
+function declare<T extends { id: string }>(
+  variables: readonly T[] | undefined,
+  name: (id: string) => string | undefined,
+  value: (variable: T) => string | undefined,
+): Declaration[] {
+  return (variables ?? []).flatMap((variable) => {
+    const property = name(variable.id);
+    const css = value(variable);
+    return property && css ? [{ property, value: css }] : [];
+  });
 }
 
 /**
@@ -32,33 +45,21 @@ function lengthCss(value: { value: number; unit: string }): string | undefined {
  * `.emvb-k-<id>` class rules, then local `.emvb-e-<id>` (local wins).
  */
 export function generateCss({ design, usedTypes, baseCss, localRules }: CssInput): string {
-  const variables: Declaration[] = [];
-  for (const color of design.variables.colors) {
-    const name = colorVariableName(color.id);
-    if (name && isSafeCssValue(color.value)) variables.push({ property: name, value: color.value });
-  }
-  for (const font of design.variables.fonts ?? []) {
-    const name = fontVariableName(font.id);
-    if (name && isSafeCssValue(font.value)) variables.push({ property: name, value: font.value });
-  }
-  for (const size of design.variables.fontSizes ?? []) {
-    const name = fontSizeVariableName(size.id);
-    const value = lengthCss(size.value);
-    if (name && value) variables.push({ property: name, value });
-  }
-  for (const space of design.variables.spacings ?? []) {
-    const name = spacingVariableName(space.id);
-    const value = lengthCss(space.value);
-    if (name && value) variables.push({ property: name, value });
-  }
-  const parts = [block(".emvb-root", variables)];
-  for (const type of [...usedTypes].toSorted()) parts.push(baseCss.get(type) ?? "");
-  for (const cls of design.classes ?? []) {
+  const { colors, fonts, fontSizes, spacings } = design.variables;
+  const variables = [
+    ...declare(colors, colorVariableName, (color) => safe(color.value)),
+    ...declare(fonts, fontVariableName, (font) => safe(font.value)),
+    ...declare(fontSizes, fontSizeVariableName, (size) => lengthCss(size.value)),
+    ...declare(spacings, spacingVariableName, (space) => lengthCss(space.value)),
+  ];
+  const classes = (design.classes ?? []).flatMap((cls) => {
     const className = styleClassName(cls.id);
-    if (!className) continue;
-    const { declarations } = styleDeclarations(cls.style);
-    parts.push(block(`.${className}`, declarations));
-  }
-  for (const rule of localRules) parts.push(block(`.emvb-e-${rule.id}`, rule.declarations));
-  return parts.join("");
+    return className ? [block(`.${className}`, styleDeclarations(cls.style).declarations)] : [];
+  });
+  return [
+    block(".emvb-root", variables),
+    ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? ""),
+    ...classes,
+    ...localRules.map((rule) => block(`.emvb-e-${rule.id}`, rule.declarations)),
+  ].join("");
 }

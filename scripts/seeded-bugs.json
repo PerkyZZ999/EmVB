@@ -375,8 +375,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "for (const type of [...usedTypes].toSorted()) parts.push(baseCss.get(type) ?? \"\");",
-          "replace": "for (const css of baseCss.values()) parts.push(css);"
+          "search": "    ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? \"\"),\n",
+          "replace": "    ...baseCss.values(),\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core"],
@@ -1906,8 +1906,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "if (name && isSafeCssValue(font.value)) variables.push({ property: name, value: font.value });",
-          "replace": "if (name) variables.push({ property: name, value: font.value });"
+          "search": "(font) => safe(font.value)",
+          "replace": "(font) => font.value"
         }
       ],
       "command": [
@@ -1986,8 +1986,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "  for (const cls of design.classes ?? []) {\n    const className = styleClassName(cls.id);\n    if (!className) continue;\n    const { declarations } = styleDeclarations(cls.style);\n    parts.push(block(`.${className}`, declarations));\n  }\n  for (const rule of localRules) parts.push(block(`.emvb-e-${rule.id}`, rule.declarations));\n",
-          "replace": "  for (const rule of localRules) parts.push(block(`.emvb-e-${rule.id}`, rule.declarations));\n  for (const cls of design.classes ?? []) {\n    const className = styleClassName(cls.id);\n    if (!className) continue;\n    const { declarations } = styleDeclarations(cls.style);\n    parts.push(block(`.${className}`, declarations));\n  }\n"
+          "search": "    ...classes,\n    ...localRules.map((rule) => block(`.emvb-e-${rule.id}`, rule.declarations)),\n",
+          "replace": "    ...localRules.map((rule) => block(`.emvb-e-${rule.id}`, rule.declarations)),\n    ...classes,\n"
         }
       ],
       "command": [
@@ -3162,6 +3162,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/arrange-golden.test.ts"],
       "expect": "\\(fail\\).*recorded outcome"
+    },
+    {
+      "id": "W-086/font-size-unit-unchecked",
+      "requirement": "R-021",
+      "description": "a font-size variable with an unsafe unit is emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "(size) => lengthCss(size.value)",
+          "replace": "(size) => `${size.value.value}${size.value.unit}`"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/generate.test.ts"],
+      "expect": "\\(fail\\).*cascade order"
     }
   ]
 }
