@@ -129,6 +129,7 @@ function EditorApp({
     canMove,
     finishDelete,
     remove,
+    arrange,
     duplicate,
     addFromPanel,
   } = useNodeActions({ state, latest, dispatch, announce: setAnnouncement, toasts });
@@ -155,9 +156,9 @@ function EditorApp({
   const selectedNode =
     state.selectedId && state.page.layout ? findNode(state.page.layout, state.selectedId) : null;
 
-  const handlers = React.useRef<ShortcutHandlers>({ save, remove, duplicate });
-  handlers.current = { save, remove, duplicate };
-  const onKeyDown = useEditorShortcuts({ latest, dispatch, announce: setAnnouncement, handlers });
+  const handlers = React.useRef<ShortcutHandlers>({ save, remove, duplicate, arrange });
+  handlers.current = { save, remove, duplicate, arrange };
+  const onKeyDown = useEditorShortcuts({ latest, dispatch, handlers });
 
   const reload = async () => {
     saver.closeConflict();
@@ -217,30 +218,8 @@ function EditorApp({
                   onAdd={addFromPanel}
                   formsAvailable={formsAvailable}
                   onDuplicate={duplicate}
-                  onMoveUp={(id) => {
-                    const layout = latest.current.page.layout;
-                    if (!layout) return;
-                    const result = moveUp(layout, id);
-                    if (!result.ok) setAnnouncement(result.reason);
-                    else
-                      dispatch({
-                        type: "apply-arranged",
-                        layout: result.layout,
-                        selected: result.selected,
-                      });
-                  }}
-                  onMoveDown={(id) => {
-                    const layout = latest.current.page.layout;
-                    if (!layout) return;
-                    const result = moveDown(layout, id);
-                    if (!result.ok) setAnnouncement(result.reason);
-                    else
-                      dispatch({
-                        type: "apply-arranged",
-                        layout: result.layout,
-                        selected: result.selected,
-                      });
-                  }}
+                  onMoveUp={(id) => arrange(id, moveUp)}
+                  onMoveDown={(id) => arrange(id, moveDown)}
                   onDelete={remove}
                 />
                 <div className="emvb-sr-only" aria-live="polite">

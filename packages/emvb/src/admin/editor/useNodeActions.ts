@@ -6,7 +6,9 @@ import {
   findNode,
   insertionPoint,
   subtreeSize,
+  type Arranged,
   type ElementType,
+  type Layout,
 } from "../../core/index.ts";
 import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./panels/ElementPanel.tsx";
@@ -76,16 +78,19 @@ export function useNodeActions({
     finishDelete(id);
   };
 
-  const duplicate = (id: string) => {
+  /** Runs an arrange operation on the latest layout, announcing the reason when it is refused (R-003). */
+  const arrange = (id: string, run: (layout: Layout, id: string) => Arranged) => {
     const layout = latest.current.page.layout;
     if (!layout) return;
-    const result = duplicateNode(layout, id);
+    const result = run(layout, id);
     if (!result.ok) {
       announce(result.reason);
       return;
     }
     dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
   };
+
+  const duplicate = (id: string) => arrange(id, duplicateNode);
 
   const addFromPanel = (type: ElementType) => {
     const layout = latest.current.page.layout;
@@ -110,6 +115,7 @@ export function useNodeActions({
     canMove,
     finishDelete,
     remove,
+    arrange,
     duplicate,
     addFromPanel,
   };

@@ -1,6 +1,8 @@
 import * as React from "react";
 import {
   firstChild,
+  type Arranged,
+  type Layout,
   moveDown,
   moveIn,
   moveOut,
@@ -28,18 +30,17 @@ export type ShortcutHandlers = {
   save: () => void;
   remove: (id: string) => void;
   duplicate: (id: string) => void;
+  arrange: (id: string, run: (layout: Layout, id: string) => Arranged) => void;
 };
 
 /** Window-level editor shortcuts (W-020): save, duplicate, delete, escape, arrange and traverse. */
 export function useEditorShortcuts({
   latest,
   dispatch,
-  announce,
   handlers,
 }: {
   latest: React.RefObject<EditorState>;
   dispatch: React.Dispatch<EditorAction>;
-  announce: (message: string) => void;
   handlers: React.RefObject<ShortcutHandlers>;
 }): (event: KeyboardEvent) => void {
   const onKeyDown = React.useCallback((event: KeyboardEvent) => {
@@ -66,27 +67,18 @@ export function useEditorShortcuts({
       return;
     }
     if (!layout || !selected) return;
-    const apply = (
-      result: { ok: true; layout: typeof layout; selected: string } | { ok: false; reason: string },
-    ) => {
-      if (!result.ok) {
-        announce(result.reason);
-        return;
-      }
-      dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
-    };
     if (event.altKey && event.key === "ArrowUp") {
       event.preventDefault();
-      apply(moveUp(layout, selected));
+      handlers.current.arrange(selected, moveUp);
     } else if (event.altKey && event.key === "ArrowDown") {
       event.preventDefault();
-      apply(moveDown(layout, selected));
+      handlers.current.arrange(selected, moveDown);
     } else if (event.altKey && event.key === "ArrowLeft") {
       event.preventDefault();
-      apply(moveOut(layout, selected));
+      handlers.current.arrange(selected, moveOut);
     } else if (event.altKey && event.key === "ArrowRight") {
       event.preventDefault();
-      apply(moveIn(layout, selected));
+      handlers.current.arrange(selected, moveIn);
     } else if (event.key === "ArrowDown") {
       event.preventDefault();
       dispatch({ type: "select", id: nextInOrder(layout, selected) });

@@ -1461,8 +1461,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
-          "search": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      apply(moveDown(layout, selected));",
-          "replace": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      apply(moveUp(layout, selected));"
+          "search": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      handlers.current.arrange(selected, moveDown);",
+          "replace": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      handlers.current.arrange(selected, moveUp);"
         }
       ],
       "command": [
@@ -2859,6 +2859,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/deps/emdash-pins.test.ts"],
       "expect": "\\(fail\\).*Kumo"
+    },
+    {
+      "id": "W-086/arrange-refusal-silent",
+      "requirement": "R-003",
+      "description": "a refused Layers or keyboard move is not announced",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "    if (!result.ok) {\n      announce(result.reason);\n      return;\n    }",
+          "replace": "    if (!result.ok) {\n      return;\n    }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/useNodeActions.test.tsx"],
+      "expect": "\\(fail\\).*refused"
     }
   ]
 }
