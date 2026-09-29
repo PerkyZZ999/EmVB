@@ -89,7 +89,7 @@ const height = (node: LayoutNode): number => {
 const contains = (node: LayoutNode, id: string): boolean =>
   node.id === id || nodeChildren(node).some((child) => contains(child, id));
 
-/** Whether `source` may go into container `parentId` (R-003 invalid drops). */
+/** Whether `parentId` is a form or sits inside one. */
 function underForm(layout: Layout, parentId: string): boolean {
   let current: string | undefined = parentId;
   while (current) {
@@ -101,40 +101,58 @@ function underForm(layout: Layout, parentId: string): boolean {
   return false;
 }
 
-/** Whether `source` may go into parent `parentId` (R-003 / W-034 form rules). */
+type Drop = { layout: Layout; node: LayoutNode; into: Located; isNew: boolean };
+
+/** Placement rules in the order their reasons take precedence (R-003, W-034, W-074). */
+const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
+  [
+    ({ node, into }) => node.type === "tab-panel" && into.node.type !== "tabs",
+    REASONS.tabOutsideTabs,
+  ],
+  [
+    ({ node, into }) => into.node.type === "tabs" && node.type !== "tab-panel",
+    REASONS.onlyTabPanels,
+  ],
+  [
+    ({ node, into, layout }) => isFormNode(node) && underForm(layout, into.node.id),
+    REASONS.nestedForm,
+  ],
+  [({ node, into }) => isFormNode(node) && !isLayoutParentNode(into.node), REASONS.formIntoField],
+  [
+    ({ node, into, layout }) => isFormFieldType(node.type) && !underForm(layout, into.node.id),
+    REASONS.fieldOutsideForm,
+  ],
+  [({ node, into }) => into.depth + height(node) > MAX_DEPTH, REASONS.tooDeep],
+  [
+    ({ node, layout, isNew }) => isNew && size(layout.root) + size(node) > MAX_NODES,
+    REASONS.tooMany,
+  ],
+];
+
+/** The node being dragged, or why an existing one can't move into `parentId`. */
+function dragged(
+  layout: Layout,
+  source: DragSource,
+  parentId: string,
+): { ok: true; node: LayoutNode } | Refusal {
+  if (source.kind === "new") return { ok: true, node: source.node };
+  const moving = locate(layout, source.id);
+  if (!moving) return refuse(REASONS.missing);
+  if (!moving.parent) return refuse(REASONS.rootFixed);
+  if (contains(moving.node, parentId)) return refuse(REASONS.intoItself);
+  return { ok: true, node: moving.node };
+}
+
+/** Whether `source` may go into parent `parentId` (R-003 invalid drops). */
 export function canDrop(layout: Layout, source: DragSource, parentId: string): Allowed {
-  const target = locate(layout, parentId);
-  if (!target) return refuse(REASONS.missing);
-  let node: LayoutNode;
-  if (source.kind === "existing") {
-    const moving = locate(layout, source.id);
-    if (!moving) return refuse(REASONS.missing);
-    if (!moving.parent) return refuse(REASONS.rootFixed);
-    if (contains(moving.node, parentId)) return refuse(REASONS.intoItself);
-    node = moving.node;
-  } else {
-    node = source.node;
-  }
-  if (!isParentNode(target.node)) return refuse(REASONS.notContainer);
-
-  if (node.type === "tab-panel" && target.node.type !== "tabs")
-    return refuse(REASONS.tabOutsideTabs);
-  if (target.node.type === "tabs" && node.type !== "tab-panel")
-    return refuse(REASONS.onlyTabPanels);
-
-  if (isFormNode(node)) {
-    if (isFormNode(target.node) || underForm(layout, parentId)) return refuse(REASONS.nestedForm);
-    if (!isLayoutParentNode(target.node)) return refuse(REASONS.formIntoField);
-  }
-  if (isFormFieldType(node.type)) {
-    const okParent = isFormNode(target.node) || underForm(layout, parentId);
-    if (!okParent) return refuse(REASONS.fieldOutsideForm);
-  }
-
-  if (target.depth + height(node) > MAX_DEPTH) return refuse(REASONS.tooDeep);
-  if (source.kind === "new" && size(layout.root) + size(node) > MAX_NODES)
-    return refuse(REASONS.tooMany);
-  return { ok: true };
+  const into = locate(layout, parentId);
+  if (!into) return refuse(REASONS.missing);
+  const moving = dragged(layout, source, parentId);
+  if (!moving.ok) return moving;
+  if (!isParentNode(into.node)) return refuse(REASONS.notContainer);
+  const drop: Drop = { layout, node: moving.node, into, isNew: source.kind === "new" };
+  const broken = DROP_RULES.find(([breaks]) => breaks(drop));
+  return broken ? refuse(broken[1]) : { ok: true };
 }
 
 /**

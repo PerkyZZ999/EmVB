@@ -1154,8 +1154,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "if (target.depth + height(node) > MAX_DEPTH) return refuse(REASONS.tooDeep);",
-          "replace": "if (target.depth + 1 > MAX_DEPTH) return refuse(REASONS.tooDeep);"
+          "search": "into.depth + height(node) > MAX_DEPTH",
+          "replace": "into.depth + 1 > MAX_DEPTH"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core"],
@@ -2106,8 +2106,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "  if (isFormNode(node)) {\n    if (isFormNode(target.node) || underForm(layout, parentId)) return refuse(REASONS.nestedForm);\n    if (!isLayoutParentNode(target.node)) return refuse(REASONS.formIntoField);\n  }",
-          "replace": "  if (isFormNode(node)) {\n    if (!isLayoutParentNode(target.node)) return refuse(REASONS.formIntoField);\n  }"
+          "search": "isFormNode(node) && underForm(layout, into.node.id),",
+          "replace": "false,"
         }
       ],
       "command": [
@@ -2126,8 +2126,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "  if (isFormFieldType(node.type)) {\n    const okParent = isFormNode(target.node) || underForm(layout, parentId);\n    if (!okParent) return refuse(REASONS.fieldOutsideForm);\n  }\n",
-          "replace": "  // seeded: allow fields outside forms\n"
+          "search": "isFormFieldType(node.type) && !underForm(layout, into.node.id),",
+          "replace": "false,"
         }
       ],
       "command": [
@@ -2681,8 +2681,13 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "  if (node.type === \"tab-panel\" && target.node.type !== \"tabs\")\n    return refuse(REASONS.tabOutsideTabs);\n  if (target.node.type === \"tabs\" && node.type !== \"tab-panel\")\n    return refuse(REASONS.onlyTabPanels);\n",
-          "replace": "  // seeded: skip tab nesting rules\n"
+          "search": "node.type === \"tab-panel\" && into.node.type !== \"tabs\",",
+          "replace": "false,"
+        },
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "into.node.type === \"tabs\" && node.type !== \"tab-panel\",",
+          "replace": "false,"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/arrange-tabs.test.ts"],
@@ -3129,6 +3134,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
       "expect": "\\(fail\\).*selects the element"
+    },
+    {
+      "id": "W-086/move-counts-toward-node-limit",
+      "requirement": "R-003",
+      "description": "moving an element on a full page is refused as if it added nodes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "isNew && size(layout.root) + size(node) > MAX_NODES",
+          "replace": "size(layout.root) + size(node) > MAX_NODES"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/arrange-golden.test.ts"],
+      "expect": "\\(fail\\).*recorded outcome"
+    },
+    {
+      "id": "W-086/form-check-parent-only",
+      "requirement": "R-003",
+      "description": "a field dropped into a container inside a form is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "    current = found.parent?.id;",
+          "replace": "    current = undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/arrange-golden.test.ts"],
+      "expect": "\\(fail\\).*recorded outcome"
     }
   ]
 }
