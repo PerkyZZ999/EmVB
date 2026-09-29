@@ -2901,6 +2901,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
       "expect": "\\(fail\\).*radio group"
+    },
+    {
+      "id": "W-086/demo-page-drifts",
+      "requirement": "R-050",
+      "description": "a page fix lands in one demo but not the other",
+      "edits": [
+        {
+          "file": "demos/cloudflare/src/pages/404.astro",
+          "search": "\t<h1>Page not found</h1>",
+          "replace": "\t<h1>Not found</h1>"
+        }
+      ],
+      "command": ["bun", "test", "./test/demos/demos-in-sync.test.ts"],
+      "expect": "\\(fail\\).*stay in sync"
     }
   ]
 }
