@@ -1805,9 +1805,9 @@
       "description": "unbound Form still renders a live ec-form shell in the editor",
       "edits": [
         {
-          "file": "packages/emvb/src/core/render/index.ts",
-          "search": "    if (isFormNode(node)) {\n      const formId = node.props.formId.trim();\n      // Unbound forms: no live <form>/ec-form shell (avoids broken preview; public stays zero-JS).\n      if (!formId) {\n        if (mode === \"public\") return undefined;\n        return {\n          tag: \"div\",\n          attrs: {\n            ...attrs,\n            class: `${attrs.class} emvb-form-unbound`.trim(),\n            \"data-emvb-form-unbound\": \"\",\n          },\n          children: [\"Bind a form in settings to preview it here.\"],\n        };\n      }",
-          "replace": "    if (isFormNode(node)) {\n      const formId = node.props.formId.trim();\n      if (false && !formId) {\n        if (mode === \"public\") return undefined;\n        return {\n          tag: \"div\",\n          attrs: {\n            ...attrs,\n            class: `${attrs.class} emvb-form-unbound`.trim(),\n            \"data-emvb-form-unbound\": \"\",\n          },\n          children: [\"Bind a form in settings to preview it here.\"],\n        };\n      }"
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "  // Unbound forms: no live <form>/ec-form shell (avoids broken preview; public stays zero-JS).\n  if (!formId) {",
+          "replace": "  if (false && !formId) {"
         }
       ],
       "command": [
@@ -1826,8 +1826,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "    // Canvas iframe has no allow-scripts (D-011): live YouTube/Vimeo players fail there.\n    if (mode === \"editor\" && node.type === \"video\") {\n      const target = resolveEmbedUrl((node.props as { url: string }).url);\n      if (target?.kind === \"iframe\") {\n        const label =\n          (node.props as { title?: string }).title?.trim() ||\n          (target.provider === \"youtube\" ? \"YouTube video\" : \"Vimeo video\");\n        return {\n          tag: \"div\",\n          attrs: {\n            ...attrs,\n            class: `${attrs.class} emvb-video-preview`.trim(),\n            \"data-emvb-video-preview\": target.provider,\n          },\n          children: [`${label} — plays on the published page`],\n        };\n      }\n    }",
-          "replace": "    if (false && mode === \"editor\" && node.type === \"video\") {\n      return undefined;\n    }"
+          "search": "    if (mode === \"editor\" && node.type === \"video\") {\n      const preview = videoPreview(node, attrs);",
+          "replace": "    if (false && mode === \"editor\" && node.type === \"video\") {\n      const preview = videoPreview(node, attrs);"
         }
       ],
       "command": [
@@ -2165,9 +2165,9 @@
       "description": "form children are not wrapped in data-page",
       "edits": [
         {
-          "file": "packages/emvb/src/core/render/index.ts",
-          "search": "        attrs: { \"data-page\": \"0\" },",
-          "replace": "        attrs: { \"data-section\": \"0\" },"
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "    attrs: { \"data-page\": \"0\" },",
+          "replace": "    attrs: { \"data-section\": \"0\" },"
         }
       ],
       "command": [
@@ -2245,7 +2245,7 @@
       "description": "hidden formId does not match the bound form",
       "edits": [
         {
-          "file": "packages/emvb/src/core/render/index.ts",
+          "file": "packages/emvb/src/core/render/form.ts",
           "search": "{ tag: \"input\", attrs: { type: \"hidden\", name: \"formId\", value: formId }, children: [] },",
           "replace": "{ tag: \"input\", attrs: { type: \"hidden\", name: \"formId\", value: \"wrong-id\" }, children: [] },"
         }
@@ -2581,7 +2581,7 @@
       "description": "loop renders only the first archive post",
       "edits": [
         {
-          "file": "packages/emvb/src/core/render/index.ts",
+          "file": "packages/emvb/src/core/render/loop.ts",
           "search": "for (const post of posts) {",
           "replace": "for (const post of posts.slice(0, 1)) {"
         }
@@ -2873,6 +2873,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/useNodeActions.test.tsx"],
       "expect": "\\(fail\\).*refused"
+    },
+    {
+      "id": "W-086/select-options-dropped",
+      "requirement": "R-040",
+      "description": "a select keeps its placeholder instead of the definition's options",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "    if (node.type === \"select\") {\n      return replaceChildren(",
+          "replace": "    if (node.type === \"select\") {\n      return vnode;\n      return replaceChildren("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
+      "expect": "\\(fail\\).*select lists"
+    },
+    {
+      "id": "W-086/radio-options-first-only",
+      "requirement": "R-040",
+      "description": "only the first radio option is rendered",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "      meta.options.map((option) => ({",
+          "replace": "      meta.options.slice(0, 1).map((option) => ({"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
+      "expect": "\\(fail\\).*radio group"
     }
   ]
 }
