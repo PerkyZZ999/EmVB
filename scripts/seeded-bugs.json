@@ -2985,6 +2985,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
       "expect": "\\(fail\\).*actions menu"
+    },
+    {
+      "id": "W-086/refused-drop-changes-state",
+      "requirement": "R-003",
+      "description": "a refused add or move still marks the page edited",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "  result.ok ? withLayout(state, result.layout, result.selected) : state;",
+          "replace": "  result.ok ? withLayout(state, result.layout, result.selected) : edited(state, state.page);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin"],
+      "expect": "\\(fail\\).*refuses an invalid drop"
     }
   ]
 }

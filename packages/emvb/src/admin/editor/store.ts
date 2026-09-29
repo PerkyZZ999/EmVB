@@ -7,6 +7,7 @@ import {
   newNodeId,
   removeNode,
   updateNode,
+  type Arranged,
   type DesignSystem,
   type Layout,
   type LayoutNode,
@@ -55,6 +56,18 @@ const edited = (state: EditorState, page: PageDraft): EditorState => ({
   version: state.version + 1,
 });
 
+/** A layout edit that also moves the selection. */
+const withLayout = (
+  state: EditorState,
+  layout: Layout,
+  selectedId: string | null,
+  lastDeleted = state.lastDeleted,
+): EditorState => ({ ...edited(state, { ...state.page, layout }), selectedId, lastDeleted });
+
+/** Applies an arrange result; a refused one leaves the state unchanged. */
+const arranged = (state: EditorState, result: Arranged): EditorState =>
+  result.ok ? withLayout(state, result.layout, result.selected) : state;
+
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
     case "set-page":
@@ -75,59 +88,30 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
           : state.selectedId;
       const { layout, removed } = removeNode(state.page.layout, action.id);
       if (!removed) return state;
-      return {
-        ...edited(state, { ...state.page, layout }),
-        selectedId: nextSelected,
-        lastDeleted: removed,
-      };
+      return withLayout(state, layout, nextSelected, removed);
     }
     case "restore": {
       const removed = state.lastDeleted;
       if (!removed || !state.page.layout) return state;
       const layout = insertNode(state.page.layout, removed.parentId, removed.index, removed.node);
-      return {
-        ...edited(state, { ...state.page, layout }),
-        selectedId: removed.node.id,
-        lastDeleted: null,
-      };
+      return withLayout(state, layout, removed.node.id, null);
     }
     case "add-root-container": {
       if (state.page.layout) return state;
       const id = newNodeId();
-      return {
-        ...edited(state, {
-          ...state.page,
-          layout: { schemaVersion: 1, root: { id, type: "container", props: {}, children: [] } },
-        }),
-        selectedId: id,
-      };
+      const root = { id, type: "container" as const, props: {}, children: [] };
+      return withLayout(state, { schemaVersion: 1, root }, id);
     }
     case "add-node": {
       if (!state.page.layout) return state;
-      const result = addNode(state.page.layout, action.node, {
-        parentId: action.parentId,
-        index: action.index,
-      });
-      if (!result.ok) return state;
-      return {
-        ...edited(state, { ...state.page, layout: result.layout }),
-        selectedId: result.selected,
-      };
+      const place = { parentId: action.parentId, index: action.index };
+      return arranged(state, addNode(state.page.layout, action.node, place));
     }
-    case "move-node": {
+    case "move-node":
       if (!state.page.layout) return state;
-      const result = moveNode(state.page.layout, action.id, action.parentId, action.index);
-      if (!result.ok) return state;
-      return {
-        ...edited(state, { ...state.page, layout: result.layout }),
-        selectedId: result.selected,
-      };
-    }
+      return arranged(state, moveNode(state.page.layout, action.id, action.parentId, action.index));
     case "apply-arranged":
-      return {
-        ...edited(state, { ...state.page, layout: action.layout }),
-        selectedId: action.selected,
-      };
+      return withLayout(state, action.layout, action.selected);
     case "saved":
       return { ...state, rev: action.rev, savedVersion: action.version };
     case "published":
