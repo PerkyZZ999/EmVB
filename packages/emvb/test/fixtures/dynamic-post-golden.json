@@ -1,0 +1,650 @@
+[
+  {
+    "type": "post-title",
+    "props": {},
+    "post": "post",
+    "mode": "public",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {},
+    "post": "post",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {},
+    "post": "bare",
+    "mode": "public",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {},
+    "post": "bare",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {},
+    "post": "unsafe",
+    "mode": "public",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {},
+    "post": "unsafe",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {},
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-title",
+    "props": {},
+    "post": "none",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Post Title</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 3
+    },
+    "post": "post",
+    "mode": "public",
+    "html": "<h3 class=\"c\">Welcome</h3>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 3
+    },
+    "post": "post",
+    "mode": "editor",
+    "html": "<h3 class=\"c\">Welcome</h3>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 3
+    },
+    "post": "bare",
+    "mode": "public",
+    "html": "<h3 class=\"c\">Welcome</h3>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 3
+    },
+    "post": "bare",
+    "mode": "editor",
+    "html": "<h3 class=\"c\">Welcome</h3>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 3
+    },
+    "post": "unsafe",
+    "mode": "public",
+    "html": "<h3 class=\"c\">Welcome</h3>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 3
+    },
+    "post": "unsafe",
+    "mode": "editor",
+    "html": "<h3 class=\"c\">Welcome</h3>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 3
+    },
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 3
+    },
+    "post": "none",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Post Title</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 9
+    },
+    "post": "post",
+    "mode": "public",
+    "html": "<h6 class=\"c\">Welcome</h6>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 9
+    },
+    "post": "post",
+    "mode": "editor",
+    "html": "<h6 class=\"c\">Welcome</h6>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 9
+    },
+    "post": "bare",
+    "mode": "public",
+    "html": "<h6 class=\"c\">Welcome</h6>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 9
+    },
+    "post": "bare",
+    "mode": "editor",
+    "html": "<h6 class=\"c\">Welcome</h6>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 9
+    },
+    "post": "unsafe",
+    "mode": "public",
+    "html": "<h6 class=\"c\">Welcome</h6>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 9
+    },
+    "post": "unsafe",
+    "mode": "editor",
+    "html": "<h6 class=\"c\">Welcome</h6>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 9
+    },
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 9
+    },
+    "post": "none",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Post Title</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 0
+    },
+    "post": "post",
+    "mode": "public",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 0
+    },
+    "post": "post",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 0
+    },
+    "post": "bare",
+    "mode": "public",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 0
+    },
+    "post": "bare",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 0
+    },
+    "post": "unsafe",
+    "mode": "public",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 0
+    },
+    "post": "unsafe",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Welcome</h1>"
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 0
+    },
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-title",
+    "props": {
+      "level": 0
+    },
+    "post": "none",
+    "mode": "editor",
+    "html": "<h1 class=\"c\">Post Title</h1>"
+  },
+  {
+    "type": "post-excerpt",
+    "props": {},
+    "post": "post",
+    "mode": "public",
+    "html": "<p class=\"c\">Short</p>"
+  },
+  {
+    "type": "post-excerpt",
+    "props": {},
+    "post": "post",
+    "mode": "editor",
+    "html": "<p class=\"c\">Short</p>"
+  },
+  {
+    "type": "post-excerpt",
+    "props": {},
+    "post": "bare",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-excerpt",
+    "props": {},
+    "post": "bare",
+    "mode": "editor",
+    "html": null
+  },
+  {
+    "type": "post-excerpt",
+    "props": {},
+    "post": "unsafe",
+    "mode": "public",
+    "html": "<p class=\"c\">Short</p>"
+  },
+  {
+    "type": "post-excerpt",
+    "props": {},
+    "post": "unsafe",
+    "mode": "editor",
+    "html": "<p class=\"c\">Short</p>"
+  },
+  {
+    "type": "post-excerpt",
+    "props": {},
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-excerpt",
+    "props": {},
+    "post": "none",
+    "mode": "editor",
+    "html": "<p class=\"c\">Post excerpt…</p>"
+  },
+  {
+    "type": "post-content",
+    "props": {},
+    "post": "post",
+    "mode": "public",
+    "html": "<div class=\"c\"><p>Body</p></div>"
+  },
+  {
+    "type": "post-content",
+    "props": {},
+    "post": "post",
+    "mode": "editor",
+    "html": "<div class=\"c\"><p>Body</p></div>"
+  },
+  {
+    "type": "post-content",
+    "props": {},
+    "post": "bare",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-content",
+    "props": {},
+    "post": "bare",
+    "mode": "editor",
+    "html": null
+  },
+  {
+    "type": "post-content",
+    "props": {},
+    "post": "unsafe",
+    "mode": "public",
+    "html": "<div class=\"c\"><p>Body</p></div>"
+  },
+  {
+    "type": "post-content",
+    "props": {},
+    "post": "unsafe",
+    "mode": "editor",
+    "html": "<div class=\"c\"><p>Body</p></div>"
+  },
+  {
+    "type": "post-content",
+    "props": {},
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-content",
+    "props": {},
+    "post": "none",
+    "mode": "editor",
+    "html": "<div class=\"c\"><p>Post content…</p></div>"
+  },
+  {
+    "type": "post-image",
+    "props": {},
+    "post": "post",
+    "mode": "public",
+    "html": "<img class=\"c\" src=\"https://example.com/hero.jpg\" alt=\"Hero\">"
+  },
+  {
+    "type": "post-image",
+    "props": {},
+    "post": "post",
+    "mode": "editor",
+    "html": "<img class=\"c\" src=\"https://example.com/hero.jpg\" alt=\"Hero\">"
+  },
+  {
+    "type": "post-image",
+    "props": {},
+    "post": "bare",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-image",
+    "props": {},
+    "post": "bare",
+    "mode": "editor",
+    "html": "<div class=\"c emvb-post-image-missing\">Featured image</div>"
+  },
+  {
+    "type": "post-image",
+    "props": {},
+    "post": "unsafe",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-image",
+    "props": {},
+    "post": "unsafe",
+    "mode": "editor",
+    "html": null
+  },
+  {
+    "type": "post-image",
+    "props": {},
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-image",
+    "props": {},
+    "post": "none",
+    "mode": "editor",
+    "html": "<div class=\"c emvb-post-image-missing\">Featured image</div>"
+  },
+  {
+    "type": "post-image",
+    "props": {
+      "decorative": true
+    },
+    "post": "post",
+    "mode": "public",
+    "html": "<img class=\"c\" src=\"https://example.com/hero.jpg\" alt=\"\">"
+  },
+  {
+    "type": "post-image",
+    "props": {
+      "decorative": true
+    },
+    "post": "post",
+    "mode": "editor",
+    "html": "<img class=\"c\" src=\"https://example.com/hero.jpg\" alt=\"\">"
+  },
+  {
+    "type": "post-image",
+    "props": {
+      "decorative": true
+    },
+    "post": "bare",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-image",
+    "props": {
+      "decorative": true
+    },
+    "post": "bare",
+    "mode": "editor",
+    "html": "<div class=\"c emvb-post-image-missing\">Featured image</div>"
+  },
+  {
+    "type": "post-image",
+    "props": {
+      "decorative": true
+    },
+    "post": "unsafe",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-image",
+    "props": {
+      "decorative": true
+    },
+    "post": "unsafe",
+    "mode": "editor",
+    "html": null
+  },
+  {
+    "type": "post-image",
+    "props": {
+      "decorative": true
+    },
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-image",
+    "props": {
+      "decorative": true
+    },
+    "post": "none",
+    "mode": "editor",
+    "html": "<div class=\"c emvb-post-image-missing\">Featured image</div>"
+  },
+  {
+    "type": "post-link",
+    "props": {},
+    "post": "post",
+    "mode": "public",
+    "html": "<a class=\"c\" href=\"/posts/welcome\">Welcome</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {},
+    "post": "post",
+    "mode": "editor",
+    "html": "<a class=\"c\" href=\"/posts/welcome\">Welcome</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {},
+    "post": "bare",
+    "mode": "public",
+    "html": "<a class=\"c\" href=\"/posts/welcome\">Welcome</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {},
+    "post": "bare",
+    "mode": "editor",
+    "html": "<a class=\"c\" href=\"/posts/welcome\">Welcome</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {},
+    "post": "unsafe",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-link",
+    "props": {},
+    "post": "unsafe",
+    "mode": "editor",
+    "html": null
+  },
+  {
+    "type": "post-link",
+    "props": {},
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-link",
+    "props": {},
+    "post": "none",
+    "mode": "editor",
+    "html": "<a class=\"c\" href=\"#\">Post link</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {
+      "text": " Read more ",
+      "newTab": true
+    },
+    "post": "post",
+    "mode": "public",
+    "html": "<a class=\"c\" href=\"/posts/welcome\" target=\"_blank\" rel=\"noopener noreferrer\">Read more</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {
+      "text": " Read more ",
+      "newTab": true
+    },
+    "post": "post",
+    "mode": "editor",
+    "html": "<a class=\"c\" href=\"/posts/welcome\" target=\"_blank\" rel=\"noopener noreferrer\">Read more</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {
+      "text": " Read more ",
+      "newTab": true
+    },
+    "post": "bare",
+    "mode": "public",
+    "html": "<a class=\"c\" href=\"/posts/welcome\" target=\"_blank\" rel=\"noopener noreferrer\">Read more</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {
+      "text": " Read more ",
+      "newTab": true
+    },
+    "post": "bare",
+    "mode": "editor",
+    "html": "<a class=\"c\" href=\"/posts/welcome\" target=\"_blank\" rel=\"noopener noreferrer\">Read more</a>"
+  },
+  {
+    "type": "post-link",
+    "props": {
+      "text": " Read more ",
+      "newTab": true
+    },
+    "post": "unsafe",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-link",
+    "props": {
+      "text": " Read more ",
+      "newTab": true
+    },
+    "post": "unsafe",
+    "mode": "editor",
+    "html": null
+  },
+  {
+    "type": "post-link",
+    "props": {
+      "text": " Read more ",
+      "newTab": true
+    },
+    "post": "none",
+    "mode": "public",
+    "html": null
+  },
+  {
+    "type": "post-link",
+    "props": {
+      "text": " Read more ",
+      "newTab": true
+    },
+    "post": "none",
+    "mode": "editor",
+    "html": "<a class=\"c\" href=\"#\">Post link</a>"
+  }
+]

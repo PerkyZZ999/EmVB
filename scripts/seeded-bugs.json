@@ -2929,6 +2929,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/editing.test.tsx"],
       "expect": "\\(fail\\).*Shift\\+Enter"
+    },
+    {
+      "id": "W-086/post-title-level-unclamped",
+      "requirement": "R-011",
+      "description": "a post title level outside 1–6 is not clamped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/dynamic-post.ts",
+          "search": "HEADING_TAGS[Math.min(6, Math.max(1, level)) - 1]",
+          "replace": "HEADING_TAGS[level - 1]"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/dynamic-post.test.ts"],
+      "expect": "\\(fail\\).*post-title"
+    },
+    {
+      "id": "W-086/post-image-decorative-alt",
+      "requirement": "R-032",
+      "description": "a decorative featured image keeps a non-empty alt",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/dynamic-post.ts",
+          "search": "props<{ decorative?: boolean }>(node).decorative\n          ? \"\"",
+          "replace": "props<{ decorative?: boolean }>(node).decorative\n          ? \"Featured image\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/dynamic-post.test.ts"],
+      "expect": "\\(fail\\).*post-image"
     }
   ]
 }
