@@ -1,21 +1,20 @@
 import { z } from "zod";
+import { POPUP_DEVICES, TRIGGER_LIMITS } from "./popup-rules.ts";
 
 export const TRIGGERS_SCHEMA_VERSION = 1;
 export const MAX_POPUP_TRIGGERS = 8;
 const MAX_CLICK_SELECTOR_LENGTH = 200;
-const MAX_DELAY_MS = 120_000;
-const MAX_SCROLL_PERCENT = 100;
 const MAX_SHOW_TIMES = 100;
 
 /** Open triggers (Elementor-inspired). URL rules / scheduling / A/B deferred (W-081). */
 const PageLoadTrigger = z.strictObject({ type: z.literal("page_load") });
 const DelayTrigger = z.strictObject({
   type: z.literal("delay"),
-  ms: z.number().int().min(0).max(MAX_DELAY_MS),
+  ms: z.number().int().min(0).max(TRIGGER_LIMITS.maxDelayMs),
 });
 const ScrollTrigger = z.strictObject({
   type: z.literal("scroll"),
-  percent: z.number().int().min(0).max(MAX_SCROLL_PERCENT),
+  percent: z.number().int().min(0).max(TRIGGER_LIMITS.maxScrollPercent),
 });
 const ClickTrigger = z.strictObject({
   type: z.literal("click"),
@@ -24,7 +23,7 @@ const ClickTrigger = z.strictObject({
 const ExitIntentTrigger = z.strictObject({ type: z.literal("exit_intent") });
 const InactivityTrigger = z.strictObject({
   type: z.literal("inactivity"),
-  ms: z.number().int().min(1_000).max(MAX_DELAY_MS),
+  ms: z.number().int().min(TRIGGER_LIMITS.minIdleMs).max(TRIGGER_LIMITS.maxDelayMs),
 });
 
 const PopupOpenTriggerSchema = z.discriminatedUnion("type", [
@@ -38,8 +37,7 @@ const PopupOpenTriggerSchema = z.discriminatedUnion("type", [
 
 export type PopupOpenTrigger = z.infer<typeof PopupOpenTriggerSchema>;
 
-const DeviceSchema = z.enum(["desktop", "tablet", "mobile"]);
-export type PopupDevice = z.infer<typeof DeviceSchema>;
+const DeviceSchema = z.enum(POPUP_DEVICES);
 
 /**
  * Advanced rules — MVP-thin (D-TB-11).
@@ -122,34 +120,4 @@ export function isSafeClickSelector(selector: string): boolean {
   if (/javascript:/i.test(trimmed)) return false;
   // Allow common CSS selector chars only.
   return /^[a-zA-Z0-9\s\-_.#[\]=,:()>+~*"'|/]+$/.test(trimmed);
-}
-
-/** Breakpoints aligned with common Elementor/EmVB device tiers. */
-export function deviceForWidth(width: number): PopupDevice {
-  if (width < 768) return "mobile";
-  if (width < 1025) return "tablet";
-  return "desktop";
-}
-
-/** True when advanced.devices is unset/empty or includes the current device. */
-export function matchesPopupDevices(
-  advanced: PopupAdvancedRules | undefined,
-  width: number,
-): boolean {
-  const devices = advanced?.devices;
-  if (!devices || devices.length === 0) return true;
-  return devices.includes(deviceForWidth(width));
-}
-
-/**
- * Pure check for show-times (localStorage count is supplied by the runtime).
- * `null`/`undefined` showTimes = unlimited.
- */
-export function withinShowTimes(
-  advanced: PopupAdvancedRules | undefined,
-  timesShown: number,
-): boolean {
-  const limit = advanced?.showTimes;
-  if (limit === null || limit === undefined) return true;
-  return timesShown < limit;
 }

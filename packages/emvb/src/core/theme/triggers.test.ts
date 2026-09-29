@@ -1,12 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import {
-  defaultTriggers,
-  deviceForWidth,
-  isSafeClickSelector,
-  matchesPopupDevices,
-  validateTriggers,
-  withinShowTimes,
-} from "./triggers.ts";
+import { deviceForWidth, matchesPopupDevices, withinShowTimes } from "./popup-rules.ts";
+import { defaultTriggers, isSafeClickSelector, validateTriggers } from "./triggers.ts";
 
 describe("validateTriggers", () => {
   test("accepts default page_load triggers", () => {

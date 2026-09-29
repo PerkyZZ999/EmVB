@@ -220,15 +220,20 @@ export {
   defaultTriggers,
   validateTriggers,
   isSafeClickSelector,
-  deviceForWidth,
-  matchesPopupDevices,
-  withinShowTimes,
   type PopupOpenTrigger,
   type PopupAdvancedRules,
-  type PopupDevice,
   type TriggersDoc,
   type TriggersValidation,
 } from "./theme/triggers.ts";
+
+export {
+  TRIGGER_LIMITS,
+  clampScrollPercent,
+  deviceForWidth,
+  matchesPopupDevices,
+  withinShowTimes,
+  type PopupDevice,
+} from "./theme/popup-rules.ts";
 
 export { POPUP_CHROME_CSS, wrapPopupMarkup, type PopupPublicConfig } from "./theme/popup-markup.ts";
 

@@ -3372,6 +3372,66 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/form-elements.test.ts"],
       "expect": "\\(fail\\).*keep their defaults"
+    },
+    {
+      "id": "W-086/scroll-percent-unclamped",
+      "requirement": "W-081",
+      "description": "scroll percent over 100 is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-rules.ts",
+          "search": "Math.min(TRIGGER_LIMITS.maxScrollPercent, Math.max(0, Number(value) || 0))",
+          "replace": "Math.max(0, Number(value) || 0)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/trigger-settings.test.tsx"
+      ],
+      "expect": "\\(fail\\).*scroll percent is clamped"
+    },
+    {
+      "id": "W-086/idle-minimum-lowered",
+      "requirement": "W-081",
+      "description": "the runtime waits less than a second of inactivity",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-rules.ts",
+          "search": "minIdleMs: 1_000,",
+          "replace": "minIdleMs: 100,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*inactivity waits at least"
+    },
+    {
+      "id": "W-086/runtime-tablet-breakpoint",
+      "requirement": "W-081",
+      "description": "a 1025 px viewport counts as a tablet",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-rules.ts",
+          "search": "if (width < 1025) return \"tablet\";",
+          "replace": "if (width <= 1025) return \"tablet\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*devices limit where"
+    },
+    {
+      "id": "W-086/runtime-show-times-ignored",
+      "requirement": "W-081",
+      "description": "the runtime ignores show times",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "if (!withinShowTimes(advanced, timesShown(config.id))) return false;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*show times caps"
     }
   ]
 }

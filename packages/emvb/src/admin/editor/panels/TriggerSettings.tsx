@@ -1,5 +1,5 @@
 import { Input } from "@cloudflare/kumo";
-import type { PopupOpenTrigger } from "../../../core/index.ts";
+import { clampScrollPercent, type PopupOpenTrigger, TRIGGER_LIMITS } from "../../../core/index.ts";
 import { FIELD } from "../../ui.ts";
 
 /** The per-type settings row inside a popup trigger (S7b / W-081). */
@@ -17,7 +17,7 @@ export function TriggerSettings({
         className={FIELD}
         type="number"
         min={0}
-        max={120000}
+        max={TRIGGER_LIMITS.maxDelayMs}
         value={String(trigger.ms)}
         onChange={(event) =>
           onChange({
@@ -35,12 +35,12 @@ export function TriggerSettings({
         className={FIELD}
         type="number"
         min={0}
-        max={100}
+        max={TRIGGER_LIMITS.maxScrollPercent}
         value={String(trigger.percent)}
         onChange={(event) =>
           onChange({
             type: "scroll",
-            percent: Math.min(100, Math.max(0, Number(event.target.value) || 0)),
+            percent: clampScrollPercent(event.target.value),
           })
         }
       />
@@ -70,13 +70,16 @@ export function TriggerSettings({
         label="Idle time (ms)"
         className={FIELD}
         type="number"
-        min={1000}
-        max={120000}
+        min={TRIGGER_LIMITS.minIdleMs}
+        max={TRIGGER_LIMITS.maxDelayMs}
         value={String(trigger.ms)}
         onChange={(event) =>
           onChange({
             type: "inactivity",
-            ms: Math.max(1000, Number(event.target.value) || 1000),
+            ms: Math.max(
+              TRIGGER_LIMITS.minIdleMs,
+              Number(event.target.value) || TRIGGER_LIMITS.minIdleMs,
+            ),
           })
         }
       />

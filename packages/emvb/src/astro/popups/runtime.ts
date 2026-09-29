@@ -7,6 +7,14 @@
  * Gaps vs Elementor (deferred): URL/query, scheduling, A/B.
  */
 
+import {
+  clampScrollPercent,
+  matchesPopupDevices,
+  type PopupDevice,
+  TRIGGER_LIMITS,
+  withinShowTimes,
+} from "../../core/theme/popup-rules.ts";
+
 type OpenTrigger =
   | { type: "page_load" }
   | { type: "delay"; ms: number }
@@ -17,7 +25,7 @@ type OpenTrigger =
 
 type Advanced = {
   showTimes?: number | null;
-  devices?: Array<"desktop" | "tablet" | "mobile"> | null;
+  devices?: PopupDevice[] | null;
 };
 
 type TriggersDoc = {
@@ -32,24 +40,6 @@ type PopupConfig = {
 };
 
 const STORAGE_PREFIX = "emvb-popup-shown:";
-
-function deviceForWidth(width: number): "desktop" | "tablet" | "mobile" {
-  if (width < 768) return "mobile";
-  if (width < 1025) return "tablet";
-  return "desktop";
-}
-
-function matchesDevices(advanced: Advanced | undefined, width: number): boolean {
-  const devices = advanced?.devices;
-  if (!devices || devices.length === 0) return true;
-  return devices.includes(deviceForWidth(width));
-}
-
-function withinShowTimes(advanced: Advanced | undefined, shown: number): boolean {
-  const limit = advanced?.showTimes;
-  if (limit === null || limit === undefined) return true;
-  return shown < limit;
-}
 
 function readConfig(el: HTMLElement): PopupConfig | null {
   const raw = el.getAttribute("data-emvb-popup-config");
@@ -83,7 +73,7 @@ function bumpTimesShown(id: string): void {
 
 function canOpen(config: PopupConfig): boolean {
   const advanced = config.triggers.advanced;
-  if (!matchesDevices(advanced, window.innerWidth)) return false;
+  if (!matchesPopupDevices(advanced, window.innerWidth)) return false;
   if (!withinShowTimes(advanced, timesShown(config.id))) return false;
   return true;
 }
@@ -184,7 +174,7 @@ function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTri
       window.setTimeout(() => openOnce(ctrl, config), Math.max(0, Number(trigger.ms) || 0));
       break;
     case "scroll": {
-      const threshold = Math.min(100, Math.max(0, Number(trigger.percent) || 0)) / 100;
+      const threshold = clampScrollPercent(trigger.percent) / 100;
       const onScroll = () => {
         const doc = document.documentElement;
         const max = doc.scrollHeight - window.innerHeight;
@@ -223,7 +213,7 @@ function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTri
       break;
     }
     case "inactivity": {
-      const ms = Math.max(1000, Number(trigger.ms) || 30_000);
+      const ms = Math.max(TRIGGER_LIMITS.minIdleMs, Number(trigger.ms) || 30_000);
       let timer = window.setTimeout(() => openOnce(ctrl, config), ms);
       const reset = () => {
         window.clearTimeout(timer);
