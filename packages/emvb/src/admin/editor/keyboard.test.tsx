@@ -72,7 +72,7 @@ describe("keyboard arrange (W-020)", () => {
     expect(subtreeSize(layout, "head0001")).toBe(1);
   });
 
-  test("apply-arranged and arrange update the store", () => {
+  test("apply-arranged updates the store", () => {
     const down = moveDown(layout, "head0002");
     expect(down.ok).toBe(true);
     if (!down.ok) return;

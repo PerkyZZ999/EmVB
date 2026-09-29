@@ -4,11 +4,6 @@ import {
   insertNode,
   moveNode,
   selectionAfterDelete,
-  moveOut,
-  moveIn,
-  moveDown,
-  moveUp,
-  duplicateNode,
   newNodeId,
   removeNode,
   updateNode,
@@ -46,8 +41,6 @@ export type EditorAction =
   | { type: "add-root-container" }
   | { type: "add-node"; node: LayoutNode; parentId: string; index: number }
   | { type: "move-node"; id: string; parentId: string; index: number }
-  | { type: "duplicate-node"; id: string }
-  | { type: "arrange"; id: string; op: "up" | "down" | "in" | "out" }
   | { type: "apply-arranged"; layout: Layout; selected: string }
   | { type: "saved"; rev: string; version: number }
   | { type: "published"; rev: string }
@@ -124,32 +117,6 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "move-node": {
       if (!state.page.layout) return state;
       const result = moveNode(state.page.layout, action.id, action.parentId, action.index);
-      if (!result.ok) return state;
-      return {
-        ...edited(state, { ...state.page, layout: result.layout }),
-        selectedId: result.selected,
-      };
-    }
-    case "duplicate-node": {
-      if (!state.page.layout) return state;
-      const result = duplicateNode(state.page.layout, action.id);
-      if (!result.ok) return state;
-      return {
-        ...edited(state, { ...state.page, layout: result.layout }),
-        selectedId: result.selected,
-      };
-    }
-    case "arrange": {
-      if (!state.page.layout) return state;
-      const run =
-        action.op === "up"
-          ? moveUp
-          : action.op === "down"
-            ? moveDown
-            : action.op === "in"
-              ? moveIn
-              : moveOut;
-      const result = run(state.page.layout, action.id);
       if (!result.ok) return state;
       return {
         ...edited(state, { ...state.page, layout: result.layout }),
