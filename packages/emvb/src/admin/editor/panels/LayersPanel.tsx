@@ -12,6 +12,7 @@ import {
 } from "../../../core/index.ts";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { ELEMENT_NAMES } from "./ElementPanel.tsx";
+import { dragStash } from "../dnd/drag-stash.ts";
 
 const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
@@ -217,12 +218,7 @@ function LayerRow({
             }
             event.dataTransfer.setData(EXISTING_ELEMENT_MIME, node.id);
             event.dataTransfer.effectAllowed = "move";
-            try {
-              sessionStorage.setItem("emvb-drag-id", node.id);
-              sessionStorage.removeItem("emvb-drag-type");
-            } catch {
-              /* private mode */
-            }
+            dragStash.existing(node.id);
           }}
           onClick={() => actions.onSelect(node.id)}
         >

@@ -9,6 +9,7 @@ import {
 } from "../dnd/drop-target.ts";
 import { newElement } from "../dnd/new-element.ts";
 import type { Box } from "./SelectionOverlay.tsx";
+import { dragStash } from "../dnd/drag-stash.ts";
 
 export type ResolvedDrop = {
   parentId: string;
@@ -69,12 +70,9 @@ export function useCanvasEvents({
       cancelled.current = false;
       const next = resolveDrop(x, y, target);
       clearDrag();
-      const id =
-        transfer?.getData(EXISTING_ELEMENT_MIME) || sessionStorage.getItem("emvb-drag-id") || "";
-      const type =
-        transfer?.getData(NEW_ELEMENT_MIME) || sessionStorage.getItem("emvb-drag-type") || "";
-      sessionStorage.removeItem("emvb-drag-id");
-      sessionStorage.removeItem("emvb-drag-type");
+      const id = transfer?.getData(EXISTING_ELEMENT_MIME) || dragStash.id() || "";
+      const type = transfer?.getData(NEW_ELEMENT_MIME) || dragStash.type() || "";
+      dragStash.clear();
       if (wasCancelled || !next) return;
       const current = layoutRef.current;
       if (!current) return;
@@ -104,13 +102,9 @@ export function useCanvasEvents({
     const move = (event: MouseEvent) => setHoverId(idAt(event.target));
     const leave = () => setHoverId(null);
     const key = (event: KeyboardEvent) => {
-      if (
-        event.key === "Escape" &&
-        (sessionStorage.getItem("emvb-drag-id") || sessionStorage.getItem("emvb-drag-type"))
-      ) {
+      if (event.key === "Escape" && dragStash.active()) {
         cancelled.current = true;
-        sessionStorage.removeItem("emvb-drag-id");
-        sessionStorage.removeItem("emvb-drag-type");
+        dragStash.clear();
         clearDrag();
         return;
       }
@@ -131,8 +125,7 @@ export function useCanvasEvents({
     };
     const dragend = () => {
       cancelled.current = false;
-      sessionStorage.removeItem("emvb-drag-id");
-      sessionStorage.removeItem("emvb-drag-type");
+      dragStash.clear();
       clearDrag();
     };
     doc.addEventListener("click", click);
@@ -193,14 +186,12 @@ export function useCanvasEvents({
   React.useEffect(() => {
     const finish = () => {
       cancelled.current = false;
-      sessionStorage.removeItem("emvb-drag-id");
-      sessionStorage.removeItem("emvb-drag-type");
+      dragStash.clear();
       clearDrag();
     };
     const onKey = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
-      if (!sessionStorage.getItem("emvb-drag-id") && !sessionStorage.getItem("emvb-drag-type"))
-        return;
+      if (!dragStash.active()) return;
       cancelled.current = true;
       finish();
     };

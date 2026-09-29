@@ -1441,8 +1441,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
-          "search": "  const row = direction.startsWith(\"row\");\n  const first = children[0];\n  const last = children.at(-1);\n  const before = index > 0 ? children[index - 1] : undefined;\n  const after = index < children.length ? children[index] : undefined;\n  if (row) {",
-          "replace": "  const row = false;\n  const first = children[0];\n  const last = children.at(-1);\n  const before = index > 0 ? children[index - 1] : undefined;\n  const after = index < children.length ? children[index] : undefined;\n  if (row) {"
+          "search": "  const row = direction.startsWith(\"row\");",
+          "replace": "  const row = false;"
         }
       ],
       "command": [
@@ -3176,6 +3176,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/css/generate.test.ts"],
       "expect": "\\(fail\\).*cascade order"
+    },
+    {
+      "id": "W-086/drag-stash-new-keeps-id",
+      "requirement": "R-003",
+      "description": "stashing a new element type leaves the previous element id, so a later drop moves the wrong thing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/drag-stash.ts",
+          "search": "new: (type: string) => store(TYPE, type, ID),",
+          "replace": "new: (type: string) => store(TYPE, type, \"none\"),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/dnd/drag-stash.test.ts"],
+      "expect": "\\(fail\\).*and the reverse"
+    },
+    {
+      "id": "W-086/drop-line-row-uses-top",
+      "requirement": "R-003",
+      "description": "the drop line in a row container is placed along the vertical axis",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "const [start, size] = row ? ([\"left\", \"width\"] as const) : ([\"top\", \"height\"] as const);",
+          "replace": "const [start, size] = [\"top\", \"height\"] as const;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/drop-line.test.ts"],
+      "expect": "\\(fail\\).*row: before, between and after"
     }
   ]
 }

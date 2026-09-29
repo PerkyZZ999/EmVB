@@ -1,6 +1,7 @@
 import { CopyIcon, DotsSixVerticalIcon, ProhibitIcon, TrashIcon } from "@phosphor-icons/react";
 import type { CanvasSelection } from "./CanvasFrame.tsx";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
+import { dragStash } from "../dnd/drag-stash.ts";
 
 export type Box = { top: number; left: number; width: number; height: number };
 
@@ -82,12 +83,7 @@ export function SelectionOverlay({
                 onDragStart={(event) => {
                   event.dataTransfer.setData(EXISTING_ELEMENT_MIME, selectedId);
                   event.dataTransfer.effectAllowed = "move";
-                  try {
-                    sessionStorage.setItem("emvb-drag-id", selectedId);
-                    sessionStorage.removeItem("emvb-drag-type");
-                  } catch {
-                    /* private mode */
-                  }
+                  dragStash.existing(selectedId);
                 }}
               >
                 <DotsSixVerticalIcon size={16} aria-hidden="true" />

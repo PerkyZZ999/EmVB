@@ -26,6 +26,7 @@ import * as React from "react";
 import { ELEMENT_DESCRIPTORS, type ElementType } from "../../../core/index.ts";
 import { NEW_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { FIELD } from "../../ui.ts";
+import { dragStash } from "../dnd/drag-stash.ts";
 
 const ICONS: Record<string, typeof TextHIcon> = {
   container: SquareIcon,
@@ -116,12 +117,7 @@ export function AddPanel({
                       onDragStart={(event) => {
                         event.dataTransfer.setData(NEW_ELEMENT_MIME, tile.type);
                         event.dataTransfer.effectAllowed = "copy";
-                        try {
-                          sessionStorage.setItem("emvb-drag-type", tile.type);
-                          sessionStorage.removeItem("emvb-drag-id");
-                        } catch {
-                          /* private mode */
-                        }
+                        dragStash.new(tile.type);
                       }}
                       onClick={() => onAdd(tile.type as ElementType)}
                       onKeyDown={(event) => {
