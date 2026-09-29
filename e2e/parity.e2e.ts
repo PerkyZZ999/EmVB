@@ -1,5 +1,6 @@
 import { expect, test, type FrameLocator, type Page } from "@playwright/test";
 import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
+import { unique } from "./support/helpers.ts";
 
 const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 
@@ -10,8 +11,6 @@ test.beforeAll(async ({ browser }) => {
   await ensureEmvbSetup(await context.newPage());
   await context.close();
 });
-
-const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
 
 /** Nested 3-deep flex layout (W-023). */
 const nestedLayout = {

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { createPage, ensureEmvbSetup, getPage, parsed } from "./support/api.ts";
+import { canvas, overlay, unique } from "./support/helpers.ts";
 
 const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 const PIXEL = path.join(process.cwd(), "e2e/fixtures/emvb-pixel.png");
@@ -22,8 +23,6 @@ const imageLayout = () => ({
   },
 });
 
-const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-
 test.describe.configure({ mode: "serial" });
 
 test.beforeAll(async ({ browser }) => {
@@ -32,8 +31,6 @@ test.beforeAll(async ({ browser }) => {
   await context.close();
 });
 
-const overlay = (page: Page) => page.locator("[data-emvb-editor]");
-const canvas = (page: Page) => page.frameLocator("iframe[data-emvb-canvas]");
 const saveStatus = (page: Page) => overlay(page).locator(".emvb-save-status");
 
 async function openEditor(page: Page, id: string) {

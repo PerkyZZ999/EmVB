@@ -1,5 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { createPage, ensureEmvbSetup, getPage, parsed } from "./support/api.ts";
+import { canvas, overlay, unique } from "./support/helpers.ts";
 
 const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 
@@ -17,8 +18,6 @@ const layoutFor = () => ({
   },
 });
 
-const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
-
 test.describe.configure({ mode: "serial" });
 
 test.beforeAll(async ({ browser }) => {
@@ -26,9 +25,6 @@ test.beforeAll(async ({ browser }) => {
   await ensureEmvbSetup(await context.newPage());
   await context.close();
 });
-
-const overlay = (page: Page) => page.locator("[data-emvb-editor]");
-const canvas = (page: Page) => page.frameLocator("iframe[data-emvb-canvas]");
 
 test("keyboard move, duplicate and delete round-trip on save", async ({ page, request }) => {
   const id = await createPage(request, "Keys", layoutFor(), `keys-${unique()}`);

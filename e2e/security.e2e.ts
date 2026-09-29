@@ -1,8 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { XSS_CORPUS } from "../packages/emvb/test/fixtures/xss.ts";
 import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
-
-const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+import { unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 

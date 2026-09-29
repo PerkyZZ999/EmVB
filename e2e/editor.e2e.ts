@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createPage, ensureEmvbSetup } from "./support/api.ts";
+import { overlay } from "./support/helpers.ts";
 
 const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 const LAYOUT = {
@@ -24,7 +25,6 @@ test.beforeAll(async ({ browser }) => {
   await context.close();
 });
 
-const overlay = (page: Page) => page.locator("[data-emvb-editor]");
 const inOverlay = (page: Page, x: number, y: number) =>
   page.evaluate(
     ([px, py]) => Boolean(document.elementFromPoint(px, py)?.closest("[data-emvb-editor]")),

@@ -1,5 +1,6 @@
 import { expect, request as requestFactory, test, type APIRequestContext } from "@playwright/test";
 import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
+import { unique } from "./support/helpers.ts";
 
 let author: APIRequestContext;
 
@@ -16,8 +17,6 @@ test.beforeAll(async ({ browser }) => {
 test.afterAll(async () => {
   await author.dispose();
 });
-
-const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
 
 const layoutWith = (text: string, color?: string) => ({
   schemaVersion: 1,

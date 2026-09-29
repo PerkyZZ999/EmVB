@@ -5,8 +5,7 @@ import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
 import { setClass, setColor } from "./support/design.ts";
 import { createContactForm } from "./support/forms.ts";
 import { uploadEmvbPixel } from "./support/media.ts";
-
-const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
+import { unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 

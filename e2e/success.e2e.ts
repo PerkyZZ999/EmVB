@@ -1,12 +1,12 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { successSignalLayout } from "../packages/emvb/src/core/forms/success-layout.ts";
 import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
 import { setClass, setColor } from "./support/design.ts";
 import { createContactForm, listSubmissions } from "./support/forms.ts";
 import { uploadEmvbPixel } from "./support/media.ts";
+import { canvas, overlay, unique } from "./support/helpers.ts";
 
 const EDITOR = "/_emdash/admin/plugins/emvb/editor";
-const unique = () => `${Date.now().toString(36)}${Math.floor(Math.random() * 1e4)}`;
 
 test.describe.configure({ mode: "serial" });
 
@@ -23,9 +23,6 @@ async function publish(request: Parameters<typeof getPage>[0], id: string) {
   });
   expect(result.status).toBe(200);
 }
-
-const overlay = (page: Page) => page.locator("[data-emvb-editor]");
-const canvas = (page: Page) => page.frameLocator("iframe[data-emvb-canvas]");
 
 test("BRIEF success signal: build, preview, publish, submit, restyle (W-039)", async ({
   page,
