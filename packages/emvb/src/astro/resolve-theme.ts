@@ -75,6 +75,31 @@ type StoredPart = {
   updatedAt: string;
 };
 
+/** A stored JSON field, or `fallback` when the field was never set. */
+const storedOr = <T>(raw: unknown, fallback: () => T): unknown =>
+  raw === undefined || raw === null || raw === "" ? fallback() : raw;
+
+/** A published entry as a theme part, or undefined when its type or conditions are invalid. */
+function storedPartFrom(entry: { id: string; data: unknown }): StoredPart | undefined {
+  const data = entry.data as Record<string, unknown>;
+  const partType = parseThemePartType(data["part_type"]);
+  if (!partType) return undefined;
+  const conditions = validateConditions(storedOr(data["conditions"], defaultConditions));
+  if (!conditions.ok) return undefined;
+  const triggers = validateTriggers(storedOr(data["triggers"], defaultTriggers));
+  // Invalid triggers fail closed for popups; other part types ignore triggers.
+  if (partType === "popup" && !triggers.ok) return undefined;
+  return {
+    id: String(data["id"] ?? entry.id),
+    title: typeof data["title"] === "string" ? data["title"] : "",
+    partType,
+    layout: data["layout"],
+    conditions: conditions.conditions,
+    triggers: triggers.ok ? triggers.triggers : defaultTriggers(),
+    updatedAt: String(data["updatedAt"] ?? data["updated_at"] ?? ""),
+  };
+}
+
 async function loadPublishedThemeParts(): Promise<StoredPart[]> {
   let result: Awaited<ReturnType<typeof getEmDashCollection>>;
   try {
@@ -87,37 +112,9 @@ async function loadPublishedThemeParts(): Promise<StoredPart[]> {
     return [];
   }
   if (result.error || !result.entries?.length) return [];
-  const parts: StoredPart[] = [];
-  for (const entry of result.entries) {
-    const data = entry.data as Record<string, unknown>;
-    const partType = parseThemePartType(data["part_type"]);
-    if (!partType) continue;
-    const conditionsRaw = data["conditions"];
-    const validated = validateConditions(
-      conditionsRaw === undefined || conditionsRaw === null || conditionsRaw === ""
-        ? defaultConditions()
-        : conditionsRaw,
-    );
-    if (!validated.ok) continue;
-    const triggersRaw = data["triggers"];
-    const triggersValidated = validateTriggers(
-      triggersRaw === undefined || triggersRaw === null || triggersRaw === ""
-        ? defaultTriggers()
-        : triggersRaw,
-    );
-    // Invalid triggers fail closed for popups; other part types ignore triggers.
-    const triggers = triggersValidated.ok ? triggersValidated.triggers : defaultTriggers();
-    if (partType === "popup" && !triggersValidated.ok) continue;
-    parts.push({
-      id: String(data["id"] ?? entry.id),
-      title: typeof data["title"] === "string" ? data["title"] : "",
-      partType,
-      layout: data["layout"],
-      conditions: validated.conditions,
-      triggers,
-      updatedAt: String(data["updatedAt"] ?? data["updated_at"] ?? ""),
-    });
-  }
+  const parts = result.entries
+    .map(storedPartFrom)
+    .filter((part): part is StoredPart => part !== undefined);
   parts.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : a.updatedAt > b.updatedAt ? -1 : 0));
   return parts;
 }
@@ -261,54 +258,45 @@ export async function resolveThemeParts(
   const handler = getPublicPluginApiRouteHandler(astro.locals as never);
   const design = await loadDesign(handler, astro.url);
 
-  let needsTabsRuntime = false;
+  const byId = new Map(parts.map((part) => [part.id, part]));
+  const rendered: RenderedPage[] = [];
+  const renderOne = (stored: StoredPart, dynamic?: ThemeDynamicData) => {
+    const page = renderStored(stored.layout, design, stored.id, undefined, dynamic);
+    rendered.push(page);
+    const html = page.html
+      ? `<div class="emvb-theme-${stored.partType}" data-emvb-theme-part="${stored.id}">${page.html}</div>`
+      : "";
+    return { html, css: page.css };
+  };
 
-  const renderPart = async (winner: ThemePartCandidate): Promise<RenderedThemePart | null> => {
-    const stored = parts.find((p) => p.id === winner.id);
+  const renderPart = async (
+    winner: ThemePartCandidate | null,
+  ): Promise<RenderedThemePart | null> => {
+    const stored = winner ? byId.get(winner.id) : undefined;
     if (!stored) return null;
     const layout = readLayout(stored.layout);
     const dynamic =
-      layout && contentWinner && winner.id === contentWinner.id
+      layout && winner === contentWinner
         ? await buildDynamicForContent(stored.partType, context, layout, parts)
         : undefined;
-    const rendered: RenderedPage = renderStored(
-      stored.layout,
-      design,
-      stored.id,
-      undefined,
-      dynamic,
-    );
-    if (rendered.needsTabsRuntime) needsTabsRuntime = true;
-    const html = rendered.html
-      ? `<div class="emvb-theme-${stored.partType}" data-emvb-theme-part="${stored.id}">${rendered.html}</div>`
-      : "";
-    return {
-      id: stored.id,
-      title: stored.title,
-      partType: stored.partType,
-      html,
-      css: rendered.css,
-    };
+    const { html, css } = renderOne(stored, dynamic);
+    return { id: stored.id, title: stored.title, partType: stored.partType, html, css };
   };
 
-  const header = headerWinner ? await renderPart(headerWinner) : null;
-  const footer = footerWinner ? await renderPart(footerWinner) : null;
-  const content = contentWinner ? await renderPart(contentWinner) : null;
+  const header = await renderPart(headerWinner);
+  const footer = await renderPart(footerWinner);
+  const content = await renderPart(contentWinner);
 
   const popups: RenderedPopup[] = [];
   for (const match of popupMatches) {
-    const stored = parts.find((p) => p.id === match.id);
+    const stored = byId.get(match.id);
     if (!stored) continue;
-    const rendered: RenderedPage = renderStored(stored.layout, design, stored.id);
-    if (rendered.needsTabsRuntime) needsTabsRuntime = true;
-    const body = rendered.html
-      ? `<div class="emvb-theme-popup" data-emvb-theme-part="${stored.id}">${rendered.html}</div>`
-      : "";
+    const { html, css } = renderOne(stored);
     popups.push({
       id: stored.id,
       title: stored.title,
-      html: wrapPopupMarkup(stored.id, body, stored.triggers),
-      css: rendered.css,
+      html: wrapPopupMarkup(stored.id, html, stored.triggers),
+      css,
       triggers: stored.triggers,
     });
   }
@@ -323,6 +311,6 @@ export async function resolveThemeParts(
     popups,
     css,
     needsPopupsRuntime: popups.length > 0,
-    needsTabsRuntime,
+    needsTabsRuntime: rendered.some((page) => page.needsTabsRuntime),
   };
 }

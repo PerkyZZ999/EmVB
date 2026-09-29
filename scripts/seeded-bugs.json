@@ -3073,6 +3073,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/theme-part-hooks.test.ts"],
       "expect": "\\(fail\\).*stored as validated"
+    },
+    {
+      "id": "W-086/popup-invalid-triggers-shown",
+      "requirement": "R-062",
+      "description": "a popup with invalid triggers is shown with default triggers instead of failing closed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  if (partType === \"popup\" && !triggers.ok) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*fail closed"
+    },
+    {
+      "id": "W-086/tabs-runtime-first-part-only",
+      "requirement": "R-031",
+      "description": "only the first rendered theme part can turn on the tabs runtime",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "rendered.some((page) => page.needsTabsRuntime)",
+          "replace": "rendered.slice(0, 1).some((page) => page.needsTabsRuntime)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*tabs runtime"
     }
   ]
 }
