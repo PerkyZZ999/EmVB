@@ -2,6 +2,7 @@ import { Button, Input, Select } from "@cloudflare/kumo";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { defaultTriggers, type PopupOpenTrigger, type TriggersDoc } from "../../../core/index.ts";
 import { BUTTON, FIELD } from "../../ui.ts";
+import { TriggerSettings } from "./TriggerSettings.tsx";
 
 type Props = {
   triggers: TriggersDoc | undefined;
@@ -84,70 +85,7 @@ export function TriggersEditor({ triggers, onChange }: Props) {
                 </Select.Option>
               ))}
             </Select>
-            {trigger.type === "delay" && (
-              <Input
-                label="Delay (ms)"
-                className={FIELD}
-                type="number"
-                min={0}
-                max={120000}
-                value={String(trigger.ms)}
-                onChange={(event) =>
-                  updateAt(index, {
-                    type: "delay",
-                    ms: Math.max(0, Number(event.target.value) || 0),
-                  })
-                }
-              />
-            )}
-            {trigger.type === "scroll" && (
-              <Input
-                label="Scroll percent"
-                className={FIELD}
-                type="number"
-                min={0}
-                max={100}
-                value={String(trigger.percent)}
-                onChange={(event) =>
-                  updateAt(index, {
-                    type: "scroll",
-                    percent: Math.min(100, Math.max(0, Number(event.target.value) || 0)),
-                  })
-                }
-              />
-            )}
-            {trigger.type === "click" && (
-              <Input
-                label="CSS selector"
-                className={`${FIELD} emvb-mono`}
-                value={trigger.selector}
-                placeholder=".open-popup"
-                onChange={(event) =>
-                  updateAt(index, { type: "click", selector: event.target.value })
-                }
-              />
-            )}
-            {trigger.type === "exit_intent" && (
-              <p className="emvb-helper">
-                Opens when the pointer leaves toward the top of the viewport (desktop).
-              </p>
-            )}
-            {trigger.type === "inactivity" && (
-              <Input
-                label="Idle time (ms)"
-                className={FIELD}
-                type="number"
-                min={1000}
-                max={120000}
-                value={String(trigger.ms)}
-                onChange={(event) =>
-                  updateAt(index, {
-                    type: "inactivity",
-                    ms: Math.max(1000, Number(event.target.value) || 1000),
-                  })
-                }
-              />
-            )}
+            <TriggerSettings trigger={trigger} onChange={(next) => updateAt(index, next)} />
             <Button
               type="button"
               variant="ghost"
