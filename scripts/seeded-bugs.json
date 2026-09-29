@@ -3344,6 +3344,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/schema/node-shapes.test.ts"],
       "expect": "\\(fail\\).*keep their shape"
+    },
+    {
+      "id": "W-086/text-input-type-missing",
+      "requirement": "R-015",
+      "description": "text inputs lose type=text",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "    ...(tag === \"input\" ? { type: \"text\" } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/form-elements.test.ts"],
+      "expect": "\\(fail\\).*keep their defaults"
+    },
+    {
+      "id": "W-086/checkbox-no-error-slot",
+      "requirement": "R-015",
+      "description": "a checkbox has nowhere to show its validation error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "return fieldBox(attrs, [labelEl, errorSlot(name)]);",
+          "replace": "return fieldBox(attrs, [labelEl]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/form-elements.test.ts"],
+      "expect": "\\(fail\\).*keep their defaults"
     }
   ]
 }
