@@ -401,6 +401,45 @@ describe("keyboard and quick actions (W-020)", () => {
     expect(saved.root.children.map((c) => c.props?.text)).toEqual(["B", "A"]);
   });
 
+  test("↑/↓ walk document order; Enter enters a container and Shift+Enter leaves it", async () => {
+    const layout = {
+      schemaVersion: 1 as const,
+      root: {
+        id: "root0001",
+        type: "container" as const,
+        props: {},
+        children: [
+          { id: "head0001", type: "heading" as const, props: { text: "A", level: 1 } },
+          {
+            id: "box00001",
+            type: "container" as const,
+            props: {},
+            children: [
+              { id: "head0002", type: "heading" as const, props: { text: "B", level: 2 } },
+            ],
+          },
+        ],
+      },
+    };
+    const { fetcher } = fakeServer({ layout });
+    await render(fetcher);
+    await openLayers();
+    await click(document.querySelector('[data-emvb-layer="head0001"] .emvb-layer-select'));
+    const current = () =>
+      document
+        .querySelector('[aria-current="true"]')
+        ?.closest("[data-emvb-layer]")
+        ?.getAttribute("data-emvb-layer");
+    await press("ArrowDown");
+    expect(current()).toBe("box00001");
+    await press("Enter");
+    expect(current()).toBe("head0002");
+    await press("Enter", { shiftKey: true });
+    expect(current()).toBe("box00001");
+    await press("ArrowUp");
+    expect(current()).toBe("head0001");
+  });
+
   test("Ctrl+D does not duplicate while a text field is focused", async () => {
     const { server, fetcher } = fakeServer();
     await render(fetcher);

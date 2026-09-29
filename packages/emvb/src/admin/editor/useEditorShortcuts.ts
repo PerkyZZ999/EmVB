@@ -26,11 +26,31 @@ const isTextField = (target: EventTarget | null) => {
 const inDialog = (target: EventTarget | null) =>
   !!(target as HTMLElement | null)?.closest?.('[role="dialog"], [role="alertdialog"]');
 
+type ArrangeOp = (layout: Layout, id: string) => Arranged;
+
+/** Alt+arrow keys: move the selected element among its siblings or across containers. */
+const ARRANGE_KEYS = new Map<string, ArrangeOp>([
+  ["ArrowUp", moveUp],
+  ["ArrowDown", moveDown],
+  ["ArrowLeft", moveOut],
+  ["ArrowRight", moveIn],
+]);
+
+/** Plain ↑/↓ walk document order; Enter goes to the first child, Shift+Enter to the parent. */
+const TRAVERSE_KEYS = new Map<
+  string,
+  (layout: Layout, id: string, shift: boolean) => string | undefined
+>([
+  ["ArrowDown", nextInOrder],
+  ["ArrowUp", previousInOrder],
+  ["Enter", (layout, id, shift) => (shift ? parentOf(layout, id) : firstChild(layout, id))],
+]);
+
 export type ShortcutHandlers = {
   save: () => void;
   remove: (id: string) => void;
   duplicate: (id: string) => void;
-  arrange: (id: string, run: (layout: Layout, id: string) => Arranged) => void;
+  arrange: (id: string, run: ArrangeOp) => void;
 };
 
 /** Window-level editor shortcuts (W-020): save, duplicate, delete, escape, arrange and traverse. */
@@ -67,34 +87,17 @@ export function useEditorShortcuts({
       return;
     }
     if (!layout || !selected) return;
-    if (event.altKey && event.key === "ArrowUp") {
+    const arrangeOp = event.altKey ? ARRANGE_KEYS.get(event.key) : undefined;
+    if (arrangeOp) {
       event.preventDefault();
-      handlers.current.arrange(selected, moveUp);
-    } else if (event.altKey && event.key === "ArrowDown") {
-      event.preventDefault();
-      handlers.current.arrange(selected, moveDown);
-    } else if (event.altKey && event.key === "ArrowLeft") {
-      event.preventDefault();
-      handlers.current.arrange(selected, moveOut);
-    } else if (event.altKey && event.key === "ArrowRight") {
-      event.preventDefault();
-      handlers.current.arrange(selected, moveIn);
-    } else if (event.key === "ArrowDown") {
-      event.preventDefault();
-      dispatch({ type: "select", id: nextInOrder(layout, selected) });
-    } else if (event.key === "ArrowUp") {
-      event.preventDefault();
-      dispatch({ type: "select", id: previousInOrder(layout, selected) });
-    } else if (event.key === "Enter") {
-      event.preventDefault();
-      if (event.shiftKey) {
-        const parent = parentOf(layout, selected);
-        if (parent) dispatch({ type: "select", id: parent });
-      } else {
-        const child = firstChild(layout, selected);
-        if (child) dispatch({ type: "select", id: child });
-      }
+      handlers.current.arrange(selected, arrangeOp);
+      return;
     }
+    const traverse = TRAVERSE_KEYS.get(event.key);
+    if (!traverse) return;
+    event.preventDefault();
+    const target = traverse(layout, selected, event.shiftKey);
+    if (target) dispatch({ type: "select", id: target });
   }, []);
 
   React.useEffect(() => {

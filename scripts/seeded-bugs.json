@@ -1461,8 +1461,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
-          "search": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      handlers.current.arrange(selected, moveDown);",
-          "replace": "    } else if (event.altKey && event.key === \"ArrowDown\") {\n      event.preventDefault();\n      handlers.current.arrange(selected, moveUp);"
+          "search": "  [\"ArrowDown\", moveDown],",
+          "replace": "  [\"ArrowDown\", moveUp],"
         }
       ],
       "command": [
@@ -2915,6 +2915,20 @@
       ],
       "command": ["bun", "test", "./test/demos/demos-in-sync.test.ts"],
       "expect": "\\(fail\\).*stay in sync"
+    },
+    {
+      "id": "W-086/shift-enter-enters",
+      "requirement": "R-003",
+      "description": "Shift+Enter goes to the first child instead of the parent",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "(shift ? parentOf(layout, id) : firstChild(layout, id))",
+          "replace": "(shift ? firstChild(layout, id) : parentOf(layout, id))"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/editing.test.tsx"],
+      "expect": "\\(fail\\).*Shift\\+Enter"
     }
   ]
 }
