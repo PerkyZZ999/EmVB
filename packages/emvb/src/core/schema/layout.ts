@@ -28,168 +28,131 @@ export const CONTAINER_TAGS = [
 ] as const;
 export const TEXT_TAGS = ["p", "div"] as const;
 
-export const HeadingNode = z.strictObject({
+/** The fields every element has; `props` is the element's own strict props schema. */
+const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) => ({
   id: NodeId,
-  type: z.literal("heading"),
-  props: z.strictObject({
+  type: z.literal(type),
+  props,
+  style: StyleProps.optional(),
+  classes: ClassIds.optional(),
+  htmlId: HtmlId.optional(),
+});
+
+const leafNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
+  z.strictObject(nodeFields(type, props));
+
+const parentNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
+  z.strictObject({
+    ...nodeFields(type, props),
+    get children(): z.ZodType<LayoutNode[]> {
+      return z.array(LayoutNode);
+    },
+  });
+
+export const HeadingNode = leafNode(
+  "heading",
+  z.strictObject({
     text: z.string().max(MAX_TEXT_LENGTH),
     level: z.number().int().min(1).max(6),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
-export const SpacerNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("spacer"),
-  props: z.strictObject({
+export const SpacerNode = leafNode(
+  "spacer",
+  z.strictObject({
     height: Length,
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
-export const DividerNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("divider"),
-  props: z.strictObject({}),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+export const DividerNode = leafNode("divider", z.strictObject({}));
 
-export const TextNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("text"),
-  props: z.strictObject({
+export const TextNode = leafNode(
+  "text",
+  z.strictObject({
     text: z.string().max(MAX_TEXT_LENGTH),
     tag: z.enum(TEXT_TAGS).optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
-export const LabelNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("label"),
-  props: z.strictObject({
+export const LabelNode = leafNode(
+  "label",
+  z.strictObject({
     text: z.string().max(MAX_TEXT_LENGTH),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
-export const LinkNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("link"),
-  props: z.strictObject({
+export const LinkNode = leafNode(
+  "link",
+  z.strictObject({
     text: z.string().max(MAX_TEXT_LENGTH),
     href: z.string().max(2000),
     newTab: z.boolean().optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
-export const ButtonNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("button"),
-  props: z.strictObject({
+export const ButtonNode = leafNode(
+  "button",
+  z.strictObject({
     text: z.string().max(MAX_TEXT_LENGTH),
     href: z.string().max(2000).optional(),
     newTab: z.boolean().optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
-export const ListNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("list"),
-  props: z.strictObject({
+export const ListNode = leafNode(
+  "list",
+  z.strictObject({
     ordered: z.boolean().optional(),
     items: z.array(z.string().max(MAX_TEXT_LENGTH)).max(200),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
 /** YouTube/Vimeo privacy embed or media-library video (W-026 / R-013). */
-export const VideoNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("video"),
-  props: z.strictObject({
+export const VideoNode = leafNode(
+  "video",
+  z.strictObject({
     url: z.string().max(2000),
     title: z.string().min(1).max(200),
     mediaId: z.string().min(1).max(128).optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
 /** Bundled Lucide icon by id (W-025 / A-04). Unknown ids stay on save; renderer shows a placeholder. */
-export const IconNode = z
-  .strictObject({
-    id: NodeId,
-    type: z.literal("icon"),
-    props: z.strictObject({
-      iconId: z.string().min(1).max(64),
-      size: z.number().int().positive().max(512).optional(),
-      decorative: z.boolean().optional(),
-      title: z.string().max(200).optional(),
-    }),
-    style: StyleProps.optional(),
-    classes: ClassIds.optional(),
-    htmlId: HtmlId.optional(),
-  })
-  .refine((node) => node.props.decorative === true || (node.props.title?.length ?? 0) > 0, {
-    message: "Title is required unless the icon is marked decorative.",
-    path: ["props", "title"],
-  });
+export const IconNode = leafNode(
+  "icon",
+  z.strictObject({
+    iconId: z.string().min(1).max(64),
+    size: z.number().int().positive().max(512).optional(),
+    decorative: z.boolean().optional(),
+    title: z.string().max(200).optional(),
+  }),
+).refine((node) => node.props.decorative === true || (node.props.title?.length ?? 0) > 0, {
+  message: "Title is required unless the icon is marked decorative.",
+  path: ["props", "title"],
+});
 
 /** Image from the media library or a URL (W-024 / R-007). Alt required unless decorative. */
-export const ImageNode = z
-  .strictObject({
-    id: NodeId,
-    type: z.literal("image"),
-    props: z.strictObject({
-      src: z.string().max(2000),
-      alt: z.string().max(500),
-      decorative: z.boolean().optional(),
-      width: z.number().int().positive().max(10000).optional(),
-      height: z.number().int().positive().max(10000).optional(),
-      mediaId: z.string().min(1).max(128).optional(),
-    }),
-    style: StyleProps.optional(),
-    classes: ClassIds.optional(),
-    htmlId: HtmlId.optional(),
-  })
-  .refine((node) => node.props.decorative === true || node.props.alt.length > 0, {
-    message: "Alt text is required unless the image is marked decorative.",
-    path: ["props", "alt"],
-  });
+export const ImageNode = leafNode(
+  "image",
+  z.strictObject({
+    src: z.string().max(2000),
+    alt: z.string().max(500),
+    decorative: z.boolean().optional(),
+    width: z.number().int().positive().max(10000).optional(),
+    height: z.number().int().positive().max(10000).optional(),
+    mediaId: z.string().min(1).max(128).optional(),
+  }),
+).refine((node) => node.props.decorative === true || node.props.alt.length > 0, {
+  message: "Alt text is required unless the image is marked decorative.",
+  path: ["props", "alt"],
+});
 
-export const ContainerNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("container"),
-  props: z.strictObject({
+export const ContainerNode = parentNode(
+  "container",
+  z.strictObject({
     tag: z.enum(CONTAINER_TAGS).optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-  get children(): z.ZodType<LayoutNode[]> {
-    return z.array(LayoutNode);
-  },
-});
+);
 
 /** Field name on a forms-plugin form (D-015). */
 const FieldName = z
@@ -198,70 +161,29 @@ const FieldName = z
   .max(80)
   .regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, "Field names start with a letter");
 
-export const DivBlockNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("div-block"),
-  props: z.strictObject({}),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-  get children(): z.ZodType<LayoutNode[]> {
-    return z.array(LayoutNode);
-  },
-});
+export const DivBlockNode = parentNode("div-block", z.strictObject({}));
 
-export const FlexboxNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("flexbox"),
-  props: z.strictObject({}),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-  get children(): z.ZodType<LayoutNode[]> {
-    return z.array(LayoutNode);
-  },
-});
+export const FlexboxNode = parentNode("flexbox", z.strictObject({}));
 
-export const SvgNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("svg"),
-  props: z.strictObject({
+export const SvgNode = leafNode(
+  "svg",
+  z.strictObject({
     /** Sanitized SVG markup (allowlisted tags/attrs only). */
     markup: z.string().max(32768),
     title: z.string().max(MAX_TEXT_LENGTH).optional(),
     decorative: z.boolean().optional(),
     size: z.number().int().positive().max(2048).optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
-export const TabPanelNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("tab-panel"),
-  props: z.strictObject({
+export const TabPanelNode = parentNode(
+  "tab-panel",
+  z.strictObject({
     label: z.string().min(1).max(MAX_TEXT_LENGTH),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-  get children(): z.ZodType<LayoutNode[]> {
-    return z.array(LayoutNode);
-  },
-});
+);
 
-const TabsNodeSchema = z.strictObject({
-  id: NodeId,
-  type: z.literal("tabs"),
-  props: z.strictObject({}),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-  get children(): z.ZodType<LayoutNode[]> {
-    return z.array(LayoutNode);
-  },
-});
+const TabsNodeSchema = parentNode("tabs", z.strictObject({}));
 
 export const FORM_FIELD_TYPES = [
   "text-input",
@@ -272,20 +194,13 @@ export const FORM_FIELD_TYPES = [
   "submit",
 ] as const;
 
-export const FormNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("form"),
-  props: z.strictObject({
+export const FormNode = parentNode(
+  "form",
+  z.strictObject({
     /** Empty until the editor binds a forms-plugin form (W-036). */
     formId: z.string().max(64),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-  get children(): z.ZodType<LayoutNode[]> {
-    return z.array(LayoutNode);
-  },
-});
+);
 
 const InputFieldProps = z.strictObject({
   field: FieldName,
@@ -293,140 +208,71 @@ const InputFieldProps = z.strictObject({
   placeholder: z.string().max(200).optional(),
 });
 
-export const TextInputNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("text-input"),
-  props: InputFieldProps,
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+export const TextInputNode = leafNode("text-input", InputFieldProps);
 
-export const TextareaNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("textarea"),
-  props: InputFieldProps,
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+export const TextareaNode = leafNode("textarea", InputFieldProps);
 
-export const SelectNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("select"),
-  props: InputFieldProps,
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+export const SelectNode = leafNode("select", InputFieldProps);
 
-export const CheckboxNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("checkbox"),
-  props: z.strictObject({
+export const CheckboxNode = leafNode(
+  "checkbox",
+  z.strictObject({
     field: FieldName,
     label: z.string().max(200).optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
-export const RadioNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("radio"),
-  props: InputFieldProps,
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+export const RadioNode = leafNode("radio", InputFieldProps);
 
-export const SubmitNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("submit"),
-  props: z.strictObject({
+export const SubmitNode = leafNode(
+  "submit",
+  z.strictObject({
     label: z.string().min(1).max(80).optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
 /** Dynamic post title from ThemeDynamicData (S7d). */
-export const PostTitleNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("post-title"),
-  props: z.strictObject({
+export const PostTitleNode = leafNode(
+  "post-title",
+  z.strictObject({
     level: z.number().int().min(1).max(6).optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
 /** Dynamic post excerpt (escaped text). */
-export const PostExcerptNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("post-excerpt"),
-  props: z.strictObject({}),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+export const PostExcerptNode = leafNode("post-excerpt", z.strictObject({}));
 
 /** Dynamic post body from Portable Text / string (sanitized via VNode serialize). */
-export const PostContentNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("post-content"),
-  props: z.strictObject({}),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+export const PostContentNode = leafNode("post-content", z.strictObject({}));
 
 /** Dynamic featured image when a URL is available. */
-export const PostImageNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("post-image"),
-  props: z.strictObject({
+export const PostImageNode = leafNode(
+  "post-image",
+  z.strictObject({
     decorative: z.boolean().optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
 /** Permalink link; empty text uses the post title. */
-export const PostLinkNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("post-link"),
-  props: z.strictObject({
+export const PostLinkNode = leafNode(
+  "post-link",
+  z.strictObject({
     text: z.string().max(MAX_TEXT_LENGTH).optional(),
     newTab: z.boolean().optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-});
+);
 
 /**
  * Repeats its item template for each post in ThemeDynamicData.posts.
  * When `itemPartId` is set, the host supplies that Loop Item layout in loopTemplates;
  * otherwise children are the inline item template.
  */
-export const LoopNode = z.strictObject({
-  id: NodeId,
-  type: z.literal("loop"),
-  props: z.strictObject({
+export const LoopNode = parentNode(
+  "loop",
+  z.strictObject({
     itemPartId: z.string().max(128).optional(),
   }),
-  style: StyleProps.optional(),
-  classes: ClassIds.optional(),
-  htmlId: HtmlId.optional(),
-  get children(): z.ZodType<LayoutNode[]> {
-    return z.array(LayoutNode);
-  },
-});
+);
 
 /** Known element type strings (everything else is an UnknownNode). */
 export const KNOWN_ELEMENT_TYPES = [

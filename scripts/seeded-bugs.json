@@ -1701,8 +1701,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": ".refine((node) => node.props.decorative === true || node.props.alt.length > 0, {\n    message: \"Alt text is required unless the image is marked decorative.\",\n    path: [\"props\", \"alt\"],\n  });",
-          "replace": ".refine(() => true, {\n    message: \"Alt text is required unless the image is marked decorative.\",\n    path: [\"props\", \"alt\"],\n  });"
+          "search": ".refine((node) => node.props.decorative === true || node.props.alt.length > 0, {",
+          "replace": ".refine(() => true, {"
         }
       ],
       "command": [
@@ -3330,6 +3330,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/api-client.test.ts"],
       "expect": "\\(fail\\).*publishThemePart posts the revision"
+    },
+    {
+      "id": "W-086/node-field-order-changed",
+      "requirement": "R-002",
+      "description": "the shared node fields change order, so saved layouts serialise differently",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "  classes: ClassIds.optional(),\n  htmlId: HtmlId.optional(),\n});",
+          "replace": "  htmlId: HtmlId.optional(),\n  classes: ClassIds.optional(),\n});"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/node-shapes.test.ts"],
+      "expect": "\\(fail\\).*keep their shape"
     }
   ]
 }
