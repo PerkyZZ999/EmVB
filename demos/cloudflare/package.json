@@ -11,10 +11,10 @@
   "dependencies": {
     "@astrojs/cloudflare": "^14.3.3",
     "@astrojs/react": "^7.0.0",
-    "@emdash-cms/cloudflare": "0.41.0",
-    "@emdash-cms/plugin-forms": "0.2.8",
+    "@emdash-cms/cloudflare": "1.0.1",
+    "@emdash-cms/plugin-forms": "0.2.9",
     "astro": "^7.3.5",
-    "emdash": "0.41.0",
+    "emdash": "1.0.1",
     "emvb": "workspace:*",
     "oxc-transform-react": "^0.151.0",
     "react": "19.3.0",

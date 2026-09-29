@@ -1,6 +1,13 @@
 import { SchemaRegistry } from "emdash";
 import { createDialect } from "emdash/db/sqlite";
-import { EmDashRuntime, dispatchPluginApiRequest, type UserInfo } from "emdash/plugin-test-runtime";
+// EmDash 1.0 moved the test runtime under `emdash/internal/` (upgrade guide). `@emdash-cms/plugin-test`
+// is the public harness but is workerd-backed for sandboxed plugins; EmVB is a native plugin and needs
+// the in-process runtime that package is built on.
+import {
+  EmDashRuntime,
+  dispatchPluginApiRequest,
+  type UserInfo,
+} from "emdash/internal/plugin-test-runtime";
 import { PAGES_COLLECTION, PLUGIN_ID } from "../../src/constants.ts";
 import { createPlugin } from "../../src/server/plugin.ts";
 
