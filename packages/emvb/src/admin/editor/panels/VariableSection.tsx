@@ -1,14 +1,14 @@
 import { Button, Input } from "@cloudflare/kumo";
-import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { TrashIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   renameVariable,
-  slugify,
   type DesignSystem,
   type Layout,
   type VariableKind,
 } from "../../../core/index.ts";
-import { BUTTON, FIELD, SOLID_PRIMARY } from "../../ui.ts";
+import { BUTTON, FIELD } from "../../ui.ts";
+import { CreateRow, matches, SectionHead, uniqueId } from "./site-list.tsx";
 
 const VAR_TOKEN: Record<VariableKind, (id: string) => string> = {
   color: (id) => `--emvb-c-${id}`,
@@ -17,21 +17,27 @@ const VAR_TOKEN: Record<VariableKind, (id: string) => string> = {
   spacing: (id) => `--emvb-s-${id}`,
 };
 
-const uniqueVarId = (design: DesignSystem, kind: VariableKind, name: string) => {
-  const base = slugify(name).slice(0, 34) || kind;
-  const listKey =
-    kind === "color"
-      ? "colors"
-      : kind === "font"
-        ? "fonts"
-        : kind === "fontSize"
-          ? "fontSizes"
-          : "spacings";
-  const taken = new Set((design.variables[listKey] ?? []).map((v) => v.id));
-  let id = base;
-  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
-  return id;
+const LIST_KEY = {
+  color: "colors",
+  font: "fonts",
+  fontSize: "fontSizes",
+  spacing: "spacings",
+} as const satisfies Record<VariableKind, keyof DesignSystem["variables"]>;
+
+const NEW_VALUE: Record<VariableKind, string> = {
+  color: "#0055ff",
+  font: "Noto Sans, sans-serif",
+  fontSize: "16",
+  spacing: "16",
 };
+
+const isLength = (kind: VariableKind) => kind === "fontSize" || kind === "spacing";
+
+/** A px length from a text field, or undefined unless it is a non-negative number. */
+function pxValue(text: string) {
+  const value = Number(text);
+  return Number.isFinite(value) && value >= 0 ? { value, unit: "px" as const } : undefined;
+}
 
 export function VariableSection({
   title,
@@ -47,90 +53,45 @@ export function VariableSection({
   onSave: (design: DesignSystem) => Promise<void>;
   onAskDelete: (id: string, name: string) => void;
 }) {
-  const listKey =
-    kind === "color"
-      ? "colors"
-      : kind === "font"
-        ? "fonts"
-        : kind === "fontSize"
-          ? "fontSizes"
-          : "spacings";
+  const listKey = LIST_KEY[kind];
   const items = design.variables[listKey] ?? [];
   const [creating, setCreating] = React.useState(false);
   const [filter, setFilter] = React.useState("");
   const [name, setName] = React.useState("");
-  const [value, setValue] = React.useState(
-    kind === "color" ? "#0055ff" : kind === "font" ? "Noto Sans, sans-serif" : "16",
-  );
+  const [value, setValue] = React.useState(NEW_VALUE[kind]);
+
+  const saveList = (list: readonly object[]) =>
+    void onSave({ ...design, variables: { ...design.variables, [listKey]: list } });
 
   const q = filter.trim().toLowerCase();
   const visible = q
-    ? items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(q) ||
-          item.id.toLowerCase().includes(q) ||
-          VAR_TOKEN[kind](item.id).toLowerCase().includes(q),
-      )
+    ? items.filter((item) => matches(q, item.name, item.id, VAR_TOKEN[kind](item.id)))
     : items;
 
   const create = async () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    const id = uniqueVarId(design, kind, trimmed);
-    let next = design;
-    if (kind === "color") {
-      next = {
-        ...design,
-        variables: {
-          ...design.variables,
-          colors: [...design.variables.colors, { id, name: trimmed, value }],
-        },
-      };
-    } else if (kind === "font") {
-      next = {
-        ...design,
-        variables: {
-          ...design.variables,
-          fonts: [...(design.variables.fonts ?? []), { id, name: trimmed, value }],
-        },
-      };
-    } else {
-      const num = Number(value);
-      if (!Number.isFinite(num) || num < 0) return;
-      const entry = { id, name: trimmed, value: { value: num, unit: "px" as const } };
-      next = {
-        ...design,
-        variables: {
-          ...design.variables,
-          [listKey]: [...(design.variables[listKey] ?? []), entry],
-        },
-      };
-    }
-    await onSave(next);
+    const id = uniqueId(
+      trimmed,
+      kind,
+      items.map((item) => item.id),
+    );
+    const length = isLength(kind) ? pxValue(value) : undefined;
+    if (isLength(kind) && !length) return;
+    const entry = { id, name: trimmed, value: length ?? value };
+    await onSave({ ...design, variables: { ...design.variables, [listKey]: [...items, entry] } });
     setCreating(false);
     setName("");
   };
 
   return (
     <section className="emvb-site-section emvb-site-card" data-emvb-var-kind={kind}>
-      <div className="emvb-site-section-head">
-        <h3 className="emvb-field-label">
-          {title}
-          <span className="emvb-site-count" data-emvb-var-count="">
-            {items.length}
-          </span>
-        </h3>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className={BUTTON}
-          icon={<PlusIcon aria-hidden="true" />}
-          onClick={() => setCreating(true)}
-        >
-          New
-        </Button>
-      </div>
+      <SectionHead
+        title={title}
+        count={items.length}
+        countProps={{ "data-emvb-var-count": "" }}
+        onNew={() => setCreating(true)}
+      />
       {items.length > 3 && (
         <div data-emvb-var-filter={kind}>
           <Input
@@ -175,22 +136,20 @@ export function VariableSection({
                     void onSave(renameVariable(design, item.id, kind, nextName));
                   }}
                 />
-                {kind === "color" || kind === "font" ? (
+                {!isLength(kind) ? (
                   <Input
                     label="Value"
                     className={FIELD}
                     value={"value" in item && typeof item.value === "string" ? item.value : ""}
                     onChange={(event) => {
                       const nextValue = event.target.value;
-                      const list = (design.variables[listKey] ?? []).map((entry) =>
-                        entry.id === item.id
-                          ? Object.assign({}, entry, { value: nextValue })
-                          : entry,
+                      saveList(
+                        items.map((entry) =>
+                          entry.id === item.id
+                            ? Object.assign({}, entry, { value: nextValue })
+                            : entry,
+                        ),
                       );
-                      void onSave({
-                        ...design,
-                        variables: { ...design.variables, [listKey]: list },
-                      });
                     }}
                   />
                 ) : (
@@ -204,19 +163,15 @@ export function VariableSection({
                         : ""
                     }
                     onChange={(event) => {
-                      const num = Number(event.target.value);
-                      if (!Number.isFinite(num) || num < 0) return;
-                      const list = (design.variables[listKey] ?? []).map((entry) =>
-                        entry.id === item.id
-                          ? Object.assign({}, entry, {
-                              value: { value: num, unit: "px" as const },
-                            })
-                          : entry,
+                      const length = pxValue(event.target.value);
+                      if (!length) return;
+                      saveList(
+                        items.map((entry) =>
+                          entry.id === item.id
+                            ? Object.assign({}, entry, { value: length })
+                            : entry,
+                        ),
                       );
-                      void onSave({
-                        ...design,
-                        variables: { ...design.variables, [listKey]: list },
-                      });
                     }}
                   />
                 )}
@@ -238,7 +193,12 @@ export function VariableSection({
         })}
       </ul>
       {creating && (
-        <div className="emvb-site-create emvb-site-elevated" data-emvb-var-create={kind}>
+        <CreateRow
+          rowProps={{ "data-emvb-var-create": kind }}
+          submitLabel="Create"
+          onCancel={() => setCreating(false)}
+          onCreate={() => void create()}
+        >
           <Input
             label="Name"
             className={FIELD}
@@ -246,31 +206,12 @@ export function VariableSection({
             onChange={(e) => setName(e.target.value)}
           />
           <Input
-            label={kind === "fontSize" || kind === "spacing" ? "Value (px)" : "Value"}
+            label={isLength(kind) ? "Value (px)" : "Value"}
             className={FIELD}
             value={value}
             onChange={(e) => setValue(e.target.value)}
           />
-          <div className="emvb-dialog-actions">
-            <Button
-              type="button"
-              variant="secondary"
-              className={BUTTON}
-              onClick={() => setCreating(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              className={BUTTON}
-              style={SOLID_PRIMARY}
-              onClick={() => void create()}
-            >
-              Create
-            </Button>
-          </div>
-        </div>
+        </CreateRow>
       )}
     </section>
   );

@@ -1,15 +1,15 @@
 import { Button, Input } from "@cloudflare/kumo";
-import { CopySimpleIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { CopySimpleIcon, TrashIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   duplicateClass,
   findClassUsages,
-  slugify,
   type DesignSystem,
   type Layout,
   type StyleProps,
 } from "../../../core/index.ts";
-import { BUTTON, FIELD, SOLID_PRIMARY } from "../../ui.ts";
+import { BUTTON, FIELD } from "../../ui.ts";
+import { CreateRow, matches, SectionHead, uniqueId } from "./site-list.tsx";
 import { StyleRow } from "./settings/StyleRow.tsx";
 
 const CLASS_STYLE_KEYS = [
@@ -28,14 +28,6 @@ const CLASS_STYLE_KEYS = [
   "justifyContent",
   "alignItems",
 ] as const satisfies ReadonlyArray<keyof StyleProps>;
-
-const uniqueClassId = (design: DesignSystem, name: string) => {
-  const base = slugify(name).slice(0, 34) || "class";
-  const taken = new Set((design.classes ?? []).map((c) => c.id));
-  let id = base;
-  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
-  return id;
-};
 
 export function ClassesSection({
   design,
@@ -56,18 +48,17 @@ export function ClassesSection({
 
   const q = filter.trim().toLowerCase();
   const visible = q
-    ? classes.filter(
-        (cls) =>
-          cls.name.toLowerCase().includes(q) ||
-          cls.id.toLowerCase().includes(q) ||
-          `emvb-k-${cls.id}`.includes(q),
-      )
+    ? classes.filter((cls) => matches(q, cls.name, cls.id, `emvb-k-${cls.id}`))
     : classes;
 
   const create = async () => {
     const trimmed = name.trim();
     if (!trimmed) return;
-    const id = uniqueClassId(design, trimmed);
+    const id = uniqueId(
+      trimmed,
+      "class",
+      classes.map((c) => c.id),
+    );
     const next = { id, name: trimmed, style: {} as StyleProps };
     await onSave({ ...design, classes: [...classes, next] });
     setCreating(false);
@@ -81,22 +72,7 @@ export function ClassesSection({
         Cascade: variables → classes (applied order on the element; later wins) → local styles.
         Editing a class updates every element that uses it.
       </p>
-      <div className="emvb-site-section-head">
-        <h3 className="emvb-field-label">
-          Classes
-          <span className="emvb-site-count">{classes.length}</span>
-        </h3>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className={BUTTON}
-          icon={<PlusIcon aria-hidden="true" />}
-          onClick={() => setCreating(true)}
-        >
-          New
-        </Button>
-      </div>
+      <SectionHead title="Classes" count={classes.length} onNew={() => setCreating(true)} />
       {classes.length > 3 && (
         <Input
           label="Filter"
@@ -197,33 +173,19 @@ export function ClassesSection({
         })}
       </ul>
       {creating && (
-        <div className="emvb-site-create emvb-site-elevated" data-emvb-class-create="">
+        <CreateRow
+          rowProps={{ "data-emvb-class-create": "" }}
+          submitLabel="Create class"
+          onCancel={() => setCreating(false)}
+          onCreate={() => void create()}
+        >
           <Input
             label="Name"
             className={FIELD}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <div className="emvb-dialog-actions">
-            <Button
-              type="button"
-              variant="secondary"
-              className={BUTTON}
-              onClick={() => setCreating(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              className={BUTTON}
-              style={SOLID_PRIMARY}
-              onClick={() => void create()}
-            >
-              Create class
-            </Button>
-          </div>
-        </div>
+        </CreateRow>
       )}
     </section>
   );

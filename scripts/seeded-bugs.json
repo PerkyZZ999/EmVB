@@ -3274,6 +3274,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/pages/lists.test.tsx"],
       "expect": "\\(fail\\).*ThemePartList > renders rows"
+    },
+    {
+      "id": "W-086/site-id-reused",
+      "requirement": "R-021",
+      "description": "a new variable or class reuses an existing id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/site-list.tsx",
+          "search": "for (let n = 2; used.has(id); n++)",
+          "replace": "for (let n = 2; false; n++)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
+      "expect": "\\(fail\\).*ClassesSection"
+    },
+    {
+      "id": "W-086/length-var-negative-saved",
+      "requirement": "R-021",
+      "description": "typing an invalid px value still saves the variable list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "                      if (!length) return;\n",
+          "replace": "                      if (!length) return saveList(items);\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
+      "expect": "\\(fail\\).*fontSize: list"
     }
   ]
 }
