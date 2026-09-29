@@ -3027,6 +3027,24 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-golden.test.ts"],
       "expect": "\\(fail\\).*<title>Logo"
+    },
+    {
+      "id": "W-086/taxonomy-label-ignores-slug",
+      "requirement": "R-061",
+      "description": "a taxonomy rule with a term is listed as All <taxonomy>",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/theme-api.ts",
+          "search": "args?.[\"slug\"] ? `${arg(args, \"taxonomy\")}:${args[\"slug\"]}` : `All ${arg(args, \"taxonomy\")}`",
+          "replace": "`All ${arg(args, \"taxonomy\")}`"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/ConditionsEditor.test.ts"
+      ],
+      "expect": "\\(fail\\).*labels every rule kind"
     }
   ]
 }

@@ -44,4 +44,69 @@ describe("summarizeConditions", () => {
       }),
     ).toBe("Search results");
   });
+
+  test("labels every rule kind, with its arguments, and falls back to group/name", () => {
+    const rule = (group: string, name: string, args: Record<string, unknown> = {}) => ({
+      op: "include",
+      group,
+      name,
+      args,
+    });
+    const label = (r: ReturnType<typeof rule>) => summarizeConditions({ rules: [r] });
+    expect(
+      [
+        rule("general", "entire_site"),
+        rule("singular", "front"),
+        rule("singular", "not_found"),
+        rule("singular", "collection", { collection: "posts" }),
+        rule("singular", "collection"),
+        rule("singular", "entry", { collection: "pages" }),
+        rule("archive", "collection", { collection: "posts" }),
+        rule("archive", "search"),
+        rule("archive", "taxonomy", { taxonomy: "category", slug: "news" }),
+        rule("archive", "taxonomy", { taxonomy: "tag" }),
+        rule("archive", "taxonomy"),
+        rule("singular", "all"),
+        rule("archive", "all"),
+        rule("general", "entry"),
+        { op: "include" } as ReturnType<typeof rule>,
+      ].map(label),
+    ).toEqual([
+      "Entire site",
+      "Front page",
+      "404",
+      "Singular: posts",
+      "Singular: ?",
+      "Entry in pages",
+      "Archive: posts",
+      "Search results",
+      "category:news",
+      "All tag",
+      "All ?",
+      "All singular",
+      "All archives",
+      "general/entry",
+      "?/?",
+    ]);
+  });
+
+  test("invalid, empty and mixed condition docs", () => {
+    expect(summarizeConditions("{not json")).toBe("Invalid conditions");
+    expect(summarizeConditions(null)).toBe("No conditions");
+    expect(summarizeConditions({ rules: [] })).toBe("No conditions");
+    expect(summarizeConditions({ rules: [{ op: "other", group: "archive", name: "all" }] })).toBe(
+      "No conditions",
+    );
+    expect(
+      summarizeConditions(
+        JSON.stringify({
+          rules: [
+            { op: "include", group: "singular", name: "front" },
+            { op: "include", group: "archive", name: "search" },
+            { op: "exclude", group: "singular", name: "not_found" },
+          ],
+        }),
+      ),
+    ).toBe("Front page · Search results · Exclude: 404");
+  });
 });

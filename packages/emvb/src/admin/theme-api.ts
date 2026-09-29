@@ -53,29 +53,30 @@ export function partTypeLabel(type: ThemePartType): string {
   return THEME_PART_TYPE_LABELS[type];
 }
 
+type RuleArgs = Record<string, unknown> | undefined;
+
+const arg = (args: RuleArgs, key: string) => String(args?.[key] ?? "?");
+
+/** Short labels for the Theme Builder list, keyed by `group/name`. */
+const RULE_LABELS: Record<string, (args: RuleArgs) => string> = {
+  "general/entire_site": () => "Entire site",
+  "singular/front": () => "Front page",
+  "singular/not_found": () => "404",
+  "singular/collection": (args) => `Singular: ${arg(args, "collection")}`,
+  "singular/entry": (args) => `Entry in ${arg(args, "collection")}`,
+  "singular/all": () => "All singular",
+  "archive/collection": (args) => `Archive: ${arg(args, "collection")}`,
+  "archive/search": () => "Search results",
+  "archive/taxonomy": (args) =>
+    args?.["slug"] ? `${arg(args, "taxonomy")}:${args["slug"]}` : `All ${arg(args, "taxonomy")}`,
+  "archive/all": () => "All archives",
+};
+
 function conditionRuleLabel(r: unknown): string {
-  const rule = r as { group?: string; name?: string; args?: Record<string, unknown> };
-  if (rule.group === "general" && rule.name === "entire_site") return "Entire site";
-  if (rule.group === "singular" && rule.name === "front") return "Front page";
-  if (rule.group === "singular" && rule.name === "not_found") return "404";
-  if (rule.group === "singular" && rule.name === "collection") {
-    return `Singular: ${String(rule.args?.["collection"] ?? "?")}`;
-  }
-  if (rule.group === "singular" && rule.name === "entry") {
-    return `Entry in ${String(rule.args?.["collection"] ?? "?")}`;
-  }
-  if (rule.group === "archive" && rule.name === "collection") {
-    return `Archive: ${String(rule.args?.["collection"] ?? "?")}`;
-  }
-  if (rule.group === "archive" && rule.name === "search") return "Search results";
-  if (rule.group === "archive" && rule.name === "taxonomy") {
-    const tax = String(rule.args?.["taxonomy"] ?? "?");
-    const slug = rule.args?.["slug"];
-    return slug ? `${tax}:${slug}` : `All ${tax}`;
-  }
-  if (rule.group === "singular" && rule.name === "all") return "All singular";
-  if (rule.group === "archive" && rule.name === "all") return "All archives";
-  return `${rule.group ?? "?"}/${rule.name ?? "?"}`;
+  const rule = r as { group?: string; name?: string; args?: RuleArgs };
+  const key = `${rule.group ?? "?"}/${rule.name ?? "?"}`;
+  const label = Object.hasOwn(RULE_LABELS, key) ? RULE_LABELS[key] : undefined;
+  return label ? label(rule.args) : key;
 }
 
 export function summarizeConditions(raw: unknown): string {
