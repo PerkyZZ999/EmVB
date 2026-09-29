@@ -37,8 +37,8 @@
     "evlog": "2.29.0",
     "fallow": "3.30.0",
     "happy-dom": "20.14.5",
-    "oxfmt": "0.70.0",
-    "oxlint": "1.85.0",
+    "oxfmt": "0.71.0",
+    "oxlint": "1.86.0",
     "typescript": "7.0.2"
   }
 }
