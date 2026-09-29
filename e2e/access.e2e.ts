@@ -1,9 +1,9 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
-import { api, createPage, ensureEmvbSetup } from "./support/api.ts";
+import { api, createPage, setUpEmvbOnce } from "./support/api.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
+import { EDITOR } from "./support/helpers.ts";
 
 const PAGES = "/_emdash/admin/plugins/emvb/pages";
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 const NO_ACCESS = "You don't have access to EmVB";
 
 const pageLayout = {
@@ -28,11 +28,7 @@ test.afterAll(() => {
 });
 
 // Page saves need the `emvb_pages` collection, and a new database has none until setup runs.
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
+setUpEmvbOnce();
 
 const sidebarLink = (page: Page) =>
   page.getByRole("complementary", { name: "Admin navigation" }).locator(`a[href$="${PAGES}"]`);

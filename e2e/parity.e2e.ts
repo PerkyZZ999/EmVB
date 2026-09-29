@@ -1,16 +1,10 @@
 import { expect, test, type FrameLocator, type Page } from "@playwright/test";
-import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
-import { unique } from "./support/helpers.ts";
-
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
+import { api, createPage, getPage, setUpEmvbOnce } from "./support/api.ts";
+import { openEditor, unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
+setUpEmvbOnce();
 
 /** Nested 3-deep flex layout (W-023). */
 const nestedLayout = {
@@ -63,10 +57,7 @@ test("nested 3-deep flex styles match in the canvas and on the published page", 
   const slug = `parity-${unique()}`;
   const id = await createPage(request, "Parity nest", nestedLayout, slug);
 
-  await page.goto(`${EDITOR}?entry=${id}`);
-  await expect(page.locator("[data-emvb-editor] .emvb-topbar-title")).toBeVisible({
-    timeout: 20_000,
-  });
+  await openEditor(page, id);
   const frame = page.frameLocator("iframe[data-emvb-canvas]");
   await expect(frame.locator(".emvb-heading")).toHaveText("Deep");
 

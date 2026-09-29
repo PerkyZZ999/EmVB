@@ -1,23 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { XSS_CORPUS } from "../packages/emvb/test/fixtures/xss.ts";
-import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
+import { createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
 import { unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
-
-async function publish(request: Parameters<typeof getPage>[0], id: string) {
-  const { rev } = await getPage(request, id);
-  expect(
-    (await api(request, "POST", `/_emdash/api/content/emvb_pages/${id}/publish`, { _rev: rev }))
-      .status,
-  ).toBe(200);
-}
+setUpEmvbOnce();
 
 test("XSS corpus strings stay inert on the published page (W-042)", async ({ page, request }) => {
   const slug = `xss-${unique()}`;
@@ -44,7 +32,7 @@ test("XSS corpus strings stay inert on the published page (W-042)", async ({ pag
     },
   };
   const id = await createPage(request, "XSS corpus", layout, slug);
-  await publish(request, id);
+  await publishPage(request, id);
 
   const dialogs: string[] = [];
   page.on("dialog", (dialog) => {

@@ -1,28 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { successSignalLayout } from "../packages/emvb/src/core/forms/success-layout.ts";
-import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
+import { api, createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
 import { setClass, setColor } from "./support/design.ts";
 import { createContactForm, listSubmissions } from "./support/forms.ts";
 import { uploadEmvbPixel } from "./support/media.ts";
-import { canvas, overlay, unique } from "./support/helpers.ts";
-
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
+import { EDITOR, canvas, overlay, saveStatus, unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
-
-async function publish(request: Parameters<typeof getPage>[0], id: string) {
-  const { rev } = await getPage(request, id);
-  const result = await api(request, "POST", `/_emdash/api/content/emvb_pages/${id}/publish`, {
-    _rev: rev,
-  });
-  expect(result.status).toBe(200);
-}
+setUpEmvbOnce();
 
 test("BRIEF success signal: build, preview, publish, submit, restyle (W-039)", async ({
   page,
@@ -61,7 +47,7 @@ test("BRIEF success signal: build, preview, publish, submit, restyle (W-039)", a
     await overlay(page)
       .getByRole("button", { name: /Save draft/ })
       .click();
-    await expect(overlay(page).locator(".emvb-save-status")).toContainText("Saved", {
+    await expect(saveStatus(page)).toContainText("Saved", {
       timeout: 15_000,
     });
 
@@ -82,7 +68,7 @@ test("BRIEF success signal: build, preview, publish, submit, restyle (W-039)", a
     expect(previewHtml).toContain("data-ec-form");
 
     // Publish
-    await publish(request, id);
+    await publishPage(request, id);
 
     // 2. Public page matches canvas content; no EmVB editor JS / data-emvb
     const publicHtml = await (await request.get(`/${slug}`)).text();

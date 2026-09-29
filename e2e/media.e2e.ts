@@ -1,9 +1,8 @@
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
-import { createPage, ensureEmvbSetup, getPage, parsed } from "./support/api.ts";
-import { canvas, overlay, unique } from "./support/helpers.ts";
+import { createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
+import { canvas, openEditor, openLayers, overlay, saveStatus, unique } from "./support/helpers.ts";
 
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 const PIXEL = path.join(process.cwd(), "e2e/fixtures/emvb-pixel.png");
 
 const imageLayout = () => ({
@@ -25,23 +24,7 @@ const imageLayout = () => ({
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
-
-const saveStatus = (page: Page) => overlay(page).locator(".emvb-save-status");
-
-async function openEditor(page: Page, id: string) {
-  await page.goto(`${EDITOR}?entry=${id}`);
-  await expect(overlay(page).locator(".emvb-topbar-title")).toBeVisible({ timeout: 20_000 });
-}
-
-async function openLayers(page: Page) {
-  if ((await overlay(page).locator('[data-emvb-panel="layers"]').count()) > 0) return;
-  await overlay(page).getByRole("tab", { name: "Layers" }).click();
-}
+setUpEmvbOnce();
 
 async function selectImage(page: Page) {
   // Empty-src images are a zero-size span until the canvas CSS kicks in — Layers is reliable.

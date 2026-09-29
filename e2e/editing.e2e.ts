@@ -1,9 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { heading, layoutOfBytes } from "../packages/emvb/test/fixtures/layouts.ts";
-import { api, createPage, ensureEmvbSetup, getPage, parsed } from "./support/api.ts";
-import { canvas, overlay, unique } from "./support/helpers.ts";
+import { api, createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
+import { canvas, openEditor, openLayers, overlay, saveStatus, unique } from "./support/helpers.ts";
 
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 const PAGES = "/_emdash/admin/plugins/emvb/pages";
 const MAX_LAYOUT_BYTES = 512 * 1024;
 
@@ -20,24 +19,7 @@ const layoutFor = (text: string) => ({
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
-
-const saveStatus = (page: Page) => overlay(page).locator(".emvb-save-status");
-
-async function openLayers(page: Page) {
-  if ((await overlay(page).locator('[data-emvb-panel="layers"]').count()) > 0) return;
-  await overlay(page).getByRole("tab", { name: "Layers" }).click();
-}
-
-async function openEditor(page: Page, id: string, text?: string) {
-  await page.goto(`${EDITOR}?entry=${id}`);
-  await expect(overlay(page).locator(".emvb-topbar-title")).toBeVisible({ timeout: 20_000 });
-  if (text) await expect(canvas(page).getByRole("heading", { name: text })).toBeVisible();
-}
+setUpEmvbOnce();
 
 async function selectHeading(page: Page, text: string) {
   await canvas(page).getByRole("heading", { name: text }).click();

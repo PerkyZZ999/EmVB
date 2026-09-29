@@ -1,8 +1,6 @@
 import { expect, test } from "@playwright/test";
-import { createPage, ensureEmvbSetup } from "./support/api.ts";
-import { unique } from "./support/helpers.ts";
-
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
+import { createPage, setUpEmvbOnce } from "./support/api.ts";
+import { EDITOR, unique } from "./support/helpers.ts";
 
 const layout = {
   schemaVersion: 1,
@@ -16,11 +14,7 @@ const layout = {
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
+setUpEmvbOnce();
 
 test("below 1024 px the small-screen notice replaces the editor (W-043)", async ({
   page,

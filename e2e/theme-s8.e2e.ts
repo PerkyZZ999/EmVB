@@ -1,17 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { createPage, createThemePart, ensureEmvbSetup } from "./support/api.ts";
-import { canvas, overlay, unique } from "./support/helpers.ts";
+import { createPage, createThemePart, setUpEmvbOnce } from "./support/api.ts";
+import { canvas, openEditor, overlay, unique } from "./support/helpers.ts";
 
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 const THEME = "/_emdash/admin/plugins/emvb/theme";
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
+setUpEmvbOnce();
 
 test("Theme Builder creates a Header and opens the theme-part editor", async ({ page }) => {
   const title = `Header ${unique()}`;
@@ -44,9 +39,7 @@ test("S8 Add panel exposes Flexbox, Div Block, SVG, and Tabs", async ({ page, re
     },
     `s8-${unique()}`,
   );
-  await page.goto(`${EDITOR}?entry=${id}`);
-  await expect(overlay(page).locator(".emvb-topbar-title")).toBeVisible({ timeout: 20_000 });
-  await expect(canvas(page).getByRole("heading", { name: "S8" })).toBeVisible();
+  await openEditor(page, id, "S8");
   for (const tile of ["flexbox", "div-block", "svg", "tabs"] as const) {
     await expect(overlay(page).locator(`[data-emvb-add-tile="${tile}"]`)).toBeVisible();
   }
@@ -68,8 +61,7 @@ test("Site styles Classes Manager tab is reachable", async ({ page, request }) =
     },
     `cls-${unique()}`,
   );
-  await page.goto(`${EDITOR}?entry=${id}`);
-  await expect(overlay(page).locator(".emvb-topbar-title")).toBeVisible({ timeout: 20_000 });
+  await openEditor(page, id);
   await overlay(page).getByRole("button", { name: "Site styles" }).click();
   await expect(overlay(page).locator("[data-emvb-site-styles]")).toBeVisible();
   await overlay(page).getByRole("tab", { name: "Classes" }).click();
@@ -87,9 +79,7 @@ test("API-created Popup theme part loads in the editor with Triggers", async ({
     partType: "popup",
     slug: `popup-${unique()}`,
   });
-  await page.goto(`${EDITOR}?entry=${id}&collection=emvb_theme_parts`);
-  await expect(overlay(page).locator(".emvb-topbar-title")).toBeVisible({ timeout: 20_000 });
-  await expect(canvas(page).getByRole("heading", { name: title })).toBeVisible();
+  await openEditor(page, id, title, "emvb_theme_parts");
   // Clear selection so theme-part settings (Triggers) appear in the right panel.
   await page.keyboard.press("Escape");
   await expect(overlay(page).locator('[data-emvb-panel="theme-part-settings"]')).toBeVisible({

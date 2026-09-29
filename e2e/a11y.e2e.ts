@@ -1,7 +1,7 @@
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { successSignalLayout } from "../packages/emvb/src/core/forms/success-layout.ts";
-import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
+import { createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
 import { setClass, setColor } from "./support/design.ts";
 import { createContactForm } from "./support/forms.ts";
 import { uploadEmvbPixel } from "./support/media.ts";
@@ -9,19 +9,7 @@ import { unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
-
-async function publish(request: Parameters<typeof getPage>[0], id: string) {
-  const { rev } = await getPage(request, id);
-  expect(
-    (await api(request, "POST", `/_emdash/api/content/emvb_pages/${id}/publish`, { _rev: rev }))
-      .status,
-  ).toBe(200);
-}
+setUpEmvbOnce();
 
 test("published EmVB page has no serious axe violations (W-041)", async ({ page, request }) => {
   const tag = unique();
@@ -45,7 +33,7 @@ test("published EmVB page has no serious axe violations (W-041)", async ({ page,
       }),
       slug,
     );
-    await publish(request, id);
+    await publishPage(request, id);
     // Anonymous-ish: no storage state for public axe (avoid EmDash edit toolbar navigating).
     await page.context().clearCookies();
     await page.goto(`/${slug}`, { waitUntil: "domcontentloaded" });

@@ -1,4 +1,4 @@
-import { expect, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 /** EmDash REST call as the signed-in admin (the storage-state cookies), with the CSRF header. */
 export async function api(
@@ -44,6 +44,17 @@ export async function ensureEmvbSetup(page: Page) {
   await expect(action.or(ready)).toBeVisible({ timeout: 20_000 });
   if (await action.isVisible()) await action.click();
   await expect(ready).toBeVisible();
+}
+
+/** Runs EmVB setup once before the spec's tests, as the signed-in admin. */
+export function setUpEmvbOnce() {
+  test.beforeAll(async ({ browser }) => {
+    const context = await browser.newContext({
+      storageState: test.info().project.use.storageState,
+    });
+    await ensureEmvbSetup(await context.newPage());
+    await context.close();
+  });
 }
 
 /** Creates an `emvb_pages` draft over the content API and returns its id. */
@@ -133,4 +144,13 @@ export async function createThemePart(
   const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
   expect(id).toBeTruthy();
   return id as string;
+}
+
+/** Publishes the page's current draft. */
+export async function publishPage(request: APIRequestContext, id: string) {
+  const { rev } = await getPage(request, id);
+  const result = await api(request, "POST", `/_emdash/api/content/emvb_pages/${id}/publish`, {
+    _rev: rev,
+  });
+  expect(result.status).toBe(200);
 }

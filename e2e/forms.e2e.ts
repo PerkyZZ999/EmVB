@@ -1,29 +1,17 @@
 import { expect, test } from "@playwright/test";
-import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
+import { api, createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
 import { createContactForm, formPageLayout, listSubmissions } from "./support/forms.ts";
 import { unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
-
-async function publish(request: Parameters<typeof getPage>[0], id: string) {
-  const { rev } = await getPage(request, id);
-  const result = await api(request, "POST", `/_emdash/api/content/emvb_pages/${id}/publish`, {
-    _rev: rev,
-  });
-  expect(result.status).toBe(200);
-}
+setUpEmvbOnce();
 
 test("integration POST submit succeeds with EmVB-bound field names", async ({ request }) => {
   const slug = `form-api-${unique()}`;
   const form = await createContactForm(request, slug);
   const pageId = await createPage(request, "Form API", formPageLayout(form.id), `page-${slug}`);
-  await publish(request, pageId);
+  await publishPage(request, pageId);
 
   const html = await (await request.get(`/page-${slug}`)).text();
   expect(html).toContain("data-ec-form");
@@ -47,7 +35,7 @@ test("visitor can fill and submit a published EmVB form", async ({ page, request
   const slug = `form-ui-${unique()}`;
   const form = await createContactForm(request, slug);
   const pageId = await createPage(request, "Form UI", formPageLayout(form.id), `page-${slug}`);
-  await publish(request, pageId);
+  await publishPage(request, pageId);
 
   await page.goto(`/page-${slug}`);
   await expect(page.locator("[data-ec-form]")).toBeVisible();

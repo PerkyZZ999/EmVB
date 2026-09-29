@@ -1,8 +1,6 @@
 import { expect, test } from "@playwright/test";
-import { createPage, ensureEmvbSetup, getPage, parsed } from "./support/api.ts";
-import { canvas, overlay, unique } from "./support/helpers.ts";
-
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
+import { createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
+import { canvas, openEditor, overlay, saveStatus, unique } from "./support/helpers.ts";
 
 const layoutFor = () => ({
   schemaVersion: 1,
@@ -20,23 +18,18 @@ const layoutFor = () => ({
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
+setUpEmvbOnce();
 
 test("keyboard move, duplicate and delete round-trip on save", async ({ page, request }) => {
   const id = await createPage(request, "Keys", layoutFor(), `keys-${unique()}`);
-  await page.goto(`${EDITOR}?entry=${id}`);
-  await expect(overlay(page).locator(".emvb-topbar-title")).toBeVisible({ timeout: 20_000 });
+  await openEditor(page, id);
   await canvas(page).getByRole("heading", { name: "First" }).click();
   await page.keyboard.press("Alt+ArrowDown");
   await page.keyboard.press("Control+d");
   await overlay(page)
     .getByRole("button", { name: /Save draft/ })
     .click();
-  await expect(overlay(page).locator(".emvb-save-status")).toContainText("Saved", {
+  await expect(saveStatus(page)).toContainText("Saved", {
     timeout: 15_000,
   });
   const stored = parsed((await getPage(request, id)).data["layout"]) as {
@@ -49,7 +42,7 @@ test("keyboard move, duplicate and delete round-trip on save", async ({ page, re
   await overlay(page)
     .getByRole("button", { name: /Save draft/ })
     .click();
-  await expect(overlay(page).locator(".emvb-save-status")).toContainText("Saved", {
+  await expect(saveStatus(page)).toContainText("Saved", {
     timeout: 15_000,
   });
   const after = parsed((await getPage(request, id)).data["layout"]) as {

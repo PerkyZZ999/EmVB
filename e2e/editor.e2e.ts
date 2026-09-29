@@ -1,8 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createPage, ensureEmvbSetup } from "./support/api.ts";
-import { overlay } from "./support/helpers.ts";
+import { EDITOR, overlay } from "./support/helpers.ts";
 
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 const LAYOUT = {
   schemaVersion: 1,
   root: {

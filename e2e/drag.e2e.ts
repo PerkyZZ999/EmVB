@@ -1,8 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createPage, ensureEmvbSetup, getPage, parsed } from "./support/api.ts";
-import { canvas, overlay, unique } from "./support/helpers.ts";
-
-const EDITOR = "/_emdash/admin/plugins/emvb/editor";
+import { createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
+import { canvas, openEditor, openLayers, overlay, saveStatus, unique } from "./support/helpers.ts";
 
 const layoutFor = (first: string, second: string) => ({
   schemaVersion: 1,
@@ -20,17 +18,7 @@ const layoutFor = (first: string, second: string) => ({
 
 test.describe.configure({ mode: "serial" });
 
-test.beforeAll(async ({ browser }) => {
-  const context = await browser.newContext({ storageState: test.info().project.use.storageState });
-  await ensureEmvbSetup(await context.newPage());
-  await context.close();
-});
-
-async function openEditor(page: Page, id: string, first: string) {
-  await page.goto(`${EDITOR}?entry=${id}`);
-  await expect(overlay(page).locator(".emvb-topbar-title")).toBeVisible({ timeout: 20_000 });
-  await expect(canvas(page).getByRole("heading", { name: first })).toBeVisible();
-}
+setUpEmvbOnce();
 
 /**
  * Native HTML5 drag from the Add tile into the canvas iframe (K16 / W-015).
@@ -71,7 +59,7 @@ test("dragging Heading onto the canvas inserts at the pointed index and saves", 
   await overlay(page)
     .getByRole("button", { name: /Save draft/ })
     .click();
-  await expect(overlay(page).locator(".emvb-save-status")).toContainText("Saved", {
+  await expect(saveStatus(page)).toContainText("Saved", {
     timeout: 15_000,
   });
 
@@ -134,7 +122,7 @@ test("moving a heading into another container saves the new tree", async ({ page
   await overlay(page)
     .getByRole("button", { name: /Save draft/ })
     .click();
-  await expect(overlay(page).locator(".emvb-save-status")).toContainText("Saved", {
+  await expect(saveStatus(page)).toContainText("Saved", {
     timeout: 15_000,
   });
   const stored = parsed((await getPage(request, id)).data["layout"]) as {
@@ -162,9 +150,7 @@ test("dropping a container into its own child shows the invalid outline and chan
   );
   await openEditor(page, id, "Inside");
   // Select the outer box via Layers
-  if ((await overlay(page).locator('[data-emvb-panel="layers"]').count()) === 0) {
-    await overlay(page).getByRole("tab", { name: "Layers" }).click();
-  }
+  await openLayers(page);
   await overlay(page).locator('[data-emvb-layer="box00001"]').click();
   await expect(overlay(page).locator(".emvb-overlay-label")).toContainText("Container");
   const handle = overlay(page).getByRole("button", { name: "Move element" });

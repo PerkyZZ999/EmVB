@@ -1,5 +1,5 @@
 import { expect, request as requestFactory, test, type APIRequestContext } from "@playwright/test";
-import { api, createPage, ensureEmvbSetup, getPage } from "./support/api.ts";
+import { api, createPage, ensureEmvbSetup, getPage, publishPage } from "./support/api.ts";
 import { unique } from "./support/helpers.ts";
 
 let author: APIRequestContext;
@@ -70,14 +70,6 @@ const layoutWithClass = (textA: string, textB: string, classId: string) => ({
   },
 });
 
-async function publish(id: string) {
-  const { rev } = await getPage(author, id);
-  const result = await api(author, "POST", `/_emdash/api/content/emvb_pages/${id}/publish`, {
-    _rev: rev,
-  });
-  expect(result.status).toBe(200);
-}
-
 type DesignDoc = {
   schemaVersion: 1;
   variables: {
@@ -146,7 +138,7 @@ test("a published page renders from the production build with its content and CS
   const slug = `pub-${unique()}`;
   const text = `Published ${slug}`;
   const id = await createPage(author, "Public check", layoutWith(text), slug);
-  await publish(id);
+  await publishPage(author, id);
 
   const response = await request.get(`/${slug}`);
   expect(response.status()).toBe(200);
@@ -173,7 +165,7 @@ test("a blank-canvas page is a whole document with no scripts at all", async ({ 
       })
     ).status,
   ).toBe(200);
-  await publish(id);
+  await publishPage(author, id);
 
   const html = await (await request.get(`/${slug}`)).text();
   expect(html.trimStart().toLowerCase().startsWith("<!doctype html>")).toBe(true);
@@ -196,7 +188,7 @@ test("a preview link renders the draft, uncached, while the public page keeps th
 }) => {
   const slug = `preview-${unique()}`;
   const id = await createPage(author, "Preview check", layoutWith(`Live ${slug}`), slug);
-  await publish(id);
+  await publishPage(author, id);
   const { rev } = await getPage(author, id);
   await api(author, "PUT", `/_emdash/api/content/emvb_pages/${id}`, {
     data: { layout: layoutWith(`Draft ${slug}`) },
@@ -231,7 +223,7 @@ test("changing a colour variable changes the published page without re-publishin
       layoutWith(`Tone ${slug}`, variable),
       slug,
     );
-    await publish(id);
+    await publishPage(author, id);
     expect(await (await request.get(`/${slug}`)).text()).toContain(declaration("#112233"));
 
     await setColor(variable, "#445566");
@@ -257,7 +249,7 @@ test("changing a spacing variable changes the published page without re-publishi
       layoutWithSpacing(`Space ${slug}`, variable),
       slug,
     );
-    await publish(id);
+    await publishPage(author, id);
     expect(await (await request.get(`/${slug}`)).text()).toContain(declaration(12));
 
     await setSpacing(variable, 32);
@@ -282,7 +274,7 @@ test("editing a class used on two elements updates both on the published page", 
       layoutWithClass(`One ${slug}`, `Two ${slug}`, classId),
       slug,
     );
-    await publish(id);
+    await publishPage(author, id);
     let html = await (await request.get(`/${slug}`)).text();
     expect(html).toContain(`emvb-k-${classId}`);
     expect(html).toContain(`.emvb-k-${classId}{color:#112233}`);
@@ -322,7 +314,7 @@ test("a published page with an unknown node still renders its other elements wit
     },
   };
   const id = await createPage(author, "Unknown check", layout, slug);
-  await publish(id);
+  await publishPage(author, id);
 
   const response = await request.get(`/${slug}`);
   expect(response.status()).toBe(200);
