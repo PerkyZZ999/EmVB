@@ -1500,7 +1500,7 @@
       "description": "subtree delete skips the confirmation dialog",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
           "search": "    const count = subtreeSize(layout, id);\n    if (count > 1) {\n      const node = findNode(layout, id);\n      setDeleteAsk({\n        id,\n        label: ELEMENT_NAMES[node?.type ?? \"container\"] ?? \"Element\",\n        count,\n      });\n      return;\n    }\n    finishDelete(id);",
           "replace": "    const count = subtreeSize(layout, id);\n    if (count > 1) {\n      /* seeded: skip dialog */\n    }\n    finishDelete(id);"
         }

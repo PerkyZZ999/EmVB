@@ -1,18 +1,7 @@
 import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@cloudflare/kumo";
 import { PlusIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import {
-  duplicateNode,
-  ELEMENT_DESCRIPTORS,
-  findNode,
-  insertionPoint,
-  moveDown,
-  moveUp,
-  renderPage,
-  subtreeSize,
-  type ElementType,
-  type LayoutNode,
-} from "../../core/index.ts";
+import { findNode, moveDown, moveUp, renderPage, type LayoutNode } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
 import { loadFormsCapability } from "../forms-api.ts";
@@ -41,8 +30,7 @@ import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { useEditorCommands } from "./useEditorCommands.ts";
 import { useSave } from "./useSave.ts";
 import { type ShortcutHandlers, useEditorShortcuts } from "./useEditorShortcuts.ts";
-
-const RESTORE_TIMEOUT_MS = 6000;
+import { useNodeActions } from "./useNodeActions.ts";
 
 /** The full-screen editor for one EmVB page or theme part (R-001, R-002, R-060). */
 export function Editor({
@@ -122,14 +110,8 @@ function EditorApp({
   const [siteStylesOpen, setSiteStylesOpen] = React.useState(false);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
-  const [deleteAsk, setDeleteAsk] = React.useState<{
-    id: string;
-    label: string;
-    count: number;
-  } | null>(null);
   const [leaveOpen, setLeaveOpen] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
-  const lastToast = React.useRef<string | null>(null);
   const latest = React.useRef(state);
   latest.current = state;
   const { busy, save, publish, preview, changeDesign } = useEditorCommands({
@@ -140,6 +122,16 @@ function EditorApp({
     saver,
     toasts,
   });
+  const {
+    deleteAsk,
+    setDeleteAsk,
+    canDelete,
+    canMove,
+    finishDelete,
+    remove,
+    duplicate,
+    addFromPanel,
+  } = useNodeActions({ state, latest, dispatch, announce: setAnnouncement, toasts });
   const [formsAvailable, setFormsAvailable] = React.useState(true);
   React.useEffect(() => {
     let cancelled = false;
@@ -163,58 +155,6 @@ function EditorApp({
   const selectedNode =
     state.selectedId && state.page.layout ? findNode(state.page.layout, state.selectedId) : null;
 
-  const canDelete = (id: string) => !!state.page.layout && state.page.layout.root.id !== id;
-  const canMove = canDelete;
-
-  const finishDelete = (id: string) => {
-    dispatch({ type: "delete-node", id });
-    setDeleteAsk(null);
-    if (lastToast.current) toasts.close(lastToast.current);
-    const toastId: string = toasts.add({
-      title: "Element deleted",
-      timeout: RESTORE_TIMEOUT_MS,
-      actions: [
-        {
-          children: "Restore",
-          variant: "secondary",
-          onClick: () => {
-            dispatch({ type: "restore" });
-            toasts.close(toastId);
-          },
-        },
-      ],
-    });
-    lastToast.current = toastId;
-  };
-
-  const remove = (id: string) => {
-    if (!canDelete(id)) return;
-    const layout = latest.current.page.layout;
-    if (!layout) return;
-    const count = subtreeSize(layout, id);
-    if (count > 1) {
-      const node = findNode(layout, id);
-      setDeleteAsk({
-        id,
-        label: ELEMENT_NAMES[node?.type ?? "container"] ?? "Element",
-        count,
-      });
-      return;
-    }
-    finishDelete(id);
-  };
-
-  const duplicate = (id: string) => {
-    const layout = latest.current.page.layout;
-    if (!layout) return;
-    const result = duplicateNode(layout, id);
-    if (!result.ok) {
-      setAnnouncement(result.reason);
-      return;
-    }
-    dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
-  };
-
   const handlers = React.useRef<ShortcutHandlers>({ save, remove, duplicate });
   handlers.current = { save, remove, duplicate };
   const onKeyDown = useEditorShortcuts({ latest, dispatch, announce: setAnnouncement, handlers });
@@ -231,22 +171,6 @@ function EditorApp({
     } catch {
       window.location.reload();
     }
-  };
-
-  const addFromPanel = (type: ElementType) => {
-    const layout = latest.current.page.layout;
-    if (!layout) {
-      if (type === "container") dispatch({ type: "add-root-container" });
-      return;
-    }
-    const node = newElement(type);
-    if (!node) return;
-    const place = insertionPoint(layout, latest.current.selectedId);
-    const parent = findNode(layout, place.parentId);
-    const parentName = ELEMENT_NAMES[parent?.type ?? "container"] ?? "Container";
-    const label = ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name ?? type;
-    dispatch({ type: "add-node", node, parentId: place.parentId, index: place.index });
-    setAnnouncement(`${label} added inside ${parentName}`);
   };
 
   const selection: CanvasSelection = {
