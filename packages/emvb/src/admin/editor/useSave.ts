@@ -1,5 +1,5 @@
 import * as React from "react";
-import { byteLength, MAX_LAYOUT_BYTES, nodeIdAtPath } from "../../core/index.ts";
+import { byteLength, MAX_LAYOUT_BYTES, nodeIdAtPath, type Layout } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { publishPage, savePage } from "../content-api.ts";
@@ -21,6 +21,52 @@ export const tooLargeMessage = (bytes: number) =>
 
 export const slugTakenMessage = (slug: string) =>
   `A page with the slug "${slug}" already exists. Choose a different slug.`;
+
+/** What the editor shows and does after a failed save. */
+export type SaveFailure = {
+  status: SaveStatus;
+  /** The inline error for the Slug field. */
+  slugError?: string;
+  /** Open the "changed somewhere else" dialog. */
+  conflict?: true;
+  /** Move the selection: to the rejected element, or `null` to show page settings. */
+  select?: string | null;
+  /** The server's rejection, shown in the element panel. */
+  rejection?: string;
+};
+
+const fixAndSave: SaveStatus = { kind: "error", message: FIX_AND_SAVE, retry: false };
+const offline: SaveStatus = { kind: "error", message: OFFLINE, retry: true };
+
+export function saveFailure(
+  error: unknown,
+  page: { slug: string; layout: Layout | null },
+): SaveFailure {
+  if (!(error instanceof ApiError) || error.status >= 500) return { status: offline };
+  if (error.status === 409 && error.code === "SLUG_CONFLICT") {
+    return { status: fixAndSave, slugError: slugTakenMessage(page.slug), select: null };
+  }
+  if (error.status === 409) {
+    const message = "Couldn't save. This page was changed somewhere else.";
+    return { status: { kind: "error", message, retry: false }, conflict: true };
+  }
+  if (error.status === 400 || error.status === 422) {
+    const path = /\broot(?:\.children\[\d+\])*/.exec(error.message)?.[0];
+    const id = path && page.layout ? nodeIdAtPath(page.layout, path) : null;
+    return { status: fixAndSave, rejection: error.message, ...(id ? { select: id } : {}) };
+  }
+  return { status: { kind: "error", message: `Couldn't save. ${error.message}`, retry: false } };
+}
+
+export function publishFailureMessage(error: unknown): string {
+  if (error instanceof ApiError && error.status === 403) {
+    return "Couldn't publish. Your role can't publish pages.";
+  }
+  if (error instanceof ApiError && error.status === 409) {
+    return "Couldn't publish. This page was changed somewhere else.";
+  }
+  return "Couldn't publish. Check your connection and try again.";
+}
 
 /**
  * Save, publish and their failure modes (R-006, IA "Save and publish"). Saves send `_rev`, so a
@@ -78,30 +124,12 @@ export function useSave(
         setStatus({ kind: "saved" });
         return next;
       } catch (error) {
-        if (!(error instanceof ApiError)) {
-          setStatus({ kind: "error", message: OFFLINE, retry: true });
-        } else if (error.status === 409 && error.code === "SLUG_CONFLICT") {
-          setSlugError(slugTakenMessage(current.page.slug));
-          dispatch({ type: "select", id: null });
-          setStatus({ kind: "error", message: FIX_AND_SAVE, retry: false });
-        } else if (error.status === 409) {
-          setConflict(true);
-          setStatus({
-            kind: "error",
-            message: "Couldn't save. This page was changed somewhere else.",
-            retry: false,
-          });
-        } else if (error.status === 400 || error.status === 422) {
-          const path = /\broot(?:\.children\[\d+\])*/.exec(error.message)?.[0];
-          const id = path && current.page.layout ? nodeIdAtPath(current.page.layout, path) : null;
-          if (id) dispatch({ type: "select", id });
-          setRejection(error.message);
-          setStatus({ kind: "error", message: FIX_AND_SAVE, retry: false });
-        } else if (error.status >= 500) {
-          setStatus({ kind: "error", message: OFFLINE, retry: true });
-        } else {
-          setStatus({ kind: "error", message: `Couldn't save. ${error.message}`, retry: false });
-        }
+        const failure = saveFailure(error, current.page);
+        if (failure.slugError) setSlugError(failure.slugError);
+        if (failure.select !== undefined) dispatch({ type: "select", id: failure.select });
+        if (failure.conflict) setConflict(true);
+        if (failure.rejection !== undefined) setRejection(failure.rejection);
+        setStatus(failure.status);
         return null;
       }
     },
@@ -137,16 +165,7 @@ export function useSave(
       return true;
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) setConflict(true);
-      setStatus({
-        kind: "error",
-        message:
-          error instanceof ApiError && error.status === 403
-            ? "Couldn't publish. Your role can't publish pages."
-            : error instanceof ApiError && error.status === 409
-              ? "Couldn't publish. This page was changed somewhere else."
-              : "Couldn't publish. Check your connection and try again.",
-        retry: false,
-      });
+      setStatus({ kind: "error", message: publishFailureMessage(error), retry: false });
       return false;
     }
   }, [fetcher, dispatch, write, collection]);

@@ -3101,6 +3101,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*tabs runtime"
+    },
+    {
+      "id": "W-086/save-5xx-not-retryable",
+      "requirement": "R-006",
+      "description": "a 5xx save error is not offered as retryable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "|| error.status >= 500) return { status: offline };",
+          "replace": "|| error.status >= 600) return { status: offline };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
+      "expect": "\\(fail\\).*5xx"
+    },
+    {
+      "id": "W-086/save-rejection-not-selected",
+      "requirement": "R-006",
+      "description": "a rejected save doesn't select the element named in the error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "rejection: error.message, ...(id ? { select: id } : {}) };",
+          "replace": "rejection: error.message };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
+      "expect": "\\(fail\\).*selects the element"
     }
   ]
 }
