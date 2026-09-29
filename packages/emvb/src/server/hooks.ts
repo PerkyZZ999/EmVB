@@ -18,6 +18,28 @@ function parseJsonField(raw: unknown): unknown {
 
 const OWNED = new Set([PAGES_COLLECTION, THEME_PARTS_COLLECTION]);
 
+type FieldValidation =
+  | { ok: true; value: unknown }
+  | { ok: false; issues: { code: string; message: string }[] };
+
+/** Theme-part fields validated on save, besides the layout (R-061). */
+const THEME_PART_FIELDS: [string, (raw: unknown) => FieldValidation][] = [
+  [
+    "conditions",
+    (raw) => {
+      const result = validateConditions(raw);
+      return result.ok ? { ok: true, value: result.conditions } : result;
+    },
+  ],
+  [
+    "triggers",
+    (raw) => {
+      const result = validateTriggers(raw);
+      return result.ok ? { ok: true, value: result.triggers } : result;
+    },
+  ],
+];
+
 /**
  * `content:beforeSave` for EmVB pages and theme parts (R-006, D-020, R-060/R-061): editors and
  * above only; validate layout (and conditions on theme parts). Logs carry ids and codes only.
@@ -52,38 +74,24 @@ export async function beforeSave(
     }
   }
 
-  if (event.collection === THEME_PARTS_COLLECTION && event.content["conditions"] !== undefined) {
-    const result = validateConditions(parseJsonField(event.content["conditions"]));
-    if (!result.ok) {
-      ctx.log.warn("emvb: theme part save rejected", {
-        pageId,
-        code: result.issues[0]?.code ?? "invalid_conditions",
-      });
-      throw new ContentSaveRejectedError(
-        `The theme part conditions are invalid. ${result.issues
-          .slice(0, 3)
-          .map((i) => i.message)
-          .join("; ")}`,
-      );
+  if (event.collection === THEME_PARTS_COLLECTION) {
+    for (const [field, validate] of THEME_PART_FIELDS) {
+      if (event.content[field] === undefined) continue;
+      const result = validate(parseJsonField(event.content[field]));
+      if (!result.ok) {
+        ctx.log.warn("emvb: theme part save rejected", {
+          pageId,
+          code: result.issues[0]?.code ?? `invalid_${field}`,
+        });
+        throw new ContentSaveRejectedError(
+          `The theme part ${field} are invalid. ${result.issues
+            .slice(0, 3)
+            .map((i) => i.message)
+            .join("; ")}`,
+        );
+      }
+      next = { ...(next ?? event.content), [field]: result.value };
     }
-    next = { ...(next ?? event.content), conditions: result.conditions };
-  }
-
-  if (event.collection === THEME_PARTS_COLLECTION && event.content["triggers"] !== undefined) {
-    const result = validateTriggers(parseJsonField(event.content["triggers"]));
-    if (!result.ok) {
-      ctx.log.warn("emvb: theme part save rejected", {
-        pageId,
-        code: result.issues[0]?.code ?? "invalid_triggers",
-      });
-      throw new ContentSaveRejectedError(
-        `The theme part triggers are invalid. ${result.issues
-          .slice(0, 3)
-          .map((i) => i.message)
-          .join("; ")}`,
-      );
-    }
-    next = { ...(next ?? event.content), triggers: result.triggers };
   }
 
   return next;

@@ -3045,6 +3045,34 @@
         "./packages/emvb/src/admin/editor/panels/ConditionsEditor.test.ts"
       ],
       "expect": "\\(fail\\).*labels every rule kind"
+    },
+    {
+      "id": "W-086/hook-triggers-unvalidated",
+      "requirement": "R-061",
+      "description": "theme-part triggers are saved without validation",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  [\n    \"triggers\",",
+          "replace": "  [\n    \"triggers-unchecked\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/theme-part-hooks.test.ts"],
+      "expect": "\\(fail\\).*invalid triggers"
+    },
+    {
+      "id": "W-086/hook-stores-raw-conditions",
+      "requirement": "R-061",
+      "description": "theme-part conditions are stored as sent instead of as validated",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "[field]: result.value };",
+          "replace": "[field]: event.content[field] };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/theme-part-hooks.test.ts"],
+      "expect": "\\(fail\\).*stored as validated"
     }
   ]
 }
