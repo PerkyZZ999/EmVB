@@ -16,7 +16,6 @@
     "astro": "^7.3.5",
     "emdash": "1.0.1",
     "emvb": "workspace:*",
-    "oxc-transform-react": "^0.151.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
