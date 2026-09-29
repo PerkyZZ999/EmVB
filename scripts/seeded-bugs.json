@@ -2762,8 +2762,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
-          "search": "      New theme part\n    </Button>",
-          "replace": "      New site chrome\n    </Button>"
+          "search": "<NewButton label=\"New theme part\"",
+          "replace": "<NewButton label=\"New site chrome\""
         }
       ],
       "command": [
@@ -3246,6 +3246,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/pages/create-dialogs.test.tsx"],
       "expect": "\\(fail\\).*re-derives an untouched slug"
+    },
+    {
+      "id": "W-086/list-blank-date-shown",
+      "requirement": "R-001",
+      "description": "a page with no edit time shows a 1970 date in the list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "{iso ? formatter.format(new Date(iso)) : \"\"}",
+          "replace": "{formatter.format(new Date(iso || 0))}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/lists.test.tsx"],
+      "expect": "\\(fail\\).*PageList > renders rows"
+    },
+    {
+      "id": "W-086/list-status-always-draft",
+      "requirement": "R-001",
+      "description": "published pages and theme parts are listed as Draft",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "{status === \"published\" ? \"Published\" : \"Draft\"}",
+          "replace": "{\"Draft\"}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/lists.test.tsx"],
+      "expect": "\\(fail\\).*ThemePartList > renders rows"
     }
   ]
 }
