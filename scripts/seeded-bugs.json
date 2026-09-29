@@ -2831,6 +2831,34 @@
         "another site"
       ],
       "expect": "\\(fail\\).*sanitizeMediaUrl"
+    },
+    {
+      "id": "W-085/kumo-peer-floating",
+      "requirement": "N-006",
+      "description": "the Kumo peer floats (^2.6.0) instead of EmDash's exact pin",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "\"peerDependencies\": {\n    \"@cloudflare/kumo\": \"2.6.0\",",
+          "replace": "\"peerDependencies\": {\n    \"@cloudflare/kumo\": \"^2.6.0\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/deps/emdash-pins.test.ts"],
+      "expect": "\\(fail\\).*Kumo"
+    },
+    {
+      "id": "W-085/kumo-dev-drifts",
+      "requirement": "N-006",
+      "description": "the Kumo dev dependency drifts from EmDash's pin",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "\"devDependencies\": {\n    \"@cloudflare/kumo\": \"2.6.0\",",
+          "replace": "\"devDependencies\": {\n    \"@cloudflare/kumo\": \"2.14.0\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/deps/emdash-pins.test.ts"],
+      "expect": "\\(fail\\).*Kumo"
     }
   ]
 }

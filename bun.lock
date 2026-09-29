@@ -69,7 +69,7 @@
         "vitest": "5.0.2",
       },
       "peerDependencies": {
-        "@cloudflare/kumo": "^2.6.0",
+        "@cloudflare/kumo": "2.6.0",
         "@emdash-cms/plugin-forms": "^0.2.9",
         "@phosphor-icons/react": "^2.1.10",
         "emdash": "^1.0.0",
