@@ -1,4 +1,4 @@
-import { ApiError, type Fetcher } from "./api.ts";
+import { envelopeError, readEnvelope, type Fetcher } from "./api.ts";
 
 /** A library item as EmDash returns it from GET/POST /_emdash/api/media (with `url`). */
 export type MediaLibraryItem = {
@@ -28,17 +28,8 @@ export async function listImages(
   });
   if (opts.q) params.set("q", opts.q);
   const response = await fetcher(`${MEDIA_API_PATH}?${params}`);
-  const payload = (await response.json().catch(() => ({}))) as {
-    data?: { items?: MediaLibraryItem[] };
-    error?: { code?: string; message?: string };
-  };
-  if (!response.ok) {
-    throw new ApiError(
-      response.status,
-      payload.error?.code ?? "HTTP_ERROR",
-      payload.error?.message ?? response.statusText,
-    );
-  }
+  const payload = await readEnvelope<{ items?: MediaLibraryItem[] }>(response);
+  if (!response.ok) throw envelopeError(response, payload);
   return (payload.data?.items ?? []).filter((item) => item.status === "ready" || !item.status);
 }
 
@@ -57,17 +48,8 @@ export async function uploadImage(
   if (meta.height !== undefined) body.set("height", String(meta.height));
   if (meta.alt) body.set("alt", meta.alt);
   const response = await fetcher(MEDIA_API_PATH, { method: "POST", body });
-  const payload = (await response.json().catch(() => ({}))) as {
-    data?: { item?: MediaLibraryItem; deduplicated?: boolean };
-    error?: { code?: string; message?: string };
-  };
-  if (!response.ok || !payload.data?.item) {
-    throw new ApiError(
-      response.status,
-      payload.error?.code ?? "HTTP_ERROR",
-      payload.error?.message ?? response.statusText,
-    );
-  }
+  const payload = await readEnvelope<{ item?: MediaLibraryItem; deduplicated?: boolean }>(response);
+  if (!response.ok || !payload.data?.item) throw envelopeError(response, payload);
   return payload.data.item;
 }
 

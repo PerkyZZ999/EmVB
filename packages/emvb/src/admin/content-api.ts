@@ -94,14 +94,23 @@ export async function savePage(
   return body["_rev"];
 }
 
-export async function publishPage(fetcher: Fetcher, id: string, rev: string | null) {
-  const body = await requestJson<{ _rev: string; item: RawItem }>(
+/** Publishes entry `id` of the collection at `contentPath`, sending `rev` so a stale draft fails. */
+export async function publishEntry(
+  fetcher: Fetcher,
+  contentPath: string,
+  id: string,
+  rev: string | null,
+) {
+  const body = await requestJson<{ _rev: string; item: { slug?: string | null } }>(
     fetcher,
-    `${CONTENT}/${encodeURIComponent(id)}/publish`,
+    `${contentPath}/${encodeURIComponent(id)}/publish`,
     { method: "POST", body: rev ? { _rev: rev } : {} },
   );
   return { rev: body["_rev"], slug: body.item.slug ?? "" };
 }
+
+export const publishPage = (fetcher: Fetcher, id: string, rev: string | null) =>
+  publishEntry(fetcher, CONTENT, id, rev);
 
 export async function previewUrl(fetcher: Fetcher, id: string): Promise<string> {
   const body = await requestJson<{ url: string }>(

@@ -825,8 +825,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/content-api.ts",
-          "search": "  return body[\"_rev\"];\n}\n\nexport async function publishPage",
-          "replace": "  return (await publishPage(fetcher, id, body[\"_rev\"])).rev;\n}\n\nexport async function publishPage"
+          "search": "  return body[\"_rev\"];\n}\n\n/** Publishes entry",
+          "replace": "  return (await publishPage(fetcher, id, body[\"_rev\"])).rev;\n}\n\n/** Publishes entry"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
@@ -3302,6 +3302,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
       "expect": "\\(fail\\).*fontSize: list"
+    },
+    {
+      "id": "W-086/api-error-code-dropped",
+      "requirement": "R-006",
+      "description": "API errors lose their code, so a taken slug is no longer recognised",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/api.ts",
+          "search": "envelope.error?.code ?? \"HTTP_ERROR\",",
+          "replace": "\"HTTP_ERROR\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/api-client.test.ts"],
+      "expect": "\\(fail\\).*report an error body the same way"
+    },
+    {
+      "id": "W-086/publish-without-rev",
+      "requirement": "R-006",
+      "description": "publishing drops the revision, so a stale draft can be published over a newer one",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "{ method: \"POST\", body: rev ? { _rev: rev } : {} },",
+          "replace": "{ method: \"POST\", body: {} },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/api-client.test.ts"],
+      "expect": "\\(fail\\).*publishThemePart posts the revision"
     }
   ]
 }

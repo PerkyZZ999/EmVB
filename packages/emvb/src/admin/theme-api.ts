@@ -11,6 +11,7 @@ import {
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { requestJson, type Fetcher } from "./api.ts";
+import { publishEntry } from "./content-api.ts";
 
 const CONTENT = `/_emdash/api/content/${THEME_PARTS_COLLECTION}`;
 
@@ -160,11 +161,5 @@ export async function saveThemePart(
   return body["_rev"];
 }
 
-export async function publishThemePart(fetcher: Fetcher, id: string, rev: string | null) {
-  const body = await requestJson<{ _rev: string; item: RawItem }>(
-    fetcher,
-    `${CONTENT}/${encodeURIComponent(id)}/publish`,
-    { method: "POST", body: rev ? { _rev: rev } : {} },
-  );
-  return { rev: body["_rev"], slug: body.item.slug ?? "" };
-}
+export const publishThemePart = (fetcher: Fetcher, id: string, rev: string | null) =>
+  publishEntry(fetcher, CONTENT, id, rev);

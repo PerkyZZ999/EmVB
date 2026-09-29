@@ -16,6 +16,21 @@ export class ApiError extends Error {
 /** `apiFetch` adds the `X-EmDash-Request` header private EmDash routes require (CSRF guard). */
 export const defaultFetcher: Fetcher = (path, init) => apiFetch(path, init);
 
+type Envelope<T> = { data?: T; error?: { code?: string; message?: string } };
+
+/** The JSON envelope of an EmDash API response, or `{}` when the body isn't JSON. */
+export async function readEnvelope<T>(response: Response): Promise<Envelope<T>> {
+  return (await response.json().catch(() => ({}))) as Envelope<T>;
+}
+
+/** The ApiError for a failed response, from its envelope's code and message when present. */
+export const envelopeError = (response: Response, envelope: Envelope<unknown>) =>
+  new ApiError(
+    response.status,
+    envelope.error?.code ?? "HTTP_ERROR",
+    envelope.error?.message ?? response.statusText,
+  );
+
 export async function requestJson<T>(
   fetcher: Fetcher,
   path: string,
@@ -27,16 +42,7 @@ export async function requestJson<T>(
       ? {}
       : { headers: { "content-type": "application/json" }, body: JSON.stringify(init.body) }),
   });
-  const payload = (await response.json().catch(() => ({}))) as {
-    data?: T;
-    error?: { code?: string; message?: string };
-  };
-  if (!response.ok) {
-    throw new ApiError(
-      response.status,
-      payload.error?.code ?? "HTTP_ERROR",
-      payload.error?.message ?? response.statusText,
-    );
-  }
+  const payload = await readEnvelope<T>(response);
+  if (!response.ok) throw envelopeError(response, payload);
   return payload.data as T;
 }
