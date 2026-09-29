@@ -1,6 +1,6 @@
 # EmVB
 
-A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS, with no EmVB JavaScript on the public site. It runs on Node (SQLite) and Cloudflare Workers (D1).
+A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS, with no EmVB JavaScript on the public site except the optional popups and tabs scripts, which load only on pages that have a popup or Tabs. Forms use the forms plugin's own script. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
 **Status:** MVP implement slices S1–S6 complete (local). Not published yet (phase 7 / D-007).
 
