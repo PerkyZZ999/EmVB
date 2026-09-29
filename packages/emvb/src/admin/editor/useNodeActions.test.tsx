@@ -2,11 +2,11 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { createKumoToastManager } from "@cloudflare/kumo";
 import * as React from "react";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import { emptyDesign, moveDown, moveUp, REASONS, type Layout } from "../../core/index.ts";
 import { container, heading } from "../../../test/fixtures/layouts.ts";
 import type { EditorAction, EditorState } from "./store.ts";
 import { useNodeActions } from "./useNodeActions.ts";
+import { cleanup, mount as mountTree } from "../../../test/dom/mount.ts";
 
 const layout: Layout = {
   schemaVersion: 1,
@@ -36,11 +36,7 @@ const state: EditorState = {
   lastDeleted: null,
 };
 
-let root: Root | undefined;
-afterEach(() => {
-  act(() => root?.unmount());
-  root = undefined;
-});
+afterEach(cleanup);
 
 async function mount() {
   const actions: EditorAction[] = [];
@@ -58,8 +54,7 @@ async function mount() {
     });
     return null;
   }
-  root = createRoot(document.createElement("div"));
-  await act(async () => root?.render(<Probe />));
+  await mountTree(<Probe />);
   if (!api) throw new Error("hook did not mount");
   return { api, actions, announced };
 }

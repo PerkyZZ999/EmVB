@@ -1,30 +1,23 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import { s1Page } from "../../../test/fixtures/layouts.ts";
 import { entryIdFromLocation, LayoutField } from "./LayoutField.tsx";
+import { cleanup, mount } from "../../../test/dom/mount.ts";
 
 const initialUrl = window.location.href;
-let root: Root | undefined;
 let host: HTMLElement;
 
 async function render(value: unknown, pathname = "/_emdash/admin/content/emvb_pages/01ABC") {
   window.history.replaceState(null, "", pathname);
-  host = document.createElement("div");
-  document.body.append(host);
   const onChange = mock(() => {});
-  root = createRoot(host);
-  await act(async () => {
-    root?.render(
-      <LayoutField value={value} onChange={onChange} label="Layout" id="field-layout" />,
-    );
-  });
+  host = await mount(
+    <LayoutField value={value} onChange={onChange} label="Layout" id="field-layout" />,
+  );
   return onChange;
 }
 
 afterEach(async () => {
-  await act(async () => root?.unmount());
-  host.remove();
+  await cleanup();
   window.history.replaceState(null, "", initialUrl);
 });
 

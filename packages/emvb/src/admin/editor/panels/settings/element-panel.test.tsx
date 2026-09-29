@@ -1,30 +1,16 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import { emptyDesign, type Layout, type LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
+import { cleanup, mount, unmount } from "../../../../../test/dom/mount.ts";
 
 const stubFetcher: Fetcher = async () => new Response("{}", { status: 200 });
 
-let root: Root | undefined;
-let host: HTMLElement | undefined;
-
 afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
-  host?.remove();
-  host = undefined;
-  document.body.innerHTML = "";
+  await cleanup();
   sessionStorage.clear();
 });
-
-async function mount(node: React.ReactNode) {
-  host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root?.render(node));
-}
 
 const layout: Layout = {
   schemaVersion: 1,
@@ -62,7 +48,7 @@ describe("ElementPanel (W-021)", () => {
     expect(document.querySelector('[data-emvb-tab="content"]')).toBeTruthy();
     expect(document.querySelector('[data-emvb-field="text"]')).toBeTruthy();
 
-    await act(async () => root?.unmount());
+    await unmount();
     await mount(
       <ElementPanel
         node={layout.root}

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import {
   ELEMENT_DESCRIPTORS,
   emptyDesign,
@@ -15,25 +14,12 @@ import { editorReducer, type EditorState } from "../store.ts";
 import { AddPanel } from "./AddPanel.tsx";
 import { LayersPanel } from "./LayersPanel.tsx";
 import { LeftPanel } from "./LeftPanel.tsx";
-
-let root: Root | undefined;
-let host: HTMLElement | undefined;
+import { cleanup, mount, unmount } from "../../../../test/dom/mount.ts";
 
 afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
-  host?.remove();
-  host = undefined;
-  document.body.innerHTML = "";
+  await cleanup();
   sessionStorage.clear();
 });
-
-async function mount(node: React.ReactNode) {
-  host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root?.render(node));
-}
 
 const layout: Layout = {
   schemaVersion: 1,
@@ -84,7 +70,7 @@ describe("Add panel (W-018)", () => {
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="xyz" />);
     expect(document.querySelector("[data-emvb-add-tile]")).toBeNull();
     expect(document.body.textContent).toContain('No elements match "xyz".');
-    await act(async () => root?.unmount());
+    await unmount();
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="head" />);
     expect(document.querySelector('[data-emvb-add-tile="heading"]')).toBeTruthy();
     expect(document.querySelector('[data-emvb-add-tile="container"]')).toBeNull();

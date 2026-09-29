@@ -1,21 +1,18 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import type { DesignSystem, Layout, VariableKind } from "../../../core/index.ts";
 import { ClassesSection } from "./ClassesSection.tsx";
 import { VariableSection } from "./VariableSection.tsx";
+import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
 
 // Snapshots were recorded from both sections before W-086 M5 shared their pieces.
-let root: Root | undefined;
 let host: HTMLElement;
 let saved: DesignSystem[] = [];
 let asked: string[] = [];
 afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
+  await cleanup();
   saved = [];
   asked = [];
-  document.body.innerHTML = "";
 });
 
 const px = (value: number) => ({ value, unit: "px" as const });
@@ -67,10 +64,7 @@ function html() {
 }
 
 async function mount(element: React.ReactElement) {
-  host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root?.render(element));
+  host = await mountTree(element);
 }
 
 const onSave = async (next: DesignSystem) => {

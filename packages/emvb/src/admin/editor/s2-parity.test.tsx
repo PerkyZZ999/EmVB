@@ -1,8 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import { emptyDesign, renderPage, serialize, type Layout } from "../../core/index.ts";
 import { vnodeToReact } from "./canvas/vnode-react.tsx";
+import { mount, unmount } from "../../../test/dom/mount.ts";
 
 /** Nested 3-deep flex layout used for S2 canvas/public parity (W-023). */
 export const nestedThreeDeep = (): Layout => ({
@@ -52,20 +51,13 @@ describe("S2 nested parity (W-023, R-005)", () => {
     const pub = renderPage(layout, design, { mode: "public" });
     const editor = renderPage(layout, design, { mode: "editor" });
 
-    let root: Root | undefined;
-    const host = document.createElement("div");
-    document.body.append(host);
     try {
-      root = createRoot(host);
-      await act(async () => {
-        root?.render(<div id="parity">{vnodeToReact(editor.vnode)}</div>);
-      });
+      const host = await mount(<div id="parity">{vnodeToReact(editor.vnode)}</div>);
       const canvas = host.querySelector("#parity")?.innerHTML ?? "";
       expect(normalize(stripEditorAttrs(canvas))).toBe(normalize(pub.html));
       expect(normalize(stripEditorAttrs(serialize(editor.vnode)))).toBe(normalize(pub.html));
     } finally {
-      await act(async () => root?.unmount());
-      host.remove();
+      await unmount();
     }
   });
 

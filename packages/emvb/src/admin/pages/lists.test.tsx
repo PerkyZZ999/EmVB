@@ -1,17 +1,12 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import type { Fetcher } from "../api.ts";
 import { PageList } from "./PageList.tsx";
 import { ThemePartList } from "./ThemePartList.tsx";
+import { cleanup, mount as mountTree, settle } from "../../../test/dom/mount.ts";
 
-let root: Root | undefined;
 let host: HTMLElement;
-afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
-  document.body.innerHTML = "";
-});
+afterEach(cleanup);
 
 const replying =
   (reply: () => Response): Fetcher =>
@@ -39,13 +34,8 @@ function html() {
 }
 
 async function mount(element: React.ReactElement) {
-  host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => {
-    root?.render(element);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
+  host = await mountTree(element);
+  await settle();
 }
 
 const pages = [

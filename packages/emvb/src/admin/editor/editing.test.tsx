@@ -1,25 +1,14 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import { heading, layoutOfBytes, s1Page } from "../../../test/fixtures/layouts.ts";
 import { byteLength, MAX_LAYOUT_BYTES, type DesignSystem } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
 import { Editor } from "./Editor.tsx";
 import { tooLargeMessage } from "./useSave.ts";
-
-let root: Root | undefined;
-let host: HTMLElement | undefined;
-
-const settle = () =>
-  act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
+import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
 
 async function render(fetcher: Fetcher) {
-  host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root?.render(<Editor fetcher={fetcher} entryId="01PAGE" />));
+  await mount(<Editor fetcher={fetcher} entryId="01PAGE" />);
   for (let i = 0; i < 200 && !document.querySelector(".emvb-save-status"); i++) {
     // Loading is sequential by nature: each tick lets the fake API and React move on.
     // oxlint-disable-next-line no-await-in-loop
@@ -27,13 +16,7 @@ async function render(fetcher: Fetcher) {
   }
 }
 
-afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
-  host?.remove();
-  host = undefined;
-  document.body.innerHTML = "";
-});
+afterEach(cleanup);
 
 type Call = { method: string; path: string; body: Record<string, unknown> | undefined };
 

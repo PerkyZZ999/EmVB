@@ -1,31 +1,13 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import { emptyDesign, type LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
+import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 
 const stubFetcher: Fetcher = async () => new Response("{}", { status: 200 });
 
-let root: Root | undefined;
-let host: HTMLElement | undefined;
-
-afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
-  host?.remove();
-  host = undefined;
-  document.body.innerHTML = "";
-});
-
-async function mount(node: React.ReactNode) {
-  if (root) await act(async () => root?.unmount());
-  host?.remove();
-  host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root?.render(node));
-}
+afterEach(cleanup);
 
 const layout = {
   schemaVersion: 1 as const,

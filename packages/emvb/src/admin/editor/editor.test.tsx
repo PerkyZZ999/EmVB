@@ -1,7 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
-import { act } from "react";
 import type * as React from "react";
-import { createRoot, type Root } from "react-dom/client";
 import { heading, s1Page } from "../../../test/fixtures/layouts.ts";
 import { XSS_CORPUS } from "../../../test/fixtures/xss.ts";
 import { emptyDesign, renderPage, serialize } from "../../core/index.ts";
@@ -10,25 +8,13 @@ import { vnodeToReact } from "./canvas/vnode-react.tsx";
 import { Editor } from "./Editor.tsx";
 import { EditorOverlay } from "./EditorOverlay.tsx";
 import { exitTarget, PAGES_URL } from "./exit.ts";
+import { mount, settle, unmount } from "../../../test/dom/mount.ts";
 
-let root: Root | undefined;
 let host: HTMLElement | undefined;
 
 async function render(node: React.ReactNode) {
-  host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root?.render(node));
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
-}
-
-async function unmount() {
-  await act(async () => root?.unmount());
-  root = undefined;
-  host?.remove();
-  host = undefined;
+  host = await mount(node);
+  await settle();
 }
 
 afterEach(unmount);

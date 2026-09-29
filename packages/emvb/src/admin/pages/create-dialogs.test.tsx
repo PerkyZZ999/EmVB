@@ -1,17 +1,12 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import type { Fetcher } from "../api.ts";
 import { slugTakenMessage } from "../editor/useSave.ts";
 import { NewPageDialog } from "./NewPageDialog.tsx";
 import { NewThemePartDialog } from "./NewThemePartDialog.tsx";
+import { cleanup, mount } from "../../../test/dom/mount.ts";
 
-let root: Root | undefined;
-afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
-  document.body.innerHTML = "";
-});
+afterEach(cleanup);
 
 type Sent = { path: string; body: unknown };
 
@@ -27,13 +22,6 @@ const created = (id: string) => () =>
   new Response(JSON.stringify({ data: { item: { id } } }), { status: 201 });
 const failed = (status: number, code: string, message: string) => () =>
   new Response(JSON.stringify({ error: { code, message } }), { status });
-
-async function mount(element: React.ReactElement) {
-  const host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root?.render(element));
-}
 
 const input = (label: string) =>
   [...document.querySelectorAll("label")]
@@ -127,8 +115,7 @@ for (const dialog of dialogs) {
       await type("Title", "Oops");
       await submit();
       expect(alertText()).toBe(`Couldn't create the ${dialog.noun}. Server broke`);
-      await act(async () => root?.unmount());
-      document.body.innerHTML = "";
+      await cleanup();
       await mount(
         dialog.render(fetcherReplying(() => Promise.reject(new TypeError("Failed to fetch")), [])),
       );

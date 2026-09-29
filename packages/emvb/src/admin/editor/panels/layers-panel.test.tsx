@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { createRoot, type Root } from "react-dom/client";
 import type { Layout } from "../../../core/index.ts";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { LayersPanel } from "./LayersPanel.tsx";
+import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
 
 const layout: Layout = {
   schemaVersion: 1,
@@ -23,33 +23,25 @@ const layout: Layout = {
   },
 };
 
-let root: Root | undefined;
 let calls: string[] = [];
 
 afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
+  await cleanup();
   calls = [];
-  document.body.innerHTML = "";
 });
 
 async function mount(selectedId: string | null) {
-  const host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
   const log = (name: string) => (id: string) => calls.push(`${name}:${id}`);
-  await act(async () =>
-    root?.render(
-      <LayersPanel
-        layout={layout}
-        selectedId={selectedId}
-        onSelect={log("select")}
-        onDuplicate={log("duplicate")}
-        onMoveUp={log("up")}
-        onMoveDown={log("down")}
-        onDelete={log("delete")}
-      />,
-    ),
+  await mountTree(
+    <LayersPanel
+      layout={layout}
+      selectedId={selectedId}
+      onSelect={log("select")}
+      onDuplicate={log("duplicate")}
+      onMoveUp={log("up")}
+      onMoveDown={log("down")}
+      onDelete={log("delete")}
+    />,
   );
 }
 

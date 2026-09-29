@@ -1,13 +1,12 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { act } from "react";
 import type * as React from "react";
-import { createRoot, type Root } from "react-dom/client";
 import type { Fetcher } from "../api.ts";
 import { EditorPage } from "../pages/EditorPage.tsx";
 import { PagesPage } from "../pages/PagesPage.tsx";
 import { RequireEditor } from "./RequireEditor.tsx";
 import { canUseEmvb, readRole } from "./role.ts";
 import { applySidebarShim, installSidebarShim } from "./sidebar-shim.ts";
+import { mount, settle, unmount } from "../../../test/dom/mount.ts";
 
 const LOWER_ROLES = [10, 20, 30];
 const EMVB_ROLES = [40, 50];
@@ -25,18 +24,10 @@ function fakeApi(role: number | "fail") {
 }
 
 const initialUrl = window.location.href;
-let root: Root | undefined;
-let host: HTMLElement | undefined;
-
 async function render(node: React.ReactNode) {
-  host = document.createElement("div");
-  document.body.append(host);
-  root = createRoot(host);
-  await act(async () => root?.render(node));
+  const host = await mount(node);
   // Let the role request and the state update after it settle.
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
-  });
+  await settle();
   return host;
 }
 
@@ -52,9 +43,7 @@ function sidebar() {
 }
 
 afterEach(async () => {
-  await act(async () => root?.unmount());
-  root = undefined;
-  host?.remove();
+  await unmount();
   document.getElementById("emvb-sidebar-shim")?.remove();
   for (const nav of document.querySelectorAll(".emdash-sidebar")) nav.remove();
   window.history.replaceState(null, "", initialUrl);
