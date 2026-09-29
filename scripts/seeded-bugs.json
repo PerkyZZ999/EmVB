@@ -2957,6 +2957,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/dynamic-post.test.ts"],
       "expect": "\\(fail\\).*post-image"
+    },
+    {
+      "id": "W-086/layers-left-skips-collapse",
+      "requirement": "R-003",
+      "description": "← in Layers leaves an open container instead of collapsing it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "return open ? { toggle: true } : { select: parentOf(layout, id) };",
+          "replace": "return { select: parentOf(layout, id) };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*collapses an open container"
+    },
+    {
+      "id": "W-086/layers-menu-wrong-action",
+      "requirement": "R-003",
+      "description": "the Layers Move down menu item moves up",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "[\"Move down\", actions.onMoveDown],",
+          "replace": "[\"Move down\", actions.onMoveUp],"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*actions menu"
     }
   ]
 }
