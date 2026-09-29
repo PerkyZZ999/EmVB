@@ -1,44 +1,16 @@
 import { defineConfig } from "@playwright/test";
+import { baseConfig, server } from "./playwright.shared.ts";
 
 // Production-output checks (W-011): pages are authored through the dev servers (dev-bypass
 // sign-in) and read back from the production builds, which share the same database.
-const executablePath = process.env["EMVB_CHROMIUM"] ?? "/usr/bin/chromium";
-
-// Astro 7 auto-backgrounds `astro dev` when an AI agent runs it (am-i-vibing), so the webServer
-// process exits immediately ("Process from config.webServer exited early"). Astro's own
-// ASTRO_DEV_BACKGROUND opt-out keeps the dev servers in the foreground where Playwright manages them.
-const foregroundDevEnv = {
-  ...Object.fromEntries(
-    Object.entries(process.env).filter((e): e is [string, string] => e[1] !== undefined),
-  ),
-  ASTRO_DEV_BACKGROUND: "1",
-};
-
 const platforms = [
   { name: "node", script: "demo:node", dev: 4411, prod: 4421 },
   { name: "cloudflare", script: "demo:cf", dev: 4412, prod: 4422 },
 ] as const;
 
-const server = (command: string, port: number, timeout: number) => ({
-  command,
-  url: `http://127.0.0.1:${port}/`,
-  reuseExistingServer: !process.env["CI"],
-  timeout,
-  stdout: "ignore" as const,
-  stderr: "pipe" as const,
-  env: foregroundDevEnv,
-});
-
 export default defineConfig({
+  ...baseConfig,
   testDir: "./e2e",
-  fullyParallel: false,
-  workers: 1,
-  forbidOnly: Boolean(process.env["CI"]),
-  retries: 0,
-  reporter: [["list"]],
-  timeout: 60_000,
-  expect: { timeout: 10_000 },
-  use: { launchOptions: { executablePath }, trace: "retain-on-failure" },
   projects: platforms.flatMap(({ name, dev, prod }) => [
     {
       name: `${name}-setup`,
