@@ -31,4 +31,11 @@ describe("sanitizeHref (R-032)", () => {
   ])("refuses %p", (input) => {
     expect(sanitizeHref(input)).toBeUndefined();
   });
+
+  test.each(["//evil.example/x", "/\\evil.example", " //evil.example", "\\\\evil.example"])(
+    "refuses %p, which browsers resolve to another site (EmDash 1.0 url-field rule)",
+    (input) => {
+      expect(sanitizeHref(input)).toBeUndefined();
+    },
+  );
 });

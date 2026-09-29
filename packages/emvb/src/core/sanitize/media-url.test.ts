@@ -21,4 +21,11 @@ describe("sanitizeMediaUrl (W-024, R-032)", () => {
   ])("refuses %s", (input) => {
     expect(sanitizeMediaUrl(input)).toBeUndefined();
   });
+
+  test.each(["//cdn.evil/a.png", "/\\cdn.evil/a.png"])(
+    "refuses %s, which loads from another site (EmDash 1.0 url-field rule)",
+    (input) => {
+      expect(sanitizeMediaUrl(input)).toBeUndefined();
+    },
+  );
 });

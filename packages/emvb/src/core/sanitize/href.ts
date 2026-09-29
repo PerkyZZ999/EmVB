@@ -13,6 +13,8 @@ export function sanitizeHref(value: string): string | undefined {
 
   const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(trimmed);
   if (!hasScheme) {
+    // Browsers resolve `//host` and `/\host` to another site; EmDash 1.0 refuses them for `url` fields too.
+    if (/^\/[/\\]/.test(trimmed)) return undefined;
     // Relative: /path, ./path, ../path, ?query, #hash, or bare path segment
     if (/^(?:[/?#.]|[A-Za-z0-9._~-])/.test(trimmed)) return trimmed;
     return undefined;

@@ -12,6 +12,8 @@ export function sanitizeMediaUrl(value: string): string | undefined {
 
   const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(trimmed);
   if (!hasScheme) {
+    // `//host` and `/\host` load from another site (EmDash 1.0 url-field rule): same-origin only.
+    if (/^\/[/\\]/.test(trimmed)) return undefined;
     if (/^(?:[/?#.]|[A-Za-z0-9._~-])/.test(trimmed)) return trimmed;
     return undefined;
   }

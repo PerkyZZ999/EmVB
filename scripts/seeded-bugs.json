@@ -2791,6 +2791,46 @@
         "exit_intent and inactivity"
       ],
       "expect": "toBe\\(true\\)|Expected|fail|ok"
+    },
+    {
+      "id": "W-084/href-protocol-relative-allowed",
+      "requirement": "R-032",
+      "description": "sanitizeHref accepts //host and /\\host as relative (pre-EmDash-1.0 behaviour)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/href.ts",
+          "search": "    if (/^\\/[/\\\\]/.test(trimmed)) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/href.test.ts",
+        "-t",
+        "another site"
+      ],
+      "expect": "\\(fail\\).*sanitizeHref"
+    },
+    {
+      "id": "W-084/media-protocol-relative-allowed",
+      "requirement": "R-032",
+      "description": "sanitizeMediaUrl accepts //host and /\\host as same-origin",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/media-url.ts",
+          "search": "    if (/^\\/[/\\\\]/.test(trimmed)) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/media-url.test.ts",
+        "-t",
+        "another site"
+      ],
+      "expect": "\\(fail\\).*sanitizeMediaUrl"
     }
   ]
 }
