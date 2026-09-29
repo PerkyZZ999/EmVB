@@ -3375,7 +3375,7 @@
     },
     {
       "id": "W-086/scroll-percent-unclamped",
-      "requirement": "W-081",
+      "requirement": "R-063",
       "description": "scroll percent over 100 is kept",
       "edits": [
         {
@@ -3393,7 +3393,7 @@
     },
     {
       "id": "W-086/idle-minimum-lowered",
-      "requirement": "W-081",
+      "requirement": "R-063",
       "description": "the runtime waits less than a second of inactivity",
       "edits": [
         {
@@ -3407,7 +3407,7 @@
     },
     {
       "id": "W-086/runtime-tablet-breakpoint",
-      "requirement": "W-081",
+      "requirement": "R-063",
       "description": "a 1025 px viewport counts as a tablet",
       "edits": [
         {
@@ -3421,7 +3421,7 @@
     },
     {
       "id": "W-086/runtime-show-times-ignored",
-      "requirement": "W-081",
+      "requirement": "R-063",
       "description": "the runtime ignores show times",
       "edits": [
         {
@@ -3435,7 +3435,7 @@
     },
     {
       "id": "W-086/tabs-end-goes-first",
-      "requirement": "W-078",
+      "requirement": "R-031",
       "description": "End jumps to the first tab",
       "edits": [
         {
@@ -3449,7 +3449,7 @@
     },
     {
       "id": "W-086/tabs-panel-hidden-inverted",
-      "requirement": "W-078",
+      "requirement": "R-031",
       "description": "the selected panel is marked hidden",
       "edits": [
         {
@@ -3463,7 +3463,7 @@
     },
     {
       "id": "W-086/tabs-own-id-overwritten",
-      "requirement": "W-078",
+      "requirement": "R-031",
       "description": "a tab's own id is replaced",
       "edits": [
         {
@@ -3474,6 +3474,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
       "expect": "\\(fail\\).*init links tabs"
+    },
+    {
+      "id": "W-086/context-front-drops-entry",
+      "requirement": "R-062",
+      "description": "the front page context loses the host's entry id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-context.ts",
+          "search": "      entryId: content?.id,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-context-golden.test.ts"],
+      "expect": "\\(fail\\).*request contexts keep their shape"
+    },
+    {
+      "id": "W-086/context-category-not-decoded",
+      "requirement": "R-062",
+      "description": "category slugs stay percent-encoded",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-context.ts",
+          "search": "taxonomy: { type: \"category\", slug: decodeURIComponent(slug ?? \"\") }",
+          "replace": "taxonomy: { type: \"category\", slug: slug ?? \"\" }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-context-golden.test.ts"],
+      "expect": "\\(fail\\).*request contexts keep their shape"
+    },
+    {
+      "id": "W-086/context-search-before-front",
+      "requirement": "R-062",
+      "description": "a search hint outranks the front page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-context.ts",
+          "search": "  if (options.isFront === true || (!content && path === \"/\")) {",
+          "replace": "  if (options.isSearch === true) return themeContextSearch(path);\n  if (options.isFront === true || (!content && path === \"/\")) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-context-golden.test.ts"],
+      "expect": "\\(fail\\).*request contexts keep their shape"
     }
   ]
 }

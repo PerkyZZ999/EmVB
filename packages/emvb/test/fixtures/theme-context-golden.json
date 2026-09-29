@@ -1,0 +1,2092 @@
+{
+  "cases": [
+    {
+      "path": "/",
+      "options": {},
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "//",
+      "options": {},
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "//",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "//",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "//",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "//",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "//",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "//",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "//",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "//",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {},
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {},
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/search/",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/search",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {},
+      "context": {
+        "path": "/category/news",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "category",
+          "slug": "news"
+        }
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/news",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "category",
+          "slug": "news"
+        }
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/category/news",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "category",
+          "slug": "news"
+        }
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/category/news",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/news",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/category/news",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/category/news",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/news",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {},
+      "context": {
+        "path": "/category/caf%C3%A9",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "category",
+          "slug": "café"
+        }
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/caf%C3%A9",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "category",
+          "slug": "café"
+        }
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/category/caf%C3%A9",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "category",
+          "slug": "café"
+        }
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/category/caf%C3%A9",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/caf%C3%A9",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/category/caf%C3%A9",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/category/caf%C3%A9",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/caf%C3%A9",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {},
+      "context": {
+        "path": "/category/a/b",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/a/b",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/category/a/b",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/category/a/b",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/a/b",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/category/a/b",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/category/a/b",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/category/a/b",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {},
+      "context": {
+        "path": "/tag/js",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "tag",
+          "slug": "js"
+        }
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/tag/js",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "tag",
+          "slug": "js"
+        }
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/tag/js",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "taxonomy": {
+          "type": "tag",
+          "slug": "js"
+        }
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/tag/js",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/tag/js",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/tag/js",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/tag/js/",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/tag/js",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {},
+      "context": {
+        "path": "/tag",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "pages"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/tag",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/tag",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "pages"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/tag",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/tag",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/tag",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/tag/",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/tag",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {},
+      "context": {
+        "path": "/posts",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "collection": "posts"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/posts",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "collection": "posts"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/posts",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "archive",
+        "collection": "posts"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/posts",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/posts",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/posts",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/posts",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/posts",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {},
+      "context": {
+        "path": "/posts/hello",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/posts/hello",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/posts/hello",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/posts/hello",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/posts/hello",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/posts/hello",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/posts/hello",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/posts/hello",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {},
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "pages"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "pages"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/about",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {},
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "pages"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "pages"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/about/",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/about",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {},
+      "context": {
+        "path": "/docs/intro",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/docs/intro",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {
+        "content": "<null>"
+      },
+      "context": {
+        "path": "/docs/intro",
+        "isFront": false,
+        "is404": false,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {
+        "is404": true
+      },
+      "context": {
+        "path": "/docs/intro",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {
+        "is404": true,
+        "isFront": true,
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/docs/intro",
+        "isFront": false,
+        "is404": true,
+        "isSearch": false,
+        "kind": "other"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {
+        "isFront": true
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "<undefined>",
+        "entryId": "<undefined>"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {
+        "isFront": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/",
+        "isFront": true,
+        "is404": false,
+        "isSearch": false,
+        "kind": "singular",
+        "collection": "posts",
+        "entryId": "01POST"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {
+        "isSearch": true
+      },
+      "context": {
+        "path": "/docs/intro",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    },
+    {
+      "path": "/docs/intro",
+      "options": {
+        "isSearch": true,
+        "content": {
+          "collection": "posts",
+          "id": "01POST",
+          "slug": "hello"
+        }
+      },
+      "context": {
+        "path": "/docs/intro",
+        "isFront": false,
+        "is404": false,
+        "isSearch": true,
+        "kind": "archive"
+      }
+    }
+  ],
+  "helpers": {
+    "front": {
+      "path": "/",
+      "isFront": true,
+      "is404": false,
+      "isSearch": false,
+      "kind": "singular"
+    },
+    "notFound": {
+      "path": "/404",
+      "isFront": false,
+      "is404": true,
+      "isSearch": false,
+      "kind": "other"
+    },
+    "notFoundAt": {
+      "path": "/missing",
+      "isFront": false,
+      "is404": true,
+      "isSearch": false,
+      "kind": "other"
+    },
+    "search": {
+      "path": "/search",
+      "isFront": false,
+      "is404": false,
+      "isSearch": true,
+      "kind": "archive"
+    },
+    "searchAt": {
+      "path": "/find",
+      "isFront": false,
+      "is404": false,
+      "isSearch": true,
+      "kind": "archive"
+    },
+    "fromContent": {
+      "path": "/blog/hello",
+      "isFront": false,
+      "is404": false,
+      "isSearch": false,
+      "kind": "singular",
+      "collection": "posts",
+      "entryId": "01POST"
+    },
+    "fromContentRoot": {
+      "path": "/",
+      "isFront": false,
+      "is404": false,
+      "isSearch": false,
+      "kind": "singular",
+      "collection": "posts",
+      "entryId": "01POST"
+    }
+  }
+}

@@ -1,6 +1,29 @@
 import type { ThemeRequestContext } from "../core/index.ts";
 
 type ContentRef = { collection: string; id: string; slug?: string | null };
+type Kind = Pick<ThemeRequestContext, "kind">;
+
+/** A context for `path` that is not the front page, a 404 or a search, plus `rest`. */
+const context = (path: string, rest: Kind & Partial<ThemeRequestContext>): ThemeRequestContext => ({
+  path,
+  isFront: false,
+  is404: false,
+  isSearch: false,
+  ...rest,
+});
+
+/** Archive URLs by pattern, and what each adds to the context. */
+const ARCHIVES: [RegExp, (match: RegExpExecArray) => Partial<ThemeRequestContext>][] = [
+  [
+    /^\/category\/([^/]+)$/,
+    ([, slug]) => ({ taxonomy: { type: "category", slug: decodeURIComponent(slug ?? "") } }),
+  ],
+  [
+    /^\/tag\/([^/]+)$/,
+    ([, slug]) => ({ taxonomy: { type: "tag", slug: decodeURIComponent(slug ?? "") } }),
+  ],
+  [/^\/posts$/, () => ({ collection: "posts" })],
+];
 
 /**
  * Build a ThemeRequestContext from the request URL and optional host content hint.
@@ -16,129 +39,37 @@ export function themeContextFrom(
   } = {},
 ): ThemeRequestContext {
   const path = url.pathname.replace(/\/+$/, "") || "/";
-  const is404 = options.is404 === true;
-  const isFront =
-    options.isFront === true || (!is404 && !options.content && (path === "/" || path === ""));
-  const isSearch = options.isSearch === true || path === "/search";
-
-  if (is404) {
-    return {
-      path,
-      isFront: false,
-      is404: true,
-      isSearch: false,
-      kind: "other",
-    };
-  }
-
-  if (isFront) {
-    return {
-      path: "/",
+  const { content } = options;
+  if (options.is404 === true) return themeContext404(path);
+  if (options.isFront === true || (!content && path === "/")) {
+    return context("/", {
       isFront: true,
-      is404: false,
-      isSearch: false,
       kind: "singular",
-      collection: options.content?.collection,
-      entryId: options.content?.id,
-    };
+      collection: content?.collection,
+      entryId: content?.id,
+    });
   }
-
-  if (isSearch) {
-    return {
-      path,
-      isFront: false,
-      is404: false,
-      isSearch: true,
-      kind: "archive",
-    };
+  if (options.isSearch === true || path === "/search") return themeContextSearch(path);
+  for (const [pattern, extra] of ARCHIVES) {
+    const match = pattern.exec(path);
+    if (match) return context(path, { kind: "archive", ...extra(match) });
   }
-
-  const category = /^\/category\/([^/]+)$/.exec(path);
-  if (category) {
-    return {
-      path,
-      isFront: false,
-      is404: false,
-      isSearch: false,
-      kind: "archive",
-      taxonomy: { type: "category", slug: decodeURIComponent(category[1] ?? "") },
-    };
+  if (content) {
+    return context(path, { kind: "singular", collection: content.collection, entryId: content.id });
   }
-
-  const tag = /^\/tag\/([^/]+)$/.exec(path);
-  if (tag) {
-    return {
-      path,
-      isFront: false,
-      is404: false,
-      isSearch: false,
-      kind: "archive",
-      taxonomy: { type: "tag", slug: decodeURIComponent(tag[1] ?? "") },
-    };
-  }
-
-  if (path === "/posts") {
-    return {
-      path,
-      isFront: false,
-      is404: false,
-      isSearch: false,
-      kind: "archive",
-      collection: "posts",
-    };
-  }
-
-  if (options.content) {
-    return {
-      path,
-      isFront: false,
-      is404: false,
-      isSearch: false,
-      kind: "singular",
-      collection: options.content.collection,
-      entryId: options.content.id,
-    };
-  }
-
   // EmVB / pages singular under /{slug} without an explicit content hint
   if (path !== "/" && !path.includes("/", 1)) {
-    return {
-      path,
-      isFront: false,
-      is404: false,
-      isSearch: false,
-      kind: "singular",
-      collection: "pages",
-    };
+    return context(path, { kind: "singular", collection: "pages" });
   }
-
-  return {
-    path,
-    isFront: false,
-    is404: false,
-    isSearch: false,
-    kind: "other",
-  };
+  return context(path, { kind: "other" });
 }
 
 export function themeContextFront(): ThemeRequestContext {
-  return {
-    path: "/",
-    isFront: true,
-    is404: false,
-    isSearch: false,
-    kind: "singular",
-  };
+  return context("/", { isFront: true, kind: "singular" });
 }
 
 export function themeContext404(path = "/404"): ThemeRequestContext {
-  return {
-    path,
-    isFront: false,
-    is404: true,
-    isSearch: false,
-    kind: "other",
-  };
+  return context(path, { is404: true, kind: "other" });
 }
 
 export function themeContextFromContent(content: ContentRef, path: string): ThemeRequestContext {
@@ -146,11 +77,5 @@ export function themeContextFromContent(content: ContentRef, path: string): Them
 }
 
 export function themeContextSearch(path = "/search"): ThemeRequestContext {
-  return {
-    path,
-    isFront: false,
-    is404: false,
-    isSearch: true,
-    kind: "archive",
-  };
+  return context(path, { isSearch: true, kind: "archive" });
 }
