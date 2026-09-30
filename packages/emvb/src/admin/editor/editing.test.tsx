@@ -231,7 +231,7 @@ describe("page settings (D-025)", () => {
   test("the SEO section is closed by default and opens on demand", async () => {
     const { fetcher } = fakeServer();
     await render(fetcher);
-    expect(field("Meta title")).toBeNull();
+    expect(field("Meta title")?.outerHTML ?? null).toBeNull();
     await click(editor()?.querySelector('[data-emvb-section="seo"]'));
     expect(field("Meta title")).toBeTruthy();
   });
@@ -244,7 +244,7 @@ describe("delete and restore (D-025)", () => {
     await openLayers();
     await click(layerRow("Heading"));
     await press("Delete");
-    expect(layerRow("Heading")).toBeUndefined();
+    expect(layerRow("Heading")?.outerHTML).toBeUndefined();
     expect(document.body.textContent).toContain("Element deleted");
     await click(button("Restore"));
     expect(layerRow("Heading")?.getAttribute("aria-current")).toBe("true");

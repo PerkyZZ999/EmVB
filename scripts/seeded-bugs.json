@@ -9793,6 +9793,321 @@
         "the happy-dom preload provides a DOM at the plugin admin URL"
       ],
       "expect": "\\(fail\\).*the happy-dom preload provides a DOM at the plugin admin URL"
+    },
+    {
+      "id": "W-090/seo-open-by-default",
+      "requirement": "W-090",
+      "description": "the page SEO section starts open",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "const [seoOpen, setSeoOpen] = React.useState(false);",
+          "replace": "const [seoOpen, setSeoOpen] = React.useState(true);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "the SEO section is closed by default and opens on demand"
+      ],
+      "expect": "\\(fail\\).*the SEO section is closed by default and opens on demand"
+    },
+    {
+      "id": "W-090/delete-key-ignored",
+      "requirement": "W-090",
+      "description": "the Delete key no longer deletes the selected element (only Backspace does)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "if ((event.key === \"Delete\" || event.key === \"Backspace\") && selected) {",
+          "replace": "if (event.key === \"Backspace\" && selected) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "Delete removes the selected element, and Restore puts it back in place, selected"
+      ],
+      "expect": "\\(fail\\).*Delete removes the selected element, and Restore puts it back in place, selected"
+    },
+    {
+      "id": "W-090/shim-kept-for-editors",
+      "requirement": "W-090",
+      "description": "the sidebar shim stays in place for editors, so it never lets go of the link",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/sidebar-shim.ts",
+          "search": "    existing?.remove();\n    return;",
+          "replace": "    return;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/access.test.tsx",
+        "-t",
+        "shows the Visual pages link for role"
+      ],
+      "expect": "\\(fail\\).*shows the Visual pages link for role"
+    },
+    {
+      "id": "W-090/denied-renders-content",
+      "requirement": "W-090",
+      "description": "the no-access state also renders the protected content",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/RequireEditor.tsx",
+          "search": "description=\"Visual pages are managed by editors and administrators. Ask an administrator if you need access.\"\n        />",
+          "replace": "description=\"Visual pages are managed by editors and administrators. Ask an administrator if you need access.\"\n        />\n        {children(status.role)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/access.test.tsx",
+        "-t",
+        "sees no access instead of the content"
+      ],
+      "expect": "\\(fail\\).*sees no access instead of the content"
+    },
+    {
+      "id": "W-090/editors-also-see-denied",
+      "requirement": "W-090",
+      "description": "editors get the content and the no-access state together",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/RequireEditor.tsx",
+          "search": "  return children(status.role);",
+          "replace": "  return (\n    <>\n      {children(status.role)}\n      <section data-emvb-access=\"denied\" />\n    </>\n  );"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/access.test.tsx",
+        "-t",
+        "gets the content"
+      ],
+      "expect": "\\(fail\\).*gets the content"
+    },
+    {
+      "id": "W-090/role-error-renders-content",
+      "requirement": "W-090",
+      "description": "a failed role check shows the error and the protected content",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/RequireEditor.tsx",
+          "search": "  if (status.state === \"error\") {\n    return (\n      <Banner",
+          "replace": "  if (status.state === \"error\") {\n    return (\n      <>\n      {children(0)}\n      <Banner"
+        },
+        {
+          "file": "packages/emvb/src/admin/access/RequireEditor.tsx",
+          "search": "        description={status.message}\n      />",
+          "replace": "        description={status.message}\n      />\n      </>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/access.test.tsx",
+        "-t",
+        "a failed role check is an error, not access"
+      ],
+      "expect": "\\(fail\\).*a failed role check is an error, not access"
+    },
+    {
+      "id": "W-090/denied-page-leaks-entry",
+      "requirement": "W-090",
+      "description": "the editor page renders the entry before the access check",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/EditorPage.tsx",
+          "search": "  return (\n    <RequireEditor fetcher={fetcher}>",
+          "replace": "  return (\n    <>\n    <i data-emvb-entry={parseSearch(window.location.search).entry ?? \"\"} />\n    <RequireEditor fetcher={fetcher}>"
+        },
+        {
+          "file": "packages/emvb/src/admin/pages/EditorPage.tsx",
+          "search": "    </RequireEditor>\n  );",
+          "replace": "    </RequireEditor>\n    </>\n  );"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/access.test.tsx",
+        "-t",
+        "the editor page shows no access below editor, even with an entry"
+      ],
+      "expect": "\\(fail\\).*the editor page shows no access below editor, even with an entry"
+    },
+    {
+      "id": "W-090/layers-menu-stays-open",
+      "requirement": "W-090",
+      "description": "a Layers menu action runs but leaves the menu open",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "                      onMenu(false);\n                      run(node.id);",
+          "replace": "                      run(node.id);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx",
+        "-t",
+        "the actions menu runs each action once and closes; the root has no menu"
+      ],
+      "expect": "\\(fail\\).*the actions menu runs each action once and closes; the root has no menu"
+    },
+    {
+      "id": "W-090/search-pins-container",
+      "requirement": "W-090",
+      "description": "the Add search pins Container to every non-empty result",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "  const matched = ELEMENT_DESCRIPTORS.filter(",
+          "replace": "  const found = ELEMENT_DESCRIPTORS.filter("
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "      (!q || d.name.toLowerCase().includes(q)),\n  );",
+          "replace": "      (!q || d.name.toLowerCase().includes(q)),\n  );\n  const pinned = ELEMENT_DESCRIPTORS.filter((d) => d.type === \"container\");\n  const matched = found.length > 0 ? [...new Set([...pinned, ...found])] : found;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx",
+        "-t",
+        "search filters tiles and shows No elements match for an empty result"
+      ],
+      "expect": "\\(fail\\).*search filters tiles and shows No elements match for an empty result"
+    },
+    {
+      "id": "W-090/unreadable-layout-shows-canvas",
+      "requirement": "W-090",
+      "description": "an unreadable layout shows the error and still a canvas iframe",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "          title=\"Couldn't open this page\"\n          description={data.message}\n        />",
+          "replace": "          title=\"Couldn't open this page\"\n          description={data.message}\n        />\n        <iframe title=\"canvas\" />"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor.test.tsx",
+        "-t",
+        "an unreadable layout is an error, not a blank canvas"
+      ],
+      "expect": "\\(fail\\).*an unreadable layout is an error, not a blank canvas"
+    },
+    {
+      "id": "W-090/overlay-not-on-body",
+      "requirement": "W-090",
+      "description": "the editor overlay is portaled into a wrapper instead of document.body",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "    </div>,\n    document.body,\n  );",
+          "replace": "    </div>,\n    document.body.appendChild(document.createElement(\"div\")),\n  );"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor.test.tsx",
+        "-t",
+        "is portaled to document.body, fixed, with z-index auto"
+      ],
+      "expect": "\\(fail\\).*is portaled to document\\.body, fixed, with z-index auto"
+    },
+    {
+      "id": "W-090/unknown-element-content-tab",
+      "requirement": "W-090",
+      "description": "the unknown-element panel renders a Content tab",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "        {props.rejection && <Alert>{props.rejection}</Alert>}\n      </div>\n    );\n  }\n  return <KnownElementPanel",
+          "replace": "        {props.rejection && <Alert>{props.rejection}</Alert>}\n        <div data-emvb-tab=\"content\" />\n      </div>\n    );\n  }\n  return <KnownElementPanel"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "unknown element panel explains it can be moved or deleted but not edited"
+      ],
+      "expect": "\\(fail\\).*unknown element panel explains it can be moved or deleted but not edited"
+    },
+    {
+      "id": "W-090/form-bind-list-and-manual",
+      "requirement": "W-090",
+      "description": "the form picker shows the manual id field next to the list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
+          "search": "      <div data-emvb-form-bind=\"list\">",
+          "replace": "      <div data-emvb-form-bind=\"list\">\n        <span data-emvb-form-bind=\"manual\" />"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "admin path shows list when forms/list succeeds"
+      ],
+      "expect": "\\(fail\\).*admin path shows list when forms/list succeeds"
+    },
+    {
+      "id": "W-090/field-bind-list-and-manual",
+      "requirement": "W-090",
+      "description": "the field picker shows the manual name field next to the list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "      <div data-emvb-field-bind=\"list\">",
+          "replace": "      <div data-emvb-field-bind=\"list\">\n        <span data-emvb-field-bind=\"manual\" />"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "shows field options from definition"
+      ],
+      "expect": "\\(fail\\).*shows field options from definition"
+    },
+    {
+      "id": "W-090/loop-item-bind-list-and-manual",
+      "requirement": "W-090",
+      "description": "the Loop Item picker shows the manual id field next to the list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LoopItemBindControl.tsx",
+          "search": "      <div data-emvb-loop-item-bind=\"list\">",
+          "replace": "      <div data-emvb-loop-item-bind=\"list\">\n        <span data-emvb-loop-item-bind=\"manual\" />"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/loop-item-bind.test.tsx",
+        "-t",
+        "shows Loop Item picker when theme parts include loop_item"
+      ],
+      "expect": "\\(fail\\).*shows Loop Item picker when theme parts include loop_item"
     }
   ]
 }

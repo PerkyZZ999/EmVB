@@ -33,7 +33,7 @@ describe("FormBindControl (W-036)", () => {
     await mount(<FormBindControl value="" fetcher={fetcher} onChange={() => undefined} />);
     await flush();
     expect(document.querySelector('[data-emvb-form-bind="list"]')).toBeTruthy();
-    expect(document.querySelector('[data-emvb-form-bind="manual"]')).toBeNull();
+    expect(document.querySelector('[data-emvb-form-bind="manual"]')?.outerHTML ?? null).toBeNull();
   });
 
   test("editor path shows manual id when list is forbidden", async () => {
@@ -68,7 +68,7 @@ describe("FieldBindControl (W-036)", () => {
     );
     await flush();
     expect(document.querySelector('[data-emvb-field-bind="list"]')).toBeTruthy();
-    expect(document.querySelector('[data-emvb-field-bind="manual"]')).toBeNull();
+    expect(document.querySelector('[data-emvb-field-bind="manual"]')?.outerHTML ?? null).toBeNull();
   });
 
   test("falls back to manual field name without form id", async () => {
@@ -140,7 +140,7 @@ describe("form and field pickers show names, never sentinel values (QA-7)", () =
 describe("AddPanel forms group (W-036)", () => {
   test("hides Form group when formsAvailable is false", async () => {
     await mount(<AddPanel onAdd={() => undefined} formsAvailable={false} />);
-    expect(document.querySelector('[data-emvb-add-tile="form"]')).toBeNull();
+    expect(document.querySelector('[data-emvb-add-tile="form"]')?.outerHTML ?? null).toBeNull();
     expect(document.querySelector('[data-emvb-add-tile="heading"]')).toBeTruthy();
     const titles = [...document.querySelectorAll(".emvb-add-group-title")].map(
       (el) => el.textContent,

@@ -29,7 +29,7 @@ describe("editor overlay layering (D-011, K13)", () => {
   test("is portaled to document.body, fixed, with z-index auto", async () => {
     await render(<EditorOverlay label="EmVB editor">content</EditorOverlay>);
     const el = editorRoot();
-    expect(el?.parentElement).toBe(document.body);
+    expect(el?.parentElement === document.body).toBe(true);
     expect(host?.contains(el ?? null)).toBe(false);
     const style = getComputedStyle(el as HTMLElement);
     expect(style.position).toBe("fixed");
@@ -174,7 +174,7 @@ describe("editor load states", () => {
       <Editor fetcher={fakeApi({ status: 200, body: item("{not json") })} entryId="01PAGE" />,
     );
     expect(editorRoot()?.textContent).toContain("This page's layout can't be read.");
-    expect(editorRoot()?.querySelector("iframe")).toBeNull();
+    expect(editorRoot()?.querySelector("iframe")?.outerHTML ?? null).toBeNull();
   });
 
   test("a readable page opens with its title and a sandboxed canvas without scripts", async () => {

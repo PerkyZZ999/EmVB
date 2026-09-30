@@ -68,12 +68,14 @@ describe("Add panel (W-018)", () => {
 
   test("search filters tiles and shows No elements match for an empty result", async () => {
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="xyz" />);
-    expect(document.querySelector("[data-emvb-add-tile]")).toBeNull();
+    expect(document.querySelector("[data-emvb-add-tile]")?.outerHTML ?? null).toBeNull();
     expect(document.body.textContent).toContain('No elements match "xyz".');
     await unmount();
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="head" />);
     expect(document.querySelector('[data-emvb-add-tile="heading"]')).toBeTruthy();
-    expect(document.querySelector('[data-emvb-add-tile="container"]')).toBeNull();
+    expect(
+      document.querySelector('[data-emvb-add-tile="container"]')?.outerHTML ?? null,
+    ).toBeNull();
   });
 
   test("clicking a tile calls onAdd with that type", async () => {

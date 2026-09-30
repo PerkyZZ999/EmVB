@@ -73,7 +73,7 @@ describe("sidebar shim (D-024 b)", () => {
   test.each(EMVB_ROLES)("shows the Visual pages link for role %i", async (role) => {
     const link = sidebar();
     await installSidebarShim(document, fakeApi(role).fetcher);
-    expect(document.getElementById("emvb-sidebar-shim")).toBeNull();
+    expect(document.getElementById("emvb-sidebar-shim")?.outerHTML ?? null).toBeNull();
     expect(getComputedStyle(link).display).not.toBe("none");
   });
 
@@ -114,7 +114,7 @@ describe("no access state (D-020)", () => {
     expect(el.querySelector('[data-emvb-access="denied"]')?.textContent).toContain(
       "You don't have access to EmVB",
     );
-    expect(el.querySelector("#secret")).toBeNull();
+    expect(el.querySelector("#secret")?.outerHTML ?? null).toBeNull();
   });
 
   test.each(EMVB_ROLES)("role %i gets the content", async (role) => {
@@ -124,7 +124,7 @@ describe("no access state (D-020)", () => {
       </RequireEditor>,
     );
     expect(el.querySelector("#ok")?.textContent).toBe(`Role ${role}`);
-    expect(el.querySelector('[data-emvb-access="denied"]')).toBeNull();
+    expect(el.querySelector('[data-emvb-access="denied"]')?.outerHTML ?? null).toBeNull();
   });
 
   test("a failed role check is an error, not access", async () => {
@@ -134,7 +134,7 @@ describe("no access state (D-020)", () => {
       </RequireEditor>,
     );
     expect(el.textContent).toContain("Couldn't check your access to EmVB");
-    expect(el.querySelector("#secret")).toBeNull();
+    expect(el.querySelector("#secret")?.outerHTML ?? null).toBeNull();
   });
 
   test("Visual pages below editor never asks for the schema", async () => {
@@ -148,7 +148,7 @@ describe("no access state (D-020)", () => {
     window.history.replaceState(null, "", "/_emdash/admin/plugins/emvb/editor?entry=01ABC");
     const el = await render(<EditorPage fetcher={fakeApi(20).fetcher} />);
     expect(el.querySelector('[data-emvb-access="denied"]')).not.toBeNull();
-    expect(el.querySelector("[data-emvb-entry]")).toBeNull();
+    expect(el.querySelector("[data-emvb-entry]")?.outerHTML ?? null).toBeNull();
   });
 });
 

@@ -117,7 +117,7 @@ describe("Layers panel (W-018)", () => {
         (el) => el.textContent === label,
       );
       await clickEl(item ?? null);
-      expect(document.querySelector('[role="menu"]')).toBeNull();
+      expect(document.querySelector('[role="menu"]')?.outerHTML ?? null).toBeNull();
       return calls.at(-1);
     };
     expect(await run("Duplicate")).toBe("duplicate:head0001");

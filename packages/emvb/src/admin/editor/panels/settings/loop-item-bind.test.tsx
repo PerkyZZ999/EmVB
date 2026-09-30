@@ -44,7 +44,9 @@ describe("LoopItemBindControl (W-077)", () => {
     await mount(<LoopItemBindControl value="" fetcher={fetcher} onChange={() => undefined} />);
     await flush();
     expect(document.querySelector('[data-emvb-loop-item-bind="list"]')).toBeTruthy();
-    expect(document.querySelector('[data-emvb-loop-item-bind="manual"]')).toBeNull();
+    expect(
+      document.querySelector('[data-emvb-loop-item-bind="manual"]')?.outerHTML ?? null,
+    ).toBeNull();
   });
 
   test("falls back to manual id when list is empty or fails", async () => {

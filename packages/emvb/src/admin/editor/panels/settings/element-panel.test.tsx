@@ -163,6 +163,6 @@ describe("ElementPanel (W-021)", () => {
     expect(document.querySelector('[data-emvb-element="carousel"]')?.textContent).toContain(
       "can be moved or deleted, but not edited",
     );
-    expect(document.querySelector('[data-emvb-tab="content"]')).toBeNull();
+    expect(document.querySelector('[data-emvb-tab="content"]')?.outerHTML ?? null).toBeNull();
   });
 });
