@@ -2408,8 +2408,8 @@
       "edits": [
         {
           "file": "scripts/pack-smoke.ts",
-          "search": "      \"package/src/astro/index.ts\",",
-          "replace": "      \"package/src/astro/MISSING.ts\","
+          "search": "  \"package/src/astro/index.ts\",",
+          "replace": "  \"package/src/astro/MISSING.ts\","
         }
       ],
       "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "TypeScript source"],
@@ -3802,6 +3802,20 @@
       ],
       "command": ["bun", "test", "./scripts/bench-render.test.ts"],
       "expect": "\\(fail\\).*sortedTimes runs the warm-up"
+    },
+    {
+      "id": "W-086/pack-accepts-built-exports",
+      "requirement": "R-052",
+      "description": "pack smoke accepts an export that points at built JS instead of TypeScript source",
+      "edits": [
+        {
+          "file": "scripts/pack-smoke.ts",
+          "search": "    if (!path.includes(\".ts\")) {",
+          "replace": "    if (!path) {"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/pack-smoke.test.ts"],
+      "expect": "\\(fail\\).*each reported"
     }
   ]
 }

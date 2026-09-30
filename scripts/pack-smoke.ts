@@ -1,6 +1,6 @@
 /**
  * R-052 / W-044: `bun pm pack` the emvb package and assert the tarball ships
- * TypeScript source exports (no build step). Optionally installs into a temp dir.
+ * TypeScript source exports (no build step).
  */
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -9,83 +9,61 @@ import { join } from "node:path";
 const ROOT = join(import.meta.dirname, "..");
 const PKG = join(ROOT, "packages/emvb");
 
+const EXPORTS = [".", "./astro", "./astro/forms", "./admin", "./core"];
+const FILES = [
+  "package/src/index.ts",
+  "package/src/astro/index.ts",
+  "package/src/astro/forms/index.ts",
+  "package/src/admin/index.tsx",
+];
+
+type PackedPackage = {
+  name?: string;
+  exports?: Record<string, string | { import?: string; default?: string }>;
+};
+
+/** What is wrong with a packed package.json and tarball file list; empty when it ships TS source. */
+export function packProblems(pkg: PackedPackage, names: string): string[] {
+  const problems: string[] = [];
+  if (pkg.name !== "emvb") problems.push(`expected name emvb, got ${pkg.name}`);
+  for (const key of EXPORTS) {
+    const entry = pkg.exports?.[key];
+    const path = typeof entry === "string" ? entry : (entry?.import ?? entry?.default ?? "");
+    if (!path.includes(".ts")) {
+      problems.push(`export ${key} must point at TypeScript source, got ${JSON.stringify(entry)}`);
+    }
+  }
+  for (const need of FILES) if (!names.includes(need)) problems.push(`tarball missing ${need}`);
+  return problems;
+}
+
+async function run(cmd: string[], cwd?: string) {
+  const child = Bun.spawn(cmd, { cwd, stdout: "pipe", stderr: "pipe" });
+  const [out, err, code] = await Promise.all([
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+    child.exited,
+  ]);
+  if (code !== 0)
+    throw new Error(`${cmd.slice(0, 3).join(" ")} failed (exit ${code})\n${out}${err}`);
+  return out;
+}
+
 async function main() {
   const staging = await mkdtemp(join(tmpdir(), "emvb-pack-"));
   try {
-    const pack = Bun.spawn(["bun", "pm", "pack", "--destination", staging], {
-      cwd: PKG,
-      stdout: "pipe",
-      stderr: "pipe",
-    });
-    const [out, err, code] = await Promise.all([
-      new Response(pack.stdout).text(),
-      new Response(pack.stderr).text(),
-      pack.exited,
-    ]);
-    if (code !== 0) {
-      throw new Error(`bun pm pack failed (exit ${code})\n${out}${err}`);
-    }
-    const match = (out + err).match(/emvb-[\d.]+(?:-[^\s]+)?\.tgz/);
-    // bun pm pack prints the filename; also list staging
+    await run(["bun", "pm", "pack", "--destination", staging], PKG);
     const listing = await Array.fromAsync(
       new Bun.Glob("*.tgz").scan({ cwd: staging, absolute: true }),
     );
     const tarball = listing[0];
-    if (!tarball) {
-      throw new Error(`No tarball in ${staging}\n${out}\n${err}`);
-    }
-    // Read package.json from tarball via bun's unzip isn't built-in; use tar
-    const tar = Bun.spawn(["tar", "-xOf", tarball, "package/package.json"], {
-      stdout: "pipe",
-      stderr: "pipe",
-    });
-    const [pkgJsonText, tarErr, tarCode] = await Promise.all([
-      new Response(tar.stdout).text(),
-      new Response(tar.stderr).text(),
-      tar.exited,
-    ]);
-    if (tarCode !== 0) {
-      throw new Error(`tar read failed (exit ${tarCode})\n${tarErr}`);
-    }
-    const pkg = JSON.parse(pkgJsonText) as {
-      name?: string;
-      exports?: Record<string, string | { import?: string; default?: string }>;
-    };
-    if (pkg.name !== "emvb") {
-      throw new Error(`expected name emvb, got ${pkg.name}`);
-    }
-    const exports = pkg.exports ?? {};
-    for (const key of [".", "./astro", "./astro/forms", "./admin", "./core"]) {
-      const entry = exports[key];
-      const path = typeof entry === "string" ? entry : (entry?.import ?? entry?.default ?? "");
-      if (!path || !String(path).includes(".ts")) {
-        process.stderr.write(
-          `export ${key} must point at TypeScript source, got ${JSON.stringify(entry)}\n`,
-        );
-        process.exit(1);
-      }
-    }
-    // Confirm packed files include src/astro and src/admin
-    const list = Bun.spawn(["tar", "-tzf", tarball], { stdout: "pipe", stderr: "pipe" });
-    const [names, , listCode] = await Promise.all([
-      new Response(list.stdout).text(),
-      new Response(list.stderr).text(),
-      list.exited,
-    ]);
-    if (listCode !== 0) throw new Error(`tar list failed (exit ${listCode})`);
-    for (const need of [
-      "package/src/index.ts",
-      "package/src/astro/index.ts",
-      "package/src/astro/forms/index.ts",
-      "package/src/admin/index.tsx",
-    ]) {
-      if (!names.includes(need)) {
-        throw new Error(`tarball missing ${need}`);
-      }
-    }
-    process.stdout.write(
-      `pack-smoke ok: ${tarball.split("/").pop()} exports TS source (${match?.[0] ?? "emvb.tgz"})\n`,
-    );
+    if (!tarball) throw new Error(`No tarball in ${staging}`);
+    const pkg = JSON.parse(
+      await run(["tar", "-xOf", tarball, "package/package.json"]),
+    ) as PackedPackage;
+    const problems = packProblems(pkg, await run(["tar", "-tzf", tarball]));
+    if (problems.length > 0) throw new Error(problems.join("\n"));
+    process.stdout.write(`pack-smoke ok: ${tarball.split("/").pop()} exports TS source\n`);
   } finally {
     await rm(staging, { recursive: true, force: true });
   }
