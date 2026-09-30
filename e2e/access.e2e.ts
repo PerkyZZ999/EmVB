@@ -1,4 +1,5 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { loadDesign, saveDesign } from "./support/design.ts";
 import { api, createPage, setUpEmvbOnce } from "./support/api.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
 import { EDITOR } from "./support/helpers.ts";
@@ -30,6 +31,11 @@ test.afterAll(() => {
 // Page saves need the `emvb_pages` collection, and a new database has none until setup runs.
 setUpEmvbOnce();
 
+async function openAdminAs(page: Page, platform: string, role: number) {
+  becomeRole(platform, role);
+  await page.goto("/_emdash/admin");
+}
+
 const sidebarLink = (page: Page) =>
   page.getByRole("complementary", { name: "Admin navigation" }).locator(`a[href$="${PAGES}"]`);
 
@@ -44,8 +50,7 @@ for (const [name, role] of lower) {
     page,
     request,
   }, testInfo) => {
-    becomeRole(testInfo.project.name, role);
-    await page.goto("/_emdash/admin");
+    await openAdminAs(page, testInfo.project.name, role);
     // The link is in the DOM (EmDash can't role-gate plugin pages) but the shim hides it.
     await expect(sidebarLink(page)).toHaveCount(1, { timeout: 20_000 });
     await expect(sidebarLink(page)).toBeHidden();
@@ -82,8 +87,7 @@ for (const [name, role] of allowed) {
     page,
     request,
   }, testInfo) => {
-    becomeRole(testInfo.project.name, role);
-    await page.goto("/_emdash/admin");
+    await openAdminAs(page, testInfo.project.name, role);
     await expect(sidebarLink(page)).toBeVisible({ timeout: 20_000 });
     await expect(page.locator("#emvb-sidebar-shim")).toHaveCount(0);
 
@@ -100,13 +104,8 @@ for (const [name, role] of allowed) {
       page.getByRole("complementary", { name: "Admin navigation" }).locator('a[href*="/editor"]'),
     ).toHaveCount(0);
 
-    const current = await api(request, "GET", "/_emdash/api/plugins/emvb/design");
-    const data = current.json?.["data"] as { design: unknown; revision: string | null };
-    const save = await api(request, "POST", "/_emdash/api/plugins/emvb/design/save", {
-      design: data.design,
-      revision: data.revision,
-    });
-    expect(save.status).toBe(200);
+    const { design, revision } = await loadDesign(request);
+    await saveDesign(request, design, revision);
     await createPage(request, "Role check", pageLayout);
   });
 }

@@ -3914,6 +3914,55 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*order comes from updatedAt"
+    },
+    {
+      "id": "W-086/e2e-stored-layout-live",
+      "requirement": "R-003",
+      "description": "the e2e storedLayout helper reads the published layout instead of the saved draft",
+      "edits": [
+        {
+          "file": "e2e/support/api.ts",
+          "search": "  parsed((await getPage(request, id)).data[\"layout\"]) as T;",
+          "replace": "  parsed((await getPage(request, id)).liveData?.[\"layout\"]) as T;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/keyboard.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*keyboard move, duplicate and delete"
+    },
+    {
+      "id": "W-086/e2e-submission-wrong-field",
+      "requirement": "R-040",
+      "description": "the e2e expectSubmission helper looks for the email in the wrong submission field",
+      "edits": [
+        {
+          "file": "e2e/support/forms.ts",
+          "search": "item.data?.[\"email\"] === email",
+          "replace": "item.data?.[\"note\"] === email"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/forms.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*integration POST submit succeeds"
+    },
+    {
+      "id": "W-086/e2e-published-html-unpublished",
+      "requirement": "R-031",
+      "description": "the prod publishedHtml helper forgets to publish, so the public page is a 404",
+      "edits": [
+        {
+          "file": "e2e/public.prod.ts",
+          "search": "  await publishPage(author, await createPage(author, title, layout, slug));",
+          "replace": "  await createPage(author, title, layout, slug);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e:prod",
+        "--project=node-public",
+        "-g",
+        "published page renders"
+      ],
+      "expect": "✘.*\\[node-public\\].*a published page renders from the production build"
     }
   ]
 }

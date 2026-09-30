@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
-import { createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
-import { canvas, openEditor, overlay, saveStatus, unique } from "./support/helpers.ts";
+import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
+import { canvas, openEditor, saveDraft, unique } from "./support/helpers.ts";
 
 const layoutFor = () => ({
   schemaVersion: 1,
@@ -26,27 +26,17 @@ test("keyboard move, duplicate and delete round-trip on save", async ({ page, re
   await canvas(page).getByRole("heading", { name: "First" }).click();
   await page.keyboard.press("Alt+ArrowDown");
   await page.keyboard.press("Control+d");
-  await overlay(page)
-    .getByRole("button", { name: /Save draft/ })
-    .click();
-  await expect(saveStatus(page)).toContainText("Saved", {
-    timeout: 15_000,
-  });
-  const stored = parsed((await getPage(request, id)).data["layout"]) as {
+  await saveDraft(page);
+  const stored = await storedLayout<{
     root: { children: Array<{ props?: { text?: string } }> };
-  };
+  }>(request, id);
   expect(stored.root.children.map((c) => c.props?.text)).toEqual(["Second", "First", "First"]);
   // Delete the duplicate (last "First")
   await canvas(page).getByRole("heading", { name: "First" }).last().click();
   await page.keyboard.press("Delete");
-  await overlay(page)
-    .getByRole("button", { name: /Save draft/ })
-    .click();
-  await expect(saveStatus(page)).toContainText("Saved", {
-    timeout: 15_000,
-  });
-  const after = parsed((await getPage(request, id)).data["layout"]) as {
+  await saveDraft(page);
+  const after = await storedLayout<{
     root: { children: Array<{ props?: { text?: string } }> };
-  };
+  }>(request, id);
   expect(after.root.children.map((c) => c.props?.text)).toEqual(["Second", "First"]);
 });

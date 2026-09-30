@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
-import { canvas, openEditor, openLayers, overlay, saveStatus, unique } from "./support/helpers.ts";
+import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
+import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
 
 const layoutFor = (first: string, second: string) => ({
   schemaVersion: 1,
@@ -56,16 +56,11 @@ test("dragging Heading onto the canvas inserts at the pointed index and saves", 
   });
   await expect(overlay(page).locator(".emvb-overlay-label")).toContainText("Heading");
 
-  await overlay(page)
-    .getByRole("button", { name: /Save draft/ })
-    .click();
-  await expect(saveStatus(page)).toContainText("Saved", {
-    timeout: 15_000,
-  });
+  await saveDraft(page);
 
-  const stored = parsed((await getPage(request, id)).data["layout"]) as {
+  const stored = await storedLayout<{
     root: { children: Array<{ type: string; props?: { text?: string } }> };
-  };
+  }>(request, id);
   expect(stored.root.children.map((child) => child.type)).toEqual([
     "heading",
     "heading",
@@ -119,13 +114,8 @@ test("moving a heading into another container saves the new tree", async ({ page
   await page.mouse.down();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 16 });
   await page.mouse.up();
-  await overlay(page)
-    .getByRole("button", { name: /Save draft/ })
-    .click();
-  await expect(saveStatus(page)).toContainText("Saved", {
-    timeout: 15_000,
-  });
-  const stored = parsed((await getPage(request, id)).data["layout"]) as {
+  await saveDraft(page);
+  const stored = await storedLayout<{
     root: {
       children: Array<{
         id: string;
@@ -133,7 +123,7 @@ test("moving a heading into another container saves the new tree", async ({ page
         children?: Array<{ props?: { text?: string } }>;
       }>;
     };
-  };
+  }>(request, id);
   const boxNode = stored.root.children.find((c) => c.id === "box00001");
   expect(boxNode?.children?.map((c) => c.props?.text)).toContain("Outside");
 });
@@ -172,9 +162,9 @@ test("dropping a container into its own child shows the invalid outline and chan
   await expect(overlay(page).locator("[data-emvb-invalid-outline]")).toHaveCount(0, {
     timeout: 5_000,
   });
-  const after = parsed((await getPage(request, id)).data["layout"]) as {
+  const after = await storedLayout<{
     root: { children: Array<{ id: string; children?: unknown[] }> };
-  };
+  }>(request, id);
   expect(after.root.children.map((c) => c.id)).toEqual(["box00001", "head0002"]);
   const outer = after.root.children[0];
   expect(

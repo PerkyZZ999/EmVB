@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { api, createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
-import { createContactForm, formPageLayout, listSubmissions } from "./support/forms.ts";
+import {
+  createContactForm,
+  expectSubmission,
+  formPageLayout,
+  submitAsVisitor,
+} from "./support/forms.ts";
 import { unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
@@ -27,8 +32,7 @@ test("integration POST submit succeeds with EmVB-bound field names", async ({ re
   expect(body?.success).toBe(true);
   expect(body?.message).toContain("EmVB received");
 
-  const items = await listSubmissions(request, form.id);
-  expect(items.some((item) => item.data?.["email"] === `visitor-${slug}@example.com`)).toBe(true);
+  await expectSubmission(request, form.id, `visitor-${slug}@example.com`);
 });
 
 test("visitor can fill and submit a published EmVB form", async ({ page, request }) => {
@@ -39,16 +43,6 @@ test("visitor can fill and submit a published EmVB form", async ({ page, request
 
   await page.goto(`/page-${slug}`);
   await expect(page.locator("[data-ec-form]")).toBeVisible();
-  await expect(page.locator("[data-ec-form][data-ec-initialized]")).toBeVisible({
-    timeout: 15_000,
-  });
-  await page.locator('input[name="email"]').fill(`ui-${slug}@example.com`);
-  await page.locator('textarea[name="note"]').fill("hello from browser");
-  await page.locator(".ec-form-submit").click();
-  await expect(page.locator("[data-form-status]")).toContainText(/EmVB received|success|Thank/i, {
-    timeout: 15_000,
-  });
-
-  const items = await listSubmissions(request, form.id);
-  expect(items.some((item) => item.data?.["email"] === `ui-${slug}@example.com`)).toBe(true);
+  await submitAsVisitor(page, `ui-${slug}@example.com`, "hello from browser");
+  await expectSubmission(request, form.id, `ui-${slug}@example.com`);
 });

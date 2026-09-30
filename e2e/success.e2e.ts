@@ -2,9 +2,9 @@ import { expect, test } from "@playwright/test";
 import { successSignalLayout } from "../packages/emvb/src/core/forms/success-layout.ts";
 import { api, createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
 import { setClass, setColor } from "./support/design.ts";
-import { createContactForm, listSubmissions } from "./support/forms.ts";
+import { createContactForm, expectSubmission, submitAsVisitor } from "./support/forms.ts";
 import { uploadEmvbPixel } from "./support/media.ts";
-import { EDITOR, canvas, overlay, saveStatus, unique } from "./support/helpers.ts";
+import { EDITOR, canvas, overlay, saveDraft, unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
@@ -44,12 +44,7 @@ test("BRIEF success signal: build, preview, publish, submit, restyle (W-039)", a
     await expect(canvas(page).locator("[data-ec-form]")).toBeVisible();
 
     // Save draft (content already stored via API; exercise Save)
-    await overlay(page)
-      .getByRole("button", { name: /Save draft/ })
-      .click();
-    await expect(saveStatus(page)).toContainText("Saved", {
-      timeout: 15_000,
-    });
+    await saveDraft(page);
 
     // Preview draft
     const preview = await api(
@@ -90,17 +85,9 @@ test("BRIEF success signal: build, preview, publish, submit, restyle (W-039)", a
     expect(publicColor).toBe("rgb(17, 34, 51)");
 
     // 3. Visitor submits the form
-    await expect(page.locator("[data-ec-form][data-ec-initialized]")).toBeVisible({
-      timeout: 15_000,
-    });
     const email = `visitor-${tag}@example.com`;
-    await page.locator('input[name="email"]').fill(email);
-    await page.locator(".ec-form-submit").click();
-    await expect(page.locator("[data-form-status]")).toContainText(/EmVB received|Thank|success/i, {
-      timeout: 15_000,
-    });
-    const items = await listSubmissions(request, form.id);
-    expect(items.some((item) => item.data?.["email"] === email)).toBe(true);
+    await submitAsVisitor(page, email);
+    await expectSubmission(request, form.id, email);
 
     // 4. Change colour variable without republish
     await setColor(request, colorVar, "#445566");

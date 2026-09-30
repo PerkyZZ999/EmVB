@@ -13,6 +13,14 @@ export const EDITOR = "/_emdash/admin/plugins/emvb/editor";
 
 export const saveStatus = (page: Page): Locator => overlay(page).locator(".emvb-save-status");
 
+/** Clicks Save draft and waits for the save to land. */
+export async function saveDraft(page: Page) {
+  await overlay(page)
+    .getByRole("button", { name: /Save draft/ })
+    .click();
+  await expect(saveStatus(page)).toContainText("Saved", { timeout: 15_000 });
+}
+
 /** Opens `id` in the editor and waits for its top bar, and for `heading` on the canvas if given. */
 export async function openEditor(page: Page, id: string, heading?: string, collection?: string) {
   await page.goto(`${EDITOR}?entry=${id}${collection ? `&collection=${collection}` : ""}`);

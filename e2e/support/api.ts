@@ -104,6 +104,10 @@ export async function getPage(request: APIRequestContext, id: string): Promise<S
 export const parsed = (value: unknown) =>
   typeof value === "string" ? (JSON.parse(value) as unknown) : value;
 
+/** The page's saved draft layout, typed as the caller reads it. */
+export const storedLayout = async <T>(request: APIRequestContext, id: string) =>
+  parsed((await getPage(request, id)).data["layout"]) as T;
+
 /** Creates an `emvb_theme_parts` draft over the content API and returns its id. */
 export async function createThemePart(
   request: APIRequestContext,

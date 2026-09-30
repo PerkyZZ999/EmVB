@@ -1,4 +1,4 @@
-import { expect, type APIRequestContext } from "@playwright/test";
+import { expect, type APIRequestContext, type Page } from "@playwright/test";
 import { api } from "./api.ts";
 
 const FORMS = "/_emdash/api/plugins/emdash-forms";
@@ -54,7 +54,7 @@ export async function createContactForm(
   return { id, slug, name };
 }
 
-export async function listSubmissions(request: APIRequestContext, formId: string) {
+async function listSubmissions(request: APIRequestContext, formId: string) {
   const listed = await api(request, "POST", `${FORMS}/submissions/list`, {
     formId,
     limit: 20,
@@ -64,6 +64,25 @@ export async function listSubmissions(request: APIRequestContext, formId: string
     items?: Array<{ id: string; data: Record<string, unknown> }>;
   };
   return data?.items ?? [];
+}
+
+/** Asserts the form has a submission from `email`. */
+export async function expectSubmission(request: APIRequestContext, formId: string, email: string) {
+  const items = await listSubmissions(request, formId);
+  expect(items.some((item) => item.data?.["email"] === email)).toBe(true);
+}
+
+/** Fills and submits the published EmVB form on `page` as a visitor, and waits for the thanks. */
+export async function submitAsVisitor(page: Page, email: string, note?: string) {
+  await expect(page.locator("[data-ec-form][data-ec-initialized]")).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.locator('input[name="email"]').fill(email);
+  if (note !== undefined) await page.locator('textarea[name="note"]').fill(note);
+  await page.locator(".ec-form-submit").click();
+  await expect(page.locator("[data-form-status]")).toContainText(/EmVB received|success|Thank/i, {
+    timeout: 15_000,
+  });
 }
 
 /** EmVB layout bound to a forms-plugin form id (email + note + submit). */

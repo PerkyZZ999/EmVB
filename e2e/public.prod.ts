@@ -1,5 +1,6 @@
 import { expect, request as requestFactory, test, type APIRequestContext } from "@playwright/test";
 import { api, createPage, ensureEmvbSetup, getPage, publishPage } from "./support/api.ts";
+import { setClass, setColor, setSpacing } from "./support/design.ts";
 import { unique } from "./support/helpers.ts";
 
 let author: APIRequestContext;
@@ -70,64 +71,17 @@ const layoutWithClass = (textA: string, textB: string, classId: string) => ({
   },
 });
 
-type DesignDoc = {
-  schemaVersion: 1;
-  variables: {
-    colors: { id: string; name: string; value: string }[];
-    fonts?: { id: string; name: string; value: string }[];
-    fontSizes?: { id: string; name: string; value: { value: number; unit: string } }[];
-    spacings?: { id: string; name: string; value: { value: number; unit: string } }[];
-  };
-  classes?: { id: string; name: string; style: Record<string, unknown> }[];
-};
-
-async function loadDesign() {
-  const current = await api(author, "GET", "/_emdash/api/plugins/emvb/design");
-  return current.json?.["data"] as { design: DesignDoc; revision: string | null };
-}
-
-async function saveDesign(design: DesignDoc, revision: string | null) {
-  const saved = await api(author, "POST", "/_emdash/api/plugins/emvb/design/save", {
-    design,
-    revision,
-  });
-  expect(saved.status).toBe(200);
-  return saved;
-}
-
-/** Sets one colour variable in the site design, or removes it when `value` is null. */
-async function setColor(variable: string, value: string | null) {
-  const data = await loadDesign();
-  const colors = data.design.variables.colors.filter((c) => c.id !== variable);
-  if (value !== null) colors.push({ id: variable, name: variable, value });
-  await saveDesign(
-    { ...data.design, variables: { ...data.design.variables, colors } },
-    data.revision,
-  );
-}
-
-/** Sets one spacing variable, or removes it when `value` is null. */
-async function setSpacing(variable: string, value: number | null) {
-  const data = await loadDesign();
-  const spacings = (data.design.variables.spacings ?? []).filter((s) => s.id !== variable);
-  if (value !== null) {
-    spacings.push({ id: variable, name: variable, value: { value, unit: "px" } });
-  }
-  await saveDesign(
-    {
-      ...data.design,
-      variables: { ...data.design.variables, spacings },
-    },
-    data.revision,
-  );
-}
-
-/** Upserts or removes a style class by id. */
-async function setClass(id: string, next: { name: string; style: Record<string, unknown> } | null) {
-  const data = await loadDesign();
-  const classes = (data.design.classes ?? []).filter((c) => c.id !== id);
-  if (next !== null) classes.push({ id, name: next.name, style: next.style });
-  await saveDesign({ ...data.design, classes }, data.revision);
+/** Creates and publishes a page as the author, and returns its public HTML (asserting 200). */
+async function publishedHtml(
+  request: APIRequestContext,
+  title: string,
+  layout: unknown,
+  slug: string,
+) {
+  await publishPage(author, await createPage(author, title, layout, slug));
+  const response = await request.get(`/${slug}`);
+  expect(response.status()).toBe(200);
+  return response.text();
 }
 
 const scriptsOf = (html: string) => html.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) ?? [];
@@ -137,12 +91,7 @@ test("a published page renders from the production build with its content and CS
 }) => {
   const slug = `pub-${unique()}`;
   const text = `Published ${slug}`;
-  const id = await createPage(author, "Public check", layoutWith(text), slug);
-  await publishPage(author, id);
-
-  const response = await request.get(`/${slug}`);
-  expect(response.status()).toBe(200);
-  const html = await response.text();
+  const html = await publishedHtml(request, "Public check", layoutWith(text), slug);
   expect(html).toContain(`<h1 class="emvb-heading">${text}</h1>`);
   expect(html).toMatch(/<style>[^<]*\.emvb-root\{[^<]*gap:24px/);
   expect(html).not.toContain("data-emvb");
@@ -214,24 +163,19 @@ test("changing a colour variable changes the published page without re-publishin
 }) => {
   const variable = `tone-${unique()}`;
   const declaration = (value: string) => `--emvb-c-${variable}:${value}`;
-  await setColor(variable, "#112233");
+  await setColor(author, variable, "#112233");
   try {
     const slug = `tone-${unique()}`;
-    const id = await createPage(
-      author,
-      "Variable check",
-      layoutWith(`Tone ${slug}`, variable),
-      slug,
-    );
-    await publishPage(author, id);
-    expect(await (await request.get(`/${slug}`)).text()).toContain(declaration("#112233"));
+    expect(
+      await publishedHtml(request, "Variable check", layoutWith(`Tone ${slug}`, variable), slug),
+    ).toContain(declaration("#112233"));
 
-    await setColor(variable, "#445566");
+    await setColor(author, variable, "#445566");
     const after = await (await request.get(`/${slug}`)).text();
     expect(after).toContain(declaration("#445566"));
     expect(after).not.toContain(declaration("#112233"));
   } finally {
-    await setColor(variable, null);
+    await setColor(author, variable, null);
   }
 });
 
@@ -240,24 +184,24 @@ test("changing a spacing variable changes the published page without re-publishi
 }) => {
   const variable = `space-${unique()}`;
   const declaration = (value: number) => `--emvb-s-${variable}:${value}px`;
-  await setSpacing(variable, 12);
+  await setSpacing(author, variable, 12);
   try {
     const slug = `space-${unique()}`;
-    const id = await createPage(
-      author,
-      "Spacing check",
-      layoutWithSpacing(`Space ${slug}`, variable),
-      slug,
-    );
-    await publishPage(author, id);
-    expect(await (await request.get(`/${slug}`)).text()).toContain(declaration(12));
+    expect(
+      await publishedHtml(
+        request,
+        "Spacing check",
+        layoutWithSpacing(`Space ${slug}`, variable),
+        slug,
+      ),
+    ).toContain(declaration(12));
 
-    await setSpacing(variable, 32);
+    await setSpacing(author, variable, 32);
     const after = await (await request.get(`/${slug}`)).text();
     expect(after).toContain(declaration(32));
     expect(after).not.toContain(declaration(12));
   } finally {
-    await setSpacing(variable, null);
+    await setSpacing(author, variable, null);
   }
 });
 
@@ -265,21 +209,19 @@ test("editing a class used on two elements updates both on the published page", 
   request,
 }) => {
   const classId = `card-${unique()}`;
-  await setClass(classId, { name: "Card", style: { color: "#112233" } });
+  await setClass(author, classId, { name: "Card", style: { color: "#112233" } });
   try {
     const slug = `class-${unique()}`;
-    const id = await createPage(
-      author,
+    let html = await publishedHtml(
+      request,
       "Class check",
       layoutWithClass(`One ${slug}`, `Two ${slug}`, classId),
       slug,
     );
-    await publishPage(author, id);
-    let html = await (await request.get(`/${slug}`)).text();
     expect(html).toContain(`emvb-k-${classId}`);
     expect(html).toContain(`.emvb-k-${classId}{color:#112233}`);
 
-    await setClass(classId, { name: "Card", style: { color: "#abcdef" } });
+    await setClass(author, classId, { name: "Card", style: { color: "#abcdef" } });
     html = await (await request.get(`/${slug}`)).text();
     expect(html).toContain(`.emvb-k-${classId}{color:#abcdef}`);
     expect(html).not.toContain("#112233");
@@ -287,7 +229,7 @@ test("editing a class used on two elements updates both on the published page", 
       2,
     );
   } finally {
-    await setClass(classId, null);
+    await setClass(author, classId, null);
   }
 });
 
@@ -313,12 +255,7 @@ test("a published page with an unknown node still renders its other elements wit
       ],
     },
   };
-  const id = await createPage(author, "Unknown check", layout, slug);
-  await publishPage(author, id);
-
-  const response = await request.get(`/${slug}`);
-  expect(response.status()).toBe(200);
-  const html = await response.text();
+  const html = await publishedHtml(request, "Unknown check", layout, slug);
   expect(html).toContain(`<h1 class="emvb-heading">${text}</h1>`);
   expect(html).not.toContain("carousel");
   expect(html).not.toContain("Unknown element");

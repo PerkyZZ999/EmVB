@@ -1,7 +1,7 @@
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
-import { createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
-import { canvas, openEditor, openLayers, overlay, saveStatus, unique } from "./support/helpers.ts";
+import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
+import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
 
 const PIXEL = path.join(process.cwd(), "e2e/fixtures/emvb-pixel.png");
 
@@ -34,6 +34,11 @@ async function selectImage(page: Page) {
   await expect(overlay(page).locator("[data-emvb-media-picker]")).toBeVisible();
 }
 
+async function uploadPixel(page: Page) {
+  await overlay(page).locator("[data-emvb-media-upload]").setInputFiles(PIXEL);
+  await expect(overlay(page).locator(".emvb-media-thumb")).toBeVisible({ timeout: 20_000 });
+}
+
 test("upload stores media id, URL, alt, and dimensions on both platforms", async ({
   page,
   request,
@@ -42,18 +47,14 @@ test("upload stores media id, URL, alt, and dimensions on both platforms", async
   await openEditor(page, id);
   await selectImage(page);
 
-  await overlay(page).locator("[data-emvb-media-upload]").setInputFiles(PIXEL);
-  await expect(overlay(page).locator(".emvb-media-thumb")).toBeVisible({ timeout: 20_000 });
+  await uploadPixel(page);
   await expect(overlay(page).getByLabel("Or paste a URL")).toHaveValue(
     /\/_emdash\/api\/media\/file\//,
   );
 
-  await overlay(page)
-    .getByRole("button", { name: /Save draft/ })
-    .click();
-  await expect(saveStatus(page)).toContainText("Saved", { timeout: 15_000 });
+  await saveDraft(page);
 
-  const layout = parsed((await getPage(request, id)).data["layout"]) as {
+  const layout = await storedLayout<{
     root: {
       children: Array<{
         type: string;
@@ -66,7 +67,7 @@ test("upload stores media id, URL, alt, and dimensions on both platforms", async
         };
       }>;
     };
-  };
+  }>(request, id);
   const image = layout.root.children[0];
   expect(image?.type).toBe("image");
   expect(image?.props.mediaId).toBeTruthy();
@@ -86,8 +87,7 @@ test("library picker reapplies a previously uploaded image", async ({ page, requ
   await selectImage(page);
 
   // Ensure the library has at least one image.
-  await overlay(page).locator("[data-emvb-media-upload]").setInputFiles(PIXEL);
-  await expect(overlay(page).locator(".emvb-media-thumb")).toBeVisible({ timeout: 20_000 });
+  await uploadPixel(page);
   const firstSrc = await overlay(page).getByLabel("Or paste a URL").inputValue();
 
   // Clear via URL field then re-pick from the library dialog.
@@ -105,14 +105,11 @@ test("library picker reapplies a previously uploaded image", async ({ page, requ
     /\/_emdash\/api\/media\/file\//,
   );
 
-  await overlay(page)
-    .getByRole("button", { name: /Save draft/ })
-    .click();
-  await expect(saveStatus(page)).toContainText("Saved", { timeout: 15_000 });
+  await saveDraft(page);
 
-  const layout = parsed((await getPage(request, id)).data["layout"]) as {
+  const layout = await storedLayout<{
     root: { children: Array<{ props: { src?: string; mediaId?: string } }> };
-  };
+  }>(request, id);
   expect(layout.root.children[0]?.props.mediaId).toBeTruthy();
   expect(layout.root.children[0]?.props.src).toMatch(/^\/_emdash\/api\/media\/file\//);
   // Re-pick may resolve the same file (dedupe) — just ensure we left the pasted URL behind.

@@ -41,6 +41,22 @@ export async function setColor(request: APIRequestContext, variable: string, val
   );
 }
 
+/** Sets one spacing variable, or removes it when `value` is null. */
+export async function setSpacing(
+  request: APIRequestContext,
+  variable: string,
+  value: number | null,
+) {
+  const data = await loadDesign(request);
+  const spacings = (data.design.variables.spacings ?? []).filter((s) => s.id !== variable);
+  if (value !== null) spacings.push({ id: variable, name: variable, value: { value, unit: "px" } });
+  await saveDesign(
+    request,
+    { ...data.design, variables: { ...data.design.variables, spacings } },
+    data.revision,
+  );
+}
+
 export async function setClass(
   request: APIRequestContext,
   id: string,
