@@ -9633,6 +9633,166 @@
         "Alt.Arrow reorders the cascade, and the order persists"
       ],
       "expect": "\\(fail\\).*Alt\\+Arrow reorders the cascade, and the order persists"
+    },
+    {
+      "id": "W-090/guard-print-hook-removed",
+      "requirement": "W-090",
+      "description": "the preload no longer gives DOM nodes a short printed form",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "Object.defineProperty(Object.getPrototypeOf(Node.prototype) as object, Bun.inspect.custom, {",
+          "replace": "Object.defineProperty({}, Bun.inspect.custom, {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/setup/happydom.test.ts",
+        "-t",
+        "print a node as its markup, cut short"
+      ],
+      "expect": "\\(fail\\).*print a node as its markup, cut short"
+    },
+    {
+      "id": "W-090/guard-print-uncut",
+      "requirement": "W-090",
+      "description": "a node prints its whole markup, however long",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "return text.length > MAX_PRINT ? `${text.slice(0, MAX_PRINT)}…` : text;",
+          "replace": "return text;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/setup/happydom.test.ts",
+        "-t",
+        "print a node as its markup, cut short"
+      ],
+      "expect": "\\(fail\\).*print a node as its markup, cut short"
+    },
+    {
+      "id": "W-090/guard-ignores-nodes",
+      "requirement": "W-090",
+      "description": "the diff-matcher guard doesn't recognise DOM nodes",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "if (value instanceof Node || value === window) return true;",
+          "replace": "if (value === window) return true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/setup/happydom.test.ts",
+        "-t",
+        "the diff matchers refuse nodes"
+      ],
+      "expect": "\\(fail\\).*the diff matchers refuse nodes"
+    },
+    {
+      "id": "W-090/guard-skips-mocks",
+      "requirement": "W-090",
+      "description": "the guard doesn't look at a mock's calls",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "if (typeof value === \"function\") return Array.isArray(calls) && holdsDomNode(calls, seen);",
+          "replace": "if (typeof value === \"function\") return false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/setup/happydom.test.ts",
+        "-t",
+        "the diff matchers refuse nodes"
+      ],
+      "expect": "\\(fail\\).*the diff matchers refuse nodes"
+    },
+    {
+      "id": "W-090/guard-shallow",
+      "requirement": "W-090",
+      "description": "the guard doesn't look inside arrays and plain objects",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "return Object.values(value).some((item) => holdsDomNode(item, seen));",
+          "replace": "return false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/setup/happydom.test.ts",
+        "-t",
+        "the diff matchers refuse nodes"
+      ],
+      "expect": "\\(fail\\).*the diff matchers refuse nodes"
+    },
+    {
+      "id": "W-090/guard-not-ignored",
+      "requirement": "W-090",
+      "description": "a guarded .not matcher runs the built-in without .not",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "builtIn.apply(context.isNot ? expect(received).not : expect(received), args);",
+          "replace": "builtIn.apply(expect(received), args);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/setup/happydom.test.ts",
+        "-t",
+        "the diff matchers still compare plain values as before"
+      ],
+      "expect": "\\(fail\\).*the diff matchers still compare plain values as before"
+    },
+    {
+      "id": "W-090/guard-drops-diff",
+      "requirement": "W-090",
+      "description": "a guarded matcher's failure loses the built-in diff",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "return { pass: context.isNot, message: () => detail.replace(/^expect\\(.*\\n+/, \"\") };",
+          "replace": "return { pass: context.isNot, message: () => \"failed\" };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/setup/happydom.test.ts",
+        "-t",
+        "the diff matchers still compare plain values as before"
+      ],
+      "expect": "\\(fail\\).*the diff matchers still compare plain values as before"
+    },
+    {
+      "id": "W-090/preload-document-loses-nodes",
+      "requirement": "W-090",
+      "description": "the preload's document can't find elements appended to it",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "// Tells React that component tests wrap updates in act().",
+          "replace": "document.querySelector = () => null;\n// Tells React that component tests wrap updates in act()."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/setup/happydom.test.ts",
+        "-t",
+        "the happy-dom preload provides a DOM at the plugin admin URL"
+      ],
+      "expect": "\\(fail\\).*the happy-dom preload provides a DOM at the plugin admin URL"
     }
   ]
 }
