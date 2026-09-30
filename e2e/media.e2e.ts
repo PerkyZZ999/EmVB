@@ -70,15 +70,23 @@ test("upload stores media id, URL, alt, and dimensions on both platforms", async
   }>(request, id);
   const image = layout.root.children[0];
   expect(image?.type).toBe("image");
-  expect(image?.props.mediaId).toBeTruthy();
   expect(image?.props.src).toMatch(/^\/_emdash\/api\/media\/file\//);
-  expect(image?.props.alt).toBeTruthy();
+  // The layout starts with the placeholder alt "Image"; an upload replaces it with the file name.
+  expect(image?.props.alt).toBe("emvb-pixel");
   expect(image?.props.width).toBe(1);
   expect(image?.props.height).toBe(1);
 
   await expect(
     canvas(page).locator('img.emvb-image[src*="/_emdash/api/media/file/"]'),
-  ).toBeVisible();
+  ).toHaveAttribute("alt", "emvb-pixel");
+
+  // The stored media id names a real library item with the stored URL.
+  const mediaId = image?.props.mediaId ?? "";
+  expect(mediaId).not.toBe("");
+  await overlay(page).locator("[data-emvb-media-library]").click();
+  const card = overlay(page).locator(`[data-emvb-media-id="${mediaId}"]`);
+  await expect(card).toHaveCount(1);
+  await expect(card.locator("img")).toHaveAttribute("src", image?.props.src ?? "");
 });
 
 test("library picker reapplies a previously uploaded image", async ({ page, request }) => {
@@ -88,7 +96,6 @@ test("library picker reapplies a previously uploaded image", async ({ page, requ
 
   // Ensure the library has at least one image.
   await uploadPixel(page);
-  const firstSrc = await overlay(page).getByLabel("Or paste a URL").inputValue();
 
   // Clear via URL field then re-pick from the library dialog.
   await overlay(page).getByLabel("Or paste a URL").fill("https://example.com/cleared.jpg");
@@ -99,7 +106,11 @@ test("library picker reapplies a previously uploaded image", async ({ page, requ
 
   await overlay(page).locator("[data-emvb-media-library]").click();
   await expect(overlay(page).locator("[data-emvb-media-dialog]")).toBeVisible();
-  await overlay(page).locator("[data-emvb-media-id]").first().click();
+  const picked = overlay(page).locator("[data-emvb-media-id]").first();
+  const pickedId = await picked.getAttribute("data-emvb-media-id");
+  const pickedSrc = await picked.locator("img").getAttribute("src");
+  expect(pickedId).not.toBeNull();
+  await picked.click();
   await expect(overlay(page).locator("[data-emvb-media-dialog]")).toHaveCount(0);
   await expect(overlay(page).getByLabel("Or paste a URL")).toHaveValue(
     /\/_emdash\/api\/media\/file\//,
@@ -110,9 +121,8 @@ test("library picker reapplies a previously uploaded image", async ({ page, requ
   const layout = await storedLayout<{
     root: { children: Array<{ props: { src?: string; mediaId?: string } }> };
   }>(request, id);
-  expect(layout.root.children[0]?.props.mediaId).toBeTruthy();
+  // The picked library item's id and URL are stored, replacing the pasted URL.
+  expect(layout.root.children[0]?.props.mediaId).toBe(pickedId ?? "");
+  expect(layout.root.children[0]?.props.src).toBe(pickedSrc ?? "");
   expect(layout.root.children[0]?.props.src).toMatch(/^\/_emdash\/api\/media\/file\//);
-  // Re-pick may resolve the same file (dedupe) — just ensure we left the pasted URL behind.
-  expect(layout.root.children[0]?.props.src).not.toBe("https://example.com/cleared.jpg");
-  void firstSrc;
 });

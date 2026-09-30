@@ -11338,6 +11338,116 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
       "expect": "\\(fail\\).*fontFamily \"#fff\""
+    },
+    {
+      "id": "W-091/e2e-media-alt-placeholder",
+      "requirement": "R-007",
+      "description": "an uploaded image keeps the placeholder alt \"Image\"",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": "else if (!alt || alt === \"Image\") next.alt =",
+          "replace": "else if (!alt) next.alt ="
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/media.e2e.ts",
+        "--project=node",
+        "-g",
+        "upload stores media id"
+      ],
+      "expect": "✘.*\\[node\\].*upload stores media id"
+    },
+    {
+      "id": "W-091/e2e-media-pick-wrong-id",
+      "requirement": "R-007",
+      "description": "a picked library image stores its storage key as the media id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": "mediaId: item.id",
+          "replace": "mediaId: item.storageKey"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/media.e2e.ts",
+        "--project=node",
+        "-g",
+        "library picker reapplies"
+      ],
+      "expect": "✘.*\\[node\\].*library picker reapplies"
+    },
+    {
+      "id": "W-091/e2e-a11y-image-alt-dropped",
+      "requirement": "W-041",
+      "description": "the renderer drops the alt attribute from images",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "|src|alt|width|",
+          "replace": "|src|width|"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/a11y.e2e.ts",
+        "--project=node",
+        "-g",
+        "no serious axe violations"
+      ],
+      "expect": "✘.*\\[node\\].*no serious axe violations"
+    },
+    {
+      "id": "W-091/e2e-parity-justify-lost",
+      "requirement": "R-005",
+      "description": "justify-content is emitted as align-content in canvas and public CSS",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "justifyContent: { css: \"justify-content\",",
+          "replace": "justifyContent: { css: \"align-content\","
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/parity.e2e.ts",
+        "--project=node",
+        "-g",
+        "nested 3-deep flex styles match"
+      ],
+      "expect": "✘.*\\[node\\].*nested 3-deep flex styles match"
+    },
+    {
+      "id": "W-091/e2e-success-editor-ids-public",
+      "requirement": "W-039",
+      "description": "published pages carry the editor-only element ids",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "if (mode === \"editor\" && id) attrs[\"data-emvb-id\"] = id;",
+          "replace": "if (id) attrs[\"data-emvb-id\"] = id;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/success.e2e.ts",
+        "--project=node",
+        "-g",
+        "BRIEF success signal"
+      ],
+      "expect": "✘.*\\[node\\].*BRIEF success signal"
     }
   ]
 }
