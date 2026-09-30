@@ -1,0 +1,666 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`loadFormsCapability (W-036) each list and definition answer maps to the same capability and requests 1`] = `
+{
+  "broken × bare404": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "broken × broken": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "broken × formMessage": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "broken × gone": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "broken × invalid": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "broken × notFoundCode": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "broken × offline": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "broken × ok": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "forbidden × bare404": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "forbidden × broken": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "forbidden × formMessage": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "forbidden × gone": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "forbidden × invalid": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "forbidden × notFoundCode": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "forbidden × offline": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "forbidden × ok": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "items × bare404": {
+    "capability": {
+      "canList": true,
+      "forms": [
+        {
+          "id": "f1",
+          "name": "A",
+          "slug": "a",
+        },
+      ],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "items × broken": {
+    "capability": {
+      "canList": true,
+      "forms": [
+        {
+          "id": "f1",
+          "name": "A",
+          "slug": "a",
+        },
+      ],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "items × formMessage": {
+    "capability": {
+      "canList": true,
+      "forms": [
+        {
+          "id": "f1",
+          "name": "A",
+          "slug": "a",
+        },
+      ],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "items × gone": {
+    "capability": {
+      "canList": true,
+      "forms": [
+        {
+          "id": "f1",
+          "name": "A",
+          "slug": "a",
+        },
+      ],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "items × invalid": {
+    "capability": {
+      "canList": true,
+      "forms": [
+        {
+          "id": "f1",
+          "name": "A",
+          "slug": "a",
+        },
+      ],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "items × notFoundCode": {
+    "capability": {
+      "canList": true,
+      "forms": [
+        {
+          "id": "f1",
+          "name": "A",
+          "slug": "a",
+        },
+      ],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "items × offline": {
+    "capability": {
+      "canList": true,
+      "forms": [
+        {
+          "id": "f1",
+          "name": "A",
+          "slug": "a",
+        },
+      ],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "items × ok": {
+    "capability": {
+      "canList": true,
+      "forms": [
+        {
+          "id": "f1",
+          "name": "A",
+          "slug": "a",
+        },
+      ],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "noData × bare404": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "noData × broken": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "noData × formMessage": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "noData × gone": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "noData × invalid": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "noData × notFoundCode": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "noData × offline": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "noData × ok": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "noItems × bare404": {
+    "capability": {
+      "canList": true,
+      "forms": [],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "noItems × broken": {
+    "capability": {
+      "canList": true,
+      "forms": [],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "noItems × formMessage": {
+    "capability": {
+      "canList": true,
+      "forms": [],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "noItems × gone": {
+    "capability": {
+      "canList": true,
+      "forms": [],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "noItems × invalid": {
+    "capability": {
+      "canList": true,
+      "forms": [],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "noItems × notFoundCode": {
+    "capability": {
+      "canList": true,
+      "forms": [],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "noItems × offline": {
+    "capability": {
+      "canList": true,
+      "forms": [],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "noItems × ok": {
+    "capability": {
+      "canList": true,
+      "forms": [],
+      "status": "ready",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "notFound × bare404": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "notFound × broken": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "notFound × formMessage": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "notFound × gone": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "notFound × invalid": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "notFound × notFoundCode": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "notFound × offline": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "notFound × ok": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "offline × bare404": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "offline × broken": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "offline × formMessage": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "offline × gone": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "offline × invalid": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "offline × notFoundCode": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "offline × offline": {
+    "capability": {
+      "status": "missing",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "offline × ok": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+      "POST /_emdash/api/plugins/emdash-forms/definition {"id":"__emvb_probe__"}",
+    ],
+  },
+  "unauthorized × bare404": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "unauthorized × broken": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "unauthorized × formMessage": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "unauthorized × gone": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "unauthorized × invalid": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "unauthorized × notFoundCode": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "unauthorized × offline": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+  "unauthorized × ok": {
+    "capability": {
+      "canList": false,
+      "status": "manual",
+    },
+    "sent": [
+      "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
+    ],
+  },
+}
+`;

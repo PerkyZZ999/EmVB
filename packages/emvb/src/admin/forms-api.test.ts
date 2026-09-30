@@ -27,6 +27,44 @@ describe("loadFormsCapability (W-036)", () => {
     const hard: Fetcher = async () => json(502, { error: { code: "UPSTREAM", message: "boom" } });
     await expect(loadFormsCapability(hard)).resolves.toEqual({ status: "missing" });
   });
+
+  // Recorded before W-086 M14 split the probe out: every list answer against every probe answer.
+  test("each list and definition answer maps to the same capability and requests", async () => {
+    const offline = () => Promise.reject(new TypeError("Failed to fetch"));
+    const lists: Record<string, () => Response | Promise<Response>> = {
+      items: () => json(200, { data: { items: [{ id: "f1", name: "A", slug: "a", extra: 1 }] } }),
+      noItems: () => json(200, { data: {} }),
+      noData: () => json(200, {}),
+      unauthorized: () => json(401, { error: { code: "UNAUTHORIZED", message: "no" } }),
+      forbidden: () => json(403, { error: { code: "FORBIDDEN", message: "no" } }),
+      notFound: () => json(404, { error: { code: "NOT_FOUND", message: "Not found" } }),
+      broken: () => json(500, { error: { code: "BOOM", message: "boom" } }),
+      offline,
+    };
+    const probes: Record<string, () => Response | Promise<Response>> = {
+      ok: () => json(200, { data: { pages: [] } }),
+      notFoundCode: () => json(404, { error: { code: "NOT_FOUND", message: "nope" } }),
+      formMessage: () => json(404, { error: { code: "MISSING", message: "Form does not exist" } }),
+      bare404: () => json(404, { error: { code: "MISSING", message: "nope" } }),
+      gone: () => json(410, { error: { code: "GONE", message: "gone" } }),
+      invalid: () => json(422, { error: { code: "INVALID", message: "bad" } }),
+      broken: () => json(500, { error: { code: "BOOM", message: "boom" } }),
+      offline,
+    };
+    const cases = Object.entries(lists).flatMap(([listName, list]) =>
+      Object.entries(probes).map(async ([probeName, probe]) => {
+        const sent: string[] = [];
+        const fetcher: Fetcher = async (path, init) => {
+          sent.push(`${init?.method} ${path} ${String(init?.body)}`);
+          return path.endsWith("/forms/list") ? list() : probe();
+        };
+        const capability = await loadFormsCapability(fetcher);
+        return [`${listName} × ${probeName}`, { capability, sent }] as const;
+      }),
+    );
+    const results = Object.fromEntries(await Promise.all(cases));
+    expect(results).toMatchSnapshot();
+  });
 });
 
 describe("loadFormFields (W-036)", () => {

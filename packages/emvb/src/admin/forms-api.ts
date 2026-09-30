@@ -10,47 +10,44 @@ export type FormsCapability =
 const LIST = "/_emdash/api/plugins/emdash-forms/forms/list";
 const DEFINITION = "/_emdash/api/plugins/emdash-forms/definition";
 
+const manual = (): FormsCapability => ({ status: "manual", canList: false });
+
+/**
+ * Whether a failed definition probe still shows the forms plugin is there. A 404 is ambiguous
+ * (no plugin, or no such form), so it counts when it reads like the plugin's own "form not found".
+ */
+function probeFoundPlugin(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return false;
+  if (error.status === 404) {
+    return error.code === "NOT_FOUND" || error.message.toLowerCase().includes("form");
+  }
+  return error.status === 410 || error.status === 422;
+}
+
+/** Asks the public definition route about a form that can't exist (unknown id → the plugin's 404). */
+async function formsPluginAnswers(fetcher: Fetcher): Promise<boolean> {
+  try {
+    await requestJson(fetcher, DEFINITION, { method: "POST", body: { id: "__emvb_probe__" } });
+    return true;
+  } catch (error) {
+    return probeFoundPlugin(error);
+  }
+}
+
 /** Probe forms plugin + list (admin). Editors get manual-id fallback (D-015). */
 export async function loadFormsCapability(fetcher: Fetcher): Promise<FormsCapability> {
   try {
-    const data = await requestJson<{ items: Array<{ id: string; name: string; slug: string }> }>(
-      fetcher,
-      LIST,
-      { method: "POST", body: {} },
-    );
-    return {
-      status: "ready",
-      canList: true,
-      forms: (data.items ?? []).map((item) => ({
-        id: item.id,
-        name: item.name,
-        slug: item.slug,
-      })),
-    };
+    const data = await requestJson<{ items: FormListItem[] }>(fetcher, LIST, {
+      method: "POST",
+      body: {},
+    });
+    const forms = (data.items ?? []).map(({ id, name, slug }) => ({ id, name, slug }));
+    return { status: "ready", canList: true, forms };
   } catch (error) {
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-      return { status: "manual", canList: false };
+      return manual();
     }
-    // Confirm plugin presence via public definition (unknown id → form 404 from plugin).
-    try {
-      await requestJson(fetcher, DEFINITION, {
-        method: "POST",
-        body: { id: "__emvb_probe__" },
-      });
-      return { status: "manual", canList: false };
-    } catch (inner) {
-      if (inner instanceof ApiError && inner.status === 404) {
-        // Ambiguous: missing plugin vs missing form. Prefer manual if message looks like form.
-        const msg = inner.message.toLowerCase();
-        if (msg.includes("form") || inner.code === "NOT_FOUND") {
-          return { status: "manual", canList: false };
-        }
-      }
-      if (inner instanceof ApiError && (inner.status === 410 || inner.status === 422)) {
-        return { status: "manual", canList: false };
-      }
-      return { status: "missing" };
-    }
+    return (await formsPluginAnswers(fetcher)) ? manual() : { status: "missing" };
   }
 }
 

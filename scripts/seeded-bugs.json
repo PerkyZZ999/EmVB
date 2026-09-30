@@ -3516,6 +3516,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/theme-context-golden.test.ts"],
       "expect": "\\(fail\\).*request contexts keep their shape"
+    },
+    {
+      "id": "W-086/forms-gone-means-missing",
+      "requirement": "R-015",
+      "description": "a 410 from the definition probe reports the forms plugin missing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/forms-api.ts",
+          "search": "return error.status === 410 || error.status === 422;",
+          "replace": "return error.status === 422;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/forms-api.test.ts"],
+      "expect": "\\(fail\\).*each list and definition answer"
+    },
+    {
+      "id": "W-086/forms-list-leaks-fields",
+      "requirement": "R-015",
+      "description": "form list items keep every field the plugin sends",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/forms-api.ts",
+          "search": ".map(({ id, name, slug }) => ({ id, name, slug }))",
+          "replace": ".map((item) => item)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/forms-api.test.ts"],
+      "expect": "\\(fail\\).*each list and definition answer"
+    },
+    {
+      "id": "W-086/forms-unauthorized-probes",
+      "requirement": "R-015",
+      "description": "a 401 on the forms list falls through to the plugin probe",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/forms-api.ts",
+          "search": "(error.status === 401 || error.status === 403)",
+          "replace": "error.status === 403"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/forms-api.test.ts"],
+      "expect": "\\(fail\\).*each list and definition answer"
     }
   ]
 }
