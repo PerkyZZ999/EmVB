@@ -69,7 +69,7 @@ Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `
 
 ### Style properties (v1, W-017)
 
-Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" }`. Colours are hex or `{ "var": "<id>" }`.
+Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "vh" }` (`vw` and `vh` since W-088). Colours are hex or `{ "var": "<id>" }`. A **size** is a length, a variable reference or `"auto"`. An **offset** is a size whose value may also be negative (−10000 to 10000).
 
 | Key | Value | CSS |
 | --- | --- | --- |
@@ -78,9 +78,16 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" }`. Colours
 | `justifyContent` | `flex-start`, `flex-end`, `center`, `space-between`, `space-around`, `space-evenly` | `justify-content` |
 | `alignItems` | `stretch`, `flex-start`, `flex-end`, `center`, `baseline` | `align-items` |
 | `gap` | length | `gap` |
-| `width` / `minWidth` / `maxWidth` / `height` / `minHeight` | length | matching size properties |
+| `width` / `height` | size | `width` / `height` |
+| `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | length | matching size properties (`maxHeight` since W-088) |
+| `overflow` | `visible`, `hidden`, `clip`, `scroll`, `auto` | `overflow` |
+| `aspectRatio` | `"auto"` or `"w/h"` with whole numbers 1–9999, such as `"16/9"` | `aspect-ratio` (`16 / 9`) |
+| `objectFit` | `fill`, `contain`, `cover`, `none`, `scale-down` | `object-fit` (the editor offers it on Image and Video) |
 | `paddingTop` / `Right` / `Bottom` / `Left` | length | `padding-*` |
-| `marginTop` / `Right` / `Bottom` / `Left` | length | `margin-*` |
+| `marginTop` / `Right` / `Bottom` / `Left` | size | `margin-*` |
+| `position` | `static`, `relative`, `absolute`, `fixed`, `sticky` | `position` |
+| `top` / `right` / `bottom` / `left` | offset | matching inset properties |
+| `zIndex` | whole number −9999 to 9999 | `z-index` |
 | `fontSize` / `lineHeight` / `letterSpacing` | length | matching type properties |
 | `fontWeight` | `400`–`700`, `normal`, `bold` | `font-weight` |
 | `textAlign` | `left`, `center`, `right`, `justify` | `text-align` |
@@ -88,6 +95,12 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" }`. Colours
 | `color` / `backgroundColor` / `borderColor` | colour | matching colour properties |
 | `borderWidth` / `borderRadius` | length | matching border properties |
 | `borderStyle` | `none`, `solid`, `dashed`, `dotted` | `border-style` |
+| `opacity` | number 0–1 (the editor shows 0–100 %) | `opacity` |
+| `boxShadow` | `{ x, y, blur, spread, color?, inset? }`: px numbers, `x`, `y` and `spread` −1000 to 1000, `blur` 0 to 1000; `color` is a colour; `inset` is a boolean | `box-shadow` as `[inset] Xpx Ypx Bpx Spx [colour]`; no colour means the text colour |
+| `filter` | `{ blur?, brightness?, contrast?, saturate?, grayscale?, hueRotate? }`, at least one set: `blur` 0–100 px, `brightness` / `contrast` / `saturate` 0–300 %, `grayscale` 0–100 %, `hueRotate` 0–360° | `filter`, functions always in that order, such as `blur(2px) grayscale(100%)` |
+| `cursor` | `default`, `pointer`, `text`, `move`, `grab`, `not-allowed`, `help`, `crosshair`, `zoom-in` | `cursor` |
+
+**W-088 additions are additive.** Every new key and unit is optional and every earlier value keeps its meaning, so stored pages and classes are valid unchanged: `schemaVersion` stays 1 and no migration runs. The keys are the same on `node.style` and on `design.classes[].style`. The generator builds each value from typed numbers and keywords only and runs the same `isSafeCssValue` gate as every other property; anything else is dropped with a `rejected-style` warning. A shadow colour bound to a colour variable counts as a use of that variable, and deleting the variable clears it from the page layout. One limit: an older EmVB reports a page or class that uses a new key as a validation issue rather than "saved by a newer EmVB".
 
 ## Design system document
 
@@ -124,7 +137,7 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 - The root gets `emvb-root`, each node `emvb-<type>` and, when its style yields at least one valid declaration, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning. Unknown element types render nothing publicly and a placeholder with `data-emvb-id` in the editor (warning `unknown-type`).
 - The CSS is, in order: variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021).
 - **Style classes** (`design.classes[]`): `{ id, name, style }`. Elements list ids in `node.classes`; HTML gets `emvb-k-<id>` in applied order. Cascade merge for computed styles: `resolveCascade(classStyles, local)` (later wins).
-- Length/font style props may use `{ "var": "<id>", "from": "spacing"|"fontSize"|"font" }` (colours keep `{ "var": "<id>" }`).
+- Length/font style props may use `{ "var": "<id>", "from": "spacing"|"fontSize"|"font" }` (colours keep `{ "var": "<id>" }`). Offsets (`top`, `right`, `bottom`, `left`) take spacing variables; the shadow colour takes a colour variable.
 - Text and attributes are escaped by the serializer. Public output has no `data-emvb-*` attributes and no scripts.
 
 ## Changing the format
