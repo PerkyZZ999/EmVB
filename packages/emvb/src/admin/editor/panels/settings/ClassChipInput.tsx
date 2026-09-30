@@ -1,12 +1,16 @@
-import { MapPinIcon, PlusIcon, TagSimpleIcon, XIcon } from "@phosphor-icons/react";
+import { MapPinIcon, PlusIcon, TagSimpleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   addClassId,
+  duplicateClass,
   moveClassId,
   removeClassId,
+  renameClass,
+  replaceClassId,
   type DesignSystem,
 } from "../../../../core/index.ts";
 import { uniqueId } from "../site-list.tsx";
+import { ClassChip, stopEditorShortcuts } from "./ClassChip.tsx";
 import {
   appliedByName,
   classOptions,
@@ -27,11 +31,6 @@ type Props = {
 
 const optionKey = (option: ClassOption) =>
   option.kind === "class" ? option.cls.id : `create-${option.name}`;
-
-/** Keys the chip box handles itself, so the editor's window shortcuts (delete, arrange) don't. */
-const stopEditorShortcuts = (event: React.KeyboardEvent) => {
-  if (!event.ctrlKey && !event.metaKey) event.stopPropagation();
-};
 
 /**
  * The Style tab's Classes field (W-087, DESIGN.md "class chip input"): a Local chip, one chip per
@@ -108,6 +107,30 @@ export function ClassChipInput({
     commit(addClassId(ids, option.cls.id));
     reset();
   };
+
+  const saveDesign = async (next: DesignSystem) => {
+    setError(null);
+    try {
+      await onDesignChange(next);
+      return true;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save the class. Try again.");
+      return false;
+    }
+  };
+
+  const rename = (id: string, name: string) => void saveDesign(renameClass(design, id, name));
+
+  /** Copies the class and swaps the copy in on this element only, ready to edit. */
+  const duplicate = async (id: string) => {
+    const next = duplicateClass(design, id);
+    const copy = next.classes?.at(-1);
+    if (next === design || !copy || !(await saveDesign(next))) return;
+    commit(replaceClassId(ids, id, copy.id));
+    onEdit(copy.id);
+  };
+
+  const reorder = (index: number, delta: -1 | 1) => commit(moveClassId(ids, index, delta));
 
   const remove = (id: string, focusIndex: number) => {
     commit(removeClassId(ids, id));
@@ -203,41 +226,25 @@ export function ClassChipInput({
               <span className="emvb-chip-label">Local</span>
             </button>
           </span>
-          {ids.map((id, index) => {
-            const name = byId.get(id)?.name ?? id;
-            return (
-              <span
-                key={id}
-                className="emvb-chip"
-                data-emvb-class-id={id}
-                data-active={editing === id}
-              >
-                <button
-                  type="button"
-                  ref={(el) => {
-                    chipRefs.current[index + 1] = el;
-                  }}
-                  className="emvb-chip-main"
-                  aria-pressed={editing === id}
-                  title={`${name} · .emvb-k-${id}`}
-                  onClick={() => onEdit(id)}
-                  onKeyDown={(event) => onChipKey(event, index + 1)}
-                >
-                  <TagSimpleIcon size={12} aria-hidden="true" />
-                  <span className="emvb-chip-label">{name}</span>
-                </button>
-                <button
-                  type="button"
-                  className="emvb-chip-icon"
-                  tabIndex={-1}
-                  aria-label={`Remove ${name}`}
-                  onClick={() => remove(id, index)}
-                >
-                  <XIcon size={12} aria-hidden="true" />
-                </button>
-              </span>
-            );
-          })}
+          {ids.map((id, index) => (
+            <ClassChip
+              key={id}
+              id={id}
+              name={byId.get(id)?.name ?? id}
+              active={editing === id}
+              first={index === 0}
+              last={index === ids.length - 1}
+              buttonRef={(el) => {
+                chipRefs.current[index + 1] = el;
+              }}
+              onKeyDown={(event) => onChipKey(event, index + 1)}
+              onEdit={() => onEdit(id)}
+              onRename={(name) => rename(id, name)}
+              onDuplicate={() => void duplicate(id)}
+              onMove={(delta) => reorder(index, delta)}
+              onRemove={() => remove(id, index)}
+            />
+          ))}
           <input
             ref={inputRef}
             id={`${baseId}-input`}

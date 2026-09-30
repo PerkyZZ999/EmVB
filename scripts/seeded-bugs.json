@@ -4265,8 +4265,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
-          "search": "{ids.map((id, index) => {",
-          "replace": "{[...ids].reverse().map((id, index) => {"
+          "search": "{ids.map((id, index) => (",
+          "replace": "{[...ids].reverse().map((id, index) => ("
         }
       ],
       "command": [
@@ -4283,8 +4283,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
-          "search": "const name = byId.get(id)?.name ?? id;",
-          "replace": "const name = id;"
+          "search": "name={byId.get(id)?.name ?? id}",
+          "replace": "name={id}"
         }
       ],
       "command": [
@@ -4300,9 +4300,9 @@
       "description": "the chip × doesn't remove the class",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
-          "search": "onClick={() => remove(id, index)}",
-          "replace": "onClick={() => undefined}"
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "        aria-label={`Remove ${name}`}\n        onClick={props.onRemove}",
+          "replace": "        aria-label={`Remove ${name}`}"
         }
       ],
       "command": [
@@ -4498,7 +4498,7 @@
       "description": "keys handled in the chip box reach the editor's window shortcuts (Backspace deletes the element)",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
           "search": "if (!event.ctrlKey && !event.metaKey) event.stopPropagation();",
           "replace": "void event;"
         }
@@ -4631,8 +4631,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
-          "search": "onClick={() => onEdit(id)}",
-          "replace": "onClick={() => undefined}"
+          "search": "onEdit={() => onEdit(id)}",
+          "replace": "onEdit={() => undefined}"
         }
       ],
       "command": [
@@ -4803,6 +4803,240 @@
         "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
       ],
       "expect": "\\(fail\\).*selecting another element goes back"
+    },
+    {
+      "id": "W-087/menu-remove-label",
+      "requirement": "R-021",
+      "description": "the chip menu's last action isn't Remove from element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "            Remove from element\n",
+          "replace": "            Remove\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*lists the actions in order"
+    },
+    {
+      "id": "W-087/move-earlier-at-start",
+      "requirement": "R-021",
+      "description": "Move earlier is offered on the first class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "disabled={props.first}",
+          "replace": "disabled={false}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*lists the actions in order"
+    },
+    {
+      "id": "W-087/menu-edit-dead",
+      "requirement": "R-021",
+      "description": "the menu's Edit class styles does nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "<DropdownMenu.Item icon={PaintBrushIcon} onClick={props.onEdit}>",
+          "replace": "<DropdownMenu.Item icon={PaintBrushIcon}>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Edit class styles selects the class"
+    },
+    {
+      "id": "W-087/rename-not-saved",
+      "requirement": "R-021",
+      "description": "renaming a chip doesn't save the new name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "const rename = (id: string, name: string) => void saveDesign(renameClass(design, id, name));",
+          "replace": "const rename = (id: string, name: string) => void [id, name];"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Rename edits the name in the chip"
+    },
+    {
+      "id": "W-087/rename-double-save",
+      "requirement": "R-021",
+      "description": "one rename saves twice (Enter, then the blur that follows)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "    if (ended.current) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*save the rename once"
+    },
+    {
+      "id": "W-087/escape-saves-rename",
+      "requirement": "R-021",
+      "description": "Escape saves the rename instead of cancelling it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "else if (event.key === \"Escape\") finish(null);",
+          "replace": "else if (event.key === \"Escape\") finish(event.currentTarget.value);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*F2 renames too"
+    },
+    {
+      "id": "W-087/f2-ignored",
+      "requirement": "R-021",
+      "description": "F2 on a chip doesn't start renaming",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "if (event.key === \"F2\") {",
+          "replace": "if (event.key === \"F12\") {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*F2 renames too"
+    },
+    {
+      "id": "W-087/rename-before-menu-closes",
+      "requirement": "R-021",
+      "description": "Rename from the menu starts before the menu hands focus back, so the field closes at once",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "requestAnimationFrame(startRename);",
+          "replace": "startRename();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Rename edits the name in the chip"
+    },
+    {
+      "id": "W-087/duplicate-added-not-swapped",
+      "requirement": "R-021",
+      "description": "Duplicate adds the copy next to the original instead of swapping it in",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "commit(replaceClassId(ids, id, copy.id));",
+          "replace": "commit(addClassId(ids, copy.id));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Duplicate swaps a copy in"
+    },
+    {
+      "id": "W-087/duplicate-not-edited",
+      "requirement": "R-021",
+      "description": "Duplicate doesn't select the copy for editing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "    onEdit(copy.id);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Duplicate swaps a copy in"
+    },
+    {
+      "id": "W-087/move-later-moves-earlier",
+      "requirement": "R-021",
+      "description": "Move later moves the class earlier",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "onMove={(delta) => reorder(index, delta)}",
+          "replace": "onMove={() => reorder(index, -1)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Move later and Move earlier"
+    },
+    {
+      "id": "W-087/menu-keys-leak",
+      "requirement": "R-021",
+      "description": "keys in the open chip menu reach the editor's window shortcuts",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "      onKeyDown={stopEditorShortcuts}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*keys in the open menu"
+    },
+    {
+      "id": "W-087/menu-remove-dead",
+      "requirement": "R-021",
+      "description": "the menu's Remove from element does nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "<DropdownMenu.Item icon={XIcon} onClick={props.onRemove}>",
+          "replace": "<DropdownMenu.Item icon={XIcon}>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Remove from element removes"
     }
   ]
 }

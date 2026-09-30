@@ -316,6 +316,11 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-chip-icon:hover { background: color-mix(in oklab, currentColor 14%, transparent); }
 .emvb-chip :focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }
 .emvb-chip[data-active="true"] :focus-visible { outline-color: #fff; outline-offset: -2px; }
+.emvb-chip-rename {
+  width: 128px; height: 20px; padding: 0 4px; border: 0; border-radius: 4px; outline: 0;
+  background: var(--color-kumo-base); color: var(--text-color-kumo-default); font: inherit;
+  box-shadow: inset 0 0 0 1px var(--color-kumo-brand);
+}
 .emvb-chip-text {
   flex: 1 0 72px; min-width: 72px; height: 20px; padding: 0 4px; border: 0; outline: 0;
   background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 13px;

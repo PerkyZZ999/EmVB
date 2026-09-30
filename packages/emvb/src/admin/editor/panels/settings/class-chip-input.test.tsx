@@ -5,7 +5,7 @@ import { emptyDesign, type DesignSystem, type LayoutNode } from "../../../../cor
 import type { Fetcher } from "../../../api.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
 import { ClassChipInput } from "./ClassChipInput.tsx";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 
 const stubFetcher: Fetcher = async () => new Response("{}", { status: 200 });
 
@@ -511,5 +511,157 @@ describe("class chip input: editing a class in context (W-087)", () => {
     await openStyle();
     expect(localButton().getAttribute("aria-pressed")).toBe("true");
     expect(chipButton("card").getAttribute("aria-pressed")).toBe("false");
+  });
+});
+
+const menuItem = (label: string) =>
+  [...document.querySelectorAll('[role="menuitem"]')].find((el) => el.textContent === label) as
+    | HTMLElement
+    | undefined;
+
+async function openMenu(name: string) {
+  const trigger = document.querySelector(`[aria-label="Actions for ${name}"]`) as HTMLElement;
+  await act(async () => trigger.click());
+  await settle();
+}
+
+async function pick(label: string) {
+  const item = menuItem(label);
+  if (!item) throw new Error(`no menu item ${label}`);
+  await act(async () => item.click());
+  await settle();
+}
+
+/** Rename from the menu starts on the frame after the menu closes. */
+const nextFrame = () =>
+  act(async () => {
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+  });
+
+const renameField = () => document.querySelector(".emvb-chip-rename") as HTMLInputElement | null;
+
+async function renameTo(text: string, key: "Enter" | "Escape") {
+  const field = renameField();
+  if (!field) throw new Error("no rename field");
+  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(field, text);
+  await press(field, key);
+  await settle();
+}
+
+describe("class chip input: chip menu (W-087)", () => {
+  test("lists the actions in order, with Remove last and moves disabled at the ends", async () => {
+    await mount(<Harness initial={["card", "accent"]} log={newLog()} />);
+    await openMenu("Card");
+    const labels = [...document.querySelectorAll('[role="menuitem"]')].map((el) => el.textContent);
+    expect(labels).toEqual([
+      "Edit class styles",
+      "Rename",
+      "Duplicate",
+      "Move earlier",
+      "Move later",
+      "Remove from element",
+    ]);
+    expect(menuItem("Move earlier")?.hasAttribute("data-disabled")).toBe(true);
+    expect(menuItem("Move later")?.hasAttribute("data-disabled")).toBe(false);
+  });
+
+  test("Edit class styles selects the class", async () => {
+    await mount(<Harness initial={["card", "accent"]} log={newLog()} />);
+    await openMenu("Accent");
+    await pick("Edit class styles");
+    expect(chipButton("accent").getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("Rename edits the name in the chip; Enter saves it and keeps the id", async () => {
+    const log = newLog();
+    await mount(<Harness initial={["card", "accent"]} log={log} />);
+    await openMenu("Card");
+    await pick("Rename");
+    await nextFrame();
+    expect(renameField()?.value).toBe("Card");
+    expect(document.activeElement === renameField()).toBe(true);
+    await renameTo("  Card large ", "Enter");
+    expect(log.designs).toHaveLength(1);
+    expect(log.designs[0]?.classes?.find((c) => c.id === "card")?.name).toBe("Card large");
+    expect(log.classes).toEqual([]);
+    expect(renameField()?.outerHTML ?? null).toBeNull();
+    expect(chipButton("card").textContent).toBe("Card large");
+  });
+
+  test("Enter and the blur that follows it save the rename once", async () => {
+    const log = newLog();
+    await mount(<Harness initial={["card"]} log={log} />);
+    await press(chipButton("card"), "F2");
+    const field = renameField();
+    if (!field) throw new Error("no rename field");
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(field, "Box");
+    await act(async () => {
+      field.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      field.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+    });
+    await settle();
+    expect(log.designs.map((d) => d.classes?.[0]?.name)).toEqual(["Box"]);
+  });
+
+  test("F2 renames too, and Escape cancels without saving", async () => {
+    const log = newLog();
+    await mount(<Harness initial={["card"]} log={log} />);
+    await press(chipButton("card"), "F2");
+    expect(renameField()?.value).toBe("Card");
+    await renameTo("Other", "Escape");
+    expect(log.designs).toEqual([]);
+    expect(chipButton("card").textContent).toBe("Card");
+  });
+
+  test("Duplicate swaps a copy in on this element and edits it", async () => {
+    const log = newLog();
+    await mount(<Harness initial={["card", "accent"]} log={log} />);
+    await openMenu("Card");
+    await pick("Duplicate");
+    const copy = log.designs[0]?.classes?.at(-1);
+    expect(copy).toEqual({
+      id: "card-copy",
+      name: "Card copy",
+      style: design.classes?.[0]?.style ?? {},
+    });
+    expect(log.classes.at(-1)).toEqual(["card-copy", "accent"]);
+    expect(chipButton("card-copy").getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("Move later and Move earlier reorder the cascade", async () => {
+    const log = newLog();
+    await mount(<Harness initial={["card", "accent"]} log={log} />);
+    await openMenu("Card");
+    await pick("Move later");
+    expect(log.classes.at(-1)).toEqual(["accent", "card"]);
+    await openMenu("Card");
+    await pick("Move earlier");
+    expect(log.classes.at(-1)).toEqual(["card", "accent"]);
+  });
+
+  test("Remove from element removes the class", async () => {
+    const log = newLog();
+    await mount(<Harness initial={["card", "accent"]} log={log} />);
+    await openMenu("Accent");
+    await pick("Remove from element");
+    expect(log.classes.at(-1)).toEqual(["card"]);
+    expect(log.designs).toEqual([]);
+  });
+
+  test("keys in the open menu don't reach the editor's window shortcuts", async () => {
+    const seen: string[] = [];
+    const listener = (event: KeyboardEvent) => seen.push(event.key);
+    window.addEventListener("keydown", listener);
+    try {
+      await mount(<Harness initial={["card"]} log={newLog()} />);
+      await openMenu("Card");
+      const item = menuItem("Duplicate");
+      if (!item) throw new Error("menu did not open");
+      await press(item, "ArrowDown");
+      await press(item, "Delete");
+      expect(seen).toEqual([]);
+    } finally {
+      window.removeEventListener("keydown", listener);
+    }
   });
 });
