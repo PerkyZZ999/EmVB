@@ -132,16 +132,36 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
   ],
 };
 
+const isLengthLiteral = (value: unknown): value is { value: number; unit: string } =>
+  typeof value === "object" && value !== null && "value" in value && "unit" in value;
+
+/** A value as placeholder text: a literal, a keyword, or the variable's name (W-089). */
+function placeholderOf(value: unknown, design: DesignSystem): string | undefined {
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  if (isLengthLiteral(value)) return `${value.value}${value.unit}`;
+  if (typeof value === "object" && value !== null && "var" in value) {
+    const { colors, fonts, fontSizes, spacings } = design.variables;
+    const id = (value as { var: unknown }).var;
+    return [...colors, ...(fonts ?? []), ...(fontSizes ?? []), ...(spacings ?? [])].find(
+      (v) => v.id === id,
+    )?.name;
+  }
+  return undefined;
+}
+
 /** One Style property row: control, set marker, reset (W-021). */
 export function StyleRow({
   styleKey,
   style,
+  inherited,
   design,
   onPatch,
   onDesignChange,
 }: {
   styleKey: StyleKey;
   style: StyleProps | undefined;
+  /** The Normal styles while a state is edited (W-089): shown as placeholders, never saved. */
+  inherited?: StyleProps;
   design: DesignSystem;
   onPatch: (patch: Partial<StyleProps>) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
@@ -149,6 +169,9 @@ export function StyleRow({
   const value = style?.[styleKey];
   const set = value !== undefined;
   const label = STYLE_LABELS[styleKey];
+  const normalValue = inherited?.[styleKey];
+  const placeholder = set ? undefined : placeholderOf(normalValue, design);
+  const inheriting = !set && normalValue !== undefined ? "true" : undefined;
 
   const reset = (
     <ResetButton label={label} set={set} onReset={() => onPatch({ [styleKey]: undefined })} />
@@ -160,10 +183,12 @@ export function StyleRow({
         className="emvb-style-row"
         data-emvb-style={styleKey}
         data-set={set ? "true" : undefined}
+        data-inherited={inheriting}
       >
         <ColorControl
           label={label}
           value={value as StyleProps["color"]}
+          placeholder={placeholder}
           design={design}
           onChange={(color) => onPatch({ [styleKey]: color })}
           onDesignChange={onDesignChange}
@@ -175,15 +200,17 @@ export function StyleRow({
 
   const options = SELECT_OPTIONS[styleKey];
   if (options) {
+    const shown = value ?? normalValue;
     const current =
-      styleKey === "fontWeight" && typeof value === "number"
-        ? String(value)
-        : ((value as string | undefined) ?? options[0]?.value ?? "");
+      styleKey === "fontWeight" && typeof shown === "number"
+        ? String(shown)
+        : ((shown as string | undefined) ?? options[0]?.value ?? "");
     return (
       <div
         className="emvb-style-row"
         data-emvb-style={styleKey}
         data-set={set ? "true" : undefined}
+        data-inherited={inheriting}
       >
         <Select
           label={label}
@@ -222,6 +249,7 @@ export function StyleRow({
         className="emvb-style-row"
         data-emvb-style={styleKey}
         data-set={set ? "true" : undefined}
+        data-inherited={inheriting}
       >
         {ref ? (
           <VariableChip
@@ -241,7 +269,7 @@ export function StyleRow({
             label={label}
             className={FIELD}
             value={text}
-            placeholder="Noto Sans, system-ui, sans-serif"
+            placeholder={placeholder ?? "Noto Sans, system-ui, sans-serif"}
             onChange={(event) => {
               const next = event.target.value.trim();
               onPatch({ fontFamily: next === "" ? undefined : next });
@@ -266,6 +294,7 @@ export function StyleRow({
         rowKey={styleKey}
         label={label}
         value={typeof value === "number" ? value : undefined}
+        inherited={typeof normalValue === "number" ? normalValue : undefined}
         spec={styleKey === "zIndex" ? Z_INDEX : OPACITY}
         onCommit={(next) => onPatch({ [styleKey]: next })}
       />
@@ -295,7 +324,13 @@ export function StyleRow({
   }
 
   if (styleKey === "filter") {
-    return <FiltersControl value={style?.filter} onChange={(filter) => onPatch({ filter })} />;
+    return (
+      <FiltersControl
+        value={style?.filter}
+        inherited={inherited?.filter}
+        onChange={(filter) => onPatch({ filter })}
+      />
+    );
   }
 
   if (LENGTH_KEYS.has(styleKey)) {
@@ -306,6 +341,7 @@ export function StyleRow({
         value={value}
         design={design}
         set={set}
+        placeholder={placeholder}
         onPatch={onPatch}
         reset={reset}
       />

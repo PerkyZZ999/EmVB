@@ -2,6 +2,7 @@ import { CaretDownIcon, CaretRightIcon, SquaresFourIcon, TextHIcon } from "@phos
 import * as React from "react";
 import {
   firstChild,
+  hasStateStyles,
   isParentNode,
   isHeadingNode,
   nextInOrder,
@@ -13,6 +14,7 @@ import {
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { ELEMENT_NAMES } from "./ElementPanel.tsx";
 import { dragStash } from "../dnd/drag-stash.ts";
+import { StateDot } from "./settings/StateSwitcher.tsx";
 
 const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
@@ -227,6 +229,7 @@ function LayerRow({
           {isHeadingNode(node) && node.props.text ? (
             <span className="emvb-layer-preview">{node.props.text}</span>
           ) : null}
+          {hasStateStyles(node) && <StateDot />}
         </button>
         {!isRoot && (
           <span className="emvb-layer-menu">

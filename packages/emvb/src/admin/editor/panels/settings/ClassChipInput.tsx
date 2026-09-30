@@ -3,6 +3,7 @@ import * as React from "react";
 import {
   addClassId,
   duplicateClass,
+  hasStateStyles,
   moveClassId,
   removeClassId,
   renameClass,
@@ -232,6 +233,7 @@ export function ClassChipInput({
               id={id}
               name={byId.get(id)?.name ?? id}
               active={editing === id}
+              hasStates={hasStateStyles(byId.get(id))}
               first={index === 0}
               last={index === ids.length - 1}
               buttonRef={(el) => {

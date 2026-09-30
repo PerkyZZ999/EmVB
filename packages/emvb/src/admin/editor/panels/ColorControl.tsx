@@ -38,12 +38,15 @@ export function ColorControl({
   label,
   value,
   design,
+  placeholder,
   onChange,
   onDesignChange,
 }: {
   label: string;
   value: ColorValue;
   design: DesignSystem;
+  /** Shown instead of Default when unset: the Normal value while a state is edited (W-089). */
+  placeholder?: string;
   onChange: (value: ColorValue) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
 }) {
@@ -69,7 +72,7 @@ export function ColorControl({
         }
         renderValue={(current: unknown) =>
           current === NONE
-            ? "Default"
+            ? (placeholder ?? "Default")
             : (colors.find((c) => c.id === current)?.name ?? String(current))
         }
       >

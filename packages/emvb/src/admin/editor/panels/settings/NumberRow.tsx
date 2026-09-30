@@ -44,12 +44,15 @@ export function NumberField({
   label,
   value,
   spec,
+  inherited,
   onCommit,
 }: {
   fieldKey: string;
   label: string;
   value: number | undefined;
   spec: NumberSpec;
+  /** The Normal value, shown as the placeholder while a state is edited (W-089). */
+  inherited?: number;
   onCommit: (next: number | undefined) => void;
 }) {
   const [draft, setDraft] = React.useState(shown(value, spec));
@@ -75,7 +78,7 @@ export function NumberField({
       className={`${FIELD} emvb-mono emvb-number`}
       inputMode="decimal"
       value={draft}
-      placeholder={spec.placeholder}
+      placeholder={inherited === undefined ? spec.placeholder : shown(inherited, spec)}
       error={error ?? undefined}
       aria-invalid={error ? true : undefined}
       data-emvb-number={fieldKey}
@@ -119,18 +122,32 @@ export function NumberRow({
   label,
   value,
   spec,
+  inherited,
   onCommit,
 }: {
   rowKey: string;
   label: string;
   value: number | undefined;
   spec: NumberSpec;
+  inherited?: number;
   onCommit: (next: number | undefined) => void;
 }) {
   const set = value !== undefined;
   return (
-    <div className="emvb-style-row" data-emvb-style={rowKey} data-set={set ? "true" : undefined}>
-      <NumberField fieldKey={rowKey} label={label} value={value} spec={spec} onCommit={onCommit} />
+    <div
+      className="emvb-style-row"
+      data-emvb-style={rowKey}
+      data-set={set ? "true" : undefined}
+      data-inherited={!set && inherited !== undefined ? "true" : undefined}
+    >
+      <NumberField
+        fieldKey={rowKey}
+        label={label}
+        value={value}
+        spec={spec}
+        inherited={inherited}
+        onCommit={onCommit}
+      />
       <ResetButton label={label} set={set} onReset={() => onCommit(undefined)} />
     </div>
   );

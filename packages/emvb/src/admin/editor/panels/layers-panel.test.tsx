@@ -142,3 +142,39 @@ describe("Layers panel (W-018)", () => {
     expect(data.get(EXISTING_ELEMENT_MIME)).toBe("head0002");
   });
 });
+
+describe("state styles dot (W-089)", () => {
+  test("a row shows the dot only when its element has state styles", async () => {
+    const withStates: Layout = {
+      ...layout,
+      root: {
+        ...layout.root,
+        children: [
+          { id: "head0001", type: "heading", props: { text: "One", level: 1 }, states: {} },
+          {
+            id: "head0003",
+            type: "heading",
+            props: { text: "Three", level: 2 },
+            states: { hover: { color: "#ff0000" } },
+          },
+        ],
+      },
+    };
+    await mountTree(
+      <LayersPanel
+        layout={withStates}
+        selectedId={null}
+        onSelect={() => undefined}
+        onDuplicate={() => undefined}
+        onMoveUp={() => undefined}
+        onMoveDown={() => undefined}
+        onDelete={() => undefined}
+      />,
+    );
+    const dot = (id: string) =>
+      document.querySelector(`[data-emvb-layer="${id}"] [aria-label="Has state styles"]`);
+    expect(Boolean(dot("head0003"))).toBe(true);
+    expect(Boolean(dot("head0001"))).toBe(false);
+    expect(Boolean(dot("root0001"))).toBe(false);
+  });
+});

@@ -25,3 +25,11 @@ test("editor tabs (Add | Layers, Content | Style, Variables | Classes) are 28 px
   expect(rule('.emvb-tabs [role="tab"]')).toMatch(/min-height: var\(--emvb-control\);/);
   expect(rule('.emvb-tabs [role="tablist"]')).toMatch(/min-height: var\(--emvb-control\);/);
 });
+
+test("the style state switcher is 28 px, and the state dot is a 6 px primary dot (W-089)", () => {
+  expect(rule('.emvb-state-tabs [role="tablist"]')).toMatch(/[{;] height: var\(--emvb-control\);/);
+  const dot = rule(".emvb-state-dot");
+  expect(dot).toMatch(/width: 6px;/);
+  expect(dot).toMatch(/height: 6px;/);
+  expect(dot).toMatch(/background: var\(--color-kumo-brand\);/);
+});

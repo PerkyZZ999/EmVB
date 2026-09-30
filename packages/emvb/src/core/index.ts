@@ -134,6 +134,7 @@ export {
   patchClassStyle,
   replaceClassId,
 } from "./design/classes.ts";
+export { hasStateStyles, patchClassState, patchStates } from "./design/states.ts";
 export {
   renderPage,
   type RenderMode,

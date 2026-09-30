@@ -10,6 +10,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
+import { StateDot } from "./StateSwitcher.tsx";
 
 /** Keys the chip box handles itself, so the editor's window shortcuts (delete, arrange) don't. */
 export const stopEditorShortcuts = (event: React.KeyboardEvent) => {
@@ -20,6 +21,8 @@ type Props = {
   id: string;
   name: string;
   active: boolean;
+  /** The class has hover, focus or active styles (W-089). */
+  hasStates?: boolean;
   first: boolean;
   last: boolean;
   buttonRef: (el: HTMLButtonElement | null) => void;
@@ -100,6 +103,7 @@ export function ClassChip(props: Props) {
         >
           <TagSimpleIcon size={12} aria-hidden="true" />
           <span className="emvb-chip-label">{name}</span>
+          {props.hasStates && <StateDot />}
         </button>
       )}
       <DropdownMenu

@@ -32,6 +32,7 @@ export function LengthRow({
   value,
   design,
   set,
+  placeholder,
   onPatch,
   reset,
 }: {
@@ -40,6 +41,8 @@ export function LengthRow({
   value: unknown;
   design: DesignSystem;
   set: boolean;
+  /** The Normal value, shown while a state is edited (W-089). */
+  placeholder?: string;
   onPatch: (patch: Partial<StyleProps>) => void;
   reset: React.ReactNode;
 }) {
@@ -95,6 +98,7 @@ export function LengthRow({
       className="emvb-style-row"
       data-emvb-style={styleKey}
       data-set={set ? "true" : undefined}
+      data-inherited={!set && placeholder !== undefined ? "true" : undefined}
       data-unit={chip ? undefined : unit}
     >
       {chip ? (
@@ -116,7 +120,7 @@ export function LengthRow({
             aria-label={label}
             inputMode="decimal"
             value={draft}
-            placeholder={unit === "auto" ? "auto" : undefined}
+            placeholder={unit === "auto" ? "auto" : placeholder}
             aria-invalid={error ? true : undefined}
             onChange={(event) => {
               if (unit === "auto") setUnit(lastNumeric.current);

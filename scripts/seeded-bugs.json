@@ -4649,8 +4649,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "    if (!cls) {\n      onChange(withStyle(node, patch));",
-          "replace": "    if (cls || !cls) {\n      onChange(withStyle(node, patch));"
+          "search": "    if (!cls) {\n      onChange(",
+          "replace": "    if (cls || !cls) {\n      onChange("
         }
       ],
       "command": [
@@ -4667,8 +4667,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "const style = cls ? cls.style : node.style;",
-          "replace": "const style = node.style;"
+          "search": "  const normal = cls ? cls.style : node.style;\n  const states = cls ? cls.states : node.states;",
+          "replace": "  const normal = node.style;\n  const states = node.states;"
         }
       ],
       "command": [
@@ -4721,8 +4721,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "              if (cls) return null;\n",
-          "replace": ""
+          "search": "              if (cls || styleState !== \"normal\") return null;",
+          "replace": "              if (styleState !== \"normal\") return null;"
         }
       ],
       "command": [
@@ -6871,8 +6871,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "            const keys = keysFor(node.type, id, style, position);",
-          "replace": "            const keys = keysFor(node.type, id, undefined, position);"
+          "search": "            const keys = keysFor(node.type, id, style, position).filter(",
+          "replace": "            const keys = keysFor(node.type, id, undefined, position).filter("
         }
       ],
       "command": [
@@ -8973,6 +8973,446 @@
         "Effects holds opacity, box shadow, filters, cursor and transition"
       ],
       "expect": "\\(fail\\).*Effects holds opacity, box shadow, filters, cursor and transition"
+    },
+    {
+      "id": "W-089/switcher-unnamed",
+      "requirement": "W-089",
+      "description": "the state switcher has no accessible name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StateSwitcher.tsx",
+          "search": "setAttribute(\"aria-label\", \"Style state\")",
+          "replace": "setAttribute(\"aria-label\", \"\")"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "Normal | Hover | Focus | Active"
+      ],
+      "expect": "\\(fail\\).*Normal | Hover | Focus | Active"
+    },
+    {
+      "id": "W-089/state-edit-hits-normal",
+      "requirement": "W-089",
+      "description": "editing in Hover changes the Normal style",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "        state === \"normal\"\n          ? withStyle(node, patch)\n          : withStates(node, patchStates(node.states, state, patch)),",
+          "replace": "        withStyle(node, patch),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "in Hover, a row edits the hover value"
+      ],
+      "expect": "\\(fail\\).*in Hover, a row edits the hover value"
+    },
+    {
+      "id": "W-089/no-normal-placeholder",
+      "requirement": "W-089",
+      "description": "rows in a state do not show the Normal value",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  const inherited = styleState === \"normal\" ? undefined : normal;",
+          "replace": "  const inherited = undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "in Hover, a row edits the hover value"
+      ],
+      "expect": "\\(fail\\).*in Hover, a row edits the hover value"
+    },
+    {
+      "id": "W-089/select-not-inherited",
+      "requirement": "W-089",
+      "description": "a select in a state shows the first option, not the Normal choice",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "    const shown = value ?? normalValue;",
+          "replace": "    const shown = value;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "a select shows the Normal choice"
+      ],
+      "expect": "\\(fail\\).*a select shows the Normal choice"
+    },
+    {
+      "id": "W-089/reset-drops-other-states",
+      "requirement": "W-089",
+      "description": "reset in one state drops the other states",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/states.ts",
+          "search": "  const next: StyleStates = { ...states };",
+          "replace": "  const next: StyleStates = {};"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "reset in a state clears only that value"
+      ],
+      "expect": "\\(fail\\).*reset in a state clears only that value"
+    },
+    {
+      "id": "W-089/counts-normal-in-state",
+      "requirement": "W-089",
+      "description": "section counts in a state count the Normal values",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "              countSet(node.type, style, id),",
+          "replace": "              countSet(node.type, normal, id),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "section counts count the chosen state"
+      ],
+      "expect": "\\(fail\\).*section counts count the chosen state"
+    },
+    {
+      "id": "W-089/transition-in-state-ui",
+      "requirement": "W-089",
+      "description": "Transition is offered in a state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "              (key) => styleState === \"normal\" || key !== \"transition\",",
+          "replace": "              () => true,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "Transition is offered only in Normal"
+      ],
+      "expect": "\\(fail\\).*Transition is offered only in Normal"
+    },
+    {
+      "id": "W-089/no-size-jump-help",
+      "requirement": "W-089",
+      "description": "Size has no jump warning in a state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "const JUMPY = new Set<StyleSectionId>([\"layout\", \"size\", \"position\"]);",
+          "replace": "const JUMPY = new Set<StyleSectionId>([\"layout\", \"position\"]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "Size, Layout and Position warn"
+      ],
+      "expect": "\\(fail\\).*Size, Layout and Position warn"
+    },
+    {
+      "id": "W-089/class-state-to-normal",
+      "requirement": "W-089",
+      "description": "editing a class in Hover changes the class Normal style",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "        : patchClassState(design, cls.id, state, patch);",
+          "replace": "        : patchClassStyle(design, cls.id, patch);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "editing a class state saves the class"
+      ],
+      "expect": "\\(fail\\).*editing a class state saves the class"
+    },
+    {
+      "id": "W-089/class-helper-wrong",
+      "requirement": "W-089",
+      "description": "the helper says \"this element\" while a class is edited",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StateSwitcher.tsx",
+          "search": "            ? `Editing ${label} for class \"${className}\"`",
+          "replace": "            ? `Editing ${label} for this element`"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "editing a class state saves the class"
+      ],
+      "expect": "\\(fail\\).*editing a class state saves the class"
+    },
+    {
+      "id": "W-089/state-kept-on-select",
+      "requirement": "W-089",
+      "description": "the chosen state survives a new selection",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  React.useEffect(() => setStyleState(\"normal\"), [node.id]);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "a new selection starts at Normal again"
+      ],
+      "expect": "\\(fail\\).*a new selection starts at Normal again"
+    },
+    {
+      "id": "W-089/preview-not-reported",
+      "requirement": "W-089",
+      "description": "the canvas never hears the chosen state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "    onStyleState?.(node.id, tab === \"style\" ? styleState : \"normal\");",
+          "replace": "    onStyleState?.(node.id, \"normal\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "Normal | Hover | Focus | Active"
+      ],
+      "expect": "\\(fail\\).*Normal | Hover | Focus | Active"
+    },
+    {
+      "id": "W-089/no-tab-dots",
+      "requirement": "W-089",
+      "description": "state tabs never show the dot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StateSwitcher.tsx",
+          "search": "      choice !== \"normal\" && Object.keys(states?.[choice] ?? {}).length > 0 ? (",
+          "replace": "      false ? ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "dots mark the states and sections"
+      ],
+      "expect": "\\(fail\\).*dots mark the states and sections"
+    },
+    {
+      "id": "W-089/no-section-dot",
+      "requirement": "W-089",
+      "description": "section headers never show the state dot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "              styleState === \"normal\" && sectionHasStates(node.type, states, id),",
+          "replace": "              false,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "dots mark the states and sections"
+      ],
+      "expect": "\\(fail\\).*dots mark the states and sections"
+    },
+    {
+      "id": "W-089/no-layers-dot",
+      "requirement": "W-089",
+      "description": "Layers rows never show the state dot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "          {hasStateStyles(node) && <StateDot />}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx",
+        "-t",
+        "a row shows the dot only when"
+      ],
+      "expect": "\\(fail\\).*a row shows the dot only when"
+    },
+    {
+      "id": "W-089/no-chip-dot",
+      "requirement": "W-089",
+      "description": "class chips never show the state dot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "hasStates={hasStateStyles(byId.get(id))}",
+          "replace": "hasStates={false}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "the class chip shows a dot"
+      ],
+      "expect": "\\(fail\\).*the class chip shows a dot"
+    },
+    {
+      "id": "W-089/empty-state-dot",
+      "requirement": "W-089",
+      "description": "an empty state object counts as having state styles",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/states.ts",
+          "search": "Object.keys(owner?.states?.[state] ?? {}).length > 0",
+          "replace": "owner?.states?.[state] !== undefined"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/states.test.ts",
+        "-t",
+        "hasStateStyles is true only"
+      ],
+      "expect": "\\(fail\\).*hasStateStyles is true only"
+    },
+    {
+      "id": "W-089/preview-on-root",
+      "requirement": "W-089",
+      "description": "the preview marks the first canvas element, not the selected one",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/state-preview.ts",
+          "search": "    .querySelector(`[data-emvb-id=\"${CSS.escape(preview.id)}\"]`)",
+          "replace": "    .querySelector(\"[data-emvb-id]\")"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/state-preview.test.ts",
+        "-t",
+        "marks only the selected element"
+      ],
+      "expect": "\\(fail\\).*marks only the selected element"
+    },
+    {
+      "id": "W-089/preview-not-cleared",
+      "requirement": "W-089",
+      "description": "an old preview mark stays after moving on",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/state-preview.ts",
+          "search": "      element.removeAttribute(\"data-emvb-state\");",
+          "replace": "      void element;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/state-preview.test.ts",
+        "-t",
+        "moving to another element or back to Normal"
+      ],
+      "expect": "\\(fail\\).*moving to another element or back to Normal"
+    },
+    {
+      "id": "W-089/state-tabs-32px",
+      "requirement": "W-089",
+      "description": "the state switcher is 32 px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-state-tabs [role=\"tablist\"] { width: 100%; height: var(--emvb-control);",
+          "replace": ".emvb-state-tabs [role=\"tablist\"] { width: 100%; height: 32px;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "the style state switcher is 28 px"
+      ],
+      "expect": "\\(fail\\).*the style state switcher is 28 px"
+    },
+    {
+      "id": "W-089/state-patch-keeps-transition",
+      "requirement": "W-089",
+      "description": "a transition can be patched into a state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/states.ts",
+          "search": "  delete merged[\"transition\"];\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/states.test.ts",
+        "-t",
+        "a transition never lands in a state"
+      ],
+      "expect": "\\(fail\\).*a transition never lands in a state"
+    },
+    {
+      "id": "W-089/class-empty-states-kept",
+      "requirement": "W-089",
+      "description": "a class whose last state value is cleared keeps its old states",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/states.ts",
+          "search": "      else delete next.states;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/states.test.ts",
+        "-t",
+        "patchClassState edits one class"
+      ],
+      "expect": "\\(fail\\).*patchClassState edits one class"
     }
   ]
 }

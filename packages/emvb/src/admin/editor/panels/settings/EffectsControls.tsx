@@ -114,9 +114,11 @@ const FILTER_ROWS: ReadonlyArray<[key: keyof Filter, label: string, NumberSpec]>
 /** The filter functions, one number row each; clearing the last one unsets Filters. */
 export function FiltersControl({
   value,
+  inherited,
   onChange,
 }: {
   value: Filter | undefined;
+  inherited?: Filter;
   onChange: (next: Filter | undefined) => void;
 }) {
   const patch = (key: keyof Filter, n: number | undefined) => {
@@ -136,6 +138,7 @@ export function FiltersControl({
           label={label}
           value={value?.[key]}
           spec={spec}
+          inherited={inherited?.[key]}
           onCommit={(n) => patch(key, n)}
         />
       ))}

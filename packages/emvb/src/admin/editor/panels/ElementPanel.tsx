@@ -28,14 +28,19 @@ import {
   type ElementDescriptor,
   type Layout,
   type LayoutNode,
+  patchClassState,
   patchClassStyle,
+  patchStates,
   resolveCascade,
+  STYLE_STATES,
   type StyleProps,
+  type StyleStates,
 } from "../../../core/index.ts";
 import { FIELD } from "../../ui.ts";
 import { FieldControl } from "./settings/FieldControl.tsx";
 import { StyleRow } from "./settings/StyleRow.tsx";
 import { ClassChipInput } from "./settings/ClassChipInput.tsx";
+import { StateDot, StateSwitcher, type StyleStateChoice } from "./settings/StateSwitcher.tsx";
 import {
   DEFAULT_UI,
   keysFor,
@@ -89,6 +94,11 @@ const withStyle = (node: LayoutNode, patch: Partial<StyleProps>): LayoutNode => 
   };
 };
 
+const withStates = (node: LayoutNode, states: StyleStates | undefined): LayoutNode => {
+  const { states: _old, ...rest } = node;
+  return (states ? { ...rest, states } : rest) as LayoutNode;
+};
+
 const sessionSectionKey = (type: string) => `emvb-style-sections:${type}`;
 
 const readSections = (type: string, fallback: StyleSectionId[]): Set<StyleSectionId> => {
@@ -112,6 +122,19 @@ const writeSections = (type: string, open: Set<StyleSectionId>) => {
 
 const countSet = (type: string, style: StyleProps | undefined, section: StyleSectionId) =>
   keysFor(type, section, style).filter((key) => style?.[key] !== undefined).length;
+
+/** Whether any state sets a key of this section (the section header's dot in Normal). */
+const sectionHasStates = (type: string, states: StyleStates | undefined, section: StyleSectionId) =>
+  STYLE_STATES.some((state) => countSet(type, states?.[state], section) > 0);
+
+/** Sections where a state change moves things around (DESIGN.md § State styles). */
+const JUMPY = new Set<StyleSectionId>(["layout", "size", "position"]);
+
+const JUMP_HELP: Record<Exclude<StyleStateChoice, "normal">, string> = {
+  hover: "Changing size or position on hover can make the page jump.",
+  focus: "Changing size or position on focus can make the page jump.",
+  active: "Changing size or position while active can make the page jump.",
+};
 
 /** The position in effect: the class's own when editing a class, else classes then local. */
 const positionInEffect = (
@@ -148,6 +171,8 @@ type Props = {
   /** False when the forms plugin is not installed (W-036). */
   formsAvailable?: boolean;
   onSelect: (id: string | null) => void;
+  /** The chosen style state, for the canvas preview (W-089). */
+  onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
 };
 
 const FORM_TYPES = new Set([
@@ -252,6 +277,7 @@ function KnownElementPanel({
   onChange,
   onDesignChange,
   onSelect,
+  onStyleState,
   descriptor,
 }: Props & { descriptor: ElementDescriptor }) {
   const ui = STYLE_UI[node.type] ?? DEFAULT_UI;
@@ -259,15 +285,32 @@ function KnownElementPanel({
   const [openSections, setSection] = useOpenSections(node.type, ui.defaultOpen, node.id);
   const { cls, editing, setEditing } = useStyleTarget(node, design);
   const [designError, setDesignError] = React.useState<string | null>(null);
-  const style = cls ? cls.style : node.style;
+  const [styleState, setStyleState] = React.useState<StyleStateChoice>("normal");
+  React.useEffect(() => setStyleState("normal"), [node.id]);
+  React.useEffect(() => {
+    onStyleState?.(node.id, tab === "style" ? styleState : "normal");
+  }, [node.id, styleState, tab, onStyleState]);
+  const normal = cls ? cls.style : node.style;
+  const states = cls ? cls.states : node.states;
+  const style = styleState === "normal" ? normal : states?.[styleState];
+  const inherited = styleState === "normal" ? undefined : normal;
   const position = positionInEffect(node, design, cls);
   const patchStyle = (patch: Partial<StyleProps>) => {
+    const state = styleState;
     if (!cls) {
-      onChange(withStyle(node, patch));
+      onChange(
+        state === "normal"
+          ? withStyle(node, patch)
+          : withStates(node, patchStates(node.states, state, patch)),
+      );
       return;
     }
     setDesignError(null);
-    onDesignChange(patchClassStyle(design, cls.id, patch)).catch((error: unknown) =>
+    const next =
+      state === "normal"
+        ? patchClassStyle(design, cls.id, patch)
+        : patchClassState(design, cls.id, state, patch);
+    onDesignChange(next).catch((error: unknown) =>
       setDesignError(
         error instanceof Error ? error.message : "Couldn't save the class. Try again.",
       ),
@@ -279,12 +322,18 @@ function KnownElementPanel({
 
   const Icon = ICONS[node.type] ?? SquaresFourIcon;
   const crumbs = breadcrumb(layout, node.id);
-  const section = (id: StyleSectionId, count: number, children: React.ReactNode) => (
+  const section = (
+    id: StyleSectionId,
+    count: number,
+    children: React.ReactNode,
+    stateMark = false,
+  ) => (
     <Section
       key={id}
       id={id}
       open={openSections.has(id)}
       count={count}
+      stateMark={stateMark}
       onOpenChange={(open) => setSection(id, open)}
     >
       {children}
@@ -358,13 +407,19 @@ function KnownElementPanel({
             onChange={(classes) => onChange({ ...node, classes })}
             onDesignChange={onDesignChange}
           />
+          <StateSwitcher
+            value={styleState}
+            states={states}
+            className={cls ? cls.name : null}
+            onChange={setStyleState}
+          />
           {designError && <Alert>{designError}</Alert>}
-          {!cls && node.type === "spacer" && (
+          {!cls && styleState === "normal" && node.type === "spacer" && (
             <FieldControl field={SPACER_HEIGHT} node={node} onChange={onChange} fetcher={fetcher} />
           )}
           {sectionsFor(ui.sections, style).map((id) => {
             if (id === "advanced") {
-              if (cls) return null;
+              if (cls || styleState !== "normal") return null;
               return section(
                 id,
                 node.htmlId ? 1 : 0,
@@ -379,17 +434,25 @@ function KnownElementPanel({
                 />,
               );
             }
-            const keys = keysFor(node.type, id, style, position);
+            const keys = keysFor(node.type, id, style, position).filter(
+              (key) => styleState === "normal" || key !== "transition",
+            );
             if (keys.length === 0) return null;
             return section(
               id,
               countSet(node.type, style, id),
               <>
+                {styleState !== "normal" && JUMPY.has(id) && (
+                  <p className="emvb-helper" data-emvb-jump-help="">
+                    {JUMP_HELP[styleState]}
+                  </p>
+                )}
                 {keys.map((key) => (
                   <StyleRow
-                    key={key}
+                    key={`${styleState}:${key}`}
                     styleKey={key}
                     style={style}
+                    inherited={inherited}
                     design={design}
                     onPatch={patchStyle}
                     onDesignChange={onDesignChange}
@@ -401,6 +464,7 @@ function KnownElementPanel({
                   </p>
                 )}
               </>,
+              styleState === "normal" && sectionHasStates(node.type, states, id),
             );
           })}
         </div>
@@ -413,12 +477,14 @@ function Section({
   id,
   open,
   count,
+  stateMark,
   onOpenChange,
   children,
 }: {
   id: StyleSectionId;
   open: boolean;
   count: number;
+  stateMark: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
 }) {
@@ -428,6 +494,7 @@ function Section({
         <span>
           {SECTION_LABELS[id]}
           {!open && count > 0 && <span className="emvb-count"> · {count}</span>}
+          {stateMark && <StateDot />}
         </span>
         {open ? (
           <CaretDownIcon size={16} aria-hidden="true" />

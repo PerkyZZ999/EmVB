@@ -21,6 +21,7 @@ import { dragStash } from "../dnd/drag-stash.ts";
 import { newElement } from "../dnd/new-element.ts";
 import { useCanvasEvents } from "./canvas-events.ts";
 import { SelectionOverlay, type Box, type InvalidDrop } from "./SelectionOverlay.tsx";
+import { applyStatePreview, type StatePreview } from "./state-preview.ts";
 import { revealInTabs } from "./tab-reveal.ts";
 import { vnodeToReact } from "./vnode-react.tsx";
 
@@ -117,6 +118,7 @@ export function CanvasFrame({
   css,
   layout,
   selection,
+  statePreview = null,
   onDropNew,
   onMove,
 }: {
@@ -124,6 +126,8 @@ export function CanvasFrame({
   css: string;
   layout: Layout | null;
   selection: CanvasSelection;
+  /** The style state chosen in the Style tab, shown on the selected element (W-089). */
+  statePreview?: StatePreview | null;
   onDropNew: (elementType: string, parentId: string, index: number) => void;
   onMove: (id: string, parentId: string, index: number) => void;
 }) {
@@ -235,6 +239,15 @@ export function CanvasFrame({
   React.useEffect(() => {
     if (doc) revealInTabs(doc, selectedId);
   }, [doc, selectedId, vnode]);
+  const previewId = statePreview?.id === selectedId ? statePreview.id : null;
+  const previewState = previewId ? statePreview?.state : undefined;
+  React.useEffect(() => {
+    if (doc)
+      applyStatePreview(
+        doc,
+        previewId && previewState ? { id: previewId, state: previewState } : null,
+      );
+  }, [doc, previewId, previewState, vnode]);
 
   React.useEffect(() => {
     if (!doc) return;

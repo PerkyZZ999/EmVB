@@ -6,6 +6,8 @@ import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
 import { loadFormsCapability } from "../forms-api.ts";
 import { CanvasFrame, type CanvasSelection } from "./canvas/CanvasFrame.tsx";
+import type { StatePreview } from "./canvas/state-preview.ts";
+import type { StyleStateChoice } from "./panels/settings/StateSwitcher.tsx";
 import { EmptyCanvas } from "./canvas/EmptyCanvas.tsx";
 import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog } from "./dialogs.tsx";
 import { EditorOverlay } from "./EditorOverlay.tsx";
@@ -107,6 +109,10 @@ function EditorApp({
   const saver = useSave(fetcher, state, dispatch, collection);
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const [siteStylesOpen, setSiteStylesOpen] = React.useState(false);
+  const [statePreview, setStatePreview] = React.useState<StatePreview | null>(null);
+  const onStyleState = React.useCallback((id: string, choice: StyleStateChoice) => {
+    setStatePreview(choice === "normal" ? null : { id, state: choice });
+  }, []);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [leaveOpen, setLeaveOpen] = React.useState(false);
@@ -232,6 +238,7 @@ function EditorApp({
                     css={rendered.css}
                     layout={state.page.layout}
                     selection={selection}
+                    statePreview={statePreview}
                     onDropNew={(elementType, parentId, index) => {
                       const node = newElement(elementType);
                       if (!node) return;
@@ -259,6 +266,7 @@ function EditorApp({
                 slugError={saver.slugError}
                 onSlugEdit={saver.clearSlugError}
                 kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
+                onStyleState={onStyleState}
               />
             </div>
           </>

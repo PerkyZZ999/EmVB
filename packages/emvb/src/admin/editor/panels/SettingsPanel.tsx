@@ -3,6 +3,7 @@ import type { DesignSystem, LayoutNode } from "../../../core/index.ts";
 import type { Fetcher } from "../../api.ts";
 import type { EditorAction, EditorState } from "../store.ts";
 import { ElementPanel } from "./ElementPanel.tsx";
+import type { StyleStateChoice } from "./settings/StateSwitcher.tsx";
 import { PageSettings } from "./PageSettings.tsx";
 import { SiteStylesDrawer } from "./SiteStylesDrawer.tsx";
 
@@ -21,6 +22,7 @@ export function SettingsPanel({
   slugError,
   onSlugEdit,
   kind,
+  onStyleState,
 }: {
   state: EditorState;
   latest: React.RefObject<EditorState>;
@@ -35,6 +37,8 @@ export function SettingsPanel({
   slugError: string | null;
   onSlugEdit: () => void;
   kind: "page" | "theme-part";
+  /** The Style tab's chosen state, for the canvas preview (W-089). */
+  onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
 }) {
   return (
     <aside
@@ -71,6 +75,7 @@ export function SettingsPanel({
           }
           onDesignChange={onDesignChange}
           onSelect={(id) => dispatch({ type: "select", id })}
+          onStyleState={onStyleState}
         />
       ) : (
         <PageSettings
