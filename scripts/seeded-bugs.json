@@ -8173,6 +8173,46 @@
         "Theme Builder filter tabs are 28 px"
       ],
       "expect": "\\(fail\\).*Theme Builder filter tabs are 28 px"
+    },
+    {
+      "id": "W-089/editor-tab-32px",
+      "requirement": "D-025",
+      "description": "editor tabs are 32 px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "  gap: 4px;\n  height: var(--emvb-control);\n  min-height: var(--emvb-control);",
+          "replace": "  gap: 4px;\n  height: 32px;\n  min-height: 32px;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "editor tabs (Add | Layers, Content | Style, Variables | Classes) are 28 px"
+      ],
+      "expect": "\\(fail\\).*editor tabs \\(Add | Layers, Content | Style, Variables | Classes\\) are 28 px"
+    },
+    {
+      "id": "W-089/editor-tablist-32px",
+      "requirement": "D-025",
+      "description": "the editor tab list is 32 px tall",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "  width: 100%;\n  min-height: var(--emvb-control);",
+          "replace": "  width: 100%;\n  min-height: 32px;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "editor tabs (Add | Layers, Content | Style, Variables | Classes) are 28 px"
+      ],
+      "expect": "\\(fail\\).*editor tabs \\(Add | Layers, Content | Style, Variables | Classes\\) are 28 px"
     }
   ]
 }

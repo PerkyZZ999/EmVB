@@ -92,7 +92,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-tabs { width: 100%; }
 .emvb-tabs [role="tablist"] {
   width: 100%;
-  min-height: 32px;
+  min-height: var(--emvb-control);
   gap: 0;
   padding-bottom: 0;
   margin-bottom: 2px;
@@ -102,8 +102,8 @@ export const EDITOR_CSS = `${UI_CSS}
   flex: 1 1 0;
   justify-content: center;
   gap: 4px;
-  height: 32px;
-  min-height: 32px;
+  height: var(--emvb-control);
+  min-height: var(--emvb-control);
   padding: 0 8px 2px;
   color: var(--text-color-kumo-subtle);
   font-size: 13px;
