@@ -2,7 +2,7 @@ import type { StyleProps } from "../schema/style.ts";
 
 const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const VAR_ID = /^[a-z0-9-]{1,40}$/;
-const UNITS = new Set(["px", "rem", "em", "%"]);
+const UNITS = new Set(["px", "rem", "em", "%", "vw", "vh"]);
 const FLEX_DIRECTIONS = new Set(["row", "column", "row-reverse", "column-reverse"]);
 const FLEX_WRAPS = new Set(["nowrap", "wrap", "wrap-reverse"]);
 const JUSTIFY = new Set([
@@ -117,6 +117,10 @@ export function cssLength(value: unknown): string | undefined {
   return `${n}${unit}`;
 }
 
+/** A length, or `auto` where the property allows it (W-088). */
+const cssLengthOrAuto = (value: unknown): string | undefined =>
+  value === "auto" ? "auto" : cssLength(value);
+
 export function cssFlexDirection(value: unknown): string | undefined {
   return typeof value === "string" && FLEX_DIRECTIONS.has(value) ? value : undefined;
 }
@@ -140,19 +144,19 @@ const PROPERTY_MAP: {
   justifyContent: { css: "justify-content", toValue: keyword(JUSTIFY) },
   alignItems: { css: "align-items", toValue: keyword(ALIGN) },
   gap: { css: "gap", toValue: cssLength },
-  width: { css: "width", toValue: cssLength },
+  width: { css: "width", toValue: cssLengthOrAuto },
   minWidth: { css: "min-width", toValue: cssLength },
   maxWidth: { css: "max-width", toValue: cssLength },
-  height: { css: "height", toValue: cssLength },
+  height: { css: "height", toValue: cssLengthOrAuto },
   minHeight: { css: "min-height", toValue: cssLength },
   paddingTop: { css: "padding-top", toValue: cssLength },
   paddingRight: { css: "padding-right", toValue: cssLength },
   paddingBottom: { css: "padding-bottom", toValue: cssLength },
   paddingLeft: { css: "padding-left", toValue: cssLength },
-  marginTop: { css: "margin-top", toValue: cssLength },
-  marginRight: { css: "margin-right", toValue: cssLength },
-  marginBottom: { css: "margin-bottom", toValue: cssLength },
-  marginLeft: { css: "margin-left", toValue: cssLength },
+  marginTop: { css: "margin-top", toValue: cssLengthOrAuto },
+  marginRight: { css: "margin-right", toValue: cssLengthOrAuto },
+  marginBottom: { css: "margin-bottom", toValue: cssLengthOrAuto },
+  marginLeft: { css: "margin-left", toValue: cssLengthOrAuto },
   fontFamily: { css: "font-family", toValue: cssFontFamily },
   fontSize: { css: "font-size", toValue: cssLength },
   fontWeight: { css: "font-weight", toValue: cssFontWeight },

@@ -85,7 +85,7 @@ describe("ElementPanel (W-021)", () => {
   });
 
   test("invalid gap keeps the previous value and shows the message", async () => {
-    const { parseLengthDraft } = await import("./StyleRow.tsx");
+    const { parseLengthDraft } = await import("./length-units.ts");
     const bad = parseLengthDraft("-4", "gap", "px");
     expect(bad.ok).toBe(false);
     if (!bad.ok) expect(bad.message).toContain("Gap can't be negative");

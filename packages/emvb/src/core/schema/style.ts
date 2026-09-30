@@ -13,13 +13,18 @@ export const ColorValue = z.union([
   VariableRef,
 ]);
 
+const LengthUnit = z.enum(["px", "rem", "em", "%", "vw", "vh"]);
+
 export const Length = z.strictObject({
   value: z.number().finite().min(0).max(10_000),
-  unit: z.enum(["px", "rem", "em", "%"]),
+  unit: LengthUnit,
 });
 
 /** Literal length or a fontSize/spacing variable reference. */
 export const LengthValue = z.union([Length, VariableRef]);
+
+/** Width, height and margins may also be `auto` (W-088). */
+const SizeValue = z.union([Length, VariableRef, z.literal("auto")]);
 
 /** Style properties for layout and text elements (W-017 / R-012). Unknown keys are rejected. */
 export const StyleProps = z.strictObject({
@@ -30,19 +35,19 @@ export const StyleProps = z.strictObject({
     .optional(),
   alignItems: z.enum(["stretch", "flex-start", "flex-end", "center", "baseline"]).optional(),
   gap: LengthValue.optional(),
-  width: LengthValue.optional(),
+  width: SizeValue.optional(),
   minWidth: LengthValue.optional(),
   maxWidth: LengthValue.optional(),
-  height: LengthValue.optional(),
+  height: SizeValue.optional(),
   minHeight: LengthValue.optional(),
   paddingTop: LengthValue.optional(),
   paddingRight: LengthValue.optional(),
   paddingBottom: LengthValue.optional(),
   paddingLeft: LengthValue.optional(),
-  marginTop: LengthValue.optional(),
-  marginRight: LengthValue.optional(),
-  marginBottom: LengthValue.optional(),
-  marginLeft: LengthValue.optional(),
+  marginTop: SizeValue.optional(),
+  marginRight: SizeValue.optional(),
+  marginBottom: SizeValue.optional(),
+  marginLeft: SizeValue.optional(),
   fontFamily: z
     .union([
       z.string().min(1).max(200).refine(isSafeFontStack, "Font stack looks unsafe."),

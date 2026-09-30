@@ -45,6 +45,18 @@ export function boundRef(value: unknown, kind: BindKind): { var: string } | null
   return ref.from === kind ? ref : null;
 }
 
+/**
+ * Any length variable a value is bound to, whatever the row's own kind: a spacing variable on
+ * Font size still renders as `var(--emvb-s-…)`, so it shows as a spacing chip (W-088).
+ */
+export function lengthRef(value: unknown): { var: string; kind: "fontSize" | "spacing" } | null {
+  if (!value || typeof value !== "object" || !("var" in value)) return null;
+  const ref = value as { var: string; from?: string };
+  return ref.from === "fontSize" || ref.from === "spacing"
+    ? { var: ref.var, kind: ref.from }
+    : null;
+}
+
 /** The variable button (Phosphor BracketsCurly): lists the site's variables of the kind. */
 export function VariableButton({
   label,

@@ -184,7 +184,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "✘.*\\[node\\].*the EmVB plugin is loaded by the host"
+      "expect": "\u2718.*\\[node\\].*the EmVB plugin is loaded by the host"
     },
     {
       "id": "W-004/size-check-loosened",
@@ -558,7 +558,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/setup.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*read-only widget instead of a JSON input",
+      "expect": "\u2718.*\\[node\\].*read-only widget instead of a JSON input",
       "env": {
         "CI": "1"
       }
@@ -589,7 +589,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*author \\(30\\): no Visual pages link",
+      "expect": "\u2718.*\\[node\\].*author \\(30\\): no Visual pages link",
       "env": {
         "CI": "1"
       }
@@ -606,7 +606,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*editor \\(40\\): sees the link",
+      "expect": "\u2718.*\\[node\\].*editor \\(40\\): sees the link",
       "env": {
         "CI": "1"
       }
@@ -623,7 +623,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*subscriber \\(10\\): no Visual pages link",
+      "expect": "\u2718.*\\[node\\].*subscriber \\(10\\): no Visual pages link",
       "env": {
         "CI": "1"
       }
@@ -682,7 +682,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*a Kumo dialog opened from the editor stacks above it",
+      "expect": "\u2718.*\\[node\\].*a Kumo dialog opened from the editor stacks above it",
       "env": {
         "CI": "1"
       }
@@ -765,7 +765,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*at 1280×720 the overlay covers the admin and the canvas gets the real width",
+      "expect": "\u2718.*\\[node\\].*at 1280\u00d7720 the overlay covers the admin and the canvas gets the real width",
       "env": {
         "CI": "1"
       }
@@ -782,7 +782,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*below 1024 px the small-screen notice replaces the editor",
+      "expect": "\u2718.*\\[node\\].*below 1024 px the small-screen notice replaces the editor",
       "env": {
         "CI": "1"
       }
@@ -813,7 +813,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*a concurrent edit from another browser shows the conflict dialog",
+      "expect": "\u2718.*\\[node\\].*a concurrent edit from another browser shows the conflict dialog",
       "env": {
         "CI": "1"
       }
@@ -830,7 +830,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*a draft save leaves the published page alone",
+      "expect": "\u2718.*\\[node\\].*a draft save leaves the published page alone",
       "env": {
         "CI": "1"
       }
@@ -925,7 +925,7 @@
         "-g",
         "Restore toast"
       ],
-      "expect": "✘.*\\[node\\].*Delete shows a Restore toast above the editor",
+      "expect": "\u2718.*\\[node\\].*Delete shows a Restore toast above the editor",
       "env": {
         "CI": "1"
       }
@@ -942,7 +942,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*a duplicate slug is refused inline",
+      "expect": "\u2718.*\\[node\\].*a duplicate slug is refused inline",
       "env": {
         "CI": "1"
       }
@@ -973,7 +973,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "colour variable"],
-      "expect": "✘.*\\[node-public\\].*changing a colour variable changes the published page",
+      "expect": "\u2718.*\\[node-public\\].*changing a colour variable changes the published page",
       "env": {
         "CI": "1"
       }
@@ -1004,7 +1004,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "adds no script"],
-      "expect": "✘.*\\[node-public\\].*adds no script",
+      "expect": "\u2718.*\\[node-public\\].*adds no script",
       "env": {
         "CI": "1"
       }
@@ -1021,7 +1021,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "blank-canvas"],
-      "expect": "✘.*\\[node-public\\].*a blank-canvas page is a whole document",
+      "expect": "\u2718.*\\[node-public\\].*a blank-canvas page is a whole document",
       "env": {
         "CI": "1"
       }
@@ -1038,7 +1038,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "are 404"],
-      "expect": "✘.*\\[node-public\\].*unpublished and missing pages are 404",
+      "expect": "\u2718.*\\[node-public\\].*unpublished and missing pages are 404",
       "env": {
         "CI": "1"
       }
@@ -1055,7 +1055,7 @@
         }
       ],
       "command": ["bun", "run", "e2e:prod", "--project=node-public", "-g", "preview link"],
-      "expect": "✘.*\\[node-public\\].*a preview link renders the draft",
+      "expect": "\u2718.*\\[node-public\\].*a preview link renders the draft",
       "env": {
         "CI": "1"
       }
@@ -1100,7 +1100,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node", "-g", "author"],
-      "expect": "✘.*\\[node\\].*author \\(30\\)",
+      "expect": "\u2718.*\\[node\\].*author \\(30\\)",
       "env": {
         "CI": "1"
       }
@@ -1218,7 +1218,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "✘.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
+      "expect": "\u2718.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
     },
     {
       "id": "W-015/e2e-drop-listener-removed",
@@ -1240,7 +1240,7 @@
       "env": {
         "CI": "1"
       },
-      "expect": "✘.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
+      "expect": "\u2718.*\\[node\\].*dragging Heading onto the canvas inserts at the pointed index"
     },
     {
       "id": "W-016/javascript-href-allowed",
@@ -1457,7 +1457,7 @@
     {
       "id": "W-020/alt-down-moves-up",
       "requirement": "R-003",
-      "description": "Alt+↓ calls moveUp instead of moveDown",
+      "description": "Alt+\u2193 calls moveUp instead of moveDown",
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
@@ -1540,9 +1540,9 @@
       "description": "parseLengthDraft accepts negative gap",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
-          "search": "  if (!Number.isFinite(n) || n < 0) return { ok: false, message: gapMessage(styleKey) };",
-          "replace": "  if (!Number.isFinite(n)) return { ok: false, message: gapMessage(styleKey) };"
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "  if (n < 0 && !NEGATIVE.has(key)) {",
+          "replace": "  if (false) {"
         }
       ],
       "command": [
@@ -2399,7 +2399,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/overlay.e2e.ts", "--project=node", "-g", "below 1024"],
-      "expect": "\\(fail\\)|✘"
+      "expect": "\\(fail\\)|\u2718"
     },
     {
       "id": "W-044/pack-missing-astro-source",
@@ -2938,7 +2938,7 @@
     {
       "id": "W-086/post-title-level-unclamped",
       "requirement": "R-011",
-      "description": "a post title level outside 1–6 is not clamped",
+      "description": "a post title level outside 1\u20136 is not clamped",
       "edits": [
         {
           "file": "packages/emvb/src/core/render/dynamic-post.ts",
@@ -2966,7 +2966,7 @@
     {
       "id": "W-086/layers-left-skips-collapse",
       "requirement": "R-003",
-      "description": "← in Layers leaves an open container instead of collapsing it",
+      "description": "\u2190 in Layers leaves an open container instead of collapsing it",
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
@@ -3714,7 +3714,7 @@
     {
       "id": "W-086/move-in-any-sibling",
       "requirement": "R-003",
-      "description": "Alt+→ moves into a non-container sibling above",
+      "description": "Alt+\u2192 moves into a non-container sibling above",
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
@@ -3787,7 +3787,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/security.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*XSS corpus strings stay inert"
+      "expect": "\u2718.*\\[node\\].*XSS corpus strings stay inert"
     },
     {
       "id": "W-086/bench-times-unsorted",
@@ -3927,7 +3927,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/keyboard.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*keyboard move, duplicate and delete"
+      "expect": "\u2718.*\\[node\\].*keyboard move, duplicate and delete"
     },
     {
       "id": "W-086/e2e-submission-wrong-field",
@@ -3941,7 +3941,7 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/forms.e2e.ts", "--project=node"],
-      "expect": "✘.*\\[node\\].*integration POST submit succeeds"
+      "expect": "\u2718.*\\[node\\].*integration POST submit succeeds"
     },
     {
       "id": "W-086/e2e-published-html-unpublished",
@@ -3962,7 +3962,7 @@
         "-g",
         "published page renders"
       ],
-      "expect": "✘.*\\[node-public\\].*a published page renders from the production build"
+      "expect": "\u2718.*\\[node-public\\].*a published page renders from the production build"
     },
     {
       "id": "W-086/qa3-forms-missing-plugin-counts-as-present",
@@ -4110,16 +4110,16 @@
         "test",
         "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx"
       ],
-      "expect": "\\(fail\\).*field \"\" reads \"Choose a field…\""
+      "expect": "\\(fail\\).*field \"\" reads \"Choose a field\u2026\""
     },
     {
       "id": "W-086/qa7-class-picker-shows-sentinel",
       "requirement": "R-021",
-      "description": "the Add class input loses its \"Add class…\" prompt (was the Add class select showing its internal placeholder value; the chip input replaced the select in W-087)",
+      "description": "the Add class input loses its \"Add class\u2026\" prompt (was the Add class select showing its internal placeholder value; the chip input replaced the select in W-087)",
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
-          "search": "placeholder={full ? \"\" : \"Add class…\"}",
+          "search": "placeholder={full ? \"\" : \"Add class\u2026\"}",
           "replace": "placeholder=\"\""
         }
       ],
@@ -4178,7 +4178,7 @@
         "-g",
         "tab label shows its panel"
       ],
-      "expect": "✘.*\\[node\\].*on the canvas a tab label shows its panel"
+      "expect": "\u2718.*\\[node\\].*on the canvas a tab label shows its panel"
     },
     {
       "id": "W-086/qa5-canvas-tab-label-selects-tabs",
@@ -4200,7 +4200,7 @@
         "-g",
         "tab label shows its panel"
       ],
-      "expect": "✘.*\\[node\\].*on the canvas a tab label shows its panel"
+      "expect": "\u2718.*\\[node\\].*on the canvas a tab label shows its panel"
     },
     {
       "id": "W-086/qa6-canvas-svg-tags-lowercase",
@@ -4297,7 +4297,7 @@
     {
       "id": "W-087/chip-x-does-nothing",
       "requirement": "R-021",
-      "description": "the chip × doesn't remove the class",
+      "description": "the chip \u00d7 doesn't remove the class",
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
@@ -4310,7 +4310,7 @@
         "test",
         "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
       ],
-      "expect": "\\(fail\\).*× removes a class"
+      "expect": "\\(fail\\).*\u00d7 removes a class"
     },
     {
       "id": "W-087/suggests-applied",
@@ -5058,7 +5058,7 @@
         "-g",
         "adds a class by typing and autocomplete"
       ],
-      "expect": "✘.*\\[node\\].*adds a class by typing and autocomplete"
+      "expect": "\u2718.*\\[node\\].*adds a class by typing and autocomplete"
     },
     {
       "id": "W-087/e2e-create-not-applied",
@@ -5080,7 +5080,7 @@
         "-g",
         "creates a new class inline with Enter"
       ],
-      "expect": "✘.*\\[node\\].*creates a new class inline with Enter"
+      "expect": "\u2718.*\\[node\\].*creates a new class inline with Enter"
     },
     {
       "id": "W-087/e2e-chip-backspace-deletes-element",
@@ -5102,7 +5102,7 @@
         "-g",
         "works from the keyboard"
       ],
-      "expect": "✘.*\\[node\\].*works from the keyboard"
+      "expect": "\u2718.*\\[node\\].*works from the keyboard"
     },
     {
       "id": "W-087/mgr-rename-escape-saves",
@@ -5770,9 +5770,9 @@
       "description": "a bound length shows the raw input, not a chip",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
-          "search": "{kind && ref ? (",
-          "replace": "{false ? ("
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "      {chip ? (",
+          "replace": "      {false ? ("
         }
       ],
       "command": [
@@ -5790,7 +5790,7 @@
       "description": "detaching a variable clears the value instead of keeping it",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
           "search": "onPatch({ [styleKey]: typeof kept === \"object\" ? kept : undefined })",
           "replace": "onPatch({ [styleKey]: undefined })"
         }
@@ -5840,9 +5840,9 @@
         "test",
         "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
         "-t",
-        "a spacing ref doesn't show"
+        "isn't marked as that font size"
       ],
-      "expect": "\\(fail\\).*a spacing ref doesn't show"
+      "expect": "\\(fail\\).*isn't marked as that font size"
     },
     {
       "id": "W-087/var-menu-no-hint",
@@ -6243,6 +6243,346 @@
         "each filter with parts shows its count"
       ],
       "expect": "\\(fail\\).*each filter with parts shows its count"
+    },
+    {
+      "id": "W-088/unit-vw-dropped",
+      "requirement": "W-088",
+      "description": "the CSS mapper refuses vw",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const UNITS = new Set([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\"]);",
+          "replace": "const UNITS = new Set([\"px\", \"rem\", \"em\", \"%\", \"vh\"]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088: width accepts"
+      ],
+      "expect": "\\(fail\\).*W-088: width accepts"
+    },
+    {
+      "id": "W-088/auto-on-every-length",
+      "requirement": "W-088",
+      "description": "cssLength emits auto for any length property",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "export function cssLength(value: unknown): string | undefined {\n  if (typeof value !== \"object\" || value === null) return undefined;",
+          "replace": "export function cssLength(value: unknown): string | undefined {\n  if (value === \"auto\") return \"auto\";\n  if (typeof value !== \"object\" || value === null) return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "refuses auto in the schema"
+      ],
+      "expect": "\\(fail\\).*refuses auto in the schema"
+    },
+    {
+      "id": "W-088/auto-schema-everywhere",
+      "requirement": "W-088",
+      "description": "every length accepts auto in the schema",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "export const LengthValue = z.union([Length, VariableRef]);",
+          "replace": "export const LengthValue = z.union([Length, VariableRef, z.literal(\"auto\")]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "refuses auto in the schema"
+      ],
+      "expect": "\\(fail\\).*refuses auto in the schema"
+    },
+    {
+      "id": "W-088/auto-dropped",
+      "requirement": "W-088",
+      "description": "width auto is dropped by the CSS mapper",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  value === \"auto\" ? \"auto\" : cssLength(value);",
+          "replace": "  cssLength(value);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088: width accepts"
+      ],
+      "expect": "\\(fail\\).*W-088: width accepts"
+    },
+    {
+      "id": "W-088/margin-auto-refused",
+      "requirement": "W-088",
+      "description": "margins refuse auto in the schema",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "  marginLeft: SizeValue.optional(),",
+          "replace": "  marginLeft: LengthValue.optional(),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088: marginLeft accepts"
+      ],
+      "expect": "\\(fail\\).*W-088: marginLeft accepts"
+    },
+    {
+      "id": "W-088/typed-unit-ignored",
+      "requirement": "W-088",
+      "description": "a typed unit is replaced by the field's unit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "const typed = (match[2]?.toLowerCase() ?? unit) as LengthUnit;",
+          "replace": "const typed = unit;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "typing a number with a unit saves that unit"
+      ],
+      "expect": "\\(fail\\).*typing a number with a unit saves that unit"
+    },
+    {
+      "id": "W-088/unit-not-restricted",
+      "requirement": "W-088",
+      "description": "a unit the property doesn't take is saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "  if (!allowed.includes(typed)) {",
+          "replace": "  if (false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "a unit the property doesn't take"
+      ],
+      "expect": "\\(fail\\).*a unit the property doesn't take"
+    },
+    {
+      "id": "W-088/auto-allowed-everywhere",
+      "requirement": "W-088",
+      "description": "typing auto is saved on properties that refuse it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "    return allowed.includes(\"auto\")\n",
+          "replace": "    return true\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "typing auto works where it is allowed"
+      ],
+      "expect": "\\(fail\\).*typing auto works where it is allowed"
+    },
+    {
+      "id": "W-088/pick-unit-no-resave",
+      "requirement": "W-088",
+      "description": "picking a unit leaves the number in the old unit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "      send({ value: parsed.value.value, unit: next });\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "picking a unit re-saves"
+      ],
+      "expect": "\\(fail\\).*picking a unit re-saves"
+    },
+    {
+      "id": "W-088/pick-auto-not-saved",
+      "requirement": "W-088",
+      "description": "picking auto saves nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "      setDraft(\"\");\n      send(\"auto\");",
+          "replace": "      setDraft(\"\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "auto saves auto"
+      ],
+      "expect": "\\(fail\\).*auto saves auto"
+    },
+    {
+      "id": "W-088/auto-typing-shows-auto",
+      "requirement": "W-088",
+      "description": "typing into an auto field keeps showing auto",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "              if (unit === \"auto\") setUnit(lastNumeric.current);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "auto saves auto"
+      ],
+      "expect": "\\(fail\\).*auto saves auto"
+    },
+    {
+      "id": "W-088/unchanged-resent",
+      "requirement": "W-088",
+      "description": "leaving a field unchanged saves it again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "    if (!same(next, value)) onPatch({ [styleKey]: next });",
+          "replace": "    onPatch({ [styleKey]: next });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "leaving a field unchanged sends nothing"
+      ],
+      "expect": "\\(fail\\).*leaving a field unchanged sends nothing"
+    },
+    {
+      "id": "W-088/label-keeps-unit",
+      "requirement": "W-088",
+      "description": "the field label keeps a unit suffix",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "          label={label}\n          className={`${FIELD} emvb-length`}",
+          "replace": "          label={`${label} (${unit})`}\n          className={`${FIELD} emvb-length`}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "the label has no unit suffix"
+      ],
+      "expect": "\\(fail\\).*the label has no unit suffix"
+    },
+    {
+      "id": "W-088/invalid-not-marked",
+      "requirement": "W-088",
+      "description": "a refused value doesn't mark the input invalid",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "aria-invalid={error ? true : undefined}",
+          "replace": "aria-invalid={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "a unit the property doesn't take"
+      ],
+      "expect": "\\(fail\\).*a unit the property doesn't take"
+    },
+    {
+      "id": "W-088/units-not-per-property",
+      "requirement": "W-088",
+      "description": "letter spacing offers every unit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "  letterSpacing: [\"px\", \"rem\", \"em\"],\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "each property offers its own units"
+      ],
+      "expect": "\\(fail\\).*each property offers its own units"
+    },
+    {
+      "id": "W-088/var-other-kind-raw",
+      "requirement": "W-088",
+      "description": "a spacing ref on Font size shows the raw input again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "  const chip = lengthRef(value);",
+          "replace": "  const chip = kind && boundRef(value, kind) ? lengthRef(value) : null;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "a spacing ref on Font size shows a spacing chip"
+      ],
+      "expect": "\\(fail\\).*a spacing ref on Font size shows a spacing chip"
+    },
+    {
+      "id": "W-088/var-chip-wrong-list",
+      "requirement": "W-088",
+      "description": "the chip looks the variable up in the row's own kind",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/VariableBinding.tsx",
+          "search": "    ? { var: ref.var, kind: ref.from }",
+          "replace": "    ? { var: ref.var, kind: \"fontSize\" as const }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "a spacing ref on Font size shows a spacing chip"
+      ],
+      "expect": "\\(fail\\).*a spacing ref on Font size shows a spacing chip"
     }
   ]
 }

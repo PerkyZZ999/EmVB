@@ -252,6 +252,14 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-style-row > :first-child { flex: 1 1 auto; min-width: 0; }
 .emvb-style-row[data-set="true"] .emvb-reset-btn { opacity: 1; }
 .emvb-reset-btn { flex: 0 0 auto; margin-top: 28px; opacity: 0.4; }
+/* Unit menu inside a length field (W-088): 24 px inside a 28 px field, radii nest (6 = 4 + 2). */
+.emvb-length .emvb-unit-addon.emvb-unit-addon { padding-right: 2px; }
+.emvb-unit-btn {
+  display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 4px 0 6px; border: 0; border-radius: 4px;
+  background: transparent; color: var(--text-color-kumo-subtle); font-family: var(--font-mono); font-size: 12px; line-height: 16px; cursor: pointer;
+}
+.emvb-unit-btn:hover, .emvb-unit-btn[data-popup-open] { background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
+.emvb-unit-btn:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -2px; }
 /* Variable button and bound-variable chip (W-087, DESIGN.md "variable chip") */
 .emvb-var-btn {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;

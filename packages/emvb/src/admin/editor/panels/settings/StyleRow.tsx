@@ -1,20 +1,11 @@
 import { Button, Input, Select } from "@cloudflare/kumo";
 import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
-import * as React from "react";
 import { isSafeFontStack, type DesignSystem, type StyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
-import { bindKind, boundRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
-
-type LengthValue = NonNullable<StyleProps["gap"]>;
-type LengthLiteral = { value: number; unit: "px" | "rem" | "em" | "%" };
-
-const isLengthLiteral = (value: LengthValue | undefined): value is LengthLiteral =>
-  !!value &&
-  typeof value === "object" &&
-  "value" in value &&
-  typeof (value as LengthLiteral).value === "number";
+import { LengthRow } from "./LengthRow.tsx";
+import { boundRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
 
 const LENGTH_KEYS = new Set<StyleKey>([
   "gap",
@@ -92,27 +83,6 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "700", label: "Bold" },
   ],
 };
-
-export function parseLengthDraft(
-  draft: string,
-  styleKey: StyleKey,
-  unit: LengthLiteral["unit"],
-): { ok: true; value: LengthLiteral | undefined } | { ok: false; message: string } {
-  if (draft.trim() === "") return { ok: true, value: undefined };
-  const n = Number(draft);
-  if (!Number.isFinite(n) || n < 0) return { ok: false, message: gapMessage(styleKey) };
-  if (n > 10_000)
-    return {
-      ok: false,
-      message: `${STYLE_LABELS[styleKey]} can be up to 10000. Enter a smaller number.`,
-    };
-  return { ok: true, value: { value: n, unit } };
-}
-
-const gapMessage = (key: StyleKey) =>
-  key === "gap"
-    ? "Gap can't be negative. Enter 0 or more."
-    : `${STYLE_LABELS[key]} can't be negative. Enter 0 or more.`;
 
 /** One Style property row: control, set marker, reset (W-021). */
 export function StyleRow({
@@ -257,7 +227,7 @@ export function StyleRow({
       <LengthRow
         styleKey={styleKey}
         label={label}
-        value={value as LengthValue | undefined}
+        value={value}
         design={design}
         set={set}
         onPatch={onPatch}
@@ -267,82 +237,6 @@ export function StyleRow({
   }
 
   return null;
-}
-
-function LengthRow({
-  styleKey,
-  label,
-  value,
-  design,
-  set,
-  onPatch,
-  reset,
-}: {
-  styleKey: StyleKey;
-  label: string;
-  value: LengthValue | undefined;
-  design: DesignSystem;
-  set: boolean;
-  onPatch: (patch: Partial<StyleProps>) => void;
-  reset: React.ReactNode;
-}) {
-  const literal = isLengthLiteral(value) ? value : undefined;
-  const [draft, setDraft] = React.useState(literal ? String(literal.value) : "");
-  const [error, setError] = React.useState<string | null>(null);
-  React.useEffect(() => {
-    setDraft(literal ? String(literal.value) : value && "var" in value ? `var:${value.var}` : "");
-    setError(null);
-  }, [value, literal]);
-
-  const commit = () => {
-    if (draft.startsWith("var:")) return;
-    const parsed = parseLengthDraft(draft, styleKey, literal?.unit ?? "px");
-    if (!parsed.ok) {
-      setError(parsed.message);
-      return;
-    }
-    setError(null);
-    onPatch({ [styleKey]: parsed.value });
-  };
-
-  const kind = bindKind(styleKey);
-  const ref = kind ? boundRef(value, kind) : null;
-  return (
-    <div className="emvb-style-row" data-emvb-style={styleKey} data-set={set ? "true" : undefined}>
-      {kind && ref ? (
-        <VariableChip
-          label={label}
-          kind={kind}
-          design={design}
-          id={ref.var}
-          onDetach={(kept) => onPatch({ [styleKey]: typeof kept === "object" ? kept : undefined })}
-        />
-      ) : (
-        <Input
-          label={`${label} (${literal?.unit ?? (value && "var" in value ? "var" : "px")})`}
-          className={`${FIELD} emvb-mono`}
-          inputMode="numeric"
-          value={draft}
-          error={error ?? undefined}
-          onChange={(event) => setDraft(event.target.value)}
-          onBlur={commit}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") commit();
-          }}
-        />
-      )}
-      {kind && (
-        <VariableButton
-          label={label}
-          kind={kind}
-          design={design}
-          current={ref?.var ?? null}
-          onBind={(next) => onPatch({ [styleKey]: next })}
-        />
-      )}
-      {reset}
-    </div>
-  );
 }
 
 export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [

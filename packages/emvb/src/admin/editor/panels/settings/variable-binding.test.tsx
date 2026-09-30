@@ -140,8 +140,44 @@ describe("variable button and chip (W-087)", () => {
     ]);
   });
 
-  test("a spacing ref doesn't show as a font size chip", async () => {
+  test("a spacing ref on Font size shows a spacing chip, not a raw var: draft (W-088)", async () => {
+    await mount(
+      <StyleRow
+        styleKey="fontSize"
+        style={{ fontSize: { var: "md", from: "spacing" } }}
+        design={{
+          ...design,
+          variables: {
+            ...design.variables,
+            spacings: [{ id: "md", name: "Medium", value: px(16) }],
+          },
+        }}
+        onPatch={(patch) => patches.push(patch)}
+        onDesignChange={async () => undefined}
+      />,
+    );
+    expect(document.querySelector("input")?.tagName ?? null).toBeNull();
+    expect(document.querySelector("[data-emvb-var-bound='md'] .emvb-var-chip")?.textContent).toBe(
+      "Medium16px",
+    );
+    await openMenu();
+    expect(
+      document.querySelector('[data-emvb-var-option][data-selected="true"]')?.tagName ?? null,
+    ).toBeNull();
+    await act(async () =>
+      document
+        .querySelector<HTMLButtonElement>('[aria-label="Detach Medium from Font size"]')
+        ?.click(),
+    );
+    expect(patches).toEqual([{ fontSize: { value: 16, unit: "px" } }]);
+  });
+
+  test("a spacing ref named like a font size isn't marked as that font size", async () => {
     await row("fontSize", { fontSize: { var: "sm", from: "spacing" } });
-    expect(document.querySelector(".emvb-var-chip")?.tagName ?? null).toBeNull();
+    expect(document.querySelector(".emvb-var-chip")?.getAttribute("data-missing")).toBe("true");
+    await openMenu();
+    expect(
+      document.querySelector('[data-emvb-var-option="sm"]')?.getAttribute("data-selected") ?? null,
+    ).toBeNull();
   });
 });
