@@ -9610,7 +9610,29 @@
         "hover, focus and active states"
       ],
       "expect": "✘.*\\[node-public\\].*hover, focus and active states",
-      "env": { "CI": "1" }
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-089/cascade-caption-old-wording",
+      "requirement": "W-089",
+      "description": "the Classes helper says local styles always win, which is untrue across states",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "Local styles win over classes in the same state.",
+          "replace": "Local styles always win."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx",
+        "-t",
+        "Alt.Arrow reorders the cascade, and the order persists"
+      ],
+      "expect": "\\(fail\\).*Alt\\+Arrow reorders the cascade, and the order persists"
     }
   ]
 }

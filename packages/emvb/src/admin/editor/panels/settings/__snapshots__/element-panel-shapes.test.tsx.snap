@@ -100,7 +100,7 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -242,7 +242,7 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -376,7 +376,7 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -515,7 +515,7 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -597,7 +597,7 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -684,7 +684,7 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -800,7 +800,7 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -968,7 +968,7 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -1146,7 +1146,7 @@ exports[`element panel markup (W-021, W-086 M16) label renders the same content 
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -1337,7 +1337,7 @@ exports[`element panel markup (W-021, W-086 M16) link renders the same content a
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -1528,7 +1528,7 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -1714,7 +1714,7 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -1928,7 +1928,7 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -2261,7 +2261,7 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -2427,7 +2427,7 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -2595,7 +2595,7 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -2786,7 +2786,7 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -2980,7 +2980,7 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -3169,7 +3169,7 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -3358,7 +3358,7 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -3541,7 +3541,7 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -3719,7 +3719,7 @@ exports[`element panel markup (W-021, W-086 M16) submit renders the same content
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -3903,7 +3903,7 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -4056,7 +4056,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -4204,7 +4204,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -4357,7 +4357,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -4505,7 +4505,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -4697,7 +4697,7 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -4894,7 +4894,7 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -5089,7 +5089,7 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -5242,7 +5242,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -5390,7 +5390,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -5543,7 +5543,7 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -5691,7 +5691,7 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -5898,7 +5898,7 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -6084,7 +6084,7 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -6273,7 +6273,7 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
               svg aria-hidden="true"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div
@@ -6412,7 +6412,7 @@ exports[`element panel markup (W-021, W-086 M16) closed sections count the prope
                 "Local"
           input.emvb-chip-text id="id-2-input" data-emvb-class-input="" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="id-2-list" placeholder="Add class…" value=""
       p.emvb-helper data-emvb-cascade-caption=""
-        "Later classes override earlier ones. Local styles always win."
+        "Later classes override earlier ones. Local styles win over classes in the same state."
     div.emvb-state-switch data-emvb-state-switch="normal"
       div.emvb-state-tabs data-orientation="horizontal" data-activation-direction="none"
         div

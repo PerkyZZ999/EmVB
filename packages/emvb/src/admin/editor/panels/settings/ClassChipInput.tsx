@@ -342,7 +342,7 @@ export function ClassChipInput({
       <p className="emvb-helper" data-emvb-cascade-caption="">
         {full
           ? `${MAX_ELEMENT_CLASSES} classes is the most one element can have.`
-          : "Later classes override earlier ones. Local styles always win."}
+          : "Later classes override earlier ones. Local styles win over classes in the same state."}
       </p>
     </div>
   );
