@@ -3886,6 +3886,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/setup/plan-golden.test.ts"],
       "expect": "\\(fail\\).*planSetup over collection and field variants"
+    },
+    {
+      "id": "W-086/seed-verify-allows-repeats",
+      "requirement": "N-001",
+      "description": "seed verification accepts a search text that occurs more than once",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "      if (count !== 1) at(",
+          "replace": "      if (count < 1) at("
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*verify names each seed that drifted"
     }
   ]
 }

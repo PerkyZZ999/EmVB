@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, test } from "bun:test";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runSeed, type Seed } from "./seeded-bug.ts";
+import { runSeed, verifySeeds, type Seed } from "./seeded-bug.ts";
 
 let root = "";
 beforeEach(async () => {
@@ -64,4 +64,36 @@ test("files created by a seed are removed afterwards", async () => {
   );
   expect(result.status).toBe("caught");
   expect(await Bun.file(join(root, "extra/marker.txt")).exists()).toBe(false);
+});
+
+test("verify reports nothing for seeds that still apply, and leaves files alone", async () => {
+  const chained = seed({
+    id: "chained",
+    edits: [
+      { file: "value.txt", search: "value=good", replace: "value=bad" },
+      { file: "value.txt", search: "value=bad", replace: "value=worse" },
+    ],
+  });
+  expect(await verifySeeds(root, [seed({}), chained])).toEqual([]);
+  expect(await readFile(join(root, "value.txt"), "utf8")).toBe("value=good\n");
+});
+
+test("verify names each seed that drifted, and why", async () => {
+  await writeFile(join(root, "twice.txt"), "x x\n");
+  const problems = await verifySeeds(root, [
+    seed({ id: "gone", edits: [{ file: "value.txt", search: "missing", replace: "x" }] }),
+    seed({ id: "twice", edits: [{ file: "twice.txt", search: "x", replace: "y" }] }),
+    seed({ id: "nofile", edits: [{ file: "nope.txt", search: "a", replace: "b" }] }),
+    seed({ id: "exists", edits: [], creates: [{ file: "value.txt", content: "" }] }),
+    seed({ id: "regex", expect: "(" }),
+    seed({ id: "twice" }),
+  ]);
+  expect(problems).toEqual([
+    'gone: "missing" occurs 0 times in value.txt',
+    'twice: "x" occurs 2 times in twice.txt',
+    "nofile: nope.txt does not exist",
+    "exists: value.txt already exists",
+    "regex: expect is not a valid regex: (",
+    "twice: duplicate id",
+  ]);
 });
