@@ -1,7 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import { randomLayouts, s1Page } from "../../../test/fixtures/layouts.ts";
 import { validateLayout } from "../validate.ts";
-import { isNewerThanSupported, upgradeLayout, type Migration } from "./index.ts";
+import { DESIGN_SCHEMA_VERSION } from "../schema/design.ts";
+import { LAYOUT_SCHEMA_VERSION } from "../schema/layout.ts";
+import { validateDesign } from "../validate.ts";
+import {
+  DESIGN_MIGRATIONS,
+  isNewerThanSupported,
+  LAYOUT_MIGRATIONS,
+  upgradeLayout,
+  type Migration,
+} from "./index.ts";
 
 // A hypothetical v0 format: `{ version: 0, tree }` with headings storing `size` instead of `level`.
 const v0 = {
@@ -24,6 +33,7 @@ const renameLevel = (node: Record<string, unknown>): Record<string, unknown> => 
   };
 };
 const migrations: Record<number, Migration> = {
+  ...LAYOUT_MIGRATIONS,
   0: (doc) => ({ root: renameLevel(doc["tree"] as Record<string, unknown>) }),
 };
 
@@ -34,7 +44,7 @@ describe("upgradeLayout", () => {
       ok: true,
       from: 0,
       doc: {
-        schemaVersion: 1,
+        schemaVersion: 2,
         root: {
           id: "root0001",
           type: "container",
@@ -50,12 +60,12 @@ describe("upgradeLayout", () => {
     const snapshot = structuredClone(v0);
     const once = upgradeLayout(v0, migrations);
     if (!once.ok) throw new Error("upgrade failed");
-    expect(upgradeLayout(once.doc, migrations)).toEqual({ ok: true, doc: once.doc, from: 1 });
+    expect(upgradeLayout(once.doc, migrations)).toEqual({ ok: true, doc: once.doc, from: 2 });
     expect(v0).toEqual(snapshot);
   });
 
   test("a current document is returned unchanged", () => {
-    expect(upgradeLayout(s1Page())).toEqual({ ok: true, doc: s1Page(), from: 1 });
+    expect(upgradeLayout(s1Page())).toEqual({ ok: true, doc: s1Page(), from: 2 });
   });
 
   test("a missing step is reported instead of skipped", () => {
@@ -77,10 +87,58 @@ describe("upgradeLayout", () => {
     const layouts = randomLayouts(200);
     for (const layout of layouts) {
       const first = upgradeLayout(layout, migrations);
-      expect(first).toEqual({ ok: true, doc: layout, from: 1 });
+      expect(first).toEqual({ ok: true, doc: layout, from: 2 });
       if (!first.ok) continue;
       expect(upgradeLayout(first.doc, migrations)).toEqual(first);
-      expect(validateLayout(layout, migrations)).toEqual({ ok: true, layout, upgradedFrom: 1 });
+      expect(validateLayout(layout, migrations)).toEqual({ ok: true, layout, upgradedFrom: 2 });
     }
+  });
+});
+
+describe("schema v2 (D-031)", () => {
+  const asV1 = <T extends object>(doc: T) => ({ ...doc, schemaVersion: 1 });
+
+  test("layout and design are at version 2", () => {
+    expect(LAYOUT_SCHEMA_VERSION).toBe(2);
+    expect(DESIGN_SCHEMA_VERSION).toBe(2);
+  });
+
+  test("a v1 layout upgrades to v2 with every value kept", () => {
+    for (const layout of randomLayouts(50, 7)) {
+      expect(upgradeLayout(asV1(layout))).toEqual({ ok: true, doc: layout, from: 1 });
+      expect(validateLayout(asV1(layout))).toEqual({ ok: true, layout, upgradedFrom: 1 });
+    }
+  });
+
+  test("a v1 design document upgrades to v2 with its variables and classes kept", () => {
+    const design = {
+      schemaVersion: 2,
+      variables: { colors: [{ id: "ink", name: "Ink", value: "#112233" }] },
+      classes: [{ id: "card", name: "Card", style: { opacity: 0.5, zIndex: 2 } }],
+    };
+    expect(upgradeLayout(asV1(design), DESIGN_MIGRATIONS, DESIGN_SCHEMA_VERSION)).toEqual({
+      ok: true,
+      doc: design,
+      from: 1,
+    });
+    expect<unknown>(validateDesign(asV1(design))).toEqual({ ok: true, design, upgradedFrom: 1 });
+  });
+
+  test("a v1 EmVB meets a v2 page as newer, not as invalid", () => {
+    const page = s1Page();
+    expect(upgradeLayout(page, {}, 1)).toEqual({ ok: false, reason: "newer-version", version: 2 });
+    expect(validateLayout({ ...page, schemaVersion: 3 })).toMatchObject({
+      ok: false,
+      issues: [{ path: "schemaVersion", code: "newer-version" }],
+    });
+  });
+
+  test("the v1 step changes nothing and does not mutate its input", () => {
+    const doc = asV1(s1Page());
+    const snapshot = structuredClone(doc);
+    const step = LAYOUT_MIGRATIONS[1];
+    expect(step?.(doc)).toEqual(doc);
+    expect(DESIGN_MIGRATIONS[1]?.(doc)).toEqual(doc);
+    expect(doc).toEqual(snapshot);
   });
 });

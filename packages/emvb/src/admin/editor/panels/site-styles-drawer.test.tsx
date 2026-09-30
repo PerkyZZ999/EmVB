@@ -7,7 +7,7 @@ import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   root: {
     id: "root0001",
     type: "container",

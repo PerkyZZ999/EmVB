@@ -64,7 +64,7 @@ async function panelFor(
   extra: { rejection?: string; formsAvailable?: boolean; sections?: string[] } = {},
 ) {
   const layout: Layout = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     root: { id: "root0001", type: "container", props: {}, children: [node] },
   };
   sessionStorage.setItem(

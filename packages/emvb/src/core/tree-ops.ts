@@ -4,6 +4,7 @@ import {
   type ContainerNode,
   type Layout,
   type LayoutNode,
+  LAYOUT_SCHEMA_VERSION,
 } from "./schema/layout.ts";
 
 /** Children of a parent node (container/form), or of an unknown node that carried children (W-022). */
@@ -114,7 +115,7 @@ export function newNodeId(random: () => number = Math.random): string {
 /** The S1 page every new page starts from: a column container with the title as its heading. */
 export function starterLayout(title: string, random?: () => number): Layout {
   return {
-    schemaVersion: 1,
+    schemaVersion: LAYOUT_SCHEMA_VERSION,
     root: {
       id: newNodeId(random),
       type: "container",

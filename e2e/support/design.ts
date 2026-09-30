@@ -2,7 +2,7 @@ import { expect, type APIRequestContext } from "@playwright/test";
 import { api } from "./api.ts";
 
 export type DesignDoc = {
-  schemaVersion: 1;
+  schemaVersion: number;
   variables: {
     colors: { id: string; name: string; value: string }[];
     fonts?: { id: string; name: string; value: string }[];

@@ -126,7 +126,7 @@ export async function createThemePart(
     {
       title: input.title,
       layout: input.layout ?? {
-        schemaVersion: 1,
+        schemaVersion: 2,
         root: {
           id: "root0001",
           type: "container",

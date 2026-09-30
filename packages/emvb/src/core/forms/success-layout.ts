@@ -1,4 +1,4 @@
-import type { Layout } from "../schema/layout.ts";
+import { LAYOUT_SCHEMA_VERSION, type Layout } from "../schema/layout.ts";
 
 /** Fixture layout for the BRIEF success signal (W-039): container + heading/text/image/button + form. */
 export function successSignalLayout(opts: {
@@ -9,7 +9,7 @@ export function successSignalLayout(opts: {
   heading: string;
 }): Layout {
   return {
-    schemaVersion: 1,
+    schemaVersion: LAYOUT_SCHEMA_VERSION,
     root: {
       id: "root0001",
       type: "container",

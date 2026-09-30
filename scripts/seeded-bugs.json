@@ -7893,6 +7893,126 @@
         "Effects section edits a class"
       ],
       "expect": "✘.*\\[node\\].*Effects section edits a class"
+    },
+    {
+      "id": "D-031/layout-v1-step-missing",
+      "requirement": "D-031",
+      "description": "no v1 → v2 layout step, so every stored v1 page is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = { 1: unchanged };",
+          "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {};"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "a v1 layout upgrades to v2"
+      ],
+      "expect": "\\(fail\\).*a v1 layout upgrades to v2"
+    },
+    {
+      "id": "D-031/design-v1-step-missing",
+      "requirement": "D-031",
+      "description": "no v1 → v2 design step, so the stored design is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = { 1: unchanged };",
+          "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {};"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "a v1 design document upgrades"
+      ],
+      "expect": "\\(fail\\).*a v1 design document upgrades"
+    },
+    {
+      "id": "D-031/design-default-no-migrations",
+      "requirement": "D-031",
+      "description": "validateDesign runs no migrations by default",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "  migrations: Readonly<Record<number, Migration>> = DESIGN_MIGRATIONS,\n): DesignValidation {",
+          "replace": "  migrations: Readonly<Record<number, Migration>> = {},\n): DesignValidation {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/plugin.test.ts",
+        "-t",
+        "an editor saves with CAS"
+      ],
+      "expect": "\\(fail\\).*an editor saves with CAS"
+    },
+    {
+      "id": "D-031/layout-version-not-bumped",
+      "requirement": "D-031",
+      "description": "the layout stays at version 1, so an older EmVB rejects W-088 keys as invalid",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 2;",
+          "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "a v1 layout upgrades to v2"
+      ],
+      "expect": "\\(fail\\).*a v1 layout upgrades to v2"
+    },
+    {
+      "id": "D-031/upgraded-layout-not-stored",
+      "requirement": "D-031",
+      "description": "a v1 layout is saved without its upgrade",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "    if (result.upgradedFrom !== result.layout.schemaVersion) {",
+          "replace": "    if (result.upgradedFrom !== result.upgradedFrom) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/plugin.test.ts",
+        "-t",
+        "a v1 layout is stored upgraded"
+      ],
+      "expect": "\\(fail\\).*a v1 layout is stored upgraded"
+    },
+    {
+      "id": "D-031/v1-step-drops-classes",
+      "requirement": "D-031",
+      "description": "the v1 step drops the design's classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "const unchanged: Migration = (doc) => doc;",
+          "replace": "const unchanged: Migration = ({ classes: _dropped, ...doc }) => doc;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "a v1 design document upgrades"
+      ],
+      "expect": "\\(fail\\).*a v1 design document upgrades"
     }
   ]
 }

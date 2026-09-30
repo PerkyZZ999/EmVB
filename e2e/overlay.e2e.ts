@@ -3,7 +3,7 @@ import { createPage, setUpEmvbOnce } from "./support/api.ts";
 import { EDITOR, unique } from "./support/helpers.ts";
 
 const layout = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   root: {
     id: "root0001",
     type: "container",

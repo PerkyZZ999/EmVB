@@ -6,7 +6,7 @@ import { LayersPanel } from "./LayersPanel.tsx";
 import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
 
 const layout: Layout = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   root: {
     id: "root0001",
     type: "container",

@@ -17,7 +17,7 @@ afterEach(async () => {
 
 const px = (value: number) => ({ value, unit: "px" as const });
 const design: DesignSystem = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   variables: {
     colors: [
       { id: "brand", name: "Brand", value: "#112233" },
@@ -43,7 +43,7 @@ const design: DesignSystem = {
 };
 
 const layout: Layout = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   root: {
     id: "root0001",
     type: "container",
@@ -394,7 +394,7 @@ describe("VariableSection", () => {
 
   test("an empty section explains what the kind is for", async () => {
     const none: DesignSystem = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
     };
     const texts: string[] = [];

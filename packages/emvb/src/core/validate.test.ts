@@ -12,7 +12,7 @@ const issuesOf = (input: unknown) => {
 describe("valid layouts", () => {
   test("the S1 page parses and keeps its content", () => {
     const result = validateLayout(s1Page());
-    expect(result).toEqual({ ok: true, layout: s1Page(), upgradedFrom: 1 });
+    expect(result).toEqual({ ok: true, layout: s1Page(), upgradedFrom: 2 });
   });
 
   test("an empty root container is valid", () => {
@@ -168,7 +168,7 @@ describe("size budget (N-005, K12)", () => {
 
 describe("versions", () => {
   test("a newer schema version is refused with an update message", () => {
-    expect(issuesOf({ ...s1Page(), schemaVersion: 2 })).toEqual([
+    expect(issuesOf({ ...s1Page(), schemaVersion: 3 })).toEqual([
       expect.objectContaining({ path: "schemaVersion", code: "newer-version" }),
     ]);
   });
@@ -190,7 +190,7 @@ describe("design system document (D-013)", () => {
   test("a valid design parses", () => {
     expect<unknown>(validateDesign(design([color(1)]))).toEqual({
       ok: true,
-      design: design([color(1)]),
+      design: { ...design([color(1)]), schemaVersion: 2 },
       upgradedFrom: 1,
     });
   });

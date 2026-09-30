@@ -68,6 +68,7 @@ export {
   upgradeLayout,
   isNewerThanSupported,
   LAYOUT_MIGRATIONS,
+  DESIGN_MIGRATIONS,
   type Migration,
   type UpgradeResult,
 } from "./migrate/index.ts";

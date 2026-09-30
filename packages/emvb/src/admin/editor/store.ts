@@ -12,6 +12,7 @@ import {
   type Layout,
   type LayoutNode,
   type Removed,
+  LAYOUT_SCHEMA_VERSION,
 } from "../../core/index.ts";
 import type { PageDraft } from "../content-api.ts";
 
@@ -100,7 +101,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       if (state.page.layout) return state;
       const id = newNodeId();
       const root = { id, type: "container" as const, props: {}, children: [] };
-      return withLayout(state, { schemaVersion: 1, root }, id);
+      return withLayout(state, { schemaVersion: LAYOUT_SCHEMA_VERSION, root }, id);
     }
     case "add-node": {
       if (!state.page.layout) return state;

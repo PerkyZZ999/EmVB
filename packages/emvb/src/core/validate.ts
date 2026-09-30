@@ -4,6 +4,7 @@ import {
   upgradeLayout,
   type Migration,
   type UpgradeResult,
+  DESIGN_MIGRATIONS,
   LAYOUT_MIGRATIONS,
 } from "./migrate/index.ts";
 import { DESIGN_SCHEMA_VERSION, DesignSystem } from "./schema/design.ts";
@@ -135,7 +136,7 @@ export type DesignValidation =
 /** Server-side check for the design document (D-013, N-005): 256 KiB budget, version, schema. */
 export function validateDesign(
   input: unknown,
-  migrations: Readonly<Record<number, Migration>> = {},
+  migrations: Readonly<Record<number, Migration>> = DESIGN_MIGRATIONS,
 ): DesignValidation {
   const sizeIssue = checkSize(input, MAX_DESIGN_BYTES, "design system");
   if (sizeIssue) return { ok: false, issues: [sizeIssue] };

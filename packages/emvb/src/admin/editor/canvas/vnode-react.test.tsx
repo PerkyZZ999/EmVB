@@ -21,7 +21,7 @@ const heading = (id: string, text: string) => ({
 
 /** Outer tabs whose third panel holds inner tabs. */
 const layout = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   root: {
     id: "root0001",
     type: "container",

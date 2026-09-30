@@ -2,7 +2,8 @@ import { z } from "zod";
 import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { Length, StyleProps } from "./style.ts";
 
-export const LAYOUT_SCHEMA_VERSION = 1;
+/** 2 since W-088 (D-031): v1 → v2 changes nothing, so an older EmVB shows "saved by a newer EmVB". */
+export const LAYOUT_SCHEMA_VERSION = 2;
 
 export const NodeId = z
   .string()

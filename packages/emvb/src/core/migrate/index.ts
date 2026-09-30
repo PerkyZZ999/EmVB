@@ -2,8 +2,14 @@ import { LAYOUT_SCHEMA_VERSION } from "../schema/layout.ts";
 
 export type Migration = (doc: Record<string, unknown>) => Record<string, unknown>;
 
+/** v1 → v2 (D-031) only marks the W-088 style keys as possible; every v1 value is valid in v2. */
+const unchanged: Migration = (doc) => doc;
+
 /** `LAYOUT_MIGRATIONS[n]` upgrades a version-n layout to version n + 1. Migrations must be pure. */
-export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {};
+export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = { 1: unchanged };
+
+/** `DESIGN_MIGRATIONS[n]` upgrades a version-n design document to version n + 1. */
+export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = { 1: unchanged };
 
 export type UpgradeResult =
   | { ok: true; doc: Record<string, unknown>; from: number }

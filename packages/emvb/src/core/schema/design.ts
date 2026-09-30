@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { StyleProps } from "./style.ts";
 
-export const DESIGN_SCHEMA_VERSION = 1;
+/** 2 since W-088 (D-031), like the layout: class styles may use the W-088 keys. */
+export const DESIGN_SCHEMA_VERSION = 2;
 
 const VariableId = z
   .string()

@@ -1,4 +1,4 @@
-# Layout format (schema v1)
+# Layout format (schema v2)
 
 How EmVB stores a page and its site-wide design, as implemented through S4 (variables W-028+). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `1`. `root` is always a container.
+- `schemaVersion` is the literal `2` (D-031; v1 documents are upgraded on read by a step that changes nothing). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style` and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -67,7 +67,7 @@ Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `
 
 **Forms (S5):** form fields are only valid inside a `form` (or under one). Pages with a form set `needsFormsRuntime`; the host route loads `EmVBFormsRuntime` so `initForms` handles AJAX submit. Pages without a form stay zero EmVB JS (R-031).
 
-### Style properties (v1, W-017)
+### Style properties (W-017, extended in W-088)
 
 Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "vh" }` (`vw` and `vh` since W-088). Colours are hex or `{ "var": "<id>" }`. A **size** is a length, a variable reference or `"auto"`. An **offset** is a size whose value may also be negative (−10000 to 10000).
 
@@ -100,13 +100,12 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `filter` | `{ blur?, brightness?, contrast?, saturate?, grayscale?, hueRotate? }`, at least one set: `blur` 0–100 px, `brightness` / `contrast` / `saturate` 0–300 %, `grayscale` 0–100 %, `hueRotate` 0–360° | `filter`, functions always in that order, such as `blur(2px) grayscale(100%)` |
 | `cursor` | `default`, `pointer`, `text`, `move`, `grab`, `not-allowed`, `help`, `crosshair`, `zoom-in` | `cursor` |
 
-**W-088 additions are additive.** Every new key and unit is optional and every earlier value keeps its meaning, so stored pages and classes are valid unchanged: `schemaVersion` stays 1 and no migration runs. The keys are the same on `node.style` and on `design.classes[].style`. The generator builds each value from typed numbers and keywords only and runs the same `isSafeCssValue` gate as every other property; anything else is dropped with a `rejected-style` warning. A shadow colour bound to a colour variable counts as a use of that variable, and deleting the variable clears it from the page layout. One limit: an older EmVB reports a page or class that uses a new key as a validation issue rather than "saved by a newer EmVB".
-
+**W-088 additions are additive.** Every new key and unit is optional and every earlier value keeps its meaning, so stored pages and classes are valid unchanged. The version moved to 2 (D-031) with a v1 → v2 step that changes nothing, so an older EmVB shows "saved by a newer EmVB" rather than an invalid-layout error. The keys are the same on `node.style` and on `design.classes[].style`. The generator builds each value from typed numbers and keywords only and runs the same `isSafeCssValue` gate as every other property; anything else is dropped with a `rejected-style` warning. A shadow colour bound to a colour variable counts as a use of that variable, and deleting the variable clears it from the page layout.
 ## Design system document
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],
