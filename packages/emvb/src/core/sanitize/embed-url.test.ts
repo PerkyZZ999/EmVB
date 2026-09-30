@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { embedUrlCases } from "../../../test/fixtures/embed-url-cases.ts";
+import golden from "../../../test/fixtures/embed-url-golden.json";
 import { resolveEmbedUrl } from "./embed-url.ts";
 
 describe("resolveEmbedUrl (W-026, R-013)", () => {
@@ -39,4 +41,15 @@ describe("resolveEmbedUrl (W-026, R-013)", () => {
     expect(resolveEmbedUrl("javascript:alert(1)")).toBeUndefined();
     expect(resolveEmbedUrl("https://www.youtube.com/watch")).toBeUndefined();
   });
+});
+
+test("resolveEmbedUrl matches the recorded golden over hosts, path shapes and ids (W-086 L7)", () => {
+  const cases = embedUrlCases();
+  expect(cases).toHaveLength(golden.cases);
+  const accepted: Record<string, unknown> = {};
+  for (const input of cases) {
+    const result = resolveEmbedUrl(input);
+    if (result) accepted[input] = result;
+  }
+  expect(accepted).toEqual(golden.accepted);
 });

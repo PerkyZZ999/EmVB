@@ -1846,8 +1846,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/embed-url.ts",
-          "search": "const src = new URL(`https://www.youtube-nocookie.com/embed/${id}`);\n    stripAutoplay(src);\n    return { kind: \"iframe\", src: src.toString(), provider: \"youtube\" };",
-          "replace": "const src = new URL(`https://www.youtube-nocookie.com/embed/${id}`);\n    src.searchParams.set(\"autoplay\", \"1\");\n    return { kind: \"iframe\", src: src.toString(), provider: \"youtube\" };"
+          "search": "{ kind: \"iframe\", src: `${provider.embed}${id}`, provider: provider.provider }",
+          "replace": "{ kind: \"iframe\", src: `${provider.embed}${id}?autoplay=1`, provider: provider.provider }"
         }
       ],
       "command": [
@@ -1866,8 +1866,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/embed-url.ts",
-          "search": "if (YT_HOSTS.has(host)) {",
-          "replace": "if (host.endsWith(\"example\") || YT_HOSTS.has(host)) {\n    if (host.endsWith(\"example\")) {\n      return { kind: \"iframe\", src: trimmed, provider: \"youtube\" };\n    }"
+          "search": "  const provider = PROVIDERS.find((p) => p.hosts.has(host));",
+          "replace": "  if (host.endsWith(\"example\")) {\n    return { kind: \"iframe\", src: trimmed, provider: \"youtube\" };\n  }\n  const provider = PROVIDERS.find((p) => p.hosts.has(host));"
         }
       ],
       "command": [
@@ -3816,6 +3816,20 @@
       ],
       "command": ["bun", "test", "./scripts/pack-smoke.test.ts"],
       "expect": "\\(fail\\).*each reported"
+    },
+    {
+      "id": "W-086/embed-path-skips-empty-segment",
+      "requirement": "R-013",
+      "description": "/embed//id and /shorts//id are accepted by skipping the empty path segment",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "matching(path.slice(prefix.length).split(\"/\")[0], YT_ID)",
+          "replace": "matching(firstSegment(path.slice(prefix.length)), YT_ID)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-url.test.ts"],
+      "expect": "\\(fail\\).*resolveEmbedUrl matches the recorded golden"
     }
   ]
 }
