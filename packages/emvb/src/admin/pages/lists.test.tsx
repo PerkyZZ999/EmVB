@@ -103,11 +103,66 @@ describe("ThemePartList", () => {
     await mount(<ThemePartList fetcher={replying(items(parts))} />);
     const tab = (label: string) =>
       [...host.querySelectorAll<HTMLButtonElement>('[role="tab"]')].find(
-        (t) => t.textContent === label,
+        (t) => t.firstChild?.textContent === label,
       );
     await act(async () => tab("Popups")?.click());
     expect(html()).toMatchSnapshot();
     await act(async () => tab("Footers")?.click());
     expect(html()).toMatchSnapshot();
+  });
+
+  test("filter tabs rove: one tab stop, arrows, Home and End move and select", async () => {
+    await mount(<ThemePartList fetcher={replying(items(parts))} />);
+    const tabs = () => [...host.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const selected = () =>
+      tabs()
+        .filter((t) => t.getAttribute("aria-selected") === "true")
+        .map((t) => t.firstChild?.textContent);
+    const stops = () =>
+      tabs()
+        .filter((t) => t.tabIndex === 0)
+        .map((t) => t.firstChild?.textContent);
+    const press = async (key: string) => {
+      const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
+      await act(async () => document.activeElement?.dispatchEvent(event));
+      return event.defaultPrevented;
+    };
+
+    expect(stops()).toEqual(["All"]);
+    tabs()[0]?.focus();
+    expect(await press("ArrowRight")).toBe(true);
+    expect(selected()).toEqual(["Headers"]);
+    expect(stops()).toEqual(["Headers"]);
+    expect((document.activeElement as HTMLElement | null)?.id).toBe("emvb-theme-filter-header");
+    await press("ArrowLeft");
+    await press("ArrowLeft");
+    expect(selected()).toEqual(["Popups"]);
+    await press("Home");
+    expect(selected()).toEqual(["All"]);
+    await press("End");
+    expect(selected()).toEqual(["Popups"]);
+    expect((document.activeElement as HTMLElement | null)?.id).toBe("emvb-theme-filter-popup");
+    expect(await press("a")).toBe(false);
+    expect(selected()).toEqual(["Popups"]);
+    const panel = host.querySelector('[role="tabpanel"]');
+    expect(panel?.getAttribute("aria-labelledby")).toBe("emvb-theme-filter-popup");
+    expect(tabs().every((t) => t.getAttribute("aria-controls") === panel?.id)).toBe(true);
+  });
+
+  test("each filter with parts shows its count", async () => {
+    await mount(<ThemePartList fetcher={replying(items(parts))} />);
+    const counts = [...host.querySelectorAll('[role="tab"]')].map((t) => t.textContent);
+    expect(counts).toEqual([
+      "All2",
+      "Headers1",
+      "Footers",
+      "Error 404",
+      "Search Results",
+      "Single Page",
+      "Single Post",
+      "Archive",
+      "Loop Item",
+      "Popups1",
+    ]);
   });
 });

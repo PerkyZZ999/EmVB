@@ -6083,6 +6083,166 @@
         "the copy speaks to people"
       ],
       "expect": "\\(fail\\).*the copy speaks to people"
+    },
+    {
+      "id": "W-087/theme-tabs-no-arrows",
+      "requirement": "W-087",
+      "description": "ArrowRight does nothing on the filter tabs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "event.key === \"ArrowRight\"",
+          "replace": "event.key === \"ArrowRightX\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/lists.test.tsx",
+        "-t",
+        "filter tabs rove"
+      ],
+      "expect": "\\(fail\\).*filter tabs rove"
+    },
+    {
+      "id": "W-087/theme-tabs-focus-stays",
+      "requirement": "W-087",
+      "description": "arrows select a tab but leave focus behind",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "    refs.current.get(next)?.focus();\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/lists.test.tsx",
+        "-t",
+        "filter tabs rove"
+      ],
+      "expect": "\\(fail\\).*filter tabs rove"
+    },
+    {
+      "id": "W-087/theme-tabs-all-tabbable",
+      "requirement": "W-087",
+      "description": "every filter tab is a tab stop",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "tabIndex={selected ? 0 : -1}",
+          "replace": "tabIndex={0}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/lists.test.tsx",
+        "-t",
+        "filter tabs rove"
+      ],
+      "expect": "\\(fail\\).*filter tabs rove"
+    },
+    {
+      "id": "W-087/theme-tabs-no-wrap",
+      "requirement": "W-087",
+      "description": "ArrowLeft on All stops instead of wrapping",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "(at - 1 + FILTERS.length) % FILTERS.length",
+          "replace": "Math.max(0, at - 1)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/lists.test.tsx",
+        "-t",
+        "filter tabs rove"
+      ],
+      "expect": "\\(fail\\).*filter tabs rove"
+    },
+    {
+      "id": "W-087/theme-tabs-end-wrong",
+      "requirement": "W-087",
+      "description": "End selects the second-to-last tab",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "              ? last\n",
+          "replace": "              ? last - 1\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/lists.test.tsx",
+        "-t",
+        "filter tabs rove"
+      ],
+      "expect": "\\(fail\\).*filter tabs rove"
+    },
+    {
+      "id": "W-087/theme-tabs-steal-keys",
+      "requirement": "W-087",
+      "description": "the tablist swallows every key",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "if (next === undefined) return;",
+          "replace": "if (next === undefined) {\n      event.preventDefault();\n      return;\n    }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/lists.test.tsx",
+        "-t",
+        "filter tabs rove"
+      ],
+      "expect": "\\(fail\\).*filter tabs rove"
+    },
+    {
+      "id": "W-087/theme-panel-label-stale",
+      "requirement": "W-087",
+      "description": "the panel stays labelled by All",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "aria-labelledby={tabId(filter)}",
+          "replace": "aria-labelledby={tabId(\"all\")}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/lists.test.tsx",
+        "-t",
+        "filter tabs rove"
+      ],
+      "expect": "\\(fail\\).*filter tabs rove"
+    },
+    {
+      "id": "W-087/theme-count-all-missing",
+      "requirement": "W-087",
+      "description": "the All tab shows no count",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "[\"all\", items.length]",
+          "replace": "[\"all\", 0]"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/lists.test.tsx",
+        "-t",
+        "each filter with parts shows its count"
+      ],
+      "expect": "\\(fail\\).*each filter with parts shows its count"
     }
   ]
 }

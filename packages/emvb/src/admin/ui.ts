@@ -104,9 +104,12 @@ export const UI_CSS = `
   display: flex;
   gap: 0;
   width: fit-content;
+  max-width: 100%;
   min-height: 32px;
   margin: 0;
   padding: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
   border-bottom: 1px solid var(--color-kumo-hairline);
 }
 .emvb-theme-filter {
@@ -129,6 +132,8 @@ export const UI_CSS = `
   font-weight: 600;
   box-shadow: inset 0 -2px 0 0 var(--color-kumo-brand);
 }
+.emvb-theme-filter { flex: none; white-space: nowrap; }
+.emvb-theme-filter-count { margin-left: 6px; color: var(--text-color-kumo-subtle); font-weight: 400; }
 .emvb-theme-filter:hover { color: var(--text-color-kumo-default); }
 .emvb-theme-filter:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 

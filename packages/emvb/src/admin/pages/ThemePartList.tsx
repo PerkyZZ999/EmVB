@@ -11,6 +11,9 @@ import { NewThemePartDialog } from "./NewThemePartDialog.tsx";
 
 type Filter = "all" | ThemePartType;
 
+const PANEL_ID = "emvb-theme-parts-panel";
+const tabId = (value: Filter) => `emvb-theme-filter-${value}`;
+
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "header", label: "Headers" },
@@ -23,6 +26,80 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "loop_item", label: "Loop Item" },
   { value: "popup", label: "Popups" },
 ];
+
+function countByType(items: readonly { partType: ThemePartType }[]): Map<Filter, number> {
+  const counts = new Map<Filter, number>([["all", items.length]]);
+  for (const { partType } of items) counts.set(partType, (counts.get(partType) ?? 0) + 1);
+  return counts;
+}
+
+/** Underline tabs with roving focus: arrows, Home and End move and select. */
+function FilterTabs({
+  filter,
+  counts,
+  onChange,
+}: {
+  filter: Filter;
+  counts: Map<Filter, number>;
+  onChange: (next: Filter) => void;
+}) {
+  const refs = React.useRef(new Map<Filter, HTMLButtonElement>());
+
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    const at = FILTERS.findIndex((f) => f.value === filter);
+    const last = FILTERS.length - 1;
+    const to =
+      event.key === "ArrowRight"
+        ? (at + 1) % FILTERS.length
+        : event.key === "ArrowLeft"
+          ? (at - 1 + FILTERS.length) % FILTERS.length
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? last
+              : -1;
+    const next = FILTERS[to]?.value;
+    if (next === undefined) return;
+    event.preventDefault();
+    onChange(next);
+    refs.current.get(next)?.focus();
+  };
+
+  return (
+    <div
+      className="emvb-theme-filters"
+      role="tablist"
+      aria-label="Filter by type"
+      onKeyDown={onKeyDown}
+    >
+      {FILTERS.map(({ value, label }) => {
+        const count = counts.get(value) ?? 0;
+        const selected = filter === value;
+        return (
+          <button
+            key={value}
+            ref={(node) => {
+              if (node) refs.current.set(value, node);
+              else refs.current.delete(value);
+            }}
+            id={tabId(value)}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            aria-controls={PANEL_ID}
+            tabIndex={selected ? 0 : -1}
+            className="emvb-theme-filter"
+            data-active={selected ? "true" : undefined}
+            onClick={() => onChange(value)}
+          >
+            {label}
+            {count > 0 && <span className="emvb-theme-filter-count emvb-tabular">{count}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 /** Theme Builder list: title, type, conditions, status, last edited; New theme part. */
 export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
@@ -49,21 +126,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
         {list.state === "ready" && list.items.length > 0 && newPart}
       </div>
       {list.state === "ready" && list.items.length > 0 && (
-        <div className="emvb-theme-filters" role="tablist" aria-label="Filter by type">
-          {FILTERS.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              role="tab"
-              aria-selected={filter === value}
-              className="emvb-theme-filter"
-              data-active={filter === value ? "true" : undefined}
-              onClick={() => setFilter(value)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <FilterTabs filter={filter} counts={countByType(list.items)} onChange={setFilter} />
       )}
       {list.state === "loading" && <Loader />}
       {list.state === "error" && (
@@ -79,50 +142,56 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
           />
         </div>
       )}
-      {list.state === "ready" && list.items.length > 0 && visible.length === 0 && (
-        <div className="emvb-surface-card emvb-empty-shell">
-          <Empty
-            icon={<SquaresFourIcon size={32} aria-hidden="true" />}
-            title={`No ${emptyFilterLabel} yet`}
-            description="Create one or choose a different filter."
-            contents={newPart}
-          />
-        </div>
-      )}
-      {list.state === "ready" && visible.length > 0 && (
-        <div className="emvb-surface-card" data-emvb-list="theme-parts">
-          <Table data-emvb-list="theme-parts">
-            <Table.Header>
-              <Table.Row>
-                <Table.Head>Title</Table.Head>
-                <Table.Head>Type</Table.Head>
-                <Table.Head>Conditions</Table.Head>
-                <Table.Head>Status</Table.Head>
-                <Table.Head>Last edited</Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {visible.map((part) => (
-                <Table.Row key={part.id} data-emvb-row={part.id}>
-                  <Table.Cell>
-                    <a className="emvb-row-title" href={editorUrl(part.id, THEME_PARTS_COLLECTION)}>
-                      {part.title}
-                    </a>
-                  </Table.Cell>
-                  <Table.Cell>{partTypeLabel(part.partType)}</Table.Cell>
-                  <Table.Cell>
-                    <span className="emvb-tabular">{part.conditionsSummary}</span>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <StatusBadge status={part.status} />
-                  </Table.Cell>
-                  <Table.Cell>
-                    <EditedTime iso={part.updatedAt} />
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
+      {list.state === "ready" && list.items.length > 0 && (
+        <div role="tabpanel" id={PANEL_ID} aria-labelledby={tabId(filter)}>
+          {visible.length === 0 ? (
+            <div className="emvb-surface-card emvb-empty-shell">
+              <Empty
+                icon={<SquaresFourIcon size={32} aria-hidden="true" />}
+                title={`No ${emptyFilterLabel} yet`}
+                description="Create one or choose a different filter."
+                contents={newPart}
+              />
+            </div>
+          ) : (
+            <div className="emvb-surface-card" data-emvb-list="theme-parts">
+              <Table data-emvb-list="theme-parts">
+                <Table.Header>
+                  <Table.Row>
+                    <Table.Head>Title</Table.Head>
+                    <Table.Head>Type</Table.Head>
+                    <Table.Head>Conditions</Table.Head>
+                    <Table.Head>Status</Table.Head>
+                    <Table.Head>Last edited</Table.Head>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {visible.map((part) => (
+                    <Table.Row key={part.id} data-emvb-row={part.id}>
+                      <Table.Cell>
+                        <a
+                          className="emvb-row-title"
+                          href={editorUrl(part.id, THEME_PARTS_COLLECTION)}
+                        >
+                          {part.title}
+                        </a>
+                      </Table.Cell>
+                      <Table.Cell>{partTypeLabel(part.partType)}</Table.Cell>
+                      <Table.Cell>
+                        <span className="emvb-tabular">{part.conditionsSummary}</span>
+                      </Table.Cell>
+                      <Table.Cell>
+                        <StatusBadge status={part.status} />
+                      </Table.Cell>
+                      <Table.Cell>
+                        <EditedTime iso={part.updatedAt} />
+                      </Table.Cell>
+                    </Table.Row>
+                  ))}
+                </Table.Body>
+              </Table>
+            </div>
+          )}
         </div>
       )}
       <NewThemePartDialog fetcher={fetcher} open={creating} onOpenChange={setCreating} />
