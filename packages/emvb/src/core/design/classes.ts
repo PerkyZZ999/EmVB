@@ -78,3 +78,39 @@ export function duplicateClass(
     classes: [...classes, { id, name: baseName, style }],
   };
 }
+
+/** Rename a design class; the id (and so its `.emvb-k-<id>` selector) stays. Pure (W-087). */
+export function renameClass(design: DesignSystem, classId: string, name: string): DesignSystem {
+  const trimmed = name.trim();
+  const classes = design.classes ?? [];
+  if (!trimmed || !classes.some((c) => c.id === classId)) return design;
+  return {
+    ...design,
+    classes: classes.map((c) => (c.id === classId ? Object.assign({}, c, { name: trimmed }) : c)),
+  };
+}
+
+/** Merge `patch` into a class's style; `undefined` values clear their property. Pure (W-087). */
+export function patchClassStyle(
+  design: DesignSystem,
+  classId: string,
+  patch: Partial<StyleProps>,
+): DesignSystem {
+  const classes = design.classes ?? [];
+  if (!classes.some((c) => c.id === classId)) return design;
+  return {
+    ...design,
+    classes: classes.map((c) => {
+      if (c.id !== classId) return c;
+      const style: Record<string, unknown> = { ...c.style, ...patch };
+      for (const [key, value] of Object.entries(patch)) if (value === undefined) delete style[key];
+      return Object.assign({}, c, { style: style as StyleProps });
+    }),
+  };
+}
+
+/** Swap one applied class id for another in place, keeping the cascade order. Pure (W-087). */
+export function replaceClassId(ids: readonly string[], from: string, to: string): string[] {
+  if (ids.includes(to)) return removeClassId(ids, from);
+  return ids.map((id) => (id === from ? to : id));
+}

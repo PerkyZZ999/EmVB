@@ -121,6 +121,9 @@ export {
   findClassUsages,
   clearClassRefs,
   duplicateClass,
+  renameClass,
+  patchClassStyle,
+  replaceClassId,
 } from "./design/classes.ts";
 export {
   renderPage,

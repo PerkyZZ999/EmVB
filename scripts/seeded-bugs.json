@@ -4115,20 +4115,20 @@
     {
       "id": "W-086/qa7-class-picker-shows-sentinel",
       "requirement": "R-021",
-      "description": "the Add class select shows its internal placeholder value instead of a prompt",
+      "description": "the Add class input loses its \"Add class…\" prompt (was the Add class select showing its internal placeholder value; the chip input replaced the select in W-087)",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/ClassPicker.tsx",
-          "search": "        renderValue={() => prompt}\n",
-          "replace": ""
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "placeholder={full ? \"\" : \"Add class…\"}",
+          "replace": "placeholder=\"\""
         }
       ],
       "command": [
         "bun",
         "test",
-        "./packages/emvb/src/admin/editor/panels/settings/class-picker.test.tsx"
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
       ],
-      "expect": "\\(fail\\).*prompts for a class"
+      "expect": "\\(fail\\).*shows Local first"
     },
     {
       "id": "W-086/qa5-canvas-tab-radio-controlled",
@@ -4257,6 +4257,372 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*a collection that never runs out of pages is read only up to a cap"
+    },
+    {
+      "id": "W-087/chips-out-of-order",
+      "requirement": "R-021",
+      "description": "class chips render in reverse cascade order",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "{ids.map((id, index) => {",
+          "replace": "{[...ids].reverse().map((id, index) => {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*shows Local first"
+    },
+    {
+      "id": "W-087/chip-shows-id",
+      "requirement": "R-021",
+      "description": "class chips show the class id instead of its name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "const name = byId.get(id)?.name ?? id;",
+          "replace": "const name = id;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*shows Local first"
+    },
+    {
+      "id": "W-087/chip-x-does-nothing",
+      "requirement": "R-021",
+      "description": "the chip × doesn't remove the class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "onClick={() => remove(id, index)}",
+          "replace": "onClick={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*× removes a class"
+    },
+    {
+      "id": "W-087/suggests-applied",
+      "requirement": "R-021",
+      "description": "suggestions include classes already on the element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/class-suggest.ts",
+          "search": "catalog.filter((cls) => !applied.includes(cls.id))",
+          "replace": "catalog.filter(() => true)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*focus lists the classes not applied"
+    },
+    {
+      "id": "W-087/no-match-ranking",
+      "requirement": "R-021",
+      "description": "exact and prefix matches aren't listed first",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/class-suggest.ts",
+          "search": "        .toSorted((a, b) => a.rank - b.rank || a.index - b.index)\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-suggest.test.ts"
+      ],
+      "expect": "\\(fail\\).*offers Create last only"
+    },
+    {
+      "id": "W-087/create-despite-exact",
+      "requirement": "R-021",
+      "description": "Create is offered even when a class has that exact name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/class-suggest.ts",
+          "search": "if (q && !taken)",
+          "replace": "if (q)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-suggest.test.ts"
+      ],
+      "expect": "\\(fail\\).*offers Create last only"
+    },
+    {
+      "id": "W-087/enter-picks-last",
+      "requirement": "R-021",
+      "description": "Enter picks the last option instead of the highlighted one",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "      choose(current);",
+          "replace": "      choose(options.at(-1));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Enter adds the highlighted suggestion"
+    },
+    {
+      "id": "W-087/create-not-applied",
+      "requirement": "R-021",
+      "description": "a class created from the input isn't applied to the element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "    commit(addClassId(ids, id));\n    reset();\n  };\n\n  const choose",
+          "replace": "    reset();\n  };\n\n  const choose"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*creates the class site-wide"
+    },
+    {
+      "id": "W-087/create-failure-applies",
+      "requirement": "R-021",
+      "description": "a failed create still applies the class id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "\"Couldn't create the class. Try again.\");\n      return;\n",
+          "replace": "\"Couldn't create the class. Try again.\");\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a failed create shows the error"
+    },
+    {
+      "id": "W-087/applied-name-silent",
+      "requirement": "R-021",
+      "description": "Enter on an applied class name gives no feedback",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "if (query.trim() && appliedByName(catalog, ids, query)) {",
+          "replace": "if (false && appliedByName(catalog, ids, query)) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*already applied says so"
+    },
+    {
+      "id": "W-087/backspace-empty-ignored",
+      "requirement": "R-021",
+      "description": "Backspace in the empty input doesn't remove the last class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "event.key === \"Backspace\" && query === \"\" && ids.length > 0",
+          "replace": "event.key === \"Backspace\" && query === \"-\" && ids.length > 0"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Backspace in the empty input removes the last class"
+    },
+    {
+      "id": "W-087/no-arrow-into-chips",
+      "requirement": "R-021",
+      "description": "Arrow Left at the start of the input doesn't reach the chips",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "event.key === \"ArrowLeft\" && atStart",
+          "replace": "event.key === \"ArrowLeft\" && atStart && false"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Arrow keys walk Local"
+    },
+    {
+      "id": "W-087/chip-backspace-focus",
+      "requirement": "R-021",
+      "description": "Backspace on a chip loses the focus position",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "event.key === \"Backspace\" ? index - 1 : index",
+          "replace": "index"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Backspace on a chip removes it"
+    },
+    {
+      "id": "W-087/shortcuts-leak",
+      "requirement": "R-021",
+      "description": "keys handled in the chip box reach the editor's window shortcuts (Backspace deletes the element)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "if (!event.ctrlKey && !event.metaKey) event.stopPropagation();",
+          "replace": "void event;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*reach the editor"
+    },
+    {
+      "id": "W-087/alt-arrow-no-reorder",
+      "requirement": "R-021",
+      "description": "Alt+Arrow on a chip doesn't reorder the cascade",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "const move = event.altKey && id !== undefined;",
+          "replace": "const move = false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Alt\\+Arrow reorders the cascade"
+    },
+    {
+      "id": "W-087/limit-off-by-one",
+      "requirement": "R-021",
+      "description": "the 20-class limit isn't enforced at 20",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "const full = ids.length >= MAX_ELEMENT_CLASSES;",
+          "replace": "const full = ids.length > MAX_ELEMENT_CLASSES;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*at 20 classes the input is disabled"
+    },
+    {
+      "id": "W-087/escape-keeps-list",
+      "requirement": "R-021",
+      "description": "Escape clears the text instead of closing the suggestions first",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "if (open) setOpen(false);\n      else reset();",
+          "replace": "reset();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Escape closes the suggestions"
+    },
+    {
+      "id": "W-087/no-activedescendant",
+      "requirement": "R-021",
+      "description": "the highlighted suggestion isn't exposed through aria-activedescendant",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "            aria-activedescendant={\n              open && current ? `${baseId}-opt-${optionKey(current)}` : undefined\n            }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Arrow Down moves the highlight"
+    },
+    {
+      "id": "W-087/rename-untrimmed",
+      "requirement": "R-021",
+      "description": "renameClass keeps surrounding spaces",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "    classes: classes.map((c) => (c.id === classId ? Object.assign({}, c, { name: trimmed }) : c)),",
+          "replace": "    classes: classes.map((c) => (c.id === classId ? Object.assign({}, c, { name }) : c)),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/classes.test.ts"],
+      "expect": "\\(fail\\).*renameClass trims"
+    },
+    {
+      "id": "W-087/patch-keeps-cleared",
+      "requirement": "R-021",
+      "description": "patchClassStyle keeps properties set to undefined",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "      for (const [key, value] of Object.entries(patch)) if (value === undefined) delete style[key];\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/classes.test.ts"],
+      "expect": "\\(fail\\).*patchClassStyle merges"
+    },
+    {
+      "id": "W-087/replace-duplicates",
+      "requirement": "R-021",
+      "description": "replaceClassId applies the same class twice",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "  if (ids.includes(to)) return removeClassId(ids, from);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/classes.test.ts"],
+      "expect": "\\(fail\\).*replaceClassId swaps"
     }
   ]
 }

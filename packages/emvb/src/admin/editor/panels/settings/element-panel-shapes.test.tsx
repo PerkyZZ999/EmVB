@@ -27,7 +27,7 @@ const KEPT =
 function outline(host: HTMLElement) {
   const ids = new Map<string, string>();
   const stable = (value: string) =>
-    value.replace(/base-ui-[\w-]+|«[^»]*»|:r[0-9a-z]+:/g, (id) => {
+    value.replace(/base-ui-[\w-]+|«[^»]*»|:r[0-9a-z]+:|_r_[0-9a-z]+_/g, (id) => {
       if (!ids.has(id)) ids.set(id, `id-${ids.size}`);
       return ids.get(id) ?? id;
     });

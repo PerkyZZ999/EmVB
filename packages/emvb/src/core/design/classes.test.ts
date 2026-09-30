@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { emptyDesign } from "../schema/design.ts";
+import { emptyDesign, type DesignSystem } from "../schema/design.ts";
 import type { Layout } from "../schema/layout.ts";
 import {
   addClassId,
@@ -7,7 +7,10 @@ import {
   duplicateClass,
   findClassUsages,
   moveClassId,
+  patchClassStyle,
   removeClassId,
+  renameClass,
+  replaceClassId,
 } from "./classes.ts";
 
 describe("class id list helpers (W-031)", () => {
@@ -73,5 +76,52 @@ describe("duplicateClass (W-071)", () => {
   test("missing id is a no-op", () => {
     const design = emptyDesign();
     expect(duplicateClass(design, "nope")).toBe(design);
+  });
+});
+
+describe("class chip helpers (W-087)", () => {
+  const design: DesignSystem = {
+    ...emptyDesign(),
+    classes: [
+      { id: "card", name: "Card", style: { color: "#112233", fontWeight: 700 } },
+      { id: "accent", name: "Accent", style: {} },
+    ],
+  };
+
+  test("renameClass trims the name and keeps the id", () => {
+    const next = renameClass(design, "card", "  Card large ");
+    expect(next.classes?.map((c) => [c.id, c.name])).toEqual([
+      ["card", "Card large"],
+      ["accent", "Accent"],
+    ]);
+    expect(design.classes?.[0]?.name).toBe("Card");
+  });
+
+  test("renameClass ignores blank names and unknown ids", () => {
+    expect(renameClass(design, "card", "   ")).toBe(design);
+    expect(renameClass(design, "nope", "X")).toBe(design);
+  });
+
+  test("patchClassStyle merges, clears undefined, and leaves other classes alone", () => {
+    const next = patchClassStyle(design, "card", {
+      backgroundColor: "#ffffff",
+      fontWeight: undefined,
+    });
+    expect(next.classes?.[0]?.style).toStrictEqual({
+      color: "#112233",
+      backgroundColor: "#ffffff",
+    });
+    expect(next.classes?.[1]).toBe(design.classes?.[1]);
+    expect(design.classes?.[0]?.style).toEqual({ color: "#112233", fontWeight: 700 });
+    expect(patchClassStyle(design, "nope", { color: "#000000" })).toBe(design);
+  });
+
+  test("replaceClassId swaps in place, or drops the old id when the new one is applied", () => {
+    expect(replaceClassId(["a", "card", "b"], "card", "card-copy")).toEqual([
+      "a",
+      "card-copy",
+      "b",
+    ]);
+    expect(replaceClassId(["card-copy", "card"], "card", "card-copy")).toEqual(["card-copy"]);
   });
 });
