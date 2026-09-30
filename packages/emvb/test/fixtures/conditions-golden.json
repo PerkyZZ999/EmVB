@@ -1,0 +1,1228 @@
+{
+  "perRule": [
+    {
+      "rule": "general-entire_site-{}",
+      "specificity": 1,
+      "valid": true,
+      "matches": {
+        "front": [true, 1],
+        "frontPage": [true, 1],
+        "notFound": [true, 1],
+        "search": [true, 1],
+        "page": [true, 1],
+        "pageEntry": [true, 1],
+        "post": [true, 1],
+        "otherPost": [true, 1],
+        "postsArchive": [true, 1],
+        "category": [true, 1],
+        "otherCategory": [true, 1],
+        "tag": [true, 1],
+        "other": [true, 1],
+        "singularNoCollection": [true, 1]
+      }
+    },
+    {
+      "rule": "general-all-{}",
+      "specificity": 0,
+      "valid": false,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "singular-all-{}",
+      "specificity": 10,
+      "valid": true,
+      "matches": {
+        "front": [true, 10],
+        "frontPage": [true, 10],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [true, 10],
+        "pageEntry": [true, 10],
+        "post": [true, 10],
+        "otherPost": [true, 10],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [true, 10]
+      }
+    },
+    {
+      "rule": "singular-front-{}",
+      "specificity": 20,
+      "valid": true,
+      "matches": {
+        "front": [true, 20],
+        "frontPage": [true, 20],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "singular-not_found-{}",
+      "specificity": 20,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [true, 20],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "singular-collection-{\"collection\":\"posts\"}",
+      "specificity": 30,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [true, 30],
+        "otherPost": [true, 30],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "singular-collection-{\"collection\":\"pages\"}",
+      "specificity": 30,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [true, 30],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [true, 30],
+        "pageEntry": [true, 30],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "singular-collection-{\"collection\":3}",
+      "specificity": 30,
+      "valid": false,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "singular-entry-{\"collection\":\"posts\",\"id\":\"01POST\"}",
+      "specificity": 50,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [true, 50],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "singular-entry-{\"collection\":\"pages\",\"id\":\"01POST\"}",
+      "specificity": 50,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "singular-entry-{\"collection\":\"posts\"}",
+      "specificity": 50,
+      "valid": false,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-all-{}",
+      "specificity": 10,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [true, 10],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [true, 10],
+        "category": [true, 10],
+        "otherCategory": [true, 10],
+        "tag": [true, 10],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-collection-{\"collection\":\"posts\"}",
+      "specificity": 30,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [true, 30],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-taxonomy-{\"taxonomy\":\"category\"}",
+      "specificity": 35,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [true, 35],
+        "otherCategory": [true, 35],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-taxonomy-{\"taxonomy\":\"category\",\"slug\":\"news\"}",
+      "specificity": 40,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [true, 40],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-taxonomy-{\"taxonomy\":\"category\",\"slug\":\"\"}",
+      "specificity": 40,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [true, 40],
+        "otherCategory": [true, 40],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-taxonomy-{\"taxonomy\":\"tag\",\"slug\":\"news\"}",
+      "specificity": 40,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [true, 40],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-taxonomy-{\"taxonomy\":\"category\",\"slug\":5}",
+      "specificity": 35,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [true, 35],
+        "otherCategory": [true, 35],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-search-{}",
+      "specificity": 20,
+      "valid": true,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [true, 20],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    },
+    {
+      "rule": "archive-front-{}",
+      "specificity": 0,
+      "valid": false,
+      "matches": {
+        "front": [false, 0],
+        "frontPage": [false, 0],
+        "notFound": [false, 0],
+        "search": [false, 0],
+        "page": [false, 0],
+        "pageEntry": [false, 0],
+        "post": [false, 0],
+        "otherPost": [false, 0],
+        "postsArchive": [false, 0],
+        "category": [false, 0],
+        "otherCategory": [false, 0],
+        "tag": [false, 0],
+        "other": [false, 0],
+        "singularNoCollection": [false, 0]
+      }
+    }
+  ],
+  "combined": {
+    "siteButNotPosts": {
+      "front": [true, 1],
+      "frontPage": [true, 1],
+      "notFound": [true, 1],
+      "search": [true, 1],
+      "page": [true, 1],
+      "pageEntry": [true, 1],
+      "post": [false, 0],
+      "otherPost": [false, 0],
+      "postsArchive": [true, 1],
+      "category": [true, 1],
+      "otherCategory": [true, 1],
+      "tag": [true, 1],
+      "other": [true, 1],
+      "singularNoCollection": [true, 1]
+    },
+    "postsButNotEntry": {
+      "front": [false, 0],
+      "frontPage": [false, 0],
+      "notFound": [false, 0],
+      "search": [false, 0],
+      "page": [false, 0],
+      "pageEntry": [false, 0],
+      "post": [false, 0],
+      "otherPost": [true, 30],
+      "postsArchive": [false, 0],
+      "category": [false, 0],
+      "otherCategory": [false, 0],
+      "tag": [false, 0],
+      "other": [false, 0],
+      "singularNoCollection": [false, 0]
+    },
+    "entryAndSingular": {
+      "front": [true, 10],
+      "frontPage": [true, 10],
+      "notFound": [false, 0],
+      "search": [false, 0],
+      "page": [true, 10],
+      "pageEntry": [true, 10],
+      "post": [true, 50],
+      "otherPost": [true, 10],
+      "postsArchive": [false, 0],
+      "category": [false, 0],
+      "otherCategory": [false, 0],
+      "tag": [false, 0],
+      "other": [false, 0],
+      "singularNoCollection": [true, 10]
+    },
+    "newsAndCategory": {
+      "front": [false, 0],
+      "frontPage": [false, 0],
+      "notFound": [false, 0],
+      "search": [true, 10],
+      "page": [false, 0],
+      "pageEntry": [false, 0],
+      "post": [false, 0],
+      "otherPost": [false, 0],
+      "postsArchive": [true, 10],
+      "category": [true, 40],
+      "otherCategory": [true, 35],
+      "tag": [true, 10],
+      "other": [false, 0],
+      "singularNoCollection": [false, 0]
+    },
+    "excludeOnly": {
+      "front": [false, 0],
+      "frontPage": [false, 0],
+      "notFound": [false, 0],
+      "search": [false, 0],
+      "page": [false, 0],
+      "pageEntry": [false, 0],
+      "post": [false, 0],
+      "otherPost": [false, 0],
+      "postsArchive": [false, 0],
+      "category": [false, 0],
+      "otherCategory": [false, 0],
+      "tag": [false, 0],
+      "other": [false, 0],
+      "singularNoCollection": [false, 0]
+    },
+    "empty": {
+      "front": [false, 0],
+      "frontPage": [false, 0],
+      "notFound": [false, 0],
+      "search": [false, 0],
+      "page": [false, 0],
+      "pageEntry": [false, 0],
+      "post": [false, 0],
+      "otherPost": [false, 0],
+      "postsArchive": [false, 0],
+      "category": [false, 0],
+      "otherCategory": [false, 0],
+      "tag": [false, 0],
+      "other": [false, 0],
+      "singularNoCollection": [false, 0]
+    }
+  },
+  "locations": {
+    "front": {
+      "content": null,
+      "applies": ["header", "footer", "popup"]
+    },
+    "frontPage": {
+      "content": null,
+      "applies": ["header", "footer", "popup"]
+    },
+    "notFound": {
+      "content": "error_404",
+      "applies": ["header", "footer", "error_404", "popup"]
+    },
+    "search": {
+      "content": "search_results",
+      "applies": ["header", "footer", "search_results", "popup"]
+    },
+    "page": {
+      "content": "single_page",
+      "applies": ["header", "footer", "single_page", "popup"]
+    },
+    "pageEntry": {
+      "content": "single_page",
+      "applies": ["header", "footer", "single_page", "popup"]
+    },
+    "post": {
+      "content": "single_post",
+      "applies": ["header", "footer", "single_post", "popup"]
+    },
+    "otherPost": {
+      "content": "single_post",
+      "applies": ["header", "footer", "single_post", "popup"]
+    },
+    "postsArchive": {
+      "content": "archive",
+      "applies": ["header", "footer", "archive", "popup"]
+    },
+    "category": {
+      "content": "archive",
+      "applies": ["header", "footer", "archive", "popup"]
+    },
+    "otherCategory": {
+      "content": "archive",
+      "applies": ["header", "footer", "archive", "popup"]
+    },
+    "tag": {
+      "content": "archive",
+      "applies": ["header", "footer", "archive", "popup"]
+    },
+    "other": {
+      "content": null,
+      "applies": ["header", "footer", "popup"]
+    },
+    "singularNoCollection": {
+      "content": null,
+      "applies": ["header", "footer", "popup"]
+    }
+  },
+  "defaults": {
+    "header": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-entire-site",
+          "op": "include",
+          "group": "general",
+          "name": "entire_site",
+          "args": {}
+        }
+      ]
+    },
+    "footer": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-entire-site",
+          "op": "include",
+          "group": "general",
+          "name": "entire_site",
+          "args": {}
+        }
+      ]
+    },
+    "error_404": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-404",
+          "op": "include",
+          "group": "singular",
+          "name": "not_found",
+          "args": {}
+        }
+      ]
+    },
+    "search_results": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-search",
+          "op": "include",
+          "group": "archive",
+          "name": "search",
+          "args": {}
+        }
+      ]
+    },
+    "single_page": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-pages",
+          "op": "include",
+          "group": "singular",
+          "name": "collection",
+          "args": {
+            "collection": "pages"
+          }
+        }
+      ]
+    },
+    "single_post": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-posts",
+          "op": "include",
+          "group": "singular",
+          "name": "collection",
+          "args": {
+            "collection": "posts"
+          }
+        }
+      ]
+    },
+    "archive": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-archive-all",
+          "op": "include",
+          "group": "archive",
+          "name": "all",
+          "args": {}
+        }
+      ]
+    },
+    "loop_item": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-entire-site",
+          "op": "include",
+          "group": "general",
+          "name": "entire_site",
+          "args": {}
+        }
+      ]
+    },
+    "popup": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-entire-site",
+          "op": "include",
+          "group": "general",
+          "name": "entire_site",
+          "args": {}
+        }
+      ]
+    }
+  },
+  "winners": {
+    "front": {
+      "header": {
+        "winner": "site-new",
+        "all": ["site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-c",
+        "all": ["popup-b", "popup-c", "popup-a"]
+      }
+    },
+    "frontPage": {
+      "header": {
+        "winner": "site-new",
+        "all": ["site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-c",
+        "all": ["popup-b", "popup-c", "popup-a"]
+      }
+    },
+    "notFound": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-a",
+        "all": ["popup-a"]
+      }
+    },
+    "search": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-a",
+        "all": ["popup-a"]
+      }
+    },
+    "page": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": "single-page",
+        "all": ["single-page"]
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-b",
+        "all": ["popup-b", "popup-a"]
+      }
+    },
+    "pageEntry": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": "single-page",
+        "all": ["single-page"]
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-b",
+        "all": ["popup-b", "popup-a"]
+      }
+    },
+    "post": {
+      "header": {
+        "winner": "entry",
+        "all": ["no-front", "site-new", "site-same", "site-old", "posts", "entry"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": "single-post",
+        "all": ["single-post"]
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-b",
+        "all": ["popup-b", "popup-a"]
+      }
+    },
+    "otherPost": {
+      "header": {
+        "winner": "posts",
+        "all": ["no-front", "site-new", "site-same", "site-old", "posts"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": "single-post",
+        "all": ["single-post"]
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-b",
+        "all": ["popup-b", "popup-a"]
+      }
+    },
+    "postsArchive": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-a",
+        "all": ["popup-a"]
+      }
+    },
+    "category": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-a",
+        "all": ["popup-a"]
+      }
+    },
+    "otherCategory": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-a",
+        "all": ["popup-a"]
+      }
+    },
+    "tag": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-a",
+        "all": ["popup-a"]
+      }
+    },
+    "other": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-a",
+        "all": ["popup-a"]
+      }
+    },
+    "singularNoCollection": {
+      "header": {
+        "winner": "no-front",
+        "all": ["no-front", "site-new", "site-same", "site-old"]
+      },
+      "footer": {
+        "winner": null,
+        "all": []
+      },
+      "error_404": {
+        "winner": null,
+        "all": []
+      },
+      "search_results": {
+        "winner": null,
+        "all": []
+      },
+      "single_page": {
+        "winner": null,
+        "all": []
+      },
+      "single_post": {
+        "winner": null,
+        "all": []
+      },
+      "archive": {
+        "winner": null,
+        "all": []
+      },
+      "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "popup": {
+        "winner": "popup-b",
+        "all": ["popup-b", "popup-a"]
+      }
+    }
+  }
+}

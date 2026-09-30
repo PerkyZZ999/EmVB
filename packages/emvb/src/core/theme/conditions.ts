@@ -87,12 +87,9 @@ export function validateConditions(raw: unknown): ConditionsValidation {
 }
 
 function vocabularyIssue(rule: ConditionRule): string | null {
-  const key = `${rule.group}:${rule.name}`;
-  const known = KNOWN_CONDITIONS[key];
-  if (!known) {
-    return `Unknown condition ${rule.group}/${rule.name}.`;
-  }
-  for (const required of known.requiredArgs) {
+  const condition = known(rule);
+  if (!condition) return `Unknown condition ${rule.group}/${rule.name}.`;
+  for (const required of condition.requiredArgs) {
     if (typeof rule.args[required] !== "string" || !rule.args[required]) {
       return `Condition ${rule.group}/${rule.name} requires args.${required}.`;
     }
@@ -100,29 +97,64 @@ function vocabularyIssue(rule: ConditionRule): string | null {
   return null;
 }
 
-type Known = { requiredArgs: readonly string[]; specificity: number };
-
-/**
- * Specificity (higher wins): entry > taxonomy+slug > collection > front/404/search >
- * singular/archive all > entire_site.
- */
-const KNOWN_CONDITIONS: Record<string, Known> = {
-  "general:entire_site": { requiredArgs: [], specificity: 1 },
-  "singular:all": { requiredArgs: [], specificity: 10 },
-  "singular:front": { requiredArgs: [], specificity: 20 },
-  "singular:not_found": { requiredArgs: [], specificity: 20 },
-  "singular:collection": { requiredArgs: ["collection"], specificity: 30 },
-  "singular:entry": { requiredArgs: ["collection", "id"], specificity: 50 },
-  "archive:all": { requiredArgs: [], specificity: 10 },
-  "archive:collection": { requiredArgs: ["collection"], specificity: 30 },
-  "archive:taxonomy": { requiredArgs: ["taxonomy"], specificity: 35 },
-  "archive:search": { requiredArgs: [], specificity: 20 },
+type Args = ConditionRule["args"];
+type Known = {
+  requiredArgs: readonly string[];
+  specificity: number;
+  matches: (ctx: ThemeRequestContext, args: Args) => boolean;
 };
 
+/** True when `args[key]` is a string equal to `actual`. */
+const argIs = (args: Args, key: string, actual: string | undefined) =>
+  typeof args[key] === "string" && actual === args[key];
+
+function taxonomyMatches(ctx: ThemeRequestContext, args: Args): boolean {
+  if (ctx.kind !== "archive" || !ctx.taxonomy) return false;
+  if (args["taxonomy"] !== ctx.taxonomy.type) return false;
+  const slug = args["slug"];
+  if (typeof slug === "string" && slug) return ctx.taxonomy.slug === slug;
+  return true;
+}
+
+/**
+ * Each condition's required args, specificity and matcher. Specificity (higher wins):
+ * entry > taxonomy+slug > collection > front/404/search > singular/archive all > entire_site.
+ */
+const KNOWN_CONDITIONS: Record<string, Known> = {
+  "general:entire_site": { requiredArgs: [], specificity: 1, matches: () => true },
+  "singular:all": { requiredArgs: [], specificity: 10, matches: (ctx) => ctx.kind === "singular" },
+  "singular:front": { requiredArgs: [], specificity: 20, matches: (ctx) => ctx.isFront },
+  "singular:not_found": { requiredArgs: [], specificity: 20, matches: (ctx) => ctx.is404 },
+  "singular:collection": {
+    requiredArgs: ["collection"],
+    specificity: 30,
+    matches: (ctx, args) => ctx.kind === "singular" && argIs(args, "collection", ctx.collection),
+  },
+  "singular:entry": {
+    requiredArgs: ["collection", "id"],
+    specificity: 50,
+    matches: (ctx, args) =>
+      ctx.kind === "singular" &&
+      argIs(args, "collection", ctx.collection) &&
+      argIs(args, "id", ctx.entryId),
+  },
+  "archive:all": { requiredArgs: [], specificity: 10, matches: (ctx) => ctx.kind === "archive" },
+  "archive:collection": {
+    requiredArgs: ["collection"],
+    specificity: 30,
+    matches: (ctx, args) => ctx.kind === "archive" && argIs(args, "collection", ctx.collection),
+  },
+  "archive:taxonomy": { requiredArgs: ["taxonomy"], specificity: 35, matches: taxonomyMatches },
+  "archive:search": { requiredArgs: [], specificity: 20, matches: (ctx) => ctx.isSearch },
+};
+
+const known = (rule: ConditionRule): Known | undefined =>
+  KNOWN_CONDITIONS[`${rule.group}:${rule.name}`];
+
 export function conditionSpecificity(rule: ConditionRule): number {
-  const known = KNOWN_CONDITIONS[`${rule.group}:${rule.name}`];
-  if (!known) return 0;
-  let score = known.specificity;
+  const condition = known(rule);
+  if (!condition) return 0;
+  let score = condition.specificity;
   // taxonomy with a concrete slug is more specific than taxonomy type alone
   if (
     rule.group === "archive" &&
@@ -161,50 +193,7 @@ export function matchesConditions(doc: ConditionsDoc, ctx: ThemeRequestContext):
 }
 
 function ruleMatches(rule: ConditionRule, ctx: ThemeRequestContext): boolean {
-  if (!KNOWN_CONDITIONS[`${rule.group}:${rule.name}`]) return false;
-  switch (`${rule.group}:${rule.name}`) {
-    case "general:entire_site":
-      return true;
-    case "singular:all":
-      return ctx.kind === "singular";
-    case "singular:front":
-      return ctx.isFront;
-    case "singular:not_found":
-      return ctx.is404;
-    case "singular:collection":
-      return (
-        ctx.kind === "singular" &&
-        typeof rule.args["collection"] === "string" &&
-        ctx.collection === rule.args["collection"]
-      );
-    case "singular:entry":
-      return (
-        ctx.kind === "singular" &&
-        typeof rule.args["collection"] === "string" &&
-        typeof rule.args["id"] === "string" &&
-        ctx.collection === rule.args["collection"] &&
-        ctx.entryId === rule.args["id"]
-      );
-    case "archive:all":
-      return ctx.kind === "archive";
-    case "archive:collection":
-      return (
-        ctx.kind === "archive" &&
-        typeof rule.args["collection"] === "string" &&
-        ctx.collection === rule.args["collection"]
-      );
-    case "archive:taxonomy": {
-      if (ctx.kind !== "archive" || !ctx.taxonomy) return false;
-      if (rule.args["taxonomy"] !== ctx.taxonomy.type) return false;
-      const slug = rule.args["slug"];
-      if (typeof slug === "string" && slug) return ctx.taxonomy.slug === slug;
-      return true;
-    }
-    case "archive:search":
-      return ctx.isSearch;
-    default:
-      return false;
-  }
+  return known(rule)?.matches(ctx, rule.args) ?? false;
 }
 
 /**
@@ -240,83 +229,32 @@ export function themePartLocationApplies(
   }
 }
 
+/** The single Include rule a new content part starts with; other types start on Entire Site. */
+const DEFAULT_RULES: Partial<Record<ThemePartType, Omit<ConditionRule, "op">>> = {
+  error_404: { id: "default-404", group: "singular", name: "not_found", args: {} },
+  search_results: { id: "default-search", group: "archive", name: "search", args: {} },
+  single_page: {
+    id: "default-pages",
+    group: "singular",
+    name: "collection",
+    args: { collection: "pages" },
+  },
+  single_post: {
+    id: "default-posts",
+    group: "singular",
+    name: "collection",
+    args: { collection: "posts" },
+  },
+  // Posts index + category/tag (location gate already excludes search).
+  archive: { id: "default-archive-all", group: "archive", name: "all", args: {} },
+};
+
 /** Default Include rule(s) when creating a part of this type. */
 export function defaultConditionsFor(partType: ThemePartType): ConditionsDoc {
-  switch (partType) {
-    case "error_404":
-      return {
-        schemaVersion: CONDITIONS_SCHEMA_VERSION,
-        rules: [
-          {
-            id: "default-404",
-            op: "include",
-            group: "singular",
-            name: "not_found",
-            args: {},
-          },
-        ],
-      };
-    case "search_results":
-      return {
-        schemaVersion: CONDITIONS_SCHEMA_VERSION,
-        rules: [
-          {
-            id: "default-search",
-            op: "include",
-            group: "archive",
-            name: "search",
-            args: {},
-          },
-        ],
-      };
-    case "single_page":
-      return {
-        schemaVersion: CONDITIONS_SCHEMA_VERSION,
-        rules: [
-          {
-            id: "default-pages",
-            op: "include",
-            group: "singular",
-            name: "collection",
-            args: { collection: "pages" },
-          },
-        ],
-      };
-    case "single_post":
-      return {
-        schemaVersion: CONDITIONS_SCHEMA_VERSION,
-        rules: [
-          {
-            id: "default-posts",
-            op: "include",
-            group: "singular",
-            name: "collection",
-            args: { collection: "posts" },
-          },
-        ],
-      };
-    case "archive":
-      // Posts index + category/tag (location gate already excludes search).
-      return {
-        schemaVersion: CONDITIONS_SCHEMA_VERSION,
-        rules: [
-          {
-            id: "default-archive-all",
-            op: "include",
-            group: "archive",
-            name: "all",
-            args: {},
-          },
-        ],
-      };
-    case "loop_item":
-      // Not location-gated; conditions unused for public selection.
-      return defaultConditions();
-    case "header":
-    case "footer":
-    case "popup":
-      return defaultConditions();
-  }
+  const rule = DEFAULT_RULES[partType];
+  if (!rule) return defaultConditions();
+  const { id, ...rest } = rule;
+  return { schemaVersion: CONDITIONS_SCHEMA_VERSION, rules: [{ id, op: "include", ...rest }] };
 }
 
 /**
@@ -345,6 +283,19 @@ export type ThemePartCandidate = {
   updatedAt: string;
 };
 
+/** Candidates of one type whose location applies and whose conditions match. */
+const matching = (
+  candidates: readonly ThemePartCandidate[],
+  partType: ThemePartType,
+  ctx: ThemeRequestContext,
+) =>
+  candidates.filter(
+    (candidate) =>
+      candidate.partType === partType &&
+      themePartLocationApplies(candidate.partType, ctx) &&
+      matchesConditions(candidate.conditions, ctx),
+  );
+
 /**
  * Among matching candidates of one type, pick the highest specificity; ties break by
  * `updatedAt` descending (ISO timestamps). Content types are also gated by location
@@ -357,15 +308,11 @@ export function pickThemePartWinner(
 ): ThemePartCandidate | null {
   let winner: ThemePartCandidate | null = null;
   let bestScore = -1;
-  for (const candidate of candidates) {
-    if (candidate.partType !== partType) continue;
-    if (!themePartLocationApplies(candidate.partType, ctx)) continue;
-    if (!matchesConditions(candidate.conditions, ctx)) continue;
+  for (const candidate of matching(candidates, partType, ctx)) {
     const score = conditionsSpecificity(candidate.conditions, ctx);
     if (
       score > bestScore ||
-      (score === bestScore && winner !== null && candidate.updatedAt > winner.updatedAt) ||
-      (score === bestScore && winner === null)
+      (score === bestScore && winner !== null && candidate.updatedAt > winner.updatedAt)
     ) {
       bestScore = score;
       winner = candidate;
@@ -383,13 +330,7 @@ export function listMatchingThemeParts(
   partType: ThemePartType,
   ctx: ThemeRequestContext,
 ): ThemePartCandidate[] {
-  const matched: ThemePartCandidate[] = [];
-  for (const candidate of candidates) {
-    if (candidate.partType !== partType) continue;
-    if (!themePartLocationApplies(candidate.partType, ctx)) continue;
-    if (!matchesConditions(candidate.conditions, ctx)) continue;
-    matched.push(candidate);
-  }
-  matched.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : a.updatedAt > b.updatedAt ? -1 : 0));
-  return matched;
+  return matching(candidates, partType, ctx).toSorted((a, b) =>
+    a.updatedAt < b.updatedAt ? 1 : a.updatedAt > b.updatedAt ? -1 : 0,
+  );
 }

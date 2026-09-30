@@ -2462,8 +2462,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/theme/conditions.ts",
-          "search": "\"singular:entry\": { requiredArgs: [\"collection\", \"id\"], specificity: 50 },",
-          "replace": "\"singular:entry\": { requiredArgs: [\"collection\", \"id\"], specificity: 1 },"
+          "search": "    requiredArgs: [\"collection\", \"id\"],\n    specificity: 50,",
+          "replace": "    requiredArgs: [\"collection\", \"id\"],\n    specificity: 1,"
         }
       ],
       "command": [
@@ -3558,6 +3558,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/forms-api.test.ts"],
       "expect": "\\(fail\\).*each list and definition answer"
+    },
+    {
+      "id": "W-086/entry-ignores-id",
+      "requirement": "R-061",
+      "description": "an entry rule matches every entry of its collection",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/conditions.ts",
+          "search": "argIs(args, \"id\", ctx.entryId)",
+          "replace": "true"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/conditions-golden.test.ts"],
+      "expect": "\\(fail\\).*conditions match, score"
+    },
+    {
+      "id": "W-086/taxonomy-slug-ignored",
+      "requirement": "R-061",
+      "description": "a taxonomy rule with a slug matches every term",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/conditions.ts",
+          "search": "  if (typeof slug === \"string\" && slug) return ctx.taxonomy.slug === slug;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/conditions-golden.test.ts"],
+      "expect": "\\(fail\\).*conditions match, score"
+    },
+    {
+      "id": "W-086/tie-keeps-oldest",
+      "requirement": "R-061",
+      "description": "equal-specificity ties go to the oldest part",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/conditions.ts",
+          "search": "candidate.updatedAt > winner.updatedAt",
+          "replace": "candidate.updatedAt < winner.updatedAt"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/conditions-golden.test.ts"],
+      "expect": "\\(fail\\).*conditions match, score"
+    },
+    {
+      "id": "W-086/archive-default-wrong-rule",
+      "requirement": "R-061",
+      "description": "a new archive part starts on the search condition",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/conditions.ts",
+          "search": "archive: { id: \"default-archive-all\", group: \"archive\", name: \"all\", args: {} },",
+          "replace": "archive: { id: \"default-archive-all\", group: \"archive\", name: \"search\", args: {} },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/conditions-golden.test.ts"],
+      "expect": "\\(fail\\).*conditions match, score"
     }
   ]
 }
