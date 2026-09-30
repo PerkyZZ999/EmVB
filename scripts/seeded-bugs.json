@@ -6751,8 +6751,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "  return SECTION_KEYS[section].filter((key) => offered.includes(key) || style?.[key] !== undefined);",
-          "replace": "  return SECTION_KEYS[section].filter((key) => offered.includes(key));"
+          "search": "  return SECTION_KEYS[section].filter((key) => offered.has(key) || style?.[key] !== undefined);",
+          "replace": "  return SECTION_KEYS[section].filter((key) => offered.has(key));"
         }
       ],
       "command": [
@@ -6811,8 +6811,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "  image: { sections: [\"spacing\", \"size\", \"border\", \"advanced\"], defaultOpen: \"size\" },",
-          "replace": "  image: { sections: [\"layout\", \"spacing\", \"size\", \"border\", \"advanced\"], defaultOpen: \"layout\" },"
+          "search": "    image: { sections: [\"spacing\", \"size\", \"position\", \"border\", \"advanced\"], defaultOpen: \"size\" },",
+          "replace": "    image: {\n      sections: [\"layout\", \"spacing\", \"size\", \"position\", \"border\", \"advanced\"],\n      defaultOpen: \"layout\",\n    },"
         }
       ],
       "command": [
@@ -6871,8 +6871,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "            const keys = keysFor(node.type, id, style);",
-          "replace": "            const keys = keysFor(node.type, id);"
+          "search": "            const keys = keysFor(node.type, id, style, position);",
+          "replace": "            const keys = keysFor(node.type, id, undefined, position);"
         }
       ],
       "command": [
@@ -6883,6 +6883,426 @@
         "the panel shows a stored value"
       ],
       "expect": "\\(fail\\).*the panel shows a stored value"
+    },
+    {
+      "id": "W-088/offset-range-open",
+      "requirement": "W-088",
+      "description": "the CSS mapper accepts any offset size",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (typeof n !== \"number\" || !Number.isFinite(n) || n < -10_000 || n > 10_000) return undefined;\n  if (typeof unit !== \"string\" || !UNITS.has(unit)) return undefined;\n  return `${n}${unit}`;\n}\n\nconst cssZIndex",
+          "replace": "  if (typeof n !== \"number\" || !Number.isFinite(n)) return undefined;\n  if (typeof unit !== \"string\" || !UNITS.has(unit)) return undefined;\n  return `${n}${unit}`;\n}\n\nconst cssZIndex"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Position: top refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Position: top refuses"
+    },
+    {
+      "id": "W-088/offset-negative-refused",
+      "requirement": "W-088",
+      "description": "offsets refuse negatives like other lengths",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  top: { css: \"top\", toValue: cssOffset },",
+          "replace": "  top: { css: \"top\", toValue: cssLengthOrAuto },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Position: top"
+      ],
+      "expect": "\\(fail\\).*W-088 Position: top"
+    },
+    {
+      "id": "W-088/offset-schema-any-length",
+      "requirement": "W-088",
+      "description": "every length may be negative in the schema",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "export const Length = z.strictObject({\n  value: z.number().finite().min(0).max(10_000),",
+          "replace": "export const Length = z.strictObject({\n  value: z.number().finite().min(-10_000).max(10_000),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "only offsets may be negative"
+      ],
+      "expect": "\\(fail\\).*only offsets may be negative"
+    },
+    {
+      "id": "W-088/z-index-fraction",
+      "requirement": "W-088",
+      "description": "z-index accepts fractions",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  Number.isInteger(value) && (value as number) >= -9999",
+          "replace": "  typeof value === \"number\" && Number.isFinite(value) && (value as number) >= -9999"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Position: zIndex refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Position: zIndex refuses"
+    },
+    {
+      "id": "W-088/z-index-schema-fraction",
+      "requirement": "W-088",
+      "description": "the schema accepts fractional z-index",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "  zIndex: z.number().int().min(-9999).max(9999).optional(),",
+          "replace": "  zIndex: z.number().min(-9999).max(9999).optional(),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Position: zIndex refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Position: zIndex refuses"
+    },
+    {
+      "id": "W-088/position-any-keyword",
+      "requirement": "W-088",
+      "description": "the CSS mapper passes any position text",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  position: { css: \"position\", toValue: keyword(POSITION) },",
+          "replace": "  position: { css: \"position\", toValue: (v) => (typeof v === \"string\" ? v : undefined) },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Position: position refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Position: position refuses"
+    },
+    {
+      "id": "W-088/offset-var-dropped",
+      "requirement": "W-088",
+      "description": "an offset bound to a spacing variable is dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (typeof value !== \"object\" || value === null || \"var\" in value) return cssLength(value);",
+          "replace": "  if (typeof value !== \"object\" || value === null || \"var\" in value) return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/style-sections.test.ts",
+        "-t",
+        "position: local styles"
+      ],
+      "expect": "\\(fail\\).*position: local styles"
+    },
+    {
+      "id": "W-088/offsets-always-shown",
+      "requirement": "W-088",
+      "description": "offsets show while the element is static",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "    ).filter((key) => !OFFSETS.has(key) || offsetsApply(position)),",
+          "replace": "    ),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "while static, offsets are hidden"
+      ],
+      "expect": "\\(fail\\).*while static, offsets are hidden"
+    },
+    {
+      "id": "W-088/static-counts-as-positioned",
+      "requirement": "W-088",
+      "description": "static counts as positioned",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  position !== undefined && position !== \"static\";",
+          "replace": "  position !== undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "a local static position overrides"
+      ],
+      "expect": "\\(fail\\).*a local static position overrides"
+    },
+    {
+      "id": "W-088/class-position-ignored",
+      "requirement": "W-088",
+      "description": "a position from a class doesn't show the offsets",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "        (node.classes ?? []).map((id) => design.classes?.find((c) => c.id === id)?.style),",
+          "replace": "        [],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "a position from a class on the element"
+      ],
+      "expect": "\\(fail\\).*a position from a class on the element"
+    },
+    {
+      "id": "W-088/class-edit-uses-local",
+      "requirement": "W-088",
+      "description": "editing a class looks at the element's position",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  cls\n    ? cls.style?.position\n",
+          "replace": "  cls\n    ? node.style?.position\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "editing a class uses the class's own position"
+      ],
+      "expect": "\\(fail\\).*editing a class uses the class's own position"
+    },
+    {
+      "id": "W-088/offsets-help-missing",
+      "requirement": "W-088",
+      "description": "no helper line while offsets are hidden",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "                {id === \"position\" && !offsetsApply(position) && (",
+          "replace": "                {false && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "while static, offsets are hidden"
+      ],
+      "expect": "\\(fail\\).*while static, offsets are hidden"
+    },
+    {
+      "id": "W-088/offset-units-no-auto",
+      "requirement": "W-088",
+      "description": "offsets don't offer auto",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "  top: BOX_AUTO,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "offsets take negative numbers"
+      ],
+      "expect": "\\(fail\\).*offsets take negative numbers"
+    },
+    {
+      "id": "W-088/offset-not-negative-ui",
+      "requirement": "W-088",
+      "description": "the offset field refuses negatives",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "const NEGATIVE = new Set<StyleKey>([\"top\", \"right\", \"bottom\", \"left\"]);",
+          "replace": "const NEGATIVE = new Set<StyleKey>([]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "offsets take negative numbers"
+      ],
+      "expect": "\\(fail\\).*offsets take negative numbers"
+    },
+    {
+      "id": "W-088/offset-range-message",
+      "requirement": "W-088",
+      "description": "an offset past the range gets the positive-only message",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "      message: NEGATIVE.has(key)\n",
+          "replace": "      message: false\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "an offset past -10000"
+      ],
+      "expect": "\\(fail\\).*an offset past -10000"
+    },
+    {
+      "id": "W-088/offset-no-variable",
+      "requirement": "W-088",
+      "description": "offsets have no variable button",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/VariableBinding.tsx",
+          "search": "  \"marginLeft\",\n  \"top\",\n",
+          "replace": "  \"marginLeft\",\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "offsets take negative numbers"
+      ],
+      "expect": "\\(fail\\).*offsets take negative numbers"
+    },
+    {
+      "id": "W-088/z-index-integer-ignored",
+      "requirement": "W-088",
+      "description": "z-index takes fractions in the panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "  if (spec.integer && !Number.isInteger(n)) {",
+          "replace": "  if (false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Z-index saves whole numbers"
+      ],
+      "expect": "\\(fail\\).*Z-index saves whole numbers"
+    },
+    {
+      "id": "W-088/z-index-range-ignored",
+      "requirement": "W-088",
+      "description": "z-index range isn't checked in the panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "  if (n < spec.min || n > spec.max) {",
+          "replace": "  if (false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Z-index saves whole numbers"
+      ],
+      "expect": "\\(fail\\).*Z-index saves whole numbers"
+    },
+    {
+      "id": "W-088/number-unchanged-resent",
+      "requirement": "W-088",
+      "description": "an unchanged number is saved again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "    if (parsed.value !== value) onCommit(parsed.value);",
+          "replace": "    onCommit(parsed.value);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Z-index sends nothing when unchanged"
+      ],
+      "expect": "\\(fail\\).*Z-index sends nothing when unchanged"
+    },
+    {
+      "id": "W-088/number-enter-ignored",
+      "requirement": "W-088",
+      "description": "Enter doesn't commit a number",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "          if (event.key === \"Enter\") commit();\n        }}\n      />\n      {reset}",
+          "replace": "          if (event.key === \"Escape\") commit();\n        }}\n      />\n      {reset}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Z-index saves whole numbers"
+      ],
+      "expect": "\\(fail\\).*Z-index saves whole numbers"
+    },
+    {
+      "id": "W-088/z-index-no-row",
+      "requirement": "W-088",
+      "description": "z-index has no control",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "  if (styleKey === \"zIndex\") {",
+          "replace": "  if (styleKey === (\"none\" as StyleKey)) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Z-index saves whole numbers"
+      ],
+      "expect": "\\(fail\\).*Z-index saves whole numbers"
     }
   ]
 }

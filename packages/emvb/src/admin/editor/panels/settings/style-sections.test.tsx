@@ -136,17 +136,23 @@ describe("Size section (W-088)", () => {
       "layout",
       "spacing",
       "size",
+      "position",
       "background",
       "border",
       "advanced",
     ]);
-    expect(STYLE_UI.heading?.sections.slice(0, 3)).toEqual(["spacing", "size", "typography"]);
+    expect(STYLE_UI.heading?.sections.slice(0, 4)).toEqual([
+      "spacing",
+      "size",
+      "position",
+      "typography",
+    ]);
   });
 
   test("Image opens on Size and shows object fit there", async () => {
     await panel(image);
     await styleTab();
-    expect(sectionIds()).toEqual(["spacing", "size", "border", "advanced"]);
+    expect(sectionIds()).toEqual(["spacing", "size", "position", "border", "advanced"]);
     expect(
       document.querySelector('[data-emvb-section="size"]')?.getAttribute("aria-expanded"),
     ).toBe("true");
@@ -165,6 +171,7 @@ describe("Size section (W-088)", () => {
       "layout",
       "spacing",
       "size",
+      "position",
       "typography",
       "background",
       "border",
@@ -204,3 +211,142 @@ describe("Size section (W-088)", () => {
     expect(document.querySelector(".emvb-unit-btn")?.getAttribute("data-emvb-unit")).toBe("vh");
   });
 });
+
+const openSection = async (id: string) => {
+  const header = document.querySelector(`[data-emvb-section="${id}"]`) as HTMLElement;
+  if (header.getAttribute("aria-expanded") !== "true") await act(async () => header.click());
+};
+
+const styleRows = (section: string) =>
+  [
+    ...(document
+      .querySelector(`[data-emvb-section="${section}"]`)
+      ?.parentElement?.querySelectorAll("[data-emvb-style]") ?? []),
+  ].map((el) => el.getAttribute("data-emvb-style"));
+
+const offsetsHelp = () => document.querySelector("[data-emvb-offsets-help]")?.textContent ?? null;
+
+const box = (style?: StyleProps, classes?: string[]): LayoutNode => ({
+  id: "boxx0001",
+  type: "container",
+  props: {},
+  children: [],
+  ...(style ? { style } : {}),
+  ...(classes ? { classes } : {}),
+});
+
+const withClass = (style: StyleProps): DesignSystem => ({
+  ...emptyDesign(),
+  classes: [{ id: "pin", name: "Pin", style }],
+});
+
+describe("Position section (W-088)", () => {
+  test("while static, offsets are hidden and a helper line explains why", async () => {
+    await panel(box());
+    await styleTab();
+    await openSection("position");
+    expect(styleRows("position")).toEqual(["position", "zIndex"]);
+    expect(offsetsHelp()).toBe(
+      "Offsets apply once Position is Relative, Absolute, Fixed or Sticky.",
+    );
+  });
+
+  test("a local position other than static shows the four offsets", async () => {
+    await panel(box({ position: "relative" }));
+    await styleTab();
+    await openSection("position");
+    expect(styleRows("position")).toEqual(["position", "top", "right", "bottom", "left", "zIndex"]);
+    expect(offsetsHelp()).toBeNull();
+  });
+
+  test("a position from a class on the element also shows the offsets", async () => {
+    await panel(box(undefined, ["pin"]), withClass({ position: "sticky" }));
+    await styleTab();
+    await openSection("position");
+    expect(styleRows("position")).toContain("top");
+  });
+
+  test("a local static position overrides the class's", async () => {
+    await panel(box({ position: "static" }, ["pin"]), withClass({ position: "absolute" }));
+    await styleTab();
+    await openSection("position");
+    expect(styleRows("position")).not.toContain("top");
+  });
+
+  test("editing a class uses the class's own position", async () => {
+    await panel(box({ position: "relative" }, ["pin"]), withClass({}));
+    await styleTab();
+    const chip = document.querySelector(
+      '[data-emvb-class-id="pin"] .emvb-chip-main',
+    ) as HTMLButtonElement;
+    await act(async () => chip.click());
+    await openSection("position");
+    expect(styleRows("position")).toEqual(["position", "zIndex"]);
+  });
+
+  test("a set offset stays visible while static", async () => {
+    await panel(box({ top: { value: 4, unit: "px" } }));
+    await styleTab();
+    await openSection("position");
+    expect(styleRows("position")).toEqual(["position", "top", "zIndex"]);
+  });
+
+  test("offsets take negative numbers, auto and a spacing variable", async () => {
+    await row("top");
+    const field = document.querySelector<HTMLInputElement>(".emvb-length input");
+    await commitText(field, "-12");
+    await commitText(field, "auto");
+    expect(patches).toEqual([{ top: { value: -12, unit: "px" } }, { top: "auto" }]);
+    expect(document.querySelector(".emvb-var-btn")?.getAttribute("aria-label")).toContain("Top");
+  });
+
+  test("an offset past -10000 is refused with its range", async () => {
+    await row("left");
+    await commitText(document.querySelector<HTMLInputElement>(".emvb-length input"), "-10001");
+    expect(patches).toEqual([]);
+    expect(document.body.textContent).toContain("Left can be from -10000 to 10000.");
+  });
+
+  test("Z-index saves whole numbers and refuses the rest", async () => {
+    await row("zIndex");
+    const field = () =>
+      document.querySelector<HTMLInputElement>('[data-emvb-style="zIndex"] input');
+    await commitText(field(), "1.5");
+    expect(document.body.textContent).toContain("Z-index must be a whole number.");
+    await commitText(field(), "10000");
+    expect(document.body.textContent).toContain("Z-index can be from -9999 to 9999.");
+    expect(field()?.getAttribute("aria-invalid")).toBe("true");
+    await commitText(field(), "-5", "enter");
+    expect(patches).toEqual([{ zIndex: -5 }]);
+  });
+
+  test("Z-index sends nothing when unchanged and clears when emptied", async () => {
+    await row("zIndex", { zIndex: 3 });
+    const field = () =>
+      document.querySelector<HTMLInputElement>('[data-emvb-style="zIndex"] input');
+    expect(field()?.value).toBe("3");
+    await commitText(field(), "3");
+    await commitText(field(), "");
+    expect(patches).toEqual([{ zIndex: undefined }]);
+  });
+});
+
+async function commitText(
+  field: HTMLInputElement | null,
+  text: string,
+  finish: "blur" | "enter" = "blur",
+) {
+  await act(async () => {
+    field?.focus();
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    setter?.call(field, text);
+    field?.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await act(async () => {
+    if (finish === "enter") {
+      field?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    } else {
+      field?.blur();
+    }
+  });
+}

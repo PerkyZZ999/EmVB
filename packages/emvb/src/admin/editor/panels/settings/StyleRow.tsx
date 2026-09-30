@@ -5,6 +5,7 @@ import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 import { LengthRow } from "./LengthRow.tsx";
+import { NumberRow, type NumberSpec } from "./NumberRow.tsx";
 import { boundRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
 
 const LENGTH_KEYS = new Set<StyleKey>([
@@ -23,12 +24,18 @@ const LENGTH_KEYS = new Set<StyleKey>([
   "marginRight",
   "marginBottom",
   "marginLeft",
+  "top",
+  "right",
+  "bottom",
+  "left",
   "fontSize",
   "lineHeight",
   "letterSpacing",
   "borderWidth",
   "borderRadius",
 ]);
+
+const Z_INDEX: NumberSpec = { min: -9999, max: 9999, integer: true, example: "10" };
 
 const COLOR_KEYS = new Set<StyleKey>(["color", "backgroundColor", "borderColor"]);
 
@@ -70,6 +77,13 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "uppercase", label: "Uppercase" },
     { value: "lowercase", label: "Lowercase" },
     { value: "capitalize", label: "Capitalize" },
+  ],
+  position: [
+    { value: "static", label: "Static" },
+    { value: "relative", label: "Relative" },
+    { value: "absolute", label: "Absolute" },
+    { value: "fixed", label: "Fixed" },
+    { value: "sticky", label: "Sticky" },
   ],
   overflow: [
     { value: "visible", label: "Visible" },
@@ -244,6 +258,20 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "zIndex") {
+    return (
+      <NumberRow
+        rowKey={styleKey}
+        label={label}
+        value={typeof value === "number" ? value : undefined}
+        spec={Z_INDEX}
+        set={set}
+        onCommit={(next) => onPatch({ zIndex: next })}
+        reset={reset}
+      />
+    );
+  }
+
   if (LENGTH_KEYS.has(styleKey)) {
     return (
       <LengthRow
@@ -265,5 +293,6 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   ...LENGTH_KEYS,
   ...COLOR_KEYS,
   "fontFamily",
+  "zIndex",
   ...(Object.keys(SELECT_OPTIONS) as StyleKey[]),
 ];

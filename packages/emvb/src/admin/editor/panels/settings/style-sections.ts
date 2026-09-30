@@ -4,6 +4,7 @@ export type StyleSectionId =
   | "layout"
   | "spacing"
   | "size"
+  | "position"
   | "typography"
   | "background"
   | "border"
@@ -16,6 +17,7 @@ const SECTION_ORDER: StyleSectionId[] = [
   "layout",
   "spacing",
   "size",
+  "position",
   "typography",
   "background",
   "border",
@@ -25,6 +27,7 @@ const SECTION_ORDER: StyleSectionId[] = [
 const TEXT_SECTIONS: StyleSectionId[] = [
   "spacing",
   "size",
+  "position",
   "typography",
   "background",
   "border",
@@ -35,12 +38,12 @@ const TEXT_SECTIONS: StyleSectionId[] = [
 export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen: StyleSectionId }> =
   {
     container: {
-      sections: ["layout", "spacing", "size", "background", "border", "advanced"],
+      sections: ["layout", "spacing", "size", "position", "background", "border", "advanced"],
       defaultOpen: "layout",
     },
     spacer: { sections: ["layout", "advanced"], defaultOpen: "layout" },
     divider: {
-      sections: ["spacing", "size", "border", "advanced"],
+      sections: ["spacing", "size", "position", "border", "advanced"],
       defaultOpen: "border",
     },
     heading: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
@@ -49,22 +52,25 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
     link: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     list: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     button: { sections: TEXT_SECTIONS, defaultOpen: "background" },
-    image: { sections: ["spacing", "size", "border", "advanced"], defaultOpen: "size" },
-    icon: { sections: ["spacing", "size", "typography", "advanced"], defaultOpen: "typography" },
-    video: { sections: ["spacing", "size", "border", "advanced"], defaultOpen: "size" },
+    image: { sections: ["spacing", "size", "position", "border", "advanced"], defaultOpen: "size" },
+    icon: {
+      sections: ["spacing", "size", "position", "typography", "advanced"],
+      defaultOpen: "typography",
+    },
+    video: { sections: ["spacing", "size", "position", "border", "advanced"], defaultOpen: "size" },
     form: {
-      sections: ["layout", "spacing", "size", "background", "border", "advanced"],
+      sections: ["layout", "spacing", "size", "position", "background", "border", "advanced"],
       defaultOpen: "layout",
     },
     "text-input": { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     textarea: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     select: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     checkbox: {
-      sections: ["layout", "spacing", "size", "typography", "advanced"],
+      sections: ["layout", "spacing", "size", "position", "typography", "advanced"],
       defaultOpen: "typography",
     },
     radio: {
-      sections: ["layout", "spacing", "size", "typography", "advanced"],
+      sections: ["layout", "spacing", "size", "position", "typography", "advanced"],
       defaultOpen: "typography",
     },
     submit: { sections: TEXT_SECTIONS, defaultOpen: "background" },
@@ -80,6 +86,7 @@ export const SECTION_LABELS: Record<StyleSectionId, string> = {
   layout: "Layout",
   spacing: "Spacing",
   size: "Size",
+  position: "Position",
   typography: "Typography",
   background: "Background",
   border: "Border",
@@ -110,6 +117,7 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "aspectRatio",
     "objectFit",
   ],
+  position: ["position", "top", "right", "bottom", "left", "zIndex"],
   typography: [
     "fontFamily",
     "fontSize",
@@ -136,15 +144,30 @@ const TYPE_SECTION_KEYS: Record<string, Partial<Record<StyleSectionId, StyleKey[
   divider: { size: ["width"] },
 };
 
+const OFFSETS = new Set<StyleKey>(["top", "right", "bottom", "left"]);
+
+/** Offsets only do anything once the element is positioned (W-088). */
+export const offsetsApply = (position: StyleProps["position"]) =>
+  position !== undefined && position !== "static";
+
 /**
- * The keys a section shows for a type. With `style`, a key that is set there is always shown,
+ * The keys a section shows for a type. Offsets need `position` (the value in effect) to be
+ * other than static. With `style`, a key that is set there is always shown,
  * even where the type wouldn't offer it, so a stored value can be seen and reset (W-088).
  */
-export function keysFor(type: string, section: StyleSectionId, style?: StyleProps): StyleKey[] {
-  const offered =
-    TYPE_SECTION_KEYS[type]?.[section] ??
-    SECTION_KEYS[section].filter((key) => ONLY_FOR[key]?.includes(type) ?? true);
-  return SECTION_KEYS[section].filter((key) => offered.includes(key) || style?.[key] !== undefined);
+export function keysFor(
+  type: string,
+  section: StyleSectionId,
+  style?: StyleProps,
+  position?: StyleProps["position"],
+): StyleKey[] {
+  const offered = new Set(
+    (
+      TYPE_SECTION_KEYS[type]?.[section] ??
+      SECTION_KEYS[section].filter((key) => ONLY_FOR[key]?.includes(type) ?? true)
+    ).filter((key) => !OFFSETS.has(key) || offsetsApply(position)),
+  );
+  return SECTION_KEYS[section].filter((key) => offered.has(key) || style?.[key] !== undefined);
 }
 
 /** The type's sections, plus any other section holding a set value, in section order. */
@@ -180,6 +203,12 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   marginRight: "Margin right",
   marginBottom: "Margin bottom",
   marginLeft: "Margin left",
+  position: "Position",
+  top: "Top",
+  right: "Right",
+  bottom: "Bottom",
+  left: "Left",
+  zIndex: "Z-index",
   fontFamily: "Font family",
   fontSize: "Font size",
   fontWeight: "Weight",

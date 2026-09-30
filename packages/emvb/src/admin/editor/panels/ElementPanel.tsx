@@ -29,6 +29,7 @@ import {
   type Layout,
   type LayoutNode,
   patchClassStyle,
+  resolveCascade,
   type StyleProps,
 } from "../../../core/index.ts";
 import { FIELD } from "../../ui.ts";
@@ -38,6 +39,7 @@ import { ClassChipInput } from "./settings/ClassChipInput.tsx";
 import {
   DEFAULT_UI,
   keysFor,
+  offsetsApply,
   SECTION_LABELS,
   sectionsFor,
   STYLE_UI,
@@ -110,6 +112,19 @@ const writeSections = (type: string, open: Set<StyleSectionId>) => {
 
 const countSet = (type: string, style: StyleProps | undefined, section: StyleSectionId) =>
   keysFor(type, section, style).filter((key) => style?.[key] !== undefined).length;
+
+/** The position in effect: the class's own when editing a class, else classes then local. */
+const positionInEffect = (
+  node: LayoutNode,
+  design: DesignSystem,
+  cls: { style?: StyleProps } | undefined,
+) =>
+  cls
+    ? cls.style?.position
+    : resolveCascade(
+        (node.classes ?? []).map((id) => design.classes?.find((c) => c.id === id)?.style),
+        node.style,
+      ).position;
 
 /** Which styles the Style sections edit (W-087): a class applied to the node, or its own. */
 function useStyleTarget(node: LayoutNode, design: DesignSystem) {
@@ -245,6 +260,7 @@ function KnownElementPanel({
   const { cls, editing, setEditing } = useStyleTarget(node, design);
   const [designError, setDesignError] = React.useState<string | null>(null);
   const style = cls ? cls.style : node.style;
+  const position = positionInEffect(node, design, cls);
   const patchStyle = (patch: Partial<StyleProps>) => {
     if (!cls) {
       onChange(withStyle(node, patch));
@@ -363,21 +379,28 @@ function KnownElementPanel({
                 />,
               );
             }
-            const keys = keysFor(node.type, id, style);
+            const keys = keysFor(node.type, id, style, position);
             if (keys.length === 0) return null;
             return section(
               id,
               countSet(node.type, style, id),
-              keys.map((key) => (
-                <StyleRow
-                  key={key}
-                  styleKey={key}
-                  style={style}
-                  design={design}
-                  onPatch={patchStyle}
-                  onDesignChange={onDesignChange}
-                />
-              )),
+              <>
+                {keys.map((key) => (
+                  <StyleRow
+                    key={key}
+                    styleKey={key}
+                    style={style}
+                    design={design}
+                    onPatch={patchStyle}
+                    onDesignChange={onDesignChange}
+                  />
+                ))}
+                {id === "position" && !offsetsApply(position) && (
+                  <p className="emvb-helper" data-emvb-offsets-help="">
+                    Offsets apply once Position is Relative, Absolute, Fixed or Sticky.
+                  </p>
+                )}
+              </>,
             );
           })}
         </div>

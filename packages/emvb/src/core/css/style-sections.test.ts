@@ -16,6 +16,16 @@ const SECTIONS: Record<string, { style: StyleProps; css: string }> = {
     },
     css: "width:50vw;max-height:400px;overflow:hidden;aspect-ratio:16 / 9;object-fit:cover",
   },
+  position: {
+    style: {
+      position: "absolute",
+      top: { value: -10, unit: "px" },
+      right: { var: "gap", from: "spacing" },
+      left: "auto",
+      zIndex: 5,
+    },
+    css: "position:absolute;top:-10px;right:var(--emvb-s-gap);left:auto;z-index:5",
+  },
 };
 
 const pageWith = (style: StyleProps, classes?: string[]) => ({

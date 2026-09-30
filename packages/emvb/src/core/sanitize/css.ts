@@ -19,6 +19,7 @@ const TEXT_TRANSFORM = new Set(["none", "uppercase", "lowercase", "capitalize"])
 const BORDER_STYLE = new Set(["none", "solid", "dashed", "dotted"]);
 const OVERFLOW = new Set(["visible", "hidden", "clip", "scroll", "auto"]);
 const OBJECT_FIT = new Set(["fill", "contain", "cover", "none", "scale-down"]);
+const POSITION = new Set(["static", "relative", "absolute", "fixed", "sticky"]);
 const ASPECT_RATIO = /^([1-9]\d{0,3})\/([1-9]\d{0,3})$/;
 const FONT_WEIGHT = new Set(["normal", "bold", "400", "500", "600", "700"]);
 const FORBIDDEN = /[{};<>\\"'`]|\/\*|url\(|expression\(|@import|javascript:/i;
@@ -124,6 +125,21 @@ export function cssLength(value: unknown): string | undefined {
 const cssLengthOrAuto = (value: unknown): string | undefined =>
   value === "auto" ? "auto" : cssLength(value);
 
+/** An offset: `auto`, a variable, or a length from -10000 to 10000 (W-088). */
+function cssOffset(value: unknown): string | undefined {
+  if (value === "auto") return "auto";
+  if (typeof value !== "object" || value === null || "var" in value) return cssLength(value);
+  const { value: n, unit } = value as { value?: unknown; unit?: unknown };
+  if (typeof n !== "number" || !Number.isFinite(n) || n < -10_000 || n > 10_000) return undefined;
+  if (typeof unit !== "string" || !UNITS.has(unit)) return undefined;
+  return `${n}${unit}`;
+}
+
+const cssZIndex = (value: unknown): string | undefined =>
+  Number.isInteger(value) && (value as number) >= -9999 && (value as number) <= 9999
+    ? String(value)
+    : undefined;
+
 function cssAspectRatio(value: unknown): string | undefined {
   if (value === "auto") return "auto";
   const match = typeof value === "string" ? ASPECT_RATIO.exec(value) : null;
@@ -170,6 +186,12 @@ const PROPERTY_MAP: {
   marginRight: { css: "margin-right", toValue: cssLengthOrAuto },
   marginBottom: { css: "margin-bottom", toValue: cssLengthOrAuto },
   marginLeft: { css: "margin-left", toValue: cssLengthOrAuto },
+  position: { css: "position", toValue: keyword(POSITION) },
+  top: { css: "top", toValue: cssOffset },
+  right: { css: "right", toValue: cssOffset },
+  bottom: { css: "bottom", toValue: cssOffset },
+  left: { css: "left", toValue: cssOffset },
+  zIndex: { css: "z-index", toValue: cssZIndex },
   fontFamily: { css: "font-family", toValue: cssFontFamily },
   fontSize: { css: "font-size", toValue: cssLength },
   fontWeight: { css: "font-weight", toValue: cssFontWeight },

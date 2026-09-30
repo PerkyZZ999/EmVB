@@ -62,12 +62,12 @@ describe("CSS value validators", () => {
       styleDeclarations({
         color: "red;}body{x:y",
         gap: { value: 8, unit: "px" },
-        position: "fixed",
+        float: "left",
         ["__proto__"]: "x",
       }),
     ).toEqual({
       declarations: [{ property: "gap", value: "8px" }],
-      rejected: ["color", "position", "__proto__"],
+      rejected: ["color", "float", "__proto__"],
     });
   });
 });

@@ -15,6 +15,10 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   marginRight: BOX_AUTO,
   marginBottom: BOX_AUTO,
   marginLeft: BOX_AUTO,
+  top: BOX_AUTO,
+  right: BOX_AUTO,
+  bottom: BOX_AUTO,
+  left: BOX_AUTO,
   fontSize: ["px", "rem", "em", "%", "vw"],
   lineHeight: ["px", "rem", "em", "%"],
   letterSpacing: ["px", "rem", "em"],
@@ -24,7 +28,7 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
 
 export const unitsFor = (key: StyleKey): readonly UnitChoice[] => UNITS[key] ?? BOX;
 
-const NEGATIVE = new Set<StyleKey>([]);
+const NEGATIVE = new Set<StyleKey>(["top", "right", "bottom", "left"]);
 
 export type ParsedLength =
   | { ok: true; value: LengthLiteral | "auto" | undefined }
@@ -68,7 +72,12 @@ export function parseLengthDraft(draft: string, key: StyleKey, unit: LengthUnit)
     };
   }
   if (Math.abs(n) > 10_000) {
-    return { ok: false, message: `${label} can be up to 10000. Enter a smaller number.` };
+    return {
+      ok: false,
+      message: NEGATIVE.has(key)
+        ? `${label} can be from -10000 to 10000.`
+        : `${label} can be up to 10000. Enter a smaller number.`,
+    };
   }
   return { ok: true, value: { value: n, unit: typed } };
 }

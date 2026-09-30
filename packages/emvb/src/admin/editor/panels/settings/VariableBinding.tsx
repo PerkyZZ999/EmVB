@@ -16,6 +16,10 @@ const SPACING_KEYS = new Set<StyleKey>([
   "marginRight",
   "marginBottom",
   "marginLeft",
+  "top",
+  "right",
+  "bottom",
+  "left",
   "borderRadius",
 ]);
 

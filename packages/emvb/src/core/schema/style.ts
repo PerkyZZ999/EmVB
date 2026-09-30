@@ -26,6 +26,13 @@ export const LengthValue = z.union([Length, VariableRef]);
 /** Width, height and margins may also be `auto` (W-088). */
 const SizeValue = z.union([Length, VariableRef, z.literal("auto")]);
 
+/** Top, right, bottom and left may be negative, `auto` or a spacing variable (W-088). */
+const OffsetValue = z.union([
+  z.strictObject({ value: z.number().finite().min(-10_000).max(10_000), unit: LengthUnit }),
+  VariableRef,
+  z.literal("auto"),
+]);
+
 /** `w/h` with whole numbers 1–9999, emitted as `w / h` (W-088). */
 const ASPECT_RATIO = /^[1-9]\d{0,3}\/[1-9]\d{0,3}$/;
 
@@ -57,6 +64,12 @@ export const StyleProps = z.strictObject({
   marginRight: SizeValue.optional(),
   marginBottom: SizeValue.optional(),
   marginLeft: SizeValue.optional(),
+  position: z.enum(["static", "relative", "absolute", "fixed", "sticky"]).optional(),
+  top: OffsetValue.optional(),
+  right: OffsetValue.optional(),
+  bottom: OffsetValue.optional(),
+  left: OffsetValue.optional(),
+  zIndex: z.number().int().min(-9999).max(9999).optional(),
   fontFamily: z
     .union([
       z.string().min(1).max(200).refine(isSafeFontStack, "Font stack looks unsafe."),

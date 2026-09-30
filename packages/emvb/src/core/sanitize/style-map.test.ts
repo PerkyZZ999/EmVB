@@ -131,6 +131,45 @@ describe("style property map (W-017, R-012)", () => {
     },
   );
 
+  test.each([
+    ["position", "sticky", "position", "sticky"],
+    ["top", { value: -12, unit: "px" }, "top", "-12px"],
+    ["right", { value: 10, unit: "%" }, "right", "10%"],
+    ["bottom", "auto", "bottom", "auto"],
+    ["left", { var: "gap", from: "spacing" }, "left", "var(--emvb-s-gap)"],
+    ["left", { value: -10_000, unit: "vw" }, "left", "-10000vw"],
+    ["zIndex", 10, "z-index", "10"],
+    ["zIndex", -9999, "z-index", "-9999"],
+  ] as const)("W-088 Position: %s %p maps to %s", (key, raw, css, expected) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(true);
+    expect(styleDeclarations({ [key]: raw })).toEqual({
+      declarations: [{ property: css, value: expected }],
+      rejected: [],
+    });
+  });
+
+  test.each([
+    ["position", "inherit"],
+    ["top", { value: -10_001, unit: "px" }],
+    ["top", { value: 10_001, unit: "px" }],
+    ["right", { value: 1, unit: "pt" }],
+    ["bottom", "calc(1px)"],
+    ["zIndex", 1.5],
+    ["zIndex", 10_000],
+    ["zIndex", "10"],
+    ["zIndex", Number.NaN],
+  ] as const)("W-088 Position: %s refuses %p", (key, raw) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(false);
+    expect(styleDeclarations({ [key]: raw }).rejected).toEqual([key]);
+  });
+
+  test("W-088 Position: only offsets may be negative", () => {
+    for (const key of ["marginTop", "width", "gap"]) {
+      expect(StyleProps.safeParse({ [key]: len(-1) }).success).toBe(false);
+      expect(styleDeclarations({ [key]: len(-1) }).rejected).toEqual([key]);
+    }
+  });
+
   test("negative padding is rejected by the schema and the CSS mapper", () => {
     expect(StyleProps.safeParse({ paddingTop: len(-1) }).success).toBe(false);
     expect(cssLength(len(-1))).toBeUndefined();

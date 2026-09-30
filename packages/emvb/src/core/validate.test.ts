@@ -74,7 +74,7 @@ describe("invalid layouts fail with the exact path", () => {
     ],
     [
       "unknown style property",
-      withChild({ ...heading("abcd1234"), style: { position: "fixed" } }),
+      withChild({ ...heading("abcd1234"), style: { float: "left" } }),
       "root.children[0].style",
       "unrecognized_keys",
     ],
