@@ -230,3 +230,67 @@ describe("box shadow colour refs (W-088)", () => {
     expect(clearVariableRefs(shadowed(), "other", "color")).toEqual(shadowed());
   });
 });
+
+describe("deleting a variable clears class styles too", () => {
+  const withClasses = () => ({
+    ...emptyDesign(),
+    variables: {
+      colors: [
+        { id: "brand", name: "Brand", value: "#0055ff" },
+        { id: "ink", name: "Ink", value: "#111111" },
+      ],
+      spacings: [{ id: "brand", name: "Brand gap", value: { value: 8, unit: "px" as const } }],
+    },
+    classes: [
+      {
+        id: "card",
+        name: "Card",
+        style: {
+          backgroundColor: { var: "brand" },
+          color: { var: "ink" },
+          paddingTop: { var: "brand", from: "spacing" as const },
+          boxShadow: { x: 0, y: 2, blur: 4, spread: 0, color: { var: "brand" } },
+        },
+      },
+      { id: "tint", name: "Tint", style: { color: { var: "brand" } } },
+      { id: "plain", name: "Plain", style: { opacity: 0.5 } },
+    ],
+  });
+
+  test("removeVariable drops the bindings of that kind on every class and keeps the rest", () => {
+    const before = withClasses();
+    const next = removeVariable(before, "brand", "color");
+    expect(next.variables.colors).toEqual([{ id: "ink", name: "Ink", value: "#111111" }]);
+    expect(next.classes).toEqual([
+      {
+        id: "card",
+        name: "Card",
+        style: {
+          color: { var: "ink" },
+          paddingTop: { var: "brand", from: "spacing" },
+          boxShadow: { x: 0, y: 2, blur: 4, spread: 0 },
+        },
+      },
+      { id: "tint", name: "Tint", style: {} },
+      { id: "plain", name: "Plain", style: { opacity: 0.5 } },
+    ]);
+    expect(next.classes?.[2]).toBe(before.classes[2]);
+    expect(findVariableUsagesInDesign(next, "brand", "color")).toEqual([]);
+    expect(findVariableUsagesInDesign(next, "brand", "spacing")).toHaveLength(1);
+    expect(before).toEqual(withClasses());
+  });
+
+  test("deleteVariable clears the page and the classes in one go", () => {
+    const result = deleteVariable(withClasses(), layout(), "brand", "color");
+    expect(findVariableUsages(result.layout, "brand", "color")).toEqual([]);
+    expect(findVariableUsagesInDesign(result.design, "brand", "color")).toEqual([]);
+  });
+
+  test("a variable used only by a class is still cleared, and an unused one changes nothing", () => {
+    const design = withClasses();
+    design.variables.colors = design.variables.colors.filter((c) => c.id !== "brand");
+    expect(removeVariable(design, "brand", "color").classes?.[1]?.style).toEqual({});
+    const untouched = withClasses();
+    expect(removeVariable(untouched, "missing", "color")).toBe(untouched);
+  });
+});

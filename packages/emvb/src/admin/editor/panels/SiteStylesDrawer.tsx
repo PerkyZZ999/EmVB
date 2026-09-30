@@ -181,6 +181,17 @@ export function SiteStylesDrawer({
   );
 }
 
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** "2 places on this page and 1 class", or null when nothing uses it. */
+function usedIn(pageUses: number, classUses: number): string | null {
+  const parts = [
+    pageUses > 0 ? `${plural(pageUses, "place", "places")} on this page` : "",
+    classUses > 0 ? plural(classUses, "class", "classes") : "",
+  ].filter(Boolean);
+  return parts.length > 0 ? parts.join(" and ") : null;
+}
+
 function DeleteConfirm({
   confirm,
   design,
@@ -196,26 +207,28 @@ function DeleteConfirm({
   onCancel: () => void;
   onConfirm: () => void;
 }) {
-  const usages =
-    confirm.kind === "variable"
-      ? [
-          ...(layout ? findVariableUsages(layout, confirm.id, confirm.variableKind) : []),
-          ...findVariableUsagesInDesign(design, confirm.id, confirm.variableKind),
-        ]
-      : layout
-        ? findClassUsages(layout, confirm.id)
-        : [];
+  const variable = confirm.kind === "variable";
+  const pageUses = !layout
+    ? 0
+    : variable
+      ? findVariableUsages(layout, confirm.id, confirm.variableKind).length
+      : findClassUsages(layout, confirm.id).length;
+  const classUses = variable
+    ? new Set(
+        findVariableUsagesInDesign(design, confirm.id, confirm.variableKind).map((u) => u.classId),
+      ).size
+    : 0;
+  const where = usedIn(pageUses, classUses);
   return (
     <div className="emvb-site-confirm" data-emvb-site-confirm="" role="alertdialog">
       <p className="emvb-field-label">Delete {confirm.name}?</p>
-      {usages.length > 0 ? (
-        <p className="emvb-helper">
-          In use on {usages.length} {usages.length === 1 ? "place" : "places"} on this page.
-          Deleting drops those bindings.
-        </p>
-      ) : (
-        <p className="emvb-helper">Not used on this page.</p>
-      )}
+      <p className="emvb-helper">
+        {where
+          ? `In use in ${where}. Deleting drops those bindings.`
+          : variable
+            ? "Not used on this page or by any class."
+            : "Not used on this page."}
+      </p>
       <div className="emvb-dialog-actions">
         <Button type="button" variant="secondary" className={BUTTON} onClick={onCancel}>
           Cancel

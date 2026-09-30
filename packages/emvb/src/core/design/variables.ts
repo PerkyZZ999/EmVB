@@ -134,18 +134,37 @@ const KIND_TO_LIST = {
   spacing: "spacings",
 } as const;
 
-/** Remove a variable from the design document (name/id lists). Pure; does not touch layouts. */
+/** Drop every binding to the variable on class styles; a class left with none keeps `{}`. */
+function clearClassStyleRefs(
+  classes: DesignSystem["classes"],
+  id: string,
+  kind: VariableKind,
+): DesignSystem["classes"] {
+  if (!classes) return classes;
+  let changed = false;
+  const next = classes.map((cls) => {
+    const style = stripRefsFromStyle(cls.style, id, kind);
+    if (style === cls.style) return cls;
+    changed = true;
+    return { ...cls, style: style ?? {} };
+  });
+  return changed ? next : classes;
+}
+
+/** Remove a variable from the design document and its bindings on class styles. Pure; does not touch layouts. */
 export function removeVariable(design: DesignSystem, id: string, kind: VariableKind): DesignSystem {
   const key = KIND_TO_LIST[kind];
   const list = design.variables[key] ?? [];
   const filtered = list.filter((v) => v.id !== id);
-  if (filtered.length === list.length) return design;
+  const classes = clearClassStyleRefs(design.classes, id, kind);
+  if (filtered.length === list.length && classes === design.classes) return design;
   return {
     ...design,
     variables: {
       ...design.variables,
       [key]: filtered,
     },
+    ...(classes ? { classes } : {}),
   };
 }
 
@@ -177,7 +196,7 @@ export function renameVariable(
 }
 
 /**
- * Delete a variable: remove it from the design and clear refs on `layout`.
+ * Delete a variable: remove it from the design, clear refs on class styles and on `layout`.
  * Callers that need a confirmation dialog should run `findVariableUsages` first.
  */
 export function deleteVariable(

@@ -224,3 +224,76 @@ describe("SiteStylesDrawer keyboard (W-087)", () => {
     }
   });
 });
+
+describe("deleting a variable from Site styles", () => {
+  test("the dialog counts page and class uses, and Delete clears both", async () => {
+    const design: DesignSystem = {
+      ...emptyDesign(),
+      variables: {
+        ...emptyDesign().variables,
+        colors: [{ id: "brand", name: "Brand", value: "#0055ff" }],
+      },
+      classes: [
+        { id: "card", name: "Card", style: { backgroundColor: { var: "brand" }, opacity: 0.5 } },
+        { id: "tint", name: "Tint", style: { color: { var: "brand" } } },
+      ],
+    };
+    const page: Layout = {
+      schemaVersion: 2,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "head0001",
+            type: "heading",
+            props: { text: "A", level: 1 },
+            style: { color: { var: "brand" } },
+          },
+        ],
+      },
+    };
+    const saves: DesignSystem[] = [];
+    const layouts: Layout[] = [];
+    await mount(
+      <SiteStylesDrawer
+        design={design}
+        layout={page}
+        onDesignChange={async (next) => {
+          saves.push(next);
+        }}
+        onLayoutChange={(next) => layouts.push(next)}
+        onClose={() => undefined}
+      />,
+    );
+    const button = (match: (b: HTMLButtonElement) => boolean) =>
+      [...document.querySelectorAll<HTMLButtonElement>("button")].find(match);
+    await act(async () =>
+      button((b) => b.getAttribute("aria-label") === "Actions for Brand")?.click(),
+    );
+    await settle();
+    const item = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+      (el) => el.textContent === "Delete",
+    );
+    expect(item?.textContent ?? null).toBe("Delete");
+    await act(async () => item?.click());
+    await settle();
+    const dialog = document.querySelector("[data-emvb-site-confirm]");
+    expect(dialog?.textContent ?? "").toContain(
+      "In use in 1 place on this page and 2 classes. Deleting drops those bindings.",
+    );
+    await act(async () =>
+      [...(dialog?.querySelectorAll<HTMLButtonElement>("button") ?? [])]
+        .find((b) => b.textContent === "Delete")
+        ?.click(),
+    );
+    await settle();
+    expect(saves.at(-1)?.variables.colors).toEqual([]);
+    expect(saves.at(-1)?.classes).toEqual([
+      { id: "card", name: "Card", style: { opacity: 0.5 } },
+      { id: "tint", name: "Tint", style: {} },
+    ]);
+    expect(layouts.at(-1)?.root.children[0]?.style).toBeUndefined();
+  });
+});

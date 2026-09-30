@@ -8013,6 +8013,126 @@
         "a v1 design document upgrades"
       ],
       "expect": "\\(fail\\).*a v1 design document upgrades"
+    },
+    {
+      "id": "W-088/var-delete-class-refs-kept",
+      "requirement": "W-088",
+      "description": "deleting a variable leaves its bindings on class styles",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  const classes = clearClassStyleRefs(design.classes, id, kind);",
+          "replace": "  const classes = design.classes;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "removeVariable drops the bindings of that kind"
+      ],
+      "expect": "\\(fail\\).*removeVariable drops the bindings of that kind"
+    },
+    {
+      "id": "W-088/var-delete-class-style-undefined",
+      "requirement": "W-088",
+      "description": "a class left with no bindings loses its style object",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "    return { ...cls, style: style ?? {} };",
+          "replace": "    return { ...cls, style: style as StyleProps };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "removeVariable drops the bindings of that kind"
+      ],
+      "expect": "\\(fail\\).*removeVariable drops the bindings of that kind"
+    },
+    {
+      "id": "W-088/var-delete-class-any-kind",
+      "requirement": "W-088",
+      "description": "deleting a colour variable also drops a spacing binding with the same id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "    const style = stripRefsFromStyle(cls.style, id, kind);",
+          "replace": "    const style = stripRefsFromStyle(cls.style, id, undefined);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "removeVariable drops the bindings of that kind"
+      ],
+      "expect": "\\(fail\\).*removeVariable drops the bindings of that kind"
+    },
+    {
+      "id": "W-088/var-delete-class-only-skipped",
+      "requirement": "W-088",
+      "description": "a variable already gone from the lists is not cleared from classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  if (filtered.length === list.length && classes === design.classes) return design;",
+          "replace": "  if (filtered.length === list.length) return design;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "a variable used only by a class is still cleared"
+      ],
+      "expect": "\\(fail\\).*a variable used only by a class is still cleared"
+    },
+    {
+      "id": "W-088/var-delete-class-copy-untouched",
+      "requirement": "W-088",
+      "description": "untouched classes are rebuilt instead of kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "    if (style === cls.style) return cls;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "removeVariable drops the bindings of that kind"
+      ],
+      "expect": "\\(fail\\).*removeVariable drops the bindings of that kind"
+    },
+    {
+      "id": "W-088/var-delete-dialog-no-class-count",
+      "requirement": "W-088",
+      "description": "the delete dialog doesn't mention class uses",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "    classUses > 0 ? plural(classUses, \"class\", \"classes\") : \"\",",
+          "replace": "    \"\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "the dialog counts page and class uses"
+      ],
+      "expect": "\\(fail\\).*the dialog counts page and class uses"
     }
   ]
 }
