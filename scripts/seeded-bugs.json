@@ -3788,6 +3788,20 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/security.e2e.ts", "--project=node"],
       "expect": "✘.*\\[node\\].*XSS corpus strings stay inert"
+    },
+    {
+      "id": "W-086/bench-times-unsorted",
+      "requirement": "N-002",
+      "description": "bench times are not sorted, so the reported median and p95 are arbitrary runs",
+      "edits": [
+        {
+          "file": "scripts/bench-render.ts",
+          "search": "  return times.toSorted((a, b) => a - b);",
+          "replace": "  return times;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/bench-render.test.ts"],
+      "expect": "\\(fail\\).*sortedTimes runs the warm-up"
     }
   ]
 }

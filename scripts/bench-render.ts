@@ -39,31 +39,34 @@ const design: DesignSystem = {
   variables: { colors: [{ id: "brand", name: "Brand", value: "#0055ff" }] },
 };
 
-export function benchRenderMedian(iterations = 40): number {
-  const layout = benchLayout();
-  for (let i = 0; i < 5; i++) renderPage(layout, design);
+/** Runs `run` `warmup` times untimed, then `iterations` timed runs; returns the times in ms, ascending. */
+export function sortedTimes(run: () => unknown, warmup: number, iterations: number): number[] {
+  for (let i = 0; i < warmup; i++) run();
   const times: number[] = [];
   for (let i = 0; i < iterations; i++) {
     const start = performance.now();
-    renderPage(layout, design);
+    run();
     times.push(performance.now() - start);
   }
-  const sorted = times.toSorted((a, b) => a - b);
-  return sorted[Math.floor(sorted.length / 2)] ?? Number.NaN;
+  return times.toSorted((a, b) => a - b);
+}
+
+const at = (sorted: number[], fraction: number) =>
+  sorted[Math.floor(sorted.length * fraction)] ?? Number.NaN;
+
+export function benchRenderMedian(iterations = 40): number {
+  const layout = benchLayout();
+  return at(
+    sortedTimes(() => renderPage(layout, design), 5, iterations),
+    0.5,
+  );
 }
 
 if (import.meta.main) {
   const layout = benchLayout();
-  for (let i = 0; i < 20; i++) renderPage(layout, design);
-  const times: number[] = [];
-  for (let i = 0; i < ITERATIONS; i++) {
-    const start = performance.now();
-    renderPage(layout, design);
-    times.push(performance.now() - start);
-  }
-  const sorted = times.toSorted((a, b) => a - b);
-  const median = sorted[Math.floor(sorted.length / 2)] ?? Number.NaN;
-  const p95 = sorted[Math.floor(sorted.length * 0.95)] ?? Number.NaN;
+  const sorted = sortedTimes(() => renderPage(layout, design), 20, ITERATIONS);
+  const median = at(sorted, 0.5);
+  const p95 = at(sorted, 0.95);
   const html = renderPage(layout, design).html.length;
   process.stdout.write(
     `renderPage, 300 nodes, ${ITERATIONS} runs: median ${median.toFixed(3)} ms, p95 ${p95.toFixed(3)} ms (budget ${BUDGET_MS} ms, ${html} bytes of HTML)\n`,
