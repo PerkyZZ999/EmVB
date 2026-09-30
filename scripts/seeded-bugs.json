@@ -10288,6 +10288,132 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/s2-parity.test.tsx"],
       "expect": "\\(fail\\).*public HTML equals the canvas HTML"
+    },
+    {
+      "id": "W-091/forms-ids-top-level-only",
+      "requirement": "D-015",
+      "description": "formIdsInLayout doesn't look inside containers, so nested forms get no definition",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "  for (const child of nodeChildren(node)) walk(child, visit);",
+          "replace": "  void nodeChildren;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*finds forms at any depth"
+    },
+    {
+      "id": "W-091/forms-def-wrapped-unread",
+      "requirement": "D-015",
+      "description": "a definition wrapped in { success, data } is not unwrapped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "  const data = body.success === true ? body.data : payload;",
+          "replace": "  const data = payload;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*asks the forms plugin in-process"
+    },
+    {
+      "id": "W-091/forms-def-without-pages-kept",
+      "requirement": "D-015",
+      "description": "a definition without pages is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "  if (!Array.isArray(def.pages)) return null;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*answers without pages, is left out"
+    },
+    {
+      "id": "W-091/forms-def-wrong-body",
+      "requirement": "D-015",
+      "description": "the definition request sends the form id under the wrong key",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "            body: JSON.stringify({ id: formId }),",
+          "replace": "            body: JSON.stringify({ formId }),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*asks the forms plugin in-process"
+    },
+    {
+      "id": "W-091/theme-parts-drafts-read",
+      "requirement": "R-062",
+      "description": "theme parts are read without the published filter, so drafts reach the public site",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "        status: \"published\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*only published parts are read"
+    },
+    {
+      "id": "W-091/theme-parts-error-page-kept",
+      "requirement": "R-062",
+      "description": "a page of theme parts that answers with an error is still used",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    if (result.error) break;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*fails \\(error\\) ends the read"
+    },
+    {
+      "id": "W-091/theme-parts-throw-propagates",
+      "requirement": "R-062",
+      "description": "a theme-parts page that throws breaks the whole public page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    } catch {\n      break;\n    }\n    if (result.error) break;",
+          "replace": "    } catch (error) {\n      throw error;\n    }\n    if (result.error) break;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*fails \\(throw\\) ends the read"
+    },
+    {
+      "id": "W-091/theme-part-empty-conditions-invalid",
+      "requirement": "R-061",
+      "description": "a part stored with empty or null conditions is dropped instead of using the defaults",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  raw === undefined || raw === null || raw === \"\" ? fallback() : raw;",
+          "replace": "  raw === undefined ? fallback() : raw;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*without conditions or triggers uses the defaults"
+    },
+    {
+      "id": "W-091/theme-part-triggers-fail-all",
+      "requirement": "R-064",
+      "description": "unreadable triggers hide every part type, not only popups",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  if (partType === \"popup\" && !triggers.ok) return undefined;",
+          "replace": "  if (!triggers.ok) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*unreadable triggers hide a popup but not a header"
     }
   ]
 }

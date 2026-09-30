@@ -16,6 +16,10 @@ let postEntries: Entry[] = [];
 const collectionCalls: string[] = [];
 /** When set, every theme-parts page claims there is another one. */
 let endlessCursor = false;
+/** The filters the theme parts were read with. */
+const themeFilters: unknown[] = [];
+/** When set, the theme-parts page at this cursor fails: "error" answers with an error, "throw" throws. */
+let failAt: { cursor: number; how: "error" | "throw" } | undefined;
 
 mock.module("emdash", () => ({
   ...realEmDash,
@@ -23,7 +27,12 @@ mock.module("emdash", () => ({
   getEmDashCollection: async (collection: string, filter?: { limit?: number; cursor?: string }) => {
     collectionCalls.push(collection);
     if (collection !== THEME_PARTS_COLLECTION) return { entries: postEntries };
+    themeFilters.push(filter);
     const start = Number(filter?.cursor ?? 0);
+    if (failAt?.cursor === start) {
+      if (failAt.how === "throw") throw new Error("D1 down");
+      return { entries: themeEntries.slice(start), error: new Error("query failed") };
+    }
     const end = filter?.limit === undefined ? themeEntries.length : start + filter.limit;
     const more = endlessCursor || end < themeEntries.length;
     return { entries: themeEntries.slice(start, end), nextCursor: more ? String(end) : undefined };
@@ -71,6 +80,8 @@ const astro = (path: string) => ({ url: new URL(path, "http://site.test"), local
 
 beforeEach(() => {
   endlessCursor = false;
+  failAt = undefined;
+  themeFilters.length = 0;
   themeEntries = [];
   postEntries = [];
   collectionCalls.length = 0;
@@ -135,6 +146,47 @@ describe("resolveThemeParts (R-062)", () => {
     const reads = collectionCalls.filter((c) => c === THEME_PARTS_COLLECTION).length;
     expect(reads).toBeGreaterThan(1);
     expect(reads).toBeLessThanOrEqual(20);
+  });
+
+  test("only published parts are read, 50 at a time", async () => {
+    themeEntries = [part("HEAD0001", "header", [heading("head0001", "Header")])];
+    await resolveThemeParts(astro("/about"));
+    expect(themeFilters).toEqual([{ status: "published", limit: 50 }]);
+  });
+
+  test.each(["error", "throw"] as const)(
+    "a page of parts that fails (%s) ends the read with the parts already read",
+    async (how) => {
+      themeEntries = Array.from({ length: 60 }, (_, i) =>
+        part(`FOOT${String(i).padStart(4, "0")}`, "footer", [heading(`head${i}`, `Footer ${i}`)], {
+          updatedAt: `2026-09-01T00:00:${String(i).padStart(2, "0")}Z`,
+        }),
+      );
+      failAt = { cursor: 50, how };
+      // The newest footer is on the failed page, so the newest of the first 50 wins.
+      expect((await resolveThemeParts(astro("/about"))).footer?.id).toBe("FOOT0049");
+      expect(themeFilters).toHaveLength(2);
+    },
+  );
+
+  test("a part saved without conditions or triggers uses the defaults (entire site, no triggers)", async () => {
+    themeEntries = [
+      part("HEAD0001", "header", [heading("head0001", "Header")], { conditions: "" }),
+      part("FOOT0001", "footer", [heading("head0002", "Footer")], { conditions: null }),
+      part("POPUP001", "popup", [heading("head0003", "Sale")], { triggers: null }),
+    ];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect([resolved.header?.id, resolved.footer?.id]).toEqual(["HEAD0001", "FOOT0001"]);
+    expect(resolved.popups.map((p) => [p.id, p.triggers])).toEqual([
+      ["POPUP001", defaultTriggers()],
+    ]);
+  });
+
+  test("unreadable triggers hide a popup but not a header, which has no triggers", async () => {
+    themeEntries = [
+      part("HEAD0001", "header", [heading("head0001", "Header")], { triggers: "{not json" }),
+    ];
+    expect((await resolveThemeParts(astro("/about"))).header?.id).toBe("HEAD0001");
   });
 
   test("order comes from updatedAt, not from the order the collection returns", async () => {
