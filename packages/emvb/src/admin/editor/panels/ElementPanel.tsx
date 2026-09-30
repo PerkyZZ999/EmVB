@@ -36,8 +36,10 @@ import { FieldControl } from "./settings/FieldControl.tsx";
 import { StyleRow } from "./settings/StyleRow.tsx";
 import { ClassChipInput } from "./settings/ClassChipInput.tsx";
 import {
+  DEFAULT_UI,
   keysFor,
   SECTION_LABELS,
+  sectionsFor,
   STYLE_UI,
   type StyleSectionId,
 } from "./settings/style-sections.ts";
@@ -107,7 +109,7 @@ const writeSections = (type: string, open: Set<StyleSectionId>) => {
 };
 
 const countSet = (type: string, style: StyleProps | undefined, section: StyleSectionId) =>
-  keysFor(type, section).filter((key) => style?.[key] !== undefined).length;
+  keysFor(type, section, style).filter((key) => style?.[key] !== undefined).length;
 
 /** Which styles the Style sections edit (W-087): a class applied to the node, or its own. */
 function useStyleTarget(node: LayoutNode, design: DesignSystem) {
@@ -142,18 +144,6 @@ const FORM_TYPES = new Set([
   "radio",
   "submit",
 ]);
-
-const DEFAULT_UI = {
-  sections: [
-    "layout",
-    "spacing",
-    "typography",
-    "background",
-    "border",
-    "advanced",
-  ] as StyleSectionId[],
-  defaultOpen: "layout" as StyleSectionId,
-};
 
 const SPACER_HEIGHT = {
   key: "height",
@@ -356,7 +346,7 @@ function KnownElementPanel({
           {!cls && node.type === "spacer" && (
             <FieldControl field={SPACER_HEIGHT} node={node} onChange={onChange} fetcher={fetcher} />
           )}
-          {ui.sections.map((id) => {
+          {sectionsFor(ui.sections, style).map((id) => {
             if (id === "advanced") {
               if (cls) return null;
               return section(
@@ -373,7 +363,7 @@ function KnownElementPanel({
                 />,
               );
             }
-            const keys = keysFor(node.type, id);
+            const keys = keysFor(node.type, id, style);
             if (keys.length === 0) return null;
             return section(
               id,

@@ -17,6 +17,9 @@ const ALIGN = new Set(["stretch", "flex-start", "flex-end", "center", "baseline"
 const TEXT_ALIGN = new Set(["left", "center", "right", "justify"]);
 const TEXT_TRANSFORM = new Set(["none", "uppercase", "lowercase", "capitalize"]);
 const BORDER_STYLE = new Set(["none", "solid", "dashed", "dotted"]);
+const OVERFLOW = new Set(["visible", "hidden", "clip", "scroll", "auto"]);
+const OBJECT_FIT = new Set(["fill", "contain", "cover", "none", "scale-down"]);
+const ASPECT_RATIO = /^([1-9]\d{0,3})\/([1-9]\d{0,3})$/;
 const FONT_WEIGHT = new Set(["normal", "bold", "400", "500", "600", "700"]);
 const FORBIDDEN = /[{};<>\\"'`]|\/\*|url\(|expression\(|@import|javascript:/i;
 
@@ -121,6 +124,12 @@ export function cssLength(value: unknown): string | undefined {
 const cssLengthOrAuto = (value: unknown): string | undefined =>
   value === "auto" ? "auto" : cssLength(value);
 
+function cssAspectRatio(value: unknown): string | undefined {
+  if (value === "auto") return "auto";
+  const match = typeof value === "string" ? ASPECT_RATIO.exec(value) : null;
+  return match ? `${match[1]} / ${match[2]}` : undefined;
+}
+
 export function cssFlexDirection(value: unknown): string | undefined {
   return typeof value === "string" && FLEX_DIRECTIONS.has(value) ? value : undefined;
 }
@@ -149,6 +158,10 @@ const PROPERTY_MAP: {
   maxWidth: { css: "max-width", toValue: cssLength },
   height: { css: "height", toValue: cssLengthOrAuto },
   minHeight: { css: "min-height", toValue: cssLength },
+  maxHeight: { css: "max-height", toValue: cssLength },
+  overflow: { css: "overflow", toValue: keyword(OVERFLOW) },
+  aspectRatio: { css: "aspect-ratio", toValue: cssAspectRatio },
+  objectFit: { css: "object-fit", toValue: keyword(OBJECT_FIT) },
   paddingTop: { css: "padding-top", toValue: cssLength },
   paddingRight: { css: "padding-right", toValue: cssLength },
   paddingBottom: { css: "padding-bottom", toValue: cssLength },

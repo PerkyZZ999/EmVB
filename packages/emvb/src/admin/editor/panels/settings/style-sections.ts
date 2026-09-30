@@ -3,6 +3,7 @@ import type { StyleProps } from "../../../../core/index.ts";
 export type StyleSectionId =
   | "layout"
   | "spacing"
+  | "size"
   | "typography"
   | "background"
   | "border"
@@ -10,87 +11,75 @@ export type StyleSectionId =
 
 export type StyleKey = keyof StyleProps;
 
+/** Elementor v4 order (W-088); every list below follows it. */
+const SECTION_ORDER: StyleSectionId[] = [
+  "layout",
+  "spacing",
+  "size",
+  "typography",
+  "background",
+  "border",
+  "advanced",
+];
+
+const TEXT_SECTIONS: StyleSectionId[] = [
+  "spacing",
+  "size",
+  "typography",
+  "background",
+  "border",
+  "advanced",
+];
+
 /** Which Style sections appear, and which opens by default (IA table). */
 export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen: StyleSectionId }> =
   {
     container: {
-      sections: ["layout", "spacing", "background", "border", "advanced"],
+      sections: ["layout", "spacing", "size", "background", "border", "advanced"],
       defaultOpen: "layout",
     },
     spacer: { sections: ["layout", "advanced"], defaultOpen: "layout" },
     divider: {
-      sections: ["layout", "spacing", "border", "advanced"],
+      sections: ["spacing", "size", "border", "advanced"],
       defaultOpen: "border",
     },
-    heading: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "typography",
-    },
-    text: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "typography",
-    },
-    label: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "typography",
-    },
-    link: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "typography",
-    },
-    list: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "typography",
-    },
-    button: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "background",
-    },
-    image: {
-      sections: ["layout", "spacing", "border", "advanced"],
-      defaultOpen: "layout",
-    },
-    icon: {
-      sections: ["layout", "spacing", "typography", "advanced"],
-      defaultOpen: "typography",
-    },
-    video: {
-      sections: ["layout", "spacing", "border", "advanced"],
-      defaultOpen: "layout",
-    },
+    heading: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
+    text: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
+    label: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
+    link: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
+    list: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
+    button: { sections: TEXT_SECTIONS, defaultOpen: "background" },
+    image: { sections: ["spacing", "size", "border", "advanced"], defaultOpen: "size" },
+    icon: { sections: ["spacing", "size", "typography", "advanced"], defaultOpen: "typography" },
+    video: { sections: ["spacing", "size", "border", "advanced"], defaultOpen: "size" },
     form: {
-      sections: ["layout", "spacing", "background", "border", "advanced"],
+      sections: ["layout", "spacing", "size", "background", "border", "advanced"],
       defaultOpen: "layout",
     },
-    "text-input": {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "typography",
-    },
-    textarea: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "typography",
-    },
-    select: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "typography",
-    },
+    "text-input": { sections: TEXT_SECTIONS, defaultOpen: "typography" },
+    textarea: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
+    select: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     checkbox: {
-      sections: ["layout", "spacing", "typography", "advanced"],
+      sections: ["layout", "spacing", "size", "typography", "advanced"],
       defaultOpen: "typography",
     },
     radio: {
-      sections: ["layout", "spacing", "typography", "advanced"],
+      sections: ["layout", "spacing", "size", "typography", "advanced"],
       defaultOpen: "typography",
     },
-    submit: {
-      sections: ["layout", "spacing", "typography", "background", "border", "advanced"],
-      defaultOpen: "background",
-    },
+    submit: { sections: TEXT_SECTIONS, defaultOpen: "background" },
   };
+
+/** Types without an entry (Flexbox, Div Block, SVG, Tabs, dynamic elements) show every section. */
+export const DEFAULT_UI = {
+  sections: SECTION_ORDER,
+  defaultOpen: "layout" as StyleSectionId,
+};
 
 export const SECTION_LABELS: Record<StyleSectionId, string> = {
   layout: "Layout",
   spacing: "Spacing",
+  size: "Size",
   typography: "Typography",
   background: "Background",
   border: "Border",
@@ -99,18 +88,7 @@ export const SECTION_LABELS: Record<StyleSectionId, string> = {
 
 /** Style property keys shown in each section (subset of StyleProps). */
 const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
-  layout: [
-    "flexDirection",
-    "flexWrap",
-    "justifyContent",
-    "alignItems",
-    "gap",
-    "width",
-    "minWidth",
-    "maxWidth",
-    "height",
-    "minHeight",
-  ],
+  layout: ["flexDirection", "flexWrap", "justifyContent", "alignItems", "gap"],
   spacing: [
     "paddingTop",
     "paddingRight",
@@ -120,6 +98,17 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "marginRight",
     "marginBottom",
     "marginLeft",
+  ],
+  size: [
+    "width",
+    "height",
+    "minWidth",
+    "minHeight",
+    "maxWidth",
+    "maxHeight",
+    "overflow",
+    "aspectRatio",
+    "objectFit",
   ],
   typography: [
     "fontFamily",
@@ -136,24 +125,36 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
   advanced: [],
 };
 
-/** Per-type filters so Spacer/Divider don't get every flex control. */
-const TYPE_SECTION_KEYS: Record<string, Partial<Record<StyleSectionId, StyleKey[]>>> = {
-  spacer: { layout: [] }, // height is a content prop, shown above sections
-  divider: { layout: ["width"] },
-  heading: {
-    layout: ["width", "minWidth", "maxWidth", "height", "minHeight"],
-  },
-  text: { layout: ["width", "minWidth", "maxWidth", "height", "minHeight"] },
-  label: { layout: ["width", "minWidth", "maxWidth", "height", "minHeight"] },
-  link: { layout: ["width", "minWidth", "maxWidth", "height", "minHeight"] },
-  list: { layout: ["width", "minWidth", "maxWidth", "height", "minHeight"] },
-  button: { layout: ["width", "minWidth", "maxWidth", "height", "minHeight"] },
+/** Keys that only make sense on some element types. */
+const ONLY_FOR: Partial<Record<StyleKey, string[]>> = {
+  objectFit: ["image", "video"],
 };
 
-export function keysFor(type: string, section: StyleSectionId): StyleKey[] {
-  const override = TYPE_SECTION_KEYS[type]?.[section];
-  if (override) return override;
-  return SECTION_KEYS[section];
+/** Per-type filters so Spacer and Divider don't get every control. */
+const TYPE_SECTION_KEYS: Record<string, Partial<Record<StyleSectionId, StyleKey[]>>> = {
+  spacer: { layout: [] }, // height is a content prop, shown above sections
+  divider: { size: ["width"] },
+};
+
+/**
+ * The keys a section shows for a type. With `style`, a key that is set there is always shown,
+ * even where the type wouldn't offer it, so a stored value can be seen and reset (W-088).
+ */
+export function keysFor(type: string, section: StyleSectionId, style?: StyleProps): StyleKey[] {
+  const offered =
+    TYPE_SECTION_KEYS[type]?.[section] ??
+    SECTION_KEYS[section].filter((key) => ONLY_FOR[key]?.includes(type) ?? true);
+  return SECTION_KEYS[section].filter((key) => offered.includes(key) || style?.[key] !== undefined);
+}
+
+/** The type's sections, plus any other section holding a set value, in section order. */
+export function sectionsFor(
+  sections: StyleSectionId[],
+  style: StyleProps | undefined,
+): StyleSectionId[] {
+  return SECTION_ORDER.filter(
+    (id) => sections.includes(id) || SECTION_KEYS[id].some((key) => style?.[key] !== undefined),
+  );
 }
 
 export const STYLE_LABELS: Record<StyleKey, string> = {
@@ -167,6 +168,10 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   maxWidth: "Max width",
   height: "Height",
   minHeight: "Min height",
+  maxHeight: "Max height",
+  overflow: "Overflow",
+  aspectRatio: "Aspect ratio",
+  objectFit: "Object fit",
   paddingTop: "Padding top",
   paddingRight: "Padding right",
   paddingBottom: "Padding bottom",
@@ -191,10 +196,4 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
 };
 
 /** Every StyleProps key that the settings panel must be able to edit. */
-export const CONTROLLED_STYLE_KEYS: StyleKey[] = [
-  ...new Set(
-    Object.values(SECTION_KEYS)
-      .flat()
-      .concat(...Object.values(TYPE_SECTION_KEYS).flatMap((m) => Object.values(m).flat())),
-  ),
-];
+export const CONTROLLED_STYLE_KEYS: StyleKey[] = Object.values(SECTION_KEYS).flat();

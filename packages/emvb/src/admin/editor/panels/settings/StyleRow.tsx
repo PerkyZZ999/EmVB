@@ -14,6 +14,7 @@ const LENGTH_KEYS = new Set<StyleKey>([
   "maxWidth",
   "height",
   "minHeight",
+  "maxHeight",
   "paddingTop",
   "paddingRight",
   "paddingBottom",
@@ -69,6 +70,27 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "uppercase", label: "Uppercase" },
     { value: "lowercase", label: "Lowercase" },
     { value: "capitalize", label: "Capitalize" },
+  ],
+  overflow: [
+    { value: "visible", label: "Visible" },
+    { value: "hidden", label: "Hidden" },
+    { value: "clip", label: "Clip" },
+    { value: "scroll", label: "Scroll" },
+    { value: "auto", label: "Auto" },
+  ],
+  aspectRatio: [
+    { value: "auto", label: "Auto" },
+    ...["1/1", "4/3", "3/2", "16/9", "21/9", "3/4", "2/3", "9/16"].map((ratio) => ({
+      value: ratio,
+      label: ratio.replace("/", ":"),
+    })),
+  ],
+  objectFit: [
+    { value: "fill", label: "Fill" },
+    { value: "contain", label: "Contain" },
+    { value: "cover", label: "Cover" },
+    { value: "none", label: "None" },
+    { value: "scale-down", label: "Scale down" },
   ],
   borderStyle: [
     { value: "none", label: "None" },

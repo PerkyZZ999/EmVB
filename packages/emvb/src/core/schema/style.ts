@@ -26,6 +26,9 @@ export const LengthValue = z.union([Length, VariableRef]);
 /** Width, height and margins may also be `auto` (W-088). */
 const SizeValue = z.union([Length, VariableRef, z.literal("auto")]);
 
+/** `w/h` with whole numbers 1–9999, emitted as `w / h` (W-088). */
+const ASPECT_RATIO = /^[1-9]\d{0,3}\/[1-9]\d{0,3}$/;
+
 /** Style properties for layout and text elements (W-017 / R-012). Unknown keys are rejected. */
 export const StyleProps = z.strictObject({
   flexDirection: z.enum(["row", "column", "row-reverse", "column-reverse"]).optional(),
@@ -40,6 +43,12 @@ export const StyleProps = z.strictObject({
   maxWidth: LengthValue.optional(),
   height: SizeValue.optional(),
   minHeight: LengthValue.optional(),
+  maxHeight: LengthValue.optional(),
+  overflow: z.enum(["visible", "hidden", "clip", "scroll", "auto"]).optional(),
+  aspectRatio: z
+    .union([z.literal("auto"), z.string().regex(ASPECT_RATIO, "Use a ratio such as 16/9")])
+    .optional(),
+  objectFit: z.enum(["fill", "contain", "cover", "none", "scale-down"]).optional(),
   paddingTop: LengthValue.optional(),
   paddingRight: LengthValue.optional(),
   paddingBottom: LengthValue.optional(),

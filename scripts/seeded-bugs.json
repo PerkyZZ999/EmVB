@@ -6603,6 +6603,286 @@
         "never transitions colours"
       ],
       "expect": "\\(fail\\).*never transitions colours"
+    },
+    {
+      "id": "W-088/aspect-ratio-raw",
+      "requirement": "W-088",
+      "description": "the aspect ratio is emitted without spaces around the slash",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "return match ? `${match[1]} / ${match[2]}` : undefined;",
+          "replace": "return match ? `${match[1]}/${match[2]}` : undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Size: aspectRatio"
+      ],
+      "expect": "\\(fail\\).*W-088 Size: aspectRatio"
+    },
+    {
+      "id": "W-088/aspect-ratio-unanchored",
+      "requirement": "W-088",
+      "description": "the CSS mapper's ratio pattern isn't anchored",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const ASPECT_RATIO = /^([1-9]\\d{0,3})\\/([1-9]\\d{0,3})$/;",
+          "replace": "const ASPECT_RATIO = /([1-9]\\d{0,3})\\/([1-9]\\d{0,3})/;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Size: aspectRatio refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Size: aspectRatio refuses"
+    },
+    {
+      "id": "W-088/aspect-ratio-schema-loose",
+      "requirement": "W-088",
+      "description": "the schema accepts any ratio text",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "z.string().regex(ASPECT_RATIO, \"Use a ratio such as 16/9\")",
+          "replace": "z.string().max(20)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Size: aspectRatio refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Size: aspectRatio refuses"
+    },
+    {
+      "id": "W-088/overflow-any-keyword",
+      "requirement": "W-088",
+      "description": "the CSS mapper passes any overflow text",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  overflow: { css: \"overflow\", toValue: keyword(OVERFLOW) },",
+          "replace": "  overflow: { css: \"overflow\", toValue: (v) => (typeof v === \"string\" ? v : undefined) },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Size: overflow refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Size: overflow refuses"
+    },
+    {
+      "id": "W-088/max-height-unmapped",
+      "requirement": "W-088",
+      "description": "max height maps to max-width",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  maxHeight: { css: \"max-height\", toValue: cssLength },",
+          "replace": "  maxHeight: { css: \"max-width\", toValue: cssLength },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/style-sections.test.ts",
+        "-t",
+        "size: local styles"
+      ],
+      "expect": "\\(fail\\).*size: local styles"
+    },
+    {
+      "id": "W-088/object-fit-dropped",
+      "requirement": "W-088",
+      "description": "object fit is dropped from the stylesheet",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  objectFit: { css: \"object-fit\", toValue: keyword(OBJECT_FIT) },",
+          "replace": "  objectFit: { css: \"object-fit\", toValue: () => undefined },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/style-sections.test.ts",
+        "-t",
+        "size: through a class"
+      ],
+      "expect": "\\(fail\\).*size: through a class"
+    },
+    {
+      "id": "W-088/object-fit-everywhere",
+      "requirement": "W-088",
+      "description": "object fit is offered on every element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  objectFit: [\"image\", \"video\"],\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "object fit is offered on Image and Video only"
+      ],
+      "expect": "\\(fail\\).*object fit is offered on Image and Video only"
+    },
+    {
+      "id": "W-088/set-value-hidden",
+      "requirement": "W-088",
+      "description": "a set value the type doesn't offer is hidden",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  return SECTION_KEYS[section].filter((key) => offered.includes(key) || style?.[key] !== undefined);",
+          "replace": "  return SECTION_KEYS[section].filter((key) => offered.includes(key));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "a set value stays visible"
+      ],
+      "expect": "\\(fail\\).*a set value stays visible"
+    },
+    {
+      "id": "W-088/set-section-hidden",
+      "requirement": "W-088",
+      "description": "a section holding a set value the type doesn't offer is hidden",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "    (id) => sections.includes(id) || SECTION_KEYS[id].some((key) => style?.[key] !== undefined),",
+          "replace": "    (id) => sections.includes(id),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "a set value stays visible"
+      ],
+      "expect": "\\(fail\\).*a set value stays visible"
+    },
+    {
+      "id": "W-088/size-in-layout",
+      "requirement": "W-088",
+      "description": "width stays in Layout",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  layout: [\"flexDirection\", \"flexWrap\", \"justifyContent\", \"alignItems\", \"gap\"],",
+          "replace": "  layout: [\"flexDirection\", \"flexWrap\", \"justifyContent\", \"alignItems\", \"gap\", \"width\"],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Size holds width"
+      ],
+      "expect": "\\(fail\\).*Size holds width"
+    },
+    {
+      "id": "W-088/image-opens-layout",
+      "requirement": "W-088",
+      "description": "Image still opens on Layout",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  image: { sections: [\"spacing\", \"size\", \"border\", \"advanced\"], defaultOpen: \"size\" },",
+          "replace": "  image: { sections: [\"layout\", \"spacing\", \"size\", \"border\", \"advanced\"], defaultOpen: \"layout\" },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Image opens on Size"
+      ],
+      "expect": "\\(fail\\).*Image opens on Size"
+    },
+    {
+      "id": "W-088/aspect-label-slash",
+      "requirement": "W-088",
+      "description": "aspect ratio options show 16/9",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "      label: ratio.replace(\"/\", \":\"),",
+          "replace": "      label: ratio,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Aspect ratio shows 16:9"
+      ],
+      "expect": "\\(fail\\).*Aspect ratio shows 16:9"
+    },
+    {
+      "id": "W-088/max-height-no-row",
+      "requirement": "W-088",
+      "description": "Max height has no length row",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "  \"minHeight\",\n  \"maxHeight\",\n  \"paddingTop\",",
+          "replace": "  \"minHeight\",\n  \"paddingTop\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Max height is a length row"
+      ],
+      "expect": "\\(fail\\).*Max height is a length row"
+    },
+    {
+      "id": "W-088/panel-ignores-set-keys",
+      "requirement": "W-088",
+      "description": "the panel lists only the offered keys",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "            const keys = keysFor(node.type, id, style);",
+          "replace": "            const keys = keysFor(node.type, id);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "the panel shows a stored value"
+      ],
+      "expect": "\\(fail\\).*the panel shows a stored value"
     }
   ]
 }

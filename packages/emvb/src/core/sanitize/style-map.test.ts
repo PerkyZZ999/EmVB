@@ -88,6 +88,49 @@ describe("style property map (W-017, R-012)", () => {
     },
   );
 
+  test.each([
+    ["maxHeight", len(400), "max-height", "400px"],
+    ["overflow", "hidden", "overflow", "hidden"],
+    ["overflow", "clip", "overflow", "clip"],
+    ["aspectRatio", "16/9", "aspect-ratio", "16 / 9"],
+    ["aspectRatio", "9999/1", "aspect-ratio", "9999 / 1"],
+    ["aspectRatio", "auto", "aspect-ratio", "auto"],
+    ["objectFit", "cover", "object-fit", "cover"],
+    ["objectFit", "scale-down", "object-fit", "scale-down"],
+  ] as const)("W-088 Size: %s %p maps to %s", (key, raw, css, expected) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(true);
+    expect(styleDeclarations({ [key]: raw })).toEqual({
+      declarations: [{ property: css, value: expected }],
+      rejected: [],
+    });
+  });
+
+  test.each([
+    ["overflow", "overlay"],
+    ["objectFit", "stretch"],
+    ["aspectRatio", "0/9"],
+    ["aspectRatio", "16/0"],
+    ["aspectRatio", "16 / 9"],
+    ["aspectRatio", "1.5"],
+    ["aspectRatio", "10000/1"],
+    ["aspectRatio", "16/9;color:red"],
+    ["aspectRatio", 1.5],
+    ["maxHeight", "auto"],
+  ] as const)("W-088 Size: %s refuses %p", (key, raw) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(false);
+    expect(styleDeclarations({ [key]: raw }).rejected).toEqual([key]);
+  });
+
+  test.each(CSS_INJECTION_CORPUS)(
+    "W-088 Size: keywords and ratios reject injection %p",
+    (value) => {
+      for (const key of ["overflow", "aspectRatio", "objectFit"]) {
+        expect(StyleProps.safeParse({ [key]: value }).success).toBe(false);
+        expect(styleDeclarations({ [key]: value }).rejected).toEqual([key]);
+      }
+    },
+  );
+
   test("negative padding is rejected by the schema and the CSS mapper", () => {
     expect(StyleProps.safeParse({ paddingTop: len(-1) }).success).toBe(false);
     expect(cssLength(len(-1))).toBeUndefined();
