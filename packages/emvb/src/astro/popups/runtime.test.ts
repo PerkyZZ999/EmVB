@@ -132,6 +132,19 @@ describe("public popup runtime (S7b, W-081)", () => {
     expect(root.hidden).toBe(false);
   });
 
+  test("a broken click selector is dropped once instead of throwing on every click", () => {
+    const listen = spyOn(document, "addEventListener");
+    popup(
+      "c2",
+      doc([
+        { type: "click", selector: "a[" },
+        { type: "click", selector: ".ok" },
+      ]),
+    );
+    expect(listen.mock.calls.filter(([type]) => type === "click")).toHaveLength(1);
+    listen.mockRestore();
+  });
+
   test("exit intent opens only when the pointer leaves through the top", () => {
     const root = popup("e1", doc([{ type: "exit_intent" }]));
     document.documentElement.dispatchEvent(new MouseEvent("mouseleave", { clientY: 40 }));

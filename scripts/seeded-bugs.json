@@ -3650,8 +3650,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/popups/runtime.ts",
-          "search": "if (target.closest(selector)) open();",
-          "replace": "if (target.matches(selector)) open();"
+          "search": "if (target?.closest?.(selector)) open();",
+          "replace": "if (target?.matches?.(selector)) open();"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
@@ -3830,6 +3830,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-url.test.ts"],
       "expect": "\\(fail\\).*resolveEmbedUrl matches the recorded golden"
+    },
+    {
+      "id": "W-086/popup-invalid-selector-registered",
+      "requirement": "R-063",
+      "description": "an invalid click selector still registers a listener that throws on every click",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "    if (!selector || !isValidSelector(selector)) return;",
+          "replace": "    if (!selector) return;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*a broken click selector is dropped once"
+    },
+    {
+      "id": "W-086/preview-failure-silent",
+      "requirement": "R-004",
+      "description": "a failed preview-URL request closes the new tab without telling the editor why",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "    onError(error);\n",
+          "replace": "    void error;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/open-in-new-tab.test.ts"],
+      "expect": "\\(fail\\).*a failed preview-URL request closes the tab and reports the error"
     }
   ]
 }

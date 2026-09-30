@@ -11,10 +11,19 @@ import type { useSave } from "./useSave.ts";
 const publicPath = (pattern: string | null | undefined, slug: string) =>
   (pattern || "/{slug}").replace("{slug}", encodeURIComponent(slug));
 
-/** Opens a tab synchronously (so pop-up blockers allow it), then points it at `url` when known. */
-async function openInNewTab(url: () => Promise<string | null>) {
+/**
+ * Opens a tab synchronously (so pop-up blockers allow it), then points it at `url` when known.
+ * `url` resolves null when it already told the user why (a failed save); a throw goes to `onError`.
+ */
+export async function openInNewTab(
+  url: () => Promise<string | null>,
+  onError: (error: unknown) => void,
+) {
   const tab = window.open("", "_blank");
-  const target = await url().catch(() => null);
+  const target = await url().catch((error: unknown) => {
+    onError(error);
+    return null;
+  });
   if (!tab) return;
   if (!target) return tab.close();
   tab.opener = null;
@@ -77,10 +86,17 @@ export function useEditorCommands({
   };
 
   const preview = () =>
-    void openInNewTab(async () => {
-      if (isDirty(latest.current) && !(await save())) return null;
-      return previewUrl(fetcher, latest.current.id);
-    });
+    void openInNewTab(
+      async () => {
+        if (isDirty(latest.current) && !(await save())) return null;
+        return previewUrl(fetcher, latest.current.id);
+      },
+      (error) =>
+        toasts.add({
+          title: "Couldn't open the preview",
+          description: error instanceof Error ? error.message : String(error),
+        }),
+    );
 
   const changeDesign = async (next: DesignSystem) => {
     try {

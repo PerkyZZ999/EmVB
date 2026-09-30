@@ -71,6 +71,16 @@ function bumpTimesShown(id: string): void {
   }
 }
 
+/** The schema allows only safe characters, but they can still form an invalid selector. */
+function isValidSelector(selector: string): boolean {
+  try {
+    document.createDocumentFragment().querySelector(selector);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function canOpen(config: PopupConfig): boolean {
   const advanced = config.triggers.advanced;
   if (!matchesPopupDevices(advanced, window.innerWidth)) return false;
@@ -107,13 +117,7 @@ function createController(root: HTMLElement): Controller | null {
       root.hidden = true;
       ctrl.opened = false;
       const prev = ctrl.lastFocus;
-      if (prev && typeof prev.focus === "function") {
-        try {
-          prev.focus({ preventScroll: true });
-        } catch {
-          // element may be gone
-        }
-      }
+      if (prev && typeof prev.focus === "function") prev.focus({ preventScroll: true });
     },
   };
   return ctrl;
@@ -194,15 +198,10 @@ const ARM: { [T in OpenTrigger["type"]]: Arm<T> } = {
   },
   click: (open, trigger) => {
     const selector = String(trigger.selector ?? "").trim();
-    if (!selector) return;
+    if (!selector || !isValidSelector(selector)) return;
     document.addEventListener("click", (event) => {
       const target = event.target as Element | null;
-      if (!target?.closest) return;
-      try {
-        if (target.closest(selector)) open();
-      } catch {
-        // invalid selector at runtime — ignore
-      }
+      if (target?.closest?.(selector)) open();
     });
   },
   exit_intent: (open) => {
