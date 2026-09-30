@@ -105,7 +105,7 @@ export const UI_CSS = `
   gap: 0;
   width: fit-content;
   max-width: 100%;
-  min-height: 32px;
+  min-height: 28px;
   margin: 0;
   padding: 0;
   overflow-x: auto;
@@ -113,8 +113,8 @@ export const UI_CSS = `
   border-bottom: 1px solid var(--color-kumo-hairline);
 }
 .emvb-theme-filter {
-  height: 32px;
-  min-height: 32px;
+  height: 28px;
+  min-height: 28px;
   padding: 0 12px 2px;
   border: 0;
   border-radius: 0;

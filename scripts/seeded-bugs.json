@@ -8133,6 +8133,46 @@
         "the dialog counts page and class uses"
       ],
       "expect": "\\(fail\\).*the dialog counts page and class uses"
+    },
+    {
+      "id": "W-087/theme-filter-32px",
+      "requirement": "D-025",
+      "description": "Theme Builder filter tabs are 32 px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-theme-filter {\n  height: 28px;\n  min-height: 28px;",
+          "replace": ".emvb-theme-filter {\n  height: 32px;\n  min-height: 32px;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/ui.test.ts",
+        "-t",
+        "Theme Builder filter tabs are 28 px"
+      ],
+      "expect": "\\(fail\\).*Theme Builder filter tabs are 28 px"
+    },
+    {
+      "id": "W-087/theme-filter-row-32px",
+      "requirement": "D-025",
+      "description": "the Theme Builder filter row is 32 px tall",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  max-width: 100%;\n  min-height: 28px;",
+          "replace": "  max-width: 100%;\n  min-height: 32px;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/ui.test.ts",
+        "-t",
+        "Theme Builder filter tabs are 28 px"
+      ],
+      "expect": "\\(fail\\).*Theme Builder filter tabs are 28 px"
     }
   ]
 }
