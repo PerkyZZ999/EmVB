@@ -28,7 +28,23 @@ describe("loadFormsCapability (W-036)", () => {
     await expect(loadFormsCapability(hard)).resolves.toEqual({ status: "missing" });
   });
 
+  // QA-3 (2026-09-29): EmDash 1.0.1's real answers, from both demos.
+  test("EmDash's missing-plugin 404 means missing; the plugin's own form 404 means manual", async () => {
+    const answer = (probe: Response) => async (path: string) =>
+      path.endsWith("/forms/list")
+        ? json(404, { error: { code: "NOT_FOUND", message: "Plugin route not found" } })
+        : probe;
+    const noPlugin = json(404, { error: { code: "NOT_FOUND", message: "Plugin route not found" } });
+    const noForm = json(404, { error: { code: "NOT_FOUND", message: "Form not found" } });
+    await expect(loadFormsCapability(answer(noPlugin))).resolves.toEqual({ status: "missing" });
+    await expect(loadFormsCapability(answer(noForm))).resolves.toEqual({
+      status: "manual",
+      canList: false,
+    });
+  });
+
   // Recorded before W-086 M14 split the probe out: every list answer against every probe answer.
+  // QA-3 re-recorded the four `notFoundCode` rows: a bare NOT_FOUND 404 now means missing.
   test("each list and definition answer maps to the same capability and requests", async () => {
     const offline = () => Promise.reject(new TypeError("Failed to fetch"));
     const lists: Record<string, () => Response | Promise<Response>> = {

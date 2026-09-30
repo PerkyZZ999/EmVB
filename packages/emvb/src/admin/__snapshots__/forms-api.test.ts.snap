@@ -52,8 +52,7 @@ exports[`loadFormsCapability (W-036) each list and definition answer maps to the
   },
   "broken × notFoundCode": {
     "capability": {
-      "canList": false,
-      "status": "manual",
+      "status": "missing",
     },
     "sent": [
       "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
@@ -329,8 +328,7 @@ exports[`loadFormsCapability (W-036) each list and definition answer maps to the
   },
   "noData × notFoundCode": {
     "capability": {
-      "canList": false,
-      "status": "manual",
+      "status": "missing",
     },
     "sent": [
       "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
@@ -486,8 +484,7 @@ exports[`loadFormsCapability (W-036) each list and definition answer maps to the
   },
   "notFound × notFoundCode": {
     "capability": {
-      "canList": false,
-      "status": "manual",
+      "status": "missing",
     },
     "sent": [
       "POST /_emdash/api/plugins/emdash-forms/forms/list {}",
@@ -563,8 +560,7 @@ exports[`loadFormsCapability (W-036) each list and definition answer maps to the
   },
   "offline × notFoundCode": {
     "capability": {
-      "canList": false,
-      "status": "manual",
+      "status": "missing",
     },
     "sent": [
       "POST /_emdash/api/plugins/emdash-forms/forms/list {}",

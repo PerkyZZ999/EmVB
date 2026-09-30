@@ -3963,6 +3963,20 @@
         "published page renders"
       ],
       "expect": "✘.*\\[node-public\\].*a published page renders from the production build"
+    },
+    {
+      "id": "QA-3/forms-missing-plugin-counts-as-present",
+      "requirement": "R-040",
+      "description": "any NOT_FOUND 404 counts as the forms plugin being there, so the not-installed notice never shows",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/forms-api.ts",
+          "search": "  if (error.status === 404) return error.message.toLowerCase().includes(\"form\");",
+          "replace": "  if (error.status === 404) return error.code === \"NOT_FOUND\" || error.message.toLowerCase().includes(\"form\");"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/forms-api.test.ts"],
+      "expect": "\\(fail\\).*EmDash's missing-plugin 404 means missing"
     }
   ]
 }

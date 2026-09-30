@@ -13,14 +13,13 @@ const DEFINITION = "/_emdash/api/plugins/emdash-forms/definition";
 const manual = (): FormsCapability => ({ status: "manual", canList: false });
 
 /**
- * Whether a failed definition probe still shows the forms plugin is there. A 404 is ambiguous
- * (no plugin, or no such form), so it counts when it reads like the plugin's own "form not found".
+ * Whether a failed definition probe still shows the forms plugin is there. A 404 is ambiguous:
+ * EmDash answers a missing plugin with `NOT_FOUND` "Plugin route not found", and the plugin
+ * answers an unknown form with `NOT_FOUND` "Form not found". Only the plugin's message counts.
  */
 function probeFoundPlugin(error: unknown): boolean {
   if (!(error instanceof ApiError)) return false;
-  if (error.status === 404) {
-    return error.code === "NOT_FOUND" || error.message.toLowerCase().includes("form");
-  }
+  if (error.status === 404) return error.message.toLowerCase().includes("form");
   return error.status === 410 || error.status === 422;
 }
 
