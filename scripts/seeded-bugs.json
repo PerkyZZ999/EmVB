@@ -3965,7 +3965,7 @@
       "expect": "✘.*\\[node-public\\].*a published page renders from the production build"
     },
     {
-      "id": "QA-3/forms-missing-plugin-counts-as-present",
+      "id": "W-086/qa3-forms-missing-plugin-counts-as-present",
       "requirement": "R-040",
       "description": "any NOT_FOUND 404 counts as the forms plugin being there, so the not-installed notice never shows",
       "edits": [
@@ -3979,7 +3979,7 @@
       "expect": "\\(fail\\).*EmDash's missing-plugin 404 means missing"
     },
     {
-      "id": "QA-2/tabs-init-steals-focus",
+      "id": "W-086/qa2-tabs-init-steals-focus",
       "requirement": "R-031",
       "description": "the tabs runtime focuses the selected tab on load, pulling focus off whatever the visitor was on",
       "edits": [
@@ -3993,7 +3993,7 @@
       "expect": "\\(fail\\).*loading the page leaves focus where it was"
     },
     {
-      "id": "QA-2/tabs-keys-stop-focusing",
+      "id": "W-086/qa2-tabs-keys-stop-focusing",
       "requirement": "R-031",
       "description": "arrow keys select the next tab but leave focus on the old one",
       "edits": [
@@ -4007,7 +4007,7 @@
       "expect": "\\(fail\\).*arrows wrap, Home and End jump"
     },
     {
-      "id": "QA-1/quoted-font-variable-dropped",
+      "id": "W-086/qa1-quoted-font-variable-dropped",
       "requirement": "R-021",
       "description": "a font variable that quotes a family name is dropped from the CSS, so text falls back to the browser font",
       "edits": [
@@ -4021,7 +4021,7 @@
       "expect": "\\(fail\\).*a font stack with quoted family names is emitted"
     },
     {
-      "id": "QA-1/quoted-font-name-unchecked",
+      "id": "W-086/qa1-quoted-font-name-unchecked",
       "requirement": "R-021",
       "description": "anything between single quotes passes as a font family name, including a style-closing tag",
       "edits": [
@@ -4035,7 +4035,7 @@
       "expect": "\\(fail\\).*a font stack with quoted family names is emitted"
     },
     {
-      "id": "QA-1/local-font-refuses-quotes",
+      "id": "W-086/qa1-local-font-refuses-quotes",
       "requirement": "R-021",
       "description": "an element's own font family drops a quoted family name at render even though the schema accepts it",
       "edits": [
@@ -4049,7 +4049,7 @@
       "expect": "\\(fail\\).*a local font stack may quote family names"
     },
     {
-      "id": "QA-4/svg-transform-arity-unchecked",
+      "id": "W-086/qa4-svg-transform-arity-unchecked",
       "requirement": "R-061",
       "description": "a transform function with the wrong number of arguments is kept, so the browser logs an error and ignores it",
       "edits": [
@@ -4063,7 +4063,7 @@
       "expect": "\\(fail\\).*refuses \"rotate\\(1 2\\)\""
     },
     {
-      "id": "QA-4/svg-transform-trailing-junk",
+      "id": "W-086/qa4-svg-transform-trailing-junk",
       "requirement": "R-061",
       "description": "text after the last transform function is kept, so a value that starts well-formed passes",
       "edits": [
@@ -4077,7 +4077,7 @@
       "expect": "\\(fail\\).*refuses \"scale\\(1\\)x\""
     },
     {
-      "id": "QA-7/form-picker-shows-sentinel",
+      "id": "W-086/qa7-form-picker-shows-sentinel",
       "requirement": "R-040",
       "description": "the Form select shows the raw form id, or its internal placeholder value, instead of the form's name",
       "edits": [
@@ -4095,7 +4095,7 @@
       "expect": "\\(fail\\).*form \"01FORM\" reads \"Contact\""
     },
     {
-      "id": "QA-7/field-picker-shows-sentinel",
+      "id": "W-086/qa7-field-picker-shows-sentinel",
       "requirement": "R-040",
       "description": "the Field select shows the raw field name, or its internal placeholder value, instead of the field label",
       "edits": [
@@ -4113,7 +4113,7 @@
       "expect": "\\(fail\\).*field \"\" reads \"Choose a field…\""
     },
     {
-      "id": "QA-7/class-picker-shows-sentinel",
+      "id": "W-086/qa7-class-picker-shows-sentinel",
       "requirement": "R-021",
       "description": "the Add class select shows its internal placeholder value instead of a prompt",
       "edits": [
@@ -4131,7 +4131,7 @@
       "expect": "\\(fail\\).*prompts for a class"
     },
     {
-      "id": "QA-5/canvas-tab-radio-controlled",
+      "id": "W-086/qa5-canvas-tab-radio-controlled",
       "requirement": "R-031",
       "description": "the canvas passes a controlled checked prop to the tab radios, so React snaps every tab group back to its first tab",
       "edits": [
@@ -4145,7 +4145,7 @@
       "expect": "\\(fail\\).*a tab radio is only checked to begin with"
     },
     {
-      "id": "QA-5/tab-reveal-skips-outer-tabs",
+      "id": "W-086/qa5-tab-reveal-skips-outer-tabs",
       "requirement": "R-031",
       "description": "selecting an element in nested tabs opens only the innermost group, leaving it inside a hidden outer panel",
       "edits": [
@@ -4159,7 +4159,7 @@
       "expect": "\\(fail\\).*selecting \"ihb00001\" shows tabs"
     },
     {
-      "id": "QA-5/canvas-selection-not-revealed",
+      "id": "W-086/qa5-canvas-selection-not-revealed",
       "requirement": "R-031",
       "description": "a tab panel chosen from a tab label or Layers stays hidden on the canvas",
       "edits": [
@@ -4181,7 +4181,7 @@
       "expect": "✘.*\\[node\\].*on the canvas a tab label shows its panel"
     },
     {
-      "id": "QA-5/canvas-tab-label-selects-tabs",
+      "id": "W-086/qa5-canvas-tab-label-selects-tabs",
       "requirement": "R-031",
       "description": "clicking a tab label on the canvas selects the whole tabs element instead of that tab's panel",
       "edits": [
@@ -4203,7 +4203,7 @@
       "expect": "✘.*\\[node\\].*on the canvas a tab label shows its panel"
     },
     {
-      "id": "QA-6/canvas-svg-tags-lowercase",
+      "id": "W-086/qa6-canvas-svg-tags-lowercase",
       "requirement": "R-061",
       "description": "the canvas creates lineargradient, radialgradient and clippath, which the SVG namespace doesn't know, so gradients and clips don't paint",
       "edits": [
@@ -4217,7 +4217,7 @@
       "expect": "\\(fail\\).*SVG attributes and tags reach the canvas DOM"
     },
     {
-      "id": "QA-6/canvas-svg-attrs-hyphenated",
+      "id": "W-086/qa6-canvas-svg-attrs-hyphenated",
       "requirement": "R-061",
       "description": "hyphenated SVG attributes reach React as-is, so the canvas logs invalid DOM property warnings",
       "edits": [
@@ -4231,7 +4231,7 @@
       "expect": "\\(fail\\).*SVG attributes and tags reach the canvas DOM"
     },
     {
-      "id": "QA-8/theme-parts-first-page-only",
+      "id": "W-086/qa8-theme-parts-first-page-only",
       "requirement": "R-062",
       "description": "only the first page of published theme parts is read, so on a site with more than 50 the older ones never win",
       "edits": [
@@ -4245,7 +4245,7 @@
       "expect": "\\(fail\\).*parts past the first page of the collection still take part"
     },
     {
-      "id": "QA-8/theme-parts-paging-unbounded",
+      "id": "W-086/qa8-theme-parts-paging-unbounded",
       "requirement": "R-062",
       "description": "a cursor that never ends keeps the page render reading theme parts for a thousand pages",
       "edits": [
