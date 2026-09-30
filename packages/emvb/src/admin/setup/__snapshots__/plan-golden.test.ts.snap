@@ -1,0 +1,1255 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`planSetup over collection and field variants matches the snapshot (W-086 L10) 1`] = `
+{
+  "both missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hasSeo": true,
+          "hidden": true,
+          "label": "Visual pages",
+          "labelSingular": "Visual page",
+          "slug": "emvb_pages",
+          "supports": [
+            "drafts",
+            "revisions",
+            "preview",
+          ],
+          "urlPattern": "/{slug}",
+        },
+        "collection": "emvb_pages",
+        "kind": "create-collection",
+      },
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "slug": "title",
+          "type": "string",
+          "validation": null,
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "label": "Layout",
+          "slug": "layout",
+          "type": "json",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "defaultValue": "site-layout",
+          "label": "Canvas mode",
+          "slug": "canvas_mode",
+          "type": "select",
+          "validation": {
+            "options": [
+              "site-layout",
+              "blank",
+            ],
+          },
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "hasSeo": false,
+          "hidden": true,
+          "label": "Theme parts",
+          "labelSingular": "Theme part",
+          "slug": "emvb_theme_parts",
+          "supports": [
+            "drafts",
+            "revisions",
+            "preview",
+          ],
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-collection",
+      },
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "slug": "title",
+          "type": "string",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "label": "Layout",
+          "slug": "layout",
+          "type": "json",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "label": "Part type",
+          "required": true,
+          "slug": "part_type",
+          "type": "select",
+          "validation": {
+            "options": [
+              "header",
+              "footer",
+              "error_404",
+              "search_results",
+              "single_page",
+              "single_post",
+              "archive",
+              "loop_item",
+              "popup",
+            ],
+          },
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "defaultValue": {
+            "rules": [
+              {
+                "args": {},
+                "group": "general",
+                "id": "default-entire-site",
+                "name": "entire_site",
+                "op": "include",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Conditions",
+          "slug": "conditions",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "defaultValue": {
+            "advanced": {},
+            "open": [
+              {
+                "type": "page_load",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Triggers",
+          "slug": "triggers",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "pages as spec": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages canvas_mode default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages canvas_mode missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": "site-layout",
+          "label": "Canvas mode",
+          "slug": "canvas_mode",
+          "type": "select",
+          "validation": {
+            "options": [
+              "site-layout",
+              "blank",
+            ],
+          },
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "pages canvas_mode options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": "site-layout",
+          "label": "Canvas mode",
+          "validation": {
+            "options": [
+              "site-layout",
+              "blank",
+            ],
+          },
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "canvas_mode",
+      },
+    ],
+  },
+  "pages canvas_mode options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages canvas_mode other type": {
+    "conflicts": [
+      "Field "canvas_mode" on emvb_pages is json; EmVB needs select.",
+    ],
+    "steps": [],
+  },
+  "pages canvas_mode other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": "site-layout",
+          "label": "Canvas mode",
+          "validation": {
+            "options": [
+              "site-layout",
+              "blank",
+            ],
+          },
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "canvas_mode",
+      },
+    ],
+  },
+  "pages canvas_mode required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": "site-layout",
+          "label": "Canvas mode",
+          "validation": {
+            "options": [
+              "site-layout",
+              "blank",
+            ],
+          },
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "canvas_mode",
+      },
+    ],
+  },
+  "pages hidden unset": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hidden": true,
+        },
+        "collection": "emvb_pages",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "pages layout default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages layout missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Layout",
+          "slug": "layout",
+          "type": "json",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "pages layout options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Layout",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "layout",
+      },
+    ],
+  },
+  "pages layout options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages layout other type": {
+    "conflicts": [
+      "Field "layout" on emvb_pages is string; EmVB needs json.",
+    ],
+    "steps": [],
+  },
+  "pages layout other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Layout",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "layout",
+      },
+    ],
+  },
+  "pages layout required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Layout",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "layout",
+      },
+    ],
+  },
+  "pages only": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hasSeo": false,
+          "hidden": true,
+          "label": "Theme parts",
+          "labelSingular": "Theme part",
+          "slug": "emvb_theme_parts",
+          "supports": [
+            "drafts",
+            "revisions",
+            "preview",
+          ],
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-collection",
+      },
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "slug": "title",
+          "type": "string",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "label": "Layout",
+          "slug": "layout",
+          "type": "json",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "label": "Part type",
+          "required": true,
+          "slug": "part_type",
+          "type": "select",
+          "validation": {
+            "options": [
+              "header",
+              "footer",
+              "error_404",
+              "search_results",
+              "single_page",
+              "single_post",
+              "archive",
+              "loop_item",
+              "popup",
+            ],
+          },
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "defaultValue": {
+            "rules": [
+              {
+                "args": {},
+                "group": "general",
+                "id": "default-entire-site",
+                "name": "entire_site",
+                "op": "include",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Conditions",
+          "slug": "conditions",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "defaultValue": {
+            "advanced": {},
+            "open": [
+              {
+                "type": "page_load",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Triggers",
+          "slug": "triggers",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "pages seo flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hasSeo": true,
+        },
+        "collection": "emvb_pages",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "pages shown": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hidden": true,
+        },
+        "collection": "emvb_pages",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "pages supports extra": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages supports missing one": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "supports": [
+            "drafts",
+            "revisions",
+            "preview",
+          ],
+        },
+        "collection": "emvb_pages",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "pages supports unset": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "supports": [
+            "drafts",
+            "revisions",
+            "preview",
+          ],
+        },
+        "collection": "emvb_pages",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "pages title default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages title missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "slug": "title",
+          "type": "string",
+          "validation": null,
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "pages title options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "validation": null,
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "title",
+      },
+    ],
+  },
+  "pages title options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages title other type": {
+    "conflicts": [
+      "Field "title" on emvb_pages is json; EmVB needs string.",
+    ],
+    "steps": [],
+  },
+  "pages title other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "validation": null,
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "title",
+      },
+    ],
+  },
+  "pages title required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "validation": null,
+        },
+        "collection": "emvb_pages",
+        "kind": "update-field",
+        "slug": "title",
+      },
+    ],
+  },
+  "pages url pattern custom": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "pages url pattern unset": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "urlPattern": "/{slug}",
+        },
+        "collection": "emvb_pages",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "parts as spec": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts conditions default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts conditions missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "rules": [
+              {
+                "args": {},
+                "group": "general",
+                "id": "default-entire-site",
+                "name": "entire_site",
+                "op": "include",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Conditions",
+          "slug": "conditions",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "parts conditions options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "rules": [
+              {
+                "args": {},
+                "group": "general",
+                "id": "default-entire-site",
+                "name": "entire_site",
+                "op": "include",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Conditions",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "conditions",
+      },
+    ],
+  },
+  "parts conditions options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts conditions other type": {
+    "conflicts": [
+      "Field "conditions" on emvb_theme_parts is string; EmVB needs json.",
+    ],
+    "steps": [],
+  },
+  "parts conditions other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "rules": [
+              {
+                "args": {},
+                "group": "general",
+                "id": "default-entire-site",
+                "name": "entire_site",
+                "op": "include",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Conditions",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "conditions",
+      },
+    ],
+  },
+  "parts conditions required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "rules": [
+              {
+                "args": {},
+                "group": "general",
+                "id": "default-entire-site",
+                "name": "entire_site",
+                "op": "include",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Conditions",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "conditions",
+      },
+    ],
+  },
+  "parts hidden unset": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hidden": true,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "parts layout default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts layout missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Layout",
+          "slug": "layout",
+          "type": "json",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "parts layout options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Layout",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "layout",
+      },
+    ],
+  },
+  "parts layout options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts layout other type": {
+    "conflicts": [
+      "Field "layout" on emvb_theme_parts is string; EmVB needs json.",
+    ],
+    "steps": [],
+  },
+  "parts layout other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Layout",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "layout",
+      },
+    ],
+  },
+  "parts layout required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Layout",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "layout",
+      },
+    ],
+  },
+  "parts only": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hasSeo": true,
+          "hidden": true,
+          "label": "Visual pages",
+          "labelSingular": "Visual page",
+          "slug": "emvb_pages",
+          "supports": [
+            "drafts",
+            "revisions",
+            "preview",
+          ],
+          "urlPattern": "/{slug}",
+        },
+        "collection": "emvb_pages",
+        "kind": "create-collection",
+      },
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "slug": "title",
+          "type": "string",
+          "validation": null,
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "label": "Layout",
+          "slug": "layout",
+          "type": "json",
+          "validation": null,
+          "widget": "emvb:layout",
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "defaultValue": "site-layout",
+          "label": "Canvas mode",
+          "slug": "canvas_mode",
+          "type": "select",
+          "validation": {
+            "options": [
+              "site-layout",
+              "blank",
+            ],
+          },
+        },
+        "collection": "emvb_pages",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "parts part_type default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts part_type missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Part type",
+          "required": true,
+          "slug": "part_type",
+          "type": "select",
+          "validation": {
+            "options": [
+              "header",
+              "footer",
+              "error_404",
+              "search_results",
+              "single_page",
+              "single_post",
+              "archive",
+              "loop_item",
+              "popup",
+            ],
+          },
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "parts part_type options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Part type",
+          "required": true,
+          "validation": {
+            "options": [
+              "header",
+              "footer",
+              "error_404",
+              "search_results",
+              "single_page",
+              "single_post",
+              "archive",
+              "loop_item",
+              "popup",
+            ],
+          },
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "part_type",
+      },
+    ],
+  },
+  "parts part_type options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts part_type other type": {
+    "conflicts": [
+      "Field "part_type" on emvb_theme_parts is json; EmVB needs select.",
+    ],
+    "steps": [],
+  },
+  "parts part_type other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Part type",
+          "required": true,
+          "validation": {
+            "options": [
+              "header",
+              "footer",
+              "error_404",
+              "search_results",
+              "single_page",
+              "single_post",
+              "archive",
+              "loop_item",
+              "popup",
+            ],
+          },
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "part_type",
+      },
+    ],
+  },
+  "parts part_type required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Part type",
+          "required": true,
+          "validation": {
+            "options": [
+              "header",
+              "footer",
+              "error_404",
+              "search_results",
+              "single_page",
+              "single_post",
+              "archive",
+              "loop_item",
+              "popup",
+            ],
+          },
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "part_type",
+      },
+    ],
+  },
+  "parts seo flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hasSeo": false,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "parts shown": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "hidden": true,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "parts supports extra": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts supports missing one": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "supports": [
+            "drafts",
+            "revisions",
+            "preview",
+          ],
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "parts supports unset": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "supports": [
+            "drafts",
+            "revisions",
+            "preview",
+          ],
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-collection",
+      },
+    ],
+  },
+  "parts title default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts title missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "slug": "title",
+          "type": "string",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "parts title options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "title",
+      },
+    ],
+  },
+  "parts title options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts title other type": {
+    "conflicts": [
+      "Field "title" on emvb_theme_parts is json; EmVB needs string.",
+    ],
+    "steps": [],
+  },
+  "parts title other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "title",
+      },
+    ],
+  },
+  "parts title required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "label": "Title",
+          "required": true,
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "title",
+      },
+    ],
+  },
+  "parts triggers default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts triggers missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "advanced": {},
+            "open": [
+              {
+                "type": "page_load",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Triggers",
+          "slug": "triggers",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "parts triggers options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "advanced": {},
+            "open": [
+              {
+                "type": "page_load",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Triggers",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "triggers",
+      },
+    ],
+  },
+  "parts triggers options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts triggers other type": {
+    "conflicts": [
+      "Field "triggers" on emvb_theme_parts is string; EmVB needs json.",
+    ],
+    "steps": [],
+  },
+  "parts triggers other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "advanced": {},
+            "open": [
+              {
+                "type": "page_load",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Triggers",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "triggers",
+      },
+    ],
+  },
+  "parts triggers required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "advanced": {},
+            "open": [
+              {
+                "type": "page_load",
+              },
+            ],
+            "schemaVersion": 1,
+          },
+          "label": "Triggers",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "triggers",
+      },
+    ],
+  },
+  "parts url pattern custom": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts url pattern unset": {
+    "conflicts": [],
+    "steps": [],
+  },
+}
+`;

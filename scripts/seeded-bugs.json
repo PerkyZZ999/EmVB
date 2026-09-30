@@ -3872,6 +3872,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/theme/dynamic.test.ts"],
       "expect": "\\(fail\\).*portableTextToVNodes over styles"
+    },
+    {
+      "id": "W-086/setup-overwrites-url-pattern",
+      "requirement": "R-002",
+      "description": "setup replaces a site's custom URL pattern with EmVB's default",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/plan.ts",
+          "search": "if (spec.urlPattern && !current.urlPattern)",
+          "replace": "if (spec.urlPattern && current.urlPattern !== spec.urlPattern)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/setup/plan-golden.test.ts"],
+      "expect": "\\(fail\\).*planSetup over collection and field variants"
     }
   ]
 }

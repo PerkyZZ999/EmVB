@@ -60,6 +60,37 @@ function fieldMatches(state: FieldState, spec: FieldSpec): boolean {
   );
 }
 
+type CollectionUpdate = Extract<SetupStep, { kind: "update-collection" }>["body"];
+
+/** Collection settings EmVB needs that the current collection lacks; empty when none. */
+function collectionUpdate(current: CollectionState, spec: CollectionSpec): CollectionUpdate {
+  const update: CollectionUpdate = {};
+  if (current.hidden !== true) update.hidden = true;
+  if (!spec.supports.every((s) => current.supports?.includes(s))) {
+    update.supports = [...spec.supports];
+  }
+  if (current.hasSeo !== spec.hasSeo) update.hasSeo = spec.hasSeo;
+  if (spec.urlPattern && !current.urlPattern) update.urlPattern = spec.urlPattern;
+  return update;
+}
+
+/** The step (or type conflict) that brings one field to its spec; nothing when it matches. */
+function fieldPlan(
+  collection: string,
+  state: FieldState | undefined,
+  spec: FieldSpec,
+): { step?: SetupStep; conflict?: string } {
+  if (!state) return { step: { kind: "create-field", collection, body: spec } };
+  if (state.type !== spec.type) {
+    return {
+      conflict: `Field "${spec.slug}" on ${collection} is ${state.type}; EmVB needs ${spec.type}.`,
+    };
+  }
+  if (fieldMatches(state, spec)) return {};
+  const { slug: _slug, type: _type, ...body } = spec;
+  return { step: { kind: "update-field", collection, slug: spec.slug, body } };
+}
+
 /**
  * Pure planner for one collection: steps that bring the current state to the spec.
  * An empty plan means up to date. A field whose type differs is a conflict (data safety).
@@ -79,34 +110,23 @@ function planCollectionSetup(
       conflicts: [],
     };
   }
-  const steps: SetupStep[] = [];
-  const conflicts: string[] = [];
-  const update: Extract<SetupStep, { kind: "update-collection" }>["body"] = {};
-  if (current.hidden !== true) update.hidden = true;
-  if (!collectionSpec.supports.every((s) => current.supports?.includes(s))) {
-    update.supports = [...collectionSpec.supports];
-  }
-  if (current.hasSeo !== collectionSpec.hasSeo) update.hasSeo = collectionSpec.hasSeo;
-  if (collectionSpec.urlPattern && !current.urlPattern) {
-    update.urlPattern = collectionSpec.urlPattern;
-  }
-  if (Object.keys(update).length > 0) {
-    steps.push({ kind: "update-collection", collection, body: update });
-  }
-  for (const spec of fieldSpecs) {
-    const state = current.fields.find((f) => f.slug === spec.slug);
-    if (!state) {
-      steps.push({ kind: "create-field", collection, body: spec });
-    } else if (state.type !== spec.type) {
-      conflicts.push(
-        `Field "${spec.slug}" on ${collection} is ${state.type}; EmVB needs ${spec.type}.`,
-      );
-    } else if (!fieldMatches(state, spec)) {
-      const { slug: _slug, type: _type, ...body } = spec;
-      steps.push({ kind: "update-field", collection, slug: spec.slug, body });
-    }
-  }
-  return { steps, conflicts };
+  const update = collectionUpdate(current, collectionSpec);
+  const fields = fieldSpecs.map((spec) =>
+    fieldPlan(
+      collection,
+      current.fields.find((f) => f.slug === spec.slug),
+      spec,
+    ),
+  );
+  return {
+    steps: [
+      ...(Object.keys(update).length > 0
+        ? [{ kind: "update-collection", collection, body: update } as const]
+        : []),
+      ...fields.flatMap((f) => (f.step ? [f.step] : [])),
+    ],
+    conflicts: fields.flatMap((f) => (f.conflict ? [f.conflict] : [])),
+  };
 }
 
 /**
