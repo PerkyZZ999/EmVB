@@ -11686,6 +11686,510 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
       "expect": "\\(fail\\).*keeps its own class"
+    },
+    {
+      "id": "W-091/tabs-render-all-checked",
+      "requirement": "R-031",
+      "description": "every tab radio starts checked",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "if (i === 0) inputAttrs.checked = \"checked\";",
+          "replace": "inputAttrs.checked = \"checked\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*full radio, tab and panel markup"
+    },
+    {
+      "id": "W-091/tabs-render-tabindex",
+      "requirement": "R-031",
+      "description": "every tab label is in the tab order",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "tabindex: i === 0 ? \"0\" : \"-1\",",
+          "replace": "tabindex: \"0\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*full radio, tab and panel markup"
+    },
+    {
+      "id": "W-091/tabs-render-no-panels-class",
+      "requirement": "R-031",
+      "description": "the panels wrapper loses its class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "attrs: { class: \"emvb-tab-panels\" }",
+          "replace": "attrs: {}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*full radio, tab and panel markup"
+    },
+    {
+      "id": "W-091/tabs-render-orientation",
+      "requirement": "R-031",
+      "description": "the tab list loses aria-orientation",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": ", \"aria-orientation\": \"horizontal\" }",
+          "replace": " }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*full radio, tab and panel markup"
+    },
+    {
+      "id": "W-091/tabs-render-panel-id-public",
+      "requirement": "R-031",
+      "description": "panels carry editor ids on the public page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "if (ctx.mode === \"editor\") panelAttrs[\"data-emvb-id\"] = panel.id;",
+          "replace": "panelAttrs[\"data-emvb-id\"] = panel.id;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*each panel carries its element id"
+    },
+    {
+      "id": "W-091/tabs-render-no-cap",
+      "requirement": "R-031",
+      "description": "more than 12 tabs render",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": ".filter(isTabPanelNode).slice(0, MAX_TABS);",
+          "replace": ".filter(isTabPanelNode);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*at most 12 panels render"
+    },
+    {
+      "id": "W-091/tabs-render-no-filter",
+      "requirement": "R-031",
+      "description": "non-panel children render as tabs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "node.children.filter(isTabPanelNode).slice(0, MAX_TABS);",
+          "replace": "(node.children as never[]).slice(0, MAX_TABS);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*at most 12 panels render"
+    },
+    {
+      "id": "W-091/tabs-render-invalid-id-group",
+      "requirement": "R-031",
+      "description": "an invalid tabs id gives an empty group name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "const group = `emvb-tabs-${id ?? \"x\"}`;",
+          "replace": "const group = `emvb-tabs-${id ?? \"\"}`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*invalid id still gets one working radio group"
+    },
+    {
+      "id": "W-091/loop-empty-public-placeholder",
+      "requirement": "R-061",
+      "description": "an empty public loop shows the editor placeholder",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "if (ctx.mode !== \"editor\") return undefined;",
+          "replace": "if (ctx.mode === \"public\" && false) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*public loop with no posts renders nothing"
+    },
+    {
+      "id": "W-091/loop-item-class-lost",
+      "requirement": "R-061",
+      "description": "loop items lose their class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "attrs: { class: \"emvb-loop-item\", \"data-emvb-loop-item\": post.id },",
+          "replace": "attrs: { \"data-emvb-loop-item\": post.id },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*each post is one loop item"
+    },
+    {
+      "id": "W-091/loop-item-part-untrimmed",
+      "requirement": "R-061",
+      "description": "the loop-item part id isn't trimmed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "node.props.itemPartId?.trim() ?? \"\";",
+          "replace": "node.props.itemPartId ?? \"\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*item part id is trimmed"
+    },
+    {
+      "id": "W-091/loop-templates-unguarded",
+      "requirement": "R-061",
+      "description": "a loop reads templates that aren't there",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "itemPartId && dynamic?.loopTemplates ? dynamic.loopTemplates[itemPartId] : undefined;",
+          "replace": "itemPartId ? (dynamic as ThemeDynamicData).loopTemplates?.[itemPartId] ?? (dynamic as ThemeDynamicData & { loopTemplates: Record<string, never> }).loopTemplates[itemPartId] : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\).*item part id with no templates falls back"
+    },
+    {
+      "id": "W-091/tabs-rt-listeners-twice",
+      "requirement": "R-031",
+      "description": "initialising twice doubles the key handlers",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "  if (root.dataset[\"emvbTabsReady\"] === \"1\") return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*initialising twice still moves one tab"
+    },
+    {
+      "id": "W-091/tabs-rt-unchecked-last",
+      "requirement": "R-031",
+      "description": "with no radio checked the runtime selects the last tab",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "return checked >= 0 ? checked : 0;",
+          "replace": "return checked;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*with no radio checked the first tab"
+    },
+    {
+      "id": "W-091/tabs-rt-focus-scrolls",
+      "requirement": "R-031",
+      "description": "keyboard focus scrolls the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "focusTarget.focus({ preventScroll: true });",
+          "replace": "focusTarget.focus();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*focus moves without scrolling"
+    },
+    {
+      "id": "W-091/tabs-rt-missing-panel-throws",
+      "requirement": "R-031",
+      "description": "a tab without a panel throws",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "panels[i]?.setAttribute(\"aria-hidden\", String(!selected));",
+          "replace": "(panels[i] as HTMLElement).setAttribute(\"aria-hidden\", String(!selected));"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*tab without a panel still gets aria-controls"
+    },
+    {
+      "id": "W-091/tabs-rt-link-missing-panel",
+      "requirement": "R-031",
+      "description": "linking assumes every tab has a panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "    if (panel) {\n      if (!label.id)",
+          "replace": "    {\n      if (!label.id)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*tab without a panel still gets aria-controls"
+    },
+    {
+      "id": "W-091/tabs-rt-no-list-throws",
+      "requirement": "R-031",
+      "description": "a group without a tab list throws",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "  if (!list) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*group without a tab list is left alone"
+    },
+    {
+      "id": "W-091/popup-rt-storage-key",
+      "requirement": "R-063",
+      "description": "the show count is stored under another key",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "const STORAGE_PREFIX = \"emvb-popup-shown:\";",
+          "replace": "const STORAGE_PREFIX = \"emvb-popup:\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*each show is counted under"
+    },
+    {
+      "id": "W-091/popup-rt-corrupt-count",
+      "requirement": "R-063",
+      "description": "a corrupt stored count is used as is",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;",
+          "replace": "return Math.floor(n);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*corrupt stored count counts as never shown"
+    },
+    {
+      "id": "W-091/popup-rt-storage-throws",
+      "requirement": "R-063",
+      "description": "blocked storage hides a capped popup",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "  } catch {\n    return 0;\n  }",
+          "replace": "  } catch {\n    return Number.NaN;\n  }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*blocks storage still shows a capped popup"
+    },
+    {
+      "id": "W-091/popup-rt-id-not-checked",
+      "requirement": "R-063",
+      "description": "a config with a non-string id is used",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "if (!parsed || typeof parsed.id !== \"string\" || !parsed.triggers?.open) return null;",
+          "replace": "if (!parsed || !parsed.triggers?.open) return null;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*id isn't a string is left alone"
+    },
+    {
+      "id": "W-091/popup-rt-reopen-steals-focus",
+      "requirement": "R-063",
+      "description": "a second open overwrites the focus to give back",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      if (ctrl.opened) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*second trigger while open keeps the focus"
+    },
+    {
+      "id": "W-091/popup-rt-close-keeps-opened",
+      "requirement": "R-063",
+      "description": "closing leaves the popup marked open",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      root.hidden = true;\n      ctrl.opened = false;",
+          "replace": "      root.hidden = true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*closed popups reopen"
+    },
+    {
+      "id": "W-091/popup-rt-close-when-closed",
+      "requirement": "R-063",
+      "description": "Escape on a closed popup moves focus again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      if (!ctrl.opened) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*Escape on a closed popup"
+    },
+    {
+      "id": "W-091/popup-rt-focus-scrolls",
+      "requirement": "R-063",
+      "description": "opening focus scrolls the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      dialog.focus({ preventScroll: true });",
+          "replace": "      dialog.focus();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*without scrolling the page"
+    },
+    {
+      "id": "W-091/popup-rt-return-focus-scrolls",
+      "requirement": "R-063",
+      "description": "closing focus scrolls the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "prev.focus({ preventScroll: true });",
+          "replace": "prev.focus();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*without scrolling the page"
+    },
+    {
+      "id": "W-091/popup-rt-focusables-unfiltered",
+      "requirement": "R-063",
+      "description": "disabled and tabindex -1 controls count as focusable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "return [...nodes].filter((el) => !el.hasAttribute(\"disabled\") && el.tabIndex >= 0);",
+          "replace": "return [...nodes];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*Tab skips disabled"
+    },
+    {
+      "id": "W-091/popup-rt-any-key-trapped",
+      "requirement": "R-063",
+      "description": "every key is handled like Tab",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "    if (event.key !== \"Tab\") return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*only Tab is trapped"
+    },
+    {
+      "id": "W-091/popup-rt-shift-tab-any",
+      "requirement": "R-063",
+      "description": "Shift+Tab always wraps",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "if (event.shiftKey && document.activeElement === first) {",
+          "replace": "if (event.shiftKey) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*only Tab is trapped"
+    },
+    {
+      "id": "W-091/popup-rt-empty-no-refocus",
+      "requirement": "R-063",
+      "description": "Tab in an empty popup doesn't bring focus back",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      event.preventDefault();\n      ctrl.dialog.focus();",
+          "replace": "      event.preventDefault();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*Tab brings focus back to the dialog"
+    },
+    {
+      "id": "W-091/popup-rt-short-page",
+      "requirement": "R-063",
+      "description": "a short page never counts as scrolled",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "const progress = max <= 0 ? 1 : window.scrollY / max;",
+          "replace": "const progress = max < 0 ? 1 : window.scrollY / max;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*no taller than the window"
+    },
+    {
+      "id": "W-091/popup-rt-scroll-listener-kept",
+      "requirement": "R-063",
+      "description": "the scroll trigger keeps listening after it opens",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "        window.removeEventListener(\"scroll\", onScroll);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*scroll and exit intent open once"
+    },
+    {
+      "id": "W-091/popup-rt-exit-listener-kept",
+      "requirement": "R-063",
+      "description": "exit intent keeps listening after it opens",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      document.documentElement.removeEventListener(\"mouseleave\", onLeave);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*scroll and exit intent open once"
+    },
+    {
+      "id": "W-091/popup-rt-scroll-not-passive",
+      "requirement": "R-063",
+      "description": "the scroll listener isn't passive",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "window.addEventListener(\"scroll\", onScroll, { passive: true });",
+          "replace": "window.addEventListener(\"scroll\", onScroll);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*listeners are passive"
+    },
+    {
+      "id": "W-091/popup-rt-idle-not-passive",
+      "requirement": "R-063",
+      "description": "activity listeners aren't passive",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "window.addEventListener(eventName, reset, { passive: true });",
+          "replace": "window.addEventListener(eventName, reset);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*listeners are passive"
     }
   ]
 }

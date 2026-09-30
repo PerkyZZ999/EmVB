@@ -260,3 +260,215 @@ describe("public popup keyboard and focus (S7b, W-081)", () => {
     expect(timers).toEqual([]);
   });
 });
+
+// W-091: survivors in the popup runtime (Stryker 79%).
+describe("public popup runtime details (W-091)", () => {
+  const escape = (root: HTMLElement) => {
+    const dialog = root.querySelector(".emvb-popup__dialog");
+    if (!dialog) throw new Error("no dialog");
+    return key(dialog, "Escape");
+  };
+
+  test("each show is counted under emvb-popup-shown:<id>", () => {
+    popup("count1", doc([{ type: "page_load" }]));
+    expect(localStorage.getItem("emvb-popup-shown:count1")).toBe("1");
+  });
+
+  test("a corrupt stored count counts as never shown", () => {
+    const opens = (stored: string) => {
+      document.body.innerHTML = "";
+      localStorage.setItem("emvb-popup-shown:bad", stored);
+      const shown = !popup("bad", doc([{ type: "page_load" }], { showTimes: 1 })).hidden;
+      return [shown, localStorage.getItem("emvb-popup-shown:bad")];
+    };
+    expect([opens("garbage"), opens("-3"), opens("Infinity")]).toEqual([
+      [true, "1"],
+      [true, "1"],
+      [true, "1"],
+    ]);
+  });
+
+  test("a browser that blocks storage still shows a capped popup", () => {
+    const real = Object.getOwnPropertyDescriptor(globalThis, "localStorage");
+    const blocked = () => {
+      throw new Error("blocked");
+    };
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: { getItem: blocked, setItem: blocked, clear: () => undefined },
+    });
+    try {
+      expect(popup("blocked", doc([{ type: "page_load" }], { showTimes: 1 })).hidden).toBe(false);
+    } finally {
+      if (real) Object.defineProperty(globalThis, "localStorage", real);
+    }
+  });
+
+  test("a config whose id isn't a string is left alone", () => {
+    const root = document.createElement("div");
+    root.setAttribute("data-emvb-popup", "");
+    root.setAttribute(
+      "data-emvb-popup-config",
+      JSON.stringify({ id: 7, triggers: doc([{ type: "page_load" }]) }),
+    );
+    root.hidden = true;
+    root.innerHTML = '<div class="emvb-popup__dialog" tabindex="-1"></div>';
+    document.body.append(root);
+    initPopups();
+    expect(root.hidden).toBe(true);
+  });
+
+  test("a second trigger while open keeps the focus to give back; closed popups reopen", () => {
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    outside.focus();
+    const root = popup(
+      "twice",
+      doc([
+        { type: "delay", ms: 0 },
+        { type: "delay", ms: 0 },
+      ]),
+    );
+    const [first, second] = timers;
+    first?.run();
+    second?.run();
+    escape(root);
+    expect(document.activeElement === outside).toBe(true);
+    expect(root.hidden).toBe(true);
+    first?.run();
+    expect(root.hidden).toBe(false);
+  });
+
+  test("Escape on a closed popup doesn't move focus again", () => {
+    const outside = document.createElement("button");
+    const elsewhere = document.createElement("button");
+    document.body.append(outside, elsewhere);
+    outside.focus();
+    const { root, open } = openablePopup("closed", "<button>Join</button>");
+    open();
+    escape(root);
+    elsewhere.focus();
+    escape(root);
+    expect(document.activeElement === elsewhere).toBe(true);
+  });
+
+  test("opening and closing move focus without scrolling the page", () => {
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    outside.focus();
+    const calls: unknown[] = [];
+    outside.focus = (options?: FocusOptions) => {
+      calls.push(["outside", options]);
+    };
+    const { root, dialog, open } = openablePopup("scroll-free", "<button>Join</button>");
+    dialog.focus = (options?: FocusOptions) => {
+      calls.push(["dialog", options]);
+    };
+    open();
+    escape(root);
+    expect(calls).toEqual([
+      ["dialog", { preventScroll: true }],
+      ["outside", { preventScroll: true }],
+    ]);
+  });
+
+  test("Tab skips disabled and tabindex -1 controls when finding the last one", () => {
+    const { dialog, open } = openablePopup(
+      "skip",
+      '<a href="/terms">Terms</a><button>Join</button><input disabled><a href="/x" tabindex="-1">X</a>',
+    );
+    open();
+    const [first, join] = [...dialog.querySelectorAll<HTMLElement>("a, button")];
+    if (!first || !join) throw new Error("missing controls");
+    join.focus();
+    expect(key(join, "Tab").defaultPrevented).toBe(true);
+    expect(document.activeElement === first).toBe(true);
+  });
+
+  test("only Tab is trapped, and Shift+Tab away from the first control is left to the browser", () => {
+    const { dialog, open } = openablePopup(
+      "keys",
+      '<a href="/a">A</a><button>B</button><button>C</button>',
+    );
+    open();
+    const [, middle, last] = [...dialog.querySelectorAll<HTMLElement>("a, button")];
+    if (!middle || !last) throw new Error("missing controls");
+    last.focus();
+    expect(key(last, "Enter").defaultPrevented).toBe(false);
+    expect(document.activeElement === last).toBe(true);
+    middle.focus();
+    expect(key(middle, "Tab", true).defaultPrevented).toBe(false);
+    expect(document.activeElement === middle).toBe(true);
+  });
+
+  test("with nothing to focus, Tab brings focus back to the dialog", () => {
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    const { dialog, open } = openablePopup("empty", "<p>Just text</p>");
+    open();
+    outside.focus();
+    expect(key(dialog, "Tab").defaultPrevented).toBe(true);
+    expect(document.activeElement === dialog).toBe(true);
+  });
+
+  test("a page no taller than the window counts as fully scrolled", () => {
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      configurable: true,
+      value: 1000,
+    });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 1000 });
+    expect(popup("short", doc([{ type: "scroll", percent: 50 }])).hidden).toBe(false);
+  });
+
+  test("scroll and exit intent open once: after closing, more scrolling or leaving doesn't reopen", () => {
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      configurable: true,
+      value: 2000,
+    });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 1000 });
+    Object.defineProperty(window, "scrollY", { configurable: true, writable: true, value: 0 });
+    const scrolled = popup("once-s", doc([{ type: "scroll", percent: 50 }]));
+    (window as { scrollY: number }).scrollY = 600;
+    window.dispatchEvent(new Event("scroll"));
+    expect(scrolled.hidden).toBe(false);
+    escape(scrolled);
+    window.dispatchEvent(new Event("scroll"));
+    expect(scrolled.hidden).toBe(true);
+
+    const left = popup("once-e", doc([{ type: "exit_intent" }]));
+    document.documentElement.dispatchEvent(new MouseEvent("mouseleave", { clientY: 0 }));
+    expect(left.hidden).toBe(false);
+    escape(left);
+    document.documentElement.dispatchEvent(new MouseEvent("mouseleave", { clientY: 0 }));
+    expect(left.hidden).toBe(true);
+  });
+
+  test("scroll and activity listeners are passive", () => {
+    const listen = spyOn(window, "addEventListener");
+    try {
+      Object.defineProperty(document.documentElement, "scrollHeight", {
+        configurable: true,
+        value: 2000,
+      });
+      Object.defineProperty(window, "innerHeight", { configurable: true, value: 1000 });
+      popup(
+        "passive",
+        doc([
+          { type: "scroll", percent: 90 },
+          { type: "inactivity", ms: 5000 },
+        ]),
+      );
+      const options = listen.mock.calls.map(([type, , opts]) => [type, opts]);
+      expect(options).toEqual([
+        ["scroll", { passive: true }],
+        ["mousemove", { passive: true }],
+        ["mousedown", { passive: true }],
+        ["keydown", { passive: true }],
+        ["touchstart", { passive: true }],
+        ["scroll", { passive: true }],
+      ]);
+    } finally {
+      listen.mockRestore();
+    }
+  });
+});

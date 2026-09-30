@@ -183,4 +183,73 @@ describe("tabs runtime (W-078)", () => {
     third.dispatchEvent(new Event("change", { bubbles: true }));
     expect(state(root)).toEqual(["- false -1 true", "- false -1 true", "checked true 0 false"]);
   });
+
+  // W-091: survivors in the tabs runtime (Stryker 76%).
+  test("initialising twice still moves one tab per key press", () => {
+    const root = threeTabs("tabs-2");
+    initTabs(document);
+    initTabs(document);
+    press(root, "ArrowRight");
+    expect(state(root)).toEqual([
+      "- false -1 true",
+      "- false -1 true",
+      "checked true 0 false focused",
+    ]);
+  });
+
+  test("with no radio checked the first tab is selected", () => {
+    const root = threeTabs("tabs-n");
+    for (const input of root.querySelectorAll<HTMLInputElement>(".emvb-tab-input")) {
+      input.checked = false;
+    }
+    initTabs(document);
+    expect(state(root)).toEqual(["checked true 0 false", "- false -1 true", "- false -1 true"]);
+  });
+
+  test("keyboard focus moves without scrolling the page", () => {
+    const root = threeTabs("tabs-s");
+    initTabs(document);
+    const labels = [
+      ...root.querySelectorAll<HTMLElement>(":scope > .emvb-tab-list > .emvb-tab-label"),
+    ];
+    const calls: unknown[] = [];
+    const third = labels[2] as HTMLElement;
+    third.focus = (options?: FocusOptions) => {
+      calls.push(options);
+    };
+    press(root, "ArrowRight");
+    expect(calls).toEqual([{ preventScroll: true }]);
+  });
+
+  test("a tab without a panel still gets aria-controls, and nothing throws", () => {
+    document.body.innerHTML = `
+      <div class="emvb-tabs" id="tabs-p">
+        <input class="emvb-tab-input" type="radio" name="p" checked />
+        <input class="emvb-tab-input" type="radio" name="p" />
+        <div class="emvb-tab-list">
+          <label class="emvb-tab-label">One</label>
+          <label class="emvb-tab-label">Two</label>
+        </div>
+        <div class="emvb-tab-panels"><div class="emvb-tab-panel">A</div></div>
+      </div>`;
+    const root = document.body.querySelector(".emvb-tabs") as HTMLElement;
+    expect(() => initTabs(document)).not.toThrow();
+    const labels = [...root.querySelectorAll<HTMLElement>(".emvb-tab-label")];
+    expect(labels.map((l) => [l.id, l.getAttribute("aria-controls")])).toEqual([
+      ["tabs-p-tab-0", "tabs-p-panel-0"],
+      ["", "tabs-p-panel-1"],
+    ]);
+    expect(() => press(root, "ArrowRight")).not.toThrow();
+    expect(state(root)).toEqual(["- false -1 true", "checked true 0  focused"]);
+  });
+
+  test("a group without a tab list is left alone", () => {
+    document.body.innerHTML = `
+      <div class="emvb-tabs">
+        <input class="emvb-tab-input" type="radio" name="l" checked />
+        <div class="emvb-tab-panels"><div class="emvb-tab-panel">A</div></div>
+      </div>`;
+    expect(() => initTabs(document)).not.toThrow();
+    expect(document.body.querySelector(".emvb-tab-panel")?.hasAttribute("aria-hidden")).toBe(false);
+  });
 });
