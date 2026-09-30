@@ -63,7 +63,8 @@ function declare<T extends { id: string }>(
  * Cascade order (R-021 / W-030 / W-089): variables on `.emvb-root`, base CSS, shared
  * `.emvb-k-<id>` class rules, then local `.emvb-e-<id>` (local wins). Each selector's `:hover`,
  * `:focus-visible` and `:active` rules follow its base rule in that order, so a state beats Normal,
- * local states beat class states, and Active beats Hover when both apply.
+ * local states beat class states, and Active beats Hover when both apply. Transitions sit on the
+ * base rule, and one closing `prefers-reduced-motion: reduce` block turns them all off.
  */
 export function generateCss({
   design,
@@ -79,6 +80,7 @@ export function generateCss({
     ...declare(fontSizes, fontSizeVariableName, (size) => lengthCss(size.value)),
     ...declare(spacings, spacingVariableName, (space) => lengthCss(space.value)),
   ];
+  const animated: string[] = [];
   const rules = (selector: string, declarations: Declaration[], states: StateDeclarations) => [
     block(selector, declarations),
     ...STYLE_STATES.map((state) =>
@@ -90,22 +92,30 @@ export function generateCss({
       ),
     ),
   ];
+  const track = (selector: string, declarations: Declaration[]) => {
+    if (declarations.some((d) => d.property === "transition")) animated.push(selector);
+    return declarations;
+  };
   const classes = (design.classes ?? []).flatMap((cls) => {
     const className = styleClassName(cls.id);
     return className
       ? rules(
           `.${className}`,
-          styleDeclarations(cls.style).declarations,
+          track(`.${className}`, styleDeclarations(cls.style).declarations),
           stateDeclarations(cls.states).states,
         )
       : [];
   });
+  const locals = localRules.flatMap((rule) =>
+    rules(`.emvb-e-${rule.id}`, track(`.emvb-e-${rule.id}`, rule.declarations), rule.states ?? {}),
+  );
   return [
     block(".emvb-root", variables),
     ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? ""),
     ...classes,
-    ...localRules.flatMap((rule) =>
-      rules(`.emvb-e-${rule.id}`, rule.declarations, rule.states ?? {}),
-    ),
+    ...locals,
+    animated.length > 0
+      ? `@media (prefers-reduced-motion: reduce){${animated.join(",")}{transition:none}}`
+      : "",
   ].join("");
 }

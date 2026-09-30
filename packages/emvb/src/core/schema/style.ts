@@ -63,6 +63,17 @@ const Filter = z
     "Set at least one filter",
   );
 
+/**
+ * A simple transition (W-089, Normal only): one duration, delay and easing for a fixed property
+ * group. `colors` means color, background-color and border-color. No free-form lists or curves.
+ */
+const Transition = z.strictObject({
+  duration: z.number().int().min(0).max(2000),
+  delay: z.number().int().min(0).max(2000).optional(),
+  easing: z.enum(["ease", "ease-in", "ease-out", "ease-in-out", "linear"]),
+  property: z.enum(["all", "colors", "opacity", "shadow", "filter"]),
+});
+
 /** Style properties for layout and text elements (W-017 / R-012). Unknown keys are rejected. */
 export const StyleProps = z.strictObject({
   flexDirection: z.enum(["row", "column", "row-reverse", "column-reverse"]).optional(),
@@ -139,18 +150,21 @@ export const StyleProps = z.strictObject({
       "zoom-in",
     ])
     .optional(),
+  transition: Transition.optional(),
 });
 
 export type StyleProps = z.infer<typeof StyleProps>;
 
 /**
  * `states` on a node or class (D-032, W-089): hover, focus (`:focus-visible`) and active, each with
- * the same keys and limits as `style`. Unknown states are refused.
+ * the same keys and limits as `style` except `transition`. Unknown states are refused.
  */
+const StateStyle = StyleProps.omit({ transition: true });
+
 export const StyleStates = z.strictObject({
-  hover: StyleProps.optional(),
-  focus: StyleProps.optional(),
-  active: StyleProps.optional(),
+  hover: StateStyle.optional(),
+  focus: StateStyle.optional(),
+  active: StateStyle.optional(),
 });
 
 export type StyleStates = z.infer<typeof StyleStates>;

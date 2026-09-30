@@ -1986,8 +1986,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "    ...classes,\n    ...localRules.flatMap((rule) =>\n      rules(`.emvb-e-${rule.id}`, rule.declarations, rule.states ?? {}),\n    ),\n",
-          "replace": "    ...localRules.flatMap((rule) =>\n      rules(`.emvb-e-${rule.id}`, rule.declarations, rule.states ?? {}),\n    ),\n    ...classes,\n"
+          "search": "    ...classes,\n    ...locals,\n",
+          "replace": "    ...locals,\n    ...classes,\n"
         }
       ],
       "command": [
@@ -8361,7 +8361,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "  hover: StyleProps.optional(),",
+          "search": "  hover: StateStyle.optional(),",
           "replace": "  hover: z.record(z.string(), z.unknown()).optional(),"
         }
       ],
@@ -8501,7 +8501,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "    const { declarations, rejected: bad } = styleDeclarations(style);",
+          "search": "    const { declarations, rejected: bad } = styleDeclarations(withoutTransition(style));",
           "replace": "    const bad: string[] = [];\n    const declarations = Object.entries(style as object).map(([property, value]) => ({\n      property,\n      value: String(value),\n    }));"
         }
       ],
@@ -8673,6 +8673,306 @@
         "copies state styles too"
       ],
       "expect": "\\(fail\\).*copies state styles too"
+    },
+    {
+      "id": "W-089/transition-duration-unbounded",
+      "requirement": "W-089",
+      "description": "the generator emits any transition duration",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "inRange(n, 0, 2000) ? `${n}ms`",
+          "replace": "inRange(n, 0, 1e9) ? `${n}ms`"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "is refused by the schema and dropped by the generator"
+      ],
+      "expect": "\\(fail\\).*is refused by the schema and dropped by the generator"
+    },
+    {
+      "id": "W-089/transition-easing-free",
+      "requirement": "W-089",
+      "description": "any easing string, such as steps() or cubic-bezier(), reaches the CSS",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const easing = typeof t[\"easing\"] === \"string\" && TRANSITION_EASINGS.has(t[\"easing\"]);",
+          "replace": "const easing = typeof t[\"easing\"] === \"string\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "is refused by the schema and dropped by the generator"
+      ],
+      "expect": "\\(fail\\).*is refused by the schema and dropped by the generator"
+    },
+    {
+      "id": "W-089/transition-property-prototype",
+      "requirement": "W-089",
+      "description": "a prototype key such as toString is taken as a property group",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "typeof t[\"property\"] === \"string\" && Object.hasOwn(TRANSITION_PROPERTIES, t[\"property\"])",
+          "replace": "typeof t[\"property\"] === \"string\" && t[\"property\"] in TRANSITION_PROPERTIES"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "is refused by the schema and dropped by the generator"
+      ],
+      "expect": "\\(fail\\).*is refused by the schema and dropped by the generator"
+    },
+    {
+      "id": "W-089/transition-extra-keys",
+      "requirement": "W-089",
+      "description": "unknown transition keys are ignored instead of refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (Object.keys(t).some((key) => !TRANSITION_KEYS.has(key))) return undefined;\n  const duration",
+          "replace": "  const duration"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "is refused by the schema and dropped by the generator"
+      ],
+      "expect": "\\(fail\\).*is refused by the schema and dropped by the generator"
+    },
+    {
+      "id": "W-089/transition-colours-short",
+      "requirement": "W-089",
+      "description": "Colours animates only color",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  colors: [\"color\", \"background-color\", \"border-color\"],",
+          "replace": "  colors: [\"color\"],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "becomes transition"
+      ],
+      "expect": "\\(fail\\).*becomes transition"
+    },
+    {
+      "id": "W-089/transition-delay-dropped",
+      "requirement": "W-089",
+      "description": "the delay is never emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "${delay ? ` ${delay}` : \"\"}",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "becomes transition"
+      ],
+      "expect": "\\(fail\\).*becomes transition"
+    },
+    {
+      "id": "W-089/transition-in-state-schema",
+      "requirement": "W-089",
+      "description": "a state may carry a transition",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "const StateStyle = StyleProps.omit({ transition: true });",
+          "replace": "const StateStyle = StyleProps;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "transitions are Normal only"
+      ],
+      "expect": "\\(fail\\).*transitions are Normal only"
+    },
+    {
+      "id": "W-089/transition-in-state-css",
+      "requirement": "W-089",
+      "description": "a forged state transition reaches the CSS",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "styleDeclarations(withoutTransition(style))",
+          "replace": "styleDeclarations(style)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "transitions are Normal only"
+      ],
+      "expect": "\\(fail\\).*transitions are Normal only"
+    },
+    {
+      "id": "W-089/no-reduced-motion",
+      "requirement": "W-089",
+      "description": "transitions still run under prefers-reduced-motion: reduce",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "      ? `@media (prefers-reduced-motion: reduce){${animated.join(\",\")}{transition:none}}`",
+          "replace": "      ? \"\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "reduced motion turns off exactly those rules"
+      ],
+      "expect": "\\(fail\\).*reduced motion turns off exactly those rules"
+    },
+    {
+      "id": "W-089/reduced-motion-skips-classes",
+      "requirement": "W-089",
+      "description": "reduced motion does not stop class transitions",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "track(`.${className}`, styleDeclarations(cls.style).declarations)",
+          "replace": "styleDeclarations(cls.style).declarations"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/transition.test.ts",
+        "-t",
+        "reduced motion turns off exactly those rules"
+      ],
+      "expect": "\\(fail\\).*reduced motion turns off exactly those rules"
+    },
+    {
+      "id": "W-089/add-transition-zero",
+      "requirement": "W-089",
+      "description": "Add transition starts at 0 ms, so nothing animates",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "const NEW_TRANSITION: Transition = { duration: 200,",
+          "replace": "const NEW_TRANSITION: Transition = { duration: 0,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Add transition starts at 200 ms"
+      ],
+      "expect": "\\(fail\\).*Add transition starts at 200 ms"
+    },
+    {
+      "id": "W-089/transition-ms-range",
+      "requirement": "W-089",
+      "description": "Duration and Delay accept up to 5000 ms, which the schema refuses",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "const MS: NumberSpec = { min: 0, max: 2000,",
+          "replace": "const MS: NumberSpec = { min: 0, max: 5000,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Duration and Delay are whole milliseconds"
+      ],
+      "expect": "\\(fail\\).*Duration and Delay are whole milliseconds"
+    },
+    {
+      "id": "W-089/easing-option-wrong",
+      "requirement": "W-089",
+      "description": "Ease out stores ease-in",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "  { value: \"ease-out\", label: \"Ease out\" },",
+          "replace": "  { value: \"ease-in\", label: \"Ease out\" },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Easing offers only the named curves"
+      ],
+      "expect": "\\(fail\\).*Easing offers only the named curves"
+    },
+    {
+      "id": "W-089/applies-to-option-wrong",
+      "requirement": "W-089",
+      "description": "Colours stores all",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "  { value: \"colors\", label: \"Colours\" },",
+          "replace": "  { value: \"all\", label: \"Colours\" },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Applies to offers only the safe property groups"
+      ],
+      "expect": "\\(fail\\).*Applies to offers only the safe property groups"
+    },
+    {
+      "id": "W-089/transition-not-in-effects",
+      "requirement": "W-089",
+      "description": "Effects has no Transition row",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  effects: [\"opacity\", \"boxShadow\", \"filter\", \"cursor\", \"transition\"],",
+          "replace": "  effects: [\"opacity\", \"boxShadow\", \"filter\", \"cursor\"],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Effects holds opacity, box shadow, filters, cursor and transition"
+      ],
+      "expect": "\\(fail\\).*Effects holds opacity, box shadow, filters, cursor and transition"
     }
   ]
 }

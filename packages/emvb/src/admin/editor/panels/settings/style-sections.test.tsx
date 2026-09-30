@@ -357,8 +357,14 @@ const numberInput = (key: string) =>
   document.querySelector<HTMLInputElement>(`input[data-emvb-number="${key}"]`);
 
 describe("Effects section (W-088)", () => {
-  test("Effects holds opacity, box shadow, filters and cursor", () => {
-    expect(keysFor("container", "effects")).toEqual(["opacity", "boxShadow", "filter", "cursor"]);
+  test("Effects holds opacity, box shadow, filters, cursor and transition", () => {
+    expect(keysFor("container", "effects")).toEqual([
+      "opacity",
+      "boxShadow",
+      "filter",
+      "cursor",
+      "transition",
+    ]);
     expect(STYLE_UI.spacer?.sections).not.toContain("effects");
   });
 
@@ -488,5 +494,69 @@ describe("Effects section (W-088)", () => {
     expect(document.querySelector('[data-emvb-section="effects"] .emvb-count')?.textContent).toBe(
       " · 2",
     );
+  });
+});
+
+describe("Transition (W-089)", () => {
+  const set = { duration: 300, easing: "ease", property: "all" } as const;
+
+  test("Add transition starts at 200 ms, Ease, All", async () => {
+    await row("transition");
+    const add = [...document.querySelectorAll("button")].find(
+      (b) => b.textContent === "Add transition",
+    );
+    await act(async () => add?.click());
+    expect(patches).toEqual([{ transition: { duration: 200, easing: "ease", property: "all" } }]);
+  });
+
+  test("Duration and Delay are whole milliseconds from 0 to 2000", async () => {
+    await row("transition", { transition: set });
+    expect(document.body.textContent).toContain("Duration (ms)");
+    expect(numberInput("transition.duration")?.value).toBe("300");
+    await commitText(numberInput("transition.duration"), "2001");
+    expect(document.body.textContent).toContain("Duration can be from 0 to 2000.");
+    await commitText(numberInput("transition.duration"), "12.5");
+    expect(document.body.textContent).toContain("Duration must be a whole number.");
+    await commitText(numberInput("transition.duration"), "150");
+    await commitText(numberInput("transition.delay"), "50");
+    expect(patches).toEqual([
+      { transition: { ...set, duration: 150 } },
+      { transition: { ...set, delay: 50 } },
+    ]);
+  });
+
+  test("Easing offers only the named curves", async () => {
+    await row("transition", { transition: { ...set, delay: 40 } });
+    expect(await choose("Easing", "Ease out")).toEqual([
+      "Ease",
+      "Ease in",
+      "Ease out",
+      "Ease in and out",
+      "Linear",
+    ]);
+    expect(patches).toEqual([{ transition: { ...set, delay: 40, easing: "ease-out" } }]);
+  });
+
+  test("Applies to offers only the safe property groups", async () => {
+    await row("transition", { transition: { ...set, delay: 40 } });
+    expect(await choose("Applies to", "Colours")).toEqual([
+      "All",
+      "Colours",
+      "Opacity",
+      "Shadow",
+      "Filters",
+    ]);
+    expect(patches).toEqual([{ transition: { ...set, delay: 40, property: "colors" } }]);
+  });
+
+  test("clearing Delay removes it, and reset removes the transition", async () => {
+    await row("transition", { transition: { ...set, delay: 40 } });
+    await commitText(numberInput("transition.delay"), "");
+    const reset = document.querySelector<HTMLButtonElement>(
+      'button[aria-label="Reset Transition to default"]',
+    );
+    expect(reset?.disabled).toBe(false);
+    await act(async () => reset?.click());
+    expect(patches).toEqual([{ transition: set }, { transition: undefined }]);
   });
 });

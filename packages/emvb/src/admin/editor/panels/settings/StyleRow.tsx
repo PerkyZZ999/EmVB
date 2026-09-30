@@ -4,7 +4,7 @@ import { FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 import { LengthRow } from "./LengthRow.tsx";
-import { FiltersControl, ShadowControl } from "./EffectsControls.tsx";
+import { FiltersControl, ShadowControl, TransitionControl } from "./EffectsControls.tsx";
 import { NumberRow, ResetButton, type NumberSpec } from "./NumberRow.tsx";
 import { boundRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
 
@@ -284,6 +284,16 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "transition") {
+    return (
+      <TransitionControl
+        value={style?.transition}
+        onChange={(transition) => onPatch({ transition })}
+        reset={reset}
+      />
+    );
+  }
+
   if (styleKey === "filter") {
     return <FiltersControl value={style?.filter} onChange={(filter) => onPatch({ filter })} />;
   }
@@ -313,5 +323,6 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "opacity",
   "boxShadow",
   "filter",
+  "transition",
   ...(Object.keys(SELECT_OPTIONS) as StyleKey[]),
 ];

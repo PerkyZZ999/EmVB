@@ -158,7 +158,7 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
   ],
   background: ["backgroundColor"],
   border: ["borderWidth", "borderStyle", "borderColor", "borderRadius"],
-  effects: ["opacity", "boxShadow", "filter", "cursor"],
+  effects: ["opacity", "boxShadow", "filter", "cursor", "transition"],
   advanced: [],
 };
 
@@ -255,6 +255,7 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   boxShadow: "Box shadow",
   filter: "Filters",
   cursor: "Cursor",
+  transition: "Transition",
 };
 
 /** Every StyleProps key that the settings panel must be able to edit. */

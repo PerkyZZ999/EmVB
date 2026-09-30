@@ -219,6 +219,35 @@ function cssFontWeight(value: unknown): string | undefined {
   return undefined;
 }
 
+const TRANSITION_EASINGS = new Set(["ease", "ease-in", "ease-out", "ease-in-out", "linear"]);
+const TRANSITION_PROPERTIES: Readonly<Record<string, readonly string[]>> = {
+  all: ["all"],
+  colors: ["color", "background-color", "border-color"],
+  opacity: ["opacity"],
+  shadow: ["box-shadow"],
+  filter: ["filter"],
+};
+const TRANSITION_KEYS = new Set(["duration", "delay", "easing", "property"]);
+
+const ms = (n: unknown) => (Number.isInteger(n) && inRange(n, 0, 2000) ? `${n}ms` : undefined);
+
+/** W-089: `{ duration, delay?, easing, property }` to one transition entry per CSS property. */
+function cssTransition(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const t = value as Record<string, unknown>;
+  if (Object.keys(t).some((key) => !TRANSITION_KEYS.has(key))) return undefined;
+  const duration = ms(t["duration"]);
+  const delay = t["delay"] === undefined ? "" : ms(t["delay"]);
+  const easing = typeof t["easing"] === "string" && TRANSITION_EASINGS.has(t["easing"]);
+  const properties =
+    typeof t["property"] === "string" && Object.hasOwn(TRANSITION_PROPERTIES, t["property"])
+      ? TRANSITION_PROPERTIES[t["property"]]
+      : undefined;
+  if (!duration || delay === undefined || !easing || !properties) return undefined;
+  const timing = `${duration} ${t["easing"] as string}${delay ? ` ${delay}` : ""}`;
+  return properties.map((property) => `${property} ${timing}`).join(",");
+}
+
 const PROPERTY_MAP: {
   [K in keyof Required<StyleProps>]: { css: string; toValue: (v: unknown) => string | undefined };
 } = {
@@ -267,6 +296,7 @@ const PROPERTY_MAP: {
   boxShadow: { css: "box-shadow", toValue: cssBoxShadow },
   filter: { css: "filter", toValue: cssFilter },
   cursor: { css: "cursor", toValue: keyword(CURSOR) },
+  transition: { css: "transition", toValue: cssTransition },
 };
 
 /** Exported for table-driven tests (W-017). */
@@ -299,6 +329,13 @@ export function styleDeclarations(style: unknown): {
   return { declarations, rejected };
 }
 
+/** Transitions are Normal only (W-089): a state's `transition` is dropped and reported. */
+const withoutTransition = (style: unknown): unknown => {
+  if (typeof style !== "object" || style === null || !("transition" in style)) return style;
+  const { transition: _drop, ...rest } = style as Record<string, unknown>;
+  return rest;
+};
+
 export type StateDeclarations = Partial<Record<StyleStateName, Declaration[]>>;
 
 /**
@@ -318,7 +355,9 @@ export function stateDeclarations(states: unknown): {
   for (const state of STYLE_STATES) {
     const style = (states as Record<string, unknown>)[state];
     if (style === undefined) continue;
-    const { declarations, rejected: bad } = styleDeclarations(style);
+    const { declarations, rejected: bad } = styleDeclarations(withoutTransition(style));
+    if (typeof style === "object" && style !== null && "transition" in style)
+      bad.push("transition");
     if (declarations.length > 0) result[state] = declarations;
     for (const key of bad) rejected.push(`${state}.${key}`);
   }
