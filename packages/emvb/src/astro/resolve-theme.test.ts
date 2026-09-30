@@ -108,6 +108,25 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.needsPopupsRuntime).toBe(false);
   });
 
+  test("order comes from updatedAt, not from the order the collection returns", async () => {
+    const at = (day: string) => ({ updatedAt: `2026-09-${day}T00:00:00Z` });
+    themeEntries = [
+      part("POPOLD01", "popup", [heading("head0001", "Old")], at("01")),
+      part("HEADTIE1", "header", [heading("head0002", "Tie one")], at("05")),
+      part("POPNEW01", "popup", [heading("head0003", "New")], at("03")),
+      part("HEADTIE2", "header", [heading("head0004", "Tie two")], at("05")),
+      part("POPMID01", "popup", [heading("head0005", "Mid")], at("02")),
+      part("HEADOLD2", "header", [heading("head0006", "Older")], at("04")),
+    ];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect(resolved.popups.map((p) => p.id)).toEqual(["POPNEW01", "POPMID01", "POPOLD01"]);
+    expect(resolved.header?.id).toBe("HEADTIE1");
+    themeEntries = themeEntries.toReversed();
+    const reversed = await resolveThemeParts(astro("/about"));
+    expect(reversed.popups.map((p) => p.id)).toEqual(["POPNEW01", "POPMID01", "POPOLD01"]);
+    expect(reversed.header?.id).toBe("HEADTIE2");
+  });
+
   test("a 404 part replaces the content on 404s only", async () => {
     themeEntries = [part("NOTF0001", "error_404", [heading("head0001", "Lost?")])];
     const ctx404 = themeContextFrom(new URL("http://site.test/missing"), { is404: true });

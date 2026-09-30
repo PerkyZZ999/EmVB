@@ -103,7 +103,8 @@ function storedPartFrom(entry: { id: string; data: unknown }): StoredPart | unde
 async function loadPublishedThemeParts(): Promise<StoredPart[]> {
   let result: Awaited<ReturnType<typeof getEmDashCollection>>;
   try {
-    // Order in JS: D1/SQLite columns are snake_case; camelCase orderBy fails the query.
+    // No orderBy: D1/SQLite columns are snake_case and camelCase orderBy fails the query.
+    // Winners and popup order come from updatedAt in core/theme/conditions.ts.
     result = await getEmDashCollection(THEME_PARTS_COLLECTION, {
       status: "published",
       limit: 50,
@@ -112,11 +113,9 @@ async function loadPublishedThemeParts(): Promise<StoredPart[]> {
     return [];
   }
   if (result.error || !result.entries?.length) return [];
-  const parts = result.entries
+  return result.entries
     .map(storedPartFrom)
     .filter((part): part is StoredPart => part !== undefined);
-  parts.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : a.updatedAt > b.updatedAt ? -1 : 0));
-  return parts;
 }
 
 async function loadLoopTemplates(

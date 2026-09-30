@@ -3900,6 +3900,20 @@
       ],
       "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
       "expect": "\\(fail\\).*verify names each seed that drifted"
+    },
+    {
+      "id": "W-086/popups-in-collection-order",
+      "requirement": "R-063",
+      "description": "matching popups keep the collection's order instead of newest first",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/conditions.ts",
+          "search": "  return matching(candidates, partType, ctx).toSorted((a, b) =>\n    a.updatedAt < b.updatedAt ? 1 : a.updatedAt > b.updatedAt ? -1 : 0,\n  );",
+          "replace": "  return matching(candidates, partType, ctx);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*order comes from updatedAt"
     }
   ]
 }
