@@ -1,4 +1,13 @@
-import { canDrop, REASONS, type DragSource } from "../../src/core/arrange.ts";
+import {
+  canDrop,
+  moveDown,
+  moveIn,
+  moveOut,
+  moveUp,
+  REASONS,
+  type Arranged,
+  type DragSource,
+} from "../../src/core/arrange.ts";
 import { defaultElement } from "../../src/core/elements/index.ts";
 import { MAX_DEPTH, MAX_NODES } from "../../src/core/limits.ts";
 import { KNOWN_ELEMENT_TYPES, type Layout, type LayoutNode } from "../../src/core/schema/layout.ts";
@@ -88,6 +97,37 @@ export function dropTable(): Record<string, string> {
       { kind: "existing", id: "many0000" },
       "root0001",
     );
+  }
+  return table;
+}
+
+/** Where `id` sits in `l`, as `parent[index]`. */
+function placeOf(l: Layout, id: string): string {
+  const find = (node: LayoutNode): string | undefined => {
+    const children = nodeChildren(node);
+    const at = children.findIndex((child) => child.id === id);
+    if (at !== -1) return `${node.id}[${at}]`;
+    for (const child of children) {
+      const found = find(child);
+      if (found) return found;
+    }
+    return undefined;
+  };
+  return find(l.root) ?? "nowhere";
+}
+
+const MOVES = { up: moveUp, down: moveDown, in: moveIn, out: moveOut };
+
+/** Every element through Alt+↑/↓/→/←, as the element's new place or the refusal. */
+export function moveTable(): Record<string, string> {
+  const table: Record<string, string> = {};
+  for (const id of [...ids(layout.root), "gone0001"]) {
+    for (const [name, move] of Object.entries(MOVES)) {
+      const result: Arranged = move(layout, id);
+      table[`${name} ${id}`] = result.ok
+        ? `${result.selected} -> ${placeOf(result.layout, id)}`
+        : (reasonKey.get(result.reason) ?? result.reason);
+    }
   }
   return table;
 }

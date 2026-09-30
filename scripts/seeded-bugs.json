@@ -1140,8 +1140,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "return moveNode(layout, id, parent.parent.id, parent.index + 1);",
-          "replace": "return moveNode(layout, id, parent.parent.id, parent.index);"
+          "search": "{ parentId: outer.parent.id, index: outer.index + 1 }",
+          "replace": "{ parentId: outer.parent.id, index: outer.index }"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core"],
@@ -3710,6 +3710,20 @@
         "./packages/emvb/src/admin/editor/panels/settings/element-panel-shapes.test.tsx"
       ],
       "expect": "\\(fail\\).*spacer renders the same"
+    },
+    {
+      "id": "W-086/move-in-any-sibling",
+      "requirement": "R-003",
+      "description": "Alt+→ moves into a non-container sibling above",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "return above && isContainer(above)",
+          "replace": "return above && \"children\" in above"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/arrange-golden.test.ts"],
+      "expect": "\\(fail\\).*keyboard moves give the recorded"
     }
   ]
 }

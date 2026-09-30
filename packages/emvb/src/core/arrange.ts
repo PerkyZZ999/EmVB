@@ -224,43 +224,48 @@ export function insertionPoint(layout: Layout, selectedId: string | null): Place
   return { parentId: layout.root.id, index: layout.root.children.length };
 }
 
-/** Alt+↑: one place earlier among its siblings. */
-export function moveUp(layout: Layout, id: string): Arranged {
+type Child = Located & { parent: NonNullable<Located["parent"]> };
+
+/** Moves a non-root element to where `place` says, or returns the first refusal. */
+function moveChild(layout: Layout, id: string, place: (found: Child) => Place | Refusal): Arranged {
   const found = locate(layout, id);
   if (!found) return refuse(REASONS.missing);
   if (!found.parent) return refuse(REASONS.rootFixed);
-  if (found.index === 0) return refuse(REASONS.first);
-  return moveNode(layout, id, found.parent.id, found.index - 1);
+  const to = place(found as Child);
+  return "ok" in to ? to : moveNode(layout, id, to.parentId, to.index);
 }
+
+/** Alt+↑: one place earlier among its siblings. */
+export const moveUp = (layout: Layout, id: string): Arranged =>
+  moveChild(layout, id, ({ parent, index }) =>
+    index === 0 ? refuse(REASONS.first) : { parentId: parent.id, index: index - 1 },
+  );
 
 /** Alt+↓: one place later among its siblings. */
-export function moveDown(layout: Layout, id: string): Arranged {
-  const found = locate(layout, id);
-  if (!found) return refuse(REASONS.missing);
-  if (!found.parent) return refuse(REASONS.rootFixed);
-  if (found.index === found.parent.children.length - 1) return refuse(REASONS.last);
-  return moveNode(layout, id, found.parent.id, found.index + 2);
-}
+export const moveDown = (layout: Layout, id: string): Arranged =>
+  moveChild(layout, id, ({ parent, index }) =>
+    index === parent.children.length - 1
+      ? refuse(REASONS.last)
+      : { parentId: parent.id, index: index + 2 },
+  );
 
 /** Alt+←: out of its container, right after it. */
-export function moveOut(layout: Layout, id: string): Arranged {
-  const found = locate(layout, id);
-  if (!found) return refuse(REASONS.missing);
-  if (!found.parent) return refuse(REASONS.rootFixed);
-  const parent = locate(layout, found.parent.id);
-  if (!parent?.parent) return refuse(REASONS.top);
-  return moveNode(layout, id, parent.parent.id, parent.index + 1);
-}
+export const moveOut = (layout: Layout, id: string): Arranged =>
+  moveChild(layout, id, ({ parent }) => {
+    const outer = locate(layout, parent.id);
+    return outer?.parent
+      ? { parentId: outer.parent.id, index: outer.index + 1 }
+      : refuse(REASONS.top);
+  });
 
 /** Alt+→: into the container just above it, as its last child. */
-export function moveIn(layout: Layout, id: string): Arranged {
-  const found = locate(layout, id);
-  if (!found) return refuse(REASONS.missing);
-  if (!found.parent) return refuse(REASONS.rootFixed);
-  const above = found.parent.children[found.index - 1];
-  if (!above || !isContainer(above)) return refuse(REASONS.noContainerAbove);
-  return moveNode(layout, id, above.id, above.children.length);
-}
+export const moveIn = (layout: Layout, id: string): Arranged =>
+  moveChild(layout, id, ({ parent, index }) => {
+    const above = parent.children[index - 1];
+    return above && isContainer(above)
+      ? { parentId: above.id, index: above.children.length }
+      : refuse(REASONS.noContainerAbove);
+  });
 
 function documentOrder(layout: Layout): string[] {
   const ids: string[] = [];
