@@ -57,6 +57,23 @@ export function setUpEmvbOnce() {
   });
 }
 
+/** Creates a draft in `collection` over the content API and returns its id. */
+async function createDraft(
+  request: APIRequestContext,
+  collection: string,
+  data: Record<string, unknown>,
+  slug?: string,
+) {
+  const created = await api(request, "POST", `/_emdash/api/content/${collection}`, {
+    data,
+    ...(slug ? { slug } : {}),
+  });
+  expect(created.status).toBe(201);
+  const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
+  expect(id).toBeTruthy();
+  return id as string;
+}
+
 /** Creates an `emvb_pages` draft over the content API and returns its id. */
 export async function createPage(
   request: APIRequestContext,
@@ -64,14 +81,7 @@ export async function createPage(
   layout: unknown,
   slug?: string,
 ) {
-  const created = await api(request, "POST", "/_emdash/api/content/emvb_pages", {
-    data: { title, layout },
-    ...(slug ? { slug } : {}),
-  });
-  expect(created.status).toBe(201);
-  const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
-  expect(id).toBeTruthy();
-  return id as string;
+  return createDraft(request, "emvb_pages", { title, layout }, slug);
 }
 
 export type StoredPage = {
@@ -106,8 +116,10 @@ export async function createThemePart(
     triggers?: unknown;
   },
 ) {
-  const created = await api(request, "POST", "/_emdash/api/content/emvb_theme_parts", {
-    data: {
+  return createDraft(
+    request,
+    "emvb_theme_parts",
+    {
       title: input.title,
       layout: input.layout ?? {
         schemaVersion: 1,
@@ -138,12 +150,8 @@ export async function createThemePart(
         advanced: {},
       },
     },
-    ...(input.slug ? { slug: input.slug } : {}),
-  });
-  expect(created.status).toBe(201);
-  const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
-  expect(id).toBeTruthy();
-  return id as string;
+    input.slug,
+  );
 }
 
 /** Publishes the page's current draft. */

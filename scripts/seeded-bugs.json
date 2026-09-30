@@ -3774,6 +3774,20 @@
         "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx"
       ],
       "expect": "\\(fail\\).*optional href commits"
+    },
+    {
+      "id": "W-086/e2e-create-draft-drops-slug",
+      "requirement": "R-062",
+      "description": "the e2e createDraft helper stops sending the requested slug, so specs visit the wrong URL",
+      "edits": [
+        {
+          "file": "e2e/support/api.ts",
+          "search": "    data,\n    ...(slug ? { slug } : {}),",
+          "replace": "    data,"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/security.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\].*XSS corpus strings stay inert"
     }
   ]
 }
