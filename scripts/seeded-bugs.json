@@ -11448,6 +11448,118 @@
         "BRIEF success signal"
       ],
       "expect": "✘.*\\[node\\].*BRIEF success signal"
+    },
+    {
+      "id": "W-091/resolve-param-ignored",
+      "requirement": "R-052",
+      "description": "the route parameter option is ignored",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "astro.params[options.param ?? \"slug\"]",
+          "replace": "astro.params[\"slug\"]"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*named route parameter"
+    },
+    {
+      "id": "W-091/resolve-missing-collection-throws",
+      "requirement": "R-052",
+      "description": "a site without the EmVB collection throws instead of falling through",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "  try {\n    found = await getEmDashEntry(PAGES_COLLECTION, slug);\n  } catch {\n    // No emvb_pages collection yet (EmVB not set up): not an EmVB page.\n    return null;\n  }",
+          "replace": "  found = await getEmDashEntry(PAGES_COLLECTION, slug);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*missing collection or entry"
+    },
+    {
+      "id": "W-091/resolve-design-not-loaded",
+      "requirement": "R-052",
+      "description": "public pages render without the stored design",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "const design = await loadDesign(handler, astro.url);",
+          "replace": "const design = await loadDesign(undefined, astro.url);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*stored design"
+    },
+    {
+      "id": "W-091/resolve-canvas-mode-any-blank",
+      "requirement": "R-052",
+      "description": "any stored canvas mode renders as blank",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "data[\"canvas_mode\"] === \"blank\" ? \"blank\" : \"site-layout\"",
+          "replace": "data[\"canvas_mode\"] ? \"blank\" : \"site-layout\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*any other canvas mode"
+    },
+    {
+      "id": "W-091/resolve-preview-lost",
+      "requirement": "R-052",
+      "description": "a preview response is not flagged, so it may be cached",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "isPreview: Boolean(found.isPreview),",
+          "replace": "isPreview: false,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*any other canvas mode"
+    },
+    {
+      "id": "W-091/resolve-forms-skipped",
+      "requirement": "R-052",
+      "description": "forms on a public page render without their definitions",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "? await loadFormDefinitions(handler, astro.url, formIdsInLayout(layout))",
+          "replace": "? await loadFormDefinitions(undefined, astro.url, formIdsInLayout(layout))"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*forms on the page"
+    },
+    {
+      "id": "W-091/resolve-page-id-lost",
+      "requirement": "R-052",
+      "description": "the unreadable-layout log loses the page id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "String(data[\"id\"] ?? slug)",
+          "replace": "String(data[\"id\"] ?? \"\")"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*unreadable layout renders empty"
+    },
+    {
+      "id": "W-091/resolve-title-any",
+      "requirement": "R-052",
+      "description": "a non-text title is shown as text",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "typeof data[\"title\"] === \"string\" ? data[\"title\"] : \"\"",
+          "replace": "String(data[\"title\"] ?? \"\")"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*any other canvas mode"
     }
   ]
 }
