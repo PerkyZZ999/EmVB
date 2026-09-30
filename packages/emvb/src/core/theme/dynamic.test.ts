@@ -153,3 +153,39 @@ describe("loop element", () => {
     expect(collectLoopItemPartIds(layout)).toEqual(["abc"]);
   });
 });
+
+test("portableTextToVNodes over styles, block types and span shapes matches the snapshot (W-086 L9)", () => {
+  const styles = [
+    undefined,
+    "normal",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "H1",
+    "blockquote",
+    2,
+    null,
+  ];
+  const spans = [
+    [{ _type: "span", text: "One" }],
+    [
+      { _type: "span", text: "  Two " },
+      { _type: "span", text: "& <three>" },
+    ],
+    [{ text: "" }, { text: "   " }],
+    [null, 3, "x", { text: 4 }, { text: "kept" }, ["nested"]],
+    "not-an-array",
+    [],
+  ];
+  const types = ["block", "image", undefined];
+  const blocks: unknown[] = [];
+  for (const style of styles)
+    for (const children of spans)
+      for (const type of types) blocks.push({ _type: type, style, children });
+  blocks.push(null, 7, "loose", [], { _type: "block" });
+  const inputs: unknown[] = [blocks, "", "  plain  ", 42, null, { _type: "block" }, [], undefined];
+  expect(inputs.map((input) => portableTextToVNodes(input))).toMatchSnapshot();
+});

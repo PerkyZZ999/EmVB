@@ -1,0 +1,275 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`portableTextToVNodes over styles, block types and span shapes matches the snapshot (W-086 L9) 1`] = `
+[
+  [
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "h1",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "h1",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "h1",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "h2",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "h2",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "h2",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "h3",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "h3",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "h3",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "h4",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "h4",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "h4",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "p",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "p",
+    },
+  ],
+  [],
+  [
+    {
+      "attrs": {},
+      "children": [
+        "plain",
+      ],
+      "tag": "p",
+    },
+  ],
+  [],
+  [],
+  [],
+  [],
+  [],
+]
+`;

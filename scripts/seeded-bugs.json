@@ -3858,6 +3858,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/open-in-new-tab.test.ts"],
       "expect": "\\(fail\\).*a failed preview-URL request closes the tab and reports the error"
+    },
+    {
+      "id": "W-086/portable-text-h5-heading",
+      "requirement": "R-061",
+      "description": "Portable Text h5/h6 blocks render as headings instead of paragraphs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/dynamic.ts",
+          "search": "new Set([\"h1\", \"h2\", \"h3\", \"h4\"])",
+          "replace": "new Set([\"h1\", \"h2\", \"h3\", \"h4\", \"h5\", \"h6\"])"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/dynamic.test.ts"],
+      "expect": "\\(fail\\).*portableTextToVNodes over styles"
     }
   ]
 }

@@ -36,16 +36,18 @@ export const SAMPLE_POST: ThemePostFields = {
   featuredImageAlt: "Featured image",
 };
 
-function spanText(children: unknown): string {
-  if (!Array.isArray(children)) return "";
-  const parts: string[] = [];
-  for (const child of children) {
-    if (!child || typeof child !== "object") continue;
-    const span = child as Record<string, unknown>;
-    if (typeof span.text === "string") parts.push(span.text);
-  }
-  return parts.join("");
-}
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === "object";
+
+const spanText = (children: unknown) =>
+  Array.isArray(children)
+    ? children
+        .filter(isRecord)
+        .map((span) => (typeof span["text"] === "string" ? span["text"] : ""))
+        .join("")
+    : "";
+
+const HEADING_STYLES = new Set(["h1", "h2", "h3", "h4"]);
 
 /**
  * Convert Portable Text (or a plain string) into safe VNodes.
@@ -57,27 +59,14 @@ export function portableTextToVNodes(value: unknown): VNode[] {
     return trimmed ? [{ tag: "p", attrs: {}, children: [trimmed] }] : [];
   }
   if (!Array.isArray(value)) return [];
-  const out: VNode[] = [];
-  for (const block of value) {
-    if (!block || typeof block !== "object") continue;
-    const b = block as Record<string, unknown>;
-    if (b["_type"] !== "block") continue;
-    const text = spanText(b.children).trim();
-    if (!text) continue;
-    const style = typeof b.style === "string" ? b.style : "normal";
-    const tag =
-      style === "h1"
-        ? "h1"
-        : style === "h2"
-          ? "h2"
-          : style === "h3"
-            ? "h3"
-            : style === "h4"
-              ? "h4"
-              : "p";
-    out.push({ tag, attrs: {}, children: [text] });
-  }
-  return out;
+  return value.flatMap((block): VNode[] => {
+    if (!isRecord(block) || block["_type"] !== "block") return [];
+    const text = spanText(block["children"]).trim();
+    if (!text) return [];
+    const style = block["style"];
+    const tag = typeof style === "string" && HEADING_STYLES.has(style) ? style : "p";
+    return [{ tag, attrs: {}, children: [text] }];
+  });
 }
 
 /** Collect `loop.itemPartId` values so hosts can load Loop Item templates. */
