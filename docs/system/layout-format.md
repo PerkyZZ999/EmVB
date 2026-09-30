@@ -99,12 +99,29 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `boxShadow` | `{ x, y, blur, spread, color?, inset? }`: px numbers, `x`, `y` and `spread` −1000 to 1000, `blur` 0 to 1000; `color` is a colour; `inset` is a boolean | `box-shadow` as `[inset] Xpx Ypx Bpx Spx [colour]`; no colour means the text colour |
 | `filter` | `{ blur?, brightness?, contrast?, saturate?, grayscale?, hueRotate? }`, at least one set: `blur` 0–100 px, `brightness` / `contrast` / `saturate` 0–300 %, `grayscale` 0–100 %, `hueRotate` 0–360° | `filter`, functions always in that order, such as `blur(2px) grayscale(100%)` |
 | `cursor` | `default`, `pointer`, `text`, `move`, `grab`, `not-allowed`, `help`, `crosshair`, `zoom-in` | `cursor` |
+| `transition` (W-089, Normal only) | `{ duration, delay?, easing, property }`: `duration` and `delay` whole ms 0–2000; `easing` `ease`, `ease-in`, `ease-out`, `ease-in-out`, `linear`; `property` `all`, `colors`, `opacity`, `shadow`, `filter`. No other keys | `transition`, one entry per CSS property: `colors` is `color`, `background-color` and `border-color`; `shadow` is `box-shadow`. For example `opacity 200ms ease-out 50ms` |
 
 **W-088 additions are additive.** Every new key and unit is optional and every earlier value keeps its meaning, so stored pages and classes are valid unchanged. The version moved to 2 (D-031) with a v1 → v2 step that changes nothing, so an older EmVB shows "saved by a newer EmVB" rather than an invalid-layout error. The keys are the same on `node.style` and on `design.classes[].style`. The generator builds each value from typed numbers and keywords only and runs the same `isSafeCssValue` gate as every other property; anything else is dropped with a `rejected-style` warning. A shadow colour bound to a colour variable counts as a use of that variable, and deleting the variable clears it from the page layout and from class styles.
 
 ### State styles (W-089)
 
-`node.states` and `design.classes[].states` are `{ "hover"?, "focus"?, "active"? }`. Each state is a style object with the same keys, limits and variable references as `style`. Any other state name is refused. Adding `states` moved the version to 3 (D-032) with a v2 → v3 step that changes nothing.
+`node.states` and `design.classes[].states` are `{ "hover"?, "focus"?, "active"? }`. Each state is a style object with the same keys, limits and variable references as `style`, except `transition`, which belongs to Normal only. Any other state name is refused. Adding `states` moved the version to 3 (D-032) with a v2 → v3 step that changes nothing.
+
+```json
+{
+  "id": "btn00001",
+  "type": "button",
+  "props": { "text": "Go" },
+  "style": { "backgroundColor": "#1d4ed8", "transition": { "duration": 200, "easing": "ease-out", "property": "colors" } },
+  "states": { "hover": { "backgroundColor": "#1e3a8a" }, "focus": { "borderColor": "#f59e0b" } }
+}
+```
+
+- **Selectors.** `hover` is `:hover`, `focus` is `:focus-visible` (keyboard focus, so a mouse click leaves no focus style) and `active` is `:active`.
+- **Cascade.** Each selector's base rule is followed by its `:hover`, `:focus-visible` and `:active` rules, classes first and then the local rule. So a state rule beats every Normal rule (a class's Hover colour shows over a local Normal colour), within one state the local rule beats the class, and Active beats Focus, which beats Hover.
+- **Safety.** State values go through the same mappers and `isSafeCssValue` gate as `style`. A rejected value is dropped with a `rejected-style` warning naming `<state>.<key>` (such as `hover.color`); a `transition` inside a state is dropped and reported the same way, and so is an unknown state name. An unknown variable in a state is reported like one in `style`. An element whose only styles are states still gets `emvb-e-<id>`.
+- **Reduced motion.** When any rule has a `transition`, the CSS ends with one `@media (prefers-reduced-motion: reduce){…{transition:none}}` block that lists exactly those selectors. Nothing else changes under reduced motion.
+- **Editor preview.** The canvas CSS repeats every state rule for `[data-emvb-state="hover"|"focus"|"active"]`, and the editor sets that attribute on the selected element while a state is chosen in the Style tab. Public CSS has neither the attribute nor those selectors.
 
 ## Design system document
 
@@ -139,8 +156,8 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 ## Rendered output
 
 - The root gets `emvb-root`, each node `emvb-<type>` and, when its style yields at least one valid declaration, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning. Unknown element types render nothing publicly and a placeholder with `data-emvb-id` in the editor (warning `unknown-type`).
-- The CSS is, in order: variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021).
-- **Style classes** (`design.classes[]`): `{ id, name, style }`. Elements list ids in `node.classes`; HTML gets `emvb-k-<id>` in applied order. Cascade merge for computed styles: `resolveCascade(classStyles, local)` (later wins).
+- The CSS is, in order: variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021). Each class and local rule is followed by its state rules, and a reduced-motion block closes the CSS when a transition is set (see [State styles](#state-styles-w-089)).
+- **Style classes** (`design.classes[]`): `{ id, name, style, states? }`. Elements list ids in `node.classes`; HTML gets `emvb-k-<id>` in applied order. Cascade merge for computed styles: `resolveCascade(classStyles, local)` (later wins).
 - Length/font style props may use `{ "var": "<id>", "from": "spacing"|"fontSize"|"font" }` (colours keep `{ "var": "<id>" }`). Offsets (`top`, `right`, `bottom`, `left`) take spacing variables; the shadow colour takes a colour variable.
 - Text and attributes are escaped by the serializer. Public output has no `data-emvb-*` attributes and no scripts.
 
