@@ -63,7 +63,16 @@ export {
   defaultElement,
   type ElementType,
 } from "./elements/index.ts";
-export { StyleProps, ColorValue, Length, LengthValue, VariableRef } from "./schema/style.ts";
+export {
+  StyleProps,
+  StyleStates,
+  STYLE_STATES,
+  ColorValue,
+  Length,
+  LengthValue,
+  VariableRef,
+} from "./schema/style.ts";
+export type { StyleStateName } from "./schema/style.ts";
 export {
   upgradeLayout,
   isNewerThanSupported,

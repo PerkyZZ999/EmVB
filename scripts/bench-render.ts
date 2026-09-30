@@ -29,13 +29,13 @@ export function benchLayout(nodes = 300): Layout {
     count += 1 + headings.length;
   }
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     root: { id: "root0001", type: "container", props: {}, children: containers },
   };
 }
 
 const design: DesignSystem = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   variables: { colors: [{ id: "brand", name: "Brand", value: "#0055ff" }] },
 };
 

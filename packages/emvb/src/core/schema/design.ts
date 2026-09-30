@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { StyleProps } from "./style.ts";
+import { StyleProps, StyleStates } from "./style.ts";
 
 /** 2 since W-088 (D-031), like the layout: class styles may use the W-088 keys. */
-export const DESIGN_SCHEMA_VERSION = 2;
+export const DESIGN_SCHEMA_VERSION = 3;
 
 const VariableId = z
   .string()
@@ -40,6 +40,7 @@ const StyleClass = z.strictObject({
   id: VariableId,
   name: z.string().min(1).max(60),
   style: StyleProps,
+  states: StyleStates.optional(),
 });
 
 /** Design system document (D-013 / W-028 / W-030). */

@@ -1,4 +1,4 @@
-# Layout format (schema v2)
+# Layout format (schema v3)
 
 How EmVB stores a page and its site-wide design, as implemented through S4 (variables W-028+). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,8 +29,8 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `2` (D-031; v1 documents are upgraded on read by a step that changes nothing). `root` is always a container.
-- Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style` and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
+- `schemaVersion` is the literal `3` (D-031, D-032; v1 and v2 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
 
@@ -101,11 +101,16 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `cursor` | `default`, `pointer`, `text`, `move`, `grab`, `not-allowed`, `help`, `crosshair`, `zoom-in` | `cursor` |
 
 **W-088 additions are additive.** Every new key and unit is optional and every earlier value keeps its meaning, so stored pages and classes are valid unchanged. The version moved to 2 (D-031) with a v1 → v2 step that changes nothing, so an older EmVB shows "saved by a newer EmVB" rather than an invalid-layout error. The keys are the same on `node.style` and on `design.classes[].style`. The generator builds each value from typed numbers and keywords only and runs the same `isSafeCssValue` gate as every other property; anything else is dropped with a `rejected-style` warning. A shadow colour bound to a colour variable counts as a use of that variable, and deleting the variable clears it from the page layout and from class styles.
+
+### State styles (W-089)
+
+`node.states` and `design.classes[].states` are `{ "hover"?, "focus"?, "active"? }`. Each state is a style object with the same keys, limits and variable references as `style`. Any other state name is refused. Adding `states` moved the version to 3 (D-032) with a v2 → v3 step that changes nothing.
+
 ## Design system document
 
 ```json
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],

@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { MAX_TEXT_LENGTH } from "../limits.ts";
-import { Length, StyleProps } from "./style.ts";
+import { Length, StyleProps, StyleStates } from "./style.ts";
 
 /** 2 since W-088 (D-031): v1 → v2 changes nothing, so an older EmVB shows "saved by a newer EmVB". */
-export const LAYOUT_SCHEMA_VERSION = 2;
+export const LAYOUT_SCHEMA_VERSION = 3;
 
 export const NodeId = z
   .string()
@@ -35,6 +35,7 @@ const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) =>
   type: z.literal(type),
   props,
   style: StyleProps.optional(),
+  states: StyleStates.optional(),
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
 });
@@ -324,6 +325,7 @@ const UnknownNodeSchema = z.strictObject({
     .refine((value) => !knownTypeSet.has(value), "Unknown element type"),
   props: z.record(z.string(), z.unknown()),
   style: StyleProps.optional(),
+  states: StyleStates.optional(),
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
   get children(): z.ZodType<LayoutNode[] | undefined> {
@@ -388,6 +390,7 @@ export type PostImageNode = z.infer<typeof PostImageNode>;
 export type PostLinkNode = z.infer<typeof PostLinkNode>;
 
 type StyleOf = z.infer<typeof StyleProps>;
+type StatesOf = z.infer<typeof StyleStates>;
 type ClassesOf = z.infer<typeof ClassIds>;
 type HtmlIdOf = z.infer<typeof HtmlId>;
 type IdOf = z.infer<typeof NodeId>;
@@ -398,6 +401,7 @@ export type UnknownNode = {
   type: string;
   props: Record<string, unknown>;
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children?: LayoutNode[];
@@ -408,6 +412,7 @@ export type ContainerNode = {
   type: "container";
   props: { tag?: (typeof CONTAINER_TAGS)[number] };
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -418,6 +423,7 @@ export type DivBlockNode = {
   type: "div-block";
   props: Record<string, never>;
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -428,6 +434,7 @@ export type FlexboxNode = {
   type: "flexbox";
   props: Record<string, never>;
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -443,6 +450,7 @@ export type SvgNode = {
     size?: number;
   };
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
 };
@@ -452,6 +460,7 @@ export type TabPanelNode = {
   type: "tab-panel";
   props: { label: string };
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -462,6 +471,7 @@ export type TabsNode = {
   type: "tabs";
   props: Record<string, never>;
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -472,6 +482,7 @@ export type FormNode = {
   type: "form";
   props: { formId: string };
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -482,6 +493,7 @@ export type LoopNode = {
   type: "loop";
   props: { itemPartId?: string };
   style?: StyleOf;
+  states?: StatesOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];

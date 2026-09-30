@@ -6,7 +6,7 @@ import { layoutHasTabs } from "./presence.ts";
 describe("layoutHasTabs (W-078)", () => {
   test("false without tabs", () => {
     const layout: Layout = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       root: {
         ...defaultElement("container", "root0001"),
         children: [defaultElement("heading", "h1")],
@@ -17,7 +17,7 @@ describe("layoutHasTabs (W-078)", () => {
 
   test("true when tabs present", () => {
     const layout: Layout = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       root: {
         ...defaultElement("container", "root0001"),
         children: [defaultElement("tabs", "tabs0001")],

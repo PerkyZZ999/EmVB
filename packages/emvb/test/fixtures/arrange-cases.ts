@@ -27,7 +27,7 @@ function chain(depth: number): LayoutNode {
 }
 
 const page = (children: LayoutNode[]): Layout => ({
-  schemaVersion: 2,
+  schemaVersion: 3,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 

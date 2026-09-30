@@ -28,12 +28,18 @@ describe("content:beforeSave on emvb_pages", () => {
     expect(result.success).toBe(true);
   });
 
-  test("a v1 layout is stored upgraded to v2 with its content unchanged (D-031)", async () => {
-    const result = await t.savePage({ title: "Home", layout: { ...s1Page(), schemaVersion: 1 } });
-    const stored = (result as { data?: { item?: { data?: Record<string, unknown> } } }).data?.item
-      ?.data?.["layout"];
-    expect(stored).toEqual(s1Page());
-  });
+  test.each([1, 2])(
+    "a v%i layout is stored upgraded to v3 with its content unchanged (D-031, D-032)",
+    async (version) => {
+      const result = await t.savePage({
+        title: "Home",
+        layout: { ...s1Page(), schemaVersion: version },
+      });
+      const stored = (result as { data?: { item?: { data?: Record<string, unknown> } } }).data?.item
+        ?.data?.["layout"];
+      expect(stored).toEqual(s1Page());
+    },
+  );
 
   test("an invalid layout is rejected with SAVE_REJECTED and a path message", async () => {
     const layout = {
@@ -118,7 +124,7 @@ describe("design routes", () => {
         success: true,
         data: {
           design: {
-            schemaVersion: 2,
+            schemaVersion: 3,
             variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
             classes: [],
           },
@@ -138,9 +144,9 @@ describe("design routes", () => {
     expect(first.status).toBe(200);
     const revision = (first.body["data"] as { revision: string }).revision;
     const read = await t.route("design");
-    // A v1 document comes back upgraded to v2 (D-031).
+    // A v1 document comes back upgraded to v3 (D-031, D-032).
     expect(read.body["data"]).toEqual({
-      design: { ...design(), schemaVersion: 2 },
+      design: { ...design(), schemaVersion: 3 },
       revision,
       status: "ok",
     });

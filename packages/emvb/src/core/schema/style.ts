@@ -142,3 +142,17 @@ export const StyleProps = z.strictObject({
 });
 
 export type StyleProps = z.infer<typeof StyleProps>;
+
+/**
+ * `states` on a node or class (D-032, W-089): hover, focus (`:focus-visible`) and active, each with
+ * the same keys and limits as `style`. Unknown states are refused.
+ */
+export const StyleStates = z.strictObject({
+  hover: StyleProps.optional(),
+  focus: StyleProps.optional(),
+  active: StyleProps.optional(),
+});
+
+export type StyleStates = z.infer<typeof StyleStates>;
+export type StyleStateName = keyof StyleStates;
+export const STYLE_STATES: readonly StyleStateName[] = ["hover", "focus", "active"];

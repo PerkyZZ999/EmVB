@@ -8,7 +8,7 @@ const PAGES = "/_emdash/admin/plugins/emvb/pages";
 const NO_ACCESS = "You don't have access to EmVB";
 
 const pageLayout = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   root: { id: "root0001", type: "container", props: {}, children: [] },
 };
 const createAs = (request: APIRequestContext) =>

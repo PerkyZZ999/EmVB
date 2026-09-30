@@ -9,7 +9,7 @@ import {
 } from "./useSave.ts";
 
 const layout: Layout = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   root: {
     id: "root0001",
     type: "container",

@@ -7901,8 +7901,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = { 1: unchanged };",
-          "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {};"
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n};",
+          "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
       "command": [
@@ -7910,9 +7910,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "a v1 layout upgrades to v2"
+        "a v1 layout upgrades to v3"
       ],
-      "expect": "\\(fail\\).*a v1 layout upgrades to v2"
+      "expect": "\\(fail\\).*a v1 layout upgrades to v3"
     },
     {
       "id": "D-031/design-v1-step-missing",
@@ -7921,8 +7921,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = { 1: unchanged };",
-          "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {};"
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n};",
+          "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
       "command": [
@@ -7961,7 +7961,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 2;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 3;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -7970,9 +7970,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "a v1 layout upgrades to v2"
+        "a v1 layout upgrades to v3"
       ],
-      "expect": "\\(fail\\).*a v1 layout upgrades to v2"
+      "expect": "\\(fail\\).*a v1 layout upgrades to v3"
     },
     {
       "id": "D-031/upgraded-layout-not-stored",
@@ -8213,6 +8213,166 @@
         "editor tabs (Add | Layers, Content | Style, Variables | Classes) are 28 px"
       ],
       "expect": "\\(fail\\).*editor tabs \\(Add | Layers, Content | Style, Variables | Classes\\) are 28 px"
+    },
+    {
+      "id": "D-032/layout-v2-step-missing",
+      "requirement": "D-032",
+      "description": "no v2 → v3 layout step, so every stored v2 page is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n};",
+          "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "a v2 layout upgrades to v3"
+      ],
+      "expect": "\\(fail\\).*a v2 layout upgrades to v3"
+    },
+    {
+      "id": "D-032/design-v2-step-missing",
+      "requirement": "D-032",
+      "description": "no v2 → v3 design step, so the stored design is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n};",
+          "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "a v2 design document upgrades"
+      ],
+      "expect": "\\(fail\\).*a v2 design document upgrades"
+    },
+    {
+      "id": "D-032/layout-version-not-bumped",
+      "requirement": "D-032",
+      "description": "the layout stays at version 2, so an older EmVB calls a page with states invalid",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 3;",
+          "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "layout and design are at version 3"
+      ],
+      "expect": "\\(fail\\).*layout and design are at version 3"
+    },
+    {
+      "id": "D-032/design-version-not-bumped",
+      "requirement": "D-032",
+      "description": "the design stays at version 2",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "export const DESIGN_SCHEMA_VERSION = 3;",
+          "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "layout and design are at version 3"
+      ],
+      "expect": "\\(fail\\).*layout and design are at version 3"
+    },
+    {
+      "id": "D-032/node-states-refused",
+      "requirement": "D-032",
+      "description": "element nodes have no states field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "  props,\n  style: StyleProps.optional(),\n  states: StyleStates.optional(),\n",
+          "replace": "  props,\n  style: StyleProps.optional(),\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/states.test.ts",
+        "-t",
+        "a node keeps hover, focus and active styles"
+      ],
+      "expect": "\\(fail\\).*a node keeps hover, focus and active styles"
+    },
+    {
+      "id": "D-032/class-states-refused",
+      "requirement": "D-032",
+      "description": "classes have no states field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "  style: StyleProps,\n  states: StyleStates.optional(),\n",
+          "replace": "  style: StyleProps,\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/states.test.ts",
+        "-t",
+        "a class keeps its state styles"
+      ],
+      "expect": "\\(fail\\).*a class keeps its state styles"
+    },
+    {
+      "id": "D-032/unknown-state-kept",
+      "requirement": "D-032",
+      "description": "unknown state names pass through",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "export const StyleStates = z.strictObject({",
+          "replace": "export const StyleStates = z.looseObject({"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/states.test.ts",
+        "-t",
+        "an unknown state is refused"
+      ],
+      "expect": "\\(fail\\).*an unknown state is refused"
+    },
+    {
+      "id": "D-032/state-values-unchecked",
+      "requirement": "D-032",
+      "description": "state values skip the style limits",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "  hover: StyleProps.optional(),",
+          "replace": "  hover: z.record(z.string(), z.unknown()).optional(),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/states.test.ts",
+        "-t",
+        "a state value gets the same limits"
+      ],
+      "expect": "\\(fail\\).*a state value gets the same limits"
     }
   ]
 }

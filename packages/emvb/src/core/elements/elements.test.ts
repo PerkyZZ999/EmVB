@@ -10,7 +10,7 @@ const parse = (html: string) => {
 };
 
 const page = (child: LayoutNode): Layout => ({
-  schemaVersion: 2,
+  schemaVersion: 3,
   root: { id: "root0001", type: "container", props: {}, children: [child] },
 });
 
@@ -107,7 +107,7 @@ describe("element renderers (W-016, R-011)", () => {
       props: { tag: "section" as const },
       children: [] as LayoutNode[],
     };
-    expect(renderPage({ schemaVersion: 2, root: section }, design).html).toContain(
+    expect(renderPage({ schemaVersion: 3, root: section }, design).html).toContain(
       '<section class="emvb-root emvb-container">',
     );
     // Defence in depth: a forged tag outside the allowlist falls back to div (never reaches serialize).
@@ -117,7 +117,7 @@ describe("element renderers (W-016, R-011)", () => {
       props: { tag: "script" as "div" },
       children: [] as LayoutNode[],
     };
-    const html = renderPage({ schemaVersion: 2, root: forged }, design).html;
+    const html = renderPage({ schemaVersion: 3, root: forged }, design).html;
     expect(html).toContain("<div class=");
     expect(html).not.toContain("<script");
   });
@@ -294,7 +294,7 @@ describe("div-block and flexbox (W-072)", () => {
     const node = defaultElement("div-block", "divb0001");
     node.children = [defaultElement("heading", "head0001")];
     const layout: Layout = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       root: { ...defaultElement("container", "root0001"), children: [node] },
     };
     const { html, css } = renderPage(layout, design);
@@ -306,7 +306,7 @@ describe("div-block and flexbox (W-072)", () => {
   test("flexbox defaults to row wrap with gap and keeps container column", () => {
     const node = defaultElement("flexbox", "flex0001");
     const layout: Layout = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       root: { ...defaultElement("container", "root0001"), children: [node] },
     };
     const { css, html } = renderPage(layout, design);
@@ -321,7 +321,7 @@ describe("svg element (W-073)", () => {
   test("renders inline sanitized SVG", () => {
     const node = defaultElement("svg", "svg00001");
     const layout: Layout = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       root: { ...defaultElement("container", "root0001"), children: [node] },
     };
     const { html } = renderPage(layout, design);
@@ -334,7 +334,7 @@ describe("svg element (W-073)", () => {
     const node = defaultElement("svg", "svg00002");
     node.props.markup = "<svg><script>alert(1)</script></svg>";
     const layout: Layout = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       root: { ...defaultElement("container", "root0001"), children: [node] },
     };
     const { html } = renderPage(layout, design);
@@ -361,7 +361,7 @@ describe("tabs (W-074)", () => {
       },
     ];
     const layout: Layout = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       root: { ...defaultElement("container", "root0001"), children: [tabs] },
     };
     const { html, css } = renderPage(layout, design);
@@ -386,14 +386,14 @@ describe("tabs (W-074)", () => {
       },
     ];
     const layout: Layout = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       root: { ...defaultElement("container", "root0001"), children: [tabs] },
     };
     expect(renderPage(layout, design).needsTabsRuntime).toBe(true);
     expect(
       renderPage(
         {
-          schemaVersion: 2,
+          schemaVersion: 3,
           root: { ...defaultElement("container", "root0001"), children: [] },
         },
         design,
