@@ -10403,7 +10403,7 @@
     },
     {
       "id": "W-091/theme-part-triggers-fail-all",
-      "requirement": "R-064",
+      "requirement": "R-063",
       "description": "unreadable triggers hide every part type, not only popups",
       "edits": [
         {
@@ -10414,6 +10414,146 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*unreadable triggers hide a popup but not a header"
+    },
+    {
+      "id": "W-091/theme-post-orphan-kept",
+      "requirement": "R-062",
+      "description": "an entry with neither id nor slug becomes a post with an empty permalink",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "  if (!slug && !id) return null;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
+      "expect": "\\(fail\\).*neither id nor slug is not a post"
+    },
+    {
+      "id": "W-091/theme-post-prefix-double-slash",
+      "requirement": "R-062",
+      "description": "a permalink prefix with a trailing slash gives a double slash",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "  const permalink = `${prefix.replace(/\\/$/, \"\")}/${slug || id}`;",
+          "replace": "  const permalink = `${prefix}/${slug || id}`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
+      "expect": "\\(fail\\).*given permalink prefix"
+    },
+    {
+      "id": "W-091/theme-post-blank-image-url",
+      "requirement": "R-062",
+      "description": "a blank image src wins over a real preview URL",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "    if (typeof candidate === \"string\" && candidate.trim()) {",
+          "replace": "    if (typeof candidate === \"string\") {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
+      "expect": "\\(fail\\).*skips blank URLs"
+    },
+    {
+      "id": "W-091/popup-escape-ignored",
+      "requirement": "R-063",
+      "description": "Escape no longer closes a popup",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "    if (event.key === \"Escape\") {",
+          "replace": "    if (event.key === \"Esc\") {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*Escape hides it and gives focus back"
+    },
+    {
+      "id": "W-091/popup-focus-not-restored",
+      "requirement": "R-063",
+      "description": "closing a popup leaves focus nowhere instead of giving it back",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      if (prev && typeof prev.focus === \"function\") prev.focus({ preventScroll: true });\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*Escape hides it and gives focus back"
+    },
+    {
+      "id": "W-091/popup-open-no-focus",
+      "requirement": "R-063",
+      "description": "an opened popup doesn't take focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      dialog.focus({ preventScroll: true });\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*focuses its dialog"
+    },
+    {
+      "id": "W-091/popup-dismiss-direct-only",
+      "requirement": "R-063",
+      "description": "a click on the icon inside a dismiss button doesn't close the popup",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "    if (target?.closest?.(\"[data-emvb-popup-dismiss]\")) {",
+          "replace": "    if (target?.hasAttribute?.(\"data-emvb-popup-dismiss\")) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*dismiss control closes the popup"
+    },
+    {
+      "id": "W-091/popup-tab-trap-wrong-last",
+      "requirement": "R-063",
+      "description": "the focus trap treats the second-to-last control as the last",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "    const last = items[items.length - 1];",
+          "replace": "    const last = items[items.length - 2];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*Tab wraps from the last control"
+    },
+    {
+      "id": "W-091/popup-empty-tab-escapes",
+      "requirement": "R-063",
+      "description": "Tab leaves a popup that has nothing to focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "    if (items.length === 0) {",
+          "replace": "    if (items.length < 0) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*nothing to focus keeps Tab"
+    },
+    {
+      "id": "W-091/popup-config-without-open",
+      "requirement": "R-063",
+      "description": "a popup config without open triggers is accepted and breaks the runtime",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": " || !parsed.triggers?.open) return null;",
+          "replace": ") return null;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*is left alone"
     }
   ]
 }

@@ -167,3 +167,96 @@ describe("public popup runtime (S7b, W-081)", () => {
     expect(root.hidden).toBe(false);
   });
 });
+
+/** A popup that opens at once, with `inner` markup in its dialog; returns its parts after init. */
+function openablePopup(id: string, inner: string) {
+  const root = popup(id, doc([{ type: "delay", ms: 0 }]));
+  const dialog = root.querySelector<HTMLElement>(".emvb-popup__dialog");
+  if (!dialog) throw new Error("no dialog");
+  dialog.innerHTML = inner;
+  const open = () => timers.at(-1)?.run();
+  return { root, dialog, open };
+}
+
+const key = (target: Element, name: string, shiftKey = false) => {
+  const event = new KeyboardEvent("keydown", {
+    key: name,
+    shiftKey,
+    bubbles: true,
+    cancelable: true,
+  });
+  target.dispatchEvent(event);
+  return event;
+};
+
+describe("public popup keyboard and focus (S7b, W-081)", () => {
+  test("opening shows the popup and focuses its dialog; Escape hides it and gives focus back", () => {
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    outside.focus();
+    const { root, dialog, open } = openablePopup("k1", "<button>Join</button>");
+    open();
+    expect(root.hidden).toBe(false);
+    expect(document.activeElement === dialog).toBe(true);
+    const escape = key(dialog, "Escape");
+    expect(escape.defaultPrevented).toBe(true);
+    expect(root.hidden).toBe(true);
+    expect(document.activeElement === outside).toBe(true);
+  });
+
+  test("a click inside a dismiss control closes the popup; other clicks don't", () => {
+    const { root, dialog, open } = openablePopup(
+      "k2",
+      '<p>Offer</p><button data-emvb-popup-dismiss=""><span>Close</span></button>',
+    );
+    open();
+    dialog.querySelector("p")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(root.hidden).toBe(false);
+    dialog.querySelector("span")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(root.hidden).toBe(true);
+  });
+
+  test("Tab wraps from the last control to the first, Shift+Tab from the first to the last", () => {
+    const { dialog, open } = openablePopup(
+      "k3",
+      '<a href="/terms">Terms</a><button disabled>Off</button><button>Join</button>',
+    );
+    open();
+    const [first, , last] = [...dialog.querySelectorAll<HTMLElement>("a, button")];
+    if (!first || !last) throw new Error("missing controls");
+    last.focus();
+    expect(key(last, "Tab").defaultPrevented).toBe(true);
+    expect(document.activeElement === first).toBe(true);
+    expect(key(first, "Tab", true).defaultPrevented).toBe(true);
+    expect(document.activeElement === last).toBe(true);
+    // Away from the ends the browser moves focus itself.
+    first.focus();
+    expect(key(first, "Tab").defaultPrevented).toBe(false);
+  });
+
+  test("a popup with nothing to focus keeps Tab on its dialog", () => {
+    const { dialog, open } = openablePopup("k4", "<p>Just text</p>");
+    open();
+    const tab = key(dialog, "Tab");
+    expect(tab.defaultPrevented).toBe(true);
+    expect(document.activeElement === dialog).toBe(true);
+  });
+
+  test("a popup whose config is unreadable, has no open triggers or has no dialog is left alone", () => {
+    const bad = document.createElement("div");
+    bad.setAttribute("data-emvb-popup", "");
+    bad.setAttribute("data-emvb-popup-config", "{not json");
+    bad.innerHTML = '<div class="emvb-popup__dialog"></div>';
+    const noTriggers = bad.cloneNode(true) as HTMLElement;
+    noTriggers.setAttribute("data-emvb-popup-config", JSON.stringify({ id: "n1", triggers: {} }));
+    const noDialog = document.createElement("div");
+    noDialog.setAttribute("data-emvb-popup", "");
+    noDialog.setAttribute(
+      "data-emvb-popup-config",
+      JSON.stringify({ id: "n2", triggers: doc([{ type: "delay", ms: 0 }]) }),
+    );
+    document.body.append(bad, noTriggers, noDialog);
+    initPopups();
+    expect(timers).toEqual([]);
+  });
+});

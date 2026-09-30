@@ -25,6 +25,29 @@ describe("themePostFromEntry", () => {
     });
   });
 
+  test("a plain data bag with missing fields gets empty text and the given permalink prefix", () => {
+    expect(themePostFromEntry({ slug: "hello", title: 5 }, { permalinkPrefix: "/blog/" })).toEqual({
+      id: "hello",
+      slug: "hello",
+      title: "",
+      excerpt: "",
+      content: "",
+      permalink: "/blog/hello",
+    });
+  });
+
+  test("an entry with neither id nor slug is not a post", () => {
+    expect(themePostFromEntry({ data: { title: "Orphan" } })).toBeNull();
+  });
+
+  test("mediaFieldsFrom skips blank URLs, trims, and drops a blank alt", () => {
+    expect(mediaFieldsFrom({ src: "  ", url: "", previewUrl: " /p.jpg ", alt: "   " })).toEqual({
+      featuredImageUrl: "/p.jpg",
+      featuredImageAlt: undefined,
+    });
+    expect(mediaFieldsFrom("/raw.jpg")).toEqual({});
+  });
+
   test("mediaFieldsFrom prefers src then url", () => {
     expect(mediaFieldsFrom({ url: "https://cdn.example/a.jpg" }).featuredImageUrl).toBe(
       "https://cdn.example/a.jpg",
