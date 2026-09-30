@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseDoc } from "./parse-doc.ts";
 import { POPUP_DEVICES, TRIGGER_LIMITS } from "./popup-rules.ts";
 
 export const TRIGGERS_SCHEMA_VERSION = 1;
@@ -70,29 +71,9 @@ export type TriggersValidation =
   | { ok: false; issues: { path: string; code: string; message: string }[] };
 
 export function validateTriggers(raw: unknown): TriggersValidation {
-  let value = raw;
-  if (typeof raw === "string") {
-    try {
-      value = JSON.parse(raw) as unknown;
-    } catch {
-      return {
-        ok: false,
-        issues: [{ path: "triggers", code: "invalid_json", message: "Triggers must be JSON." }],
-      };
-    }
-  }
-  const parsed = TriggersDocSchema.safeParse(value);
-  if (!parsed.success) {
-    return {
-      ok: false,
-      issues: parsed.error.issues.map((issue) => ({
-        path: issue.path.length ? `triggers.${issue.path.join(".")}` : "triggers",
-        code: issue.code,
-        message: issue.message,
-      })),
-    };
-  }
-  for (const [i, trigger] of parsed.data.open.entries()) {
+  const parsed = parseDoc(raw, TriggersDocSchema, "triggers", "Triggers");
+  if (!parsed.ok) return parsed;
+  for (const [i, trigger] of parsed.doc.open.entries()) {
     if (trigger.type === "click" && !isSafeClickSelector(trigger.selector)) {
       return {
         ok: false,
@@ -106,7 +87,7 @@ export function validateTriggers(raw: unknown): TriggersValidation {
       };
     }
   }
-  return { ok: true, triggers: parsed.data };
+  return { ok: true, triggers: parsed.doc };
 }
 
 /**

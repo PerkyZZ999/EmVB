@@ -1,0 +1,389 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`both validators report the same issues for every input 1`] = `
+[
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_json",
+          "message": "Conditions must be JSON.",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_json",
+          "message": "Triggers must be JSON.",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_json",
+          "message": "Conditions must be JSON.",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_json",
+          "message": "Triggers must be JSON.",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected object, received null",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected object, received null",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected object, received null",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected object, received null",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected object, received number",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected object, received number",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected object, received array",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected object, received array",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_value",
+          "message": "Invalid input: expected 1",
+          "path": "conditions.schemaVersion",
+        },
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected array, received undefined",
+          "path": "conditions.rules",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_value",
+          "message": "Invalid input: expected 1",
+          "path": "triggers.schemaVersion",
+        },
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected array, received undefined",
+          "path": "triggers.open",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_value",
+          "message": "Invalid input: expected 1",
+          "path": "conditions.schemaVersion",
+        },
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized key: "open"",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_value",
+          "message": "Invalid input: expected 1",
+          "path": "triggers.schemaVersion",
+        },
+        {
+          "code": "too_small",
+          "message": "Too small: expected array to have >=1 items",
+          "path": "triggers.open",
+        },
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized key: "rules"",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "too_small",
+          "message": "Too small: expected string to have >=1 characters",
+          "path": "conditions.rules.0.id",
+        },
+        {
+          "code": "invalid_value",
+          "message": "Invalid option: expected one of "include"|"exclude"",
+          "path": "conditions.rules.0.op",
+        },
+        {
+          "code": "invalid_value",
+          "message": "Invalid option: expected one of "general"|"singular"|"archive"",
+          "path": "conditions.rules.0.group",
+        },
+        {
+          "code": "too_small",
+          "message": "Too small: expected string to have >=1 characters",
+          "path": "conditions.rules.0.name",
+        },
+        {
+          "code": "invalid_union",
+          "message": "Invalid input",
+          "path": "conditions.rules.0.args.a",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected array, received undefined",
+          "path": "triggers.open",
+        },
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized key: "rules"",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected array, received undefined",
+          "path": "conditions.rules",
+        },
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized keys: "open", "advanced"",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "too_small",
+          "message": "Too small: expected number to be >=0",
+          "path": "triggers.open.0.ms",
+        },
+        {
+          "code": "invalid_union",
+          "message": "Invalid discriminator value. Expected 'page_load' | 'delay' | 'scroll' | 'click' | 'exit_intent' | 'inactivity'",
+          "path": "triggers.open.1.type",
+        },
+        {
+          "code": "too_small",
+          "message": "Too small: expected number to be >=1",
+          "path": "triggers.advanced.showTimes",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized keys: "open", "extra"",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized keys: "rules", "extra"",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized key: "open"",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized key: "rules"",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "unknown_condition",
+          "message": "Unknown condition general/nowhere.",
+          "path": "conditions.rules[0]",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected array, received undefined",
+          "path": "triggers.open",
+        },
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized key: "rules"",
+          "path": "triggers",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+  [
+    {
+      "issues": [
+        {
+          "code": "invalid_type",
+          "message": "Invalid input: expected array, received undefined",
+          "path": "conditions.rules",
+        },
+        {
+          "code": "unrecognized_keys",
+          "message": "Unrecognized key: "open"",
+          "path": "conditions",
+        },
+      ],
+      "ok": false,
+    },
+    {
+      "issues": [
+        {
+          "code": "unsafe_selector",
+          "message": "Click selector may only use simple CSS selectors (no scripts).",
+          "path": "triggers.open[0].selector",
+        },
+      ],
+      "ok": false,
+    },
+  ],
+]
+`;

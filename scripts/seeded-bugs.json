@@ -3724,6 +3724,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/arrange-golden.test.ts"],
       "expect": "\\(fail\\).*keyboard moves give the recorded"
+    },
+    {
+      "id": "W-086/doc-issue-path-flattened",
+      "requirement": "R-061",
+      "description": "validation issues lose the path inside the document",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/parse-doc.ts",
+          "search": "path: issue.path.length ? `${root}.${issue.path.join(\".\")}` : root,",
+          "replace": "path: root,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/doc-validation.test.ts"],
+      "expect": "\\(fail\\).*both validators report"
     }
   ]
 }

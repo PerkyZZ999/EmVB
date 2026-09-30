@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseDoc } from "./parse-doc.ts";
 import { type ContentThemePartType, type ThemePartType } from "./part-types.ts";
 
 export const CONDITIONS_SCHEMA_VERSION = 1;
@@ -52,29 +53,9 @@ export type ConditionsValidation =
   | { ok: false; issues: { path: string; code: string; message: string }[] };
 
 export function validateConditions(raw: unknown): ConditionsValidation {
-  let value = raw;
-  if (typeof raw === "string") {
-    try {
-      value = JSON.parse(raw) as unknown;
-    } catch {
-      return {
-        ok: false,
-        issues: [{ path: "conditions", code: "invalid_json", message: "Conditions must be JSON." }],
-      };
-    }
-  }
-  const parsed = ConditionsDocSchema.safeParse(value);
-  if (!parsed.success) {
-    return {
-      ok: false,
-      issues: parsed.error.issues.map((issue) => ({
-        path: issue.path.length ? `conditions.${issue.path.join(".")}` : "conditions",
-        code: issue.code,
-        message: issue.message,
-      })),
-    };
-  }
-  for (const [i, rule] of parsed.data.rules.entries()) {
+  const parsed = parseDoc(raw, ConditionsDocSchema, "conditions", "Conditions");
+  if (!parsed.ok) return parsed;
+  for (const [i, rule] of parsed.doc.rules.entries()) {
     const vocab = vocabularyIssue(rule);
     if (vocab) {
       return {
@@ -83,7 +64,7 @@ export function validateConditions(raw: unknown): ConditionsValidation {
       };
     }
   }
-  return { ok: true, conditions: parsed.data };
+  return { ok: true, conditions: parsed.doc };
 }
 
 function vocabularyIssue(rule: ConditionRule): string | null {
