@@ -10554,6 +10554,90 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
       "expect": "\\(fail\\).*is left alone"
+    },
+    {
+      "id": "W-091/url-metachars-allowed",
+      "requirement": "R-032",
+      "description": "URLs may contain quotes, angle brackets and backticks",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/url.ts",
+          "search": "\"<>\\\"'`\".includes(ch)",
+          "replace": "\"\".includes(ch)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
+      "expect": "\\(fail\\).*refuses \"/a\\\\\"onmouseover"
+    },
+    {
+      "id": "W-091/url-del-allowed",
+      "requirement": "R-032",
+      "description": "the DEL control character is allowed in URLs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/url.ts",
+          "search": "code === 127 ||",
+          "replace": "code === 128 ||"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
+      "expect": "\\(fail\\).*refuses \"/a\\x7fb\""
+    },
+    {
+      "id": "W-091/url-length-unbounded",
+      "requirement": "R-032",
+      "description": "the 2 000-character URL limit is gone",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/url.ts",
+          "search": "trimmed.length > 2000",
+          "replace": "trimmed.length > 20000"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
+      "expect": "\\(fail\\).*2 001 is refused"
+    },
+    {
+      "id": "W-091/url-scheme-unanchored",
+      "requirement": "R-032",
+      "description": "a colon anywhere in a relative path is read as a scheme",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/url.ts",
+          "search": "const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(trimmed);",
+          "replace": "const hasScheme = /[a-z][a-z0-9+.-]*:/i.test(trimmed);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
+      "expect": "\\(fail\\).*accepts \"/docs/a:b\""
+    },
+    {
+      "id": "W-091/url-parse-error-throws",
+      "requirement": "R-032",
+      "description": "an unparsable URL throws instead of being refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/url.ts",
+          "search": "  try {\n    parsed = new URL(trimmed.replace(/\\s+/g, \"\"));\n  } catch {\n    return undefined;\n  }",
+          "replace": "  parsed = new URL(trimmed.replace(/\\s+/g, \"\"));"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
+      "expect": "\\(fail\\).*refuses \"http://\\["
+    },
+    {
+      "id": "W-091/url-untrimmed",
+      "requirement": "R-032",
+      "description": "a URL with surrounding spaces is refused instead of trimmed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/url.ts",
+          "search": "  const trimmed = value.trim();",
+          "replace": "  const trimmed = value;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
+      "expect": "\\(fail\\).*accepts \" /pricing \""
     }
   ]
 }
