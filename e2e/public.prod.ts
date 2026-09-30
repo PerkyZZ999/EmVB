@@ -357,3 +357,79 @@ test("Size, Position and Effects styles, local and from a class, render on the p
     await setClass(author, classId, null);
   }
 });
+
+test("hover, focus and active states from local styles and a class work on the production page, with no editor preview CSS", async ({
+  page,
+  request,
+}) => {
+  const classId = `st-${unique()}`;
+  await setClass(author, classId, {
+    name: "Stateful",
+    style: {},
+    states: { hover: { color: "#f59e0b" } },
+  });
+  try {
+    const slug = `w089-${unique()}`;
+    const layout = {
+      schemaVersion: 3,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "btn00001",
+            type: "button",
+            props: { text: "Go" },
+            classes: [classId],
+            style: {
+              backgroundColor: "#1d4ed8",
+              color: "#ffffff",
+              borderWidth: { value: 2, unit: "px" },
+              borderStyle: "solid",
+              borderColor: "#1d4ed8",
+              transition: { duration: 150, easing: "linear", property: "all" },
+            },
+            states: {
+              hover: { backgroundColor: "#1e3a8a" },
+              focus: { borderColor: "#f59e0b" },
+              active: { backgroundColor: "#172554" },
+            },
+          },
+        ],
+      },
+    };
+    const html = await publishedHtml(request, "States check", layout, slug);
+    expect(html).toContain(".emvb-e-btn00001:hover{");
+    expect(html).toContain(".emvb-e-btn00001:focus-visible{");
+    expect(html).toContain(".emvb-e-btn00001:active{");
+    expect(html).toContain(`.emvb-k-${classId}:hover{`);
+    expect(html).toContain("@media (prefers-reduced-motion: reduce)");
+    expect(html).not.toContain("data-emvb");
+
+    await page.goto(`/${slug}`);
+    const live = page.locator(".emvb-e-btn00001");
+    const read = (key: string) =>
+      live.evaluate((el, name) => getComputedStyle(el).getPropertyValue(name), key);
+    expect(await read("transition-duration")).toBe("0.15s");
+    await live.hover();
+    await expect.poll(() => read("background-color")).toBe("rgb(30, 58, 138)");
+    await expect.poll(() => read("color")).toBe("rgb(245, 158, 11)");
+    await page.mouse.down();
+    await expect.poll(() => read("background-color")).toBe("rgb(23, 37, 84)");
+    await page.mouse.up();
+    await page.mouse.move(0, 0);
+    await expect.poll(() => read("background-color")).toBe("rgb(29, 78, 216)");
+    expect(await live.evaluate((el) => el.matches(":focus-visible"))).toBe(false);
+    expect(await read("border-top-color")).toBe("rgb(29, 78, 216)");
+    await page.locator("body").click({ position: { x: 1, y: 1 } });
+    for (let i = 0; i < 40 && !(await live.evaluate((el) => el === document.activeElement)); i++)
+      await page.keyboard.press("Tab");
+    await expect(live).toBeFocused();
+    await expect.poll(() => read("border-top-color")).toBe("rgb(245, 158, 11)");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    expect(await read("transition-duration")).toBe("0s");
+  } finally {
+    await setClass(author, classId, null);
+  }
+});

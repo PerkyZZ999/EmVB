@@ -9413,6 +9413,204 @@
         "patchClassState edits one class"
       ],
       "expect": "\\(fail\\).*patchClassState edits one class"
+    },
+    {
+      "id": "W-089/e2e-preview-attr-missing",
+      "requirement": "W-089",
+      "description": "the canvas never marks the selected element with the chosen state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/state-preview.ts",
+          "search": "?.setAttribute(\"data-emvb-state\", preview.state);",
+          "replace": "?.removeAttribute(\"data-emvb-state\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "state switcher edits Hover"
+      ],
+      "expect": "✘.*\\[node\\].*state switcher edits Hover"
+    },
+    {
+      "id": "W-089/e2e-preview-css-missing",
+      "requirement": "W-089",
+      "description": "the canvas CSS has no state preview selectors",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "previewStates: mode === \"editor\",",
+          "replace": "previewStates: false,"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "state switcher edits Hover"
+      ],
+      "expect": "✘.*\\[node\\].*state switcher edits Hover"
+    },
+    {
+      "id": "W-089/e2e-state-never-reported",
+      "requirement": "W-089",
+      "description": "the Style panel never tells the canvas which state is chosen",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "onStyleState?.(node.id, tab === \"style\" ? styleState : \"normal\");",
+          "replace": "onStyleState?.(node.id, \"normal\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "state switcher edits Hover"
+      ],
+      "expect": "✘.*\\[node\\].*state switcher edits Hover"
+    },
+    {
+      "id": "W-089/e2e-focus-is-plain-focus",
+      "requirement": "W-089",
+      "description": "Focus is emitted as :focus, so a mouse click shows it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "focus: \":focus-visible\",",
+          "replace": "focus: \":focus\","
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "published page applies real"
+      ],
+      "expect": "✘.*\\[node\\].*published page applies real"
+    },
+    {
+      "id": "W-089/e2e-reduced-motion-kept",
+      "requirement": "W-089",
+      "description": "reduced motion leaves transitions running",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "{transition:none}",
+          "replace": "{transition-delay:0s}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "published page applies real"
+      ],
+      "expect": "✘.*\\[node\\].*published page applies real"
+    },
+    {
+      "id": "W-089/e2e-states-reversed",
+      "requirement": "W-089",
+      "description": "state rules are emitted Active first, so Hover beats Active",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "...STYLE_STATES.map(",
+          "replace": "...STYLE_STATES.toReversed().map("
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "published page applies real"
+      ],
+      "expect": "✘.*\\[node\\].*published page applies real"
+    },
+    {
+      "id": "W-089/e2e-class-states-dropped",
+      "requirement": "W-089",
+      "description": "class state styles never reach the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "stateDeclarations(cls.states).states,",
+          "replace": "{},"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "published page applies real"
+      ],
+      "expect": "✘.*\\[node\\].*published page applies real"
+    },
+    {
+      "id": "W-089/e2e-colors-means-all",
+      "requirement": "W-089",
+      "description": "the Colours transition animates every property",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "return properties.map((property) => `${property} ${timing}`).join(\",\");",
+          "replace": "return `all ${timing}`;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "published page applies real"
+      ],
+      "expect": "✘.*\\[node\\].*published page applies real"
+    },
+    {
+      "id": "W-089/e2e-prod-preview-leaks",
+      "requirement": "W-089",
+      "description": "the public page carries the editor-only state preview selectors (production build)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "previewStates: mode === \"editor\",",
+          "replace": "previewStates: true,"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e:prod",
+        "--project=node-public",
+        "-g",
+        "hover, focus and active states"
+      ],
+      "expect": "✘.*\\[node-public\\].*hover, focus and active states",
+      "env": { "CI": "1" }
     }
   ]
 }

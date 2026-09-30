@@ -9,7 +9,12 @@ export type DesignDoc = {
     fontSizes?: { id: string; name: string; value: { value: number; unit: string } }[];
     spacings?: { id: string; name: string; value: { value: number; unit: string } }[];
   };
-  classes?: { id: string; name: string; style: Record<string, unknown> }[];
+  classes?: {
+    id: string;
+    name: string;
+    style: Record<string, unknown>;
+    states?: Record<string, Record<string, unknown>>;
+  }[];
 };
 
 export async function loadDesign(request: APIRequestContext) {
@@ -60,10 +65,14 @@ export async function setSpacing(
 export async function setClass(
   request: APIRequestContext,
   id: string,
-  next: { name: string; style: Record<string, unknown> } | null,
+  next: {
+    name: string;
+    style: Record<string, unknown>;
+    states?: Record<string, Record<string, unknown>>;
+  } | null,
 ) {
   const data = await loadDesign(request);
   const classes = (data.design.classes ?? []).filter((c) => c.id !== id);
-  if (next !== null) classes.push({ id, name: next.name, style: next.style });
+  if (next !== null) classes.push({ id, ...next });
   await saveDesign(request, { ...data.design, classes }, data.revision);
 }
