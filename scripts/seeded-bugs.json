@@ -3738,6 +3738,42 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/theme/doc-validation.test.ts"],
       "expect": "\\(fail\\).*both validators report"
+    },
+    {
+      "id": "W-086/draft-enter-does-not-commit",
+      "requirement": "R-004",
+      "description": "Enter no longer commits a number or link field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "        if (event.key === \"Enter\") commit();",
+          "replace": "        if (event.key === \"Tab\") commit();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx"
+      ],
+      "expect": "\\(fail\\).*commits and reports errors"
+    },
+    {
+      "id": "W-086/optional-href-not-clearable",
+      "requirement": "R-004",
+      "description": "clearing an optional link reports an error instead of removing it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "      if (commitClearable()) return;\n      const safe = sanitizeHref(draft.trim());",
+          "replace": "      const safe = sanitizeHref(draft.trim());"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx"
+      ],
+      "expect": "\\(fail\\).*optional href commits"
     }
   ]
 }

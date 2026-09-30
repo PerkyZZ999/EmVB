@@ -11,6 +11,43 @@ import { propsOf, withProp } from "./node-props.ts";
 
 const MAX_FIELD_NUMBER = 10_000;
 
+/** An input that keeps a draft and commits it on blur or Enter. */
+function CommitInput({
+  label,
+  className,
+  inputMode,
+  fieldKey,
+  draft,
+  error,
+  setDraft,
+  commit,
+}: {
+  label: string;
+  className: string;
+  inputMode?: "numeric";
+  fieldKey: string;
+  draft: string;
+  error: string | null;
+  setDraft: (draft: string) => void;
+  commit: () => void;
+}) {
+  return (
+    <Input
+      label={label}
+      className={className}
+      inputMode={inputMode}
+      value={draft}
+      error={error ?? undefined}
+      data-emvb-field={fieldKey}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") commit();
+      }}
+    />
+  );
+}
+
 /**
  * Text-like content-tab controls (W-021): textarea/list-items, int, number, href and text. Owns
  * the draft buffer and its validation; commit rules differ per field kind.
@@ -103,31 +140,23 @@ export function DraftTextField({
       onChange(withProp(node, field.key, integer ? value : { value, unit }));
     };
     return (
-      <Input
+      <CommitInput
         label={integer ? field.label : `${field.label} (${unit})`}
         className={`${FIELD} emvb-mono`}
         inputMode="numeric"
-        value={draft}
-        error={error ?? undefined}
-        data-emvb-field={field.key}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") commit();
-        }}
+        fieldKey={field.key}
+        draft={draft}
+        error={error}
+        setDraft={setDraft}
+        commit={commit}
       />
     );
   }
 
   if (field.kind === "href") {
     const commit = () => {
-      const trimmed = draft.trim();
-      if (trimmed === "" && field.optional) {
-        setError(null);
-        onChange(withProp(node, field.key, undefined));
-        return;
-      }
-      const safe = sanitizeHref(trimmed);
+      if (commitClearable()) return;
+      const safe = sanitizeHref(draft.trim());
       if (!safe) {
         setError(
           field.message ?? "Use a full URL such as https://example.com or a path such as /pricing.",
@@ -138,17 +167,14 @@ export function DraftTextField({
       onChange(withProp(node, field.key, safe));
     };
     return (
-      <Input
+      <CommitInput
         label={field.label}
         className={FIELD}
-        value={draft}
-        error={error ?? undefined}
-        data-emvb-field={field.key}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") commit();
-        }}
+        fieldKey={field.key}
+        draft={draft}
+        error={error}
+        setDraft={setDraft}
+        commit={commit}
       />
     );
   }

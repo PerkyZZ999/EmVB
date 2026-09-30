@@ -1,0 +1,155 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`draft text fields (W-021) text commits and reports errors as before 1`] = `
+{
+  "initial": "Hi",
+  "label": "Text",
+  "seen": [
+    "Text",
+    "TextText can be up to 2000 characters. Shorten it.",
+  ],
+  "sent": [
+    "Hello",
+    "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  ],
+}
+`;
+
+exports[`draft text fields (W-021) textarea commits and reports errors as before 1`] = `
+{
+  "initial": "a",
+  "label": "Body",
+  "seen": [
+    
+"Bodyone
+two  "
+,
+  ],
+  "sent": [
+    
+"one
+two  "
+,
+  ],
+}
+`;
+
+exports[`draft text fields (W-021) list commits and reports errors as before 1`] = `
+{
+  "initial": 
+"a
+b"
+,
+  "label": "Items",
+  "seen": [
+    
+"Itemsx  
+
+ y 
+"
+,
+    
+"Items  
+"
+,
+  ],
+  "sent": [
+    [
+      "x",
+      " y",
+    ],
+    [
+      "",
+    ],
+  ],
+}
+`;
+
+exports[`draft text fields (W-021) int commits and reports errors as before 1`] = `
+{
+  "initial": "2",
+  "label": "Level",
+  "seen": [
+    "LevelEnter a positive whole number.",
+    "LevelEnter a positive whole number.",
+    "LevelEnter a number up to 10000.",
+    "Level",
+    "LevelEnter a positive whole number.",
+  ],
+  "sent": [
+    3,
+  ],
+}
+`;
+
+exports[`draft text fields (W-021) number commits and reports errors as before 1`] = `
+{
+  "initial": "4",
+  "label": "Height (rem)",
+  "seen": [
+    "Height (rem)No negatives.",
+    "Height (rem)No negatives.",
+    "Height (rem)",
+    "Height (rem)",
+  ],
+  "sent": [
+    {
+      "unit": "rem",
+      "value": 0,
+    },
+    {
+      "unit": "rem",
+      "value": 12.5,
+    },
+  ],
+}
+`;
+
+exports[`draft text fields (W-021) optional number commits and reports errors as before 1`] = `
+{
+  "initial": "",
+  "label": "Size (px)",
+  "seen": [
+    "Size (px)",
+    "Size (px)",
+  ],
+  "sent": [
+    "<removed>",
+    {
+      "unit": "px",
+      "value": 8,
+    },
+  ],
+}
+`;
+
+exports[`draft text fields (W-021) href commits and reports errors as before 1`] = `
+{
+  "initial": "/a",
+  "label": "Link",
+  "seen": [
+    "LinkUse a full URL such as https://example.com or a path such as /pricing.",
+    "Link",
+    "LinkUse a full URL such as https://example.com or a path such as /pricing.",
+    "LinkUse a full URL such as https://example.com or a path such as /pricing.",
+  ],
+  "sent": [
+    "/pricing",
+  ],
+}
+`;
+
+exports[`draft text fields (W-021) optional href commits and reports errors as before 1`] = `
+{
+  "initial": "/a",
+  "label": "Link",
+  "seen": [
+    "Link",
+    "Link",
+  ],
+  "sent": [
+    "<removed>",
+    "https://example.com",
+  ],
+}
+`;
