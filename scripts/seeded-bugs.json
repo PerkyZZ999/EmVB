@@ -10234,6 +10234,60 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
       "expect": "\\(fail\\).*an unreadable or missing layout renders an empty page"
+    },
+    {
+      "id": "W-091/pack-files-drop-astro",
+      "requirement": "R-052",
+      "description": "the package's files list ships only the core, so the astro and admin entry files are missing from the tarball",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "  \"files\": [\n    \"src\"\n  ],",
+          "replace": "  \"files\": [\n    \"src/core\",\n    \"src/index.ts\"\n  ],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./scripts/pack-smoke.test.ts",
+        "-t",
+        "TypeScript source entrypoints"
+      ],
+      "expect": "\\(fail\\).*packed emvb tarball exports TypeScript source"
+    },
+    {
+      "id": "W-091/pack-export-built-js",
+      "requirement": "R-052",
+      "description": "the ./core export points at built JavaScript that isn't shipped",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "    \"./core\": \"./src/core/index.ts\",",
+          "replace": "    \"./core\": \"./dist/core/index.js\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./scripts/pack-smoke.test.ts",
+        "-t",
+        "TypeScript source entrypoints"
+      ],
+      "expect": "\\(fail\\).*packed emvb tarball exports TypeScript source"
+    },
+    {
+      "id": "W-091/parity-canvas-class-lost",
+      "requirement": "R-005",
+      "description": "the canvas maps the class attribute to the wrong React prop, so canvas markup loses its classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/vnode-react.tsx",
+          "search": "  class: \"className\",",
+          "replace": "  class: \"classList\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/s2-parity.test.tsx"],
+      "expect": "\\(fail\\).*public HTML equals the canvas HTML"
     }
   ]
 }

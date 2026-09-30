@@ -49,7 +49,8 @@ async function run(cmd: string[], cwd?: string) {
   return out;
 }
 
-async function main() {
+/** Packs the emvb package and returns what is wrong with the tarball; empty when it ships TS source. */
+export async function packSmoke(): Promise<string[]> {
   const staging = await mkdtemp(join(tmpdir(), "emvb-pack-"));
   try {
     await run(["bun", "pm", "pack", "--destination", staging], PKG);
@@ -61,12 +62,16 @@ async function main() {
     const pkg = JSON.parse(
       await run(["tar", "-xOf", tarball, "package/package.json"]),
     ) as PackedPackage;
-    const problems = packProblems(pkg, await run(["tar", "-tzf", tarball]));
-    if (problems.length > 0) throw new Error(problems.join("\n"));
-    process.stdout.write(`pack-smoke ok: ${tarball.split("/").pop()} exports TS source\n`);
+    return packProblems(pkg, await run(["tar", "-tzf", tarball]));
   } finally {
     await rm(staging, { recursive: true, force: true });
   }
+}
+
+async function main() {
+  const problems = await packSmoke();
+  if (problems.length > 0) throw new Error(problems.join("\n"));
+  process.stdout.write("pack-smoke ok: the tarball exports TS source\n");
 }
 
 if (import.meta.main) {
@@ -77,5 +82,3 @@ if (import.meta.main) {
     process.exit(1);
   }
 }
-
-export { main as packSmoke };

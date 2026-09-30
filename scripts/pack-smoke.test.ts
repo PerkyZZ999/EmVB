@@ -3,8 +3,7 @@ import { packProblems, packSmoke } from "./pack-smoke.ts";
 
 describe("pack smoke (W-044, R-052)", () => {
   test("packed emvb tarball exports TypeScript source entrypoints", async () => {
-    await packSmoke();
-    expect(true).toBe(true);
+    expect(await packSmoke()).toEqual([]);
   }, 120_000);
 
   const ts = {
