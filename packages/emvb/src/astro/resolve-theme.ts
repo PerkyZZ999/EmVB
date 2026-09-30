@@ -100,22 +100,34 @@ function storedPartFrom(entry: { id: string; data: unknown }): StoredPart | unde
   };
 }
 
+const THEME_PARTS_PAGE = 50;
+/** Enough pages for any real site; stops a cursor that never ends. */
+const THEME_PARTS_MAX_PAGES = 20;
+
+/** Every published theme part, page by page; a failed page ends the read with what came before. */
 async function loadPublishedThemeParts(): Promise<StoredPart[]> {
-  let result: Awaited<ReturnType<typeof getEmDashCollection>>;
-  try {
-    // No orderBy: D1/SQLite columns are snake_case and camelCase orderBy fails the query.
-    // Winners and popup order come from updatedAt in core/theme/conditions.ts.
-    result = await getEmDashCollection(THEME_PARTS_COLLECTION, {
-      status: "published",
-      limit: 50,
-    });
-  } catch {
-    return [];
+  const entries: Awaited<ReturnType<typeof getEmDashCollection>>["entries"] = [];
+  let cursor: string | undefined;
+  for (let page = 0; page < THEME_PARTS_MAX_PAGES; page += 1) {
+    let result: Awaited<ReturnType<typeof getEmDashCollection>>;
+    try {
+      // No orderBy: D1/SQLite columns are snake_case and camelCase orderBy fails the query.
+      // Winners and popup order come from updatedAt in core/theme/conditions.ts.
+      // oxlint-disable-next-line no-await-in-loop -- each page needs the previous page's cursor
+      result = await getEmDashCollection(THEME_PARTS_COLLECTION, {
+        status: "published",
+        limit: THEME_PARTS_PAGE,
+        ...(cursor ? { cursor } : {}),
+      });
+    } catch {
+      break;
+    }
+    if (result.error) break;
+    entries.push(...(result.entries ?? []));
+    cursor = result.nextCursor;
+    if (!cursor) break;
   }
-  if (result.error || !result.entries?.length) return [];
-  return result.entries
-    .map(storedPartFrom)
-    .filter((part): part is StoredPart => part !== undefined);
+  return entries.map(storedPartFrom).filter((part): part is StoredPart => part !== undefined);
 }
 
 async function loadLoopTemplates(

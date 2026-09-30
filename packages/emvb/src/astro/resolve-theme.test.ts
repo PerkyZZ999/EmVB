@@ -14,12 +14,19 @@ type Entry = { id: string; data: Record<string, unknown> };
 let themeEntries: Entry[] = [];
 let postEntries: Entry[] = [];
 const collectionCalls: string[] = [];
+/** When set, every theme-parts page claims there is another one. */
+let endlessCursor = false;
 
 mock.module("emdash", () => ({
   ...realEmDash,
-  getEmDashCollection: async (collection: string) => {
+  // Pages like EmDash: `limit` entries from `cursor`, and a `nextCursor` while more remain.
+  getEmDashCollection: async (collection: string, filter?: { limit?: number; cursor?: string }) => {
     collectionCalls.push(collection);
-    return { entries: collection === THEME_PARTS_COLLECTION ? themeEntries : postEntries };
+    if (collection !== THEME_PARTS_COLLECTION) return { entries: postEntries };
+    const start = Number(filter?.cursor ?? 0);
+    const end = filter?.limit === undefined ? themeEntries.length : start + filter.limit;
+    const more = endlessCursor || end < themeEntries.length;
+    return { entries: themeEntries.slice(start, end), nextCursor: more ? String(end) : undefined };
   },
   getEmDashEntry: async (_collection: string, key: string) => ({
     entry: postEntries.find((e) => e.id === key || e.data["slug"] === key) ?? null,
@@ -63,6 +70,7 @@ function part(
 const astro = (path: string) => ({ url: new URL(path, "http://site.test"), locals: {} });
 
 beforeEach(() => {
+  endlessCursor = false;
   themeEntries = [];
   postEntries = [];
   collectionCalls.length = 0;
@@ -106,6 +114,27 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.popups).toEqual([]);
     expect(resolved.css).toBe([resolved.header?.css, resolved.footer?.css].join("\n"));
     expect(resolved.needsPopupsRuntime).toBe(false);
+  });
+
+  test("parts past the first page of the collection still take part (QA-8)", async () => {
+    themeEntries = [
+      ...Array.from({ length: 120 }, (_, i) =>
+        part(`FOOT${String(i).padStart(4, "0")}`, "footer", [heading("head0001", `Footer ${i}`)]),
+      ),
+      part("HEADLAST", "header", [heading("head0002", "Last header")]),
+    ];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect(resolved.header?.id).toBe("HEADLAST");
+  });
+
+  test("a collection that never runs out of pages is read only up to a cap", async () => {
+    endlessCursor = true;
+    themeEntries = [part("HEAD0001", "header", [heading("head0001", "Header")])];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect(resolved.header?.id).toBe("HEAD0001");
+    const reads = collectionCalls.filter((c) => c === THEME_PARTS_COLLECTION).length;
+    expect(reads).toBeGreaterThan(1);
+    expect(reads).toBeLessThanOrEqual(20);
   });
 
   test("order comes from updatedAt, not from the order the collection returns", async () => {

@@ -4229,6 +4229,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/vnode-react.test.tsx"],
       "expect": "\\(fail\\).*SVG attributes and tags reach the canvas DOM"
+    },
+    {
+      "id": "QA-8/theme-parts-first-page-only",
+      "requirement": "R-062",
+      "description": "only the first page of published theme parts is read, so on a site with more than 50 the older ones never win",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    cursor = result.nextCursor;\n    if (!cursor) break;",
+          "replace": "    break;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*parts past the first page of the collection still take part"
+    },
+    {
+      "id": "QA-8/theme-parts-paging-unbounded",
+      "requirement": "R-062",
+      "description": "a cursor that never ends keeps the page render reading theme parts for a thousand pages",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "const THEME_PARTS_MAX_PAGES = 20;",
+          "replace": "const THEME_PARTS_MAX_PAGES = 1000;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*a collection that never runs out of pages is read only up to a cap"
     }
   ]
 }
