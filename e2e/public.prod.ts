@@ -261,3 +261,99 @@ test("a published page with an unknown node still renders its other elements wit
   expect(html).not.toContain("Unknown element");
   expect(html).not.toContain("Hidden");
 });
+
+test("Size, Position and Effects styles, local and from a class, render on the published page", async ({
+  page,
+  request,
+}) => {
+  const classId = `fx-${unique()}`;
+  await setClass(author, classId, {
+    name: "Effects",
+    style: {
+      opacity: 0.8,
+      boxShadow: { x: 0, y: 4, blur: 12, spread: 0, color: "#0000002e" },
+      filter: { blur: 2, grayscale: 50 },
+      cursor: "pointer",
+    },
+  });
+  try {
+    const slug = `w088-${unique()}`;
+    const text = `Sections ${slug}`;
+    const layout = {
+      schemaVersion: 1,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "card0001",
+            type: "container",
+            props: {},
+            style: {
+              position: "relative",
+              width: { value: 50, unit: "%" },
+              maxHeight: { value: 20, unit: "rem" },
+              aspectRatio: "4/3",
+              overflow: "hidden",
+              zIndex: 1,
+            },
+            children: [
+              {
+                id: "head0001",
+                type: "heading",
+                props: { text, level: 1 },
+                classes: [classId],
+                style: { position: "absolute", top: { value: 8, unit: "px" }, left: "auto" },
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const html = await publishedHtml(request, "Sections check", layout, slug);
+    expect(html).toContain("aspect-ratio:4 / 3");
+    expect(html).toContain(`.emvb-k-${classId}{`);
+
+    await page.goto(`/${slug}`);
+    const read = (selector: string, keys: string[]) =>
+      page.locator(selector).evaluate((el, names) => {
+        const style = getComputedStyle(el);
+        return Object.fromEntries(names.map((name) => [name, style.getPropertyValue(name)]));
+      }, keys);
+    expect(
+      await read(".emvb-e-card0001", [
+        "position",
+        "max-height",
+        "aspect-ratio",
+        "overflow",
+        "z-index",
+      ]),
+    ).toEqual({
+      position: "relative",
+      "max-height": "320px",
+      "aspect-ratio": "4 / 3",
+      overflow: "hidden",
+      "z-index": "1",
+    });
+    expect(
+      await read(".emvb-e-head0001", [
+        "position",
+        "top",
+        "opacity",
+        "box-shadow",
+        "filter",
+        "cursor",
+      ]),
+    ).toEqual({
+      position: "absolute",
+      top: "8px",
+      opacity: "0.8",
+      "box-shadow": "rgba(0, 0, 0, 0.18) 0px 4px 12px 0px",
+      filter: "blur(2px) grayscale(0.5)",
+      cursor: "pointer",
+    });
+  } finally {
+    await setClass(author, classId, null);
+  }
+});

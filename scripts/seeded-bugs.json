@@ -7783,6 +7783,116 @@
         "Cursor saves the chosen keyword"
       ],
       "expect": "\\(fail\\).*Cursor saves the chosen keyword"
+    },
+    {
+      "id": "W-088/e2e-unit-menu-ignored",
+      "requirement": "W-088",
+      "description": "choosing a unit in the browser menu does nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "onValueChange={(next: UnitChoice) => pickUnit(next)}",
+          "replace": "onValueChange={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/style-sections.e2e.ts",
+        "--project=node",
+        "-g",
+        "Size section sets width"
+      ],
+      "expect": "✘.*\\[node\\].*Size section sets width"
+    },
+    {
+      "id": "W-088/e2e-overflow-not-emitted",
+      "requirement": "W-088",
+      "description": "overflow is never turned into CSS",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  overflow: { css: \"overflow\", toValue: keyword(OVERFLOW) },\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/style-sections.e2e.ts",
+        "--project=node",
+        "-g",
+        "Size section sets width"
+      ],
+      "expect": "✘.*\\[node\\].*Size section sets width"
+    },
+    {
+      "id": "W-088/e2e-offsets-never-shown",
+      "requirement": "W-088",
+      "description": "offsets stay hidden after Position is set",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "const position = positionInEffect(node, design, cls);",
+          "replace": "const position: StyleProps[\"position\"] = cls ? undefined : undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/style-sections.e2e.ts",
+        "--project=node",
+        "-g",
+        "Position section shows offsets"
+      ],
+      "expect": "✘.*\\[node\\].*Position section shows offsets"
+    },
+    {
+      "id": "W-088/e2e-negative-offset-refused",
+      "requirement": "W-088",
+      "description": "a negative offset typed in the browser is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "function cssOffset(value: unknown): string | undefined {",
+          "replace": "function cssOffset(value: unknown): string | undefined {\n  if (typeof value === \"object\" && value !== null && \"value\" in value && Number(value.value) < 0) return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/style-sections.e2e.ts",
+        "--project=node",
+        "-g",
+        "Position section shows offsets"
+      ],
+      "expect": "✘.*\\[node\\].*Position section shows offsets"
+    },
+    {
+      "id": "W-088/e2e-inset-ignored",
+      "requirement": "W-088",
+      "description": "the Inset checkbox does nothing in the browser",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "onCheckedChange={(checked) => patch({ inset: checked === true ? true : undefined })}",
+          "replace": "onCheckedChange={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/style-sections.e2e.ts",
+        "--project=node",
+        "-g",
+        "Effects section edits a class"
+      ],
+      "expect": "✘.*\\[node\\].*Effects section edits a class"
     }
   ]
 }
