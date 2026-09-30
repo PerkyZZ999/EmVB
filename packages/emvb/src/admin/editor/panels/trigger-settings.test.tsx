@@ -6,18 +6,27 @@ import { TriggerSettings } from "./TriggerSettings.tsx";
 
 afterEach(cleanup);
 
-/** Renders the settings row, types `value` into its number field, and returns the field and what was sent. */
-async function enter(trigger: PopupOpenTrigger, value: string) {
+/**
+ * Renders the settings row, types `value` into its number field and commits it (blur, or Enter
+ * with `key`), and returns the field bounds, what was sent, and what the field shows after.
+ */
+async function enter(trigger: PopupOpenTrigger, value: string, key?: "Enter") {
   const sent: PopupOpenTrigger[] = [];
   const host = await mount(
     <TriggerSettings trigger={trigger} onChange={(next) => sent.push(next)} />,
   );
   const field = host.querySelector("input") as HTMLInputElement;
   await act(async () => {
+    field.focus();
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(field, value);
     field.dispatchEvent(new Event("input", { bubbles: true }));
   });
-  return { bounds: [field.min, field.max], sent };
+  const typed = sent.length;
+  await act(async () => {
+    if (key) field.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    else field.blur();
+  });
+  return { bounds: [field.min, field.max], sent, typed, shown: field.value };
 }
 
 describe("popup trigger settings (W-081)", () => {
@@ -41,6 +50,37 @@ describe("popup trigger settings (W-081)", () => {
     expect((await enter({ type: "scroll", percent: 50 }, "")).sent).toEqual([
       { type: "scroll", percent: 0 },
     ]);
+  });
+
+  test("delay is capped at 120 000 ms", async () => {
+    expect((await enter({ type: "delay", ms: 3000 }, "150000")).sent).toEqual([
+      { type: "delay", ms: 120_000 },
+    ]);
+  });
+
+  test("typing sends nothing until blur or Enter, then shows the committed value", async () => {
+    const idle = await enter({ type: "inactivity", ms: 30_000 }, "5", "Enter");
+    expect(idle.typed).toBe(0);
+    expect(idle.sent).toEqual([{ type: "inactivity", ms: 1000 }]);
+    expect(idle.shown).toBe("1000");
+    const same = await enter({ type: "delay", ms: 3000 }, "3000");
+    expect(same.sent).toEqual([]);
+  });
+
+  test("each number field explains its unit in words", async () => {
+    const texts: string[] = [];
+    for (const trigger of [
+      { type: "delay", ms: 4500 },
+      { type: "scroll", percent: 50 },
+      { type: "inactivity", ms: 30_000 },
+    ] as PopupOpenTrigger[]) {
+      // oxlint-disable-next-line no-await-in-loop -- one mounted row at a time
+      const host = await mount(<TriggerSettings trigger={trigger} onChange={() => undefined} />);
+      texts.push(host.textContent ?? "");
+    }
+    expect(texts[0]).toContain("4.5 s after the page loads.");
+    expect(texts[1]).toContain("How far down the page, from 0 to 100.");
+    expect(texts[2]).toContain("30 s without scrolling, typing, clicking or moving the pointer.");
   });
 
   test("idle time is at least 1 000 ms, and an empty field means 1 000", async () => {

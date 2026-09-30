@@ -5883,6 +5883,206 @@
         "a chip for a deleted variable"
       ],
       "expect": "\\(fail\\).*a chip for a deleted variable"
+    },
+    {
+      "id": "W-087/trig-per-keystroke",
+      "requirement": "W-087",
+      "description": "trigger numbers commit on every keystroke",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggerSettings.tsx",
+          "search": "onChange={(event) => setDraft(event.target.value)}",
+          "replace": "onChange={(event) => onCommit(normalize(event.target.value))}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/trigger-settings.test.tsx",
+        "-t",
+        "typing sends nothing until blur"
+      ],
+      "expect": "\\(fail\\).*typing sends nothing until blur"
+    },
+    {
+      "id": "W-087/trig-delay-uncapped",
+      "requirement": "W-087",
+      "description": "delay above 120 000 ms is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggerSettings.tsx",
+          "search": "clamp(Number(raw) || 0, 0, TRIGGER_LIMITS.maxDelayMs)",
+          "replace": "Math.max(0, Number(raw) || 0)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/trigger-settings.test.tsx",
+        "-t",
+        "delay is capped"
+      ],
+      "expect": "\\(fail\\).*delay is capped"
+    },
+    {
+      "id": "W-087/trig-draft-not-normalized",
+      "requirement": "W-087",
+      "description": "the field keeps the typed value after it was clamped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggerSettings.tsx",
+          "search": "    setDraft(String(next));\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/trigger-settings.test.tsx",
+        "-t",
+        "typing sends nothing until blur"
+      ],
+      "expect": "\\(fail\\).*typing sends nothing until blur"
+    },
+    {
+      "id": "W-087/trig-same-value-sent",
+      "requirement": "W-087",
+      "description": "committing an unchanged number still sends a change",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggerSettings.tsx",
+          "search": "if (next !== value) onCommit(next);",
+          "replace": "onCommit(next);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/trigger-settings.test.tsx",
+        "-t",
+        "typing sends nothing until blur"
+      ],
+      "expect": "\\(fail\\).*typing sends nothing until blur"
+    },
+    {
+      "id": "W-087/trig-seconds-wrong",
+      "requirement": "W-087",
+      "description": "the seconds hint is off by ten",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggerSettings.tsx",
+          "search": "(ms / 1000)",
+          "replace": "(ms / 100)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/trigger-settings.test.tsx",
+        "-t",
+        "each number field explains"
+      ],
+      "expect": "\\(fail\\).*each number field explains"
+    },
+    {
+      "id": "W-087/trig-or-when-missing",
+      "requirement": "W-087",
+      "description": "later trigger types have no label",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "label={index === 0 ? \"Open when\" : \"Or when\"}",
+          "replace": "label={index === 0 ? \"Open when\" : undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx",
+        "-t",
+        "every trigger"
+      ],
+      "expect": "\\(fail\\).*every trigger"
+    },
+    {
+      "id": "W-087/trig-remove-only-default",
+      "requirement": "W-087",
+      "description": "the only On page load trigger can be removed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "disabled={onlyDefault}",
+          "replace": "disabled={false}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx",
+        "-t",
+        "the only On page load trigger"
+      ],
+      "expect": "\\(fail\\).*the only On page load trigger"
+    },
+    {
+      "id": "W-087/showtimes-uncapped",
+      "requirement": "W-087",
+      "description": "Show at most above 100 is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "Math.min(100, Math.max(1, Math.round(Number(raw)) || 1))",
+          "replace": "Math.max(1, Math.round(Number(raw)) || 1)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx",
+        "-t",
+        "Show at most commits on blur"
+      ],
+      "expect": "\\(fail\\).*Show at most commits on blur"
+    },
+    {
+      "id": "W-087/showtimes-per-keystroke",
+      "requirement": "W-087",
+      "description": "Show at most commits on every keystroke",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "onChange={(event) => setDraft(event.target.value)}",
+          "replace": "onChange={(event) => { setDraft(event.target.value); onCommit(event.target.value === \"\" ? null : Number(event.target.value)); }}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx",
+        "-t",
+        "Show at most commits on blur"
+      ],
+      "expect": "\\(fail\\).*Show at most commits on blur"
+    },
+    {
+      "id": "W-087/popup-copy-mvp",
+      "requirement": "W-087",
+      "description": "the Advanced helper says MVP-thin",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "Limit how often the popup shows, and on which devices.",
+          "replace": "MVP-thin: show limit and devices."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx",
+        "-t",
+        "the copy speaks to people"
+      ],
+      "expect": "\\(fail\\).*the copy speaks to people"
     }
   ]
 }

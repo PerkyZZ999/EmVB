@@ -149,6 +149,24 @@ export const UI_CSS = `
   color: var(--text-color-kumo-subtle);
 }
 
+/* Popup triggers (W-087): one elevated card per trigger, settings under its type */
+.emvb-triggers { display: flex; flex-direction: column; gap: 8px; }
+.emvb-triggers > .emvb-section-label:not(:first-child) { margin-top: 12px; }
+.emvb-triggers > .emvb-section-label + .emvb-helper { margin-top: -4px; }
+.emvb-trigger-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.emvb-trigger-row {
+  display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 6px;
+  background: var(--emvb-glass-elevated, var(--color-kumo-elevated)); box-shadow: var(--emvb-elevation-s);
+}
+.emvb-trigger-head { display: flex; align-items: flex-end; gap: 4px; }
+.emvb-trigger-head > :first-child { flex: 1 1 auto; min-width: 0; }
+.emvb-device-fieldset { display: flex; flex-wrap: wrap; gap: 4px 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.emvb-device-fieldset > legend { float: left; width: 100%; padding: 0; }
+.emvb-device-fieldset > .emvb-helper { width: 100%; margin: 0; }
+.emvb-device-option { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; font-size: 13px; cursor: pointer; }
+.emvb-device-option input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-kumo-brand); }
+.emvb-device-option input:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
+
 /* Conditions editor (theme-part settings) */
 .emvb-section-label {
   margin: 4px 0 0;
