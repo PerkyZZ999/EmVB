@@ -305,8 +305,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "if (entry && value !== undefined && isSafeCssValue(value)) {\n      declarations.push({ property: entry.css, value });",
-          "replace": "if (entry) {\n      declarations.push({ property: entry.css, value: value ?? String(raw) });"
+          "search": "    if (entry && safe) {\n      declarations.push({ property: entry.css, value });",
+          "replace": "    if (entry) {\n      declarations.push({ property: entry.css, value: value ?? String(raw) });"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core"],
@@ -1906,7 +1906,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "(font) => safe(font.value)",
+          "search": "(font) => fontStack(font.value)",
           "replace": "(font) => font.value"
         }
       ],
@@ -4005,6 +4005,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
       "expect": "\\(fail\\).*arrows wrap, Home and End jump"
+    },
+    {
+      "id": "QA-1/quoted-font-variable-dropped",
+      "requirement": "R-021",
+      "description": "a font variable that quotes a family name is dropped from the CSS, so text falls back to the browser font",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "(font) => fontStack(font.value)",
+          "replace": "(font) => safe(font.value)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/generate.test.ts"],
+      "expect": "\\(fail\\).*a font stack with quoted family names is emitted"
+    },
+    {
+      "id": "QA-1/quoted-font-name-unchecked",
+      "requirement": "R-021",
+      "description": "anything between single quotes passes as a font family name, including a style-closing tag",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "(?:'[\\p{L}\\p{N} _.-]+'|",
+          "replace": "(?:'[^']+'|"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/generate.test.ts"],
+      "expect": "\\(fail\\).*a font stack with quoted family names is emitted"
+    },
+    {
+      "id": "QA-1/local-font-refuses-quotes",
+      "requirement": "R-021",
+      "description": "an element's own font family drops a quoted family name at render even though the schema accepts it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "(entry?.css === \"font-family\" ? isSafeFontStack(value) : isSafeCssValue(value))",
+          "replace": "isSafeCssValue(value)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/style-map.test.ts"],
+      "expect": "\\(fail\\).*a local font stack may quote family names"
     }
   ]
 }

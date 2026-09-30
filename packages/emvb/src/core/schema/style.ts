@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isSafeFontStack } from "../sanitize/css.ts";
 
 /** Colour refs omit `from` (legacy). Length/font refs set `from` (W-028). */
 export const VariableRef = z.strictObject({
@@ -44,11 +45,7 @@ export const StyleProps = z.strictObject({
   marginLeft: LengthValue.optional(),
   fontFamily: z
     .union([
-      z
-        .string()
-        .min(1)
-        .max(200)
-        .refine((v) => !/[{};<>\\"'`]/.test(v), "Font stack looks unsafe."),
+      z.string().min(1).max(200).refine(isSafeFontStack, "Font stack looks unsafe."),
       VariableRef,
     ])
     .optional(),

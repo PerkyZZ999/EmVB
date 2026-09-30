@@ -18,7 +18,7 @@ export const ColorVariable = z.strictObject({
     ),
 });
 
-/** Font stack string — commas and quotes allowed; CSS injection chars refused downstream. */
+/** Font stack string — commas and quoted family names allowed; `generateCss` drops an unsafe one. */
 export const FontVariable = z.strictObject({
   id: VariableId,
   name: z.string().min(1).max(60),

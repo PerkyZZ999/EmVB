@@ -59,6 +59,23 @@ describe("style property map (W-017, R-012)", () => {
     expect(styleDeclarations({ paddingTop: len(-1) }).rejected).toContain("paddingTop");
   });
 
+  test("a local font stack may quote family names (QA-1)", () => {
+    const value = `'Inter', "Noto Sans", sans-serif`;
+    expect(StyleProps.safeParse({ fontFamily: value }).success).toBe(true);
+    expect(styleDeclarations({ fontFamily: value })).toEqual({
+      declarations: [{ property: "font-family", value }],
+      rejected: [],
+    });
+  });
+
+  test.each([...CSS_INJECTION_CORPUS, "'Inter", "'a'}b{", "'a\\'", "'a</style>'"])(
+    "font family rejects injection %p",
+    (value) => {
+      expect(StyleProps.safeParse({ fontFamily: value }).success).toBe(false);
+      expect(styleDeclarations({ fontFamily: value }).rejected).toEqual(["fontFamily"]);
+    },
+  );
+
   test.each(CSS_INJECTION_CORPUS)("colour rejects injection %p", (value) => {
     expect(cssColor(value)).toBeUndefined();
     expect(StyleProps.safeParse({ color: value }).success).toBe(false);

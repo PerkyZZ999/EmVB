@@ -4,6 +4,7 @@ import {
   fontSizeVariableName,
   fontVariableName,
   isSafeCssValue,
+  isSafeFontStack,
   spacingVariableName,
   styleClassName,
   styleDeclarations,
@@ -23,6 +24,8 @@ const block = (selector: string, declarations: Declaration[]) =>
     : `${selector}{${declarations.map((d) => `${d.property}:${d.value}`).join(";")}}`;
 
 const safe = (value: string) => (isSafeCssValue(value) ? value : undefined);
+
+const fontStack = (value: string) => (isSafeFontStack(value) ? value : undefined);
 
 const lengthCss = (length: { value: number; unit: string }) =>
   safe(`${length.value}${length.unit}`);
@@ -48,7 +51,7 @@ export function generateCss({ design, usedTypes, baseCss, localRules }: CssInput
   const { colors, fonts, fontSizes, spacings } = design.variables;
   const variables = [
     ...declare(colors, colorVariableName, (color) => safe(color.value)),
-    ...declare(fonts, fontVariableName, (font) => safe(font.value)),
+    ...declare(fonts, fontVariableName, (font) => fontStack(font.value)),
     ...declare(fontSizes, fontSizeVariableName, (size) => lengthCss(size.value)),
     ...declare(spacings, spacingVariableName, (space) => lengthCss(space.value)),
   ];

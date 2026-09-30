@@ -25,6 +25,20 @@ export function isSafeCssValue(value: string): boolean {
   return value.length > 0 && value.length <= 200 && !FORBIDDEN.test(value) && !/[\n\r]/.test(value);
 }
 
+const FAMILY = String.raw`(?:'[\p{L}\p{N} _.-]+'|"[\p{L}\p{N} _.-]+"|[\p{L}\p{N}_-]+(?: [\p{L}\p{N}_-]+)*)`;
+const FONT_STACK = new RegExp(String.raw`^${FAMILY}(?:\s*,\s*${FAMILY})*$`, "u");
+
+/**
+ * A comma-separated font stack whose family names may be quoted. Quoted names hold only letters,
+ * digits, spaces, `_`, `.` and `-`, so a quote can never open or close anything else.
+ */
+export function isSafeFontStack(value: string): boolean {
+  return (
+    isSafeCssValue(value) ||
+    (value.length <= 200 && !/[\n\r]/.test(value) && FONT_STACK.test(value))
+  );
+}
+
 export function colorVariableName(id: string): string | undefined {
   return VAR_ID.test(id) ? `--emvb-c-${id}` : undefined;
 }
@@ -72,7 +86,7 @@ export function cssColor(value: unknown): string | undefined {
 
 function cssFontFamily(value: unknown): string | undefined {
   if (typeof value === "string") {
-    return isSafeCssValue(value) && !HEX_COLOR.test(value) ? value : undefined;
+    return isSafeFontStack(value) && !HEX_COLOR.test(value) ? value : undefined;
   }
   if (typeof value === "object" && value !== null) {
     const ref = refOf(value);
@@ -172,7 +186,10 @@ export function styleDeclarations(style: unknown): {
       ? PROPERTY_MAP[key as keyof StyleProps]
       : undefined;
     const value = entry?.toValue(raw);
-    if (entry && value !== undefined && isSafeCssValue(value)) {
+    const safe =
+      value !== undefined &&
+      (entry?.css === "font-family" ? isSafeFontStack(value) : isSafeCssValue(value));
+    if (entry && safe) {
       declarations.push({ property: entry.css, value });
     } else {
       rejected.push(key);

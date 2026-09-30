@@ -48,6 +48,28 @@ test("generateCss emits safe variables, used base CSS, classes and local rules i
   expect(css).toBe(EXPECTED);
 });
 
+test("a font stack with quoted family names is emitted, and a broken or unsafe one is dropped (QA-1)", () => {
+  const fonts = [
+    { id: "single", name: "Single", value: "'Inter', sans-serif" },
+    { id: "double", name: "Double", value: '"Noto Sans", system-ui, -apple-system, sans-serif' },
+    { id: "open", name: "Open", value: "'Inter, sans-serif" },
+    { id: "break", name: "Break", value: "'x'}body{color:red}" },
+    { id: "escape", name: "Escape", value: "'a\\27'" },
+    { id: "close", name: "Close", value: "'a</style>'" },
+    { id: "semi", name: "Semi", value: "'a';color:red" },
+    { id: "empty", name: "Empty", value: "''" },
+  ];
+  const css = generateCss({
+    design: { schemaVersion: 1, variables: { colors: [], fonts } },
+    usedTypes: new Set(),
+    baseCss: new Map(),
+    localRules: [],
+  });
+  expect(css).toBe(
+    `.emvb-root{--emvb-f-single:'Inter', sans-serif;--emvb-f-double:"Noto Sans", system-ui, -apple-system, sans-serif}`,
+  );
+});
+
 test("an empty design emits no variable block", () => {
   const css = generateCss({
     design: { schemaVersion: 1, variables: { colors: [] } },
