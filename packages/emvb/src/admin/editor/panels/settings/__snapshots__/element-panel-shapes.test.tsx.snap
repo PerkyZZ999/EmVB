@@ -156,6 +156,11 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -277,6 +282,11 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -393,6 +403,11 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -639,6 +654,11 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-6" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -737,6 +757,11 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-6" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -908,6 +933,11 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -1068,6 +1098,11 @@ exports[`element panel markup (W-021, W-086 M16) label renders the same content 
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -1241,6 +1276,11 @@ exports[`element panel markup (W-021, W-086 M16) link renders the same content a
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -1414,6 +1454,11 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -1582,6 +1627,11 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -1757,6 +1807,11 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-6" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -2076,6 +2131,11 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
         div.emvb-style-row data-emvb-style="textAlign"
         div.emvb-style-row data-emvb-style="textTransform"
         div.emvb-style-row data-emvb-style="color"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-6" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -2220,6 +2280,11 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-6" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -2388,6 +2453,11 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -2564,6 +2634,11 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -2740,6 +2815,11 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -2911,6 +2991,11 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -3076,6 +3161,11 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
         div.emvb-style-row data-emvb-style="textAlign"
         div.emvb-style-row data-emvb-style="textTransform"
         div.emvb-style-row data-emvb-style="color"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-7" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -3241,6 +3331,11 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
         div.emvb-style-row data-emvb-style="textAlign"
         div.emvb-style-row data-emvb-style="textTransform"
         div.emvb-style-row data-emvb-style="color"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-7" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -3407,6 +3502,11 @@ exports[`element panel markup (W-021, W-086 M16) submit renders the same content
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -3584,6 +3684,11 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -3719,6 +3824,11 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -3849,6 +3959,11 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -3984,6 +4099,11 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -4114,6 +4234,11 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -4288,6 +4413,11 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -4467,6 +4597,11 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -4644,6 +4779,11 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -4779,6 +4919,11 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -4909,6 +5054,11 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -5044,6 +5194,11 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -5174,6 +5329,11 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -5363,6 +5523,11 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -5531,6 +5696,11 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -5702,6 +5872,11 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
         div.emvb-style-row data-emvb-style="borderStyle"
         div.emvb-style-row data-emvb-style="borderColor"
         div.emvb-style-row data-emvb-style="borderRadius" data-unit="px"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
+        svg aria-hidden="true"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-9" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"
         span
@@ -5792,6 +5967,11 @@ exports[`element panel markup (W-021, W-086 M16) closed sections count the prope
       button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="border"
         span
           "Border"
+        svg aria-hidden="true"
+    div data-closed=""
+      button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="effects"
+        span
+          "Effects"
         svg aria-hidden="true"
     div data-closed=""
       button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="advanced"

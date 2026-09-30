@@ -1561,8 +1561,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
-          "search": "      onClick={() => onPatch({ [styleKey]: undefined })}",
-          "replace": "      onClick={() => onPatch({})}"
+          "search": "    <ResetButton label={label} set={set} onReset={() => onPatch({ [styleKey]: undefined })} />",
+          "replace": "    <ResetButton label={label} set={set} onReset={() => onPatch({})} />"
         }
       ],
       "command": [
@@ -6811,8 +6811,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "    image: { sections: [\"spacing\", \"size\", \"position\", \"border\", \"advanced\"], defaultOpen: \"size\" },",
-          "replace": "    image: {\n      sections: [\"layout\", \"spacing\", \"size\", \"position\", \"border\", \"advanced\"],\n      defaultOpen: \"layout\",\n    },"
+          "search": "    image: {\n      sections: [\"spacing\", \"size\", \"position\", \"border\", \"effects\", \"advanced\"],\n      defaultOpen: \"size\",\n    },",
+          "replace": "    image: {\n      sections: [\"layout\", \"spacing\", \"size\", \"position\", \"border\", \"effects\", \"advanced\"],\n      defaultOpen: \"layout\",\n    },"
         }
       ],
       "command": [
@@ -7271,8 +7271,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
-          "search": "          if (event.key === \"Enter\") commit();\n        }}\n      />\n      {reset}",
-          "replace": "          if (event.key === \"Escape\") commit();\n        }}\n      />\n      {reset}"
+          "search": "        if (event.key === \"Enter\") commit();\n      }}\n    />\n  );\n}",
+          "replace": "        if (event.key === \"Escape\") commit();\n      }}\n    />\n  );\n}"
         }
       ],
       "command": [
@@ -7291,8 +7291,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
-          "search": "  if (styleKey === \"zIndex\") {",
-          "replace": "  if (styleKey === (\"none\" as StyleKey)) {"
+          "search": "  if (styleKey === \"zIndex\" || styleKey === \"opacity\") {",
+          "replace": "  if (styleKey === \"opacity\") {"
         }
       ],
       "command": [
@@ -7303,6 +7303,486 @@
         "Z-index saves whole numbers"
       ],
       "expect": "\\(fail\\).*Z-index saves whole numbers"
+    },
+    {
+      "id": "W-088/opacity-range-open",
+      "requirement": "W-088",
+      "description": "opacity above 1 is emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const cssOpacity = (value: unknown) => (inRange(value, 0, 1) ? String(value) : undefined);",
+          "replace": "const cssOpacity = (value: unknown) => (typeof value === \"number\" ? String(value) : undefined);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: opacity refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: opacity refuses"
+    },
+    {
+      "id": "W-088/shadow-extra-keys",
+      "requirement": "W-088",
+      "description": "a shadow with unknown keys is emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (Object.keys(value).some((key) => !SHADOW_KEYS.has(key))) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: boxShadow refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: boxShadow refuses"
+    },
+    {
+      "id": "W-088/shadow-colour-unchecked",
+      "requirement": "W-088",
+      "description": "the shadow colour isn't checked",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  const colour = color === undefined ? undefined : cssColor(color);\n  if (color !== undefined && colour === undefined) return undefined;",
+          "replace": "  const colour = typeof color === \"string\" ? color : color === undefined ? undefined : cssColor(color);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: boxShadow refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: boxShadow refuses"
+    },
+    {
+      "id": "W-088/shadow-blur-negative",
+      "requirement": "W-088",
+      "description": "a negative shadow blur is emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (!inRange(blur, 0, 1000) || !inRange(spread, -1000, 1000)) return undefined;",
+          "replace": "  if (!inRange(blur, -1000, 1000) || !inRange(spread, -1000, 1000)) return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: boxShadow refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: boxShadow refuses"
+    },
+    {
+      "id": "W-088/shadow-inset-dropped",
+      "requirement": "W-088",
+      "description": "inset is dropped from the shadow",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  const parts = [inset ? \"inset\" : \"\",",
+          "replace": "  const parts = [\"\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: boxShadow"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: boxShadow"
+    },
+    {
+      "id": "W-088/shadow-var-colour-dropped",
+      "requirement": "W-088",
+      "description": "a colour variable on the shadow is lost",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  const colour = color === undefined ? undefined : cssColor(color);",
+          "replace": "  const colour = typeof color === \"string\" ? cssColor(color) : undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/style-sections.test.ts",
+        "-t",
+        "effects: local styles"
+      ],
+      "expect": "\\(fail\\).*effects: local styles"
+    },
+    {
+      "id": "W-088/filter-order-by-key",
+      "requirement": "W-088",
+      "description": "filters are emitted in stored key order",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  for (const [key, fn, max, unit] of FILTERS) {",
+          "replace": "  for (const [key, fn, max, unit] of FILTERS.toSorted(([a], [b]) => Object.keys(filter).indexOf(a) - Object.keys(filter).indexOf(b))) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: filter"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: filter"
+    },
+    {
+      "id": "W-088/filter-unknown-ok",
+      "requirement": "W-088",
+      "description": "an unknown filter key is ignored rather than refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (Object.keys(filter).some((key) => !FILTER_KEYS.has(key))) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: filter refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: filter refuses"
+    },
+    {
+      "id": "W-088/filter-empty-schema",
+      "requirement": "W-088",
+      "description": "the schema accepts an empty filter",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "    (filter) => Object.values(filter).some((v) => v !== undefined),",
+          "replace": "    () => true,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: filter refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: filter refuses"
+    },
+    {
+      "id": "W-088/filter-range-open",
+      "requirement": "W-088",
+      "description": "filter ranges aren't checked by the CSS mapper",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    if (!inRange(n, 0, max)) return undefined;",
+          "replace": "    if (!inRange(n, 0, 10_000)) return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: filter refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: filter refuses"
+    },
+    {
+      "id": "W-088/cursor-any",
+      "requirement": "W-088",
+      "description": "any cursor text is emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  cursor: { css: \"cursor\", toValue: keyword(CURSOR) },",
+          "replace": "  cursor: { css: \"cursor\", toValue: (v) => (typeof v === \"string\" ? v : undefined) },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/style-map.test.ts",
+        "-t",
+        "W-088 Effects: cursor refuses"
+      ],
+      "expect": "\\(fail\\).*W-088 Effects: cursor refuses"
+    },
+    {
+      "id": "W-088/shadow-usage-missed",
+      "requirement": "W-088",
+      "description": "the managers don't count a shadow colour",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  if (shadowColorMatches(style, id, kind)) hit(\"boxShadow.color\");\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "the managers count a colour variable used by a box shadow"
+      ],
+      "expect": "\\(fail\\).*the managers count a colour variable used by a box shadow"
+    },
+    {
+      "id": "W-088/shadow-delete-drops-shadow",
+      "requirement": "W-088",
+      "description": "deleting the colour variable removes the whole shadow",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "    const { color: _drop, ...shadow } = style.boxShadow;\n    next[\"boxShadow\"] = shadow;",
+          "replace": "    delete next[\"boxShadow\"];"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "deleting the variable clears only the shadow's colour"
+      ],
+      "expect": "\\(fail\\).*deleting the variable clears only the shadow's colour"
+    },
+    {
+      "id": "W-088/shadow-kind-ignored",
+      "requirement": "W-088",
+      "description": "any variable kind with the same id matches the shadow colour",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  matches(style.boxShadow?.color, id, kind);",
+          "replace": "  matches(style.boxShadow?.color, id, undefined);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "the managers count a colour variable used by a box shadow"
+      ],
+      "expect": "\\(fail\\).*the managers count a colour variable used by a box shadow"
+    },
+    {
+      "id": "W-088/opacity-not-scaled",
+      "requirement": "W-088",
+      "description": "opacity is stored as the percent typed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "const OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: \"50\", suffix: \"%\" };",
+          "replace": "const OPACITY: NumberSpec = { min: 0, max: 100, example: \"50\", suffix: \"%\" };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Opacity shows and takes percent"
+      ],
+      "expect": "\\(fail\\).*Opacity shows and takes percent"
+    },
+    {
+      "id": "W-088/new-shadow-wrong",
+      "requirement": "W-088",
+      "description": "Add shadow adds a hard black shadow",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "const NEW_SHADOW: Shadow = { x: 0, y: 4, blur: 12, spread: 0, color: \"#0000002e\" };",
+          "replace": "const NEW_SHADOW: Shadow = { x: 0, y: 4, blur: 12, spread: 0, color: \"#000000\" };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Add shadow adds"
+      ],
+      "expect": "\\(fail\\).*Add shadow adds"
+    },
+    {
+      "id": "W-088/shadow-edit-drops-rest",
+      "requirement": "W-088",
+      "description": "editing X drops the other shadow values",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "    const next: Record<string, unknown> = { ...value, ...part };",
+          "replace": "    const next: Record<string, unknown> = { x: 0, y: 0, blur: 0, spread: 0, ...part };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "a set shadow edits X"
+      ],
+      "expect": "\\(fail\\).*a set shadow edits X"
+    },
+    {
+      "id": "W-088/inset-false-kept",
+      "requirement": "W-088",
+      "description": "unchecking Inset stores inset false",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "patch({ inset: checked === true ? true : undefined })",
+          "replace": "patch({ inset: checked === true })"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Inset toggles"
+      ],
+      "expect": "\\(fail\\).*Inset toggles"
+    },
+    {
+      "id": "W-088/shadow-default-colour-kept",
+      "requirement": "W-088",
+      "description": "Default leaves the old shadow colour",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "    for (const key of Object.keys(next)) if (next[key] === undefined) delete next[key];",
+          "replace": "    for (const key of Object.keys(next)) if (next[key] === undefined) next[key] = value[key as keyof Shadow];"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "the shadow colour binds"
+      ],
+      "expect": "\\(fail\\).*the shadow colour binds"
+    },
+    {
+      "id": "W-088/filter-empty-kept",
+      "requirement": "W-088",
+      "description": "clearing the last filter leaves an empty filter",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "    onChange(Object.keys(next).length > 0 ? (next as Filter) : undefined);",
+          "replace": "    onChange(next as Filter);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "each filter is its own row"
+      ],
+      "expect": "\\(fail\\).*each filter is its own row"
+    },
+    {
+      "id": "W-088/filter-hue-range",
+      "requirement": "W-088",
+      "description": "hue rotation takes up to 3600",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "max: 360,",
+          "replace": "max: 3600,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "each filter is its own row"
+      ],
+      "expect": "\\(fail\\).*each filter is its own row"
+    },
+    {
+      "id": "W-088/number-label-no-suffix",
+      "requirement": "W-088",
+      "description": "number fields drop their unit suffix",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "      label={spec.suffix ? `${label} (${spec.suffix})` : label}",
+          "replace": "      label={label}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Opacity shows and takes percent"
+      ],
+      "expect": "\\(fail\\).*Opacity shows and takes percent"
+    },
+    {
+      "id": "W-088/filters-count-each",
+      "requirement": "W-088",
+      "description": "the Effects count counts each filter",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  keysFor(type, section, style).filter((key) => style?.[key] !== undefined).length;",
+          "replace": "  keysFor(type, section, style).reduce((n, key) => n + (key === \"filter\" ? Object.keys(style?.filter ?? {}).length : style?.[key] !== undefined ? 1 : 0), 0);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "closed Effects counts Filters as one"
+      ],
+      "expect": "\\(fail\\).*closed Effects counts Filters as one"
+    },
+    {
+      "id": "W-088/cursor-no-options",
+      "requirement": "W-088",
+      "description": "cursor loses its last options",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "    { value: \"zoom-in\", label: \"Zoom in\" },\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "Cursor saves the chosen keyword"
+      ],
+      "expect": "\\(fail\\).*Cursor saves the chosen keyword"
     }
   ]
 }

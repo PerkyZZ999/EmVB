@@ -139,6 +139,7 @@ describe("Size section (W-088)", () => {
       "position",
       "background",
       "border",
+      "effects",
       "advanced",
     ]);
     expect(STYLE_UI.heading?.sections.slice(0, 4)).toEqual([
@@ -152,7 +153,7 @@ describe("Size section (W-088)", () => {
   test("Image opens on Size and shows object fit there", async () => {
     await panel(image);
     await styleTab();
-    expect(sectionIds()).toEqual(["spacing", "size", "position", "border", "advanced"]);
+    expect(sectionIds()).toEqual(["spacing", "size", "position", "border", "effects", "advanced"]);
     expect(
       document.querySelector('[data-emvb-section="size"]')?.getAttribute("aria-expanded"),
     ).toBe("true");
@@ -175,6 +176,7 @@ describe("Size section (W-088)", () => {
       "typography",
       "background",
       "border",
+      "effects",
       "advanced",
     ]);
     const size = document.querySelector('[data-emvb-section="size"]') as HTMLElement;
@@ -350,3 +352,141 @@ async function commitText(
     }
   });
 }
+
+const numberInput = (key: string) =>
+  document.querySelector<HTMLInputElement>(`input[data-emvb-number="${key}"]`);
+
+describe("Effects section (W-088)", () => {
+  test("Effects holds opacity, box shadow, filters and cursor", () => {
+    expect(keysFor("container", "effects")).toEqual(["opacity", "boxShadow", "filter", "cursor"]);
+    expect(STYLE_UI.spacer?.sections).not.toContain("effects");
+  });
+
+  test("Opacity shows and takes percent, and stores 0 to 1", async () => {
+    await row("opacity", { opacity: 0.25 });
+    expect(numberInput("opacity")?.value).toBe("25");
+    expect(document.body.textContent).toContain("Opacity (%)");
+    await commitText(numberInput("opacity"), "101");
+    expect(document.body.textContent).toContain("Opacity can be from 0 to 100.");
+    await commitText(numberInput("opacity"), "50");
+    expect(patches).toEqual([{ opacity: 0.5 }]);
+  });
+
+  test("Add shadow adds 0 4 12 0 at 18% black", async () => {
+    await row("boxShadow");
+    const add = [...document.querySelectorAll("button")].find(
+      (b) => b.textContent === "Add shadow",
+    );
+    await act(async () => add?.click());
+    expect(patches).toEqual([
+      { boxShadow: { x: 0, y: 4, blur: 12, spread: 0, color: "#0000002e" } },
+    ]);
+  });
+
+  const lifted = { x: 0, y: 4, blur: 12, spread: 0, color: "#0000002e" };
+
+  test("a set shadow edits X, Y, blur and spread, and keeps the rest", async () => {
+    await row("boxShadow", { boxShadow: lifted });
+    expect(numberInput("boxShadow.y")?.value).toBe("4");
+    await commitText(numberInput("boxShadow.x"), "-3");
+    await commitText(numberInput("boxShadow.blur"), "-1");
+    expect(document.body.textContent).toContain("Blur can be from 0 to 1000.");
+    expect(patches).toEqual([{ boxShadow: { ...lifted, x: -3 } }]);
+  });
+
+  test("Inset toggles on a Kumo checkbox, and off drops the key", async () => {
+    // Clicking the label text: happy-dom forwards a click on the box twice (label activation).
+    const inset = () =>
+      [...document.querySelectorAll("label span")].find(
+        (el) => el.textContent === "Inset",
+      ) as HTMLElement;
+    await row("boxShadow", { boxShadow: lifted });
+    expect(document.querySelector('[role="checkbox"]')?.getAttribute("aria-checked")).toBe("false");
+    await act(async () => inset().click());
+    expect(patches).toEqual([{ boxShadow: { ...lifted, inset: true } }]);
+    await row("boxShadow", { boxShadow: { ...lifted, inset: true } });
+    expect(document.querySelector('[role="checkbox"]')?.getAttribute("aria-checked")).toBe("true");
+    await act(async () => inset().click());
+    expect(patches).toEqual([{ boxShadow: { ...lifted, inset: true } }, { boxShadow: lifted }]);
+  });
+
+  test("the shadow colour binds a colour variable, and Default drops it", async () => {
+    const design = {
+      ...emptyDesign(),
+      variables: {
+        ...emptyDesign().variables,
+        colors: [{ id: "ink", name: "Ink", value: "#112233" }],
+      },
+    };
+    await mount(
+      <StyleRow
+        styleKey="boxShadow"
+        style={{ boxShadow: lifted }}
+        design={design}
+        onPatch={(patch) => patches.push(patch)}
+        onDesignChange={async () => undefined}
+      />,
+    );
+    await choose("Shadow color", "Ink");
+    await choose("Shadow color", "Default");
+    const { color: _drop, ...plain } = lifted;
+    expect(patches).toEqual([
+      { boxShadow: { ...lifted, color: { var: "ink" } } },
+      { boxShadow: plain },
+    ]);
+  });
+
+  test("the row's reset removes the shadow", async () => {
+    await row("boxShadow", { boxShadow: lifted });
+    const reset = document.querySelector<HTMLButtonElement>(
+      '[aria-label="Reset Box shadow to default"]',
+    );
+    expect(reset?.disabled).toBe(false);
+    await act(async () => reset?.click());
+    expect(patches).toEqual([{ boxShadow: undefined }]);
+  });
+
+  test("each filter is its own row; clearing the last one unsets Filters", async () => {
+    await row("filter");
+    expect(
+      [...document.querySelectorAll("input[data-emvb-number]")].map((el) =>
+        el.getAttribute("data-emvb-number"),
+      ),
+    ).toEqual([
+      "filter.blur",
+      "filter.brightness",
+      "filter.contrast",
+      "filter.saturate",
+      "filter.grayscale",
+      "filter.hueRotate",
+    ]);
+    await commitText(numberInput("filter.hueRotate"), "400");
+    expect(document.body.textContent).toContain("Hue rotation can be from 0 to 360.");
+    await commitText(numberInput("filter.blur"), "4");
+    expect(patches).toEqual([{ filter: { blur: 4 } }]);
+    await row("filter", { filter: { blur: 4, grayscale: 50 } });
+    await commitText(numberInput("filter.blur"), "");
+    await row("filter", { filter: { grayscale: 50 } });
+    await act(async () =>
+      document
+        .querySelector<HTMLButtonElement>('[aria-label="Reset Grayscale to default"]')
+        ?.click(),
+    );
+    expect(patches.slice(1)).toEqual([{ filter: { grayscale: 50 } }, { filter: undefined }]);
+  });
+
+  test("Cursor saves the chosen keyword", async () => {
+    await row("cursor");
+    const options = await choose("Cursor", "Not allowed");
+    expect(options).toContain("Zoom in");
+    expect(patches).toEqual([{ cursor: "not-allowed" }]);
+  });
+
+  test("closed Effects counts Filters as one property", async () => {
+    await panel(box({ opacity: 0.5, filter: { blur: 1, grayscale: 20 } }));
+    await styleTab();
+    expect(document.querySelector('[data-emvb-section="effects"] .emvb-count')?.textContent).toBe(
+      " · 2",
+    );
+  });
+});

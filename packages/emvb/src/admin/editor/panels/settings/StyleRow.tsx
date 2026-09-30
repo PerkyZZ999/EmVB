@@ -1,11 +1,11 @@
-import { Button, Input, Select } from "@cloudflare/kumo";
-import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
+import { Input, Select } from "@cloudflare/kumo";
 import { isSafeFontStack, type DesignSystem, type StyleProps } from "../../../../core/index.ts";
-import { BUTTON, FIELD } from "../../../ui.ts";
+import { FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 import { LengthRow } from "./LengthRow.tsx";
-import { NumberRow, type NumberSpec } from "./NumberRow.tsx";
+import { FiltersControl, ShadowControl } from "./EffectsControls.tsx";
+import { NumberRow, ResetButton, type NumberSpec } from "./NumberRow.tsx";
 import { boundRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
 
 const LENGTH_KEYS = new Set<StyleKey>([
@@ -36,6 +36,7 @@ const LENGTH_KEYS = new Set<StyleKey>([
 ]);
 
 const Z_INDEX: NumberSpec = { min: -9999, max: 9999, integer: true, example: "10" };
+const OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: "50", suffix: "%" };
 
 const COLOR_KEYS = new Set<StyleKey>(["color", "backgroundColor", "borderColor"]);
 
@@ -106,6 +107,17 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "none", label: "None" },
     { value: "scale-down", label: "Scale down" },
   ],
+  cursor: [
+    { value: "default", label: "Default" },
+    { value: "pointer", label: "Pointer" },
+    { value: "text", label: "Text" },
+    { value: "move", label: "Move" },
+    { value: "grab", label: "Grab" },
+    { value: "not-allowed", label: "Not allowed" },
+    { value: "help", label: "Help" },
+    { value: "crosshair", label: "Crosshair" },
+    { value: "zoom-in", label: "Zoom in" },
+  ],
   borderStyle: [
     { value: "none", label: "None" },
     { value: "solid", label: "Solid" },
@@ -139,17 +151,7 @@ export function StyleRow({
   const label = STYLE_LABELS[styleKey];
 
   const reset = (
-    <Button
-      type="button"
-      variant="ghost"
-      className={`${BUTTON} emvb-reset-btn`}
-      aria-label={`Reset ${label} to default`}
-      title="Reset to default"
-      disabled={!set}
-      onClick={() => onPatch({ [styleKey]: undefined })}
-    >
-      <ArrowCounterClockwiseIcon size={14} aria-hidden="true" />
-    </Button>
+    <ResetButton label={label} set={set} onReset={() => onPatch({ [styleKey]: undefined })} />
   );
 
   if (COLOR_KEYS.has(styleKey)) {
@@ -258,18 +260,32 @@ export function StyleRow({
     );
   }
 
-  if (styleKey === "zIndex") {
+  if (styleKey === "zIndex" || styleKey === "opacity") {
     return (
       <NumberRow
         rowKey={styleKey}
         label={label}
         value={typeof value === "number" ? value : undefined}
-        spec={Z_INDEX}
-        set={set}
-        onCommit={(next) => onPatch({ zIndex: next })}
+        spec={styleKey === "zIndex" ? Z_INDEX : OPACITY}
+        onCommit={(next) => onPatch({ [styleKey]: next })}
+      />
+    );
+  }
+
+  if (styleKey === "boxShadow") {
+    return (
+      <ShadowControl
+        value={style?.boxShadow}
+        design={design}
+        onChange={(boxShadow) => onPatch({ boxShadow })}
+        onDesignChange={onDesignChange}
         reset={reset}
       />
     );
+  }
+
+  if (styleKey === "filter") {
+    return <FiltersControl value={style?.filter} onChange={(filter) => onPatch({ filter })} />;
   }
 
   if (LENGTH_KEYS.has(styleKey)) {
@@ -294,5 +310,8 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   ...COLOR_KEYS,
   "fontFamily",
   "zIndex",
+  "opacity",
+  "boxShadow",
+  "filter",
   ...(Object.keys(SELECT_OPTIONS) as StyleKey[]),
 ];

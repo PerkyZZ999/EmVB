@@ -20,6 +20,17 @@ const BORDER_STYLE = new Set(["none", "solid", "dashed", "dotted"]);
 const OVERFLOW = new Set(["visible", "hidden", "clip", "scroll", "auto"]);
 const OBJECT_FIT = new Set(["fill", "contain", "cover", "none", "scale-down"]);
 const POSITION = new Set(["static", "relative", "absolute", "fixed", "sticky"]);
+const CURSOR = new Set([
+  "default",
+  "pointer",
+  "text",
+  "move",
+  "grab",
+  "not-allowed",
+  "help",
+  "crosshair",
+  "zoom-in",
+]);
 const ASPECT_RATIO = /^([1-9]\d{0,3})\/([1-9]\d{0,3})$/;
 const FONT_WEIGHT = new Set(["normal", "bold", "400", "500", "600", "700"]);
 const FORBIDDEN = /[{};<>\\"'`]|\/\*|url\(|expression\(|@import|javascript:/i;
@@ -140,6 +151,52 @@ const cssZIndex = (value: unknown): string | undefined =>
     ? String(value)
     : undefined;
 
+const inRange = (value: unknown, min: number, max: number): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
+
+const cssOpacity = (value: unknown) => (inRange(value, 0, 1) ? String(value) : undefined);
+
+const SHADOW_KEYS = new Set(["x", "y", "blur", "spread", "color", "inset"]);
+
+/** `[inset] x y blur spread [colour]`, built only from checked numbers and a checked colour. */
+function cssBoxShadow(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  if (Object.keys(value).some((key) => !SHADOW_KEYS.has(key))) return undefined;
+  const { x, y, blur, spread, color, inset } = value as Record<string, unknown>;
+  if (!inRange(x, -1000, 1000) || !inRange(y, -1000, 1000)) return undefined;
+  if (!inRange(blur, 0, 1000) || !inRange(spread, -1000, 1000)) return undefined;
+  if (inset !== undefined && typeof inset !== "boolean") return undefined;
+  const colour = color === undefined ? undefined : cssColor(color);
+  if (color !== undefined && colour === undefined) return undefined;
+  const parts = [inset ? "inset" : "", `${x}px ${y}px ${blur}px ${spread}px`, colour ?? ""];
+  return parts.filter(Boolean).join(" ");
+}
+
+/** Filter functions in a fixed order, each with its own range and unit. */
+const FILTERS: ReadonlyArray<[key: string, fn: string, max: number, unit: string]> = [
+  ["blur", "blur", 100, "px"],
+  ["brightness", "brightness", 300, "%"],
+  ["contrast", "contrast", 300, "%"],
+  ["saturate", "saturate", 300, "%"],
+  ["grayscale", "grayscale", 100, "%"],
+  ["hueRotate", "hue-rotate", 360, "deg"],
+];
+const FILTER_KEYS = new Set(FILTERS.map(([key]) => key));
+
+function cssFilter(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const filter = value as Record<string, unknown>;
+  if (Object.keys(filter).some((key) => !FILTER_KEYS.has(key))) return undefined;
+  const parts: string[] = [];
+  for (const [key, fn, max, unit] of FILTERS) {
+    const n = filter[key];
+    if (n === undefined) continue;
+    if (!inRange(n, 0, max)) return undefined;
+    parts.push(`${fn}(${n}${unit})`);
+  }
+  return parts.length > 0 ? parts.join(" ") : undefined;
+}
+
 function cssAspectRatio(value: unknown): string | undefined {
   if (value === "auto") return "auto";
   const match = typeof value === "string" ? ASPECT_RATIO.exec(value) : null;
@@ -205,6 +262,10 @@ const PROPERTY_MAP: {
   borderStyle: { css: "border-style", toValue: keyword(BORDER_STYLE) },
   borderColor: { css: "border-color", toValue: cssColor },
   borderRadius: { css: "border-radius", toValue: cssLength },
+  opacity: { css: "opacity", toValue: cssOpacity },
+  boxShadow: { css: "box-shadow", toValue: cssBoxShadow },
+  filter: { css: "filter", toValue: cssFilter },
+  cursor: { css: "cursor", toValue: keyword(CURSOR) },
 };
 
 /** Exported for table-driven tests (W-017). */

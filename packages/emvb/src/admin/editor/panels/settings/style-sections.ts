@@ -8,6 +8,7 @@ export type StyleSectionId =
   | "typography"
   | "background"
   | "border"
+  | "effects"
   | "advanced";
 
 export type StyleKey = keyof StyleProps;
@@ -21,6 +22,7 @@ const SECTION_ORDER: StyleSectionId[] = [
   "typography",
   "background",
   "border",
+  "effects",
   "advanced",
 ];
 
@@ -31,6 +33,7 @@ const TEXT_SECTIONS: StyleSectionId[] = [
   "typography",
   "background",
   "border",
+  "effects",
   "advanced",
 ];
 
@@ -38,12 +41,21 @@ const TEXT_SECTIONS: StyleSectionId[] = [
 export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen: StyleSectionId }> =
   {
     container: {
-      sections: ["layout", "spacing", "size", "position", "background", "border", "advanced"],
+      sections: [
+        "layout",
+        "spacing",
+        "size",
+        "position",
+        "background",
+        "border",
+        "effects",
+        "advanced",
+      ],
       defaultOpen: "layout",
     },
     spacer: { sections: ["layout", "advanced"], defaultOpen: "layout" },
     divider: {
-      sections: ["spacing", "size", "position", "border", "advanced"],
+      sections: ["spacing", "size", "position", "border", "effects", "advanced"],
       defaultOpen: "border",
     },
     heading: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
@@ -52,25 +64,40 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
     link: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     list: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     button: { sections: TEXT_SECTIONS, defaultOpen: "background" },
-    image: { sections: ["spacing", "size", "position", "border", "advanced"], defaultOpen: "size" },
+    image: {
+      sections: ["spacing", "size", "position", "border", "effects", "advanced"],
+      defaultOpen: "size",
+    },
     icon: {
-      sections: ["spacing", "size", "position", "typography", "advanced"],
+      sections: ["spacing", "size", "position", "typography", "effects", "advanced"],
       defaultOpen: "typography",
     },
-    video: { sections: ["spacing", "size", "position", "border", "advanced"], defaultOpen: "size" },
+    video: {
+      sections: ["spacing", "size", "position", "border", "effects", "advanced"],
+      defaultOpen: "size",
+    },
     form: {
-      sections: ["layout", "spacing", "size", "position", "background", "border", "advanced"],
+      sections: [
+        "layout",
+        "spacing",
+        "size",
+        "position",
+        "background",
+        "border",
+        "effects",
+        "advanced",
+      ],
       defaultOpen: "layout",
     },
     "text-input": { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     textarea: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     select: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     checkbox: {
-      sections: ["layout", "spacing", "size", "position", "typography", "advanced"],
+      sections: ["layout", "spacing", "size", "position", "typography", "effects", "advanced"],
       defaultOpen: "typography",
     },
     radio: {
-      sections: ["layout", "spacing", "size", "position", "typography", "advanced"],
+      sections: ["layout", "spacing", "size", "position", "typography", "effects", "advanced"],
       defaultOpen: "typography",
     },
     submit: { sections: TEXT_SECTIONS, defaultOpen: "background" },
@@ -90,6 +117,7 @@ export const SECTION_LABELS: Record<StyleSectionId, string> = {
   typography: "Typography",
   background: "Background",
   border: "Border",
+  effects: "Effects",
   advanced: "Advanced",
 };
 
@@ -130,6 +158,7 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
   ],
   background: ["backgroundColor"],
   border: ["borderWidth", "borderStyle", "borderColor", "borderRadius"],
+  effects: ["opacity", "boxShadow", "filter", "cursor"],
   advanced: [],
 };
 
@@ -222,6 +251,10 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   borderStyle: "Border style",
   borderColor: "Border color",
   borderRadius: "Radius",
+  opacity: "Opacity",
+  boxShadow: "Box shadow",
+  filter: "Filters",
+  cursor: "Cursor",
 };
 
 /** Every StyleProps key that the settings panel must be able to edit. */

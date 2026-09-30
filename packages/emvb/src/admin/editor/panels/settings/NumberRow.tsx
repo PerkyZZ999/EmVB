@@ -1,18 +1,20 @@
-import { Input } from "@cloudflare/kumo";
+import { Button, Input } from "@cloudflare/kumo";
+import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { FIELD } from "../../../ui.ts";
+import { BUTTON, FIELD } from "../../../ui.ts";
 
-/** Range and scale of a plain number row; `scale` converts stored to shown (opacity 0–1 → %). */
+/** Range and scale of a plain number field; `scale` converts stored to shown (opacity 0–1 → %). */
 export type NumberSpec = {
   min: number;
   max: number;
   integer?: boolean;
   scale?: number;
   example: string;
+  suffix?: string;
   placeholder?: string;
 };
 
-/** Checks a number row's text. Empty is unset. Returns the stored number. */
+/** Checks a number field's text. Empty is unset. Returns the stored number. */
 function parseNumberDraft(
   draft: string,
   label: string,
@@ -36,23 +38,19 @@ function parseNumberDraft(
 const shown = (value: number | undefined, spec: NumberSpec) =>
   value === undefined ? "" : String(Math.round(value * (spec.scale ?? 1) * 1000) / 1000);
 
-/** A mono number input that commits on blur or Enter (W-088: z-index, opacity, filters). */
-export function NumberRow({
-  rowKey,
+/** A mono number input that commits on blur or Enter (W-088). */
+export function NumberField({
+  fieldKey,
   label,
   value,
   spec,
-  set,
   onCommit,
-  reset,
 }: {
-  rowKey: string;
+  fieldKey: string;
   label: string;
   value: number | undefined;
   spec: NumberSpec;
-  set: boolean;
   onCommit: (next: number | undefined) => void;
-  reset: React.ReactNode;
 }) {
   const [draft, setDraft] = React.useState(shown(value, spec));
   const [error, setError] = React.useState<string | null>(null);
@@ -72,22 +70,68 @@ export function NumberRow({
   };
 
   return (
+    <Input
+      label={spec.suffix ? `${label} (${spec.suffix})` : label}
+      className={`${FIELD} emvb-mono emvb-number`}
+      inputMode="decimal"
+      value={draft}
+      placeholder={spec.placeholder}
+      error={error ?? undefined}
+      aria-invalid={error ? true : undefined}
+      data-emvb-number={fieldKey}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") commit();
+      }}
+    />
+  );
+}
+
+/** The row's reset button (W-021): enabled once the property is set. */
+export function ResetButton({
+  label,
+  set,
+  onReset,
+}: {
+  label: string;
+  set: boolean;
+  onReset: () => void;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      className={`${BUTTON} emvb-reset-btn`}
+      aria-label={`Reset ${label} to default`}
+      title="Reset to default"
+      disabled={!set}
+      onClick={onReset}
+    >
+      <ArrowCounterClockwiseIcon size={14} aria-hidden="true" />
+    </Button>
+  );
+}
+
+/** A number field with its reset button, as one Style row. */
+export function NumberRow({
+  rowKey,
+  label,
+  value,
+  spec,
+  onCommit,
+}: {
+  rowKey: string;
+  label: string;
+  value: number | undefined;
+  spec: NumberSpec;
+  onCommit: (next: number | undefined) => void;
+}) {
+  const set = value !== undefined;
+  return (
     <div className="emvb-style-row" data-emvb-style={rowKey} data-set={set ? "true" : undefined}>
-      <Input
-        label={label}
-        className={`${FIELD} emvb-mono emvb-number`}
-        inputMode="decimal"
-        value={draft}
-        placeholder={spec.placeholder}
-        error={error ?? undefined}
-        aria-invalid={error ? true : undefined}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") commit();
-        }}
-      />
-      {reset}
+      <NumberField fieldKey={rowKey} label={label} value={value} spec={spec} onCommit={onCommit} />
+      <ResetButton label={label} set={set} onReset={() => onCommit(undefined)} />
     </div>
   );
 }

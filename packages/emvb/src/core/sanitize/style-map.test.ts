@@ -170,6 +170,71 @@ describe("style property map (W-017, R-012)", () => {
     }
   });
 
+  const shadow = { x: 0, y: 4, blur: 12, spread: 0 };
+
+  test.each([
+    ["opacity", 0.5, "opacity", "0.5"],
+    ["opacity", 0, "opacity", "0"],
+    ["boxShadow", { ...shadow, color: "#0000002e" }, "box-shadow", "0px 4px 12px 0px #0000002e"],
+    [
+      "boxShadow",
+      { x: 1, y: -2, blur: 0, spread: -3, color: { var: "ink" }, inset: true },
+      "box-shadow",
+      "inset 1px -2px 0px -3px var(--emvb-c-ink)",
+    ],
+    ["boxShadow", { ...shadow, inset: false }, "box-shadow", "0px 4px 12px 0px"],
+    [
+      "filter",
+      { hueRotate: 90, blur: 4, brightness: 120 },
+      "filter",
+      "blur(4px) brightness(120%) hue-rotate(90deg)",
+    ],
+    [
+      "filter",
+      { grayscale: 100, saturate: 0, contrast: 300 },
+      "filter",
+      "contrast(300%) saturate(0%) grayscale(100%)",
+    ],
+    ["cursor", "not-allowed", "cursor", "not-allowed"],
+  ] as const)("W-088 Effects: %s %p maps to %s", (key, raw, css, expected) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(true);
+    expect(styleDeclarations({ [key]: raw })).toEqual({
+      declarations: [{ property: css, value: expected }],
+      rejected: [],
+    });
+  });
+
+  test.each([
+    ["opacity", 1.5],
+    ["opacity", -0.1],
+    ["opacity", "0.5"],
+    ["boxShadow", { ...shadow, blur: -1 }],
+    ["boxShadow", { ...shadow, x: 1001 }],
+    ["boxShadow", { ...shadow, color: "red" }],
+    ["boxShadow", { ...shadow, color: "#000;x:y" }],
+    ["boxShadow", { ...shadow, inset: "yes" }],
+    ["boxShadow", { ...shadow, extra: 1 }],
+    ["boxShadow", { x: 0, y: 4 }],
+    ["boxShadow", "0 4px 12px black"],
+    ["filter", {}],
+    ["filter", { brightness: 301 }],
+    ["filter", { blur: -1 }],
+    ["filter", { sepia: 50 }],
+    ["filter", { blur: 1, sepia: 50 }],
+    ["filter", "blur(4px)"],
+    ["cursor", "auto"],
+    ["cursor", "url(x.png), pointer"],
+  ] as const)("W-088 Effects: %s refuses %p", (key, raw) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(false);
+    expect(styleDeclarations({ [key]: raw }).rejected).toEqual([key]);
+  });
+
+  test("W-088 Effects: a non-colour variable on the shadow is dropped, as on Color", () => {
+    const raw = { ...shadow, color: { var: "gap", from: "spacing" } };
+    expect(styleDeclarations({ boxShadow: raw }).rejected).toEqual(["boxShadow"]);
+    expect(styleDeclarations({ color: raw.color }).rejected).toEqual(["color"]);
+  });
+
   test("negative padding is rejected by the schema and the CSS mapper", () => {
     expect(StyleProps.safeParse({ paddingTop: len(-1) }).success).toBe(false);
     expect(cssLength(len(-1))).toBeUndefined();

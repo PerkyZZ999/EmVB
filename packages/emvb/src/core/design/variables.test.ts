@@ -191,3 +191,42 @@ describe("findVariableUsagesInDesign (W-029 prep for classes)", () => {
     ]);
   });
 });
+
+describe("box shadow colour refs (W-088)", () => {
+  const shadowed = (): Layout => ({
+    schemaVersion: 1,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      style: {
+        boxShadow: { x: 0, y: 4, blur: 12, spread: 0, color: { var: "brand" }, inset: true },
+        color: { var: "ink" },
+      },
+      children: [],
+    },
+  });
+
+  test("the managers count a colour variable used by a box shadow", () => {
+    expect(findVariableUsages(shadowed(), "brand", "color")).toEqual([
+      { nodeId: "root0001", prop: "boxShadow.color" },
+    ]);
+    expect(findVariableUsages(shadowed(), "brand", "spacing")).toEqual([]);
+    const design = {
+      ...emptyDesign(),
+      classes: [{ id: "lift", name: "Lift", style: shadowed().root.style ?? {} }],
+    };
+    expect(findVariableUsagesInDesign(design, "brand", "color")).toEqual([
+      { nodeId: "", prop: "boxShadow.color", classId: "lift" },
+    ]);
+  });
+
+  test("deleting the variable clears only the shadow's colour", () => {
+    const next = clearVariableRefs(shadowed(), "brand", "color");
+    expect(next.root.style).toEqual({
+      boxShadow: { x: 0, y: 4, blur: 12, spread: 0, inset: true },
+      color: { var: "ink" },
+    });
+    expect(clearVariableRefs(shadowed(), "other", "color")).toEqual(shadowed());
+  });
+});

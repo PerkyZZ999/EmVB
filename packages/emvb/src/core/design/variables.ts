@@ -27,6 +27,13 @@ export function refMatchesKind(ref: VariableRefLike, kind: VariableKind): boolea
   return ref.from === kind;
 }
 
+const matches = (value: unknown, id: string, kind: VariableKind | undefined) =>
+  isVariableRef(value) && value.var === id && (kind === undefined || refMatchesKind(value, kind));
+
+/** The box shadow's colour is the one ref nested inside a style value (W-088). */
+const shadowColorMatches = (style: StyleProps, id: string, kind: VariableKind | undefined) =>
+  matches(style.boxShadow?.color, id, kind);
+
 function collectStyleUsages(
   style: StyleProps | undefined,
   id: string,
@@ -35,11 +42,9 @@ function collectStyleUsages(
 ): void {
   if (!style) return;
   for (const [prop, value] of Object.entries(style)) {
-    if (!isVariableRef(value)) continue;
-    if (value.var !== id) continue;
-    if (kind !== undefined && !refMatchesKind(value, kind)) continue;
-    hit(prop);
+    if (matches(value, id, kind)) hit(prop);
   }
+  if (shadowColorMatches(style, id, kind)) hit("boxShadow.color");
 }
 
 function walkNodes(node: LayoutNode, visit: (node: LayoutNode) => void): void {
@@ -89,10 +94,13 @@ function stripRefsFromStyle(
   let changed = false;
   const next: Record<string, unknown> = { ...style };
   for (const [prop, value] of Object.entries(style)) {
-    if (!isVariableRef(value)) continue;
-    if (value.var !== id) continue;
-    if (kind !== undefined && !refMatchesKind(value, kind)) continue;
+    if (!matches(value, id, kind)) continue;
     delete next[prop];
+    changed = true;
+  }
+  if (style.boxShadow && shadowColorMatches(style, id, kind)) {
+    const { color: _drop, ...shadow } = style.boxShadow;
+    next["boxShadow"] = shadow;
     changed = true;
   }
   if (!changed) return style;

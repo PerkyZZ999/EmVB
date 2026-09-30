@@ -26,6 +26,15 @@ const SECTIONS: Record<string, { style: StyleProps; css: string }> = {
     },
     css: "position:absolute;top:-10px;right:var(--emvb-s-gap);left:auto;z-index:5",
   },
+  effects: {
+    style: {
+      opacity: 0.5,
+      boxShadow: { x: 0, y: 4, blur: 12, spread: 0, color: { var: "ink" } },
+      filter: { grayscale: 100, blur: 2 },
+      cursor: "pointer",
+    },
+    css: "opacity:0.5;box-shadow:0px 4px 12px 0px var(--emvb-c-ink);filter:blur(2px) grayscale(100%);cursor:pointer",
+  },
 };
 
 const pageWith = (style: StyleProps, classes?: string[]) => ({

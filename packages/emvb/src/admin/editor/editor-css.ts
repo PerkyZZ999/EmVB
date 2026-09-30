@@ -245,6 +245,10 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-breadcrumb-part:hover { color: var(--text-color-kumo-default); text-decoration: underline; text-underline-offset: 2px; }
 .emvb-breadcrumb-part:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 .emvb-style-row { display: flex; align-items: flex-start; gap: 4px; }
+.emvb-shadow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.emvb-add-shadow { align-self: flex-start; }
+.emvb-filters { display: flex; flex-direction: column; gap: 10px; }
+.emvb-sub-label { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--text-color-kumo-default); }
 .emvb-style-row > :first-child { flex: 1 1 auto; min-width: 0; }
 .emvb-style-row[data-set="true"] .emvb-reset-btn { opacity: 1; }
 .emvb-reset-btn { flex: 0 0 auto; margin-top: 28px; opacity: 0.4; }

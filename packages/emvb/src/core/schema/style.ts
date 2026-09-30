@@ -36,6 +36,33 @@ const OffsetValue = z.union([
 /** `w/h` with whole numbers 1–9999, emitted as `w / h` (W-088). */
 const ASPECT_RATIO = /^[1-9]\d{0,3}\/[1-9]\d{0,3}$/;
 
+const num = (min: number, max: number) => z.number().finite().min(min).max(max);
+
+/** One box shadow in px (W-088). No colour means the text colour, as in CSS. */
+const BoxShadow = z.strictObject({
+  x: num(-1000, 1000),
+  y: num(-1000, 1000),
+  blur: num(0, 1000),
+  spread: num(-1000, 1000),
+  color: ColorValue.optional(),
+  inset: z.boolean().optional(),
+});
+
+/** Filter functions, emitted in a fixed order; at least one is set (W-088). */
+const Filter = z
+  .strictObject({
+    blur: num(0, 100).optional(),
+    brightness: num(0, 300).optional(),
+    contrast: num(0, 300).optional(),
+    saturate: num(0, 300).optional(),
+    grayscale: num(0, 100).optional(),
+    hueRotate: num(0, 360).optional(),
+  })
+  .refine(
+    (filter) => Object.values(filter).some((v) => v !== undefined),
+    "Set at least one filter",
+  );
+
 /** Style properties for layout and text elements (W-017 / R-012). Unknown keys are rejected. */
 export const StyleProps = z.strictObject({
   flexDirection: z.enum(["row", "column", "row-reverse", "column-reverse"]).optional(),
@@ -96,6 +123,22 @@ export const StyleProps = z.strictObject({
   borderStyle: z.enum(["none", "solid", "dashed", "dotted"]).optional(),
   borderColor: ColorValue.optional(),
   borderRadius: LengthValue.optional(),
+  opacity: z.number().finite().min(0).max(1).optional(),
+  boxShadow: BoxShadow.optional(),
+  filter: Filter.optional(),
+  cursor: z
+    .enum([
+      "default",
+      "pointer",
+      "text",
+      "move",
+      "grab",
+      "not-allowed",
+      "help",
+      "crosshair",
+      "zoom-in",
+    ])
+    .optional(),
 });
 
 export type StyleProps = z.infer<typeof StyleProps>;
