@@ -5037,6 +5037,72 @@
         "./packages/emvb/src/admin/editor/panels/settings/class-chip-input.test.tsx"
       ],
       "expect": "\\(fail\\).*Remove from element removes"
+    },
+    {
+      "id": "W-087/e2e-option-click-blurs",
+      "requirement": "R-021",
+      "description": "clicking a suggestion blurs the input first, which closes the list before the click lands",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "                onMouseDown={(event) => event.preventDefault()}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/class-chips.e2e.ts",
+        "--project=node",
+        "-g",
+        "adds a class by typing and autocomplete"
+      ],
+      "expect": "✘.*\\[node\\].*adds a class by typing and autocomplete"
+    },
+    {
+      "id": "W-087/e2e-create-not-applied",
+      "requirement": "R-021",
+      "description": "a class created from the input isn't applied (browser)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "    commit(addClassId(ids, id));\n    reset();\n  };\n\n  const choose",
+          "replace": "    reset();\n  };\n\n  const choose"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/class-chips.e2e.ts",
+        "--project=node",
+        "-g",
+        "creates a new class inline with Enter"
+      ],
+      "expect": "✘.*\\[node\\].*creates a new class inline with Enter"
+    },
+    {
+      "id": "W-087/e2e-chip-backspace-deletes-element",
+      "requirement": "R-021",
+      "description": "Backspace on a chip reaches the editor and deletes the element (browser)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "if (!event.ctrlKey && !event.metaKey) event.stopPropagation();",
+          "replace": "void event;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/class-chips.e2e.ts",
+        "--project=node",
+        "-g",
+        "works from the keyboard"
+      ],
+      "expect": "✘.*\\[node\\].*works from the keyboard"
     }
   ]
 }
