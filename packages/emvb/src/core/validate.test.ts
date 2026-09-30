@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { container, heading, layoutOfBytes, nested, s1Page } from "../../test/fixtures/layouts.ts";
 import { MAX_DEPTH, MAX_DESIGN_BYTES, MAX_LAYOUT_BYTES, MAX_NODES } from "./limits.ts";
-import { validateDesign, validateLayout } from "./validate.ts";
+import { summarizeIssues, validateDesign, validateLayout } from "./validate.ts";
 
 const issuesOf = (input: unknown) => {
   const result = validateLayout(input);
@@ -276,5 +276,31 @@ describe("image alt (W-024, N-003)", () => {
         },
       }).ok,
     ).toBe(true);
+  });
+});
+
+describe("summarizeIssues (W-091)", () => {
+  const issue = (path: string, message: string) => ({ path, code: "custom", message });
+
+  test("each issue is shown with its path, joined by semicolons", () => {
+    expect(summarizeIssues([issue("root.children[0]", "Bad"), issue("root", "Worse")])).toBe(
+      "root.children[0]: Bad; root: Worse",
+    );
+  });
+
+  test("an issue without a path shows only its message", () => {
+    expect(summarizeIssues([issue("", "Too big"), issue("root", "Bad")])).toBe(
+      "Too big; root: Bad",
+    );
+  });
+
+  test("only the first three issues are shown by default, and max can change that", () => {
+    const issues = ["a", "b", "c", "d"].map((path) => issue(path, "x"));
+    expect(summarizeIssues(issues)).toBe("a: x; b: x; c: x");
+    expect(summarizeIssues(issues, 1)).toBe("a: x");
+  });
+
+  test("no issues summarize to an empty string", () => {
+    expect(summarizeIssues([])).toBe("");
   });
 });

@@ -401,3 +401,32 @@ describe("tabs (W-074)", () => {
     ).toBe(false);
   });
 });
+
+describe("editor video preview labels (W-091)", () => {
+  const preview = (url: string, title?: string) => {
+    const node = {
+      ...defaultElement("video", "vid00009"),
+      props: title === undefined ? { url } : { url, title },
+    };
+    const html = renderPage(page(node), design, { mode: "editor" }).html;
+    return parse(html).querySelector("[data-emvb-video-preview]");
+  };
+
+  test("a YouTube video without a title is labelled YouTube video", () => {
+    const el = preview("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "   ");
+    expect(el?.getAttribute("data-emvb-video-preview")).toBe("youtube");
+    expect(el?.textContent).toBe("YouTube video — plays on the published page");
+  });
+
+  test("a Vimeo video without a title is labelled Vimeo video", () => {
+    const el = preview("https://vimeo.com/76979871");
+    expect(el?.getAttribute("data-emvb-video-preview")).toBe("vimeo");
+    expect(el?.textContent).toBe("Vimeo video — plays on the published page");
+  });
+
+  test("the title is trimmed and the element keeps its own class", () => {
+    const el = preview("https://vimeo.com/76979871", "  Launch  ");
+    expect(el?.textContent).toBe("Launch — plays on the published page");
+    expect(el?.getAttribute("class")).toBe("emvb-video emvb-video-preview");
+  });
+});

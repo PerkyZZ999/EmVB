@@ -11560,6 +11560,132 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
       "expect": "\\(fail\\).*any other canvas mode"
+    },
+    {
+      "id": "W-091/summarize-path-dropped",
+      "requirement": "R-010",
+      "description": "summarizeIssues drops the issue path",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "(issue.path ? `${issue.path}: ${issue.message}` : issue.message)",
+          "replace": "issue.message"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate.test.ts"],
+      "expect": "\\(fail\\).*each issue is shown with its path"
+    },
+    {
+      "id": "W-091/summarize-empty-path-prefix",
+      "requirement": "R-010",
+      "description": "summarizeIssues prefixes an empty path",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "(issue.path ? `${issue.path}: ${issue.message}` : issue.message)",
+          "replace": "`${issue.path}: ${issue.message}`"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate.test.ts"],
+      "expect": "\\(fail\\).*without a path shows only its message"
+    },
+    {
+      "id": "W-091/summarize-join-changed",
+      "requirement": "R-010",
+      "description": "summarizeIssues joins with a comma",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "    .join(\"; \");",
+          "replace": "    .join(\", \");"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate.test.ts"],
+      "expect": "\\(fail\\).*joined by semicolons"
+    },
+    {
+      "id": "W-091/summarize-max-ignored",
+      "requirement": "R-010",
+      "description": "summarizeIssues shows every issue",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "    .slice(0, max)\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate.test.ts"],
+      "expect": "\\(fail\\).*only the first three issues"
+    },
+    {
+      "id": "W-091/summarize-default-max",
+      "requirement": "R-010",
+      "description": "summarizeIssues defaults to 5 issues",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "max = 3): string",
+          "replace": "max = 5): string"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate.test.ts"],
+      "expect": "\\(fail\\).*only the first three issues"
+    },
+    {
+      "id": "W-091/video-preview-youtube-label",
+      "requirement": "R-013",
+      "description": "the untitled YouTube preview is labelled as Vimeo",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "(target.provider === \"youtube\" ? \"YouTube video\" : \"Vimeo video\")",
+          "replace": "(target.provider === \"vimeo\" ? \"YouTube video\" : \"Vimeo video\")"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
+      "expect": "\\(fail\\).*YouTube video without a title"
+    },
+    {
+      "id": "W-091/video-preview-title-untrimmed",
+      "requirement": "R-013",
+      "description": "the preview title is not trimmed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "(node.props as { title?: string }).title?.trim() ||",
+          "replace": "(node.props as { title?: string }).title ||"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
+      "expect": "\\(fail\\).*without a title is labelled YouTube"
+    },
+    {
+      "id": "W-091/video-preview-provider-attr",
+      "requirement": "R-013",
+      "description": "the preview always says youtube",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "\"data-emvb-video-preview\": target.provider,",
+          "replace": "\"data-emvb-video-preview\": \"youtube\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
+      "expect": "\\(fail\\).*Vimeo video without a title"
+    },
+    {
+      "id": "W-091/video-preview-class-lost",
+      "requirement": "R-013",
+      "description": "the preview drops the element's own class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "class: `${attrs.class} emvb-video-preview`.trim(),",
+          "replace": "class: \"emvb-video-preview\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
+      "expect": "\\(fail\\).*keeps its own class"
     }
   ]
 }
