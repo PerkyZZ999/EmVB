@@ -1,5 +1,5 @@
 import { Button, DropdownMenu, Input } from "@cloudflare/kumo";
-import { DotsThreeVerticalIcon, PlusIcon, type Icon } from "@phosphor-icons/react";
+import { DotsThreeIcon, PlusIcon, type Icon } from "@phosphor-icons/react";
 import * as React from "react";
 import { slugify } from "../../../core/index.ts";
 import { BUTTON, FIELD, SOLID_PRIMARY } from "../../ui.ts";
@@ -181,7 +181,7 @@ export function RowMenu({ label, actions }: { label: string; actions: RowAction[
     >
       <DropdownMenu.Trigger>
         <button type="button" className="emvb-site-menu-btn" aria-label={label}>
-          <DotsThreeVerticalIcon size={16} weight="bold" aria-hidden="true" />
+          <DotsThreeIcon size={16} weight="bold" aria-hidden="true" />
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
