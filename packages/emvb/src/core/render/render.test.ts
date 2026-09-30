@@ -4,7 +4,7 @@ import { CSS_INJECTION_CORPUS, XSS_CORPUS } from "../../../test/fixtures/xss.ts"
 import { emptyDesign, type DesignSystem } from "../schema/design.ts";
 import { isContainerNode, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { renderPage } from "./index.ts";
-import { serialize } from "./vnode.ts";
+import { isAllowedAttr, isAllowedTag, serialize } from "./vnode.ts";
 
 const design: DesignSystem = {
   schemaVersion: 3,
@@ -93,6 +93,53 @@ describe("safe output (R-032)", () => {
     } as DesignSystem;
     expect(renderPage(page(), bad).css).not.toContain("body");
   });
+
+  test.each(["onerror", "onload", "srcdoc", "formaction", "style", "xhref", "hrefx"])(
+    "the serializer and the canvas refuse the attribute %p (W-091)",
+    (name) => {
+      expect(isAllowedAttr(name)).toBe(false);
+      expect(() => serialize({ tag: "img", attrs: { [name]: "x" }, children: [] })).toThrow(
+        `attribute "${name}" is not allowed`,
+      );
+    },
+  );
+
+  test("allowlisted attribute names and tags pass both checks (W-091)", () => {
+    expect(["class", "aria-label", "data-emvb-id", "xlink:href"].map(isAllowedAttr)).toEqual([
+      true,
+      true,
+      true,
+      true,
+    ]);
+    expect(["div", "svg", "script", "object"].map(isAllowedTag)).toEqual([
+      true,
+      true,
+      false,
+      false,
+    ]);
+  });
+
+  test.each([
+    ["hero", "hero"],
+    ["a".repeat(64), "a".repeat(64)],
+    ["1hero", null],
+    ["hero!", null],
+    ["a".repeat(65), null],
+  ])("the CSS id %p renders as the id %p (W-091, W-016)", (htmlId, expected) => {
+    const node = { ...heading("head0001", "Title"), htmlId } as LayoutNode;
+    const { html } = renderPage(page(node), design);
+    expect(parse(html).querySelector(".emvb-heading")?.getAttribute("id") ?? null).toBe(expected);
+  });
+
+  test.each(["x}*{abcd", "abcd}*{x"])(
+    "an element id %p that isn't a safe id gets no CSS rule or class (W-091)",
+    (id) => {
+      const node = { ...heading(id, "Title"), style: { color: "#112233" } } as LayoutNode;
+      const { html, css } = renderPage(page(node), design);
+      expect(css.includes("}*{")).toBe(false);
+      expect(html.includes("emvb-e-")).toBe(false);
+    },
+  );
 
   test("the serializer refuses tags and attributes outside the allowlist", () => {
     expect(() => serialize({ tag: "script", attrs: {}, children: [] })).toThrow("not allowed");

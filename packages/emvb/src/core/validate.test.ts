@@ -114,6 +114,24 @@ describe("invalid layouts fail with the exact path", () => {
     ]);
   });
 
+  test("a CSS id used twice is reported at the second use; different ids pass (W-091, W-016)", () => {
+    const input = {
+      schemaVersion: 3,
+      root: container("root0001", [
+        { ...heading("head0001"), htmlId: "hero" },
+        container("cont0001", [{ ...heading("head0002"), htmlId: "hero" }]),
+        { ...heading("head0003"), htmlId: "other" },
+      ]),
+    };
+    expect(issuesOf(input)).toEqual([
+      {
+        path: "root.children[1].children[0].htmlId",
+        code: "duplicate_html_id",
+        message: 'The CSS id "hero" is used more than once on this page.',
+      },
+    ]);
+  });
+
   test("nesting deeper than the limit is refused at the offending node", () => {
     expect(validateLayout(nested(MAX_DEPTH)).ok).toBe(true);
     const issues = issuesOf(nested(MAX_DEPTH + 1));

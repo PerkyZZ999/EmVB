@@ -11044,6 +11044,300 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/media-api.test.ts"],
       "expect": "\\(fail\\).*answered without an item"
+    },
+    {
+      "id": "W-091/serialize-attr-unanchored-start",
+      "requirement": "R-032",
+      "description": "the attribute allowlist accepts any name ending in an allowed one (onerror, formaction)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "/^(?:class|id|href|",
+          "replace": "/(?:class|id|href|"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/render.test.ts"],
+      "expect": "\\(fail\\).*refuse the attribute \"onerror\""
+    },
+    {
+      "id": "W-091/serialize-attr-unanchored-end",
+      "requirement": "R-032",
+      "description": "the attribute allowlist accepts any name starting with an allowed one (srcdoc)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "|data-[a-z][a-z0-9-]*)$/;",
+          "replace": "|data-[a-z][a-z0-9-]*)/;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/render.test.ts"],
+      "expect": "\\(fail\\).*refuse the attribute \"srcdoc\""
+    },
+    {
+      "id": "W-091/canvas-attr-check-open",
+      "requirement": "R-032",
+      "description": "the canvas attribute check lets every attribute through",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "export const isAllowedAttr = (name: string) => ATTR_NAME.test(name);",
+          "replace": "export const isAllowedAttr = (_name: string) => true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/render.test.ts"],
+      "expect": "\\(fail\\).*refuse the attribute \"onerror\""
+    },
+    {
+      "id": "W-091/canvas-tag-check-open",
+      "requirement": "R-032",
+      "description": "the canvas tag check lets every tag through",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "export const isAllowedTag = (tag: string) => TAGS.has(tag);",
+          "replace": "export const isAllowedTag = (_tag: string) => true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/render.test.ts"],
+      "expect": "\\(fail\\).*allowlisted attribute names and tags"
+    },
+    {
+      "id": "W-091/html-id-unanchored",
+      "requirement": "W-016",
+      "description": "a CSS id starting with a digit is rendered",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "const HTML_ID = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;",
+          "replace": "const HTML_ID = /[A-Za-z][A-Za-z0-9_-]{0,63}$/;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/render.test.ts"],
+      "expect": "\\(fail\\).*CSS id \"1hero\""
+    },
+    {
+      "id": "W-091/html-id-open-end",
+      "requirement": "W-016",
+      "description": "a CSS id with a trailing unsafe character is rendered",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "const HTML_ID = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;",
+          "replace": "const HTML_ID = /^[A-Za-z][A-Za-z0-9_-]{0,63}/;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/render.test.ts"],
+      "expect": "\\(fail\\).*CSS id \"hero!\""
+    },
+    {
+      "id": "W-091/node-id-unanchored",
+      "requirement": "R-032",
+      "description": "an element id with CSS metacharacters before a safe tail reaches the CSS selector",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "const ID = /^[A-Za-z0-9_-]{4,24}$/;",
+          "replace": "const ID = /[A-Za-z0-9_-]{4,24}$/;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/render.test.ts"],
+      "expect": "\\(fail\\).*element id \"x\\}\\*\\{abcd\""
+    },
+    {
+      "id": "W-091/node-id-open-end",
+      "requirement": "R-032",
+      "description": "an element id with CSS metacharacters after a safe head reaches the CSS selector",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "const ID = /^[A-Za-z0-9_-]{4,24}$/;",
+          "replace": "const ID = /^[A-Za-z0-9_-]{4,24}/;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/render.test.ts"],
+      "expect": "\\(fail\\).*element id \"abcd\\}\\*\\{x\""
+    },
+    {
+      "id": "W-091/html-id-duplicates-allowed",
+      "requirement": "W-016",
+      "description": "a CSS id used twice on a page is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "if (htmlIds.has(node.htmlId)) {",
+          "replace": "if (false) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/validate.test.ts"],
+      "expect": "\\(fail\\).*CSS id used twice"
+    },
+    {
+      "id": "W-091/css-hex-unanchored",
+      "requirement": "R-032",
+      "description": "a colour with text before the hex value is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const HEX_COLOR = /^#(?:",
+          "replace": "const HEX_COLOR = /#(?:"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*color \"red#fff\""
+    },
+    {
+      "id": "W-091/css-hex-four-digit-lost",
+      "requirement": "R-032",
+      "description": "four-digit hex colours are refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "[0-9a-f]{3}|[0-9a-f]{4}|",
+          "replace": "[0-9a-f]{3}|"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*color \"#FFFF\""
+    },
+    {
+      "id": "W-091/css-aspect-unanchored",
+      "requirement": "R-032",
+      "description": "an aspect ratio with text before it is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const ASPECT_RATIO = /^([1-9]",
+          "replace": "const ASPECT_RATIO = /([1-9]"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*aspectRatio \"x16/9\""
+    },
+    {
+      "id": "W-091/css-value-length-unbounded",
+      "requirement": "R-032",
+      "description": "the 200-character limit on every emitted CSS value is gone",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "value.length > 0 && value.length <= 200 && !FORBIDDEN",
+          "replace": "value.length > 0 && !FORBIDDEN"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*1 to 200 characters"
+    },
+    {
+      "id": "W-091/css-font-stack-newline",
+      "requirement": "R-032",
+      "description": "a quoted font stack may span lines",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "(value.length <= 200 && !/[\\n\\r]/.test(value) && FONT_STACK.test(value))",
+          "replace": "(value.length <= 200 && FONT_STACK.test(value))"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*quoted font stack"
+    },
+    {
+      "id": "W-091/css-class-name-open-end",
+      "requirement": "R-032",
+      "description": "a class name with a space and more after it is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "if (!/^[a-z0-9-]{1,40}$/.test(id)) return undefined;",
+          "replace": "if (!/^[a-z0-9-]{1,40}/.test(id)) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*class name is 1 to 40"
+    },
+    {
+      "id": "W-091/css-color-accepts-other-vars",
+      "requirement": "R-032",
+      "description": "a font or spacing variable is accepted as a colour",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "if (!ref || ref.from !== \"color\") return undefined;",
+          "replace": "if (!ref) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*color"
+    },
+    {
+      "id": "W-091/css-length-unbounded",
+      "requirement": "R-032",
+      "description": "lengths above 10 000 are accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "if (typeof n !== \"number\" || !Number.isFinite(n) || n < 0 || n > 10_000) return undefined;",
+          "replace": "if (typeof n !== \"number\" || !Number.isFinite(n) || n < 0) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*gap"
+    },
+    {
+      "id": "W-091/css-zindex-no-floor",
+      "requirement": "R-032",
+      "description": "z-index below -9999 is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "(value as number) >= -9999 && (value as number) <= 9999",
+          "replace": "(value as number) <= 9999"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*zIndex -10000"
+    },
+    {
+      "id": "W-091/css-font-weight-any-number",
+      "requirement": "R-032",
+      "description": "any numeric font weight is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "if (typeof value === \"number\" && FONT_WEIGHT.has(String(value))) return String(value);",
+          "replace": "if (typeof value === \"number\") return String(value);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*fontWeight 800"
+    },
+    {
+      "id": "W-091/css-filter-empty-emitted",
+      "requirement": "R-032",
+      "description": "an empty filter emits an empty value",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "return parts.length > 0 ? parts.join(\" \") : undefined;",
+          "replace": "return parts.join(\" \");"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*filter"
+    },
+    {
+      "id": "W-091/css-font-hex-accepted",
+      "requirement": "R-032",
+      "description": "a hex colour is accepted as a font family",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "return isSafeFontStack(value) && !HEX_COLOR.test(value) ? value : undefined;",
+          "replace": "return isSafeFontStack(value) ? value : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
+      "expect": "\\(fail\\).*fontFamily \"#fff\""
     }
   ]
 }
