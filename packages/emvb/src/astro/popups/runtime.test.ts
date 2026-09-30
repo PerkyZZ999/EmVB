@@ -1,20 +1,26 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { initPopups } from "./runtime.ts";
 
-type Timer = { ms: number; run: () => void };
+type Timer = { id: number; ms: number; run: () => void };
 let timers: Timer[] = [];
+// Ids stay unique across tests: listeners from earlier popups still clear their own timers.
+let lastId = 0;
 let timeoutSpy: ReturnType<typeof spyOn>;
+let clearSpy: ReturnType<typeof spyOn>;
 
 beforeEach(() => {
   timers = [];
   timeoutSpy = spyOn(window, "setTimeout").mockImplementation(((run: () => void, ms?: number) => {
-    timers.push({ ms: ms ?? 0, run });
-    return timers.length;
+    lastId += 1;
+    timers.push({ id: lastId, ms: ms ?? 0, run });
+    return lastId;
   }) as unknown as typeof window.setTimeout);
+  clearSpy = spyOn(window, "clearTimeout").mockImplementation(() => undefined);
 });
 
 afterEach(() => {
   timeoutSpy.mockRestore();
+  clearSpy.mockRestore();
   document.body.innerHTML = "";
   localStorage.clear();
   for (const key of ["innerWidth", "innerHeight", "scrollY"]) Reflect.deleteProperty(window, key);
@@ -104,5 +110,47 @@ describe("public popup runtime (S7b, W-081)", () => {
     localStorage.clear();
     document.body.innerHTML = "";
     expect(popup("free", doc([{ type: "page_load" }], { showTimes: null })).hidden).toBe(false);
+  });
+
+  test("a click inside the selector opens it; clicks elsewhere, blank and broken selectors don't", () => {
+    const button = document.createElement("button");
+    button.className = "open-me";
+    button.innerHTML = "<span>Go</span>";
+    const other = document.createElement("p");
+    const root = popup(
+      "c1",
+      doc([
+        { type: "click", selector: "  .open-me " },
+        { type: "click", selector: "  " },
+        { type: "click", selector: "[[" },
+      ]),
+    );
+    document.body.append(button, other);
+    other.click();
+    expect(root.hidden).toBe(true);
+    button.querySelector("span")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(root.hidden).toBe(false);
+  });
+
+  test("exit intent opens only when the pointer leaves through the top", () => {
+    const root = popup("e1", doc([{ type: "exit_intent" }]));
+    document.documentElement.dispatchEvent(new MouseEvent("mouseleave", { clientY: 40 }));
+    expect(root.hidden).toBe(true);
+    document.documentElement.dispatchEvent(new MouseEvent("mouseleave", { clientY: 0 }));
+    expect(root.hidden).toBe(false);
+  });
+
+  test("activity restarts the inactivity timer; unknown triggers are ignored", () => {
+    const root = popup("i1", doc([{ type: "inactivity", ms: 2500 }, { type: "hover" }]));
+    const idle = () => timers.filter((t) => t.ms === 2500);
+    expect(timers.length).toBe(1);
+    window.dispatchEvent(new Event("keydown"));
+    window.dispatchEvent(new Event("mousemove"));
+    expect(idle().length).toBe(3);
+    const first = idle()[0]?.id;
+    expect(clearSpy.mock.calls.filter((call: unknown[]) => call[0] === first).length).toBe(1);
+    expect(root.hidden).toBe(true);
+    idle().at(-1)?.run();
+    expect(root.hidden).toBe(false);
   });
 });

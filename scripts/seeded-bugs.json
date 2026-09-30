@@ -3614,6 +3614,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/theme/conditions-golden.test.ts"],
       "expect": "\\(fail\\).*conditions match, score"
+    },
+    {
+      "id": "W-086/exit-intent-any-edge",
+      "requirement": "R-063",
+      "description": "exit intent fires when the pointer leaves through any edge",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      if (event.clientY > 0) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*exit intent opens only"
+    },
+    {
+      "id": "W-086/idle-timer-not-reset",
+      "requirement": "R-063",
+      "description": "activity no longer restarts the inactivity timer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      window.clearTimeout(timer);\n      timer = window.setTimeout(open, ms);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*activity restarts the inactivity"
+    },
+    {
+      "id": "W-086/click-exact-target-only",
+      "requirement": "R-063",
+      "description": "a click on a child of the trigger element doesn't open the popup",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "if (target.closest(selector)) open();",
+          "replace": "if (target.matches(selector)) open();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*a click inside the selector"
     }
   ]
 }

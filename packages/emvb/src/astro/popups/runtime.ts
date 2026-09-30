@@ -165,72 +165,71 @@ function openOnce(ctrl: Controller, config: PopupConfig): void {
   bumpTimesShown(config.id);
 }
 
-function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTrigger): void {
-  switch (trigger.type) {
-    case "page_load":
-      openOnce(ctrl, config);
-      break;
-    case "delay":
-      window.setTimeout(() => openOnce(ctrl, config), Math.max(0, Number(trigger.ms) || 0));
-      break;
-    case "scroll": {
-      const threshold = clampScrollPercent(trigger.percent) / 100;
-      const onScroll = () => {
-        const doc = document.documentElement;
-        const max = doc.scrollHeight - window.innerHeight;
-        const progress = max <= 0 ? 1 : window.scrollY / max;
-        if (progress >= threshold) {
-          window.removeEventListener("scroll", onScroll);
-          openOnce(ctrl, config);
-        }
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-      onScroll();
-      break;
-    }
-    case "click": {
-      const selector = String(trigger.selector ?? "").trim();
-      if (!selector) break;
-      document.addEventListener("click", (event) => {
-        const target = event.target as Element | null;
-        if (!target?.closest) return;
-        try {
-          if (target.closest(selector)) openOnce(ctrl, config);
-        } catch {
-          // invalid selector at runtime — ignore
-        }
-      });
-      break;
-    }
-    case "exit_intent": {
-      // Desktop: pointer leaves the document toward the top chrome (common exit-intent heuristic).
-      const onLeave = (event: MouseEvent) => {
-        if (event.clientY > 0) return;
-        document.documentElement.removeEventListener("mouseleave", onLeave);
-        openOnce(ctrl, config);
-      };
-      document.documentElement.addEventListener("mouseleave", onLeave);
-      break;
-    }
-    case "inactivity": {
-      const ms = Math.max(TRIGGER_LIMITS.minIdleMs, Number(trigger.ms) || 30_000);
-      let timer = window.setTimeout(() => openOnce(ctrl, config), ms);
-      const reset = () => {
-        window.clearTimeout(timer);
-        timer = window.setTimeout(() => openOnce(ctrl, config), ms);
-      };
-      for (const eventName of [
-        "mousemove",
-        "mousedown",
-        "keydown",
-        "touchstart",
-        "scroll",
-      ] as const) {
-        window.addEventListener(eventName, reset, { passive: true });
+const IDLE_EVENTS = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"] as const;
+
+type Arm<T extends OpenTrigger["type"]> = (
+  open: () => void,
+  trigger: Extract<OpenTrigger, { type: T }>,
+) => void;
+
+/** How each open trigger waits before calling `open`; unknown types never open. */
+const ARM: { [T in OpenTrigger["type"]]: Arm<T> } = {
+  page_load: (open) => open(),
+  delay: (open, trigger) => {
+    window.setTimeout(open, Math.max(0, Number(trigger.ms) || 0));
+  },
+  scroll: (open, trigger) => {
+    const threshold = clampScrollPercent(trigger.percent) / 100;
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      const progress = max <= 0 ? 1 : window.scrollY / max;
+      if (progress >= threshold) {
+        window.removeEventListener("scroll", onScroll);
+        open();
       }
-      break;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  },
+  click: (open, trigger) => {
+    const selector = String(trigger.selector ?? "").trim();
+    if (!selector) return;
+    document.addEventListener("click", (event) => {
+      const target = event.target as Element | null;
+      if (!target?.closest) return;
+      try {
+        if (target.closest(selector)) open();
+      } catch {
+        // invalid selector at runtime — ignore
+      }
+    });
+  },
+  exit_intent: (open) => {
+    // Desktop: pointer leaves the document toward the top chrome (common exit-intent heuristic).
+    const onLeave = (event: MouseEvent) => {
+      if (event.clientY > 0) return;
+      document.documentElement.removeEventListener("mouseleave", onLeave);
+      open();
+    };
+    document.documentElement.addEventListener("mouseleave", onLeave);
+  },
+  inactivity: (open, trigger) => {
+    const ms = Math.max(TRIGGER_LIMITS.minIdleMs, Number(trigger.ms) || 30_000);
+    let timer = window.setTimeout(open, ms);
+    const reset = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(open, ms);
+    };
+    for (const eventName of IDLE_EVENTS) {
+      window.addEventListener(eventName, reset, { passive: true });
     }
-  }
+  },
+};
+
+function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTrigger): void {
+  const arm = (ARM as Record<string, Arm<OpenTrigger["type"]> | undefined>)[trigger.type];
+  arm?.(() => openOnce(ctrl, config), trigger as never);
 }
 
 export function initPopups(root: ParentNode = document): void {
