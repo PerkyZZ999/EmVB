@@ -105,9 +105,35 @@ const ATTR_ALLOW = new Set([
 const FORBIDDEN =
   /<script\b|<\/script\b|\bon[a-z]+\s*=|javascript:|data:|<\s*foreignObject\b|<\s*style\b|<\s*iframe\b|<\s*a\b/i;
 
-/** Transform attributes take only transform-function syntax (no url(), no punctuation). */
+/** Transform attributes take only a list of SVG transform functions with the right arity. */
 const TRANSFORM_ATTRS = new Set(["transform", "gradientTransform", "patternTransform"]);
-const TRANSFORM_VALUE = /^[a-z0-9.\s,()\-+e]+$/i;
+const TRANSFORM_ARITY: Record<string, readonly number[]> = {
+  matrix: [6],
+  translate: [1, 2],
+  scale: [1, 2],
+  rotate: [1, 3],
+  skewX: [1],
+  skewY: [1],
+};
+const NUMBER = String.raw`[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?`;
+const TRANSFORM_FN = new RegExp(
+  String.raw`\s*([A-Za-z]+)\s*\(\s*(${NUMBER}(?:(?:\s*,\s*|\s+)${NUMBER})*)\s*\)\s*,?`,
+  "y",
+);
+
+function isTransformList(value: string): boolean {
+  if (value.trim() === "") return false;
+  TRANSFORM_FN.lastIndex = 0;
+  let end = 0;
+  for (let match = TRANSFORM_FN.exec(value); match; match = TRANSFORM_FN.exec(value)) {
+    const name = match[1] ?? "";
+    const arity = Object.hasOwn(TRANSFORM_ARITY, name) ? TRANSFORM_ARITY[name] : undefined;
+    const count = (match[2] ?? "").split(/\s*,\s*|\s+/).length;
+    if (!arity?.includes(count)) return false;
+    end = TRANSFORM_FN.lastIndex;
+  }
+  return end === value.length && !/,\s*$/.test(value);
+}
 /** The only elements whose text content is kept. */
 const TEXT_TAGS = new Set(["title", "desc", "text", "tspan"]);
 
@@ -152,7 +178,7 @@ function parseAttrs(tag: string, raw: string): Record<string, string> | undefine
     if (!ATTR_ALLOW.has(name)) continue;
     const value = decodeAttr(match[2] ?? match[3] ?? "");
     if (/[<>`]|javascript:/i.test(value)) return undefined;
-    if (TRANSFORM_ATTRS.has(name) && !TRANSFORM_VALUE.test(value)) return undefined;
+    if (TRANSFORM_ATTRS.has(name) && !isTransformList(value)) return undefined;
     if (!isSafeHref(tag, name, value)) return undefined;
     if (!isSafeUrlRefAttr(name, value)) return undefined;
     // Never allow inline style attribute (XSS vector); presentation attrs only.

@@ -174,19 +174,7 @@
   },
   {
     "input": "<svg><lineargradient gradientTransform=\"expression(x)\"/></svg>",
-    "output": {
-      "tag": "svg",
-      "attrs": {},
-      "children": [
-        {
-          "tag": "lineargradient",
-          "attrs": {
-            "gradientTransform": "expression(x)"
-          },
-          "children": []
-        }
-      ]
-    }
+    "output": null
   },
   {
     "input": "<svg><pattern patternTransform=\"skewX(1)\"/></svg>",

@@ -4047,6 +4047,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/style-map.test.ts"],
       "expect": "\\(fail\\).*a local font stack may quote family names"
+    },
+    {
+      "id": "QA-4/svg-transform-arity-unchecked",
+      "requirement": "R-061",
+      "description": "a transform function with the wrong number of arguments is kept, so the browser logs an error and ignores it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "    if (!arity?.includes(count)) return false;",
+          "replace": "    if (!arity) return false;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg.test.ts"],
+      "expect": "\\(fail\\).*refuses \"rotate\\(1 2\\)\""
+    },
+    {
+      "id": "QA-4/svg-transform-trailing-junk",
+      "requirement": "R-061",
+      "description": "text after the last transform function is kept, so a value that starts well-formed passes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  return end === value.length && !/,\\s*$/.test(value);",
+          "replace": "  return end > 0;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg.test.ts"],
+      "expect": "\\(fail\\).*refuses \"scale\\(1\\)x\""
     }
   ]
 }

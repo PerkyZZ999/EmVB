@@ -57,6 +57,40 @@ describe("sanitizeSvgMarkup (W-073 / W-079)", () => {
     expect(html).toContain("<text");
   });
 
+  describe("transform attributes hold only well-formed transform functions (QA-4)", () => {
+    const withTransform = (value: string) =>
+      sanitizeSvgMarkup(
+        `<svg><g transform="${value}"/><pattern patternTransform="${value}"/></svg>`,
+      );
+    test.each([
+      "translate(1, 2) rotate(45)",
+      "matrix(1 0 0 1 10 10)",
+      "matrix(1,0,0,1,-2.5,.5)",
+      "scale(2)",
+      "scale(1 -1)",
+      "rotate(45 5 5)",
+      "skewX(-1.5e1)",
+      "translate(10),skewY(3)",
+    ])("keeps %p", (value) => {
+      expect(withTransform(value)?.children).toHaveLength(2);
+    });
+    test.each([
+      "expression(x)",
+      "scale()",
+      "rotate(a)",
+      "translate(1,2",
+      "rotate(1 2)",
+      "matrix(1 0 0 1)",
+      "scale(1 2 3)",
+      "skewx(1)",
+      "scale(1)x",
+      "scale(1,)",
+      "",
+    ])("refuses %p", (value) => {
+      expect(withTransform(value)).toBeUndefined();
+    });
+  });
+
   test("strips unknown attributes but keeps allowlisted ones", () => {
     const tree = sanitizeSvgMarkup(
       '<svg viewBox="0 0 10 10" class="evil" data-x="1"><rect x="0" y="0" width="10" height="10" fill="currentColor"/></svg>',
