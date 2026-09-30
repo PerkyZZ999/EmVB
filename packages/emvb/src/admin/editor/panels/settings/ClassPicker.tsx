@@ -27,6 +27,7 @@ export function ClassPicker({
   const catalog = design.classes ?? [];
   const byId = new Map(catalog.map((cls) => [cls.id, cls]));
   const available = catalog.filter((cls) => !ids.includes(cls.id));
+  const prompt = available.length === 0 ? "No more classes" : "Choose a class…";
 
   const commit = (next: string[]) => {
     onChange(next.length === 0 ? undefined : next);
@@ -99,10 +100,9 @@ export function ClassPicker({
           if (!value || value === NONE) return;
           commit(addClassId(ids, value));
         }}
+        renderValue={() => prompt}
       >
-        <Select.Option value={NONE}>
-          {available.length === 0 ? "No more classes" : "Choose a class…"}
-        </Select.Option>
+        <Select.Option value={NONE}>{prompt}</Select.Option>
         {available.map((cls) => (
           <Select.Option key={cls.id} value={cls.id}>
             {cls.name}

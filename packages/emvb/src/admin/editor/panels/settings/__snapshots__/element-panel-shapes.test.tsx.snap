@@ -109,7 +109,7 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -246,7 +246,7 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -369,7 +369,7 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -497,7 +497,7 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -578,7 +578,7 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -664,7 +664,7 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -771,7 +771,7 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -930,7 +930,7 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -1103,7 +1103,7 @@ exports[`element panel markup (W-021, W-086 M16) label renders the same content 
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -1289,7 +1289,7 @@ exports[`element panel markup (W-021, W-086 M16) link renders the same content a
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -1475,7 +1475,7 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -1656,7 +1656,7 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -1865,7 +1865,7 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -2198,7 +2198,7 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -2364,7 +2364,7 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -2532,7 +2532,7 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -2712,7 +2712,7 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -2906,7 +2906,7 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -3095,7 +3095,7 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -3284,7 +3284,7 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -3456,7 +3456,7 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -3623,7 +3623,7 @@ exports[`element panel markup (W-021, W-086 M16) submit renders the same content
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -3807,7 +3807,7 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -3949,7 +3949,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -4086,7 +4086,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -4228,7 +4228,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -4365,7 +4365,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -4546,7 +4546,7 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -4732,7 +4732,7 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -4916,7 +4916,7 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -5058,7 +5058,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -5195,7 +5195,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -5337,7 +5337,7 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -5474,7 +5474,7 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -5670,7 +5670,7 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -5845,7 +5845,7 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -6023,7 +6023,7 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"
@@ -6143,7 +6143,7 @@ exports[`element panel markup (W-021, W-086 M16) closed sections count the prope
             "Add class"
         button.emvb-field type="button" data-disabled="" tabindex="-1" disabled="" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Add class" data-filled=""
           span
-            "__none__"
+            "No more classes"
           span aria-hidden="true"
             svg
         input id="id-4" disabled="" tabindex="-1" aria-hidden="true" value="__none__"

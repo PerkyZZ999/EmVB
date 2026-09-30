@@ -5,6 +5,9 @@ import { loadFormFields, type DefinitionField } from "../../../forms-api.ts";
 import { FIELD } from "../../../ui.ts";
 
 const MANUAL = "__manual__";
+const CHOOSE = "Choose a field…";
+
+const fieldLabel = (field: DefinitionField) => `${field.label}${field.required ? " *" : ""}`;
 
 /** Field name binder: options from public definition when the parent form id is known. */
 export function FieldBindControl({
@@ -46,12 +49,15 @@ export function FieldBindControl({
             if (!next || next === MANUAL) return;
             onChange(next);
           }}
+          renderValue={(current: unknown) => {
+            const field = fields.find((each) => each.name === current);
+            return field ? fieldLabel(field) : CHOOSE;
+          }}
         >
-          {!known && <Select.Option value={MANUAL}>Choose a field…</Select.Option>}
+          {!known && <Select.Option value={MANUAL}>{CHOOSE}</Select.Option>}
           {fields.map((field) => (
             <Select.Option key={field.name} value={field.name}>
-              {field.label}
-              {field.required ? " *" : ""}
+              {fieldLabel(field)}
             </Select.Option>
           ))}
         </Select>

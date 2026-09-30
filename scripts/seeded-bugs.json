@@ -4075,6 +4075,60 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg.test.ts"],
       "expect": "\\(fail\\).*refuses \"scale\\(1\\)x\""
+    },
+    {
+      "id": "QA-7/form-picker-shows-sentinel",
+      "requirement": "R-040",
+      "description": "the Form select shows the raw form id, or its internal placeholder value, instead of the form's name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
+          "search": "          renderValue={(current: unknown) =>\n            capability.forms.find((form) => form.id === current)?.name ?? placeholder\n          }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx"
+      ],
+      "expect": "\\(fail\\).*form \"01FORM\" reads \"Contact\""
+    },
+    {
+      "id": "QA-7/field-picker-shows-sentinel",
+      "requirement": "R-040",
+      "description": "the Field select shows the raw field name, or its internal placeholder value, instead of the field label",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "            return field ? fieldLabel(field) : CHOOSE;",
+          "replace": "            return field ? fieldLabel(field) : String(current);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx"
+      ],
+      "expect": "\\(fail\\).*field \"\" reads \"Choose a field…\""
+    },
+    {
+      "id": "QA-7/class-picker-shows-sentinel",
+      "requirement": "R-021",
+      "description": "the Add class select shows its internal placeholder value instead of a prompt",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassPicker.tsx",
+          "search": "        renderValue={() => prompt}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*prompts for a class"
     }
   ]
 }

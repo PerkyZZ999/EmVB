@@ -3,6 +3,7 @@ import { act } from "react";
 import { emptyDesign, type LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
+import { ClassPicker } from "./ClassPicker.tsx";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 
 const stubFetcher: Fetcher = async () => new Response("{}", { status: 200 });
@@ -93,5 +94,19 @@ describe("ClassPicker (W-031)", () => {
       ),
     ).toEqual(["accent", "card"]);
     expect(current.classes).toEqual(["accent", "card"]);
+  });
+});
+
+describe("ClassPicker add select (QA-7)", () => {
+  const shown = () =>
+    document.querySelector('[data-kumo-part="trigger"] > span:first-child')?.textContent;
+
+  test("prompts for a class, and says when none are left, instead of showing its sentinel", async () => {
+    await mount(<ClassPicker applied={["card"]} design={design} onChange={() => undefined} />);
+    expect(shown()).toBe("Choose a class…");
+    await mount(
+      <ClassPicker applied={["card", "accent"]} design={design} onChange={() => undefined} />,
+    );
+    expect(shown()).toBe("No more classes");
   });
 });

@@ -45,6 +45,7 @@ export function FormBindControl({
 
   if (capability?.status === "ready" && capability.forms.length > 0) {
     const known = capability.forms.some((form) => form.id === value);
+    const placeholder = !known && value ? "Current id (not in list)" : "Choose a form…";
     return (
       <div data-emvb-form-bind="list">
         <Select
@@ -55,12 +56,11 @@ export function FormBindControl({
             if (!next || next === MANUAL) return;
             onChange(next);
           }}
+          renderValue={(current: unknown) =>
+            capability.forms.find((form) => form.id === current)?.name ?? placeholder
+          }
         >
-          {!known && value ? (
-            <Select.Option value={MANUAL}>Current id (not in list)</Select.Option>
-          ) : (
-            <Select.Option value={MANUAL}>Choose a form…</Select.Option>
-          )}
+          <Select.Option value={MANUAL}>{placeholder}</Select.Option>
           {capability.forms.map((form: FormListItem) => (
             <Select.Option key={form.id} value={form.id}>
               {form.name}

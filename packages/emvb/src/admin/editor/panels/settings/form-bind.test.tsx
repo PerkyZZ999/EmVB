@@ -86,6 +86,57 @@ describe("FieldBindControl (W-036)", () => {
   });
 });
 
+const shown = () =>
+  [...document.querySelectorAll('[data-kumo-part="trigger"] > span:first-child')].map(
+    (el) => el.textContent,
+  );
+
+describe("form and field pickers show names, never sentinel values (QA-7)", () => {
+  const forms: Fetcher = async (path) =>
+    path.includes("/forms/list")
+      ? new Response(
+          JSON.stringify({ data: { items: [{ id: "01FORM", name: "Contact", slug: "contact" }] } }),
+          { status: 200 },
+        )
+      : new Response("{}", { status: 404 });
+  const fields: Fetcher = async () =>
+    new Response(
+      JSON.stringify({
+        data: {
+          pages: [{ fields: [{ name: "email", type: "email", label: "Email", required: true }] }],
+        },
+      }),
+      { status: 200 },
+    );
+
+  test.each([
+    ["", "Choose a form…"],
+    ["01FORM", "Contact"],
+    ["gone", "Current id (not in list)"],
+  ])("form %p reads %p", async (value, label) => {
+    await mount(<FormBindControl value={value} fetcher={forms} onChange={() => undefined} />);
+    await flush();
+    expect(shown()).toEqual([label]);
+  });
+
+  test.each([
+    ["", "Choose a field…"],
+    ["email", "Email *"],
+    ["phone", "Choose a field…"],
+  ])("field %p reads %p", async (value, label) => {
+    await mount(
+      <FieldBindControl
+        value={value}
+        formId="01FORM"
+        fetcher={fields}
+        onChange={() => undefined}
+      />,
+    );
+    await flush();
+    expect(shown()).toEqual([label]);
+  });
+});
+
 describe("AddPanel forms group (W-036)", () => {
   test("hides Form group when formsAvailable is false", async () => {
     await mount(<AddPanel onAdd={() => undefined} formsAvailable={false} />);
