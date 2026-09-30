@@ -127,8 +127,16 @@ describe("tabs runtime (W-078)", () => {
     ]);
     expect(state(root)).toEqual(["- false -1 true", "checked true 0 false", "- false -1 true"]);
     const inner = document.getElementById("inner") as HTMLElement;
-    // Init focuses each group's selected tab, so the last group enhanced ends up focused.
-    expect(state(inner)).toEqual(["checked true 0 false focused"]);
+    expect(state(inner)).toEqual(["checked true 0 false"]);
+  });
+
+  test("loading the page leaves focus where it was (QA-2)", () => {
+    threeTabs("tabs-f");
+    const before = document.createElement("button");
+    document.body.append(before);
+    before.focus();
+    initTabs(document);
+    expect(document.activeElement?.outerHTML).toBe(before.outerHTML);
   });
 
   test("a root without an id names its tabs emvb-tabs-…", () => {
@@ -173,10 +181,6 @@ describe("tabs runtime (W-078)", () => {
     )[2] as HTMLInputElement;
     third.checked = true;
     third.dispatchEvent(new Event("change", { bubbles: true }));
-    expect(state(root)).toEqual([
-      "- false -1 true",
-      "- false -1 true",
-      "checked true 0 false focused",
-    ]);
+    expect(state(root)).toEqual(["- false -1 true", "- false -1 true", "checked true 0 false"]);
   });
 });

@@ -24,7 +24,8 @@ const KEY_TARGETS: Record<string, (current: number, count: number) => number> = 
   End: (_current, count) => count - 1,
 };
 
-function activate(root: HTMLElement, index: number): void {
+/** Selects tab `index`; only keyboard navigation moves focus, never load or a radio change. */
+function activate(root: HTMLElement, index: number, focus = false): void {
   if (root.dataset["emvbTabsActivating"] === "1") return;
   root.dataset["emvbTabsActivating"] = "1";
   try {
@@ -40,7 +41,7 @@ function activate(root: HTMLElement, index: number): void {
       label.tabIndex = selected ? 0 : -1;
       panels[i]?.setAttribute("aria-hidden", String(!selected));
     }
-    const focusTarget = labels[next];
+    const focusTarget = focus ? labels[next] : undefined;
     if (focusTarget && document.activeElement !== focusTarget) {
       try {
         focusTarget.focus({ preventScroll: true });
@@ -88,7 +89,7 @@ function enhance(root: HTMLElement): void {
     if (!target) return;
     event.preventDefault();
     if (labels.length === 0) return;
-    activate(root, target(selectedIndex(root), labels.length));
+    activate(root, target(selectedIndex(root), labels.length), true);
   });
 
   // Keep ARIA in sync when the CSS-only radio path is used (click / label).

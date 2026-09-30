@@ -3977,6 +3977,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/forms-api.test.ts"],
       "expect": "\\(fail\\).*EmDash's missing-plugin 404 means missing"
+    },
+    {
+      "id": "QA-2/tabs-init-steals-focus",
+      "requirement": "R-031",
+      "description": "the tabs runtime focuses the selected tab on load, pulling focus off whatever the visitor was on",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "    const focusTarget = focus ? labels[next] : undefined;",
+          "replace": "    const focusTarget = labels[next];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*loading the page leaves focus where it was"
+    },
+    {
+      "id": "QA-2/tabs-keys-stop-focusing",
+      "requirement": "R-031",
+      "description": "arrow keys select the next tab but leave focus on the old one",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "activate(root, target(selectedIndex(root), labels.length), true);",
+          "replace": "activate(root, target(selectedIndex(root), labels.length));"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*arrows wrap, Home and End jump"
     }
   ]
 }
