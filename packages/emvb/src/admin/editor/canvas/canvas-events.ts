@@ -9,6 +9,7 @@ import {
 } from "../dnd/drop-target.ts";
 import { newElement } from "../dnd/new-element.ts";
 import type { Box } from "./SelectionOverlay.tsx";
+import { tabPanelIdForLabel } from "./tab-reveal.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
 
 export type ResolvedDrop = {
@@ -97,7 +98,7 @@ export function useCanvasEvents({
     if (!doc) return;
     const click = (event: MouseEvent) => {
       event.preventDefault();
-      handlers.current.onSelect(idAt(event.target));
+      handlers.current.onSelect(tabPanelIdForLabel(event.target) ?? idAt(event.target));
     };
     const move = (event: MouseEvent) => setHoverId(idAt(event.target));
     const leave = () => setHoverId(null);

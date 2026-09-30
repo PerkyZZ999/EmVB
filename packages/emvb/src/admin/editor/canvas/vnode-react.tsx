@@ -1,7 +1,7 @@
 import * as React from "react";
 import { isAllowedAttr, isAllowedTag, type VNode } from "../../../core/index.ts";
 
-/** HTML/SVG attr names React expects in camelCase (avoids DOM-property console warnings). */
+/** Lowercase HTML attr names React spells in camelCase. */
 const REACT_ATTR: Record<string, string> = {
   class: "className",
   for: "htmlFor",
@@ -9,10 +9,24 @@ const REACT_ATTR: Record<string, string> = {
   autocomplete: "autoComplete",
   allowfullscreen: "allowFullScreen",
   referrerpolicy: "referrerPolicy",
-  "stroke-width": "strokeWidth",
-  "stroke-linecap": "strokeLinecap",
-  "stroke-linejoin": "strokeLinejoin",
+  // The canvas never updates a radio from props, so a tab chosen there stays chosen (QA-5).
+  checked: "defaultChecked",
 };
+
+/** SVG tags the core keeps lowercase; the SVG namespace only knows their camelCase names. */
+const REACT_TAG: Record<string, string> = {
+  lineargradient: "linearGradient",
+  radialgradient: "radialGradient",
+  clippath: "clipPath",
+};
+
+/** React's name for an attribute: SVG's `stop-color` and `xlink:href` become `stopColor`, `xlinkHref`. */
+function reactAttr(name: string): string {
+  const mapped = REACT_ATTR[name];
+  if (mapped) return mapped;
+  if (name.startsWith("data-") || name.startsWith("aria-")) return name;
+  return name.replace(/[-:]([a-z])/g, (_match, letter: string) => letter.toUpperCase());
+}
 
 /**
  * Turns the core's VNode tree into React elements for the canvas (A-08). It applies the same tag
@@ -25,10 +39,10 @@ export function vnodeToReact(node: VNode | string, key?: React.Key): React.React
   const props: Record<string, unknown> = { key };
   for (const [name, value] of Object.entries(node.attrs)) {
     if (!isAllowedAttr(name)) continue;
-    props[REACT_ATTR[name] ?? name] = value;
+    props[reactAttr(name)] = name === "checked" ? true : value;
   }
   return React.createElement(
-    node.tag,
+    REACT_TAG[node.tag] ?? node.tag,
     props,
     ...node.children.map((child, index) => vnodeToReact(child, index)),
   );

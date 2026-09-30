@@ -21,6 +21,7 @@ import { dragStash } from "../dnd/drag-stash.ts";
 import { newElement } from "../dnd/new-element.ts";
 import { useCanvasEvents } from "./canvas-events.ts";
 import { SelectionOverlay, type Box, type InvalidDrop } from "./SelectionOverlay.tsx";
+import { revealInTabs } from "./tab-reveal.ts";
 import { vnodeToReact } from "./vnode-react.tsx";
 
 const SRCDOC =
@@ -231,6 +232,10 @@ export function CanvasFrame({
   });
 
   const { selectedId } = selection;
+  React.useEffect(() => {
+    if (doc) revealInTabs(doc, selectedId);
+  }, [doc, selectedId, vnode]);
+
   React.useEffect(() => {
     if (!doc) return;
     let frameId = 0;

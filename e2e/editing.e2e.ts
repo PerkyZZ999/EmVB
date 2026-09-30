@@ -238,3 +238,50 @@ test("a colour variable can be created, bound and edited, and the design persist
     "rgb(255, 0, 0)",
   );
 });
+
+const tabPanel = (id: string, label: string, text: string) => ({
+  id,
+  type: "tab-panel",
+  props: { label },
+  children: [heading(`h${id.slice(1)}`, text)],
+});
+
+test("on the canvas a tab label shows its panel, and so does a panel chosen in Layers", async ({
+  page,
+  request,
+}) => {
+  const layout = {
+    schemaVersion: 1,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "tabs0001",
+          type: "tabs",
+          props: {},
+          children: [
+            tabPanel("tpa00001", "First", "Panel one"),
+            tabPanel("tpb00001", "Second", "Panel two"),
+            tabPanel("tpc00001", "Third", "Panel three"),
+          ],
+        },
+      ],
+    },
+  };
+  const id = await createPage(request, "Canvas tabs", layout, `tabs-${unique()}`);
+  await openEditor(page, id, "Panel one");
+  const shown = (text: string) => canvas(page).getByRole("heading", { name: text });
+  await expect(shown("Panel two")).toBeHidden();
+
+  await canvas(page).locator(".emvb-tab-label", { hasText: "Second" }).click();
+  await expect(shown("Panel two")).toBeVisible();
+  await expect(shown("Panel one")).toBeHidden();
+  await expect(overlay(page).locator(".emvb-overlay-label")).toContainText("Tab panel");
+
+  await openLayers(page);
+  await overlay(page).locator(".emvb-layer-select").filter({ hasText: "Panel three" }).click();
+  await expect(shown("Panel three")).toBeVisible();
+  await expect(shown("Panel two")).toBeHidden();
+});

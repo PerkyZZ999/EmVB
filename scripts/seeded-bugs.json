@@ -4129,6 +4129,106 @@
         "./packages/emvb/src/admin/editor/panels/settings/class-picker.test.tsx"
       ],
       "expect": "\\(fail\\).*prompts for a class"
+    },
+    {
+      "id": "QA-5/canvas-tab-radio-controlled",
+      "requirement": "R-031",
+      "description": "the canvas passes a controlled checked prop to the tab radios, so React snaps every tab group back to its first tab",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/vnode-react.tsx",
+          "search": "  checked: \"defaultChecked\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/vnode-react.test.tsx"],
+      "expect": "\\(fail\\).*a tab radio is only checked to begin with"
+    },
+    {
+      "id": "QA-5/tab-reveal-skips-outer-tabs",
+      "requirement": "R-031",
+      "description": "selecting an element in nested tabs opens only the innermost group, leaving it inside a hidden outer panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/tab-reveal.ts",
+          "search": "    panel = panel.parentElement?.closest(\".emvb-tab-panel\")",
+          "replace": "    panel = null"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/vnode-react.test.tsx"],
+      "expect": "\\(fail\\).*selecting \"ihb00001\" shows tabs"
+    },
+    {
+      "id": "QA-5/canvas-selection-not-revealed",
+      "requirement": "R-031",
+      "description": "a tab panel chosen from a tab label or Layers stays hidden on the canvas",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "    if (doc) revealInTabs(doc, selectedId);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "tab label shows its panel"
+      ],
+      "expect": "✘.*\\[node\\].*on the canvas a tab label shows its panel"
+    },
+    {
+      "id": "QA-5/canvas-tab-label-selects-tabs",
+      "requirement": "R-031",
+      "description": "clicking a tab label on the canvas selects the whole tabs element instead of that tab's panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/canvas-events.ts",
+          "search": "tabPanelIdForLabel(event.target) ?? idAt(event.target)",
+          "replace": "idAt(event.target)"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "tab label shows its panel"
+      ],
+      "expect": "✘.*\\[node\\].*on the canvas a tab label shows its panel"
+    },
+    {
+      "id": "QA-6/canvas-svg-tags-lowercase",
+      "requirement": "R-061",
+      "description": "the canvas creates lineargradient, radialgradient and clippath, which the SVG namespace doesn't know, so gradients and clips don't paint",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/vnode-react.tsx",
+          "search": "    REACT_TAG[node.tag] ?? node.tag,",
+          "replace": "    node.tag,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/vnode-react.test.tsx"],
+      "expect": "\\(fail\\).*SVG attributes and tags reach the canvas DOM"
+    },
+    {
+      "id": "QA-6/canvas-svg-attrs-hyphenated",
+      "requirement": "R-061",
+      "description": "hyphenated SVG attributes reach React as-is, so the canvas logs invalid DOM property warnings",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/vnode-react.tsx",
+          "search": "  return name.replace(/[-:]([a-z])/g, (_match, letter: string) => letter.toUpperCase());",
+          "replace": "  return name;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/vnode-react.test.tsx"],
+      "expect": "\\(fail\\).*SVG attributes and tags reach the canvas DOM"
     }
   ]
 }
