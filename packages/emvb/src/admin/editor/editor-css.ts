@@ -247,6 +247,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-style-row { display: flex; align-items: flex-start; gap: 4px; }
 .emvb-shadow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .emvb-add-shadow { align-self: flex-start; }
+.emvb-style-row[data-emvb-style="boxShadow"] > .emvb-reset-btn { margin-top: -4px; }
 .emvb-filters { display: flex; flex-direction: column; gap: 10px; }
 .emvb-sub-label { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--text-color-kumo-default); }
 .emvb-style-row > :first-child { flex: 1 1 auto; min-width: 0; }
