@@ -297,11 +297,10 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-chip {
   display: inline-flex; align-items: center; min-width: 0; max-width: 100%; height: 20px;
   border-radius: 4px; background: var(--color-kumo-tint); color: var(--text-color-kumo-default);
-  font-family: var(--font-mono); font-size: 12px; line-height: 16px;
+  font-family: var(--font-sans); font-size: 12px; line-height: 16px;
 }
 .emvb-chip:hover { background: var(--color-kumo-recessed); }
 .emvb-chip[data-active="true"] { background: var(--color-kumo-brand); color: #fff; }
-.emvb-chip-local { font-family: var(--font-sans); }
 .emvb-chip-main {
   display: inline-flex; align-items: center; gap: 4px; min-width: 0; height: 20px; padding: 0 4px;
   border: 0; border-radius: 4px; background: transparent; color: inherit; font: inherit; cursor: pointer;
