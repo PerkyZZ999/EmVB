@@ -10108,6 +10108,132 @@
         "shows Loop Item picker when theme parts include loop_item"
       ],
       "expect": "\\(fail\\).*shows Loop Item picker when theme parts include loop_item"
+    },
+    {
+      "id": "W-091/hook-string-layout-not-parsed",
+      "requirement": "R-006",
+      "description": "beforeSave no longer parses a layout sent as a JSON string, so valid string layouts are refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  if (typeof raw !== \"string\") return raw;",
+          "replace": "  if (typeof raw !== \"string\" || raw) return raw;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/before-save.test.ts"],
+      "expect": "\\(fail\\).*a layout sent as a JSON string is validated"
+    },
+    {
+      "id": "W-091/hook-upgrade-drops-fields",
+      "requirement": "D-031",
+      "description": "an upgraded layout is returned without the entry's other fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "      next = { ...(next ?? event.content), layout: result.layout };",
+          "replace": "      next = { layout: result.layout };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/before-save.test.ts"],
+      "expect": "\\(fail\\).*an upgraded layout keeps the entry's other fields"
+    },
+    {
+      "id": "W-091/hook-role-message-always-page",
+      "requirement": "D-020",
+      "description": "the role refusal says pages for theme parts too",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  const kind = event.collection === THEME_PARTS_COLLECTION ? \"theme part\" : \"page\";",
+          "replace": "  const kind = \"page\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/before-save.test.ts"],
+      "expect": "\\(fail\\).*an author saving a theme part is refused"
+    },
+    {
+      "id": "W-091/hook-theme-part-message-one-issue",
+      "requirement": "R-061",
+      "description": "the theme-part refusal keeps only the first issue message",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "            .slice(0, 3)",
+          "replace": "            .slice(0, 1)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/before-save.test.ts"],
+      "expect": "\\(fail\\).*invalid conditions give the first issue messages"
+    },
+    {
+      "id": "W-091/design-unreadable-served-raw",
+      "requirement": "D-013",
+      "description": "GET design serves the stored design without validating it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "    if (result.ok) return { design: result.design, revision: current.revision, status: \"ok\" };",
+          "replace": "    return { design: current.value as DesignSystem, revision: current.revision, status: \"ok\" };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/plugin.test.ts"],
+      "expect": "\\(fail\\).*an unreadable stored design is served as the empty design"
+    },
+    {
+      "id": "W-091/design-unreadable-log-content",
+      "requirement": "N-008",
+      "description": "the unreadable-design log carries the stored design",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "{ code: result.issues[0]?.code });",
+          "replace": "{ code: result.issues[0]?.code, design: current.value });"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/plugin.test.ts"],
+      "expect": "\\(fail\\).*an unreadable stored design is served as the empty design"
+    },
+    {
+      "id": "W-091/design-size-off-by-one",
+      "requirement": "S0-9",
+      "description": "a design of exactly the size limit is refused as too large",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "    if (bytes > MAX_DESIGN_BYTES) {",
+          "replace": "    if (bytes >= MAX_DESIGN_BYTES) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/plugin.test.ts"],
+      "expect": "\\(fail\\).*exactly 256 KiB passes the size check"
+    },
+    {
+      "id": "W-091/render-logs-missing-layout",
+      "requirement": "R-033",
+      "description": "a page with no layout yet is logged as unreadable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "    if (raw !== null && raw !== undefined && raw !== \"\") {",
+          "replace": "    if (raw !== null) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
+      "expect": "\\(fail\\).*an unreadable or missing layout renders an empty page"
+    },
+    {
+      "id": "W-091/render-log-carries-layout",
+      "requirement": "N-008",
+      "description": "the unreadable-layout log carries the stored layout",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "    console.error(\"emvb: stored layout is unreadable\", { pageId });",
+          "replace": "    console.error(\"emvb: stored layout is unreadable\", { pageId, raw });"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
+      "expect": "\\(fail\\).*an unreadable or missing layout renders an empty page"
     }
   ]
 }

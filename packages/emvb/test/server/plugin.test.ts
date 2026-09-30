@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { layoutOfBytes, s1Page } from "../fixtures/layouts.ts";
 import { MAX_DESIGN_BYTES, MAX_LAYOUT_BYTES } from "../../src/core/index.ts";
+import { designRoute } from "../../src/server/design-routes.ts";
 import { createPlugin } from "../../src/server/plugin.ts";
 import { createTestRuntime, ROLES, userWithRole } from "./runtime.ts";
 
@@ -190,6 +191,46 @@ describe("design routes", () => {
     });
     expect(result.status).toBe(413);
     expect(JSON.stringify(result.body)).toContain("DESIGN_TOO_LARGE");
+  });
+
+  test("a design of exactly 256 KiB passes the size check and goes on to validation", async () => {
+    const big = { ...design(), padding: "" };
+    big.padding = "x".repeat(
+      MAX_DESIGN_BYTES - new TextEncoder().encode(JSON.stringify(big)).length,
+    );
+    expect(new TextEncoder().encode(JSON.stringify(big)).length).toBe(MAX_DESIGN_BYTES);
+    const result = await t.route("design/save", {
+      user: userWithRole(ROLES.admin),
+      body: { design: big, revision: null },
+    });
+    // The padding key is not part of a design, so validation (422) runs instead of the size limit (413).
+    expect(result.status).toBe(422);
+    expect(JSON.stringify(result.body)).toContain("INVALID_DESIGN");
+  });
+
+  test("an unreadable stored design is served as the empty design, and only its issue code is logged", async () => {
+    const errors: unknown[][] = [];
+    const ctx = {
+      storage: {
+        design: {
+          getVersioned: async () => ({
+            value: { ...design("red;}body{x:y"), secret: "SECRET" },
+            revision: "r7",
+          }),
+        },
+      },
+      log: { error: (...args: unknown[]) => void errors.push(args) },
+    } as never;
+    expect(await designRoute.handler(ctx)).toEqual({
+      design: {
+        schemaVersion: 3,
+        variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
+        classes: [],
+      },
+      revision: "r7",
+      status: "unreadable",
+    });
+    expect(errors).toEqual([["emvb: stored design is unreadable", { code: "invalid_format" }]]);
   });
 
   test("an invalid design gets 422 with issue paths", async () => {

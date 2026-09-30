@@ -53,10 +53,17 @@ describe("rendering a stored layout (R-031, R-033)", () => {
     try {
       expect(renderStored("{nope", DESIGN, "01PAGE")).toEqual(empty);
       expect(renderStored({ schemaVersion: 1 }, DESIGN, "01PAGE")).toEqual(empty);
-      expect(logged).toHaveBeenCalledTimes(2);
+      // A page with no layout yet is not an error.
+      expect(renderStored(null, DESIGN, "01PAGE")).toEqual(empty);
+      expect(renderStored(undefined, DESIGN, "01PAGE")).toEqual(empty);
+      expect(renderStored("", DESIGN, "01PAGE")).toEqual(empty);
+      // Only the page id is logged, never layout content.
+      expect(logged.mock.calls).toEqual([
+        ["emvb: stored layout is unreadable", { pageId: "01PAGE" }],
+        ["emvb: stored layout is unreadable", { pageId: "01PAGE" }],
+      ]);
     } finally {
       logged.mockRestore();
     }
-    expect(renderStored(null, DESIGN, "01PAGE")).toEqual(empty);
   });
 });
