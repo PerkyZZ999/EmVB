@@ -149,7 +149,9 @@ if (import.meta.main) {
   if (process.argv.includes("--verify")) {
     const problems = await verifySeeds(root, seeds);
     for (const problem of problems) process.stderr.write(`${problem}\n`);
-    process.stdout.write(`seeded bugs: ${seeds.length} seeds, ${problems.length} problems\n`);
+    process.stdout.write(
+      `seeded bugs: ${seeds.length} seeds checked to still apply, none run; ${problems.length} problems\n`,
+    );
     process.exit(problems.length === 0 ? 0 : 1);
   }
   const selected = seeds.filter((s) => !only || s.id.includes(only));
