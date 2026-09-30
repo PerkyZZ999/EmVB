@@ -28,6 +28,7 @@ import {
   type ElementDescriptor,
   type Layout,
   type LayoutNode,
+  patchClassStyle,
   type StyleProps,
 } from "../../../core/index.ts";
 import { FIELD } from "../../ui.ts";
@@ -105,8 +106,19 @@ const writeSections = (type: string, open: Set<StyleSectionId>) => {
   }
 };
 
-const countSet = (node: LayoutNode, section: StyleSectionId) =>
-  keysFor(node.type, section).filter((key) => node.style?.[key] !== undefined).length;
+const countSet = (type: string, style: StyleProps | undefined, section: StyleSectionId) =>
+  keysFor(type, section).filter((key) => style?.[key] !== undefined).length;
+
+/** Which styles the Style sections edit (W-087): a class applied to the node, or its own. */
+function useStyleTarget(node: LayoutNode, design: DesignSystem) {
+  const [editing, setEditing] = React.useState<string | null>(null);
+  React.useEffect(() => setEditing(null), [node.id]);
+  const cls =
+    editing && node.classes?.includes(editing)
+      ? design.classes?.find((c) => c.id === editing)
+      : undefined;
+  return { cls, editing: cls ? cls.id : null, setEditing };
+}
 
 type Props = {
   node: LayoutNode;
@@ -240,6 +252,21 @@ function KnownElementPanel({
   const ui = STYLE_UI[node.type] ?? DEFAULT_UI;
   const [tab, setTab] = React.useState(descriptor.defaultTab);
   const [openSections, setSection] = useOpenSections(node.type, ui.defaultOpen, node.id);
+  const { cls, editing, setEditing } = useStyleTarget(node, design);
+  const [designError, setDesignError] = React.useState<string | null>(null);
+  const style = cls ? cls.style : node.style;
+  const patchStyle = (patch: Partial<StyleProps>) => {
+    if (!cls) {
+      onChange(withStyle(node, patch));
+      return;
+    }
+    setDesignError(null);
+    onDesignChange(patchClassStyle(design, cls.id, patch)).catch((error: unknown) =>
+      setDesignError(
+        error instanceof Error ? error.message : "Couldn't save the class. Try again.",
+      ),
+    );
+  };
   React.useEffect(() => {
     setTab(descriptor.defaultTab);
   }, [node.id, node.type, descriptor.defaultTab]);
@@ -320,14 +347,18 @@ function KnownElementPanel({
           <ClassChipInput
             applied={node.classes}
             design={design}
+            editing={editing}
+            onEdit={setEditing}
             onChange={(classes) => onChange({ ...node, classes })}
             onDesignChange={onDesignChange}
           />
-          {node.type === "spacer" && (
+          {designError && <Alert>{designError}</Alert>}
+          {!cls && node.type === "spacer" && (
             <FieldControl field={SPACER_HEIGHT} node={node} onChange={onChange} fetcher={fetcher} />
           )}
           {ui.sections.map((id) => {
             if (id === "advanced") {
+              if (cls) return null;
               return section(
                 id,
                 node.htmlId ? 1 : 0,
@@ -346,14 +377,14 @@ function KnownElementPanel({
             if (keys.length === 0) return null;
             return section(
               id,
-              countSet(node, id),
+              countSet(node.type, style, id),
               keys.map((key) => (
                 <StyleRow
                   key={key}
                   styleKey={key}
-                  style={node.style}
+                  style={style}
                   design={design}
-                  onPatch={(patch) => onChange(withStyle(node, patch))}
+                  onPatch={patchStyle}
                   onDesignChange={onDesignChange}
                 />
               )),

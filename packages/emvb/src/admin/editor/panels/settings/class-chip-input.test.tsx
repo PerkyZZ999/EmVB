@@ -50,10 +50,13 @@ function Harness({
 }) {
   const [classes, setClasses] = React.useState(initial);
   const [current, setCurrent] = React.useState(start);
+  const [editing, setEditing] = React.useState<string | null>(null);
   return (
     <ClassChipInput
       applied={classes}
       design={current}
+      editing={editing}
+      onEdit={setEditing}
       onChange={(next) => {
         log.classes.push(next);
         setClasses(next);
@@ -81,6 +84,14 @@ const chipButton = (id: string) =>
   document.querySelector(`[data-emvb-class-id="${id}"] .emvb-chip-main`) as HTMLButtonElement;
 const localButton = () =>
   document.querySelector("[data-emvb-chip-local] .emvb-chip-main") as HTMLButtonElement;
+
+/** Which part of the chip box has focus, as a string so failures print small. */
+const focused = () => {
+  const el = document.activeElement;
+  if (el === input()) return "input";
+  if (el?.closest("[data-emvb-chip-local]")) return "local";
+  return el?.closest("[data-emvb-class-id]")?.getAttribute("data-emvb-class-id") ?? "other";
+};
 
 async function type(text: string) {
   const field = input();
@@ -229,7 +240,7 @@ describe("class chip input: keyboard (W-087)", () => {
     await type("ca");
     await press(input(), "Escape");
     expect(input().getAttribute("aria-expanded")).toBe("false");
-    expect(document.querySelector('[role="listbox"]')).toBeNull();
+    expect(document.querySelector('[role="listbox"]')?.outerHTML ?? null).toBeNull();
     await press(input(), "Escape");
     expect(input().value).toBe("");
   });
@@ -246,17 +257,17 @@ describe("class chip input: keyboard (W-087)", () => {
     await mount(<Harness initial={["card", "accent"]} log={newLog()} />);
     await act(async () => input().focus());
     await press(input(), "ArrowLeft");
-    expect(document.activeElement).toBe(chipButton("accent"));
+    expect(focused()).toBe("accent");
     await press(chipButton("accent"), "ArrowLeft");
-    expect(document.activeElement).toBe(chipButton("card"));
+    expect(focused()).toBe("card");
     await press(chipButton("card"), "ArrowLeft");
-    expect(document.activeElement).toBe(localButton());
+    expect(focused()).toBe("local");
     await press(localButton(), "End");
-    expect(document.activeElement).toBe(input());
+    expect(focused()).toBe("input");
     await press(chipButton("card"), "ArrowRight");
-    expect(document.activeElement).toBe(chipButton("accent"));
+    expect(focused()).toBe("accent");
     await press(chipButton("accent"), "ArrowRight");
-    expect(document.activeElement).toBe(input());
+    expect(focused()).toBe("input");
   });
 
   test("Backspace on a chip removes it and focuses the one before; Delete focuses the next", async () => {
@@ -265,10 +276,10 @@ describe("class chip input: keyboard (W-087)", () => {
     await act(async () => chipButton("accent").focus());
     await press(chipButton("accent"), "Backspace");
     expect(log.classes.at(-1)).toEqual(["card", "hero-title"]);
-    expect(document.activeElement).toBe(chipButton("card"));
+    expect(focused()).toBe("card");
     await press(chipButton("card"), "Delete");
     expect(log.classes.at(-1)).toEqual(["hero-title"]);
-    expect(document.activeElement).toBe(chipButton("hero-title"));
+    expect(focused()).toBe("hero-title");
   });
 
   test("Backspace on the Local chip removes nothing", async () => {
@@ -331,5 +342,174 @@ describe("class chip input in the element panel (W-031, W-087)", () => {
     ) as HTMLElement;
     await act(async () => again.click());
     expect(chipIds()).toEqual(["accent", "card"]);
+  });
+});
+
+function PanelHarness({
+  initial,
+  log,
+  failSave,
+}: {
+  initial: LayoutNode;
+  log: { nodes: LayoutNode[]; designs: DesignSystem[] };
+  failSave?: string;
+}) {
+  const [node, setNode] = React.useState(initial);
+  const [current, setCurrent] = React.useState(design);
+  return (
+    <ElementPanel
+      node={node}
+      layout={layout}
+      design={current}
+      rejection={null}
+      fetcher={stubFetcher}
+      onChange={(next) => {
+        log.nodes.push(next);
+        setNode(next);
+      }}
+      onDesignChange={async (next) => {
+        if (failSave) throw new Error(failSave);
+        log.designs.push(next);
+        setCurrent(next);
+      }}
+      onSelect={() => undefined}
+    />
+  );
+}
+
+async function openStyle() {
+  const tab = [...document.querySelectorAll('[role="tab"]')].find(
+    (t) => t.textContent === "Style",
+  ) as HTMLElement;
+  await act(async () => tab.click());
+}
+
+const styledHeading = (): LayoutNode => ({
+  id: "head0001",
+  type: "heading",
+  props: { text: "Hi", level: 1 },
+  classes: ["card", "accent"],
+  style: { paddingBottom: { value: 4, unit: "px" } },
+});
+
+const openSection = async (id: string) => {
+  const header = document.querySelector(`[data-emvb-section="${id}"]`) as HTMLElement;
+  if (header.getAttribute("aria-expanded") !== "true") await act(async () => header.click());
+};
+
+describe("class chip input: editing a class in context (W-087)", () => {
+  test("clicking a class chip points the Style sections at the class, and saves there", async () => {
+    const log = { nodes: [] as LayoutNode[], designs: [] as DesignSystem[] };
+    await mount(<PanelHarness initial={styledHeading()} log={log} />);
+    await openStyle();
+    expect(document.querySelector("[data-emvb-class-scope]")?.outerHTML ?? null).toBeNull();
+    await act(async () => chipButton("card").click());
+    expect(chipButton("card").getAttribute("aria-pressed")).toBe("true");
+    expect(localButton().getAttribute("aria-pressed")).toBe("false");
+    expect(document.querySelector("[data-emvb-class-scope]")?.textContent).toContain(
+      'Editing class "Card". Changes apply to every element that uses it.',
+    );
+    await openSection("spacing");
+    const resetOf = (label: string) =>
+      document.querySelector(`[aria-label="Reset ${label} to default"]`) as HTMLButtonElement;
+    expect(resetOf("Padding bottom").disabled).toBe(true);
+    expect(resetOf("Padding top").disabled).toBe(false);
+    await act(async () => resetOf("Padding top").click());
+    expect(log.nodes).toEqual([]);
+    expect(log.designs).toHaveLength(1);
+    expect(log.designs[0]?.classes?.find((c) => c.id === "card")?.style).toStrictEqual({});
+  });
+
+  test("Back to local styles and the Local chip return to the element's own styles", async () => {
+    const log = { nodes: [] as LayoutNode[], designs: [] as DesignSystem[] };
+    await mount(<PanelHarness initial={styledHeading()} log={log} />);
+    await openStyle();
+    await act(async () => chipButton("accent").click());
+    const back = [...document.querySelectorAll("[data-emvb-class-scope] button")][0] as HTMLElement;
+    await act(async () => back.click());
+    expect(localButton().getAttribute("aria-pressed")).toBe("true");
+    expect(document.querySelector("[data-emvb-class-scope]")?.outerHTML ?? null).toBeNull();
+    await act(async () => chipButton("accent").click());
+    await act(async () => localButton().click());
+    expect(document.querySelector("[data-emvb-class-scope]")?.outerHTML ?? null).toBeNull();
+    await openSection("spacing");
+    const reset = document.querySelector(
+      '[aria-label="Reset Padding bottom to default"]',
+    ) as HTMLButtonElement;
+    await act(async () => reset.click());
+    expect(log.designs).toEqual([]);
+    expect(log.nodes.at(-1)?.style).toBeUndefined();
+  });
+
+  test("section counts and Advanced follow the edited target", async () => {
+    await mount(<PanelHarness initial={styledHeading()} log={{ nodes: [], designs: [] }} />);
+    await openStyle();
+    const count = () =>
+      document.querySelector('[data-emvb-section="spacing"] .emvb-count')?.textContent;
+    expect(count()).toBe(" · 1");
+    expect(document.querySelector('[data-emvb-section="advanced"]') !== null).toBe(true);
+    await act(async () => chipButton("accent").click());
+    expect(count()).toBeUndefined();
+    expect(document.querySelector('[data-emvb-section="advanced"]')?.outerHTML ?? null).toBeNull();
+  });
+
+  test("removing the class being edited goes back to local styles", async () => {
+    await mount(<PanelHarness initial={styledHeading()} log={{ nodes: [], designs: [] }} />);
+    await openStyle();
+    await act(async () => chipButton("card").click());
+    const x = document.querySelector('[aria-label="Remove Card"]') as HTMLButtonElement;
+    await act(async () => x.click());
+    expect(localButton().getAttribute("aria-pressed")).toBe("true");
+    expect(document.querySelector("[data-emvb-class-scope]")?.outerHTML ?? null).toBeNull();
+  });
+
+  test("a failed class save shows the error", async () => {
+    await mount(
+      <PanelHarness
+        initial={styledHeading()}
+        log={{ nodes: [], designs: [] }}
+        failSave="Couldn't save site styles. Check your connection and try again."
+      />,
+    );
+    await openStyle();
+    await act(async () => chipButton("card").click());
+    await openSection("spacing");
+    const reset = document.querySelector(
+      '[aria-label="Reset Padding top to default"]',
+    ) as HTMLButtonElement;
+    await act(async () => reset.click());
+    expect(document.querySelector('[data-emvb-tab="style"] [role="alert"]')?.textContent).toBe(
+      "Couldn't save site styles. Check your connection and try again.",
+    );
+  });
+
+  test("selecting another element goes back to local styles", async () => {
+    const other: LayoutNode = { ...styledHeading(), id: "head0002" };
+    function Switcher() {
+      const [node, setNode] = React.useState(styledHeading());
+      return (
+        <>
+          <button type="button" data-switch="" onClick={() => setNode(other)} />
+          <ElementPanel
+            node={node}
+            layout={layout}
+            design={design}
+            rejection={null}
+            fetcher={stubFetcher}
+            onChange={() => undefined}
+            onDesignChange={async () => undefined}
+            onSelect={() => undefined}
+          />
+        </>
+      );
+    }
+    await mount(<Switcher />);
+    await openStyle();
+    await act(async () => chipButton("card").click());
+    expect(chipButton("card").getAttribute("aria-pressed")).toBe("true");
+    await act(async () => (document.querySelector("[data-switch]") as HTMLElement).click());
+    await openStyle();
+    expect(localButton().getAttribute("aria-pressed")).toBe("true");
+    expect(chipButton("card").getAttribute("aria-pressed")).toBe("false");
   });
 });

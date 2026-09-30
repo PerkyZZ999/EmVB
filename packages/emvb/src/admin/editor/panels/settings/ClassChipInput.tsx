@@ -18,6 +18,9 @@ import {
 type Props = {
   applied: readonly string[] | undefined;
   design: DesignSystem;
+  /** The applied class the Style sections edit, or null for this element's local styles. */
+  editing: string | null;
+  onEdit: (classId: string | null) => void;
   onChange: (classes: string[] | undefined) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
 };
@@ -34,7 +37,14 @@ const stopEditorShortcuts = (event: React.KeyboardEvent) => {
  * The Style tab's Classes field (W-087, DESIGN.md "class chip input"): a Local chip, one chip per
  * applied class in cascade order, and a combobox that suggests classes or creates one.
  */
-export function ClassChipInput({ applied, design, onChange, onDesignChange }: Props) {
+export function ClassChipInput({
+  applied,
+  design,
+  editing,
+  onEdit,
+  onChange,
+  onDesignChange,
+}: Props) {
   const ids = applied ?? [];
   const catalog = design.classes ?? [];
   const byId = new Map(catalog.map((cls) => [cls.id, cls]));
@@ -173,15 +183,20 @@ export function ClassChipInput({ applied, design, onChange, onDesignChange }: Pr
             }
           }}
         >
-          <span className="emvb-chip emvb-chip-local" data-emvb-chip-local="" data-active="true">
+          <span
+            className="emvb-chip emvb-chip-local"
+            data-emvb-chip-local=""
+            data-active={editing === null}
+          >
             <button
               type="button"
               ref={(el) => {
                 chipRefs.current[0] = el;
               }}
               className="emvb-chip-main"
-              aria-pressed="true"
+              aria-pressed={editing === null}
               title="Local styles: this element only"
+              onClick={() => onEdit(null)}
               onKeyDown={(event) => onChipKey(event, 0)}
             >
               <MapPinIcon size={12} weight="fill" aria-hidden="true" />
@@ -191,14 +206,21 @@ export function ClassChipInput({ applied, design, onChange, onDesignChange }: Pr
           {ids.map((id, index) => {
             const name = byId.get(id)?.name ?? id;
             return (
-              <span key={id} className="emvb-chip" data-emvb-class-id={id}>
+              <span
+                key={id}
+                className="emvb-chip"
+                data-emvb-class-id={id}
+                data-active={editing === id}
+              >
                 <button
                   type="button"
                   ref={(el) => {
                     chipRefs.current[index + 1] = el;
                   }}
                   className="emvb-chip-main"
+                  aria-pressed={editing === id}
                   title={`${name} · .emvb-k-${id}`}
+                  onClick={() => onEdit(id)}
                   onKeyDown={(event) => onChipKey(event, index + 1)}
                 >
                   <TagSimpleIcon size={12} aria-hidden="true" />
@@ -294,6 +316,15 @@ export function ClassChipInput({ applied, design, onChange, onDesignChange }: Pr
           </ul>
         )}
       </div>
+      {editing !== null && (
+        <p className="emvb-helper emvb-class-scope" data-emvb-class-scope="">
+          Editing class &quot;{byId.get(editing)?.name ?? editing}&quot;. Changes apply to every
+          element that uses it.{" "}
+          <button type="button" className="emvb-link-button" onClick={() => onEdit(null)}>
+            Back to local styles
+          </button>
+        </p>
+      )}
       {error && (
         <p className="emvb-inline-error" role="alert" data-emvb-class-error="">
           {error}

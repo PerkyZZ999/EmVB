@@ -89,8 +89,8 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -212,8 +212,8 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -321,8 +321,8 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -435,8 +435,8 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -502,8 +502,8 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -574,8 +574,8 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -667,8 +667,8 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -812,8 +812,8 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -971,8 +971,8 @@ exports[`element panel markup (W-021, W-086 M16) label renders the same content 
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -1143,8 +1143,8 @@ exports[`element panel markup (W-021, W-086 M16) link renders the same content a
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -1315,8 +1315,8 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -1482,8 +1482,8 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -1677,8 +1677,8 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -1996,8 +1996,8 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -2148,8 +2148,8 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -2302,8 +2302,8 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -2468,8 +2468,8 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -2648,8 +2648,8 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -2823,8 +2823,8 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -2998,8 +2998,8 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -3156,8 +3156,8 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -3309,8 +3309,8 @@ exports[`element panel markup (W-021, W-086 M16) submit renders the same content
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -3479,8 +3479,8 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -3607,8 +3607,8 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -3730,8 +3730,8 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -3858,8 +3858,8 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -3981,8 +3981,8 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -4148,8 +4148,8 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -4320,8 +4320,8 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -4490,8 +4490,8 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -4618,8 +4618,8 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -4741,8 +4741,8 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -4869,8 +4869,8 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -4992,8 +4992,8 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -5174,8 +5174,8 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -5335,8 +5335,8 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
@@ -5499,8 +5499,8 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
               svg aria-hidden="true"
               span.emvb-chip-label
                 "Local"
-          span.emvb-chip data-emvb-class-id="card"
-            button.emvb-chip-main type="button"
+          span.emvb-chip data-emvb-class-id="card" data-active="false"
+            button.emvb-chip-main type="button" aria-pressed="false"
               svg aria-hidden="true"
               span.emvb-chip-label
                 "card"
