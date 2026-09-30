@@ -101,48 +101,6 @@ const KINDS: [VariableKind, string, string][] = [
   ["spacing", "24", "Spacing"],
 ];
 
-describe("VariableSection", () => {
-  for (const [kind, newValue, title] of KINDS) {
-    test(`${kind}: list, filter, rename, value, create`, async () => {
-      await mount(
-        <VariableSection
-          title={title}
-          kind={kind}
-          design={design}
-          layout={layout}
-          onSave={onSave}
-          onAskDelete={onAskDelete}
-        />,
-      );
-      expect(html()).toMatchSnapshot("list");
-      const filter = inputs("Filter")[0];
-      if (filter) {
-        await type(filter, "zz");
-        expect(html()).toMatchSnapshot("no matches");
-        await type(filter, "--emvb");
-        await type(filter, "b");
-        expect(html()).toMatchSnapshot("filtered");
-        await type(filter, "");
-      }
-      await type(inputs("Name")[0], "Renamed");
-      const valueLabel = kind === "color" || kind === "font" ? "Value" : "Value (px)";
-      await type(inputs(valueLabel)[0], "-1");
-      await type(inputs(valueLabel)[0], newValue);
-      await click(byLabel(`Delete ${design.variables.colors[0]?.name}`));
-      await click(byText("New"));
-      expect(html()).toMatchSnapshot("create row");
-      await type(inputs("Name").at(-1), "Brand");
-      await click(byText("Create"));
-      await click(byText("New"));
-      await type(inputs("Name").at(-1), "  ");
-      await click(byText("Create"));
-      await click(byText("Cancel"));
-      expect({ saved, asked }).toMatchSnapshot("saves");
-      expect(html()).toMatchSnapshot("after");
-    });
-  }
-});
-
 const menuItem = (label: string) =>
   [...document.querySelectorAll('[role="menuitem"]')].find((el) => el.textContent === label) as
     | HTMLElement
@@ -187,6 +145,274 @@ const search = (label: string) =>
   host.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`);
 const mountClasses = (d: DesignSystem = design) =>
   mount(<ClassesSection design={d} layout={layout} onSave={onSave} onAskDelete={onAskDelete} />);
+
+const varRow = (id: string) =>
+  host.querySelector<HTMLButtonElement>(`[data-emvb-var-id="${id}"] .emvb-site-item-main`);
+const valueField = (name: string) =>
+  host.querySelector<HTMLInputElement>(`input[aria-label="Value of ${name}"]`);
+/** Focus, then blur, so the field really fires its blur handler. */
+const blurField = (field: HTMLInputElement | null | undefined) =>
+  act(async () => {
+    field?.focus();
+    field?.blur();
+  });
+const mountVars = (kind: VariableKind, title: string, d: DesignSystem = design, l = layout) =>
+  mount(
+    <VariableSection
+      title={title}
+      kind={kind}
+      design={d}
+      layout={l}
+      onSave={onSave}
+      onAskDelete={onAskDelete}
+    />,
+  );
+
+describe("VariableSection", () => {
+  for (const [kind, newValue, title] of KINDS) {
+    test(`${kind}: list, filter, rename, value, create`, async () => {
+      await mountVars(kind, title);
+      expect(html()).toMatchSnapshot("list");
+      const filter = search(`Search ${title.toLowerCase()}`) ?? undefined;
+      if (filter) {
+        await type(filter, "zz");
+        expect(html()).toMatchSnapshot("no matches");
+        await type(filter, "--emvb");
+        await type(filter, "b");
+        expect(html()).toMatchSnapshot("filtered");
+        await type(filter, "");
+      }
+      await press(varRow("brand"), "F2");
+      await renameTo("Renamed", "Enter");
+      await act(async () => varRow("brand")?.click());
+      expect(html()).toMatchSnapshot("open");
+      await type(valueField("Brand") ?? undefined, "-1");
+      await press(valueField("Brand"), "Enter");
+      await type(valueField("Brand") ?? undefined, newValue);
+      await press(valueField("Brand"), "Enter");
+      await pick(`Actions for ${design.variables.colors[0]?.name}`, "Delete");
+      await click(byText("New"));
+      expect(html()).toMatchSnapshot("create row");
+      await type(inputs("Name").at(-1), "Brand");
+      await click(byText("Create"));
+      await click(byText("New"));
+      await type(inputs("Name").at(-1), "  ");
+      await click(byText("Create"));
+      await click(byText("Cancel"));
+      expect({ saved, asked }).toMatchSnapshot("saves");
+      expect(html()).toMatchSnapshot("after");
+    });
+  }
+
+  test("rows preview each kind: swatch, font, capped type size and spacing bar", async () => {
+    const preview = (id: string) =>
+      host.querySelector<HTMLElement>(`[data-emvb-var-id="${id}"] .emvb-site-preview`);
+    await mountVars("color", "Colors");
+    expect(preview("brand")?.style.background).toBe("#112233");
+    expect(host.querySelector('[data-emvb-var-id="brand"] [data-emvb-var-text]')?.textContent).toBe(
+      "#112233",
+    );
+    await mountVars("font", "Fonts");
+    expect(preview("brand")?.style.fontFamily).toBe("Inter, sans-serif");
+    expect(preview("brand")?.textContent).toBe("Ag");
+    await mountVars("fontSize", "Font sizes");
+    expect(preview("small")?.style.fontSize).toBe("12px");
+    expect(preview("huge")?.style.fontSize).toBe("24px");
+    expect(host.querySelector('[data-emvb-var-id="huge"] [data-emvb-var-text]')?.textContent).toBe(
+      "48px",
+    );
+    const bars: DesignSystem = {
+      ...design,
+      variables: {
+        ...design.variables,
+        spacings: [
+          { id: "tight", name: "Tight", value: { value: 1, unit: "px" } },
+          { id: "roomy", name: "Roomy", value: { value: 1.5, unit: "rem" } },
+          { id: "vast", name: "Vast", value: { value: 200, unit: "px" } },
+        ],
+      },
+    };
+    await mountVars("spacing", "Spacing", bars);
+    const bar = (id: string) =>
+      host.querySelector<HTMLElement>(`[data-emvb-var-id="${id}"] [data-emvb-var-bar]`)?.style
+        .width;
+    expect([bar("tight"), bar("roomy"), bar("vast")]).toEqual(["2px", "24px", "64px"]);
+    expect(host.querySelector('[data-emvb-var-id="roomy"] [data-emvb-var-text]')?.textContent).toBe(
+      "1.5rem",
+    );
+  });
+
+  test("a value saves once on Enter or blur, keeps its unit, and Escape reverts", async () => {
+    await mountVars("fontSize", "Font sizes");
+    await act(async () => varRow("brand")?.click());
+    const field = () => valueField("Brand") ?? undefined;
+    await type(field(), "1");
+    await type(field(), "1.2");
+    expect(saved.length).toBe(0);
+    await type(field(), "1.25rem");
+    await press(field(), "Enter");
+    await blurField(field());
+    expect(saved.map((d) => d.variables.fontSizes?.[0]?.value)).toEqual([
+      { value: 1.25, unit: "rem" },
+    ]);
+    await type(field(), "99");
+    await press(field(), "Escape");
+    expect(field()?.value).toBe("1.25rem");
+    await blurField(field());
+    expect(saved.length).toBe(1);
+  });
+
+  test("an invalid value explains the fix inline and saves nothing", async () => {
+    await mountVars("color", "Colors");
+    await act(async () => varRow("brand")?.click());
+    await type(valueField("Brand") ?? undefined, "#12");
+    await blurField(valueField("Brand"));
+    expect(host.querySelector('[data-emvb-var-id="brand"] [role="alert"]')?.textContent).toBe(
+      "Enter a hex color such as #1a2b3c.",
+    );
+    expect(valueField("Brand")?.getAttribute("aria-invalid")).toBe("true");
+    expect(saved.length).toBe(0);
+    await type(valueField("Brand") ?? undefined, "#123");
+    expect(
+      host.querySelector('[data-emvb-var-id="brand"] [role="alert"]')?.textContent ?? null,
+    ).toBeNull();
+    await press(valueField("Brand"), "Enter");
+    expect(saved.map((d) => d.variables.colors[0]?.value)).toEqual(["#123"]);
+  });
+
+  test("the colour picker saves on its change event, not while dragging", async () => {
+    await mountVars("color", "Colors");
+    await act(async () => varRow("brand")?.click());
+    const picker = host.querySelector<HTMLInputElement>('input[aria-label="Pick Brand"]');
+    expect(picker?.value ?? null).toBe("#112233");
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+        picker,
+        "#445566",
+      );
+      picker?.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(saved.length).toBe(0);
+    expect(valueField("Brand")?.value).toBe("#445566");
+    await act(async () => picker?.dispatchEvent(new Event("change", { bubbles: true })));
+    expect(saved.map((d) => d.variables.colors[0]?.value)).toEqual(["#445566"]);
+  });
+
+  test("an invalid new value is explained in the create row and not saved", async () => {
+    await mountVars("spacing", "Spacing");
+    await click(byText("New"));
+    await type(inputs("Name").at(-1), "Gutter");
+    await type(inputs("Value (px, rem, em or %)").at(-1), "wide");
+    await click(byText("Create"));
+    expect(host.querySelector("[data-emvb-var-create] [role='alert']")?.textContent).toBe(
+      "Enter a length such as 16, 16px or 1.5rem.",
+    );
+    expect(saved.length).toBe(0);
+    await type(inputs("Value (px, rem, em or %)").at(-1), "2em");
+    await click(byText("Create"));
+    expect(saved.map((d) => d.variables.spacings?.at(-1))).toEqual([
+      { id: "gutter", name: "Gutter", value: { value: 2, unit: "em" } },
+    ]);
+  });
+
+  test("shows page usage, with class usage in the tooltip", async () => {
+    const used: DesignSystem = {
+      ...design,
+      classes: [
+        { id: "card", name: "Card", style: { color: { var: "brand" } } },
+        {
+          id: "hero",
+          name: "Hero",
+          style: { backgroundColor: { var: "brand" }, color: { var: "brand" } },
+        },
+      ],
+    };
+    const page = {
+      ...layout,
+      root: {
+        ...layout.root,
+        children: [
+          {
+            id: "head0001",
+            type: "heading",
+            props: { text: "Hi", level: 1 },
+            style: { color: { var: "brand" } },
+          },
+        ],
+      },
+    } as Layout;
+    await mountVars("color", "Colors", used, page);
+    const usage = (id: string) =>
+      host.querySelector(`[data-emvb-var-id="${id}"] [data-emvb-usage]`);
+    expect(usage("brand")?.textContent).toBe("1 on page");
+    expect(usage("brand")?.getAttribute("title")).toBe("Used 1 time on this page and in 2 classes");
+    expect(usage("ink")?.textContent).toBe("0 on page");
+    expect(usage("ink")?.getAttribute("title")).toBe("Used 0 times on this page");
+  });
+
+  test("the menu edits, renames, copies the CSS variable and deletes last", async () => {
+    const copiedText: string[] = [];
+    const original = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async (text: string) => void copiedText.push(text) },
+    });
+    try {
+      await mountVars("spacing", "Spacing");
+      await click(byLabel("Actions for Brand"));
+      await settle();
+      const parts = [
+        ...(document
+          .querySelector('[role="menu"]')
+          ?.querySelectorAll('[role="menuitem"], [role="separator"]') ?? []),
+      ];
+      expect(parts.map((el) => el.textContent || el.getAttribute("role"))).toEqual([
+        "Edit value",
+        "Rename",
+        "Copy CSS variable",
+        "separator",
+        "Delete",
+      ]);
+      await act(async () => menuItem("Copy CSS variable")?.click());
+      await settle();
+      expect(copiedText).toEqual(["var(--emvb-s-brand)"]);
+      expect(host.querySelector('[data-emvb-var-id="brand"] [data-emvb-usage]')?.textContent).toBe(
+        "Copied",
+      );
+      await pick("Actions for Brand", "Edit value");
+      expect(varRow("brand")?.getAttribute("aria-expanded")).toBe("true");
+      await pick("Actions for Brand", "Rename");
+      await nextFrame();
+      await renameTo("Base", "Enter");
+      expect(saved.map((d) => d.variables.spacings?.[0]?.name)).toEqual(["Base"]);
+      expect(document.activeElement === varRow("brand")).toBe(true);
+    } finally {
+      if (original) Object.defineProperty(navigator, "clipboard", original);
+      else Reflect.deleteProperty(navigator, "clipboard");
+    }
+  });
+
+  test("an empty section explains what the kind is for", async () => {
+    const none: DesignSystem = {
+      schemaVersion: 1,
+      variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
+    };
+    const texts: string[] = [];
+    for (const [kind, , title] of KINDS) {
+      // oxlint-disable-next-line no-await-in-loop -- one mounted section at a time
+      await mountVars(kind, title, none);
+      texts.push(host.querySelector(`[data-emvb-var-empty="${kind}"]`)?.textContent ?? "");
+    }
+    expect(texts).toEqual([
+      "No colors yet. Add one to reuse it in any color field.",
+      "No fonts yet. Add a font stack to reuse it.",
+      "No font sizes yet. Add one to build a type scale.",
+      "No spacing yet. Add one to keep gaps consistent.",
+    ]);
+    await click(byText("New"));
+    expect(host.querySelector("[data-emvb-var-empty]")?.tagName ?? null).toBeNull();
+  });
+});
 
 describe("ClassesSection", () => {
   test("list, filter, duplicate, delete, create", async () => {

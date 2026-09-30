@@ -3295,9 +3295,9 @@
       "description": "typing an invalid px value still saves the variable list",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
-          "search": "                      if (!length) return;\n",
-          "replace": "                      if (!length) return saveList(items);\n"
+          "file": "packages/emvb/src/admin/editor/panels/variable-values.ts",
+          "search": "const LENGTH = /^(\\d+(?:\\.\\d+)?|\\.\\d+)\\s*(px|rem|em|%)?$/i;",
+          "replace": "const LENGTH = /^(-?\\d+(?:\\.\\d+)?|\\.\\d+)\\s*(px|rem|em|%)?$/i;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
@@ -5383,6 +5383,346 @@
         "keys pressed inside the drawer"
       ],
       "expect": "\\(fail\\).*keys pressed inside the drawer"
+    },
+    {
+      "id": "W-087/var-value-per-keystroke",
+      "requirement": "W-087",
+      "description": "the variable value saves on every keystroke",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "            setText(event.target.value);\n            if (error) setError(null);",
+          "replace": "            setText(event.target.value);\n            commit(event.target.value);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "a value saves once on Enter or blur"
+      ],
+      "expect": "\\(fail\\).*a value saves once on Enter or blur"
+    },
+    {
+      "id": "W-087/var-value-enter-blur-twice",
+      "requirement": "W-087",
+      "description": "Enter then blur saves the same value twice",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "    committed.current = trimmed;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "a value saves once on Enter or blur"
+      ],
+      "expect": "\\(fail\\).*a value saves once on Enter or blur"
+    },
+    {
+      "id": "W-087/var-value-escape-keeps",
+      "requirement": "W-087",
+      "description": "Escape keeps the edited value instead of reverting",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "setText(committed.current);",
+          "replace": "setText(text);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "a value saves once on Enter or blur"
+      ],
+      "expect": "\\(fail\\).*a value saves once on Enter or blur"
+    },
+    {
+      "id": "W-087/var-length-unit-dropped",
+      "requirement": "W-087",
+      "description": "a length's unit is dropped (1.25rem saved as px)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/variable-values.ts",
+          "search": "(match[2]?.toLowerCase() ?? \"px\") as Length[\"unit\"]",
+          "replace": "\"px\" as Length[\"unit\"]"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "a value saves once on Enter or blur"
+      ],
+      "expect": "\\(fail\\).*a value saves once on Enter or blur"
+    },
+    {
+      "id": "W-087/var-invalid-hex-saved",
+      "requirement": "W-087",
+      "description": "an invalid hex colour is saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/variable-values.ts",
+          "search": "HEX.test(trimmed) ? { ok: true, value: trimmed }",
+          "replace": "true ? { ok: true, value: trimmed }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "an invalid value explains the fix inline"
+      ],
+      "expect": "\\(fail\\).*an invalid value explains the fix inline"
+    },
+    {
+      "id": "W-087/var-value-no-error",
+      "requirement": "W-087",
+      "description": "an invalid value shows no inline message",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "      {error && <InlineError>{error}</InlineError>}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "an invalid value explains the fix inline"
+      ],
+      "expect": "\\(fail\\).*an invalid value explains the fix inline"
+    },
+    {
+      "id": "W-087/var-picker-saves-on-input",
+      "requirement": "W-087",
+      "description": "the colour picker saves on every input step",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "onChange={(event) => setText(event.target.value)}",
+          "replace": "onChange={(event) => commit(event.target.value)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "the colour picker saves on its change event"
+      ],
+      "expect": "\\(fail\\).*the colour picker saves on its change event"
+    },
+    {
+      "id": "W-087/var-picker-change-ignored",
+      "requirement": "W-087",
+      "description": "the colour picker's change event is ignored",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "el.addEventListener(\"change\", onChange);",
+          "replace": "el.addEventListener(\"changed\", onChange);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "the colour picker saves on its change event"
+      ],
+      "expect": "\\(fail\\).*the colour picker saves on its change event"
+    },
+    {
+      "id": "W-087/var-type-preview-uncapped",
+      "requirement": "W-087",
+      "description": "a large font size preview grows the row",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "Math.min(lengthPx(value), MAX_TYPE_PREVIEW)",
+          "replace": "lengthPx(value)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "rows preview each kind"
+      ],
+      "expect": "\\(fail\\).*rows preview each kind"
+    },
+    {
+      "id": "W-087/var-bar-uncapped",
+      "requirement": "W-087",
+      "description": "a large spacing bar overflows the row",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "Math.min(lengthPx(item.value), MAX_BAR)",
+          "replace": "lengthPx(item.value)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "rows preview each kind"
+      ],
+      "expect": "\\(fail\\).*rows preview each kind"
+    },
+    {
+      "id": "W-087/var-rem-preview-as-px",
+      "requirement": "W-087",
+      "description": "rem lengths preview as px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/variable-values.ts",
+          "search": "  return length.value * 16;",
+          "replace": "  return length.value;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "rows preview each kind"
+      ],
+      "expect": "\\(fail\\).*rows preview each kind"
+    },
+    {
+      "id": "W-087/var-create-invalid-saved",
+      "requirement": "W-087",
+      "description": "an invalid new variable value is saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "      setCreateError(parsed.error);\n      return;\n",
+          "replace": "      setCreateError(parsed.error);\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "an invalid new value is explained"
+      ],
+      "expect": "\\(fail\\).*an invalid new value is explained"
+    },
+    {
+      "id": "W-087/var-usage-no-classes",
+      "requirement": "W-087",
+      "description": "the usage tooltip leaves out class usage",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "                    inClasses ? ` and in",
+          "replace": "                    false ? ` and in"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "shows page usage, with class usage"
+      ],
+      "expect": "\\(fail\\).*shows page usage, with class usage"
+    },
+    {
+      "id": "W-087/var-usage-counts-props",
+      "requirement": "W-087",
+      "description": "class usage counts properties, not classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "          const inClasses = new Set(\n            findVariableUsagesInDesign(design, item.id, kind).map((u) => u.classId),\n          ).size;",
+          "replace": "          const inClasses = findVariableUsagesInDesign(design, item.id, kind).length;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "shows page usage, with class usage"
+      ],
+      "expect": "\\(fail\\).*shows page usage, with class usage"
+    },
+    {
+      "id": "W-087/var-copy-bare-token",
+      "requirement": "W-087",
+      "description": "Copy CSS variable copies the bare custom property",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "writeText(`var(${token})`)",
+          "replace": "writeText(token)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "the menu edits, renames, copies"
+      ],
+      "expect": "\\(fail\\).*the menu edits, renames, copies"
+    },
+    {
+      "id": "W-087/var-no-empty-state",
+      "requirement": "W-087",
+      "description": "an empty variable section shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "{items.length === 0 && !creating && (",
+          "replace": "{false && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "an empty section explains"
+      ],
+      "expect": "\\(fail\\).*an empty section explains"
+    },
+    {
+      "id": "W-087/var-picker-hex-short",
+      "requirement": "W-087",
+      "description": "a 3-digit hex isn't expanded for the colour picker",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/variable-values.ts",
+          "search": "(c) => c + c",
+          "replace": "(c) => c"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/variable-values.test.ts",
+        "-t",
+        "pickerHex gives"
+      ],
+      "expect": "\\(fail\\).*pickerHex gives"
     }
   ]
 }

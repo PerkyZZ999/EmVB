@@ -354,9 +354,6 @@ export const EDITOR_CSS = `${UI_CSS}
   border-radius: 999px; font-size: 11px; font-weight: 600;
   background: var(--color-kumo-tint); color: var(--text-color-kumo-default);
 }
-.emvb-site-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
-.emvb-site-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; }
-.emvb-site-row-fields { flex: 1 1 140px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .emvb-site-elevated {
   padding: 8px; border-radius: 6px;
   background: var(--emvb-glass-elevated, var(--color-kumo-elevated));
@@ -364,14 +361,8 @@ export const EDITOR_CSS = `${UI_CSS}
   border: 1px solid var(--color-kumo-hairline);
 }
 .emvb-site-create { display: flex; flex-direction: column; gap: 8px; }
-.emvb-site-class { display: flex; flex-direction: column; gap: 8px; }
-.emvb-site-class-active {
-  border-color: var(--color-kumo-primary, #0055ff);
-  box-shadow: var(--emvb-elevation-s), 0 0 0 1px color-mix(in oklab, var(--color-kumo-primary, #0055ff) 35%, transparent);
-}
 .emvb-site-class-styles { display: flex; flex-direction: column; gap: 8px; }
 .emvb-site-token { margin: 0; font-size: 11px; color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.emvb-site-swatch { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--color-kumo-hairline); margin-bottom: 6px; }
 .emvb-site-cascade { margin: 0 0 4px; padding: 8px; border-radius: 6px; background: var(--color-kumo-tint); border: 1px solid var(--color-kumo-hairline); }
 .emvb-site-usage { flex: 0 0 auto; white-space: nowrap; font-size: 11px; line-height: 16px; color: var(--text-color-kumo-subtle); font-variant-numeric: tabular-nums; }
 /* Compact manager rows (W-087): one 32 px line per class or variable, details on demand */
@@ -410,6 +401,34 @@ export const EDITOR_CSS = `${UI_CSS}
   box-shadow: inset 0 0 0 1px var(--color-kumo-brand);
 }
 .emvb-site-empty-card { border-radius: 6px; border: 1px dashed var(--color-kumo-line); }
+.emvb-site-empty {
+  display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 8px;
+  border-radius: 6px; border: 1px dashed var(--color-kumo-line);
+  font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); text-wrap: pretty;
+}
+.emvb-site-empty svg { flex: 0 0 auto; }
+.emvb-site-preview {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 24px; height: 24px; overflow: hidden; border-radius: 4px;
+  font-size: 13px; line-height: 1; color: var(--text-color-kumo-default);
+}
+.emvb-site-preview-color { box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--text-color-kumo-default) 18%, transparent); }
+.emvb-site-preview-icon { color: var(--text-color-kumo-subtle); }
+.emvb-site-bar {
+  display: inline-block; height: 6px; margin-right: 6px; border-radius: 2px; vertical-align: 1px;
+  background: color-mix(in oklab, var(--color-kumo-brand) 60%, transparent);
+}
+.emvb-site-value-row { display: flex; align-items: center; gap: 6px; }
+.emvb-site-value-row .emvb-site-value-input { flex: 1 1 auto; min-width: 0; font-family: var(--font-mono); }
+.emvb-site-picker {
+  flex: 0 0 auto; width: 28px; height: 28px; padding: 2px; border: 0; border-radius: 6px;
+  background: var(--color-kumo-control, var(--color-kumo-base)); box-shadow: inset 0 0 0 1px var(--color-kumo-line); cursor: pointer;
+}
+.emvb-site-picker::-webkit-color-swatch-wrapper { padding: 0; }
+.emvb-site-picker::-webkit-color-swatch { border: 0; border-radius: 4px; }
+.emvb-site-picker::-moz-color-swatch { border: 0; border-radius: 4px; }
+.emvb-site-picker:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }
+.emvb-site-font-sample { margin: 0; font-size: 14px; line-height: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color-kumo-default); }
 .emvb-site-empty-card p { text-wrap: pretty; }
 @media (prefers-reduced-motion: reduce) {
   .emvb-site-item-row { transition: none; }

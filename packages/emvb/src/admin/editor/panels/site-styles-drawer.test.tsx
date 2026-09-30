@@ -133,8 +133,13 @@ describe("SiteStylesDrawer managers (W-071)", () => {
     expect(document.querySelector("[data-emvb-manager-label]")?.textContent).toContain(
       "Variables Manager",
     );
+    const row = document.querySelector(
+      '[data-emvb-var-id="brand"] .emvb-site-item-main',
+    ) as HTMLButtonElement | null;
+    expect(row?.title).toBe("Brand · var(--emvb-c-brand)");
+    await act(async () => row?.click());
     expect(document.querySelector('[data-emvb-var-id="brand"]')?.textContent).toContain(
-      "--emvb-c-brand",
+      "var(--emvb-c-brand)",
     );
     expect(document.querySelector("[data-emvb-var-swatch]")).toBeTruthy();
   });
