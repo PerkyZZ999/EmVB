@@ -73,10 +73,10 @@ export function duplicateClass(
   let id = randomSuffix ? `${base}-${randomSuffix}`.slice(0, 40) : base;
   for (let n = 2; taken.has(id); n++) id = `${base}-${n}`.slice(0, 40);
   const style = { ...source.style } as StyleProps;
-  return {
-    ...design,
-    classes: [...classes, { id, name: baseName, style }],
-  };
+  const copy = source.states
+    ? { id, name: baseName, style, states: structuredClone(source.states) }
+    : { id, name: baseName, style };
+  return { ...design, classes: [...classes, copy] };
 }
 
 /** Rename a design class; the id (and so its `.emvb-k-<id>` selector) stays. Pure (W-087). */

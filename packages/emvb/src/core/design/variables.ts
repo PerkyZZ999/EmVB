@@ -1,6 +1,7 @@
 import type { DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
-import type { StyleProps } from "../schema/style.ts";
+import { STYLE_STATES } from "../schema/state-names.ts";
+import type { StyleProps, StyleStates } from "../schema/style.ts";
 import { nodeChildren, updateNode } from "../tree-ops.ts";
 
 export type VariableKind = "color" | "font" | "fontSize" | "spacing";
@@ -47,6 +48,19 @@ function collectStyleUsages(
   if (shadowColorMatches(style, id, kind)) hit("boxShadow.color");
 }
 
+/** Style and state styles (W-089) together; a state usage is reported as `<state>.<prop>`. */
+function collectAllUsages(
+  owner: { style?: StyleProps; states?: StyleStates },
+  id: string,
+  kind: VariableKind | undefined,
+  hit: (prop: string) => void,
+): void {
+  collectStyleUsages(owner.style, id, kind, hit);
+  for (const state of STYLE_STATES) {
+    collectStyleUsages(owner.states?.[state], id, kind, (prop) => hit(`${state}.${prop}`));
+  }
+}
+
 function walkNodes(node: LayoutNode, visit: (node: LayoutNode) => void): void {
   visit(node);
   for (const child of nodeChildren(node)) walkNodes(child, visit);
@@ -60,7 +74,7 @@ export function findVariableUsages(
 ): VariableUsage[] {
   const usages: VariableUsage[] = [];
   walkNodes(layout.root, (node) => {
-    collectStyleUsages(node.style, id, kind, (prop) => {
+    collectAllUsages(node, id, kind, (prop) => {
       usages.push({ nodeId: node.id, prop });
     });
   });
@@ -78,7 +92,7 @@ export function findVariableUsagesInDesign(
 ): VariableUsage[] {
   const usages: VariableUsage[] = [];
   for (const cls of design.classes ?? []) {
-    collectStyleUsages(cls.style, id, kind, (prop) => {
+    collectAllUsages(cls, id, kind, (prop) => {
       usages.push({ nodeId: "", prop, classId: cls.id });
     });
   }
@@ -107,6 +121,41 @@ function stripRefsFromStyle(
   return Object.keys(next).length === 0 ? undefined : (next as StyleProps);
 }
 
+/** The same for every state; a state left empty is dropped, and so is `states` itself. */
+function stripRefsFromStates(
+  states: StyleStates | undefined,
+  id: string,
+  kind: VariableKind | undefined,
+): StyleStates | undefined {
+  if (!states) return undefined;
+  let changed = false;
+  const next: StyleStates = {};
+  for (const state of STYLE_STATES) {
+    const style = states[state];
+    if (!style) continue;
+    const stripped = stripRefsFromStyle(style, id, kind);
+    if (stripped !== style) changed = true;
+    if (stripped) next[state] = stripped;
+  }
+  if (!changed) return states;
+  return Object.keys(next).length === 0 ? undefined : next;
+}
+
+/** Style and states with the refs removed, keeping the same object when nothing changed. */
+function stripOwner<T extends { style?: StyleProps; states?: StyleStates }>(
+  owner: T,
+  id: string,
+  kind: VariableKind | undefined,
+): T {
+  const style = stripRefsFromStyle(owner.style, id, kind);
+  const states = stripRefsFromStates(owner.states, id, kind);
+  if (style === owner.style && states === owner.states) return owner;
+  const next: T = { ...owner, style, states };
+  if (style === undefined) delete next.style;
+  if (states === undefined) delete next.states;
+  return next;
+}
+
 /** Drop every `{ var: id }` style binding on the layout (fallback to defaults). Pure. */
 export function clearVariableRefs(layout: Layout, id: string, kind?: VariableKind): Layout {
   let next = layout;
@@ -114,15 +163,7 @@ export function clearVariableRefs(layout: Layout, id: string, kind?: VariableKin
   // Deduplicate node ids — a node may reference the same var on several props.
   const nodeIds = [...new Set(usages.map((u) => u.nodeId))];
   for (const nodeId of nodeIds) {
-    next = updateNode(next, nodeId, (node) => {
-      const style = stripRefsFromStyle(node.style, id, kind);
-      if (style === node.style) return node;
-      if (style === undefined) {
-        const { style: _drop, ...rest } = node;
-        return rest as LayoutNode;
-      }
-      return { ...node, style };
-    });
+    next = updateNode(next, nodeId, (node) => stripOwner(node, id, kind));
   }
   return next;
 }
@@ -143,10 +184,10 @@ function clearClassStyleRefs(
   if (!classes) return classes;
   let changed = false;
   const next = classes.map((cls) => {
-    const style = stripRefsFromStyle(cls.style, id, kind);
-    if (style === cls.style) return cls;
+    const stripped = stripOwner(cls, id, kind);
+    if (stripped === cls) return cls;
     changed = true;
-    return { ...cls, style: style ?? {} };
+    return { ...stripped, style: stripped.style ?? {} };
   });
   return changed ? next : classes;
 }

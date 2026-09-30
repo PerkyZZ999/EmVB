@@ -73,6 +73,18 @@ describe("duplicateClass (W-071)", () => {
     expect(next.classes?.[1]?.id).not.toBe("card");
   });
 
+  test("copies state styles too, as a separate object (W-089)", () => {
+    const states = { hover: { color: "#ff0000" }, active: { opacity: 0.5 } };
+    const design = {
+      ...emptyDesign(),
+      classes: [{ id: "card", name: "Card", style: {}, states }],
+    };
+    const copy = duplicateClass(design, "card", "x").classes?.[1];
+    expect(copy?.states).toEqual(states);
+    expect(copy?.states).not.toBe(states);
+    expect(copy?.states?.hover).not.toBe(states.hover);
+  });
+
   test("missing id is a no-op", () => {
     const design = emptyDesign();
     expect(duplicateClass(design, "nope")).toBe(design);

@@ -154,5 +154,3 @@ export const StyleStates = z.strictObject({
 });
 
 export type StyleStates = z.infer<typeof StyleStates>;
-export type StyleStateName = keyof StyleStates;
-export const STYLE_STATES: readonly StyleStateName[] = ["hover", "focus", "active"];

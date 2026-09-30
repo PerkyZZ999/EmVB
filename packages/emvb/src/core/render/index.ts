@@ -11,7 +11,15 @@ import {
   type Layout,
   type LayoutNode,
 } from "../schema/layout.ts";
-import { cssLength, styleClassName, styleDeclarations, type Declaration } from "../sanitize/css.ts";
+import {
+  cssLength,
+  stateDeclarations,
+  styleClassName,
+  styleDeclarations,
+  type Declaration,
+  type StateDeclarations,
+} from "../sanitize/css.ts";
+import { STYLE_STATES } from "../schema/state-names.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import { resolvePostForRender, type ThemeDynamicData } from "../theme/dynamic.ts";
 import type { FormDefinitions } from "../forms/definition.ts";
@@ -77,7 +85,7 @@ export function renderPage(
   const baseDynamic = opts.dynamic;
   const warnings: RenderWarning[] = [];
   const usedTypes = new Set<string>();
-  const localRules: { id: string; declarations: Declaration[] }[] = [];
+  const localRules: { id: string; declarations: Declaration[]; states: StateDeclarations }[] = [];
   const knownVariables = new Set(design.variables.colors.map((c) => c.id));
 
   const ctx: RenderContext = {
@@ -106,13 +114,18 @@ export function renderPage(
       const height = cssLength((node as { props: { height: unknown } }).props.height);
       if (height) declarations.push({ property: "height", value: height });
     }
-    const color = node.style?.color;
-    if (typeof color === "object" && !knownVariables.has(color.var)) {
-      warnings.push({ nodeId, code: "unknown-variable", detail: color.var });
+    const states = stateDeclarations(node.states);
+    for (const key of states.rejected) {
+      warnings.push({ nodeId, code: "rejected-style", detail: key });
     }
-    if (id && declarations.length > 0) {
+    for (const color of [node.style?.color, ...STYLE_STATES.map((s) => node.states?.[s]?.color)]) {
+      if (typeof color === "object" && !knownVariables.has(color.var)) {
+        warnings.push({ nodeId, code: "unknown-variable", detail: color.var });
+      }
+    }
+    if (id && (declarations.length > 0 || Object.keys(states.states).length > 0)) {
       classes.push(`emvb-e-${id}`);
-      localRules.push({ id, declarations });
+      localRules.push({ id, declarations, states: states.states });
     }
     const attrs: Record<string, string> = { class: classes.join(" ") };
     if (mode === "editor" && id) attrs["data-emvb-id"] = id;
@@ -165,7 +178,13 @@ export function renderPage(
   return {
     vnode,
     html: serialize(vnode),
-    css: generateCss({ design, usedTypes, baseCss, localRules }),
+    css: generateCss({
+      design,
+      usedTypes,
+      baseCss,
+      localRules,
+      previewStates: mode === "editor",
+    }),
     needsFormsRuntime: layoutHasForm(layout),
     needsTabsRuntime: layoutHasTabs(layout),
     warnings,

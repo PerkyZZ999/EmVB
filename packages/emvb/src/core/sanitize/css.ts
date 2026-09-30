@@ -1,3 +1,4 @@
+import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
 import type { StyleProps } from "../schema/style.ts";
 
 const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -296,4 +297,30 @@ export function styleDeclarations(style: unknown): {
     }
   }
   return { declarations, rejected };
+}
+
+export type StateDeclarations = Partial<Record<StyleStateName, Declaration[]>>;
+
+/**
+ * `states` (W-089) through the same mappers and gates as `style`. Rejected keys are reported as
+ * `<state>.<key>`; an unknown state name is reported whole.
+ */
+export function stateDeclarations(states: unknown): {
+  states: StateDeclarations;
+  rejected: string[];
+} {
+  const result: StateDeclarations = {};
+  const rejected: string[] = [];
+  if (typeof states !== "object" || states === null) return { states: result, rejected };
+  for (const key of Object.keys(states)) {
+    if (!STYLE_STATES.includes(key as StyleStateName)) rejected.push(key);
+  }
+  for (const state of STYLE_STATES) {
+    const style = (states as Record<string, unknown>)[state];
+    if (style === undefined) continue;
+    const { declarations, rejected: bad } = styleDeclarations(style);
+    if (declarations.length > 0) result[state] = declarations;
+    for (const key of bad) rejected.push(`${state}.${key}`);
+  }
+  return { states: result, rejected };
 }

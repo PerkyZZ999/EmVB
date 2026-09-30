@@ -66,13 +66,12 @@ export {
 export {
   StyleProps,
   StyleStates,
-  STYLE_STATES,
   ColorValue,
   Length,
   LengthValue,
   VariableRef,
 } from "./schema/style.ts";
-export type { StyleStateName } from "./schema/style.ts";
+export { STYLE_STATES, type StyleStateName } from "./schema/state-names.ts";
 export {
   upgradeLayout,
   isNewerThanSupported,

@@ -294,3 +294,59 @@ describe("deleting a variable clears class styles too", () => {
     expect(removeVariable(untouched, "missing", "color")).toBe(untouched);
   });
 });
+
+describe("state styles use variables too (W-089)", () => {
+  const stateLayout = (): Layout => ({
+    schemaVersion: 3,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "btn00001",
+          type: "button",
+          props: { text: "Go", href: "/go" },
+          style: { color: { var: "ink" } },
+          states: {
+            hover: { color: { var: "brand" }, opacity: 0.8 },
+            focus: { borderColor: { var: "brand" } },
+          },
+        },
+      ],
+    },
+  });
+  const stateDesign = () => ({
+    ...emptyDesign(),
+    classes: [
+      {
+        id: "card",
+        name: "Card",
+        style: { opacity: 0.5 },
+        states: { active: { backgroundColor: { var: "brand" } } },
+      },
+    ],
+  });
+
+  test("usages on node and class states are counted with the state in the prop", () => {
+    expect(findVariableUsages(stateLayout(), "brand", "color")).toEqual([
+      { nodeId: "btn00001", prop: "hover.color" },
+      { nodeId: "btn00001", prop: "focus.borderColor" },
+    ]);
+    expect(findVariableUsagesInDesign(stateDesign(), "brand", "color")).toEqual([
+      { nodeId: "", prop: "active.backgroundColor", classId: "card" },
+    ]);
+  });
+
+  test("deleting the variable clears state bindings and drops states left empty", () => {
+    const result = deleteVariable(stateDesign(), stateLayout(), "brand", "color");
+    const button = result.layout.root.children[0];
+    expect(button?.style).toEqual({ color: { var: "ink" } });
+    expect(button?.states).toEqual({ hover: { opacity: 0.8 } });
+    expect(result.design.classes?.[0]).toEqual({
+      id: "card",
+      name: "Card",
+      style: { opacity: 0.5 },
+    });
+  });
+});

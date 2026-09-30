@@ -1986,8 +1986,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "    ...classes,\n    ...localRules.map((rule) => block(`.emvb-e-${rule.id}`, rule.declarations)),\n",
-          "replace": "    ...localRules.map((rule) => block(`.emvb-e-${rule.id}`, rule.declarations)),\n    ...classes,\n"
+          "search": "    ...classes,\n    ...localRules.flatMap((rule) =>\n      rules(`.emvb-e-${rule.id}`, rule.declarations, rule.states ?? {}),\n    ),\n",
+          "replace": "    ...localRules.flatMap((rule) =>\n      rules(`.emvb-e-${rule.id}`, rule.declarations, rule.states ?? {}),\n    ),\n    ...classes,\n"
         }
       ],
       "command": [
@@ -8041,8 +8041,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/variables.ts",
-          "search": "    return { ...cls, style: style ?? {} };",
-          "replace": "    return { ...cls, style: style as StyleProps };"
+          "search": "    return { ...stripped, style: stripped.style ?? {} };",
+          "replace": "    return { ...stripped, style: stripped.style as StyleProps };"
         }
       ],
       "command": [
@@ -8061,8 +8061,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/variables.ts",
-          "search": "    const style = stripRefsFromStyle(cls.style, id, kind);",
-          "replace": "    const style = stripRefsFromStyle(cls.style, id, undefined);"
+          "search": "    const stripped = stripOwner(cls, id, kind);",
+          "replace": "    const stripped = stripOwner(cls, id, undefined);"
         }
       ],
       "command": [
@@ -8101,7 +8101,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/variables.ts",
-          "search": "    if (style === cls.style) return cls;\n",
+          "search": "    if (stripped === cls) return cls;\n",
           "replace": ""
         }
       ],
@@ -8373,6 +8373,306 @@
         "a state value gets the same limits"
       ],
       "expect": "\\(fail\\).*a state value gets the same limits"
+    },
+    {
+      "id": "W-089/state-order-reversed",
+      "requirement": "W-089",
+      "description": "Active is emitted before Hover, so Hover wins when both apply",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/state-names.ts",
+          "search": "[\"hover\", \"focus\", \"active\"] as const",
+          "replace": "[\"active\", \"focus\", \"hover\"] as const"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "rules follow the cascade"
+      ],
+      "expect": "\\(fail\\).*rules follow the cascade"
+    },
+    {
+      "id": "W-089/state-before-base",
+      "requirement": "W-089",
+      "description": "state rules come before the base rule, so Normal wins over the state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "  const rules = (selector: string, declarations: Declaration[], states: StateDeclarations) => [\n    block(selector, declarations),\n    ...STYLE_STATES.map(",
+          "replace": "  const rules = (selector: string, declarations: Declaration[], states: StateDeclarations) => [\n    ...STYLE_STATES.map("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "rules follow the cascade"
+      ],
+      "expect": "\\(fail\\).*rules follow the cascade"
+    },
+    {
+      "id": "W-089/class-states-dropped",
+      "requirement": "W-089",
+      "description": "class state styles are never emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "          stateDeclarations(cls.states).states,\n",
+          "replace": "          {},\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "rules follow the cascade"
+      ],
+      "expect": "\\(fail\\).*rules follow the cascade"
+    },
+    {
+      "id": "W-089/focus-not-visible",
+      "requirement": "W-089",
+      "description": "Focus maps to :focus, so a mouse click leaves a sticky focus style",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "  focus: \":focus-visible\",",
+          "replace": "  focus: \":focus\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "focus is keyboard focus"
+      ],
+      "expect": "\\(fail\\).*focus is keyboard focus"
+    },
+    {
+      "id": "W-089/preview-in-public",
+      "requirement": "W-089",
+      "description": "published CSS carries the editor-only data-emvb-state selectors",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      previewStates: mode === \"editor\",",
+          "replace": "      previewStates: true,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "public CSS has no preview selectors"
+      ],
+      "expect": "\\(fail\\).*public CSS has no preview selectors"
+    },
+    {
+      "id": "W-089/no-canvas-preview",
+      "requirement": "W-089",
+      "description": "the canvas CSS has no data-emvb-state rules, so picking a state shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "          ? `${selector}${STATE_PSEUDO[state]},${selector}[data-emvb-state=\"${state}\"]`",
+          "replace": "          ? `${selector}${STATE_PSEUDO[state]}`"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "public CSS has no preview selectors"
+      ],
+      "expect": "\\(fail\\).*public CSS has no preview selectors"
+    },
+    {
+      "id": "W-089/state-values-unsanitized",
+      "requirement": "W-089",
+      "description": "state values skip the sanitizer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    const { declarations, rejected: bad } = styleDeclarations(style);",
+          "replace": "    const bad: string[] = [];\n    const declarations = Object.entries(style as object).map(([property, value]) => ({\n      property,\n      value: String(value),\n    }));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "state value"
+      ],
+      "expect": "\\(fail\\).*state value"
+    },
+    {
+      "id": "W-089/state-rejections-silent",
+      "requirement": "W-089",
+      "description": "dropped state values are not reported",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    for (const key of bad) rejected.push(`${state}.${key}`);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "state value"
+      ],
+      "expect": "\\(fail\\).*state value"
+    },
+    {
+      "id": "W-089/unknown-state-silent",
+      "requirement": "W-089",
+      "description": "an unknown state name is dropped without a warning",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    if (!STYLE_STATES.includes(key as StyleStateName)) rejected.push(key);",
+          "replace": "    if (!STYLE_STATES.includes(key as StyleStateName)) continue;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "an unknown state name is dropped"
+      ],
+      "expect": "\\(fail\\).*an unknown state name is dropped"
+    },
+    {
+      "id": "W-089/states-only-no-class",
+      "requirement": "W-089",
+      "description": "an element with only state styles gets no local class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (id && (declarations.length > 0 || Object.keys(states.states).length > 0)) {",
+          "replace": "    if (id && declarations.length > 0) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "an element with only state styles"
+      ],
+      "expect": "\\(fail\\).*an element with only state styles"
+    },
+    {
+      "id": "W-089/state-unknown-variable-silent",
+      "requirement": "W-089",
+      "description": "an unknown colour variable in a state is not reported",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    for (const color of [node.style?.color, ...STYLE_STATES.map((s) => node.states?.[s]?.color)]) {",
+          "replace": "    for (const color of [node.style?.color]) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/states.test.ts",
+        "-t",
+        "an unknown colour variable in a state"
+      ],
+      "expect": "\\(fail\\).*an unknown colour variable in a state"
+    },
+    {
+      "id": "W-089/state-var-usage-missed",
+      "requirement": "W-089",
+      "description": "variable usages in states are not counted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  collectStyleUsages(owner.style, id, kind, hit);\n  for (const state of STYLE_STATES) {",
+          "replace": "  collectStyleUsages(owner.style, id, kind, hit);\n  for (const state of [] as typeof STYLE_STATES[number][]) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "usages on node and class states"
+      ],
+      "expect": "\\(fail\\).*usages on node and class states"
+    },
+    {
+      "id": "W-089/state-var-delete-missed",
+      "requirement": "W-089",
+      "description": "deleting a variable leaves its state bindings",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  const states = stripRefsFromStates(owner.states, id, kind);",
+          "replace": "  const states = owner.states;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "deleting the variable clears state bindings"
+      ],
+      "expect": "\\(fail\\).*deleting the variable clears state bindings"
+    },
+    {
+      "id": "W-089/empty-state-kept",
+      "requirement": "W-089",
+      "description": "a state left empty after a delete stays as {}",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "    if (stripped) next[state] = stripped;",
+          "replace": "    next[state] = stripped ?? {};"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "deleting the variable clears state bindings"
+      ],
+      "expect": "\\(fail\\).*deleting the variable clears state bindings"
+    },
+    {
+      "id": "W-089/duplicate-shares-states",
+      "requirement": "W-089",
+      "description": "a duplicated class shares its state objects with the original",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "states: structuredClone(source.states)",
+          "replace": "states: source.states"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/classes.test.ts",
+        "-t",
+        "copies state styles too"
+      ],
+      "expect": "\\(fail\\).*copies state styles too"
     }
   ]
 }
