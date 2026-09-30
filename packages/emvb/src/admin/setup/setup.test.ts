@@ -256,6 +256,44 @@ describe("runSetup", () => {
     expect(api.calls.filter((c) => !c.startsWith("GET"))).toEqual([]);
   });
 
+  test("an outdated site is upgraded through the schema API and ends up current (W-091)", async () => {
+    const current = upToDatePages();
+    current.hidden = false;
+    current.fields = current.fields.filter((f) => f.slug !== "canvas_mode");
+    const layout = current.fields.find((f) => f.slug === "layout");
+    if (layout) layout.widget = null;
+    const api = fakeSchemaApi({ pages: current, themeParts: upToDateThemeParts() });
+    expect((await runSetup(api.fetcher)).conflicts).toEqual([]);
+    const base = `/_emdash/api/schema/collections/${PAGES_COLLECTION}`;
+    expect(api.calls.filter((c) => !c.startsWith("GET"))).toEqual([
+      `PUT ${base}`,
+      `PUT ${base}/fields/layout`,
+      `POST ${base}/fields`,
+    ]);
+    expect(planSetup(api.state().pages, api.state().themeParts)).toEqual({
+      steps: [],
+      conflicts: [],
+    });
+  });
+
+  test("a failed read (not a 404) stops setup before any write (W-091)", async () => {
+    const writes: string[] = [];
+    const fetcher: Fetcher = async (path, init) => {
+      if ((init?.method ?? "GET") !== "GET") {
+        writes.push(path);
+        return new Response(JSON.stringify({ data: {} }), { status: 200 });
+      }
+      return new Response(
+        JSON.stringify({ error: { code: "DOWN", message: "Schema read failed" } }),
+        {
+          status: 500,
+        },
+      );
+    };
+    await expect(runSetup(fetcher)).rejects.toThrow("Schema read failed");
+    expect(writes).toEqual([]);
+  });
+
   test("an API failure surfaces as an error", async () => {
     const failing: Fetcher = async () =>
       new Response(

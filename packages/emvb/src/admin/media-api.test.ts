@@ -72,3 +72,58 @@ describe("media API path (W-024, R-007)", () => {
     expect(seen).toEqual(["GET /_emdash/api/media", "POST /_emdash/api/media"]);
   });
 });
+
+describe("media API requests (W-091, R-007)", () => {
+  test("listImages asks for images with a limit and search, and keeps only ready ones", async () => {
+    const { listImages } = await import("./media-api.ts");
+    const urls: string[] = [];
+    const fetcher: Fetcher = async (path) => {
+      urls.push(path);
+      const items = [
+        item({ id: "a" }),
+        item({ id: "b", status: "pending" }),
+        item({ id: "c", status: undefined }),
+      ];
+      return new Response(JSON.stringify({ data: { items } }), { status: 200 });
+    };
+    const found = await listImages(fetcher, { limit: 40, q: "hero" });
+    expect(found.map((media) => media.id)).toEqual(["a", "c"]);
+    await listImages(fetcher);
+    expect(urls).toEqual([
+      "/_emdash/api/media?mimeType=image%2F&limit=40&q=hero",
+      "/_emdash/api/media?mimeType=image%2F&limit=50",
+    ]);
+  });
+
+  test("uploadImage sends the file with its size, and alt only when given", async () => {
+    const { uploadImage } = await import("./media-api.ts");
+    const bodies: FormData[] = [];
+    const fetcher: Fetcher = async (_path, init) => {
+      bodies.push(init?.body as FormData);
+      return new Response(JSON.stringify({ data: { item: item() } }), { status: 201 });
+    };
+    const file = new File([new Uint8Array([1])], "hero.png", { type: "image/png" });
+    expect((await uploadImage(fetcher, file, { width: 0, height: 480, alt: "Hero" })).id).toBe(
+      "01MEDIA",
+    );
+    await uploadImage(fetcher, file);
+    const fields = bodies.map((body) =>
+      [...body.keys()].toSorted().map((key) => {
+        const value = body.get(key);
+        return `${key}=${typeof value === "string" ? value : (value as File).name}`;
+      }),
+    );
+    expect(fields).toEqual([
+      ["alt=Hero", "file=hero.png", "height=480", "width=0"],
+      ["file=hero.png"],
+    ]);
+  });
+
+  test("an upload answered without an item is an error", async () => {
+    const { uploadImage } = await import("./media-api.ts");
+    const fetcher: Fetcher = async () =>
+      new Response(JSON.stringify({ data: {} }), { status: 200 });
+    const file = new File([new Uint8Array([1])], "hero.png", { type: "image/png" });
+    await expect(uploadImage(fetcher, file)).rejects.toMatchObject({ status: 200 });
+  });
+});

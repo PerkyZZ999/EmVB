@@ -37,6 +37,32 @@ describe("save failures (R-006)", () => {
     });
   });
 
+  test("a 500 is a retryable connection error and a 499 is not (W-091)", () => {
+    expect(saveFailure(new ApiError(500, "ERR", "boom"), page)).toEqual({ status: offline });
+    expect(saveFailure(new ApiError(499, "ERR", "closed"), page).status).toEqual({
+      kind: "error",
+      message: "Couldn't save. closed",
+      retry: false,
+    });
+  });
+
+  test("a rejection path with a two-digit index selects that element (W-091)", () => {
+    const children = Array.from({ length: 12 }, (_, i) => ({
+      id: `head${String(i).padStart(4, "0")}`,
+      type: "heading",
+      props: { text: "A", level: 1 },
+    }));
+    const wide: Layout = { schemaVersion: 3, root: { ...layout.root, children } };
+    const message = "The page layout is invalid. root.children[11].props.level: too big";
+    expect(
+      saveFailure(new ApiError(422, "SAVE_REJECTED", message), { ...page, layout: wide }),
+    ).toEqual({
+      status: fix,
+      rejection: message,
+      select: "head0011",
+    });
+  });
+
   test("a taken slug shows the Slug error and opens page settings", () => {
     expect(saveFailure(new ApiError(409, "SLUG_CONFLICT", "taken"), page)).toEqual({
       status: fix,

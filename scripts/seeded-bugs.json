@@ -10638,6 +10638,412 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
       "expect": "\\(fail\\).*accepts \" /pricing \""
+    },
+    {
+      "id": "W-091/load-entry-part-type-default",
+      "requirement": "D-013",
+      "description": "a theme part without a readable type opens as a footer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "parseThemePartType(data[\"part_type\"]) ?? \"header\"",
+          "replace": "parseThemePartType(data[\"part_type\"]) ?? \"footer\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\).*fall back to the defaults"
+    },
+    {
+      "id": "W-091/load-entry-page-gets-part-fields",
+      "requirement": "D-013",
+      "description": "a page is read with theme-part conditions and triggers",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "if (collection !== THEME_PARTS_COLLECTION) return base;",
+          "replace": "if (collection === \"never\") return base;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\).*a page has no part type"
+    },
+    {
+      "id": "W-091/load-entry-conditions-invalid-kept",
+      "requirement": "D-013",
+      "description": "unreadable stored conditions reach the editor instead of the defaults",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "conditions: validated.ok ? validated.conditions : defaultConditions(),",
+          "replace": "conditions: validated.ok ? validated.conditions : (conditionsRaw as ConditionsDoc),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\).*fall back to the defaults"
+    },
+    {
+      "id": "W-091/load-entry-triggers-invalid-kept",
+      "requirement": "D-013",
+      "description": "unreadable stored triggers reach the editor instead of the defaults",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "triggers: triggersValidated.ok ? triggersValidated.triggers : defaultTriggers(),",
+          "replace": "triggers: triggersValidated.ok ? triggersValidated.triggers : (triggersRaw as TriggersDoc),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\).*fall back to the defaults"
+    },
+    {
+      "id": "W-091/load-entry-string-layout-unparsed",
+      "requirement": "D-013",
+      "description": "a layout stored as a JSON string is not parsed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "if (typeof raw === \"string\") {",
+          "replace": "if (typeof raw === \"number\") {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\).*parses a JSON-string layout"
+    },
+    {
+      "id": "W-091/load-entry-invalid-layout-blank",
+      "requirement": "D-013",
+      "description": "an invalid stored layout opens as a blank page instead of an error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "if (!result.ok) throw new Error(UNREADABLE);",
+          "replace": "if (!result.ok) return null;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\).*not a layout is refused as unreadable"
+    },
+    {
+      "id": "W-091/load-entry-rev-lost",
+      "requirement": "D-013",
+      "description": "the stored revision is dropped, so the next save cannot detect a conflict",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "rev: body?.[\"_rev\"] ?? null,",
+          "replace": "rev: null,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\).*parses a JSON-string layout"
+    },
+    {
+      "id": "W-091/load-entry-id-unencoded",
+      "requirement": "D-013",
+      "description": "the entry id is put into the API path without encoding",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "${encodeURIComponent(id)}",
+          "replace": "${id}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\).*parses a JSON-string layout"
+    },
+    {
+      "id": "W-091/save-part-as-page",
+      "requirement": "R-061",
+      "description": "a theme part is saved through the page API",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "collection === THEME_PARTS_COLLECTION\n            ? await saveThemePart(",
+          "replace": "collection === \"never\"\n            ? await saveThemePart("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*saves its type, conditions and triggers"
+    },
+    {
+      "id": "W-091/save-part-default-type",
+      "requirement": "R-061",
+      "description": "a theme part without a type is saved as a footer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "partType: current.page.partType ?? \"header\",",
+          "replace": "partType: current.page.partType ?? \"footer\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*saves the defaults"
+    },
+    {
+      "id": "W-091/save-part-default-triggers",
+      "requirement": "R-063",
+      "description": "a popup without triggers is saved with no open trigger",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "open: [{ type: \"page_load\" }],",
+          "replace": "open: [],"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*saves the defaults"
+    },
+    {
+      "id": "W-091/publish-part-as-page",
+      "requirement": "R-061",
+      "description": "a theme part is published through the page API",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "? await publishThemePart(fetcher, latest.current.id, rev)",
+          "replace": "? await publishPage(fetcher, latest.current.id, rev)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*publishing a saved theme part"
+    },
+    {
+      "id": "W-091/publish-always-saves",
+      "requirement": "R-006",
+      "description": "publish saves again even when nothing changed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "if (latest.current.version !== latest.current.savedVersion) {",
+          "replace": "if (true) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*publishing a saved theme part"
+    },
+    {
+      "id": "W-091/publish-conflict-no-dialog",
+      "requirement": "R-006",
+      "description": "a publish conflict does not open the conflict dialog",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "if (error instanceof ApiError && error.status === 409) setConflict(true);",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*publish conflict opens"
+    },
+    {
+      "id": "W-091/publish-after-failed-save",
+      "requirement": "R-006",
+      "description": "publish goes ahead after the save before it failed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "if (!rev) return false;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*failed save before publishing stops"
+    },
+    {
+      "id": "W-091/overwrite-local-rev",
+      "requirement": "R-006",
+      "description": "Overwrite saves with the stale local revision",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "await write(stored.rev);",
+          "replace": "await write(latest.current.rev);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*Overwrite saves over the stored revision"
+    },
+    {
+      "id": "W-091/overwrite-error-silent",
+      "requirement": "R-006",
+      "description": "Overwrite that cannot read the stored page shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "    } catch {\n      setStatus({ kind: \"error\", message: OFFLINE, retry: true });",
+          "replace": "    } catch {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*can.t read the stored page"
+    },
+    {
+      "id": "W-091/size-limit-off-by-one",
+      "requirement": "S0-9",
+      "description": "a layout of exactly the limit is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "if (bytes > MAX_LAYOUT_BYTES) {",
+          "replace": "if (bytes >= MAX_LAYOUT_BYTES) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*exactly the limit is saved"
+    },
+    {
+      "id": "W-091/size-message-floor",
+      "requirement": "S0-9",
+      "description": "the size message rounds the page size down",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "Math.ceil(bytes / 1024)",
+          "replace": "Math.floor(bytes / 1024)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*rounds up to whole KB"
+    },
+    {
+      "id": "W-091/save-500-not-retry",
+      "requirement": "R-006",
+      "description": "a 500 on save is not offered as a retryable connection error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "error.status >= 500",
+          "replace": "error.status > 500"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
+      "expect": "\\(fail\\).*a 500 is a retryable"
+    },
+    {
+      "id": "W-091/rejection-path-one-digit",
+      "requirement": "R-006",
+      "description": "a rejection path with a two-digit index selects the wrong element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "/\\broot(?:\\.children\\[\\d+\\])*/",
+          "replace": "/\\broot(?:\\.children\\[\\d\\])*/"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
+      "expect": "\\(fail\\).*two-digit index"
+    },
+    {
+      "id": "W-091/setup-update-collection-skipped",
+      "requirement": "D-031",
+      "description": "Upgrade never sends the collection settings update",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/run.ts",
+          "search": "    case \"update-collection\":\n      return requestJson(",
+          "replace": "    case \"update-collection\":\n      return undefined;\n      return requestJson("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/setup/setup.test.ts"],
+      "expect": "\\(fail\\).*outdated site is upgraded through the schema API"
+    },
+    {
+      "id": "W-091/setup-update-field-path",
+      "requirement": "D-031",
+      "description": "Upgrade sends field updates to the fields list instead of the field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/run.ts",
+          "search": "`${BASE}/${step.collection}/fields/${step.slug}`",
+          "replace": "`${BASE}/${step.collection}/fields`"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/setup/setup.test.ts"],
+      "expect": "\\(fail\\).*outdated site is upgraded through the schema API"
+    },
+    {
+      "id": "W-091/setup-read-error-as-missing",
+      "requirement": "D-031",
+      "description": "any failed collection read is taken as a missing collection",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/run.ts",
+          "search": "if (error instanceof ApiError && error.status === 404) return null;",
+          "replace": "if (error instanceof ApiError) return null;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/setup/setup.test.ts"],
+      "expect": "\\(fail\\).*failed read \\(not a 404\\) stops setup"
+    },
+    {
+      "id": "W-091/media-list-no-search",
+      "requirement": "R-007",
+      "description": "the media library search is never sent",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": "if (opts.q) params.set(\"q\", opts.q);",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/media-api.test.ts"],
+      "expect": "\\(fail\\).*listImages asks for images"
+    },
+    {
+      "id": "W-091/media-list-pending-kept",
+      "requirement": "R-007",
+      "description": "images still processing are offered in the library",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": ".filter((item) => item.status === \"ready\" || !item.status)",
+          "replace": ".filter(() => true)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/media-api.test.ts"],
+      "expect": "\\(fail\\).*listImages asks for images"
+    },
+    {
+      "id": "W-091/media-upload-width-zero-dropped",
+      "requirement": "R-007",
+      "description": "a zero width is not sent with the upload",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": "if (meta.width !== undefined)",
+          "replace": "if (meta.width)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/media-api.test.ts"],
+      "expect": "\\(fail\\).*uploadImage sends the file"
+    },
+    {
+      "id": "W-091/media-upload-no-height",
+      "requirement": "R-007",
+      "description": "the image height is not sent with the upload",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": "if (meta.height !== undefined) body.set(\"height\", String(meta.height));",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/media-api.test.ts"],
+      "expect": "\\(fail\\).*uploadImage sends the file"
+    },
+    {
+      "id": "W-091/media-upload-empty-item-ok",
+      "requirement": "R-007",
+      "description": "an upload answered without an item is taken as a success",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": "if (!response.ok || !payload.data?.item) throw",
+          "replace": "if (!response.ok) throw"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/media-api.test.ts"],
+      "expect": "\\(fail\\).*answered without an item"
     }
   ]
 }
