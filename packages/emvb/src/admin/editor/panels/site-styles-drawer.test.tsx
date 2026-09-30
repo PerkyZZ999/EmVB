@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import { emptyDesign, type DesignSystem, type Layout } from "../../../core/index.ts";
 import { SiteStylesDrawer } from "./SiteStylesDrawer.tsx";
-import { cleanup, mount } from "../../../../test/dom/mount.ts";
+import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
 
 afterEach(cleanup);
 
@@ -60,7 +60,9 @@ describe("SiteStylesDrawer (W-032)", () => {
     expect(classesTab).toBeTruthy();
     await act(async () => classesTab?.click());
     expect(document.querySelector('[data-emvb-site-tab="classes"]')).toBeTruthy();
-    expect(document.querySelector('[data-emvb-class-def="card"]')?.textContent).toContain("2 used");
+    expect(document.querySelector('[data-emvb-class-def="card"]')?.textContent).toContain(
+      "2 on page",
+    );
   });
 
   test("class edit styles button expands StyleRows and save receives patch", async () => {
@@ -85,23 +87,27 @@ describe("SiteStylesDrawer (W-032)", () => {
       (t) => t.textContent === "Classes",
     ) as HTMLElement | undefined;
     await act(async () => classesTab?.click());
-    const edit = [...document.querySelectorAll("button")].find(
-      (b) => b.textContent === "Edit styles",
-    );
-    await act(async () => edit?.click());
-    expect(document.querySelector(".emvb-site-class-styles")).toBeTruthy();
-    // Rename triggers save
+    const row = document.querySelector(
+      '[data-emvb-class-def="card"] .emvb-site-item-main',
+    ) as HTMLButtonElement | null;
+    expect(row?.getAttribute("aria-expanded")).toBe("false");
+    await act(async () => row?.click());
+    expect(row?.getAttribute("aria-expanded")).toBe("true");
+    const keys = document.querySelectorAll(".emvb-site-class-styles [data-emvb-style]");
+    expect(new Set([...keys].map((el) => el.getAttribute("data-emvb-style"))).size).toBe(14);
+    await act(async () => {
+      row?.dispatchEvent(new KeyboardEvent("keydown", { key: "F2", bubbles: true }));
+    });
     const nameInput = document.querySelector(
-      '[data-emvb-class-def="card"] input',
+      '[data-emvb-class-def="card"] .emvb-site-rename',
     ) as HTMLInputElement | null;
-    expect(nameInput).toBeTruthy();
+    expect(nameInput?.value ?? null).toBe("Card");
     await act(async () => {
       const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
       setter?.call(nameInput, "Card 2");
-      nameInput?.dispatchEvent(new Event("input", { bubbles: true }));
-      nameInput?.dispatchEvent(new Event("change", { bubbles: true }));
+      nameInput?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     });
-    expect(saves.length).toBeGreaterThan(0);
+    expect(saves.length).toBe(1);
     expect(saves.at(-1)?.classes?.[0]?.name).toBe("Card 2");
   });
 });
@@ -162,11 +168,54 @@ describe("SiteStylesDrawer managers (W-071)", () => {
     expect(document.querySelector('[data-emvb-class-def="card"]')?.textContent).toContain(
       "emvb-k-card",
     );
-    const dup = document.querySelector(
-      '[data-emvb-class-def="card"] button[aria-label="Duplicate Card"]',
+    const menu = document.querySelector(
+      '[data-emvb-class-def="card"] button[aria-label="Actions for Card"]',
     ) as HTMLButtonElement | null;
-    expect(dup).toBeTruthy();
+    await act(async () => menu?.click());
+    await settle();
+    const dup = [...document.querySelectorAll('[role="menuitem"]')].find(
+      (item) => item.textContent === "Duplicate",
+    ) as HTMLElement | undefined;
+    expect(dup?.textContent ?? null).toBe("Duplicate");
     await act(async () => dup?.click());
     expect(saves.at(-1)?.classes?.length).toBe(2);
+  });
+});
+
+describe("SiteStylesDrawer keyboard (W-087)", () => {
+  test("keys pressed inside the drawer don't reach the editor's window shortcuts", async () => {
+    const seen: string[] = [];
+    const listener = (event: KeyboardEvent) => seen.push(event.key);
+    window.addEventListener("keydown", listener);
+    try {
+      await mount(
+        <SiteStylesDrawer
+          design={{ ...emptyDesign(), classes: [{ id: "card", name: "Card", style: {} }] }}
+          layout={layout}
+          onDesignChange={async () => undefined}
+          onLayoutChange={() => undefined}
+          onClose={() => undefined}
+        />,
+      );
+      const tab = [...document.querySelectorAll('[role="tab"]')].find(
+        (t) => t.textContent === "Classes",
+      ) as HTMLElement | undefined;
+      await act(async () => tab?.click());
+      const row = document.querySelector(".emvb-site-item-main") as HTMLElement | null;
+      for (const key of ["Delete", "Backspace", "Enter", "ArrowDown", "Escape"]) {
+        // oxlint-disable-next-line no-await-in-loop -- one key at a time
+        await act(async () => {
+          row?.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+        });
+      }
+      await act(async () => {
+        row?.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "s", ctrlKey: true, bubbles: true }),
+        );
+      });
+      expect(seen).toEqual(["s"]);
+    } finally {
+      window.removeEventListener("keydown", listener);
+    }
   });
 });

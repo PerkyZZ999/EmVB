@@ -3,7 +3,7 @@ import { act } from "react";
 import type { DesignSystem, Layout, VariableKind } from "../../../core/index.ts";
 import { ClassesSection } from "./ClassesSection.tsx";
 import { VariableSection } from "./VariableSection.tsx";
-import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
+import { cleanup, mount as mountTree, settle } from "../../../../test/dom/mount.ts";
 
 // Snapshots were recorded from both sections before W-086 M5 shared their pieces.
 let host: HTMLElement;
@@ -143,25 +143,143 @@ describe("VariableSection", () => {
   }
 });
 
+const menuItem = (label: string) =>
+  [...document.querySelectorAll('[role="menuitem"]')].find((el) => el.textContent === label) as
+    | HTMLElement
+    | undefined;
+
+async function pick(menu: string, label: string) {
+  await click(byLabel(menu));
+  await settle();
+  const item = menuItem(label);
+  expect(item?.textContent ?? null).toBe(label);
+  await act(async () => item?.click());
+  await settle();
+}
+
+/** Rename from a menu starts on the frame after the menu closes. */
+const nextFrame = () =>
+  act(async () => {
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
+  });
+
+const renameField = () => host.querySelector<HTMLInputElement>(".emvb-site-rename");
+
+async function press(target: Element | null | undefined, key: string) {
+  expect(target?.tagName ?? null).not.toBeNull();
+  await act(async () => {
+    target?.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+  });
+}
+
+async function renameTo(text: string, key: "Enter" | "Escape" | "blur") {
+  const field = renameField();
+  expect(field?.tagName ?? null).toBe("INPUT");
+  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(field, text);
+  if (key === "blur") await act(async () => field?.blur());
+  else await press(field, key);
+  await nextFrame();
+}
+
+const classRow = (id: string) =>
+  host.querySelector<HTMLButtonElement>(`[data-emvb-class-def="${id}"] .emvb-site-item-main`);
+const search = (label: string) =>
+  host.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`);
+const mountClasses = (d: DesignSystem = design) =>
+  mount(<ClassesSection design={d} layout={layout} onSave={onSave} onAskDelete={onAskDelete} />);
+
 describe("ClassesSection", () => {
-  test("list, filter, rename, duplicate, delete, create", async () => {
-    await mount(
-      <ClassesSection design={design} layout={layout} onSave={onSave} onAskDelete={onAskDelete} />,
-    );
+  test("list, filter, duplicate, delete, create", async () => {
+    await mountClasses();
     expect(html()).toMatchSnapshot("list");
-    await type(inputs("Filter")[0], "emvb-k-no");
+    await type(search("Search classes") ?? undefined, "emvb-k-no");
     expect(html()).toMatchSnapshot("filtered");
-    await type(inputs("Filter")[0], "");
-    await type(inputs("Name")[0], "Card 2");
-    await click(byLabel("Duplicate Card"));
-    await click(byLabel("Delete Hero"));
-    await click(byText("Edit styles"));
+    await type(search("Search classes") ?? undefined, "zz");
+    expect(host.querySelector("[data-emvb-classes-nomatch]")?.textContent).toBe(
+      'No classes match "zz".',
+    );
+    await press(search("Search classes"), "Escape");
+    expect(search("Search classes")?.value).toBe("");
+    expect(host.querySelectorAll("[data-emvb-class-def]").length).toBe(4);
+    await pick("Actions for Card", "Duplicate");
+    await pick("Actions for Hero", "Delete");
+    await act(async () => classRow("card")?.click());
+    expect(classRow("card")?.getAttribute("aria-expanded")).toBe("true");
     expect(html()).toMatchSnapshot("editing");
-    await click(byText("Hide styles"));
+    await act(async () => classRow("card")?.click());
+    expect(classRow("card")?.getAttribute("aria-expanded")).toBe("false");
     await click(byText("New"));
     await type(inputs("Name").at(-1), "Card");
     await click(byText("Create class"));
     expect({ saved, asked }).toMatchSnapshot("saves");
     expect(html()).toMatchSnapshot("after");
+  });
+
+  test("the row menu offers Edit styles, Rename, Duplicate, then Delete after a separator", async () => {
+    await mountClasses();
+    await click(byLabel("Actions for Card"));
+    await settle();
+    const content = document.querySelector('[role="menu"]');
+    const parts = [...(content?.querySelectorAll('[role="menuitem"], [role="separator"]') ?? [])];
+    expect(parts.map((el) => el.textContent || el.getAttribute("role"))).toEqual([
+      "Edit styles",
+      "Rename",
+      "Duplicate",
+      "separator",
+      "Delete",
+    ]);
+    await act(async () => menuItem("Edit styles")?.click());
+    await settle();
+    expect(classRow("card")?.getAttribute("aria-expanded")).toBe("true");
+    await click(byLabel("Actions for Card"));
+    await settle();
+    expect(menuItem("Hide styles")?.textContent ?? null).toBe("Hide styles");
+  });
+
+  test("renames in place from the menu, F2 or a double-click; Enter or blur saves once", async () => {
+    await mountClasses();
+    await pick("Actions for Card", "Rename");
+    await nextFrame();
+    expect(renameField()?.getAttribute("aria-label")).toBe("Rename Card");
+    expect(document.activeElement === renameField()).toBe(true);
+    await renameTo("  Card big  ", "Enter");
+    expect(saved.map((d) => d.classes?.[0]?.name)).toEqual(["Card big"]);
+    expect(renameField()?.tagName ?? null).toBeNull();
+    expect(document.activeElement === classRow("card")).toBe(true);
+
+    await press(classRow("hero"), "F2");
+    await renameTo("Hero banner", "blur");
+    expect(saved.at(-1)?.classes?.[1]?.name).toBe("Hero banner");
+    expect(saved.length).toBe(2);
+
+    await act(async () =>
+      classRow("note")?.dispatchEvent(new MouseEvent("dblclick", { bubbles: true })),
+    );
+    await renameTo("Ignored", "Escape");
+    await press(classRow("badge"), "F2");
+    await renameTo("   ", "Enter");
+    await press(classRow("badge"), "F2");
+    await renameTo("Badge", "Enter");
+    expect(saved.length).toBe(2);
+  });
+
+  test("shows the page usage count, with the full sentence in the tooltip", async () => {
+    await mountClasses();
+    const usage = (id: string) =>
+      host.querySelector(`[data-emvb-class-def="${id}"] [data-emvb-usage]`);
+    expect(usage("card")?.textContent).toBe("1 on page");
+    expect(usage("card")?.getAttribute("title")).toBe("Used by 1 element on this page");
+    expect(usage("hero")?.textContent).toBe("0 on page");
+    expect(usage("hero")?.getAttribute("title")).toBe("Used by 0 elements on this page");
+  });
+
+  test("an empty site shows a Kumo Empty that points to the Style tab, and no list", async () => {
+    await mountClasses({ ...design, classes: [] });
+    const empty = host.querySelector("[data-emvb-classes-empty]");
+    expect(empty?.textContent).toContain("No classes yet");
+    expect(empty?.textContent).toContain("Style tab");
+    expect(search("Search classes")?.tagName ?? null).toBeNull();
+    await click(byText("New"));
+    expect(host.querySelector("[data-emvb-classes-empty]")?.tagName ?? null).toBeNull();
   });
 });

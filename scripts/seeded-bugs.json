@@ -2086,8 +2086,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
-          "search": "                    const nextName = event.target.value;\n                      void onSave({\n                        ...design,\n                        classes: classes.map((c) =>\n                          c.id === cls.id ? Object.assign({}, c, { name: nextName }) : c,\n                        ),\n                      });",
-          "replace": "                    const nextName = event.target.value;\n                      void nextName;"
+          "search": "    if (next) void onSave(renameClass(design, id, next));",
+          "replace": "    if (next) void next;"
         }
       ],
       "command": [
@@ -5103,6 +5103,286 @@
         "works from the keyboard"
       ],
       "expect": "✘.*\\[node\\].*works from the keyboard"
+    },
+    {
+      "id": "W-087/mgr-rename-escape-saves",
+      "requirement": "W-087",
+      "description": "Escape in the manager rename field saves instead of cancelling",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/site-list.tsx",
+          "search": "        else if (event.key === \"Escape\") {\n          event.stopPropagation();\n          finish(null);",
+          "replace": "        else if (event.key === \"Escape\") {\n          event.stopPropagation();\n          finish(event.currentTarget.value);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "renames in place from the menu, F2 or a double-click"
+      ],
+      "expect": "\\(fail\\).*renames in place from the menu, F2 or a double-click"
+    },
+    {
+      "id": "W-087/mgr-rename-unchanged-saves",
+      "requirement": "W-087",
+      "description": "renaming to the same name still saves",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/site-list.tsx",
+          "search": "onDone(trimmed && trimmed !== name ? trimmed : null);",
+          "replace": "onDone(trimmed || null);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "renames in place from the menu, F2 or a double-click"
+      ],
+      "expect": "\\(fail\\).*renames in place from the menu, F2 or a double-click"
+    },
+    {
+      "id": "W-087/mgr-rename-no-f2",
+      "requirement": "W-087",
+      "description": "F2 on a class row doesn't start a rename",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "if (event.key !== \"F2\") return;",
+          "replace": "if (event.key !== \"F9\") return;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "renames in place from the menu, F2 or a double-click"
+      ],
+      "expect": "\\(fail\\).*renames in place from the menu, F2 or a double-click"
+    },
+    {
+      "id": "W-087/mgr-rename-no-dblclick",
+      "requirement": "W-087",
+      "description": "double-clicking a class row doesn't start a rename",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "                    onDoubleClick={() => setRenaming(cls.id)}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "renames in place from the menu, F2 or a double-click"
+      ],
+      "expect": "\\(fail\\).*renames in place from the menu, F2 or a double-click"
+    },
+    {
+      "id": "W-087/mgr-rename-focus-lost",
+      "requirement": "W-087",
+      "description": "focus isn't returned to the row after a rename",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "    requestAnimationFrame(() => rows.current.get(id)?.focus());\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "renames in place from the menu, F2 or a double-click"
+      ],
+      "expect": "\\(fail\\).*renames in place from the menu, F2 or a double-click"
+    },
+    {
+      "id": "W-087/mgr-usage-zero",
+      "requirement": "W-087",
+      "description": "class rows always show 0 uses",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "const count = layout ? findClassUsages(layout, cls.id).length : 0;",
+          "replace": "const count = 0;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "shows the page usage count"
+      ],
+      "expect": "\\(fail\\).*shows the page usage count"
+    },
+    {
+      "id": "W-087/mgr-usage-plural",
+      "requirement": "W-087",
+      "description": "the usage tooltip says '1 elements'",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "count === 1 ? \"element\" : \"elements\"",
+          "replace": "\"elements\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "shows the page usage count"
+      ],
+      "expect": "\\(fail\\).*shows the page usage count"
+    },
+    {
+      "id": "W-087/mgr-no-empty-state",
+      "requirement": "W-087",
+      "description": "an empty Classes manager shows no empty state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "{classes.length === 0 && !creating && (",
+          "replace": "{false && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "an empty site shows a Kumo Empty"
+      ],
+      "expect": "\\(fail\\).*an empty site shows a Kumo Empty"
+    },
+    {
+      "id": "W-087/mgr-no-nomatch",
+      "requirement": "W-087",
+      "description": "a search with no results shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "{classes.length > 0 && visible.length === 0 && (",
+          "replace": "{false && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "list, filter, duplicate, delete, create"
+      ],
+      "expect": "\\(fail\\).*list, filter, duplicate, delete, create"
+    },
+    {
+      "id": "W-087/mgr-search-escape",
+      "requirement": "W-087",
+      "description": "Escape doesn't clear the manager search",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/site-list.tsx",
+          "search": "if (event.key === \"Escape\" && value) {",
+          "replace": "if (event.key === \"Esc\" && value) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "list, filter, duplicate, delete, create"
+      ],
+      "expect": "\\(fail\\).*list, filter, duplicate, delete, create"
+    },
+    {
+      "id": "W-087/mgr-menu-no-separator",
+      "requirement": "W-087",
+      "description": "Delete isn't separated from the other row actions",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/site-list.tsx",
+          "search": "            {action.danger && <DropdownMenu.Separator />}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "the row menu offers Edit styles"
+      ],
+      "expect": "\\(fail\\).*the row menu offers Edit styles"
+    },
+    {
+      "id": "W-087/mgr-menu-hide-label",
+      "requirement": "W-087",
+      "description": "the row menu says Edit styles while the styles are open",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "label: open ? \"Hide styles\" : \"Edit styles\",",
+          "replace": "label: \"Edit styles\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "the row menu offers Edit styles"
+      ],
+      "expect": "\\(fail\\).*the row menu offers Edit styles"
+    },
+    {
+      "id": "W-087/mgr-row-not-expanded",
+      "requirement": "W-087",
+      "description": "the class row doesn't expose aria-expanded",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "aria-expanded={open}",
+          "replace": "aria-expanded={false}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "list, filter, duplicate, delete, create"
+      ],
+      "expect": "\\(fail\\).*list, filter, duplicate, delete, create"
+    },
+    {
+      "id": "W-087/drawer-keys-leak",
+      "requirement": "W-087",
+      "description": "keys pressed in the Site styles drawer reach the editor shortcuts",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "      onKeyDown={stopEditorShortcuts}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "keys pressed inside the drawer"
+      ],
+      "expect": "\\(fail\\).*keys pressed inside the drawer"
     }
   ]
 }

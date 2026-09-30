@@ -14,6 +14,7 @@ import {
 } from "../../../core/index.ts";
 import { BUTTON, SOLID_DESTRUCTIVE } from "../../ui.ts";
 import { ClassesSection } from "./ClassesSection.tsx";
+import { stopEditorShortcuts } from "./settings/ClassChip.tsx";
 import { VariableSection } from "./VariableSection.tsx";
 
 type Props = {
@@ -62,7 +63,11 @@ export function SiteStylesDrawer({
   };
 
   return (
-    <div className="emvb-panel-body emvb-site-styles" data-emvb-site-styles="">
+    <div
+      className="emvb-panel-body emvb-site-styles"
+      data-emvb-site-styles=""
+      onKeyDown={stopEditorShortcuts}
+    >
       <div className="emvb-site-styles-head">
         <div className="emvb-site-styles-titles">
           <h2 className="emvb-panel-title">Site styles</h2>

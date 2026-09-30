@@ -1,15 +1,33 @@
-import { Button, Input } from "@cloudflare/kumo";
-import { CopySimpleIcon, TrashIcon } from "@phosphor-icons/react";
+import { Empty, Input } from "@cloudflare/kumo";
+import {
+  CaretDownIcon,
+  CaretRightIcon,
+  CopySimpleIcon,
+  PaintBrushIcon,
+  PencilSimpleLineIcon,
+  TagSimpleIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import * as React from "react";
 import {
   duplicateClass,
   findClassUsages,
+  patchClassStyle,
+  renameClass,
   type DesignSystem,
   type Layout,
   type StyleProps,
 } from "../../../core/index.ts";
-import { BUTTON, FIELD } from "../../ui.ts";
-import { CreateRow, matches, SectionHead, uniqueId } from "./site-list.tsx";
+import { FIELD } from "../../ui.ts";
+import {
+  CreateRow,
+  matches,
+  RenameInput,
+  RowMenu,
+  SectionHead,
+  SiteSearch,
+  uniqueId,
+} from "./site-list.tsx";
 import { StyleRow } from "./settings/StyleRow.tsx";
 
 const CLASS_STYLE_KEYS = [
@@ -29,6 +47,9 @@ const CLASS_STYLE_KEYS = [
   "alignItems",
 ] as const satisfies ReadonlyArray<keyof StyleProps>;
 
+/** "2 on page": class usage is counted on the open page only. */
+const usageText = (count: number) => `${count} on page`;
+
 export function ClassesSection({
   design,
   layout,
@@ -44,7 +65,9 @@ export function ClassesSection({
   const [creating, setCreating] = React.useState(false);
   const [name, setName] = React.useState("");
   const [editing, setEditing] = React.useState<string | null>(null);
+  const [renaming, setRenaming] = React.useState<string | null>(null);
   const [filter, setFilter] = React.useState("");
+  const rows = React.useRef(new Map<string, HTMLButtonElement>());
 
   const q = filter.trim().toLowerCase();
   const visible = q
@@ -66,6 +89,12 @@ export function ClassesSection({
     setEditing(id);
   };
 
+  const rename = (id: string, next: string | null) => {
+    setRenaming(null);
+    requestAnimationFrame(() => rows.current.get(id)?.focus());
+    if (next) void onSave(renameClass(design, id, next));
+  };
+
   return (
     <section className="emvb-site-section" data-emvb-classes="">
       <p className="emvb-helper emvb-site-cascade" data-emvb-cascade-help="">
@@ -74,95 +103,130 @@ export function ClassesSection({
       </p>
       <SectionHead title="Classes" count={classes.length} onNew={() => setCreating(true)} />
       {classes.length > 3 && (
-        <Input
-          label="Filter"
-          className={FIELD}
-          value={filter}
-          placeholder="Search class…"
-          onChange={(e) => setFilter(e.target.value)}
-        />
+        <SiteSearch label="Search classes" value={filter} onChange={setFilter} />
       )}
-      {classes.length === 0 && !creating && <p className="emvb-helper">None yet.</p>}
-      <ul className="emvb-site-list">
+      {classes.length === 0 && !creating && (
+        <div className="emvb-site-empty-card" data-emvb-classes-empty="">
+          <Empty
+            size="sm"
+            icon={<TagSimpleIcon size={24} aria-hidden="true" />}
+            title="No classes yet"
+            description="Select an element, open its Style tab and type a name in the Classes box. Or use New here."
+          />
+        </div>
+      )}
+      {classes.length > 0 && visible.length === 0 && (
+        <p className="emvb-helper" data-emvb-classes-nomatch="">
+          No classes match "{filter.trim()}".
+        </p>
+      )}
+      <ul className="emvb-site-items">
         {visible.map((cls) => {
           const count = layout ? findClassUsages(layout, cls.id).length : 0;
           const open = editing === cls.id;
           const token = `emvb-k-${cls.id}`;
+          const toggle = () => setEditing(open ? null : cls.id);
           return (
             <li
               key={cls.id}
-              className={`emvb-site-class emvb-site-elevated${open ? " emvb-site-class-active" : ""}`}
+              className="emvb-site-item"
               data-emvb-class-def={cls.id}
               data-emvb-class-editing={open ? "" : undefined}
+              data-open={open || undefined}
             >
-              <div className="emvb-site-row">
-                <div className="emvb-site-row-fields">
-                  <Input
-                    label="Name"
-                    className={FIELD}
-                    value={cls.name}
-                    onChange={(event) => {
-                      const nextName = event.target.value;
-                      void onSave({
-                        ...design,
-                        classes: classes.map((c) =>
-                          c.id === cls.id ? Object.assign({}, c, { name: nextName }) : c,
-                        ),
-                      });
+              <div className="emvb-site-item-row">
+                {renaming === cls.id ? (
+                  <span className="emvb-site-item-main" data-renaming="">
+                    <TagSimpleIcon size={14} aria-hidden="true" className="emvb-site-item-icon" />
+                    <RenameInput
+                      name={cls.name}
+                      label={`Rename ${cls.name}`}
+                      onDone={(next) => rename(cls.id, next)}
+                    />
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    ref={(el) => {
+                      if (el) rows.current.set(cls.id, el);
+                      else rows.current.delete(cls.id);
                     }}
-                  />
-                  <p className="emvb-mono emvb-site-token">{token}</p>
-                </div>
-                <span className="emvb-helper emvb-site-usage">{count} used</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className={BUTTON}
-                  onClick={() => setEditing(open ? null : cls.id)}
+                    className="emvb-site-item-main"
+                    aria-expanded={open}
+                    title={`${cls.name} · .${token}`}
+                    onClick={toggle}
+                    onDoubleClick={() => setRenaming(cls.id)}
+                    onKeyDown={(event) => {
+                      if (event.key !== "F2") return;
+                      event.preventDefault();
+                      setRenaming(cls.id);
+                    }}
+                  >
+                    {open ? (
+                      <CaretDownIcon
+                        size={12}
+                        aria-hidden="true"
+                        className="emvb-site-item-caret"
+                      />
+                    ) : (
+                      <CaretRightIcon
+                        size={12}
+                        aria-hidden="true"
+                        className="emvb-site-item-caret"
+                      />
+                    )}
+                    <TagSimpleIcon size={14} aria-hidden="true" className="emvb-site-item-icon" />
+                    <span className="emvb-site-item-text">
+                      <span className="emvb-site-item-name">{cls.name}</span>
+                      <span className="emvb-mono emvb-site-token">.{token}</span>
+                    </span>
+                  </button>
+                )}
+                <span
+                  className="emvb-site-usage"
+                  title={`Used by ${count} ${count === 1 ? "element" : "elements"} on this page`}
+                  data-emvb-usage=""
                 >
-                  {open ? "Hide styles" : "Edit styles"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className={BUTTON}
-                  aria-label={`Duplicate ${cls.name}`}
-                  icon={<CopySimpleIcon aria-hidden="true" />}
-                  onClick={() => void onSave(duplicateClass(design, cls.id))}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className={BUTTON}
-                  aria-label={`Delete ${cls.name}`}
-                  icon={<TrashIcon aria-hidden="true" />}
-                  onClick={() => onAskDelete(cls.id, cls.name)}
+                  {usageText(count)}
+                </span>
+                <RowMenu
+                  label={`Actions for ${cls.name}`}
+                  actions={[
+                    {
+                      label: open ? "Hide styles" : "Edit styles",
+                      icon: PaintBrushIcon,
+                      onSelect: toggle,
+                    },
+                    {
+                      label: "Rename",
+                      icon: PencilSimpleLineIcon,
+                      afterClose: true,
+                      onSelect: () => setRenaming(cls.id),
+                    },
+                    {
+                      label: "Duplicate",
+                      icon: CopySimpleIcon,
+                      onSelect: () => void onSave(duplicateClass(design, cls.id)),
+                    },
+                    {
+                      label: "Delete",
+                      icon: TrashIcon,
+                      danger: true,
+                      onSelect: () => onAskDelete(cls.id, cls.name),
+                    },
+                  ]}
                 />
               </div>
               {open && (
-                <div className="emvb-site-class-styles">
-                  <p className="emvb-helper">Editing class styles (site-wide).</p>
+                <div className="emvb-site-item-body emvb-site-class-styles">
+                  <p className="emvb-helper">These styles apply everywhere the class is used.</p>
                   {CLASS_STYLE_KEYS.map((key) => (
                     <StyleRow
                       key={key}
                       styleKey={key}
                       style={cls.style}
                       design={design}
-                      onPatch={(patch) => {
-                        const style = { ...cls.style, ...patch };
-                        for (const [k, v] of Object.entries(patch)) {
-                          if (v === undefined) delete (style as Record<string, unknown>)[k];
-                        }
-                        void onSave({
-                          ...design,
-                          classes: classes.map((c) =>
-                            c.id === cls.id ? Object.assign({}, c, { style }) : c,
-                          ),
-                        });
-                      }}
+                      onPatch={(patch) => void onSave(patchClassStyle(design, cls.id, patch))}
                       onDesignChange={onSave}
                     />
                   ))}

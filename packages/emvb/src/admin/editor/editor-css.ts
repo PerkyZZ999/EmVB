@@ -340,7 +340,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-chip-option-token { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--text-color-kumo-subtle); }
 .emvb-chip-option-hint { padding: 4px 8px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
 
-.emvb-site-styles { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.emvb-site-styles { display: flex; flex-direction: column; gap: 8px; min-height: 0; height: 100%; }
 .emvb-site-styles-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .emvb-site-styles-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .emvb-site-styles-subtitle { margin: 0; font-size: 11px; color: var(--text-color-kumo-subtle); }
@@ -373,7 +373,47 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-site-token { margin: 0; font-size: 11px; color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-site-swatch { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 4px; border: 1px solid var(--color-kumo-hairline); margin-bottom: 6px; }
 .emvb-site-cascade { margin: 0 0 4px; padding: 8px; border-radius: 6px; background: var(--color-kumo-tint); border: 1px solid var(--color-kumo-hairline); }
-.emvb-site-usage { flex: 0 0 auto; white-space: nowrap; }
+.emvb-site-usage { flex: 0 0 auto; white-space: nowrap; font-size: 11px; line-height: 16px; color: var(--text-color-kumo-subtle); font-variant-numeric: tabular-nums; }
+/* Compact manager rows (W-087): one 32 px line per class or variable, details on demand */
+.emvb-site-items {
+  margin: 0; padding: 2px; list-style: none; display: flex; flex-direction: column; gap: 2px;
+  border-radius: 6px; background: var(--emvb-glass-elevated, var(--color-kumo-elevated));
+  box-shadow: var(--emvb-elevation-s);
+}
+.emvb-site-items:empty { display: none; }
+.emvb-site-item { display: flex; flex-direction: column; border-radius: 4px; }
+.emvb-site-item[data-open] { background: var(--color-kumo-tint); }
+.emvb-site-item-row { display: flex; align-items: center; gap: 4px; min-height: 32px; padding: 2px; border-radius: 4px; transition: background-color 150ms ease-out; }
+.emvb-site-item-row:hover { background: var(--color-kumo-tint); }
+.emvb-site-item-main {
+  display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; min-height: 28px; padding: 0 4px;
+  border: 0; border-radius: 4px; background: transparent; color: var(--text-color-kumo-default);
+  font: inherit; font-size: 13px; text-align: left; cursor: pointer;
+}
+.emvb-site-item-main[data-renaming] { cursor: default; }
+.emvb-site-item-main:focus-visible, .emvb-site-menu-btn:focus-visible, .emvb-site-value-edit:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -2px; }
+.emvb-site-item-caret { flex: 0 0 auto; color: var(--text-color-kumo-subtle); }
+.emvb-site-item-icon { flex: 0 0 auto; color: var(--text-color-kumo-subtle); }
+.emvb-site-item-text { display: flex; flex-direction: column; min-width: 0; }
+.emvb-site-item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 16px; }
+.emvb-site-item-text .emvb-site-token { line-height: 14px; }
+.emvb-site-item-body { display: flex; flex-direction: column; gap: 8px; padding: 4px 8px 8px; }
+.emvb-site-menu-btn {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 28px; height: 28px; padding: 0; border: 0; border-radius: 4px;
+  background: transparent; color: var(--text-color-kumo-subtle); cursor: pointer;
+}
+.emvb-site-menu-btn:hover, .emvb-site-menu-btn[data-popup-open] { background: var(--color-kumo-recessed); color: var(--text-color-kumo-default); }
+.emvb-site-rename {
+  flex: 1 1 auto; min-width: 0; height: 24px; padding: 0 6px; border: 0; border-radius: 4px; outline: 0;
+  background: var(--color-kumo-base); color: var(--text-color-kumo-default); font: inherit; font-size: 13px;
+  box-shadow: inset 0 0 0 1px var(--color-kumo-brand);
+}
+.emvb-site-empty-card { border-radius: 6px; border: 1px dashed var(--color-kumo-line); }
+.emvb-site-empty-card p { text-wrap: pretty; }
+@media (prefers-reduced-motion: reduce) {
+  .emvb-site-item-row { transition: none; }
+}
 .emvb-site-confirm {
   display: flex;
   flex-direction: column;
