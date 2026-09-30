@@ -3347,7 +3347,7 @@
     },
     {
       "id": "W-086/text-input-type-missing",
-      "requirement": "R-015",
+      "requirement": "R-040",
       "description": "text inputs lose type=text",
       "edits": [
         {
@@ -3361,7 +3361,7 @@
     },
     {
       "id": "W-086/checkbox-no-error-slot",
-      "requirement": "R-015",
+      "requirement": "R-040",
       "description": "a checkbox has nowhere to show its validation error",
       "edits": [
         {
@@ -3519,7 +3519,7 @@
     },
     {
       "id": "W-086/forms-gone-means-missing",
-      "requirement": "R-015",
+      "requirement": "R-040",
       "description": "a 410 from the definition probe reports the forms plugin missing",
       "edits": [
         {
@@ -3533,7 +3533,7 @@
     },
     {
       "id": "W-086/forms-list-leaks-fields",
-      "requirement": "R-015",
+      "requirement": "R-040",
       "description": "form list items keep every field the plugin sends",
       "edits": [
         {
@@ -3547,7 +3547,7 @@
     },
     {
       "id": "W-086/forms-unauthorized-probes",
-      "requirement": "R-015",
+      "requirement": "R-040",
       "description": "a 401 on the forms list falls through to the plugin probe",
       "edits": [
         {
@@ -3656,6 +3656,60 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
       "expect": "\\(fail\\).*a click inside the selector"
+    },
+    {
+      "id": "W-086/forms-notice-on-every-element",
+      "requirement": "R-040",
+      "description": "the forms-missing notice shows on non-form elements",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "{!formsAvailable && FORM_TYPES.has(node.type) && (",
+          "replace": "{!formsAvailable && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel-shapes.test.tsx"
+      ],
+      "expect": "\\(fail\\).*heading renders the same"
+    },
+    {
+      "id": "W-086/advanced-count-ignored",
+      "requirement": "R-004",
+      "description": "a closed Advanced section doesn't count its CSS id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "                node.htmlId ? 1 : 0,",
+          "replace": "                0,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel-shapes.test.tsx"
+      ],
+      "expect": "\\(fail\\).*closed sections count"
+    },
+    {
+      "id": "W-086/spacer-height-missing",
+      "requirement": "R-004",
+      "description": "the spacer's Style tab loses its Height field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "<FieldControl field={SPACER_HEIGHT} node={node} onChange={onChange} fetcher={fetcher} />",
+          "replace": "<span />"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel-shapes.test.tsx"
+      ],
+      "expect": "\\(fail\\).*spacer renders the same"
     }
   ]
 }

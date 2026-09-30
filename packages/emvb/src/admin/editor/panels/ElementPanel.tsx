@@ -25,6 +25,7 @@ import {
   isFormNode,
   parentOf,
   type DesignSystem,
+  type ElementDescriptor,
   type Layout,
   type LayoutNode,
   type StyleProps,
@@ -120,8 +121,111 @@ type Props = {
   onSelect: (id: string | null) => void;
 };
 
+const FORM_TYPES = new Set([
+  "form",
+  "text-input",
+  "textarea",
+  "select",
+  "checkbox",
+  "radio",
+  "submit",
+]);
+
+const DEFAULT_UI = {
+  sections: [
+    "layout",
+    "spacing",
+    "typography",
+    "background",
+    "border",
+    "advanced",
+  ] as StyleSectionId[],
+  defaultOpen: "layout" as StyleSectionId,
+};
+
+const SPACER_HEIGHT = {
+  key: "height",
+  kind: "number",
+  label: "Height",
+  message: "Height can't be negative. Enter 0 or more.",
+} as const;
+
+const TABS = [
+  {
+    value: "content",
+    label: (
+      <>
+        <PencilSimpleIcon size={14} aria-hidden="true" />
+        Content
+      </>
+    ),
+  },
+  {
+    value: "style",
+    label: (
+      <>
+        <PaintBrushIcon size={14} aria-hidden="true" />
+        Style
+      </>
+    ),
+  },
+];
+
+function Alert({
+  children,
+  ...data
+}: {
+  children: React.ReactNode;
+  "data-emvb-forms-missing"?: "";
+}) {
+  return (
+    <p className="emvb-inline-error" role="alert" {...data}>
+      <WarningCircleIcon size={16} aria-hidden="true" />
+      {children}
+    </p>
+  );
+}
+
 /** Right panel with an element selected (IA / W-021): descriptor Content + Style sections. */
-export function ElementPanel({
+export function ElementPanel(props: Props) {
+  const descriptor = ELEMENT_DESCRIPTORS.find((d) => d.type === props.node.type);
+  if (!descriptor) {
+    return (
+      <div
+        className="emvb-panel-body"
+        data-emvb-panel="element"
+        data-emvb-element={props.node.type}
+      >
+        <h2 className="emvb-panel-title">Unknown element</h2>
+        <p className="emvb-helper">
+          Unknown element &quot;{props.node.type}&quot;. It can be moved or deleted, but not edited.
+        </p>
+        {props.rejection && <Alert>{props.rejection}</Alert>}
+      </div>
+    );
+  }
+  return <KnownElementPanel {...props} descriptor={descriptor} />;
+}
+
+/** The open Style sections for an element type, remembered for the session. */
+function useOpenSections(type: string, defaultOpen: StyleSectionId, nodeId: string) {
+  const [open, setOpen] = React.useState(() => readSections(type, [defaultOpen]));
+  React.useEffect(() => {
+    setOpen(readSections(type, [defaultOpen]));
+  }, [nodeId, type, defaultOpen]);
+  const setSection = (id: StyleSectionId, isOpen: boolean) => {
+    setOpen((current) => {
+      const next = new Set(current);
+      if (isOpen) next.add(id);
+      else next.delete(id);
+      writeSections(type, next);
+      return next;
+    });
+  };
+  return [open, setSection] as const;
+}
+
+function KnownElementPanel({
   node,
   layout,
   design,
@@ -131,67 +235,28 @@ export function ElementPanel({
   onChange,
   onDesignChange,
   onSelect,
-}: Props) {
-  const known = ELEMENT_DESCRIPTORS.some((d) => d.type === node.type);
-  if (!known) {
-    return (
-      <div className="emvb-panel-body" data-emvb-panel="element" data-emvb-element={node.type}>
-        <h2 className="emvb-panel-title">Unknown element</h2>
-        <p className="emvb-helper">
-          Unknown element &quot;{node.type}&quot;. It can be moved or deleted, but not edited.
-        </p>
-        {rejection && (
-          <p className="emvb-inline-error" role="alert">
-            <WarningCircleIcon size={16} aria-hidden="true" />
-            {rejection}
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  const descriptor =
-    ELEMENT_DESCRIPTORS.find((d) => d.type === node.type) ??
-    ({
-      type: node.type,
-      name: ELEMENT_NAMES[node.type] ?? node.type,
-      group: "content" as const,
-      defaultTab: "content" as const,
-      fields: [],
-    } as const);
-  const ui = STYLE_UI[node.type] ?? {
-    sections: [
-      "layout",
-      "spacing",
-      "typography",
-      "background",
-      "border",
-      "advanced",
-    ] as StyleSectionId[],
-    defaultOpen: "layout" as StyleSectionId,
-  };
+  descriptor,
+}: Props & { descriptor: ElementDescriptor }) {
+  const ui = STYLE_UI[node.type] ?? DEFAULT_UI;
   const [tab, setTab] = React.useState(descriptor.defaultTab);
-  const [openSections, setOpenSections] = React.useState(() =>
-    readSections(node.type, [ui.defaultOpen]),
-  );
-
+  const [openSections, setSection] = useOpenSections(node.type, ui.defaultOpen, node.id);
   React.useEffect(() => {
     setTab(descriptor.defaultTab);
-    setOpenSections(readSections(node.type, [ui.defaultOpen]));
-  }, [node.id, node.type, descriptor.defaultTab, ui.defaultOpen]);
-
-  const setSection = (id: StyleSectionId, open: boolean) => {
-    setOpenSections((current) => {
-      const next = new Set(current);
-      if (open) next.add(id);
-      else next.delete(id);
-      writeSections(node.type, next);
-      return next;
-    });
-  };
+  }, [node.id, node.type, descriptor.defaultTab]);
 
   const Icon = ICONS[node.type] ?? SquaresFourIcon;
   const crumbs = breadcrumb(layout, node.id);
+  const section = (id: StyleSectionId, count: number, children: React.ReactNode) => (
+    <Section
+      key={id}
+      id={id}
+      open={openSections.has(id)}
+      count={count}
+      onOpenChange={(open) => setSection(id, open)}
+    >
+      {children}
+    </Section>
+  );
 
   return (
     <div className="emvb-panel-body" data-emvb-panel="element" data-emvb-element={node.type}>
@@ -215,48 +280,16 @@ export function ElementPanel({
           ))}
         </nav>
       )}
-      {rejection && (
-        <p className="emvb-inline-error" role="alert">
-          <WarningCircleIcon size={16} aria-hidden="true" />
-          {rejection}
-        </p>
+      {rejection && <Alert>{rejection}</Alert>}
+      {!formsAvailable && FORM_TYPES.has(node.type) && (
+        <Alert data-emvb-forms-missing="">
+          The forms plugin is not installed. Form elements can&apos;t submit until it is added.
+        </Alert>
       )}
-      {!formsAvailable &&
-        (node.type === "form" ||
-          node.type === "text-input" ||
-          node.type === "textarea" ||
-          node.type === "select" ||
-          node.type === "checkbox" ||
-          node.type === "radio" ||
-          node.type === "submit") && (
-          <p className="emvb-inline-error" role="alert" data-emvb-forms-missing="">
-            <WarningCircleIcon size={16} aria-hidden="true" />
-            The forms plugin is not installed. Form elements can&apos;t submit until it is added.
-          </p>
-        )}
       <Tabs
         variant="underline"
         className="emvb-tabs"
-        tabs={[
-          {
-            value: "content",
-            label: (
-              <>
-                <PencilSimpleIcon size={14} aria-hidden="true" />
-                Content
-              </>
-            ),
-          },
-          {
-            value: "style",
-            label: (
-              <>
-                <PaintBrushIcon size={14} aria-hidden="true" />
-                Style
-              </>
-            ),
-          },
-        ]}
+        tabs={TABS}
         value={tab}
         onValueChange={(value) => setTab(value === "style" ? "style" : "content")}
       />
@@ -290,64 +323,39 @@ export function ElementPanel({
             onChange={(classes) => onChange({ ...node, classes })}
           />
           {node.type === "spacer" && (
-            <FieldControl
-              field={{
-                key: "height",
-                kind: "number",
-                label: "Height",
-                message: "Height can't be negative. Enter 0 or more.",
-              }}
-              node={node}
-              onChange={onChange}
-              fetcher={fetcher}
-            />
+            <FieldControl field={SPACER_HEIGHT} node={node} onChange={onChange} fetcher={fetcher} />
           )}
-          {ui.sections.map((section) => {
-            if (section === "advanced") {
-              return (
-                <Section
-                  key={section}
-                  id={section}
-                  open={openSections.has(section)}
-                  count={node.htmlId ? 1 : 0}
-                  onOpenChange={(open) => setSection(section, open)}
-                >
-                  <Input
-                    label="CSS id"
-                    className={`${FIELD} emvb-mono`}
-                    value={node.htmlId ?? ""}
-                    onChange={(event) => {
-                      const next = event.target.value.trim();
-                      onChange({
-                        ...node,
-                        htmlId: next === "" ? undefined : next,
-                      });
-                    }}
-                  />
-                </Section>
+          {ui.sections.map((id) => {
+            if (id === "advanced") {
+              return section(
+                id,
+                node.htmlId ? 1 : 0,
+                <Input
+                  label="CSS id"
+                  className={`${FIELD} emvb-mono`}
+                  value={node.htmlId ?? ""}
+                  onChange={(event) => {
+                    const next = event.target.value.trim();
+                    onChange({ ...node, htmlId: next === "" ? undefined : next });
+                  }}
+                />,
               );
             }
-            const keys = keysFor(node.type, section);
+            const keys = keysFor(node.type, id);
             if (keys.length === 0) return null;
-            return (
-              <Section
-                key={section}
-                id={section}
-                open={openSections.has(section)}
-                count={countSet(node, section)}
-                onOpenChange={(open) => setSection(section, open)}
-              >
-                {keys.map((key) => (
-                  <StyleRow
-                    key={key}
-                    styleKey={key}
-                    style={node.style}
-                    design={design}
-                    onPatch={(patch) => onChange(withStyle(node, patch))}
-                    onDesignChange={onDesignChange}
-                  />
-                ))}
-              </Section>
+            return section(
+              id,
+              countSet(node, id),
+              keys.map((key) => (
+                <StyleRow
+                  key={key}
+                  styleKey={key}
+                  style={node.style}
+                  design={design}
+                  onPatch={(patch) => onChange(withStyle(node, patch))}
+                  onDesignChange={onDesignChange}
+                />
+              )),
             );
           })}
         </div>
