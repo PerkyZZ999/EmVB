@@ -5723,6 +5723,166 @@
         "pickerHex gives"
       ],
       "expect": "\\(fail\\).*pickerHex gives"
+    },
+    {
+      "id": "W-087/var-bind-no-from",
+      "requirement": "W-087",
+      "description": "binding a variable drops its kind",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/VariableBinding.tsx",
+          "search": "onBind({ var: variable.id, from: kind })",
+          "replace": "onBind({ var: variable.id })"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "lists the kind's variables"
+      ],
+      "expect": "\\(fail\\).*lists the kind's variables"
+    },
+    {
+      "id": "W-087/var-button-no-spacing",
+      "requirement": "W-087",
+      "description": "spacing properties get no variable button",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/VariableBinding.tsx",
+          "search": "return SPACING_KEYS.has(key) ? \"spacing\" : null;",
+          "replace": "return null;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "only font, font size and spacing"
+      ],
+      "expect": "\\(fail\\).*only font, font size and spacing"
+    },
+    {
+      "id": "W-087/var-chip-not-shown",
+      "requirement": "W-087",
+      "description": "a bound length shows the raw input, not a chip",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "{kind && ref ? (",
+          "replace": "{false ? ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "a bound value shows a chip"
+      ],
+      "expect": "\\(fail\\).*a bound value shows a chip"
+    },
+    {
+      "id": "W-087/var-detach-drops-value",
+      "requirement": "W-087",
+      "description": "detaching a variable clears the value instead of keeping it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "onPatch({ [styleKey]: typeof kept === \"object\" ? kept : undefined })",
+          "replace": "onPatch({ [styleKey]: undefined })"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "a bound value shows a chip"
+      ],
+      "expect": "\\(fail\\).*a bound value shows a chip"
+    },
+    {
+      "id": "W-087/var-detach-unsafe-font",
+      "requirement": "W-087",
+      "description": "detaching keeps an unsafe font stack",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "typeof literal === \"string\" && isSafeFontStack(literal) ? literal : undefined",
+          "replace": "typeof literal === \"string\" ? literal : undefined"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "a font binds and detaches too"
+      ],
+      "expect": "\\(fail\\).*a font binds and detaches too"
+    },
+    {
+      "id": "W-087/var-ref-any-kind",
+      "requirement": "W-087",
+      "description": "a ref of another kind shows as a chip",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/VariableBinding.tsx",
+          "search": "return ref.from === kind ? ref : null;",
+          "replace": "return ref;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "a spacing ref doesn't show"
+      ],
+      "expect": "\\(fail\\).*a spacing ref doesn't show"
+    },
+    {
+      "id": "W-087/var-menu-no-hint",
+      "requirement": "W-087",
+      "description": "an empty variable menu gives no hint",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/VariableBinding.tsx",
+          "search": "{list.length === 0 ? (",
+          "replace": "{false ? ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "with no variables of the kind"
+      ],
+      "expect": "\\(fail\\).*with no variables of the kind"
+    },
+    {
+      "id": "W-087/var-chip-missing-silent",
+      "requirement": "W-087",
+      "description": "a chip for a deleted variable looks normal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/VariableBinding.tsx",
+          "search": "data-missing={variable ? undefined : \"true\"}",
+          "replace": "data-missing={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/variable-binding.test.tsx",
+        "-t",
+        "a chip for a deleted variable"
+      ],
+      "expect": "\\(fail\\).*a chip for a deleted variable"
     }
   ]
 }

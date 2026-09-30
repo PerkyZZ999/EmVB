@@ -251,7 +251,42 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-style-row { display: flex; align-items: flex-start; gap: 4px; }
 .emvb-style-row > :first-child { flex: 1 1 auto; min-width: 0; }
 .emvb-style-row[data-set="true"] .emvb-reset-btn { opacity: 1; }
-.emvb-reset-btn { flex: 0 0 auto; margin-top: 20px; opacity: 0.4; }
+.emvb-reset-btn { flex: 0 0 auto; margin-top: 28px; opacity: 0.4; }
+/* Variable button and bound-variable chip (W-087, DESIGN.md "variable chip") */
+.emvb-var-btn {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 28px; height: 28px; margin-top: 28px; padding: 0; border: 0; border-radius: 6px;
+  background: transparent; color: var(--text-color-kumo-subtle); cursor: pointer;
+  transition: background-color 150ms ease-out, color 150ms ease-out;
+}
+.emvb-var-btn:hover, .emvb-var-btn[data-popup-open] { background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
+.emvb-var-btn[data-active="true"] { color: var(--color-kumo-brand); }
+.emvb-var-btn:focus-visible, .emvb-var-chip-x:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }
+.emvb-var-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.emvb-var-field-label { font-size: 14px; line-height: 20px; font-weight: 500; color: var(--text-color-kumo-default); }
+.emvb-var-chip {
+  display: flex; align-items: center; gap: 6px; min-width: 0; height: 28px; padding: 0 2px 0 8px;
+  border-radius: 6px; background: var(--color-kumo-tint); color: var(--text-color-kumo-default);
+  box-shadow: inset 0 0 0 1px var(--color-kumo-line); font-family: var(--font-mono); font-size: 13px;
+}
+.emvb-var-chip > svg { flex: 0 0 auto; color: var(--color-kumo-brand); }
+.emvb-var-chip[data-missing="true"] { box-shadow: inset 0 0 0 1px var(--text-color-kumo-danger); }
+.emvb-var-chip[data-missing="true"] > svg { color: var(--text-color-kumo-danger); }
+.emvb-var-chip-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-var-chip-value { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: var(--text-color-kumo-subtle); }
+.emvb-var-chip-x {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer;
+}
+.emvb-var-chip-x:hover { background: var(--color-kumo-recessed); }
+.emvb-var-option { display: flex; align-items: center; gap: 8px; min-width: 176px; max-width: 256px; }
+.emvb-var-option-sample { flex: 0 0 20px; text-align: center; font-size: 13px; color: var(--text-color-kumo-subtle); }
+.emvb-var-option-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-var-option-value { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 11px; color: var(--text-color-kumo-subtle); }
+[data-emvb-var-option][data-selected="true"] .emvb-var-option-name { font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .emvb-var-btn { transition: none; }
+}
 .emvb-textarea { min-height: 72px; height: auto; padding: 8px; resize: vertical; font: inherit; }
 .emvb-field-label { font-size: 12px; font-weight: 500; color: var(--text-color-kumo-subtle); }
 .emvb-panel [data-emvb-panel] .emvb-helper { margin-top: -2px; }

@@ -1,10 +1,11 @@
 import { Button, Input, Select } from "@cloudflare/kumo";
 import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
+import { isSafeFontStack, type DesignSystem, type StyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
+import { bindKind, boundRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
 
 type LengthValue = NonNullable<StyleProps["gap"]>;
 type LengthLiteral = { value: number; unit: "px" | "rem" | "em" | "%" };
@@ -207,21 +208,44 @@ export function StyleRow({
 
   if (styleKey === "fontFamily") {
     const text = typeof value === "string" ? value : "";
+    const ref = boundRef(value, "font");
     return (
       <div
         className="emvb-style-row"
         data-emvb-style={styleKey}
         data-set={set ? "true" : undefined}
       >
-        <Input
+        {ref ? (
+          <VariableChip
+            label={label}
+            kind="font"
+            design={design}
+            id={ref.var}
+            onDetach={(literal) =>
+              onPatch({
+                fontFamily:
+                  typeof literal === "string" && isSafeFontStack(literal) ? literal : undefined,
+              })
+            }
+          />
+        ) : (
+          <Input
+            label={label}
+            className={FIELD}
+            value={text}
+            placeholder="Noto Sans, system-ui, sans-serif"
+            onChange={(event) => {
+              const next = event.target.value.trim();
+              onPatch({ fontFamily: next === "" ? undefined : next });
+            }}
+          />
+        )}
+        <VariableButton
           label={label}
-          className={FIELD}
-          value={text}
-          placeholder="Noto Sans, system-ui, sans-serif"
-          onChange={(event) => {
-            const next = event.target.value.trim();
-            onPatch({ fontFamily: next === "" ? undefined : next });
-          }}
+          kind="font"
+          design={design}
+          current={ref?.var ?? null}
+          onBind={(next) => onPatch({ fontFamily: next as StyleProps["fontFamily"] })}
         />
         {reset}
       </div>
@@ -234,6 +258,7 @@ export function StyleRow({
         styleKey={styleKey}
         label={label}
         value={value as LengthValue | undefined}
+        design={design}
         set={set}
         onPatch={onPatch}
         reset={reset}
@@ -248,6 +273,7 @@ function LengthRow({
   styleKey,
   label,
   value,
+  design,
   set,
   onPatch,
   reset,
@@ -255,6 +281,7 @@ function LengthRow({
   styleKey: StyleKey;
   label: string;
   value: LengthValue | undefined;
+  design: DesignSystem;
   set: boolean;
   onPatch: (patch: Partial<StyleProps>) => void;
   reset: React.ReactNode;
@@ -278,20 +305,41 @@ function LengthRow({
     onPatch({ [styleKey]: parsed.value });
   };
 
+  const kind = bindKind(styleKey);
+  const ref = kind ? boundRef(value, kind) : null;
   return (
     <div className="emvb-style-row" data-emvb-style={styleKey} data-set={set ? "true" : undefined}>
-      <Input
-        label={`${label} (${literal?.unit ?? (value && "var" in value ? "var" : "px")})`}
-        className={`${FIELD} emvb-mono`}
-        inputMode="numeric"
-        value={draft}
-        error={error ?? undefined}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") commit();
-        }}
-      />
+      {kind && ref ? (
+        <VariableChip
+          label={label}
+          kind={kind}
+          design={design}
+          id={ref.var}
+          onDetach={(kept) => onPatch({ [styleKey]: typeof kept === "object" ? kept : undefined })}
+        />
+      ) : (
+        <Input
+          label={`${label} (${literal?.unit ?? (value && "var" in value ? "var" : "px")})`}
+          className={`${FIELD} emvb-mono`}
+          inputMode="numeric"
+          value={draft}
+          error={error ?? undefined}
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={commit}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") commit();
+          }}
+        />
+      )}
+      {kind && (
+        <VariableButton
+          label={label}
+          kind={kind}
+          design={design}
+          current={ref?.var ?? null}
+          onBind={(next) => onPatch({ [styleKey]: next })}
+        />
+      )}
       {reset}
     </div>
   );

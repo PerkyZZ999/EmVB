@@ -134,6 +134,7 @@ export {
 export { serialize, isAllowedTag, isAllowedAttr, type VNode } from "./render/vnode.ts";
 export { escapeAttr, escapeText } from "./sanitize/escape.ts";
 export { sanitizeHref } from "./sanitize/href.ts";
+export { isSafeFontStack } from "./sanitize/css.ts";
 export { sanitizeMediaUrl } from "./sanitize/media-url.ts";
 export { sanitizeSvgMarkup, isSafeSvgMarkup } from "./sanitize/svg.ts";
 export { resolveEmbedUrl, type EmbedTarget } from "./sanitize/embed-url.ts";
