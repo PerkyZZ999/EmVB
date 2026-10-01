@@ -24,7 +24,7 @@ const design: DesignSystem = {
 };
 
 const layout = {
-  schemaVersion: 3 as const,
+  schemaVersion: 4 as const,
   root: {
     id: "root0001",
     type: "container" as const,

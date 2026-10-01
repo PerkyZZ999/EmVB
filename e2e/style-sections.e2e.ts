@@ -11,7 +11,7 @@ type Styled = { style?: Record<string, unknown>; children?: Styled[] };
 type Stored = { root: Styled };
 
 const layoutFor = (text: string, classes?: string[]) => ({
-  schemaVersion: 3,
+  schemaVersion: 4,
   root: {
     id: "root0001",
     type: "container",

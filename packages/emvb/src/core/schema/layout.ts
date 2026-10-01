@@ -3,7 +3,7 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { Length, StyleProps, StyleStates } from "./style.ts";
 
 /** 2 since W-088 (D-031): v1 → v2 changes nothing, so an older EmVB shows "saved by a newer EmVB". */
-export const LAYOUT_SCHEMA_VERSION = 3;
+export const LAYOUT_SCHEMA_VERSION = 4;
 
 export const NodeId = z
   .string()

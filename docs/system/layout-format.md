@@ -1,4 +1,4 @@
-# Layout format (schema v3)
+# Layout format (schema v4)
 
 How EmVB stores a page and its site-wide design, as implemented through S4 (variables W-028+). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `3` (D-031, D-032; v1 and v2 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- `schemaVersion` is the literal `4` (D-031, D-032, D-034; v1, v2 and v3 documents are upgraded on read by steps that change nothing). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -93,6 +93,12 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `textAlign` | `left`, `center`, `right`, `justify` | `text-align` |
 | `textTransform` | `none`, `uppercase`, `lowercase`, `capitalize` | `text-transform` |
 | `color` / `backgroundColor` / `borderColor` | colour | matching colour properties |
+| `backgroundImage` (W-094) | http(s) URL or a site path, no spaces, quotes or parentheses | `background-image` as `url("…")`. With no size, position or repeat: `cover`, `center`, `no-repeat` |
+| `backgroundSize` | `auto`, `cover`, `contain` | `background-size` (the image layer) |
+| `backgroundPosition` | `center`, an edge (`top`, `bottom`, `left`, `right`) or a corner (`top left` and the other three) | `background-position` |
+| `backgroundRepeat` | `no-repeat`, `repeat`, `repeat-x`, `repeat-y` | `background-repeat` |
+| `gradient` | `{ angle: 0–360, from, to }`; stops are colours | `linear-gradient`, behind the image |
+| `overlay` | `{ color, opacity: 0–1 }` | a colour layer above the image. Hex becomes 8-digit hex; a colour variable becomes `color-mix` |
 | `borderWidth` / `borderRadius` | length | matching border properties |
 | `borderStyle` | `none`, `solid`, `dashed`, `dotted` | `border-style` |
 | `opacity` | number 0–1 (the editor shows 0–100 %) | `opacity` |
@@ -127,7 +133,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],

@@ -181,10 +181,16 @@ const asRef = (value: unknown): Ref | null =>
     ? { var: value["var"], kind: (value["from"] as VariableKind | undefined) ?? "color" }
     : null;
 
-/** Every variable ref in a style: each value, plus the box shadow's colour (W-088). */
+/** Every variable ref in a style: each value, plus nested colours (shadow, gradient, overlay). */
 function refsInStyle(style: StyleProps | undefined): Ref[] {
   if (!style) return [];
-  const values: unknown[] = [...Object.values(style), style.boxShadow?.color];
+  const values: unknown[] = [
+    ...Object.values(style),
+    style.boxShadow?.color,
+    style.gradient?.from,
+    style.gradient?.to,
+    style.overlay?.color,
+  ];
   return values.map(asRef).filter((ref): ref is Ref => ref !== null);
 }
 

@@ -44,7 +44,7 @@ describe("upgradeLayout", () => {
       ok: true,
       from: 0,
       doc: {
-        schemaVersion: 3,
+        schemaVersion: 4,
         root: {
           id: "root0001",
           type: "container",
@@ -60,12 +60,12 @@ describe("upgradeLayout", () => {
     const snapshot = structuredClone(v0);
     const once = upgradeLayout(v0, migrations);
     if (!once.ok) throw new Error("upgrade failed");
-    expect(upgradeLayout(once.doc, migrations)).toEqual({ ok: true, doc: once.doc, from: 3 });
+    expect(upgradeLayout(once.doc, migrations)).toEqual({ ok: true, doc: once.doc, from: 4 });
     expect(v0).toEqual(snapshot);
   });
 
   test("a current document is returned unchanged", () => {
-    expect(upgradeLayout(s1Page())).toEqual({ ok: true, doc: s1Page(), from: 3 });
+    expect(upgradeLayout(s1Page())).toEqual({ ok: true, doc: s1Page(), from: 4 });
   });
 
   test("a missing step is reported instead of skipped", () => {
@@ -87,10 +87,10 @@ describe("upgradeLayout", () => {
     const layouts = randomLayouts(200);
     for (const layout of layouts) {
       const first = upgradeLayout(layout, migrations);
-      expect(first).toEqual({ ok: true, doc: layout, from: 3 });
+      expect(first).toEqual({ ok: true, doc: layout, from: 4 });
       if (!first.ok) continue;
       expect(upgradeLayout(first.doc, migrations)).toEqual(first);
-      expect(validateLayout(layout, migrations)).toEqual({ ok: true, layout, upgradedFrom: 3 });
+      expect(validateLayout(layout, migrations)).toEqual({ ok: true, layout, upgradedFrom: 4 });
     }
   });
 });
@@ -100,12 +100,12 @@ describe("schema versions (D-031, D-032)", () => {
     (version: number) =>
     <T extends object>(doc: T) => ({ ...doc, schemaVersion: version });
 
-  test("layout and design are at version 3", () => {
-    expect(LAYOUT_SCHEMA_VERSION).toBe(3);
-    expect(DESIGN_SCHEMA_VERSION).toBe(3);
+  test("layout and design are at version 4", () => {
+    expect(LAYOUT_SCHEMA_VERSION).toBe(4);
+    expect(DESIGN_SCHEMA_VERSION).toBe(4);
   });
 
-  test.each([1, 2])("a v%i layout upgrades to v3 with every value kept", (version) => {
+  test.each([1, 2, 3])("a v%i layout upgrades to v4 with every value kept", (version) => {
     for (const layout of randomLayouts(50, 7)) {
       const older = asV(version)(layout);
       expect(upgradeLayout(older)).toEqual({ ok: true, doc: layout, from: version });
@@ -113,11 +113,11 @@ describe("schema versions (D-031, D-032)", () => {
     }
   });
 
-  test.each([1, 2])(
-    "a v%i design document upgrades to v3 with its variables and classes kept",
+  test.each([1, 2, 3])(
+    "a v%i design document upgrades to v4 with its variables and classes kept",
     (version) => {
       const design = {
-        schemaVersion: 3,
+        schemaVersion: 4,
         variables: { colors: [{ id: "ink", name: "Ink", value: "#112233" }] },
         classes: [{ id: "card", name: "Card", style: { opacity: 0.5, zIndex: 2 } }],
       };
@@ -133,14 +133,14 @@ describe("schema versions (D-031, D-032)", () => {
 
   test("an older EmVB meets a v3 page as newer, not as invalid", () => {
     const page = s1Page();
-    expect(upgradeLayout(page, {}, 2)).toEqual({ ok: false, reason: "newer-version", version: 3 });
-    expect(validateLayout({ ...page, schemaVersion: 4 })).toMatchObject({
+    expect(upgradeLayout(page, {}, 2)).toEqual({ ok: false, reason: "newer-version", version: 4 });
+    expect(validateLayout({ ...page, schemaVersion: 5 })).toMatchObject({
       ok: false,
       issues: [{ path: "schemaVersion", code: "newer-version" }],
     });
   });
 
-  test.each([1, 2])("the v%i step changes nothing and does not mutate its input", (version) => {
+  test.each([1, 2, 3])("the v%i step changes nothing and does not mutate its input", (version) => {
     const doc = asV(version)(s1Page());
     const snapshot = structuredClone(doc);
     expect(LAYOUT_MIGRATIONS[version]?.(doc)).toEqual(doc);

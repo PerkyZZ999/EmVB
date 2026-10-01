@@ -12,7 +12,7 @@ const issuesOf = (input: unknown) => {
 describe("valid layouts", () => {
   test("the S1 page parses and keeps its content", () => {
     const result = validateLayout(s1Page());
-    expect(result).toEqual({ ok: true, layout: s1Page(), upgradedFrom: 3 });
+    expect(result).toEqual({ ok: true, layout: s1Page(), upgradedFrom: 4 });
   });
 
   test("an empty root container is valid", () => {
@@ -116,7 +116,7 @@ describe("invalid layouts fail with the exact path", () => {
 
   test("a CSS id used twice is reported at the second use; different ids pass (W-091, W-016)", () => {
     const input = {
-      schemaVersion: 3,
+      schemaVersion: 4,
       root: container("root0001", [
         { ...heading("head0001"), htmlId: "hero" },
         container("cont0001", [{ ...heading("head0002"), htmlId: "hero" }]),
@@ -186,7 +186,7 @@ describe("size budget (N-005, K12)", () => {
 
 describe("versions", () => {
   test("a newer schema version is refused with an update message", () => {
-    expect(issuesOf({ ...s1Page(), schemaVersion: 4 })).toEqual([
+    expect(issuesOf({ ...s1Page(), schemaVersion: 5 })).toEqual([
       expect.objectContaining({ path: "schemaVersion", code: "newer-version" }),
     ]);
   });
@@ -208,7 +208,7 @@ describe("design system document (D-013)", () => {
   test("a valid design parses", () => {
     expect<unknown>(validateDesign(design([color(1)]))).toEqual({
       ok: true,
-      design: { ...design([color(1)]), schemaVersion: 3 },
+      design: { ...design([color(1)]), schemaVersion: 4 },
       upgradedFrom: 1,
     });
   });
@@ -233,7 +233,7 @@ describe("design system document (D-013)", () => {
   });
 
   test("a newer design version is refused", () => {
-    const result = validateDesign({ ...design([]), schemaVersion: 4 });
+    const result = validateDesign({ ...design([]), schemaVersion: 5 });
     expect(result.ok ? undefined : result.issues[0]?.code).toBe("newer-version");
   });
 });

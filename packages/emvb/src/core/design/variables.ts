@@ -31,7 +31,7 @@ export function refMatchesKind(ref: VariableRefLike, kind: VariableKind): boolea
 const matches = (value: unknown, id: string, kind: VariableKind | undefined) =>
   isVariableRef(value) && value.var === id && (kind === undefined || refMatchesKind(value, kind));
 
-/** The box shadow's colour is the one ref nested inside a style value (W-088). */
+/** Nested colour refs: the box shadow (W-088), and gradient stops and the overlay (W-094). */
 const shadowColorMatches = (style: StyleProps, id: string, kind: VariableKind | undefined) =>
   matches(style.boxShadow?.color, id, kind);
 
@@ -46,6 +46,9 @@ function collectStyleUsages(
     if (matches(value, id, kind)) hit(prop);
   }
   if (shadowColorMatches(style, id, kind)) hit("boxShadow.color");
+  if (matches(style.gradient?.from, id, kind)) hit("gradient.from");
+  if (matches(style.gradient?.to, id, kind)) hit("gradient.to");
+  if (matches(style.overlay?.color, id, kind)) hit("overlay.color");
 }
 
 /** Style and state styles (W-089) together; a state usage is reported as `<state>.<prop>`. */
@@ -115,6 +118,17 @@ function stripRefsFromStyle(
   if (style.boxShadow && shadowColorMatches(style, id, kind)) {
     const { color: _drop, ...shadow } = style.boxShadow;
     next["boxShadow"] = shadow;
+    changed = true;
+  }
+  if (
+    style.gradient &&
+    (matches(style.gradient.from, id, kind) || matches(style.gradient.to, id, kind))
+  ) {
+    delete next["gradient"];
+    changed = true;
+  }
+  if (style.overlay && matches(style.overlay.color, id, kind)) {
+    delete next["overlay"];
     changed = true;
   }
   if (!changed) return style;

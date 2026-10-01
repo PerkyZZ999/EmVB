@@ -1,7 +1,9 @@
 import { Input, Select } from "@cloudflare/kumo";
 import { isSafeFontStack, type DesignSystem, type StyleProps } from "../../../../core/index.ts";
+import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
+import { BackgroundImageControl, GradientControl, OverlayControl } from "./BackgroundControls.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 import { LengthRow } from "./LengthRow.tsx";
 import { FiltersControl, ShadowControl, TransitionControl } from "./EffectsControls.tsx";
@@ -124,6 +126,28 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "dashed", label: "Dashed" },
     { value: "dotted", label: "Dotted" },
   ],
+  backgroundSize: [
+    { value: "cover", label: "Cover" },
+    { value: "contain", label: "Contain" },
+    { value: "auto", label: "Auto" },
+  ],
+  backgroundPosition: [
+    { value: "center", label: "Center" },
+    { value: "top", label: "Top" },
+    { value: "bottom", label: "Bottom" },
+    { value: "left", label: "Left" },
+    { value: "right", label: "Right" },
+    { value: "top left", label: "Top left" },
+    { value: "top right", label: "Top right" },
+    { value: "bottom left", label: "Bottom left" },
+    { value: "bottom right", label: "Bottom right" },
+  ],
+  backgroundRepeat: [
+    { value: "no-repeat", label: "No repeat" },
+    { value: "repeat", label: "Repeat" },
+    { value: "repeat-x", label: "Repeat horizontally" },
+    { value: "repeat-y", label: "Repeat vertically" },
+  ],
   fontWeight: [
     { value: "400", label: "Regular" },
     { value: "500", label: "Medium" },
@@ -155,6 +179,7 @@ export function StyleRow({
   style,
   inherited,
   design,
+  fetcher,
   onPatch,
   onDesignChange,
 }: {
@@ -163,6 +188,8 @@ export function StyleRow({
   /** The Normal styles while a state is edited (W-089): shown as placeholders, never saved. */
   inherited?: StyleProps;
   design: DesignSystem;
+  /** Present on an element, so a background image can use the media library. */
+  fetcher?: Fetcher;
   onPatch: (patch: Partial<StyleProps>) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
 }) {
@@ -176,6 +203,41 @@ export function StyleRow({
   const reset = (
     <ResetButton label={label} set={set} onReset={() => onPatch({ [styleKey]: undefined })} />
   );
+
+  if (styleKey === "backgroundImage") {
+    return (
+      <BackgroundImageControl
+        value={typeof value === "string" ? value : undefined}
+        fetcher={fetcher}
+        onChange={(next) => onPatch({ backgroundImage: next })}
+        reset={reset}
+      />
+    );
+  }
+
+  if (styleKey === "gradient") {
+    return (
+      <GradientControl
+        value={style?.gradient}
+        design={design}
+        onChange={(next) => onPatch({ gradient: next })}
+        onDesignChange={onDesignChange}
+        reset={reset}
+      />
+    );
+  }
+
+  if (styleKey === "overlay") {
+    return (
+      <OverlayControl
+        value={style?.overlay}
+        design={design}
+        onChange={(next) => onPatch({ overlay: next })}
+        onDesignChange={onDesignChange}
+        reset={reset}
+      />
+    );
+  }
 
   if (COLOR_KEYS.has(styleKey)) {
     return (
@@ -360,5 +422,8 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "boxShadow",
   "filter",
   "transition",
+  "backgroundImage",
+  "gradient",
+  "overlay",
   ...(Object.keys(SELECT_OPTIONS) as StyleKey[]),
 ];

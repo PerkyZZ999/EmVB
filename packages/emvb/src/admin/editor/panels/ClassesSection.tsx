@@ -33,6 +33,12 @@ import { StyleRow } from "./settings/StyleRow.tsx";
 const CLASS_STYLE_KEYS = [
   "color",
   "backgroundColor",
+  "backgroundImage",
+  "backgroundSize",
+  "backgroundPosition",
+  "backgroundRepeat",
+  "gradient",
+  "overlay",
   "paddingTop",
   "paddingRight",
   "paddingBottom",

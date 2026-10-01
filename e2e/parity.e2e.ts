@@ -8,7 +8,7 @@ setUpEmvbOnce();
 
 /** Nested 3-deep flex layout (W-023). */
 const nestedLayout = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   root: {
     id: "root0001",
     type: "container",

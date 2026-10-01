@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isSafeFontStack } from "../sanitize/css.ts";
+import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 
 /** Colour refs omit `from` (legacy). Length/font refs set `from` (W-028). */
 export const VariableRef = z.strictObject({
@@ -130,6 +131,46 @@ export const StyleProps = z.strictObject({
   textTransform: z.enum(["none", "uppercase", "lowercase", "capitalize"]).optional(),
   color: ColorValue.optional(),
   backgroundColor: ColorValue.optional(),
+  /** http(s) or a site path. Spaces, quotes and parentheses are refused so the URL can sit inside `url("")`. */
+  backgroundImage: z
+    .string()
+    .min(1)
+    .max(2000)
+    .refine(
+      (value) => sanitizeMediaUrl(value) === value && !/[()\\\s"'`]/.test(value),
+      "Use an http(s) URL or a site path, with no spaces or parentheses",
+    )
+    .optional(),
+  backgroundSize: z.enum(["auto", "cover", "contain"]).optional(),
+  backgroundPosition: z
+    .enum([
+      "center",
+      "top",
+      "bottom",
+      "left",
+      "right",
+      "top left",
+      "top right",
+      "bottom left",
+      "bottom right",
+    ])
+    .optional(),
+  backgroundRepeat: z.enum(["no-repeat", "repeat", "repeat-x", "repeat-y"]).optional(),
+  /** Two-stop linear gradient. Stops are colours, so a variable binding is a colour use (W-094). */
+  gradient: z
+    .strictObject({
+      angle: z.number().int().min(0).max(360),
+      from: ColorValue,
+      to: ColorValue,
+    })
+    .optional(),
+  /** A colour laid over the image and gradient. `opacity` is 0–1 (W-094). */
+  overlay: z
+    .strictObject({
+      color: ColorValue,
+      opacity: z.number().finite().min(0).max(1),
+    })
+    .optional(),
   borderWidth: LengthValue.optional(),
   borderStyle: z.enum(["none", "solid", "dashed", "dotted"]).optional(),
   borderColor: ColorValue.optional(),

@@ -28,7 +28,7 @@ describe("class id list helpers (W-031)", () => {
 describe("findClassUsages / clearClassRefs (W-032)", () => {
   test("finds and clears class ids across the tree", () => {
     const layout: Layout = {
-      schemaVersion: 3,
+      schemaVersion: 4,
       root: {
         id: "root0001",
         type: "container",

@@ -1,5 +1,6 @@
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
 import type { StyleProps } from "../schema/style.ts";
+import { sanitizeMediaUrl } from "./media-url.ts";
 
 const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const VAR_ID = /^[a-z0-9-]{1,40}$/;
@@ -248,6 +249,169 @@ function cssTransition(value: unknown): string | undefined {
   return properties.map((property) => `${property} ${timing}`).join(",");
 }
 
+export type Declaration = { property: string; value: string };
+
+const BACKGROUND_SIZE = new Set(["auto", "cover", "contain"]);
+const BACKGROUND_POSITION = new Set([
+  "center",
+  "top",
+  "bottom",
+  "left",
+  "right",
+  "top left",
+  "top right",
+  "bottom left",
+  "bottom right",
+]);
+const BACKGROUND_REPEAT = new Set(["no-repeat", "repeat", "repeat-x", "repeat-y"]);
+const BACKGROUND_KEYS = new Set([
+  "backgroundImage",
+  "backgroundSize",
+  "backgroundPosition",
+  "backgroundRepeat",
+  "gradient",
+  "overlay",
+]);
+
+/** Backstop for values that must contain `url()` or quotes, which `isSafeCssValue` refuses. */
+function isSafeBackground(value: string): boolean {
+  return value.length > 0 && value.length <= 4096 && !/[{};<>\\`]|\/\*|\n|\r/.test(value);
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+/** A media URL wrapped for CSS. The schema already refuses quotes, spaces and parentheses. */
+function cssBackgroundImage(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  if (sanitizeMediaUrl(value) !== value || /[()\\\s"'`]/.test(value)) return undefined;
+  const css = `url("${value}")`;
+  return isSafeBackground(css) ? css : undefined;
+}
+
+function cssGradient(value: unknown): string | undefined {
+  if (!isRecord(value)) return undefined;
+  if (Object.keys(value).some((key) => key !== "angle" && key !== "from" && key !== "to"))
+    return undefined;
+  const { angle, from, to } = value;
+  if (!Number.isInteger(angle) || (angle as number) < 0 || (angle as number) > 360)
+    return undefined;
+  const start = cssColor(from);
+  const end = cssColor(to);
+  if (!start || !end) return undefined;
+  const css = `linear-gradient(${angle as number}deg, ${start}, ${end})`;
+  return isSafeBackground(css) ? css : undefined;
+}
+
+/** `#rgb` / `#rrggbb` (and an existing alpha) times `opacity`, as 8-digit hex. */
+function hexWithAlpha(hex: string, opacity: number): string | undefined {
+  let body = hex.slice(1).toLowerCase();
+  if (body.length === 3 || body.length === 4) body = [...body].map((ch) => ch + ch).join("");
+  if (body.length !== 6 && body.length !== 8) return undefined;
+  const existing = body.length === 8 ? Number.parseInt(body.slice(6), 16) / 255 : 1;
+  const alpha = Math.round(existing * opacity * 255)
+    .toString(16)
+    .padStart(2, "0");
+  return `#${body.slice(0, 6)}${alpha}`;
+}
+
+function overlayPaint(color: string, opacity: number): string | undefined {
+  if (opacity === 1) return color;
+  if (color.startsWith("var(")) {
+    return `color-mix(in srgb, ${color} ${Math.round(opacity * 100)}%, transparent)`;
+  }
+  return HEX_COLOR.test(color) ? hexWithAlpha(color, opacity) : undefined;
+}
+
+function cssOverlay(value: unknown): string | undefined {
+  if (!isRecord(value)) return undefined;
+  if (Object.keys(value).some((key) => key !== "color" && key !== "opacity")) return undefined;
+  const color = cssColor(value["color"]);
+  const opacity = value["opacity"];
+  if (
+    !color ||
+    typeof opacity !== "number" ||
+    !Number.isFinite(opacity) ||
+    opacity < 0 ||
+    opacity > 1
+  )
+    return undefined;
+  const paint = overlayPaint(color, opacity);
+  if (!paint) return undefined;
+  const css = `linear-gradient(${paint}, ${paint})`;
+  return isSafeBackground(css) ? css : undefined;
+}
+
+/**
+ * Image, gradient and overlay share `background-image`. The overlay is the top layer, then the
+ * image, then the gradient. Size, position and repeat apply to the image; the other layers fill.
+ */
+function composeBackground(style: Record<string, unknown>): {
+  declarations: Declaration[];
+  rejected: string[];
+} {
+  const rejected: string[] = [];
+  const take = (key: string, css: string | undefined) => {
+    if (style[key] === undefined) return undefined;
+    if (!css) rejected.push(key);
+    return css;
+  };
+  const image = take("backgroundImage", cssBackgroundImage(style["backgroundImage"]));
+  const size = take("backgroundSize", keyword(BACKGROUND_SIZE)(style["backgroundSize"]));
+  const position = take(
+    "backgroundPosition",
+    keyword(BACKGROUND_POSITION)(style["backgroundPosition"]),
+  );
+  const repeat = take("backgroundRepeat", keyword(BACKGROUND_REPEAT)(style["backgroundRepeat"]));
+  const gradient = take("gradient", cssGradient(style["gradient"]));
+  const overlay = take("overlay", cssOverlay(style["overlay"]));
+
+  const layers: string[] = [];
+  const sizes: string[] = [];
+  const positions: string[] = [];
+  const repeats: string[] = [];
+  const push = (layer: string, layerSize: string, layerPosition: string, layerRepeat: string) => {
+    layers.push(layer);
+    sizes.push(layerSize);
+    positions.push(layerPosition);
+    repeats.push(layerRepeat);
+  };
+  if (overlay) push(overlay, "auto", "center", "no-repeat");
+  if (image) push(image, size ?? "cover", position ?? "center", repeat ?? "no-repeat");
+  if (gradient) push(gradient, "auto", "center", "no-repeat");
+
+  const declarations: Declaration[] = [];
+  if (layers.length > 0) {
+    const value = layers.join(",");
+    if (!isSafeBackground(value)) {
+      for (const key of ["overlay", "backgroundImage", "gradient"]) {
+        if (style[key] !== undefined && !rejected.includes(key)) rejected.push(key);
+      }
+    } else {
+      declarations.push({ property: "background-image", value });
+      if (layers.length > 1) {
+        declarations.push(
+          { property: "background-size", value: sizes.join(",") },
+          { property: "background-position", value: positions.join(",") },
+          { property: "background-repeat", value: repeats.join(",") },
+        );
+      } else if (image) {
+        declarations.push(
+          { property: "background-size", value: size ?? "cover" },
+          { property: "background-position", value: position ?? "center" },
+          { property: "background-repeat", value: repeat ?? "no-repeat" },
+        );
+      }
+    }
+  }
+  if (!image) {
+    if (size) declarations.push({ property: "background-size", value: size });
+    if (position) declarations.push({ property: "background-position", value: position });
+    if (repeat) declarations.push({ property: "background-repeat", value: repeat });
+  }
+  return { declarations, rejected };
+}
+
 const PROPERTY_MAP: {
   [K in keyof Required<StyleProps>]: { css: string; toValue: (v: unknown) => string | undefined };
 } = {
@@ -288,6 +452,12 @@ const PROPERTY_MAP: {
   textTransform: { css: "text-transform", toValue: keyword(TEXT_TRANSFORM) },
   color: { css: "color", toValue: cssColor },
   backgroundColor: { css: "background-color", toValue: cssColor },
+  backgroundImage: { css: "background-image", toValue: cssBackgroundImage },
+  backgroundSize: { css: "background-size", toValue: keyword(BACKGROUND_SIZE) },
+  backgroundPosition: { css: "background-position", toValue: keyword(BACKGROUND_POSITION) },
+  backgroundRepeat: { css: "background-repeat", toValue: keyword(BACKGROUND_REPEAT) },
+  gradient: { css: "background-image", toValue: cssGradient },
+  overlay: { css: "background-image", toValue: cssOverlay },
   borderWidth: { css: "border-width", toValue: cssLength },
   borderStyle: { css: "border-style", toValue: keyword(BORDER_STYLE) },
   borderColor: { css: "border-color", toValue: cssColor },
@@ -302,8 +472,6 @@ const PROPERTY_MAP: {
 /** Exported for table-driven tests (W-017). */
 export const STYLE_PROPERTY_MAP = PROPERTY_MAP;
 
-export type Declaration = { property: string; value: string };
-
 /** Converts style props into safe declarations; anything that fails validation is dropped and reported. */
 export function styleDeclarations(style: unknown): {
   declarations: Declaration[];
@@ -312,7 +480,9 @@ export function styleDeclarations(style: unknown): {
   const declarations: Declaration[] = [];
   const rejected: string[] = [];
   if (typeof style !== "object" || style === null) return { declarations, rejected };
-  for (const [key, raw] of Object.entries(style)) {
+  const record = style as Record<string, unknown>;
+  for (const [key, raw] of Object.entries(record)) {
+    if (BACKGROUND_KEYS.has(key)) continue;
     const entry = Object.hasOwn(PROPERTY_MAP, key)
       ? PROPERTY_MAP[key as keyof StyleProps]
       : undefined;
@@ -326,6 +496,9 @@ export function styleDeclarations(style: unknown): {
       rejected.push(key);
     }
   }
+  const background = composeBackground(record);
+  declarations.push(...background.declarations);
+  rejected.push(...background.rejected);
   return { declarations, rejected };
 }
 

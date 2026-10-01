@@ -454,6 +454,7 @@ function KnownElementPanel({
                     style={style}
                     inherited={inherited}
                     design={design}
+                    fetcher={fetcher}
                     onPatch={patchStyle}
                     onDesignChange={onDesignChange}
                   />

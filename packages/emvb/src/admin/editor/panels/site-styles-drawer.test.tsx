@@ -7,7 +7,7 @@ import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   root: {
     id: "root0001",
     type: "container",
@@ -94,7 +94,7 @@ describe("SiteStylesDrawer (W-032)", () => {
     await act(async () => row?.click());
     expect(row?.getAttribute("aria-expanded")).toBe("true");
     const keys = document.querySelectorAll(".emvb-site-class-styles [data-emvb-style]");
-    expect(new Set([...keys].map((el) => el.getAttribute("data-emvb-style"))).size).toBe(14);
+    expect(new Set([...keys].map((el) => el.getAttribute("data-emvb-style"))).size).toBe(20);
     await act(async () => {
       row?.dispatchEvent(new KeyboardEvent("keydown", { key: "F2", bubbles: true }));
     });
@@ -239,7 +239,7 @@ describe("deleting a variable from Site styles", () => {
       ],
     };
     const page: Layout = {
-      schemaVersion: 3,
+      schemaVersion: 4,
       root: {
         id: "root0001",
         type: "container",
