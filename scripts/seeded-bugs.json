@@ -13968,6 +13968,244 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
       "expect": "\\(fail\\).*valid SVG is safe to store"
+    },
+    {
+      "id": "W-091/svg-el-default-size",
+      "requirement": "R-011",
+      "description": "the SVG element defaults to 24 px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "const size = node.props.size ?? 48;",
+          "replace": "const size = node.props.size ?? 24;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*decorative SVG is hidden, 48 px"
+    },
+    {
+      "id": "W-091/svg-el-xmlns-dropped",
+      "requirement": "R-032",
+      "description": "the SVG element drops a missing xmlns",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "xmlns: tree.attrs.xmlns ?? \"http://www.w3.org/2000/svg\",",
+          "replace": "xmlns: tree.attrs.xmlns ?? \"\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*decorative SVG is hidden, 48 px"
+    },
+    {
+      "id": "W-091/svg-el-fill-overrides",
+      "requirement": "R-011",
+      "description": "currentColor overrides a stroke-only SVG",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "if (!svgAttrs.fill && !svgAttrs.stroke) {",
+          "replace": "if (!svgAttrs.fill) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*titled SVG is an img"
+    },
+    {
+      "id": "W-091/svg-el-no-current-color",
+      "requirement": "R-011",
+      "description": "an SVG without colours gets no fill",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    if (!svgAttrs.fill && !svgAttrs.stroke) {\n      svgAttrs.fill = \"currentColor\";\n    }\n    if (decorative) {\n      svgAttrs[\"aria-hidden\"] = \"true\";\n    } else {\n      svgAttrs.role = \"img\";\n      if (node.props.title) svgAttrs[\"aria-label\"] = node.props.title;\n    }\n    return {\n      tag: \"span\",\n      attrs,",
+          "replace": "    if (decorative) {\n      svgAttrs[\"aria-hidden\"] = \"true\";\n    } else {\n      svgAttrs.role = \"img\";\n      if (node.props.title) svgAttrs[\"aria-label\"] = node.props.title;\n    }\n    return {\n      tag: \"span\",\n      attrs,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*decorative SVG is hidden, 48 px"
+    },
+    {
+      "id": "W-091/svg-el-decorative-shown",
+      "requirement": "R-033",
+      "description": "a decorative SVG is exposed as an img",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    const size = node.props.size ?? 48;\n    const decorative = node.props.decorative === true;",
+          "replace": "    const size = node.props.size ?? 48;\n    const decorative = false;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*decorative SVG is hidden"
+    },
+    {
+      "id": "W-091/svg-el-missing-class",
+      "requirement": "R-011",
+      "description": "unsafe SVG markup loses the missing class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "class: `${attrs.class ?? \"\"} emvb-svg-missing`.trim(),",
+          "replace": "class: attrs.class ?? \"\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*unsafe markup renders an empty hidden placeholder"
+    },
+    {
+      "id": "W-091/icon-default-size",
+      "requirement": "R-011",
+      "description": "icons default to 48 px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "const size = node.props.size ?? 24;",
+          "replace": "const size = node.props.size ?? 48;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*24 px by default"
+    },
+    {
+      "id": "W-091/icon-decorative-shown",
+      "requirement": "R-033",
+      "description": "a decorative icon is exposed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    const decorative = node.props.decorative === true;\n    const size = node.props.size ?? 24;",
+          "replace": "    const decorative = false;\n    const size = node.props.size ?? 24;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*decorative icon at 16 px is hidden"
+    },
+    {
+      "id": "W-091/icon-no-label",
+      "requirement": "R-033",
+      "description": "an icon loses its label",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "      svgAttrs.role = \"img\";\n      if (node.props.title) svgAttrs[\"aria-label\"] = node.props.title;\n    }\n    const children",
+          "replace": "      svgAttrs.role = \"img\";\n    }\n    const children"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*img labelled by its title"
+    },
+    {
+      "id": "W-091/icon-child-attrs-lost",
+      "requirement": "R-011",
+      "description": "icon paths lose their attributes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "      attrs: { ...child.attrs },\n",
+          "replace": "      attrs: {},\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*img labelled by its title"
+    },
+    {
+      "id": "W-091/icon-missing-class",
+      "requirement": "R-011",
+      "description": "an unknown icon loses the missing class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),",
+          "replace": "class: attrs.class ?? \"\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*unknown icon renders an empty hidden placeholder"
+    },
+    {
+      "id": "W-091/image-decorative-role",
+      "requirement": "R-033",
+      "description": "a decorative image has no presentation role",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    if (decorative) imgAttrs.role = \"presentation\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*decorative image has empty alt"
+    },
+    {
+      "id": "W-091/image-width-always",
+      "requirement": "R-011",
+      "description": "images always get a width",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "if (node.props.width !== undefined) imgAttrs.width = String(node.props.width);",
+          "replace": "imgAttrs.width = String(node.props.width ?? 0);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*sizes only when set"
+    },
+    {
+      "id": "W-091/image-missing-class",
+      "requirement": "R-011",
+      "description": "a missing image loses the missing class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "class: `${attrs.class ?? \"\"} emvb-image-missing`.trim()",
+          "replace": "class: attrs.class ?? \"\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*without a usable source renders"
+    },
+    {
+      "id": "W-091/video-missing-class",
+      "requirement": "R-013",
+      "description": "a missing video loses the missing class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "class: `${attrs.class ?? \"\"} emvb-video-missing`.trim(),",
+          "replace": "class: attrs.class ?? \"\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*without a usable source renders"
+    },
+    {
+      "id": "W-091/post-title-default-level",
+      "requirement": "R-062",
+      "description": "a new dynamic element loses its default",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/dynamic-elements.ts",
+          "search": "defaults: () => ({ type: \"post-title\", props: { level: 1 } }),",
+          "replace": "defaults: () => ({ type: \"post-title\", props: {} }),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*new Post Title is an h1"
+    },
+    {
+      "id": "W-091/post-image-default-decorative",
+      "requirement": "R-062",
+      "description": "a new dynamic element loses its default",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/dynamic-elements.ts",
+          "search": "defaults: () => ({ type: \"post-image\", props: { decorative: false } }),",
+          "replace": "defaults: () => ({ type: \"post-image\", props: {} }),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
+      "expect": "\\(fail\\).*new Post Title is an h1"
     }
   ]
 }
