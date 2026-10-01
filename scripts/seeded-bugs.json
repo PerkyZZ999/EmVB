@@ -12702,6 +12702,432 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
       "expect": "\\(fail\\).*Cancel closes the form"
+    },
+    {
+      "id": "W-091/e2e-size-limit-client",
+      "requirement": "N-005",
+      "description": "the editor lets a layout twice the limit through",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "if (bytes > MAX_LAYOUT_BYTES) {",
+          "replace": "if (bytes > MAX_LAYOUT_BYTES * 2) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "past the size limit"
+      ],
+      "expect": "✘.*\\[node\\].*past the size limit"
+    },
+    {
+      "id": "W-091/e2e-seo-title-not-saved",
+      "requirement": "R-006",
+      "description": "the SEO title is never saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "seo: { title: draft.seoTitle || null,",
+          "replace": "seo: { title: null,"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "SEO section closed until opened"
+      ],
+      "expect": "✘.*\\[node\\].*SEO section closed until opened"
+    },
+    {
+      "id": "W-091/e2e-site-styles-opens-classes",
+      "requirement": "R-021",
+      "description": "Site styles opens on Classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "React.useState<\"variables\" | \"classes\">(\"variables\")",
+          "replace": "React.useState<\"variables\" | \"classes\">(\"classes\")"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "Site styles opens the Variables drawer"
+      ],
+      "expect": "✘.*\\[node\\].*Site styles opens the Variables drawer"
+    },
+    {
+      "id": "W-091/e2e-variable-edit-keeps-old",
+      "requirement": "R-021",
+      "description": "editing a colour variable commits the old value",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "await onCommit(draft);",
+          "replace": "await onCommit(value);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "colour variable can be created, bound and edited"
+      ],
+      "expect": "✘.*\\[node\\].*colour variable can be created, bound and edited"
+    },
+    {
+      "id": "W-091/e2e-ctrlk-not-blocked",
+      "requirement": "R-009",
+      "description": "Ctrl+K reaches the host while the editor is open",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "      event.preventDefault();\n      event.stopImmediatePropagation();\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editor.e2e.ts",
+        "--project=node",
+        "-g",
+        "open the host command palette while the editor is open"
+      ],
+      "expect": "✘.*\\[node\\].*open the host command palette while the editor is open"
+    },
+    {
+      "id": "W-091/e2e-overlay-above-host-dialogs",
+      "requirement": "R-009",
+      "description": "the overlay stacks above host dialogs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "zIndex: \"auto\"",
+          "replace": "zIndex: 2147483647"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editor.e2e.ts",
+        "--project=node",
+        "-g",
+        "block turned off, the host palette stacks above"
+      ],
+      "expect": "✘.*\\[node\\].*block turned off, the host palette stacks above"
+    },
+    {
+      "id": "W-091/e2e-unknown-entry-error",
+      "requirement": "R-009",
+      "description": "an unknown entry shows the load error, not Page not found",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "error.status === 404) setData({ state: \"not-found\" })",
+          "replace": "error.status === 410) setData({ state: \"not-found\" })"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editor.e2e.ts",
+        "--project=node",
+        "-g",
+        "unknown entry shows Page not found"
+      ],
+      "expect": "✘.*\\[node\\].*unknown entry shows Page not found"
+    },
+    {
+      "id": "W-091/e2e-setup-upgrade-skips-update",
+      "requirement": "R-001",
+      "description": "setup never updates an altered collection",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/run.ts",
+          "search": "    case \"update-collection\":\n      return requestJson(",
+          "replace": "    case \"update-collection\":\n      return undefined;\n      return requestJson("
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/setup.e2e.ts",
+        "--project=node",
+        "-g",
+        "upgrading an altered schema converges"
+      ],
+      "expect": "✘.*\\[node\\].*upgrading an altered schema converges"
+    },
+    {
+      "id": "W-091/e2e-setup-collection-visible",
+      "requirement": "R-001",
+      "description": "the pages collection is not hidden",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/spec.ts",
+          "search": "labelSingular: \"Visual page\",\n  hidden: true,",
+          "replace": "labelSingular: \"Visual page\",\n  hidden: false,"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/setup.e2e.ts",
+        "--project=node",
+        "-g",
+        "hidden collection has no sidebar link"
+      ],
+      "expect": "✘.*\\[node\\].*hidden collection has no sidebar link"
+    },
+    {
+      "id": "W-091/e2e-save-summary-no-path",
+      "requirement": "R-010",
+      "description": "the 422 summary loses the issue path",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/validate.ts",
+          "search": "(issue.path ? `${issue.path}: ${issue.message}` : issue.message)",
+          "replace": "issue.message"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/setup.e2e.ts",
+        "--project=node",
+        "-g",
+        "saves are validated over HTTP"
+      ],
+      "expect": "✘.*\\[node\\].*saves are validated over HTTP"
+    },
+    {
+      "id": "W-091/e2e-chip-backspace-noop",
+      "requirement": "R-021",
+      "description": "Backspace keeps the last chip",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "commit(ids.slice(0, -1));",
+          "replace": "commit(ids);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/class-chips.e2e.ts",
+        "--project=node",
+        "-g",
+        "removes chips with the x, the menu and Backspace"
+      ],
+      "expect": "✘.*\\[node\\].*removes chips with the x, the menu and Backspace"
+    },
+    {
+      "id": "W-091/e2e-chip-duplicate-not-swapped",
+      "requirement": "R-021",
+      "description": "Duplicate leaves the original class on the element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "commit(replaceClassId(ids, id, copy.id));",
+          "replace": "commit(ids);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/class-chips.e2e.ts",
+        "--project=node",
+        "-g",
+        "chip menu renames and duplicates"
+      ],
+      "expect": "✘.*\\[node\\].*chip menu renames and duplicates"
+    },
+    {
+      "id": "W-091/e2e-classes-tab-unreachable",
+      "requirement": "R-021",
+      "description": "the Classes tab can't be selected",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "onValueChange={(value) => setTab(value === \"classes\" ? \"classes\" : \"variables\")}",
+          "replace": "onValueChange={() => setTab(\"variables\")}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/theme-s8.e2e.ts",
+        "--project=node",
+        "-g",
+        "Classes Manager tab is reachable"
+      ],
+      "expect": "✘.*\\[node\\].*Classes Manager tab is reachable"
+    },
+    {
+      "id": "W-091/e2e-popup-no-triggers",
+      "requirement": "R-062",
+      "description": "a popup's settings have no Triggers",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "{page.partType === \"popup\" && (",
+          "replace": "{page.partType === \"header\" && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/theme-s8.e2e.ts",
+        "--project=node",
+        "-g",
+        "Popup theme part loads in the editor with Triggers"
+      ],
+      "expect": "✘.*\\[node\\].*Popup theme part loads in the editor with Triggers"
+    },
+    {
+      "id": "W-091/e2e-forms-runtime-missing",
+      "requirement": "R-040",
+      "description": "a page with a form ships no forms runtime",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "needsFormsRuntime: layoutHasForm(layout),",
+          "replace": "needsFormsRuntime: false,"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/forms.e2e.ts",
+        "--project=node",
+        "-g",
+        "visitor can fill and submit"
+      ],
+      "expect": "✘.*\\[node\\].*visitor can fill and submit"
+    },
+    {
+      "id": "W-091/e2e-prod-spacing-vars-dropped",
+      "requirement": "R-021",
+      "description": "spacing variables are not emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    ...declare(spacings, spacingVariableName, (space) => lengthCss(space.value)),\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e:prod",
+        "--project=node-public",
+        "-g",
+        "changing a spacing variable changes the published page"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node-public\\].*changing a spacing variable changes the published page"
+    },
+    {
+      "id": "W-091/e2e-prod-class-rules-dropped",
+      "requirement": "R-021",
+      "description": "class rules are not emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    ...classes,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e:prod",
+        "--project=node-public",
+        "-g",
+        "editing a class used on two elements"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node-public\\].*editing a class used on two elements"
+    },
+    {
+      "id": "W-091/e2e-prod-unknown-node-public-marker",
+      "requirement": "R-010",
+      "description": "an unknown node renders an editor marker on the public page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      if (mode === \"public\") return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e:prod",
+        "--project=node-public",
+        "-g",
+        "page with an unknown node still renders"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node-public\\].*page with an unknown node still renders"
+    },
+    {
+      "id": "W-091/e2e-prod-max-height-wrong-property",
+      "requirement": "R-021",
+      "description": "max height is emitted as min-height",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "maxHeight: { css: \"max-height\", toValue: cssLength },",
+          "replace": "maxHeight: { css: \"min-height\", toValue: cssLength },"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e:prod",
+        "--project=node-public",
+        "-g",
+        "Size, Position and Effects styles"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node-public\\].*Size, Position and Effects styles"
     }
   ]
 }
