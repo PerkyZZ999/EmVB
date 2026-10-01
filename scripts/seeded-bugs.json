@@ -14206,6 +14206,508 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
       "expect": "\\(fail\\).*new Post Title is an h1"
+    },
+    {
+      "id": "W-091/ui-media-empty-url-committed",
+      "requirement": "R-007",
+      "description": "an empty URL is committed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    if (trimmed === \"\") {\n      setError(\"Choose a library image, upload a file, or enter a URL.\");\n      return;\n    }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*empty URL asks for a source"
+    },
+    {
+      "id": "W-091/ui-media-unsafe-url-committed",
+      "requirement": "R-007",
+      "description": "an unsafe URL is committed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    const safe = sanitizeMediaUrl(trimmed);\n    if (!safe) {",
+          "replace": "    const safe = trimmed;\n    if (!safe) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*unsafe URL is refused"
+    },
+    {
+      "id": "W-091/ui-media-url-untrimmed",
+      "requirement": "R-007",
+      "description": "a pasted URL isn't trimmed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    const trimmed = urlDraft.trim();",
+          "replace": "    const trimmed = urlDraft;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*an empty URL asks for a source"
+    },
+    {
+      "id": "W-091/ui-media-url-keeps-id",
+      "requirement": "R-007",
+      "description": "a pasted URL keeps the old library id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    delete next.mediaId;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*drops the library id"
+    },
+    {
+      "id": "W-091/ui-media-library-limit",
+      "requirement": "R-007",
+      "description": "the library asks for 50 images",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "setItems(await listImages(fetcher, { limit: 40 }));",
+          "replace": "setItems(await listImages(fetcher, {}));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*asks for up to 40 images"
+    },
+    {
+      "id": "W-091/ui-media-library-empty-note",
+      "requirement": "R-007",
+      "description": "an empty library shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "{!busy && items.length === 0 && (",
+          "replace": "{false && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*empty library says so"
+    },
+    {
+      "id": "W-091/ui-media-library-error-hidden",
+      "requirement": "R-007",
+      "description": "a library error is hidden",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "      setError(caught instanceof Error ? caught.message : \"Couldn't load the media library.\");",
+          "replace": "      setError(null);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*fails to load shows its error"
+    },
+    {
+      "id": "W-091/ui-media-library-close",
+      "requirement": "R-007",
+      "description": "Close leaves the library open",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "              onClick={() => setOpen(false)}\n            >\n              Close",
+          "replace": "              onClick={() => undefined}\n            >\n              Close"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Close hides the library"
+    },
+    {
+      "id": "W-091/ui-conflict-reload-overwrites",
+      "requirement": "R-006",
+      "description": "Reload page overwrites",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "<Button variant=\"secondary\" className={BUTTON} onClick={onReload}>",
+          "replace": "<Button variant=\"secondary\" className={BUTTON} onClick={onOverwrite}>"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/dialogs.test.tsx"],
+      "expect": "\\(fail\\).*Reload and Overwrite"
+    },
+    {
+      "id": "W-091/ui-leave-discard-saves",
+      "requirement": "R-006",
+      "description": "Discard changes saves and leaves",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "              onClick={onDiscard}\n",
+          "replace": "              onClick={onSaveAndLeave}\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/dialogs.test.tsx"],
+      "expect": "\\(fail\\).*discards, saves and leaves"
+    },
+    {
+      "id": "W-091/ui-leave-keep-editing-discards",
+      "requirement": "R-006",
+      "description": "Keep editing doesn't close the dialog",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "            <Dialog.Close\n              render={(props) => (\n                <Button {...props} variant=\"secondary\" className={BUTTON}>\n                  Keep editing",
+          "replace": "            <Dialog.Close\n              render={(props) => (\n                <Button {...props} onClick={undefined} variant=\"secondary\" className={BUTTON}>\n                  Keep editing"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/dialogs.test.tsx"],
+      "expect": "\\(fail\\).*keeps editing"
+    },
+    {
+      "id": "W-091/ui-delete-count-whole",
+      "requirement": "R-006",
+      "description": "the delete title counts the element itself",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "  const inside = count - 1;",
+          "replace": "  const inside = count;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/dialogs.test.tsx"],
+      "expect": "\\(fail\\).*counts the elements inside"
+    },
+    {
+      "id": "W-091/ui-delete-plural-always",
+      "requirement": "R-006",
+      "description": "the delete title is always plural",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "element{inside === 1 ? \"\" : \"s\"} inside it?",
+          "replace": "elements inside it?"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/dialogs.test.tsx"],
+      "expect": "\\(fail\\).*singular and plural"
+    },
+    {
+      "id": "W-091/ui-number-exponent-accepted",
+      "requirement": "R-021",
+      "description": "1e3 style numbers are accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "const n = /^-?(?:\\d+(?:\\.\\d*)?|\\.\\d+)$/.test(text) ? Number(text) : Number.NaN;",
+          "replace": "const n = Number(text);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*are refused"
+    },
+    {
+      "id": "W-091/ui-number-integer-unchecked",
+      "requirement": "R-021",
+      "description": "integer fields take fractions",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "if (spec.integer && !Number.isInteger(n)) {",
+          "replace": "if (false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*are refused"
+    },
+    {
+      "id": "W-091/ui-number-max-off-by-one",
+      "requirement": "R-021",
+      "description": "the maximum is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "if (n < spec.min || n > spec.max) {",
+          "replace": "if (n < spec.min || n >= spec.max) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*are refused"
+    },
+    {
+      "id": "W-091/ui-number-min-unchecked",
+      "requirement": "R-021",
+      "description": "below the minimum is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "if (n < spec.min || n > spec.max) {",
+          "replace": "if (n > spec.max) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*are refused"
+    },
+    {
+      "id": "W-091/ui-number-scale-not-undone",
+      "requirement": "R-021",
+      "description": "a scaled value commits in display units",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "Math.round((n / scale) * 1000) / 1000",
+          "replace": "Math.round(n * 1000) / 1000"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*display units"
+    },
+    {
+      "id": "W-091/ui-number-scale-unrounded",
+      "requirement": "R-021",
+      "description": "the stored scaled value isn't rounded",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "Math.round((n / scale) * 1000) / 1000",
+          "replace": "n / scale"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*display units"
+    },
+    {
+      "id": "W-091/ui-number-shown-unscaled",
+      "requirement": "R-021",
+      "description": "the stored value shows unscaled",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "String(Math.round(value * (spec.scale ?? 1) * 1000) / 1000)",
+          "replace": "String(value)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*display units"
+    },
+    {
+      "id": "W-091/ui-number-empty-not-unset",
+      "requirement": "R-021",
+      "description": "an empty field reports an error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "if (text === \"\") return { ok: true, value: undefined };",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*empty field unsets"
+    },
+    {
+      "id": "W-091/ui-number-recommit-same",
+      "requirement": "R-021",
+      "description": "an unchanged value commits again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "if (parsed.value !== value) onCommit(parsed.value);",
+          "replace": "onCommit(parsed.value);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*isn't committed again"
+    },
+    {
+      "id": "W-091/ui-number-error-sticks",
+      "requirement": "R-021",
+      "description": "the error isn't cleared on a valid entry",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "    setError(null);\n    if (parsed.value",
+          "replace": "    if (parsed.value"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*clears the error"
+    },
+    {
+      "id": "W-091/ui-number-no-blur-commit",
+      "requirement": "R-021",
+      "description": "blur doesn't commit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "      onBlur={commit}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*display units"
+    },
+    {
+      "id": "W-091/ui-number-inherited-placeholder-raw",
+      "requirement": "R-021",
+      "description": "the inherited placeholder is unscaled",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "placeholder={inherited === undefined ? spec.placeholder : shown(inherited, spec)}",
+          "replace": "placeholder={inherited === undefined ? spec.placeholder : String(inherited)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*placeholder"
+    },
+    {
+      "id": "W-091/ui-number-inherited-flag-when-set",
+      "requirement": "R-021",
+      "description": "data-inherited ignores whether the row is set",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "data-inherited={!set && inherited !== undefined ? \"true\" : undefined}",
+          "replace": "data-inherited={inherited !== undefined || !set ? \"true\" : undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*placeholder"
+    },
+    {
+      "id": "W-091/ui-number-reset-always-enabled",
+      "requirement": "R-021",
+      "description": "reset is enabled when unset",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "      disabled={!set}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*reset is disabled"
+    },
+    {
+      "id": "W-091/ui-number-reset-noop",
+      "requirement": "R-021",
+      "description": "reset doesn't unset",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "onReset={() => onCommit(undefined)}",
+          "replace": "onReset={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*reset is disabled"
+    },
+    {
+      "id": "W-091/ui-number-suffix-missing",
+      "requirement": "R-021",
+      "description": "the unit suffix isn't in the label",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/NumberRow.tsx",
+          "search": "label={spec.suffix ? `${label} (${spec.suffix})` : label}",
+          "replace": "label={label}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
+      ],
+      "expect": "\\(fail\\).*display units"
     }
   ]
 }
