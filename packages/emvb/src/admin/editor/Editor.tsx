@@ -1,11 +1,20 @@
 import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@cloudflare/kumo";
 import { WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { findNode, moveDown, moveUp, renderPage } from "../../core/index.ts";
+import {
+  DEVICE_PREVIEW_PX,
+  findNode,
+  moveDown,
+  moveUp,
+  renderPage,
+  toggleHidden,
+  type PopupDevice,
+} from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
 import { loadFormsCapability } from "../forms-api.ts";
 import { CanvasFrame, type CanvasSelection } from "./canvas/CanvasFrame.tsx";
+import { DeviceBar } from "./canvas/DeviceBar.tsx";
 import type { StatePreview } from "./canvas/state-preview.ts";
 import type { StyleStateChoice } from "./panels/settings/StateSwitcher.tsx";
 import { EmptyCanvas } from "./canvas/EmptyCanvas.tsx";
@@ -114,6 +123,7 @@ function EditorApp({
   const saver = useSave(fetcher, state, dispatch, collection);
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const [siteStylesOpen, setSiteStylesOpen] = React.useState(false);
+  const [device, setDevice] = React.useState<PopupDevice>("desktop");
   const [statePreview, setStatePreview] = React.useState<StatePreview | null>(null);
   const onStyleState = React.useCallback((id: string, choice: StyleStateChoice) => {
     setStatePreview(choice === "normal" ? null : { id, state: choice });
@@ -262,11 +272,38 @@ function EditorApp({
                 </div>
               </aside>
               <main className="emvb-canvas">
+                <DeviceBar
+                  device={device}
+                  hidden={
+                    !!state.page.layout &&
+                    !!state.selectedId &&
+                    !!findNode(state.page.layout, state.selectedId)?.hiddenOn?.includes(device)
+                  }
+                  canHide={!!state.selectedId}
+                  onDevice={setDevice}
+                  onToggleHidden={() => {
+                    const id = state.selectedId;
+                    const node =
+                      state.page.layout && id ? findNode(state.page.layout, id) : undefined;
+                    if (!node) return;
+                    const hiddenOn = toggleHidden(node.hiddenOn, device);
+                    dispatch({
+                      type: "update-node",
+                      id: node.id,
+                      update: (current) => {
+                        const next = { ...current, hiddenOn };
+                        if (!hiddenOn) delete next.hiddenOn;
+                        return next;
+                      },
+                    });
+                  }}
+                />
                 {rendered ? (
                   <CanvasFrame
                     vnode={rendered.vnode}
                     css={rendered.css}
                     layout={state.page.layout}
+                    previewWidth={device === "desktop" ? null : DEVICE_PREVIEW_PX[device]}
                     selection={selection}
                     statePreview={statePreview}
                     refusal={refusalShown ? refusal : null}
@@ -298,6 +335,7 @@ function EditorApp({
                 onSlugEdit={saver.clearSlugError}
                 kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
                 onStyleState={onStyleState}
+                device={device}
               />
             </div>
           </>

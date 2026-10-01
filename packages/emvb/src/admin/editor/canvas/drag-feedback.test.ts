@@ -4,7 +4,7 @@ import { dropLineBox } from "./CanvasFrame.tsx";
 import { container, heading } from "../../../../test/fixtures/layouts.ts";
 
 const layout: Layout = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   root: container("root0001", [
     heading("head0001"),
     container("box00001", [heading("head0002")]),

@@ -7,7 +7,7 @@ test.describe.configure({ mode: "serial" });
 setUpEmvbOnce();
 
 const layoutFor = (text: string) => ({
-  schemaVersion: 4,
+  schemaVersion: 5,
   root: {
     id: "root0001",
     type: "container",

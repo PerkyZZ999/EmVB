@@ -1,5 +1,5 @@
 import type * as React from "react";
-import type { DesignSystem, LayoutNode } from "../../../core/index.ts";
+import type { DesignSystem, LayoutNode, PopupDevice } from "../../../core/index.ts";
 import type { Fetcher } from "../../api.ts";
 import type { EditorAction, EditorState } from "../store.ts";
 import { ElementPanel } from "./ElementPanel.tsx";
@@ -23,6 +23,7 @@ export function SettingsPanel({
   onSlugEdit,
   kind,
   onStyleState,
+  device = "desktop",
 }: {
   state: EditorState;
   latest: React.RefObject<EditorState>;
@@ -39,6 +40,8 @@ export function SettingsPanel({
   kind: "page" | "theme-part";
   /** The Style tab's chosen state, for the canvas preview (W-089). */
   onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
+  /** Which device's styles the Style tab edits (W-096). */
+  device?: PopupDevice;
 }) {
   return (
     <aside
@@ -76,6 +79,7 @@ export function SettingsPanel({
           onDesignChange={onDesignChange}
           onSelect={(id) => dispatch({ type: "select", id })}
           onStyleState={onStyleState}
+          device={device}
         />
       ) : (
         <PageSettings

@@ -28,9 +28,14 @@ import {
   type ElementDescriptor,
   type Layout,
   type LayoutNode,
+  patchClassDevices,
   patchClassState,
   patchClassStyle,
+  patchDeviceStyle,
   patchStates,
+  type DeviceStyles,
+  type PopupDevice,
+  type ResponsiveDevice,
   resolveCascade,
   STYLE_STATES,
   type StyleProps,
@@ -92,6 +97,11 @@ const withStyle = (node: LayoutNode, patch: Partial<StyleProps>): LayoutNode => 
     ...node,
     style: Object.keys(style).length > 0 ? (style as StyleProps) : undefined,
   };
+};
+
+const withDevices = (node: LayoutNode, devices: DeviceStyles | undefined): LayoutNode => {
+  const { devices: _old, ...rest } = node;
+  return (devices ? { ...rest, devices } : rest) as LayoutNode;
 };
 
 const withStates = (node: LayoutNode, states: StyleStates | undefined): LayoutNode => {
@@ -173,6 +183,8 @@ type Props = {
   onSelect: (id: string | null) => void;
   /** The chosen style state, for the canvas preview (W-089). */
   onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
+  /** Tablet and mobile edit overrides. Desktop edits `style` (W-096). */
+  device?: PopupDevice;
 };
 
 const FORM_TYPES = new Set([
@@ -278,6 +290,7 @@ function KnownElementPanel({
   onDesignChange,
   onSelect,
   onStyleState,
+  device = "desktop",
   descriptor,
 }: Props & { descriptor: ElementDescriptor }) {
   const ui = STYLE_UI[node.type] ?? DEFAULT_UI;
@@ -292,10 +305,36 @@ function KnownElementPanel({
   }, [node.id, styleState, tab, onStyleState]);
   const normal = cls ? cls.style : node.style;
   const states = cls ? cls.states : node.states;
-  const style = styleState === "normal" ? normal : states?.[styleState];
-  const inherited = styleState === "normal" ? undefined : normal;
+  const responsive: ResponsiveDevice | null = device === "desktop" ? null : device;
+  const ownerDevices = cls ? cls.devices : node.devices;
+  const style = responsive
+    ? ownerDevices?.[responsive]
+    : styleState === "normal"
+      ? normal
+      : states?.[styleState];
+  const inherited = responsive
+    ? {
+        ...normal,
+        ...(responsive === "mobile" ? ownerDevices?.tablet : undefined),
+      }
+    : styleState === "normal"
+      ? undefined
+      : normal;
   const position = positionInEffect(node, design, cls);
   const patchStyle = (patch: Partial<StyleProps>) => {
+    if (responsive) {
+      if (!cls) {
+        onChange(withDevices(node, patchDeviceStyle(node.devices, responsive, patch)));
+        return;
+      }
+      setDesignError(null);
+      onDesignChange(patchClassDevices(design, cls.id, responsive, patch)).catch((error: unknown) =>
+        setDesignError(
+          error instanceof Error ? error.message : "Couldn't save the class. Try again.",
+        ),
+      );
+      return;
+    }
     const state = styleState;
     if (!cls) {
       onChange(
@@ -407,12 +446,18 @@ function KnownElementPanel({
             onChange={(classes) => onChange({ ...node, classes })}
             onDesignChange={onDesignChange}
           />
-          <StateSwitcher
-            value={styleState}
-            states={states}
-            className={cls ? cls.name : null}
-            onChange={setStyleState}
-          />
+          {device === "desktop" ? (
+            <StateSwitcher
+              value={styleState}
+              states={states}
+              className={cls ? cls.name : null}
+              onChange={setStyleState}
+            />
+          ) : (
+            <p className="emvb-helper">
+              These override Desktop. State styles apply on every device.
+            </p>
+          )}
           {designError && <Alert>{designError}</Alert>}
           {!cls && styleState === "normal" && node.type === "spacer" && (
             <FieldControl field={SPACER_HEIGHT} node={node} onChange={onChange} fetcher={fetcher} />

@@ -9,7 +9,7 @@ import {
 } from "./useSave.ts";
 
 const layout: Layout = {
-  schemaVersion: 4,
+  schemaVersion: 5,
   root: {
     id: "root0001",
     type: "container",
@@ -52,7 +52,7 @@ describe("save failures (R-006)", () => {
       type: "heading",
       props: { text: "A", level: 1 },
     }));
-    const wide: Layout = { schemaVersion: 4, root: { ...layout.root, children } };
+    const wide: Layout = { schemaVersion: 5, root: { ...layout.root, children } };
     const message = "The page layout is invalid. root.children[11].props.level: too big";
     expect(
       saveFailure(new ApiError(422, "SAVE_REJECTED", message), { ...page, layout: wide }),

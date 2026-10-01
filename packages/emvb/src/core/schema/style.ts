@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isSafeFontStack } from "../sanitize/css.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
+import { POPUP_DEVICES } from "../theme/popup-rules.ts";
 
 /** Colour refs omit `from` (legacy). Length/font refs set `from` (W-028). */
 export const VariableRef = z.strictObject({
@@ -209,3 +210,19 @@ export const StyleStates = z.strictObject({
 });
 
 export type StyleStates = z.infer<typeof StyleStates>;
+
+/**
+ * Tablet and mobile overrides (W-096). Desktop is the element's `style`. Only keys that differ
+ * are stored. A phone matches both media queries, so mobile wins over tablet for the same key.
+ */
+export const DeviceStyles = z.strictObject({
+  tablet: StyleProps.optional(),
+  mobile: StyleProps.optional(),
+});
+
+export type DeviceStyles = z.infer<typeof DeviceStyles>;
+
+/** Devices on which the element is `display: none`. Empty means shown everywhere. */
+export const HiddenOn = z.array(z.enum(POPUP_DEVICES)).max(3);
+
+export type HiddenOn = z.infer<typeof HiddenOn>;

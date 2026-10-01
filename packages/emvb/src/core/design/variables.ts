@@ -1,7 +1,7 @@
 import type { DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { STYLE_STATES } from "../schema/state-names.ts";
-import type { StyleProps, StyleStates } from "../schema/style.ts";
+import type { DeviceStyles, StyleProps, StyleStates } from "../schema/style.ts";
 import { nodeChildren, updateNode } from "../tree-ops.ts";
 
 export type VariableKind = "color" | "font" | "fontSize" | "spacing";
@@ -51,9 +51,11 @@ function collectStyleUsages(
   if (matches(style.overlay?.color, id, kind)) hit("overlay.color");
 }
 
-/** Style and state styles (W-089) together; a state usage is reported as `<state>.<prop>`. */
+const RESPONSIVE = ["tablet", "mobile"] as const;
+
+/** Style, state styles and device overrides. A nested usage is `<state|device>.<prop>`. */
 function collectAllUsages(
-  owner: { style?: StyleProps; states?: StyleStates },
+  owner: { style?: StyleProps; states?: StyleStates; devices?: DeviceStyles },
   id: string,
   kind: VariableKind | undefined,
   hit: (prop: string) => void,
@@ -61,6 +63,9 @@ function collectAllUsages(
   collectStyleUsages(owner.style, id, kind, hit);
   for (const state of STYLE_STATES) {
     collectStyleUsages(owner.states?.[state], id, kind, (prop) => hit(`${state}.${prop}`));
+  }
+  for (const device of RESPONSIVE) {
+    collectStyleUsages(owner.devices?.[device], id, kind, (prop) => hit(`${device}.${prop}`));
   }
 }
 
@@ -155,18 +160,39 @@ function stripRefsFromStates(
   return Object.keys(next).length === 0 ? undefined : next;
 }
 
-/** Style and states with the refs removed, keeping the same object when nothing changed. */
-function stripOwner<T extends { style?: StyleProps; states?: StyleStates }>(
+function stripRefsFromDevices(
+  devices: DeviceStyles | undefined,
+  id: string,
+  kind: VariableKind | undefined,
+): DeviceStyles | undefined {
+  if (!devices) return undefined;
+  let changed = false;
+  const next: DeviceStyles = { ...devices };
+  for (const device of RESPONSIVE) {
+    const style = stripRefsFromStyle(devices[device], id, kind);
+    if (style === devices[device]) continue;
+    changed = true;
+    if (style) next[device] = style;
+    else delete next[device];
+  }
+  if (!changed) return devices;
+  return next.tablet || next.mobile ? next : undefined;
+}
+
+/** Style, states and device overrides with the refs removed. Same object when nothing changed. */
+function stripOwner<T extends { style?: StyleProps; states?: StyleStates; devices?: DeviceStyles }>(
   owner: T,
   id: string,
   kind: VariableKind | undefined,
 ): T {
   const style = stripRefsFromStyle(owner.style, id, kind);
   const states = stripRefsFromStates(owner.states, id, kind);
-  if (style === owner.style && states === owner.states) return owner;
-  const next: T = { ...owner, style, states };
+  const devices = stripRefsFromDevices(owner.devices, id, kind);
+  if (style === owner.style && states === owner.states && devices === owner.devices) return owner;
+  const next: T = { ...owner, style, states, devices };
   if (style === undefined) delete next.style;
   if (states === undefined) delete next.states;
+  if (devices === undefined) delete next.devices;
   return next;
 }
 

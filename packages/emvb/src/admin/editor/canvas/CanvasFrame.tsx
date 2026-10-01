@@ -122,6 +122,7 @@ export function CanvasFrame({
   layout,
   selection,
   statePreview = null,
+  previewWidth = null,
   refusal = null,
   onDropNew,
   onMove,
@@ -132,6 +133,8 @@ export function CanvasFrame({
   selection: CanvasSelection;
   /** The style state chosen in the Style tab, shown on the selected element (W-089). */
   statePreview?: StatePreview | null;
+  /** Tablet or mobile preview width in px. Desktop is the full canvas (W-096, no zoom). */
+  previewWidth?: number | null;
   /** A refused paste, outlined on its target with the reason like an invalid drop (W-093). */
   refusal?: PasteRefusal | null;
   onDropNew: (elementType: string, parentId: string, index: number) => void;
@@ -284,22 +287,27 @@ export function CanvasFrame({
 
   return (
     <div className="emvb-stage">
-      <iframe
-        ref={frame}
-        title="Page canvas"
-        data-emvb-canvas=""
-        srcDoc={SRCDOC}
-        sandbox="allow-same-origin"
-        onLoad={onLoad}
-      />
-      <SelectionOverlay
-        hover={boxes.hover}
-        selected={boxes.selected}
-        selectedId={selectedId}
-        selection={selection}
-        dropLine={dropLine}
-        invalid={invalid ?? refused}
-      />
+      <div
+        className="emvb-stage-frame"
+        style={previewWidth ? { width: previewWidth, maxWidth: "100%" } : undefined}
+      >
+        <iframe
+          ref={frame}
+          title="Page canvas"
+          data-emvb-canvas=""
+          srcDoc={SRCDOC}
+          sandbox="allow-same-origin"
+          onLoad={onLoad}
+        />
+        <SelectionOverlay
+          hover={boxes.hover}
+          selected={boxes.selected}
+          selectedId={selectedId}
+          selection={selection}
+          dropLine={dropLine}
+          invalid={invalid ?? refused}
+        />
+      </div>
       {doc && createPortal(<style data-emvb-canvas-css="">{css}</style>, doc.head)}
       {doc &&
         createPortal(<style data-emvb-editor-canvas-css="">{EDITOR_CANVAS_CSS}</style>, doc.head)}

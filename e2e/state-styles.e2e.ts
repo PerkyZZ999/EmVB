@@ -27,7 +27,7 @@ const button = (id: string, text: string, extra: Record<string, unknown> = {}) =
 });
 
 const layoutWith = (children: unknown[]) => ({
-  schemaVersion: 4,
+  schemaVersion: 5,
   root: {
     id: "root0001",
     type: "container",

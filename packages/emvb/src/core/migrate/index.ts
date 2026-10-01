@@ -4,8 +4,8 @@ export type Migration = (doc: Record<string, unknown>) => Record<string, unknown
 
 /**
  * v1 → v2 (D-031) marks the W-088 style keys as possible, v2 → v3 (D-032) the W-089
- * `states` and `transition`, and v3 → v4 (D-034) background images, gradients and overlays.
- * Every older value is valid in the newer version.
+ * `states` and `transition`, v3 → v4 (D-034) background images, gradients and overlays,
+ * and v4 → v5 (D-036) per-device styles. Every older value is valid in the newer version.
  */
 const unchanged: Migration = (doc) => doc;
 
@@ -14,6 +14,7 @@ export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {
   1: unchanged,
   2: unchanged,
   3: unchanged,
+  4: unchanged,
 };
 
 /** `DESIGN_MIGRATIONS[n]` upgrades a version-n design document to version n + 1. */
@@ -21,6 +22,7 @@ export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {
   1: unchanged,
   2: unchanged,
   3: unchanged,
+  4: unchanged,
 };
 
 export type UpgradeResult =

@@ -7901,7 +7901,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7910,9 +7910,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "a v1 layout upgrades to v4"
+        "a v1 layout upgrades to v5"
       ],
-      "expect": "\\(fail\\).*a v1 layout upgrades to v4"
+      "expect": "\\(fail\\).*a v1 layout upgrades to v5"
     },
     {
       "id": "D-031/design-v1-step-missing",
@@ -7921,7 +7921,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7961,7 +7961,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 4;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 5;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -7970,9 +7970,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "a v1 layout upgrades to v4"
+        "a v1 layout upgrades to v5"
       ],
-      "expect": "\\(fail\\).*a v1 layout upgrades to v4"
+      "expect": "\\(fail\\).*a v1 layout upgrades to v5"
     },
     {
       "id": "D-031/upgraded-layout-not-stored",
@@ -8221,7 +8221,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8230,9 +8230,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "a v2 layout upgrades to v4"
+        "a v2 layout upgrades to v5"
       ],
-      "expect": "\\(fail\\).*a v2 layout upgrades to v4"
+      "expect": "\\(fail\\).*a v2 layout upgrades to v5"
     },
     {
       "id": "D-032/design-v2-step-missing",
@@ -8241,7 +8241,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8261,7 +8261,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 4;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 5;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8270,9 +8270,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 4"
+        "layout and design are at version 5"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 4"
+      "expect": "\\(fail\\).*layout and design are at version 5"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8281,7 +8281,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 4;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 5;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8290,9 +8290,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 4"
+        "layout and design are at version 5"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 4"
+      "expect": "\\(fail\\).*layout and design are at version 5"
     },
     {
       "id": "D-032/node-states-refused",
@@ -8561,7 +8561,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "    if (id && (declarations.length > 0 || Object.keys(states.states).length > 0)) {",
+          "search": "    if (id && (declarations.length > 0 || Object.keys(states.states).length > 0 || responsive)) {",
           "replace": "    if (id && declarations.length > 0) {"
         }
       ],
@@ -9021,7 +9021,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "  const inherited = styleState === \"normal\" ? undefined : normal;",
+          "search": "  const inherited = responsive\n    ? {\n        ...normal,\n        ...(responsive === \"mobile\" ? ownerDevices?.tablet : undefined),\n      }\n    : styleState === \"normal\"\n      ? undefined\n      : normal;",
           "replace": "  const inherited = undefined;"
         }
       ],
@@ -16099,6 +16099,108 @@
         "Ctrl\\+Z restores a deleted"
       ],
       "expect": "✘.*\\[node\\].*Ctrl\\+Z restores a deleted"
+    },
+    {
+      "id": "W-096/tablet-query-wrong",
+      "requirement": "W-096",
+      "description": "the tablet media query no longer matches deviceForWidth",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-rules.ts",
+          "search": "tablet: \"(max-width: 1024px)\",",
+          "replace": "tablet: \"(max-width: 10px)\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/devices.test.ts",
+        "-t",
+        "preview widths"
+      ],
+      "expect": "\\(fail\\).*preview widths"
+    },
+    {
+      "id": "W-096/mobile-before-tablet",
+      "requirement": "W-096",
+      "description": "mobile overrides are emitted before tablet, so tablet wins on a phone",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    at(DEVICE_MEDIA.tablet, \"tablet\"),\n    at(DEVICE_MEDIA.mobile, \"mobile\"),",
+          "replace": "    at(DEVICE_MEDIA.mobile, \"mobile\"),\n    at(DEVICE_MEDIA.tablet, \"tablet\"),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/devices.test.ts",
+        "-t",
+        "tablet overrides come first"
+      ],
+      "expect": "\\(fail\\).*tablet overrides come first"
+    },
+    {
+      "id": "W-096/hide-uses-style-query",
+      "requirement": "W-096",
+      "description": "hiding on desktop uses the tablet style query",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    hide(\"desktop\", DEVICE_MEDIA.hideDesktop),",
+          "replace": "    hide(\"desktop\", DEVICE_MEDIA.tablet),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/devices.test.ts",
+        "-t",
+        "tablet overrides come first"
+      ],
+      "expect": "\\(fail\\).*tablet overrides come first"
+    },
+    {
+      "id": "W-096/cleared-device-kept",
+      "requirement": "W-096",
+      "description": "clearing the last device override leaves an empty object",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/devices.ts",
+          "search": "  return next.tablet || next.mobile ? next : undefined;",
+          "replace": "  return next;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/devices.test.ts",
+        "-t",
+        "a device override drops"
+      ],
+      "expect": "\\(fail\\).*a device override drops"
+    },
+    {
+      "id": "W-096/e2e-hide-not-stored",
+      "requirement": "W-096",
+      "description": "Hide on mobile does not change the element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "const hiddenOn = toggleHidden(node.hiddenOn, device);",
+          "replace": "const hiddenOn = node.hiddenOn;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/devices.e2e.ts",
+        "--project=node",
+        "-g",
+        "Hide on mobile"
+      ],
+      "expect": "✘.*\\[node\\].*Hide on mobile"
     }
   ]
 }

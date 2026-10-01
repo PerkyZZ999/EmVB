@@ -137,8 +137,12 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-layer-select[aria-current="true"]:focus-visible { outline-color: #fff; }
 .emvb-layer-preview { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color-kumo-subtle); }
 .emvb-layer-select[aria-current="true"] .emvb-layer-preview { color: inherit; }
-.emvb-canvas { min-width: 0; min-height: 0; background: var(--color-kumo-canvas); }
-.emvb-stage { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.emvb-canvas { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--color-kumo-canvas); }
+.emvb-device-bar { display: flex; flex: none; align-items: center; justify-content: center; gap: 12px; height: 36px; border-bottom: 1px solid var(--color-kumo-line); background: var(--color-kumo-surface); }
+.emvb-device-tabs { width: 240px; }
+.emvb-device-hide { display: inline-flex; align-items: center; gap: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
+.emvb-stage { position: relative; display: flex; flex: 1 1 auto; justify-content: center; min-height: 0; width: 100%; overflow: hidden; }
+.emvb-stage-frame { position: relative; width: 100%; height: 100%; }
 .emvb-canvas iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
 .emvb-overlay { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .emvb-outline-hover, .emvb-outline-selected { position: absolute; box-shadow: inset 0 0 0 1px var(--color-kumo-brand); }

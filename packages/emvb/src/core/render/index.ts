@@ -85,7 +85,14 @@ export function renderPage(
   const baseDynamic = opts.dynamic;
   const warnings: RenderWarning[] = [];
   const usedTypes = new Set<string>();
-  const localRules: { id: string; declarations: Declaration[]; states: StateDeclarations }[] = [];
+  const localRules: {
+    id: string;
+    declarations: Declaration[];
+    states: StateDeclarations;
+    tablet?: Declaration[];
+    mobile?: Declaration[];
+    hiddenOn?: LayoutNode["hiddenOn"];
+  }[] = [];
   const knownVariables = new Set(design.variables.colors.map((c) => c.id));
 
   const ctx: RenderContext = {
@@ -109,7 +116,11 @@ export function renderPage(
       if (name) classes.push(name);
     }
     const { declarations, rejected } = styleDeclarations(node.style);
-    for (const key of rejected) warnings.push({ nodeId, code: "rejected-style", detail: key });
+    const tablet = styleDeclarations(node.devices?.tablet);
+    const mobile = styleDeclarations(node.devices?.mobile);
+    for (const key of [...rejected, ...tablet.rejected, ...mobile.rejected]) {
+      warnings.push({ nodeId, code: "rejected-style", detail: key });
+    }
     if (node.type === "spacer") {
       const height = cssLength((node as { props: { height: unknown } }).props.height);
       if (height) declarations.push({ property: "height", value: height });
@@ -123,9 +134,21 @@ export function renderPage(
         warnings.push({ nodeId, code: "unknown-variable", detail: color.var });
       }
     }
-    if (id && (declarations.length > 0 || Object.keys(states.states).length > 0)) {
+    const hiddenOn = node.hiddenOn;
+    const responsive =
+      tablet.declarations.length > 0 ||
+      mobile.declarations.length > 0 ||
+      (hiddenOn?.length ?? 0) > 0;
+    if (id && (declarations.length > 0 || Object.keys(states.states).length > 0 || responsive)) {
       classes.push(`emvb-e-${id}`);
-      localRules.push({ id, declarations, states: states.states });
+      localRules.push({
+        id,
+        declarations,
+        states: states.states,
+        tablet: tablet.declarations,
+        mobile: mobile.declarations,
+        hiddenOn,
+      });
     }
     const attrs: Record<string, string> = { class: classes.join(" ") };
     if (mode === "editor" && id) attrs["data-emvb-id"] = id;

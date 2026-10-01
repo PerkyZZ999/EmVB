@@ -11,6 +11,21 @@ export const TRIGGER_LIMITS = {
 export const POPUP_DEVICES = ["desktop", "tablet", "mobile"] as const;
 export type PopupDevice = (typeof POPUP_DEVICES)[number];
 
+/**
+ * Widths that agree with `deviceForWidth` (W-096). The canvas previews tablet at 768 and mobile
+ * at 390, with no zoom. Public CSS uses the matching max-width queries.
+ */
+export const DEVICE_PREVIEW_PX = { tablet: 768, mobile: 390 } as const;
+
+/** Public CSS queries. Bounds match `deviceForWidth`: 767 mobile, 1024 tablet, 1025 desktop. */
+export const DEVICE_MEDIA = {
+  tablet: "(max-width: 1024px)",
+  mobile: "(max-width: 767px)",
+  hideDesktop: "(min-width: 1025px)",
+  hideTablet: "(min-width: 768px) and (max-width: 1024px)",
+  hideMobile: "(max-width: 767px)",
+} as const;
+
 /** A scroll percent as a number from 0 to 100; anything unreadable is 0. */
 export const clampScrollPercent = (value: unknown): number =>
   Math.min(TRIGGER_LIMITS.maxScrollPercent, Math.max(0, Number(value) || 0));

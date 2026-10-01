@@ -29,8 +29,8 @@ describe("content:beforeSave on emvb_pages", () => {
     expect(result.success).toBe(true);
   });
 
-  test.each([1, 2, 3])(
-    "a v%i layout is stored upgraded to v4 with its content unchanged (D-031, D-032, D-034)",
+  test.each([1, 2, 3, 4])(
+    "a v%i layout is stored upgraded to v5 with its content unchanged (D-031, D-032, D-034, D-036)",
     async (version) => {
       const result = await t.savePage({
         title: "Home",
@@ -125,7 +125,7 @@ describe("design routes", () => {
         success: true,
         data: {
           design: {
-            schemaVersion: 4,
+            schemaVersion: 5,
             variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
             classes: [],
           },
@@ -145,9 +145,9 @@ describe("design routes", () => {
     expect(first.status).toBe(200);
     const revision = (first.body["data"] as { revision: string }).revision;
     const read = await t.route("design");
-    // A v1 document comes back upgraded to v4 (D-031, D-032, D-034).
+    // A v1 document comes back upgraded to v5 (D-031, D-032, D-034, D-036).
     expect(read.body["data"]).toEqual({
-      design: { ...design(), schemaVersion: 4 },
+      design: { ...design(), schemaVersion: 5 },
       revision,
       status: "ok",
     });
@@ -223,7 +223,7 @@ describe("design routes", () => {
     } as never;
     expect(await designRoute.handler(ctx)).toEqual({
       design: {
-        schemaVersion: 4,
+        schemaVersion: 5,
         variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
         classes: [],
       },

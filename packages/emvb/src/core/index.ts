@@ -66,6 +66,8 @@ export {
 export {
   StyleProps,
   StyleStates,
+  DeviceStyles,
+  HiddenOn,
   ColorValue,
   Length,
   LengthValue,
@@ -135,6 +137,12 @@ export {
   replaceClassId,
 } from "./design/classes.ts";
 export { hasStateStyles, patchClassState, patchStates } from "./design/states.ts";
+export {
+  patchClassDevices,
+  patchDeviceStyle,
+  toggleHidden,
+  type ResponsiveDevice,
+} from "./design/devices.ts";
 export {
   renderPage,
   type RenderMode,
@@ -245,6 +253,9 @@ export {
   TRIGGER_LIMITS,
   clampScrollPercent,
   deviceForWidth,
+  POPUP_DEVICES,
+  DEVICE_MEDIA,
+  DEVICE_PREVIEW_PX,
   matchesPopupDevices,
   withinShowTimes,
   type PopupDevice,

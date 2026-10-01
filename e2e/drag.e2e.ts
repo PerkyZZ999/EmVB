@@ -3,7 +3,7 @@ import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
 
 const layoutFor = (first: string, second: string) => ({
-  schemaVersion: 4,
+  schemaVersion: 5,
   root: {
     id: "root0001",
     type: "container",
@@ -74,7 +74,7 @@ test("dragging Heading onto the canvas inserts at the pointed index and saves", 
 });
 
 const nestedLayout = (outer: string, inner: string) => ({
-  schemaVersion: 4,
+  schemaVersion: 5,
   root: {
     id: "root0001",
     type: "container",

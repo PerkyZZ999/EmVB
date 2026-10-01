@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { StyleProps, StyleStates } from "./style.ts";
+import { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./style.ts";
 
 /** 4 since W-094 (D-034). Class styles may use the same style keys as a node. */
-export const DESIGN_SCHEMA_VERSION = 4;
+export const DESIGN_SCHEMA_VERSION = 5;
 
 const VariableId = z
   .string()
@@ -41,6 +41,8 @@ const StyleClass = z.strictObject({
   name: z.string().min(1).max(60),
   style: StyleProps,
   states: StyleStates.optional(),
+  devices: DeviceStyles.optional(),
+  hiddenOn: HiddenOn.optional(),
 });
 
 /** Design system document (D-013 / W-028 / W-030). */

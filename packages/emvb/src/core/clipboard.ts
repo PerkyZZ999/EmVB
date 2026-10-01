@@ -24,7 +24,7 @@ import {
   type LayoutNode,
 } from "./schema/layout.ts";
 import { STYLE_STATES } from "./schema/state-names.ts";
-import type { StyleProps, StyleStates } from "./schema/style.ts";
+import type { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./schema/style.ts";
 import { findNode, nodeChildren } from "./tree-ops.ts";
 import { summarizeIssues, validateLayout } from "./validate.ts";
 
@@ -38,7 +38,12 @@ export const CLIPBOARD_FORMAT = "emvb-clipboard";
 export const CLIPBOARD_VERSION = 1;
 
 /** A node's local style: `style` (with its transition) and the hover, focus and active states. */
-export type CopiedStyle = { style?: StyleProps; states?: StyleStates };
+export type CopiedStyle = {
+  style?: StyleProps;
+  states?: StyleStates;
+  devices?: DeviceStyles;
+  hiddenOn?: HiddenOn;
+};
 
 export type ClipEnvelope = {
   format: typeof CLIPBOARD_FORMAT;
@@ -71,6 +76,8 @@ export function styleOf(node: LayoutNode): CopiedStyle {
   const copied: CopiedStyle = {};
   if (node.style) copied.style = structuredClone(node.style);
   if (node.states) copied.states = structuredClone(node.states);
+  if (node.devices) copied.devices = structuredClone(node.devices);
+  if (node.hiddenOn) copied.hiddenOn = structuredClone(node.hiddenOn);
   return copied;
 }
 
@@ -151,6 +158,8 @@ export function readClip(raw: string | null): ReadClip {
     const own: Record<string, unknown> = {};
     if (data["style"] !== undefined) own["style"] = data["style"];
     if (data["states"] !== undefined) own["states"] = data["states"];
+    if (data["devices"] !== undefined) own["devices"] = data["devices"];
+    if (data["hiddenOn"] !== undefined) own["hiddenOn"] = data["hiddenOn"];
     const layout = validated(schemaVersion, own);
     if ("ok" in layout) return layout;
     return { ok: true, clip: { kind, style: styleOf(layout.root) } };
@@ -197,6 +206,8 @@ function refsInStyle(style: StyleProps | undefined): Ref[] {
 const refsOf = (owner: CopiedStyle): Ref[] => [
   ...refsInStyle(owner.style),
   ...STYLE_STATES.flatMap((state) => refsInStyle(owner.states?.[state])),
+  ...refsInStyle(owner.devices?.tablet),
+  ...refsInStyle(owner.devices?.mobile),
 ];
 
 const hasVariable = (design: DesignSystem, ref: Ref) =>
@@ -320,13 +331,17 @@ export function prepareStyle(
   return { style: styleOf(holder), dropped };
 }
 
-/** Replaces the node's local style and states with `style`; props, classes and children stay. */
+/** Replaces the node's local style, states and device overrides; props, classes and children stay. */
 export function applyStyle<T extends LayoutNode>(node: T, style: CopiedStyle): T {
   const next = { ...node };
   delete next.style;
   delete next.states;
+  delete next.devices;
+  delete next.hiddenOn;
   if (style.style) next.style = structuredClone(style.style);
   if (style.states) next.states = structuredClone(style.states);
+  if (style.devices) next.devices = structuredClone(style.devices);
+  if (style.hiddenOn) next.hiddenOn = structuredClone(style.hiddenOn);
   return next;
 }
 

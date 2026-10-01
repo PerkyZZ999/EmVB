@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `4` (D-031, D-032, D-034; v1, v2 and v3 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- `schemaVersion` is the literal `5` (D-031, D-032, D-034, D-036; v1–v4 documents are upgraded on read by steps that change nothing). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -63,7 +63,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | `post-link` | optional `text`, `newTab` | none | Dynamic permalink; blank text → title |
 | `loop` | optional `itemPartId` | `children: Node[]` (inline item template when no part id) | Repeats item template for each archive post |
 
-Every node may also carry optional `htmlId` (CSS `id`, unique on the page) and `classes` (style-class ids from the design system, S4).
+Every node may also carry optional `htmlId` (CSS `id`, unique on the page), `classes` (style-class ids from the design system, S4), `devices` and `hiddenOn` (W-096, below).
 
 **Forms (S5):** form fields are only valid inside a `form` (or under one). Pages with a form set `needsFormsRuntime`; the host route loads `EmVBFormsRuntime` so `initForms` handles AJAX submit. Pages without a form stay zero EmVB JS (R-031).
 
@@ -129,11 +129,20 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 - **Reduced motion.** When any rule has a `transition`, the CSS ends with one `@media (prefers-reduced-motion: reduce){…{transition:none}}` block that lists exactly those selectors. Nothing else changes under reduced motion.
 - **Editor preview.** The canvas CSS repeats every state rule for `[data-emvb-state="hover"|"focus"|"active"]`, and the editor sets that attribute on the selected element while a state is chosen in the Style tab. Public CSS has neither the attribute nor those selectors.
 
+### Per-device styles (W-096)
+
+`node.devices` and `design.classes[].devices` are `{ "tablet"?, "mobile"? }`. Each is a style object with the same keys as `style`. Only keys that differ from desktop are stored. `node.hiddenOn` and `design.classes[].hiddenOn` are arrays of `"desktop"`, `"tablet"` and `"mobile"` (at most one of each). Desktop itself stays in `style`.
+
+- **Queries.** Tablet is `@media (max-width: 1024px)`, then mobile `@media (max-width: 767px)`. A phone matches both, so mobile wins on a shared key, and a tablet-only key still applies on mobile. The bounds match `deviceForWidth` (under 768 mobile, under 1025 tablet).
+- **Hide.** Each device has its own query, so `display: none` does not leak: desktop `(min-width: 1025px)`, tablet `(min-width: 768px) and (max-width: 1024px)`, mobile `(max-width: 767px)`.
+- **States.** Hover, focus and active stay all-viewport. Device overrides edit Normal only.
+- **Version.** Adding these fields moved the version to 5 (D-036) with a v4 → v5 step that changes nothing.
+
 ## Design system document
 
 ```json
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],
@@ -161,9 +170,9 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 
 ## Rendered output
 
-- The root gets `emvb-root`, each node `emvb-<type>` and, when its style yields at least one valid declaration, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning. Unknown element types render nothing publicly and a placeholder with `data-emvb-id` in the editor (warning `unknown-type`).
-- The CSS is, in order: variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021). Each class and local rule is followed by its state rules, and a reduced-motion block closes the CSS when a transition is set (see [State styles](#state-styles-w-089)).
-- **Style classes** (`design.classes[]`): `{ id, name, style, states? }`. Elements list ids in `node.classes`; HTML gets `emvb-k-<id>` in applied order. Cascade merge for computed styles: `resolveCascade(classStyles, local)` (later wins).
+- The root gets `emvb-root`, each node `emvb-<type>` and, when its style, a state, a device override or a hide flag yields a rule, `emvb-e-<id>`. Invalid style values are dropped with a render warning. A reference to an unknown variable is kept and also reported as a warning. Unknown element types render nothing publicly and a placeholder with `data-emvb-id` in the editor (warning `unknown-type`).
+- The CSS is, in order: variables on `.emvb-root` (`--emvb-c-*` colours, `--emvb-f-*` fonts, `--emvb-fs-*` font sizes, `--emvb-s-*` spacings), base CSS for the element types in use, then class rules (W-030), then one `.emvb-e-<id>{…}` rule per styled node (R-021). Each class and local rule is followed by its state rules, then the tablet media query, the mobile media query and the hide queries (see [Per-device styles](#per-device-styles-w-096)). A reduced-motion block closes the CSS when a transition is set (see [State styles](#state-styles-w-089)).
+- **Style classes** (`design.classes[]`): `{ id, name, style, states?, devices?, hiddenOn? }`. Elements list ids in `node.classes`; HTML gets `emvb-k-<id>` in applied order. Cascade merge for computed styles: `resolveCascade(classStyles, local)` (later wins).
 - Length/font style props may use `{ "var": "<id>", "from": "spacing"|"fontSize"|"font" }` (colours keep `{ "var": "<id>" }`). Offsets (`top`, `right`, `bottom`, `left`) take spacing variables; the shadow colour takes a colour variable.
 - Text and attributes are escaped by the serializer. Public output has no `data-emvb-*` attributes and no scripts.
 

@@ -13,6 +13,7 @@ import {
   type StateDeclarations,
 } from "../sanitize/css.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
+import { DEVICE_MEDIA, type PopupDevice } from "../theme/popup-rules.ts";
 
 export type CssInput = {
   design: DesignSystem;
@@ -22,6 +23,10 @@ export type CssInput = {
     id: string;
     declarations: Declaration[];
     states?: StateDeclarations;
+    /** Tablet and mobile overrides (W-096). Desktop stays in `declarations`. */
+    tablet?: Declaration[];
+    mobile?: Declaration[];
+    hiddenOn?: readonly PopupDevice[];
   }>;
   /** Editor canvas only: repeat each state rule for `[data-emvb-state="<state>"]` (W-089). */
   previewStates?: boolean;
@@ -109,11 +114,47 @@ export function generateCss({
   const locals = localRules.flatMap((rule) =>
     rules(`.emvb-e-${rule.id}`, track(`.emvb-e-${rule.id}`, rule.declarations), rule.states ?? {}),
   );
+  const responsive = [
+    ...(design.classes ?? []).flatMap((cls) => {
+      const className = styleClassName(cls.id);
+      return className
+        ? [
+            {
+              selector: `.${className}`,
+              tablet: styleDeclarations(cls.devices?.tablet).declarations,
+              mobile: styleDeclarations(cls.devices?.mobile).declarations,
+              hiddenOn: cls.hiddenOn,
+            },
+          ]
+        : [];
+    }),
+    ...localRules.map((rule) => ({
+      selector: `.emvb-e-${rule.id}`,
+      tablet: rule.tablet ?? [],
+      mobile: rule.mobile ?? [],
+      hiddenOn: rule.hiddenOn,
+    })),
+  ];
+  const at = (query: string, which: "tablet" | "mobile") => {
+    const body = responsive.map((rule) => block(rule.selector, rule[which])).join("");
+    return body ? `@media ${query}{${body}}` : "";
+  };
+  const hide = (device: PopupDevice, query: string) => {
+    const selectors = responsive
+      .filter((rule) => rule.hiddenOn?.includes(device))
+      .map((rule) => rule.selector);
+    return selectors.length > 0 ? `@media ${query}{${selectors.join(",")}{display:none}}` : "";
+  };
   return [
     block(".emvb-root", variables),
     ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? ""),
     ...classes,
     ...locals,
+    at(DEVICE_MEDIA.tablet, "tablet"),
+    at(DEVICE_MEDIA.mobile, "mobile"),
+    hide("desktop", DEVICE_MEDIA.hideDesktop),
+    hide("tablet", DEVICE_MEDIA.hideTablet),
+    hide("mobile", DEVICE_MEDIA.hideMobile),
     animated.length > 0
       ? `@media (prefers-reduced-motion: reduce){${animated.join(",")}{transition:none}}`
       : "",

@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { MAX_TEXT_LENGTH } from "../limits.ts";
-import { Length, StyleProps, StyleStates } from "./style.ts";
+import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
-/** 2 since W-088 (D-031): v1 → v2 changes nothing, so an older EmVB shows "saved by a newer EmVB". */
-export const LAYOUT_SCHEMA_VERSION = 4;
+/** 5 since W-096 (D-036): v4 → v5 changes nothing, so an older EmVB shows "saved by a newer EmVB". */
+export const LAYOUT_SCHEMA_VERSION = 5;
 
 export const NodeId = z
   .string()
@@ -36,6 +36,8 @@ const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) =>
   props,
   style: StyleProps.optional(),
   states: StyleStates.optional(),
+  devices: DeviceStyles.optional(),
+  hiddenOn: HiddenOn.optional(),
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
 });
@@ -391,6 +393,8 @@ export type PostLinkNode = z.infer<typeof PostLinkNode>;
 
 type StyleOf = z.infer<typeof StyleProps>;
 type StatesOf = z.infer<typeof StyleStates>;
+type DevicesOf = z.infer<typeof DeviceStyles>;
+type HiddenOnOf = z.infer<typeof HiddenOn>;
 type ClassesOf = z.infer<typeof ClassIds>;
 type HtmlIdOf = z.infer<typeof HtmlId>;
 type IdOf = z.infer<typeof NodeId>;
@@ -402,6 +406,8 @@ export type UnknownNode = {
   props: Record<string, unknown>;
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children?: LayoutNode[];
@@ -413,6 +419,8 @@ export type ContainerNode = {
   props: { tag?: (typeof CONTAINER_TAGS)[number] };
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -424,6 +432,8 @@ export type DivBlockNode = {
   props: Record<string, never>;
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -435,6 +445,8 @@ export type FlexboxNode = {
   props: Record<string, never>;
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -451,6 +463,8 @@ export type SvgNode = {
   };
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
 };
@@ -461,6 +475,8 @@ export type TabPanelNode = {
   props: { label: string };
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -472,6 +488,8 @@ export type TabsNode = {
   props: Record<string, never>;
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -483,6 +501,8 @@ export type FormNode = {
   props: { formId: string };
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
@@ -494,6 +514,8 @@ export type LoopNode = {
   props: { itemPartId?: string };
   style?: StyleOf;
   states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   children: LayoutNode[];
