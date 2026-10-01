@@ -69,6 +69,81 @@ const withLayout = (
 const arranged = (state: EditorState, result: Arranged): EditorState =>
   result.ok ? withLayout(state, result.layout, result.selected) : state;
 
+/** Page edits kept for undo. Save, publish and design stay on the live state (D-035, proposed). */
+const PAGE_HISTORY_LIMIT = 100;
+
+type PageSnapshot = {
+  page: PageDraft;
+  selectedId: string | null;
+  lastDeleted: Removed | null;
+  version: number;
+};
+
+export type EditorHistory = {
+  present: EditorState;
+  past: readonly PageSnapshot[];
+  future: readonly PageSnapshot[];
+};
+
+export type HistoryAction = EditorAction | { type: "undo" } | { type: "redo" };
+
+const snapshotOf = (state: EditorState): PageSnapshot => ({
+  page: state.page,
+  selectedId: state.selectedId,
+  lastDeleted: state.lastDeleted,
+  version: state.version,
+});
+
+const withSnapshot = (state: EditorState, snap: PageSnapshot): EditorState => ({
+  ...state,
+  page: snap.page,
+  selectedId: snap.selectedId,
+  lastDeleted: snap.lastDeleted,
+  version: snap.version,
+});
+
+export const emptyHistory = (present: EditorState): EditorHistory => ({
+  present,
+  past: [],
+  future: [],
+});
+
+/**
+ * Wraps `editorReducer`. A page edit (version bump) pushes the previous page onto `past` and
+ * clears `redo`. Selection, save, publish and design updates replace `present` only. `reset`
+ * drops both stacks. Undo restores the page and leaves the current revision and saved version.
+ */
+export function historyReducer(history: EditorHistory, action: HistoryAction): EditorHistory {
+  if (action.type === "undo") {
+    const snap = history.past.at(-1);
+    if (!snap) return history;
+    return {
+      present: withSnapshot(history.present, snap),
+      past: history.past.slice(0, -1),
+      future: [snapshotOf(history.present), ...history.future],
+    };
+  }
+  if (action.type === "redo") {
+    const snap = history.future.at(0);
+    if (!snap) return history;
+    return {
+      present: withSnapshot(history.present, snap),
+      past: [...history.past, snapshotOf(history.present)],
+      future: history.future.slice(1),
+    };
+  }
+  if (action.type === "reset") return emptyHistory(action.state);
+  const next = editorReducer(history.present, action);
+  if (next === history.present) return history;
+  if (next.version === history.present.version) return { ...history, present: next };
+  const past = [...history.past, snapshotOf(history.present)];
+  return {
+    present: next,
+    past: past.length > PAGE_HISTORY_LIMIT ? past.slice(-PAGE_HISTORY_LIMIT) : past,
+    future: [],
+  };
+}
+
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
     case "set-page":

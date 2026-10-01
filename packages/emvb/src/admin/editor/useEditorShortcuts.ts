@@ -11,7 +11,7 @@ import {
   parentOf,
   previousInOrder,
 } from "../../core/index.ts";
-import type { EditorAction, EditorState } from "./store.ts";
+import type { EditorState, HistoryAction } from "./store.ts";
 
 const isTextField = (target: EventTarget | null) => {
   const element = target as HTMLElement | null;
@@ -66,9 +66,9 @@ export type ShortcutHandlers = {
 };
 
 /**
- * Window-level editor shortcuts (W-020): save, duplicate, copy and paste (W-093), delete, escape,
- * arrange and traverse. Inside text fields and dialogs only Save works, so typing, native copy and
- * paste keep working there.
+ * Window-level editor shortcuts (W-020): save, undo and redo (W-095), duplicate, copy and paste
+ * (W-093), delete, escape, arrange and traverse. Inside text fields and dialogs only Save works, so
+ * typing, native undo, copy and paste keep working there.
  */
 export function useEditorShortcuts({
   latest,
@@ -76,7 +76,7 @@ export function useEditorShortcuts({
   handlers,
 }: {
   latest: React.RefObject<EditorState>;
-  dispatch: React.Dispatch<EditorAction>;
+  dispatch: React.Dispatch<HistoryAction>;
   handlers: React.RefObject<ShortcutHandlers>;
 }): (event: KeyboardEvent) => void {
   const onKeyDown = React.useCallback((event: KeyboardEvent) => {
@@ -86,6 +86,16 @@ export function useEditorShortcuts({
       return;
     }
     if (isTextField(event.target) || inDialog(event.target)) return;
+    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "z") {
+      event.preventDefault();
+      dispatch(event.shiftKey ? { type: "redo" } : { type: "undo" });
+      return;
+    }
+    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === "y") {
+      event.preventDefault();
+      dispatch({ type: "redo" });
+      return;
+    }
     const layout = latest.current.page.layout;
     const selected = latest.current.selectedId;
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selected) {

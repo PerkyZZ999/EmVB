@@ -1481,8 +1481,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
-          "search": "    if (isTextField(event.target) || inDialog(event.target)) return;\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {",
-          "replace": "    if (inDialog(event.target)) return;\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {"
+          "search": "    if (isTextField(event.target) || inDialog(event.target)) return;\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"z\") {\n      event.preventDefault();\n      dispatch(event.shiftKey ? { type: \"redo\" } : { type: \"undo\" });\n      return;\n    }\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"y\") {\n      event.preventDefault();\n      dispatch({ type: \"redo\" });\n      return;\n    }\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {",
+          "replace": "    if (inDialog(event.target)) return;\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"z\") {\n      event.preventDefault();\n      dispatch(event.shiftKey ? { type: \"redo\" } : { type: \"undo\" });\n      return;\n    }\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"y\") {\n      event.preventDefault();\n      dispatch({ type: \"redo\" });\n      return;\n    }\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {"
         }
       ],
       "command": [
@@ -15917,6 +15917,188 @@
         "Background section sets an image"
       ],
       "expect": "✘.*\\[node\\].*Background section sets an image"
+    },
+    {
+      "id": "W-095/undo-keeps-the-edit",
+      "requirement": "R-003",
+      "description": "undo leaves the page on the edited step",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "if (action.type === \"undo\") {\n    const snap = history.past.at(-1);\n    if (!snap) return history;\n    return {\n      present: withSnapshot(history.present, snap),",
+          "replace": "if (action.type === \"undo\") {\n    const snap = history.past.at(-1);\n    if (!snap) return history;\n    return {\n      present: history.present,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/history.test.ts",
+        "-t",
+        "undo restores the page"
+      ],
+      "expect": "\\(fail\\).*undo restores the page"
+    },
+    {
+      "id": "W-095/new-edit-keeps-redo",
+      "requirement": "R-003",
+      "description": "a new edit leaves the undone step on the redo stack",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "past: past.length > PAGE_HISTORY_LIMIT ? past.slice(-PAGE_HISTORY_LIMIT) : past,\n    future: [],",
+          "replace": "past: past.length > PAGE_HISTORY_LIMIT ? past.slice(-PAGE_HISTORY_LIMIT) : past,\n    future: history.future,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/history.test.ts",
+        "-t",
+        "a new edit drops"
+      ],
+      "expect": "\\(fail\\).*a new edit drops"
+    },
+    {
+      "id": "W-095/save-is-a-step",
+      "requirement": "R-003",
+      "description": "saving is an undo step, so one undo does not return the previous page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "if (next.version === history.present.version) return { ...history, present: next };",
+          "replace": "if (false) return { ...history, present: next };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/history.test.ts",
+        "-t",
+        "undo keeps the saved revision"
+      ],
+      "expect": "\\(fail\\).*undo keeps the saved revision"
+    },
+    {
+      "id": "W-095/reset-keeps-history",
+      "requirement": "R-003",
+      "description": "opening another document keeps the previous undo stack",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "if (action.type === \"reset\") return emptyHistory(action.state);",
+          "replace": "if (action.type === \"reset\") return { ...history, present: action.state };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/history.test.ts",
+        "-t",
+        "loading another document"
+      ],
+      "expect": "\\(fail\\).*loading another document"
+    },
+    {
+      "id": "W-095/history-never-drops",
+      "requirement": "R-003",
+      "description": "undo remembers every edit, with no limit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "past: past.length > PAGE_HISTORY_LIMIT ? past.slice(-PAGE_HISTORY_LIMIT) : past,",
+          "replace": "past,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/history.test.ts",
+        "-t",
+        "the oldest edit falls off"
+      ],
+      "expect": "\\(fail\\).*the oldest edit falls off"
+    },
+    {
+      "id": "W-095/shortcut-skips-undo",
+      "requirement": "R-003",
+      "description": "Ctrl+Z does not undo",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "dispatch(event.shiftKey ? { type: \"redo\" } : { type: \"undo\" });",
+          "replace": "dispatch({ type: \"select\", id: latest.current.selectedId });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/history.test.tsx",
+        "-t",
+        "Ctrl\\+Z puts a deleted"
+      ],
+      "expect": "\\(fail\\).*Ctrl\\+Z puts a deleted"
+    },
+    {
+      "id": "W-095/shortcut-skips-redo",
+      "requirement": "R-003",
+      "description": "Ctrl+Y does not redo",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "dispatch({ type: \"redo\" });",
+          "replace": "dispatch({ type: \"undo\" });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/history.test.tsx",
+        "-t",
+        "Ctrl\\+Z puts a deleted"
+      ],
+      "expect": "\\(fail\\).*Ctrl\\+Z puts a deleted"
+    },
+    {
+      "id": "W-095/undo-inside-a-field",
+      "requirement": "R-003",
+      "description": "Ctrl+Z inside a text field undoes the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "if (isTextField(event.target) || inDialog(event.target)) return;",
+          "replace": "if (inDialog(event.target)) return;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/history.test.tsx",
+        "-t",
+        "left to the field"
+      ],
+      "expect": "\\(fail\\).*left to the field"
+    },
+    {
+      "id": "W-095/e2e-undo-skips",
+      "requirement": "R-003",
+      "description": "Ctrl+Z does not restore a deleted element on the canvas",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "dispatch(event.shiftKey ? { type: \"redo\" } : { type: \"undo\" });",
+          "replace": "dispatch({ type: \"select\", id: latest.current.selectedId });"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/history.e2e.ts",
+        "--project=node",
+        "-g",
+        "Ctrl\\+Z restores a deleted"
+      ],
+      "expect": "✘.*\\[node\\].*Ctrl\\+Z restores a deleted"
     }
   ]
 }

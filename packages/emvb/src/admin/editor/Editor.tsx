@@ -18,7 +18,7 @@ import { LeftPanel } from "./panels/LeftPanel.tsx";
 import { SettingsPanel } from "./panels/SettingsPanel.tsx";
 import { ShortcutsDialog } from "./ShortcutsDialog.tsx";
 import { SmallScreenNotice } from "./SmallScreenNotice.tsx";
-import { editorReducer, isDirty, type EditorState } from "./store.ts";
+import { emptyHistory, historyReducer, isDirty, type EditorState } from "./store.ts";
 import { TopBar } from "./TopBar.tsx";
 import {
   loadEntry,
@@ -106,9 +106,10 @@ function EditorApp({
   wideEnough: boolean;
   collection: string;
 }) {
-  const [state, dispatch] = React.useReducer(editorReducer, undefined, () =>
-    initialState(entry, design),
+  const [history, dispatch] = React.useReducer(historyReducer, undefined, () =>
+    emptyHistory(initialState(entry, design)),
   );
+  const state = history.present;
   const dirty = isDirty(state);
   const saver = useSave(fetcher, state, dispatch, collection);
   const toasts = React.useMemo(() => createKumoToastManager(), []);

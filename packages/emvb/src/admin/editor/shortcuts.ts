@@ -11,6 +11,7 @@ export const SHORTCUTS: readonly { action: string; keys: string }[] = [
   { action: "Copy / paste element", keys: "Ctrl/Cmd+C / Ctrl/Cmd+V" },
   { action: "Paste style", keys: "Ctrl/Cmd+Shift+V" },
   { action: "Delete", keys: "Delete or Backspace" },
+  { action: "Undo / redo", keys: "Ctrl/Cmd+Z / Ctrl/Cmd+Shift+Z" },
   { action: "Save draft", keys: "Ctrl/Cmd+S" },
 ];
 
