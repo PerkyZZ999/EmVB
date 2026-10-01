@@ -14708,6 +14708,114 @@
         "./packages/emvb/src/admin/editor/panels/settings/number-row.test.tsx"
       ],
       "expect": "\\(fail\\).*display units"
+    },
+    {
+      "id": "W-091/ui-field-boolean-off-false",
+      "requirement": "R-011",
+      "description": "turning a switch off stores false",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "onChange(withProp(node, field.key, checked || undefined))",
+          "replace": "onChange(withProp(node, field.key, checked))"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*boolean field sets true"
+    },
+    {
+      "id": "W-091/ui-field-boolean-checked-ignored",
+      "requirement": "R-011",
+      "description": "the switch ignores the stored value",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "checked={Boolean(raw)}",
+          "replace": "checked={false}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*boolean field sets true"
+    },
+    {
+      "id": "W-091/ui-field-select-value-stringified",
+      "requirement": "R-011",
+      "description": "a select commits the option's text value",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "onChange(withProp(node, field.key, option ? option.value : next));",
+          "replace": "onChange(withProp(node, field.key, next));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*value type"
+    },
+    {
+      "id": "W-091/ui-field-select-no-default",
+      "requirement": "R-011",
+      "description": "an unset select shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "const value = raw ?? field.options[0]?.value ?? \"\";",
+          "replace": "const value = raw ?? \"\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*first option when unset"
+    },
+    {
+      "id": "W-091/ui-field-select-label-raw",
+      "requirement": "R-011",
+      "description": "the select shows the raw value",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "field.options?.find((o) => String(o.value) === String(current))?.label ??\n            String(current)",
+          "replace": "String(current)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*stored value's label"
+    },
+    {
+      "id": "W-091/ui-field-media-no-session-picker",
+      "requirement": "R-011",
+      "description": "the media field renders nothing without a session",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "          Media library needs a signed-in session.\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*without a session"
     }
   ]
 }
