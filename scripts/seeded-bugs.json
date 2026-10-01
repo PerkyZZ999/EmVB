@@ -13128,6 +13128,468 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node-public\\].*Size, Position and Effects styles"
+    },
+    {
+      "id": "W-091/css-flex-reverse-dropped",
+      "requirement": "R-021",
+      "description": "row-reverse is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"row\", \"column\", \"row-reverse\", \"column-reverse\"",
+          "replace": "\"row\", \"column\", \"column-reverse\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*flexDirection \\([a-z-]+\\) accepts row-reverse"
+    },
+    {
+      "id": "W-091/css-wrap-reverse-dropped",
+      "requirement": "R-021",
+      "description": "wrap-reverse is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"nowrap\", \"wrap\", \"wrap-reverse\"",
+          "replace": "\"nowrap\", \"wrap\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*flexWrap \\([a-z-]+\\) accepts wrap-reverse"
+    },
+    {
+      "id": "W-091/css-space-evenly-dropped",
+      "requirement": "R-021",
+      "description": "space-evenly is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  \"space-around\",\n  \"space-evenly\",\n",
+          "replace": "  \"space-around\",\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*justifyContent \\([a-z-]+\\) accepts space-evenly"
+    },
+    {
+      "id": "W-091/css-align-baseline-dropped",
+      "requirement": "R-021",
+      "description": "baseline is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"stretch\", \"flex-start\", \"flex-end\", \"center\", \"baseline\"",
+          "replace": "\"stretch\", \"flex-start\", \"flex-end\", \"center\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*alignItems \\([a-z-]+\\) accepts baseline"
+    },
+    {
+      "id": "W-091/css-justify-text-dropped",
+      "requirement": "R-021",
+      "description": "text-align justify is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"left\", \"center\", \"right\", \"justify\"",
+          "replace": "\"left\", \"center\", \"right\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*textAlign \\([a-z-]+\\) accepts justify"
+    },
+    {
+      "id": "W-091/css-capitalize-dropped",
+      "requirement": "R-021",
+      "description": "capitalize is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"none\", \"uppercase\", \"lowercase\", \"capitalize\"",
+          "replace": "\"none\", \"uppercase\", \"lowercase\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*textTransform \\([a-z-]+\\) accepts capitalize"
+    },
+    {
+      "id": "W-091/css-dotted-dropped",
+      "requirement": "R-021",
+      "description": "dotted borders are refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"none\", \"solid\", \"dashed\", \"dotted\"",
+          "replace": "\"none\", \"solid\", \"dashed\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*borderStyle \\([a-z-]+\\) accepts dotted"
+    },
+    {
+      "id": "W-091/css-overflow-scroll-dropped",
+      "requirement": "R-021",
+      "description": "overflow scroll is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"visible\", \"hidden\", \"clip\", \"scroll\", \"auto\"",
+          "replace": "\"visible\", \"hidden\", \"clip\", \"auto\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*overflow \\([a-z-]+\\) accepts scroll"
+    },
+    {
+      "id": "W-091/css-object-fit-fill-dropped",
+      "requirement": "R-021",
+      "description": "object-fit fill is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"fill\", \"contain\", \"cover\", \"none\", \"scale-down\"",
+          "replace": "\"contain\", \"cover\", \"none\", \"scale-down\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*objectFit \\([a-z-]+\\) accepts fill"
+    },
+    {
+      "id": "W-091/css-position-fixed-dropped",
+      "requirement": "R-021",
+      "description": "position fixed is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"static\", \"relative\", \"absolute\", \"fixed\", \"sticky\"",
+          "replace": "\"static\", \"relative\", \"absolute\", \"sticky\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*position \\([a-z-]+\\) accepts fixed"
+    },
+    {
+      "id": "W-091/css-cursor-zoom-dropped",
+      "requirement": "R-021",
+      "description": "cursor zoom-in is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  \"crosshair\",\n  \"zoom-in\",\n",
+          "replace": "  \"crosshair\",\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*cursor \\([a-z-]+\\) accepts zoom-in"
+    },
+    {
+      "id": "W-091/css-weight-500-dropped",
+      "requirement": "R-021",
+      "description": "font weight 500 is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "\"normal\", \"bold\", \"400\", \"500\", \"600\", \"700\"",
+          "replace": "\"normal\", \"bold\", \"400\", \"600\", \"700\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*fontWeight \\([a-z-]+\\) accepts 500"
+    },
+    {
+      "id": "W-091/css-em-unit-dropped",
+      "requirement": "R-021",
+      "description": "the em unit is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "new Set([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\"])",
+          "replace": "new Set([\"px\", \"rem\", \"%\", \"vw\", \"vh\"])"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*lengths accept the em unit"
+    },
+    {
+      "id": "W-091/css-from-color-refused",
+      "requirement": "R-020",
+      "description": "from: color is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "if (from === undefined || from === \"color\") return { id, from: \"color\" };",
+          "replace": "if (from === undefined) return { id, from: \"color\" };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*may say from: color"
+    },
+    {
+      "id": "W-091/css-color-number-throws",
+      "requirement": "R-032",
+      "description": "a number colour reaches the reference check",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (typeof value === \"object\" && value !== null) {\n    const ref = refOf(value);\n    if (!ref || ref.from !== \"color\") return undefined;",
+          "replace": "  if (value !== null) {\n    const ref = refOf(value as object);\n    if (!ref || ref.from !== \"color\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*color: 5"
+    },
+    {
+      "id": "W-091/css-shadow-null-throws",
+      "requirement": "R-032",
+      "description": "a null shadow is read",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "function cssBoxShadow(value: unknown): string | undefined {\n  if (typeof value !== \"object\" || value === null) return undefined;",
+          "replace": "function cssBoxShadow(value: unknown): string | undefined {\n  if (typeof value !== \"object\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*boxShadow: null"
+    },
+    {
+      "id": "W-091/css-filter-null-throws",
+      "requirement": "R-032",
+      "description": "a null filter is read",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "function cssFilter(value: unknown): string | undefined {\n  if (typeof value !== \"object\" || value === null) return undefined;",
+          "replace": "function cssFilter(value: unknown): string | undefined {\n  if (typeof value !== \"object\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*filter: null"
+    },
+    {
+      "id": "W-091/css-transition-null-throws",
+      "requirement": "R-032",
+      "description": "a null transition is read",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "function cssTransition(value: unknown): string | undefined {\n  if (typeof value !== \"object\" || value === null) return undefined;",
+          "replace": "function cssTransition(value: unknown): string | undefined {\n  if (typeof value !== \"object\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*transition: null"
+    },
+    {
+      "id": "W-091/css-null-style-throws",
+      "requirement": "R-032",
+      "description": "a null style is read",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (typeof style !== \"object\" || style === null) return { declarations, rejected };",
+          "replace": "  if (typeof style !== \"object\") return { declarations, rejected };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*null style is empty"
+    },
+    {
+      "id": "W-091/css-null-states-throws",
+      "requirement": "R-032",
+      "description": "null states are read",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (typeof states !== \"object\" || states === null) return { states: result, rejected };",
+          "replace": "  if (typeof states !== \"object\") return { states: result, rejected };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*null states"
+    },
+    {
+      "id": "W-091/css-state-string-throws",
+      "requirement": "R-032",
+      "description": "a string state is checked for a transition",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (typeof style !== \"object\" || style === null || !(\"transition\" in style)) return style;",
+          "replace": "  if (style === null || !(\"transition\" in (style as object))) return style;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*null states"
+    },
+    {
+      "id": "W-091/css-state-all-unknown",
+      "requirement": "R-021",
+      "description": "every state is reported unknown",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    if (!STYLE_STATES.includes(key as StyleStateName)) rejected.push(key);",
+          "replace": "    rejected.push(key);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*valid state reports nothing"
+    },
+    {
+      "id": "W-091/css-state-empty-rule",
+      "requirement": "R-021",
+      "description": "a state with only bad values gets an empty rule",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    if (declarations.length > 0) result[state] = declarations;",
+          "replace": "    result[state] = declarations;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
+      "expect": "\\(fail\\).*valid state reports nothing"
+    },
+    {
+      "id": "W-091/design-id-unanchored",
+      "requirement": "R-020",
+      "description": "variable ids are checked at the start only",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": ".regex(/^[a-z0-9-]{1,40}$/, \"Ids are",
+          "replace": ".regex(/^[a-z0-9-]{1,40}/, \"Ids are"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*variable ids must be lowercase"
+    },
+    {
+      "id": "W-091/design-hex-unanchored",
+      "requirement": "R-020",
+      "description": "colour values are checked at the end only",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "/^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i,\n",
+          "replace": "/#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i,\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*3, 4, 6 or 8 hex digits"
+    },
+    {
+      "id": "W-091/design-hex-no-alpha",
+      "requirement": "R-020",
+      "description": "4- and 8-digit colours are refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "/^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i,\n",
+          "replace": "/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i,\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*3, 4, 6 or 8 hex digits"
+    },
+    {
+      "id": "W-091/design-rem-unit-dropped",
+      "requirement": "R-020",
+      "description": "rem font sizes are refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "unit: z.enum([\"px\", \"rem\", \"em\", \"%\"]),",
+          "replace": "unit: z.enum([\"px\", \"em\", \"%\"]),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*accept rem"
+    },
+    {
+      "id": "W-091/layout-icon-title-optional",
+      "requirement": "R-032",
+      "description": "an icon needs no title",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": ").refine((node) => node.props.decorative === true || (node.props.title?.length ?? 0) > 0, {",
+          "replace": ").refine((node) => node.props.decorative === true || node.props.title !== undefined, {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*icon needs a title unless decorative"
+    },
+    {
+      "id": "W-091/layout-image-alt-path",
+      "requirement": "R-032",
+      "description": "the missing-alt issue has no path",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "  path: [\"props\", \"alt\"],\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*missing alt is reported on props.alt"
+    },
+    {
+      "id": "W-091/layout-array-node-allowed",
+      "requirement": "R-010",
+      "description": "an array child reaches the type check",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    if (!input || typeof input !== \"object\" || Array.isArray(input)) {",
+          "replace": "    if (!input || typeof input !== \"object\") {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*isn't an object, or whose type isn't a string"
+    },
+    {
+      "id": "W-091/layout-type-issue-path",
+      "requirement": "R-010",
+      "description": "the bad-type issue points at the node",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "path: [\"type\"] });",
+          "replace": "path: [] });"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*isn't an object, or whose type isn't a string"
+    },
+    {
+      "id": "W-091/layout-guard-flexbox",
+      "requirement": "R-010",
+      "description": "isFlexboxNode matches div blocks",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "(node: LayoutNode): node is FlexboxNode => node.type === \"flexbox\";",
+          "replace": "(node: LayoutNode): node is FlexboxNode => node.type === \"div-block\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*each guard matches its own type only"
+    },
+    {
+      "id": "W-091/layout-guard-unknown",
+      "requirement": "R-010",
+      "description": "isUnknownNode matches known types",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "  !knownTypeSet.has(node.type);",
+          "replace": "  knownTypeSet.has(node.type);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*each guard matches its own type only"
     }
   ]
 }
