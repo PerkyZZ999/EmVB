@@ -32,6 +32,7 @@ import { useEditorCommands } from "./useEditorCommands.ts";
 import { useSave } from "./useSave.ts";
 import { type ShortcutHandlers, useEditorShortcuts } from "./useEditorShortcuts.ts";
 import { useNodeActions } from "./useNodeActions.ts";
+import { type PasteRefusal, useClipboardActions } from "./useClipboardActions.ts";
 
 /** The full-screen editor for one EmVB page or theme part (R-001, R-002, R-060). */
 export function Editor({
@@ -63,6 +64,9 @@ export function Editor({
     </EditorOverlay>
   );
 }
+
+/** How long a refused paste stays outlined on the canvas (W-093). */
+const REFUSAL_MS = 4000;
 
 const exit = () => window.location.assign(exitTarget(document.referrer, window.location.origin));
 
@@ -138,6 +142,20 @@ function EditorApp({
     duplicate,
     addFromPanel,
   } = useNodeActions({ state, latest, dispatch, announce: setAnnouncement, toasts });
+  const [refusal, setRefusal] = React.useState<PasteRefusal | null>(null);
+  const clipboard = useClipboardActions({
+    latest,
+    dispatch,
+    announce: setAnnouncement,
+    toasts,
+    onRefuse: setRefusal,
+  });
+  React.useEffect(() => {
+    if (!refusal) return;
+    const timer = setTimeout(() => setRefusal(null), REFUSAL_MS);
+    return () => clearTimeout(timer);
+  }, [refusal]);
+  const refusalShown = refusal && refusal.id === (state.selectedId ?? state.page.layout?.root.id);
   const [formsAvailable, setFormsAvailable] = React.useState(true);
   React.useEffect(() => {
     let cancelled = false;
@@ -161,8 +179,17 @@ function EditorApp({
   const selectedNode =
     state.selectedId && state.page.layout ? findNode(state.page.layout, state.selectedId) : null;
 
-  const handlers = React.useRef<ShortcutHandlers>({ save, remove, duplicate, arrange });
-  handlers.current = { save, remove, duplicate, arrange };
+  const shortcutHandlers: ShortcutHandlers = {
+    save,
+    remove,
+    duplicate,
+    arrange,
+    copy: clipboard.copy,
+    paste: clipboard.paste,
+    pasteStyle: clipboard.pasteStyle,
+  };
+  const handlers = React.useRef(shortcutHandlers);
+  handlers.current = shortcutHandlers;
   const onKeyDown = useEditorShortcuts({ latest, dispatch, handlers });
 
   const reload = async () => {
@@ -192,6 +219,7 @@ function EditorApp({
     onDelete: remove,
     onDuplicate: duplicate,
     onKeyDown,
+    clipboard,
   };
 
   return (
@@ -226,6 +254,7 @@ function EditorApp({
                   onMoveUp={(id) => arrange(id, moveUp)}
                   onMoveDown={(id) => arrange(id, moveDown)}
                   onDelete={remove}
+                  clipboard={clipboard}
                 />
                 <div className="emvb-sr-only" aria-live="polite">
                   {announcement}
@@ -239,6 +268,7 @@ function EditorApp({
                     layout={state.page.layout}
                     selection={selection}
                     statePreview={statePreview}
+                    refusal={refusalShown ? refusal : null}
                     onDropNew={(elementType, parentId, index) => {
                       const node = newElement(elementType);
                       if (!node) return;

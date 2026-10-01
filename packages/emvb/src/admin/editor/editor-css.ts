@@ -243,6 +243,9 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-layer-menu-list button { border: 0; background: transparent; text-align: left; padding: 6px 8px; border-radius: 4px; font: inherit; font-size: 13px; cursor: pointer; color: var(--text-color-kumo-default); min-height: 28px; }
 .emvb-layer-menu-list button:hover { background: var(--color-kumo-tint); }
+.emvb-layer-menu-list button:disabled { color: var(--text-color-kumo-subtle); cursor: not-allowed; background: transparent; }
+.emvb-menu-hint { margin: 4px 8px 2px; max-width: 200px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
+.emvb-layer-menu-hint { margin: 4px 8px 2px; max-width: 180px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
 
 .emvb-element-header { display: flex; align-items: center; gap: 8px; }
 .emvb-element-header svg { color: var(--color-kumo-brand); flex: 0 0 auto; }

@@ -3,6 +3,7 @@ import * as React from "react";
 import type { ElementType, Layout } from "../../../core/index.ts";
 import { AddPanel } from "./AddPanel.tsx";
 import { LayersPanel } from "./LayersPanel.tsx";
+import type { ClipboardActions } from "../useClipboardActions.ts";
 
 const SESSION_KEY = "emvb-left-tab";
 
@@ -16,6 +17,7 @@ export function LeftPanel({
   onMoveUp,
   onMoveDown,
   onDelete,
+  clipboard,
   formsAvailable = true,
 }: {
   layout: Layout | null;
@@ -26,6 +28,7 @@ export function LeftPanel({
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
   onDelete: (id: string) => void;
+  clipboard?: ClipboardActions;
   formsAvailable?: boolean;
 }) {
   const [tab, setTab] = React.useState(() => {
@@ -66,6 +69,7 @@ export function LeftPanel({
           onMoveUp={onMoveUp}
           onMoveDown={onMoveDown}
           onDelete={onDelete}
+          clipboard={clipboard}
         />
       )}
     </div>

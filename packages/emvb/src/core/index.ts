@@ -177,6 +177,7 @@ export {
   previousInOrder,
   selectionAfterDelete,
   subtreeSize,
+  withFreshIds,
   type Allowed,
   type Arranged,
   type DragSource,
@@ -262,3 +263,27 @@ export {
 } from "./theme/dynamic.ts";
 
 export { layoutHasTabs } from "./tabs/presence.ts";
+export {
+  CLIPBOARD_FORMAT,
+  CLIPBOARD_VERSION,
+  CLIP_REASONS,
+  applyStyle,
+  clipStyle,
+  droppedNotice,
+  elementClip,
+  encodeClip,
+  pasteNode,
+  pastePlace,
+  peekClipKind,
+  prepareElement,
+  prepareStyle,
+  readClip,
+  styleClip,
+  styleOf,
+  type Clip,
+  type ClipEnvelope,
+  type CopiedStyle,
+  type Dropped,
+  type PasteMode,
+  type ReadClip,
+} from "./clipboard.ts";

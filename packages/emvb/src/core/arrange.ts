@@ -197,6 +197,13 @@ function allIds(node: LayoutNode, into = new Set<string>()): Set<string> {
   return into;
 }
 
+/** A deep copy of `node` whose ids (its own and every descendant's) are new and unused on `layout`. */
+export const withFreshIds = (
+  layout: Layout,
+  node: LayoutNode,
+  random: () => number = Math.random,
+): LayoutNode => withNewIds(node, allIds(layout.root), random);
+
 /** A deep copy with new unique ids, inserted right after the original and selected. */
 export function duplicateNode(
   layout: Layout,

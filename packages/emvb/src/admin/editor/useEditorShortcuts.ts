@@ -26,6 +26,15 @@ const isTextField = (target: EventTarget | null) => {
 const inDialog = (target: EventTarget | null) =>
   !!(target as HTMLElement | null)?.closest?.('[role="dialog"], [role="alertdialog"]');
 
+/** Selected text on the page or the canvas: Ctrl/Cmd+C then copies the text, as usual (W-093). */
+const hasTextSelection = (target: EventTarget | null) => {
+  const docs = new Set([document, (target as Node | null)?.ownerDocument ?? document]);
+  return [...docs].some((doc) => {
+    const selection = doc.getSelection?.();
+    return !!selection && !selection.isCollapsed && selection.toString().length > 0;
+  });
+};
+
 type ArrangeOp = (layout: Layout, id: string) => Arranged;
 
 /** Alt+arrow keys: move the selected element among its siblings or across containers. */
@@ -51,9 +60,16 @@ export type ShortcutHandlers = {
   remove: (id: string) => void;
   duplicate: (id: string) => void;
   arrange: (id: string, run: ArrangeOp) => void;
+  copy: (id: string) => void;
+  paste: (id: string | null) => void;
+  pasteStyle: (id: string | null) => void;
 };
 
-/** Window-level editor shortcuts (W-020): save, duplicate, delete, escape, arrange and traverse. */
+/**
+ * Window-level editor shortcuts (W-020): save, duplicate, copy and paste (W-093), delete, escape,
+ * arrange and traverse. Inside text fields and dialogs only Save works, so typing, native copy and
+ * paste keep working there.
+ */
 export function useEditorShortcuts({
   latest,
   dispatch,
@@ -75,6 +91,19 @@ export function useEditorShortcuts({
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selected) {
       event.preventDefault();
       handlers.current.duplicate(selected);
+      return;
+    }
+    const clipKey =
+      (event.ctrlKey || event.metaKey) && !event.altKey ? event.key.toLowerCase() : "";
+    if (clipKey === "c" && !event.shiftKey && selected && !hasTextSelection(event.target)) {
+      event.preventDefault();
+      handlers.current.copy(selected);
+      return;
+    }
+    if (clipKey === "v" && layout) {
+      event.preventDefault();
+      if (event.shiftKey) handlers.current.pasteStyle(selected);
+      else handlers.current.paste(selected);
       return;
     }
     if (event.key === "Escape" && selected) {

@@ -1,4 +1,13 @@
-import { CopyIcon, DotsSixVerticalIcon, ProhibitIcon, TrashIcon } from "@phosphor-icons/react";
+import { DropdownMenu } from "@cloudflare/kumo";
+import {
+  ClipboardTextIcon,
+  CopyIcon,
+  CopySimpleIcon,
+  DotsSixVerticalIcon,
+  PaintBrushIcon,
+  ProhibitIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import type { CanvasSelection } from "./CanvasFrame.tsx";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
@@ -101,6 +110,9 @@ export function SelectionOverlay({
                 <CopyIcon size={16} aria-hidden="true" />
               </button>
             )}
+            {selection.clipboard && (
+              <ClipboardMenu clipboard={selection.clipboard} selectedId={selectedId} />
+            )}
             {selection.canDelete(selectedId) && (
               <button
                 type="button"
@@ -116,5 +128,58 @@ export function SelectionOverlay({
         </>
       )}
     </div>
+  );
+}
+
+/** Copy and paste on the selected element (W-093); paste items say why when they're unavailable. */
+function ClipboardMenu({
+  clipboard,
+  selectedId,
+}: {
+  clipboard: NonNullable<CanvasSelection["clipboard"]>;
+  selectedId: string;
+}) {
+  const hint = clipboard.pasteStyleBlocked ?? clipboard.pasteBlocked;
+  return (
+    <DropdownMenu>
+      <DropdownMenu.Trigger>
+        <button
+          type="button"
+          className="emvb-overlay-action"
+          aria-label="Copy and paste"
+          title="Copy and paste"
+        >
+          <ClipboardTextIcon size={16} aria-hidden="true" />
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content data-emvb-clipboard-menu={selectedId}>
+        <DropdownMenu.Item icon={CopySimpleIcon} onClick={() => clipboard.copy(selectedId)}>
+          Copy
+        </DropdownMenu.Item>
+        <DropdownMenu.Item
+          icon={ClipboardTextIcon}
+          disabled={!!clipboard.pasteBlocked}
+          onClick={() => clipboard.paste(selectedId)}
+        >
+          Paste
+        </DropdownMenu.Item>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item icon={PaintBrushIcon} onClick={() => clipboard.copyStyle(selectedId)}>
+          Copy style
+        </DropdownMenu.Item>
+        <DropdownMenu.Item
+          icon={PaintBrushIcon}
+          disabled={!!clipboard.pasteStyleBlocked}
+          onClick={() => clipboard.pasteStyle(selectedId)}
+        >
+          Paste style
+        </DropdownMenu.Item>
+        {hint && (
+          <p className="emvb-menu-hint" data-emvb-paste-hint="">
+            {hint}
+          </p>
+        )}
+      </DropdownMenu.Content>
+    </DropdownMenu>
   );
 }

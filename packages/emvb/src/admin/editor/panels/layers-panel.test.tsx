@@ -3,6 +3,7 @@ import { act } from "react";
 import type { Layout } from "../../../core/index.ts";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { LayersPanel } from "./LayersPanel.tsx";
+import type { ClipboardActions } from "../useClipboardActions.ts";
 import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
 
 const layout: Layout = {
@@ -176,5 +177,130 @@ describe("state styles dot (W-089)", () => {
     expect(Boolean(dot("head0003"))).toBe(true);
     expect(Boolean(dot("head0001"))).toBe(false);
     expect(Boolean(dot("root0001"))).toBe(false);
+  });
+});
+
+describe("copy and paste in the Layers menu (W-093)", () => {
+  const clipboard = (blocked: {
+    paste: string | null;
+    style: string | null;
+  }): ClipboardActions => ({
+    copy: (id) => calls.push(`copy:${id}`),
+    copyStyle: (id) => calls.push(`copy-style:${id}`),
+    paste: (id, mode = "auto") => calls.push(`paste-${mode}:${id}`),
+    pasteStyle: (id) => calls.push(`paste-style:${id}`),
+    pasteBlocked: blocked.paste,
+    pasteStyleBlocked: blocked.style,
+  });
+  const mountWith = async (clip: ClipboardActions) => {
+    const log = (name: string) => (id: string) => calls.push(`${name}:${id}`);
+    await mountTree(
+      <LayersPanel
+        layout={layout}
+        selectedId={null}
+        onSelect={log("select")}
+        onDuplicate={log("duplicate")}
+        onMoveUp={log("up")}
+        onMoveDown={log("down")}
+        onDelete={log("delete")}
+        clipboard={clip}
+      />,
+    );
+  };
+  const openMenu = (id: string) =>
+    clickEl(document.querySelector(`[data-emvb-layer="${id}"] .emvb-layer-menu-btn`));
+  const items = () =>
+    [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].map((el) =>
+      el.disabled ? `${el.textContent} (off)` : el.textContent,
+    );
+  const run = async (id: string, label: string) => {
+    await openMenu(id);
+    await clickEl(
+      [...document.querySelectorAll('[role="menuitem"]')].find((el) => el.textContent === label) ??
+        null,
+    );
+    return calls.at(-1);
+  };
+
+  test("an element gets Copy, Paste, Duplicate and the style items; a parent also Paste inside", async () => {
+    await mountWith(clipboard({ paste: null, style: null }));
+    await openMenu("head0001");
+    expect(items()).toEqual([
+      "Copy",
+      "Paste",
+      "Duplicate",
+      "Copy style",
+      "Paste style",
+      "Move up",
+      "Move down",
+      "Delete",
+    ]);
+    await openMenu("head0001");
+    await openMenu("box00001");
+    expect(items()).toEqual([
+      "Copy",
+      "Paste",
+      "Paste inside",
+      "Duplicate",
+      "Copy style",
+      "Paste style",
+      "Move up",
+      "Move down",
+      "Delete",
+    ]);
+    expect(document.querySelector("[data-emvb-paste-hint]")?.outerHTML ?? null).toBeNull();
+  });
+
+  test("each item runs its action on that row", async () => {
+    await mountWith(clipboard({ paste: null, style: null }));
+    expect(await run("head0001", "Copy")).toBe("copy:head0001");
+    expect(await run("head0001", "Paste")).toBe("paste-auto:head0001");
+    expect(await run("box00001", "Paste inside")).toBe("paste-inside:box00001");
+    expect(await run("head0001", "Copy style")).toBe("copy-style:head0001");
+    expect(await run("head0001", "Paste style")).toBe("paste-style:head0001");
+    expect(await run("head0001", "Duplicate")).toBe("duplicate:head0001");
+  });
+
+  test("the page's outer container gets the items that apply to it", async () => {
+    await mountWith(clipboard({ paste: null, style: null }));
+    await openMenu("root0001");
+    expect(items()).toEqual(["Copy", "Paste inside", "Copy style", "Paste style"]);
+    await clickEl(
+      [...document.querySelectorAll('[role="menuitem"]')].find(
+        (el) => el.textContent === "Paste inside",
+      ) ?? null,
+    );
+    expect(calls.at(-1)).toBe("paste-inside:root0001");
+  });
+
+  test("with nothing copied the paste items are off, with the reason", async () => {
+    await mountWith(
+      clipboard({ paste: "Copy an element first.", style: "Copy an element or a style first." }),
+    );
+    await openMenu("box00001");
+    expect(items()).toEqual([
+      "Copy",
+      "Paste (off)",
+      "Paste inside (off)",
+      "Duplicate",
+      "Copy style",
+      "Paste style (off)",
+      "Move up",
+      "Move down",
+      "Delete",
+    ]);
+    expect(document.querySelector("[data-emvb-paste-hint]")?.textContent ?? null).toBe(
+      "Copy an element or a style first.",
+    );
+  });
+
+  test("with only a style copied, Paste is off and says to copy an element", async () => {
+    await mountWith(clipboard({ paste: "Copy an element first.", style: null }));
+    await openMenu("head0001");
+    expect(items()).toContain("Paste (off)");
+    expect(items()).toContain("Paste style");
+    expect(document.querySelector("[data-emvb-paste-hint]")?.textContent ?? null).toBe(
+      "Copy an element first.",
+    );
   });
 });

@@ -2984,8 +2984,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "[\"Move down\", actions.onMoveDown],",
-          "replace": "[\"Move down\", actions.onMoveUp],"
+          "search": "{ label: \"Move down\", run: actions.onMoveDown },",
+          "replace": "{ label: \"Move down\", run: actions.onMoveUp },"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
@@ -15087,6 +15087,654 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
       "expect": "\\(fail\\).*a type that isn't text is described as what it is"
+    },
+    {
+      "id": "W-093/clip-shares-objects",
+      "requirement": "R-003",
+      "description": "the element clip shares objects with the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  node: structuredClone(node),\n",
+          "replace": "  node,\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*round-trips through the envelope"
+    },
+    {
+      "id": "W-093/style-clip-copies-classes",
+      "requirement": "R-003",
+      "description": "Copy style also carries the classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  if (node.states) copied.states = structuredClone(node.states);\n",
+          "replace": "  if (node.states) copied.states = structuredClone(node.states);\n  if (node.classes) (copied as Record<string, unknown>)[\"classes\"] = node.classes;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*a style clip holds style, states and transition"
+    },
+    {
+      "id": "W-093/clip-version-unchecked",
+      "requirement": "R-003",
+      "description": "a clip from a newer envelope version is read",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  if (version > CLIPBOARD_VERSION || schemaVersion > LAYOUT_SCHEMA_VERSION)",
+          "replace": "  if (schemaVersion > LAYOUT_SCHEMA_VERSION)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*newer EmVB"
+    },
+    {
+      "id": "W-093/clip-node-unvalidated",
+      "requirement": "R-003",
+      "description": "a copied node skips the layout validator",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    const layout = validated(schemaVersion, { children: [data[\"node\"]] });",
+          "replace": "    const layout = { root: { children: [data[\"node\"]] } } as unknown as Layout;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*must pass the layout validator"
+    },
+    {
+      "id": "W-093/clip-format-unchecked",
+      "requirement": "R-003",
+      "description": "any JSON object is read as a clip",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  if (!isRecord(data) || data[\"format\"] !== CLIPBOARD_FORMAT)\n    return refuse(CLIP_REASONS.unreadable);",
+          "replace": "  if (!isRecord(data)) return refuse(CLIP_REASONS.unreadable);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*foreign and broken clipboard text"
+    },
+    {
+      "id": "W-093/peek-ignores-format",
+      "requirement": "R-003",
+      "description": "the menus treat foreign JSON as a clip",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    if (!isRecord(data) || data[\"format\"] !== CLIPBOARD_FORMAT) return null;",
+          "replace": "    if (!isRecord(data)) return null;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*peeked without validating"
+    },
+    {
+      "id": "W-093/paste-keeps-ids",
+      "requirement": "R-003",
+      "description": "a pasted element keeps its copied ids",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  return { node: withFreshIds(layout, cleaned, random), dropped };",
+          "replace": "  return { node: cleaned, dropped };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*every id is new"
+    },
+    {
+      "id": "W-093/paste-keeps-missing-classes",
+      "requirement": "R-003",
+      "description": "classes the site doesn't have are pasted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    const kept = next.classes.filter((id) => known.has(id));",
+          "replace": "    const kept = next.classes.filter((id) => id.length > 0 || known.has(id));"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*classes the design doesn't have"
+    },
+    {
+      "id": "W-093/paste-keeps-missing-variables",
+      "requirement": "R-003",
+      "description": "refs to missing variables are pasted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  const missing = refsOf(node).filter((ref) => !hasVariable(design, ref));",
+          "replace": "  const missing = refsOf(node).filter((ref) => !ref.var);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*refs to missing variables are dropped"
+    },
+    {
+      "id": "W-093/paste-misses-shadow-ref",
+      "requirement": "R-003",
+      "description": "the box shadow's colour ref isn't checked",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  const values: unknown[] = [...Object.values(style), style.boxShadow?.color];",
+          "replace": "  const values: unknown[] = [...Object.values(style)];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*refs to missing variables are dropped"
+    },
+    {
+      "id": "W-093/paste-misses-state-refs",
+      "requirement": "R-003",
+      "description": "state styles' refs aren't checked",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  ...STYLE_STATES.flatMap((state) => refsInStyle(owner.states?.[state])),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*refs to missing variables are dropped"
+    },
+    {
+      "id": "W-093/paste-variable-kind-ignored",
+      "requirement": "R-003",
+      "description": "a ref of one kind passes for a variable of another",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  (design.variables[VARIABLE_LISTS[ref.kind]] ?? []).some((v) => v.id === ref.var);",
+          "replace": "  Object.values(design.variables).some((list) => (list ?? []).some((v) => v.id === ref.var));"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*refs to missing variables are dropped"
+    },
+    {
+      "id": "W-093/paste-children-unchecked",
+      "requirement": "R-003",
+      "description": "nested children skip the checks",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    children: kids.map((child) => cleanNode(child, design, usedHtmlIds, dropped)),",
+          "replace": "    children: kids,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*checks reach nested children"
+    },
+    {
+      "id": "W-093/paste-keeps-taken-html-id",
+      "requirement": "R-003",
+      "description": "a CSS id already on the page is pasted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  if (next.htmlId && usedHtmlIds.has(next.htmlId)) {",
+          "replace": "  if (next.htmlId && usedHtmlIds.has(`${next.htmlId}-`)) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*CSS id already used on the page"
+    },
+    {
+      "id": "W-093/paste-unsafe-href",
+      "requirement": "R-003",
+      "description": "refused links and images are pasted as they are",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    if (safe === undefined) fallBack(field.key, field.optional);",
+          "replace": "    if (safe === undefined) continue;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*sanitizers refuse fall back"
+    },
+    {
+      "id": "W-093/paste-unsafe-svg",
+      "requirement": "R-003",
+      "description": "unsafe SVG markup is pasted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  if (type === \"svg\" && typeof props[\"markup\"] === \"string\" && !isSafeSvgMarkup(props[\"markup\"]))",
+          "replace": "  if (type === \"svg\" && typeof props[\"markup\"] === \"string\" && !props[\"markup\"])"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*sanitizers refuse fall back"
+    },
+    {
+      "id": "W-093/paste-optional-href-defaulted",
+      "requirement": "R-003",
+      "description": "a refused optional link gets the default instead of going",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    if (optional || defaults[key] === undefined) delete props[key];\n    else props[key] = defaults[key];",
+          "replace": "    if (defaults[key] === undefined) props[key] = \"/\";\n    else props[key] = defaults[key];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*sanitizers refuse fall back"
+    },
+    {
+      "id": "W-093/style-paste-keeps-missing-variables",
+      "requirement": "R-003",
+      "description": "Paste style keeps refs to missing variables",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  return { style: styleOf(holder), dropped };",
+          "replace": "  return { style, dropped };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*a style paste drops missing variables"
+    },
+    {
+      "id": "W-093/notice-misses-unsafe",
+      "requirement": "R-003",
+      "description": "the notice leaves out refused links",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  count(\n    dropped.unsafe,",
+          "replace": "  count(\n    0,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*the notice lists what was left out"
+    },
+    {
+      "id": "W-093/paste-before-selected",
+      "requirement": "R-003",
+      "description": "Paste goes before the selected element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    return { ok: true, place: { parentId, index: index + 1 } };",
+          "replace": "    return { ok: true, place: { parentId, index } };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*after the selected element, selected"
+    },
+    {
+      "id": "W-093/paste-no-inside-fallback",
+      "requirement": "R-003",
+      "description": "a field pasted on a form is refused instead of going inside",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    const into = inside();\n    if (into.ok) return into;",
+          "replace": "    const into = inside();\n    if (!into.ok) return into;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*inside when after is refused"
+    },
+    {
+      "id": "W-093/paste-inside-ignored",
+      "requirement": "R-003",
+      "description": "Paste inside pastes after",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  if (mode === \"inside\" || !parentId) {",
+          "replace": "  if (!parentId) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*Paste inside goes to the end"
+    },
+    {
+      "id": "W-093/apply-style-drops-classes",
+      "requirement": "R-003",
+      "description": "Paste style removes the classes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  const next = { ...node };\n  delete next.style;",
+          "replace": "  const next = { ...node };\n  delete next.classes;\n  delete next.style;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*replaces local style and states"
+    },
+    {
+      "id": "W-093/apply-style-keeps-old-states",
+      "requirement": "R-003",
+      "description": "Paste style keeps the old states",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  delete next.style;\n  delete next.states;\n",
+          "replace": "  delete next.style;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*replaces local style and states"
+    },
+    {
+      "id": "W-093/shortcut-in-text-field",
+      "requirement": "R-003",
+      "description": "copy and paste shortcuts fire inside text fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "    if (isTextField(event.target) || inDialog(event.target)) return;",
+          "replace": "    if (inDialog(event.target)) return;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*shortcuts inside a text field"
+    },
+    {
+      "id": "W-093/shortcut-ignores-text-selection",
+      "requirement": "R-003",
+      "description": "Ctrl+C copies the element over a text selection",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "selected && !hasTextSelection(event.target)) {",
+          "replace": "selected) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*with text selected on the page"
+    },
+    {
+      "id": "W-093/shortcut-shift-v-pastes-element",
+      "requirement": "R-003",
+      "description": "Ctrl+Shift+V pastes an element, not the style",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "      if (event.shiftKey) handlers.current.pasteStyle(selected);",
+          "replace": "      if (event.shiftKey && !selected) handlers.current.pasteStyle(selected);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*Ctrl\\+Shift\\+V pastes the copied style"
+    },
+    {
+      "id": "W-093/shortcut-no-meta",
+      "requirement": "R-003",
+      "description": "Cmd doesn't work for paste on a Mac",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "    const clipKey =\n      (event.ctrlKey || event.metaKey) && !event.altKey ? event.key.toLowerCase() : \"\";",
+          "replace": "    const clipKey = event.ctrlKey && !event.altKey ? event.key.toLowerCase() : \"\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*Cmd\\+V pastes after the selected element"
+    },
+    {
+      "id": "W-093/refusal-not-shown",
+      "requirement": "R-003",
+      "description": "a refused paste isn't shown on the canvas",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "                    refusal={refusalShown ? refusal : null}",
+          "replace": "                    refusal={null}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*drop rules refuse changes nothing"
+    },
+    {
+      "id": "W-093/refusal-stays-on-reselect",
+      "requirement": "R-003",
+      "description": "a refusal outline stays after selecting another element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "                    refusal={refusalShown ? refusal : null}",
+          "replace": "                    refusal={refusal}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*drop rules refuse changes nothing"
+    },
+    {
+      "id": "W-093/refusal-label-dropped",
+      "requirement": "R-003",
+      "description": "CanvasFrame ignores the refusal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "        invalid={invalid ?? refused}",
+          "replace": "        invalid={invalid}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*drop rules refuse changes nothing"
+    },
+    {
+      "id": "W-093/paste-notice-missing",
+      "requirement": "R-003",
+      "description": "a paste that dropped classes says nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useClipboardActions.ts",
+          "search": "    const notice = droppedNotice(dropped);\n    if (notice) notify(message, notice);\n  };\n\n  const pasteStyle",
+          "replace": "    const notice = droppedNotice(dropped);\n    if (notice) announce(message);\n  };\n\n  const pasteStyle"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*classes and variables the site doesn't have"
+    },
+    {
+      "id": "W-093/store-not-reactive",
+      "requirement": "R-003",
+      "description": "a copy in another tab isn't picked up",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/clipboard-store.ts",
+          "search": "  window.addEventListener(\"storage\", onStorage);",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
+      "expect": "\\(fail\\).*copy made in another tab"
+    },
+    {
+      "id": "W-093/store-write-failure-hidden",
+      "requirement": "R-003",
+      "description": "a blocked copy reports success",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/clipboard-store.ts",
+          "search": "  } catch {\n    return false;\n  }",
+          "replace": "  } catch {\n    return true;\n  }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard-store.test.ts"],
+      "expect": "\\(fail\\).*blocked storage"
+    },
+    {
+      "id": "W-093/layers-paste-inside-on-leaf",
+      "requirement": "R-003",
+      "description": "Paste inside is offered on elements that can't hold any",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "        ...(parent\n",
+          "replace": "        ...(true\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*an element gets Copy, Paste"
+    },
+    {
+      "id": "W-093/layers-paste-not-disabled",
+      "requirement": "R-003",
+      "description": "Layers paste items stay on with nothing copied",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "                    disabled={disabled}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*with nothing copied the paste items are off"
+    },
+    {
+      "id": "W-093/layers-root-no-menu",
+      "requirement": "R-003",
+      "description": "the outer container has no clipboard menu",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "        {(!isRoot || actions.clipboard) && (",
+          "replace": "        {!isRoot && ("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*outer container gets the items"
+    },
+    {
+      "id": "W-093/layers-paste-wrong-mode",
+      "requirement": "R-003",
+      "description": "Layers Paste inside pastes after",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "                run: (id: string) => clip.paste(id, \"inside\"),",
+          "replace": "                run: (id: string) => clip.paste(id),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*each item runs its action"
+    },
+    {
+      "id": "W-093/layers-hint-style-only",
+      "requirement": "R-003",
+      "description": "with only a style copied the menu gives no reason",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  clip ? (clip.pasteStyleBlocked ?? clip.pasteBlocked) : null;",
+          "replace": "  clip ? clip.pasteStyleBlocked : null;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*only a style copied"
+    },
+    {
+      "id": "W-093/overlay-paste-not-disabled",
+      "requirement": "R-003",
+      "description": "the canvas Paste stays on with nothing copied",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
+          "search": "          disabled={!!clipboard.pasteBlocked}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/selection-overlay.test.tsx"
+      ],
+      "expect": "\\(fail\\).*with nothing copied the paste items are off"
+    },
+    {
+      "id": "W-093/overlay-copy-style-wrong",
+      "requirement": "R-003",
+      "description": "the canvas Copy style copies the element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
+          "search": "onClick={() => clipboard.copyStyle(selectedId)}",
+          "replace": "onClick={() => clipboard.copy(selectedId)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/selection-overlay.test.tsx"
+      ],
+      "expect": "\\(fail\\).*the menu copies, pastes"
+    },
+    {
+      "id": "W-093/e2e-canvas-paste-ignored",
+      "requirement": "R-003",
+      "description": "Ctrl+V from the canvas does nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "    if (clipKey === \"v\" && layout) {",
+          "replace": "    if (clipKey === \"v\" && layout && event.target === window) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/clipboard.e2e.ts",
+        "--project=node",
+        "-g",
+        "an element copied on one page pastes on another page and in a theme part"
+      ],
+      "expect": "✘.*\\[node\\].*an element copied on one page pastes on another page and in a theme part"
+    },
+    {
+      "id": "W-093/e2e-layers-paste-style-copies",
+      "requirement": "R-003",
+      "description": "Layers Paste style copies the style instead",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "        { label: \"Paste style\", run: clip.pasteStyle, disabled: !!clip.pasteStyleBlocked },",
+          "replace": "        { label: \"Paste style\", run: clip.copyStyle, disabled: !!clip.pasteStyleBlocked },"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/clipboard.e2e.ts",
+        "--project=node",
+        "-g",
+        "Copy style and Paste style in the Layers menu carry state styles and the transition"
+      ],
+      "expect": "✘.*\\[node\\].*Copy style and Paste style in the Layers menu carry state styles and the transition"
+    },
+    {
+      "id": "W-093/e2e-refusal-never-clears",
+      "requirement": "R-003",
+      "description": "a refused paste stays outlined forever",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "    const timer = setTimeout(() => setRefusal(null), REFUSAL_MS);",
+          "replace": "    const timer = setTimeout(() => undefined, REFUSAL_MS);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/clipboard.e2e.ts",
+        "--project=node",
+        "-g",
+        "a paste the drop rules refuse shows the reason on the canvas and changes nothing"
+      ],
+      "expect": "✘.*\\[node\\].*a paste the drop rules refuse shows the reason on the canvas and changes nothing"
     }
   ]
 }

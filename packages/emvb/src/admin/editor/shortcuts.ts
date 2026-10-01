@@ -8,6 +8,8 @@ export const SHORTCUTS: readonly { action: string; keys: string }[] = [
   { action: "Move up / down", keys: "Alt+↑ / Alt+↓" },
   { action: "Move out / in", keys: "Alt+← / Alt+→" },
   { action: "Duplicate", keys: "Ctrl/Cmd+D" },
+  { action: "Copy / paste element", keys: "Ctrl/Cmd+C / Ctrl/Cmd+V" },
+  { action: "Paste style", keys: "Ctrl/Cmd+Shift+V" },
   { action: "Delete", keys: "Delete or Backspace" },
   { action: "Save draft", keys: "Ctrl/Cmd+S" },
 ];

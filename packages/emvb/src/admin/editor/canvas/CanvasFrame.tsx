@@ -24,6 +24,7 @@ import { SelectionOverlay, type Box, type InvalidDrop } from "./SelectionOverlay
 import { applyStatePreview, type StatePreview } from "./state-preview.ts";
 import { revealInTabs } from "./tab-reveal.ts";
 import { vnodeToReact } from "./vnode-react.tsx";
+import type { ClipboardActions, PasteRefusal } from "../useClipboardActions.ts";
 
 const SRCDOC =
   '<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0}</style></head><body></body></html>';
@@ -107,6 +108,8 @@ export type CanvasSelection = {
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onKeyDown: (event: KeyboardEvent) => void;
+  /** Copy and paste in the quick actions (W-093). */
+  clipboard?: ClipboardActions;
 };
 
 /**
@@ -119,6 +122,7 @@ export function CanvasFrame({
   layout,
   selection,
   statePreview = null,
+  refusal = null,
   onDropNew,
   onMove,
 }: {
@@ -128,6 +132,8 @@ export function CanvasFrame({
   selection: CanvasSelection;
   /** The style state chosen in the Style tab, shown on the selected element (W-089). */
   statePreview?: StatePreview | null;
+  /** A refused paste, outlined on its target with the reason like an invalid drop (W-093). */
+  refusal?: PasteRefusal | null;
   onDropNew: (elementType: string, parentId: string, index: number) => void;
   onMove: (id: string, parentId: string, index: number) => void;
 }) {
@@ -235,6 +241,16 @@ export function CanvasFrame({
     setHoverId,
   });
 
+  const [refused, setRefused] = React.useState<InvalidDrop | null>(null);
+  React.useEffect(() => {
+    const box = doc && refusal ? boxOf(doc, refusal.id) : null;
+    setRefused(
+      box && refusal
+        ? { outline: box, label: { x: box.left, y: box.top, reason: refusal.reason } }
+        : null,
+    );
+  }, [doc, refusal]);
+
   const { selectedId } = selection;
   React.useEffect(() => {
     if (doc) revealInTabs(doc, selectedId);
@@ -282,7 +298,7 @@ export function CanvasFrame({
         selectedId={selectedId}
         selection={selection}
         dropLine={dropLine}
-        invalid={invalid}
+        invalid={invalid ?? refused}
       />
       {doc && createPortal(<style data-emvb-canvas-css="">{css}</style>, doc.head)}
       {doc &&

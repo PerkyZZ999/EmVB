@@ -15,6 +15,7 @@ import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { ELEMENT_NAMES } from "./ElementPanel.tsx";
 import { dragStash } from "../dnd/drag-stash.ts";
 import { StateDot } from "./settings/StateSwitcher.tsx";
+import type { ClipboardActions } from "../useClipboardActions.ts";
 
 const ICONS: Record<string, typeof TextHIcon> = {
   heading: TextHIcon,
@@ -42,7 +43,64 @@ type LayerActions = {
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
   onDelete: (id: string) => void;
+  /** Copy and paste (W-093); without it the menu has no clipboard items. */
+  clipboard?: ClipboardActions;
 };
+
+type MenuItem = {
+  label: string;
+  run: (id: string) => void;
+  className?: string;
+  disabled?: boolean;
+};
+
+/** Why a paste item is disabled: nothing copied, or only a style. */
+const pasteHint = (clip: ClipboardActions | undefined) =>
+  clip ? (clip.pasteStyleBlocked ?? clip.pasteBlocked) : null;
+
+/** The ··· menu: clipboard items, then Duplicate and the moves; the root row gets what applies to it. */
+function menuItems(node: LayoutNode, isRoot: boolean, actions: LayerActions): MenuItem[] {
+  const clip = actions.clipboard;
+  const parent = isParentNode(node);
+  const clipboard: MenuItem[] = clip
+    ? [
+        { label: "Copy", run: clip.copy },
+        ...(isRoot
+          ? []
+          : [
+              {
+                label: "Paste",
+                run: (id: string) => clip.paste(id),
+                disabled: !!clip.pasteBlocked,
+              },
+            ]),
+        ...(parent
+          ? [
+              {
+                label: "Paste inside",
+                run: (id: string) => clip.paste(id, "inside"),
+                disabled: !!clip.pasteBlocked,
+              },
+            ]
+          : []),
+      ]
+    : [];
+  const style: MenuItem[] = clip
+    ? [
+        { label: "Copy style", run: clip.copyStyle },
+        { label: "Paste style", run: clip.pasteStyle, disabled: !!clip.pasteStyleBlocked },
+      ]
+    : [];
+  if (isRoot) return [...clipboard, ...style];
+  return [
+    ...clipboard,
+    { label: "Duplicate", run: actions.onDuplicate },
+    ...style,
+    { label: "Move up", run: actions.onMoveUp },
+    { label: "Move down", run: actions.onMoveDown },
+    { label: "Delete", run: actions.onDelete, className: "emvb-danger-text" },
+  ];
+}
 
 /** What a key does in the tree: select another row, toggle the selected one, or nothing. */
 function treeKey(
@@ -231,7 +289,7 @@ function LayerRow({
           ) : null}
           {hasStateStyles(node) && <StateDot />}
         </button>
-        {!isRoot && (
+        {(!isRoot || actions.clipboard) && (
           <span className="emvb-layer-menu">
             <button
               type="button"
@@ -247,19 +305,13 @@ function LayerRow({
             </button>
             {menuOpen && (
               <div className="emvb-layer-menu-list" role="menu">
-                {(
-                  [
-                    ["Duplicate", actions.onDuplicate],
-                    ["Move up", actions.onMoveUp],
-                    ["Move down", actions.onMoveDown],
-                    ["Delete", actions.onDelete, "emvb-danger-text"],
-                  ] as const
-                ).map(([label, run, className]) => (
+                {menuItems(node, isRoot, actions).map(({ label, run, className, disabled }) => (
                   <button
                     key={label}
                     type="button"
                     role="menuitem"
                     className={className}
+                    disabled={disabled}
                     onClick={(event) => {
                       event.stopPropagation();
                       onMenu(false);
@@ -269,6 +321,11 @@ function LayerRow({
                     {label}
                   </button>
                 ))}
+                {pasteHint(actions.clipboard) && (
+                  <p className="emvb-layer-menu-hint" data-emvb-paste-hint="">
+                    {pasteHint(actions.clipboard)}
+                  </p>
+                )}
               </div>
             )}
           </span>
