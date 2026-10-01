@@ -11801,7 +11801,7 @@
     },
     {
       "id": "W-091/loop-empty-public-placeholder",
-      "requirement": "R-061",
+      "requirement": "R-062",
       "description": "an empty public loop shows the editor placeholder",
       "edits": [
         {
@@ -11815,7 +11815,7 @@
     },
     {
       "id": "W-091/loop-item-class-lost",
-      "requirement": "R-061",
+      "requirement": "R-062",
       "description": "loop items lose their class",
       "edits": [
         {
@@ -11829,7 +11829,7 @@
     },
     {
       "id": "W-091/loop-item-part-untrimmed",
-      "requirement": "R-061",
+      "requirement": "R-062",
       "description": "the loop-item part id isn't trimmed",
       "edits": [
         {
@@ -11843,7 +11843,7 @@
     },
     {
       "id": "W-091/loop-templates-unguarded",
-      "requirement": "R-061",
+      "requirement": "R-062",
       "description": "a loop reads templates that aren't there",
       "edits": [
         {
@@ -12190,6 +12190,518 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
       "expect": "\\(fail\\).*listeners are passive"
+    },
+    {
+      "id": "W-091/ui-tb-saving",
+      "requirement": "R-006",
+      "description": "the save status never says Saving…",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "content = \"Saving…\";",
+          "replace": "content = \"\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*saving, saved, unsaved and idle"
+    },
+    {
+      "id": "W-091/ui-tb-retry-never",
+      "requirement": "R-006",
+      "description": "a retryable save error has no Retry",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "{status.retry && (",
+          "replace": "{false && ("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*Retry saves again"
+    },
+    {
+      "id": "W-091/ui-tb-retry-wrong",
+      "requirement": "R-006",
+      "description": "Retry publishes instead of saving",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "onRetry={onSave}",
+          "replace": "onRetry={onPublish}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*Retry saves again"
+    },
+    {
+      "id": "W-091/ui-tb-unsaved",
+      "requirement": "R-006",
+      "description": "unsaved changes aren't announced",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "else if (dirty) content = \"Unsaved changes\";",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*saving, saved, unsaved and idle"
+    },
+    {
+      "id": "W-091/ui-tb-untitled",
+      "requirement": "R-006",
+      "description": "an untitled page shows an empty title",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "{page.title || \"Untitled page\"}",
+          "replace": "{page.title}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*falls back to Untitled page"
+    },
+    {
+      "id": "W-091/ui-tb-site-styles-nopage",
+      "requirement": "R-006",
+      "description": "Site styles shows before the page loads",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "{page && onSiteStyles && (",
+          "replace": "{onSiteStyles && ("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*before the page loads only Exit"
+    },
+    {
+      "id": "W-091/ui-tb-save-enabled-busy",
+      "requirement": "R-006",
+      "description": "Save draft stays enabled while busy",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "              loading={busy === \"save\"}\n              disabled={busy !== null}",
+          "replace": "              loading={busy === \"save\"}\n              disabled={false}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*both Save draft and Publish are disabled"
+    },
+    {
+      "id": "W-091/ui-tb-publish-enabled-busy",
+      "requirement": "R-006",
+      "description": "Publish stays enabled while busy",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "              loading={busy === \"publish\"}\n              disabled={busy !== null}",
+          "replace": "              loading={busy === \"publish\"}\n              disabled={false}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*both Save draft and Publish are disabled"
+    },
+    {
+      "id": "W-091/ui-tb-status-live",
+      "requirement": "R-006",
+      "description": "the save status isn't a live region",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "role=\"status\" aria-live=\"polite\"",
+          "replace": "role=\"status\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*polite live region"
+    },
+    {
+      "id": "W-091/ui-ce-add-include-op",
+      "requirement": "R-061",
+      "description": "Add Include adds an exclude",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "onClick={() => add(\"include\")}",
+          "replace": "onClick={() => add(\"exclude\")}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Add Include adds an Entire site include"
+    },
+    {
+      "id": "W-091/ui-ce-add-exclude-op",
+      "requirement": "R-061",
+      "description": "Add Exclude adds an include",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "onClick={() => add(\"exclude\")}",
+          "replace": "onClick={() => add(\"include\")}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Add Exclude appends"
+    },
+    {
+      "id": "W-091/ui-ce-add-replaces",
+      "requirement": "R-061",
+      "description": "adding a rule drops the others",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "setRules([...doc.rules, ruleFromOption(",
+          "replace": "setRules([ruleFromOption("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Add Exclude appends"
+    },
+    {
+      "id": "W-091/ui-ce-update-all",
+      "requirement": "R-061",
+      "description": "changing one rule changes all",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "(rule.id === id ? { ...rule, ...patch } : rule)",
+          "replace": "({ ...rule, ...patch })"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*changes only that rule"
+    },
+    {
+      "id": "W-091/ui-ce-remove-all",
+      "requirement": "R-061",
+      "description": "removing one rule removes all",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "doc.rules.filter((rule) => rule.id !== id)",
+          "replace": "[]"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Remove condition removes only its own row"
+    },
+    {
+      "id": "W-091/ui-ce-op-always-include",
+      "requirement": "R-061",
+      "description": "the op select can't choose Exclude",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "update(rule.id, { op: event.target.value === \"exclude\" ? \"exclude\" : \"include\" })",
+          "replace": "update(rule.id, { op: \"include\" })"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*switching a rule to Exclude"
+    },
+    {
+      "id": "W-091/ui-ce-where-loses-op",
+      "requirement": "R-061",
+      "description": "choosing where resets the op to include",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "ruleFromOption(event.target.value, rule.op, rule.id)",
+          "replace": "ruleFromOption(event.target.value, \"include\", rule.id)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*keeps its op and id"
+    },
+    {
+      "id": "W-091/ui-ce-empty-note",
+      "requirement": "R-061",
+      "description": "no note when a part has no rules",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "{doc.rules.length === 0 && (",
+          "replace": "{false && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*says the part shows nowhere"
+    },
+    {
+      "id": "W-091/ui-ce-schema-version",
+      "requirement": "R-061",
+      "description": "the editor writes the wrong conditions version",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "onChange({ schemaVersion: 1, rules })",
+          "replace": "onChange({ schemaVersion: 2, rules })"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Add Include adds an Entire site include"
+    },
+    {
+      "id": "W-091/ui-ps-seo-desc",
+      "requirement": "R-006",
+      "description": "Meta description edits are dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "onChange={(event) => onChange({ seoDescription: event.target.value })}",
+          "replace": "onChange={() => undefined}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*SEO fields send their own patches"
+    },
+    {
+      "id": "W-091/ui-ps-seo-title-max",
+      "requirement": "R-006",
+      "description": "Meta title allows 2000 characters",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "maxLength={200}",
+          "replace": "maxLength={2000}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*SEO fields send their own patches"
+    },
+    {
+      "id": "W-091/ui-ps-part-title",
+      "requirement": "R-060",
+      "description": "theme-part title edits are dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "          value={page.title}\n          onChange={(event) => onChange({ title: event.target.value })}",
+          "replace": "          value={page.title}\n          onChange={() => undefined}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*popup shows its type, sends title changes"
+    },
+    {
+      "id": "W-091/ui-ps-part-conditions",
+      "requirement": "R-060",
+      "description": "theme-part condition edits are dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "onChange={(conditions) => onChange({ conditions })}",
+          "replace": "onChange={() => undefined}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*changing a condition sends it"
+    },
+    {
+      "id": "W-091/ui-ps-part-type",
+      "requirement": "R-060",
+      "description": "every part type reads Header",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "THEME_PART_TYPE_LABELS[page.partType ?? \"header\"]",
+          "replace": "THEME_PART_TYPE_LABELS[\"header\"]"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*popup shows its type"
+    },
+    {
+      "id": "W-091/ui-cc-commit-other-vars",
+      "requirement": "R-020",
+      "description": "editing one colour variable changes all",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "(c.id === bound.id ? { ...c, value: hex } : c)",
+          "replace": "({ ...c, value: hex })"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*only that variable changed"
+    },
+    {
+      "id": "W-091/ui-cc-bad-hex-commits",
+      "requirement": "R-020",
+      "description": "an invalid hex is saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "    if (!HEX.test(draft)) {\n      setError(BAD_HEX);\n      return;\n    }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*invalid hex shows the hex error"
+    },
+    {
+      "id": "W-091/ui-cc-same-value-commits",
+      "requirement": "R-020",
+      "description": "an unchanged value is saved again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "    if (draft === value) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*unchanged saves nothing"
+    },
+    {
+      "id": "W-091/ui-cc-commit-error-hidden",
+      "requirement": "R-020",
+      "description": "a failed variable save shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "      await onCommit(draft);\n    } catch (failure) {\n      setError(errorText(failure));",
+          "replace": "      await onCommit(draft);\n    } catch {\n      setError(null);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*failed save shows its message"
+    },
+    {
+      "id": "W-091/ui-cc-create-id-collide",
+      "requirement": "R-020",
+      "description": "a new variable reuses a taken id",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "for (let n = 2; taken.has(id); n++)",
+          "replace": "for (let n = 2; false; n++)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*taken id gets a suffix"
+    },
+    {
+      "id": "W-091/ui-cc-create-name-empty",
+      "requirement": "R-020",
+      "description": "a variable can be created without a name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "if (!name.trim()) return setError(\"Enter a name for the variable.\");",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*a name is required"
+    },
+    {
+      "id": "W-091/ui-cc-create-bad-hex",
+      "requirement": "R-020",
+      "description": "a variable can be created with a bad hex",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "if (!HEX.test(hex)) return setError(BAD_HEX);",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*a name is required"
+    },
+    {
+      "id": "W-091/ui-cc-create-untrimmed",
+      "requirement": "R-020",
+      "description": "the new variable name isn't trimmed",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "await onCreate(name.trim(), hex);",
+          "replace": "await onCreate(name, hex);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*name is trimmed"
+    },
+    {
+      "id": "W-091/ui-cc-create-error-hidden",
+      "requirement": "R-020",
+      "description": "a failed create shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "      setError(errorText(failure));\n      setBusy(false);",
+          "replace": "      setBusy(false);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*failed create shows its message"
+    },
+    {
+      "id": "W-091/ui-cc-create-enter",
+      "requirement": "R-020",
+      "description": "Enter doesn't create the variable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "if (event.key === \"Enter\") void create();\n        }}\n      />\n      {error",
+          "replace": "if (event.key === \"Escape\") void create();\n        }}\n      />\n      {error"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*Enter creates it"
+    },
+    {
+      "id": "W-091/ui-cc-cancel",
+      "requirement": "R-020",
+      "description": "Cancel doesn't close the form",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "onClick={onCancel}",
+          "replace": "onClick={() => undefined}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*Cancel closes the form"
     }
   ]
 }
