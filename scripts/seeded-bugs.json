@@ -13590,6 +13590,384 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
       "expect": "\\(fail\\).*each guard matches its own type only"
+    },
+    {
+      "id": "W-091/svg-polygon-dropped",
+      "requirement": "R-032",
+      "description": "polygon is dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  \"polygon\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*<polygon> is kept"
+    },
+    {
+      "id": "W-091/svg-marker-dropped",
+      "requirement": "R-032",
+      "description": "marker is dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  \"marker\",\n  \"text\",",
+          "replace": "  \"text\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*<marker> is kept"
+    },
+    {
+      "id": "W-091/svg-stroke-width-dropped",
+      "requirement": "R-032",
+      "description": "stroke-width is dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  \"stroke-width\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*stroke-width is kept"
+    },
+    {
+      "id": "W-091/svg-aria-label-dropped",
+      "requirement": "R-032",
+      "description": "aria-label is dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  \"aria-label\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*aria-label is kept"
+    },
+    {
+      "id": "W-091/svg-ref-y-dropped",
+      "requirement": "R-032",
+      "description": "refY is dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  \"refY\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*refY is kept"
+    },
+    {
+      "id": "W-091/svg-forbidden-skipped",
+      "requirement": "R-032",
+      "description": "the pre-parse reject is skipped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  if (FORBIDDEN.test(trimmed)) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*data: in text"
+    },
+    {
+      "id": "W-091/svg-forbidden-handler-loose",
+      "requirement": "R-032",
+      "description": "the handler pattern needs exactly one space",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "|\\bon[a-z]+\\s*=|javascript:|",
+          "replace": "|\\bon[a-z]+\\s=|javascript:|"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*handler-like text"
+    },
+    {
+      "id": "W-091/svg-style-attr-spaces",
+      "requirement": "R-032",
+      "description": "a spaced style attribute slips through",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  if (/\\bstyle\\s*=/i.test(raw)) return undefined;",
+          "replace": "  if (/\\bstyle=/i.test(raw)) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*style attribute with spaces"
+    },
+    {
+      "id": "W-091/svg-xlink-unchecked",
+      "requirement": "R-032",
+      "description": "xlink:href is not checked",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "if (name !== \"href\" && name !== \"xlink:href\") return true;",
+          "replace": "if (name !== \"href\") return true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*remote xlink:href on use"
+    },
+    {
+      "id": "W-091/svg-mask-unchecked",
+      "requirement": "R-032",
+      "description": "mask url() is not checked",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "if (name !== \"clip-path\" && name !== \"mask\") return true;",
+          "replace": "if (name !== \"clip-path\") return true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*remote url\\(\\) mask"
+    },
+    {
+      "id": "W-091/svg-href-unanchored",
+      "requirement": "R-032",
+      "description": "fragment hrefs are checked at the start only",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "const FRAGMENT_HREF = /^#[A-Za-z_][\\w.-]*$/;",
+          "replace": "const FRAGMENT_HREF = /^#[A-Za-z_][\\w.-]*/;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*href with a space"
+    },
+    {
+      "id": "W-091/svg-url-ref-no-start",
+      "requirement": "R-032",
+      "description": "url(#id) is checked at the end only",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "const URL_HASH_REF = /^url\\(\\s*#[A-Za-z_][\\w.-]*\\s*\\)$/i;",
+          "replace": "const URL_HASH_REF = /url\\(\\s*#[A-Za-z_][\\w.-]*\\s*\\)$/i;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*clip-path with a prefix"
+    },
+    {
+      "id": "W-091/svg-url-ref-no-end",
+      "requirement": "R-032",
+      "description": "url(#id) is checked at the start only",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "const URL_HASH_REF = /^url\\(\\s*#[A-Za-z_][\\w.-]*\\s*\\)$/i;",
+          "replace": "const URL_HASH_REF = /^url\\(\\s*#[A-Za-z_][\\w.-]*\\s*\\)/i;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*clip-path with a suffix"
+    },
+    {
+      "id": "W-091/svg-transform-trailing-comma",
+      "requirement": "R-032",
+      "description": "a trailing comma ends a transform list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "return end === value.length && !/,\\s*$/.test(value);",
+          "replace": "return end === value.length;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*trailing comma in a transform"
+    },
+    {
+      "id": "W-091/svg-transform-double-space",
+      "requirement": "R-032",
+      "description": "two spaces between numbers break a transform",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "const count = (match[2] ?? \"\").split(/\\s*,\\s*|\\s+/).length;",
+          "replace": "const count = (match[2] ?? \"\").split(/\\s*,\\s*|\\s/).length;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*transforms, fragment hrefs"
+    },
+    {
+      "id": "W-091/svg-attr-spaces",
+      "requirement": "R-032",
+      "description": "attributes with spaces around = are dropped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "const re = /([A-Za-z_:][-A-Za-z0-9_:]*)\\s*=\\s*(?:",
+          "replace": "const re = /([A-Za-z_:][-A-Za-z0-9_:]*)=\\s*(?:"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*spaces around ="
+    },
+    {
+      "id": "W-091/svg-lt-not-decoded",
+      "requirement": "R-032",
+      "description": "&lt; isn't decoded",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "    .replace(/&lt;/g, \"<\")\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*entities are decoded"
+    },
+    {
+      "id": "W-091/svg-quot-not-decoded",
+      "requirement": "R-032",
+      "description": "&quot; isn't decoded",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "    .replace(/&quot;/g, '\"')\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*entities are decoded"
+    },
+    {
+      "id": "W-091/svg-mismatch-kept",
+      "requirement": "R-032",
+      "description": "a broken child is skipped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "      if (child === undefined) return undefined;\n",
+          "replace": "      if (child === undefined) continue;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*mismatched nesting"
+    },
+    {
+      "id": "W-091/svg-any-root",
+      "requirement": "R-032",
+      "description": "any root element is accepted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "if (!root || typeof root === \"string\" || root.tag !== \"svg\") return undefined;",
+          "replace": "if (!root || typeof root === \"string\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*non-svg root"
+    },
+    {
+      "id": "W-091/svg-self-closing-bare",
+      "requirement": "R-032",
+      "description": "<tag/> without a space is refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "const openBody = selfClosing ? body.slice(0, -1).trim() : body;",
+          "replace": "const openBody = body;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*<g> is kept"
+    },
+    {
+      "id": "W-091/svg-whitespace-text-kept",
+      "requirement": "R-032",
+      "description": "whitespace-only text is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "      if (text.trim()) tokens.push({ kind: \"text\", value: text });",
+          "replace": "      tokens.push({ kind: \"text\", value: text });"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*whitespace-only text is dropped"
+    },
+    {
+      "id": "W-091/svg-comment-not-skipped",
+      "requirement": "R-032",
+      "description": "comments reject the SVG",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "    if (input.startsWith(\"<!--\", i)) {",
+          "replace": "    if (input.startsWith(\"<!---\", i)) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*comments are dropped"
+    },
+    {
+      "id": "W-091/svg-cap-exclusive",
+      "requirement": "R-032",
+      "description": "the size cap is exclusive",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;",
+          "replace": "if (!trimmed || trimmed.length >= MAX_MARKUP) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*32 768-character cap"
+    },
+    {
+      "id": "W-091/svg-cap-before-trim",
+      "requirement": "R-032",
+      "description": "the cap counts surrounding whitespace",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  const trimmed = raw.trim();\n  if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;",
+          "replace": "  const trimmed = raw.trim();\n  if (!trimmed || raw.length > MAX_MARKUP) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*32 768-character cap"
+    },
+    {
+      "id": "W-091/svg-non-string-throws",
+      "requirement": "R-032",
+      "description": "a non-string reaches trim",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  if (typeof raw !== \"string\") return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*isn't a string is refused"
+    },
+    {
+      "id": "W-091/svg-is-safe-inverted",
+      "requirement": "R-032",
+      "description": "isSafeSvgMarkup is always false",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  return sanitizeSvgMarkup(raw) !== undefined;",
+          "replace": "  return sanitizeSvgMarkup(raw) === undefined && false;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
+      "expect": "\\(fail\\).*valid SVG is safe to store"
     }
   ]
 }
