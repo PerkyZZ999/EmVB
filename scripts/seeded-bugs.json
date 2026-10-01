@@ -138,7 +138,7 @@
           "replace": "preload = [\"./test/setup/emdash-virtual.ts\"]"
         }
       ],
-      "command": ["bun", "test", "./test/setup"],
+      "command": ["bun", "test", "./test/setup/preload.test.ts"],
       "expect": "document is not defined|\\(fail\\)"
     },
     {
@@ -14816,6 +14816,20 @@
         "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
       ],
       "expect": "\\(fail\\).*without a session"
+    },
+    {
+      "id": "W-091/preload-act-env-missing",
+      "requirement": "N-001",
+      "description": "the preload no longer marks the act() environment",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./test/setup/preload.test.ts"],
+      "expect": "\\(fail\\).*preload provides the DOM"
     }
   ]
 }
