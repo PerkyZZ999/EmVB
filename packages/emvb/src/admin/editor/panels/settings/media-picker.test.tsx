@@ -36,12 +36,28 @@ async function picker(node: LayoutNode, respond: () => Response) {
       input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     });
   };
+  /** Focus the field, optionally type, then leave it (blur), as tabbing through does. */
+  const leaveUrl = async (text?: string) => {
+    const input = url();
+    if (!input) throw new Error("no URL field");
+    await act(async () => {
+      input.focus();
+      if (text !== undefined) {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+          input,
+          text,
+        );
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+    await act(async () => input.blur());
+  };
   const openLibrary = async () => {
     await act(async () => host.querySelector<HTMLElement>("[data-emvb-media-library]")?.click());
     await settle();
   };
   const text = () => host.textContent ?? "";
-  return { host, sent, paths, typeUrl, openLibrary, text };
+  return { host, sent, paths, typeUrl, leaveUrl, openLibrary, text };
 }
 
 const ok = (items: unknown[]) => () => Response.json({ data: { items } });
@@ -67,6 +83,46 @@ describe("image source URL (W-091)", () => {
     expect(view.sent.map((n) => n.props)).toEqual([
       { src: "https://example.com/new.jpg", alt: "A" },
     ]);
+  });
+});
+
+describe("leaving the URL field (W-092)", () => {
+  test("tabbing through an unchanged URL keeps the library image and changes nothing", async () => {
+    const view = await picker(image({ src: "/media/cat.png", alt: "A", mediaId: "m1" }), ok([]));
+    await view.leaveUrl();
+    expect(view.sent).toEqual([]);
+    expect(view.text()).not.toContain("Use a full URL");
+  });
+
+  test("tabbing through the empty field of an image without a source shows no error", async () => {
+    const view = await picker(image({ src: "", alt: "A" }), ok([]));
+    await view.leaveUrl();
+    expect(view.sent).toEqual([]);
+    expect(view.text()).not.toContain("Choose a library image, upload a file, or enter a URL.");
+  });
+
+  test("the same URL with spaces around it, or Enter on it, is not a change", async () => {
+    const view = await picker(image({ src: "/media/cat.png", alt: "A", mediaId: "m1" }), ok([]));
+    await view.leaveUrl("  /media/cat.png ");
+    await view.typeUrl("/media/cat.png");
+    expect(view.sent).toEqual([]);
+  });
+
+  test("leaving after a real change commits it once", async () => {
+    const view = await picker(image({ src: "/media/cat.png", alt: "A", mediaId: "m1" }), ok([]));
+    await view.leaveUrl("https://example.com/dog.jpg");
+    expect(view.sent.map((n) => n.props)).toEqual([
+      { src: "https://example.com/dog.jpg", alt: "A" },
+    ]);
+  });
+
+  test("going back to the saved URL clears an earlier error", async () => {
+    const view = await picker(image({ src: "/media/cat.png", alt: "A" }), ok([]));
+    await view.typeUrl("javascript:alert(1)");
+    expect(view.text()).toContain("Use a full URL");
+    await view.leaveUrl("/media/cat.png");
+    expect(view.text()).not.toContain("Use a full URL");
+    expect(view.sent).toEqual([]);
   });
 });
 
@@ -104,6 +160,6 @@ describe("media library (W-091)", () => {
     await view.openLibrary();
     const close = [...view.host.querySelectorAll("button")].find((b) => b.textContent === "Close");
     await act(async () => close?.click());
-    expect(view.host.querySelector("[data-emvb-media-dialog]")).toBeNull();
+    expect(view.host.querySelector("[data-emvb-media-dialog]")?.outerHTML ?? null).toBeNull();
   });
 });

@@ -12002,8 +12002,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/popups/runtime.ts",
-          "search": "      if (ctrl.opened) return;\n",
-          "replace": ""
+          "search": "  if (ctrl.opened || !canOpen(config)) return;",
+          "replace": "  if (!canOpen(config)) return;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
@@ -14830,6 +14830,263 @@
       ],
       "command": ["bun", "test", "./test/setup/preload.test.ts"],
       "expect": "\\(fail\\).*preload provides the DOM"
+    },
+    {
+      "id": "W-092/form-def-settings-missing",
+      "requirement": "D-015",
+      "description": "a form definition without settings is passed to the renderer as is (TypeError at render)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "  return { ...(def as PublicFormDefinition), pages, settings };",
+          "replace": "  return { ...(def as PublicFormDefinition), pages };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*a definition without settings renders the form with the default submit label"
+    },
+    {
+      "id": "W-092/form-def-fields-unchecked",
+      "requirement": "D-015",
+      "description": "fields of the wrong shape reach the renderer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "      ? page.fields.map(asField).filter((field) => field !== null)",
+          "replace": "      ? page.fields"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*pages, fields and options of the wrong shape, are left out"
+    },
+    {
+      "id": "W-092/form-def-label-any-type",
+      "requirement": "D-015",
+      "description": "a submit label that isn't text is kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "  if (typeof rawSettings.submitLabel !== \"string\") delete settings.submitLabel;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*settings that aren't text"
+    },
+    {
+      "id": "W-092/form-def-options-unchecked",
+      "requirement": "D-015",
+      "description": "options that aren't label/value text are kept",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "  if (Array.isArray(value.options)) field.options = value.options.filter(isOption);",
+          "replace": "  if (Array.isArray(value.options)) field.options = value.options;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*pages, fields and options of the wrong shape, are left out"
+    },
+    {
+      "id": "W-092/media-blur-commits-unchanged",
+      "requirement": "R-007",
+      "description": "leaving the URL field commits an unchanged URL (drops mediaId, marks dirty)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    if (!explicit && trimmed === src) {\n      setError(null);\n      return;\n    }\n",
+          "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    if (safe === src) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*tabbing through an unchanged URL keeps the library image"
+    },
+    {
+      "id": "W-092/media-blur-empty-error",
+      "requirement": "R-007",
+      "description": "leaving the empty URL field of an image without a source shows the empty-source error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "        onBlur={() => commitUrl(false)}",
+          "replace": "        onBlur={() => commitUrl(true)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*tabbing through the empty field of an image without a source shows no error"
+    },
+    {
+      "id": "W-092/media-same-url-recommitted",
+      "requirement": "R-007",
+      "description": "the same URL (with spaces, or on Enter) is committed again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    if (safe === src) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*the same URL with spaces around it, or Enter on it, is not a change"
+    },
+    {
+      "id": "W-092/media-error-kept-on-revert",
+      "requirement": "R-007",
+      "description": "going back to the saved URL keeps the earlier error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    if (!explicit && trimmed === src) {\n      setError(null);\n      return;\n    }\n",
+          "replace": "    if (!explicit && trimmed === src) {\n      return;\n    }\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*going back to the saved URL clears an earlier error"
+    },
+    {
+      "id": "W-092/popup-counts-while-open",
+      "requirement": "R-063",
+      "description": "a trigger that fires while the popup is open counts another show",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "  if (ctrl.opened || !canOpen(config)) return;",
+          "replace": "  if (!canOpen(config)) return;\n  if (ctrl.opened) {\n    bumpTimesShown(config.id);\n    return;\n  }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*two triggers in one visit count one show"
+    },
+    {
+      "id": "W-092/conditions-no-cap",
+      "requirement": "R-061",
+      "description": "Add Include/Exclude stays enabled and adds a 21st rule",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "  const full = doc.rules.length >= MAX_CONDITION_RULES;",
+          "replace": "  const full = doc.rules.length > MAX_CONDITION_RULES;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*at 20 rules both Add buttons are disabled"
+    },
+    {
+      "id": "W-092/conditions-cap-off-by-one",
+      "requirement": "R-061",
+      "description": "the cap stops at 19 rules",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "  const full = doc.rules.length >= MAX_CONDITION_RULES;",
+          "replace": "  const full = doc.rules.length >= MAX_CONDITION_RULES - 1;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*at 19 rules the 20th can still be added"
+    },
+    {
+      "id": "W-092/conditions-add-ignores-cap",
+      "requirement": "R-061",
+      "description": "a disabled Add still adds when clicked programmatically",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "    if (full) return;\n",
+          "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "          disabled={full}\n          title={full ? fullReason : undefined}\n          onClick={() => add(\"include\")}",
+          "replace": "          title={full ? fullReason : undefined}\n          onClick={() => add(\"include\")}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*at 20 rules both Add buttons are disabled"
+    },
+    {
+      "id": "W-092/conditions-full-hint-missing",
+      "requirement": "R-061",
+      "description": "the limit hint is not shown",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "      {full && (\n        <p className=\"emvb-helper\" data-emvb-conditions-full=\"\">",
+          "replace": "      {false && (\n        <p className=\"emvb-helper\" data-emvb-conditions-full=\"\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx"
+      ],
+      "expect": "\\(fail\\).*at 20 rules both Add buttons are disabled"
+    },
+    {
+      "id": "W-092/page-settings-hook-after-return",
+      "requirement": "R-060",
+      "description": "PageSettings calls useState after the theme-part early return",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "  const [seoOpen, setSeoOpen] = React.useState(false);\n  if (kind === \"theme-part\") {",
+          "replace": "  if (kind === \"theme-part\") {"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "  const seoCount",
+          "replace": "  const [seoOpen, setSeoOpen] = React.useState(false);\n  const seoCount"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*an open SEO section stays open across a switch"
+    },
+    {
+      "id": "W-092/node-type-message-object",
+      "requirement": "R-010",
+      "description": "a non-text node type is reported as \"received object\"",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "      ctx.addIssue({ code: \"invalid_type\", expected: \"string\", input: type, path: [\"type\"] });",
+          "replace": "      ctx.addIssue({ code: \"invalid_type\", expected: \"string\", path: [\"type\"] });"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
+      "expect": "\\(fail\\).*a type that isn't text is described as what it is"
     }
   ]
 }

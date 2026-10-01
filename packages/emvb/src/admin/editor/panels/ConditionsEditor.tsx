@@ -1,6 +1,11 @@
 import { Button } from "@cloudflare/kumo";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
-import { defaultConditions, type ConditionRule, type ConditionsDoc } from "../../../core/index.ts";
+import {
+  defaultConditions,
+  MAX_CONDITION_RULES,
+  type ConditionRule,
+  type ConditionsDoc,
+} from "../../../core/index.ts";
 import { BUTTON, FIELD } from "../../ui.ts";
 
 type Props = {
@@ -94,7 +99,12 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
   const doc = conditions ?? defaultConditions();
   const setRules = (rules: ConditionRule[]) => onChange({ schemaVersion: 1, rules });
 
+  /** The schema allows at most 20 rules, so a 21st would make the part unsavable (W-092). */
+  const full = doc.rules.length >= MAX_CONDITION_RULES;
+  const fullReason = `${MAX_CONDITION_RULES} conditions is the most one part can have. Remove one to add another.`;
+
   const add = (op: "include" | "exclude") => {
+    if (full) return;
     setRules([...doc.rules, ruleFromOption("general:entire_site", op, newConditionId())]);
   };
 
@@ -163,6 +173,8 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
           variant="secondary"
           className={BUTTON}
           icon={<PlusIcon aria-hidden="true" />}
+          disabled={full}
+          title={full ? fullReason : undefined}
           onClick={() => add("include")}
         >
           Add Include
@@ -172,11 +184,18 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
           variant="secondary"
           className={BUTTON}
           icon={<PlusIcon aria-hidden="true" />}
+          disabled={full}
+          title={full ? fullReason : undefined}
           onClick={() => add("exclude")}
         >
           Add Exclude
         </Button>
       </div>
+      {full && (
+        <p className="emvb-helper" data-emvb-conditions-full="">
+          {fullReason}
+        </p>
+      )}
     </div>
   );
 }

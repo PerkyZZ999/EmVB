@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type { PublicPluginApiRouteHandler } from "emdash/plugin-utils";
-import { defaultElement, type Layout, type LayoutNode } from "../core/index.ts";
+import {
+  defaultElement,
+  emptyDesign,
+  renderPage,
+  type Layout,
+  type LayoutNode,
+} from "../core/index.ts";
 import { formIdsInLayout, loadFormDefinitions } from "./forms-definitions.ts";
 
 const form = (id: string, formId?: string): LayoutNode =>
@@ -91,5 +97,77 @@ describe("loading public form definitions (D-015)", () => {
     expect((await loadFormDefinitions(undefined, BASE, ["contact"])).size).toBe(0);
     expect((await loadFormDefinitions(asHandler(handler), BASE, [])).size).toBe(0);
     expect(calls).toEqual([]);
+  });
+});
+
+describe("form definitions the forms plugin answers oddly (W-092)", () => {
+  const answer = (data: unknown) => asHandler(async () => ({ success: true, data }));
+
+  test("a definition without settings renders the form with the default submit label", async () => {
+    const defs = await loadFormDefinitions(answer({ name: "Bare", pages: [] }), BASE, ["bare"]);
+    expect(defs.get("bare")?.settings).toStrictEqual({});
+    const { html } = renderPage(layout(form("form0001", "bare")), emptyDesign(), {
+      formDefinitions: defs,
+    });
+    expect(html).toContain('data-submit-label="Submit"');
+  });
+
+  test("settings that aren't text, and pages, fields and options of the wrong shape, are left out", async () => {
+    const defs = await loadFormDefinitions(
+      answer({
+        name: "Odd",
+        settings: { submitLabel: 5, spamProtection: ["x"], extra: "kept" },
+        pages: [
+          null,
+          { fields: "none" },
+          {
+            fields: [
+              null,
+              { name: 7 },
+              { name: "email" },
+              {
+                name: "topic",
+                type: "select",
+                label: "Topic",
+                required: "yes",
+                placeholder: 3,
+                options: [{ label: "A", value: "a" }, { label: 1, value: "b" }, "c"],
+              },
+            ],
+          },
+        ],
+      }),
+      BASE,
+      ["odd"],
+    );
+    const odd = defs.get("odd");
+    expect(odd?.settings as Record<string, unknown> | undefined).toStrictEqual({ extra: "kept" });
+    expect(odd?.pages).toStrictEqual([
+      { fields: [] },
+      {
+        fields: [
+          { name: "email", type: "", label: "email", required: false },
+          {
+            name: "topic",
+            type: "select",
+            label: "Topic",
+            required: false,
+            options: [{ label: "A", value: "a" }],
+          },
+        ],
+      },
+    ]);
+  });
+
+  test("a text submit label is kept", async () => {
+    const defs = await loadFormDefinitions(
+      answer({ name: "Labelled", settings: { submitLabel: "Send" }, pages: [] }),
+      BASE,
+      ["labelled"],
+    );
+    const { html } = renderPage(layout(form("form0001", "labelled")), emptyDesign(), {
+      formDefinitions: defs,
+    });
+    expect(html).toContain('data-submit-label="Send"');
   });
 });

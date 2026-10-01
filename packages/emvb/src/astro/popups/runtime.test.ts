@@ -339,6 +339,26 @@ describe("public popup runtime details (W-091)", () => {
     expect(root.hidden).toBe(false);
   });
 
+  test("two triggers in one visit count one show, and a later reopen counts again (W-092)", () => {
+    const root = popup(
+      "both",
+      doc(
+        [
+          { type: "delay", ms: 0 },
+          { type: "delay", ms: 10 },
+        ],
+        { showTimes: 2 },
+      ),
+    );
+    const [first, second] = timers;
+    first?.run();
+    second?.run();
+    expect(localStorage.getItem("emvb-popup-shown:both")).toBe("1");
+    escape(root);
+    first?.run();
+    expect([root.hidden, localStorage.getItem("emvb-popup-shown:both")]).toEqual([false, "2"]);
+  });
+
   test("Escape on a closed popup doesn't move focus again", () => {
     const outside = document.createElement("button");
     const elsewhere = document.createElement("button");

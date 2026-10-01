@@ -106,7 +106,6 @@ function createController(root: HTMLElement): Controller | null {
     lastFocus: null,
     opened: false,
     open() {
-      if (ctrl.opened) return;
       ctrl.lastFocus = document.activeElement as HTMLElement | null;
       root.hidden = false;
       ctrl.opened = true;
@@ -163,8 +162,9 @@ function bindA11y(ctrl: Controller): void {
   });
 }
 
+/** Opens a closed popup and counts the show; a trigger while it's open does neither (W-092). */
 function openOnce(ctrl: Controller, config: PopupConfig): void {
-  if (!canOpen(config)) return;
+  if (ctrl.opened || !canOpen(config)) return;
   ctrl.open();
   bumpTimesShown(config.id);
 }

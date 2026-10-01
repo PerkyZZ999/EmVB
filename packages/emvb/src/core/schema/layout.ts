@@ -545,7 +545,8 @@ const LayoutNode: z.ZodType<LayoutNode> = z.lazy(() =>
     }
     const type = (input as { type?: unknown }).type;
     if (typeof type !== "string") {
-      ctx.addIssue({ code: "invalid_type", expected: "string", path: ["type"] });
+      // `input` is the type itself; without it Zod describes the whole node ("received object").
+      ctx.addIssue({ code: "invalid_type", expected: "string", input: type, path: ["type"] });
       return z.NEVER;
     }
     const result = knownTypeSet.has(type)

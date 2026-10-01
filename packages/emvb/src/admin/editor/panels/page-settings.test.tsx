@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import type { PageDraft } from "../../content-api.ts";
-import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
+import { cleanup, mount, rerender, settle } from "../../../../test/dom/mount.ts";
 import type { PagePatch } from "../store.ts";
 import { PageSettings } from "./PageSettings.tsx";
 
@@ -100,5 +100,38 @@ describe("theme part settings (W-091)", () => {
     );
     await act(async () => add?.click());
     expect(view.sent.map((patch) => Object.keys(patch))).toEqual([["conditions"]]);
+  });
+});
+
+describe("switching between page and theme-part settings (W-092)", () => {
+  const view = (kind: "page" | "theme-part") => (
+    <PageSettings page={PAGE} slugError={null} kind={kind} onChange={() => undefined} />
+  );
+  const panel = () =>
+    document.querySelector("[data-emvb-panel]")?.getAttribute("data-emvb-panel") ?? null;
+  const metaTitleShown = () =>
+    [...document.querySelectorAll("label")].some((l) => l.textContent?.trim() === "Meta title");
+
+  test("a mounted panel can change from theme-part to page and back without breaking", async () => {
+    await mount(view("theme-part"));
+    expect(panel()).toBe("theme-part-settings");
+    await rerender(view("page"));
+    expect(panel()).toBe("page-settings");
+    expect(document.querySelector('[data-emvb-section="seo"]')?.textContent).toBe("SEO");
+    await rerender(view("theme-part"));
+    expect(panel()).toBe("theme-part-settings");
+  });
+
+  test("the hook runs on every render, so an open SEO section stays open across a switch", async () => {
+    await mount(view("page"));
+    await act(async () =>
+      document.querySelector<HTMLElement>('[data-emvb-section="seo"]')?.click(),
+    );
+    await settle();
+    expect(metaTitleShown()).toBe(true);
+    await rerender(view("theme-part"));
+    await rerender(view("page"));
+    await settle();
+    expect(metaTitleShown()).toBe(true);
   });
 });

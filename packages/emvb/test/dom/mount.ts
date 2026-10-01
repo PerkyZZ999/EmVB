@@ -24,6 +24,13 @@ export async function mount(node: ReactNode): Promise<HTMLElement> {
   return next;
 }
 
+/** Renders `node` into the current tree, keeping its state, as a parent re-render would. */
+export async function rerender(node: ReactNode): Promise<void> {
+  const current = root;
+  if (!current) throw new Error("Nothing is mounted");
+  await act(async () => current.render(node));
+}
+
 /** Lets pending timers, and the renders they cause, run. */
 export const settle = () =>
   act(async () => {

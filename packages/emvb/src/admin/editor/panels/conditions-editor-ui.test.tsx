@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { CONDITIONS_SCHEMA_VERSION, type ConditionsDoc } from "../../../core/index.ts";
+import {
+  CONDITIONS_SCHEMA_VERSION,
+  MAX_CONDITION_RULES,
+  validateConditions,
+  type ConditionsDoc,
+} from "../../../core/index.ts";
 import { cleanup, mount } from "../../../../test/dom/mount.ts";
 import { ConditionsEditor } from "./ConditionsEditor.tsx";
 
@@ -123,5 +128,47 @@ describe("display conditions editor (W-091)", () => {
     expect(view.sent).toEqual([
       { schemaVersion: CONDITIONS_SCHEMA_VERSION, rules: [TWO.rules[0]] } as ConditionsDoc,
     ]);
+  });
+});
+
+describe("the condition limit (W-092)", () => {
+  const rules = (count: number): ConditionsDoc => ({
+    schemaVersion: CONDITIONS_SCHEMA_VERSION,
+    rules: Array.from({ length: count }, (_, i) => ({
+      id: `r${i}`,
+      op: "include" as const,
+      group: "general" as const,
+      name: "entire_site",
+      args: {},
+    })),
+  });
+  const addButtons = (host: HTMLElement) =>
+    [...host.querySelectorAll<HTMLButtonElement>("button")].filter((b) =>
+      (b.textContent ?? "").startsWith("Add "),
+    );
+
+  test("at 20 rules both Add buttons are disabled, say why, and add nothing", async () => {
+    const view = await editor(rules(MAX_CONDITION_RULES));
+    // The Kumo tooltip (`title`) only mounts on hover; the helper line says why at all times.
+    expect(addButtons(view.host).map((b) => [b.textContent, b.disabled])).toEqual([
+      ["Add Include", true],
+      ["Add Exclude", true],
+    ]);
+    expect(view.host.querySelector("[data-emvb-conditions-full]")?.textContent).toBe(
+      "20 conditions is the most one part can have. Remove one to add another.",
+    );
+    await act(async () => {
+      for (const button of addButtons(view.host)) button.click();
+    });
+    expect(view.sent).toEqual([]);
+  });
+
+  test("at 19 rules the 20th can still be added, and the result is a valid document", async () => {
+    const view = await editor(rules(MAX_CONDITION_RULES - 1));
+    expect(addButtons(view.host).map((b) => b.disabled)).toEqual([false, false]);
+    expect(view.host.querySelector("[data-emvb-conditions-full]") === null).toBe(true);
+    await view.press("Add Exclude");
+    expect(view.sent.map((doc) => doc.rules.length)).toEqual([MAX_CONDITION_RULES]);
+    expect(validateConditions(view.sent[0]).ok).toBe(true);
   });
 });

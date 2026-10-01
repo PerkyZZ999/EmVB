@@ -25,6 +25,8 @@ export function PageSettings({
   onChange: (patch: PagePatch) => void;
   kind?: "page" | "theme-part";
 }) {
+  // Hooks run before the theme-part branch, so switching `kind` keeps the hook order (W-092).
+  const [seoOpen, setSeoOpen] = React.useState(false);
   if (kind === "theme-part") {
     return (
       <div className="emvb-panel-body" data-emvb-panel="theme-part-settings">
@@ -56,7 +58,6 @@ export function PageSettings({
     );
   }
 
-  const [seoOpen, setSeoOpen] = React.useState(false);
   const seoCount = (page.seoTitle ? 1 : 0) + (page.seoDescription ? 1 : 0);
   return (
     <div className="emvb-panel-body" data-emvb-panel="page-settings">

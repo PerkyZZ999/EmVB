@@ -5,6 +5,7 @@ import {
   type Layout,
   type LayoutNode,
   type PublicFormDefinition,
+  type PublicFormField,
 } from "../core/index.ts";
 import { nodeChildren } from "../core/tree-ops.ts";
 
@@ -23,14 +24,53 @@ export function formIdsInLayout(layout: Layout): string[] {
   return [...ids];
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === "object" && !Array.isArray(value);
+
+const isOption = (value: unknown): value is { label: string; value: string } =>
+  isRecord(value) && typeof value.label === "string" && typeof value.value === "string";
+
+/** A field the renderer can use, or null; options that aren't label/value text are left out. */
+function asField(value: unknown): PublicFormField | null {
+  if (!isRecord(value) || typeof value.name !== "string") return null;
+  const field: PublicFormField = {
+    ...value,
+    name: value.name,
+    type: typeof value.type === "string" ? value.type : "",
+    label: typeof value.label === "string" ? value.label : value.name,
+    required: value.required === true,
+  };
+  if (Array.isArray(value.options)) field.options = value.options.filter(isOption);
+  else delete field.options;
+  if (typeof value.placeholder !== "string") delete field.placeholder;
+  return field;
+}
+
+/**
+ * The plugin's answer as a definition the core renderer can trust. The route is another plugin's
+ * code, so missing `settings`, odd pages or fields are normalised here rather than crashing the
+ * public render (W-092).
+ */
 function asDefinition(payload: unknown): PublicFormDefinition | null {
   if (!payload || typeof payload !== "object") return null;
   const body = payload as { success?: boolean; data?: unknown };
   const data = body.success === true ? body.data : payload;
   if (!data || typeof data !== "object") return null;
-  const def = data as PublicFormDefinition;
+  const def = data as Record<string, unknown>;
   if (!Array.isArray(def.pages)) return null;
-  return def;
+  const rawPages: unknown[] = Array.isArray(def.pages) ? def.pages : [];
+  const pages = rawPages.filter(isRecord).map((page) =>
+    Object.assign({}, page, {
+      fields: Array.isArray(page.fields)
+        ? page.fields.map(asField).filter((field) => field !== null)
+        : [],
+    }),
+  );
+  const rawSettings = isRecord(def.settings) ? def.settings : {};
+  const settings: PublicFormDefinition["settings"] = { ...rawSettings };
+  if (typeof rawSettings.submitLabel !== "string") delete settings.submitLabel;
+  if (typeof rawSettings.spamProtection !== "string") delete settings.spamProtection;
+  return { ...(def as PublicFormDefinition), pages, settings };
 }
 
 /** Loads public form definitions in-process (D-015). Missing forms are omitted. */

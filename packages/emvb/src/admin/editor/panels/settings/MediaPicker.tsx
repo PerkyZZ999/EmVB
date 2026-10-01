@@ -81,8 +81,13 @@ export function MediaPicker({ node, fetcher, onChange }: Props) {
     }
   };
 
-  const commitUrl = () => {
+  /** Enter always checks the field; leaving it (blur) only commits a real change (W-092). */
+  const commitUrl = (explicit: boolean) => {
     const trimmed = urlDraft.trim();
+    if (!explicit && trimmed === src) {
+      setError(null);
+      return;
+    }
     if (trimmed === "") {
       setError("Choose a library image, upload a file, or enter a URL.");
       return;
@@ -95,6 +100,7 @@ export function MediaPicker({ node, fetcher, onChange }: Props) {
       return;
     }
     setError(null);
+    if (safe === src) return;
     const next: Record<string, unknown> = { ...propsOf(node), src: safe };
     delete next.mediaId;
     onChange(withProps(node, next));
@@ -147,9 +153,9 @@ export function MediaPicker({ node, fetcher, onChange }: Props) {
         error={error ?? undefined}
         data-emvb-media-url=""
         onChange={(event) => setUrlDraft(event.target.value)}
-        onBlur={commitUrl}
+        onBlur={() => commitUrl(false)}
         onKeyDown={(event) => {
-          if (event.key === "Enter") commitUrl();
+          if (event.key === "Enter") commitUrl(true);
         }}
       />
       {open && (

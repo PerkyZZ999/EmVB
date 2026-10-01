@@ -83,6 +83,16 @@ describe("layout node refinements and shape guard (W-091)", () => {
     ]);
   });
 
+  test("a type that isn't text is described as what it is, not as the node (W-092)", () => {
+    const message = (type: unknown) => issues({ id: "abcd0001", type, props: {} })[0]?.message;
+    expect([message(5), message(null), message(undefined), message(["heading"])]).toEqual([
+      "Invalid input: expected string, received number",
+      "Invalid input: expected string, received null",
+      "Invalid input: expected string, received undefined",
+      "Invalid input: expected string, received array",
+    ]);
+  });
+
   test("a child that isn't an object, or whose type isn't a string, is an invalid_type issue", () => {
     expect(issues("text").map(({ path, code }) => ({ path, code }))).toEqual([
       { path: "root.children[0]", code: "invalid_type" },
