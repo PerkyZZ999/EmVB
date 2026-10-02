@@ -207,6 +207,10 @@ export function themePartLocationApplies(
     case "loop_item":
       // Reusable item template; never selected as a page location.
       return false;
+    case "section":
+    case "page_template":
+      // Reusable fragments; never selected as a page location.
+      return false;
   }
 }
 

@@ -162,6 +162,8 @@ describe("ThemePartList", () => {
       "Single Post",
       "Archive",
       "Loop Item",
+      "Sections",
+      "Page templates",
       "Popups1",
     ]);
   });

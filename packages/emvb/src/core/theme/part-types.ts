@@ -8,6 +8,8 @@ export const THEME_PART_TYPES = [
   "single_post",
   "archive",
   "loop_item",
+  "section",
+  "page_template",
   "popup",
 ] as const;
 
@@ -15,7 +17,7 @@ export type ThemePartType = (typeof THEME_PART_TYPES)[number];
 
 /**
  * Body/main templates that compete for `<main>` (S7c + S7d).
- * `loop_item` is a reusable fragment referenced by Loop elements — not a page location.
+ * `loop_item`, `section`, and `page_template` are reusable fragments — not page locations.
  * `popup` injects overlays (not a main replacement).
  */
 export const CONTENT_THEME_PART_TYPES = [
@@ -29,7 +31,7 @@ export const CONTENT_THEME_PART_TYPES = [
 export type ContentThemePartType = (typeof CONTENT_THEME_PART_TYPES)[number];
 
 /** Reusable item templates (not selected by route). */
-export const ITEM_THEME_PART_TYPES = ["loop_item"] as const;
+export const ITEM_THEME_PART_TYPES = ["loop_item", "section", "page_template"] as const;
 
 export type ItemThemePartType = (typeof ITEM_THEME_PART_TYPES)[number];
 
@@ -47,6 +49,8 @@ export const THEME_PART_TYPE_LABELS: Record<ThemePartType, string> = {
   single_post: "Single Post",
   archive: "Archive",
   loop_item: "Loop Item",
+  section: "Section",
+  page_template: "Page template",
   popup: "Popup",
 };
 

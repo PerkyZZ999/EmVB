@@ -3,7 +3,7 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /** 5 since W-096 (D-036): v4 → v5 changes nothing, so an older EmVB shows "saved by a newer EmVB". */
-export const LAYOUT_SCHEMA_VERSION = 5;
+export const LAYOUT_SCHEMA_VERSION = 6;
 
 export const NodeId = z
   .string()
@@ -278,6 +278,17 @@ export const LoopNode = parentNode(
   }),
 );
 
+/**
+ * A reusable block. When `partId` is set, the host supplies that Section theme part in
+ * `sectionTemplates` and the part's children render in place of `children`.
+ */
+export const SectionNode = parentNode(
+  "section",
+  z.strictObject({
+    partId: z.string().max(128).optional(),
+  }),
+);
+
 /** Known element type strings (everything else is an UnknownNode). */
 export const KNOWN_ELEMENT_TYPES = [
   "container",
@@ -305,6 +316,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "post-image",
   "post-link",
   "loop",
+  "section",
   "div-block",
   "flexbox",
   "svg",
@@ -366,6 +378,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   PostImageNode,
   PostLinkNode,
   LoopNode,
+  SectionNode,
 ]);
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
@@ -521,6 +534,19 @@ export type LoopNode = {
   children: LayoutNode[];
 };
 
+export type SectionNode = {
+  id: IdOf;
+  type: "section";
+  props: { partId?: string };
+  style?: StyleOf;
+  states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  children: LayoutNode[];
+};
+
 export type LayoutNode =
   | ContainerNode
   | DivBlockNode
@@ -530,6 +556,7 @@ export type LayoutNode =
   | TabPanelNode
   | FormNode
   | LoopNode
+  | SectionNode
   | HeadingNode
   | SpacerNode
   | DividerNode
@@ -606,6 +633,8 @@ export const isFormNode = (node: LayoutNode): node is FormNode => node.type === 
 
 export const isLoopNode = (node: LayoutNode): node is LoopNode => node.type === "loop";
 
+export const isSectionNode = (node: LayoutNode): node is SectionNode => node.type === "section";
+
 export const isDivBlockNode = (node: LayoutNode): node is DivBlockNode => node.type === "div-block";
 
 export const isFlexboxNode = (node: LayoutNode): node is FlexboxNode => node.type === "flexbox";
@@ -618,11 +647,12 @@ export const isTabPanelNode = (node: LayoutNode): node is TabPanelNode => node.t
 /** Layout parents that accept general children (forms may land here). */
 export const isLayoutParentNode = (
   node: LayoutNode,
-): node is ContainerNode | DivBlockNode | FlexboxNode | TabPanelNode =>
+): node is ContainerNode | DivBlockNode | FlexboxNode | TabPanelNode | SectionNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "flexbox" ||
-  node.type === "tab-panel";
+  node.type === "tab-panel" ||
+  node.type === "section";
 
 /** Nodes that may hold children. */
 export const isParentNode = (
@@ -633,6 +663,7 @@ export const isParentNode = (
   | FlexboxNode
   | FormNode
   | LoopNode
+  | SectionNode
   | TabsNode
   | TabPanelNode =>
   node.type === "container" ||
@@ -640,6 +671,7 @@ export const isParentNode = (
   node.type === "flexbox" ||
   node.type === "form" ||
   node.type === "loop" ||
+  node.type === "section" ||
   node.type === "tabs" ||
   node.type === "tab-panel";
 

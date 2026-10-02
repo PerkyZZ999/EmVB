@@ -87,7 +87,7 @@ export async function submitAsVisitor(page: Page, email: string, note?: string) 
 
 /** EmVB layout bound to a forms-plugin form id (email + note + submit). */
 export const formPageLayout = (formId: string) => ({
-  schemaVersion: 5,
+  schemaVersion: 6,
   root: {
     id: "root0001",
     type: "container",

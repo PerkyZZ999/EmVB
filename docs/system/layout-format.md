@@ -1,4 +1,4 @@
-# Layout format (schema v4)
+# Layout format (schema v6)
 
 How EmVB stores a page and its site-wide design, as implemented through S4 (variables W-028+). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `5` (D-031, D-032, D-034, D-036; v1–v4 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- `schemaVersion` is the literal `6` (D-031, D-032, D-034, D-036, D-038; v1–v5 documents are upgraded on read by steps that change nothing). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -62,6 +62,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | `post-image` | optional `decorative` | none | Dynamic featured image when URL present |
 | `post-link` | optional `text`, `newTab` | none | Dynamic permalink; blank text → title |
 | `loop` | optional `itemPartId` | `children: Node[]` (inline item template when no part id) | Repeats item template for each archive post |
+| `section` | optional `partId` | `children: Node[]` (inline contents when no part id) | When `partId` is set, the published Section theme part's children replace the local ones |
 
 Every node may also carry optional `htmlId` (CSS `id`, unique on the page), `classes` (style-class ids from the design system, S4), `devices` and `hiddenOn` (W-096, below).
 
@@ -142,7 +143,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],

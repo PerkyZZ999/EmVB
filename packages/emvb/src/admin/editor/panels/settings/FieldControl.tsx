@@ -51,6 +51,21 @@ export function FieldControl({
     );
   }
 
+  if (field.key === "partId" && node.type === "section" && fetcher) {
+    return (
+      <LoopItemBindControl
+        key={field.key}
+        value={typeof raw === "string" ? raw : ""}
+        fetcher={fetcher}
+        partType="section"
+        label="Section"
+        emptyLabel="Inline section"
+        marker="section"
+        onChange={(partId) => onChange(withProp(node, "partId", partId || undefined))}
+      />
+    );
+  }
+
   if (field.key === "field" && fetcher) {
     return (
       <FieldBindControl

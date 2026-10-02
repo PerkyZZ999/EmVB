@@ -161,6 +161,8 @@ describe("planSetup", () => {
           "single_post",
           "archive",
           "loop_item",
+          "section",
+          "page_template",
           "popup",
         ],
       },

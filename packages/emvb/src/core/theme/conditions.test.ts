@@ -284,6 +284,8 @@ describe("S7c content part types", () => {
       name: "all",
     });
     expect(defaultConditionsFor("loop_item")).toEqual(defaultConditions());
+    expect(defaultConditionsFor("section")).toEqual(defaultConditions());
+    expect(defaultConditionsFor("page_template")).toEqual(defaultConditions());
     expect(defaultConditionsFor("header")).toEqual(defaultConditions());
     expect(defaultConditionsFor("popup")).toEqual(defaultConditions());
   });
@@ -394,6 +396,21 @@ describe("S7c content part types", () => {
     expect(pickThemePartWinner(candidates, "archive", category)?.id).toBe("arch");
     expect(pickThemePartWinner(candidates, "archive", search)).toBeNull();
     expect(pickThemePartWinner(candidates, "archive", post)).toBeNull();
+  });
+
+  test("section and page_template never win as a page location", () => {
+    for (const partType of ["section", "page_template"] as const) {
+      const candidates: ThemePartCandidate[] = [
+        {
+          id: partType,
+          partType,
+          conditions: defaultConditions(),
+          updatedAt: "2026-09-27T12:00:00.000Z",
+        },
+      ];
+      expect(pickThemePartWinner(candidates, partType, postsArchive)).toBeNull();
+      expect(pickThemePartWinner(candidates, partType, post)).toBeNull();
+    }
   });
 
   test("loop_item never wins as a page location", () => {

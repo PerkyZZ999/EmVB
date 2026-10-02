@@ -1,5 +1,5 @@
 import * as React from "react";
-import { canDrop, type Layout } from "../../../core/index.ts";
+import { canDrop, findNode, type Layout } from "../../../core/index.ts";
 import {
   EXISTING_ELEMENT_MIME,
   idAt,
@@ -20,6 +20,20 @@ export type ResolvedDrop = {
 };
 
 type TransferKinds = ReturnType<typeof transferKinds>;
+
+/**
+ * The nearest `data-emvb-id` that belongs to this layout.
+ * Synced section contents keep the part's ids, so a click walks up to the section on the page.
+ */
+function ownedId(target: EventTarget | null, layout: Layout | null): string | null {
+  let el: Element | null = target && (target as Node).nodeType === 1 ? (target as Element) : null;
+  while (el) {
+    const id = el.getAttribute("data-emvb-id");
+    if (id && (!layout || findNode(layout, id))) return id;
+    el = el.parentElement;
+  }
+  return null;
+}
 
 /** The canvas iframe's content document needs events wired per load (W-015 / W-019). */
 export function useCanvasEvents({
@@ -99,13 +113,17 @@ export function useCanvasEvents({
     if (!doc) return;
     const click = (event: MouseEvent) => {
       event.preventDefault();
-      const id = tabPanelIdForLabel(event.target) ?? idAt(event.target);
+      const hit = tabPanelIdForLabel(event.target) ?? idAt(event.target);
+      const id =
+        hit && layoutRef.current && !findNode(layoutRef.current, hit)
+          ? ownedId(event.target, layoutRef.current)
+          : hit;
       handlers.current.onSelect(id);
       // The second click of a double-click reports detail 2. dblclick itself does not
       // cross the sandboxed iframe, so this click is the signal (W-097).
       if (event.detail === 2 && id) handlers.current.onEditText?.(id);
     };
-    const move = (event: MouseEvent) => setHoverId(idAt(event.target));
+    const move = (event: MouseEvent) => setHoverId(ownedId(event.target, layoutRef.current));
     const leave = () => setHoverId(null);
     const key = (event: KeyboardEvent) => {
       if (event.key === "Escape" && dragStash.active()) {

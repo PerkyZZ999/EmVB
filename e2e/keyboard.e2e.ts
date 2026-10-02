@@ -3,7 +3,7 @@ import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, saveDraft, unique } from "./support/helpers.ts";
 
 const layoutFor = () => ({
-  schemaVersion: 5,
+  schemaVersion: 6,
   root: {
     id: "root0001",
     type: "container",

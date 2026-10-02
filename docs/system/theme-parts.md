@@ -8,7 +8,7 @@ Post-MVP slices **S7a** (Headers/Footers), **S7c** (Error 404, Search Results, S
 |---|---|---|
 | `title` | string | Required |
 | `layout` | json + `emvb:layout` | Same layout schema as Visual pages |
-| `part_type` | select | `header` \| `footer` \| `error_404` \| `search_results` \| `single_page` \| `single_post` \| `archive` \| `loop_item` \| `popup` |
+| `part_type` | select | `header` \| `footer` \| `error_404` \| `search_results` \| `single_page` \| `single_post` \| `archive` \| `loop_item` \| `section` \| `page_template` \| `popup` |
 | `conditions` | json | Conditions doc v1 (see below) |
 | `triggers` | json | Triggers doc v1 — meaningful for `popup` (see below) |
 
@@ -26,9 +26,11 @@ No SEO. No public `urlPattern` (parts are not catch-all pages).
 | `single_post` | Replaces `<main>` on EmDash `posts` singular | `kind=singular`, `collection=posts` (e.g. `/posts/welcome`) |
 | `archive` | Replaces `<main>` on posts archive / category / tag | `kind=archive` and not search |
 | `loop_item` | Reusable item template for Loop elements | **Never** a page location; referenced by `loop.itemPartId` |
+| `section` | Reusable synced block | **Never** a page location; referenced by `section.partId`. Pages render the part's children live |
+| `page_template` | Starting layout for a new page | **Never** a page location. New page copies the layout with fresh ids |
 | `popup` | Overlay dialog at body end | Always competes; conditions decide; **not** a content replace |
 
-Default Include on create: Entire Site (header/footer/loop_item/popup); 404 page (`error_404`); Search results (`search_results`); Pages all (`single_page`); Posts all (`single_post`); All archives (`archive` — posts index + category/tag; search excluded by location gate).
+Default Include on create: Entire Site (header/footer/loop_item/section/page_template/popup); 404 page (`error_404`); Search results (`search_results`); Pages all (`single_page`); Posts all (`single_post`); All archives (`archive` — posts index + category/tag; search excluded by location gate).
 
 ## Conditions (schemaVersion 1)
 
@@ -90,6 +92,10 @@ Public HTML stays JS-free (R-031) **except** when a matching popup is present �
 | `loop` | Repeats item template for each archive post |
 
 **Loop Item:** set `loop.itemPartId` to a published `loop_item` theme-part id, or nest post-* elements under Loop as an inline template. Editor canvas shows sample placeholders when no live post is bound.
+
+**Section:** set `section.partId` to a published `section` theme-part id. The part's children render in place of the section's own children, on pages and in theme parts. A missing part renders empty (it does not fall back to local children). Leave `partId` blank to use the nested elements as an inline section.
+
+**Page template:** a `page_template` part is a starting layout. The new-page dialog copies it onto the page with fresh ids, so later edits stay on that page.
 
 ## Public render
 

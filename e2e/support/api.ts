@@ -126,7 +126,7 @@ export async function createThemePart(
     {
       title: input.title,
       layout: input.layout ?? {
-        schemaVersion: 5,
+        schemaVersion: 6,
         root: {
           id: "root0001",
           type: "container",
@@ -156,6 +156,17 @@ export async function createThemePart(
     },
     input.slug,
   );
+}
+
+/** Publishes a theme part's current draft. */
+export async function publishThemePart(request: APIRequestContext, id: string) {
+  const { status, json } = await api(request, "GET", `/_emdash/api/content/emvb_theme_parts/${id}`);
+  expect(status).toBe(200);
+  const body = json?.["data"] as { _rev: string };
+  const result = await api(request, "POST", `/_emdash/api/content/emvb_theme_parts/${id}/publish`, {
+    _rev: body["_rev"],
+  });
+  expect(result.status).toBe(200);
 }
 
 /** Publishes the page's current draft. */

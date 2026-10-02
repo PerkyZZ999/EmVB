@@ -4,6 +4,7 @@ import {
   parseThemePartType,
   starterLayout,
   THEME_PART_TYPE_LABELS,
+  validateLayout,
   type ConditionsDoc,
   type Layout,
   type ThemePartType,
@@ -163,3 +164,23 @@ export async function saveThemePart(
 
 export const publishThemePart = (fetcher: Fetcher, id: string, rev: string | null) =>
   publishEntry(fetcher, CONTENT, id, rev);
+
+/** The part's layout when it is the expected type. Null when missing or unreadable. */
+export async function themePartLayout(
+  fetcher: Fetcher,
+  id: string,
+  partType: ThemePartType,
+): Promise<Layout | null> {
+  try {
+    const body = await requestJson<{ item?: { data?: Record<string, unknown> } }>(
+      fetcher,
+      `${CONTENT}/${encodeURIComponent(id)}`,
+    );
+    const data = body?.item?.data;
+    if (!data || data["part_type"] !== partType) return null;
+    const result = validateLayout(data["layout"]);
+    return result.ok ? result.layout : null;
+  } catch {
+    return null;
+  }
+}

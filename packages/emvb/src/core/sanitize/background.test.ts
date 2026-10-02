@@ -98,7 +98,7 @@ describe("background images, gradients and overlays (W-094)", () => {
 
   test("deleting a colour variable clears a gradient stop and an overlay that use it", () => {
     const page: Layout = {
-      schemaVersion: 5,
+      schemaVersion: 6,
       root: {
         id: "root0001",
         type: "container",
@@ -118,6 +118,6 @@ describe("background images, gradients and overlays (W-094)", () => {
     const cleared = clearVariableRefs(page, "brand", "color");
     expect(cleared.root.style).toBeUndefined();
     expect(findVariableUsages(cleared, "brand", "color")).toEqual([]);
-    expect(emptyDesign().schemaVersion).toBe(5);
+    expect(emptyDesign().schemaVersion).toBe(6);
   });
 });

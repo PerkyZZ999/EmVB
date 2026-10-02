@@ -3,6 +3,7 @@ import { getPublicPluginApiRouteHandler } from "emdash/plugin-utils";
 import { PAGES_COLLECTION } from "../constants.ts";
 import { formIdsInLayout, loadFormDefinitions } from "./forms-definitions.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
+import { sectionTemplatesFor } from "./resolve-theme.ts";
 
 type EmDashEntry = NonNullable<Awaited<ReturnType<typeof getEmDashEntry>>["entry"]>;
 
@@ -47,8 +48,15 @@ export async function resolveEmVBPage(
   const formDefinitions = layout
     ? await loadFormDefinitions(handler, astro.url, formIdsInLayout(layout))
     : undefined;
+  const sectionTemplates = layout ? await sectionTemplatesFor(layout) : {};
   return {
-    ...renderStored(data["layout"], design, String(data["id"] ?? slug), formDefinitions),
+    ...renderStored(
+      data["layout"],
+      design,
+      String(data["id"] ?? slug),
+      formDefinitions,
+      Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : undefined,
+    ),
     entry,
     title: typeof data["title"] === "string" ? data["title"] : "",
     canvasMode: data["canvas_mode"] === "blank" ? "blank" : "site-layout",

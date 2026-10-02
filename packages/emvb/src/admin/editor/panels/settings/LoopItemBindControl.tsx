@@ -1,5 +1,6 @@
 import { Input, Select } from "@cloudflare/kumo";
 import * as React from "react";
+import type { ThemePartType } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { listThemeParts, type ThemePartSummary } from "../../../theme-api.ts";
 import { FIELD } from "../../../ui.ts";
@@ -15,10 +16,19 @@ export function LoopItemBindControl({
   value,
   fetcher,
   onChange,
+  partType = "loop_item",
+  label = "Loop Item",
+  emptyLabel = "Use nested elements",
+  marker = "loop-item",
 }: {
   value: string;
   fetcher: Fetcher;
   onChange: (itemPartId: string) => void;
+  partType?: ThemePartType;
+  label?: string;
+  emptyLabel?: string;
+  /** `data-emvb-${marker}-bind` keeps the loop-item tests stable. */
+  marker?: string;
 }) {
   const [parts, setParts] = React.useState<ThemePartSummary[] | null>(null);
   const [failed, setFailed] = React.useState(false);
@@ -28,7 +38,7 @@ export function LoopItemBindControl({
     void listThemeParts(fetcher)
       .then((all) => {
         if (cancelled) return;
-        setParts(all.filter((part) => part.partType === "loop_item"));
+        setParts(all.filter((part) => part.partType === partType));
         setFailed(false);
       })
       .catch(() => {
@@ -40,15 +50,15 @@ export function LoopItemBindControl({
     return () => {
       cancelled = true;
     };
-  }, [fetcher]);
+  }, [fetcher, partType]);
 
   if (parts && parts.length > 0) {
     const known = parts.some((part) => part.id === value);
     const selectValue = value === "" ? NONE : known ? value : MANUAL;
     return (
-      <div data-emvb-loop-item-bind="list">
+      <div {...{ [`data-emvb-${marker}-bind`]: "list" }}>
         <Select
-          label="Loop Item"
+          label={label}
           className={FIELD}
           value={selectValue}
           onValueChange={(next) => {
@@ -60,13 +70,13 @@ export function LoopItemBindControl({
             onChange(next);
           }}
           renderValue={(current: unknown) => {
-            if (current === NONE || current === "") return "Use nested elements";
+            if (current === NONE || current === "") return emptyLabel;
             if (current === MANUAL) return "Current id (not in list)";
             const match = parts.find((part) => part.id === String(current));
             return match ? labelFor(match) : String(current);
           }}
         >
-          <Select.Option value={NONE}>Use nested elements</Select.Option>
+          <Select.Option value={NONE}>{emptyLabel}</Select.Option>
           {!known && value ? (
             <Select.Option value={MANUAL}>Current id (not in list)</Select.Option>
           ) : null}
@@ -77,31 +87,31 @@ export function LoopItemBindControl({
           ))}
         </Select>
         <Input
-          label="Loop Item part id"
+          label={`${label} part id`}
           className={`${FIELD} emvb-mono`}
           value={value}
           onChange={(event) => onChange(event.target.value.trim())}
         />
         <p className="emvb-helper">
-          Optional published Loop Item theme part. Leave blank to use nested elements as the item
-          template. <a href="/_emdash/admin/plugins/emvb/theme">Open Theme Builder</a>
+          Optional published {label} theme part. Leave blank to use nested elements.
+          <a href="/_emdash/admin/plugins/emvb/theme"> Open Theme Builder</a>
         </p>
       </div>
     );
   }
 
   return (
-    <div data-emvb-loop-item-bind="manual">
+    <div {...{ [`data-emvb-${marker}-bind`]: "manual" }}>
       <Input
-        label="Loop Item part id"
+        label={`${label} part id`}
         className={`${FIELD} emvb-mono`}
         value={value}
         onChange={(event) => onChange(event.target.value.trim())}
       />
       <p className="emvb-helper">
         {failed
-          ? "Could not load Loop Item parts. Paste a theme-part id, or "
-          : "No Loop Item theme parts yet. Paste an id, or "}
+          ? `Could not load ${label} parts. Paste a theme-part id, or `
+          : `No ${label} theme parts yet. Paste an id, or `}
         <a href="/_emdash/admin/plugins/emvb/theme">create one in Theme Builder</a>.
       </p>
     </div>

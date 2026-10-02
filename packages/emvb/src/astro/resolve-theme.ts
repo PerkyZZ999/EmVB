@@ -2,6 +2,7 @@ import { getEmDashCollection, getEmDashEntry } from "emdash";
 import { getPublicPluginApiRouteHandler } from "emdash/plugin-utils";
 import {
   collectLoopItemPartIds,
+  collectSectionPartIds,
   contentPartTypeForContext,
   defaultConditions,
   defaultTriggers,
@@ -147,6 +148,32 @@ async function loadLoopTemplates(
   return templates;
 }
 
+/** Section parts referenced by `layout`, including sections nested inside those parts. */
+function loadSectionTemplates(layout: Layout, parts: StoredPart[]): Record<string, Layout> {
+  const byId = new Map(parts.map((p) => [p.id, p]));
+  const templates: Record<string, Layout> = {};
+  const queue = collectSectionPartIds(layout);
+  const seen = new Set<string>();
+  while (queue.length > 0 && seen.size < 32) {
+    const id = queue.shift();
+    if (!id || seen.has(id)) continue;
+    seen.add(id);
+    const part = byId.get(id);
+    if (!part || part.partType !== "section") continue;
+    const itemLayout = readLayout(part.layout);
+    if (!itemLayout) continue;
+    templates[id] = itemLayout;
+    queue.push(...collectSectionPartIds(itemLayout));
+  }
+  return templates;
+}
+
+/** Published Section layouts a page references. Empty when the page has no section parts. */
+export async function sectionTemplatesFor(layout: Layout): Promise<Record<string, Layout>> {
+  if (collectSectionPartIds(layout).length === 0) return {};
+  return loadSectionTemplates(layout, await loadPublishedThemeParts());
+}
+
 async function loadSingularPost(ctx: ThemeRequestContext): Promise<ThemePostFields | undefined> {
   if (ctx.kind !== "singular" || ctx.collection !== "posts") return undefined;
   const key = ctx.entryId || undefined;
@@ -205,16 +232,21 @@ async function buildDynamicForContent(
   parts: StoredPart[],
 ): Promise<ThemeDynamicData | undefined> {
   const loopTemplates = await loadLoopTemplates(layout, parts);
+  const sectionTemplates = loadSectionTemplates(layout, parts);
+  const referenced: ThemeDynamicData = {
+    ...(Object.keys(loopTemplates).length > 0 ? { loopTemplates } : {}),
+    ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
+  };
   if (partType === "single_post") {
     const post = await loadSingularPost(ctx);
-    if (!post && Object.keys(loopTemplates).length === 0) return undefined;
-    return { post, loopTemplates };
+    if (!post && Object.keys(referenced).length === 0) return undefined;
+    return { ...referenced, post };
   }
   if (partType === "archive") {
     const { posts, archiveTitle } = await loadArchivePosts(ctx);
-    return { posts, archiveTitle, loopTemplates };
+    return { ...referenced, posts, archiveTitle };
   }
-  if (Object.keys(loopTemplates).length > 0) return { loopTemplates };
+  if (Object.keys(referenced).length > 0) return referenced;
   return undefined;
 }
 
@@ -286,10 +318,22 @@ export async function resolveThemeParts(
     const stored = winner ? byId.get(winner.id) : undefined;
     if (!stored) return null;
     const layout = readLayout(stored.layout);
+    const sectionTemplates = layout ? loadSectionTemplates(layout, parts) : {};
+    const loopTemplates = layout ? await loadLoopTemplates(layout, parts) : {};
+    const referenced: ThemeDynamicData | undefined =
+      Object.keys(sectionTemplates).length > 0 || Object.keys(loopTemplates).length > 0
+        ? {
+            ...(Object.keys(loopTemplates).length > 0 ? { loopTemplates } : {}),
+            ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
+          }
+        : undefined;
     const dynamic =
       layout && winner === contentWinner
-        ? await buildDynamicForContent(stored.partType, context, layout, parts)
-        : undefined;
+        ? {
+            ...referenced,
+            ...(await buildDynamicForContent(stored.partType, context, layout, parts)),
+          }
+        : referenced;
     const { html, css } = renderOne(stored, dynamic);
     return { id: stored.id, title: stored.title, partType: stored.partType, html, css };
   };

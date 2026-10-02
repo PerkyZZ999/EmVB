@@ -125,7 +125,7 @@ describe("design routes", () => {
         success: true,
         data: {
           design: {
-            schemaVersion: 5,
+            schemaVersion: 6,
             variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
             classes: [],
           },
@@ -147,7 +147,7 @@ describe("design routes", () => {
     const read = await t.route("design");
     // A v1 document comes back upgraded to v5 (D-031, D-032, D-034, D-036).
     expect(read.body["data"]).toEqual({
-      design: { ...design(), schemaVersion: 5 },
+      design: { ...design(), schemaVersion: 6 },
       revision,
       status: "ok",
     });
@@ -223,7 +223,7 @@ describe("design routes", () => {
     } as never;
     expect(await designRoute.handler(ctx)).toEqual({
       design: {
-        schemaVersion: 5,
+        schemaVersion: 6,
         variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
         classes: [],
       },

@@ -38,6 +38,7 @@ import {
   type LoadedDesign,
 } from "./useEditorData.ts";
 import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
+import { useSectionTemplates } from "./section-templates.ts";
 import { useEditorCommands } from "./useEditorCommands.ts";
 import { useSave } from "./useSave.ts";
 import { type ShortcutHandlers, useEditorShortcuts } from "./useEditorShortcuts.ts";
@@ -183,10 +184,16 @@ function EditorApp({
     if (leaving) exit();
   }, [leaving]);
 
+  const sectionTemplates = useSectionTemplates(state.page.layout, fetcher);
   const rendered = React.useMemo(
     () =>
-      state.page.layout ? renderPage(state.page.layout, state.design, { mode: "editor" }) : null,
-    [state.page.layout, state.design],
+      state.page.layout
+        ? renderPage(state.page.layout, state.design, {
+            mode: "editor",
+            dynamic: Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : undefined,
+          })
+        : null,
+    [state.page.layout, state.design, sectionTemplates],
   );
   const selectedNode =
     state.selectedId && state.page.layout ? findNode(state.page.layout, state.selectedId) : null;

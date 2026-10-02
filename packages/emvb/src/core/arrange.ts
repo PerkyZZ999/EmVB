@@ -1,16 +1,25 @@
 import { MAX_DEPTH, MAX_NODES } from "./limits.ts";
 import {
+  isContainerNode,
   isFormFieldType,
   isFormNode,
   isParentNode,
   isLayoutParentNode,
+  LAYOUT_SCHEMA_VERSION,
   type ContainerNode,
   type FormNode,
   type LoopNode,
   type Layout,
   type LayoutNode,
 } from "./schema/layout.ts";
-import { findNode, insertNode, newNodeId, nodeChildren, removeNode } from "./tree-ops.ts";
+import {
+  findNode,
+  insertNode,
+  newNodeId,
+  nodeChildren,
+  removeNode,
+  starterLayout,
+} from "./tree-ops.ts";
 
 /** A refused operation, with the reason shown or announced to the user (R-003). */
 export type Refusal = { ok: false; reason: string };
@@ -203,6 +212,21 @@ export const withFreshIds = (
   node: LayoutNode,
   random: () => number = Math.random,
 ): LayoutNode => withNewIds(node, allIds(layout.root), random);
+
+/**
+ * A new page from a Page template theme part.
+ * Ids are fresh, so editing the page does not rewrite the template or other pages.
+ */
+export function layoutFromPageTemplate(source: Layout, random: () => number = Math.random): Layout {
+  if (!isContainerNode(source.root)) return starterLayout("Page", random);
+  const blank: Layout = {
+    schemaVersion: LAYOUT_SCHEMA_VERSION,
+    root: { id: "tplblank", type: "container", props: {}, children: [] },
+  };
+  const root = withFreshIds(blank, source.root, random);
+  if (!isContainerNode(root)) return starterLayout("Page", random);
+  return { schemaVersion: LAYOUT_SCHEMA_VERSION, root };
+}
 
 /** A deep copy with new unique ids, inserted right after the original and selected. */
 export function duplicateNode(

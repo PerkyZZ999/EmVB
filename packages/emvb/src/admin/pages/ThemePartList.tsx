@@ -24,6 +24,8 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "single_post", label: "Single Post" },
   { value: "archive", label: "Archive" },
   { value: "loop_item", label: "Loop Item" },
+  { value: "section", label: "Sections" },
+  { value: "page_template", label: "Page templates" },
   { value: "popup", label: "Popups" },
 ];
 

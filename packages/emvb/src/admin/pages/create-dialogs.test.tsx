@@ -81,7 +81,7 @@ for (const dialog of dialogs) {
       await mount(dialog.render(fetcherReplying(created("x"), sent)));
       await submit();
       expect(text()).toContain(dialog.emptyTitle);
-      expect(sent).toHaveLength(0);
+      expect(sent.filter((item) => item.body !== undefined)).toHaveLength(0);
     });
 
     test("the slug follows the title until it is edited, then the page opens in the editor", async () => {
@@ -94,8 +94,9 @@ for (const dialog of dialogs) {
       await type("Title", "About Them");
       expect((input("Slug") as HTMLInputElement).value).toBe("Custom Slug!");
       await submit();
-      expect(sent).toHaveLength(1);
-      const body = sent[0]?.body as { slug: string; data: { title: string } };
+      const creates = sent.filter((item) => item.body !== undefined);
+      expect(creates).toHaveLength(1);
+      const body = creates[0]?.body as { slug: string; data: { title: string } };
       expect(body.slug).toBe("custom-slug");
       expect(body.data.title).toBe("About Them");
       expect(assign).toHaveBeenCalledWith(dialog.url("01NEW"));

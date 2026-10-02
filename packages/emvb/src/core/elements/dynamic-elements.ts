@@ -1,5 +1,6 @@
 import type {
   LoopNode,
+  SectionNode,
   PostContentNode,
   PostExcerptNode,
   PostImageNode,
@@ -115,6 +116,28 @@ export const loop: ElementDefinition<LoopNode> = {
         optional: true,
         message:
           "Optional published Loop Item theme part. Leave blank to use nested elements as the item template.",
+      },
+    ],
+  },
+  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
+export const section: ElementDefinition<SectionNode> = {
+  baseCss: ".emvb-section{display:flex;flex-direction:column;min-width:0}",
+  defaults: () => ({ type: "section", props: {}, children: [] }),
+  descriptor: {
+    type: "section",
+    name: "Section",
+    group: "layout",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "partId",
+        kind: "text",
+        label: "Section",
+        optional: true,
+        message:
+          "Optional published Section theme part. When set, the part's contents replace the nested elements on every page that uses it.",
       },
     ],
   },

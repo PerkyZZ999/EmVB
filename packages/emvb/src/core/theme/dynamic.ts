@@ -22,6 +22,10 @@ export type ThemeDynamicData = {
   posts?: ThemePostFields[];
   /** Published Loop Item layouts keyed by theme-part entry id. */
   loopTemplates?: Record<string, Layout>;
+  /** Published Section layouts keyed by theme-part entry id. */
+  sectionTemplates?: Record<string, Layout>;
+  /** Section part ids already being expanded, so a section cannot include itself. */
+  sectionStack?: readonly string[];
   archiveTitle?: string;
 };
 
@@ -77,6 +81,25 @@ export function collectLoopItemPartIds(layout: Layout): string[] {
       const id =
         typeof (node.props as { itemPartId?: unknown }).itemPartId === "string"
           ? (node.props as { itemPartId: string }).itemPartId.trim()
+          : "";
+      if (id) ids.add(id);
+    }
+    if (isParentNode(node)) {
+      for (const child of node.children) walk(child);
+    }
+  };
+  walk(layout.root);
+  return [...ids];
+}
+
+/** Collect `section.partId` values so hosts can load Section templates. */
+export function collectSectionPartIds(layout: Layout): string[] {
+  const ids = new Set<string>();
+  const walk = (node: LayoutNode): void => {
+    if (node.type === "section") {
+      const id =
+        typeof (node.props as { partId?: unknown }).partId === "string"
+          ? (node.props as { partId: string }).partId.trim()
           : "";
       if (id) ids.add(id);
     }

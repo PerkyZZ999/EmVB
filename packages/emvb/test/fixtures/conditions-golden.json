@@ -678,6 +678,30 @@
         }
       ]
     },
+    "section": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-entire-site",
+          "op": "include",
+          "group": "general",
+          "name": "entire_site",
+          "args": {}
+        }
+      ]
+    },
+    "page_template": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-entire-site",
+          "op": "include",
+          "group": "general",
+          "name": "entire_site",
+          "args": {}
+        }
+      ]
+    },
     "popup": {
       "schemaVersion": 1,
       "rules": [
@@ -725,6 +749,14 @@
         "winner": null,
         "all": []
       },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
+        "winner": null,
+        "all": []
+      },
       "popup": {
         "winner": "popup-c",
         "all": ["popup-b", "popup-c", "popup-a"]
@@ -760,6 +792,14 @@
         "all": []
       },
       "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
         "winner": null,
         "all": []
       },
@@ -801,6 +841,14 @@
         "winner": null,
         "all": []
       },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
+        "winner": null,
+        "all": []
+      },
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
@@ -836,6 +884,14 @@
         "all": []
       },
       "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
         "winner": null,
         "all": []
       },
@@ -877,6 +933,14 @@
         "winner": null,
         "all": []
       },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
+        "winner": null,
+        "all": []
+      },
       "popup": {
         "winner": "popup-b",
         "all": ["popup-b", "popup-a"]
@@ -912,6 +976,14 @@
         "all": []
       },
       "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
         "winner": null,
         "all": []
       },
@@ -953,6 +1025,14 @@
         "winner": null,
         "all": []
       },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
+        "winner": null,
+        "all": []
+      },
       "popup": {
         "winner": "popup-b",
         "all": ["popup-b", "popup-a"]
@@ -988,6 +1068,14 @@
         "all": []
       },
       "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
         "winner": null,
         "all": []
       },
@@ -1029,6 +1117,14 @@
         "winner": null,
         "all": []
       },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
+        "winner": null,
+        "all": []
+      },
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
@@ -1064,6 +1160,14 @@
         "all": []
       },
       "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
         "winner": null,
         "all": []
       },
@@ -1105,6 +1209,14 @@
         "winner": null,
         "all": []
       },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
+        "winner": null,
+        "all": []
+      },
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
@@ -1140,6 +1252,14 @@
         "all": []
       },
       "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
         "winner": null,
         "all": []
       },
@@ -1181,6 +1301,14 @@
         "winner": null,
         "all": []
       },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
+        "winner": null,
+        "all": []
+      },
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
@@ -1216,6 +1344,14 @@
         "all": []
       },
       "loop_item": {
+        "winner": null,
+        "all": []
+      },
+      "section": {
+        "winner": null,
+        "all": []
+      },
+      "page_template": {
         "winner": null,
         "all": []
       },

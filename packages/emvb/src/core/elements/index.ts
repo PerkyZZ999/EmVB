@@ -30,6 +30,7 @@ import type { ElementDefinition } from "./definition.ts";
 import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
 import {
   loop,
+  section,
   postContent,
   postExcerpt,
   postImage,
@@ -634,6 +635,7 @@ export const ELEMENTS = {
   "post-image": postImage,
   "post-link": postLink,
   loop,
+  section,
   "div-block": divBlock,
   flexbox,
   svg: svgEl,

@@ -21,7 +21,7 @@ const definition = (_id: string): PublicFormDefinition => ({
 });
 
 const layoutWithForm = (withEmail: boolean): Layout => ({
-  schemaVersion: 5,
+  schemaVersion: 6,
   root: {
     id: "root0001",
     type: "container",
@@ -77,7 +77,7 @@ describe("forms markup contract (W-035)", () => {
 
   test("pages without a form stay needsFormsRuntime false", () => {
     const layout: Layout = {
-      schemaVersion: 5,
+      schemaVersion: 6,
       root: {
         id: "root0001",
         type: "container",
@@ -109,7 +109,7 @@ describe("forms submit contract (W-037)", () => {
 describe("unbound form preview (QA)", () => {
   test("empty formId shows an editor placeholder and is omitted publicly", () => {
     const layout: Layout = {
-      schemaVersion: 5,
+      schemaVersion: 6,
       root: {
         id: "root0001",
         type: "container",
