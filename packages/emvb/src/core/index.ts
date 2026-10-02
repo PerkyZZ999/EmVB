@@ -64,6 +64,13 @@ export {
   type ElementType,
 } from "./elements/index.ts";
 export {
+  commitPlainText,
+  isMultilineText,
+  isPlainTextNode,
+  plainTextOf,
+  withPlainText,
+} from "./elements/plain-text.ts";
+export {
   StyleProps,
   StyleStates,
   DeviceStyles,

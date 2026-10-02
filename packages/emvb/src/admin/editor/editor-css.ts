@@ -144,6 +144,18 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-stage { position: relative; display: flex; flex: 1 1 auto; justify-content: center; min-height: 0; width: 100%; overflow: hidden; }
 .emvb-stage-frame { position: relative; width: 100%; height: 100%; }
 .emvb-canvas iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+.emvb-canvas-text {
+  position: absolute;
+  z-index: 6;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  overflow: hidden;
+  resize: none;
+  background: transparent;
+  outline: 1px solid var(--color-kumo-brand);
+  outline-offset: -1px;
+}
 .emvb-overlay { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .emvb-outline-hover, .emvb-outline-selected { position: absolute; box-shadow: inset 0 0 0 1px var(--color-kumo-brand); }
 .emvb-outline-selected { box-shadow: inset 0 0 0 1.5px var(--color-kumo-brand), 0 0 0 1px color-mix(in oklab, var(--color-kumo-brand) 25%, transparent); }
@@ -163,10 +175,10 @@ export const EDITOR_CSS = `${UI_CSS}
   letter-spacing: 0.01em;
   white-space: nowrap;
   box-shadow: 0 1px 2px var(--color-kumo-shadow-edge), 0 2px 6px var(--color-kumo-shadow-drop);
-  pointer-events: auto;
+  pointer-events: none;
 }
 .emvb-overlay-label > span { padding: 0 4px; }
-.emvb-overlay-action { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; }
+.emvb-overlay-action { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; pointer-events: auto; }
 .emvb-overlay-action:hover { background: var(--color-kumo-brand-hover); }
 .emvb-overlay-action:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
 .emvb-empty-canvas { display: flex; align-items: center; justify-content: center; height: 100%; padding: 24px; }

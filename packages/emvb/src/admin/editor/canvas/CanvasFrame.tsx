@@ -3,6 +3,10 @@ import { createPortal } from "react-dom";
 import {
   isParentNode,
   canDrop,
+  findNode,
+  isPlainTextNode,
+  isMultilineText,
+  plainTextOf,
   type DragSource,
   type Layout,
   type LayoutNode,
@@ -23,6 +27,7 @@ import { useCanvasEvents } from "./canvas-events.ts";
 import { SelectionOverlay, type Box, type InvalidDrop } from "./SelectionOverlay.tsx";
 import { applyStatePreview, type StatePreview } from "./state-preview.ts";
 import { revealInTabs } from "./tab-reveal.ts";
+import { CanvasTextEdit } from "./CanvasTextEdit.tsx";
 import { vnodeToReact } from "./vnode-react.tsx";
 import type { ClipboardActions, PasteRefusal } from "../useClipboardActions.ts";
 
@@ -31,7 +36,7 @@ const SRCDOC =
 
 /** Canvas-only: empty containers are droppable. Never emitted into the saved page CSS. */
 const EDITOR_CANVAS_CSS =
-  ".emvb-container:empty{min-height:48px}.emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}";
+  ".emvb-container:empty{min-height:48px}.emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}[data-emvb-editing]{color:transparent !important}";
 
 const boxOf = (doc: Document, id: string | null): Box | null => {
   if (!id) return null;
@@ -126,6 +131,7 @@ export function CanvasFrame({
   refusal = null,
   onDropNew,
   onMove,
+  onCommitText,
 }: {
   vnode: VNode | null;
   css: string;
@@ -139,6 +145,8 @@ export function CanvasFrame({
   refusal?: PasteRefusal | null;
   onDropNew: (elementType: string, parentId: string, index: number) => void;
   onMove: (id: string, parentId: string, index: number) => void;
+  /** Stores a canvas plain-text edit (W-097). */
+  onCommitText: (id: string, text: string) => void;
 }) {
   const frame = React.useRef<HTMLIFrameElement>(null);
   const [doc, setDoc] = React.useState<Document | null>(null);
@@ -149,10 +157,20 @@ export function CanvasFrame({
     hover: null,
     selected: null,
   });
-  const handlers = React.useRef(selection);
-  handlers.current = selection;
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const handlers = React.useRef<CanvasSelection & { onEditText?: (id: string) => void }>(selection);
   const layoutRef = React.useRef(layout);
   layoutRef.current = layout;
+  handlers.current = {
+    ...selection,
+    onEditText: (id) => {
+      const node = layoutRef.current ? findNode(layoutRef.current, id) : undefined;
+      if (node && isPlainTextNode(node) && plainTextOf(node) !== null) {
+        selection.onSelect(id);
+        setEditingId(id);
+      }
+    },
+  };
   const dropRef = React.useRef(onDropNew);
   dropRef.current = onDropNew;
   const moveRef = React.useRef(onMove);
@@ -255,6 +273,13 @@ export function CanvasFrame({
   }, [doc, refusal]);
 
   const { selectedId } = selection;
+  const editingNode = editingId && layout ? findNode(layout, editingId) : undefined;
+  const editingText = editingNode ? plainTextOf(editingNode) : null;
+  const editingBox = doc && editingId && editingText !== null ? boxOf(doc, editingId) : null;
+  const editingEl =
+    doc && editingId && editingText !== null
+      ? doc.querySelector(`[data-emvb-id="${CSS.escape(editingId)}"]`)
+      : null;
   React.useEffect(() => {
     if (doc) revealInTabs(doc, selectedId);
   }, [doc, selectedId, vnode]);
@@ -307,6 +332,19 @@ export function CanvasFrame({
           dropLine={dropLine}
           invalid={invalid ?? refused}
         />
+        {editingId && editingText !== null && editingBox && editingEl?.nodeType === 1 && (
+          <CanvasTextEdit
+            element={editingEl}
+            box={editingBox}
+            text={editingText}
+            multiline={editingNode ? isMultilineText(editingNode) : false}
+            onCommit={(text) => {
+              onCommitText(editingId, text);
+              setEditingId(null);
+            }}
+            onCancel={() => setEditingId(null)}
+          />
+        )}
       </div>
       {doc && createPortal(<style data-emvb-canvas-css="">{css}</style>, doc.head)}
       {doc &&

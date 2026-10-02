@@ -16201,6 +16201,68 @@
         "Hide on mobile"
       ],
       "expect": "✘.*\\[node\\].*Hide on mobile"
+    },
+    {
+      "id": "W-097/heading-not-plain-text",
+      "requirement": "W-097",
+      "description": "a heading is not edited on the canvas",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/plain-text.ts",
+          "search": "const PLAIN_TEXT = [\"heading\", \"text\", \"label\", \"link\", \"button\"] as const;",
+          "replace": "const PLAIN_TEXT = [\"text\", \"label\", \"link\", \"button\"] as const;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/plain-text.test.ts",
+        "-t",
+        "canvas text is the stored"
+      ],
+      "expect": "\\(fail\\).*canvas text is the stored"
+    },
+    {
+      "id": "W-097/newline-kept-on-heading",
+      "requirement": "W-097",
+      "description": "a heading commit keeps a line break",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/plain-text.ts",
+          "search": "  const flat = multiline ? text : text.replaceAll(\"\\n\", \"\");",
+          "replace": "  const flat = text;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/plain-text.test.ts",
+        "-t",
+        "a heading commit drops"
+      ],
+      "expect": "\\(fail\\).*a heading commit drops"
+    },
+    {
+      "id": "W-097/e2e-dblclick-ignored",
+      "requirement": "W-097",
+      "description": "double-click does not open the canvas text editor",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "        setEditingId(id);",
+          "replace": "        setEditingId(null);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/canvas-text.e2e.ts",
+        "--project=node",
+        "-g",
+        "double-clicking a heading"
+      ],
+      "expect": "✘.*\\[node\\].*double-clicking a heading"
     }
   ]
 }

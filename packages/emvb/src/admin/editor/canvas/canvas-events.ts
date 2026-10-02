@@ -40,6 +40,7 @@ export function useCanvasEvents({
   handlers: React.RefObject<{
     onSelect: (id: string | null) => void;
     onKeyDown: (event: KeyboardEvent) => void;
+    onEditText?: (id: string) => void;
   }>;
   layoutRef: React.RefObject<Layout | null>;
   moveRef: React.RefObject<(id: string, parentId: string, index: number) => void>;
@@ -98,7 +99,11 @@ export function useCanvasEvents({
     if (!doc) return;
     const click = (event: MouseEvent) => {
       event.preventDefault();
-      handlers.current.onSelect(tabPanelIdForLabel(event.target) ?? idAt(event.target));
+      const id = tabPanelIdForLabel(event.target) ?? idAt(event.target);
+      handlers.current.onSelect(id);
+      // The second click of a double-click reports detail 2. dblclick itself does not
+      // cross the sandboxed iframe, so this click is the signal (W-097).
+      if (event.detail === 2 && id) handlers.current.onEditText?.(id);
     };
     const move = (event: MouseEvent) => setHoverId(idAt(event.target));
     const leave = () => setHoverId(null);

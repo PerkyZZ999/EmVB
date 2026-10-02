@@ -8,6 +8,7 @@ import {
   moveUp,
   renderPage,
   toggleHidden,
+  withPlainText,
   type PopupDevice,
 } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
@@ -314,6 +315,13 @@ function EditorApp({
                     }}
                     onMove={(id, parentId, index) =>
                       dispatch({ type: "move-node", id, parentId, index })
+                    }
+                    onCommitText={(id, text) =>
+                      dispatch({
+                        type: "update-node",
+                        id,
+                        update: (node) => withPlainText(node, text),
+                      })
                     }
                   />
                 ) : (
