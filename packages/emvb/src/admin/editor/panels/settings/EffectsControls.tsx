@@ -9,6 +9,7 @@ import { NumberField, NumberRow, type NumberSpec } from "./NumberRow.tsx";
 type Shadow = NonNullable<StyleProps["boxShadow"]>;
 type Filter = NonNullable<StyleProps["filter"]>;
 type Transition = NonNullable<StyleProps["transition"]>;
+type Entrance = NonNullable<StyleProps["entrance"]>;
 
 /** DESIGN.md: Add shadow starts at 0 4 12 0, 18 % black. */
 const NEW_SHADOW: Shadow = { x: 0, y: 4, blur: 12, spread: 0, color: "#0000002e" };
@@ -192,6 +193,63 @@ function TransitionSelect<T extends string>({
         </Select.Option>
       ))}
     </Select>
+  );
+}
+
+const ENTRANCE_TYPES: { value: Entrance["type"]; label: string }[] = [
+  { value: "fade", label: "Fade" },
+  { value: "fade-up", label: "Fade up" },
+  { value: "fade-down", label: "Fade down" },
+];
+
+/** Plays once on load (W-101, Normal only). Add entrance starts at Fade, 400 ms. */
+export function EntranceControl({
+  value,
+  onChange,
+  reset,
+}: {
+  value: Entrance | undefined;
+  onChange: (next: Entrance | undefined) => void;
+  reset: React.ReactNode;
+}) {
+  return (
+    <div
+      className="emvb-style-row"
+      data-emvb-style="entrance"
+      data-set={value ? "true" : undefined}
+    >
+      <div className="emvb-field-group emvb-transition">
+        <span className="emvb-var-field-label">Entrance</span>
+        {value ? (
+          <>
+            <TransitionSelect
+              label="Entrance"
+              value={value.type}
+              options={ENTRANCE_TYPES}
+              onChange={(type) => onChange({ ...value, type })}
+            />
+            <NumberField
+              fieldKey="entrance.duration"
+              label="Duration"
+              value={value.duration}
+              spec={MS}
+              onCommit={(n) => onChange({ ...value, duration: n ?? 0 })}
+            />
+          </>
+        ) : (
+          <Button
+            type="button"
+            variant="secondary"
+            className={`${BUTTON} emvb-add-shadow`}
+            icon={<PlusIcon aria-hidden="true" />}
+            onClick={() => onChange({ type: "fade", duration: 400 })}
+          >
+            Add entrance
+          </Button>
+        )}
+      </div>
+      {reset}
+    </div>
   );
 }
 

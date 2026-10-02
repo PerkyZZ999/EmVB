@@ -44,7 +44,7 @@ describe("upgradeLayout", () => {
       ok: true,
       from: 0,
       doc: {
-        schemaVersion: 7,
+        schemaVersion: 8,
         root: {
           id: "root0001",
           type: "container",
@@ -60,12 +60,12 @@ describe("upgradeLayout", () => {
     const snapshot = structuredClone(v0);
     const once = upgradeLayout(v0, migrations);
     if (!once.ok) throw new Error("upgrade failed");
-    expect(upgradeLayout(once.doc, migrations)).toEqual({ ok: true, doc: once.doc, from: 7 });
+    expect(upgradeLayout(once.doc, migrations)).toEqual({ ok: true, doc: once.doc, from: 8 });
     expect(v0).toEqual(snapshot);
   });
 
   test("a current document is returned unchanged", () => {
-    expect(upgradeLayout(s1Page())).toEqual({ ok: true, doc: s1Page(), from: 7 });
+    expect(upgradeLayout(s1Page())).toEqual({ ok: true, doc: s1Page(), from: 8 });
   });
 
   test("a missing step is reported instead of skipped", () => {
@@ -87,10 +87,10 @@ describe("upgradeLayout", () => {
     const layouts = randomLayouts(200);
     for (const layout of layouts) {
       const first = upgradeLayout(layout, migrations);
-      expect(first).toEqual({ ok: true, doc: layout, from: 7 });
+      expect(first).toEqual({ ok: true, doc: layout, from: 8 });
       if (!first.ok) continue;
       expect(upgradeLayout(first.doc, migrations)).toEqual(first);
-      expect(validateLayout(layout, migrations)).toEqual({ ok: true, layout, upgradedFrom: 7 });
+      expect(validateLayout(layout, migrations)).toEqual({ ok: true, layout, upgradedFrom: 8 });
     }
   });
 });
@@ -100,24 +100,27 @@ describe("schema versions (D-031, D-032)", () => {
     (version: number) =>
     <T extends object>(doc: T) => ({ ...doc, schemaVersion: version });
 
-  test("layout and design are at version 7", () => {
-    expect(LAYOUT_SCHEMA_VERSION).toBe(7);
-    expect(DESIGN_SCHEMA_VERSION).toBe(7);
+  test("layout and design are at version 8", () => {
+    expect(LAYOUT_SCHEMA_VERSION).toBe(8);
+    expect(DESIGN_SCHEMA_VERSION).toBe(8);
   });
 
-  test.each([1, 2, 3, 4, 5, 6])("a v%i layout upgrades to v7 with every value kept", (version) => {
-    for (const layout of randomLayouts(50, 7)) {
-      const older = asV(version)(layout);
-      expect(upgradeLayout(older)).toEqual({ ok: true, doc: layout, from: version });
-      expect(validateLayout(older)).toEqual({ ok: true, layout, upgradedFrom: version });
-    }
-  });
+  test.each([1, 2, 3, 4, 5, 6, 7])(
+    "a v%i layout upgrades to v8 with every value kept",
+    (version) => {
+      for (const layout of randomLayouts(50, 7)) {
+        const older = asV(version)(layout);
+        expect(upgradeLayout(older)).toEqual({ ok: true, doc: layout, from: version });
+        expect(validateLayout(older)).toEqual({ ok: true, layout, upgradedFrom: version });
+      }
+    },
+  );
 
-  test.each([1, 2, 3, 4, 5, 6])(
-    "a v%i design document upgrades to v7 with its variables and classes kept",
+  test.each([1, 2, 3, 4, 5, 6, 7])(
+    "a v%i design document upgrades to v8 with its variables and classes kept",
     (version) => {
       const design = {
-        schemaVersion: 7,
+        schemaVersion: 8,
         variables: { colors: [{ id: "ink", name: "Ink", value: "#112233" }] },
         classes: [{ id: "card", name: "Card", style: { opacity: 0.5, zIndex: 2 } }],
       };
@@ -133,14 +136,14 @@ describe("schema versions (D-031, D-032)", () => {
 
   test("an older EmVB meets a v3 page as newer, not as invalid", () => {
     const page = s1Page();
-    expect(upgradeLayout(page, {}, 2)).toEqual({ ok: false, reason: "newer-version", version: 7 });
-    expect(validateLayout({ ...page, schemaVersion: 8 })).toMatchObject({
+    expect(upgradeLayout(page, {}, 2)).toEqual({ ok: false, reason: "newer-version", version: 8 });
+    expect(validateLayout({ ...page, schemaVersion: 9 })).toMatchObject({
       ok: false,
       issues: [{ path: "schemaVersion", code: "newer-version" }],
     });
   });
 
-  test.each([1, 2, 3, 4, 5, 6])(
+  test.each([1, 2, 3, 4, 5, 6, 7])(
     "the v%i step changes nothing and does not mutate its input",
     (version) => {
       const doc = asV(version)(s1Page());

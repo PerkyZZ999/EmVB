@@ -197,15 +197,22 @@ export const StyleProps = z.strictObject({
     ])
     .optional(),
   transition: Transition.optional(),
+  /** Plays once when the element appears (W-101). Not a state style. */
+  entrance: z
+    .strictObject({
+      type: z.enum(["fade", "fade-up", "fade-down"]),
+      duration: z.number().int().min(0).max(2000),
+    })
+    .optional(),
 });
 
 export type StyleProps = z.infer<typeof StyleProps>;
 
 /**
  * `states` on a node or class (D-032, W-089): hover, focus (`:focus-visible`) and active, each with
- * the same keys and limits as `style` except `transition`. Unknown states are refused.
+ * the same keys and limits as `style` except `transition` and `entrance`. Unknown states are refused.
  */
-const StateStyle = StyleProps.omit({ transition: true });
+const StateStyle = StyleProps.omit({ transition: true, entrance: true });
 
 export const StyleStates = z.strictObject({
   hover: StateStyle.optional(),

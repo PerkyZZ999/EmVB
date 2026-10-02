@@ -13,7 +13,7 @@ import { editorReducer, type EditorState } from "./store.ts";
 import { emptyDesign } from "../../core/index.ts";
 
 const layout: Layout = {
-  schemaVersion: 7,
+  schemaVersion: 8,
   root: container("root0001", [
     heading("head0001", "A"),
     container("box00001", [heading("head0002", "B"), heading("head0003", "C")]),

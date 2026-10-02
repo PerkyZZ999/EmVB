@@ -174,7 +174,7 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "overlay",
   ],
   border: ["borderWidth", "borderStyle", "borderColor", "borderRadius"],
-  effects: ["opacity", "boxShadow", "filter", "cursor", "transition"],
+  effects: ["opacity", "boxShadow", "filter", "cursor", "entrance", "transition"],
   advanced: [],
 };
 
@@ -279,6 +279,7 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   boxShadow: "Box shadow",
   filter: "Filters",
   cursor: "Cursor",
+  entrance: "Entrance",
   transition: "Transition",
 };
 

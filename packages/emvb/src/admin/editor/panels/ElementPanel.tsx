@@ -480,7 +480,7 @@ function KnownElementPanel({
               );
             }
             const keys = keysFor(node.type, id, style, position).filter(
-              (key) => styleState === "normal" || key !== "transition",
+              (key) => styleState === "normal" || (key !== "transition" && key !== "entrance"),
             );
             if (keys.length === 0) return null;
             return section(

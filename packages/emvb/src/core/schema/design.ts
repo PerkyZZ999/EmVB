@@ -2,7 +2,7 @@ import { z } from "zod";
 import { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./style.ts";
 
 /** 4 since W-094 (D-034). Class styles may use the same style keys as a node. */
-export const DESIGN_SCHEMA_VERSION = 7;
+export const DESIGN_SCHEMA_VERSION = 8;
 
 const VariableId = z
   .string()

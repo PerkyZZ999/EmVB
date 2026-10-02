@@ -153,6 +153,19 @@ const cssZIndex = (value: unknown): string | undefined =>
     ? String(value)
     : undefined;
 
+const ENTRANCES = new Set(["fade", "fade-up", "fade-down"]);
+
+/** `emvb-<type> <ms> ease-out both`, only for a known type and a duration of 0–2000 (W-101). */
+function cssEntrance(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const { type, duration } = value as { type?: unknown; duration?: unknown };
+  if (typeof type !== "string" || !ENTRANCES.has(type)) return undefined;
+  if (!Number.isInteger(duration) || (duration as number) < 0 || (duration as number) > 2000) {
+    return undefined;
+  }
+  return `emvb-${type} ${duration}ms ease-out both`;
+}
+
 const cssGridSpan = (value: unknown): string | undefined =>
   Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 12
     ? `span ${value}`
@@ -474,6 +487,7 @@ const PROPERTY_MAP: {
   filter: { css: "filter", toValue: cssFilter },
   cursor: { css: "cursor", toValue: keyword(CURSOR) },
   transition: { css: "transition", toValue: cssTransition },
+  entrance: { css: "animation", toValue: cssEntrance },
 };
 
 /** Exported for table-driven tests (W-017). */

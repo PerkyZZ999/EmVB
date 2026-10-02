@@ -18,7 +18,7 @@ import { tooLargeMessage, useSave } from "./useSave.ts";
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 7,
+  schemaVersion: 8,
   root: { id: "root0001", type: "container", props: {}, children: [] },
 };
 const conditions: ConditionsDoc = {

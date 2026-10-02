@@ -22,7 +22,7 @@ afterEach(async () => {
 });
 
 const layout: Layout = {
-  schemaVersion: 7,
+  schemaVersion: 8,
   root: {
     id: "root0001",
     type: "container",

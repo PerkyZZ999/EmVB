@@ -60,7 +60,7 @@ test("a font stack with quoted family names is emitted, and a broken or unsafe o
     { id: "empty", name: "Empty", value: "''" },
   ];
   const css = generateCss({
-    design: { schemaVersion: 7, variables: { colors: [], fonts } },
+    design: { schemaVersion: 8, variables: { colors: [], fonts } },
     usedTypes: new Set(),
     baseCss: new Map(),
     localRules: [],
@@ -72,7 +72,7 @@ test("a font stack with quoted family names is emitted, and a broken or unsafe o
 
 test("an empty design emits no variable block", () => {
   const css = generateCss({
-    design: { schemaVersion: 7, variables: { colors: [] } },
+    design: { schemaVersion: 8, variables: { colors: [] } },
     usedTypes: new Set(),
     baseCss: new Map(),
     localRules: [],

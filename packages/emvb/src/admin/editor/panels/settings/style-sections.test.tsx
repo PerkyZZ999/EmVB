@@ -57,7 +57,7 @@ const panel = (node: LayoutNode, design: DesignSystem = emptyDesign()) =>
     <ElementPanel
       node={node}
       layout={{
-        schemaVersion: 7,
+        schemaVersion: 8,
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }}
       design={design}
@@ -365,6 +365,7 @@ describe("Effects section (W-088)", () => {
       "boxShadow",
       "filter",
       "cursor",
+      "entrance",
       "transition",
     ]);
     expect(STYLE_UI.spacer?.sections).not.toContain("effects");

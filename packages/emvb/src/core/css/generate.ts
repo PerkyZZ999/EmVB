@@ -86,6 +86,7 @@ export function generateCss({
     ...declare(spacings, spacingVariableName, (space) => lengthCss(space.value)),
   ];
   const animated: string[] = [];
+  const entrances: string[] = [];
   const rules = (selector: string, declarations: Declaration[], states: StateDeclarations) => [
     block(selector, declarations),
     ...STYLE_STATES.map((state) =>
@@ -99,6 +100,7 @@ export function generateCss({
   ];
   const track = (selector: string, declarations: Declaration[]) => {
     if (declarations.some((d) => d.property === "transition")) animated.push(selector);
+    if (declarations.some((d) => d.property === "animation")) entrances.push(selector);
     return declarations;
   };
   const classes = (design.classes ?? []).flatMap((cls) => {
@@ -145,7 +147,18 @@ export function generateCss({
       .map((rule) => rule.selector);
     return selectors.length > 0 ? `@media ${query}{${selectors.join(",")}{display:none}}` : "";
   };
+  for (const rule of responsive) {
+    if (
+      !entrances.includes(rule.selector) &&
+      [...rule.tablet, ...rule.mobile].some((d) => d.property === "animation")
+    ) {
+      entrances.push(rule.selector);
+    }
+  }
   return [
+    entrances.length > 0
+      ? "@keyframes emvb-fade{from{opacity:0}to{opacity:1}}@keyframes emvb-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes emvb-fade-down{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}"
+      : "",
     block(".emvb-root", variables),
     ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? ""),
     ...classes,
@@ -157,6 +170,9 @@ export function generateCss({
     hide("mobile", DEVICE_MEDIA.hideMobile),
     animated.length > 0
       ? `@media (prefers-reduced-motion: reduce){${animated.join(",")}{transition:none}}`
+      : "",
+    entrances.length > 0
+      ? `@media (prefers-reduced-motion: reduce){${entrances.join(",")}{animation:none}}`
       : "",
   ].join("");
 }

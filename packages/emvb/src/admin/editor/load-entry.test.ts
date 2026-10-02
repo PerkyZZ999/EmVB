@@ -10,7 +10,7 @@ import type { Fetcher } from "../api.ts";
 import { loadEntry } from "./useEditorData.ts";
 
 const layout: Layout = {
-  schemaVersion: 7,
+  schemaVersion: 8,
   root: { id: "root0001", type: "container", props: {}, children: [] },
 };
 
@@ -76,7 +76,7 @@ describe("loadEntry reads a page for the editor (W-091)", () => {
   test.each([
     ["a string that is not JSON", "{not json"],
     ["a JSON string that is not a layout", JSON.stringify({ root: 1 })],
-    ["an object that is not a layout", { schemaVersion: 7 }],
+    ["an object that is not a layout", { schemaVersion: 8 }],
   ])("%s is refused as unreadable", async (_name, stored) => {
     const { fetcher } = contentFetcher({ item: { data: { layout: stored } } });
     await expect(loadEntry(fetcher, "p1")).rejects.toThrow("This page's layout can't be read.");

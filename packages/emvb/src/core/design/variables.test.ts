@@ -11,7 +11,7 @@ import {
 } from "./variables.ts";
 
 const layout = (): Layout => ({
-  schemaVersion: 7,
+  schemaVersion: 8,
   root: {
     id: "root0001",
     type: "container",
@@ -85,7 +85,7 @@ describe("findVariableUsages (W-029)", () => {
 
   test("kind filter ignores the same id under a different kind", () => {
     const page: Layout = {
-      schemaVersion: 7,
+      schemaVersion: 8,
       root: {
         id: "root0001",
         type: "container",
@@ -138,7 +138,7 @@ describe("clearVariableRefs / deleteVariable (W-029)", () => {
 
   test("clearVariableRefs drops only matching props and removes empty style objects", () => {
     const page: Layout = {
-      schemaVersion: 7,
+      schemaVersion: 8,
       root: {
         id: "root0001",
         type: "container",
@@ -194,7 +194,7 @@ describe("findVariableUsagesInDesign (W-029 prep for classes)", () => {
 
 describe("box shadow colour refs (W-088)", () => {
   const shadowed = (): Layout => ({
-    schemaVersion: 7,
+    schemaVersion: 8,
     root: {
       id: "root0001",
       type: "container",
@@ -297,7 +297,7 @@ describe("deleting a variable clears class styles too", () => {
 
 describe("state styles use variables too (W-089)", () => {
   const stateLayout = (): Layout => ({
-    schemaVersion: 7,
+    schemaVersion: 8,
     root: {
       id: "root0001",
       type: "container",

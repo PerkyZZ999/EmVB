@@ -6,7 +6,12 @@ import { ColorControl } from "../ColorControl.tsx";
 import { BackgroundImageControl, GradientControl, OverlayControl } from "./BackgroundControls.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 import { LengthRow } from "./LengthRow.tsx";
-import { FiltersControl, ShadowControl, TransitionControl } from "./EffectsControls.tsx";
+import {
+  EntranceControl,
+  FiltersControl,
+  ShadowControl,
+  TransitionControl,
+} from "./EffectsControls.tsx";
 import { NumberRow, ResetButton, type NumberSpec } from "./NumberRow.tsx";
 import { boundRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
 
@@ -382,6 +387,16 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "entrance") {
+    return (
+      <EntranceControl
+        value={style?.entrance}
+        onChange={(entrance) => onPatch({ entrance })}
+        reset={reset}
+      />
+    );
+  }
+
   if (styleKey === "transition") {
     return (
       <TransitionControl
@@ -430,6 +445,7 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "opacity",
   "boxShadow",
   "filter",
+  "entrance",
   "transition",
   "backgroundImage",
   "gradient",

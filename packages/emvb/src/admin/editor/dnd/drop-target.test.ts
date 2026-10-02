@@ -63,7 +63,7 @@ describe("dropIndex (K16 drop-target maths)", () => {
 
 describe("dropContainer", () => {
   const layout: Layout = {
-    schemaVersion: 7,
+    schemaVersion: 8,
     root: container("root0001", [
       heading("head0001"),
       container("box00001", [heading("head0002")]),
