@@ -123,7 +123,15 @@ export const SECTION_LABELS: Record<StyleSectionId, string> = {
 
 /** Style property keys shown in each section (subset of StyleProps). */
 const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
-  layout: ["flexDirection", "flexWrap", "justifyContent", "alignItems", "gap"],
+  layout: [
+    "flexDirection",
+    "flexWrap",
+    "justifyContent",
+    "alignItems",
+    "gap",
+    "gridColumnSpan",
+    "gridRowSpan",
+  ],
   spacing: [
     "paddingTop",
     "paddingRight",
@@ -223,6 +231,8 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   justifyContent: "Justify",
   alignItems: "Align",
   gap: "Gap",
+  gridColumnSpan: "Column span",
+  gridRowSpan: "Row span",
   width: "Width",
   minWidth: "Min width",
   maxWidth: "Max width",

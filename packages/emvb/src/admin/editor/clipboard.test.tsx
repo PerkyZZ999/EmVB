@@ -16,7 +16,7 @@ import { Editor } from "./Editor.tsx";
 import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
 
 const DESIGN: DesignSystem = {
-  schemaVersion: 6,
+  schemaVersion: 7,
   variables: { colors: [{ id: "brand", name: "Brand", value: "#112233" }] },
   classes: [{ id: "card", name: "Card", style: {} }],
 };
@@ -145,7 +145,7 @@ describe("copy and paste shortcuts (W-093)", () => {
     expect(JSON.parse(stored() ?? "null")).toMatchObject({
       format: "emvb-clipboard",
       version: 1,
-      schemaVersion: 6,
+      schemaVersion: 7,
       kind: "element",
       node: { id: "text0001", type: "text", props: { text: "Body" } },
     });

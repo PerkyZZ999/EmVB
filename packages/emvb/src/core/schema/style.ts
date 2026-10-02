@@ -85,6 +85,10 @@ export const StyleProps = z.strictObject({
     .optional(),
   alignItems: z.enum(["stretch", "flex-start", "flex-end", "center", "baseline"]).optional(),
   gap: LengthValue.optional(),
+  /** How many grid columns this element spans (1–12). */
+  gridColumnSpan: z.number().int().min(1).max(12).optional(),
+  /** How many grid rows this element spans (1–12). */
+  gridRowSpan: z.number().int().min(1).max(12).optional(),
   width: SizeValue.optional(),
   minWidth: LengthValue.optional(),
   maxWidth: LengthValue.optional(),

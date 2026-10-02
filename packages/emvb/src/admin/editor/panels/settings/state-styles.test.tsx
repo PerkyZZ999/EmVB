@@ -45,7 +45,7 @@ function Harness({ start, design: startDesign }: { start: LayoutNode; design: De
     <ElementPanel
       node={node}
       layout={{
-        schemaVersion: 6,
+        schemaVersion: 7,
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }}
       design={design}

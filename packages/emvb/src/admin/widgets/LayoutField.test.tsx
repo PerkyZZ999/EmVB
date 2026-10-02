@@ -24,7 +24,7 @@ afterEach(async () => {
 describe("read-only layout widget (D-019)", () => {
   test("summarises the page and links to the editor for this entry", async () => {
     await render(s1Page());
-    expect(host.textContent).toContain("2 elements · schema 6");
+    expect(host.textContent).toContain("2 elements · schema 7");
     const link = host.querySelector("a");
     expect(link?.textContent).toBe("Open in EmVB");
     expect(link?.getAttribute("href")).toBe("/_emdash/admin/plugins/emvb/editor?entry=01ABC");

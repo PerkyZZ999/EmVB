@@ -57,7 +57,7 @@ const panel = (node: LayoutNode, design: DesignSystem = emptyDesign()) =>
     <ElementPanel
       node={node}
       layout={{
-        schemaVersion: 6,
+        schemaVersion: 7,
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }}
       design={design}
@@ -105,6 +105,8 @@ describe("Size section (W-088)", () => {
       "justifyContent",
       "alignItems",
       "gap",
+      "gridColumnSpan",
+      "gridRowSpan",
     ]);
   });
 

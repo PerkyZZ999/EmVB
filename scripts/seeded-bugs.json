@@ -6791,8 +6791,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "  layout: [\"flexDirection\", \"flexWrap\", \"justifyContent\", \"alignItems\", \"gap\"],",
-          "replace": "  layout: [\"flexDirection\", \"flexWrap\", \"justifyContent\", \"alignItems\", \"gap\", \"width\"],"
+          "search": "    \"gap\",\n    \"gridColumnSpan\",",
+          "replace": "    \"gap\",\n    \"width\",\n    \"gridColumnSpan\","
         }
       ],
       "command": [
@@ -7291,8 +7291,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
-          "search": "  if (styleKey === \"zIndex\" || styleKey === \"opacity\") {",
-          "replace": "  if (styleKey === \"opacity\") {"
+          "search": "    styleKey === \"zIndex\" ||\n    styleKey === \"opacity\" ||",
+          "replace": "    styleKey === \"opacity\" ||"
         }
       ],
       "command": [
@@ -7901,7 +7901,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7910,9 +7910,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "a v1 layout upgrades to v6"
+        "a v1 layout upgrades to v7"
       ],
-      "expect": "\\(fail\\).*a v1 layout upgrades to v6"
+      "expect": "\\(fail\\).*a v1 layout upgrades to v7"
     },
     {
       "id": "D-031/design-v1-step-missing",
@@ -7921,7 +7921,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7961,7 +7961,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 6;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 7;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -7970,9 +7970,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "a v1 layout upgrades to v6"
+        "a v1 layout upgrades to v7"
       ],
-      "expect": "\\(fail\\).*a v1 layout upgrades to v6"
+      "expect": "\\(fail\\).*a v1 layout upgrades to v7"
     },
     {
       "id": "D-031/upgraded-layout-not-stored",
@@ -8221,7 +8221,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8230,9 +8230,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "a v2 layout upgrades to v6"
+        "a v2 layout upgrades to v7"
       ],
-      "expect": "\\(fail\\).*a v2 layout upgrades to v6"
+      "expect": "\\(fail\\).*a v2 layout upgrades to v7"
     },
     {
       "id": "D-032/design-v2-step-missing",
@@ -8241,7 +8241,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8261,7 +8261,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 6;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 7;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8270,9 +8270,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 6"
+        "layout and design are at version 7"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 6"
+      "expect": "\\(fail\\).*layout and design are at version 7"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8281,7 +8281,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 6;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 7;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8290,9 +8290,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 6"
+        "layout and design are at version 7"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 6"
+      "expect": "\\(fail\\).*layout and design are at version 7"
     },
     {
       "id": "D-032/node-states-refused",
@@ -16325,6 +16325,54 @@
         "synced section"
       ],
       "expect": "✘.*\\[node\\].*synced section"
+    },
+    {
+      "id": "W-099/grid-columns-not-emitted",
+      "requirement": "W-099",
+      "description": "a grid does not emit equal columns",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "          value: `repeat(${columns}, minmax(0, 1fr))`,",
+          "replace": "          value: \"1fr\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/grid.test.ts",
+        "-t",
+        "equal columns"
+      ],
+      "expect": "\\(fail\\).*equal columns"
+    },
+    {
+      "id": "W-099/span-over-12-kept",
+      "requirement": "W-099",
+      "description": "a column span of 13 is emitted",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const cssGridSpan = (value: unknown): string | undefined =>\n  Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 12",
+          "replace": "const cssGridSpan = (value: unknown): string | undefined =>\n  Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 99"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/grid.test.ts", "-t", "outside 1"],
+      "expect": "\\(fail\\).*outside 1"
+    },
+    {
+      "id": "W-099/e2e-grid-not-grid",
+      "requirement": "W-099",
+      "description": "the grid element is not display grid",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "  baseCss: \".emvb-grid{display:grid;min-width:0}\",",
+          "replace": "  baseCss: \".emvb-grid{display:block;min-width:0}\","
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/grid.e2e.ts", "--project=node", "-g", "equal columns"],
+      "expect": "✘.*\\[node\\].*equal columns"
     }
   ]
 }

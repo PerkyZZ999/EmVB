@@ -38,6 +38,7 @@ const LENGTH_KEYS = new Set<StyleKey>([
 ]);
 
 const Z_INDEX: NumberSpec = { min: -9999, max: 9999, integer: true, example: "10" };
+const GRID_SPAN: NumberSpec = { min: 1, max: 12, integer: true, example: "2" };
 const OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: "50", suffix: "%" };
 
 const COLOR_KEYS = new Set<StyleKey>(["color", "backgroundColor", "borderColor"]);
@@ -350,14 +351,20 @@ export function StyleRow({
     );
   }
 
-  if (styleKey === "zIndex" || styleKey === "opacity") {
+  if (
+    styleKey === "zIndex" ||
+    styleKey === "opacity" ||
+    styleKey === "gridColumnSpan" ||
+    styleKey === "gridRowSpan"
+  ) {
+    const spec = styleKey === "zIndex" ? Z_INDEX : styleKey === "opacity" ? OPACITY : GRID_SPAN;
     return (
       <NumberRow
         rowKey={styleKey}
         label={label}
         value={typeof value === "number" ? value : undefined}
         inherited={typeof normalValue === "number" ? normalValue : undefined}
-        spec={styleKey === "zIndex" ? Z_INDEX : OPACITY}
+        spec={spec}
         onCommit={(next) => onPatch({ [styleKey]: next })}
       />
     );
@@ -418,6 +425,8 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   ...COLOR_KEYS,
   "fontFamily",
   "zIndex",
+  "gridColumnSpan",
+  "gridRowSpan",
   "opacity",
   "boxShadow",
   "filter",

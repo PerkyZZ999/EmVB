@@ -3,7 +3,7 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /** 5 since W-096 (D-036): v4 → v5 changes nothing, so an older EmVB shows "saved by a newer EmVB". */
-export const LAYOUT_SCHEMA_VERSION = 6;
+export const LAYOUT_SCHEMA_VERSION = 7;
 
 export const NodeId = z
   .string()
@@ -169,6 +169,14 @@ export const DivBlockNode = parentNode("div-block", z.strictObject({}));
 
 export const FlexboxNode = parentNode("flexbox", z.strictObject({}));
 
+/** Equal columns. Children span with `gridColumnSpan` and `gridRowSpan` on their style. */
+export const GridNode = parentNode(
+  "grid",
+  z.strictObject({
+    columns: z.number().int().min(1).max(12),
+  }),
+);
+
 export const SvgNode = leafNode(
   "svg",
   z.strictObject({
@@ -319,6 +327,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "section",
   "div-block",
   "flexbox",
+  "grid",
   "svg",
   "tabs",
   "tab-panel",
@@ -351,6 +360,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   ContainerNode,
   DivBlockNode,
   FlexboxNode,
+  GridNode,
   SvgNode,
   TabsNodeSchema,
   TabPanelNode,
@@ -443,6 +453,19 @@ export type DivBlockNode = {
   id: IdOf;
   type: "div-block";
   props: Record<string, never>;
+  style?: StyleOf;
+  states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  children: LayoutNode[];
+};
+
+export type GridNode = {
+  id: IdOf;
+  type: "grid";
+  props: { columns: number };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;
@@ -551,6 +574,7 @@ export type LayoutNode =
   | ContainerNode
   | DivBlockNode
   | FlexboxNode
+  | GridNode
   | SvgNode
   | TabsNode
   | TabPanelNode
@@ -647,10 +671,11 @@ export const isTabPanelNode = (node: LayoutNode): node is TabPanelNode => node.t
 /** Layout parents that accept general children (forms may land here). */
 export const isLayoutParentNode = (
   node: LayoutNode,
-): node is ContainerNode | DivBlockNode | FlexboxNode | TabPanelNode | SectionNode =>
+): node is ContainerNode | DivBlockNode | FlexboxNode | GridNode | TabPanelNode | SectionNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "flexbox" ||
+  node.type === "grid" ||
   node.type === "tab-panel" ||
   node.type === "section";
 
@@ -661,6 +686,7 @@ export const isParentNode = (
   | ContainerNode
   | DivBlockNode
   | FlexboxNode
+  | GridNode
   | FormNode
   | LoopNode
   | SectionNode
@@ -669,6 +695,7 @@ export const isParentNode = (
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "flexbox" ||
+  node.type === "grid" ||
   node.type === "form" ||
   node.type === "loop" ||
   node.type === "section" ||

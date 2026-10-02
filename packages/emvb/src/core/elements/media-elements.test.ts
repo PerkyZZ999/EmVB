@@ -8,7 +8,7 @@ import { defaultElement } from "./index.ts";
 const design = emptyDesign();
 const render = (node: LayoutNode) => {
   const layout: Layout = {
-    schemaVersion: 6,
+    schemaVersion: 7,
     root: { id: "root0001", type: "container", props: {}, children: [node] },
   };
   const host = document.createElement("div");

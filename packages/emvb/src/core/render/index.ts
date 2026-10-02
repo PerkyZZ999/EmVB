@@ -127,6 +127,20 @@ export function renderPage(
       const height = cssLength((node as { props: { height: unknown } }).props.height);
       if (height) declarations.push({ property: "height", value: height });
     }
+    if (node.type === "grid") {
+      const columns = (node as { props: { columns: unknown } }).props.columns;
+      if (
+        typeof columns === "number" &&
+        Number.isInteger(columns) &&
+        columns >= 1 &&
+        columns <= 12
+      ) {
+        declarations.push({
+          property: "grid-template-columns",
+          value: `repeat(${columns}, minmax(0, 1fr))`,
+        });
+      }
+    }
     const states = stateDeclarations(node.states);
     for (const key of states.rejected) {
       warnings.push({ nodeId, code: "rejected-style", detail: key });

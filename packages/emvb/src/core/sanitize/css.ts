@@ -153,6 +153,11 @@ const cssZIndex = (value: unknown): string | undefined =>
     ? String(value)
     : undefined;
 
+const cssGridSpan = (value: unknown): string | undefined =>
+  Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 12
+    ? `span ${value}`
+    : undefined;
+
 const inRange = (value: unknown, min: number, max: number): value is number =>
   typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
 
@@ -420,6 +425,8 @@ const PROPERTY_MAP: {
   justifyContent: { css: "justify-content", toValue: keyword(JUSTIFY) },
   alignItems: { css: "align-items", toValue: keyword(ALIGN) },
   gap: { css: "gap", toValue: cssLength },
+  gridColumnSpan: { css: "grid-column", toValue: cssGridSpan },
+  gridRowSpan: { css: "grid-row", toValue: cssGridSpan },
   width: { css: "width", toValue: cssLengthOrAuto },
   minWidth: { css: "min-width", toValue: cssLength },
   maxWidth: { css: "max-width", toValue: cssLength },

@@ -3,6 +3,7 @@ import type {
   ContainerNode,
   DivBlockNode,
   FlexboxNode,
+  GridNode,
   SvgNode,
   TabsNode,
   TabPanelNode,
@@ -590,6 +591,29 @@ const divBlock: ElementDefinition<DivBlockNode> = {
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
 };
 
+const grid: ElementDefinition<GridNode> = {
+  baseCss: ".emvb-grid{display:grid;min-width:0}",
+  defaults: () => ({ type: "grid", props: { columns: 3 }, children: [] }),
+  descriptor: {
+    type: "grid",
+    name: "Grid",
+    group: "layout",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "columns",
+        kind: "select",
+        label: "Columns",
+        options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => ({
+          value: n,
+          label: String(n),
+        })),
+      },
+    ],
+  },
+  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
 const flexbox: ElementDefinition<FlexboxNode> = {
   baseCss:
     ".emvb-flexbox{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px}",
@@ -638,6 +662,7 @@ export const ELEMENTS = {
   section,
   "div-block": divBlock,
   flexbox,
+  grid,
   svg: svgEl,
   tabs,
   "tab-panel": tabPanel,
