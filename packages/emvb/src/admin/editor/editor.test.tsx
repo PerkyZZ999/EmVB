@@ -144,7 +144,7 @@ function fakeApi(content: { status: number; body?: unknown }) {
   const fetcher: Fetcher = async (path) => {
     if (path.startsWith("/_emdash/api/content/emvb_pages/"))
       return Response.json(content.body ?? {}, { status: content.status });
-    if (path === "/_emdash/api/plugins/emvb/design")
+    if (path === "/_emdash/api/plugins/emvb/design/draft")
       return Response.json({ data: { design: emptyDesign(), revision: null, status: "empty" } });
     return Response.json({}, { status: 404 });
   };

@@ -168,7 +168,7 @@ function VariableValue({
       {error ? (
         <InlineError>{error}</InlineError>
       ) : (
-        <p className="emvb-helper">Changes to site styles apply to all pages immediately.</p>
+        <p className="emvb-helper">Style changes stay unpublished until you publish styles.</p>
       )}
     </>
   );

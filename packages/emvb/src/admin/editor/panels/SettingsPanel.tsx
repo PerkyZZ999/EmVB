@@ -16,6 +16,7 @@ export function SettingsPanel({
   siteStylesOpen,
   onCloseSiteStyles,
   onDesignChange,
+  onPublishStyles,
   fetcher,
   formsAvailable,
   rejection,
@@ -32,6 +33,7 @@ export function SettingsPanel({
   siteStylesOpen: boolean;
   onCloseSiteStyles: () => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
+  onPublishStyles: () => Promise<void>;
   fetcher: Fetcher;
   formsAvailable: boolean;
   rejection: string | null;
@@ -55,6 +57,8 @@ export function SettingsPanel({
           design={state.design}
           layout={state.page.layout}
           onDesignChange={onDesignChange}
+          unpublished={state.designUnpublished === true}
+          onPublishStyles={onPublishStyles}
           onLayoutChange={(layout) =>
             dispatch({
               type: "apply-arranged",

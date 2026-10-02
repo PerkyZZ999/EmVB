@@ -199,7 +199,7 @@ test("Site styles opens the Variables drawer", async ({ page, request }) => {
   await expect(overlay(page).locator("[data-emvb-site-styles]")).toBeVisible();
   await expect(overlay(page).locator('[data-emvb-site-tab="variables"]')).toBeVisible();
   await expect(
-    overlay(page).getByText("Changes to site styles apply to all pages immediately."),
+    overlay(page).getByText("Style changes stay unpublished until you publish styles."),
   ).toBeVisible();
 });
 
@@ -225,11 +225,24 @@ test("a colour variable can be created, bound and edited, and the design persist
   await page.keyboard.press("Control+s");
   await expect(saveStatus(page)).toHaveText("Saved");
 
-  const design = await api(request, "GET", "/_emdash/api/plugins/emvb/design");
-  const data = design.json?.["data"] as
-    | { design: { variables: { colors: unknown[] } } }
-    | undefined;
-  const colors = data?.design.variables.colors ?? [];
+  const draft = await api(request, "GET", "/_emdash/api/plugins/emvb/design/draft");
+  const draftColors =
+    (draft.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)?.design
+      .variables.colors ?? [];
+  expect(draftColors).toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
+  const live = await api(request, "GET", "/_emdash/api/plugins/emvb/design");
+  const liveColors =
+    (live.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)?.design
+      .variables.colors ?? [];
+  expect(liveColors).not.toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
+
+  await overlay(page).getByRole("button", { name: "Site styles" }).click();
+  await overlay(page).getByRole("button", { name: "Publish styles" }).click();
+  await expect(overlay(page).getByRole("button", { name: "Publish styles" })).toHaveCount(0);
+  const published = await api(request, "GET", "/_emdash/api/plugins/emvb/design");
+  const colors =
+    (published.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)
+      ?.design.variables.colors ?? [];
   expect(colors).toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
   await page.reload();
   await openEditor(page, id, "Coloured");

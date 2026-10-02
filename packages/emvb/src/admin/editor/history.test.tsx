@@ -32,7 +32,7 @@ function fakeServer() {
       server.puts.push(server.data);
       return Response.json(envelope());
     }
-    if (path === "/_emdash/api/plugins/emvb/design")
+    if (path === "/_emdash/api/plugins/emvb/design/draft")
       return Response.json({ data: { design: emptyDesign(), revision: "d1" } });
     return Response.json({}, { status: 404 });
   };

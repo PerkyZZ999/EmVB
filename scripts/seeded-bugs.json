@@ -445,8 +445,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/design-routes.ts",
-          "search": "const write = await store(ctx).compareAndSet(DESIGN_KEY, ctx.input.revision, result.design);",
-          "replace": "await (ctx.storage[\"design\"] as unknown as { put(id: string, v: unknown): Promise<void> }).put(DESIGN_KEY, result.design);\n    const write = { applied: true as const, revision: crypto.randomUUID() };"
+          "search": "    const write = await store(ctx).compareAndSet(\n      DESIGN_DRAFT_KEY,\n      ctx.input.revision,\n      result.design,\n    );",
+          "replace": "    await (ctx.storage[\"design\"] as unknown as { put(id: string, v: unknown): Promise<void> }).put(DESIGN_DRAFT_KEY, result.design);\n    const write = { applied: true as const, revision: crypto.randomUUID() };"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server"],
@@ -473,8 +473,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/design-routes.ts",
-          "search": "permission: \"content:edit_any\",",
-          "replace": "permission: \"content:read\","
+          "search": "permission: \"content:edit_any\",\n  input: SaveInput,",
+          "replace": "permission: \"content:read\",\n  input: SaveInput,"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server"],
@@ -601,8 +601,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/design-routes.ts",
-          "search": "  permission: \"content:edit_any\",\n",
-          "replace": ""
+          "search": "  permission: \"content:edit_any\",\n  input: SaveInput,\n",
+          "replace": "  input: SaveInput,\n"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node"],
@@ -10172,8 +10172,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/design-routes.ts",
-          "search": "    if (result.ok) return { design: result.design, revision: current.revision, status: \"ok\" };",
-          "replace": "    return { design: current.value as DesignSystem, revision: current.revision, status: \"ok\" };"
+          "search": "  if (result.ok) return { design: result.design, revision: current.revision, status: \"ok\" };",
+          "replace": "  return { design: current.value as DesignSystem, revision: current.revision, status: \"ok\" };"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/plugin.test.ts"],
@@ -16373,6 +16373,88 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/grid.e2e.ts", "--project=node", "-g", "equal columns"],
       "expect": "✘.*\\[node\\].*equal columns"
+    },
+    {
+      "id": "W-100/draft-is-public",
+      "requirement": "W-100",
+      "description": "saving styles writes the published design",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "    const write = await store(ctx).compareAndSet(\n      DESIGN_DRAFT_KEY,\n      ctx.input.revision,",
+          "replace": "    const write = await store(ctx).compareAndSet(\n      DESIGN_KEY,\n      ctx.input.revision,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/plugin.test.ts",
+        "-t",
+        "stays off the public"
+      ],
+      "expect": "\\(fail\\).*stays off the public"
+    },
+    {
+      "id": "W-100/publish-writes-draft",
+      "requirement": "W-100",
+      "description": "publishing styles does not update the public design",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "    const write = await store(ctx).compareAndSet(\n      DESIGN_KEY,\n      ctx.input.publishedRevision,",
+          "replace": "    const write = await store(ctx).compareAndSet(\n      DESIGN_DRAFT_KEY,\n      ctx.input.publishedRevision,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/plugin.test.ts",
+        "-t",
+        "stays off the public"
+      ],
+      "expect": "\\(fail\\).*stays off the public"
+    },
+    {
+      "id": "W-100/publish-button-hidden",
+      "requirement": "W-100",
+      "description": "the drawer never offers Publish styles",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "        {unpublished && (",
+          "replace": "        {false && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "offered only"
+      ],
+      "expect": "\\(fail\\).*offered only"
+    },
+    {
+      "id": "W-100/e2e-styles-go-live",
+      "requirement": "W-100",
+      "description": "a style edit is published as soon as it is saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "        designUnpublished: true,",
+          "replace": "        designUnpublished: false,"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "colour variable"
+      ],
+      "expect": "✘.*\\[node\\].*colour variable"
     }
   ]
 }

@@ -30,6 +30,32 @@ const layout: Layout = {
 };
 
 describe("SiteStylesDrawer (W-032)", () => {
+  test("Publish styles is offered only while a draft is unpublished", async () => {
+    const calls: string[] = [];
+    await mount(
+      <SiteStylesDrawer
+        design={emptyDesign()}
+        layout={layout}
+        onDesignChange={async () => undefined}
+        unpublished
+        onPublishStyles={async () => {
+          calls.push("publish");
+        }}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    const label = [...document.querySelectorAll("button")].find(
+      (button) => button.textContent === "Publish styles",
+    )?.textContent;
+    expect(label).toBe("Publish styles");
+    const button = [...document.querySelectorAll("button")].find(
+      (item) => item.textContent === "Publish styles",
+    );
+    await act(async () => button?.click());
+    expect(calls).toEqual(["publish"]);
+  });
+
   test("Variables tab is default with footer; Classes tab lists usage counts", async () => {
     const design: DesignSystem = {
       ...emptyDesign(),
@@ -51,7 +77,7 @@ describe("SiteStylesDrawer (W-032)", () => {
     expect(document.querySelector('[data-emvb-site-tab="variables"]')).toBeTruthy();
     expect(document.querySelector('[data-emvb-var-kind="spacing"]')).toBeTruthy();
     expect(document.body.textContent).toContain(
-      "Changes to site styles apply to all pages immediately.",
+      "Style changes stay unpublished until you publish styles.",
     );
 
     const classesTab = [...document.querySelectorAll('[role="tab"]')].find(

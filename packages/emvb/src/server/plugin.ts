@@ -1,6 +1,11 @@
 import { definePlugin } from "emdash";
 import { ADMIN_ENTRY, PLUGIN_ID, PLUGIN_VERSION } from "../constants.ts";
-import { designRoute, designSaveRoute } from "./design-routes.ts";
+import {
+  designDraftRoute,
+  designPublishRoute,
+  designRoute,
+  designSaveRoute,
+} from "./design-routes.ts";
 import { beforeSave } from "./hooks.ts";
 
 export function createPlugin() {
@@ -26,7 +31,9 @@ export function createPlugin() {
         handler: async () => ({ ok: true, plugin: PLUGIN_ID, version: PLUGIN_VERSION }),
       },
       design: designRoute,
+      "design/draft": designDraftRoute,
       "design/save": designSaveRoute,
+      "design/publish": designPublishRoute,
     },
   });
 }

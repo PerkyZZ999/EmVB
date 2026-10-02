@@ -136,16 +136,30 @@ describe("design routes", () => {
     });
   });
 
-  test("an editor saves with CAS, and the public route returns the new revision", async () => {
+  test("a style draft stays off the public route until styles are published", async () => {
     const editor = userWithRole(ROLES.editor);
     const first = await t.route("design/save", {
       user: editor,
       body: { design: design(), revision: null },
     });
     expect(first.status).toBe(200);
-    const revision = (first.body["data"] as { revision: string }).revision;
+    const draftRevision = (first.body["data"] as { revision: string }).revision;
+    const before = await t.route("design");
+    expect(before.body["data"]).toMatchObject({ status: "empty" });
+    const draft = await t.route("design/draft", { user: editor });
+    expect(draft.body["data"]).toEqual({
+      design: { ...design(), schemaVersion: 7 },
+      revision: draftRevision,
+      publishedRevision: null,
+      unpublished: true,
+    });
+    const published = await t.route("design/publish", {
+      user: editor,
+      body: { publishedRevision: null },
+    });
+    expect(published.status).toBe(200);
+    const revision = (published.body["data"] as { revision: string }).revision;
     const read = await t.route("design");
-    // A v1 document comes back upgraded to v5 (D-031, D-032, D-034, D-036).
     expect(read.body["data"]).toEqual({
       design: { ...design(), schemaVersion: 7 },
       revision,
@@ -166,7 +180,9 @@ describe("design routes", () => {
       body: { design: design("#222222"), revision },
     });
     expect(stale.status).toBe(409);
-    expect(JSON.stringify((await t.route("design")).body)).toContain("#111111");
+    const draft = await t.route("design/draft", { user: editor });
+    expect(JSON.stringify(draft.body)).toContain("#111111");
+    expect(JSON.stringify((await t.route("design")).body)).not.toContain("#111111");
   });
 
   test("a second first-save (revision null) also conflicts instead of overwriting", async () => {

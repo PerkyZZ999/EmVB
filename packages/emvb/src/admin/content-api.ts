@@ -133,3 +133,15 @@ export async function saveDesign(
   );
   return body.revision;
 }
+
+export async function publishDesign(
+  fetcher: Fetcher,
+  publishedRevision: string | null,
+): Promise<string> {
+  const body = await requestJson<{ revision: string }>(
+    fetcher,
+    `/_emdash/api/plugins/${PLUGIN_ID}/design/publish`,
+    { method: "POST", body: { publishedRevision } },
+  );
+  return body.revision;
+}

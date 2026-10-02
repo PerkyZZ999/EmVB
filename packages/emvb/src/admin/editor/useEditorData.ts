@@ -33,7 +33,12 @@ export type EditorEntry = {
   triggers?: TriggersDoc;
 };
 
-export type LoadedDesign = { design: DesignSystem; revision: string | null };
+export type LoadedDesign = {
+  design: DesignSystem;
+  revision: string | null;
+  publishedRevision: string | null;
+  unpublished: boolean;
+};
 
 export type EditorData =
   | { state: "loading" }
@@ -115,14 +120,18 @@ function readLayout(raw: unknown): Layout | null {
 }
 
 async function loadDesign(fetcher: Fetcher): Promise<LoadedDesign> {
-  const body = await requestJson<{ design?: unknown; revision?: string | null }>(
-    fetcher,
-    `/_emdash/api/plugins/${PLUGIN_ID}/design`,
-  );
+  const body = await requestJson<{
+    design?: unknown;
+    revision?: string | null;
+    publishedRevision?: string | null;
+    unpublished?: boolean;
+  }>(fetcher, `/_emdash/api/plugins/${PLUGIN_ID}/design/draft`);
   const result = validateDesign(body?.design);
   return {
     design: result.ok ? result.design : emptyDesign(),
     revision: body?.revision ?? null,
+    publishedRevision: body?.publishedRevision ?? null,
+    unpublished: body?.unpublished === true,
   };
 }
 

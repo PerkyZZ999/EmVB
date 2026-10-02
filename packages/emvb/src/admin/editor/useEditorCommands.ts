@@ -3,7 +3,7 @@ import type { createKumoToastManager } from "@cloudflare/kumo";
 import type { DesignSystem } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
-import { previewUrl, saveDesign } from "../content-api.ts";
+import { previewUrl, publishDesign, saveDesign } from "../content-api.ts";
 import { readCollection } from "../setup/run.ts";
 import { isDirty, type EditorAction, type EditorState } from "./store.ts";
 import type { useSave } from "./useSave.ts";
@@ -118,5 +118,25 @@ export function useEditorCommands({
     }
   };
 
-  return { busy, save, publish, preview, changeDesign };
+  const publishStyles = async () => {
+    try {
+      const revision = await publishDesign(fetcher, latest.current.publishedRevision ?? null);
+      dispatch({ type: "publish-design", revision });
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        throw new Error(
+          "Site styles were published somewhere else. Reload the editor and try again.",
+          { cause: error },
+        );
+      }
+      throw new Error(
+        error instanceof ApiError
+          ? `Couldn't publish site styles. ${error.message}`
+          : "Couldn't publish site styles. Check your connection and try again.",
+        { cause: error },
+      );
+    }
+  };
+
+  return { busy, save, publish, preview, changeDesign, publishStyles };
 }

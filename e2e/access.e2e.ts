@@ -69,6 +69,10 @@ for (const [name, role] of lower) {
       revision: null,
     });
     expect(save.status).toBe(403);
+    const publishStyles = await api(request, "POST", "/_emdash/api/plugins/emvb/design/publish", {
+      publishedRevision: null,
+    });
+    expect(publishStyles.status).toBe(403);
 
     // EmDash refuses roles without content permissions (403); EmVB's hook refuses the rest (422).
     const created = await createAs(request);

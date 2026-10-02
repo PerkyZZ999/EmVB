@@ -76,7 +76,7 @@ function fakeServer(options: { layout?: unknown; takenSlug?: string; rejectText?
       server.rev += 1;
       return Response.json(envelope());
     }
-    if (path === "/_emdash/api/plugins/emvb/design") {
+    if (path === "/_emdash/api/plugins/emvb/design/draft") {
       return Response.json({ data: { design: DESIGN, revision: server.designRevision } });
     }
     if (path === "/_emdash/api/plugins/emvb/design/save") {

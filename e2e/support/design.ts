@@ -22,6 +22,32 @@ export async function loadDesign(request: APIRequestContext) {
   return current.json?.["data"] as { design: DesignDoc; revision: string | null };
 }
 
+type DraftDoc = {
+  design: DesignDoc;
+  revision: string | null;
+  publishedRevision: string | null;
+};
+
+async function loadDraft(request: APIRequestContext): Promise<DraftDoc> {
+  const current = await api(request, "GET", "/_emdash/api/plugins/emvb/design/draft");
+  return current.json?.["data"] as DraftDoc;
+}
+
+export async function publishStyles(request: APIRequestContext, publishedRevision: string | null) {
+  const published = await api(request, "POST", "/_emdash/api/plugins/emvb/design/publish", {
+    publishedRevision,
+  });
+  expect(published.status).toBe(200);
+  return published;
+}
+
+/** Saves a draft and publishes it, so callers still see the change on the public site. */
+async function saveAndPublish(request: APIRequestContext, design: DesignDoc) {
+  const data = await loadDraft(request);
+  await saveDesign(request, design, data.revision);
+  await publishStyles(request, data.publishedRevision);
+}
+
 export async function saveDesign(
   request: APIRequestContext,
   design: DesignDoc,
@@ -36,14 +62,13 @@ export async function saveDesign(
 }
 
 export async function setColor(request: APIRequestContext, variable: string, value: string | null) {
-  const data = await loadDesign(request);
+  const data = await loadDraft(request);
   const colors = data.design.variables.colors.filter((c) => c.id !== variable);
   if (value !== null) colors.push({ id: variable, name: variable, value });
-  await saveDesign(
-    request,
-    { ...data.design, variables: { ...data.design.variables, colors } },
-    data.revision,
-  );
+  await saveAndPublish(request, {
+    ...data.design,
+    variables: { ...data.design.variables, colors },
+  });
 }
 
 /** Sets one spacing variable, or removes it when `value` is null. */
@@ -52,14 +77,13 @@ export async function setSpacing(
   variable: string,
   value: number | null,
 ) {
-  const data = await loadDesign(request);
+  const data = await loadDraft(request);
   const spacings = (data.design.variables.spacings ?? []).filter((s) => s.id !== variable);
   if (value !== null) spacings.push({ id: variable, name: variable, value: { value, unit: "px" } });
-  await saveDesign(
-    request,
-    { ...data.design, variables: { ...data.design.variables, spacings } },
-    data.revision,
-  );
+  await saveAndPublish(request, {
+    ...data.design,
+    variables: { ...data.design.variables, spacings },
+  });
 }
 
 export async function setClass(
@@ -71,8 +95,8 @@ export async function setClass(
     states?: Record<string, Record<string, unknown>>;
   } | null,
 ) {
-  const data = await loadDesign(request);
+  const data = await loadDraft(request);
   const classes = (data.design.classes ?? []).filter((c) => c.id !== id);
   if (next !== null) classes.push({ id, ...next });
-  await saveDesign(request, { ...data.design, classes }, data.revision);
+  await saveAndPublish(request, { ...data.design, classes });
 }

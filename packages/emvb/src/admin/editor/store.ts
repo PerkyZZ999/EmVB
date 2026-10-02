@@ -24,6 +24,10 @@ export type EditorState = {
   rev: string | null;
   design: DesignSystem;
   designRevision: string | null;
+  /** CAS token for the published design. Absent until the editor has loaded a draft (W-100). */
+  publishedRevision?: string | null;
+  /** True after a style edit that has not been published. */
+  designUnpublished?: boolean;
   selectedId: string | null;
   /** Bumped on every page edit. A save only clears `dirty` if nothing changed while it ran. */
   version: number;
@@ -47,6 +51,7 @@ export type EditorAction =
   | { type: "saved"; rev: string; version: number }
   | { type: "published"; rev: string }
   | { type: "set-design"; design: DesignSystem; revision: string | null }
+  | { type: "publish-design"; revision: string }
   | { type: "reset"; state: EditorState };
 
 export const isDirty = (state: EditorState) => state.version !== state.savedVersion;
@@ -193,7 +198,14 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "published":
       return { ...state, rev: action.rev, status: "published" };
     case "set-design":
-      return { ...state, design: action.design, designRevision: action.revision };
+      return {
+        ...state,
+        design: action.design,
+        designRevision: action.revision,
+        designUnpublished: true,
+      };
+    case "publish-design":
+      return { ...state, designUnpublished: false, publishedRevision: action.revision };
     case "reset":
       return action.state;
   }

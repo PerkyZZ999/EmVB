@@ -98,6 +98,8 @@ const initialState = (entry: EditorEntry, design: LoadedDesign): EditorState => 
   rev: entry.rev,
   design: design.design,
   designRevision: design.revision,
+  publishedRevision: design.publishedRevision,
+  designUnpublished: design.unpublished,
   selectedId: null,
   version: 0,
   savedVersion: 0,
@@ -136,7 +138,7 @@ function EditorApp({
   const [leaving, setLeaving] = React.useState(false);
   const latest = React.useRef(state);
   latest.current = state;
-  const { busy, save, publish, preview, changeDesign } = useEditorCommands({
+  const { busy, save, publish, preview, changeDesign, publishStyles } = useEditorCommands({
     fetcher,
     collection,
     latest,
@@ -217,7 +219,12 @@ function EditorApp({
       const fresh = await loadEntry(fetcher, state.id);
       dispatch({
         type: "reset",
-        state: initialState(fresh, { design: state.design, revision: state.designRevision }),
+        state: initialState(fresh, {
+          design: state.design,
+          revision: state.designRevision,
+          publishedRevision: state.publishedRevision ?? null,
+          unpublished: state.designUnpublished === true,
+        }),
       });
       saver.markIdle();
     } catch {
@@ -343,6 +350,7 @@ function EditorApp({
                 siteStylesOpen={siteStylesOpen}
                 onCloseSiteStyles={() => setSiteStylesOpen(false)}
                 onDesignChange={changeDesign}
+                onPublishStyles={publishStyles}
                 fetcher={fetcher}
                 formsAvailable={formsAvailable}
                 rejection={saver.rejection}

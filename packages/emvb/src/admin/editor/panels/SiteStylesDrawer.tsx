@@ -17,10 +17,14 @@ import { ClassesSection } from "./ClassesSection.tsx";
 import { stopEditorShortcuts } from "./settings/ClassChip.tsx";
 import { VariableSection } from "./VariableSection.tsx";
 
+const STYLE_NOTE = "Style changes stay unpublished until you publish styles.";
+
 type Props = {
   design: DesignSystem;
   layout: Layout | null;
   onDesignChange: (design: DesignSystem) => Promise<void>;
+  unpublished?: boolean;
+  onPublishStyles?: () => Promise<void>;
   onLayoutChange: (layout: Layout) => void;
   onClose: () => void;
 };
@@ -42,6 +46,8 @@ export function SiteStylesDrawer({
   design,
   layout,
   onDesignChange,
+  unpublished = false,
+  onPublishStyles,
   onLayoutChange,
   onClose,
 }: Props) {
@@ -62,6 +68,16 @@ export function SiteStylesDrawer({
     }
   };
 
+  const publish = async () => {
+    if (!onPublishStyles) return;
+    setError(null);
+    try {
+      await onPublishStyles();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't publish site styles. Try again.");
+    }
+  };
+
   return (
     <div
       className="emvb-panel-body emvb-site-styles"
@@ -75,6 +91,11 @@ export function SiteStylesDrawer({
             {tab === "variables" ? "Variables Manager" : "Classes Manager"}
           </p>
         </div>
+        {unpublished && (
+          <Button type="button" variant="primary" onClick={() => void publish()}>
+            Publish styles
+          </Button>
+        )}
         <Button
           type="button"
           variant="ghost"
@@ -150,9 +171,7 @@ export function SiteStylesDrawer({
           />
         </div>
       )}
-      <p className="emvb-helper emvb-site-styles-footer">
-        Changes to site styles apply to all pages immediately.
-      </p>
+      <p className="emvb-helper emvb-site-styles-footer">{STYLE_NOTE}</p>
       {confirm && (
         <DeleteConfirm
           confirm={confirm}
