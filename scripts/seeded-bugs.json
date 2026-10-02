@@ -16511,6 +16511,86 @@
         "entrance animation"
       ],
       "expect": "✘.*\\[node\\].*entrance animation"
+    },
+    {
+      "id": "W-102/class-list-not-element-order",
+      "requirement": "W-102",
+      "description": "class priority follows the order on the element",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/cascade.ts",
+          "search": "  const applied = new Set(appliedIds);\n  return (classes ?? []).filter((cls) => applied.has(cls.id)).map((cls) => cls.style);",
+          "replace": "  return appliedIds.map((id) => classes?.find((cls) => cls.id === id)?.style);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/cascade.test.ts",
+        "-t",
+        "Site styles list"
+      ],
+      "expect": "\\(fail\\).*Site styles list"
+    },
+    {
+      "id": "W-102/move-class-stays",
+      "requirement": "W-102",
+      "description": "moving a class does not change the list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "  next[index] = swap;\n  next[j] = at;\n  return { ...design, classes: next };",
+          "replace": "  next[index] = swap;\n  next[j] = swap;\n  return { ...design, classes: next };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/classes.test.ts",
+        "-t",
+        "moves a class"
+      ],
+      "expect": "\\(fail\\).*moves a class"
+    },
+    {
+      "id": "W-102/duplicate-variable-drops-value",
+      "requirement": "W-102",
+      "description": "a duplicated variable does not keep its value",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "    value: typeof source.value === \"object\" ? structuredClone(source.value) : source.value,",
+          "replace": "    value: \"#000000\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/design/variables.test.ts",
+        "-t",
+        "copies the value"
+      ],
+      "expect": "\\(fail\\).*copies the value"
+    },
+    {
+      "id": "W-102/class-size-hidden",
+      "requirement": "W-102",
+      "description": "the class editor hides Width",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  size: [\n    \"width\",",
+          "replace": "  size: ["
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "Move down"
+      ],
+      "expect": "\\(fail\\).*Width"
     }
   ]
 }

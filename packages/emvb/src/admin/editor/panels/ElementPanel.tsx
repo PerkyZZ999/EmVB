@@ -36,6 +36,7 @@ import {
   type DeviceStyles,
   type PopupDevice,
   type ResponsiveDevice,
+  classStylesInListOrder,
   resolveCascade,
   STYLE_STATES,
   type StyleProps,
@@ -154,10 +155,8 @@ const positionInEffect = (
 ) =>
   cls
     ? cls.style?.position
-    : resolveCascade(
-        (node.classes ?? []).map((id) => design.classes?.find((c) => c.id === id)?.style),
-        node.style,
-      ).position;
+    : resolveCascade(classStylesInListOrder(design.classes, node.classes ?? []), node.style)
+        .position;
 
 /** Which styles the Style sections edit (W-087): a class applied to the node, or its own. */
 function useStyleTarget(node: LayoutNode, design: DesignSystem) {

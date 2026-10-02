@@ -58,6 +58,28 @@ export function clearClassRefs(layout: Layout, classId: string): Layout {
   return next;
 }
 
+/**
+ * Move a class one step in the site list. Later classes win when they set the same property,
+ * because their CSS rule comes later. Out of range is a no-op. Pure.
+ */
+export function moveDesignClass(
+  design: DesignSystem,
+  classId: string,
+  delta: -1 | 1,
+): DesignSystem {
+  const classes = [...(design.classes ?? [])];
+  const index = classes.findIndex((cls) => cls.id === classId);
+  const j = index + delta;
+  if (index < 0 || j < 0 || j >= classes.length) return design;
+  const next = classes.slice();
+  const at = next[index];
+  const swap = next[j];
+  if (at === undefined || swap === undefined) return design;
+  next[index] = swap;
+  next[j] = at;
+  return { ...design, classes: next };
+}
+
 /** Duplicate a design class with a new id/name. Pure (W-071). */
 export function duplicateClass(
   design: DesignSystem,

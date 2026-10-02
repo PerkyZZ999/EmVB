@@ -4,6 +4,7 @@ import type { Layout } from "../schema/layout.ts";
 import {
   clearVariableRefs,
   deleteVariable,
+  duplicateVariable,
   findVariableUsages,
   findVariableUsagesInDesign,
   renameVariable,
@@ -348,5 +349,18 @@ describe("state styles use variables too (W-089)", () => {
       name: "Card",
       style: { opacity: 0.5 },
     });
+  });
+});
+
+describe("duplicateVariable", () => {
+  test("copies the value under a new id and leaves the source", () => {
+    const design = emptyDesign();
+    design.variables.colors = [{ id: "brand", name: "Brand", value: "#112233" }];
+    const next = duplicateVariable(design, "brand", "color");
+    expect(next.variables.colors.map((entry) => entry.name)).toEqual(["Brand", "Brand copy"]);
+    expect(next.variables.colors[1]?.value).toBe("#112233");
+    expect(next.variables.colors[1]?.id).not.toBe("brand");
+    expect(next.variables.colors[0]).toBe(design.variables.colors[0]);
+    expect(duplicateVariable(design, "missing", "color")).toBe(design);
   });
 });

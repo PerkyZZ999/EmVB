@@ -114,12 +114,13 @@ export {
   clearVariableRefs,
   removeVariable,
   renameVariable,
+  duplicateVariable,
   deleteVariable,
   refMatchesKind,
   type VariableKind,
   type VariableUsage,
 } from "./design/variables.ts";
-export { resolveCascade } from "./design/cascade.ts";
+export { classStylesInListOrder, resolveCascade } from "./design/cascade.ts";
 export {
   findMissingRequiredFields,
   layoutHasForm,
@@ -141,6 +142,7 @@ export {
   findClassUsages,
   clearClassRefs,
   duplicateClass,
+  moveDesignClass,
   renameClass,
   patchClassStyle,
   replaceClassId,

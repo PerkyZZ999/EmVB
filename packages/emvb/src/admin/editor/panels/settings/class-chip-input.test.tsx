@@ -333,7 +333,7 @@ describe("class chip input in the element panel (W-031, W-087)", () => {
     ) as HTMLElement;
     await act(async () => styleTab.click());
     expect(document.querySelector("[data-emvb-cascade-caption]")?.textContent).toBe(
-      "Later classes override earlier ones. Local styles win over classes in the same state.",
+      "When two classes set the same property, the one lower in Site styles wins. Local styles still win.",
     );
     expect(chipIds()).toEqual(["card", "accent"]);
     await press(chipButton("accent"), "ArrowLeft", { altKey: true });

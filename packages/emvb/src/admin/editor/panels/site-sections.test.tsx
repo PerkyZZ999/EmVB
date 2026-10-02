@@ -369,6 +369,7 @@ describe("VariableSection", () => {
       expect(parts.map((el) => el.textContent || el.getAttribute("role"))).toEqual([
         "Edit value",
         "Rename",
+        "Duplicate",
         "Copy CSS variable",
         "separator",
         "Delete",
@@ -450,6 +451,8 @@ describe("ClassesSection", () => {
     expect(parts.map((el) => el.textContent || el.getAttribute("role"))).toEqual([
       "Edit styles",
       "Rename",
+      "Move up",
+      "Move down",
       "Duplicate",
       "separator",
       "Delete",
@@ -487,6 +490,20 @@ describe("ClassesSection", () => {
     await press(classRow("badge"), "F2");
     await renameTo("Badge", "Enter");
     expect(saved.length).toBe(2);
+  });
+
+  test("Move down reorders the class list, and Size offers Width", async () => {
+    await mountClasses();
+    await pick("Actions for Card", "Move down");
+    expect(saved.at(-1)?.classes?.map((cls) => cls.id)).toEqual(["hero", "card", "note", "badge"]);
+    await pick("Actions for Card", "Move up");
+    expect(saved).toHaveLength(1);
+    await act(async () => classRow("card")?.click());
+    await act(async () =>
+      host.querySelector<HTMLButtonElement>("[data-emvb-class-section='size']")?.click(),
+    );
+    expect(host.textContent).toContain("Width");
+    expect(host.textContent).toContain("lower in this list wins");
   });
 
   test("shows the page usage count, with the full sentence in the tooltip", async () => {

@@ -3,7 +3,7 @@ import { generateCss } from "../css/generate.ts";
 import { emptyDesign } from "../schema/design.ts";
 import type { Layout } from "../schema/layout.ts";
 import { renderPage } from "../render/index.ts";
-import { resolveCascade } from "./cascade.ts";
+import { classStylesInListOrder, resolveCascade } from "./cascade.ts";
 
 describe("resolveCascade (W-030, R-021)", () => {
   test("later class styles and local win (table)", () => {
@@ -21,6 +21,16 @@ describe("resolveCascade (W-030, R-021)", () => {
       fontSize: { value: 18, unit: "px" },
     });
     expect(resolveCascade([])).toEqual({});
+  });
+
+  test("the Site styles list wins over the order written on the element", () => {
+    const classes = [
+      { id: "card", style: { color: "#111111" } },
+      { id: "accent", style: { color: "#222222" } },
+    ];
+    expect(resolveCascade(classStylesInListOrder(classes, ["accent", "card"]))).toEqual({
+      color: "#222222",
+    });
   });
 });
 

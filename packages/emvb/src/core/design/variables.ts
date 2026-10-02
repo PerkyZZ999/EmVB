@@ -2,7 +2,7 @@ import type { DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { STYLE_STATES } from "../schema/state-names.ts";
 import type { DeviceStyles, StyleProps, StyleStates } from "../schema/style.ts";
-import { nodeChildren, updateNode } from "../tree-ops.ts";
+import { nodeChildren, slugify, updateNode } from "../tree-ops.ts";
 
 export type VariableKind = "color" | "font" | "fontSize" | "spacing";
 
@@ -246,6 +246,32 @@ export function removeVariable(design: DesignSystem, id: string, kind: VariableK
       [key]: filtered,
     },
     ...(classes ? { classes } : {}),
+  };
+}
+
+/** A copy of a variable, with a new id and the name "… copy". The source is unchanged. Pure. */
+export function duplicateVariable(
+  design: DesignSystem,
+  id: string,
+  kind: VariableKind,
+): DesignSystem {
+  const key = KIND_TO_LIST[kind];
+  const list = design.variables[key] ?? [];
+  const source = list.find((entry) => entry.id === id);
+  if (!source) return design;
+  const name = `${source.name} copy`;
+  const base = slugify(name).slice(0, 34) || kind;
+  const taken = new Set(list.map((entry) => entry.id));
+  let nextId = base;
+  for (let n = 2; taken.has(nextId); n++) nextId = `${base}-${n}`.slice(0, 40);
+  const copy = Object.assign({}, source, {
+    id: nextId,
+    name,
+    value: typeof source.value === "object" ? structuredClone(source.value) : source.value,
+  });
+  return {
+    ...design,
+    variables: { ...design.variables, [key]: [...list, copy] },
   };
 }
 

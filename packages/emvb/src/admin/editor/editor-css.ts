@@ -427,6 +427,13 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-site-create { display: flex; flex-direction: column; gap: 8px; }
 .emvb-site-class-styles { display: flex; flex-direction: column; gap: 8px; }
+.emvb-site-class-sections { display: flex; flex-wrap: wrap; gap: 4px; }
+.emvb-site-class-section {
+  height: 28px; padding: 0 8px; border: 0; border-radius: 4px;
+  background: transparent; color: var(--text-color-kumo-subtle); font: inherit; font-size: 12px; cursor: pointer;
+}
+.emvb-site-class-section[aria-selected="true"] { background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
+.emvb-site-class-section:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -2px; }
 .emvb-site-token { margin: 0; font-size: 11px; color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-site-cascade { margin: 0 0 4px; padding: 8px; border-radius: 6px; background: var(--color-kumo-tint); border: 1px solid var(--color-kumo-hairline); }
 .emvb-site-usage { flex: 0 0 auto; white-space: nowrap; font-size: 11px; line-height: 16px; color: var(--text-color-kumo-subtle); font-variant-numeric: tabular-nums; }

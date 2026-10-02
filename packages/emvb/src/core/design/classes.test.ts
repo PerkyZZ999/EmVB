@@ -7,6 +7,7 @@ import {
   duplicateClass,
   findClassUsages,
   moveClassId,
+  moveDesignClass,
   patchClassStyle,
   removeClassId,
   renameClass,
@@ -22,6 +23,24 @@ describe("class id list helpers (W-031)", () => {
     expect(moveClassId(ids, 1, -1)).toEqual(["accent", "card"]);
     expect(moveClassId(ids, 0, -1)).toEqual(["card", "accent"]);
     expect(removeClassId(ids, "card")).toEqual(["accent"]);
+  });
+});
+
+describe("moveDesignClass", () => {
+  const design = {
+    ...emptyDesign(),
+    classes: [
+      { id: "a", name: "A", style: {} },
+      { id: "b", name: "B", style: {} },
+      { id: "c", name: "C", style: {} },
+    ],
+  };
+
+  test("moves a class one step, and the ends stay put", () => {
+    expect(moveDesignClass(design, "a", 1).classes?.map((cls) => cls.id)).toEqual(["b", "a", "c"]);
+    expect(moveDesignClass(design, "a", -1)).toBe(design);
+    expect(moveDesignClass(design, "missing", 1)).toBe(design);
+    expect(design.classes?.map((cls) => cls.id)).toEqual(["a", "b", "c"]);
   });
 });
 

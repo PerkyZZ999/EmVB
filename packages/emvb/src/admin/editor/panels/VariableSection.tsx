@@ -14,6 +14,7 @@ import {
 } from "@phosphor-icons/react";
 import * as React from "react";
 import {
+  duplicateVariable,
   findVariableUsages,
   findVariableUsagesInDesign,
   renameVariable,
@@ -424,6 +425,11 @@ export function VariableSection({
                       icon: TextTIcon,
                       afterClose: true,
                       onSelect: () => setRenaming(item.id),
+                    },
+                    {
+                      label: "Duplicate",
+                      icon: CopySimpleIcon,
+                      onSelect: () => void onSave(duplicateVariable(design, item.id, kind)),
                     },
                     {
                       label: "Copy CSS variable",
