@@ -80,3 +80,20 @@ describe("accordion (W-106)", () => {
     expect(canDrop(layout, { kind: "existing", id: "item0001" }, "root0001").ok).toBe(false);
   });
 });
+
+describe("entrance motion (W-107)", () => {
+  test("slide, delay, and scroll into view stay in the sanitizer", () => {
+    const layout = page([
+      {
+        id: "head0001",
+        type: "heading",
+        props: { text: "Hi", level: 1 },
+        style: { entrance: { type: "slide-up", duration: 500, delay: 120, trigger: "view" } },
+      },
+    ]);
+    const css = renderPage(layout, design).css;
+    expect(css).toContain("animation:emvb-slide-up 500ms ease-out 120ms both");
+    expect(css).toContain("animation-timeline:view()");
+    expect(css).toContain("@keyframes emvb-scale");
+  });
+});

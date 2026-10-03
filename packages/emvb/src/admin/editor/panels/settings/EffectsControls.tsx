@@ -200,6 +200,9 @@ const ENTRANCE_TYPES: { value: Entrance["type"]; label: string }[] = [
   { value: "fade", label: "Fade" },
   { value: "fade-up", label: "Fade up" },
   { value: "fade-down", label: "Fade down" },
+  { value: "slide-up", label: "Slide up" },
+  { value: "slide-down", label: "Slide down" },
+  { value: "scale", label: "Scale" },
 ];
 
 /** Plays once on load (W-101, Normal only). Add entrance starts at Fade, 400 ms. */
@@ -234,6 +237,24 @@ export function EntranceControl({
               value={value.duration}
               spec={MS}
               onCommit={(n) => onChange({ ...value, duration: n ?? 0 })}
+            />
+            <NumberField
+              fieldKey="entrance.delay"
+              label="Delay"
+              value={value.delay ?? 0}
+              spec={MS}
+              onCommit={(n) => onChange({ ...value, delay: n && n > 0 ? n : undefined })}
+            />
+            <TransitionSelect
+              label="Start"
+              value={value.trigger ?? "load"}
+              options={[
+                { value: "load", label: "On load" },
+                { value: "view", label: "In view" },
+              ]}
+              onChange={(trigger) =>
+                onChange({ ...value, trigger: trigger === "load" ? undefined : "view" })
+              }
             />
           </>
         ) : (

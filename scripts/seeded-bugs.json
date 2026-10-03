@@ -16649,6 +16649,20 @@
       "expect": "\\(fail\\).*an item is a details"
     },
     {
+      "id": "W-107/view-timeline-dropped",
+      "requirement": "W-107",
+      "description": "scroll into view does not set animation-timeline",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "{ property: \"animation-timeline\", value: \"view()\" },",
+          "replace": "{ property: \"animation-name\", value: \"none\" },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "slide, delay"],
+      "expect": "\\(fail\\).*slide, delay"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",

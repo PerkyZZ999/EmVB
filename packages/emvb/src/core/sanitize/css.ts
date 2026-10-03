@@ -153,17 +153,30 @@ const cssZIndex = (value: unknown): string | undefined =>
     ? String(value)
     : undefined;
 
-const ENTRANCES = new Set(["fade", "fade-up", "fade-down"]);
+const ENTRANCES = new Set(["fade", "fade-up", "fade-down", "slide-up", "slide-down", "scale"]);
 
-/** `emvb-<type> <ms> ease-out both`, only for a known type and a duration of 0–2000 (W-101). */
+/** `emvb-<type> <ms> ease-out [delay] both`. A bad trigger drops the whole entrance. */
 function cssEntrance(value: unknown): string | undefined {
   if (typeof value !== "object" || value === null) return undefined;
-  const { type, duration } = value as { type?: unknown; duration?: unknown };
+  const { type, duration, delay, trigger } = value as {
+    type?: unknown;
+    duration?: unknown;
+    delay?: unknown;
+    trigger?: unknown;
+  };
   if (typeof type !== "string" || !ENTRANCES.has(type)) return undefined;
   if (!Number.isInteger(duration) || (duration as number) < 0 || (duration as number) > 2000) {
     return undefined;
   }
-  return `emvb-${type} ${duration}ms ease-out both`;
+  if (trigger !== undefined && trigger !== "load" && trigger !== "view") return undefined;
+  if (
+    delay !== undefined &&
+    (!Number.isInteger(delay) || (delay as number) < 0 || (delay as number) > 2000)
+  ) {
+    return undefined;
+  }
+  const wait = typeof delay === "number" && delay > 0 ? ` ${delay}ms` : "";
+  return `emvb-${type} ${duration}ms ease-out${wait} both`;
 }
 
 const cssGridSpan = (value: unknown): string | undefined =>
@@ -513,6 +526,15 @@ export function styleDeclarations(style: unknown): {
       (entry?.css === "font-family" ? isSafeFontStack(value) : isSafeCssValue(value));
     if (entry && safe) {
       declarations.push({ property: entry.css, value });
+      if (key === "entrance") {
+        const trigger = (raw as { trigger?: unknown }).trigger;
+        if (trigger === "view") {
+          declarations.push(
+            { property: "animation-timeline", value: "view()" },
+            { property: "animation-range", value: "entry 0% cover 40%" },
+          );
+        }
+      }
     } else {
       rejected.push(key);
     }

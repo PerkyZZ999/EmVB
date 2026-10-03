@@ -197,11 +197,17 @@ export const StyleProps = z.strictObject({
     ])
     .optional(),
   transition: Transition.optional(),
-  /** Plays once when the element appears (W-101). Not a state style. */
+  /**
+   * Plays once (W-101, W-107). `delay` waits before it starts. `view` starts as the element
+   * scrolls into view, using CSS scroll-driven animations, and falls back to playing on load.
+   * Not a state style.
+   */
   entrance: z
     .strictObject({
-      type: z.enum(["fade", "fade-up", "fade-down"]),
+      type: z.enum(["fade", "fade-up", "fade-down", "slide-up", "slide-down", "scale"]),
       duration: z.number().int().min(0).max(2000),
+      delay: z.number().int().min(0).max(2000).optional(),
+      trigger: z.enum(["load", "view"]).optional(),
     })
     .optional(),
 });
