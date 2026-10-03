@@ -31,6 +31,7 @@ import { renderLoop } from "./loop.ts";
 import { renderSection } from "./section.ts";
 import { renderTabs } from "./tabs.ts";
 import { serialize, type VNode } from "./vnode.ts";
+import { customAttributes } from "./extras.ts";
 
 export type { RenderMode } from "./context.ts";
 export { FORMS_SUBMIT_PATH } from "./form.ts";
@@ -166,7 +167,7 @@ export function renderPage(
         hiddenOn,
       });
     }
-    const attrs: Record<string, string> = { class: classes.join(" ") };
+    const attrs: Record<string, string> = { class: classes.join(" "), ...customAttributes(node) };
     if (mode === "editor" && id) attrs["data-emvb-id"] = id;
     if (node.htmlId && HTML_ID.test(node.htmlId)) attrs.id = node.htmlId;
     return attrs;

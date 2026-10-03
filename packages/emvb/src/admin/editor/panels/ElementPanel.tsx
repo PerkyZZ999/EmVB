@@ -1,4 +1,4 @@
-import { Collapsible, Input, Tabs } from "@cloudflare/kumo";
+import { Button, Collapsible, Input, Tabs } from "@cloudflare/kumo";
 import type { Fetcher } from "../../api.ts";
 import {
   CaretDownIcon,
@@ -42,7 +42,7 @@ import {
   type StyleProps,
   type StyleStates,
 } from "../../../core/index.ts";
-import { FIELD } from "../../ui.ts";
+import { BUTTON, FIELD } from "../../ui.ts";
 import { FieldControl } from "./settings/FieldControl.tsx";
 import { StyleRow } from "./settings/StyleRow.tsx";
 import { ClassChipInput } from "./settings/ClassChipInput.tsx";
@@ -466,16 +466,22 @@ function KnownElementPanel({
               if (cls || styleState !== "normal") return null;
               return section(
                 id,
-                node.htmlId ? 1 : 0,
-                <Input
-                  label="CSS id"
-                  className={`${FIELD} emvb-mono`}
-                  value={node.htmlId ?? ""}
-                  onChange={(event) => {
-                    const next = event.target.value.trim();
-                    onChange({ ...node, htmlId: next === "" ? undefined : next });
-                  }}
-                />,
+                (node.htmlId ? 1 : 0) + (node.attributes?.length ?? 0),
+                <>
+                  <Input
+                    label="CSS id"
+                    className={`${FIELD} emvb-mono`}
+                    value={node.htmlId ?? ""}
+                    onChange={(event) => {
+                      const next = event.target.value.trim();
+                      onChange({ ...node, htmlId: next === "" ? undefined : next });
+                    }}
+                  />
+                  <AttributesEditor
+                    attributes={node.attributes}
+                    onChange={(attributes) => onChange({ ...node, attributes })}
+                  />
+                </>,
               );
             }
             const keys = keysFor(node.type, id, style, position).filter(
@@ -569,4 +575,55 @@ function breadcrumb(
     current = parentOf(layout, current);
   }
   return [{ id: null, label: "Page" }, ...chain];
+}
+
+function AttributesEditor({
+  attributes,
+  onChange,
+}: {
+  attributes: LayoutNode["attributes"];
+  onChange: (next: LayoutNode["attributes"]) => void;
+}) {
+  const list = attributes ?? [];
+  const update = (index: number, patch: { name?: string; value?: string }) => {
+    const next = list.map((item, i) => (i === index ? { ...item, ...patch } : item));
+    onChange(next);
+  };
+  return (
+    <div className="emvb-field-group" data-emvb-attributes="">
+      <span className="emvb-var-field-label">Attributes</span>
+      {list.map((item, index) => (
+        <div key={index} className="emvb-style-row">
+          <Input
+            label="Name"
+            className={`${FIELD} emvb-mono`}
+            value={item.name}
+            onChange={(event) => update(index, { name: event.target.value.trim() })}
+          />
+          <Input
+            label="Value"
+            className={FIELD}
+            value={item.value}
+            onChange={(event) => update(index, { value: event.target.value })}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => onChange(list.filter((_, i) => i !== index))}
+          >
+            Remove
+          </Button>
+        </div>
+      ))}
+      <Button
+        type="button"
+        variant="secondary"
+        className={BUTTON}
+        onClick={() => onChange([...list, { name: "data-", value: "" }])}
+      >
+        Add attribute
+      </Button>
+      <p className="emvb-helper">data-* and aria-* names only. Event handlers are refused.</p>
+    </div>
+  );
 }

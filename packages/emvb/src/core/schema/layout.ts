@@ -29,6 +29,19 @@ export const CONTAINER_TAGS = [
 ] as const;
 export const TEXT_TAGS = ["p", "div"] as const;
 
+/** `data-*` and `aria-*` only. Names stay unique on the element (W-105 / R-032). */
+const HtmlAttribute = z.strictObject({
+  name: z
+    .string()
+    .regex(
+      /^(?:data|aria)-[a-z][a-z0-9-]{0,40}$/,
+      "Use a data-* or aria-* name, starting with a letter",
+    ),
+  value: z.string().max(200),
+});
+
+const HtmlAttributes = z.array(HtmlAttribute).max(20);
+
 /** The fields every element has; `props` is the element's own strict props schema. */
 const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) => ({
   id: NodeId,
@@ -40,6 +53,7 @@ const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) =>
   hiddenOn: HiddenOn.optional(),
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
+  attributes: HtmlAttributes.optional(),
 });
 
 const leafNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
@@ -351,6 +365,7 @@ const UnknownNodeSchema = z.strictObject({
   states: StyleStates.optional(),
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
+  attributes: HtmlAttributes.optional(),
   get children(): z.ZodType<LayoutNode[] | undefined> {
     return z.array(LayoutNode).optional();
   },
@@ -420,6 +435,7 @@ type DevicesOf = z.infer<typeof DeviceStyles>;
 type HiddenOnOf = z.infer<typeof HiddenOn>;
 type ClassesOf = z.infer<typeof ClassIds>;
 type HtmlIdOf = z.infer<typeof HtmlId>;
+type HtmlAttributeOf = z.infer<typeof HtmlAttribute>;
 type IdOf = z.infer<typeof NodeId>;
 
 /** Manual recursive types so UnknownNode does not poison `z.infer` of the tree. */
@@ -433,6 +449,7 @@ export type UnknownNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children?: LayoutNode[];
 };
 
@@ -446,6 +463,7 @@ export type ContainerNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 
@@ -459,6 +477,7 @@ export type DivBlockNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 
@@ -472,6 +491,7 @@ export type GridNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 
@@ -485,6 +505,7 @@ export type FlexboxNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 
@@ -503,6 +524,7 @@ export type SvgNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
 };
 
 export type TabPanelNode = {
@@ -515,6 +537,7 @@ export type TabPanelNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 
@@ -528,6 +551,7 @@ export type TabsNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 
@@ -541,6 +565,7 @@ export type FormNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 
@@ -554,6 +579,7 @@ export type LoopNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 
@@ -567,6 +593,7 @@ export type SectionNode = {
   hiddenOn?: HiddenOnOf;
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
   children: LayoutNode[];
 };
 

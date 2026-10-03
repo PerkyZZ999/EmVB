@@ -5,6 +5,7 @@ import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { designFromJson, designToJson } from "../design/transfer.ts";
 import { renderPage } from "./index.ts";
 
+const design: DesignSystem = emptyDesign();
 const page = (children: LayoutNode[], root: Partial<LayoutNode> = {}): Layout => ({
   schemaVersion: 9,
   root: { ...container("root0001", children), ...root } as Layout["root"],
@@ -39,5 +40,26 @@ describe("tag defaults (W-104)", () => {
     const css = renderPage(page([]), styled).css;
     expect(css).toContain(":where(.emvb-root) h1{color:#111111}");
     expect(css.indexOf(":where(.emvb-root) h1")).toBeLessThan(css.indexOf(".emvb-k-card"));
+  });
+});
+
+describe("custom attributes (W-105)", () => {
+  test("data and aria attributes are escaped and event names are dropped", () => {
+    const layout = page([
+      {
+        id: "head0001",
+        type: "heading",
+        props: { text: "Hi", level: 2 },
+        attributes: [
+          { name: "data-track", value: 'a"b' },
+          { name: "aria-label", value: "Title" },
+          { name: "onclick", value: "alert(1)" },
+        ],
+      },
+    ]);
+    const html = renderPage(layout, design).html;
+    expect(html).toContain('data-track="a&quot;b"');
+    expect(html).toContain('aria-label="Title"');
+    expect(html).not.toContain("onclick");
   });
 });

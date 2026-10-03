@@ -16621,6 +16621,20 @@
       "expect": "\\(fail\\).*a heading default"
     },
     {
+      "id": "W-105/attribute-name-unfiltered",
+      "requirement": "W-105",
+      "description": "custom attributes skip the data/aria allowlist",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/extras.ts",
+          "search": "if (!ATTR_NAME.test(item.name) || item.name.startsWith(\"data-emvb\")) continue;",
+          "replace": "if (item.name.startsWith(\"data-emvb\")) continue;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "data and aria"],
+      "expect": "\\(fail\\).*data and aria|attribute \\\"onclick\\\" is not allowed"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",
