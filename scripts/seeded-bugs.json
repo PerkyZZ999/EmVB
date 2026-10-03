@@ -16635,6 +16635,20 @@
       "expect": "\\(fail\\).*data and aria|attribute \\\"onclick\\\" is not allowed"
     },
     {
+      "id": "W-106/accordion-not-details",
+      "requirement": "W-106",
+      "description": "an accordion item is a div instead of details",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "      tag: \"details\",",
+          "replace": "      tag: \"div\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "an item is a details"],
+      "expect": "\\(fail\\).*an item is a details"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",

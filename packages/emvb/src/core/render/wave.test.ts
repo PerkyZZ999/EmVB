@@ -3,6 +3,7 @@ import { container } from "../../../test/fixtures/layouts.ts";
 import { emptyDesign, type DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { designFromJson, designToJson } from "../design/transfer.ts";
+import { canDrop } from "../arrange.ts";
 import { renderPage } from "./index.ts";
 
 const design: DesignSystem = emptyDesign();
@@ -61,5 +62,21 @@ describe("custom attributes (W-105)", () => {
     expect(html).toContain('data-track="a&quot;b"');
     expect(html).toContain('aria-label="Title"');
     expect(html).not.toContain("onclick");
+  });
+});
+
+describe("accordion (W-106)", () => {
+  test("an item is a details element and only fits inside an accordion", () => {
+    const item: LayoutNode = {
+      id: "item0001",
+      type: "accordion-item",
+      props: { summary: "More" },
+      children: [{ id: "text0001", type: "text", props: { text: "Body" } }],
+    };
+    const layout = page([{ id: "acco0001", type: "accordion", props: {}, children: [item] }]);
+    const html = renderPage(layout, design).html;
+    expect(html).toContain("<details");
+    expect(html).toContain("<summary>More</summary>");
+    expect(canDrop(layout, { kind: "existing", id: "item0001" }, "root0001").ok).toBe(false);
   });
 });

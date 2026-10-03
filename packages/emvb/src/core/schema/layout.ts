@@ -191,6 +191,17 @@ export const GridNode = parentNode(
   }),
 );
 
+/** Several disclosures. Items are `<details>`, so the public page needs no script (W-106). */
+export const AccordionNode = parentNode("accordion", z.strictObject({}));
+
+export const AccordionItemNode = parentNode(
+  "accordion-item",
+  z.strictObject({
+    summary: z.string().min(1).max(200),
+    open: z.boolean().optional(),
+  }),
+);
+
 export const SvgNode = leafNode(
   "svg",
   z.strictObject({
@@ -345,6 +356,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "svg",
   "tabs",
   "tab-panel",
+  "accordion",
+  "accordion-item",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -404,6 +417,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   PostLinkNode,
   LoopNode,
   SectionNode,
+  AccordionNode,
+  AccordionItemNode,
 ]);
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
@@ -597,6 +612,34 @@ export type SectionNode = {
   children: LayoutNode[];
 };
 
+export type AccordionNode = {
+  id: IdOf;
+  type: "accordion";
+  props: Record<string, never>;
+  style?: StyleOf;
+  states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
+  children: LayoutNode[];
+};
+
+export type AccordionItemNode = {
+  id: IdOf;
+  type: "accordion-item";
+  props: { summary: string; open?: boolean };
+  style?: StyleOf;
+  states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
+  children: LayoutNode[];
+};
+
 export type LayoutNode =
   | ContainerNode
   | DivBlockNode
@@ -630,6 +673,8 @@ export type LayoutNode =
   | PostContentNode
   | PostImageNode
   | PostLinkNode
+  | AccordionNode
+  | AccordionItemNode
   | UnknownNode;
 
 /**
@@ -698,13 +743,21 @@ export const isTabPanelNode = (node: LayoutNode): node is TabPanelNode => node.t
 /** Layout parents that accept general children (forms may land here). */
 export const isLayoutParentNode = (
   node: LayoutNode,
-): node is ContainerNode | DivBlockNode | FlexboxNode | GridNode | TabPanelNode | SectionNode =>
+): node is
+  | ContainerNode
+  | DivBlockNode
+  | FlexboxNode
+  | GridNode
+  | TabPanelNode
+  | SectionNode
+  | AccordionItemNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "flexbox" ||
   node.type === "grid" ||
   node.type === "tab-panel" ||
-  node.type === "section";
+  node.type === "section" ||
+  node.type === "accordion-item";
 
 /** Nodes that may hold children. */
 export const isParentNode = (
@@ -718,7 +771,9 @@ export const isParentNode = (
   | LoopNode
   | SectionNode
   | TabsNode
-  | TabPanelNode =>
+  | TabPanelNode
+  | AccordionNode
+  | AccordionItemNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "flexbox" ||
@@ -727,7 +782,9 @@ export const isParentNode = (
   node.type === "loop" ||
   node.type === "section" ||
   node.type === "tabs" ||
-  node.type === "tab-panel";
+  node.type === "tab-panel" ||
+  node.type === "accordion" ||
+  node.type === "accordion-item";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

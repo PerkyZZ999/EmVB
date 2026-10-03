@@ -7,6 +7,8 @@ import type {
   SvgNode,
   TabsNode,
   TabPanelNode,
+  AccordionNode,
+  AccordionItemNode,
   DividerNode,
   HeadingNode,
   IconNode,
@@ -633,6 +635,44 @@ const flexbox: ElementDefinition<FlexboxNode> = {
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
 };
 
+const accordion: ElementDefinition<AccordionNode> = {
+  baseCss:
+    ".emvb-accordion{display:flex;flex-direction:column;min-width:0}.emvb-accordion-item{border-bottom:1px solid currentColor}.emvb-accordion-item>summary{cursor:pointer;padding:12px 0;font-weight:600}.emvb-accordion-body{padding:0 0 12px}",
+  defaults: () => ({ type: "accordion", props: {}, children: [] }),
+  descriptor: {
+    type: "accordion",
+    name: "Accordion",
+    group: "layout",
+    defaultTab: "content",
+    fields: [],
+  },
+  build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
+const accordionItem: ElementDefinition<AccordionItemNode> = {
+  baseCss: "",
+  defaults: () => ({ type: "accordion-item", props: { summary: "Title" }, children: [] }),
+  descriptor: {
+    type: "accordion-item",
+    name: "Accordion item",
+    group: "layout",
+    defaultTab: "content",
+    fields: [
+      { key: "summary", kind: "text", label: "Title" },
+      { key: "open", kind: "boolean", label: "Open", optional: true },
+    ],
+  },
+  build: (node, attrs, children) => {
+    const summary: VNode = { tag: "summary", attrs: {}, children: [node.props.summary] };
+    const body: VNode = { tag: "div", attrs: { class: "emvb-accordion-body" }, children };
+    return {
+      tag: "details",
+      attrs: node.props.open ? { ...attrs, open: "" } : attrs,
+      children: [summary, body],
+    };
+  },
+};
+
 export const ELEMENTS = {
   heading,
   container,
@@ -666,6 +706,8 @@ export const ELEMENTS = {
   svg: svgEl,
   tabs,
   "tab-panel": tabPanel,
+  accordion,
+  "accordion-item": accordionItem,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;

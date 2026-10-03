@@ -44,6 +44,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   icon: StarIcon,
   svg: GraphIcon,
   tabs: BrowserIcon,
+  accordion: ListBulletsIcon,
   video: YoutubeLogoIcon,
   form: ClipboardTextIcon,
   "text-input": TextboxIcon,

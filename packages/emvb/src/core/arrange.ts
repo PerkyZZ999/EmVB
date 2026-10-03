@@ -31,9 +31,11 @@ export type DragSource = { kind: "existing"; id: string } | { kind: "new"; node:
 
 export type Place = { parentId: string; index: number };
 
+type ArrangeParent = Extract<LayoutNode, { children: LayoutNode[] }>;
+
 type Located = {
   node: LayoutNode;
-  parent?: ContainerNode | FormNode | LoopNode;
+  parent?: ArrangeParent;
   index: number;
   depth: number;
 };
@@ -55,6 +57,8 @@ export const REASONS = {
   formIntoField: "A form can only go inside a layout container.",
   tabOutsideTabs: "Tab panels can only go inside Tabs.",
   onlyTabPanels: "Tabs can only hold tab panels.",
+  itemOutsideAccordion: "Accordion items can only go inside an Accordion.",
+  onlyAccordionItems: "An accordion can only hold accordion items.",
 } as const;
 
 const refuse = (reason: string): Refusal => ({ ok: false, reason });
@@ -64,7 +68,7 @@ const isContainer = (node: LayoutNode): node is ContainerNode => node.type === "
 function locate(layout: Layout, id: string): Located | undefined {
   const walk = (
     node: LayoutNode,
-    parent: ContainerNode | FormNode | LoopNode | undefined,
+    parent: ArrangeParent | undefined,
     index: number,
     depth: number,
   ): Located | undefined => {
@@ -73,7 +77,7 @@ function locate(layout: Layout, id: string): Located | undefined {
     // children so nested ids can be found (they are not rearrangeable).
     if (isParentNode(node)) {
       for (const [i, child] of node.children.entries()) {
-        const found = walk(child, node as ContainerNode, i, depth + 1);
+        const found = walk(child, node as ArrangeParent, i, depth + 1);
         if (found) return found;
       }
       return undefined;
@@ -121,6 +125,14 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
   [
     ({ node, into }) => into.node.type === "tabs" && node.type !== "tab-panel",
     REASONS.onlyTabPanels,
+  ],
+  [
+    ({ node, into }) => node.type === "accordion-item" && into.node.type !== "accordion",
+    REASONS.itemOutsideAccordion,
+  ],
+  [
+    ({ node, into }) => into.node.type === "accordion" && node.type !== "accordion-item",
+    REASONS.onlyAccordionItems,
   ],
   [
     ({ node, into, layout }) => isFormNode(node) && underForm(layout, into.node.id),
