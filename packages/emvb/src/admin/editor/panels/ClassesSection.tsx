@@ -33,7 +33,12 @@ import {
   uniqueId,
 } from "./site-list.tsx";
 import { StateSwitcher, type StyleStateChoice } from "./settings/StateSwitcher.tsx";
-import { keysFor, SECTION_LABELS, type StyleSectionId } from "./settings/style-sections.ts";
+import {
+  keysFor,
+  SECTION_LABELS,
+  type StyleKey,
+  type StyleSectionId,
+} from "./settings/style-sections.ts";
 import { StyleRow } from "./settings/StyleRow.tsx";
 
 /** Same sections as the Style tab. Advanced has no keys. A class can sit on any element. */
@@ -53,12 +58,15 @@ function classKeys(
   style: StyleProps | undefined,
   position: StyleProps["position"],
   state: StyleStateChoice,
-) {
+): StyleKey[] {
   const keys = keysFor("container", section, style, position);
-  const withFit = section === "size" && !keys.includes("objectFit") ? [...keys, "objectFit"] : keys;
-  return state === "normal"
-    ? withFit
-    : withFit.filter((key) => key !== "transition" && key !== "entrance");
+  const withFit =
+    section === "size" && !keys.includes("objectFit") ? [...keys, "objectFit" as const] : keys;
+  return (
+    state === "normal"
+      ? withFit
+      : withFit.filter((key) => key !== "transition" && key !== "entrance")
+  ) as StyleKey[];
 }
 
 function ClassStyleEditor({

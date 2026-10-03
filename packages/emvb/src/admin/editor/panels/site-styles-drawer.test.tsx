@@ -120,7 +120,17 @@ describe("SiteStylesDrawer (W-032)", () => {
     await act(async () => row?.click());
     expect(row?.getAttribute("aria-expanded")).toBe("true");
     const keys = document.querySelectorAll(".emvb-site-class-styles [data-emvb-style]");
-    expect(new Set([...keys].map((el) => el.getAttribute("data-emvb-style"))).size).toBe(20);
+    expect(new Set([...keys].map((el) => el.getAttribute("data-emvb-style")))).toEqual(
+      new Set([
+        "flexDirection",
+        "flexWrap",
+        "justifyContent",
+        "alignItems",
+        "gap",
+        "gridColumnSpan",
+        "gridRowSpan",
+      ]),
+    );
     await act(async () => {
       row?.dispatchEvent(new KeyboardEvent("keydown", { key: "F2", bubbles: true }));
     });
@@ -195,7 +205,9 @@ describe("SiteStylesDrawer managers (W-071)", () => {
     expect(document.querySelector("[data-emvb-manager-label]")?.textContent).toContain(
       "Classes Manager",
     );
-    expect(document.querySelector("[data-emvb-cascade-help]")?.textContent).toMatch(/Cascade/);
+    expect(document.querySelector("[data-emvb-cascade-help]")?.textContent).toMatch(
+      /lower in this list wins/,
+    );
     expect(document.querySelector('[data-emvb-class-def="card"]')?.textContent).toContain(
       "emvb-k-card",
     );
