@@ -143,3 +143,30 @@ describe("logical properties (W-109)", () => {
     expect(css).toContain("text-align:end");
   });
 });
+
+describe("background video (W-110)", () => {
+  test("an allowed video sits behind the element and a script URL does not", () => {
+    const layout = page([
+      {
+        id: "box00001",
+        type: "container",
+        props: {},
+        style: { backgroundVideo: "https://cdn.example/clip.mp4" },
+        children: [],
+      },
+    ]);
+    const html = renderPage(layout, design).html;
+    expect(html).toContain('class="emvb-bg-video"');
+    expect(html).toContain('src="https://cdn.example/clip.mp4"');
+    const blocked = page([
+      {
+        id: "box00002",
+        type: "container",
+        props: {},
+        style: { backgroundVideo: "javascript:alert(1)" },
+        children: [],
+      },
+    ]);
+    expect(renderPage(blocked, design).html).not.toContain("emvb-bg-video");
+  });
+});

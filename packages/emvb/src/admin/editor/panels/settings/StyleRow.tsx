@@ -221,6 +221,25 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "backgroundVideo") {
+    const video = typeof value === "string" ? value : "";
+    return (
+      <div className="emvb-style-row" data-emvb-style="backgroundVideo" data-set={set || undefined}>
+        <Input
+          label="Background video"
+          className={FIELD}
+          value={video}
+          placeholder="https:// or /path"
+          onChange={(event) => {
+            const next = event.target.value.trim();
+            onPatch({ backgroundVideo: next === "" ? undefined : next });
+          }}
+        />
+        {reset}
+      </div>
+    );
+  }
+
   if (styleKey === "gradient") {
     return (
       <GradientControl
@@ -448,6 +467,7 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "entrance",
   "transition",
   "backgroundImage",
+  "backgroundVideo",
   "gradient",
   "overlay",
   ...(Object.keys(SELECT_OPTIONS) as StyleKey[]),

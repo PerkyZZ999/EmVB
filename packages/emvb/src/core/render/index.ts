@@ -31,7 +31,12 @@ import { renderLoop } from "./loop.ts";
 import { renderSection } from "./section.ts";
 import { renderTabs } from "./tabs.ts";
 import { serialize, type VNode } from "./vnode.ts";
-import { customAttributes } from "./extras.ts";
+import { classStylesInListOrder } from "../design/cascade.ts";
+import {
+  applyBackgroundVideo,
+  customAttributes,
+  safeBackgroundVideo,
+} from "./extras.ts";
 
 export type { RenderMode } from "./context.ts";
 export { FORMS_SUBMIT_PATH } from "./form.ts";
@@ -97,6 +102,7 @@ export function renderPage(
     hiddenOn?: LayoutNode["hiddenOn"];
   }[] = [];
   const knownVariables = new Set(design.variables.colors.map((c) => c.id));
+  let backgroundVideo = false;
 
   const ctx: RenderContext = {
     mode,
@@ -193,21 +199,44 @@ export function renderPage(
     usedTypes.add(type);
     const attrs = nodeAttrs(node, isRoot, id, nodeId);
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
-    if (isFormNode(node)) return renderForm(node, attrs, ctx, dynamic);
-    if (isLoopNode(node)) return renderLoop(node, attrs, ctx, dynamic);
-    if (isSectionNode(node)) return renderSection(node, attrs, ctx, dynamic);
+    if (isFormNode(node)) return finish(node, renderForm(node, attrs, ctx, dynamic));
+    if (isLoopNode(node)) return finish(node, renderLoop(node, attrs, ctx, dynamic));
+    if (isSectionNode(node)) return finish(node, renderSection(node, attrs, ctx, dynamic));
     if (isDynamicPostNode(node)) {
-      return renderDynamicPost(node, attrs, resolvePostForRender(dynamic, mode), mode);
+      return finish(
+        node,
+        renderDynamicPost(node, attrs, resolvePostForRender(dynamic, mode), mode),
+      );
     }
-    if (isTabsNode(node)) return renderTabs(node, id, attrs, ctx, dynamic);
+    if (isTabsNode(node)) return finish(node, renderTabs(node, id, attrs, ctx, dynamic));
     if (isParentNode(node)) {
-      return def.build(node as never, attrs, ctx.children(node.children, dynamic));
+      return finish(node, def.build(node as never, attrs, ctx.children(node.children, dynamic)));
     }
     if (mode === "editor" && node.type === "video") {
       const preview = videoPreview(node, attrs);
-      if (preview) return preview;
+      if (preview) return finish(node, preview);
     }
-    return withFieldOptions(def.build(node as never, attrs, []), node, ctx.definitions);
+    return finish(
+      node,
+      withFieldOptions(def.build(node as never, attrs, []), node, ctx.definitions),
+    );
+  }
+
+  function videoOf(node: LayoutNode): string | undefined {
+    let found: string | undefined;
+    for (const style of classStylesInListOrder(design.classes, node.classes ?? [])) {
+      const safe = safeBackgroundVideo(style?.backgroundVideo);
+      if (safe) found = safe;
+    }
+    const own = safeBackgroundVideo(node.style?.backgroundVideo);
+    return own ?? found;
+  }
+
+  function finish(node: LayoutNode, vnode: VNode | undefined): VNode | undefined {
+    if (!vnode) return undefined;
+    const src = videoOf(node);
+    if (src) backgroundVideo = true;
+    return applyBackgroundVideo(vnode, src);
   }
 
   const vnode = visit(layout.root, true) ?? {
@@ -225,6 +254,7 @@ export function renderPage(
       baseCss,
       localRules,
       previewStates: mode === "editor",
+      backgroundVideo,
     }),
     needsFormsRuntime: layoutHasForm(layout),
     needsTabsRuntime: layoutHasTabs(layout),

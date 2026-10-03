@@ -308,6 +308,7 @@ const BACKGROUND_KEYS = new Set([
   "backgroundRepeat",
   "gradient",
   "overlay",
+  "backgroundVideo",
 ]);
 
 /** Backstop for values that must contain `url()` or quotes, which `isSafeCssValue` refuses. */
@@ -495,6 +496,7 @@ const PROPERTY_MAP: {
   backgroundSize: { css: "background-size", toValue: keyword(BACKGROUND_SIZE) },
   backgroundPosition: { css: "background-position", toValue: keyword(BACKGROUND_POSITION) },
   backgroundRepeat: { css: "background-repeat", toValue: keyword(BACKGROUND_REPEAT) },
+  backgroundVideo: { css: "background-image", toValue: () => undefined },
   gradient: { css: "background-image", toValue: cssGradient },
   overlay: { css: "background-image", toValue: cssOverlay },
   borderWidth: { css: "border-width", toValue: cssLength },

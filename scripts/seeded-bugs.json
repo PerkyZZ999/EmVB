@@ -16691,6 +16691,20 @@
       "expect": "\\(fail\\).*writing direction"
     },
     {
+      "id": "W-110/video-class-missing",
+      "requirement": "W-110",
+      "description": "the background video element loses its class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/extras.ts",
+          "search": "attrs: { class: \"emvb-bg-video\", src, muted: \"\", loop: \"\", playsinline: \"\", autoplay: \"\" },",
+          "replace": "attrs: { src, muted: \"\", loop: \"\", playsinline: \"\", autoplay: \"\" },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "an allowed video"],
+      "expect": "\\(fail\\).*an allowed video"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",

@@ -161,6 +161,16 @@ export const StyleProps = z.strictObject({
     ])
     .optional(),
   backgroundRepeat: z.enum(["no-repeat", "repeat", "repeat-x", "repeat-y"]).optional(),
+  /** Video behind the element. Same URL rules as a background image (W-110). */
+  backgroundVideo: z
+    .string()
+    .min(1)
+    .max(2000)
+    .refine(
+      (value) => sanitizeMediaUrl(value) === value && !/[()\\\s"'`]/.test(value),
+      "Use an http(s) URL or a site path, with no spaces or parentheses",
+    )
+    .optional(),
   /** Two-stop linear gradient. Stops are colours, so a variable binding is a colour use (W-094). */
   gradient: z
     .strictObject({

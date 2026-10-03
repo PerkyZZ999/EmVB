@@ -31,6 +31,8 @@ export type CssInput = {
   }>;
   /** Editor canvas only: repeat each state rule for `[data-emvb-state="<state>"]` (W-089). */
   previewStates?: boolean;
+  /** When a node rendered a background video (W-110). */
+  backgroundVideo?: boolean;
 };
 
 /** Focus is keyboard focus (W-089): `:focus-visible`, never `:focus`. */
@@ -92,6 +94,7 @@ export function generateCss({
   baseCss,
   localRules,
   previewStates = false,
+  backgroundVideo = false,
 }: CssInput): string {
   const { colors, fonts, fontSizes, spacings } = design.variables;
   const variables = [
@@ -176,6 +179,9 @@ export function generateCss({
       : "",
     block(".emvb-root", variables),
     tagDefaultCss(design),
+    backgroundVideo
+      ? ".emvb-has-bg-video{position:relative;overflow:hidden}.emvb-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}.emvb-has-bg-video>:not(.emvb-bg-video){position:relative;z-index:1}"
+      : "",
     ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? ""),
     ...classes,
     ...locals,
