@@ -73,6 +73,17 @@ const heading: ElementDefinition<HeadingNode> = {
   }),
 };
 
+const BOX_LINK_FIELDS = [
+  {
+    key: "href",
+    kind: "text" as const,
+    label: "Link",
+    optional: true,
+    message: "Makes this box the link when it is a div. A link already inside stays as it is.",
+  },
+  { key: "newTab", kind: "boolean" as const, label: "Open in new tab", optional: true },
+];
+
 const container: ElementDefinition<ContainerNode> = {
   baseCss: ".emvb-container{display:flex;flex-direction:column;min-width:0}",
   defaults: () => ({ type: "container", props: {}, children: [] }),
@@ -90,6 +101,7 @@ const container: ElementDefinition<ContainerNode> = {
         options: CONTAINER_TAGS.map((tag) => ({ value: tag, label: tag })),
         message: "Pick a landmark or div.",
       },
+      ...BOX_LINK_FIELDS,
     ],
   },
   build: (node, attrs, children) => {
@@ -590,7 +602,7 @@ const divBlock: ElementDefinition<DivBlockNode> = {
     name: "Div Block",
     group: "layout",
     defaultTab: "style",
-    fields: [],
+    fields: BOX_LINK_FIELDS,
   },
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
 };
@@ -613,6 +625,7 @@ const grid: ElementDefinition<GridNode> = {
           label: String(n),
         })),
       },
+      ...BOX_LINK_FIELDS,
     ],
   },
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
@@ -632,7 +645,7 @@ const flexbox: ElementDefinition<FlexboxNode> = {
     name: "Flexbox",
     group: "layout",
     defaultTab: "style",
-    fields: [],
+    fields: BOX_LINK_FIELDS,
   },
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
 };

@@ -34,6 +34,7 @@ import { serialize, type VNode } from "./vnode.ts";
 import { classStylesInListOrder } from "../design/cascade.ts";
 import {
   applyBackgroundVideo,
+  applyBoxLink,
   customAttributes,
   safeBackgroundVideo,
 } from "./extras.ts";
@@ -236,7 +237,7 @@ export function renderPage(
     if (!vnode) return undefined;
     const src = videoOf(node);
     if (src) backgroundVideo = true;
-    return applyBackgroundVideo(vnode, src);
+    return applyBackgroundVideo(applyBoxLink(node, vnode), src);
   }
 
   const vnode = visit(layout.root, true) ?? {

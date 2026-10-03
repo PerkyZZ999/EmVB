@@ -16705,6 +16705,20 @@
       "expect": "\\(fail\\).*an allowed video"
     },
     {
+      "id": "W-111/nested-link-allowed",
+      "requirement": "W-111",
+      "description": "a box becomes a link even when a link is already inside",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/extras.ts",
+          "search": "  if (childrenOf(node).some(containsInteractive)) return vnode;",
+          "replace": "  if (false) return vnode;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "a box becomes the link"],
+      "expect": "\\(fail\\).*a box becomes the link"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",

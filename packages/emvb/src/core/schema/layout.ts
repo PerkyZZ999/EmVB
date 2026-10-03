@@ -42,6 +42,12 @@ const HtmlAttribute = z.strictObject({
 
 const HtmlAttributes = z.array(HtmlAttribute).max(20);
 
+/** A box may be the link. A link inside a link is dropped at render time (W-111). */
+const BoxLink = {
+  href: z.string().max(2000).optional(),
+  newTab: z.boolean().optional(),
+};
+
 /** The fields every element has; `props` is the element's own strict props schema. */
 const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) => ({
   id: NodeId,
@@ -169,6 +175,7 @@ export const ContainerNode = parentNode(
   "container",
   z.strictObject({
     tag: z.enum(CONTAINER_TAGS).optional(),
+    ...BoxLink,
   }),
 );
 
@@ -179,15 +186,16 @@ const FieldName = z
   .max(80)
   .regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, "Field names start with a letter");
 
-export const DivBlockNode = parentNode("div-block", z.strictObject({}));
+export const DivBlockNode = parentNode("div-block", z.strictObject({ ...BoxLink }));
 
-export const FlexboxNode = parentNode("flexbox", z.strictObject({}));
+export const FlexboxNode = parentNode("flexbox", z.strictObject({ ...BoxLink }));
 
 /** Equal columns. Children span with `gridColumnSpan` and `gridRowSpan` on their style. */
 export const GridNode = parentNode(
   "grid",
   z.strictObject({
     columns: z.number().int().min(1).max(12),
+    ...BoxLink,
   }),
 );
 
@@ -483,7 +491,7 @@ export type UnknownNode = {
 export type ContainerNode = {
   id: IdOf;
   type: "container";
-  props: { tag?: (typeof CONTAINER_TAGS)[number] };
+  props: { tag?: (typeof CONTAINER_TAGS)[number]; href?: string; newTab?: boolean };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;
@@ -497,7 +505,7 @@ export type ContainerNode = {
 export type DivBlockNode = {
   id: IdOf;
   type: "div-block";
-  props: Record<string, never>;
+  props: { href?: string; newTab?: boolean };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;
@@ -511,7 +519,7 @@ export type DivBlockNode = {
 export type GridNode = {
   id: IdOf;
   type: "grid";
-  props: { columns: number };
+  props: { columns: number; href?: string; newTab?: boolean };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;
@@ -525,7 +533,7 @@ export type GridNode = {
 export type FlexboxNode = {
   id: IdOf;
   type: "flexbox";
-  props: Record<string, never>;
+  props: { href?: string; newTab?: boolean };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;
@@ -571,7 +579,7 @@ export type TabPanelNode = {
 export type TabsNode = {
   id: IdOf;
   type: "tabs";
-  props: Record<string, never>;
+  props: { href?: string; newTab?: boolean };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;

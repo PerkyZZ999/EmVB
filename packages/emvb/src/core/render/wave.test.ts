@@ -170,3 +170,35 @@ describe("background video (W-110)", () => {
     expect(renderPage(blocked, design).html).not.toContain("emvb-bg-video");
   });
 });
+
+describe("link on a container (W-111)", () => {
+  test("a box becomes the link, and a link inside the box blocks it", () => {
+    const open = page([
+      {
+        id: "box00001",
+        type: "container",
+        props: { href: "https://example.com/a" },
+        children: [{ id: "text0001", type: "text", props: { text: "Go" } }],
+      },
+    ]);
+    expect(renderPage(open, design).html).toContain(
+      '<a class="emvb-container" href="https://example.com/a">',
+    );
+    const nested = page([
+      {
+        id: "box00001",
+        type: "container",
+        props: { href: "https://example.com/a" },
+        children: [
+          { id: "link0001", type: "link", props: { text: "Inner", href: "https://example.com/b" } },
+        ],
+      },
+    ]);
+    const html = renderPage(nested, design).html;
+    expect(
+      html.startsWith('<div class="emvb-root emvb-container"><div class="emvb-container">'),
+    ).toBe(true);
+    expect(html).toContain('href="https://example.com/b"');
+    expect(html.match(/<a /g)?.length).toBe(1);
+  });
+});
