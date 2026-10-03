@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./style.ts";
 
-/** 9 since W-104 (D-043): tag default styles. Older documents stay valid. */
+/** 9 since W-104 (D-042): tag default styles. Older documents stay valid. */
 export const DESIGN_SCHEMA_VERSION = 9;
 
 /** Tags a site can give a starting style. Classes and local styles still win. */

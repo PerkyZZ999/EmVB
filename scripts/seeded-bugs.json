@@ -16603,7 +16603,13 @@
           "replace": "false"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "a newer design file"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "a newer design file"
+      ],
       "expect": "\\(fail\\).*a newer design file is refused"
     },
     {
@@ -16617,7 +16623,13 @@
           "replace": "css += block(tag, declarations);"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "a heading default"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "a heading default"
+      ],
       "expect": "\\(fail\\).*a heading default"
     },
     {
@@ -16631,7 +16643,13 @@
           "replace": "if (item.name.startsWith(\"data-emvb\")) continue;"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "data and aria"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "data and aria"
+      ],
       "expect": "\\(fail\\).*data and aria|attribute \\\"onclick\\\" is not allowed"
     },
     {
@@ -16645,7 +16663,13 @@
           "replace": "      tag: \"div\","
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "an item is a details"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "an item is a details"
+      ],
       "expect": "\\(fail\\).*an item is a details"
     },
     {
@@ -16659,7 +16683,13 @@
           "replace": "{ property: \"animation-name\", value: \"none\" },"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "slide, delay"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "slide, delay"
+      ],
       "expect": "\\(fail\\).*slide, delay"
     },
     {
@@ -16673,7 +16703,13 @@
           "replace": "return name ? { tag: \"span\", attrs, children: [\"Author\"] } : undefined;"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "the public page shows the date"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "the public page shows the date"
+      ],
       "expect": "\\(fail\\).*the public page shows the date"
     },
     {
@@ -16687,7 +16723,13 @@
           "replace": "paddingLeft: { css: \"padding-left\", toValue: cssLength },"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "writing direction"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "writing direction"
+      ],
       "expect": "\\(fail\\).*writing direction"
     },
     {
@@ -16701,7 +16743,13 @@
           "replace": "attrs: { src, muted: \"\", loop: \"\", playsinline: \"\", autoplay: \"\" },"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "an allowed video"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "an allowed video"
+      ],
       "expect": "\\(fail\\).*an allowed video"
     },
     {
@@ -16715,7 +16763,13 @@
           "replace": "  if (false) return vnode;"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "a box becomes the link"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/wave.test.ts",
+        "-t",
+        "a box becomes the link"
+      ],
       "expect": "\\(fail\\).*a box becomes the link"
     },
     {
@@ -16729,7 +16783,13 @@
           "replace": "const SECTION_LABEL = \"Not EmVB\";"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/admin/access/access.test.tsx", "-t", "own sidebar section"],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/access.test.tsx",
+        "-t",
+        "own sidebar section"
+      ],
       "expect": "\\(fail\\).*own sidebar section"
     }
   ]
