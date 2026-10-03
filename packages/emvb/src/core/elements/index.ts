@@ -243,7 +243,7 @@ const button: ElementDefinition<ButtonNode> = {
 };
 
 const list: ElementDefinition<ListNode> = {
-  baseCss: ".emvb-list{margin:0;padding-left:1.25em}.emvb-list li{margin:0}",
+  baseCss: ".emvb-list{margin:0;padding-inline-start:1.25em}.emvb-list li{margin:0}",
   defaults: () => ({ type: "list", props: { items: ["Item"] } }),
   descriptor: {
     type: "list",

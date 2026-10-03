@@ -52,7 +52,19 @@ const cases = Object.entries(KEYWORDS).flatMap(([key, { css, values }]) =>
 describe("keyword allowlists (W-091)", () => {
   test.each(cases)("%s (%s) accepts %s", (key, css, value) => {
     expect(styleDeclarations({ [key]: value })).toEqual({
-      declarations: [{ property: css, value }],
+      declarations: [
+        {
+          property: css,
+          value:
+            key === "textAlign"
+              ? value === "left"
+                ? "start"
+                : value === "right"
+                  ? "end"
+                  : value
+              : value,
+        },
+      ],
       rejected: [],
     });
   });

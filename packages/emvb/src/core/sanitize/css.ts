@@ -16,7 +16,6 @@ const JUSTIFY = new Set([
   "space-evenly",
 ]);
 const ALIGN = new Set(["stretch", "flex-start", "flex-end", "center", "baseline"]);
-const TEXT_ALIGN = new Set(["left", "center", "right", "justify"]);
 const TEXT_TRANSFORM = new Set(["none", "uppercase", "lowercase", "capitalize"]);
 const BORDER_STYLE = new Set(["none", "solid", "dashed", "dotted"]);
 const OVERFLOW = new Set(["visible", "hidden", "clip", "scroll", "auto"]);
@@ -177,6 +176,13 @@ function cssEntrance(value: unknown): string | undefined {
   }
   const wait = typeof delay === "number" && delay > 0 ? ` ${delay}ms` : "";
   return `emvb-${type} ${duration}ms ease-out${wait} both`;
+}
+
+function cssTextAlign(value: unknown): string | undefined {
+  if (value === "left") return "start";
+  if (value === "right") return "end";
+  if (value === "center" || value === "justify") return value;
+  return undefined;
 }
 
 const cssGridSpan = (value: unknown): string | undefined =>
@@ -463,25 +469,25 @@ const PROPERTY_MAP: {
   aspectRatio: { css: "aspect-ratio", toValue: cssAspectRatio },
   objectFit: { css: "object-fit", toValue: keyword(OBJECT_FIT) },
   paddingTop: { css: "padding-top", toValue: cssLength },
-  paddingRight: { css: "padding-right", toValue: cssLength },
+  paddingRight: { css: "padding-inline-end", toValue: cssLength },
   paddingBottom: { css: "padding-bottom", toValue: cssLength },
-  paddingLeft: { css: "padding-left", toValue: cssLength },
+  paddingLeft: { css: "padding-inline-start", toValue: cssLength },
   marginTop: { css: "margin-top", toValue: cssLengthOrAuto },
-  marginRight: { css: "margin-right", toValue: cssLengthOrAuto },
+  marginRight: { css: "margin-inline-end", toValue: cssLengthOrAuto },
   marginBottom: { css: "margin-bottom", toValue: cssLengthOrAuto },
-  marginLeft: { css: "margin-left", toValue: cssLengthOrAuto },
+  marginLeft: { css: "margin-inline-start", toValue: cssLengthOrAuto },
   position: { css: "position", toValue: keyword(POSITION) },
   top: { css: "top", toValue: cssOffset },
-  right: { css: "right", toValue: cssOffset },
+  right: { css: "inset-inline-end", toValue: cssOffset },
   bottom: { css: "bottom", toValue: cssOffset },
-  left: { css: "left", toValue: cssOffset },
+  left: { css: "inset-inline-start", toValue: cssOffset },
   zIndex: { css: "z-index", toValue: cssZIndex },
   fontFamily: { css: "font-family", toValue: cssFontFamily },
   fontSize: { css: "font-size", toValue: cssLength },
   fontWeight: { css: "font-weight", toValue: cssFontWeight },
   lineHeight: { css: "line-height", toValue: cssLength },
   letterSpacing: { css: "letter-spacing", toValue: cssLength },
-  textAlign: { css: "text-align", toValue: keyword(TEXT_ALIGN) },
+  textAlign: { css: "text-align", toValue: cssTextAlign },
   textTransform: { css: "text-transform", toValue: keyword(TEXT_TRANSFORM) },
   color: { css: "color", toValue: cssColor },
   backgroundColor: { css: "background-color", toValue: cssColor },

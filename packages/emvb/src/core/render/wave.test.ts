@@ -122,3 +122,24 @@ describe("post date and author (W-108)", () => {
     expect(html).toContain(">Ada<");
   });
 });
+
+describe("logical properties (W-109)", () => {
+  test("left and right padding and alignment follow the writing direction", () => {
+    const layout = page([
+      {
+        id: "text0001",
+        type: "text",
+        props: { text: "Hi" },
+        style: {
+          paddingLeft: { value: 8, unit: "px" },
+          paddingRight: { value: 4, unit: "px" },
+          textAlign: "right",
+        },
+      },
+    ]);
+    const css = renderPage(layout, design).css;
+    expect(css).toContain("padding-inline-start:8px");
+    expect(css).toContain("padding-inline-end:4px");
+    expect(css).toContain("text-align:end");
+  });
+});

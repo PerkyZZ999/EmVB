@@ -24,7 +24,7 @@ const SECTIONS: Record<string, { style: StyleProps; css: string }> = {
       left: "auto",
       zIndex: 5,
     },
-    css: "position:absolute;top:-10px;right:var(--emvb-s-gap);left:auto;z-index:5",
+    css: "position:absolute;top:-10px;inset-inline-end:var(--emvb-s-gap);inset-inline-start:auto;z-index:5",
   },
   effects: {
     style: {

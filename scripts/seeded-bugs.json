@@ -16677,6 +16677,20 @@
       "expect": "\\(fail\\).*the public page shows the date"
     },
     {
+      "id": "W-109/physical-padding",
+      "requirement": "W-109",
+      "description": "left padding stays a physical property",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "paddingLeft: { css: \"padding-inline-start\", toValue: cssLength },",
+          "replace": "paddingLeft: { css: \"padding-left\", toValue: cssLength },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "writing direction"],
+      "expect": "\\(fail\\).*writing direction"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",
