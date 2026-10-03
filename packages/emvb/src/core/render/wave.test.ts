@@ -97,3 +97,28 @@ describe("entrance motion (W-107)", () => {
     expect(css).toContain("@keyframes emvb-scale");
   });
 });
+
+describe("post date and author (W-108)", () => {
+  test("the public page shows the date and the author", () => {
+    const layout = page([
+      { id: "date0001", type: "post-date", props: {} },
+      { id: "auth0001", type: "post-author", props: {} },
+    ]);
+    const html = renderPage(layout, design, {
+      dynamic: {
+        post: {
+          id: "p",
+          slug: "p",
+          title: "Hello",
+          excerpt: "",
+          content: "",
+          permalink: "/posts/p",
+          publishedAt: "2026-10-02T12:00:00.000Z",
+          authorName: "Ada",
+        },
+      },
+    }).html;
+    expect(html).toContain(">Oct 2, 2026<");
+    expect(html).toContain(">Ada<");
+  });
+});

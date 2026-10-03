@@ -58,6 +58,8 @@ const ICONS: Record<string, typeof TextHIcon> = {
   "post-content": NotePencilIcon,
   "post-image": ImageIcon,
   "post-link": LinkSimpleIcon,
+  "post-date": TextTIcon,
+  "post-author": TextTIcon,
   loop: ListBulletsIcon,
 };
 

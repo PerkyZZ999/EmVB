@@ -1,7 +1,9 @@
 import type {
   LoopNode,
   SectionNode,
+  PostAuthorNode,
   PostContentNode,
+  PostDateNode,
   PostExcerptNode,
   PostImageNode,
   PostLinkNode,
@@ -76,6 +78,32 @@ export const postImage: ElementDefinition<PostImageNode> = {
     attrs: { ...attrs, class: `${attrs.class ?? ""} emvb-post-image-missing`.trim() },
     children: ["Featured image"],
   }),
+};
+
+export const postDate: ElementDefinition<PostDateNode> = {
+  baseCss: ".emvb-post-date{margin:0}",
+  defaults: () => ({ type: "post-date", props: {} }),
+  descriptor: {
+    type: "post-date",
+    name: "Post Date",
+    group: "dynamic",
+    defaultTab: "style",
+    fields: [],
+  },
+  build: (_node, attrs) => ({ tag: "time", attrs, children: ["Post date"] }),
+};
+
+export const postAuthor: ElementDefinition<PostAuthorNode> = {
+  baseCss: ".emvb-post-author{margin:0}",
+  defaults: () => ({ type: "post-author", props: {} }),
+  descriptor: {
+    type: "post-author",
+    name: "Post Author",
+    group: "dynamic",
+    defaultTab: "style",
+    fields: [],
+  },
+  build: (_node, attrs) => ({ tag: "span", attrs, children: ["Author"] }),
 };
 
 export const postLink: ElementDefinition<PostLinkNode> = {

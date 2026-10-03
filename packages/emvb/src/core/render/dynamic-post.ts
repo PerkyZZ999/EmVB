@@ -98,6 +98,35 @@ const POST_FIELDS = new Map<string, PostField>([
       },
     },
   ],
+  [
+    "post-date",
+    {
+      placeholder: (attrs) => ({ tag: "time", attrs, children: ["Post date"] }),
+      has: (post) => !!post.publishedAt?.trim(),
+      render: (_node, attrs, post) => {
+        const raw = post.publishedAt?.trim();
+        if (!raw) return undefined;
+        const parsed = Date.parse(raw);
+        const text = Number.isNaN(parsed)
+          ? raw.slice(0, 80)
+          : new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" }).format(
+              new Date(parsed),
+            );
+        return { tag: "time", attrs: { ...attrs, datetime: raw.slice(0, 80) }, children: [text] };
+      },
+    },
+  ],
+  [
+    "post-author",
+    {
+      placeholder: (attrs) => ({ tag: "span", attrs, children: ["Author"] }),
+      has: (post) => !!post.authorName?.trim(),
+      render: (_node, attrs, post) => {
+        const name = post.authorName?.trim();
+        return name ? { tag: "span", attrs, children: [name.slice(0, 200)] } : undefined;
+      },
+    },
+  ],
 ]);
 
 export const isDynamicPostNode = (node: LayoutNode) => POST_FIELDS.has(node.type);

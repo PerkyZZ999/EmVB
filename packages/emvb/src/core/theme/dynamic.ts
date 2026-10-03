@@ -14,6 +14,9 @@ export type ThemePostFields = {
   featuredImageAlt?: string;
   /** Public path, e.g. `/posts/welcome`. */
   permalink: string;
+  /** ISO date or a display string from the post. */
+  publishedAt?: string;
+  authorName?: string;
 };
 
 /** Data passed into `renderPage` when resolving Single Post / Archive / Loop Item. */

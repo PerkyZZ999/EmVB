@@ -48,6 +48,8 @@ export function themePostFromEntry(
   const prefix = options.permalinkPrefix ?? "/posts";
   const permalink = `${prefix.replace(/\/$/, "")}/${slug || id}`;
   const media = mediaFieldsFrom(data["featured_image"]);
+  const publishedAt = firstString(data, ["published_at", "publishedAt", "date"]);
+  const authorName = authorFrom(data);
   return {
     id: id || slug,
     slug: slug || id,
@@ -55,6 +57,28 @@ export function themePostFromEntry(
     excerpt,
     content,
     permalink,
+    ...(publishedAt ? { publishedAt } : {}),
+    ...(authorName ? { authorName } : {}),
     ...media,
   };
+}
+
+function firstString(data: Record<string, unknown>, keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = data[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return undefined;
+}
+
+function authorFrom(data: Record<string, unknown>): string | undefined {
+  const direct = firstString(data, ["author_name", "authorName"]);
+  if (direct) return direct;
+  const author = data["author"];
+  if (typeof author === "string" && author.trim()) return author.trim();
+  if (author && typeof author === "object" && "name" in author) {
+    const name = (author as { name?: unknown }).name;
+    if (typeof name === "string" && name.trim()) return name.trim();
+  }
+  return undefined;
 }

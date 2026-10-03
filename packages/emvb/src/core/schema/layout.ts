@@ -290,6 +290,12 @@ export const PostImageNode = leafNode(
   }),
 );
 
+/** Published date from the post, shown as a `<time>` element (W-108). */
+export const PostDateNode = leafNode("post-date", z.strictObject({}));
+
+/** Author name from the post (W-108). */
+export const PostAuthorNode = leafNode("post-author", z.strictObject({}));
+
 /** Permalink link; empty text uses the post title. */
 export const PostLinkNode = leafNode(
   "post-link",
@@ -348,6 +354,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "post-content",
   "post-image",
   "post-link",
+  "post-date",
+  "post-author",
   "loop",
   "section",
   "div-block",
@@ -415,6 +423,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   PostContentNode,
   PostImageNode,
   PostLinkNode,
+  PostDateNode,
+  PostAuthorNode,
   LoopNode,
   SectionNode,
   AccordionNode,
@@ -443,6 +453,8 @@ export type PostExcerptNode = z.infer<typeof PostExcerptNode>;
 export type PostContentNode = z.infer<typeof PostContentNode>;
 export type PostImageNode = z.infer<typeof PostImageNode>;
 export type PostLinkNode = z.infer<typeof PostLinkNode>;
+export type PostDateNode = z.infer<typeof PostDateNode>;
+export type PostAuthorNode = z.infer<typeof PostAuthorNode>;
 
 type StyleOf = z.infer<typeof StyleProps>;
 type StatesOf = z.infer<typeof StyleStates>;
@@ -673,6 +685,8 @@ export type LayoutNode =
   | PostContentNode
   | PostImageNode
   | PostLinkNode
+  | PostDateNode
+  | PostAuthorNode
   | AccordionNode
   | AccordionItemNode
   | UnknownNode;

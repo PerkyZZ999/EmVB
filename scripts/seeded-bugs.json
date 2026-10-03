@@ -16663,6 +16663,20 @@
       "expect": "\\(fail\\).*slide, delay"
     },
     {
+      "id": "W-108/author-placeholder",
+      "requirement": "W-108",
+      "description": "the author element keeps the placeholder instead of the name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/dynamic-post.ts",
+          "search": "return name ? { tag: \"span\", attrs, children: [name.slice(0, 200)] } : undefined;",
+          "replace": "return name ? { tag: \"span\", attrs, children: [\"Author\"] } : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "the public page shows the date"],
+      "expect": "\\(fail\\).*the public page shows the date"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",
