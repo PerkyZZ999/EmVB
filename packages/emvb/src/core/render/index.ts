@@ -1,4 +1,5 @@
 import { generateCss } from "../css/generate.ts";
+import { cssScopeToken, scopeAttribute, scopeCss, scopeWrapperCss } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import { layoutHasForm } from "../forms/binding.ts";
 import { layoutHasTabs } from "../tabs/presence.ts";
@@ -88,6 +89,8 @@ export function renderPage(
     mode?: RenderMode;
     formDefinitions?: FormDefinitions;
     dynamic?: ThemeDynamicData;
+    /** Public renders: wrap the markup and scope the CSS to it, so sheets can't override each other (W-112). */
+    scope?: string;
   } = {},
 ): RenderResult {
   const mode = opts.mode ?? "public";
@@ -246,17 +249,20 @@ export function renderPage(
     children: [],
   };
   const baseCss = new Map(Object.entries(ELEMENTS).map(([type, def]) => [type, def.baseCss]));
+  const html = serialize(vnode);
+  const css = generateCss({
+    design,
+    usedTypes,
+    baseCss,
+    localRules,
+    previewStates: mode === "editor",
+    backgroundVideo,
+  });
+  const scope = opts.scope === undefined ? undefined : cssScopeToken(opts.scope);
   return {
     vnode,
-    html: serialize(vnode),
-    css: generateCss({
-      design,
-      usedTypes,
-      baseCss,
-      localRules,
-      previewStates: mode === "editor",
-      backgroundVideo,
-    }),
+    html: scope ? `<div ${scopeAttribute(scope)}>${html}</div>` : html,
+    css: scope ? scopeWrapperCss() + scopeCss(css, scope) : css,
     needsFormsRuntime: layoutHasForm(layout),
     needsTabsRuntime: layoutHasTabs(layout),
     warnings,

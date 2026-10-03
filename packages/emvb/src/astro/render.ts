@@ -68,6 +68,7 @@ export function renderStored(
   const { html, css, needsFormsRuntime, needsTabsRuntime } = renderPage(layout, design, {
     formDefinitions,
     dynamic,
+    scope: pageId,
   });
   return { html, css, needsFormsRuntime, needsTabsRuntime };
 }

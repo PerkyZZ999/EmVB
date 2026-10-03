@@ -35,7 +35,7 @@ describe("public design loading (D-013)", () => {
 
 describe("rendering a stored layout (R-031, R-033)", () => {
   test("object and JSON-string layouts render the core output with the design's variables", () => {
-    const expected = renderPage(s1Page(), DESIGN);
+    const expected = renderPage(s1Page(), DESIGN, { scope: "01PAGE" });
     const fromObject = renderStored(s1Page(), DESIGN, "01PAGE");
     expect(fromObject).toEqual({
       html: expected.html,
@@ -45,6 +45,29 @@ describe("rendering a stored layout (R-031, R-033)", () => {
     });
     expect(fromObject.css).toContain("#123456");
     expect(renderStored(JSON.stringify(s1Page()), DESIGN, "01PAGE")).toEqual(fromObject);
+  });
+
+  test("a page's rules reach only its own markup, so a theme part keeps its styles (W-112)", () => {
+    const header = renderStored(s1Page(), DESIGN, "01HEAD");
+    const page = renderStored(s1Page(), DESIGN, "01PAGE");
+    expect(header.html).toStartWith('<div data-emvb-scope="01HEAD">');
+    expect(page.html).toStartWith('<div data-emvb-scope="01PAGE">');
+    const selectors = (css: string) =>
+      [
+        ...css
+          .replace(/@keyframes[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, "")
+          .matchAll(/([^{}@]+)\{/g),
+      ]
+        .map((m) => m[1]?.trim() ?? "")
+        .filter((selector) => selector && !selector.startsWith("@"));
+    const pageSelectors = selectors(page.css).filter((s) => s !== ":where([data-emvb-scope])");
+    expect(pageSelectors.length).toBeGreaterThan(2);
+    for (const list of pageSelectors) {
+      for (const selector of list.split(",")) {
+        expect(selector).toStartWith(':where([data-emvb-scope="01PAGE"]) ');
+      }
+    }
+    expect(page.css).toStartWith(":where([data-emvb-scope]){display:contents}");
   });
 
   test("an unreadable or missing layout renders an empty page", () => {

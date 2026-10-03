@@ -16773,6 +16773,106 @@
       "expect": "\\(fail\\).*a box becomes the link"
     },
     {
+      "id": "W-112/page-not-scoped",
+      "requirement": "W-112",
+      "description": "a public page is rendered without its own style scope, so its base rules override theme parts",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "    scope: pageId,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/render.test.ts",
+        "-t",
+        "reach only its own markup"
+      ],
+      "expect": "\\(fail\\).*reach only its own markup"
+    },
+    {
+      "id": "W-112/media-rules-unscoped",
+      "requirement": "W-112",
+      "description": "rules inside @media blocks (device overrides, hide-on-device) are not scoped",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "out += `${prelude}{${scopeCss(body, token)}}`;",
+          "replace": "out += `${prelude}{${body}}`;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/scope.test.ts",
+        "-t",
+        "inside @media too"
+      ],
+      "expect": "\\(fail\\).*inside @media too"
+    },
+    {
+      "id": "W-112/scope-adds-specificity",
+      "requirement": "W-112",
+      "description": "the scope prefix adds specificity instead of sitting under :where",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "const prefix = `:where([${SCOPE_ATTR}=\"${token}\"]) `;",
+          "replace": "const prefix = `[${SCOPE_ATTR}=\"${token}\"] `;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/scope.test.ts",
+        "-t",
+        "inside @media too"
+      ],
+      "expect": "\\(fail\\).*inside @media too"
+    },
+    {
+      "id": "W-112/comma-split-in-parens",
+      "requirement": "W-112",
+      "description": "selector lists split on commas inside :is() or attribute values",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "    else if (ch === \",\" && depth === 0) {",
+          "replace": "    else if (ch === \",\") {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/scope.test.ts",
+        "-t",
+        "don't split a selector"
+      ],
+      "expect": "\\(fail\\).*don't split a selector"
+    },
+    {
+      "id": "W-112/markup-not-wrapped",
+      "requirement": "W-112",
+      "description": "the scoped CSS is emitted but the markup is not wrapped in its scope",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "html: scope ? `<div ${scopeAttribute(scope)}>${html}</div>` : html,",
+          "replace": "html,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/render.test.ts",
+        "-t",
+        "reach only its own markup"
+      ],
+      "expect": "\\(fail\\).*reach only its own markup"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",
