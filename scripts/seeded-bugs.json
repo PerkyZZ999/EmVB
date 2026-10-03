@@ -7961,7 +7961,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 8;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 9;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -8261,7 +8261,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 8;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 9;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8270,9 +8270,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 8"
+        "layout and design are at version 9"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 8"
+      "expect": "\\(fail\\).*layout and design are at version 9"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8281,7 +8281,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 8;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 9;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8290,9 +8290,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 8"
+        "layout and design are at version 9"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 8"
+      "expect": "\\(fail\\).*layout and design are at version 9"
     },
     {
       "id": "D-032/node-states-refused",
@@ -16591,6 +16591,20 @@
         "Move down"
       ],
       "expect": "\\(fail\\).*Width"
+    },
+    {
+      "id": "W-103/import-accepts-newer",
+      "requirement": "W-103",
+      "description": "a newer design file is imported instead of refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/transfer.ts",
+          "search": "upgraded.reason === \"newer-version\"",
+          "replace": "false"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "a newer design file"],
+      "expect": "\\(fail\\).*a newer design file is refused"
     },
     {
       "id": "nav/emvb-section-label",

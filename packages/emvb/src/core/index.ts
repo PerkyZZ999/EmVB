@@ -148,6 +148,7 @@ export {
   replaceClassId,
 } from "./design/classes.ts";
 export { hasStateStyles, patchClassState, patchStates } from "./design/states.ts";
+export { designFromJson, designToJson, type DesignImport } from "./design/transfer.ts";
 export {
   patchClassDevices,
   patchDeviceStyle,

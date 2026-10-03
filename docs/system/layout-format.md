@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `8` (D-031, D-032, D-034, D-036, D-038, D-039, D-041; v1–v7 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- `schemaVersion` is the literal `9` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042; v1–v8 documents are upgraded on read by steps that change nothing). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -146,7 +146,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],

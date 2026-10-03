@@ -4,6 +4,8 @@ import * as React from "react";
 import {
   clearClassRefs,
   deleteVariable,
+  designFromJson,
+  designToJson,
   findClassUsages,
   findVariableUsages,
   findVariableUsagesInDesign,
@@ -38,6 +40,16 @@ function InlineError({ children }: { children: string }) {
   );
 }
 
+function exportDesign(design: DesignSystem) {
+  const blob = new Blob([designToJson(design)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "emvb-design.json";
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 /**
  * Site styles drawer — Variables Manager and Classes Manager (W-032 / W-071).
  * Elementor v4–inspired workflow on EmVB tokens; saves via CAS (D-013 / D-EV4-03).
@@ -58,6 +70,7 @@ export function SiteStylesDrawer({
     | { kind: "class"; id: string; name: string }
     | null
   >(null);
+  const fileRef = React.useRef<HTMLInputElement>(null);
 
   const save = async (next: DesignSystem) => {
     setError(null);
@@ -78,6 +91,17 @@ export function SiteStylesDrawer({
     }
   };
 
+  const importDesign = async (file: File) => {
+    setError(null);
+    const text = await file.text();
+    const result = designFromJson(text);
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
+    await save(result.design);
+  };
+
   return (
     <div
       className="emvb-panel-body emvb-site-styles"
@@ -96,6 +120,24 @@ export function SiteStylesDrawer({
             Publish styles
           </Button>
         )}
+        <Button type="button" variant="secondary" onClick={() => exportDesign(design)}>
+          Export
+        </Button>
+        <Button type="button" variant="secondary" onClick={() => fileRef.current?.click()}>
+          Import
+        </Button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          data-emvb-design-import=""
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (file) void importDesign(file);
+          }}
+        />
         <Button
           type="button"
           variant="ghost"

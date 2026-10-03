@@ -5,7 +5,7 @@ import { mount, unmount } from "../../../test/dom/mount.ts";
 
 /** Nested 3-deep flex layout used for S2 canvas/public parity (W-023). */
 export const nestedThreeDeep = (): Layout => ({
-  schemaVersion: 8,
+  schemaVersion: 9,
   root: {
     id: "root0001",
     type: "container",

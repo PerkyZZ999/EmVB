@@ -4,7 +4,7 @@ import { generateCss } from "../css/generate.ts";
 import type { Layout } from "./layout.ts";
 
 const page = (style: Record<string, unknown>): Layout => ({
-  schemaVersion: 8,
+  schemaVersion: 9,
   root: {
     id: "root0001",
     type: "container",
@@ -23,7 +23,7 @@ const page = (style: Record<string, unknown>): Layout => ({
 describe("design variables (W-028, R-020)", () => {
   test("fonts, fontSizes and spacings emit namespaced custom properties", () => {
     const design = {
-      schemaVersion: 8 as const,
+      schemaVersion: 9 as const,
       variables: {
         colors: [{ id: "brand", name: "Brand", value: "#112233" }],
         fonts: [{ id: "body", name: "Body", value: "Noto Sans, sans-serif" }],

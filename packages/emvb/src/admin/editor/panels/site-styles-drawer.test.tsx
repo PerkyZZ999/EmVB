@@ -7,7 +7,7 @@ import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 8,
+  schemaVersion: 9,
   root: {
     id: "root0001",
     type: "container",
@@ -277,7 +277,7 @@ describe("deleting a variable from Site styles", () => {
       ],
     };
     const page: Layout = {
-      schemaVersion: 8,
+      schemaVersion: 9,
       root: {
         id: "root0001",
         type: "container",

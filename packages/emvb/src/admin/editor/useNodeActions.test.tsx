@@ -9,7 +9,7 @@ import { useNodeActions } from "./useNodeActions.ts";
 import { cleanup, mount as mountTree } from "../../../test/dom/mount.ts";
 
 const layout: Layout = {
-  schemaVersion: 8,
+  schemaVersion: 9,
   root: container("root0001", [
     heading("head0001", "A"),
     heading("head0002", "B"),

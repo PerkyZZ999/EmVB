@@ -13,7 +13,7 @@ test("a grid publishes equal columns and a column span", async ({ page, request 
     request,
     text,
     {
-      schemaVersion: 8,
+      schemaVersion: 9,
       root: {
         id: "root0001",
         type: "container",

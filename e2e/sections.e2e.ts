@@ -25,7 +25,7 @@ test("a synced section shows the part, not its local heading", async ({ page, re
     request,
     "Section page",
     {
-      schemaVersion: 8,
+      schemaVersion: 9,
       root: {
         id: "root0001",
         type: "container",
