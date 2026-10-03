@@ -54,10 +54,14 @@ test("an admin sets up EmVB, and upgrading an altered schema converges to the sa
 test("the hidden collection has no sidebar link, and Visual pages does", async ({ page }) => {
   await page.goto("/_emdash/admin");
   const nav = page.getByRole("complementary", { name: "Admin navigation" });
-  await expect(nav.getByRole("link", { name: "Visual pages" })).toHaveAttribute(
+  await expect(nav.getByRole("link", { name: "Pages VisualBuilder" })).toHaveAttribute(
     "href",
     "/_emdash/admin/plugins/emvb/pages",
   );
+  const emvb = nav.locator("[data-emvb-nav]");
+  await expect(emvb).toContainText("EmVB");
+  await expect(emvb.getByRole("link", { name: "Pages VisualBuilder" })).toBeVisible();
+  await expect(emvb.getByRole("link", { name: "Theme Builder" })).toBeVisible();
   await expect(nav.locator('a[href*="/content/emvb_pages"]')).toHaveCount(0);
 });
 

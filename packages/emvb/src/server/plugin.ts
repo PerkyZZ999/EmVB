@@ -20,7 +20,7 @@ export function createPlugin() {
     admin: {
       entry: ADMIN_ENTRY,
       pages: [
-        { path: "/pages", label: "Visual pages", icon: "layout" },
+        { path: "/pages", label: "Pages VisualBuilder", icon: "layout" },
         { path: "/theme", label: "Theme Builder", icon: "layout" },
       ],
       fieldWidgets: [{ name: "layout", label: "EmVB page (read-only)", fieldTypes: ["json"] }],

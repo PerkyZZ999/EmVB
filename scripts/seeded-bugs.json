@@ -16591,6 +16591,20 @@
         "Move down"
       ],
       "expect": "\\(fail\\).*Width"
+    },
+    {
+      "id": "nav/emvb-section-label",
+      "requirement": "D-024",
+      "description": "the EmVB sidebar section is mislabeled",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/sidebar-shim.ts",
+          "search": "const SECTION_LABEL = \"EmVB\";",
+          "replace": "const SECTION_LABEL = \"Not EmVB\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/access/access.test.tsx", "-t", "own sidebar section"],
+      "expect": "\\(fail\\).*own sidebar section"
     }
   ]
 }

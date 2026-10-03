@@ -296,7 +296,7 @@ describe("design routes", () => {
 describe("admin declarations (D-024)", () => {
   test("Visual pages and Theme Builder are declared; the editor stays undeclared", () => {
     expect(createPlugin().admin?.pages).toEqual([
-      { path: "/pages", label: "Visual pages", icon: "layout" },
+      { path: "/pages", label: "Pages VisualBuilder", icon: "layout" },
       { path: "/theme", label: "Theme Builder", icon: "layout" },
     ]);
   });

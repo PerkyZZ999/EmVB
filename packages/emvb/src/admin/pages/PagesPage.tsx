@@ -12,7 +12,7 @@ export function PagesPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
           fetcher={fetcher}
           role={role}
           page="pages"
-          title="Visual pages"
+          title="Pages VisualBuilder"
           keptNote="Existing pages are kept."
         >
           <div data-emvb-setup="ready" className="emvb-pages">

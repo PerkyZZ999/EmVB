@@ -17,7 +17,7 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
   return (
     <>
       <div className="emvb-list-header">
-        <h1 className="emvb-page-title">Visual pages</h1>
+        <h1 className="emvb-page-title">Pages VisualBuilder</h1>
         {list.state === "ready" && list.items.length > 0 && newPage}
       </div>
       {list.state === "loading" && <Loader />}

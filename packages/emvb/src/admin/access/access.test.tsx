@@ -5,12 +5,13 @@ import { EditorPage } from "../pages/EditorPage.tsx";
 import { PagesPage } from "../pages/PagesPage.tsx";
 import { RequireEditor } from "./RequireEditor.tsx";
 import { canUseEmvb, readRole } from "./role.ts";
-import { applySidebarShim, installSidebarShim } from "./sidebar-shim.ts";
+import { applySidebarShim, installSidebarShim, placeEmvbSection } from "./sidebar-shim.ts";
 import { mount, settle, unmount } from "../../../test/dom/mount.ts";
 
 const LOWER_ROLES = [10, 20, 30];
 const EMVB_ROLES = [40, 50];
 const PAGES_HREF = "/_emdash/admin/plugins/emvb/pages";
+const THEME_HREF = "/_emdash/admin/plugins/emvb/theme";
 
 function fakeApi(role: number | "fail") {
   const calls: string[] = [];
@@ -87,6 +88,70 @@ describe("sidebar shim (D-024 b)", () => {
     const link = sidebar();
     await installSidebarShim(document, fakeApi("fail").fetcher);
     expect(getComputedStyle(link).display).not.toBe("none");
+  });
+
+  test("gives EmVB its own sidebar section for an editor", async () => {
+    const nav = document.createElement("nav");
+    nav.className = "emdash-sidebar";
+    const group = document.createElement("div");
+    group.setAttribute("data-sidebar", "group");
+    const label = document.createElement("div");
+    label.setAttribute("data-sidebar", "group-label");
+    const labelText = document.createElement("div");
+    labelText.textContent = "Plugins";
+    label.append(labelText);
+    const menu = document.createElement("ul");
+    menu.setAttribute("data-sidebar", "menu");
+    const add = (href: string, text: string) => {
+      const item = document.createElement("li");
+      item.setAttribute("data-sidebar", "menu-item");
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = text;
+      item.append(link);
+      menu.append(item);
+      return link;
+    };
+    add("/_emdash/admin/plugins/forms/forms", "Forms");
+    add(PAGES_HREF, "Pages VisualBuilder");
+    add(THEME_HREF, "Theme Builder");
+    group.append(label, menu);
+    nav.append(group);
+    document.body.append(nav);
+
+    await installSidebarShim(document, fakeApi(40).fetcher);
+    const section = nav.querySelector("[data-emvb-nav]");
+    expect(section?.querySelector("[data-sidebar=group-label]")?.textContent).toBe("EmVB");
+    expect(section?.querySelector(`a[href$="${PAGES_HREF}"]`)?.textContent).toBe(
+      "Pages VisualBuilder",
+    );
+    expect(section?.querySelector(`a[href$="${THEME_HREF}"]`)?.textContent).toBe("Theme Builder");
+    expect(group.querySelector(`a[href$="${PAGES_HREF}"]`)?.outerHTML ?? null).toBeNull();
+    expect(group.querySelector('a[href$="/forms"]')?.textContent).toBe("Forms");
+    placeEmvbSection(document);
+    expect(nav.querySelectorAll("[data-emvb-nav]").length).toBe(1);
+  });
+
+  test("leaves the links under Plugins for a lower role", async () => {
+    const nav = document.createElement("nav");
+    nav.className = "emdash-sidebar";
+    const group = document.createElement("div");
+    group.setAttribute("data-sidebar", "group");
+    const menu = document.createElement("ul");
+    menu.setAttribute("data-sidebar", "menu");
+    const item = document.createElement("li");
+    item.setAttribute("data-sidebar", "menu-item");
+    const link = document.createElement("a");
+    link.href = PAGES_HREF;
+    link.textContent = "Pages VisualBuilder";
+    item.append(link);
+    menu.append(item);
+    group.append(menu);
+    nav.append(group);
+    document.body.append(nav);
+    await installSidebarShim(document, fakeApi(10).fetcher);
+    expect(nav.querySelector("[data-emvb-nav]")?.outerHTML ?? null).toBeNull();
+    expect(group.contains(link)).toBe(true);
   });
 
   test("only targets the EmVB link inside the admin sidebar", async () => {
