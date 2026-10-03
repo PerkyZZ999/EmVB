@@ -33,3 +33,10 @@ test("the style state switcher is 28 px, and the state dot is a 6 px primary dot
   expect(dot).toMatch(/height: 6px;/);
   expect(dot).toMatch(/background: var\(--color-kumo-brand\);/);
 });
+
+test("the Site styles actions wrap on their own row and the title takes the free width (W-115)", () => {
+  const actions = rule(".emvb-site-styles-actions");
+  expect(actions).toMatch(/display: flex;/);
+  expect(actions).toMatch(/flex-wrap: wrap;/);
+  expect(rule(".emvb-site-styles-titles")).toMatch(/flex: 1 1 auto;/);
+});

@@ -56,6 +56,34 @@ describe("SiteStylesDrawer (W-032)", () => {
     expect(calls).toEqual(["publish"]);
   });
 
+  test("the header holds the title and Close; the actions sit in their own row (W-115)", async () => {
+    await mount(
+      <SiteStylesDrawer
+        design={emptyDesign()}
+        layout={layout}
+        onDesignChange={async () => undefined}
+        unpublished
+        onPublishStyles={async () => undefined}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    const labels = (selector: string) =>
+      [...document.querySelectorAll(`${selector} button`)].map(
+        (button) => button.getAttribute("aria-label") ?? button.textContent,
+      );
+    expect(labels(".emvb-site-styles-head")).toEqual(["Close site styles"]);
+    const actions = document.querySelector("[data-emvb-site-styles-actions]");
+    expect(actions?.getAttribute("role")).toBe("group");
+    expect(actions?.getAttribute("aria-label")).toBe("Site styles actions");
+    expect(actions?.parentElement?.classList.contains("emvb-site-styles")).toBe(true);
+    expect(labels("[data-emvb-site-styles-actions]")).toEqual([
+      "Publish styles",
+      "Export",
+      "Import",
+    ]);
+  });
+
   test("Variables tab is default with footer; Classes tab lists usage counts", async () => {
     const design: DesignSystem = {
       ...emptyDesign(),

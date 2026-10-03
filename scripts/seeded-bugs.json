@@ -17055,6 +17055,71 @@
       "expect": "✘.*\\[node\\].*bordered default look"
     },
     {
+      "id": "W-115/actions-in-head",
+      "requirement": "W-115",
+      "description": "Publish styles, Export and Import sit in the header row next to the title again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "          onClick={onClose}\n        />\n      </div>\n      {/* W-115",
+          "replace": "          onClick={onClose}\n        />\n      {/* W-115"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "      </div>\n      <Tabs",
+          "replace": "      </div>\n      </div>\n      <Tabs"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "their own row"
+      ],
+      "expect": "\\(fail\\).*their own row"
+    },
+    {
+      "id": "W-115/actions-unlabelled",
+      "requirement": "W-115",
+      "description": "the actions row is not a labelled group",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "        aria-label=\"Site styles actions\"\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "their own row"
+      ],
+      "expect": "\\(fail\\).*their own row"
+    },
+    {
+      "id": "W-115/actions-dont-wrap",
+      "requirement": "W-115",
+      "description": "the actions row does not wrap",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-site-styles-actions { display: flex; flex-wrap: wrap;",
+          "replace": ".emvb-site-styles-actions { display: flex;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "wrap on their own row"
+      ],
+      "expect": "\\(fail\\).*wrap on their own row"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",

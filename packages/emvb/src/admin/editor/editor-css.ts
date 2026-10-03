@@ -407,7 +407,8 @@ export const EDITOR_CSS = `${UI_CSS}
 
 .emvb-site-styles { display: flex; flex-direction: column; gap: 8px; min-height: 0; height: 100%; }
 .emvb-site-styles-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.emvb-site-styles-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.emvb-site-styles-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.emvb-site-styles-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .emvb-site-styles-subtitle { margin: 0; font-size: 11px; color: var(--text-color-kumo-subtle); }
 .emvb-site-styles-body { display: flex; flex-direction: column; gap: 10px; overflow: auto; min-height: 0; flex: 1 1 auto; }
 .emvb-site-styles-footer { margin-top: auto; }

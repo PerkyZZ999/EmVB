@@ -124,15 +124,37 @@ export function SiteStylesDrawer({
                 : "Defaults"}
           </p>
         </div>
+        <Button
+          type="button"
+          variant="ghost"
+          shape="square"
+          className="emvb-icon-btn"
+          aria-label="Close site styles"
+          icon={<XIcon aria-hidden="true" />}
+          onClick={onClose}
+        />
+      </div>
+      {/* W-115: the actions get their own wrapping row, so the title is never squeezed. */}
+      <div
+        className="emvb-site-styles-actions"
+        role="group"
+        aria-label="Site styles actions"
+        data-emvb-site-styles-actions=""
+      >
         {unpublished && (
-          <Button type="button" variant="primary" onClick={() => void publish()}>
+          <Button type="button" variant="primary" size="sm" onClick={() => void publish()}>
             Publish styles
           </Button>
         )}
-        <Button type="button" variant="secondary" onClick={() => exportDesign(design)}>
+        <Button type="button" variant="secondary" size="sm" onClick={() => exportDesign(design)}>
           Export
         </Button>
-        <Button type="button" variant="secondary" onClick={() => fileRef.current?.click()}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() => fileRef.current?.click()}
+        >
           Import
         </Button>
         <input
@@ -146,15 +168,6 @@ export function SiteStylesDrawer({
             event.target.value = "";
             if (file) void importDesign(file);
           }}
-        />
-        <Button
-          type="button"
-          variant="ghost"
-          shape="square"
-          className="emvb-icon-btn"
-          aria-label="Close site styles"
-          icon={<XIcon aria-hidden="true" />}
-          onClick={onClose}
         />
       </div>
       <Tabs
