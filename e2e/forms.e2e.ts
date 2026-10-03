@@ -46,3 +46,44 @@ test("visitor can fill and submit a published EmVB form", async ({ page, request
   await submitAsVisitor(page, `ui-${slug}@example.com`, "hello from browser");
   await expectSubmission(request, form.id, `ui-${slug}@example.com`);
 });
+
+test("published form fields have a bordered default look that a field style and the theme can override (W-114)", async ({
+  page,
+  request,
+}) => {
+  const slug = `form-look-${unique()}`;
+  const form = await createContactForm(request, slug);
+  const layout = formPageLayout(form.id);
+  const field = layout.root.children[0]?.children[0] as { style?: object } | undefined;
+  if (field) field.style = { color: "#123456", fontSize: { value: 20, unit: "px" } };
+  const pageId = await createPage(request, "Form look", layout, `page-${slug}`);
+  await publishPage(request, pageId);
+
+  await page.goto(`/page-${slug}`);
+  const look = (selector: string) =>
+    page.locator(selector).evaluate((el) => {
+      const style = getComputedStyle(el);
+      const box = el.getBoundingClientRect();
+      const parent = (el.parentElement as HTMLElement).getBoundingClientRect();
+      return {
+        border: style.borderTopWidth,
+        radius: style.borderTopLeftRadius,
+        padding: style.paddingLeft !== "0px",
+        color: style.color,
+        fontSize: style.fontSize,
+        fillsField: Math.abs(box.width - parent.width) < 1,
+      };
+    });
+  expect(await look('input[name="email"]')).toEqual({
+    border: "1px",
+    radius: "6px",
+    padding: true,
+    color: "rgb(18, 52, 86)",
+    fontSize: "20px",
+    fillsField: true,
+  });
+  expect((await look('textarea[name="note"]')).radius).toBe("6px");
+
+  await page.addStyleTag({ content: "input{border-radius:0}" });
+  expect((await look('input[name="email"]')).radius).toBe("0px");
+});

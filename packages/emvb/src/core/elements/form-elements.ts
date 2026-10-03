@@ -28,9 +28,28 @@ const TEXT_FIELDS: ElementDescriptor["fields"] = [
   { key: "placeholder", kind: "text", label: "Placeholder", optional: true },
 ];
 
+/**
+ * Default field look (W-114). Every selector sits inside `:where`, so it has no specificity:
+ * a class, a field's own style or the host theme's `input` rule wins. Colours come from
+ * `currentColor`, so the fields follow the text colour of the page, the form or the field, and
+ * the field's typography reaches the control through `font: inherit`.
+ */
+const FORM_FIELD_CSS =
+  ":where(.emvb-form .emvb-form-label){font-weight:600}" +
+  ":where(.emvb-form .ec-form-input){box-sizing:border-box;width:100%;max-width:100%;margin:0;padding:.625em .75em;font:inherit;color:inherit;background-color:transparent;border:1px solid rgba(128,128,128,.5);border:1px solid color-mix(in srgb,currentColor 30%,transparent);border-radius:6px}" +
+  ":where(.emvb-form textarea.ec-form-input){min-height:7.5em;resize:vertical}" +
+  ":where(.emvb-form .ec-form-input)::placeholder{color:inherit;opacity:.55}" +
+  ":where(.emvb-form .ec-form-input:focus-visible){outline:2px solid currentColor;outline-offset:1px;border-color:currentColor}" +
+  ':where(.emvb-form .ec-form-input[aria-invalid="true"]){border-color:#b3261e}' +
+  ':where(.emvb-form input[type="checkbox"],.emvb-form input[type="radio"]){width:1.1em;height:1.1em;margin:0;accent-color:currentColor}' +
+  ":where(.emvb-form .emvb-form-checkbox-label,.emvb-form .emvb-form-radio-label){display:inline-flex;align-items:center;gap:.5em}" +
+  ":where(.emvb-form .emvb-radio-group){display:flex;flex-direction:column;gap:6px;margin:0;padding:0;border:0}" +
+  ":where(.emvb-form .ec-form-error){font-size:.875em;color:#b3261e}";
+
 export const form: ElementDefinition<FormNode> = {
   baseCss:
-    ".emvb-form{display:flex;flex-direction:column;gap:12px;min-width:0}.emvb-form-unbound{min-height:48px;padding:12px;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}.ec-form-hp{position:absolute;left:-9999px}",
+    ".emvb-form{display:flex;flex-direction:column;gap:12px;min-width:0}.emvb-form-unbound{min-height:48px;padding:12px;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}.ec-form-hp{position:absolute;left:-9999px}" +
+    FORM_FIELD_CSS,
   defaults: () => ({ type: "form", props: { formId: "" }, children: [] }),
   descriptor: fieldDescriptor("form", "Form", [
     { key: "formId", kind: "text", label: "Form id", message: "Paste a forms-plugin form id." },

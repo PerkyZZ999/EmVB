@@ -16973,6 +16973,88 @@
       "expect": "\\(fail\\).*Decoration sets an underline"
     },
     {
+      "id": "W-114/fields-unstyled",
+      "requirement": "W-114",
+      "description": "the form's base CSS leaves out the default field look",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "left:-9999px}\" +\n    FORM_FIELD_CSS,",
+          "replace": "left:-9999px}\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/form-fields-style.test.ts",
+        "-t",
+        "get a border, padding"
+      ],
+      "expect": "\\(fail\\).*get a border, padding"
+    },
+    {
+      "id": "W-114/field-font-not-inherited",
+      "requirement": "W-114",
+      "description": "a control keeps the browser font and colour instead of the field's",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "margin:0;padding:.625em .75em;font:inherit;color:inherit;",
+          "replace": "margin:0;padding:.625em .75em;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/form-fields-style.test.ts",
+        "-t",
+        "get a border, padding"
+      ],
+      "expect": "\\(fail\\).*get a border, padding"
+    },
+    {
+      "id": "W-114/field-rule-specific",
+      "requirement": "W-114",
+      "description": "a field rule has specificity, so the theme can't override it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "\":where(.emvb-form .ec-form-input:focus-visible){",
+          "replace": "\".emvb-form .ec-form-input:focus-visible{"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/form-fields-style.test.ts",
+        "-t",
+        "no specificity"
+      ],
+      "expect": "\\(fail\\).*no specificity"
+    },
+    {
+      "id": "W-114/e2e-field-look",
+      "requirement": "W-114",
+      "description": "published inputs have no border radius",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "color-mix(in srgb,currentColor 30%,transparent);border-radius:6px}",
+          "replace": "color-mix(in srgb,currentColor 30%,transparent)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/forms.e2e.ts",
+        "--project=node",
+        "-g",
+        "bordered default look"
+      ],
+      "expect": "✘.*\\[node\\].*bordered default look"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",
