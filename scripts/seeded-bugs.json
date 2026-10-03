@@ -16607,6 +16607,20 @@
       "expect": "\\(fail\\).*a newer design file is refused"
     },
     {
+      "id": "W-104/tag-default-beats-class",
+      "requirement": "W-104",
+      "description": "tag defaults are emitted as plain tags, so they can beat a class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "css += block(`:where(.emvb-root) ${tag}`, declarations);",
+          "replace": "css += block(tag, declarations);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/wave.test.ts", "-t", "a heading default"],
+      "expect": "\\(fail\\).*a heading default"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",

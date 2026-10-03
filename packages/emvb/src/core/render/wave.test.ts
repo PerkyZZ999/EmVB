@@ -1,6 +1,14 @@
 import { describe, expect, test } from "bun:test";
+import { container } from "../../../test/fixtures/layouts.ts";
 import { emptyDesign, type DesignSystem } from "../schema/design.ts";
+import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { designFromJson, designToJson } from "../design/transfer.ts";
+import { renderPage } from "./index.ts";
+
+const page = (children: LayoutNode[], root: Partial<LayoutNode> = {}): Layout => ({
+  schemaVersion: 9,
+  root: { ...container("root0001", children), ...root } as Layout["root"],
+});
 
 describe("design transfer (W-103)", () => {
   test("export then import keeps variables and classes", () => {
@@ -18,5 +26,18 @@ describe("design transfer (W-103)", () => {
     const result = designFromJson(JSON.stringify({ ...emptyDesign(), schemaVersion: 10 }));
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.message).toBe("That design was saved by a newer EmVB.");
+  });
+});
+
+describe("tag defaults (W-104)", () => {
+  test("a heading default is a tag rule that a class still outranks", () => {
+    const styled: DesignSystem = {
+      ...emptyDesign(),
+      defaults: { h1: { color: "#111111" } },
+      classes: [{ id: "card", name: "Card", style: { color: "#222222" } }],
+    };
+    const css = renderPage(page([]), styled).css;
+    expect(css).toContain(":where(.emvb-root) h1{color:#111111}");
+    expect(css.indexOf(":where(.emvb-root) h1")).toBeLessThan(css.indexOf(".emvb-k-card"));
   });
 });

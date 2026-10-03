@@ -102,11 +102,13 @@ export {
 } from "./validate.ts";
 export {
   DESIGN_SCHEMA_VERSION,
+  DEFAULT_STYLE_TAGS,
   DesignSystem,
   ColorVariable,
   emptyDesign,
   FontVariable,
   LengthVariable,
+  type DefaultStyleTag,
 } from "./schema/design.ts";
 export {
   findVariableUsages,

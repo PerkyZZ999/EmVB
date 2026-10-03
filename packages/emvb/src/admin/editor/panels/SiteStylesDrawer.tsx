@@ -1,4 +1,4 @@
-import { Button, Tabs } from "@cloudflare/kumo";
+import { Button, Select, Tabs } from "@cloudflare/kumo";
 import { WarningCircleIcon, XIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
@@ -10,13 +10,18 @@ import {
   findVariableUsages,
   findVariableUsagesInDesign,
   removeVariable,
+  DEFAULT_STYLE_TAGS,
+  type DefaultStyleTag,
   type DesignSystem,
   type Layout,
+  type StyleProps,
   type VariableKind,
 } from "../../../core/index.ts";
 import { BUTTON, SOLID_DESTRUCTIVE } from "../../ui.ts";
 import { ClassesSection } from "./ClassesSection.tsx";
 import { stopEditorShortcuts } from "./settings/ClassChip.tsx";
+import { StyleRow } from "./settings/StyleRow.tsx";
+import { FIELD } from "../../ui.ts";
 import { VariableSection } from "./VariableSection.tsx";
 
 const STYLE_NOTE = "Style changes stay unpublished until you publish styles.";
@@ -63,7 +68,7 @@ export function SiteStylesDrawer({
   onLayoutChange,
   onClose,
 }: Props) {
-  const [tab, setTab] = React.useState<"variables" | "classes">("variables");
+  const [tab, setTab] = React.useState<"variables" | "classes" | "defaults">("variables");
   const [error, setError] = React.useState<string | null>(null);
   const [confirm, setConfirm] = React.useState<
     | { kind: "variable"; variableKind: VariableKind; id: string; name: string }
@@ -112,7 +117,11 @@ export function SiteStylesDrawer({
         <div className="emvb-site-styles-titles">
           <h2 className="emvb-panel-title">Site styles</h2>
           <p className="emvb-helper emvb-site-styles-subtitle" data-emvb-manager-label="">
-            {tab === "variables" ? "Variables Manager" : "Classes Manager"}
+            {tab === "variables"
+              ? "Variables Manager"
+              : tab === "classes"
+                ? "Classes Manager"
+                : "Defaults"}
           </p>
         </div>
         {unpublished && (
@@ -154,9 +163,12 @@ export function SiteStylesDrawer({
         tabs={[
           { value: "variables", label: "Variables" },
           { value: "classes", label: "Classes" },
+          { value: "defaults", label: "Defaults" },
         ]}
         value={tab}
-        onValueChange={(value) => setTab(value === "classes" ? "classes" : "variables")}
+        onValueChange={(value) =>
+          setTab(value === "classes" ? "classes" : value === "defaults" ? "defaults" : "variables")
+        }
       />
       {error && <InlineError>{error}</InlineError>}
       {tab === "variables" && (
@@ -211,6 +223,11 @@ export function SiteStylesDrawer({
             onSave={save}
             onAskDelete={(id, name) => setConfirm({ kind: "class", id, name })}
           />
+        </div>
+      )}
+      {tab === "defaults" && (
+        <div data-emvb-site-tab="defaults" className="emvb-site-styles-body">
+          <DefaultsSection design={design} onSave={save} />
         </div>
       )}
       <p className="emvb-helper emvb-site-styles-footer">{STYLE_NOTE}</p>
@@ -305,5 +322,58 @@ function DeleteConfirm({
         </Button>
       </div>
     </div>
+  );
+}
+
+const DEFAULT_KEYS = ["color", "fontSize", "fontWeight", "textAlign"] as const;
+
+function DefaultsSection({
+  design,
+  onSave,
+}: {
+  design: DesignSystem;
+  onSave: (design: DesignSystem) => Promise<void>;
+}) {
+  const [tag, setTag] = React.useState<DefaultStyleTag>("p");
+  const style = design.defaults?.[tag];
+  const patch = (partial: Partial<StyleProps>) => {
+    const next: StyleProps = { ...style, ...partial };
+    for (const key of Object.keys(partial) as (keyof StyleProps)[]) {
+      if (partial[key] === undefined) delete next[key];
+    }
+    const defaults = {
+      ...design.defaults,
+      [tag]: Object.keys(next).length > 0 ? next : undefined,
+    };
+    void onSave({ ...design, defaults });
+  };
+  return (
+    <>
+      <p className="emvb-helper">
+        Elements of this tag start here. A class or a local style still wins.
+      </p>
+      <Select
+        label="Tag"
+        className={FIELD}
+        value={tag}
+        onValueChange={(value) => setTag(value as DefaultStyleTag)}
+      >
+        {DEFAULT_STYLE_TAGS.map((item) => (
+          <Select.Option key={item} value={item}>
+            {item}
+          </Select.Option>
+        ))}
+      </Select>
+      {DEFAULT_KEYS.map((key) => (
+        <StyleRow
+          key={`${tag}:${key}`}
+          styleKey={key}
+          style={style}
+          design={design}
+          onPatch={patch}
+          onDesignChange={onSave}
+        />
+      ))}
+    </>
   );
 }

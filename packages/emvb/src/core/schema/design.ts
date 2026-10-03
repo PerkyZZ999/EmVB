@@ -1,8 +1,13 @@
 import { z } from "zod";
 import { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./style.ts";
 
-/** 4 since W-094 (D-034). Class styles may use the same style keys as a node. */
+/** 9 since W-104 (D-043): tag default styles. Older documents stay valid. */
 export const DESIGN_SCHEMA_VERSION = 9;
+
+/** Tags a site can give a starting style. Classes and local styles still win. */
+export const DEFAULT_STYLE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "a", "button"] as const;
+
+export type DefaultStyleTag = (typeof DEFAULT_STYLE_TAGS)[number];
 
 const VariableId = z
   .string()
@@ -55,6 +60,20 @@ export const DesignSystem = z.strictObject({
     spacings: z.array(LengthVariable).max(100).optional(),
   }),
   classes: z.array(StyleClass).max(100).optional(),
+  /** Starting styles for HTML tags, emitted under `:where(.emvb-root)` so a class still wins. */
+  defaults: z
+    .strictObject({
+      h1: StyleProps.optional(),
+      h2: StyleProps.optional(),
+      h3: StyleProps.optional(),
+      h4: StyleProps.optional(),
+      h5: StyleProps.optional(),
+      h6: StyleProps.optional(),
+      p: StyleProps.optional(),
+      a: StyleProps.optional(),
+      button: StyleProps.optional(),
+    })
+    .optional(),
 });
 
 export type ColorVariable = z.infer<typeof ColorVariable>;

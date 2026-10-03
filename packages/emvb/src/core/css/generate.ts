@@ -1,4 +1,5 @@
 import type { DesignSystem } from "../schema/design.ts";
+import { DEFAULT_STYLE_TAGS } from "../schema/design.ts";
 import {
   colorVariableName,
   fontSizeVariableName,
@@ -43,6 +44,20 @@ const block = (selector: string, declarations: Declaration[]) =>
   declarations.length === 0
     ? ""
     : `${selector}{${declarations.map((d) => `${d.property}:${d.value}`).join(";")}}`;
+
+/** Tag defaults sit under `:where` so a class (0,1,0) still beats the tag (0,0,1). */
+function tagDefaultCss(design: DesignSystem): string {
+  const defaults = design.defaults;
+  if (!defaults) return "";
+  let css = "";
+  for (const tag of DEFAULT_STYLE_TAGS) {
+    const style = defaults[tag];
+    if (!style) continue;
+    const { declarations } = styleDeclarations(style);
+    css += block(`:where(.emvb-root) ${tag}`, declarations);
+  }
+  return css;
+}
 
 const safe = (value: string) => (isSafeCssValue(value) ? value : undefined);
 
@@ -160,6 +175,7 @@ export function generateCss({
       ? "@keyframes emvb-fade{from{opacity:0}to{opacity:1}}@keyframes emvb-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes emvb-fade-down{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}"
       : "",
     block(".emvb-root", variables),
+    tagDefaultCss(design),
     ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? ""),
     ...classes,
     ...locals,
