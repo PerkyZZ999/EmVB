@@ -17,6 +17,7 @@ const JUSTIFY = new Set([
 ]);
 const ALIGN = new Set(["stretch", "flex-start", "flex-end", "center", "baseline"]);
 const TEXT_TRANSFORM = new Set(["none", "uppercase", "lowercase", "capitalize"]);
+const TEXT_DECORATION = new Set(["none", "underline", "overline", "line-through"]);
 const BORDER_STYLE = new Set(["none", "solid", "dashed", "dotted"]);
 const OVERFLOW = new Set(["visible", "hidden", "clip", "scroll", "auto"]);
 const OBJECT_FIT = new Set(["fill", "contain", "cover", "none", "scale-down"]);
@@ -490,6 +491,7 @@ const PROPERTY_MAP: {
   letterSpacing: { css: "letter-spacing", toValue: cssLength },
   textAlign: { css: "text-align", toValue: cssTextAlign },
   textTransform: { css: "text-transform", toValue: keyword(TEXT_TRANSFORM) },
+  textDecoration: { css: "text-decoration", toValue: keyword(TEXT_DECORATION) },
   color: { css: "color", toValue: cssColor },
   backgroundColor: { css: "background-color", toValue: cssColor },
   backgroundImage: { css: "background-image", toValue: cssBackgroundImage },

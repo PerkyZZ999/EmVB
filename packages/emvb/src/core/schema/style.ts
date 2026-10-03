@@ -134,6 +134,8 @@ export const StyleProps = z.strictObject({
   letterSpacing: LengthValue.optional(),
   textAlign: z.enum(["left", "center", "right", "justify"]).optional(),
   textTransform: z.enum(["none", "uppercase", "lowercase", "capitalize"]).optional(),
+  /** W-113. A button sets `none` in its base CSS, so it is not underlined unless a style says so. */
+  textDecoration: z.enum(["none", "underline", "overline", "line-through"]).optional(),
   color: ColorValue.optional(),
   backgroundColor: ColorValue.optional(),
   /** http(s) or a site path. Spaces, quotes and parentheses are refused so the URL can sit inside `url("")`. */

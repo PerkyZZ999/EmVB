@@ -218,7 +218,7 @@ const link: ElementDefinition<LinkNode> = {
 
 const button: ElementDefinition<ButtonNode> = {
   baseCss:
-    ".emvb-button{display:inline-flex;align-items:center;justify-content:center;margin:0;font:inherit;cursor:pointer}",
+    ".emvb-button{display:inline-flex;align-items:center;justify-content:center;margin:0;font:inherit;text-decoration:none;cursor:pointer}",
   defaults: () => ({ type: "button", props: { text: "Button" } }),
   descriptor: {
     type: "button",

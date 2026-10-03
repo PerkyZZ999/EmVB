@@ -100,6 +100,22 @@ async function commitText(field: HTMLInputElement | null, text: string) {
 
 const helper = () => document.querySelector("[data-emvb-state-help]")?.textContent ?? null;
 
+async function choose(label: string, option: string) {
+  const trigger = document.querySelector<HTMLElement>(`[role="combobox"][aria-label="${label}"]`);
+  await act(async () => {
+    trigger?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    trigger?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    trigger?.click();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  });
+  const options = [...document.querySelectorAll<HTMLElement>('[role="option"]')];
+  await act(async () => {
+    options.find((o) => o.textContent === option)?.click();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  });
+  return options.map((o) => o.textContent);
+}
+
 describe("style state switcher (W-089)", () => {
   test("Normal | Hover | Focus | Active, named Style state, starting at Normal", async () => {
     await panel();
@@ -159,6 +175,20 @@ describe("style state switcher (W-089)", () => {
     expect(count()).toBe(" · 2");
     await pick("Focus");
     expect(count()).toBeUndefined();
+  });
+
+  test("Typography's Decoration sets an underline for Hover only (W-113)", async () => {
+    open("typography");
+    await panel();
+    await pick("Hover");
+    expect(await choose("Decoration", "Underline")).toEqual([
+      "None",
+      "Underline",
+      "Overline",
+      "Line-through",
+    ]);
+    expect(nodes.at(-1)?.style).toEqual(baseButton.style);
+    expect(nodes.at(-1)?.states).toEqual({ hover: { textDecoration: "underline" } });
   });
 
   test("Transition is offered only in Normal", async () => {

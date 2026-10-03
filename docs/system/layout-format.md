@@ -95,6 +95,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `fontWeight` | `400`–`700`, `normal`, `bold` | `font-weight` |
 | `textAlign` | `left`, `center`, `right`, `justify` | `text-align` |
 | `textTransform` | `none`, `uppercase`, `lowercase`, `capitalize` | `text-transform` |
+| `textDecoration` | `none`, `underline`, `overline`, `line-through` | `text-decoration` (W-113; a button sets `none` in its base CSS) |
 | `color` / `backgroundColor` / `borderColor` | colour | matching colour properties |
 | `backgroundImage` (W-094) | http(s) URL or a site path, no spaces, quotes or parentheses | `background-image` as `url("…")`. With no size, position or repeat: `cover`, `center`, `no-repeat` |
 | `backgroundSize` | `auto`, `cover`, `contain` | `background-size` (the image layer) |

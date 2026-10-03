@@ -162,6 +162,7 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "letterSpacing",
     "textAlign",
     "textTransform",
+    "textDecoration",
     "color",
   ],
   background: [
@@ -264,6 +265,7 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   letterSpacing: "Letter spacing",
   textAlign: "Align text",
   textTransform: "Transform",
+  textDecoration: "Decoration",
   color: "Color",
   backgroundColor: "Background",
   backgroundImage: "Image",

@@ -24,6 +24,10 @@ const KEYWORDS: Record<string, { css: string; values: string[] }> = {
     css: "text-transform",
     values: ["none", "uppercase", "lowercase", "capitalize"],
   },
+  textDecoration: {
+    css: "text-decoration",
+    values: ["none", "underline", "overline", "line-through"],
+  },
   borderStyle: { css: "border-style", values: ["none", "solid", "dashed", "dotted"] },
   overflow: { css: "overflow", values: ["visible", "hidden", "clip", "scroll", "auto"] },
   objectFit: { css: "object-fit", values: ["fill", "contain", "cover", "none", "scale-down"] },

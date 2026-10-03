@@ -87,6 +87,12 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "lowercase", label: "Lowercase" },
     { value: "capitalize", label: "Capitalize" },
   ],
+  textDecoration: [
+    { value: "none", label: "None" },
+    { value: "underline", label: "Underline" },
+    { value: "overline", label: "Overline" },
+    { value: "line-through", label: "Line-through" },
+  ],
   position: [
     { value: "static", label: "Static" },
     { value: "relative", label: "Relative" },

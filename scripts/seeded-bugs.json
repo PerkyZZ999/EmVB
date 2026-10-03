@@ -16873,6 +16873,106 @@
       "expect": "\\(fail\\).*reach only its own markup"
     },
     {
+      "id": "W-113/button-underlined",
+      "requirement": "W-113",
+      "description": "a button link keeps the browser underline by default",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "font:inherit;text-decoration:none;cursor:pointer}",
+          "replace": "font:inherit;cursor:pointer}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/text-decoration.test.ts",
+        "-t",
+        "not underlined by default"
+      ],
+      "expect": "\\(fail\\).*not underlined by default"
+    },
+    {
+      "id": "W-113/keyword-dropped",
+      "requirement": "W-113",
+      "description": "the sanitizer drops line-through",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const TEXT_DECORATION = new Set([\"none\", \"underline\", \"overline\", \"line-through\"]);",
+          "replace": "const TEXT_DECORATION = new Set([\"none\", \"underline\", \"overline\"]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/css-keywords.test.ts",
+        "-t",
+        "textDecoration"
+      ],
+      "expect": "\\(fail\\).*textDecoration"
+    },
+    {
+      "id": "W-113/schema-refuses",
+      "requirement": "W-113",
+      "description": "the style schema has no textDecoration",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "  textDecoration: z.enum([\"none\", \"underline\", \"overline\", \"line-through\"]).optional(),\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/text-decoration.test.ts",
+        "-t",
+        "the schema takes"
+      ],
+      "expect": "\\(fail\\).*the schema takes"
+    },
+    {
+      "id": "W-113/no-typography-row",
+      "requirement": "W-113",
+      "description": "Typography offers no Decoration control",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "    \"textTransform\",\n    \"textDecoration\",\n",
+          "replace": "    \"textTransform\",\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "Decoration sets an underline"
+      ],
+      "expect": "\\(fail\\).*Decoration sets an underline"
+    },
+    {
+      "id": "W-113/option-missing",
+      "requirement": "W-113",
+      "description": "the Decoration select leaves out Line-through",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "    { value: \"line-through\", label: \"Line-through\" },\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/state-styles.test.tsx",
+        "-t",
+        "Decoration sets an underline"
+      ],
+      "expect": "\\(fail\\).*Decoration sets an underline"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",

@@ -41,6 +41,7 @@ describe("style property map (W-017, R-012)", () => {
     ["letterSpacing", len(1), "letter-spacing", "1px"],
     ["textAlign", "center", "text-align", "center"],
     ["textTransform", "uppercase", "text-transform", "uppercase"],
+    ["textDecoration", "line-through", "text-decoration", "line-through"],
     ["color", "#aabbcc", "color", "#aabbcc"],
     ["backgroundColor", { var: "brand" }, "background-color", "var(--emvb-c-brand)"],
     ["borderWidth", len(1), "border-width", "1px"],
