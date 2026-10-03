@@ -193,9 +193,10 @@ function EditorApp({
         ? renderPage(state.page.layout, state.design, {
             mode: "editor",
             dynamic: Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : undefined,
+            previewDevice: device,
           })
         : null,
-    [state.page.layout, state.design, sectionTemplates],
+    [state.page.layout, state.design, sectionTemplates, device],
   );
   const selectedNode =
     state.selectedId && state.page.layout ? findNode(state.page.layout, state.selectedId) : null;

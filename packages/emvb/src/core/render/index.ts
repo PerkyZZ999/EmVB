@@ -25,6 +25,7 @@ import { STYLE_STATES } from "../schema/state-names.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import { resolvePostForRender, type ThemeDynamicData } from "../theme/dynamic.ts";
 import type { FormDefinitions } from "../forms/definition.ts";
+import type { PopupDevice } from "../theme/popup-rules.ts";
 import type { RenderContext, RenderMode } from "./context.ts";
 import { isDynamicPostNode, renderDynamicPost } from "./dynamic-post.ts";
 import { renderForm, withFieldOptions } from "./form.ts";
@@ -91,6 +92,8 @@ export function renderPage(
     dynamic?: ThemeDynamicData;
     /** Public renders: wrap the markup and scope the CSS to it, so sheets can't override each other (W-112). */
     scope?: string;
+    /** Editor canvas: device rules follow this device, not the frame width (W-116). */
+    previewDevice?: PopupDevice;
   } = {},
 ): RenderResult {
   const mode = opts.mode ?? "public";
@@ -257,6 +260,7 @@ export function renderPage(
     localRules,
     previewStates: mode === "editor",
     backgroundVideo,
+    ...(mode === "editor" && opts.previewDevice ? { previewDevice: opts.previewDevice } : {}),
   });
   const scope = opts.scope === undefined ? undefined : cssScopeToken(opts.scope);
   return {

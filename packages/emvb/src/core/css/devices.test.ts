@@ -53,4 +53,47 @@ describe("per-device styles (W-096)", () => {
     expect(toggleHidden(["mobile"], "mobile")).toBeUndefined();
     expect(toggleHidden(undefined, "tablet")).toEqual(["tablet"]);
   });
+
+  test("the editor canvas follows the previewed device, not the frame width (W-116)", () => {
+    const layout = s1Page();
+    const heading = layout.root.children[0];
+    if (!heading) throw new Error("missing heading");
+    heading.devices = { tablet: { color: "#111111" }, mobile: { color: "#222222" } };
+    heading.hiddenOn = ["desktop"];
+    layout.root.hiddenOn = ["mobile"];
+    const h = `.emvb-e-${heading.id}`;
+    const css = (previewDevice: "desktop" | "tablet" | "mobile") =>
+      renderPage(layout, emptyDesign(), { mode: "editor", previewDevice }).css;
+
+    const desktop = css("desktop");
+    expect(desktop).not.toContain("@media (m");
+    expect(desktop).not.toContain("#111111");
+    expect(desktop).not.toContain("#222222");
+    expect(desktop).toContain(`${h}{display:none}`);
+    expect(desktop).not.toContain(".emvb-e-root0001{display:none}");
+
+    const tablet = css("tablet");
+    expect(tablet).not.toContain("@media (m");
+    expect(tablet).toContain(`${h}{color:#111111}`);
+    expect(tablet).not.toContain("#222222");
+    expect(tablet).not.toContain("{display:none}");
+
+    const mobile = css("mobile");
+    expect(mobile).not.toContain("@media (m");
+    expect(mobile.indexOf(`${h}{color:#111111}`)).toBeGreaterThan(-1);
+    expect(mobile.indexOf(`${h}{color:#222222}`)).toBeGreaterThan(
+      mobile.indexOf(`${h}{color:#111111}`),
+    );
+    expect(mobile).toContain(".emvb-e-root0001{display:none}");
+    expect(mobile).not.toContain(`${h}{display:none}`);
+  });
+
+  test("a public render ignores a preview device and keeps its media queries (W-116)", () => {
+    const layout = s1Page();
+    const heading = layout.root.children[0];
+    if (!heading) throw new Error("missing heading");
+    heading.devices = { tablet: { color: "#111111" } };
+    const css = renderPage(layout, emptyDesign(), { mode: "public", previewDevice: "desktop" }).css;
+    expect(css).toContain(`@media ${DEVICE_MEDIA.tablet}{.emvb-e-${heading.id}{color:#111111}}`);
+  });
 });

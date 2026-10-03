@@ -17120,6 +17120,88 @@
       "expect": "\\(fail\\).*wrap on their own row"
     },
     {
+      "id": "W-116/preview-device-ignored",
+      "requirement": "W-116",
+      "description": "device rules stay in their media queries in the canvas, so the frame width decides",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    if (previewDevice === undefined) return `@media ${query}{${body}}`;\n    return devices.includes(previewDevice) ? body : \"\";",
+          "replace": "    return previewDevice === undefined || devices.length > 0 ? `@media ${query}{${body}}` : \"\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/devices.test.ts",
+        "-t",
+        "follows the previewed device"
+      ],
+      "expect": "\\(fail\\).*follows the previewed device"
+    },
+    {
+      "id": "W-116/mobile-drops-tablet",
+      "requirement": "W-116",
+      "description": "the Mobile canvas leaves out the tablet overrides that a phone also gets",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "which === \"tablet\" ? [\"tablet\", \"mobile\"] : [\"mobile\"],",
+          "replace": "which === \"tablet\" ? [\"tablet\"] : [\"mobile\"],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/devices.test.ts",
+        "-t",
+        "follows the previewed device"
+      ],
+      "expect": "\\(fail\\).*follows the previewed device"
+    },
+    {
+      "id": "W-116/public-follows-preview",
+      "requirement": "W-116",
+      "description": "a public render drops its media queries when given a preview device",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "...(mode === \"editor\" && opts.previewDevice ?",
+          "replace": "...(opts.previewDevice ?"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/css/devices.test.ts",
+        "-t",
+        "ignores a preview device"
+      ],
+      "expect": "\\(fail\\).*ignores a preview device"
+    },
+    {
+      "id": "W-116/e2e-editor-no-device",
+      "requirement": "W-116",
+      "description": "the editor does not tell the canvas render which device it previews",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "            previewDevice: device,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/devices.e2e.ts",
+        "--project=node",
+        "-g",
+        "Desktop canvas uses desktop styles"
+      ],
+      "expect": "✘.*\\[node\\].*Desktop canvas uses desktop styles"
+    },
+    {
       "id": "nav/emvb-section-label",
       "requirement": "D-024",
       "description": "the EmVB sidebar section is mislabeled",

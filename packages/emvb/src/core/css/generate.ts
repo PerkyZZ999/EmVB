@@ -33,6 +33,12 @@ export type CssInput = {
   previewStates?: boolean;
   /** When a node rendered a background video (W-110). */
   backgroundVideo?: boolean;
+  /**
+   * Editor canvas only (W-116): the device the canvas previews. Device rules then follow this
+   * device instead of the frame's width, so the Desktop canvas never picks up tablet styles in a
+   * narrow window. Without it, the rules sit in their media queries as usual.
+   */
+  previewDevice?: PopupDevice;
 };
 
 /** Focus is keyboard focus (W-089): `:focus-visible`, never `:focus`. */
@@ -95,6 +101,7 @@ export function generateCss({
   localRules,
   previewStates = false,
   backgroundVideo = false,
+  previewDevice,
 }: CssInput): string {
   const { colors, fonts, fontSizes, spacings } = design.variables;
   const variables = [
@@ -155,15 +162,27 @@ export function generateCss({
       hiddenOn: rule.hiddenOn,
     })),
   ];
-  const at = (query: string, which: "tablet" | "mobile") => {
-    const body = responsive.map((rule) => block(rule.selector, rule[which])).join("");
-    return body ? `@media ${query}{${body}}` : "";
+  /** A device block: in its media query, or, for a previewed device, on or off outright. */
+  const forDevices = (devices: readonly PopupDevice[], query: string, body: string) => {
+    if (!body) return "";
+    if (previewDevice === undefined) return `@media ${query}{${body}}`;
+    return devices.includes(previewDevice) ? body : "";
   };
+  const at = (query: string, which: "tablet" | "mobile") =>
+    forDevices(
+      which === "tablet" ? ["tablet", "mobile"] : ["mobile"],
+      query,
+      responsive.map((rule) => block(rule.selector, rule[which])).join(""),
+    );
   const hide = (device: PopupDevice, query: string) => {
     const selectors = responsive
       .filter((rule) => rule.hiddenOn?.includes(device))
       .map((rule) => rule.selector);
-    return selectors.length > 0 ? `@media ${query}{${selectors.join(",")}{display:none}}` : "";
+    return forDevices(
+      [device],
+      query,
+      selectors.length > 0 ? `${selectors.join(",")}{display:none}` : "",
+    );
   };
   for (const rule of responsive) {
     if (
