@@ -18,14 +18,29 @@ export function CanvasTextEdit({
   onCommit: (text: string) => void;
   onCancel: () => void;
 }) {
-  const view = element.ownerDocument.defaultView;
-  const computed = view?.getComputedStyle(element);
+  // W-117: read the element's look once, before it is marked as editing. Computed style is live,
+  // and the canvas makes an editing element's text transparent, so reading it on a later render
+  // (every keystroke) gave the field transparent text.
+  const look = React.useMemo(() => {
+    const computed = element.ownerDocument.defaultView?.getComputedStyle(element);
+    return {
+      font: computed?.font,
+      color: computed?.color,
+      textAlign: computed?.textAlign as React.CSSProperties["textAlign"],
+      letterSpacing: computed?.letterSpacing,
+      lineHeight: computed?.lineHeight,
+      padding: computed?.padding,
+    };
+  }, [element]);
   const ref = React.useRef<HTMLTextAreaElement>(null);
   const done = React.useRef(false);
   const [draft, setDraft] = React.useState(text);
 
   React.useLayoutEffect(() => {
     element.setAttribute("data-emvb-editing", "");
+    // The double-click that opened the field also selected a word on the canvas; clear it, or its
+    // highlight shows through the transparent field.
+    element.ownerDocument.getSelection()?.removeAllRanges();
     const field = ref.current;
     field?.focus();
     const end = field?.value.length ?? 0;
@@ -53,12 +68,7 @@ export function CanvasTextEdit({
         left: box.left,
         width: box.width,
         height: Math.max(box.height, 20),
-        font: computed?.font,
-        color: computed?.color,
-        textAlign: computed?.textAlign as React.CSSProperties["textAlign"],
-        letterSpacing: computed?.letterSpacing,
-        lineHeight: computed?.lineHeight,
-        padding: computed?.padding,
+        ...look,
       }}
       onChange={(event) => setDraft(commitPlainText(event.target.value, multiline))}
       onBlur={() => finish(commitPlainText(draft, multiline))}

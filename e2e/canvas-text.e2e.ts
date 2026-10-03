@@ -34,3 +34,29 @@ test("double-clicking a heading edits its text on the canvas", async ({ page, re
   }>(request, id);
   expect(stored.root.children?.[0]?.props?.text).toBe(next);
 });
+
+test("the text being edited stays visible in the heading's colour (W-117)", async ({
+  page,
+  request,
+}) => {
+  const text = `Visible ${unique()}`;
+  const layout = layoutFor(text);
+  const heading = layout.root.children[0] as { style?: object } | undefined;
+  if (heading) heading.style = { color: "#123456" };
+  const id = await createPage(request, text, layout);
+  await openEditor(page, id, text);
+  await canvas(page).getByRole("heading", { name: text }).dblclick();
+  const field = overlay(page).getByRole("textbox", { name: "Edit text" });
+  await expect(field).toBeVisible();
+  const color = () => field.evaluate((el) => getComputedStyle(el).color);
+  expect(await color()).toBe("rgb(18, 52, 86)");
+  const canvasSelection = await canvas(page)
+    .locator("body")
+    .evaluate((body) => body.ownerDocument.getSelection()?.toString() ?? "");
+  expect(canvasSelection).toBe("");
+  await field.press("End");
+  await field.pressSequentially(" now");
+  await expect(field).toHaveValue(`${text} now`);
+  expect(await color()).toBe("rgb(18, 52, 86)");
+  await field.press("Escape");
+});
