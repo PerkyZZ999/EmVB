@@ -68,7 +68,7 @@ Blank-canvas EmVB pages use `standalone` on `EmVBPage` (see the demos).
 
 1. Start the site (`bunx --bun astro dev` or your host’s script).
 2. Sign in as an admin.
-3. Open **Visual pages** → **Set up EmVB** once (creates the hidden `emvb_pages` collection).
+3. Open **Pages VisualBuilder** → **Set up EmVB** once (creates the hidden `emvb_pages` collection).
 4. Create a page, publish it, open `/{slug}`.
 
 ## 5. Package shape check

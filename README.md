@@ -2,7 +2,7 @@
 
 A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS, with no EmVB JavaScript on the public site except the optional popups and tabs scripts, which load only on pages that have a popup or Tabs. Forms use the forms plugin's own script. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
-**Status:** MVP implement slices S1–S6 complete (local). Not published yet (phase 7 / D-007).
+**Status:** MVP implement slices S1–S6 complete. The source can be published on GitHub. The npm package stays private until release (D-007).
 
 ## Quick start
 
@@ -15,7 +15,7 @@ bun run demo:node    # Node demo on http://127.0.0.1:4411
 ```
 
 1. Sign in to the demo admin (dev only): <http://127.0.0.1:4411/_emdash/api/setup/dev-bypass?redirect=/_emdash/admin>
-2. Open **Visual pages** and click **Set up EmVB**.
+2. Open **Pages VisualBuilder** and click **Set up EmVB**.
 3. Click **New page**, edit the heading, and **Publish**. The page is served at `http://127.0.0.1:4411/<slug>`.
 
 The Cloudflare demo runs the same way with `bun run demo:cf` on port 4412.
