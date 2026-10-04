@@ -7667,8 +7667,44 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
         "Style"
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
-    p.emvb-helper
-      "This element has no content settings.""
+    div.emvb-item-list data-emvb-item-list="tabs"
+      h3.emvb-section-label
+        "Tabs"
+      ol.emvb-trigger-list
+        li.emvb-item-row data-emvb-item="k95iy5dy"
+          div data-filled=""
+            label id="id-2" for="id-3" data-filled=""
+              span
+                "Tab 1 label"
+            input.emvb-field id="id-3" data-emvb-field="label" value="Tab 1" data-filled="" aria-labelledby="id-2"
+          div.emvb-item-actions
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Edit tab 1" id="id-4" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" disabled="" type="button" aria-label="Move tab 1 up" id="id-5" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Move tab 1 down" id="id-6" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Delete tab 1" id="id-7" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+        li.emvb-item-row data-emvb-item="z7vht4ag"
+          div data-filled=""
+            label id="id-8" for="id-9" data-filled=""
+              span
+                "Tab 2 label"
+            input.emvb-field id="id-9" data-emvb-field="label" value="Tab 2" data-filled="" aria-labelledby="id-8"
+          div.emvb-item-actions
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Edit tab 2" id="id-10" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Move tab 2 up" id="id-11" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" disabled="" type="button" aria-label="Move tab 2 down" id="id-12" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Delete tab 2" id="id-13" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+      button.emvb-btn data-kumo-component="Button" type="button"
+        svg aria-hidden="true"
+        span
+          "Add tab""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="tabs"
@@ -7875,7 +7911,9 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
       label id="id-2" for="id-3" data-filled=""
         span
           "Tab label"
-      input.emvb-field id="id-3" data-emvb-field="label" value="Tab" data-filled="" aria-labelledby="id-2""
+      input.emvb-field id="id-3" data-emvb-field="label" value="Tab" data-filled="" aria-labelledby="id-2"
+    p.emvb-helper
+      "The tab's content is the elements in its panel. Select this tab, then add elements, or drag them into its panel on the canvas.""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="tab-panel"
@@ -8078,8 +8116,59 @@ exports[`element panel markup (W-021, W-086 M16) accordion renders the same cont
         "Style"
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
-    p.emvb-helper
-      "This element has no content settings.""
+    div.emvb-item-list data-emvb-item-list="accordion"
+      h3.emvb-section-label
+        "Items"
+      ol.emvb-trigger-list
+        li.emvb-item-row data-emvb-item="k95iy5dy"
+          div data-filled=""
+            label id="id-2" for="id-3" data-filled=""
+              span
+                "Item 1 title"
+            input.emvb-field id="id-3" data-emvb-field="summary" value="Item 1" data-filled="" aria-labelledby="id-2"
+          div.emvb-item-actions
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Edit item 1" id="id-4" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" disabled="" type="button" aria-label="Move item 1 up" id="id-5" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Move item 1 down" id="id-6" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Delete item 1" id="id-7" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+        li.emvb-item-row data-emvb-item="z7vht4ag"
+          div data-filled=""
+            label id="id-8" for="id-9" data-filled=""
+              span
+                "Item 2 title"
+            input.emvb-field id="id-9" data-emvb-field="summary" value="Item 2" data-filled="" aria-labelledby="id-8"
+          div.emvb-item-actions
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Edit item 2" id="id-10" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Move item 2 up" id="id-11" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Move item 2 down" id="id-12" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Delete item 2" id="id-13" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+        li.emvb-item-row data-emvb-item="7qhrmrp9"
+          div data-filled=""
+            label id="id-14" for="id-15" data-filled=""
+              span
+                "Item 3 title"
+            input.emvb-field id="id-15" data-emvb-field="summary" value="Item 3" data-filled="" aria-labelledby="id-14"
+          div.emvb-item-actions
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Edit item 3" id="id-16" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Move item 3 up" id="id-17" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" disabled="" type="button" aria-label="Move item 3 down" id="id-18" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+            button.emvb-btn data-kumo-component="Button" type="button" aria-label="Delete item 3" id="id-19" data-base-ui-tooltip-trigger=""
+              svg aria-hidden="true"
+      button.emvb-btn data-kumo-component="Button" type="button"
+        svg aria-hidden="true"
+        span
+          "Add item""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="accordion"
@@ -8294,7 +8383,9 @@ exports[`element panel markup (W-021, W-086 M16) accordion-item renders the same
             "Open"
         button data-unchecked="" type="button" tabindex="0" id="id-5" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open" aria-labelledby="id-4"
           div
-        input tabindex="-1" aria-hidden="true" type="checkbox""
+        input tabindex="-1" aria-hidden="true" type="checkbox"
+    p.emvb-helper
+      "The item's content is the elements in its body. Select this item, then add elements, or drag them into its body on the canvas.""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="accordion-item"

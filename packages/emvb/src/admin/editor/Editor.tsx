@@ -156,6 +156,7 @@ function EditorApp({
     arrange,
     duplicate,
     addFromPanel,
+    items: itemActions,
   } = useNodeActions({ state, latest, dispatch, announce: setAnnouncement, toasts });
   const [refusal, setRefusal] = React.useState<PasteRefusal | null>(null);
   const clipboard = useClipboardActions({
@@ -360,6 +361,7 @@ function EditorApp({
                 kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
                 onStyleState={onStyleState}
                 device={device}
+                items={itemActions}
               />
             </div>
           </>

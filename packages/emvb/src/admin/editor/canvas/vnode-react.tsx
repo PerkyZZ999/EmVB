@@ -13,6 +13,20 @@ const REACT_ATTR: Record<string, string> = {
   checked: "defaultChecked",
 };
 
+/**
+ * Presence attributes the core writes as `""`. React reads `""` as false for these, so a saved-open
+ * accordion item rendered closed on the canvas (W-130); presence means on.
+ */
+const BOOLEAN_ATTRS = new Set([
+  "open",
+  "controls",
+  "allowfullscreen",
+  "muted",
+  "loop",
+  "playsinline",
+  "autoplay",
+]);
+
 /** SVG tags the core keeps lowercase; the SVG namespace only knows their camelCase names. */
 const REACT_TAG: Record<string, string> = {
   lineargradient: "linearGradient",
@@ -39,7 +53,7 @@ export function vnodeToReact(node: VNode | string, key?: React.Key): React.React
   const props: Record<string, unknown> = { key };
   for (const [name, value] of Object.entries(node.attrs)) {
     if (!isAllowedAttr(name)) continue;
-    props[reactAttr(name)] = name === "checked" ? true : value;
+    props[reactAttr(name)] = name === "checked" || BOOLEAN_ATTRS.has(name) ? true : value;
   }
   return React.createElement(
     REACT_TAG[node.tag] ?? node.tag,

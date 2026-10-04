@@ -1,9 +1,8 @@
+import { MAX_TABS } from "../limits.ts";
 import { isTabPanelNode, type TabsNode } from "../schema/layout.ts";
 import type { ThemeDynamicData } from "../theme/dynamic.ts";
 import type { RenderContext } from "./context.ts";
 import type { VNode } from "./vnode.ts";
-
-const MAX_TABS = 12;
 
 /** CSS-only tabs (radio inputs and labels) that the optional tabs script enhances. */
 export function renderTabs(

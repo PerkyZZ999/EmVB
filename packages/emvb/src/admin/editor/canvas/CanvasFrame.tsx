@@ -33,7 +33,7 @@ import {
   type InvalidDrop,
 } from "./SelectionOverlay.tsx";
 import { applyStatePreview, type StatePreview } from "./state-preview.ts";
-import { revealInTabs } from "./tab-reveal.ts";
+import { revealInAccordions, revealInTabs } from "./tab-reveal.ts";
 import { CanvasTextEdit } from "./CanvasTextEdit.tsx";
 import { vnodeToReact } from "./vnode-react.tsx";
 import type { ClipboardActions, PasteRefusal } from "../useClipboardActions.ts";
@@ -42,18 +42,17 @@ const SRCDOC =
   '<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0}</style></head><body></body></html>';
 
 /** Element types that hold other elements and show the empty drop placeholder (W-128). */
-const DROP_BOXES = [
-  "container",
-  "div-block",
-  "flexbox",
-  "grid",
-  "section",
-  "form",
-  "tab-panel",
-  "accordion-item",
-]
+const DROP_BOXES = ["container", "div-block", "flexbox", "grid", "section", "form"]
   .map((type) => `.emvb-${type}:empty`)
   .join(",");
+/**
+ * Empty boxes whose display the page controls (a hidden tab panel stays hidden), so the
+ * placeholder must not set it (W-130).
+ */
+const DROP_BODIES = ".emvb-tab-panel:empty,.emvb-accordion-body:empty";
+/** An Accordion or Tabs with no items: only items go in, so it points at the item list (W-130). */
+const NO_ITEMS = ".emvb-accordion:empty,.emvb-tabs:not(:has(.emvb-tab-panel))";
+const HINT = "color:#64748b;font:13px/1.4 system-ui,sans-serif;pointer-events:none";
 
 /**
  * Canvas-only: empty containers are droppable and say so (W-128). Never emitted into the saved
@@ -61,7 +60,11 @@ const DROP_BOXES = [
  */
 export const EDITOR_CANVAS_CSS =
   `:is(${DROP_BOXES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px;display:flex;align-items:center;justify-content:center}` +
-  `:is(${DROP_BOXES})::after{content:"Drop elements here";color:#64748b;font:13px/1.4 system-ui,sans-serif;pointer-events:none}` +
+  `:is(${DROP_BOXES})::after{content:"Drop elements here";${HINT}}` +
+  `:is(${DROP_BODIES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px}` +
+  `:is(${DROP_BODIES})::after{content:"Drop elements here";display:block;line-height:48px;text-align:center;${HINT}}` +
+  `:is(${NO_ITEMS}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px}` +
+  `:is(${NO_ITEMS})::after{content:"No items yet: add them in this element's Content settings";display:block;line-height:48px;text-align:center;${HINT}}` +
   ".emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}[data-emvb-editing]{color:transparent !important}";
 
 const boxOf = (doc: Document, id: string | null): Box | null => {
@@ -350,8 +353,13 @@ export function CanvasFrame({
       ? doc.querySelector(`[data-emvb-id="${CSS.escape(editingId)}"]`)
       : null;
   React.useEffect(() => {
-    if (doc) revealInTabs(doc, selectedId);
-  }, [doc, selectedId, vnode]);
+    if (!doc) return;
+    revealInTabs(doc, selectedId);
+    revealInAccordions(doc, selectedId, (itemId) => {
+      const item = layout ? findNode(layout, itemId) : undefined;
+      return item?.type === "accordion-item" && item.props.open === true;
+    });
+  }, [doc, selectedId, vnode, layout]);
   const previewId = statePreview?.id === selectedId ? statePreview.id : null;
   const previewState = previewId ? statePreview?.state : undefined;
   React.useEffect(() => {

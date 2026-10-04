@@ -5,3 +5,5 @@ export const MAX_DESIGN_BYTES = 256 * 1024;
 export const MAX_DEPTH = 24;
 export const MAX_NODES = 2000;
 export const MAX_TEXT_LENGTH = 2000;
+/** Tabs show at most this many panels; the CSS-only switcher has a rule per tab. */
+export const MAX_TABS = 12;

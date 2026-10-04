@@ -33,3 +33,37 @@ export function tabPanelIdForLabel(target: EventTarget | null): string | null {
   const { labels, panels } = own(tabs);
   return panels[labels.indexOf(label)]?.getAttribute("data-emvb-id") ?? null;
 }
+
+const AUTO_OPEN = "data-emvb-auto-open";
+
+/**
+ * Opens the closed accordion items that hold element `id` on the canvas, so it can be seen and
+ * edited, and closes the ones it opened before once the selection leaves them. Canvas only: the
+ * saved Open setting is untouched (W-130).
+ */
+export function revealInAccordions(
+  doc: Document,
+  id: string | null,
+  savedOpen: (itemId: string) => boolean = () => false,
+): void {
+  const element = id ? doc.querySelector(`[data-emvb-id="${CSS.escape(id)}"]`) : null;
+  const holders = new Set<HTMLDetailsElement>();
+  for (
+    let item = element?.closest<HTMLDetailsElement>("details.emvb-accordion-item");
+    item;
+    item = item.parentElement?.closest<HTMLDetailsElement>("details.emvb-accordion-item")
+  ) {
+    holders.add(item);
+  }
+  for (const item of doc.querySelectorAll<HTMLDetailsElement>(`details[${AUTO_OPEN}]`)) {
+    if (holders.has(item)) continue;
+    item.removeAttribute(AUTO_OPEN);
+    // Open was switched on while we held it open: leave it open.
+    if (!savedOpen(item.getAttribute("data-emvb-id") ?? "")) item.open = false;
+  }
+  for (const item of holders) {
+    if (item.open) continue;
+    item.setAttribute(AUTO_OPEN, "");
+    item.open = true;
+  }
+}

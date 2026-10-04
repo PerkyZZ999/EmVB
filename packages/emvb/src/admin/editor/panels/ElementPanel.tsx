@@ -19,6 +19,7 @@ import {
   NotePencilIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
+import { hasItemList, ItemList, type ItemActions } from "./settings/ItemList.tsx";
 import {
   ELEMENT_DESCRIPTORS,
   findNode,
@@ -184,6 +185,16 @@ type Props = {
   onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
   /** Tablet and mobile edit overrides. Desktop edits `style` (W-096). */
   device?: PopupDevice;
+  /** Add, move and delete for Accordion items and Tabs panels (W-130). */
+  items?: ItemActions;
+};
+
+/** What an item's content is, since it has no content field of its own (W-130). */
+const ITEM_NOTES: Record<string, string> = {
+  "accordion-item":
+    "The item's content is the elements in its body. Select this item, then add elements, or drag them into its body on the canvas.",
+  "tab-panel":
+    "The tab's content is the elements in its panel. Select this tab, then add elements, or drag them into its panel on the canvas.",
 };
 
 const FORM_TYPES = new Set([
@@ -290,6 +301,7 @@ function KnownElementPanel({
   onSelect,
   onStyleState,
   device = "desktop",
+  items,
   descriptor,
 }: Props & { descriptor: ElementDescriptor }) {
   const ui = STYLE_UI[node.type] ?? DEFAULT_UI;
@@ -415,7 +427,9 @@ function KnownElementPanel({
       />
       {tab === "content" && (
         <div className="emvb-panel-body" data-emvb-tab="content">
-          {descriptor.fields.length === 0 ? (
+          {hasItemList(node.type) ? (
+            <ItemList node={node} onChange={onChange} onSelect={onSelect} actions={items} />
+          ) : descriptor.fields.length === 0 ? (
             <p className="emvb-helper">
               {node.type === "container"
                 ? "A container holds other elements. Arrange them in Style."
@@ -433,6 +447,7 @@ function KnownElementPanel({
               />
             ))
           )}
+          {ITEM_NOTES[node.type] && <p className="emvb-helper">{ITEM_NOTES[node.type]}</p>}
         </div>
       )}
       {tab === "style" && (

@@ -165,6 +165,13 @@ export const UI_CSS = `
 }
 .emvb-trigger-head { display: flex; align-items: flex-end; gap: 4px; }
 .emvb-trigger-head > :first-child { flex: 1 1 auto; min-width: 0; }
+/* Accordion items and Tabs panels as a list (W-130) */
+.emvb-item-list { display: flex; flex-direction: column; gap: 8px; }
+.emvb-item-row {
+  display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 6px;
+  background: var(--emvb-glass-elevated, var(--color-kumo-elevated)); box-shadow: var(--emvb-elevation-s);
+}
+.emvb-item-actions { display: flex; justify-content: flex-end; gap: 2px; }
 .emvb-device-fieldset { display: flex; flex-wrap: wrap; gap: 4px 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .emvb-device-fieldset > legend { float: left; width: 100%; padding: 0; }
 .emvb-device-fieldset > .emvb-helper { width: 100%; margin: 0; }

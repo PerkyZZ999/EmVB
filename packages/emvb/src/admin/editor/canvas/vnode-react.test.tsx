@@ -124,6 +124,28 @@ describe("canvas vnode rendering (QA-5, QA-6)", () => {
   });
 });
 
+describe("presence attributes on the canvas (W-130)", () => {
+  test("a saved-open accordion item and a video's controls stay on", async () => {
+    const host = await mount(
+      <div>
+        {vnodeToReact({
+          tag: "div",
+          attrs: {},
+          children: [
+            { tag: "details", attrs: { open: "" }, children: [] },
+            { tag: "details", attrs: {}, children: [] },
+            { tag: "video", attrs: { controls: "", loop: "" }, children: [] },
+          ],
+        })}
+      </div>,
+    );
+    const [open, closed] = [...host.querySelectorAll("details")];
+    expect([open?.open, closed?.open]).toEqual([true, false]);
+    const video = host.querySelector("video");
+    expect([video?.hasAttribute("controls"), video?.hasAttribute("loop")]).toEqual([true, true]);
+  });
+});
+
 describe("revealing an element inside tabs (QA-5)", () => {
   const load = () => {
     const { html } = renderPage(layout, emptyDesign(), { mode: "editor" });

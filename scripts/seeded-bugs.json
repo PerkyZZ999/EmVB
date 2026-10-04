@@ -17934,6 +17934,203 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*dragging into an empty nested container"
+    },
+    {
+      "id": "W-130/accordion-starts-empty",
+      "requirement": "W-130",
+      "description": "A new Accordion is inserted with no items again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "children: [1, 2, 3].map((n) => newAccordionItem(n, random, n === 1)),",
+          "replace": "children: [],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a new Accordion starts with three items"
+    },
+    {
+      "id": "W-130/no-item-list",
+      "requirement": "W-130",
+      "description": "Accordion and Tabs show no item list in their Content tab.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "{hasItemList(node.type) ? (",
+          "replace": "{false ? ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*the list names each item"
+    },
+    {
+      "id": "W-130/move-up-goes-down",
+      "requirement": "W-130",
+      "description": "Move up moves the item down.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ItemList.tsx",
+          "search": "const to = direction === \"up\" ? from - 1 : from + 1;",
+          "replace": "const to = from + 1;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*without editor actions the list edits the parent directly"
+    },
+    {
+      "id": "W-130/no-tab-cap",
+      "requirement": "W-130",
+      "description": "Add tab stays enabled past the 12 tabs Tabs can show.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ItemList.tsx",
+          "search": "disabled={full}",
+          "replace": "disabled={false}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*stop adding at 12 tabs"
+    },
+    {
+      "id": "W-130/reveal-never-closes",
+      "requirement": "W-130",
+      "description": "An accordion item opened for the selection stays open after the selection leaves.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/tab-reveal.ts",
+          "search": "if (!savedOpen(item.getAttribute(\"data-emvb-id\") ?? \"\")) item.open = false;",
+          "replace": "item.open = true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*selecting elsewhere closes it again"
+    },
+    {
+      "id": "W-130/reveal-closes-saved-open",
+      "requirement": "W-130",
+      "description": "An item saved as open is closed when the selection leaves it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/tab-reveal.ts",
+          "search": "if (!savedOpen(item.getAttribute(\"data-emvb-id\") ?? \"\")) item.open = false;",
+          "replace": "item.open = false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*an item saved as open stays open"
+    },
+    {
+      "id": "W-130/canvas-open-attr-dropped",
+      "requirement": "W-130",
+      "description": "Presence attributes such as open reach React as empty strings, so saved-open items render closed on the canvas.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/vnode-react.tsx",
+          "search": "name === \"checked\" || BOOLEAN_ATTRS.has(name) ? true : value;",
+          "replace": "name === \"checked\" ? true : value;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/canvas/vnode-react.test.tsx"],
+      "expect": "\\(fail\\).*a saved-open accordion item and a video's controls stay on"
+    },
+    {
+      "id": "W-130/e2e-add-selects-new-item",
+      "requirement": "W-130",
+      "description": "Add item selects the new item, so the list closes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "dispatch({ type: \"apply-arranged\", layout: result.layout, selected: parentId });",
+          "replace": "dispatch({ type: \"apply-arranged\", layout: result.layout, selected: node.id });"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/items.e2e.ts",
+        "--project=node",
+        "-g",
+        "a new Accordion has three items"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*a new Accordion has three items"
+    },
+    {
+      "id": "W-130/e2e-hidden-tab-panel-shown",
+      "requirement": "W-130",
+      "description": "The empty-panel placeholder sets display, so hidden empty tab panels show on the canvas.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "`:is(${DROP_BODIES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px}` +",
+          "replace": "`:is(${DROP_BODIES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px;display:flex}` +"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/items.e2e.ts",
+        "--project=node",
+        "-g",
+        "a saved empty Accordion keeps working"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*a saved empty Accordion keeps working"
+    },
+    {
+      "id": "W-130/e2e-no-accordion-reveal",
+      "requirement": "W-130",
+      "description": "Selecting inside a closed accordion item leaves it closed on the canvas.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "revealInAccordions(doc, selectedId, (itemId) => {",
+          "replace": "revealInAccordions(doc, null, (itemId) => {"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/items.e2e.ts",
+        "--project=node",
+        "-g",
+        "selecting inside a closed accordion item"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*selecting inside a closed accordion item"
     }
   ]
 }

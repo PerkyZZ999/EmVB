@@ -3,6 +3,7 @@ import type { DesignSystem, LayoutNode, PopupDevice } from "../../../core/index.
 import type { Fetcher } from "../../api.ts";
 import type { EditorAction, EditorState } from "../store.ts";
 import { ElementPanel } from "./ElementPanel.tsx";
+import type { ItemActions } from "./settings/ItemList.tsx";
 import type { StyleStateChoice } from "./settings/StateSwitcher.tsx";
 import { PageSettings } from "./PageSettings.tsx";
 import { SiteStylesDrawer } from "./SiteStylesDrawer.tsx";
@@ -25,6 +26,7 @@ export function SettingsPanel({
   kind,
   onStyleState,
   device = "desktop",
+  items,
 }: {
   state: EditorState;
   latest: React.RefObject<EditorState>;
@@ -44,6 +46,8 @@ export function SettingsPanel({
   onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
   /** Which device's styles the Style tab edits (W-096). */
   device?: PopupDevice;
+  /** Accordion and Tabs item actions (W-130). */
+  items?: ItemActions;
 }) {
   return (
     <aside
@@ -84,6 +88,7 @@ export function SettingsPanel({
           onSelect={(id) => dispatch({ type: "select", id })}
           onStyleState={onStyleState}
           device={device}
+          items={items}
         />
       ) : (
         <PageSettings
