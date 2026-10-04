@@ -24,7 +24,7 @@ const design: DesignSystem = {
 };
 
 const layout = {
-  schemaVersion: 9 as const,
+  schemaVersion: 10 as const,
   root: {
     id: "root0001",
     type: "container" as const,
@@ -412,11 +412,16 @@ describe("class chip input: editing a class in context (W-087)", () => {
       'Editing class "Card". Changes apply to every element that uses it.',
     );
     await openSection("spacing");
-    const resetOf = (label: string) =>
-      document.querySelector(`[aria-label="Reset ${label} to default"]`) as HTMLButtonElement;
-    expect(resetOf("Padding bottom").disabled).toBe(true);
-    expect(resetOf("Padding top").disabled).toBe(false);
-    await act(async () => resetOf("Padding top").click());
+    const box = (label: string) =>
+      document.querySelector(`input[aria-label="${label}"]`) as HTMLInputElement;
+    // The boxes show the class's padding, not the element's own 4 px bottom (W-138).
+    expect(box("Padding top").value).toBe("8");
+    expect(box("Padding bottom").value).toBe("");
+    const reset = document.querySelector(
+      '[aria-label="Reset Padding to default"]',
+    ) as HTMLButtonElement;
+    expect(reset.disabled).toBe(false);
+    await act(async () => reset.click());
     expect(log.nodes).toEqual([]);
     expect(log.designs).toHaveLength(1);
     expect(log.designs[0]?.classes?.find((c) => c.id === "card")?.style).toStrictEqual({});
@@ -435,8 +440,11 @@ describe("class chip input: editing a class in context (W-087)", () => {
     await act(async () => localButton().click());
     expect(document.querySelector("[data-emvb-class-scope]")?.outerHTML ?? null).toBeNull();
     await openSection("spacing");
+    expect(
+      (document.querySelector('input[aria-label="Padding bottom"]') as HTMLInputElement).value,
+    ).toBe("4");
     const reset = document.querySelector(
-      '[aria-label="Reset Padding bottom to default"]',
+      '[aria-label="Reset Padding to default"]',
     ) as HTMLButtonElement;
     await act(async () => reset.click());
     expect(log.designs).toEqual([]);
@@ -479,7 +487,7 @@ describe("class chip input: editing a class in context (W-087)", () => {
     await act(async () => chipButton("card").click());
     await openSection("spacing");
     const reset = document.querySelector(
-      '[aria-label="Reset Padding top to default"]',
+      '[aria-label="Reset Padding to default"]',
     ) as HTMLButtonElement;
     await act(async () => reset.click());
     expect(document.querySelector('[data-emvb-tab="style"] [role="alert"]')?.textContent).toBe(

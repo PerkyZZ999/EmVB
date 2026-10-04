@@ -48,6 +48,8 @@ import {
 } from "../../../core/index.ts";
 import { BUTTON, FIELD } from "../../ui.ts";
 import { FieldControl } from "./settings/FieldControl.tsx";
+import { BoxControl } from "./settings/BoxControl.tsx";
+import { boxGroupOf } from "./settings/box-sides.ts";
 import { StyleRow } from "./settings/StyleRow.tsx";
 import { ClassChipInput } from "./settings/ClassChipInput.tsx";
 import { StateDot, StateSwitcher, type StyleStateChoice } from "./settings/StateSwitcher.tsx";
@@ -533,18 +535,35 @@ function KnownElementPanel({
                     {JUMP_HELP[styleState]}
                   </p>
                 )}
-                {keys.map((key) => (
-                  <StyleRow
-                    key={`${styleState}:${key}`}
-                    styleKey={key}
-                    style={style}
-                    inherited={inherited}
-                    design={design}
-                    fetcher={fetcher}
-                    onPatch={patchStyle}
-                    onDesignChange={onDesignChange}
-                  />
-                ))}
+                {keys.map((key) => {
+                  const group = boxGroupOf(key);
+                  if (group) {
+                    // One four-box control per group, where its first key would be (W-138).
+                    if (keys.find((k) => boxGroupOf(k) === group) !== key) return null;
+                    return (
+                      <BoxControl
+                        key={`${node.id}:${responsive ?? "desktop"}:${styleState}:${group.id}`}
+                        group={group}
+                        style={style}
+                        inherited={inherited}
+                        design={design}
+                        onPatch={patchStyle}
+                      />
+                    );
+                  }
+                  return (
+                    <StyleRow
+                      key={`${styleState}:${key}`}
+                      styleKey={key}
+                      style={style}
+                      inherited={inherited}
+                      design={design}
+                      fetcher={fetcher}
+                      onPatch={patchStyle}
+                      onDesignChange={onDesignChange}
+                    />
+                  );
+                })}
                 {id === "position" && !offsetsApply(position) && (
                   <p className="emvb-helper" data-emvb-offsets-help="">
                     Offsets apply once Position is Relative, Absolute, Fixed or Sticky.

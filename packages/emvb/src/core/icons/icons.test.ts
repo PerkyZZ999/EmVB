@@ -6,7 +6,7 @@ import { BUNDLED_ICON_IDS, BUNDLED_ICONS, getBundledIcon } from "./catalog.ts";
 import type { Layout } from "../schema/layout.ts";
 
 const page = (node: ReturnType<typeof defaultElement>): Layout => ({
-  schemaVersion: 9,
+  schemaVersion: 10,
   root: {
     id: "root0001",
     type: "container",

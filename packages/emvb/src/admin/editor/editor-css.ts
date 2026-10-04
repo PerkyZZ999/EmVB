@@ -306,6 +306,33 @@ export const EDITOR_CSS = `${UI_CSS}
   width: 28px; height: 28px; margin-top: 28px; padding: 0; border: 0; border-radius: 6px;
   background: transparent; color: var(--text-color-kumo-subtle); cursor: pointer;
 }
+/* Linked four-box control (W-138, D-044): padding, margin, border width, radius. */
+.emvb-box > .emvb-box-body { display: flex; flex-direction: column; gap: 4px; }
+.emvb-box > .emvb-reset-btn { margin-top: 0; }
+.emvb-box-head { display: flex; align-items: center; gap: 2px; min-height: 28px; }
+.emvb-box-label { flex: 1 1 auto; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--text-color-kumo-default); }
+.emvb-box-head .emvb-var-btn { margin-top: 0; }
+.emvb-link-btn {
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 28px; height: 28px; padding: 0; border: 0; border-radius: 6px;
+  background: transparent; color: var(--text-color-kumo-subtle); cursor: pointer;
+}
+.emvb-link-btn:hover { background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
+.emvb-link-btn[aria-pressed="true"] { color: var(--color-kumo-brand); background: var(--color-kumo-tint); }
+.emvb-link-btn:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }
+.emvb-box-sides { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.emvb-box-side { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+.emvb-box-input {
+  width: 100%; height: 28px; padding: 0 4px; border: 0; border-radius: 6px; text-align: center;
+  background: var(--color-kumo-control); color: var(--text-color-kumo-default); font-size: 13px;
+  box-shadow: inset 0 0 0 1px var(--color-kumo-line);
+}
+.emvb-box-input::placeholder { color: var(--text-color-kumo-subtle); }
+.emvb-box-input:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -1px; }
+.emvb-box-input[aria-invalid="true"] { box-shadow: inset 0 0 0 1px var(--text-color-kumo-danger); }
+.emvb-box-input[data-bound="true"] { color: var(--color-kumo-brand); }
+.emvb-box-name { font-size: 11px; line-height: 14px; color: var(--text-color-kumo-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.emvb-box-error { margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-danger); }
 .emvb-var-btn:hover, .emvb-var-btn[data-popup-open] { background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
 .emvb-var-btn[data-active="true"] { color: var(--color-kumo-brand); }
 .emvb-var-btn:focus-visible, .emvb-var-chip-x:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }

@@ -12,7 +12,7 @@ const issuesOf = (input: unknown) => {
 describe("valid layouts", () => {
   test("the S1 page parses and keeps its content", () => {
     const result = validateLayout(s1Page());
-    expect(result).toEqual({ ok: true, layout: s1Page(), upgradedFrom: 9 });
+    expect(result).toEqual({ ok: true, layout: s1Page(), upgradedFrom: 10 });
   });
 
   test("an empty root container is valid", () => {
@@ -116,7 +116,7 @@ describe("invalid layouts fail with the exact path", () => {
 
   test("a CSS id used twice is reported at the second use; different ids pass (W-091, W-016)", () => {
     const input = {
-      schemaVersion: 9,
+      schemaVersion: 10,
       root: container("root0001", [
         { ...heading("head0001"), htmlId: "hero" },
         container("cont0001", [{ ...heading("head0002"), htmlId: "hero" }]),
@@ -178,7 +178,7 @@ describe("size budget (N-005, K12)", () => {
   });
 
   test("the limit counts UTF-8 bytes, not characters", () => {
-    const doc = layoutOfBytes(MAX_LAYOUT_BYTES + 2, "é");
+    const doc = layoutOfBytes(MAX_LAYOUT_BYTES + 1, "é");
     expect(JSON.stringify(doc).length).toBeLessThan(MAX_LAYOUT_BYTES);
     expect(issuesOf(doc)[0]?.code).toBe("too_large");
   });
@@ -186,7 +186,7 @@ describe("size budget (N-005, K12)", () => {
 
 describe("versions", () => {
   test("a newer schema version is refused with an update message", () => {
-    expect(issuesOf({ ...s1Page(), schemaVersion: 10 })).toEqual([
+    expect(issuesOf({ ...s1Page(), schemaVersion: 11 })).toEqual([
       expect.objectContaining({ path: "schemaVersion", code: "newer-version" }),
     ]);
   });
@@ -208,7 +208,7 @@ describe("design system document (D-013)", () => {
   test("a valid design parses", () => {
     expect<unknown>(validateDesign(design([color(1)]))).toEqual({
       ok: true,
-      design: { ...design([color(1)]), schemaVersion: 9 },
+      design: { ...design([color(1)]), schemaVersion: 10 },
       upgradedFrom: 1,
     });
   });
@@ -233,7 +233,7 @@ describe("design system document (D-013)", () => {
   });
 
   test("a newer design version is refused", () => {
-    const result = validateDesign({ ...design([]), schemaVersion: 10 });
+    const result = validateDesign({ ...design([]), schemaVersion: 11 });
     expect(result.ok ? undefined : result.issues[0]?.code).toBe("newer-version");
   });
 });

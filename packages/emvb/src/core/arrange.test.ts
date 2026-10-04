@@ -35,7 +35,7 @@ import { validateLayout } from "./validate.ts";
  * └─ d (heading)
  */
 const page = (): Layout => ({
-  schemaVersion: 9,
+  schemaVersion: 10,
   root: container("root0001", [
     heading("aaaa0001"),
     container("box00001", [heading("bbbb0001"), container("inner001", [heading("cccc0001")])]),
@@ -120,7 +120,7 @@ describe("canDrop (R-003 drop rules)", () => {
 
   test("new elements can't push the page past the element limit", () => {
     const full: Layout = {
-      schemaVersion: 9,
+      schemaVersion: 10,
       root: container(
         "root0001",
         Array.from({ length: MAX_NODES - 1 }, (_, i) => heading(`h${String(i).padStart(7, "0")}`)),
@@ -216,7 +216,7 @@ describe("duplicateNode", () => {
     const values = [...Array.from({ length: 8 }, () => 0), ...Array.from({ length: 8 }, () => 0.5)];
     let i = 0;
     const layout: Layout = {
-      schemaVersion: 9,
+      schemaVersion: 10,
       root: container("root0001", [heading("aaaaaaaa")]) as Layout["root"],
     };
     const result = duplicateNode(layout, "aaaaaaaa", () => values[i++ % values.length] ?? 0);
@@ -238,7 +238,7 @@ describe("duplicateNode", () => {
     } as LayoutNode;
     const box = { ...container("box00001", [button]), htmlId: "hero" } as LayoutNode;
     const layout: Layout = {
-      schemaVersion: 9,
+      schemaVersion: 10,
       root: container("root0001", [box]) as Layout["root"],
     };
     const result = duplicateNode(layout, "box00001");

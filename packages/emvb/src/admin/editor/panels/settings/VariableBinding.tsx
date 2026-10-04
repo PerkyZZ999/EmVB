@@ -21,6 +21,10 @@ const SPACING_KEYS = new Set<StyleKey>([
   "bottom",
   "left",
   "borderRadius",
+  "borderTopLeftRadius",
+  "borderTopRightRadius",
+  "borderBottomRightRadius",
+  "borderBottomLeftRadius",
 ]);
 
 /** The variable kind a style property takes, or null when it has no variable button. */

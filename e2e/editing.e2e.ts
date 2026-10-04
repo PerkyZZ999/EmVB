@@ -7,7 +7,7 @@ const PAGES = "/_emdash/admin/plugins/emvb/pages";
 const MAX_LAYOUT_BYTES = 512 * 1024;
 
 const layoutFor = (text: string) => ({
-  schemaVersion: 9,
+  schemaVersion: 10,
   root: {
     id: "root0001",
     type: "container",
@@ -267,7 +267,7 @@ test("on the canvas a tab label shows its panel, and so does a panel chosen in L
   request,
 }) => {
   const layout = {
-    schemaVersion: 9,
+    schemaVersion: 10,
     root: {
       id: "root0001",
       type: "container",
@@ -319,7 +319,7 @@ test("the selected element's toolbar sits inside its outline and lets clicks thr
   request,
 }) => {
   const layout = {
-    schemaVersion: 9,
+    schemaVersion: 10,
     root: {
       id: "root0001",
       type: "container",

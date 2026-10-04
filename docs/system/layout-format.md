@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `9` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042; v1–v8 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- `schemaVersion` is the literal `10` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044; v1–v9 documents are upgraded on read by steps that change nothing). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -103,7 +103,9 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `backgroundRepeat` | `no-repeat`, `repeat`, `repeat-x`, `repeat-y` | `background-repeat` |
 | `gradient` | `{ angle: 0–360, from, to }`; stops are colours | `linear-gradient`, behind the image |
 | `overlay` | `{ color, opacity: 0–1 }` | a colour layer above the image. Hex becomes 8-digit hex; a colour variable becomes `color-mix` |
-| `borderWidth` / `borderRadius` | length | matching border properties |
+| `borderWidth` / `borderRadius` | length | matching border properties: every side or corner |
+| `borderTopWidth`, `borderRightWidth`, `borderBottomWidth`, `borderLeftWidth` (W-138) | length | `border-top-width`, `border-inline-end-width`, `border-bottom-width`, `border-inline-start-width`, after `border-width`, so a side beats it |
+| `borderTopLeftRadius`, `borderTopRightRadius`, `borderBottomRightRadius`, `borderBottomLeftRadius` (W-138) | length or a spacing variable | `border-start-start-radius`, `border-start-end-radius`, `border-end-end-radius`, `border-end-start-radius`, after `border-radius` |
 | `borderStyle` | `none`, `solid`, `dashed`, `dotted` | `border-style` |
 | `opacity` | number 0–1 (the editor shows 0–100 %) | `opacity` |
 | `boxShadow` | `{ x, y, blur, spread, color?, inset? }`: px numbers, `x`, `y` and `spread` −1000 to 1000, `blur` 0 to 1000; `color` is a colour; `inset` is a boolean | `box-shadow` as `[inset] Xpx Ypx Bpx Spx [colour]`; no colour means the text colour |
@@ -147,7 +149,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],

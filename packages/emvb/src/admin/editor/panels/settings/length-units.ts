@@ -24,7 +24,15 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   lineHeight: ["em", "px", "rem", "%"],
   letterSpacing: ["px", "rem", "em"],
   borderWidth: ["px", "rem", "em"],
+  borderTopWidth: ["px", "rem", "em"],
+  borderRightWidth: ["px", "rem", "em"],
+  borderBottomWidth: ["px", "rem", "em"],
+  borderLeftWidth: ["px", "rem", "em"],
   borderRadius: ["px", "%", "rem", "em"],
+  borderTopLeftRadius: ["px", "%", "rem", "em"],
+  borderTopRightRadius: ["px", "%", "rem", "em"],
+  borderBottomRightRadius: ["px", "%", "rem", "em"],
+  borderBottomLeftRadius: ["px", "%", "rem", "em"],
 };
 
 export const unitsFor = (key: StyleKey): readonly UnitChoice[] => UNITS[key] ?? BOX;

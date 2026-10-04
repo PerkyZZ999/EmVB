@@ -2,8 +2,11 @@ import { z } from "zod";
 import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
-/** 9 since W-103 (D-042). v8 → v9 changes nothing, so an older EmVB shows "saved by a newer EmVB". */
-export const LAYOUT_SCHEMA_VERSION = 9;
+/**
+ * 10 since W-138 (D-044): per-side border widths and per-corner radii. v9 → v10 changes nothing,
+ * so an older EmVB shows "saved by a newer EmVB".
+ */
+export const LAYOUT_SCHEMA_VERSION = 10;
 
 export const NodeId = z
   .string()

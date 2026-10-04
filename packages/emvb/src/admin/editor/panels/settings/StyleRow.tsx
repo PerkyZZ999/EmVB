@@ -39,7 +39,15 @@ const LENGTH_KEYS = new Set<StyleKey>([
   "lineHeight",
   "letterSpacing",
   "borderWidth",
+  "borderTopWidth",
+  "borderRightWidth",
+  "borderBottomWidth",
+  "borderLeftWidth",
   "borderRadius",
+  "borderTopLeftRadius",
+  "borderTopRightRadius",
+  "borderBottomRightRadius",
+  "borderBottomLeftRadius",
 ]);
 
 const Z_INDEX: NumberSpec = { min: -9999, max: 9999, integer: true, example: "10" };
@@ -172,7 +180,7 @@ const isLengthLiteral = (value: unknown): value is { value: number; unit: string
   typeof value === "object" && value !== null && "value" in value && "unit" in value;
 
 /** A value as placeholder text: a literal, a keyword, or the variable's name (W-089). */
-function placeholderOf(value: unknown, design: DesignSystem): string | undefined {
+export function placeholderOf(value: unknown, design: DesignSystem): string | undefined {
   if (typeof value === "string" || typeof value === "number") return String(value);
   if (isLengthLiteral(value)) return `${value.value}${value.unit}`;
   if (typeof value === "object" && value !== null && "var" in value) {

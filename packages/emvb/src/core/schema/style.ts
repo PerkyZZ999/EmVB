@@ -189,9 +189,19 @@ export const StyleProps = z.strictObject({
     })
     .optional(),
   borderWidth: LengthValue.optional(),
+  /** Per-side widths (W-138, D-044), after `borderWidth`, so a side beats the all-sides value. */
+  borderTopWidth: LengthValue.optional(),
+  borderRightWidth: LengthValue.optional(),
+  borderBottomWidth: LengthValue.optional(),
+  borderLeftWidth: LengthValue.optional(),
   borderStyle: z.enum(["none", "solid", "dashed", "dotted"]).optional(),
   borderColor: ColorValue.optional(),
   borderRadius: LengthValue.optional(),
+  /** Per-corner radii (W-138, D-044), after `borderRadius`. */
+  borderTopLeftRadius: LengthValue.optional(),
+  borderTopRightRadius: LengthValue.optional(),
+  borderBottomRightRadius: LengthValue.optional(),
+  borderBottomLeftRadius: LengthValue.optional(),
   opacity: z.number().finite().min(0).max(1).optional(),
   boxShadow: BoxShadow.optional(),
   filter: Filter.optional(),

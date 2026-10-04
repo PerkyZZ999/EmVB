@@ -502,9 +502,17 @@ const PROPERTY_MAP: {
   gradient: { css: "background-image", toValue: cssGradient },
   overlay: { css: "background-image", toValue: cssOverlay },
   borderWidth: { css: "border-width", toValue: cssLength },
+  borderTopWidth: { css: "border-top-width", toValue: cssLength },
+  borderRightWidth: { css: "border-inline-end-width", toValue: cssLength },
+  borderBottomWidth: { css: "border-bottom-width", toValue: cssLength },
+  borderLeftWidth: { css: "border-inline-start-width", toValue: cssLength },
   borderStyle: { css: "border-style", toValue: keyword(BORDER_STYLE) },
   borderColor: { css: "border-color", toValue: cssColor },
   borderRadius: { css: "border-radius", toValue: cssLength },
+  borderTopLeftRadius: { css: "border-start-start-radius", toValue: cssLength },
+  borderTopRightRadius: { css: "border-start-end-radius", toValue: cssLength },
+  borderBottomRightRadius: { css: "border-end-end-radius", toValue: cssLength },
+  borderBottomLeftRadius: { css: "border-end-start-radius", toValue: cssLength },
   opacity: { css: "opacity", toValue: cssOpacity },
   boxShadow: { css: "box-shadow", toValue: cssBoxShadow },
   filter: { css: "filter", toValue: cssFilter },
@@ -516,6 +524,18 @@ const PROPERTY_MAP: {
 /** Exported for table-driven tests (W-017). */
 export const STYLE_PROPERTY_MAP = PROPERTY_MAP;
 
+/** All-sides keys whose CSS shorthand must come before the per-side longhands (W-138). */
+const SHORTHANDS = new Set(["borderWidth", "borderRadius"]);
+
+/** Entries with `borderWidth` and `borderRadius` first, so a side or corner always wins. */
+const shorthandsFirst = (record: Record<string, unknown>): [string, unknown][] => {
+  const entries = Object.entries(record);
+  return [
+    ...entries.filter(([key]) => SHORTHANDS.has(key)),
+    ...entries.filter(([key]) => !SHORTHANDS.has(key)),
+  ];
+};
+
 /** Converts style props into safe declarations; anything that fails validation is dropped and reported. */
 export function styleDeclarations(style: unknown): {
   declarations: Declaration[];
@@ -525,7 +545,7 @@ export function styleDeclarations(style: unknown): {
   const rejected: string[] = [];
   if (typeof style !== "object" || style === null) return { declarations, rejected };
   const record = style as Record<string, unknown>;
-  for (const [key, raw] of Object.entries(record)) {
+  for (const [key, raw] of shorthandsFirst(record)) {
     if (BACKGROUND_KEYS.has(key)) continue;
     const entry = Object.hasOwn(PROPERTY_MAP, key)
       ? PROPERTY_MAP[key as keyof StyleProps]

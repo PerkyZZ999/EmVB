@@ -7902,7 +7902,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7922,7 +7922,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7962,7 +7962,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 9;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 10;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -8222,7 +8222,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8242,7 +8242,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8262,7 +8262,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 9;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 10;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8271,9 +8271,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 9"
+        "layout and design are at version 10"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 9"
+      "expect": "\\(fail\\).*layout and design are at version 10"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8282,7 +8282,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 9;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 10;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8291,9 +8291,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 9"
+        "layout and design are at version 10"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 9"
+      "expect": "\\(fail\\).*layout and design are at version 10"
     },
     {
       "id": "D-032/node-states-refused",
@@ -18614,6 +18614,113 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*open by default"
+    },
+    {
+      "id": "W-138/linked-sets-one-side",
+      "requirement": "W-138",
+      "description": "With the boxes linked, a typed value only reaches the box it was typed in.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BoxControl.tsx",
+          "search": "onPatch(linked ? linkedPatch(group, parsed.value) : sidePatch(group, index, parsed.value));",
+          "replace": "onPatch(sidePatch(group, index, parsed.value));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*linked, one value goes to all four sides"
+    },
+    {
+      "id": "W-138/linked-border-keeps-sides",
+      "requirement": "W-138",
+      "description": "Linking border width or radius writes the all-sides value but leaves the per-side values, which still win.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/box-sides.ts",
+          "search": "    patch[group.all] = value;\n    for (const key of group.sides) patch[key] = undefined;",
+          "replace": "    patch[group.all] = value;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*border width per side beats the all-sides width"
+    },
+    {
+      "id": "W-138/shorthand-after-sides",
+      "requirement": "W-138",
+      "description": "Declarations follow key order, so a border-width set after a side width wipes the side out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  for (const [key, raw] of shorthandsFirst(record)) {",
+          "replace": "  for (const [key, raw] of Object.entries(record)) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*the all-sides CSS comes first"
+    },
+    {
+      "id": "W-138/no-all-sides-fallback",
+      "requirement": "W-138",
+      "description": "A border side box shows empty when only the all-sides width is set.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/box-sides.ts",
+          "search": "  return group.sides.map((key) => style?.[key] ?? all);",
+          "replace": "  return group.sides.map((key) => style?.[key] ?? (all === undefined ? undefined : undefined));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a side falls back to the all-sides value"
+    },
+    {
+      "id": "W-138/unlink-ignored",
+      "requirement": "W-138",
+      "description": "The link button can't unlink equal sides, so one side can't be set on its own.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BoxControl.tsx",
+          "search": "      setLinkWanted(false);\n      return;",
+          "replace": "      return;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*unlinked, a box sets only its side"
+    },
+    {
+      "id": "W-138/e2e-linked-sets-one-side",
+      "requirement": "W-138",
+      "description": "In the editor, linked padding only changes the side typed in.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BoxControl.tsx",
+          "search": "onPatch(linked ? linkedPatch(group, parsed.value) : sidePatch(group, index, parsed.value));",
+          "replace": "onPatch(sidePatch(group, index, parsed.value));"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/box-control.e2e.ts", "--project=node", "-g", "W-138"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*the linked boxes set padding"
     }
   ]
 }
