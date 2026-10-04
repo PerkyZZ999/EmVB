@@ -21,6 +21,14 @@ export async function saveDraft(page: Page) {
   await expect(saveStatus(page)).toContainText("Saved", { timeout: 15_000 });
 }
 
+/** Publishes the style draft from Site styles, as a user does (W-100). */
+export async function publishSiteStyles(page: Page) {
+  await overlay(page).getByRole("button", { name: "Site styles" }).click();
+  const publish = overlay(page).getByRole("button", { name: "Publish styles" });
+  await publish.click();
+  await expect(publish).toHaveCount(0);
+}
+
 /** Opens `id` in the editor and waits for its top bar, and for `heading` on the canvas if given. */
 export async function openEditor(page: Page, id: string, heading?: string, collection?: string) {
   await page.goto(`${EDITOR}?entry=${id}${collection ? `&collection=${collection}` : ""}`);

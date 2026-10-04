@@ -1,7 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
-import { loadDesign, setClass } from "./support/design.ts";
-import { canvas, openEditor, overlay, saveDraft, unique } from "./support/helpers.ts";
+import { loadDraft, setClass } from "./support/design.ts";
+import {
+  canvas,
+  openEditor,
+  overlay,
+  publishSiteStyles,
+  saveDraft,
+  unique,
+} from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
@@ -199,7 +206,7 @@ test("Effects section edits a class: opacity, inset shadow, grayscale and cursor
     const heading = `.emvb-k-${classId}`;
     await expect.poll(() => computed(page, heading, keys, true)).toEqual(expected);
     await expect
-      .poll(async () => (await loadDesign(request)).design.classes?.find((c) => c.id === classId))
+      .poll(async () => (await loadDraft(request)).design.classes?.find((c) => c.id === classId))
       .toMatchObject({
         style: {
           opacity: 0.5,
@@ -211,6 +218,7 @@ test("Effects section edits a class: opacity, inset shadow, grayscale and cursor
     const stored = await storedLayout<Stored>(request, id);
     expect(stored.root.children?.[0]?.children?.[0]?.style).toBeUndefined();
 
+    await publishSiteStyles(page);
     await publishPage(request, id);
     await page.goto(`/${slug}`);
     expect(await computed(page, heading, keys, false)).toEqual(expected);

@@ -1,7 +1,14 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
-import { loadDesign, setClass } from "./support/design.ts";
-import { canvas, openEditor, overlay, saveDraft, unique } from "./support/helpers.ts";
+import { loadDesign, loadDraft, setClass } from "./support/design.ts";
+import {
+  canvas,
+  openEditor,
+  overlay,
+  publishSiteStyles,
+  saveDraft,
+  unique,
+} from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
@@ -140,8 +147,11 @@ test("state switcher edits Hover on the element and on a class, previews each st
     await type(page, "Opacity (%)", "60");
     await expect.poll(() => one(classed, "opacity")).toBe("0.6");
     await expect
-      .poll(async () => (await loadDesign(request)).design.classes?.find((c) => c.id === classId))
+      .poll(async () => (await loadDraft(request)).design.classes?.find((c) => c.id === classId))
       .toMatchObject({ style: {}, states: { hover: { opacity: 0.6 } } });
+    // Style edits stay in the draft until Publish styles (W-100).
+    const unpublished = (await loadDesign(request)).design.classes?.find((c) => c.id === classId);
+    expect(unpublished?.states).toBeUndefined();
     await expect(chip.locator("xpath=..").locator(".emvb-state-dot")).toHaveCount(1);
 
     await saveDraft(page);
@@ -151,6 +161,10 @@ test("state switcher edits Hover on the element and on a class, previews each st
     expect(first).toMatchObject({ style: { opacity: 0.9, transition: { duration: 200 } } });
     expect(second?.states).toBeUndefined();
 
+    await publishSiteStyles(page);
+    await expect
+      .poll(async () => (await loadDesign(request)).design.classes?.find((c) => c.id === classId))
+      .toMatchObject({ states: { hover: { opacity: 0.6 } } });
     await publishPage(request, id);
     await page.goto(`/${slug}`);
     const live = page.locator(".emvb-e-btn00001");

@@ -17346,6 +17346,116 @@
         "own sidebar section"
       ],
       "expect": "\\(fail\\).*own sidebar section"
+    },
+    {
+      "id": "W-118/e2e-class-state-not-stored",
+      "requirement": "W-118",
+      "description": "the style draft drops a class's Hover, Focus and Active styles when it is saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "      DESIGN_DRAFT_KEY,\n      ctx.input.revision,\n      result.design,\n",
+          "replace": "      DESIGN_DRAFT_KEY,\n      ctx.input.revision,\n      { ...result.design, classes: result.design.classes?.map(({ states: _states, ...cls }) => cls) },\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "state switcher edits Hover"
+      ],
+      "expect": "✘.*\\[node\\].*state switcher edits Hover"
+    },
+    {
+      "id": "W-118/e2e-draft-served-publicly",
+      "requirement": "W-118",
+      "description": "the public design route serves the style draft before Publish styles",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "  handler: (ctx) => readDesign(ctx, DESIGN_KEY),\n",
+          "replace": "  handler: (ctx) => readDesign(ctx, DESIGN_DRAFT_KEY),\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/state-styles.e2e.ts",
+        "--project=node",
+        "-g",
+        "state switcher edits Hover"
+      ],
+      "expect": "✘.*\\[node\\].*state switcher edits Hover"
+    },
+    {
+      "id": "W-118/e2e-class-style-not-stored",
+      "requirement": "W-118",
+      "description": "the style draft empties a class's Normal styles when it is saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "      DESIGN_DRAFT_KEY,\n      ctx.input.revision,\n      result.design,\n",
+          "replace": "      DESIGN_DRAFT_KEY,\n      ctx.input.revision,\n      { ...result.design, classes: result.design.classes?.map((cls) => ({ ...cls, style: {} })) },\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/style-sections.e2e.ts",
+        "--project=node",
+        "-g",
+        "Effects section edits a class"
+      ],
+      "expect": "✘.*\\[node\\].*Effects section edits a class"
+    },
+    {
+      "id": "W-118/e2e-publish-keeps-old-styles",
+      "requirement": "W-118",
+      "description": "Publish styles writes the old public design back instead of the draft",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "      ctx.input.publishedRevision,\n      draft.design,\n",
+          "replace": "      ctx.input.publishedRevision,\n      (await readDesign(ctx, DESIGN_KEY)).design,\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/style-sections.e2e.ts",
+        "--project=node",
+        "-g",
+        "Effects section edits a class"
+      ],
+      "expect": "✘.*\\[node\\].*Effects section edits a class"
+    },
+    {
+      "id": "W-118/e2e-design-never-saved",
+      "requirement": "W-118",
+      "description": "the editor applies a style change without saving it to the style draft",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "const revision = await saveDesign(fetcher, next, latest.current.designRevision);",
+          "replace": "const revision = latest.current.designRevision;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/class-chips.e2e.ts",
+        "--project=node",
+        "-g",
+        "creates a new class inline"
+      ],
+      "expect": "✘.*\\[node\\].*creates a new class inline"
     }
   ]
 }

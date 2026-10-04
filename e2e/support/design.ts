@@ -28,7 +28,8 @@ type DraftDoc = {
   publishedRevision: string | null;
 };
 
-async function loadDraft(request: APIRequestContext): Promise<DraftDoc> {
+/** The style draft the editor saves to (W-100); `loadDesign` reads the published design. */
+export async function loadDraft(request: APIRequestContext): Promise<DraftDoc> {
   const current = await api(request, "GET", "/_emdash/api/plugins/emvb/design/draft");
   return current.json?.["data"] as DraftDoc;
 }

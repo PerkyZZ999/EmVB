@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
-import { loadDesign, setClass } from "./support/design.ts";
+import { loadDraft, setClass } from "./support/design.ts";
 import { canvas, openEditor, overlay, saveDraft, unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
@@ -94,12 +94,12 @@ test("Classes chip input creates a new class inline with Enter", async ({ page, 
     );
     await input(page).press("Enter");
     await expect(box(page).locator(".emvb-chip-label", { hasText: name })).toBeVisible();
-    const design = (await loadDesign(request)).design;
+    const design = (await loadDraft(request)).design;
     createdId = design.classes?.find((c) => c.name === name)?.id;
     expect(createdId).toBeTruthy();
     expect(await chipIds(page)).toEqual([createdId]);
   } finally {
-    createdId ??= (await loadDesign(request)).design.classes?.find((c) => c.name === name)?.id;
+    createdId ??= (await loadDraft(request)).design.classes?.find((c) => c.name === name)?.id;
     if (createdId) await setClass(request, createdId, null);
   }
 });
@@ -151,7 +151,7 @@ test("Classes chip input works from the keyboard", async ({ page, request }) => 
     await page.keyboard.press("Enter");
     await expect(chip(page, b)).toContainText(`Renamed ${b}`);
     await expect
-      .poll(async () => (await loadDesign(request)).design.classes?.find((c) => c.id === b)?.name)
+      .poll(async () => (await loadDraft(request)).design.classes?.find((c) => c.id === b)?.name)
       .toBe(`Renamed ${b}`);
     await chip(page, b).focus();
     await page.keyboard.press("Backspace");
@@ -182,7 +182,7 @@ test("Classes chip menu renames and duplicates", async ({ page, request }) => {
     try {
       await expect
         .poll(async () => {
-          const classes = (await loadDesign(request)).design.classes ?? [];
+          const classes = (await loadDraft(request)).design.classes ?? [];
           copyId = classes.find((c) => c.name === `Menu two ${classId} copy`)?.id;
           return copyId;
         })
