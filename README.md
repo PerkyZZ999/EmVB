@@ -34,3 +34,12 @@ The project site is a static Astro app in `site/`:
 bun run site        # http://127.0.0.1:4455
 bun run site:build
 ```
+
+## Before a public GitHub push
+
+Pushing this repository is not an npm publish. D-007 still keeps the `emvb` package private.
+
+- There is no `LICENSE` file. Until you add one, a public repository does not grant reuse.
+- Do not commit a Cloudflare `database_id`, KV id, or API token. `demos/cloudflare/wrangler.jsonc` names the local D1 database only.
+- `.env`, `.dev.vars`, local databases, and `demos/*/.wrangler/` are gitignored. Check `git status` before the first push.
+- `docs/HANDOFF.md` includes notes about this machine. Read that block if those notes should stay private.
