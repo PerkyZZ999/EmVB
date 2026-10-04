@@ -20,7 +20,8 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   bottom: BOX_AUTO,
   left: BOX_AUTO,
   fontSize: ["px", "rem", "em", "%", "vw"],
-  lineHeight: ["px", "rem", "em", "%"],
+  // em first, so a typed 1.5 means 1.5 times the font size, not 1.5 px (W-125).
+  lineHeight: ["em", "px", "rem", "%"],
   letterSpacing: ["px", "rem", "em"],
   borderWidth: ["px", "rem", "em"],
   borderRadius: ["px", "%", "rem", "em"],

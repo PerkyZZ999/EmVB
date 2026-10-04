@@ -17692,6 +17692,26 @@
         "named by their label"
       ],
       "expect": "\\(fail\\).*is labelled \"Body\""
+    },
+    {
+      "id": "W-125/line-height-defaults-to-px",
+      "requirement": "W-125",
+      "description": "Line height offers px first again, so a typed 1.1 becomes 1.1px and the lines overlap",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "lineHeight: [\"em\", \"px\", \"rem\", \"%\"],",
+          "replace": "lineHeight: [\"px\", \"rem\", \"em\", \"%\"],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx",
+        "-t",
+        "multiple of the font size"
+      ],
+      "expect": "\\(fail\\).*multiple of the font size"
     }
   ]
 }
