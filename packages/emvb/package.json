@@ -3,8 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "description": "Visual page builder plugin for EmDash CMS",
+  "keywords": [
+    "astro",
+    "cloudflare-workers",
+    "emdash",
+    "emdash-plugin",
+    "page-builder",
+    "visual-editor"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OWNER/EmVB.git",
+    "directory": "packages/emvb"
+  },
   "files": [
-    "src"
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!src/**/__snapshots__"
   ],
   "type": "module",
   "exports": {
