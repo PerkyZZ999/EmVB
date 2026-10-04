@@ -1,10 +1,10 @@
 # Changelog
 
-EmVB isn't released yet. The `emvb` package is private, so nothing is on npm.
+## 0.1.0 — 2026-10-04
 
-## Unreleased
+The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb): a visual page builder for EmDash CMS 1.0.x on Node (SQLite) and Cloudflare Workers (D1).
 
-The first public source release: a visual page builder for EmDash CMS 1.0.x on Node (SQLite) and Cloudflare Workers (D1).
+- **Package:** install with `npm i @perkyzz/emvb` and register `emvb()` in `astro.config`. It ships TypeScript source (no build step) and needs EmDash ^1.0.0, Astro ^7 and React ^19.
 
 - **Editor:** a full-screen editor inside the EmDash admin. Drag, drop and nest elements, edit text on the canvas, copy and paste, undo and redo, and preview desktop, tablet and mobile.
 - **Elements:** containers with flexbox or CSS Grid, headings, text, buttons, images, video, icons, tabs, accordions, popups and forms (through the EmDash forms plugin).

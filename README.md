@@ -34,7 +34,26 @@ The Cloudflare demo runs the same way with `bun run demo:cf` on port 4412.
 
 ## Use it in your EmDash site
 
-EmVB isn't on npm yet. To try it in a host site, follow [docs/guides/install-in-a-host-site.md](docs/guides/install-in-a-host-site.md). The demos in `demos/node` and `demos/cloudflare` are complete host sites; their `src/pages/[slug].astro` shows the public route.
+```bash
+npm i @perkyzz/emvb
+```
+
+Register it next to your other EmDash plugins in `astro.config.mjs`:
+
+```js
+import { emvb } from "@perkyzz/emvb";
+
+export default defineConfig({
+  integrations: [
+    emdash({
+      plugins: [emvb()],
+      // …database, storage…
+    }),
+  ],
+});
+```
+
+Then add the public route and run **Set up EmVB** once, as [docs/guides/install-in-a-host-site.md](docs/guides/install-in-a-host-site.md) describes. The demos in `demos/node` and `demos/cloudflare` are complete host sites; their `src/pages/[slug].astro` shows the public route.
 
 ## Development and testing
 

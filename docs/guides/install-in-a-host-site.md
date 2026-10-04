@@ -6,12 +6,14 @@ Verified against EmDash `^1.0.0` (1.0.1) and the EmVB TypeScript-source package 
 
 ## 1. Install the package
 
-From your EmDash site root (Bun):
+From your EmDash site root:
 
 ```bash
-bun add emvb@file:../path/to/emvb-*.tgz
-# or, in a monorepo workspace: "emvb": "workspace:*"
+npm i @perkyzz/emvb
+# or: bun add @perkyzz/emvb
 ```
+
+EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.0 site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash's exact pin) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own.
 
 Optional (forms on EmVB pages):
 
@@ -24,7 +26,7 @@ bun add @emdash-cms/plugin-forms@0.2.9
 In `astro.config.mjs` (or `.ts`), add EmVB next to your other plugins:
 
 ```js
-import { emvb } from "emvb";
+import { emvb } from "@perkyzz/emvb";
 import { formsPlugin } from "@emdash-cms/plugin-forms"; // optional
 
 export default defineConfig({
@@ -44,8 +46,8 @@ Copy the pattern from EmVB’s demos (`demos/node/src/pages/[slug].astro`): try 
 ```astro
 ---
 import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
-import { EmVBPage, resolveEmVBPage } from "emvb/astro";
-import { EmVBFormsRuntime } from "emvb/astro/forms";
+import { EmVBPage, resolveEmVBPage } from "@perkyzz/emvb/astro";
+import { EmVBFormsRuntime } from "@perkyzz/emvb/astro/forms"; // only with @emdash-cms/plugin-forms
 // …site layout…
 
 const emvb = await resolveEmVBPage(Astro);
@@ -64,6 +66,8 @@ if (!emvb && !(await getEmDashEntry("pages", decodeSlug(Astro.params.slug)))) {
 
 Blank-canvas EmVB pages use `standalone` on `EmVBPage` (see the demos).
 
+`@perkyzz/emvb/astro/forms` imports the forms plugin's client script, so import `EmVBFormsRuntime` only when `@emdash-cms/plugin-forms` is installed. Without it the build fails with `"initForms" is not exported`; drop that import and the `EmVBFormsRuntime` element.
+
 ## 4. First-run setup
 
 1. Start the site (`bunx --bun astro dev` or your host’s script).
@@ -73,12 +77,12 @@ Blank-canvas EmVB pages use `standalone` on `EmVBPage` (see the demos).
 
 ## 5. Package shape check
 
-From the EmVB repo:
+From the EmVB repo, to try an unreleased change in a host site:
 
 ```bash
 bun pm pack --cwd packages/emvb
-# Install the tarball into a fresh starter and apply steps 2–4.
+# In the host site: npm i /path/to/perkyzz-emvb-<version>.tgz, then apply steps 2–4.
 bun run pack:smoke
 ```
 
-`pack:smoke` records that the packed package exports `.`, `./astro`, and `./astro/forms` without a build step.
+`pack:smoke` checks that the packed package is `@perkyzz/emvb`, isn't private, exports TypeScript source for `.`, `./astro`, `./astro/forms`, `./admin` and `./core`, ships no tests, and has no `workspace:` or `catalog:` ranges.
