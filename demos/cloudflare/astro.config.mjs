@@ -3,7 +3,7 @@ import react from "@astrojs/react";
 import { d1, r2 } from "@emdash-cms/cloudflare";
 import { defineConfig } from "astro/config";
 import { formsPlugin } from "@emdash-cms/plugin-forms";
-import { emvb } from "emvb";
+import { emvb } from "@perkyzz/emvb";
 import emdash from "emdash/astro";
 
 export default defineConfig({

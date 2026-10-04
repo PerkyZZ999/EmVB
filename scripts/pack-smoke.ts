@@ -17,15 +17,30 @@ const FILES = [
   "package/src/admin/index.tsx",
 ];
 
+/** The name EmVB is published under on npm (W-123). */
+const PACKAGE = "@perkyzz/emvb";
+/** Fields npm installs from; a `workspace:` or `catalog:` range there breaks every install. */
+const DEP_FIELDS = ["dependencies", "peerDependencies", "optionalDependencies"] as const;
+
 type PackedPackage = {
   name?: string;
+  private?: boolean;
   exports?: Record<string, string | { import?: string; default?: string }>;
-};
+} & { [field in (typeof DEP_FIELDS)[number]]?: Record<string, string> };
 
-/** What is wrong with a packed package.json and tarball file list; empty when it ships TS source and no tests. */
+/**
+ * What is wrong with a packed package.json and tarball file list; empty when it can be published
+ * as is: the right name, not private, TS source exports, no tests and no workspace-only ranges.
+ */
 export function packProblems(pkg: PackedPackage, names: string): string[] {
   const problems: string[] = [];
-  if (pkg.name !== "emvb") problems.push(`expected name emvb, got ${pkg.name}`);
+  if (pkg.name !== PACKAGE) problems.push(`expected name ${PACKAGE}, got ${pkg.name}`);
+  if (pkg.private) problems.push("the package is marked private");
+  for (const field of DEP_FIELDS) {
+    for (const [dep, range] of Object.entries(pkg[field] ?? {})) {
+      if (/^(workspace|catalog):/.test(range)) problems.push(`${field}.${dep} uses ${range}`);
+    }
+  }
   for (const key of EXPORTS) {
     const entry = pkg.exports?.[key];
     const path = typeof entry === "string" ? entry : (entry?.import ?? entry?.default ?? "");
@@ -52,7 +67,7 @@ async function run(cmd: string[], cwd?: string) {
   return out;
 }
 
-/** Packs the emvb package and returns what is wrong with the tarball; empty when it ships TS source. */
+/** Packs the emvb package and returns what is wrong with the tarball; empty when it can be published. */
 export async function packSmoke(): Promise<string[]> {
   const staging = await mkdtemp(join(tmpdir(), "emvb-pack-"));
   try {

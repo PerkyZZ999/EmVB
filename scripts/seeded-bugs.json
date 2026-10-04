@@ -8,8 +8,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PACKAGE_NAME = \"emvb\";",
-          "replace": "export const PACKAGE_NAME = \"emvb\";\nexport const debug = () => console.log(\"x\");"
+          "search": "export const PACKAGE_NAME = \"@perkyzz/emvb\";",
+          "replace": "export const PACKAGE_NAME = \"@perkyzz/emvb\";\nexport const debug = () => console.log(\"x\");"
         }
       ],
       "command": ["bun", "run", "lint"],
@@ -78,8 +78,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PACKAGE_NAME = \"emvb\";",
-          "replace": "export const PACKAGE_NAME = \"emvb\";\nexport const UNUSED_CONSTANT = 1;"
+          "search": "export const PACKAGE_NAME = \"@perkyzz/emvb\";",
+          "replace": "export const PACKAGE_NAME = \"@perkyzz/emvb\";\nexport const UNUSED_CONSTANT = 1;"
         }
       ],
       "command": ["bun", "run", "fallow"],
@@ -17551,6 +17551,127 @@
       ],
       "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "a test file or a snapshot"],
       "expect": "\\(fail\\).*a test file or a snapshot"
+    },
+    {
+      "id": "W-123/entrypoint-not-package-name",
+      "requirement": "W-123",
+      "description": "the descriptor's entrypoint keeps the old package name, so a host installing @perkyzz/emvb can't import the plugin",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const PACKAGE_NAME = \"@perkyzz/emvb\";",
+          "replace": "export const PACKAGE_NAME = \"emvb\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/deps/package-identity.test.ts"],
+      "expect": "\\(fail\\).*entrypoint is the npm package name"
+    },
+    {
+      "id": "W-123/admin-entry-not-exported",
+      "requirement": "W-123",
+      "description": "the admin entry names a subpath the package doesn't export",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const ADMIN_ENTRY = `${PACKAGE_NAME}/admin`;",
+          "replace": "export const ADMIN_ENTRY = `${PACKAGE_NAME}/editor`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/deps/package-identity.test.ts"],
+      "expect": "\\(fail\\).*admin entry is the package's ./admin export"
+    },
+    {
+      "id": "W-123/plugin-version-drifts",
+      "requirement": "W-123",
+      "description": "the plugin reports 0.0.0 while the package is 0.1.0",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const PLUGIN_VERSION = \"0.1.0\";",
+          "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/deps/package-identity.test.ts"],
+      "expect": "\\(fail\\).*reports the package version"
+    },
+    {
+      "id": "W-123/e2e-health-old-version",
+      "requirement": "W-123",
+      "description": "the health route reports the old plugin version",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const PLUGIN_VERSION = \"0.1.0\";",
+          "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/smoke.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*the EmVB plugin is loaded by the host"
+    },
+    {
+      "id": "W-123/pack-expects-old-name",
+      "requirement": "W-123",
+      "description": "the pack check still expects the unscoped name, so the real tarball is refused",
+      "edits": [
+        {
+          "file": "scripts/pack-smoke.ts",
+          "search": "const PACKAGE = \"@perkyzz/emvb\";",
+          "replace": "const PACKAGE = \"emvb\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./scripts/pack-smoke.test.ts",
+        "-t",
+        "TypeScript source entrypoints"
+      ],
+      "expect": "\\(fail\\).*packed emvb tarball exports TypeScript source"
+    },
+    {
+      "id": "W-123/pack-private-unchecked",
+      "requirement": "W-123",
+      "description": "the pack check accepts a package marked private",
+      "edits": [
+        {
+          "file": "scripts/pack-smoke.ts",
+          "search": "  if (pkg.private) problems.push(\"the package is marked private\");\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "a private flag"],
+      "expect": "\\(fail\\).*a private flag"
+    },
+    {
+      "id": "W-123/pack-catalog-range-unchecked",
+      "requirement": "W-123",
+      "description": "the pack check catches workspace: ranges but not catalog: ones",
+      "edits": [
+        {
+          "file": "scripts/pack-smoke.ts",
+          "search": "/^(workspace|catalog):/",
+          "replace": "/^workspace:/"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "a private flag"],
+      "expect": "\\(fail\\).*a private flag"
+    },
+    {
+      "id": "W-123/pack-peer-ranges-unchecked",
+      "requirement": "W-123",
+      "description": "the pack check skips peerDependencies, so a workspace: peer would ship",
+      "edits": [
+        {
+          "file": "scripts/pack-smoke.ts",
+          "search": "const DEP_FIELDS = [\"dependencies\", \"peerDependencies\", \"optionalDependencies\"] as const;",
+          "replace": "const DEP_FIELDS = [\"dependencies\", \"optionalDependencies\"] as const;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "a private flag"],
+      "expect": "\\(fail\\).*a private flag"
     }
   ]
 }
