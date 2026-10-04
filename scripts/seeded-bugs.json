@@ -18480,6 +18480,79 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/design/classes.test.ts"],
       "expect": "\\(fail\\).*copies tablet and mobile styles and Hide on too"
+    },
+    {
+      "id": "W-136/custom-hex-unchecked",
+      "requirement": "W-136",
+      "description": "The Custom color field applies any text, so an invalid colour reaches the element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "    if (!HEX.test(hex)) {\n      setError(BAD_HEX);\n      return;\n    }\n    setError(null);\n    onCommit(hex);",
+          "replace": "    setError(null);\n    onCommit(hex);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*a bad hex is refused, a good one applied"
+    },
+    {
+      "id": "W-136/no-swatches",
+      "requirement": "W-136",
+      "description": "The colour variables are only inside the Select again, with no visible swatches.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "      {colors.length > 0 && (",
+          "replace": "      {colors.length < 0 && ("
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*every colour variable shows as a swatch button"
+    },
+    {
+      "id": "W-136/picker-applies-every-drag",
+      "requirement": "W-136",
+      "description": "The native colour picker applies on every drag step, flooding the undo history.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "          ref={picker}\n          value={pickerHex(HEX.test(draft) ? draft : value || \"#000000\")}\n          onChange={(event) => setDraft(event.target.value)}",
+          "replace": "          ref={picker}\n          value={pickerHex(HEX.test(draft) ? draft : value || \"#000000\")}\n          onChange={(event) => {\n            setDraft(event.target.value);\n            commit(event.target.value);\n          }}"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*applies when its dialog closes"
+    },
+    {
+      "id": "W-136/trigger-without-swatch",
+      "requirement": "W-136",
+      "description": "The Select shows a custom colour as bare text, with no swatch.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "                <Swatch color={custom} />\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
+      "expect": "\\(fail\\).*shows the swatch"
+    },
+    {
+      "id": "W-136/e2e-no-custom-option",
+      "requirement": "W-136",
+      "description": "In the editor, the colour Select has no Custom color option, so a one-off hex can't be set.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "        <Select.Option value={CUSTOM}>Custom color</Select.Option>\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/color.e2e.ts", "--project=node", "-g", "W-136"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*takes a validated custom hex"
     }
   ]
 }

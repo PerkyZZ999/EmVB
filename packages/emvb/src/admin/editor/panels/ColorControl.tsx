@@ -5,9 +5,13 @@ import { slugify, type DesignSystem, type StyleProps } from "../../../core/index
 
 type ColorValue = StyleProps["color"];
 import { BUTTON, FIELD } from "../../ui.ts";
+import { pickerHex } from "./variable-values.ts";
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const NONE = "__none__";
+const CUSTOM = "__custom__";
+/** Swatch buttons shown under the Select; the rest stay in its list (W-136). */
+const SWATCH_LIMIT = 16;
 const BAD_HEX = "Enter a hex color such as #1a2b3c.";
 
 const errorText = (error: unknown) =>
@@ -22,6 +26,10 @@ function InlineError({ children }: { children: string }) {
   );
 }
 
+function Swatch({ color }: { color: string }) {
+  return <span className="emvb-swatch" style={{ background: color }} aria-hidden="true" />;
+}
+
 const uniqueId = (design: DesignSystem, name: string) => {
   const base = slugify(name).slice(0, 34) || "color";
   const taken = new Set(design.variables.colors.map((color) => color.id));
@@ -31,8 +39,10 @@ const uniqueId = (design: DesignSystem, name: string) => {
 };
 
 /**
- * Colour bound to a design variable (R-004 partial). Creating a variable or editing a bound
- * variable's value saves the design at once: it applies to every page (D-013).
+ * Colour: Default, a design variable (R-004) or a custom hex (W-136, D-043). The Select keeps its
+ * visible label and shows the current swatch; the site's colour variables also show as swatch
+ * buttons under it, and "Custom color" opens a validated hex field with the browser's picker.
+ * Creating a variable or editing a bound variable's value saves the design at once (D-013).
  */
 export function ColorControl({
   label,
@@ -53,38 +63,85 @@ export function ColorControl({
   const colors = design.variables.colors;
   const bound = value && typeof value === "object" ? colors.find((c) => c.id === value.var) : null;
   const [creating, setCreating] = React.useState(false);
+  const [customOpen, setCustomOpen] = React.useState(false);
+  const custom = typeof value === "string" ? value : null;
+  const showCustom = custom !== null || customOpen;
 
-  const selectValue = !value ? NONE : typeof value === "object" ? value.var : value;
+  const selectValue = showCustom ? CUSTOM : value && typeof value === "object" ? value.var : NONE;
+  const pick = (next: unknown) => {
+    if (next === CUSTOM) {
+      setCustomOpen(true);
+      return;
+    }
+    setCustomOpen(false);
+    onChange(next === NONE || next === null ? undefined : { var: String(next) });
+  };
   return (
     <div className="emvb-field-group" data-emvb-control="color">
       <Select
         label={label}
         className={FIELD}
         value={selectValue}
-        onValueChange={(next) =>
-          onChange(
-            next === NONE
-              ? undefined
-              : HEX.test(String(next))
-                ? String(next)
-                : { var: String(next) },
-          )
-        }
-        renderValue={(current: unknown) =>
-          current === NONE
-            ? (placeholder ?? "Default")
-            : (colors.find((c) => c.id === current)?.name ?? String(current))
-        }
+        onValueChange={pick}
+        renderValue={(current: unknown) => {
+          if (current === NONE) return placeholder ?? "Default";
+          if (current === CUSTOM)
+            return custom ? (
+              <>
+                <Swatch color={custom} />
+                {custom}
+              </>
+            ) : (
+              "Custom color"
+            );
+          const color = colors.find((c) => c.id === current);
+          return color ? (
+            <>
+              <Swatch color={color.value} />
+              {color.name}
+            </>
+          ) : (
+            String(current)
+          );
+        }}
       >
         <Select.Option value={NONE}>Default</Select.Option>
-        {typeof value === "string" && <Select.Option value={value}>{value}</Select.Option>}
         {colors.map((color) => (
           <Select.Option key={color.id} value={color.id}>
-            <span className="emvb-swatch" style={{ background: color.value }} aria-hidden="true" />
+            <Swatch color={color.value} />
             {color.name}
           </Select.Option>
         ))}
+        <Select.Option value={CUSTOM}>Custom color</Select.Option>
       </Select>
+      {colors.length > 0 && (
+        <div
+          className="emvb-swatches"
+          role="group"
+          aria-label={`${label}: colour variables`}
+          data-emvb-swatches=""
+        >
+          {colors.slice(0, SWATCH_LIMIT).map((color) => (
+            <button
+              key={color.id}
+              type="button"
+              className="emvb-swatch-button"
+              aria-label={`${color.name} (${color.value})`}
+              aria-pressed={bound?.id === color.id}
+              title={`${color.name} · ${color.value}`}
+              onClick={() => pick(color.id)}
+            >
+              <Swatch color={color.value} />
+            </button>
+          ))}
+          {colors.length > SWATCH_LIMIT && (
+            <span className="emvb-helper">+{colors.length - SWATCH_LIMIT} more in the list</span>
+          )}
+        </div>
+      )}
+      {showCustom && (
+        <CustomColor key={custom ?? "new"} value={custom ?? ""} label={label} onCommit={onChange} />
+      )}
       {bound && (
         <VariableValue
           key={bound.id}
@@ -124,6 +181,72 @@ export function ColorControl({
           New variable
         </Button>
       )}
+    </div>
+  );
+}
+
+/** The custom hex field with the browser's colour picker beside it (W-136). */
+function CustomColor({
+  value,
+  label,
+  onCommit,
+}: {
+  value: string;
+  label: string;
+  onCommit: (hex: string) => void;
+}) {
+  const [draft, setDraft] = React.useState(value);
+  const [error, setError] = React.useState<string | null>(null);
+  const picker = React.useRef<HTMLInputElement | null>(null);
+  const commit = (next: string) => {
+    const hex = next.trim();
+    if (hex === value || hex === "") {
+      setError(null);
+      return;
+    }
+    if (!HEX.test(hex)) {
+      setError(BAD_HEX);
+      return;
+    }
+    setError(null);
+    onCommit(hex);
+  };
+  // The picker applies on its native change event (the dialog closed), not on every drag step.
+  React.useEffect(() => {
+    const el = picker.current;
+    if (!el) return;
+    const onPicked = () => {
+      setDraft(el.value);
+      commit(el.value);
+    };
+    el.addEventListener("change", onPicked);
+    return () => el.removeEventListener("change", onPicked);
+  });
+  return (
+    <div className="emvb-custom-color" data-emvb-custom-color="">
+      <div className="emvb-custom-color-row">
+        <Input
+          label="Custom color"
+          className={`${FIELD} emvb-mono`}
+          placeholder="#1a2b3c"
+          value={draft}
+          variant={error ? "error" : undefined}
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={() => commit(draft)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") commit(draft);
+          }}
+        />
+        <input
+          type="color"
+          className="emvb-color-picker"
+          aria-label={`Pick ${label.toLowerCase()}`}
+          ref={picker}
+          value={pickerHex(HEX.test(draft) ? draft : value || "#000000")}
+          onChange={(event) => setDraft(event.target.value)}
+        />
+      </div>
+      {error && <InlineError>{error}</InlineError>}
     </div>
   );
 }

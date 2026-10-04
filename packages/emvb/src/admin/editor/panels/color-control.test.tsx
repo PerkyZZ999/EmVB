@@ -72,7 +72,20 @@ async function control(value: StyleProps["color"], fail?: string) {
   const alert = () => host.querySelector('[role="alert"]')?.textContent ?? null;
   const has = (label: string) =>
     [...host.querySelectorAll("label")].some((l) => l.textContent?.trim() === label);
-  return { designs, values, type, blur, enter, click, alert, has };
+  const swatches = () =>
+    [...host.querySelectorAll<HTMLButtonElement>("[data-emvb-swatches] button")].map(
+      (b) =>
+        `${b.getAttribute("aria-label")}${b.getAttribute("aria-pressed") === "true" ? " *" : ""}`,
+    );
+  const swatch = async (name: string) => {
+    const button = host.querySelector<HTMLButtonElement>(
+      `[data-emvb-swatches] button[aria-label^="${name} "]`,
+    );
+    if (!button) throw new Error(`no ${name} swatch`);
+    await act(async () => button.click());
+  };
+  const picker = () => host.querySelector<HTMLInputElement>('input[type="color"]');
+  return { designs, values, type, blur, enter, click, alert, has, swatches, swatch, picker, host };
 }
 
 describe("editing a bound colour variable (W-091)", () => {
@@ -164,5 +177,58 @@ describe("creating a colour variable (W-091)", () => {
     await view.click("Cancel");
     expect(view.has("Variable name")).toBe(false);
     expect(view.designs).toEqual([]);
+  });
+});
+
+describe("colour field: label, swatches and Custom color (W-136)", () => {
+  test("the label stays visible and every colour variable shows as a swatch button", async () => {
+    const view = await control({ var: "ink" });
+    // Kumo's Select prints its label as visible text above the trigger.
+    expect(
+      [...view.host.querySelectorAll("span")].some((el) => el.textContent === "Text color"),
+    ).toBe(true);
+    expect(view.swatches()).toEqual(["Brand (#0055ff)", "Ink (#111111) *"]);
+    await view.swatch("Brand");
+    expect(view.values).toEqual([{ var: "brand" }]);
+    expect(view.has("Custom color")).toBe(false);
+  });
+
+  test("a hex value shows the Custom color field; a bad hex is refused, a good one applied", async () => {
+    const view = await control("#c2410c");
+    expect(view.has("Custom color")).toBe(true);
+    await view.type("Custom color", "#12");
+    await view.blur("Custom color");
+    expect(view.alert()).toBe("Enter a hex color such as #1a2b3c.");
+    expect(view.values).toEqual([]);
+    await view.type("Custom color", " #123456 ");
+    await view.enter("Custom color");
+    expect(view.alert()).toBeNull();
+    expect(view.values).toEqual(["#123456"]);
+    expect(view.designs).toEqual([]);
+  });
+
+  test("the browser's picker previews while dragging and applies when its dialog closes", async () => {
+    const view = await control("#c2410c");
+    const picker = view.picker();
+    if (!picker) throw new Error("no picker");
+    expect(picker.value).toBe("#c2410c");
+    expect(picker.getAttribute("aria-label")).toBe("Pick text color");
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+        picker,
+        "#00ff00",
+      );
+      picker.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(view.values).toEqual([]);
+    await act(async () => picker.dispatchEvent(new Event("change", { bubbles: true })));
+    expect(view.values).toEqual(["#00ff00"]);
+  });
+
+  test("the Select lists Default, the variables and Custom color, and shows the swatch", async () => {
+    const view = await control("#c2410c");
+    const trigger = view.host.querySelector("[data-emvb-control=color] button");
+    expect(trigger?.querySelector(".emvb-swatch")?.getAttribute("style")).toContain("#c2410c");
+    expect(trigger?.textContent).toContain("#c2410c");
   });
 });
