@@ -8,6 +8,7 @@ dist/
 coverage/
 
 # Local data and secrets
+docs/private/
 *.db
 *.db-shm
 *.db-wal
