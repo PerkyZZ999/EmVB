@@ -72,3 +72,28 @@ test("the Desktop canvas uses desktop styles even in a window narrower than a de
   await page.getByRole("tab", { name: "Desktop" }).click();
   await expect.poll(color).toBe("rgb(51, 51, 51)");
 });
+
+test("the device switcher hugs its options, each with an icon and its name (W-127)", async ({
+  page,
+  request,
+}) => {
+  const text = `Switcher ${unique()}`;
+  const id = await createPage(request, text, layoutFor(text), `switcher-${unique()}`);
+  await openEditor(page, id, text);
+  const list = page.getByRole("tablist", { name: "Device" });
+  for (const name of ["Desktop", "Tablet", "Mobile"]) {
+    const tab = list.getByRole("tab", { name, exact: true });
+    await expect(tab).toBeVisible();
+    await expect(tab.locator('svg[aria-hidden="true"]')).toHaveCount(1);
+  }
+  const gaps = await list.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    const tabs = [...el.querySelectorAll('[role="tab"]')].map((t) => t.getBoundingClientRect());
+    return {
+      left: Math.round((tabs[0]?.left ?? 0) - box.left),
+      right: Math.round(box.right - (tabs.at(-1)?.right ?? 0)),
+    };
+  });
+  // Only the control's own padding is left on each side, the same on both.
+  expect(gaps.right).toBeLessThanOrEqual(gaps.left + 2);
+});

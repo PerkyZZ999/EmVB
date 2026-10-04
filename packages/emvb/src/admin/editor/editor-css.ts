@@ -139,7 +139,9 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-layer-select[aria-current="true"] .emvb-layer-preview { color: inherit; }
 .emvb-canvas { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--color-kumo-canvas); }
 .emvb-device-bar { display: flex; flex: none; align-items: center; justify-content: center; gap: 12px; height: 36px; border-bottom: 1px solid var(--color-kumo-line); background: var(--color-kumo-surface); }
-.emvb-device-tabs { width: 240px; }
+/* W-127: the segmented control hugs its three options; a fixed width left a gap on the right. */
+.emvb-device-tabs { width: max-content; }
+.emvb-device-label { display: inline-flex; align-items: center; gap: 6px; }
 .emvb-device-hide { display: inline-flex; align-items: center; gap: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
 .emvb-stage { position: relative; display: flex; flex: 1 1 auto; justify-content: center; min-height: 0; width: 100%; overflow: hidden; }
 .emvb-stage-frame { position: relative; width: 100%; height: 100%; }

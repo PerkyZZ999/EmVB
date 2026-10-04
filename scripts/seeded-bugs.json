@@ -17752,6 +17752,40 @@
         "W-126"
       ],
       "expect": "\\(fail\\).*styles are not live yet"
+    },
+    {
+      "id": "W-127/device-switcher-fixed-width",
+      "requirement": "W-127",
+      "description": "the device switcher keeps its fixed 240px width, leaving an empty gap right of Mobile",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-device-tabs { width: max-content; }",
+          "replace": ".emvb-device-tabs { width: 240px; }"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/devices.e2e.ts", "--project=node", "-g", "W-127"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*the device switcher hugs its options"
+    },
+    {
+      "id": "W-127/device-icons-missing",
+      "requirement": "W-127",
+      "description": "the device options lose their icons",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/DeviceBar.tsx",
+          "search": "      <DeviceIcon aria-hidden=\"true\" size={14} />\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/devices.e2e.ts", "--project=node", "-g", "W-127"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*the device switcher hugs its options"
     }
   ]
 }
