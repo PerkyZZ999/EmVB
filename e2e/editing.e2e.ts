@@ -298,3 +298,75 @@ test("on the canvas a tab label shows its panel, and so does a panel chosen in L
   await expect(shown("Panel three")).toBeVisible();
   await expect(shown("Panel two")).toBeHidden();
 });
+
+/** The page-space box of a locator, failing when it has none. */
+const boxOf = async (where: { boundingBox: () => Promise<unknown> }) => {
+  const box = (await where.boundingBox()) as {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null;
+  if (!box) throw new Error("no box");
+  return box;
+};
+
+test("the selected element's toolbar sits inside its outline and lets clicks through (W-131)", async ({
+  page,
+  request,
+}) => {
+  const layout = {
+    schemaVersion: 9,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        { id: "head0001", type: "heading", props: { text: "Above the box", level: 2 } },
+        {
+          id: "box00001",
+          type: "container",
+          props: {},
+          style: {
+            paddingTop: { value: 40, unit: "px" },
+            paddingBottom: { value: 40, unit: "px" },
+          },
+          children: [{ id: "text0001", type: "text", props: { text: "Inside the box" } }],
+        },
+      ],
+    },
+  };
+  const id = await createPage(request, "Toolbar place", layout, `toolbar-${unique()}`);
+  await openEditor(page, id, "Above the box");
+  const toolbar = overlay(page).locator("[data-emvb-toolbar]");
+  const outline = overlay(page).locator("[data-emvb-selected]");
+  const frame = await page.locator("iframe[data-emvb-canvas]").boundingBox();
+  if (!frame) throw new Error("canvas has no box");
+
+  await openLayers(page);
+  await overlay(page).locator('[data-emvb-layer="box00001"] .emvb-layer-select').click();
+  await expect(toolbar).toContainText("Container");
+  const container = await boxOf(outline);
+  const bar = await boxOf(toolbar);
+  const above = await boxOf(canvas(page).getByRole("heading", { name: "Above the box" }));
+  // Inside the container's corner, clear of the heading above it.
+  expect(bar.y).toBeGreaterThanOrEqual(container.y);
+  expect(bar.x).toBeGreaterThanOrEqual(container.x);
+  expect(bar.y + 1).toBeGreaterThanOrEqual(above.y + above.height);
+  // The toolbar's name lets the pointer through to the canvas; only its buttons take clicks.
+  const name = await boxOf(toolbar.locator("span").first());
+  const hit = await page.evaluate(
+    ({ x, y }) => document.elementFromPoint(x, y)?.matches("iframe[data-emvb-canvas]") ?? false,
+    { x: name.x + name.width / 2, y: name.y + name.height / 2 },
+  );
+  expect(hit).toBe(true);
+
+  // A short element at the top of the canvas keeps its toolbar outside, below it.
+  await canvas(page).getByRole("heading", { name: "Above the box" }).click();
+  await expect(toolbar).toContainText("Heading");
+  const headingBox = await boxOf(outline);
+  const short = await boxOf(toolbar);
+  expect(headingBox.height).toBeLessThan(52);
+  expect(headingBox.y).toBeLessThan(frame.y + 26);
+  expect(short.y + 1).toBeGreaterThanOrEqual(headingBox.y + headingBox.height);
+});

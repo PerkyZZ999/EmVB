@@ -37,6 +37,25 @@ export function dropLabelAt(outline: Box): { top: number; left: number } {
     : { top: Math.max(0, outline.top - LABEL_HEIGHT), left: outline.left };
 }
 
+/** Tall enough for the selected element's toolbar to sit inside its top-left corner. */
+const TOOLBAR_ROOM = 2 * LABEL_HEIGHT;
+
+/**
+ * Where the selected element's toolbar goes (W-131): inside the element's top-left corner, so it
+ * doesn't cover the element above, and kept in view while a tall element scrolls. Outside (above,
+ * or below at the top of the canvas) when the element is too short, or while its text is being
+ * edited on the canvas. The toolbar lets clicks through except on its buttons.
+ */
+export function toolbarAt(box: Box, editing = false): { top: number; left: number } {
+  const left = Math.max(0, box.left);
+  if (box.height >= TOOLBAR_ROOM && !editing) {
+    const lowest = box.top + box.height - LABEL_HEIGHT - 2;
+    return { top: Math.min(Math.max(box.top + 2, 2), lowest), left: left + 2 };
+  }
+  if (box.top >= LABEL_HEIGHT) return { top: box.top - LABEL_HEIGHT, left };
+  return { top: box.top + box.height, left };
+}
+
 const place = (box: Box) => ({
   top: box.top,
   left: box.left,
@@ -53,6 +72,7 @@ export function SelectionOverlay({
   dropLine,
   dropTarget,
   invalid,
+  editing = false,
 }: {
   hover: Box | null;
   selected: Box | null;
@@ -61,6 +81,8 @@ export function SelectionOverlay({
   dropLine?: Box | null;
   dropTarget?: DropTarget | null;
   invalid?: InvalidDrop | null;
+  /** The selected element's text is being edited on the canvas (W-131). */
+  editing?: boolean;
 }) {
   const show = selected || dropLine || invalid || dropTarget;
   return (
@@ -111,10 +133,8 @@ export function SelectionOverlay({
           />
           <div
             className="emvb-overlay-label"
-            style={{
-              top: selected.top >= LABEL_HEIGHT ? selected.top - LABEL_HEIGHT : selected.top,
-              left: Math.max(0, selected.left),
-            }}
+            data-emvb-toolbar=""
+            style={toolbarAt(selected, editing)}
           >
             {selection.canMove(selectedId) && (
               <button

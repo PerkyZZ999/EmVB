@@ -18131,6 +18131,95 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*selecting inside a closed accordion item"
+    },
+    {
+      "id": "W-131/toolbar-always-above",
+      "requirement": "W-131",
+      "description": "The selected element's toolbar sits above the outline again, covering the element above.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
+          "search": "if (box.height >= TOOLBAR_ROOM && !editing) {",
+          "replace": "if (false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/canvas/selection-overlay.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a tall element gets the toolbar in its top-left corner"
+    },
+    {
+      "id": "W-131/toolbar-scrolls-away",
+      "requirement": "W-131",
+      "description": "The inside toolbar scrolls out of view with a tall element's top.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
+          "search": "Math.min(Math.max(box.top + 2, 2), lowest)",
+          "replace": "box.top + 2 + lowest * 0"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/canvas/selection-overlay.test.tsx"
+      ],
+      "expect": "\\(fail\\).*it stays in view while a tall element scrolls up"
+    },
+    {
+      "id": "W-131/toolbar-covers-edited-text",
+      "requirement": "W-131",
+      "description": "The toolbar stays inside the element while its text is edited on the canvas, covering the text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
+          "search": "if (box.height >= TOOLBAR_ROOM && !editing) {",
+          "replace": "if (box.height >= TOOLBAR_ROOM) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/canvas/selection-overlay.test.tsx"
+      ],
+      "expect": "\\(fail\\).*goes outside while editing text"
+    },
+    {
+      "id": "W-131/short-toolbar-covers-top",
+      "requirement": "W-131",
+      "description": "A short element at the top of the canvas gets the toolbar over itself instead of below.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
+          "search": "return { top: box.top + box.height, left };",
+          "replace": "return { top: box.top, left };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/canvas/selection-overlay.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a short element keeps it above, or below"
+    },
+    {
+      "id": "W-131/e2e-toolbar-blocks-clicks",
+      "requirement": "W-131",
+      "description": "The toolbar takes pointer events everywhere, so content under its name can't be clicked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "  box-shadow: 0 1px 2px var(--color-kumo-shadow-edge), 0 2px 6px var(--color-kumo-shadow-drop);\n  pointer-events: none;\n}",
+          "replace": "  box-shadow: 0 1px 2px var(--color-kumo-shadow-edge), 0 2px 6px var(--color-kumo-shadow-drop);\n  pointer-events: auto;\n}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/editing.e2e.ts", "--project=node", "-g", "W-131"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*toolbar sits inside its outline"
     }
   ]
 }

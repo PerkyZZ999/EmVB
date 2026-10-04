@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import type { ClipboardActions } from "../useClipboardActions.ts";
 import type { CanvasSelection } from "./CanvasFrame.tsx";
-import { SelectionOverlay } from "./SelectionOverlay.tsx";
+import { SelectionOverlay, toolbarAt } from "./SelectionOverlay.tsx";
 import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
 
 let calls: string[] = [];
@@ -112,5 +112,44 @@ describe("canvas quick actions: copy and paste (W-093)", () => {
       />,
     );
     expect(trigger()?.outerHTML ?? null).toBeNull();
+  });
+});
+
+describe("the selected element's toolbar sits inside its outline (W-131)", () => {
+  const toolbar = () => document.querySelector<HTMLElement>("[data-emvb-toolbar]");
+  const render = (box: typeof BOX, editing = false) =>
+    mount(
+      <SelectionOverlay
+        hover={null}
+        selected={box}
+        selectedId="head0001"
+        selection={selection()}
+        editing={editing}
+      />,
+    );
+
+  test("a tall element gets the toolbar in its top-left corner", async () => {
+    await render({ top: 120, left: 30, width: 400, height: 200 });
+    expect([toolbar()?.style.top, toolbar()?.style.left]).toEqual(["122px", "32px"]);
+  });
+
+  test("a short element keeps it above, or below at the top of the canvas", () => {
+    expect(toolbarAt({ top: 120, left: 30, width: 400, height: 30 })).toEqual({
+      top: 94,
+      left: 30,
+    });
+    expect(toolbarAt({ top: 4, left: 30, width: 400, height: 30 })).toEqual({ top: 34, left: 30 });
+  });
+
+  test("it stays in view while a tall element scrolls up, and goes outside while editing text", () => {
+    expect(toolbarAt({ top: -300, left: 0, width: 400, height: 600 })).toEqual({ top: 2, left: 2 });
+    expect(toolbarAt({ top: -580, left: 0, width: 400, height: 600 })).toEqual({
+      top: -8,
+      left: 2,
+    });
+    expect(toolbarAt({ top: 120, left: 30, width: 400, height: 200 }, true)).toEqual({
+      top: 94,
+      left: 30,
+    });
   });
 });

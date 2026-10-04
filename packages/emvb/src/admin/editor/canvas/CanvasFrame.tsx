@@ -409,6 +409,7 @@ export function CanvasFrame({
           dropLine={dropLine}
           dropTarget={invalid ? null : dropTarget}
           invalid={invalid ?? refused}
+          editing={!!editingId && editingId === selectedId}
         />
         {editingId && editingText !== null && editingBox && editingEl?.nodeType === 1 && (
           <CanvasTextEdit
