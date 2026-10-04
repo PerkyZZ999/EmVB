@@ -17476,6 +17476,42 @@
         "summarises the page"
       ],
       "expect": "\\(fail\\).*summarises the page"
+    },
+    {
+      "id": "W-120/e2e-widget-schema-off-by-one",
+      "requirement": "W-120",
+      "description": "the read-only layout widget shows the schema version one lower than the page's",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/LayoutField.tsx",
+          "search": "schema ${summary.schemaVersion ?? \"unknown\"}",
+          "replace": "schema ${(summary.schemaVersion ?? 1) - 1}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/setup.e2e.ts",
+        "--project=node",
+        "-g",
+        "read-only widget"
+      ],
+      "expect": "✘.*\\[node\\].*read-only widget"
+    },
+    {
+      "id": "W-120/e2e-draft-revision-hidden",
+      "requirement": "W-120",
+      "description": "the style draft route hides the draft's revision, so an editor's save conflicts",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/design-routes.ts",
+          "search": "      revision: draft.revision,\n",
+          "replace": "      revision: null,\n"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node", "-g", "saves pages"],
+      "expect": "✘.*\\[node\\].*saves pages"
     }
   ]
 }

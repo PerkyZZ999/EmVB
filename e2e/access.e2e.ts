@@ -1,5 +1,5 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
-import { loadDesign, saveDesign } from "./support/design.ts";
+import { loadDraft, saveDesign } from "./support/design.ts";
 import { api, createPage, setUpEmvbOnce } from "./support/api.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
 import { EDITOR } from "./support/helpers.ts";
@@ -108,7 +108,8 @@ for (const [name, role] of allowed) {
       page.getByRole("complementary", { name: "Admin navigation" }).locator('a[href*="/editor"]'),
     ).toHaveCount(0);
 
-    const { design, revision } = await loadDesign(request);
+    // Saves go to the style draft, so they need the draft's revision (W-100).
+    const { design, revision } = await loadDraft(request);
     await saveDesign(request, design, revision);
     await createPage(request, "Role check", pageLayout);
   });
