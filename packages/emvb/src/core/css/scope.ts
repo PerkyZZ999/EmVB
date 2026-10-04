@@ -2,12 +2,14 @@
  * Per-render style scoping (W-112). A public page and each theme part are rendered on their own,
  * and each stylesheet repeats the base rules of the element types it uses. Without a scope, the
  * page's base rules come after a header's local rules on the same specificity and win. Every
- * selector here is prefixed with `:where([data-emvb-scope="<id>"])`, so a sheet styles only the
- * markup it was rendered with. `:where` adds no specificity, so the cascade inside a sheet and
+ * selector here is prefixed with `:where(.emvb-s-<id>)`, so a sheet styles only the markup it was
+ * rendered with. The scope is a class, not a `data-emvb-*` attribute, because published HTML
+ * carries no `data-emvb` markers. `:where` adds no specificity, so the cascade inside a sheet and
  * against the host's own CSS stays as it was.
  */
 
-const SCOPE_ATTR = "data-emvb-scope";
+const WRAPPER_CLASS = "emvb-scope";
+const scopeClass = (token: string) => `emvb-s-${token}`;
 
 /** A scope token that is safe in an attribute value and an attribute selector. */
 export function cssScopeToken(id: string): string | undefined {
@@ -17,11 +19,12 @@ export function cssScopeToken(id: string): string | undefined {
 
 /** The wrapper the scoped markup sits in. It takes no part in layout. */
 export function scopeWrapperCss(): string {
-  return `:where([${SCOPE_ATTR}]){display:contents}`;
+  return `:where(.${WRAPPER_CLASS}){display:contents}`;
 }
 
+/** The wrapper's class attribute for a scope token. */
 export function scopeAttribute(token: string): string {
-  return `${SCOPE_ATTR}="${token}"`;
+  return `class="${WRAPPER_CLASS} ${scopeClass(token)}"`;
 }
 
 function splitSelectors(prelude: string): string[] {
@@ -58,7 +61,7 @@ const GROUPING_AT_RULE = /^@(media|supports|container|layer)\b/;
 
 /** Prefixes every style rule in `css`, inside `@media` and `@supports` too. Keyframes stay as they are. */
 export function scopeCss(css: string, token: string): string {
-  const prefix = `:where([${SCOPE_ATTR}="${token}"]) `;
+  const prefix = `:where(.${scopeClass(token)}) `;
   let out = "";
   let i = 0;
   while (i < css.length) {

@@ -8461,8 +8461,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "      previewStates: mode === \"editor\",",
-          "replace": "      previewStates: true,"
+          "search": "    previewStates: mode === \"editor\",",
+          "replace": "    previewStates: true,"
         }
       ],
       "command": [
@@ -16819,8 +16819,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "const prefix = `:where([${SCOPE_ATTR}=\"${token}\"]) `;",
-          "replace": "const prefix = `[${SCOPE_ATTR}=\"${token}\"] `;"
+          "search": "const prefix = `:where(.${scopeClass(token)}) `;",
+          "replace": "const prefix = `.${scopeClass(token)} `;"
         }
       ],
       "command": [
@@ -17284,6 +17284,48 @@
         "stays visible"
       ],
       "expect": "✘.*\\[node\\].*stays visible"
+    },
+    {
+      "id": "W-112/e2e-hide-rule-unscoped",
+      "requirement": "W-112",
+      "description": "the published page's hide rule is not scoped to the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "    scope: pageId,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/devices.e2e.ts",
+        "--project=node",
+        "-g",
+        "Hide on mobile is stored"
+      ],
+      "expect": "✘.*\\[node\\].*Hide on mobile is stored"
+    },
+    {
+      "id": "W-112/scope-as-data-attribute",
+      "requirement": "W-112",
+      "description": "the scope wrapper puts a data-emvb attribute into published HTML",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/scope.ts",
+          "search": "  return `class=\"${WRAPPER_CLASS} ${scopeClass(token)}\"`;",
+          "replace": "  return `data-emvb-scope=\"${token}\" class=\"${WRAPPER_CLASS} ${scopeClass(token)}\"`;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/render.test.ts",
+        "-t",
+        "reach only its own markup"
+      ],
+      "expect": "\\(fail\\).*reach only its own markup"
     },
     {
       "id": "nav/emvb-section-label",

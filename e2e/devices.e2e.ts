@@ -39,7 +39,7 @@ test("Hide on mobile is stored and the published CSS hides that element", async 
   await page.goto(`/${slug}`);
   const sheet = (await page.locator("style").allTextContents()).join("\n");
   expect(sheet).toContain(
-    `@media (max-width: 767px){:where([data-emvb-scope="${id}"]) .emvb-e-head0001{display:none}}`,
+    `@media (max-width: 767px){:where(.emvb-s-${id}) .emvb-e-head0001{display:none}}`,
   );
 });
 

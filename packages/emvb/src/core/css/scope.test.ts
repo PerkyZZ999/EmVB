@@ -7,17 +7,17 @@ describe("per-render style scoping (W-112)", () => {
       ".a{color:red}.b,.c:hover{margin:0}@media (max-width: 767px){.d{display:none}}" +
       "@keyframes emvb-fade{from{opacity:0}to{opacity:1}}:where(.emvb-root) h1{margin:0}";
     expect(scopeCss(css, "P1")).toBe(
-      ':where([data-emvb-scope="P1"]) .a{color:red}' +
-        ':where([data-emvb-scope="P1"]) .b,:where([data-emvb-scope="P1"]) .c:hover{margin:0}' +
-        '@media (max-width: 767px){:where([data-emvb-scope="P1"]) .d{display:none}}' +
+      ":where(.emvb-s-P1) .a{color:red}" +
+        ":where(.emvb-s-P1) .b,:where(.emvb-s-P1) .c:hover{margin:0}" +
+        "@media (max-width: 767px){:where(.emvb-s-P1) .d{display:none}}" +
         "@keyframes emvb-fade{from{opacity:0}to{opacity:1}}" +
-        ':where([data-emvb-scope="P1"]) :where(.emvb-root) h1{margin:0}',
+        ":where(.emvb-s-P1) :where(.emvb-root) h1{margin:0}",
     );
   });
 
   test("commas inside :where, :is or attribute selectors don't split a selector", () => {
     expect(scopeCss(':is(.a,.b) [x="1,2"]{gap:0}', "S")).toBe(
-      ':where([data-emvb-scope="S"]) :is(.a,.b) [x="1,2"]{gap:0}',
+      ':where(.emvb-s-S) :is(.a,.b) [x="1,2"]{gap:0}',
     );
   });
 
