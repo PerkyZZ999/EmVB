@@ -7,6 +7,7 @@ import {
   isPlainTextNode,
   isMultilineText,
   plainTextOf,
+  REASONS,
   type DragSource,
   type Layout,
   type LayoutNode,
@@ -15,6 +16,7 @@ import {
 import {
   dropContainer,
   dropIndex,
+  edgeDrop,
   EXISTING_ELEMENT_MIME,
   idAt,
   NEW_ELEMENT_MIME,
@@ -24,7 +26,12 @@ import {
 import { dragStash } from "../dnd/drag-stash.ts";
 import { newElement } from "../dnd/new-element.ts";
 import { useCanvasEvents } from "./canvas-events.ts";
-import { SelectionOverlay, type Box, type InvalidDrop } from "./SelectionOverlay.tsx";
+import {
+  SelectionOverlay,
+  type Box,
+  type DropTarget,
+  type InvalidDrop,
+} from "./SelectionOverlay.tsx";
 import { applyStatePreview, type StatePreview } from "./state-preview.ts";
 import { revealInTabs } from "./tab-reveal.ts";
 import { CanvasTextEdit } from "./CanvasTextEdit.tsx";
@@ -34,9 +41,28 @@ import type { ClipboardActions, PasteRefusal } from "../useClipboardActions.ts";
 const SRCDOC =
   '<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0}</style></head><body></body></html>';
 
-/** Canvas-only: empty containers are droppable. Never emitted into the saved page CSS. */
-const EDITOR_CANVAS_CSS =
-  ".emvb-container:empty{min-height:48px}.emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}[data-emvb-editing]{color:transparent !important}";
+/** Element types that hold other elements and show the empty drop placeholder (W-128). */
+const DROP_BOXES = [
+  "container",
+  "div-block",
+  "flexbox",
+  "grid",
+  "section",
+  "form",
+  "tab-panel",
+  "accordion-item",
+]
+  .map((type) => `.emvb-${type}:empty`)
+  .join(",");
+
+/**
+ * Canvas-only: empty containers are droppable and say so (W-128). Never emitted into the saved
+ * page CSS.
+ */
+export const EDITOR_CANVAS_CSS =
+  `:is(${DROP_BOXES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px;display:flex;align-items:center;justify-content:center}` +
+  `:is(${DROP_BOXES})::after{content:"Drop elements here";color:#64748b;font:13px/1.4 system-ui,sans-serif;pointer-events:none}` +
+  ".emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}[data-emvb-editing]{color:transparent !important}";
 
 const boxOf = (doc: Document, id: string | null): Box | null => {
   if (!id) return null;
@@ -64,6 +90,9 @@ const directionOf = (node: LayoutNode) =>
   (isParentNode(node) ? node.style?.flexDirection : undefined) ?? "column";
 
 const childrenOf = (node: LayoutNode): LayoutNode[] => (isParentNode(node) ? node.children : []);
+
+/** Refusals that end the walk to an accepting ancestor, so the user sees why (W-128). */
+const STOPS = new Set<string>([REASONS.intoItself, REASONS.tooDeep, REASONS.tooMany]);
 
 /** Insertion line for the drop index inside a container (DESIGN: brand accent). */
 export function dropLineBox(
@@ -153,6 +182,7 @@ export function CanvasFrame({
   const [hoverId, setHoverId] = React.useState<string | null>(null);
   const [dropLine, setDropLine] = React.useState<Box | null>(null);
   const [invalid, setInvalid] = React.useState<InvalidDrop | null>(null);
+  const [dropTarget, setDropTarget] = React.useState<DropTarget | null>(null);
   const [boxes, setBoxes] = React.useState<{ hover: Box | null; selected: Box | null }>({
     hover: null,
     selected: null,
@@ -179,6 +209,7 @@ export function CanvasFrame({
 
   const clearDrag = React.useCallback(() => {
     setDropLine(null);
+    setDropTarget(null);
     setInvalid(null);
   }, []);
 
@@ -188,19 +219,45 @@ export function CanvasFrame({
   }, []);
 
   const resolveDrop = React.useCallback(
-    (clientX: number, clientY: number, target: EventTarget | null) => {
+    (
+      clientX: number,
+      clientY: number,
+      target: EventTarget | null,
+      source: DragSource | null = null,
+    ) => {
       const current = layoutRef.current;
       const currentDoc = frame.current?.contentDocument;
       if (!current || !currentDoc) return null;
-      const container = dropContainer(current, idAt(target));
+      // W-128: the nearest element that takes the dragged one. A refusal the user must see
+      // (into itself, too deep, too many) stops the walk so the invalid outline still shows.
+      const verdict = (parent: LayoutNode) =>
+        source ? canDrop(current, source, parent.id) : { ok: isParentNode(parent) };
+      const accepts = (parent: LayoutNode) => {
+        const result = verdict(parent);
+        return result.ok || ("reason" in result && STOPS.has(result.reason as string));
+      };
+      const activePanel = (tabsId: string) => {
+        const tabs = findNode(current, tabsId);
+        return childrenOf(tabs ?? current.root).find(
+          (panel) => (rectOf(currentDoc, panel.id)?.height ?? 0) > 0,
+        )?.id;
+      };
+      const point = { x: clientX, y: clientY };
+      const hovered = dropContainer(current, idAt(target), accepts, activePanel);
+      const hoveredBox = rectOf(currentDoc, hovered.id);
+      const edge =
+        hoveredBox && hovered.id !== current.root.id
+          ? edgeDrop(current, hovered, hoveredBox, point, (parent) => verdict(parent).ok)
+          : null;
+      const container = (edge && findNode(current, edge.parentId)) || hovered;
       const direction = directionOf(container);
       const kids = childrenOf(container);
       const rects = kids.map((child) => {
         const rect = rectOf(currentDoc, child.id);
         return rect ?? { top: clientY, left: clientX, width: 0, height: 0 };
       });
-      const index = dropIndex(direction, rects, { x: clientX, y: clientY });
-      const containerBox = rectOf(currentDoc, container.id);
+      const index = edge ? edge.index : dropIndex(direction, rects, point);
+      const containerBox = edge ? rectOf(currentDoc, container.id) : hoveredBox;
       return {
         parentId: container.id,
         index,
@@ -222,12 +279,12 @@ export function CanvasFrame({
       if (!kinds.neu && !kinds.existing) return false;
       const current = layoutRef.current;
       if (!current) return false;
-      const next = resolveDrop(clientX, clientY, target);
+      const source = draggedSource(transfer, kinds.existing);
+      const next = resolveDrop(clientX, clientY, target, source);
       if (!next) {
         clearDrag();
         return true;
       }
-      const source = draggedSource(transfer, kinds.existing);
       // Until the source is known the line is provisional; canDrop runs again on drop.
       const allowed = source ? canDrop(current, source, next.parentId) : null;
       if (allowed && !allowed.ok) {
@@ -242,6 +299,18 @@ export function CanvasFrame({
       }
       setInvalid(null);
       setDropLine(next.line);
+      setDropTarget(
+        next.outline
+          ? {
+              outline: next.outline,
+              // The root is the page itself, so say so rather than "Container" (W-128).
+              label:
+                next.parentId === current.root.id
+                  ? "Inside Page"
+                  : `Inside ${handlers.current.labelFor(next.parentId)}`,
+            }
+          : null,
+      );
       if (allowed && transfer) transfer.dropEffect = kinds.existing ? "move" : "copy";
       return true;
     },
@@ -330,6 +399,7 @@ export function CanvasFrame({
           selectedId={selectedId}
           selection={selection}
           dropLine={dropLine}
+          dropTarget={invalid ? null : dropTarget}
           invalid={invalid ?? refused}
         />
         {editingId && editingText !== null && editingBox && editingEl?.nodeType === 1 && (

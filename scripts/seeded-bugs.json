@@ -17786,6 +17786,117 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*the device switcher hugs its options"
+    },
+    {
+      "id": "W-128/grid-not-a-drop-target",
+      "requirement": "W-128",
+      "description": "a Grid hands drops to its parent again, so elements land beside it instead of in it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/drop-target.ts",
+          "search": "    if (isParentNode(current)) {\n      if (accepts(current)) return current;",
+          "replace": "    if (isParentNode(current) && current.type !== \"grid\") {\n      if (accepts(current)) return current;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node", "-g", "W-128"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*a drop over a Grid's empty cell goes into the Grid"
+    },
+    {
+      "id": "W-128/no-empty-placeholder",
+      "requirement": "W-128",
+      "description": "empty containers lose their Drop elements here placeholder",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "content:\"Drop elements here\"",
+          "replace": "content:\"\""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node", "-g", "W-128"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*dragging into an empty nested container"
+    },
+    {
+      "id": "W-128/drop-target-hidden",
+      "requirement": "W-128",
+      "description": "the target container is no longer outlined and named while dragging",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "dropTarget={invalid ? null : dropTarget}",
+          "replace": "dropTarget={null}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node", "-g", "W-128"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*dragging into an empty nested container"
+    },
+    {
+      "id": "W-128/no-edge-zones",
+      "requirement": "W-128",
+      "description": "a drop near a container's edge always goes inside it, so nothing can be dropped beside it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/drop-target.ts",
+          "search": "const zone = Math.min(EDGE_ZONE, (span.end - span.start) / 4);",
+          "replace": "const zone = 0;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/drop-target.test.ts",
+        "-t",
+        "W-128"
+      ],
+      "expect": "\\(fail\\).*near a container's top or bottom edge"
+    },
+    {
+      "id": "W-128/tabs-drop-not-redirected",
+      "requirement": "W-128",
+      "description": "a heading dropped on Tabs is refused instead of going into the open panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/drop-target.ts",
+          "search": "      if (current.type === \"tabs\") {\n        const wanted",
+          "replace": "      if (current.type === \"tabs\" && accepts(current)) {\n        const wanted"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/drop-target.test.ts",
+        "-t",
+        "W-128"
+      ],
+      "expect": "\\(fail\\).*goes into the active panel"
+    },
+    {
+      "id": "W-128/walk-up-stops-early",
+      "requirement": "W-128",
+      "description": "a drop over an element that refuses it is not handed to the nearest ancestor that takes it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/drop-target.ts",
+          "search": "    const parentId = parentOf(layout, current.id);\n    current = parentId ? findNode(layout, parentId) : undefined;\n  }\n  return layout.root;",
+          "replace": "    if (isParentNode(current)) break;\n    const parentId = parentOf(layout, current.id);\n    current = parentId ? findNode(layout, parentId) : undefined;\n  }\n  return layout.root;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dnd/drop-target.test.ts",
+        "-t",
+        "W-128"
+      ],
+      "expect": "\\(fail\\).*nearest ancestor that takes it"
     }
   ]
 }

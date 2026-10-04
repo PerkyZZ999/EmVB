@@ -1,5 +1,5 @@
 import type { Layout, LayoutNode, StyleProps } from "../../../core/index.ts";
-import { findNode, parentOf } from "../../../core/index.ts";
+import { findNode, isParentNode, parentOf } from "../../../core/index.ts";
 
 export type Rect = { top: number; left: number; width: number; height: number };
 export type Point = { x: number; y: number };
@@ -83,19 +83,66 @@ export function dropIndex(direction: Direction, children: Rect[], point: Point):
   return before ?? (group.at(-1) as number) + 1;
 }
 
-/** The container a drop over `hoveredId` goes into: the element itself if it's a container, else its parent. */
-export function dropContainer(layout: Layout, hoveredId: string | null): LayoutNode {
-  const hovered = hoveredId ? findNode(layout, hoveredId) : undefined;
-  if (!hovered) return layout.root;
-  if (
-    hovered.type === "container" ||
-    hovered.type === "div-block" ||
-    hovered.type === "flexbox" ||
-    hovered.type === "loop" ||
-    hovered.type === "tabs" ||
-    hovered.type === "tab-panel"
-  )
-    return hovered;
-  const parentId = parentOf(layout, hovered.id);
-  return (parentId && findNode(layout, parentId)) || layout.root;
+/** Whether `parent` takes the element being dragged (usually `canDrop` for the known source). */
+export type Accepts = (parent: LayoutNode) => boolean;
+
+const anyParent: Accepts = (parent) => isParentNode(parent);
+
+/**
+ * The element a drop over `hoveredId` goes into (W-128): the nearest element at or above it that
+ * takes the dragged element. A non-panel dropped on Tabs goes into its active panel
+ * (`activePanel`, else the first panel). Falls back to the page's root.
+ */
+export function dropContainer(
+  layout: Layout,
+  hoveredId: string | null,
+  accepts: Accepts = anyParent,
+  activePanel?: (tabsId: string) => string | undefined,
+): LayoutNode {
+  let current: LayoutNode | undefined = hoveredId ? findNode(layout, hoveredId) : undefined;
+  while (current) {
+    if (isParentNode(current)) {
+      if (accepts(current)) return current;
+      if (current.type === "tabs") {
+        const wanted = activePanel?.(current.id);
+        const panel = current.children.find((child) => child.id === wanted) ?? current.children[0];
+        if (panel && accepts(panel)) return panel;
+      }
+    }
+    const parentId = parentOf(layout, current.id);
+    current = parentId ? findNode(layout, parentId) : undefined;
+  }
+  return layout.root;
+}
+
+/** How close to a container's edge, along its parent's main axis, a drop goes beside it. */
+export const EDGE_ZONE = 10;
+
+/**
+ * Before/after edge zones (W-128): a pointer within `EDGE_ZONE` px (at most a quarter of its size)
+ * of `container`'s start or end edge, along its parent's main axis, drops beside it in the
+ * parent instead of inside it. Null when the pointer is in the middle, for the root, or when the
+ * parent doesn't take the element.
+ */
+export function edgeDrop(
+  layout: Layout,
+  container: LayoutNode,
+  rect: Rect,
+  point: Point,
+  accepts: Accepts = anyParent,
+): { parentId: string; index: number } | null {
+  const parentId = parentOf(layout, container.id);
+  const parent = parentId ? findNode(layout, parentId) : undefined;
+  if (!parent || !isParentNode(parent) || !accepts(parent)) return null;
+  const direction = parent.style?.flexDirection ?? "column";
+  const row = direction.startsWith("row");
+  const span = along(rect, row);
+  const zone = Math.min(EDGE_ZONE, (span.end - span.start) / 4);
+  const pointer = row ? point.x : point.y;
+  const index = parent.children.findIndex((child) => child.id === container.id);
+  const reverse = direction.endsWith("reverse");
+  if (pointer < span.start + zone)
+    return { parentId: parent.id, index: reverse ? index + 1 : index };
+  if (pointer > span.end - zone) return { parentId: parent.id, index: reverse ? index : index + 1 };
+  return null;
 }

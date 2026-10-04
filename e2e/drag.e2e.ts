@@ -171,3 +171,181 @@ test("dropping a container into its own child shows the invalid outline and chan
     outer && "children" in outer && Array.isArray(outer.children) ? outer.children.length : -1,
   ).toBe(1);
 });
+
+type Tree = { id: string; type: string; props?: { text?: string }; children?: Tree[] };
+
+const nestingLayout = {
+  schemaVersion: 9,
+  root: {
+    id: "root0001",
+    type: "container",
+    props: {},
+    style: { flexDirection: "column", gap: { value: 16, unit: "px" } },
+    children: [
+      { id: "head0001", type: "heading", props: { text: "Nest top", level: 1 } },
+      {
+        id: "outr0001",
+        type: "container",
+        props: {},
+        style: {
+          paddingTop: { value: 24, unit: "px" },
+          paddingBottom: { value: 24, unit: "px" },
+          gap: { value: 12, unit: "px" },
+        },
+        children: [
+          { id: "text0001", type: "text", props: { text: "Card copy" } },
+          { id: "innr0001", type: "div-block", props: {}, children: [] },
+        ],
+      },
+      {
+        id: "grid0001",
+        type: "grid",
+        props: { columns: 2 },
+        children: [{ id: "text0002", type: "text", props: { text: "Cell one" } }],
+      },
+    ],
+  },
+};
+
+/** Drags an Add tile to a canvas point; `during` runs while the pointer is still down. */
+async function dragTileTo(
+  page: Page,
+  tile: string,
+  x: number,
+  y: number,
+  during?: () => Promise<void>,
+) {
+  const box = await overlay(page).locator(`[data-emvb-add-tile="${tile}"]`).boundingBox();
+  if (!box) throw new Error(`${tile} tile has no box`);
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(x, y, { steps: 16 });
+  // A real pointer keeps sending dragover while it rests on the target.
+  await page.mouse.move(x + 1, y);
+  await page.mouse.move(x, y);
+  await during?.();
+  await page.mouse.up();
+}
+
+const childTypes = (tree: Tree, id: string): string[] => {
+  const find = (node: Tree): Tree | undefined =>
+    node.id === id ? node : node.children?.map(find).find(Boolean);
+  return find(tree)?.children?.map((child) => child.type) ?? [];
+};
+
+test("dragging into an empty nested container nests it there and names the target (W-128)", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(request, "Nest drag", nestingLayout, `nest-${unique()}`);
+  await openEditor(page, id, "Nest top");
+  const inner = canvas(page).locator('[data-emvb-id="innr0001"]');
+  const placeholder = await inner.evaluate((el) => ({
+    text: getComputedStyle(el, "::after").content,
+    height: el.getBoundingClientRect().height,
+  }));
+  expect(placeholder.text).toBe('"Drop elements here"');
+  expect(placeholder.height).toBeGreaterThanOrEqual(48);
+  const box = await inner.boundingBox();
+  if (!box) throw new Error("inner div block has no box");
+  await dragTileTo(page, "heading", box.x + box.width / 2, box.y + box.height / 2, async () => {
+    await expect(overlay(page).locator("[data-emvb-drop-target-label]")).toHaveText(
+      "Inside Div Block",
+    );
+    await expect(overlay(page).locator("[data-emvb-drop-target]")).toBeVisible();
+  });
+  await expect(overlay(page).locator("[data-emvb-drop-target]")).toHaveCount(0);
+  await saveDraft(page);
+  const stored = await storedLayout<{ root: Tree }>(request, id);
+  expect(childTypes(stored.root, "innr0001")).toEqual(["heading"]);
+  expect(childTypes(stored.root, "outr0001")).toEqual(["text", "div-block"]);
+});
+
+test("a drop over a Grid's empty cell goes into the Grid, not beside it (W-128)", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(request, "Grid drag", nestingLayout, `nest-grid-${unique()}`);
+  await openEditor(page, id, "Nest top");
+  const grid = await canvas(page).locator('[data-emvb-id="grid0001"]').boundingBox();
+  if (!grid) throw new Error("grid has no box");
+  // The empty second column: right half of the grid, vertically centred.
+  await dragTileTo(page, "text", grid.x + grid.width * 0.75, grid.y + grid.height / 2);
+  await saveDraft(page);
+  const stored = await storedLayout<{ root: Tree }>(request, id);
+  expect(childTypes(stored.root, "grid0001")).toEqual(["text", "text"]);
+  expect(childTypes(stored.root, "root0001")).toEqual(["heading", "container", "grid"]);
+});
+
+test("near a container's bottom edge the drop goes after it, in its parent (W-128)", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(request, "Edge drag", nestingLayout, `nest-edge-${unique()}`);
+  await openEditor(page, id, "Nest top");
+  const outer = await canvas(page).locator('[data-emvb-id="outr0001"]').boundingBox();
+  if (!outer) throw new Error("outer container has no box");
+  await dragTileTo(
+    page,
+    "text",
+    outer.x + outer.width / 2,
+    outer.y + outer.height - 3,
+    async () => {
+      await expect(overlay(page).locator("[data-emvb-drop-target-label]")).toHaveText(
+        "Inside Page",
+      );
+    },
+  );
+  await saveDraft(page);
+  const stored = await storedLayout<{ root: Tree }>(request, id);
+  expect(childTypes(stored.root, "root0001")).toEqual(["heading", "container", "text", "grid"]);
+  expect(childTypes(stored.root, "outr0001")).toEqual(["text", "div-block"]);
+});
+
+test("a heading dropped on Tabs lands in the open tab panel (W-128)", async ({ page, request }) => {
+  const layout = {
+    schemaVersion: 9,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        { id: "head0001", type: "heading", props: { text: "Tabs top", level: 1 } },
+        {
+          id: "tabs0001",
+          type: "tabs",
+          props: {},
+          children: [
+            { id: "tabp0001", type: "tab-panel", props: { label: "First" }, children: [] },
+            { id: "tabp0002", type: "tab-panel", props: { label: "Second" }, children: [] },
+          ],
+        },
+      ],
+    },
+  };
+  const id = await createPage(request, "Tabs drag", layout, `nest-tabs-${unique()}`);
+  await openEditor(page, id, "Tabs top");
+  const tabs = await canvas(page).locator('[data-emvb-id="tabs0001"]').boundingBox();
+  if (!tabs) throw new Error("tabs have no box");
+  // The tab strip itself belongs to Tabs, which only takes panels.
+  await dragTileTo(page, "heading", tabs.x + tabs.width / 2, tabs.y + 6);
+  await saveDraft(page);
+  const stored = await storedLayout<{ root: Tree }>(request, id);
+  expect(childTypes(stored.root, "tabp0001")).toEqual(["heading"]);
+  expect(childTypes(stored.root, "tabs0001")).toEqual(["tab-panel", "tab-panel"]);
+});
+
+test("with a container selected, clicking an Add tile puts the element inside it (W-128)", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(request, "Click add", nestingLayout, `nest-click-${unique()}`);
+  await openEditor(page, id, "Nest top");
+  await openLayers(page);
+  await overlay(page).locator('[data-emvb-layer="innr0001"] .emvb-layer-select').click();
+  await overlay(page).getByRole("tab", { name: "Add" }).click();
+  await overlay(page).locator('[data-emvb-add-tile="heading"]').click();
+  await saveDraft(page);
+  const stored = await storedLayout<{ root: Tree }>(request, id);
+  expect(childTypes(stored.root, "innr0001")).toEqual(["heading"]);
+});

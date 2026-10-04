@@ -1,5 +1,5 @@
 import * as React from "react";
-import { canDrop, findNode, type Layout } from "../../../core/index.ts";
+import { canDrop, findNode, type DragSource, type Layout } from "../../../core/index.ts";
 import {
   EXISTING_ELEMENT_MIME,
   idAt,
@@ -65,6 +65,7 @@ export function useCanvasEvents({
     clientX: number,
     clientY: number,
     target: EventTarget | null,
+    source?: DragSource | null,
   ) => ResolvedDrop | null;
   paintDrag: (
     transfer: DataTransfer | null,
@@ -84,10 +85,17 @@ export function useCanvasEvents({
     ) => {
       const wasCancelled = cancelled.current;
       cancelled.current = false;
-      const next = resolveDrop(x, y, target);
-      clearDrag();
       const id = transfer?.getData(EXISTING_ELEMENT_MIME) || dragStash.id() || "";
       const type = transfer?.getData(NEW_ELEMENT_MIME) || dragStash.type() || "";
+      const fresh = !kinds.existing && type ? newElement(type) : null;
+      const source: DragSource | null =
+        kinds.existing && id
+          ? { kind: "existing", id }
+          : fresh
+            ? { kind: "new", node: fresh }
+            : null;
+      const next = resolveDrop(x, y, target, source);
+      clearDrag();
       dragStash.clear();
       if (wasCancelled || !next) return;
       const current = layoutRef.current;
@@ -99,7 +107,7 @@ export function useCanvasEvents({
         return;
       }
       if (kinds.neu && type) {
-        const node = newElement(type);
+        const node = fresh;
         if (!node) return;
         const allowed = canDrop(current, { kind: "new", node }, next.parentId);
         if (!allowed.ok) return;

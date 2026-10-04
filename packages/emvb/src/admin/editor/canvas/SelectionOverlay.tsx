@@ -19,6 +19,9 @@ export type InvalidDrop = {
   label: { x: number; y: number; reason: string };
 };
 
+/** The container a valid drop goes into, outlined and named while dragging (W-128). */
+export type DropTarget = { outline: Box; label: string };
+
 const LABEL_HEIGHT = 26;
 
 const place = (box: Box) => ({
@@ -35,6 +38,7 @@ export function SelectionOverlay({
   selectedId,
   selection,
   dropLine,
+  dropTarget,
   invalid,
 }: {
   hover: Box | null;
@@ -42,11 +46,31 @@ export function SelectionOverlay({
   selectedId: string | null;
   selection: CanvasSelection;
   dropLine?: Box | null;
+  dropTarget?: DropTarget | null;
   invalid?: InvalidDrop | null;
 }) {
-  const show = selected || dropLine || invalid;
+  const show = selected || dropLine || invalid || dropTarget;
   return (
     <div className="emvb-overlay" aria-hidden={show ? undefined : true}>
+      {dropTarget && (
+        <>
+          <div
+            className="emvb-drop-target"
+            data-emvb-drop-target=""
+            style={place(dropTarget.outline)}
+          />
+          <div
+            className="emvb-drop-target-label"
+            data-emvb-drop-target-label=""
+            style={{
+              top: Math.max(0, dropTarget.outline.top - LABEL_HEIGHT),
+              left: dropTarget.outline.left,
+            }}
+          >
+            {dropTarget.label}
+          </div>
+        </>
+      )}
       {dropLine && (
         <div className="emvb-drop-line" data-emvb-drop-line="" style={place(dropLine)} />
       )}

@@ -225,7 +225,10 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-element-tile:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 .emvb-element-tile:active { cursor: grabbing; }
-.emvb-drop-line { position: absolute; background: var(--color-kumo-brand); pointer-events: none; z-index: 2; }
+.emvb-drop-line { position: absolute; background: var(--color-kumo-brand); pointer-events: none; z-index: 2; height: auto; min-height: 3px; min-width: 3px; box-shadow: 0 0 0 1px var(--color-kumo-base, #fff); border-radius: 2px; }
+/* W-128: the container a drop goes into is tinted and named. */
+.emvb-drop-target { position: absolute; pointer-events: none; z-index: 1; border: 2px dashed var(--color-kumo-brand); background: color-mix(in srgb, var(--color-kumo-brand) 6%, transparent); border-radius: 4px; box-sizing: border-box; }
+.emvb-drop-target-label { position: absolute; pointer-events: none; z-index: 2; height: 22px; padding: 2px 8px; border-radius: 4px; background: var(--color-kumo-brand); color: #fff; font-size: 12px; line-height: 18px; white-space: nowrap; box-sizing: border-box; }
 
 .emvb-left-panel { gap: 12px; }
 .emvb-add-group { display: flex; flex-direction: column; gap: 8px; }
