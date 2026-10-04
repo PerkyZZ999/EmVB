@@ -148,6 +148,9 @@ export {
   renameClass,
   patchClassStyle,
   replaceClassId,
+  hasLocalStyles,
+  localToClassRefusal,
+  localStylesToClass,
 } from "./design/classes.ts";
 export { hasStateStyles, patchClassState, patchStates } from "./design/states.ts";
 export { designFromJson, designToJson, type DesignImport } from "./design/transfer.ts";

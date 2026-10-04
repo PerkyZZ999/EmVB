@@ -394,6 +394,9 @@ export const EDITOR_CSS = `${UI_CSS}
   flex: 1 0 72px; min-width: 72px; height: 20px; padding: 0 4px; border: 0; outline: 0;
   background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 13px;
 }
+.emvb-save-local { align-self: flex-start; font-size: 13px; }
+.emvb-save-local-row { display: flex; flex-direction: column; gap: 8px; }
+.emvb-save-local-actions { display: flex; gap: 8px; }
 .emvb-chip-text::placeholder { color: var(--text-color-kumo-placeholder, var(--text-color-kumo-subtle)); }
 .emvb-chip-listbox {
   position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0;

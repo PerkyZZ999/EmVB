@@ -23,6 +23,9 @@ import { hasItemList, ItemList, type ItemActions } from "./settings/ItemList.tsx
 import {
   ELEMENT_DESCRIPTORS,
   findNode,
+  hasLocalStyles,
+  localStylesToClass,
+  localToClassRefusal,
   isFormNode,
   parentOf,
   type DesignSystem,
@@ -459,6 +462,18 @@ function KnownElementPanel({
             onEdit={setEditing}
             onChange={(classes) => onChange({ ...node, classes })}
             onDesignChange={onDesignChange}
+            onSaveLocal={
+              editing === null && hasLocalStyles(node)
+                ? async (name) => {
+                    const refusal = localToClassRefusal(design, node);
+                    if (refusal) throw new Error(refusal);
+                    const moved = localStylesToClass(design, node, name);
+                    if (!moved) throw new Error("Couldn't save the class. Try again.");
+                    await onDesignChange(moved.design);
+                    onChange(moved.node);
+                  }
+                : undefined
+            }
           />
           {device === "desktop" ? (
             <StateSwitcher

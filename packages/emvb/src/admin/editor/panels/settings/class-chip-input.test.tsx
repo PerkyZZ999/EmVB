@@ -667,3 +667,100 @@ describe("class chip input: chip menu (W-087)", () => {
     }
   });
 });
+
+const saveLocalButton = () =>
+  document.querySelector("[data-emvb-save-local]") as HTMLButtonElement | null;
+const localNameField = () =>
+  document.querySelector("[data-emvb-save-local-row] input") as HTMLInputElement | null;
+
+async function nameLocal(text: string, key: "Enter" | "Escape" = "Enter") {
+  await act(async () => saveLocalButton()?.click());
+  const field = localNameField();
+  if (!field) throw new Error("no class name field");
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(field, text);
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await press(field, key);
+  await settle();
+}
+
+describe("save local styles as class (W-134)", () => {
+  const local = (): LayoutNode => ({
+    id: "head0001",
+    type: "heading",
+    props: { text: "Hi", level: 1 },
+    classes: ["card"],
+    hiddenOn: ["mobile"],
+    style: { color: "#112233" },
+    states: { hover: { color: "#445566" } },
+    devices: { tablet: { color: "#778899" } },
+  });
+
+  test("moves local, state and device styles into a new class applied last, in one change", async () => {
+    const log = { nodes: [] as LayoutNode[], designs: [] as DesignSystem[] };
+    await mount(<PanelHarness initial={local()} log={log} />);
+    await openStyle();
+    await nameLocal("  Brand heading ");
+    expect(log.designs).toHaveLength(1);
+    const made = log.designs[0]?.classes?.at(-1);
+    expect(made).toEqual({
+      id: "brand-heading",
+      name: "Brand heading",
+      style: { color: "#112233" },
+      states: { hover: { color: "#445566" } },
+      devices: { tablet: { color: "#778899" } },
+    });
+    expect(log.nodes).toEqual([
+      {
+        id: "head0001",
+        type: "heading",
+        props: { text: "Hi", level: 1 },
+        classes: ["card", "brand-heading"],
+        hiddenOn: ["mobile"],
+      },
+    ]);
+    expect(document.querySelector("[data-emvb-save-local-done]")?.textContent).toBe(
+      'Saved as class "Brand heading". Publish site styles to show it on the site.',
+    );
+    expect(saveLocalButton()).toBeNull();
+  });
+
+  test("is offered only for local styles, and Escape or an existing name saves nothing", async () => {
+    const plain = { nodes: [] as LayoutNode[], designs: [] as DesignSystem[] };
+    await mount(
+      <PanelHarness
+        initial={{ id: "head0001", type: "heading", props: { text: "Hi", level: 1 } }}
+        log={plain}
+      />,
+    );
+    await openStyle();
+    expect(saveLocalButton()).toBeNull();
+    await cleanup();
+
+    const log = { nodes: [] as LayoutNode[], designs: [] as DesignSystem[] };
+    await mount(<PanelHarness initial={local()} log={log} />);
+    await openStyle();
+    await nameLocal("Mine", "Escape");
+    expect(localNameField()).toBeNull();
+    await nameLocal("card");
+    expect(document.querySelector("[data-emvb-class-error]")?.textContent).toBe(
+      'A class named "card" already exists. Pick another name.',
+    );
+    expect(log).toEqual({ nodes: [], designs: [] });
+  });
+
+  test("a failed site styles save keeps the local styles and shows why", async () => {
+    const log = { nodes: [] as LayoutNode[], designs: [] as DesignSystem[] };
+    await mount(
+      <PanelHarness initial={local()} log={log} failSave="Site styles changed elsewhere." />,
+    );
+    await openStyle();
+    await nameLocal("Brand");
+    expect(document.querySelector("[data-emvb-class-error]")?.textContent).toBe(
+      "Site styles changed elsewhere.",
+    );
+    expect(log.nodes).toEqual([]);
+    expect(localNameField()?.value).toBe("Brand");
+  });
+});

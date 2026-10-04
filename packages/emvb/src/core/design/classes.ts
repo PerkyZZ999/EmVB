@@ -80,6 +80,59 @@ export function moveDesignClass(
   return { ...design, classes: next };
 }
 
+const filled = (style: object | undefined) =>
+  !!style && Object.values(style).some((value) => value !== undefined);
+
+/** Whether an element has local styles: base, hover/focus/active or tablet/mobile (W-134). */
+export function hasLocalStyles(node: LayoutNode): boolean {
+  return (
+    filled(node.style) ||
+    Object.values(node.states ?? {}).some(filled) ||
+    Object.values(node.devices ?? {}).some(filled)
+  );
+}
+
+/** Why "Save local styles as class" can't run, or null when it can (W-134). */
+export function localToClassRefusal(design: DesignSystem, node: LayoutNode): string | null {
+  if (!hasLocalStyles(node)) return "This element has no local styles to save.";
+  if ((design.classes ?? []).length >= 100)
+    return "This site already has 100 classes, the most allowed.";
+  if ((node.classes ?? []).length >= 20) return "20 classes is the most one element can have.";
+  return null;
+}
+
+/**
+ * Moves an element's local, state and tablet/mobile styles into a new class, applied last on the
+ * element and added last in Site styles, so it wins over the element's other classes as the local
+ * styles did (W-134). Visibility (`hiddenOn`) stays on the element. Null when it can't run. Pure.
+ */
+export function localStylesToClass(
+  design: DesignSystem,
+  node: LayoutNode,
+  name: string,
+): { design: DesignSystem; node: LayoutNode; classId: string } | null {
+  const trimmed = name.trim().slice(0, 60);
+  if (!trimmed || localToClassRefusal(design, node)) return null;
+  const classes = design.classes ?? [];
+  const base = slugify(trimmed).slice(0, 34) || "class";
+  const taken = new Set(classes.map((c) => c.id));
+  let id = base;
+  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
+  const cls = {
+    id,
+    name: trimmed,
+    style: structuredClone(node.style ?? {}) as StyleProps,
+    ...(node.states ? { states: structuredClone(node.states) } : {}),
+    ...(node.devices ? { devices: structuredClone(node.devices) } : {}),
+  };
+  const { style: _style, states: _states, devices: _devices, ...rest } = node;
+  return {
+    design: { ...design, classes: [...classes, cls] },
+    node: { ...rest, classes: addClassId(node.classes ?? [], id) } as LayoutNode,
+    classId: id,
+  };
+}
+
 /** Duplicate a design class with a new id/name. Pure (W-071). */
 export function duplicateClass(
   design: DesignSystem,

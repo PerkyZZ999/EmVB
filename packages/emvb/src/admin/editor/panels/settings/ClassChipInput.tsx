@@ -1,3 +1,4 @@
+import { Button, Input } from "@cloudflare/kumo";
 import { MapPinIcon, PlusIcon, TagSimpleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
@@ -10,6 +11,7 @@ import {
   replaceClassId,
   type DesignSystem,
 } from "../../../../core/index.ts";
+import { BUTTON, FIELD } from "../../../ui.ts";
 import { uniqueId } from "../site-list.tsx";
 import { ClassChip, stopEditorShortcuts } from "./ClassChip.tsx";
 import {
@@ -28,6 +30,11 @@ type Props = {
   onEdit: (classId: string | null) => void;
   onChange: (classes: string[] | undefined) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
+  /**
+   * Moves this element's local styles into a new class named `name` (W-134). Absent when the
+   * element has no local styles or a class is being edited. Throws with the reason it can't.
+   */
+  onSaveLocal?: (name: string) => Promise<void>;
 };
 
 const optionKey = (option: ClassOption) =>
@@ -44,6 +51,7 @@ export function ClassChipInput({
   onEdit,
   onChange,
   onDesignChange,
+  onSaveLocal,
 }: Props) {
   const ids = applied ?? [];
   const catalog = design.classes ?? [];
@@ -55,6 +63,9 @@ export function ClassChipInput({
   const [active, setActive] = React.useState(0);
   const [error, setError] = React.useState<string | null>(null);
   const [focusAt, setFocusAt] = React.useState<{ index: number } | null>(null);
+  const [naming, setNaming] = React.useState(false);
+  const [localName, setLocalName] = React.useState("");
+  const [savedNote, setSavedNote] = React.useState<string | null>(null);
   const chipRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -129,6 +140,30 @@ export function ClassChipInput({
     if (next === design || !copy || !(await saveDesign(next))) return;
     commit(replaceClassId(ids, id, copy.id));
     onEdit(copy.id);
+  };
+
+  const closeNaming = () => {
+    setNaming(false);
+    setLocalName("");
+  };
+
+  /** "Save local styles as class" (W-134): one page edit, so one Ctrl+Z puts them back. */
+  const saveLocal = async () => {
+    const name = localName.trim();
+    if (!name || !onSaveLocal) return;
+    if (catalog.some((cls) => cls.name.toLowerCase() === name.toLowerCase())) {
+      setError(`A class named "${name}" already exists. Pick another name.`);
+      return;
+    }
+    setError(null);
+    try {
+      await onSaveLocal(name);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't save the class. Try again.");
+      return;
+    }
+    closeNaming();
+    setSavedNote(`Saved as class "${name}". Publish site styles to show it on the site.`);
   };
 
   const reorder = (index: number, delta: -1 | 1) => commit(moveClassId(ids, index, delta));
@@ -332,6 +367,65 @@ export function ClassChipInput({
           <button type="button" className="emvb-link-button" onClick={() => onEdit(null)}>
             Back to local styles
           </button>
+        </p>
+      )}
+      {onSaveLocal && editing === null && !naming && (
+        <button
+          type="button"
+          className="emvb-link-button emvb-save-local"
+          data-emvb-save-local=""
+          onClick={() => {
+            setNaming(true);
+            setSavedNote(null);
+            setError(null);
+          }}
+        >
+          Save local styles as class
+        </button>
+      )}
+      {naming && (
+        <div
+          className="emvb-save-local-row"
+          data-emvb-save-local-row=""
+          onKeyDown={stopEditorShortcuts}
+        >
+          <Input
+            label="New class name"
+            className={FIELD}
+            value={localName}
+            maxLength={60}
+            // oxlint-disable-next-line jsx-a11y/no-autofocus -- the user asked to name the class; focus moves into the field
+            autoFocus
+            onChange={(event) => {
+              setLocalName(event.target.value);
+              setError(null);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                void saveLocal();
+              } else if (event.key === "Escape") closeNaming();
+            }}
+          />
+          <div className="emvb-save-local-actions">
+            <Button
+              type="button"
+              variant="primary"
+              className={BUTTON}
+              disabled={localName.trim() === ""}
+              onClick={() => void saveLocal()}
+            >
+              Save as class
+            </Button>
+            <Button type="button" variant="ghost" className={BUTTON} onClick={closeNaming}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+      {savedNote && (
+        <p className="emvb-helper" role="status" data-emvb-save-local-done="">
+          {savedNote}
         </p>
       )}
       {error && (

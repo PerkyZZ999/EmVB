@@ -6,6 +6,9 @@ import {
   clearClassRefs,
   duplicateClass,
   findClassUsages,
+  hasLocalStyles,
+  localStylesToClass,
+  localToClassRefusal,
   moveClassId,
   moveDesignClass,
   patchClassStyle,
@@ -154,5 +157,75 @@ describe("class chip helpers (W-087)", () => {
       "b",
     ]);
     expect(replaceClassId(["card-copy", "card"], "card", "card-copy")).toEqual(["card-copy"]);
+  });
+});
+
+describe("localStylesToClass (W-134)", () => {
+  const node = {
+    id: "butn0001",
+    type: "button" as const,
+    props: { text: "Go" },
+    classes: ["card"],
+    htmlId: "go",
+    hiddenOn: ["mobile" as const],
+    style: { backgroundColor: "#1d4ed8" },
+    states: { hover: { backgroundColor: "#1e3a8a" } },
+    devices: { mobile: { backgroundColor: "#f59e0b" } },
+  };
+  const design: DesignSystem = {
+    ...emptyDesign(),
+    classes: [
+      { id: "card", name: "Card", style: {} },
+      { id: "primary", name: "Primary", style: {} },
+    ],
+  };
+
+  test("moves every local style into a new class added and applied last", () => {
+    const moved = localStylesToClass(design, node, "Primary");
+    if (!moved) throw new Error("expected a class");
+    expect(moved.classId).toBe("primary-2");
+    expect(moved.design.classes?.map((c) => c.id)).toEqual(["card", "primary", "primary-2"]);
+    expect(moved.design.classes?.at(-1)).toEqual({
+      id: "primary-2",
+      name: "Primary",
+      style: node.style,
+      states: node.states,
+      devices: node.devices,
+    });
+    expect(moved.node).toEqual({
+      id: "butn0001",
+      type: "button",
+      props: { text: "Go" },
+      classes: ["card", "primary-2"],
+      htmlId: "go",
+      hiddenOn: ["mobile"],
+    });
+    // The class holds copies: changing it later doesn't reach back into the element.
+    const made = moved.design.classes?.at(-1);
+    if (made) made.style.color = "#000000";
+    expect(node.style).toEqual({ backgroundColor: "#1d4ed8" });
+  });
+
+  test("state-only or device-only styles count; none, a blank name or a full list refuse", () => {
+    const bare = { id: "butn0001", type: "button" as const, props: { text: "Go" } };
+    expect(hasLocalStyles(bare)).toBe(false);
+    expect(hasLocalStyles({ ...bare, style: { color: undefined } })).toBe(false);
+    expect(hasLocalStyles({ ...bare, states: { focus: { color: "#000000" } } })).toBe(true);
+    expect(hasLocalStyles({ ...bare, devices: { tablet: { color: "#000000" } } })).toBe(true);
+    expect(localStylesToClass(design, bare, "X")).toBeNull();
+    expect(localStylesToClass(design, node, "   ")).toBeNull();
+    expect(localToClassRefusal(design, bare)).toBe("This element has no local styles to save.");
+    const many = {
+      ...design,
+      classes: Array.from({ length: 100 }, (_, i) => ({ id: `c${i}`, name: `C${i}`, style: {} })),
+    };
+    expect(localToClassRefusal(many, node)).toBe(
+      "This site already has 100 classes, the most allowed.",
+    );
+    const crowded = { ...node, classes: Array.from({ length: 20 }, (_, i) => `k${i}`) };
+    expect(localToClassRefusal(design, crowded)).toBe(
+      "20 classes is the most one element can have.",
+    );
+    expect(localStylesToClass(design, crowded, "X")).toBeNull();
   });
 });
