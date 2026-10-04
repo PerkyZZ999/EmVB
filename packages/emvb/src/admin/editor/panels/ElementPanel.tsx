@@ -114,11 +114,17 @@ const withStates = (node: LayoutNode, states: StyleStates | undefined): LayoutNo
   return (states ? { ...rest, states } : rest) as LayoutNode;
 };
 
-const sessionSectionKey = (type: string) => `emvb-style-sections:${type}`;
+const sectionKey = (type: string) => `emvb-style-sections:${type}`;
+
+/**
+ * Open the first time an element type is selected, where it has them (W-137): the sections most
+ * edits need. After that the open and closed sections are remembered per type, across visits.
+ */
+const OPEN_FIRST: StyleSectionId[] = ["typography", "spacing", "background", "border"];
 
 const readSections = (type: string, fallback: StyleSectionId[]): Set<StyleSectionId> => {
   try {
-    const raw = sessionStorage.getItem(sessionSectionKey(type));
+    const raw = localStorage.getItem(sectionKey(type));
     if (!raw) return new Set(fallback);
     const parsed = JSON.parse(raw) as string[];
     return new Set(parsed.filter((id): id is StyleSectionId => id in SECTION_LABELS));
@@ -129,7 +135,7 @@ const readSections = (type: string, fallback: StyleSectionId[]): Set<StyleSectio
 
 const writeSections = (type: string, open: Set<StyleSectionId>) => {
   try {
-    sessionStorage.setItem(sessionSectionKey(type), JSON.stringify([...open]));
+    localStorage.setItem(sectionKey(type), JSON.stringify([...open]));
   } catch {
     /* private mode */
   }
@@ -274,11 +280,11 @@ export function ElementPanel(props: Props) {
   return <KnownElementPanel {...props} descriptor={descriptor} />;
 }
 
-/** The open Style sections for an element type, remembered for the session. */
+/** The open Style sections for an element type, remembered across visits (W-137). */
 function useOpenSections(type: string, defaultOpen: StyleSectionId, nodeId: string) {
-  const [open, setOpen] = React.useState(() => readSections(type, [defaultOpen]));
+  const [open, setOpen] = React.useState(() => readSections(type, [defaultOpen, ...OPEN_FIRST]));
   React.useEffect(() => {
-    setOpen(readSections(type, [defaultOpen]));
+    setOpen(readSections(type, [defaultOpen, ...OPEN_FIRST]));
   }, [nodeId, type, defaultOpen]);
   const setSection = (id: StyleSectionId, isOpen: boolean) => {
     setOpen((current) => {

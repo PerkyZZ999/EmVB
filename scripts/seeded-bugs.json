@@ -18553,6 +18553,67 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*takes a validated custom hex"
+    },
+    {
+      "id": "W-137/one-section-open",
+      "requirement": "W-137",
+      "description": "Only the element's default Style section opens; Typography, Spacing, Background and Border start closed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "const OPEN_FIRST: StyleSectionId[] = [\"typography\", \"spacing\", \"background\", \"border\"];",
+          "replace": "const OPEN_FIRST: StyleSectionId[] = [];"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Background and Border open the first time"
+    },
+    {
+      "id": "W-137/sections-forgotten",
+      "requirement": "W-137",
+      "description": "Opening or closing a Style section isn't remembered, so the next element of that type resets it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "    localStorage.setItem(sectionKey(type), JSON.stringify([...open]));",
+          "replace": "    void [sectionKey(type), open];"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a closed section stays closed on the next element"
+    },
+    {
+      "id": "W-137/e2e-one-section-open",
+      "requirement": "W-137",
+      "description": "In the editor, a heading's Style tab opens with only Typography open.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "const OPEN_FIRST: StyleSectionId[] = [\"typography\", \"spacing\", \"background\", \"border\"];",
+          "replace": "const OPEN_FIRST: StyleSectionId[] = [];"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/style-sections.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-137"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*open by default"
     }
   ]
 }

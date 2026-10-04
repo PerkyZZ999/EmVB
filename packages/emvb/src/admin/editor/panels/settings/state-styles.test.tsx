@@ -66,7 +66,7 @@ function Harness({ start, design: startDesign }: { start: LayoutNode; design: De
 }
 
 const open = (...sections: string[]) =>
-  sessionStorage.setItem("emvb-style-sections:button", JSON.stringify(sections));
+  localStorage.setItem("emvb-style-sections:button", JSON.stringify(sections));
 
 async function panel(node: LayoutNode = baseButton, design: DesignSystem = emptyDesign()) {
   await mount(<Harness start={node} design={design} />);

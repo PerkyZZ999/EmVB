@@ -67,7 +67,7 @@ async function panelFor(
     schemaVersion: 9,
     root: { id: "root0001", type: "container", props: {}, children: [node] },
   };
-  sessionStorage.setItem(
+  localStorage.setItem(
     `emvb-style-sections:${node.type}`,
     JSON.stringify(extra.sections ?? ALL_SECTIONS),
   );

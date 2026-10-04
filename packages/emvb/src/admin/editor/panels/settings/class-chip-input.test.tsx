@@ -444,6 +444,8 @@ describe("class chip input: editing a class in context (W-087)", () => {
   });
 
   test("section counts and Advanced follow the edited target", async () => {
+    // Counts show on closed sections; Spacing opens by default (W-137), so start with it closed.
+    localStorage.setItem("emvb-style-sections:heading", JSON.stringify(["typography"]));
     await mount(<PanelHarness initial={styledHeading()} log={{ nodes: [], designs: [] }} />);
     await openStyle();
     const count = () =>

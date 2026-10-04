@@ -41,4 +41,7 @@ export const settle = () =>
 export async function cleanup(): Promise<void> {
   await unmount();
   document.body.innerHTML = "";
+  // The Style tab remembers open sections in localStorage (W-137); each test starts fresh.
+  for (const key of Object.keys(localStorage))
+    if (key.startsWith("emvb-style-sections:")) localStorage.removeItem(key);
 }

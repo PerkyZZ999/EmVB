@@ -226,3 +226,27 @@ test("Effects section edits a class: opacity, inset shadow, grayscale and cursor
     await setClass(request, classId, null);
   }
 });
+
+test("Typography, Spacing, Background and Border open by default; a closed one stays closed after a reload (W-137)", async ({
+  page,
+  request,
+}) => {
+  const { id, text } = await openPage(page, request);
+  const section = (name: string) => overlay(page).locator(`[data-emvb-section="${name}"]`);
+  const select = async () => {
+    await canvas(page).getByRole("heading", { name: text }).click();
+    await showStyle(page);
+  };
+  await select();
+  for (const name of ["typography", "spacing", "background", "border"])
+    // oxlint-disable-next-line no-await-in-loop
+    await expect(section(name)).toHaveAttribute("aria-expanded", "true");
+  await expect(section("size")).toHaveAttribute("aria-expanded", "false");
+
+  await section("border").click();
+  await expect(section("border")).toHaveAttribute("aria-expanded", "false");
+  await openEditor(page, id, text);
+  await select();
+  await expect(section("border")).toHaveAttribute("aria-expanded", "false");
+  await expect(section("typography")).toHaveAttribute("aria-expanded", "true");
+});

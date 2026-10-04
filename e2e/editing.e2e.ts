@@ -212,7 +212,10 @@ test("a colour variable can be created, bound and edited, and the design persist
   await openEditor(page, id, "Coloured");
   await selectHeading(page, "Coloured");
   await overlay(page).getByRole("tab", { name: "Style" }).click();
-  await overlay(page).getByRole("button", { name: "New variable" }).click();
+  await overlay(page)
+    .locator('[data-emvb-style="color"]')
+    .getByRole("button", { name: "New variable" })
+    .click();
   await overlay(page).getByLabel("Variable name").fill(name);
   await overlay(page).getByLabel("Value", { exact: true }).fill("#0055ff");
   await overlay(page).getByRole("button", { name: "Create variable" }).click();
