@@ -2,6 +2,7 @@
   "name": "@emvb/site",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "ASTRO_DEV_BACKGROUND=1 bun --bun astro dev --host 127.0.0.1 --port 4455",

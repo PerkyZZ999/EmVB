@@ -59,14 +59,14 @@ EmVB isn't on npm yet. To try it in a host site, follow [docs/guides/install-in-
 
 ## License
 
-No license has been chosen yet. Until a `LICENSE` file is added, the code is visible but not licensed for reuse.
+[MIT](LICENSE) © 2026 Charles Wilkin.
 
 ## Before a public GitHub push
 
 Pushing this repository is not an npm publish. D-007 still keeps the `emvb` package private.
 
-- [ ] Add a `LICENSE` file and a matching `license` field in `packages/emvb/package.json`, then update the License section above.
-- [ ] Replace `OWNER` in the `repository` URL in `packages/emvb/package.json`.
+- [x] `LICENSE` is MIT, and every `package.json` says `"license": "MIT"`.
+- [x] The package's `repository`, `homepage` and `bugs` URLs point at `github.com/PerkyZZ999/EmVB`.
 - [x] No Cloudflare `database_id`, KV id or API token is committed. `demos/cloudflare/wrangler.jsonc` names the local D1 database only.
 - [x] `.env`, `.dev.vars`, local databases, `demos/*/.wrangler/`, build output and Playwright auth state are gitignored; nothing generated or local is tracked.
 - [ ] Decide whether the internal notes stay public: `docs/HANDOFF.md`, `docs/project/STATE.md` and `docs/project/VALIDATION.md` mention this machine, and every commit carries the author's email address.
