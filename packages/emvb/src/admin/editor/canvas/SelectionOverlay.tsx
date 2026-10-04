@@ -24,6 +24,19 @@ export type DropTarget = { outline: Box; label: string };
 
 const LABEL_HEIGHT = 26;
 
+/** Tall enough for the drop label to sit inside the target's top-left corner. */
+export const DROP_LABEL_ROOM = 40;
+
+/**
+ * Where the "Inside …" label goes (W-129): inside the target's top-left corner, so it doesn't
+ * cover the element above; above the outline only when the target is too short to hold it.
+ */
+export function dropLabelAt(outline: Box): { top: number; left: number } {
+  return outline.height >= DROP_LABEL_ROOM
+    ? { top: outline.top + 4, left: outline.left + 4 }
+    : { top: Math.max(0, outline.top - LABEL_HEIGHT), left: outline.left };
+}
+
 const place = (box: Box) => ({
   top: box.top,
   left: box.left,
@@ -62,10 +75,7 @@ export function SelectionOverlay({
           <div
             className="emvb-drop-target-label"
             data-emvb-drop-target-label=""
-            style={{
-              top: Math.max(0, dropTarget.outline.top - LABEL_HEIGHT),
-              left: dropTarget.outline.left,
-            }}
+            style={dropLabelAt(dropTarget.outline)}
           >
             {dropTarget.label}
           </div>

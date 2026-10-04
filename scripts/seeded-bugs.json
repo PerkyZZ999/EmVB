@@ -17897,6 +17897,43 @@
         "W-128"
       ],
       "expect": "\\(fail\\).*nearest ancestor that takes it"
+    },
+    {
+      "id": "W-129/drop-label-above-target",
+      "requirement": "W-129",
+      "description": "the Inside label goes back above the target, covering the element above it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
+          "search": "return outline.height >= DROP_LABEL_ROOM",
+          "replace": "return outline.height >= Infinity"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/drop-line.test.ts",
+        "-t",
+        "W-129"
+      ],
+      "expect": "\\(fail\\).*holds the label inside"
+    },
+    {
+      "id": "W-129/e2e-drop-label-above",
+      "requirement": "W-129",
+      "description": "in the browser the Inside label sits above the target again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
+          "search": "return outline.height >= DROP_LABEL_ROOM",
+          "replace": "return outline.height >= Infinity"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node", "-g", "W-128"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*dragging into an empty nested container"
     }
   ]
 }

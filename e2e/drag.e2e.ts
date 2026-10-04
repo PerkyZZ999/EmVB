@@ -253,6 +253,10 @@ test("dragging into an empty nested container nests it there and names the targe
       "Inside Div Block",
     );
     await expect(overlay(page).locator("[data-emvb-drop-target]")).toBeVisible();
+    // W-129: the label sits inside the target's outline, not over the element above.
+    const label = await overlay(page).locator("[data-emvb-drop-target-label]").boundingBox();
+    const outline = await overlay(page).locator("[data-emvb-drop-target]").boundingBox();
+    expect(label && outline ? Math.round(label.y - outline.y) : -1).toBeGreaterThanOrEqual(0);
   });
   await expect(overlay(page).locator("[data-emvb-drop-target]")).toHaveCount(0);
   await saveDraft(page);

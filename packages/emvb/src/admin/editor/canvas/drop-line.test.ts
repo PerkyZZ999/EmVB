@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { dropLineBox } from "./CanvasFrame.tsx";
+import { dropLabelAt } from "./SelectionOverlay.tsx";
 
 describe("dropLineBox", () => {
   const container = { top: 10, left: 20, width: 200, height: 100 };
@@ -36,5 +37,22 @@ describe("dropLineBox", () => {
       width: 200,
       height: 2,
     });
+  });
+});
+
+describe("the Inside label sits in the target's corner (W-129)", () => {
+  test("a target tall enough holds the label inside its top-left corner", () => {
+    expect(dropLabelAt({ top: 100, left: 20, width: 400, height: 48 })).toEqual({
+      top: 104,
+      left: 24,
+    });
+  });
+
+  test("a short target puts the label above it, never off the top of the canvas", () => {
+    expect(dropLabelAt({ top: 100, left: 20, width: 400, height: 18 })).toEqual({
+      top: 74,
+      left: 20,
+    });
+    expect(dropLabelAt({ top: 10, left: 0, width: 400, height: 18 })).toEqual({ top: 0, left: 0 });
   });
 });
