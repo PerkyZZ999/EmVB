@@ -3,7 +3,8 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /**
- * 10 since W-138 (D-044): per-side border widths and per-corner radii. v9 → v10 changes nothing,
+ * 10 since W-138 (D-044): per-side border widths and per-corner radii, and W-139 (D-039): grid
+ * columns per device. v9 → v10 changes nothing,
  * so an older EmVB shows "saved by a newer EmVB".
  */
 export const LAYOUT_SCHEMA_VERSION = 10;
@@ -193,11 +194,16 @@ export const DivBlockNode = parentNode("div-block", z.strictObject({ ...BoxLink 
 
 export const FlexboxNode = parentNode("flexbox", z.strictObject({ ...BoxLink }));
 
-/** Equal columns. Children span with `gridColumnSpan` and `gridRowSpan` on their style. */
+/**
+ * Equal columns. Children span with `gridColumnSpan` and `gridRowSpan` on their style. Tablet
+ * and mobile may have their own count (W-139); unset follows the next wider device.
+ */
 export const GridNode = parentNode(
   "grid",
   z.strictObject({
     columns: z.number().int().min(1).max(12),
+    columnsTablet: z.number().int().min(1).max(12).optional(),
+    columnsMobile: z.number().int().min(1).max(12).optional(),
     ...BoxLink,
   }),
 );
@@ -522,7 +528,13 @@ export type DivBlockNode = {
 export type GridNode = {
   id: IdOf;
   type: "grid";
-  props: { columns: number; href?: string; newTab?: boolean };
+  props: {
+    columns: number;
+    columnsTablet?: number;
+    columnsMobile?: number;
+    href?: string;
+    newTab?: boolean;
+  };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;

@@ -8,8 +8,8 @@ export type Migration = (doc: Record<string, unknown>) => Record<string, unknown
  * v4 → v5 (D-036) per-device styles, v5 → v6 (D-038) synced sections,
  * v6 → v7 (D-039) CSS Grid, v7 → v8 (D-041) entrance animations, and v8 → v9
  * (D-042) attributes, accordion, richer entrances, post date and author, background video,
- * a link on a box, and tag defaults, and v9 → v10 (D-044) per-side border widths and per-corner
- * radii. Every older value is valid in the newer version.
+ * a link on a box, and tag defaults, and v9 → v10 (D-044, D-039) per-side border widths,
+ * per-corner radii and grid columns per device. Every older value is valid in the newer version.
  */
 const unchanged: Migration = (doc) => doc;
 

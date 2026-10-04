@@ -21,6 +21,8 @@ export type FieldDescriptor = {
   /** Shown under the control when the value is invalid. */
   message?: string;
   optional?: boolean;
+  /** Props that hold this field's tablet and mobile values (W-139); unset follows the wider device. */
+  devices?: { tablet: string; mobile: string };
 };
 
 export type ElementDescriptor = {

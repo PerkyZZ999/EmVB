@@ -83,6 +83,12 @@ function videoPreview(node: LayoutNode, attrs: Record<string, string>): VNode | 
  * Renders a validated layout to lean HTML and CSS (R-031, R-032). Walks defensively: unknown types
  * render nothing publicly and a placeholder in the editor (R-033); unsafe style values are dropped.
  */
+/** `grid-template-columns` for a whole column count from 1 to 12; anything else emits nothing. */
+const gridTracks = (columns: unknown): Declaration[] =>
+  typeof columns === "number" && Number.isInteger(columns) && columns >= 1 && columns <= 12
+    ? [{ property: "grid-template-columns", value: `repeat(${columns}, minmax(0, 1fr))` }]
+    : [];
+
 export function renderPage(
   layout: Layout,
   design: DesignSystem,
@@ -142,18 +148,11 @@ export function renderPage(
       if (height) declarations.push({ property: "height", value: height });
     }
     if (node.type === "grid") {
-      const columns = (node as { props: { columns: unknown } }).props.columns;
-      if (
-        typeof columns === "number" &&
-        Number.isInteger(columns) &&
-        columns >= 1 &&
-        columns <= 12
-      ) {
-        declarations.push({
-          property: "grid-template-columns",
-          value: `repeat(${columns}, minmax(0, 1fr))`,
-        });
-      }
+      const props = (node as { props: Record<string, unknown> }).props;
+      declarations.push(...gridTracks(props["columns"]));
+      // Tablet and mobile counts go in their media queries (W-139).
+      tablet.declarations.unshift(...gridTracks(props["columnsTablet"]));
+      mobile.declarations.unshift(...gridTracks(props["columnsMobile"]));
     }
     const states = stateDeclarations(node.states);
     for (const key of states.rejected) {

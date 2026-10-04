@@ -620,6 +620,7 @@ const grid: ElementDefinition<GridNode> = {
         key: "columns",
         kind: "select",
         label: "Columns",
+        devices: { tablet: "columnsTablet", mobile: "columnsMobile" },
         options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => ({
           value: n,
           label: String(n),

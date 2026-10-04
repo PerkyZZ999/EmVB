@@ -14753,8 +14753,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
-          "search": "onChange(withProp(node, field.key, option ? option.value : next));",
-          "replace": "onChange(withProp(node, field.key, next));"
+          "search": "            const option = field.options?.find((o) => String(o.value) === String(next));\n            onChange(withProp(node, field.key, option ? option.value : next));",
+          "replace": "            onChange(withProp(node, field.key, next));"
         }
       ],
       "command": [
@@ -16334,8 +16334,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "          value: `repeat(${columns}, minmax(0, 1fr))`,",
-          "replace": "          value: \"1fr\","
+          "search": "    ? [{ property: \"grid-template-columns\", value: `repeat(${columns}, minmax(0, 1fr))` }]",
+          "replace": "    ? [{ property: \"grid-template-columns\", value: \"1fr\" }]"
         }
       ],
       "command": [
@@ -18721,6 +18721,87 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*the linked boxes set padding"
+    },
+    {
+      "id": "W-139/tablet-columns-ignored",
+      "requirement": "W-139",
+      "description": "A grid's tablet column count never reaches the CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      tablet.declarations.unshift(...gridTracks(props[\"columnsTablet\"]));\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/grid.test.ts"],
+      "expect": "\\(fail\\).*tablet and mobile columns go in their media queries"
+    },
+    {
+      "id": "W-139/device-field-edits-desktop",
+      "requirement": "W-139",
+      "description": "On Tablet, the grid's Columns field changes the desktop count.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "  const key = devices[device];",
+          "replace": "  const key = field.key;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/grid-columns.test.tsx"
+      ],
+      "expect": "\\(fail\\).*on Tablet, Columns edits the tablet count"
+    },
+    {
+      "id": "W-139/mobile-skips-tablet",
+      "requirement": "W-139",
+      "description": "On Mobile, an unset count says it follows desktop even when tablet has its own.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "  const wider = device === \"mobile\" && tablet !== undefined ? tablet : desktop;",
+          "replace": "  const wider = desktop;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/grid-columns.test.tsx"
+      ],
+      "expect": "\\(fail\\).*on Mobile, unset follows the tablet count"
+    },
+    {
+      "id": "W-139/device-columns-unbounded",
+      "requirement": "W-139",
+      "description": "The schema accepts any tablet column count.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    columnsTablet: z.number().int().min(1).max(12).optional(),",
+          "replace": "    columnsTablet: z.number().int().optional(),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/grid.test.ts"],
+      "expect": "\\(fail\\).*a device column count outside 1–12 is refused"
+    },
+    {
+      "id": "W-139/e2e-device-field-edits-desktop",
+      "requirement": "W-139",
+      "description": "In the editor, the Tablet Columns field changes the desktop count.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "  const key = devices[device];",
+          "replace": "  const key = field.key;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/grid.e2e.ts", "--project=node", "-g", "W-139"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*a grid takes its own column count"
     }
   ]
 }

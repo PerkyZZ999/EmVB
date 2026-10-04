@@ -455,6 +455,7 @@ function KnownElementPanel({
                 onChange={onChange}
                 fetcher={fetcher}
                 parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
+                device={device}
               />
             ))
           )}

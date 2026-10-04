@@ -17,9 +17,12 @@ export function FieldControl({
   onChange,
   fetcher,
   parentFormId,
+  device = "desktop",
 }: {
   field: FieldDescriptor;
   node: LayoutNode;
+  /** The canvas device: a field with `devices` edits that device's value (W-139). */
+  device?: "desktop" | "tablet" | "mobile";
   onChange: (node: LayoutNode) => void;
   /** Required for media library / upload fields (W-024). */
   fetcher?: Fetcher;
@@ -105,6 +108,18 @@ export function FieldControl({
     );
   }
 
+  if (field.kind === "select" && field.options && field.devices) {
+    return (
+      <DeviceSelectField
+        field={field}
+        devices={field.devices}
+        node={node}
+        device={device}
+        onChange={onChange}
+      />
+    );
+  }
+
   if (field.kind === "select" && field.options) {
     const value = raw ?? field.options[0]?.value ?? "";
     return (
@@ -133,6 +148,96 @@ export function FieldControl({
   }
 
   return <DraftTextField field={field} node={node} onChange={onChange} />;
+}
+
+const DEVICE_NAMES = { tablet: "tablet", mobile: "mobile" } as const;
+
+/**
+ * A select with tablet and mobile values (W-139): on Desktop it edits the field and lists the
+ * device values under it; on Tablet or Mobile it edits that device's value, where the first
+ * option follows the next wider device.
+ */
+function DeviceSelectField({
+  field,
+  devices,
+  node,
+  device,
+  onChange,
+}: {
+  field: FieldDescriptor;
+  devices: { tablet: string; mobile: string };
+  node: LayoutNode;
+  device: "desktop" | "tablet" | "mobile";
+  onChange: (node: LayoutNode) => void;
+}) {
+  const props = propsOf(node);
+  const options = field.options ?? [];
+  const labelOf = (value: unknown) =>
+    options.find((o) => String(o.value) === String(value))?.label ?? String(value);
+  const desktop = props[field.key] ?? options[0]?.value;
+  const tablet = props[devices.tablet];
+  const mobile = props[devices.mobile];
+  if (device === "desktop") {
+    const notes = [
+      tablet !== undefined ? `Tablet ${labelOf(tablet)}` : null,
+      mobile !== undefined ? `Mobile ${labelOf(mobile)}` : null,
+    ].filter((note): note is string => note !== null);
+    return (
+      <div data-emvb-field={field.key}>
+        <Select
+          label={field.label}
+          className={FIELD}
+          value={String(desktop ?? "")}
+          onValueChange={(next) => {
+            const option = options.find((o) => String(o.value) === String(next));
+            onChange(withProp(node, field.key, option ? option.value : next));
+          }}
+          renderValue={(current: unknown) => labelOf(current)}
+        >
+          {options.map((option) => (
+            <Select.Option key={String(option.value)} value={String(option.value)}>
+              {option.label}
+            </Select.Option>
+          ))}
+        </Select>
+        {notes.length > 0 && (
+          <p className="emvb-helper" data-emvb-device-values={field.key}>
+            {notes.join(" · ")}. Switch the canvas to Tablet or Mobile to change them.
+          </p>
+        )}
+      </div>
+    );
+  }
+  const key = devices[device];
+  const own = props[key];
+  const wider = device === "mobile" && tablet !== undefined ? tablet : desktop;
+  const SAME = "same";
+  const sameLabel = `Same as ${device === "mobile" && tablet !== undefined ? "tablet" : "desktop"} (${labelOf(wider)})`;
+  return (
+    <div data-emvb-field={key}>
+      <Select
+        label={`${field.label} on ${DEVICE_NAMES[device]}`}
+        className={FIELD}
+        value={own === undefined ? SAME : String(own)}
+        onValueChange={(next) => {
+          if (next === SAME) {
+            onChange(withProp(node, key, undefined));
+            return;
+          }
+          const option = options.find((o) => String(o.value) === String(next));
+          onChange(withProp(node, key, option ? option.value : next));
+        }}
+        renderValue={(current: unknown) => (current === SAME ? sameLabel : labelOf(current))}
+      >
+        <Select.Option value={SAME}>{sameLabel}</Select.Option>
+        {options.map((option) => (
+          <Select.Option key={String(option.value)} value={String(option.value)}>
+            {option.label}
+          </Select.Option>
+        ))}
+      </Select>
+    </div>
+  );
 }
 
 /** Field kinds the panel implements — coverage tests assert this stays complete. */
