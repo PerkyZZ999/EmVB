@@ -8662,8 +8662,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/classes.ts",
-          "search": "states: structuredClone(source.states)",
-          "replace": "states: source.states"
+          "search": "  const copy = { ...structuredClone(source), id, name: baseName };",
+          "replace": "  const copy = { ...structuredClone(source), states: source.states, id, name: baseName };"
         }
       ],
       "command": [
@@ -18452,6 +18452,34 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*undoes in one step"
+    },
+    {
+      "id": "W-135/class-copy-drops-devices",
+      "requirement": "W-135",
+      "description": "Duplicating a class loses its tablet and mobile styles and Hide on.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "  const copy = { ...structuredClone(source), id, name: baseName };",
+          "replace": "  const { devices: _devices, hiddenOn: _hiddenOn, ...kept } = source;\n  const copy = { ...structuredClone(kept), id, name: baseName };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/design/classes.test.ts"],
+      "expect": "\\(fail\\).*copies tablet and mobile styles and Hide on too"
+    },
+    {
+      "id": "W-135/class-copy-shares-objects",
+      "requirement": "W-135",
+      "description": "A duplicated class shares its device style objects with the original, so editing one edits both.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "  const copy = { ...structuredClone(source), id, name: baseName };",
+          "replace": "  const copy = { ...source, states: source.states && structuredClone(source.states), id, name: baseName };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/design/classes.test.ts"],
+      "expect": "\\(fail\\).*copies tablet and mobile styles and Hide on too"
     }
   ]
 }

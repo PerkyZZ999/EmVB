@@ -133,7 +133,7 @@ export function localStylesToClass(
   };
 }
 
-/** Duplicate a design class with a new id/name. Pure (W-071). */
+/** Duplicate a design class with a new id/name, deep-copying all its styles. Pure (W-071, W-135). */
 export function duplicateClass(
   design: DesignSystem,
   classId: string,
@@ -147,10 +147,8 @@ export function duplicateClass(
   const taken = new Set(classes.map((c) => c.id));
   let id = randomSuffix ? `${base}-${randomSuffix}`.slice(0, 40) : base;
   for (let n = 2; taken.has(id); n++) id = `${base}-${n}`.slice(0, 40);
-  const style = { ...source.style } as StyleProps;
-  const copy = source.states
-    ? { id, name: baseName, style, states: structuredClone(source.states) }
-    : { id, name: baseName, style };
+  // Every part of the class, tablet and mobile styles and Hide on included (W-135).
+  const copy = { ...structuredClone(source), id, name: baseName };
   return { ...design, classes: [...classes, copy] };
 }
 

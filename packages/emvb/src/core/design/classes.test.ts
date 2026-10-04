@@ -107,6 +107,21 @@ describe("duplicateClass (W-071)", () => {
     expect(copy?.states?.hover).not.toBe(states.hover);
   });
 
+  test("copies tablet and mobile styles and Hide on too, as separate objects (W-135)", () => {
+    const devices = {
+      tablet: { color: "#00ff00" },
+      mobile: { fontSize: { value: 14, unit: "px" as const } },
+    };
+    const design = {
+      ...emptyDesign(),
+      classes: [{ id: "card", name: "Card", style: {}, devices, hiddenOn: ["mobile" as const] }],
+    };
+    const copy = duplicateClass(design, "card", "x").classes?.[1];
+    expect(copy?.devices).toEqual(devices);
+    expect(copy?.devices?.tablet).not.toBe(devices.tablet);
+    expect(copy?.hiddenOn).toEqual(["mobile"]);
+  });
+
   test("missing id is a no-op", () => {
     const design = emptyDesign();
     expect(duplicateClass(design, "nope")).toBe(design);
