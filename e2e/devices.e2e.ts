@@ -97,3 +97,38 @@ test("the device switcher hugs its options, each with an icon and its name (W-12
   // Only the control's own padding is left on each side, the same on both.
   expect(gaps.right).toBeLessThanOrEqual(gaps.left + 2);
 });
+
+test("Tablet and Mobile previews scroll without a scrollbar of their own (W-140)", async ({
+  page,
+  request,
+}) => {
+  const text = `Tall ${unique()}`;
+  const layout = layoutFor(text);
+  layout.root.children.push(
+    ...Array.from({ length: 50 }, (_, i) => ({
+      id: `tall${String(i).padStart(4, "0")}`,
+      type: "heading",
+      props: { text: `Row ${i}`, level: 1 },
+    })),
+  );
+  const id = await createPage(request, text, layout, `tall-${unique()}`);
+  await openEditor(page, id, text);
+  const root = canvas(page).locator("html");
+  const bar = () => root.evaluate((el) => getComputedStyle(el).scrollbarWidth);
+  await expect.poll(bar).toBe("auto");
+  for (const name of ["Mobile", "Tablet"]) {
+    await page.getByRole("tab", { name }).click();
+    await expect.poll(bar).toBe("none");
+    // The page gets the whole frame width: no scrollbar takes a strip of it.
+    const frame = await page.locator("iframe[data-emvb-canvas]").evaluate((el) => el.clientWidth);
+    await expect.poll(() => root.evaluate((el) => el.clientWidth)).toBe(frame);
+  }
+  // Still scrolls with the wheel.
+  await page.locator(".emvb-stage").hover();
+  await page.mouse.wheel(0, 600);
+  await expect
+    .poll(() => root.evaluate((el) => el.ownerDocument.defaultView?.scrollY ?? 0))
+    .toBeGreaterThan(0);
+  await page.getByRole("tab", { name: "Desktop" }).click();
+  await expect.poll(bar).toBe("auto");
+});

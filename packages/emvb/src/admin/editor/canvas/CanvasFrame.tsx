@@ -67,6 +67,12 @@ const EDITOR_CANVAS_CSS =
   `:is(${NO_ITEMS})::after{content:"No items yet: add them in this element's Content settings";display:block;line-height:48px;text-align:center;${HINT}}` +
   ".emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}[data-emvb-editing]{color:transparent !important}";
 
+/**
+ * Tablet and Mobile previews scroll without a visible scrollbar (W-140), as phones and tablets
+ * do, so the scrollbar doesn't take width from the previewed page.
+ */
+const PREVIEW_SCROLL_CSS = "html{scrollbar-width:none}html::-webkit-scrollbar{display:none}";
+
 const boxOf = (doc: Document, id: string | null): Box | null => {
   if (!id) return null;
   const element = doc.querySelector(`[data-emvb-id="${CSS.escape(id)}"]`);
@@ -428,6 +434,9 @@ export function CanvasFrame({
       {doc && createPortal(<style data-emvb-canvas-css="">{css}</style>, doc.head)}
       {doc &&
         createPortal(<style data-emvb-editor-canvas-css="">{EDITOR_CANVAS_CSS}</style>, doc.head)}
+      {doc &&
+        previewWidth &&
+        createPortal(<style data-emvb-preview-css="">{PREVIEW_SCROLL_CSS}</style>, doc.head)}
       {doc && vnode && createPortal(vnodeToReact(vnode), doc.body)}
     </div>
   );

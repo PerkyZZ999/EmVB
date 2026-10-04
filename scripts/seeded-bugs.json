@@ -18802,6 +18802,23 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*a grid takes its own column count"
+    },
+    {
+      "id": "W-140/e2e-preview-scrollbar",
+      "requirement": "W-140",
+      "description": "The Mobile and Tablet canvas previews show their own scrollbar, which takes width from the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "const PREVIEW_SCROLL_CSS = \"html{scrollbar-width:none}html::-webkit-scrollbar{display:none}\";",
+          "replace": "const PREVIEW_SCROLL_CSS = \"\";"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/devices.e2e.ts", "--project=node", "-g", "W-140"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*Tablet and Mobile previews scroll"
     }
   ]
 }
