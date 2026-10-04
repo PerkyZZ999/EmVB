@@ -1481,14 +1481,15 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
-          "search": "    if (isTextField(event.target) || inDialog(event.target)) return;\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"z\") {\n      event.preventDefault();\n      dispatch(event.shiftKey ? { type: \"redo\" } : { type: \"undo\" });\n      return;\n    }\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"y\") {\n      event.preventDefault();\n      dispatch({ type: \"redo\" });\n      return;\n    }\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {",
-          "replace": "    if (inDialog(event.target)) return;\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"z\") {\n      event.preventDefault();\n      dispatch(event.shiftKey ? { type: \"redo\" } : { type: \"undo\" });\n      return;\n    }\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"y\") {\n      event.preventDefault();\n      dispatch({ type: \"redo\" });\n      return;\n    }\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {"
+          "search": "    if (isTextField(event.target) || inDialog(event.target)) return;\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"z\") {\n      event.preventDefault();\n      dispatch(event.shiftKey ? { type: \"redo\" } : { type: \"undo\" });\n      return;\n    }\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"y\") {\n      event.preventDefault();\n      dispatch({ type: \"redo\" });\n      return;\n    }\n    if (!onCanvasOrLayers(event.target)) return;\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {",
+          "replace": "    if (inDialog(event.target)) return;\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"z\") {\n      event.preventDefault();\n      dispatch(event.shiftKey ? { type: \"redo\" } : { type: \"undo\" });\n      return;\n    }\n    if ((event.ctrlKey || event.metaKey) && !event.altKey && event.key.toLowerCase() === \"y\") {\n      event.preventDefault();\n      dispatch({ type: \"redo\" });\n      return;\n    }\n    if (!onCanvasOrLayers(event.target)) return;\n    const layout = latest.current.page.layout;\n    const selected = latest.current.selectedId;\n    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === \"d\" && selected) {"
         }
       ],
       "command": [
         "bun",
         "test",
         "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "./packages/emvb/src/admin/editor/shortcut-focus.test.tsx",
         "-t",
         "Ctrl\\+D does not duplicate"
       ],
@@ -18220,6 +18221,65 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*toolbar sits inside its outline"
+    },
+    {
+      "id": "W-132/panel-keys-move-selection",
+      "requirement": "W-132",
+      "description": "Element shortcuts act from the settings panel's tabs and section headers, so ArrowUp on the Style tab selects the parent.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "    if (!onCanvasOrLayers(event.target)) return;\n    const layout",
+          "replace": "    const layout"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/shortcut-focus.test.tsx"],
+      "expect": "\\(fail\\).*on a panel tab or section header do nothing"
+    },
+    {
+      "id": "W-132/keys-dead-everywhere",
+      "requirement": "W-132",
+      "description": "The focus guard rejects every target, so element shortcuts stop working from the canvas and Layers too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "  if (!element || typeof element.closest !== \"function\") return true;",
+          "replace": "  if (element || !element) return false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/shortcut-focus.test.tsx"],
+      "expect": "\\(fail\\).*act from Layers, the canvas overlay"
+    },
+    {
+      "id": "W-132/undo-blocked-from-panels",
+      "requirement": "W-132",
+      "description": "The focus guard runs before undo and redo, so Ctrl+Z does nothing while a panel tab has focus.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "    if (isTextField(event.target) || inDialog(event.target)) return;\n",
+          "replace": "    if (isTextField(event.target) || inDialog(event.target)) return;\n    if (!onCanvasOrLayers(event.target)) return;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/shortcut-focus.test.tsx"],
+      "expect": "\\(fail\\).*Save, undo and redo still work"
+    },
+    {
+      "id": "W-132/e2e-panel-keys-move-selection",
+      "requirement": "W-132",
+      "description": "In the editor, ArrowUp on the Style tab or a Style section header changes the selected element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "    if (!onCanvasOrLayers(event.target)) return;\n    const layout",
+          "replace": "    const layout"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/keyboard.e2e.ts", "--project=node", "-g", "W-132"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*leave the selection alone"
     }
   ]
 }

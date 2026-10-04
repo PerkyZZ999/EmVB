@@ -26,6 +26,23 @@ const isTextField = (target: EventTarget | null) => {
 const inDialog = (target: EventTarget | null) =>
   !!(target as HTMLElement | null)?.closest?.('[role="dialog"], [role="alertdialog"]');
 
+/**
+ * Element shortcuts (traverse, arrange, delete, duplicate, copy, paste, Escape) act only from the
+ * canvas, Layers, or with nothing focused, never from the settings panel, its tabs and section
+ * headers, the Add panel or the top bar: ↑ on the Style tab used to select the previous element,
+ * often the parent (W-132). Keys from the canvas iframe arrive with targets in its own document.
+ */
+const onCanvasOrLayers = (target: EventTarget | null) => {
+  const element = target as Element | null;
+  if (!element || typeof element.closest !== "function") return true;
+  const doc = element.ownerDocument;
+  if (doc !== document) return true;
+  if (element === doc.body || element === doc.documentElement) return true;
+  return !!element.closest(
+    '[data-emvb-panel="layers"], .emvb-overlay, .emvb-stage, iframe[data-emvb-canvas]',
+  );
+};
+
 /** Selected text on the page or the canvas: Ctrl/Cmd+C then copies the text, as usual (W-093). */
 const hasTextSelection = (target: EventTarget | null) => {
   const docs = new Set([document, (target as Node | null)?.ownerDocument ?? document]);
@@ -68,7 +85,8 @@ export type ShortcutHandlers = {
 /**
  * Window-level editor shortcuts (W-020): save, undo and redo (W-095), duplicate, copy and paste
  * (W-093), delete, escape, arrange and traverse. Inside text fields and dialogs only Save works, so
- * typing, native undo, copy and paste keep working there.
+ * typing, native undo, copy and paste keep working there. Element shortcuts also need focus on
+ * the canvas, Layers, or nothing (W-132); Save, undo and redo work from the panels too.
  */
 export function useEditorShortcuts({
   latest,
@@ -96,6 +114,7 @@ export function useEditorShortcuts({
       dispatch({ type: "redo" });
       return;
     }
+    if (!onCanvasOrLayers(event.target)) return;
     const layout = latest.current.page.layout;
     const selected = latest.current.selectedId;
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "d" && selected) {
