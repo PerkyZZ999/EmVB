@@ -9,19 +9,19 @@ const solid = (color: string) =>
 
 /**
  * Kumo paints emphasis buttons with a light gradient that leaves white text below AA. EmVB
- * flattens it to the solid fill (DESIGN.md, contrast override). Kumo lets `style` win.
+ * flattens it to the solid fill (contrast override). Kumo lets `style` win.
  */
 export const SOLID_PRIMARY = solid("var(--color-kumo-brand)");
 export const SOLID_DESTRUCTIVE = solid("var(--text-color-kumo-danger)");
 
-/** EmVB's compact control size: 28 px and a 6 px radius (DESIGN.md). Doubled to beat utilities. */
+/** EmVB's compact control size: 28 px and a 6 px radius. Doubled to beat utilities. */
 export const BUTTON = "emvb-btn";
 export const FIELD = "emvb-field";
 
 /**
  * Shared EmVB admin chrome (list pages, dialogs, setup states, conditions) plus compact
- * control sizing used inside the editor. Glass / elevation tokens match DESIGN.md and the
- * editor's mockup1 denser elevated look.
+ * control sizing used inside the editor. Glass / elevation tokens match the
+ * editor's denser elevated look.
  */
 export const UI_CSS = `
 [data-emvb-page],

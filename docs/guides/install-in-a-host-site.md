@@ -1,6 +1,6 @@
-# Install EmVB in a host site (R-052)
+# Install EmVB in a host site
 
-EmVB is a **native** EmDash plugin: add the package, register it in `astro.config`, and add one public route. The EmDash plugin registry installs sandboxed plugins only; native plugins like EmVB are npm packages (D-010, W-082).
+EmVB is a **native** EmDash plugin: add the package, register it in `astro.config`, and add one public route. The EmDash plugin registry installs sandboxed plugins only; native plugins like EmVB are npm packages.
 
 Verified against EmDash `^1.0.0` (1.0.1) and the EmVB TypeScript-source package shape (no `bun build` step for the plugin).
 

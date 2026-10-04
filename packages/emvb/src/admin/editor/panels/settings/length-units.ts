@@ -7,7 +7,7 @@ export type LengthLiteral = { value: number; unit: LengthUnit };
 const BOX: readonly UnitChoice[] = ["px", "%", "rem", "em", "vw", "vh"];
 const BOX_AUTO: readonly UnitChoice[] = [...BOX, "auto"];
 
-/** Units each length property offers in its unit menu (DESIGN.md § Inputs). */
+/** Units each length property offers in its unit menu. */
 const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   width: BOX_AUTO,
   height: BOX_AUTO,

@@ -2,7 +2,7 @@
 
 A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS, with no EmVB JavaScript on the public site except the optional popups and tabs scripts, which load only on pages that have a popup or Tabs. Forms use the forms plugin's own script. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
-**Status:** MVP implement slices S1–S6 complete. The source can be published on GitHub. The npm package stays private until release (D-007).
+**Status:** pre-release. The MVP is complete; the npm package stays private until the first release.
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
@@ -47,26 +47,15 @@ EmVB isn't on npm yet. To try it in a host site, follow [docs/guides/install-in-
 | Seeded bugs (prove the tests catch real defects)     | `bun run seeded-bugs`                                        |
 | Project site                                         | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |
 
-[AGENTS.md](AGENTS.md) has the full guide: commands, test layout, code style and troubleshooting. [CONTRIBUTING.md](CONTRIBUTING.md) covers pull requests, and [SECURITY.md](SECURITY.md) how to report a vulnerability.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers setup, pull requests and troubleshooting, and [SECURITY.md](SECURITY.md) how to report a vulnerability.
 
 ## Docs
 
 - [docs/system/layout-format.md](docs/system/layout-format.md): how pages and the design system are stored.
 - [docs/system/theme-parts.md](docs/system/theme-parts.md): theme parts, conditions, triggers and dynamic data.
-- [docs/DESIGN.md](docs/DESIGN.md): the editor's UI rules.
-- [docs/project/](docs/project/): requirements, decisions, architecture, work items and validation evidence.
+- [docs/guides/install-in-a-host-site.md](docs/guides/install-in-a-host-site.md): add EmVB to an EmDash site.
 - [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
 [MIT](LICENSE) © 2026 Charles Wilkin.
-
-## Before a public GitHub push
-
-Pushing this repository is not an npm publish. D-007 still keeps the `emvb` package private.
-
-- [x] `LICENSE` is MIT, and every `package.json` says `"license": "MIT"`.
-- [x] The package's `repository`, `homepage` and `bugs` URLs point at `github.com/PerkyZZ999/EmVB`.
-- [x] No Cloudflare `database_id`, KV id or API token is committed. `demos/cloudflare/wrangler.jsonc` names the local D1 database only.
-- [x] `.env`, `.dev.vars`, local databases, `demos/*/.wrangler/`, build output and Playwright auth state are gitignored; nothing generated or local is tracked.
-- [ ] Decide whether the internal notes stay public: `docs/HANDOFF.md`, `docs/project/STATE.md` and `docs/project/VALIDATION.md` mention this machine, and every commit carries the author's email address.

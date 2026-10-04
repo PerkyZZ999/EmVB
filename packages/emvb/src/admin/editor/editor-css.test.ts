@@ -19,7 +19,7 @@ const rule = (selector: string) => {
   return start < 0 ? "" : EDITOR_CSS.slice(start, EDITOR_CSS.indexOf("}", start));
 };
 
-test("editor tabs (Add | Layers, Content | Style, Variables | Classes) are 28 px (DESIGN.md)", () => {
+test("editor tabs (Add | Layers, Content | Style, Variables | Classes) are 28 px", () => {
   expect(EDITOR_CSS).toMatch(/--emvb-control: 28px;/);
   expect(rule('.emvb-tabs [role="tab"]')).toMatch(/\bheight: var\(--emvb-control\);/);
   expect(rule('.emvb-tabs [role="tab"]')).toMatch(/min-height: var\(--emvb-control\);/);

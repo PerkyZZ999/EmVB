@@ -4,22 +4,22 @@
     {
       "script": "demos/cloudflare#dev",
       "reason": "Cloudflare's Vite plugin (miniflare) crashes under the Bun runtime: `this.#runtimeDispatcher?.close is not a function`.",
-      "evidence": "VALIDATION.md S0-3"
+      "evidence": "spike S0-3"
     },
     {
       "script": "demos/cloudflare#start",
       "reason": "`wrangler dev` prints Ready under the Bun runtime but every request hangs.",
-      "evidence": "VALIDATION.md S0-3"
+      "evidence": "spike S0-3"
     },
     {
       "script": ".#e2e",
       "reason": "Under `bun --bun`, child processes see Bun as `node`, so Playwright's Cloudflare web server (`astro dev`) crashes the same way as S0-3. The runner itself stays on Node; the Node demo it starts still runs on Bun (`bun --bun astro dev`).",
-      "evidence": "VALIDATION.md W-003 (miniflare `this.#runtimeDispatcher?.close is not a function` under `bun --bun playwright test`)"
+      "evidence": "W-003 (miniflare `this.#runtimeDispatcher?.close is not a function` under `bun --bun playwright test`)"
     },
     {
       "script": ".#e2e:prod",
       "reason": "Same as `.#e2e`: the runner starts the Cloudflare dev server and `wrangler dev`, which crash or hang under the Bun runtime (S0-3). The Node demo it starts still runs on Bun.",
-      "evidence": "VALIDATION.md W-003, S0-3"
+      "evidence": "W-003, spike S0-3"
     }
   ]
 }

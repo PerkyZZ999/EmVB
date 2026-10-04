@@ -1,4 +1,4 @@
-/** The editor's keyboard shortcuts (DESIGN_BRIEF), shown in the Shortcuts dialog. */
+/** The editor's keyboard shortcuts, shown in the Shortcuts dialog. */
 export const SHORTCUTS: readonly { action: string; keys: string }[] = [
   { action: "Move focus between regions", keys: "Tab / Shift+Tab" },
   { action: "Next or previous element", keys: "↑ / ↓" },

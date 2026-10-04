@@ -8,7 +8,7 @@ const rule = (selector: string) => {
   return UI_CSS.slice(start, UI_CSS.indexOf("}", start));
 };
 
-test("Theme Builder filter tabs are 28 px, like every tab in DESIGN.md", () => {
+test("Theme Builder filter tabs are 28 px, like every editor tab", () => {
   expect(rule(".emvb-theme-filter")).toMatch(/\bheight: 28px;/);
   expect(rule(".emvb-theme-filter")).toMatch(/min-height: 28px;/);
   expect(rule(".emvb-theme-filters")).toMatch(/min-height: 28px;/);

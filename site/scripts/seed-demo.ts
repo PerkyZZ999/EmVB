@@ -77,7 +77,7 @@ export async function signIn(page: Page) {
       await dashboard.waitFor({ timeout: 10_000 });
       return;
     } catch {
-      // The first loads after a dev-server start can fail to hydrate (AGENTS.md); reload.
+      // The first loads after a dev-server start can fail to hydrate; reload.
     }
   }
   throw new Error("The admin did not load");

@@ -1,5 +1,5 @@
 /**
- * Every number here is quoted from docs/project/VALIDATION.md. Keep the source
+ * Every number here is quoted from the project's validation records. Keep the source
  * next to the figure, and update both together.
  */
 export interface Metric {

@@ -34,7 +34,7 @@ const optionKey = (option: ClassOption) =>
   option.kind === "class" ? option.cls.id : `create-${option.name}`;
 
 /**
- * The Style tab's Classes field (W-087, DESIGN.md "class chip input"): a Local chip, one chip per
+ * The Style tab's Classes field (W-087): a Local chip, one chip per
  * applied class in cascade order, and a combobox that suggests classes or creates one.
  */
 export function ClassChipInput({

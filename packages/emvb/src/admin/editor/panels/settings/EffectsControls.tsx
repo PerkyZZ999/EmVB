@@ -11,7 +11,7 @@ type Filter = NonNullable<StyleProps["filter"]>;
 type Transition = NonNullable<StyleProps["transition"]>;
 type Entrance = NonNullable<StyleProps["entrance"]>;
 
-/** DESIGN.md: Add shadow starts at 0 4 12 0, 18 % black. */
+/** Add shadow starts at 0 4 12 0, 18 % black. */
 const NEW_SHADOW: Shadow = { x: 0, y: 4, blur: 12, spread: 0, color: "#0000002e" };
 
 const OFFSET: NumberSpec = { min: -1000, max: 1000, example: "4" };

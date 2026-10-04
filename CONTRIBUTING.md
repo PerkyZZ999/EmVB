@@ -1,6 +1,6 @@
 # Contributing to EmVB
 
-Thanks for helping. [AGENTS.md](AGENTS.md) is the full guide to commands, tests and code style. This page covers the essentials.
+Thanks for helping. This page covers setup, the checks to run, code style and common problems.
 
 ## Set up
 
@@ -26,6 +26,15 @@ bun run e2e e2e/<area>.e2e.ts --project=node    # the e2e specs for what you tou
 ## Commits
 
 Keep commits small, one change each, in the form `feat(scope): …`, `fix(scope): …`, `test(scope): …`, `docs: …` or `chore: …`.
+
+## Troubleshooting
+
+- **The first admin load after a dev-server start shows "Loading EmDash..." or a hydration error.** Reload; `e2e/auth.setup.ts` retries until two clean loads.
+- **Don't run `astro build` for a demo while its dev server is running.** It can leave the dev admin unable to hydrate; restart the dev server.
+- **Port already in use** (4411, 4412, 4421, 4422): a demo is still running. Stop it, or run Playwright without `CI=1` to reuse it.
+- **A failing `bun test` prints megabytes of object dump:** an assertion was given a DOM element. Assert on its markup or on a boolean instead.
+- **workerd crashes with `SIGXFSZ`:** a file-size limit (`ulimit -f`) is set in your shell. Don't limit file size or address space when running the demos or e2e; cap memory instead if you need to.
+- **Playwright failures** keep a trace in `test-results/<test>/trace.zip`.
 
 ## Security
 

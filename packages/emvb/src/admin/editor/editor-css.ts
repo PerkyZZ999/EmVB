@@ -1,5 +1,5 @@
 /**
- * Editor chrome styles (DESIGN.md). The admin's Tailwind build is precompiled, so EmVB ships its
+ * Editor chrome styles. The admin's Tailwind build is precompiled, so EmVB ships its
  * own rules, scoped to the editor root and built only from Kumo variables. Panels keep their
  * 1 px borders inside their width, so the canvas gets exactly the space between them (D-025).
  * Density is compact (28 px controls, 44 px top bar, 256/288 panels) with near-opaque
@@ -286,7 +286,7 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-unit-btn:hover, .emvb-unit-btn[data-popup-open] { background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
 .emvb-unit-btn:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -2px; }
-/* Variable button and bound-variable chip (W-087, DESIGN.md "variable chip") */
+/* Variable button and bound-variable chip (W-087) */
 .emvb-var-btn {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
   width: 28px; height: 28px; margin-top: 28px; padding: 0; border: 0; border-radius: 6px;
@@ -349,7 +349,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-icon-tile[data-selected="true"] { border-color: var(--color-kumo-brand); background: var(--color-kumo-tint); }
 .emvb-icon-tile span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
-/* Class chip input (W-087, DESIGN.md): one 28 px box holding the chips and the text input */
+/* Class chip input (W-087): one 28 px box holding the chips and the text input */
 .emvb-class-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
 .emvb-chip-anchor { position: relative; }
 .emvb-chip-box {

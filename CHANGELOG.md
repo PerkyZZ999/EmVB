@@ -1,6 +1,6 @@
 # Changelog
 
-EmVB isn't released yet. The `emvb` package is private (D-007), so nothing is on npm.
+EmVB isn't released yet. The `emvb` package is private, so nothing is on npm.
 
 ## Unreleased
 
