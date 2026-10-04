@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "demos/*"
+    "demos/*",
+    "site"
   ],
   "type": "module",
   "scripts": {
@@ -19,6 +20,8 @@
     "demo:cf": "bun run --cwd demos/cloudflare dev",
     "demo:cf:build": "bun run --cwd demos/cloudflare build",
     "demo:cf:prod": "bun run --cwd demos/cloudflare start",
+    "site": "bun run --cwd site dev",
+    "site:build": "bun run --cwd site build",
     "check:runtime": "bun scripts/check-runtime.ts",
     "check:seeds": "bun scripts/seeded-bug.ts --verify",
     "test": "bun test ./packages ./scripts ./test",

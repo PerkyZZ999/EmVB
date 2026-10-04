@@ -1,0 +1,37 @@
+---
+import FeatureGrid from "../components/FeatureGrid.astro";
+import Faq from "../components/Faq.astro";
+import Gallery from "../components/Gallery.astro";
+import GetStarted from "../components/GetStarted.astro";
+import Hero from "../components/Hero.astro";
+import Lightbox from "../components/Lightbox.astro";
+import Output from "../components/Output.astro";
+import Pipeline from "../components/Pipeline.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import Styling from "../components/Styling.astro";
+import ThemeBuilder from "../components/ThemeBuilder.astro";
+import Trust from "../components/Trust.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  title="EmVB · a visual page builder for EmDash CMS"
+  description="EmVB is a visual page builder plugin for EmDash CMS 1.0. Design pages, headers, footers and popups on a canvas; publish plain HTML and CSS."
+>
+  <SiteHeader />
+  <main id="content">
+    <Hero />
+    <FeatureGrid />
+    <Styling />
+    <Output />
+    <ThemeBuilder />
+    <Gallery />
+    <Pipeline />
+    <Trust />
+    <GetStarted />
+    <Faq />
+  </main>
+  <SiteFooter />
+  <Lightbox />
+</Base>

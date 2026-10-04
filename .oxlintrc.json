@@ -48,7 +48,7 @@
       }
     },
     {
-      "files": ["scripts/**", "e2e/**"],
+      "files": ["scripts/**", "e2e/**", "site/scripts/**"],
       "rules": {
         "no-await-in-loop": "off"
       }
@@ -57,6 +57,17 @@
       "files": ["**/*.test.ts", "**/*.test.tsx"],
       "rules": {
         "unicorn/consistent-function-scoping": "off"
+      }
+    },
+    {
+      "files": ["site/src/**"],
+      "rules": {
+        "import/no-unassigned-import": [
+          "error",
+          {
+            "allow": ["**/*.css"]
+          }
+        ]
       }
     }
   ]

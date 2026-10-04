@@ -27,3 +27,10 @@ The Cloudflare demo runs the same way with `bun run demo:cf` on port 4412.
 - [docs/system/layout-format.md](docs/system/layout-format.md): how pages and the design system are stored.
 
 See [docs/guides/install-in-a-host-site.md](docs/guides/install-in-a-host-site.md).
+
+The project site is a static Astro app in `site/`:
+
+```bash
+bun run site        # http://127.0.0.1:4455
+bun run site:build
+```

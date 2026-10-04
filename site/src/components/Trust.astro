@@ -1,0 +1,145 @@
+---
+import { metrics, safeguards } from "../data/trust";
+import SectionIntro from "./SectionIntro.astro";
+---
+
+<section class="section trust" aria-labelledby="trust-title">
+  <div class="wrap">
+    <SectionIntro id="trust-title" eyebrow="Performance and safety" title="Small output, strict input, lots of tests">
+      <p>Numbers from the project’s validation log, measured on the Node demo.</p>
+    </SectionIntro>
+
+    <dl class="metrics">
+      {
+        metrics.map((metric) => (
+          <div class="metric reveal">
+            <dt>{metric.label}</dt>
+            <dd>
+              <span class="value">{metric.value}</span>
+              <span class="source">{metric.source}</span>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <ul class="guards">
+      {
+        safeguards.map((item) => (
+          <li class="reveal">
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0 0 var(--space-8);
+    border-block: 1px solid var(--rule-strong);
+  }
+
+  .metric {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .metric + .metric {
+    border-left: 1px solid var(--rule);
+  }
+
+  dd {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+  }
+
+  .value {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 1.6rem + 2vw, 3.4rem);
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  .source {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+
+  dt {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .guards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .guards li {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+  }
+
+  .guards li::before {
+    content: "";
+    width: 2rem;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  h3 {
+    font-size: var(--step-1);
+  }
+
+  .guards p {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 1000px) {
+    .metrics,
+    .guards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .metric:nth-child(3) {
+      border-left: 0;
+    }
+
+    .metric:nth-child(n + 3) {
+      border-top: 1px solid var(--rule);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .metrics,
+    .guards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .metric + .metric {
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+
+    .metric {
+      padding-inline: 0;
+    }
+  }
+</style>

@@ -1,0 +1,93 @@
+---
+/** A quiet browser window around a desktop screenshot, or a phone bezel. */
+interface Props {
+  label?: string;
+  phone?: boolean;
+}
+
+const { label, phone = false } = Astro.props;
+---
+
+<div class:list={["frame", phone && "frame--phone"]}>
+  {
+    !phone && (
+      <div class="chrome" aria-hidden="true">
+        <span class="dots">
+          <i />
+          <i />
+          <i />
+        </span>
+        {label && <span class="url">{label}</span>}
+      </div>
+    )
+  }
+  <div class="screen"><slot /></div>
+</div>
+
+<style>
+  .frame {
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-l);
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-frame);
+  }
+
+  .chrome {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 2.1rem;
+    padding-inline: var(--space-4);
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper-sunk);
+  }
+
+  .dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .dots i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--rule-strong);
+  }
+
+  .url {
+    padding: 0.1rem 0.9rem;
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+
+  .screen :global(img) {
+    width: 100%;
+  }
+
+  .frame--phone {
+    padding: 7px;
+    border-radius: 34px;
+    background: var(--ink);
+    border-color: transparent;
+  }
+
+  .frame--phone .screen {
+    overflow: hidden;
+    border-radius: 27px;
+  }
+
+  @media (max-width: 560px) {
+    .chrome {
+      height: 1.6rem;
+    }
+
+    .url {
+      display: none;
+    }
+  }
+</style>

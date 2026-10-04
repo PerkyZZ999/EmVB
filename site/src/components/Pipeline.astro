@@ -1,0 +1,165 @@
+---
+import { sample, steps } from "../data/pipeline";
+import SectionIntro from "./SectionIntro.astro";
+---
+
+<section class="section" aria-labelledby="hood-title">
+  <div class="wrap" id="under-the-hood">
+    <SectionIntro id="hood-title" eyebrow="Under the hood" title="From canvas to markup in four steps" />
+
+    <ol class="steps">
+      {
+        steps.map((step, index) => (
+          <li class="reveal">
+            <span class="num" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+            <h3>{step.title}</h3>
+            <p>{step.body}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="code reveal">
+      <figure>
+        <figcaption>Layout JSON <span>stored</span></figcaption>
+        <pre><code>{sample.json}</code></pre>
+      </figure>
+      <div class="arrow" aria-hidden="true">→</div>
+      <figure>
+        <figcaption>HTML and CSS <span>served</span></figcaption>
+        <pre><code>{sample.html}</code></pre>
+        <pre class="css"><code>{sample.css}</code></pre>
+      </figure>
+    </div>
+    <p class="note">The hero heading of the Northfold demo, as saved and as published (line breaks added).</p>
+  </div>
+</section>
+
+<style>
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0 0 var(--space-8);
+    padding: 0;
+    list-style: none;
+  }
+
+  .steps li {
+    position: relative;
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    padding-top: var(--space-5);
+    border-top: 2px solid var(--ink);
+  }
+
+  .steps li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    right: -0.75rem;
+    width: 10px;
+    height: 10px;
+    border-top: 2px solid var(--ink);
+    border-right: 2px solid var(--ink);
+    transform: rotate(45deg);
+  }
+
+  .num {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  h3 {
+    font-size: var(--step-2);
+  }
+
+  .steps p {
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+
+  .code {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-4);
+    padding: clamp(1rem, 3vw, 2rem);
+    border-radius: var(--radius-l);
+    background: var(--code-bg);
+    color: var(--code-ink);
+  }
+
+  figure {
+    min-width: 0;
+    margin: 0;
+  }
+
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+    color: var(--code-faint);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  pre {
+    margin: 0;
+    padding: var(--space-4);
+    overflow-x: auto;
+    border: 1px solid rgb(255 255 255 / 8%);
+    border-radius: var(--radius-m);
+    background: rgb(255 255 255 / 3%);
+    font-size: 0.78rem;
+    line-height: 1.65;
+  }
+
+  pre.css {
+    margin-top: var(--space-3);
+    color: #9cc0ff;
+  }
+
+  .arrow {
+    color: var(--code-faint);
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+  }
+
+  .note {
+    margin-top: var(--space-4);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 1000px) {
+    .steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: var(--space-6);
+    }
+
+    .steps li::after {
+      display: none;
+    }
+
+    .code {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .arrow {
+      justify-self: center;
+      transform: rotate(90deg);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .steps {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

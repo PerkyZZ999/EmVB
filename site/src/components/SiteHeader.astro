@@ -1,0 +1,182 @@
+---
+import { nav } from "../data/nav";
+import Logo from "./Logo.astro";
+---
+
+<header class="header">
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="EmVB, back to top">
+      <Logo />
+      <span>EmVB</span>
+    </a>
+
+    <nav class="links" aria-label="Sections">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+
+    <a class="button cta" href="#get-started">Get started</a>
+
+    <details class="menu">
+      <summary>
+        <span class="visually-hidden">Menu</span>
+        <span class="burger" aria-hidden="true"></span>
+      </summary>
+      <nav class="sheet" aria-label="Sections">
+        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        <a href="#get-started">Get started</a>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--rule);
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    backdrop-filter: saturate(1.4) blur(14px);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    height: var(--header-h);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+  }
+
+  .links {
+    display: flex;
+    gap: var(--space-5);
+    margin-inline-start: auto;
+  }
+
+  .links a,
+  .sheet a {
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    text-decoration: none;
+  }
+
+  .links a:hover,
+  .sheet a:hover {
+    color: var(--ink);
+  }
+
+  .cta {
+    min-height: 2.25rem;
+    padding-inline: 0.95rem;
+    font-size: 0.8rem;
+  }
+
+  .menu {
+    display: none;
+    position: relative;
+    margin-inline-start: auto;
+  }
+
+  .menu summary {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .burger,
+  .burger::before,
+  .burger::after {
+    display: block;
+    width: 1rem;
+    height: 1.5px;
+    background: var(--ink);
+  }
+
+  .burger {
+    position: relative;
+  }
+
+  .burger::before,
+  .burger::after {
+    content: "";
+    position: absolute;
+    left: 0;
+  }
+
+  .burger::before {
+    top: -5px;
+  }
+
+  .burger::after {
+    top: 5px;
+  }
+
+  .menu[open] .burger {
+    background: transparent;
+  }
+
+  .menu[open] .burger::before {
+    top: 0;
+    transform: rotate(45deg);
+  }
+
+  .menu[open] .burger::after {
+    top: 0;
+    transform: rotate(-45deg);
+  }
+
+  .sheet {
+    position: absolute;
+    top: calc(100% + var(--space-3));
+    right: 0;
+    display: grid;
+    min-width: 13rem;
+    padding: var(--space-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-frame);
+  }
+
+  .sheet a {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-s);
+    font-size: 0.9rem;
+  }
+
+  .sheet a:hover {
+    background: var(--paper-sunk);
+  }
+
+  @media (max-width: 860px) {
+    .links,
+    .cta {
+      display: none;
+    }
+
+    .menu {
+      display: block;
+    }
+  }
+</style>

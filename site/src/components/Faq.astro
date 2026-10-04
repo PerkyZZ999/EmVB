@@ -1,0 +1,81 @@
+---
+import { faqs } from "../data/faq";
+import SectionIntro from "./SectionIntro.astro";
+---
+
+<section class="section" aria-labelledby="faq-title">
+  <div class="wrap narrow" id="faq">
+    <SectionIntro id="faq-title" eyebrow="FAQ" title="Questions people ask first" />
+    <div class="list">
+      {
+        faqs.map((item) => (
+          <details>
+            <summary>{item.q}</summary>
+            <p>{item.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .narrow {
+    max-width: 52rem;
+  }
+
+  .list {
+    border-top: 1px solid var(--rule-strong);
+  }
+
+  details {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5) 0;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: "+";
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 50%;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    transition: transform 200ms var(--ease-out);
+  }
+
+  details[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  details p {
+    max-width: 44rem;
+    padding-bottom: var(--space-5);
+    color: var(--ink-soft);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    summary::after {
+      transition: none;
+    }
+  }
+</style>

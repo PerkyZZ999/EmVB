@@ -1,0 +1,172 @@
+---
+import { largestSrc } from "../data/shots";
+import type { Spotlight } from "../data/spotlights";
+import Frame from "./Frame.astro";
+import Shot from "./Shot.astro";
+
+interface Props {
+  item: Spotlight;
+  flip?: boolean;
+}
+
+const { item, flip = false } = Astro.props;
+const detail = item.detail;
+const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 2.5rem)";
+---
+
+<article class:list={["spotlight", "reveal", flip && "spotlight--flip"]}>
+  <div class="copy">
+    <p class="kicker">{item.kicker}</p>
+    <h3>{item.title}</h3>
+    <p class="body">{item.body}</p>
+    <ul>
+      {item.points.map((point) => <li>{point}</li>)}
+    </ul>
+  </div>
+  <div class:list={["visual", detail && "visual--detail"]}>
+    <a class="zoom" href={largestSrc(item.shot)} data-lightbox>
+      <Frame>
+        <Shot id={item.shot} sizes={sizes} />
+      </Frame>
+      <span class="visually-hidden">Open full size</span>
+    </a>
+    {
+      detail && (
+        <figure
+          class="detail"
+          style={`--x: ${detail.x}; --y: ${detail.y}; --w: ${detail.w}; --h: ${detail.h}`}
+        >
+          <div class="crop">
+            <Shot id={detail.shot} sizes="1200px" />
+          </div>
+          <figcaption>{detail.label}</figcaption>
+        </figure>
+      )
+    }
+  </div>
+</article>
+
+<style>
+  .spotlight {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4.5rem);
+  }
+
+  .spotlight--flip {
+    grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  }
+
+  .spotlight--flip .copy {
+    order: 2;
+  }
+
+  .kicker {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin-top: var(--space-3);
+    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem);
+  }
+
+  .body {
+    margin-top: var(--space-4);
+    color: var(--ink-soft);
+  }
+
+  ul {
+    display: grid;
+    gap: var(--space-2);
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: grid;
+    grid-template-columns: 1rem 1fr;
+    gap: var(--space-2);
+    font-size: 0.98rem;
+  }
+
+  li::before {
+    content: "";
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-top: 0.55em;
+    border: 1.5px solid var(--accent);
+    border-radius: 2px;
+  }
+
+  .visual {
+    position: relative;
+  }
+
+  .zoom {
+    display: block;
+    border-radius: var(--radius-l);
+    cursor: zoom-in;
+  }
+
+  .visual--detail {
+    padding-bottom: 4rem;
+  }
+
+  .detail {
+    position: absolute;
+    bottom: 0;
+    left: -1.5rem;
+    width: 34%;
+    margin: 0;
+    padding: 6px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-frame);
+  }
+
+  .crop {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: calc(var(--w) * 1440) / calc(var(--h) * 900);
+    border-radius: calc(var(--radius-m) - 4px);
+  }
+
+  .crop :global(img) {
+    position: absolute;
+    top: calc(-100% * var(--y) / var(--h));
+    left: calc(-100% * var(--x) / var(--w));
+    width: calc(100% / var(--w));
+    max-width: none;
+  }
+
+  .detail figcaption {
+    padding: var(--space-2) var(--space-2) var(--space-1);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+  }
+
+  @media (max-width: 900px) {
+    .spotlight,
+    .spotlight--flip {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .spotlight--flip .copy {
+      order: 0;
+    }
+
+    .detail {
+      left: auto;
+      right: -0.5rem;
+      width: 42%;
+    }
+  }
+</style>

@@ -1,0 +1,75 @@
+---
+import { nav } from "../data/nav";
+import Logo from "./Logo.astro";
+---
+
+<footer class="footer">
+  <div class="wrap grid">
+    <div class="brand">
+      <Logo size={24} />
+      <p>
+        <strong>EmVB</strong>, a visual page builder plugin for{" "}
+        <a href="https://github.com/emdash-cms/emdash">EmDash CMS</a>.
+      </p>
+    </div>
+    <nav aria-label="Footer">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a href="#get-started">Get started</a>
+    </nav>
+    <p class="small">
+      Screenshots show the real editor running on the Node demo. Northfold is a fictional company.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: var(--space-7);
+    border-top: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-5);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: var(--ink);
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+
+  nav a:hover {
+    color: var(--ink);
+  }
+
+  .small {
+    grid-column: 1 / -1;
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+
+  @media (max-width: 720px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

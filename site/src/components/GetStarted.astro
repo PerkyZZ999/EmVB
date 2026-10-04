@@ -1,0 +1,140 @@
+---
+import SectionIntro from "./SectionIntro.astro";
+
+const commands = [
+  { cmd: "bun install", note: "Bun and Node; Bun 1.4.2 and Node 24 are verified" },
+  { cmd: "bun run demo:node", note: "Node + SQLite demo on http://127.0.0.1:4411" },
+];
+
+const steps = [
+  "Sign in to the demo admin with the dev-only bypass link below.",
+  "Open Pages VisualBuilder and click Set up EmVB once.",
+  "Click New page, edit the heading and Publish. The page is served at /your-slug.",
+];
+---
+
+<section class="section start" aria-labelledby="start-title">
+  <div class="wrap" id="get-started">
+    <div class="grid">
+      <SectionIntro id="start-title" eyebrow="Get started" title="Run it locally in a few minutes">
+        <p>
+          From the repository root, install and start the Node demo. The Cloudflare demo, with D1
+          and R2, runs with <code>bun run demo:cf</code> on port 4412.
+        </p>
+      </SectionIntro>
+
+      <div class="panel reveal">
+        <div class="terminal" role="group" aria-label="Terminal commands">
+          {
+            commands.map((line) => (
+              <p>
+                <span class="prompt" aria-hidden="true">$</span>
+                <code>{line.cmd}</code>
+                <span class="comment"># {line.note}</span>
+              </p>
+            ))
+          }
+        </div>
+        <ol>
+          {steps.map((step) => <li>{step}</li>)}
+        </ol>
+        <p class="link">
+          <code>http://127.0.0.1:4411/_emdash/api/setup/dev-bypass?redirect=/_emdash/admin</code>
+        </p>
+        <p class="aside">
+          Adding EmVB to your own EmDash site? Follow the guide at{" "}
+          <code>docs/guides/install-in-a-host-site.md</code>{" "}in the repository. The npm package is
+          private for now.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .start {
+    background: var(--paper-sunk);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+
+  .panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+
+  .terminal {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    overflow-x: auto;
+    border-radius: var(--radius-m);
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .terminal p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-3);
+  }
+
+  .prompt {
+    color: var(--code-faint);
+  }
+
+  .terminal code {
+    font-size: inherit;
+  }
+
+  .comment {
+    color: var(--code-faint);
+  }
+
+  ol {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding-left: 1.4rem;
+  }
+
+  ol li::marker {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+  }
+
+  .link code {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    overflow-x: auto;
+    border: 1px dashed var(--rule-strong);
+    border-radius: var(--radius-s);
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .aside {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+
+  .aside code {
+    font-size: 0.82rem;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

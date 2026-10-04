@@ -1,0 +1,80 @@
+---
+import { largestSrc, shots, type ShotId } from "../data/shots";
+import SectionIntro from "./SectionIntro.astro";
+import Shot from "./Shot.astro";
+
+const items: ShotId[] = ["canvasText", "pagesList", "editorDark", "grid", "forms", "popup"];
+---
+
+<section class="section" aria-labelledby="gallery-title">
+  <div class="wrap">
+    <SectionIntro id="gallery-title" eyebrow="More of the editor" title="Text editing, pages, grid, forms, popups, dark mode" />
+    <ul class="grid">
+      {
+        items.map((id) => (
+          <li class="reveal">
+            <figure>
+              <a class="zoom" href={largestSrc(id)} data-lightbox>
+                <Shot id={id} sizes="(min-width: 1260px) 592px, (min-width: 720px) 48vw, calc(100vw - 2.5rem)" />
+                <span class="visually-hidden">Open full size</span>
+              </a>
+              <figcaption>{shots[id].caption}</figcaption>
+            </figure>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-7) var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  figure {
+    margin: 0;
+  }
+
+  .zoom {
+    display: block;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-frame);
+    cursor: zoom-in;
+  }
+
+  .zoom :global(img) {
+    width: 100%;
+    transition: transform 400ms var(--ease-out);
+  }
+
+  .zoom:hover :global(img) {
+    transform: scale(1.015);
+  }
+
+  figcaption {
+    margin-top: var(--space-4);
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+
+  @media (max-width: 720px) {
+    .grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .zoom :global(img) {
+      transition: none;
+    }
+  }
+</style>

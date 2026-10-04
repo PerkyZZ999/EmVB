@@ -1,0 +1,31 @@
+---
+/** The EmVB mark: a canvas frame with a selected block, drawn in currentColor. */
+interface Props {
+  size?: number;
+}
+
+const { size = 28 } = Astro.props;
+---
+
+<svg
+  class="logo"
+  width={size}
+  height={size}
+  viewBox="0 0 32 32"
+  aria-hidden="true"
+  focusable="false"
+>
+  <rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="currentColor"></rect>
+  <rect x="7" y="8" width="18" height="4" rx="1" fill="var(--paper)"></rect>
+  <rect x="7" y="15" width="11" height="9" rx="1" fill="var(--paper)" opacity="0.55"></rect>
+  <rect
+    x="20"
+    y="15"
+    width="5"
+    height="9"
+    rx="1"
+    fill="none"
+    stroke="var(--accent)"
+    stroke-width="1.6"
+  ></rect>
+</svg>

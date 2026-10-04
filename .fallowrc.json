@@ -1,7 +1,7 @@
 {
   "$schema": "https://fallow.tools/schema.json",
   "entry": ["demos/*/src/live.config.ts"],
-  "ignorePatterns": ["spikes/**"],
+  "ignorePatterns": ["spikes/**", "site/**"],
   "boundaries": {
     "zones": [
       {

@@ -1,0 +1,128 @@
+---
+import { partTypes, popupTriggers } from "../data/theme";
+import Frame from "./Frame.astro";
+import SectionIntro from "./SectionIntro.astro";
+import Shot from "./Shot.astro";
+---
+
+<section class="section theme" aria-labelledby="theme-title">
+  <div class="wrap" id="theme-builder">
+    <SectionIntro id="theme-title" eyebrow="Theme Builder" title="Headers, footers, templates and popups, shown where you say">
+      <p>
+        Theme parts are built in the same editor. Display conditions include or exclude them for
+        the entire site, the front page, a collection, a single entry, archives, taxonomy terms,
+        search or the 404 page. The most specific part wins, and an exclude beats an include.
+      </p>
+    </SectionIntro>
+
+    <div class="layout">
+      <div class="shots reveal">
+        <Frame label="Theme Builder">
+          <Shot id="themeBuilder" sizes="(min-width: 1260px) 720px, (min-width: 960px) 58vw, calc(100vw - 2.5rem)" />
+        </Frame>
+        <div class="second">
+          <Frame label="Route guide popup">
+            <Shot id="popupEditor" sizes="(min-width: 1260px) 640px, (min-width: 960px) 52vw, 88vw" />
+          </Frame>
+        </div>
+      </div>
+
+      <div class="facts">
+        <div class="block">
+          <h3>Part types</h3>
+          <ul class="chips">
+            {partTypes.map((type) => <li>{type}</li>)}
+          </ul>
+        </div>
+        <div class="block">
+          <h3>Popup triggers</h3>
+          <ul class="chips">
+            {popupTriggers.map((trigger) => <li>{trigger}</li>)}
+          </ul>
+          <p>Limit how often a popup shows and on which devices. Close and Escape return focus.</p>
+        </div>
+        <div class="block">
+          <h3>Dynamic content</h3>
+          <p>
+            Single, archive and loop item parts use Loop and post elements: title, excerpt, content,
+            featured image, link, date and author.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .theme {
+    background: var(--paper-sunk);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    align-items: start;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+
+  .shots {
+    display: grid;
+  }
+
+  .shots .second {
+    width: 88%;
+    margin: -14% 0 0 auto;
+    position: relative;
+  }
+
+  .facts {
+    display: grid;
+    gap: var(--space-6);
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-6));
+  }
+
+  .block {
+    display: grid;
+    gap: var(--space-3);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--rule-strong);
+  }
+
+  h3 {
+    font-size: var(--step-1);
+  }
+
+  .block p {
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chips li {
+    padding: 0.2rem 0.65rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    background: var(--paper);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 960px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .facts {
+      position: static;
+    }
+  }
+</style>

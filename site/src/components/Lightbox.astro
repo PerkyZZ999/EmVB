@@ -1,0 +1,81 @@
+---
+/**
+ * One shared dialog for every link marked data-lightbox. Without JavaScript the
+ * links still open the full-size screenshot.
+ */
+---
+
+<dialog class="lightbox" aria-label="Screenshot">
+  <form method="dialog">
+    <button class="close" aria-label="Close">×</button>
+  </form>
+  <img alt="" />
+</dialog>
+
+<script>
+  // Progressive enhancement: links open the full-size file without this script.
+  const dialog = document.querySelector<HTMLDialogElement>("dialog.lightbox");
+  const image = dialog?.querySelector("img");
+  if (dialog && image) {
+    for (const link of document.querySelectorAll<HTMLAnchorElement>("a[data-lightbox]")) {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        image.src = link.href;
+        image.alt = link.querySelector("img")?.alt ?? "";
+        dialog.showModal();
+      });
+    }
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog || event.target === image) dialog.close();
+    });
+  }
+</script>
+
+<style>
+.lightbox {
+  width: min(96vw, 1600px);
+  max-width: none;
+  max-height: 94vh;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: transparent;
+  overflow: visible;
+}
+
+.lightbox::backdrop {
+  background: rgb(10 10 12 / 82%);
+  backdrop-filter: blur(4px);
+}
+
+.lightbox img {
+  width: 100%;
+  max-height: 94vh;
+  object-fit: contain;
+  border-radius: var(--radius-m);
+  cursor: zoom-out;
+}
+
+.close {
+  position: absolute;
+  top: -0.75rem;
+  right: -0.75rem;
+  z-index: 1;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+  @media (max-width: 720px) {
+    .close {
+      top: 0.5rem;
+      right: 0.5rem;
+    }
+  }
+</style>

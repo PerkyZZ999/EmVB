@@ -1,0 +1,80 @@
+/* Design tokens. Light is the default; dark follows the visitor's system setting. */
+:root {
+  color-scheme: light dark;
+
+  --font-display: "Fraunces Variable", "Iowan Old Style", Palatino, Georgia, serif;
+  --font-body: "Source Serif 4 Variable", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --paper: #f5f2ea;
+  --paper-raised: #fffdf8;
+  --paper-sunk: #ebe6da;
+  --ink: #16140f;
+  --ink-soft: #4d483f;
+  --ink-faint: #6f685c;
+  --rule: #d9d2c3;
+  --rule-strong: #b9b0a0;
+  --accent: #0a5ce6;
+  --accent-strong: #0047c2;
+  --accent-ink: #ffffff;
+  --accent-wash: #e3ecfd;
+  --signal: #c2541f;
+  --code-bg: #16140f;
+  --code-ink: #efe9dc;
+  --code-faint: #a39c8d;
+  --shadow-frame:
+    0 1px 0 rgb(22 20 15 / 6%), 0 24px 48px -24px rgb(22 20 15 / 35%),
+    0 60px 120px -60px rgb(10 92 230 / 30%);
+  --grid-line: rgb(22 20 15 / 5%);
+
+  --radius-s: 6px;
+  --radius-m: 12px;
+  --radius-l: 18px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: clamp(4.5rem, 9vw, 8rem);
+
+  --step--1: 0.875rem;
+  --step-0: 1.0625rem;
+  --step-1: 1.25rem;
+  --step-2: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
+  --step-3: clamp(1.9rem, 1.4rem + 2vw, 2.9rem);
+  --step-4: clamp(2.1rem, 1.3rem + 4.4vw, 4.75rem);
+
+  --page: 76rem;
+  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --header-h: 4rem;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #111214;
+    --paper-raised: #191b1f;
+    --paper-sunk: #0b0c0d;
+    --ink: #eee9de;
+    --ink-soft: #c2bcb0;
+    --ink-faint: #9b958a;
+    --rule: #2b2d31;
+    --rule-strong: #43464c;
+    --accent: #6ea4ff;
+    --accent-strong: #9cc0ff;
+    --accent-ink: #08142b;
+    --accent-wash: #15233d;
+    --signal: #f08a55;
+    --code-bg: #0b0c0d;
+    --code-ink: #e9e4d8;
+    --code-faint: #8e887d;
+    --shadow-frame:
+      0 1px 0 rgb(255 255 255 / 5%), 0 30px 60px -30px rgb(0 0 0 / 70%),
+      0 60px 140px -60px rgb(110 164 255 / 28%);
+    --grid-line: rgb(238 233 222 / 4%);
+  }
+}

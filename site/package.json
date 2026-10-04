@@ -1,0 +1,17 @@
+{
+  "name": "@emvb/site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ASTRO_DEV_BACKGROUND=1 bun --bun astro dev --host 127.0.0.1 --port 4455",
+    "build": "bun --bun astro build",
+    "preview": "ASTRO_DEV_BACKGROUND=1 bun --bun astro preview --host 127.0.0.1 --port 4455"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.2.9",
+    "@fontsource-variable/source-serif-4": "^5.2.9",
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "astro": "^7.3.5"
+  }
+}

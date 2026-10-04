@@ -1,0 +1,29 @@
+---
+import { shotSize, shotSrc, shots, type ShotId } from "../data/shots";
+
+interface Props {
+  id: ShotId;
+  /** The `sizes` attribute: how wide the image is shown at each viewport. */
+  sizes: string;
+  eager?: boolean;
+}
+
+const { id, sizes, eager = false } = Astro.props;
+const shot = shots[id];
+const { widths, ratio } = shotSize[shot.kind];
+const width = widths[0];
+const height = Math.round(width * ratio);
+const srcset = widths.map((w) => `${shotSrc(shot.name, w)} ${w}w`).join(", ");
+---
+
+<img
+  src={shotSrc(shot.name, width)}
+  srcset={srcset}
+  sizes={sizes}
+  width={width}
+  height={height}
+  alt={shot.alt}
+  loading={eager ? "eager" : "lazy"}
+  fetchpriority={eager ? "high" : "auto"}
+  decoding={eager ? "sync" : "async"}
+/>

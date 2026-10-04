@@ -1,0 +1,79 @@
+---
+import Frame from "./Frame.astro";
+import SectionIntro from "./SectionIntro.astro";
+import Shot from "./Shot.astro";
+---
+
+<section class="section" aria-labelledby="output-title">
+  <div class="wrap">
+    <SectionIntro id="output-title" eyebrow="What visitors get" title="Built in the editor. Served as HTML and CSS." align="center">
+      <p>
+        Northfold is one EmVB page inside a header and footer from the Theme Builder. The only EmVB
+        scripts it loads are for its popup and its tabs. The enquiry form uses the forms plugin’s
+        script.
+      </p>
+    </SectionIntro>
+
+    <div class="stage reveal">
+      <Frame label="127.0.0.1:4411/northfold">
+        <Shot id="publicDesktop" sizes="(min-width: 1260px) 960px, calc(100vw - 2.5rem)" />
+      </Frame>
+      <div class="phones">
+        <Frame phone>
+          <Shot id="publicMobile" sizes="(min-width: 1260px) 210px, 26vw" />
+        </Frame>
+        <Frame phone>
+          <Shot id="publicMobileTrips" sizes="(min-width: 1260px) 210px, 26vw" />
+        </Frame>
+      </div>
+    </div>
+    <p class="note">
+      Real screenshots from the Node demo. Northfold is a made-up company; photos from Unsplash via
+      Lorem Picsum.
+    </p>
+  </div>
+</section>
+
+<style>
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-6);
+  }
+
+  .phones {
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  .phones > :global(*) {
+    width: clamp(7rem, 15vw, 13rem);
+  }
+
+  .phones > :global(:last-child) {
+    margin-bottom: var(--space-7);
+  }
+
+  .note {
+    margin-top: var(--space-6);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  @media (max-width: 900px) {
+    .stage {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .phones {
+      justify-content: center;
+    }
+
+    .phones > :global(*) {
+      width: min(42vw, 13rem);
+    }
+  }
+</style>

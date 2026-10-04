@@ -1,0 +1,228 @@
+---
+import Frame from "./Frame.astro";
+import Shot from "./Shot.astro";
+
+const facts = [
+  "React + Kumo editor in the EmDash admin",
+  "Plain HTML and CSS on the public site",
+  "Node + SQLite or Cloudflare + D1",
+];
+
+/** Widths of the editor's three columns at 1440 px, used for the dimension line. */
+const columns = [
+  { label: "Layers", fr: 228 },
+  { label: "Canvas", fr: 796 },
+  { label: "Style panel", fr: 256 },
+];
+---
+
+<section class="hero" id="top" aria-labelledby="hero-title">
+  <div class="wrap intro">
+    <p class="eyebrow">Visual page builder for EmDash CMS 1.0</p>
+    <h1 id="hero-title">Design on a canvas. <em>Ship plain HTML.</em></h1>
+    <p class="lede">
+      EmVB puts a full visual editor inside the EmDash admin: layers, live styles, states, devices
+      and a site-wide design system. Visitors get the markup and the CSS, not the builder.
+    </p>
+    <div class="actions">
+      <a class="button" href="#get-started">Run the demo</a>
+      <a class="button button--ghost" href="#features">See what it does</a>
+    </div>
+    <ul class="facts">
+      {facts.map((fact) => <li>{fact}</li>)}
+    </ul>
+  </div>
+
+  <div class="wrap stage">
+    <div class="dimensions" aria-hidden="true" style={`--cols: ${columns.map((c) => `${c.fr}fr`).join(" ")}`}>
+      {columns.map((c) => <span>{c.label}</span>)}
+    </div>
+    <Frame label="127.0.0.1:4411/_emdash/admin/plugins/emvb/editor">
+      <Shot id="editor" eager sizes="(min-width: 1260px) 1216px, calc(100vw - 2.5rem)" />
+    </Frame>
+    <div class="phone">
+      <Frame phone>
+        <Shot id="publicMobile" sizes="(min-width: 1260px) 200px, 16vw" />
+      </Frame>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    padding-block: clamp(2.5rem, 5vw, 4rem) var(--space-9);
+    isolation: isolate;
+  }
+
+  /* Blueprint grid, fading out from the top. */
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 100% 3rem,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 50% 0 / 3rem 100%;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+
+  .intro {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-4);
+    text-align: center;
+  }
+
+  h1 {
+    max-width: 15ch;
+    font-size: var(--step-4);
+    letter-spacing: -0.01em;
+  }
+
+  h1 em {
+    display: block;
+    color: var(--accent);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .lede {
+    max-width: 46rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-5);
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    list-style: none;
+  }
+
+  .facts li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .facts li::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .stage {
+    position: relative;
+    margin-top: clamp(2.25rem, 4vw, 3.25rem);
+  }
+
+  .dimensions {
+    display: grid;
+    grid-template-columns: var(--cols);
+    margin-bottom: var(--space-3);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .dimensions span {
+    position: relative;
+    padding: 0 var(--space-2) var(--space-2);
+    border-bottom: 1px solid var(--rule-strong);
+    text-align: center;
+  }
+
+  .dimensions span::before,
+  .dimensions span::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    width: 1px;
+    height: 9px;
+    background: var(--rule-strong);
+  }
+
+  .dimensions span::before {
+    left: 0;
+  }
+
+  .dimensions span:last-child::after {
+    right: 0;
+  }
+
+  .phone {
+    position: absolute;
+    right: clamp(-2.75rem, -3vw, -0.5rem);
+    bottom: -3.5rem;
+    width: clamp(7rem, 16vw, 12.5rem);
+    transform: rotate(2.5deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .intro > * {
+      animation: rise 700ms var(--ease-out) both;
+    }
+
+    .intro > :nth-child(2) {
+      animation-delay: 60ms;
+    }
+
+    .intro > :nth-child(3) {
+      animation-delay: 120ms;
+    }
+
+    .intro > :nth-child(n + 4) {
+      animation-delay: 180ms;
+    }
+
+    .stage {
+      animation: rise 900ms 240ms var(--ease-out) both;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(1.25rem);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .intro .eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+    }
+
+    .intro .eyebrow::before {
+      display: none;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .dimensions {
+      display: none;
+    }
+
+    .phone {
+      bottom: -2rem;
+      right: -0.25rem;
+    }
+  }
+</style>

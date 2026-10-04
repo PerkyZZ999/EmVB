@@ -1,0 +1,9 @@
+# Build output and Astro's generated types
+dist/
+.astro/
+node_modules/
+
+# Written by scripts/seed-demo.ts and scripts/capture-screenshots.ts
+scripts/.raw/
+scripts/.demo-state.json
+scripts/.demo-auth.json

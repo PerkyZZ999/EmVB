@@ -1,0 +1,161 @@
+---
+import { elementFamilies, featureGroups } from "../data/features";
+import SectionIntro from "./SectionIntro.astro";
+---
+
+<section class="section" aria-labelledby="features-title">
+  <div class="wrap" id="features">
+    <SectionIntro id="features-title" eyebrow="Features" title="A real builder, not a block editor">
+      <p>
+        EmVB covers what site builders expect from a visual editor, and keeps the output small enough
+        to read.
+      </p>
+    </SectionIntro>
+
+    <div class="groups">
+      {
+        featureGroups.map((group, index) => (
+          <section class="group reveal" aria-labelledby={`group-${group.id}`}>
+            <h3 id={`group-${group.id}`}>
+              <span class="index">{String(index + 1).padStart(2, "0")}</span>
+              {group.label}
+            </h3>
+            <dl>
+              {group.items.map((item) => (
+                <div class="item">
+                  <dt>{item.title}</dt>
+                  <dd>{item.body}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ))
+      }
+    </div>
+
+    <div class="elements reveal">
+      <h3>Elements</h3>
+      <dl>
+        {
+          elementFamilies.map((family) => (
+            <div class="family">
+              <dt>{family.label}</dt>
+              <dd>
+                <ul>
+                  {family.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+
+  .group {
+    padding: var(--space-6);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-l);
+    background: var(--paper-raised);
+  }
+
+  h3 {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+    font-size: var(--step-2);
+  }
+
+  .index {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+
+  dl {
+    display: grid;
+    gap: var(--space-5);
+    margin: 0;
+  }
+
+  dt {
+    font-weight: 600;
+  }
+
+  dd {
+    margin: var(--space-1) 0 0;
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+
+  .elements {
+    margin-top: var(--space-5);
+    padding: var(--space-6);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-l);
+  }
+
+  .elements dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5) var(--space-6);
+  }
+
+  .family dt {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .family ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .family li {
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  @media (max-width: 1000px) {
+    .groups,
+    .elements dl {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .groups,
+    .elements dl {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .group,
+    .elements {
+      padding: var(--space-5);
+    }
+  }
+</style>
