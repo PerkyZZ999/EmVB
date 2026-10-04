@@ -30,7 +30,7 @@ export async function openInNewTab(
   tab.location.href = target;
 }
 
-export const STYLES_PENDING =
+const STYLES_PENDING =
   "Site styles have unpublished changes, so the public page may look unstyled until you publish styles.";
 
 /** Persistence commands: save, publish, preview and site-styles save (with the busy flag). */

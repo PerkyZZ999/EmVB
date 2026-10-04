@@ -4165,7 +4165,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
-          "search": "    if (doc) revealInTabs(doc, selectedId);\n",
+          "search": "    revealInTabs(doc, selectedId);\n",
           "replace": ""
         }
       ],
@@ -17811,8 +17811,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
-          "search": "content:\"Drop elements here\"",
-          "replace": "content:\"\""
+          "search": "(${DROP_BOXES})::after{content:\"Drop elements here\"",
+          "replace": "(${DROP_BOXES})::after{content:\"\""
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node", "-g", "W-128"],

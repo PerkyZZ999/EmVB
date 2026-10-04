@@ -116,7 +116,7 @@ export function dropContainer(
 }
 
 /** How close to a container's edge, along its parent's main axis, a drop goes beside it. */
-export const EDGE_ZONE = 10;
+const EDGE_ZONE = 10;
 
 /**
  * Before/after edge zones (W-128): a pointer within `EDGE_ZONE` px (at most a quarter of its size)

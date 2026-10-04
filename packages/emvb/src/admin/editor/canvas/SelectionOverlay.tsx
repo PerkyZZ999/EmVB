@@ -25,7 +25,7 @@ export type DropTarget = { outline: Box; label: string };
 const LABEL_HEIGHT = 26;
 
 /** Tall enough for the drop label to sit inside the target's top-left corner. */
-export const DROP_LABEL_ROOM = 40;
+const DROP_LABEL_ROOM = 40;
 
 /**
  * Where the "Inside …" label goes (W-129): inside the target's top-left corner, so it doesn't

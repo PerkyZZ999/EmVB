@@ -58,7 +58,7 @@ const HINT = "color:#64748b;font:13px/1.4 system-ui,sans-serif;pointer-events:no
  * Canvas-only: empty containers are droppable and say so (W-128). Never emitted into the saved
  * page CSS.
  */
-export const EDITOR_CANVAS_CSS =
+const EDITOR_CANVAS_CSS =
   `:is(${DROP_BOXES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px;display:flex;align-items:center;justify-content:center}` +
   `:is(${DROP_BOXES})::after{content:"Drop elements here";${HINT}}` +
   `:is(${DROP_BODIES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px}` +
