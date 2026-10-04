@@ -38,14 +38,14 @@ EmVB isn't on npm yet. To try it in a host site, follow [docs/guides/install-in-
 
 ## Development and testing
 
-| Task | Command |
-| --- | --- |
-| Lint, format, types, dead code, unit and Astro tests | `bun run check` |
-| Unit tests only | `bun run test` |
-| End to end, both demos (Playwright) | `bun run e2e` |
-| Public pages on production builds | `bun run e2e:prod` |
-| Seeded bugs (prove the tests catch real defects) | `bun run seeded-bugs` |
-| Project site | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |
+| Task                                                 | Command                                                      |
+| ---------------------------------------------------- | ------------------------------------------------------------ |
+| Lint, format, types, dead code, unit and Astro tests | `bun run check`                                              |
+| Unit tests only                                      | `bun run test`                                               |
+| End to end, both demos (Playwright)                  | `bun run e2e`                                                |
+| Public pages on production builds                    | `bun run e2e:prod`                                           |
+| Seeded bugs (prove the tests catch real defects)     | `bun run seeded-bugs`                                        |
+| Project site                                         | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |
 
 [AGENTS.md](AGENTS.md) has the full guide: commands, test layout, code style and troubleshooting. [CONTRIBUTING.md](CONTRIBUTING.md) covers pull requests, and [SECURITY.md](SECURITY.md) how to report a vulnerability.
 
