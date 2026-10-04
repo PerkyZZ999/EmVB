@@ -24,6 +24,14 @@ describe("pack smoke (W-044, R-052)", () => {
     expect(packProblems({ name: "emvb", exports: ts }, files)).toEqual([]);
   });
 
+  test("a test file or a snapshot in the tarball is reported", () => {
+    const shipped = `${files}\npackage/src/core/a.test.ts\npackage/src/admin/__snapshots__/b.test.tsx.snap`;
+    expect(packProblems({ name: "emvb", exports: ts }, shipped)).toEqual([
+      "tarball ships package/src/core/a.test.ts",
+      "tarball ships package/src/admin/__snapshots__/b.test.tsx.snap",
+    ]);
+  });
+
   test("a wrong name, a built export, a missing export and a missing file are each reported", () => {
     const { "./core": _core, ...rest } = ts;
     const problems = packProblems(

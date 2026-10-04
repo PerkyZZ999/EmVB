@@ -10242,8 +10242,8 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "  \"files\": [\n    \"src\"\n  ],",
-          "replace": "  \"files\": [\n    \"src/core\",\n    \"src/index.ts\"\n  ],"
+          "search": "  \"files\": [\n    \"src\",\n    \"!src/**/*.test.ts\",",
+          "replace": "  \"files\": [\n    \"src/core\",\n    \"src/index.ts\",\n    \"!src/**/*.test.ts\","
         }
       ],
       "command": [
@@ -17512,6 +17512,45 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node", "-g", "saves pages"],
       "expect": "✘.*\\[node\\].*saves pages"
+    },
+    {
+      "id": "W-121/pack-ships-tests",
+      "requirement": "W-121",
+      "description": "the package's files list no longer leaves out tests and snapshots",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "    \"!src/**/*.test.ts\",\n    \"!src/**/*.test.tsx\",\n    \"!src/**/__snapshots__\"\n",
+          "replace": ""
+        },
+        {
+          "file": "packages/emvb/package.json",
+          "search": "    \"src\",\n",
+          "replace": "    \"src\"\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./scripts/pack-smoke.test.ts",
+        "-t",
+        "TypeScript source entrypoints"
+      ],
+      "expect": "\\(fail\\).*packed emvb tarball exports TypeScript source"
+    },
+    {
+      "id": "W-121/pack-test-files-unchecked",
+      "requirement": "W-121",
+      "description": "the pack check accepts test files and snapshots in the tarball",
+      "edits": [
+        {
+          "file": "scripts/pack-smoke.ts",
+          "search": "problems.push(`tarball ships ${name}`);",
+          "replace": "void name;"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "a test file or a snapshot"],
+      "expect": "\\(fail\\).*a test file or a snapshot"
     }
   ]
 }

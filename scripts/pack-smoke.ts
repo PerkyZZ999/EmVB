@@ -22,7 +22,7 @@ type PackedPackage = {
   exports?: Record<string, string | { import?: string; default?: string }>;
 };
 
-/** What is wrong with a packed package.json and tarball file list; empty when it ships TS source. */
+/** What is wrong with a packed package.json and tarball file list; empty when it ships TS source and no tests. */
 export function packProblems(pkg: PackedPackage, names: string): string[] {
   const problems: string[] = [];
   if (pkg.name !== "emvb") problems.push(`expected name emvb, got ${pkg.name}`);
@@ -34,6 +34,9 @@ export function packProblems(pkg: PackedPackage, names: string): string[] {
     }
   }
   for (const need of FILES) if (!names.includes(need)) problems.push(`tarball missing ${need}`);
+  for (const name of names.split("\n")) {
+    if (/\.test\.tsx?$|\/__snapshots__\//.test(name)) problems.push(`tarball ships ${name}`);
+  }
   return problems;
 }
 
