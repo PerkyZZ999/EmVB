@@ -1,5 +1,7 @@
 # @perkyzz/emvb
 
+[![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
+
 A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
 ![The EmVB editor](https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/site/public/screenshots/editor-1600.webp)

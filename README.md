@@ -1,8 +1,10 @@
 # EmVB
 
+[![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
+
 A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS, with no EmVB JavaScript on the public site except the optional popups and tabs scripts, which load only on pages that have a popup or Tabs. Forms use the forms plugin's own script. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
-**Status:** pre-release. The MVP is complete; the npm package stays private until the first release.
+**Status:** 0.1.0 is on npm as [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb). The MVP is complete.
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
