@@ -150,3 +150,17 @@ describe("draft text fields (W-021)", () => {
     });
   }
 });
+
+describe("multi-line fields are named by their label (W-124)", () => {
+  for (const field of [area, list]) {
+    test(`${field.kind} is labelled "${field.label}"`, async () => {
+      const node = { id: "node0001", type: "text", props: {} } as unknown as LayoutNode;
+      const host = await mount(<DraftTextField field={field} node={node} onChange={() => {}} />);
+      const control = host.querySelector("textarea");
+      const label = host.querySelector("label");
+      expect(control?.id ?? "").not.toBe("");
+      expect(label?.htmlFor).toBe(control?.id ?? "missing");
+      expect(control?.labels?.[0]?.textContent).toBe(field.label);
+    });
+  }
+});

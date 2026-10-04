@@ -983,21 +983,21 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
     div.emvb-field-group data-emvb-field="text"
-      label.emvb-field-label
+      label.emvb-field-label for="id-2"
         "Text"
-      textarea.emvb-field.emvb-textarea
+      textarea.emvb-field.emvb-textarea id="id-2"
         "Text"
     div data-emvb-field="tag"
       div data-filled=""
-        div id="id-2" data-filled=""
+        div id="id-3" data-filled=""
           span
             "HTML tag"
-        button.emvb-field type="button" tabindex="0" id="id-3" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="HTML tag" data-filled=""
+        button.emvb-field type="button" tabindex="0" id="id-4" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="HTML tag" data-filled=""
           span
             "p"
           span aria-hidden="true"
             svg
-        input id="id-4" tabindex="-1" aria-hidden="true" value="p""
+        input id="id-5" tabindex="-1" aria-hidden="true" value="p""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="text"
@@ -1804,9 +1804,9 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
           div
         input tabindex="-1" aria-hidden="true" type="checkbox"
     div.emvb-field-group data-emvb-field="items"
-      label.emvb-field-label
+      label.emvb-field-label for="id-4"
         "Items"
-      textarea.emvb-field.emvb-textarea
+      textarea.emvb-field.emvb-textarea id="id-4"
         "Item""
 ,
   "style": 
@@ -7443,28 +7443,28 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
     div.emvb-field-group data-emvb-field="markup"
-      label.emvb-field-label
+      label.emvb-field-label for="id-2"
         "SVG markup"
-      textarea.emvb-field.emvb-textarea
+      textarea.emvb-field.emvb-textarea id="id-2"
         "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>"
     div data-filled=""
-      label id="id-2" for="id-3" data-filled=""
+      label id="id-3" for="id-4" data-filled=""
         span
           "Title"
-      input.emvb-field id="id-3" data-emvb-field="title" value="SVG" data-filled="" aria-labelledby="id-2"
+      input.emvb-field id="id-4" data-emvb-field="title" value="SVG" data-filled="" aria-labelledby="id-3"
     div.emvb-field-group data-emvb-field="decorative"
       div
-        label id="id-4" for="id-5"
+        label id="id-5" for="id-6"
           span
             "Decorative (hide from assistive tech)"
-        button data-unchecked="" type="button" tabindex="0" id="id-5" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Decorative (hide from assistive tech)" aria-labelledby="id-4"
+        button data-unchecked="" type="button" tabindex="0" id="id-6" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Decorative (hide from assistive tech)" aria-labelledby="id-5"
           div
         input tabindex="-1" aria-hidden="true" type="checkbox"
     div data-filled=""
-      label id="id-6" for="id-7" data-filled=""
+      label id="id-7" for="id-8" data-filled=""
         span
           "Size (px)"
-      input.emvb-field.emvb-mono id="id-7" data-emvb-field="size" value="48" data-filled="" aria-labelledby="id-6""
+      input.emvb-field.emvb-mono id="id-8" data-emvb-field="size" value="48" data-filled="" aria-labelledby="id-7""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="svg"

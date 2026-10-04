@@ -65,6 +65,8 @@ export function DraftTextField({
   const raw = props[field.key];
   const [draft, setDraft] = React.useState(String(raw ?? ""));
   const [error, setError] = React.useState<string | null>(null);
+  // The textarea's label must name it, for screen readers and click-to-focus (W-124).
+  const areaId = React.useId();
 
   React.useEffect(() => {
     if (field.kind === "number" && raw && typeof raw === "object" && "value" in raw) {
@@ -98,8 +100,11 @@ export function DraftTextField({
     };
     return (
       <div className="emvb-field-group" data-emvb-field={field.key}>
-        <label className="emvb-field-label">{field.label}</label>
+        <label className="emvb-field-label" htmlFor={areaId}>
+          {field.label}
+        </label>
         <textarea
+          id={areaId}
           className={`${FIELD} emvb-textarea`}
           rows={field.kind === "list-items" ? 4 : 5}
           value={draft}

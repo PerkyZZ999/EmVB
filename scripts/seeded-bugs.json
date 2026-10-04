@@ -17672,6 +17672,26 @@
       ],
       "command": ["bun", "test", "./scripts/pack-smoke.test.ts", "-t", "a private flag"],
       "expect": "\\(fail\\).*a private flag"
+    },
+    {
+      "id": "W-124/textarea-label-unlinked",
+      "requirement": "W-124",
+      "description": "the multi-line field's label is not tied to its textarea, so the field has no accessible name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "<label className=\"emvb-field-label\" htmlFor={areaId}>",
+          "replace": "<label className=\"emvb-field-label\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "named by their label"
+      ],
+      "expect": "\\(fail\\).*is labelled \"Body\""
     }
   ]
 }
