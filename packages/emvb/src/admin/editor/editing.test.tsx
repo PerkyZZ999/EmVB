@@ -26,7 +26,14 @@ const DESIGN: DesignSystem = {
 };
 
 /** A stateful stand-in for EmDash's content API and EmVB's design routes. */
-function fakeServer(options: { layout?: unknown; takenSlug?: string; rejectText?: string } = {}) {
+function fakeServer(
+  options: {
+    layout?: unknown;
+    takenSlug?: string;
+    rejectText?: string;
+    designUnpublished?: boolean;
+  } = {},
+) {
   const calls: Call[] = [];
   const server = {
     rev: 1,
@@ -77,7 +84,17 @@ function fakeServer(options: { layout?: unknown; takenSlug?: string; rejectText?
       return Response.json(envelope());
     }
     if (path === "/_emdash/api/plugins/emvb/design/draft") {
-      return Response.json({ data: { design: DESIGN, revision: server.designRevision } });
+      return Response.json({
+        data: {
+          design: DESIGN,
+          revision: server.designRevision,
+          publishedRevision: "p1",
+          unpublished: options.designUnpublished === true,
+        },
+      });
+    }
+    if (path === "/_emdash/api/plugins/emvb/design/publish") {
+      return Response.json({ data: { revision: "p2" } });
     }
     if (path === "/_emdash/api/plugins/emvb/design/save") {
       server.designRevision = "d2";
@@ -224,6 +241,32 @@ describe("save draft (R-006)", () => {
     expect(puts(server.calls)).toHaveLength(1);
     expect(publish?.body?.["_rev"]).toBe("rev2");
     expect(editor()?.querySelector(".emvb-status")?.textContent).toBe("Published");
+  });
+});
+
+describe("publishing with unpublished site styles (W-126)", () => {
+  const toastText = () => document.body.textContent ?? "";
+
+  test("the Published notice says the styles are not live yet and publishes them on request", async () => {
+    const { server, fetcher } = fakeServer({ designUnpublished: true });
+    await render(fetcher);
+    await click(button("Publish"));
+    await settle();
+    expect(toastText()).toContain("Site styles have unpublished changes");
+    await click(button("Publish site styles"));
+    await settle();
+    const published = server.calls.find((c) => c.path.endsWith("/design/publish"));
+    expect(published?.body?.["publishedRevision"]).toBe("p1");
+    expect(toastText()).toContain("Site styles published");
+  });
+
+  test("with the styles already live, the notice says nothing about them", async () => {
+    const { fetcher } = fakeServer();
+    await render(fetcher);
+    await click(button("Publish"));
+    await settle();
+    expect(toastText()).toContain("Published");
+    expect(toastText()).not.toContain("Site styles have unpublished changes");
   });
 });
 

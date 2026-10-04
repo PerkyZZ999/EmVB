@@ -30,6 +30,9 @@ export async function openInNewTab(
   tab.location.href = target;
 }
 
+export const STYLES_PENDING =
+  "Site styles have unpublished changes, so the public page may look unstyled until you publish styles.";
+
 /** Persistence commands: save, publish, preview and site-styles save (with the busy flag). */
 export function useEditorCommands({
   fetcher,
@@ -73,9 +76,30 @@ export function useEditorCommands({
       () => null,
     );
     const path = publicPath(pattern, latest.current.page.slug);
+    // W-126: unpublished site styles (a new colour variable, a class) are not on the public
+    // page yet, so it can look unstyled. Say so and offer to publish them.
+    const stylesPending = latest.current.designUnpublished === true;
     toasts.add({
       title: "Published",
+      ...(stylesPending ? { description: STYLES_PENDING } : {}),
       actions: [
+        ...(stylesPending
+          ? [
+              {
+                children: "Publish site styles",
+                variant: "primary" as const,
+                onClick: () =>
+                  void publishStyles().then(
+                    () => toasts.add({ title: "Site styles published" }),
+                    (error: unknown) =>
+                      toasts.add({
+                        title: "Couldn't publish site styles",
+                        description: error instanceof Error ? error.message : String(error),
+                      }),
+                  ),
+              },
+            ]
+          : []),
         {
           children: "View page ↗",
           variant: "secondary",

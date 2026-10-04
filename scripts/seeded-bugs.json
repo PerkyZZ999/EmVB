@@ -17712,6 +17712,46 @@
         "multiple of the font size"
       ],
       "expect": "\\(fail\\).*multiple of the font size"
+    },
+    {
+      "id": "W-126/publish-ignores-pending-styles",
+      "requirement": "W-126",
+      "description": "the Published notice no longer mentions unpublished site styles",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "const stylesPending = latest.current.designUnpublished === true;",
+          "replace": "const stylesPending = false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "W-126"
+      ],
+      "expect": "\\(fail\\).*styles are not live yet"
+    },
+    {
+      "id": "W-126/publish-styles-action-inert",
+      "requirement": "W-126",
+      "description": "the notice's Publish styles button does not publish the styles",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "                  void publishStyles().then(",
+          "replace": "                  void Promise.resolve().then("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "W-126"
+      ],
+      "expect": "\\(fail\\).*styles are not live yet"
     }
   ]
 }
