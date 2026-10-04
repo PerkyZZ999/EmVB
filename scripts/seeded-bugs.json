@@ -18280,6 +18280,65 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*leave the selection alone"
+    },
+    {
+      "id": "W-133/duplicate-copies-css-id",
+      "requirement": "W-133",
+      "description": "Duplicate copies the CSS id, so the page fails to save and edits to the copy never reach the site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  const { htmlId: _htmlId, ...rest } = node;",
+          "replace": "  const rest = { ...node };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/arrange.test.ts"],
+      "expect": "\\(fail\\).*leaves CSS ids on the original"
+    },
+    {
+      "id": "W-133/no-css-id-note",
+      "requirement": "W-133",
+      "description": "Duplicate drops the CSS id silently, with no note that it stayed on the original.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "...(dropped > 0 ? { note: CSS_ID_KEPT } : {}),",
+          "replace": "...(dropped < 0 ? { note: CSS_ID_KEPT } : {}),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/arrange.test.ts"],
+      "expect": "\\(fail\\).*leaves CSS ids on the original"
+    },
+    {
+      "id": "W-133/note-not-shown",
+      "requirement": "W-133",
+      "description": "The editor ignores the duplicate's note, so nobody learns the CSS id stayed on the original.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "    if (result.note) {",
+          "replace": "    if (result.note && !result.ok) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/useNodeActions.test.tsx"],
+      "expect": "\\(fail\\).*says the id stays on the original"
+    },
+    {
+      "id": "W-133/e2e-duplicate-copies-css-id",
+      "requirement": "W-133",
+      "description": "In the editor, a duplicated Button keeps the CSS id, the save is refused and the copy's label never reaches the site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  const { htmlId: _htmlId, ...rest } = node;",
+          "replace": "  const rest = { ...node };"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/duplicate.e2e.ts", "--project=node", "-g", "W-133"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*its edits reach the site"
     }
   ]
 }

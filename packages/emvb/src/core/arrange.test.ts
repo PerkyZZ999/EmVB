@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { container, heading, nested, randomLayouts } from "../../test/fixtures/layouts.ts";
 import {
+  CSS_ID_KEPT,
   REASONS,
   addNode,
   canDrop,
@@ -221,6 +222,45 @@ describe("duplicateNode", () => {
     const result = duplicateNode(layout, "aaaaaaaa", () => values[i++ % values.length] ?? 0);
     expect(result.ok && result.selected).not.toBe("aaaaaaaa");
     expect(validateLayout(layoutOf(result)).ok).toBe(true);
+  });
+
+  test("a copy keeps its text, link, classes and every style but leaves CSS ids on the original (W-133)", () => {
+    const button = {
+      id: "butn0001",
+      type: "button",
+      props: { text: "Sign up", href: "/signup" },
+      htmlId: "signup",
+      classes: ["primary"],
+      style: { backgroundColor: "#1d4ed8", color: "#ffffff" },
+      states: { hover: { backgroundColor: "#1e3a8a" } },
+      devices: { mobile: { backgroundColor: "#f59e0b" } },
+      attributes: [{ name: "data-track", value: "cta" }],
+    } as LayoutNode;
+    const box = { ...container("box00001", [button]), htmlId: "hero" } as LayoutNode;
+    const layout: Layout = {
+      schemaVersion: 9,
+      root: container("root0001", [box]) as Layout["root"],
+    };
+    const result = duplicateNode(layout, "box00001");
+    if (!result.ok) throw new Error("expected a copy");
+    expect(result.note).toBe(CSS_ID_KEPT);
+    const after = result.layout;
+    expect(validateLayout(after).ok).toBe(true);
+    const [original, copy] = after.root.children;
+    if (!original || !copy || !isContainerNode(copy) || !isContainerNode(original))
+      throw new Error("expected two boxes");
+    expect(original.htmlId).toBe("hero");
+    expect(original.children[0]?.htmlId).toBe("signup");
+    expect(copy.htmlId).toBeUndefined();
+    const copied = copy.children[0];
+    const { id: _id, htmlId: _htmlId, ...kept } = button;
+    expect(copied && { ...copied, id: "x" }).toEqual({ ...kept, id: "x" } as LayoutNode);
+
+    const plain = duplicateNode(page(), "aaaa0001");
+    expect(plain.ok && plain.note).toBeUndefined();
+    const single = duplicateNode(after, "butn0001");
+    expect(single.ok && single.note).toBe(CSS_ID_KEPT);
+    expect(validateLayout(layoutOf(single)).ok).toBe(true);
   });
 
   test("the root can't be duplicated", () => {

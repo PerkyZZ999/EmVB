@@ -2,7 +2,14 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { createKumoToastManager } from "@cloudflare/kumo";
 import * as React from "react";
 import { act } from "react";
-import { emptyDesign, moveDown, moveUp, REASONS, type Layout } from "../../core/index.ts";
+import {
+  CSS_ID_KEPT,
+  emptyDesign,
+  moveDown,
+  moveUp,
+  REASONS,
+  type Layout,
+} from "../../core/index.ts";
 import { container, heading } from "../../../test/fixtures/layouts.ts";
 import type { EditorAction, EditorState } from "./store.ts";
 import { useNodeActions } from "./useNodeActions.ts";
@@ -38,15 +45,15 @@ const state: EditorState = {
 
 afterEach(cleanup);
 
-async function mount() {
+async function mount(start: EditorState = state) {
   const actions: EditorAction[] = [];
   const announced: string[] = [];
   let api: ReturnType<typeof useNodeActions> | undefined;
   function Probe() {
-    const latest = React.useRef(state);
+    const latest = React.useRef(start);
     const toasts = React.useMemo(() => createKumoToastManager(), []);
     api = useNodeActions({
-      state,
+      state: start,
       latest,
       dispatch: (action) => actions.push(action),
       announce: (message) => announced.push(message),
@@ -76,6 +83,36 @@ describe("useNodeActions arrange (R-003)", () => {
     expect(actions).toEqual([
       { type: "apply-arranged", layout: expected.layout, selected: expected.selected },
     ]);
+  });
+
+  test("duplicating an element with a CSS id says the id stays on the original (W-133)", async () => {
+    const withId: Layout = {
+      ...layout,
+      root: {
+        ...layout.root,
+        children: [{ ...heading("head0001", "A"), htmlId: "intro" }, heading("head0002", "B")],
+      } as Layout["root"],
+    };
+    const { api, actions, announced } = await mount({
+      ...state,
+      page: { ...state.page, layout: withId },
+    });
+    act(() => api.duplicate("head0001"));
+    expect(announced).toEqual([`Duplicated. ${CSS_ID_KEPT}`]);
+    const applied = actions[0];
+    if (applied?.type !== "apply-arranged") throw new Error("expected the copy");
+    expect(applied.layout.root.children.map((n) => n.htmlId)).toEqual([
+      "intro",
+      undefined,
+      undefined,
+    ]);
+  });
+
+  test("duplicating without a CSS id announces nothing", async () => {
+    const { api, actions, announced } = await mount();
+    act(() => api.duplicate("head0001"));
+    expect(announced).toEqual([]);
+    expect(actions).toHaveLength(1);
   });
 
   test("duplicating the root is refused with its reason", async () => {

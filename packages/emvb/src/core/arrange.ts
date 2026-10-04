@@ -23,7 +23,8 @@ import {
 
 /** A refused operation, with the reason shown or announced to the user (R-003). */
 export type Refusal = { ok: false; reason: string };
-export type Arranged = { ok: true; layout: Layout; selected: string } | Refusal;
+/** `note`, when set, is announced after the change (W-133: a CSS id left on the original). */
+export type Arranged = { ok: true; layout: Layout; selected: string; note?: string } | Refusal;
 export type Allowed = { ok: true } | Refusal;
 
 /** What is being dropped: an element already on the page, or a new one from the Add panel. */
@@ -240,7 +241,28 @@ export function layoutFromPageTemplate(source: Layout, random: () => number = Ma
   return { schemaVersion: LAYOUT_SCHEMA_VERSION, root };
 }
 
-/** A deep copy with new unique ids, inserted right after the original and selected. */
+/** Announced when a duplicate leaves its CSS ids on the original (W-133). */
+export const CSS_ID_KEPT = "The CSS id stays on the original: CSS ids must be unique on the page.";
+
+/** `node` without the CSS id on it or any descendant; returns how many it dropped. */
+function withoutHtmlIds(node: LayoutNode): { node: LayoutNode; dropped: number } {
+  let dropped = node.htmlId ? 1 : 0;
+  const { htmlId: _htmlId, ...rest } = node;
+  const kids = nodeChildren(node);
+  if (kids.length === 0) return { node: rest as LayoutNode, dropped };
+  const children = kids.map((child) => {
+    const cleaned = withoutHtmlIds(child);
+    dropped += cleaned.dropped;
+    return cleaned.node;
+  });
+  return { node: { ...rest, children } as LayoutNode, dropped };
+}
+
+/**
+ * A deep copy with new unique ids, inserted right after the original and selected. CSS ids stay
+ * on the original: a copied one made the page fail to save, so edits to the copy never reached
+ * the site (W-133).
+ */
 export function duplicateNode(
   layout: Layout,
   id: string,
@@ -250,11 +272,14 @@ export function duplicateNode(
   if (!found) return refuse(REASONS.missing);
   if (!found.parent) return refuse(REASONS.rootCopy);
   if (size(layout.root) + size(found.node) > MAX_NODES) return refuse(REASONS.tooMany);
-  const copy = withNewIds(found.node, allIds(layout.root), random);
+  const { node: copy, dropped } = withoutHtmlIds(
+    withNewIds(found.node, allIds(layout.root), random),
+  );
   return {
     ok: true,
     layout: insertNode(layout, found.parent.id, found.index + 1, copy),
     selected: copy.id,
+    ...(dropped > 0 ? { note: CSS_ID_KEPT } : {}),
   };
 }
 

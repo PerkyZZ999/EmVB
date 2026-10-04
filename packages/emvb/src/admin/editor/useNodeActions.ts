@@ -19,6 +19,7 @@ import type { ItemActions } from "./panels/settings/ItemList.tsx";
 import type { EditorAction, EditorState } from "./store.ts";
 
 const RESTORE_TIMEOUT_MS = 6000;
+const NOTICE_TIMEOUT_MS = 4000;
 
 /** Node actions on the layout tree: delete (with restore toast), duplicate, and add from the panel. */
 export function useNodeActions({
@@ -92,6 +93,15 @@ export function useNodeActions({
       return;
     }
     dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
+    if (result.note) {
+      announce(`Duplicated. ${result.note}`);
+      if (lastToast.current) toasts.close(lastToast.current);
+      lastToast.current = toasts.add({
+        title: "Duplicated",
+        description: result.note,
+        timeout: NOTICE_TIMEOUT_MS,
+      });
+    }
   };
 
   const duplicate = (id: string) => arrange(id, duplicateNode);

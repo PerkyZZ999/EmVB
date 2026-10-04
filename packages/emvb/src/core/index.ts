@@ -201,6 +201,7 @@ export {
   subtreeSize,
   withFreshIds,
   layoutFromPageTemplate,
+  CSS_ID_KEPT,
   type Allowed,
   type Arranged,
   type DragSource,
