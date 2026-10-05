@@ -155,14 +155,15 @@ export const section: ElementDefinition<SectionNode> = {
   defaults: () => ({ type: "section", props: {}, children: [] }),
   descriptor: {
     type: "section",
-    name: "Section",
+    // "Theme section": it embeds a Section theme part; the layout Section is its own element (W-155).
+    name: "Theme section",
     group: "layout",
     defaultTab: "content",
     fields: [
       {
         key: "partId",
         kind: "text",
-        label: "Section",
+        label: "Section part",
         optional: true,
         message:
           "Optional published Section theme part. When set, the part's contents replace the nested elements on every page that uses it.",

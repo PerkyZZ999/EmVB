@@ -19212,6 +19212,20 @@
         "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
       ],
       "expect": "\\(fail\\).*a new Accordion starts with three items"
+    },
+    {
+      "id": "W-155/section-name-unchanged",
+      "requirement": "W-155",
+      "description": "The theme-part embed is still called Section in the Add panel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/dynamic-elements.ts",
+          "search": "    name: \"Theme section\",",
+          "replace": "    name: \"Section\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/add-panel.test.tsx"],
+      "expect": "\\(fail\\).*the theme-part embed is named Theme section"
     }
   ]
 }

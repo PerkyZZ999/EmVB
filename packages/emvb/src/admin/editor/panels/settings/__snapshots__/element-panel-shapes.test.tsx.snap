@@ -6138,7 +6138,7 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Section"
+      "Theme section"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6149,7 +6149,7 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
     span aria-hidden="true"
       "›"
     button.emvb-breadcrumb-part type="button"
-      "Section"
+      "Theme section"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6167,10 +6167,10 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
       div
         label id="id-2" for="id-3"
           span
-            "Section part id"
+            "Section part part id"
         input.emvb-field.emvb-mono id="id-3" value="" aria-labelledby="id-2"
       p.emvb-helper
-        "No Section theme parts yet. Paste an id, or"
+        "No Section part theme parts yet. Paste an id, or"
         a href="/_emdash/admin/plugins/emvb/theme"
           "create one in Theme Builder"
         ".""
@@ -6180,7 +6180,7 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Section"
+      "Theme section"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6191,7 +6191,7 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
     span aria-hidden="true"
       "›"
     button.emvb-breadcrumb-part type="button"
-      "Section"
+      "Theme section"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."

@@ -78,6 +78,12 @@ describe("Add panel (W-018)", () => {
     ).toBeNull();
   });
 
+  test("the theme-part embed is named Theme section, and search finds it (W-155)", async () => {
+    await mount(<AddPanel onAdd={() => undefined} defaultQuery="theme" />);
+    const tile = document.querySelector('[data-emvb-add-tile="section"]');
+    expect(tile?.textContent).toContain("Theme section");
+  });
+
   test("clicking a tile calls onAdd with that type", async () => {
     const seen: string[] = [];
     await mount(<AddPanel onAdd={(type) => seen.push(type)} />);

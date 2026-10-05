@@ -61,7 +61,7 @@ export function FieldControl({
         value={typeof raw === "string" ? raw : ""}
         fetcher={fetcher}
         partType="section"
-        label="Section"
+        label="Section part"
         emptyLabel="Inline section"
         marker="section"
         onChange={(partId) => onChange(withProp(node, "partId", partId || undefined))}
