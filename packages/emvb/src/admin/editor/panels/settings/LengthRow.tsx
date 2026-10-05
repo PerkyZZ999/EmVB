@@ -121,6 +121,9 @@ export function LengthRow({
             inputMode="decimal"
             value={draft}
             placeholder={unit === "auto" ? "auto" : placeholder}
+            title={`A number in ${unit === "auto" ? lastNumeric.current : unit}, or with its own unit (2rem, 50%)${
+              units.includes("auto") ? ", or auto" : ""
+            }`}
             aria-invalid={error ? true : undefined}
             onChange={(event) => {
               if (unit === "auto") setUnit(lastNumeric.current);
@@ -146,6 +149,7 @@ export function LengthRow({
               </DropdownMenu.Trigger>
               <DropdownMenu.Content data-emvb-unit-menu={styleKey}>
                 <DropdownMenu.RadioGroup
+                  aria-label={`${label} unit`}
                   value={unit}
                   onValueChange={(next: UnitChoice) => pickUnit(next)}
                 >

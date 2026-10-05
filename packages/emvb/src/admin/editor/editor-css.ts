@@ -481,6 +481,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-site-class-section:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -2px; }
 .emvb-site-token { margin: 0; font-size: 11px; color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-site-cascade { margin: 0 0 4px; padding: 8px; border-radius: 6px; background: var(--color-kumo-tint); border: 1px solid var(--color-kumo-hairline); }
+.emvb-unit-note { margin-left: 8px; font-size: 11px; color: var(--text-color-kumo-subtle); }
 .emvb-site-usage { flex: 0 0 auto; white-space: nowrap; font-size: 11px; line-height: 16px; color: var(--text-color-kumo-subtle); font-variant-numeric: tabular-nums; }
 /* Compact manager rows (W-087): one 32 px line per class or variable, details on demand */
 .emvb-site-items {

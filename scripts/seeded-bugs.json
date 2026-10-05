@@ -19083,6 +19083,60 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
       "expect": "\\(fail\\).*shows page usage and the classes that use it"
+    },
+    {
+      "id": "W-151/typed-unit-ignored",
+      "requirement": "W-151",
+      "description": "A unit typed with the number (100%, 2rem) is ignored; the menu's unit is used.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "const typed = (match[2]?.toLowerCase() ?? unit) as LengthUnit;",
+          "replace": "const typed = unit;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*typing 100% or 2rem sets that unit in the menu"
+    },
+    {
+      "id": "W-151/margin-auto-item-dead",
+      "requirement": "W-151",
+      "description": "Margin's auto menu item does nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BoxControl.tsx",
+          "search": "onPatch(autoSidesPatch(group));",
+          "replace": "void autoSidesPatch;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Margin says it takes auto, and its menu sets auto left and right"
+    },
+    {
+      "id": "W-151/margin-no-auto-hint",
+      "requirement": "W-151",
+      "description": "Margin's boxes don't say they take auto.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BoxControl.tsx",
+          "search": "${takesAuto ? \", or auto\" : \"\"}",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Margin says it takes auto, and its menu sets auto left and right"
     }
   ]
 }

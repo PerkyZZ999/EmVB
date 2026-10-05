@@ -9,7 +9,7 @@ import {
 } from "../../../../core/index.ts";
 import { styleDeclarations } from "../../../../core/sanitize/css.ts";
 import type { Fetcher } from "../../../api.ts";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
 import {
   BOX_GROUPS,
@@ -239,6 +239,56 @@ describe("link state follows the values (W-149)", () => {
     ) as HTMLButtonElement;
     await act(async () => chip.click());
     expect(link("padding").getAttribute("aria-pressed")).toBe("true");
+  });
+});
+
+describe("unit fields (W-151)", () => {
+  const unitButton = (name: string) =>
+    document.querySelector(`button[aria-label^="${name} unit ("]`) as HTMLButtonElement;
+  async function openUnits(name: string) {
+    await act(async () => unitButton(name).click());
+    await settle();
+  }
+
+  test("typing 100% or 2rem sets that unit in the menu", async () => {
+    localStorage.setItem(
+      "emvb-style-sections:container",
+      JSON.stringify(["spacing", "size", "border"]),
+    );
+    await mount(<Harness start={box()} />);
+    const tab = [...document.querySelectorAll('[role="tab"]')].find(
+      (el) => el.textContent === "Style",
+    ) as HTMLElement;
+    await act(async () => tab.click());
+    await type("Width", "100%");
+    expect(nodes.at(-1)?.style?.width).toEqual({ value: 100, unit: "%" });
+    expect(unitButton("Width").textContent).toBe("%");
+    expect(input("Width").value).toBe("100");
+    await type("Padding top", "2rem");
+    expect(unitButton("Padding").textContent).toBe("rem");
+    expect(input("Padding left").value).toBe("2");
+  });
+
+  test("Margin says it takes auto, and its menu sets auto left and right", async () => {
+    await panel(box({ marginTop: px(8) }));
+    expect(input("Margin left").title).toContain("or auto");
+    expect(input("Padding left").title).not.toContain("auto");
+    await openUnits("Margin");
+    const radios = document.querySelector('[data-emvb-unit-menu="margin"] [role="group"]');
+    expect(radios?.getAttribute("aria-label")).toBe("Margin unit");
+    const auto = document.querySelector(
+      '[data-emvb-unit-menu="margin"] [data-emvb-unit-option="auto"]',
+    ) as HTMLElement;
+    expect(auto.getAttribute("role")).toBe("menuitem");
+    await act(async () => auto.click());
+    await settle();
+    expect(nodes.at(-1)?.style).toEqual({
+      marginTop: px(8),
+      marginRight: "auto",
+      marginLeft: "auto",
+    });
+    expect(input("Margin left").value).toBe("auto");
+    expect(document.querySelector('[data-emvb-unit-menu="padding"]')).toBeNull();
   });
 });
 

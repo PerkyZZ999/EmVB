@@ -21,6 +21,12 @@ import { STYLE_LABELS } from "./style-sections.ts";
 import { placeholderOf } from "./StyleRow.tsx";
 import { bindKind, boundRef, VariableButton } from "./VariableBinding.tsx";
 
+/** Margin's "auto" menu item: auto left and right margins centre a box with a width (W-151). */
+const autoSidesPatch = (group: BoxGroup): Partial<StyleProps> => ({
+  [group.sides[1]]: "auto",
+  [group.sides[3]]: "auto",
+});
+
 /**
  * Four boxes with one unit menu and a link toggle (W-138, D-044): padding, margin, border width
  * per side and radius per corner. Linked, a value typed in any box goes to all four.
@@ -50,9 +56,13 @@ export function BoxControl({
     if (allEmpty) setLinkWanted(true);
   }, [signature, allEmpty]);
   const linked = linkWanted && same;
-  const units = unitsFor(group.sides[0]).filter((u): u is LengthUnit => u !== "auto");
+  const choices = unitsFor(group.sides[0]);
+  const takesAuto = choices.includes("auto");
+  const units = choices.filter((u): u is LengthUnit => u !== "auto");
   const [fallbackUnit, setFallbackUnit] = React.useState<LengthUnit>(units[0] ?? "px");
   const unit = sharedUnit(values, fallbackUnit);
+  // What a box takes, as a tooltip (W-151): Margin also takes auto.
+  const hint = `A number in ${unit}, or with its own unit (2rem, 50%)${takesAuto ? ", or auto" : ""}`;
   const [error, setError] = React.useState<{ index: number; message: string } | null>(null);
   const labelId = React.useId();
   const set = groupSet(group, style);
@@ -113,6 +123,7 @@ export function BoxControl({
             </DropdownMenu.Trigger>
             <DropdownMenu.Content data-emvb-unit-menu={group.id}>
               <DropdownMenu.RadioGroup
+                aria-label={`${group.label} unit`}
                 value={unit}
                 onValueChange={(next: LengthUnit) => {
                   setFallbackUnit(next);
@@ -132,6 +143,21 @@ export function BoxControl({
                   </DropdownMenu.RadioItem>
                 ))}
               </DropdownMenu.RadioGroup>
+              {takesAuto && (
+                <>
+                  <DropdownMenu.Separator />
+                  <DropdownMenu.Item
+                    data-emvb-unit-option="auto"
+                    onClick={() => {
+                      setError(null);
+                      onPatch(autoSidesPatch(group));
+                    }}
+                  >
+                    <span className="emvb-mono">auto</span>
+                    <span className="emvb-unit-note">left and right, to centre</span>
+                  </DropdownMenu.Item>
+                </>
+              )}
             </DropdownMenu.Content>
           </DropdownMenu>
           {kind && (
@@ -171,6 +197,7 @@ export function BoxControl({
               styleKey={key}
               text={sideDraft(values[index], unit, placeholderOf(values[index], design))}
               placeholder={placeholderOf(normal[index], design)}
+              hint={hint}
               bound={refs[index] !== undefined}
               invalid={error?.index === index}
               onCommit={(draft) => commit(index, draft)}
@@ -201,6 +228,7 @@ function SideBox({
   styleKey,
   text,
   placeholder,
+  hint,
   bound,
   invalid,
   onCommit,
@@ -210,6 +238,7 @@ function SideBox({
   styleKey: string;
   text: string;
   placeholder?: string;
+  hint: string;
   bound: boolean;
   invalid: boolean;
   onCommit: (draft: string) => void;
@@ -226,6 +255,7 @@ function SideBox({
         inputMode="decimal"
         value={draft}
         placeholder={placeholder}
+        title={hint}
         aria-invalid={invalid ? true : undefined}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={() => onCommit(draft)}
