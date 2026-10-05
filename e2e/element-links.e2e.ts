@@ -80,3 +80,64 @@ test("a Heading and an Icon take a link from their Content tab (W-141)", async (
     "/favourites",
   );
 });
+
+test("a Button looks like a button before it is styled, with or without a URL (W-148)", async ({
+  page,
+  request,
+}) => {
+  const slug = `button-look-${unique()}`;
+  const id = await createPage(
+    request,
+    "Button look",
+    {
+      schemaVersion: 10,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        style: { color: "#112233" },
+        children: [
+          { id: "butt0001", type: "button", props: { text: "Linked", href: "/pricing" } },
+          { id: "butt0002", type: "button", props: { text: "Plain" } },
+          {
+            id: "butt0003",
+            type: "button",
+            props: { text: "Styled", href: "/x" },
+            style: { borderRadius: { value: 0, unit: "px" } },
+          },
+        ],
+      },
+    },
+    slug,
+  );
+  await publishPage(request, id);
+  await page.goto(`/${slug}`);
+  const look = (name: string) =>
+    page.getByText(name, { exact: true }).evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        tag: el.tagName,
+        decoration: cs.textDecorationLine,
+        color: cs.color,
+        radius: cs.borderTopLeftRadius,
+        padding: Number.parseFloat(cs.paddingTop),
+        background: cs.backgroundColor,
+      };
+    });
+  for (const [name, tag] of [
+    ["Linked", "A"],
+    ["Plain", "BUTTON"],
+  ] as const) {
+    expect(await look(name)).toEqual({
+      tag,
+      decoration: "none",
+      color: "rgb(17, 34, 51)",
+      radius: "6px",
+      padding: expect.any(Number),
+      background: "rgba(0, 0, 0, 0)",
+    });
+    expect((await look(name)).padding).toBeGreaterThan(0);
+  }
+  // A local style still wins over the base look.
+  expect((await look("Styled")).radius).toBe("0px");
+});

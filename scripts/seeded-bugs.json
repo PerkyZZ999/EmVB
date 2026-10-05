@@ -19008,6 +19008,31 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
       "expect": "\\(fail\\).*the first Heading on a page without an H1 becomes the H1"
+    },
+    {
+      "id": "W-148/e2e-button-browser-look",
+      "requirement": "W-148",
+      "description": "An unstyled Button with a URL shows as a browser link (blue, no padding).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ":where(.emvb-button){color:inherit;background:transparent;border:1px solid currentColor;border-radius:6px;padding:0.625em 1.25em;line-height:1.2}",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/element-links.e2e.ts",
+        "--project=cloudflare",
+        "-g",
+        "W-148"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[cloudflare\\].*a Button looks like a button"
     }
   ]
 }

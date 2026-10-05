@@ -253,7 +253,8 @@ const link: ElementDefinition<LinkNode> = {
 
 const button: ElementDefinition<ButtonNode> = {
   baseCss:
-    ".emvb-button{display:inline-flex;align-items:center;justify-content:center;margin:0;font:inherit;text-decoration:none;cursor:pointer}",
+    // The look sits in :where() so site tag defaults, classes and local styles all win (W-148).
+    ".emvb-button{display:inline-flex;align-items:center;justify-content:center;margin:0;font:inherit;text-decoration:none;cursor:pointer}:where(.emvb-button){color:inherit;background:transparent;border:1px solid currentColor;border-radius:6px;padding:0.625em 1.25em;line-height:1.2}",
   defaults: () => ({ type: "button", props: { text: "Button" } }),
   descriptor: {
     type: "button",
