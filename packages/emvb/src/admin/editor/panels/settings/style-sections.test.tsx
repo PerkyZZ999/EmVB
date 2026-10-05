@@ -563,3 +563,20 @@ describe("Transition (W-089)", () => {
     expect(patches).toEqual([{ transition: set }, { transition: undefined }]);
   });
 });
+
+describe("Div Block layout controls (W-144)", () => {
+  test("a Div Block offers no flex controls, only the grid spans; Flexbox keeps them", () => {
+    expect(keysFor("div-block", "layout")).toEqual(["gridColumnSpan", "gridRowSpan"]);
+    expect(keysFor("flexbox", "layout")).toEqual(
+      expect.arrayContaining(["flexDirection", "justifyContent", "alignItems", "gap"]),
+    );
+  });
+
+  test("a flex value already stored on a Div Block still shows, so it can be reset", () => {
+    expect(keysFor("div-block", "layout", { gap: { value: 8, unit: "px" } })).toEqual([
+      "gap",
+      "gridColumnSpan",
+      "gridRowSpan",
+    ]);
+  });
+});

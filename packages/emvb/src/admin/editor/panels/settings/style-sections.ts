@@ -202,6 +202,9 @@ const ONLY_FOR: Partial<Record<StyleKey, string[]>> = {
 const TYPE_SECTION_KEYS: Record<string, Partial<Record<StyleSectionId, StyleKey[]>>> = {
   spacer: { layout: [] }, // height is a content prop, shown above sections
   divider: { size: ["width"] },
+  // A Div Block is a plain block box (Elementor v4, D-EV4-01): flex controls would do nothing on
+  // the page, so Layout offers only the grid spans (W-144). Use Flexbox or Container for flex.
+  "div-block": { layout: ["gridColumnSpan", "gridRowSpan"] },
 };
 
 const OFFSETS = new Set<StyleKey>(["top", "right", "bottom", "left"]);

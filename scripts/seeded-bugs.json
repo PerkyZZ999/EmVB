@@ -18945,6 +18945,24 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
       "expect": "\\(fail\\).*elements without text, or with only spaces, show no preview"
+    },
+    {
+      "id": "W-144/div-block-offers-flex",
+      "requirement": "W-144",
+      "description": "A Div Block offers Direction, Justify, Align and Gap, which do nothing on its block box.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  \"div-block\": { layout: [\"gridColumnSpan\", \"gridRowSpan\"] },\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a Div Block offers no flex controls"
     }
   ]
 }
