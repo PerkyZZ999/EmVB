@@ -18903,6 +18903,48 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*a colour variable can be created"
+    },
+    {
+      "id": "W-143/text-has-no-preview",
+      "requirement": "W-143",
+      "description": "Layers shows no content preview for Text elements, so two Texts look the same.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  text: \"text\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*text elements, accordion items and tab panels show their own text"
+    },
+    {
+      "id": "W-143/accordion-item-unnamed",
+      "requirement": "W-143",
+      "description": "Layers shows every accordion item as just \"Accordion item\".",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  \"accordion-item\": \"summary\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*text elements, accordion items and tab panels show their own text"
+    },
+    {
+      "id": "W-143/blank-preview-shown",
+      "requirement": "W-143",
+      "description": "A Text of only spaces shows an empty preview in Layers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  return first || undefined;",
+          "replace": "  return first;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*elements without text, or with only spaces, show no preview"
     }
   ]
 }

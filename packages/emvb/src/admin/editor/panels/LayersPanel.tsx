@@ -4,7 +4,6 @@ import {
   firstChild,
   hasStateStyles,
   isParentNode,
-  isHeadingNode,
   nextInOrder,
   parentOf,
   previousInOrder,
@@ -129,6 +128,28 @@ function treeKey(
 }
 
 /** Layers list (IA / W-018): tree with collapse, keyboard navigation, auto-expand to selection. */
+
+/** Props whose text tells same-type elements apart in Layers (the layer-row preview, W-143). */
+const PREVIEW_PROP: Partial<Record<string, string>> = {
+  heading: "text",
+  text: "text",
+  label: "text",
+  link: "text",
+  button: "text",
+  "accordion-item": "summary",
+  "tab-panel": "label",
+};
+
+/** The first line of the element's own text, or undefined when it has none. */
+export function layerPreview(node: LayoutNode): string | undefined {
+  const key = PREVIEW_PROP[node.type];
+  if (!key) return undefined;
+  const value = (node.props as Record<string, unknown>)[key];
+  if (typeof value !== "string") return undefined;
+  const first = value.trim().split("\n")[0]?.trim();
+  return first || undefined;
+}
+
 export function LayersPanel({
   layout,
   selectedId,
@@ -229,6 +250,7 @@ function LayerRow({
   actions: LayerActions;
 }) {
   const Icon = ICONS[node.type] ?? SquaresFourIcon;
+  const preview = layerPreview(node);
   const name = ELEMENT_NAMES[node.type] ?? node.type;
   const hasChildren = isParentNode(node) && node.children.length > 0;
   return (
@@ -284,9 +306,7 @@ function LayerRow({
         >
           <Icon size={16} aria-hidden="true" />
           <span>{name}</span>
-          {isHeadingNode(node) && node.props.text ? (
-            <span className="emvb-layer-preview">{node.props.text}</span>
-          ) : null}
+          {preview ? <span className="emvb-layer-preview">{preview}</span> : null}
           {hasStateStyles(node) && <StateDot />}
         </button>
         {(!isRoot || actions.clipboard) && (

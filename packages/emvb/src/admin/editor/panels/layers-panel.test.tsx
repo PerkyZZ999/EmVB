@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import type { Layout } from "../../../core/index.ts";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
-import { LayersPanel } from "./LayersPanel.tsx";
+import { LayersPanel, layerPreview } from "./LayersPanel.tsx";
 import type { ClipboardActions } from "../useClipboardActions.ts";
 import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
 
@@ -302,5 +302,28 @@ describe("copy and paste in the Layers menu (W-093)", () => {
     expect(document.querySelector("[data-emvb-paste-hint]")?.textContent ?? null).toBe(
       "Copy an element first.",
     );
+  });
+});
+
+describe("Layers content preview (W-143)", () => {
+  const node = (type: string, props: Record<string, unknown>) =>
+    ({ id: "node0001", type, props }) as unknown as Parameters<typeof layerPreview>[0];
+
+  test("text elements, accordion items and tab panels show their own text", () => {
+    expect(layerPreview(node("heading", { text: "Pricing", level: 2 }))).toBe("Pricing");
+    expect(layerPreview(node("text", { text: "  First line\nSecond line" }))).toBe("First line");
+    expect(layerPreview(node("button", { text: "Start free trial" }))).toBe("Start free trial");
+    expect(layerPreview(node("link", { text: "Privacy", href: "/privacy" }))).toBe("Privacy");
+    expect(layerPreview(node("label", { text: "Email" }))).toBe("Email");
+    expect(layerPreview(node("accordion-item", { summary: "Is my data sampled?" }))).toBe(
+      "Is my data sampled?",
+    );
+    expect(layerPreview(node("tab-panel", { label: "Monthly" }))).toBe("Monthly");
+  });
+
+  test("elements without text, or with only spaces, show no preview", () => {
+    expect(layerPreview(node("container", {}))).toBeUndefined();
+    expect(layerPreview(node("image", { src: "/a.png", alt: "A" }))).toBeUndefined();
+    expect(layerPreview(node("text", { text: "   " }))).toBeUndefined();
   });
 });
