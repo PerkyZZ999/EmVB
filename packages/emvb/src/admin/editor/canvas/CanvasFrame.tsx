@@ -59,11 +59,15 @@ const HINT = "color:#64748b;font:13px/1.4 system-ui,sans-serif;pointer-events:no
  * page CSS.
  */
 const EDITOR_CANVAS_CSS =
-  `:is(${DROP_BOXES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px;display:flex;align-items:center;justify-content:center}` +
+  // The 48 px floor is in :where() so a min-height the user set always wins (W-145).
+  `:where(${DROP_BOXES}){min-height:48px}` +
+  `:is(${DROP_BOXES}){outline:1px dashed #94a3b8;outline-offset:-1px;display:flex;align-items:center;justify-content:center}` +
   `:is(${DROP_BOXES})::after{content:"Drop elements here";${HINT}}` +
-  `:is(${DROP_BODIES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px}` +
+  `:where(${DROP_BODIES}){min-height:48px}` +
+  `:is(${DROP_BODIES}){outline:1px dashed #94a3b8;outline-offset:-1px}` +
   `:is(${DROP_BODIES})::after{content:"Drop elements here";display:block;line-height:48px;text-align:center;${HINT}}` +
-  `:is(${NO_ITEMS}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px}` +
+  `:where(${NO_ITEMS}){min-height:48px}` +
+  `:is(${NO_ITEMS}){outline:1px dashed #94a3b8;outline-offset:-1px}` +
   `:is(${NO_ITEMS})::after{content:"No items yet: add them in this element's Content settings";display:block;line-height:48px;text-align:center;${HINT}}` +
   ".emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}[data-emvb-editing]{color:transparent !important}";
 

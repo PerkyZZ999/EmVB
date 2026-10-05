@@ -18090,8 +18090,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
-          "search": "`:is(${DROP_BODIES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px}` +",
-          "replace": "`:is(${DROP_BODIES}){min-height:48px;outline:1px dashed #94a3b8;outline-offset:-1px;display:flex}` +"
+          "search": "`:is(${DROP_BODIES}){outline:1px dashed #94a3b8;outline-offset:-1px}` +",
+          "replace": "`:is(${DROP_BODIES}){outline:1px dashed #94a3b8;outline-offset:-1px;display:flex}` +"
         }
       ],
       "command": [
@@ -18963,6 +18963,23 @@
         "packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx"
       ],
       "expect": "\\(fail\\).*a Div Block offers no flex controls"
+    },
+    {
+      "id": "W-145/e2e-placeholder-beats-min-height",
+      "requirement": "W-145",
+      "description": "The canvas's 48 px empty-box floor overrides a min-height the user set.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "  `:where(${DROP_BOXES}){min-height:48px}` +",
+          "replace": "  `:is(${DROP_BOXES}){min-height:48px}` +"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/canvas-boxes.e2e.ts", "--project=node", "-g", "W-145"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*an empty box keeps the min-height"
     }
   ]
 }
