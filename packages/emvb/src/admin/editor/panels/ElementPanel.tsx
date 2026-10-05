@@ -170,6 +170,33 @@ const positionInEffect = (
     : resolveCascade(classStylesInListOrder(design.classes, node.classes ?? []), node.style)
         .position;
 
+/**
+ * Where the panel was scrolled, per tab, for the session (W-152). A new selection or a tab switch
+ * shows the tab where it was left, rather than wherever the shorter or longer content clamps it.
+ */
+const tabScroll: Record<string, number> = {};
+
+function useTabScroll(ref: React.RefObject<HTMLElement | null>, tab: string, nodeId: string) {
+  React.useLayoutEffect(() => {
+    const scroller = ref.current?.closest<HTMLElement>(".emvb-panel");
+    if (!scroller) return;
+    const restore = () => {
+      scroller.scrollTop = tabScroll[tab] ?? 0;
+    };
+    restore();
+    // Sections may grow a frame later; put the position back once they have.
+    const frame = requestAnimationFrame(restore);
+    const save = () => {
+      tabScroll[tab] = scroller.scrollTop;
+    };
+    scroller.addEventListener("scroll", save, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      scroller.removeEventListener("scroll", save);
+    };
+  }, [ref, tab, nodeId]);
+}
+
 /** Which styles the Style sections edit (W-087): a class applied to the node, or its own. */
 function useStyleTarget(node: LayoutNode, design: DesignSystem) {
   const [editing, setEditing] = React.useState<string | null>(null);
@@ -380,6 +407,8 @@ function KnownElementPanel({
   React.useEffect(() => {
     setTab(descriptor.defaultTab);
   }, [node.id, node.type, descriptor.defaultTab]);
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+  useTabScroll(bodyRef, tab, node.id);
 
   const Icon = ICONS[node.type] ?? SquaresFourIcon;
   const crumbs = breadcrumb(layout, node.id);
@@ -402,7 +431,12 @@ function KnownElementPanel({
   );
 
   return (
-    <div className="emvb-panel-body" data-emvb-panel="element" data-emvb-element={node.type}>
+    <div
+      ref={bodyRef}
+      className="emvb-panel-body"
+      data-emvb-panel="element"
+      data-emvb-element={node.type}
+    >
       <div className="emvb-element-header">
         <Icon size={16} aria-hidden="true" />
         <h2 className="emvb-panel-title">{descriptor.name}</h2>
