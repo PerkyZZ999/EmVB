@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import * as React from "react";
 import { act } from "react";
 import {
   emptyDesign,
@@ -103,9 +104,9 @@ describe("Accordion and Tabs item editing (W-130)", () => {
     if (!node || node.type !== "accordion") throw new Error("expected an accordion");
     const summary = (c: LayoutNode) => c.props as { summary?: string; open?: boolean };
     expect(kidsOf(node).map((c) => [summary(c).summary, summary(c).open ?? false])).toEqual([
-      ["Item 1", true],
-      ["Item 2", false],
-      ["Item 3", false],
+      ["Question 1", true],
+      ["Question 2", false],
+      ["Question 3", false],
     ]);
     expect(kidsOf(node).map((c) => kidsOf(c).map((k) => k.type))).toEqual([
       ["text"],
@@ -166,9 +167,33 @@ describe("Accordion and Tabs item editing (W-130)", () => {
     ]);
     const fresh = added[0];
     if (fresh?.type !== "accordion-item") throw new Error("expected a new accordion item");
-    expect(fresh.props.summary).toBe("Item 3");
+    expect(fresh.props.summary).toBe("Question 3");
     expect(kidsOf(fresh).map((c) => c.type)).toEqual(["text"]);
     expect(calls.changed).toEqual([]);
+  });
+
+  test("Add item focuses the new title with its text selected (W-154)", async () => {
+    function Live() {
+      const [node, setNode] = React.useState(accordion([item("itm00001", "First")]));
+      return (
+        <ElementPanel
+          node={node}
+          layout={layoutWith(node)}
+          design={emptyDesign()}
+          rejection={null}
+          fetcher={stubFetcher}
+          onChange={setNode}
+          onDesignChange={async () => undefined}
+          onSelect={() => undefined}
+        />
+      );
+    }
+    await mount(<Live />);
+    await act(async () => button("Add item").click());
+    const title = inputLabelled("Item 2 title");
+    expect(title.value).toBe("Question 2");
+    expect(document.activeElement).toBe(title);
+    expect([title.selectionStart, title.selectionEnd]).toEqual([0, "Question 2".length]);
   });
 
   test("without editor actions the list edits the parent directly", async () => {

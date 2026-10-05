@@ -7899,7 +7899,7 @@ exports[`element panel markup (W-021, W-086 M16) accordion renders the same cont
             label id="id-2" for="id-3" data-filled=""
               span
                 "Item 1 title"
-            input.emvb-field id="id-3" data-emvb-field="summary" value="Item 1" data-filled="" aria-labelledby="id-2"
+            input.emvb-field id="id-3" data-emvb-field="summary" value="Question 1" data-filled="" aria-labelledby="id-2"
           div.emvb-item-actions
             button.emvb-btn data-kumo-component="Button" type="button" aria-label="Edit item 1" id="id-4" data-base-ui-tooltip-trigger=""
               svg aria-hidden="true"
@@ -7914,7 +7914,7 @@ exports[`element panel markup (W-021, W-086 M16) accordion renders the same cont
             label id="id-8" for="id-9" data-filled=""
               span
                 "Item 2 title"
-            input.emvb-field id="id-9" data-emvb-field="summary" value="Item 2" data-filled="" aria-labelledby="id-8"
+            input.emvb-field id="id-9" data-emvb-field="summary" value="Question 2" data-filled="" aria-labelledby="id-8"
           div.emvb-item-actions
             button.emvb-btn data-kumo-component="Button" type="button" aria-label="Edit item 2" id="id-10" data-base-ui-tooltip-trigger=""
               svg aria-hidden="true"
@@ -7929,7 +7929,7 @@ exports[`element panel markup (W-021, W-086 M16) accordion renders the same cont
             label id="id-14" for="id-15" data-filled=""
               span
                 "Item 3 title"
-            input.emvb-field id="id-15" data-emvb-field="summary" value="Item 3" data-filled="" aria-labelledby="id-14"
+            input.emvb-field id="id-15" data-emvb-field="summary" value="Question 3" data-filled="" aria-labelledby="id-14"
           div.emvb-item-actions
             button.emvb-btn data-kumo-component="Button" type="button" aria-label="Edit item 3" id="id-16" data-base-ui-tooltip-trigger=""
               svg aria-hidden="true"

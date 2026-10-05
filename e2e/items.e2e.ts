@@ -70,34 +70,34 @@ test("a new Accordion has three items and its Content tab edits them (W-130)", a
 
   await expect(overlay(page).locator('[data-emvb-element="accordion"]')).toBeVisible();
   await expect(contentPanel(page)).not.toContainText("no content settings");
-  expect(await titles(page)).toEqual(["Item 1", "Item 2", "Item 3"]);
-  expect(await summaries(page)).toEqual(["Item 1", "Item 2", "Item 3"]);
-  await expect(canvas(page).getByText("Content for item 1.", { exact: false })).toBeVisible();
-  await expect(canvas(page).getByText("Content for item 2.", { exact: false })).toBeHidden();
+  expect(await titles(page)).toEqual(["Question 1", "Question 2", "Question 3"]);
+  expect(await summaries(page)).toEqual(["Question 1", "Question 2", "Question 3"]);
+  await expect(canvas(page).getByText("Answer to question 1.", { exact: false })).toBeVisible();
+  await expect(canvas(page).getByText("Answer to question 2.", { exact: false })).toBeHidden();
 
   await contentPanel(page).getByLabel("Item 2 title").fill("Pricing");
   await expect(canvas(page).locator("summary").nth(1)).toHaveText("Pricing");
 
   await contentPanel(page).getByRole("button", { name: "Add item" }).click();
   await expect(overlay(page).locator('[data-emvb-element="accordion"]')).toBeVisible();
-  expect(await titles(page)).toEqual(["Item 1", "Pricing", "Item 3", "Item 4"]);
+  expect(await titles(page)).toEqual(["Question 1", "Pricing", "Question 3", "Question 4"]);
 
   await contentPanel(page).getByRole("button", { name: "Move item 4 up" }).click();
-  expect(await titles(page)).toEqual(["Item 1", "Pricing", "Item 4", "Item 3"]);
-  expect(await summaries(page)).toEqual(["Item 1", "Pricing", "Item 4", "Item 3"]);
+  expect(await titles(page)).toEqual(["Question 1", "Pricing", "Question 4", "Question 3"]);
+  expect(await summaries(page)).toEqual(["Question 1", "Pricing", "Question 4", "Question 3"]);
 
   await contentPanel(page).getByRole("button", { name: "Delete item 1" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
-  expect(await titles(page)).toEqual(["Pricing", "Item 4", "Item 3"]);
+  expect(await titles(page)).toEqual(["Pricing", "Question 4", "Question 3"]);
   await clickRestore(page);
   await expect(canvas(page).locator("summary")).toHaveCount(4);
   // Restore selects what came back, as for any delete; the breadcrumb leads back to the list.
-  await expect(contentPanel(page).getByLabel("Title")).toHaveValue("Item 1");
+  await expect(contentPanel(page).getByLabel("Title")).toHaveValue("Question 1");
   await overlay(page)
     .getByRole("navigation", { name: "Element path" })
     .getByRole("button", { name: "Accordion", exact: true })
     .click();
-  expect(await titles(page)).toEqual(["Item 1", "Pricing", "Item 4", "Item 3"]);
+  expect(await titles(page)).toEqual(["Question 1", "Pricing", "Question 4", "Question 3"]);
 
   await contentPanel(page).getByRole("button", { name: "Edit item 2" }).click();
   await expect(overlay(page).locator('[data-emvb-element="accordion-item"]')).toBeVisible();
@@ -108,10 +108,10 @@ test("a new Accordion has three items and its Content tab edits them (W-130)", a
   const stored = await storedLayout<{ root: Tree }>(request, id);
   const accordion = stored.root.children?.find((c) => c.type === "accordion");
   expect(accordion?.children?.map((c) => c.props.summary)).toEqual([
-    "Item 1",
+    "Question 1",
     "Pricing",
-    "Item 4",
-    "Item 3",
+    "Question 4",
+    "Question 3",
   ]);
   expect(accordion?.children?.map((c) => c.children?.map((k) => k.type))).toEqual([
     ["text"],
@@ -152,11 +152,13 @@ test("a saved empty Accordion keeps working and points at its item list (W-130)"
   await overlay(page).locator('[data-emvb-layer="acc00001"] .emvb-layer-select').click();
   await expect(contentPanel(page)).toContainText("No items yet");
   await contentPanel(page).getByRole("button", { name: "Add item" }).click();
-  expect(await summaries(page)).toEqual(["Item 1"]);
+  expect(await summaries(page)).toEqual(["Question 1"]);
   expect(await hint(page, '[data-emvb-id="acc00001"]')).toBe("");
   await saveDraft(page);
   const stored = await storedLayout<{ root: Tree }>(request, id);
-  expect(find(stored.root, "acc00001")?.children?.map((c) => c.props.summary)).toEqual(["Item 1"]);
+  expect(find(stored.root, "acc00001")?.children?.map((c) => c.props.summary)).toEqual([
+    "Question 1",
+  ]);
 });
 
 const question = (n: number, open?: boolean) => ({

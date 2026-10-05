@@ -1,4 +1,5 @@
 import { Button } from "@cloudflare/kumo";
+import * as React from "react";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -81,13 +82,27 @@ export function ItemList({
   actions?: ItemActions;
 }) {
   const kind = KINDS[node.type];
-  if (!kind) return null;
   const kids = childrenOf(node);
+  // An added item's title field takes focus with its text selected, so typing names it (W-154).
+  const listRef = React.useRef<HTMLDivElement>(null);
+  const focusNew = React.useRef<string | null>(null);
+  const ids = kids.map((child) => child.id).join(" ");
+  React.useEffect(() => {
+    const id = focusNew.current;
+    if (!id || !ids.split(" ").includes(id)) return;
+    focusNew.current = null;
+    const field = listRef.current?.querySelector<HTMLInputElement>(
+      `[data-emvb-item="${id}"] input`,
+    );
+    field?.focus();
+    field?.select();
+  }, [ids]);
+  if (!kind) return null;
   const run = actions ?? localActions(node, onChange);
   const Noun = kind.noun === "tab" ? "Tab" : "Item";
   const full = kind.max !== undefined && kids.length >= kind.max;
   return (
-    <div className="emvb-item-list" data-emvb-item-list={node.type}>
+    <div className="emvb-item-list" data-emvb-item-list={node.type} ref={listRef}>
       <h3 className="emvb-section-label">{kind.noun === "tab" ? "Tabs" : "Items"}</h3>
       {kids.length === 0 ? (
         <p className="emvb-helper" data-emvb-item-empty="">
@@ -166,7 +181,11 @@ export function ItemList({
         className={BUTTON}
         icon={<PlusIcon aria-hidden="true" />}
         disabled={full}
-        onClick={() => run.add(node.id, kind.make(kids.length + 1))}
+        onClick={() => {
+          const fresh = kind.make(kids.length + 1);
+          focusNew.current = fresh.id;
+          run.add(node.id, fresh);
+        }}
       >
         {`Add ${kind.noun}`}
       </Button>

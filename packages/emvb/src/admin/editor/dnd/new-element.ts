@@ -26,13 +26,18 @@ const textNode = (text: string, random?: () => number): LayoutNode => ({
   props: { text },
 });
 
-/** An accordion item titled "Item n" holding a Text, for a new Accordion or its Add item (W-130). */
+/**
+ * An accordion item titled "Question n" holding a Text, for a new Accordion or its Add item
+ * (W-130, W-154).
+ */
 export function newAccordionItem(n: number, random?: () => number, open = false): LayoutNode {
   return {
     id: newNodeId(random),
     type: "accordion-item",
-    props: open ? { summary: `Item ${n}`, open: true } : { summary: `Item ${n}` },
-    children: [textNode(`Content for item ${n}. Replace this text or add elements here.`, random)],
+    props: open ? { summary: `Question ${n}`, open: true } : { summary: `Question ${n}` },
+    children: [
+      textNode(`Answer to question ${n}. Replace this text or add elements here.`, random),
+    ],
   };
 }
 

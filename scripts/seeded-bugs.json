@@ -19176,6 +19176,42 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/editing.test.tsx"],
       "expect": "\\(fail\\).*a dot and its name say the styles are unpublished"
+    },
+    {
+      "id": "W-154/new-item-not-focused",
+      "requirement": "W-154",
+      "description": "Add item leaves focus on the button; the new title field isn't focused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ItemList.tsx",
+          "search": "          focusNew.current = fresh.id;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Add item focuses the new title with its text selected"
+    },
+    {
+      "id": "W-154/item-title-generic",
+      "requirement": "W-154",
+      "description": "A new accordion item is titled \"Item n\" rather than \"Question n\".",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "{ summary: `Question ${n}`, open: true } : { summary: `Question ${n}` }",
+          "replace": "{ summary: `Item ${n}`, open: true } : { summary: `Item ${n}` }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a new Accordion starts with three items"
     }
   ]
 }
