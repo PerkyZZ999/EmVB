@@ -18878,6 +18878,31 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*a Heading and an Icon take a link"
+    },
+    {
+      "id": "W-142/e2e-accent-variable-left-behind",
+      "requirement": "W-142",
+      "description": "The colour-variable e2e leaves its 'Accent …' variable on the dev site.",
+      "edits": [
+        {
+          "file": "e2e/support/design.ts",
+          "search": "  const colors = data.design.variables.colors.filter((c) => c.name !== name);",
+          "replace": "  const colors = data.design.variables.colors.filter(() => true);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/editing.e2e.ts",
+        "--project=node",
+        "-g",
+        "colour variable can be created"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*a colour variable can be created"
     }
   ]
 }

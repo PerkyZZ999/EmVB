@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { heading, layoutOfBytes } from "../packages/emvb/test/fixtures/layouts.ts";
 import { api, createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
 import { canvas, openEditor, openLayers, overlay, saveStatus, unique } from "./support/helpers.ts";
+import { loadDesign, loadDraft, removeColorsNamed } from "./support/design.ts";
 
 const PAGES = "/_emdash/admin/plugins/emvb/pages";
 const MAX_LAYOUT_BYTES = 512 * 1024;
@@ -209,50 +210,65 @@ test("a colour variable can be created, bound and edited, and the design persist
 }) => {
   const id = await createPage(request, "Variable check", layoutFor("Coloured"), `var-${unique()}`);
   const name = `Accent ${unique()}`;
-  await openEditor(page, id, "Coloured");
-  await selectHeading(page, "Coloured");
-  await overlay(page).getByRole("tab", { name: "Style" }).click();
-  await overlay(page)
-    .locator('[data-emvb-style="color"]')
-    .getByRole("button", { name: "New variable" })
-    .click();
-  await overlay(page).getByLabel("Variable name").fill(name);
-  await overlay(page).getByLabel("Value", { exact: true }).fill("#0055ff");
-  await overlay(page).getByRole("button", { name: "Create variable" }).click();
-  const title = canvas(page).getByRole("heading", { name: "Coloured" });
-  await expect(title).toHaveCSS("color", "rgb(0, 85, 255)");
+  // The variable is site-wide, so the test removes it again and checks it is gone (no "Accent …"
+  // leftovers on the dev sites).
+  let cleaned = false;
+  try {
+    await openEditor(page, id, "Coloured");
+    await selectHeading(page, "Coloured");
+    await overlay(page).getByRole("tab", { name: "Style" }).click();
+    await overlay(page)
+      .locator('[data-emvb-style="color"]')
+      .getByRole("button", { name: "New variable" })
+      .click();
+    await overlay(page).getByLabel("Variable name").fill(name);
+    await overlay(page).getByLabel("Value", { exact: true }).fill("#0055ff");
+    await overlay(page).getByRole("button", { name: "Create variable" }).click();
+    const title = canvas(page).getByRole("heading", { name: "Coloured" });
+    await expect(title).toHaveCSS("color", "rgb(0, 85, 255)");
 
-  await overlay(page).getByLabel(`${name} value`).fill("#ff0000");
-  await overlay(page).getByLabel(`${name} value`).press("Enter");
-  await expect(title).toHaveCSS("color", "rgb(255, 0, 0)");
-  await page.keyboard.press("Control+s");
-  await expect(saveStatus(page)).toHaveText("Saved");
+    await overlay(page).getByLabel(`${name} value`).fill("#ff0000");
+    await overlay(page).getByLabel(`${name} value`).press("Enter");
+    await expect(title).toHaveCSS("color", "rgb(255, 0, 0)");
+    await page.keyboard.press("Control+s");
+    await expect(saveStatus(page)).toHaveText("Saved");
 
-  const draft = await api(request, "GET", "/_emdash/api/plugins/emvb/design/draft");
-  const draftColors =
-    (draft.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)?.design
-      .variables.colors ?? [];
-  expect(draftColors).toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
-  const live = await api(request, "GET", "/_emdash/api/plugins/emvb/design");
-  const liveColors =
-    (live.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)?.design
-      .variables.colors ?? [];
-  expect(liveColors).not.toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
+    const draft = await api(request, "GET", "/_emdash/api/plugins/emvb/design/draft");
+    const draftColors =
+      (draft.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)?.design
+        .variables.colors ?? [];
+    expect(draftColors).toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
+    const live = await api(request, "GET", "/_emdash/api/plugins/emvb/design");
+    const liveColors =
+      (live.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)?.design
+        .variables.colors ?? [];
+    expect(liveColors).not.toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
 
-  await overlay(page).getByRole("button", { name: "Site styles" }).click();
-  await overlay(page).getByRole("button", { name: "Publish styles" }).click();
-  await expect(overlay(page).getByRole("button", { name: "Publish styles" })).toHaveCount(0);
-  const published = await api(request, "GET", "/_emdash/api/plugins/emvb/design");
-  const colors =
-    (published.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)
-      ?.design.variables.colors ?? [];
-  expect(colors).toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
-  await page.reload();
-  await openEditor(page, id, "Coloured");
-  await expect(canvas(page).getByRole("heading", { name: "Coloured" })).toHaveCSS(
-    "color",
-    "rgb(255, 0, 0)",
-  );
+    await overlay(page).getByRole("button", { name: "Site styles" }).click();
+    await overlay(page).getByRole("button", { name: "Publish styles" }).click();
+    await expect(overlay(page).getByRole("button", { name: "Publish styles" })).toHaveCount(0);
+    const published = await api(request, "GET", "/_emdash/api/plugins/emvb/design");
+    const colors =
+      (published.json?.["data"] as { design: { variables: { colors: unknown[] } } } | undefined)
+        ?.design.variables.colors ?? [];
+    expect(colors).toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
+    await page.reload();
+    await openEditor(page, id, "Coloured");
+    await expect(canvas(page).getByRole("heading", { name: "Coloured" })).toHaveCSS(
+      "color",
+      "rgb(255, 0, 0)",
+    );
+
+    await removeColorsNamed(request, name);
+    cleaned = true;
+    const after = (await loadDraft(request)).design.variables.colors;
+    expect(after.map((c) => c.name)).not.toContain(name);
+    expect((await loadDesign(request)).design.variables.colors.map((c) => c.name)).not.toContain(
+      name,
+    );
+  } finally {
+    if (!cleaned) await removeColorsNamed(request, name);
+  }
 });
 
 const tabPanel = (id: string, label: string, text: string) => ({

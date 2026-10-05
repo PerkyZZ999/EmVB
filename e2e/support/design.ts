@@ -72,6 +72,17 @@ export async function setColor(request: APIRequestContext, variable: string, val
   });
 }
 
+/** Removes every colour variable with this name from the draft and publishes, so a test leaves no trace. */
+export async function removeColorsNamed(request: APIRequestContext, name: string) {
+  const data = await loadDraft(request);
+  const colors = data.design.variables.colors.filter((c) => c.name !== name);
+  if (colors.length === data.design.variables.colors.length) return;
+  await saveAndPublish(request, {
+    ...data.design,
+    variables: { ...data.design.variables, colors },
+  });
+}
+
 /** Sets one spacing variable, or removes it when `value` is null. */
 export async function setSpacing(
   request: APIRequestContext,
