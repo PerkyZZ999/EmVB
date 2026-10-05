@@ -18,6 +18,7 @@ export function LeftPanel({
   onMoveDown,
   onDelete,
   clipboard,
+  onRename,
   formsAvailable = true,
 }: {
   layout: Layout | null;
@@ -29,6 +30,8 @@ export function LeftPanel({
   onMoveDown: (id: string) => void;
   onDelete: (id: string) => void;
   clipboard?: ClipboardActions;
+  /** Layers rename (W-157). */
+  onRename?: (id: string, label: string | undefined) => void;
   formsAvailable?: boolean;
 }) {
   const [tab, setTab] = React.useState(() => {
@@ -70,6 +73,7 @@ export function LeftPanel({
           onMoveDown={onMoveDown}
           onDelete={onDelete}
           clipboard={clipboard}
+          onRename={onRename}
         />
       )}
     </div>

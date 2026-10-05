@@ -33,6 +33,9 @@ export const CONTAINER_TAGS = [
 ] as const;
 export const TEXT_TAGS = ["p", "div"] as const;
 
+/** The editor-only name of a node in Layers (W-157, D-045). Never rendered on the page. */
+const NodeLabel = z.string().trim().min(1).max(80);
+
 /** `data-*` and `aria-*` only. Names stay unique on the element (W-105 / R-032). */
 const HtmlAttribute = z.strictObject({
   name: z
@@ -64,6 +67,7 @@ const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) =>
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
   attributes: HtmlAttributes.optional(),
+  label: NodeLabel.optional(),
 });
 
 const leafNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
@@ -429,6 +433,7 @@ const UnknownNodeSchema = z.strictObject({
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
   attributes: HtmlAttributes.optional(),
+  label: NodeLabel.optional(),
   get children(): z.ZodType<LayoutNode[] | undefined> {
     return z.array(LayoutNode).optional();
   },
@@ -520,6 +525,7 @@ export type UnknownNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children?: LayoutNode[];
 };
 
@@ -534,6 +540,7 @@ export type ContainerNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -548,6 +555,7 @@ export type DivBlockNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -566,6 +574,7 @@ export type LayoutSectionNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -586,6 +595,7 @@ export type GridNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -600,6 +610,7 @@ export type FlexboxNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -619,6 +630,7 @@ export type SvgNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
 };
 
 export type TabPanelNode = {
@@ -632,6 +644,7 @@ export type TabPanelNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -646,6 +659,7 @@ export type TabsNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -660,6 +674,7 @@ export type FormNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -674,6 +689,7 @@ export type LoopNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -688,6 +704,7 @@ export type SectionNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -702,6 +719,7 @@ export type AccordionNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 
@@ -716,6 +734,7 @@ export type AccordionItemNode = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
+  label?: string;
   children: LayoutNode[];
 };
 

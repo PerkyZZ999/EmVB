@@ -9952,8 +9952,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "                      onMenu(false);\n                      run(node.id);",
-          "replace": "                      run(node.id);"
+          "search": "                        onMenu(false);\n                        run(node.id);",
+          "replace": "                        run(node.id);"
         }
       ],
       "command": [
@@ -19279,6 +19279,48 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*a layout Section is added"
+    },
+    {
+      "id": "W-157/label-refused",
+      "requirement": "W-157",
+      "description": "The schema has no node label, so a labelled page is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "  attributes: HtmlAttributes.optional(),\n  label: NodeLabel.optional(),\n});",
+          "replace": "  attributes: HtmlAttributes.optional(),\n});"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/schema/node-label.test.ts"],
+      "expect": "\\(fail\\).*any node, the root and an unknown one included, may carry a label"
+    },
+    {
+      "id": "W-157/rename-not-saved",
+      "requirement": "W-157",
+      "description": "Enter in the Layers name field doesn't save the name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "        if (event.key === \"Enter\") finish(text);",
+          "replace": "        if (event.key === \"Enter\") finish(null);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*double-click names a row"
+    },
+    {
+      "id": "W-157/label-not-shown",
+      "requirement": "W-157",
+      "description": "A labelled row still shows the element type, not its name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  const name = node.label ?? typeName;",
+          "replace": "  const name = typeName;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\).*double-click names a row"
     }
   ]
 }

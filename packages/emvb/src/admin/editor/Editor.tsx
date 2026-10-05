@@ -9,6 +9,7 @@ import {
   renderPage,
   toggleHidden,
   withPlainText,
+  type LayoutNode,
   type PopupDevice,
 } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
@@ -46,6 +47,13 @@ import { useNodeActions } from "./useNodeActions.ts";
 import { type PasteRefusal, useClipboardActions } from "./useClipboardActions.ts";
 
 /** The full-screen editor for one EmVB page or theme part (R-001, R-002, R-060). */
+
+/** Sets or clears a node's editor-only name (W-157). */
+const withLabel = (node: LayoutNode, label: string | undefined): LayoutNode => {
+  const { label: _old, ...rest } = node;
+  return (label ? { ...rest, label } : rest) as LayoutNode;
+};
+
 export function Editor({
   fetcher,
   entryId,
@@ -238,7 +246,7 @@ function EditorApp({
     selectedId: selectedNode ? state.selectedId : null,
     labelFor: (id) => {
       const node = state.page.layout ? findNode(state.page.layout, id) : undefined;
-      return node ? (ELEMENT_NAMES[node.type] ?? node.type) : "Element";
+      return node ? (node.label ?? ELEMENT_NAMES[node.type] ?? node.type) : "Element";
     },
     canDelete,
     canMove,
@@ -284,6 +292,13 @@ function EditorApp({
                   onMoveDown={(id) => arrange(id, moveDown)}
                   onDelete={remove}
                   clipboard={clipboard}
+                  onRename={(id, label) =>
+                    dispatch({
+                      type: "update-node",
+                      id,
+                      update: (node) => withLabel(node, label),
+                    })
+                  }
                 />
                 <div className="emvb-sr-only" aria-live="polite">
                   {announcement}

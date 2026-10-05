@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import * as React from "react";
 import { act } from "react";
-import type { Layout } from "../../../core/index.ts";
+import type { Layout, LayoutNode } from "../../../core/index.ts";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { LayersPanel, layerPreview } from "./LayersPanel.tsx";
 import type { ClipboardActions } from "../useClipboardActions.ts";
@@ -325,5 +326,96 @@ describe("Layers content preview (W-143)", () => {
     expect(layerPreview(node("container", {}))).toBeUndefined();
     expect(layerPreview(node("image", { src: "/a.png", alt: "A" }))).toBeUndefined();
     expect(layerPreview(node("text", { text: "   " }))).toBeUndefined();
+  });
+});
+
+describe("renaming a layer (W-157)", () => {
+  const renames: [string, string | undefined][] = [];
+  afterEach(() => {
+    renames.length = 0;
+  });
+
+  function Live({ start }: { start: Layout }) {
+    const [page, setPage] = React.useState(start);
+    return (
+      <LayersPanel
+        layout={page}
+        selectedId="head0001"
+        onSelect={() => undefined}
+        onDuplicate={() => undefined}
+        onMoveUp={() => undefined}
+        onMoveDown={() => undefined}
+        onDelete={() => undefined}
+        onRename={(id, label) => {
+          renames.push([id, label]);
+          const relabel = (node: LayoutNode): LayoutNode => {
+            const { label: _old, ...rest } = node;
+            const next = (
+              node.id === id ? (label ? { ...rest, label } : rest) : node
+            ) as LayoutNode;
+            return "children" in next && Array.isArray(next.children)
+              ? ({ ...next, children: next.children.map(relabel) } as LayoutNode)
+              : next;
+          };
+          setPage({ ...page, root: relabel(page.root) as Layout["root"] });
+        }}
+      />
+    );
+  }
+
+  const select = (id: string) =>
+    document.querySelector(`[data-emvb-layer="${id}"] .emvb-layer-select`) as HTMLButtonElement;
+  const field = () => document.querySelector("[data-emvb-layer-rename]") as HTMLInputElement | null;
+  async function typeName(text: string, key: "Enter" | "Escape") {
+    const input = field();
+    if (!input) throw new Error("no rename field");
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(input, text);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      input.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    });
+  }
+
+  test("double-click names a row; the name replaces the type and the type moves to the tooltip", async () => {
+    await mountTree(<Live start={layout} />);
+    await act(async () => {
+      select("head0001").dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+    });
+    expect(document.activeElement).toBe(field());
+    expect(field()?.placeholder).toBe("Heading");
+    await typeName("  Hero title  ", "Enter");
+    expect(renames).toEqual([["head0001", "Hero title"]]);
+    expect(field()).toBeNull();
+    expect(select("head0001").textContent).toContain("Hero title");
+    expect(select("head0001").textContent).not.toContain("Heading");
+    expect(select("head0001").title).toBe("Heading");
+  });
+
+  test("F2 renames and Escape cancels; the menu's Rename with an empty name clears it", async () => {
+    const labelled: Layout = {
+      ...layout,
+      root: {
+        ...layout.root,
+        children: [{ ...(layout.root.children[0] as LayoutNode), label: "Hero" }],
+      },
+    };
+    await mountTree(<Live start={labelled} />);
+    await act(async () => {
+      select("head0001").dispatchEvent(new KeyboardEvent("keydown", { key: "F2", bubbles: true }));
+    });
+    expect(field()?.value).toBe("Hero");
+    await typeName("Other", "Escape");
+    expect(renames).toEqual([]);
+    expect(select("head0001").textContent).toContain("Hero");
+    await clickEl(document.querySelector('[data-emvb-layer="head0001"] .emvb-layer-menu-btn'));
+    const rename = [...document.querySelectorAll('[role="menuitem"]')].find(
+      (el) => el.textContent === "Rename",
+    );
+    await clickEl(rename ?? null);
+    await typeName("", "Enter");
+    expect(renames).toEqual([["head0001", undefined]]);
+    expect(select("head0001").textContent).toContain("Heading");
   });
 });

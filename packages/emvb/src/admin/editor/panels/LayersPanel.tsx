@@ -51,6 +51,8 @@ type LayerActions = {
   onDelete: (id: string) => void;
   /** Copy and paste (W-093); without it the menu has no clipboard items. */
   clipboard?: ClipboardActions;
+  /** Sets or clears a node's editor-only name (W-157); without it rows can't be renamed. */
+  onRename?: (id: string, label: string | undefined) => void;
 };
 
 type MenuItem = {
@@ -65,8 +67,14 @@ const pasteHint = (clip: ClipboardActions | undefined) =>
   clip ? (clip.pasteStyleBlocked ?? clip.pasteBlocked) : null;
 
 /** The ··· menu: clipboard items, then Duplicate and the moves; the root row gets what applies to it. */
-function menuItems(node: LayoutNode, isRoot: boolean, actions: LayerActions): MenuItem[] {
+function menuItems(
+  node: LayoutNode,
+  isRoot: boolean,
+  actions: LayerActions,
+  rename: () => void,
+): MenuItem[] {
   const clip = actions.clipboard;
+  const naming: MenuItem[] = actions.onRename ? [{ label: "Rename", run: rename }] : [];
   const parent = isParentNode(node);
   const clipboard: MenuItem[] = clip
     ? [
@@ -97,8 +105,9 @@ function menuItems(node: LayoutNode, isRoot: boolean, actions: LayerActions): Me
         { label: "Paste style", run: clip.pasteStyle, disabled: !!clip.pasteStyleBlocked },
       ]
     : [];
-  if (isRoot) return [...clipboard, ...style];
+  if (isRoot) return [...naming, ...clipboard, ...style];
   return [
+    ...naming,
     ...clipboard,
     { label: "Duplicate", run: actions.onDuplicate },
     ...style,
@@ -258,8 +267,20 @@ function LayerRow({
 }) {
   const Icon = ICONS[node.type] ?? SquaresFourIcon;
   const preview = layerPreview(node);
-  const name = ELEMENT_NAMES[node.type] ?? node.type;
+  const typeName = ELEMENT_NAMES[node.type] ?? node.type;
+  // A label names the row in place of the type (W-157); the type stays in the tooltip.
+  const name = node.label ?? typeName;
   const hasChildren = isParentNode(node) && node.children.length > 0;
+  const [renaming, setRenaming] = React.useState(false);
+  const startRename = () => {
+    if (actions.onRename) setRenaming(true);
+  };
+  const finishRename = (text: string | null) => {
+    setRenaming(false);
+    if (text === null || !actions.onRename) return;
+    const next = text.trim().slice(0, 80) || undefined;
+    if (next !== node.label) actions.onRename(node.id, next);
+  };
   return (
     <li role="treeitem" aria-expanded={hasChildren ? !collapsed : undefined}>
       <div
@@ -295,27 +316,41 @@ function LayerRow({
         ) : (
           <span className="emvb-layer-caret" />
         )}
-        <button
-          type="button"
-          className="emvb-layer-select"
-          aria-current={selected ? "true" : undefined}
-          draggable={!isRoot}
-          onDragStart={(event) => {
-            if (isRoot) {
-              event.preventDefault();
-              return;
-            }
-            event.dataTransfer.setData(EXISTING_ELEMENT_MIME, node.id);
-            event.dataTransfer.effectAllowed = "move";
-            dragStash.existing(node.id);
-          }}
-          onClick={() => actions.onSelect(node.id)}
-        >
-          <Icon size={16} aria-hidden="true" />
-          <span>{name}</span>
-          {preview ? <span className="emvb-layer-preview">{preview}</span> : null}
-          {hasStateStyles(node) && <StateDot />}
-        </button>
+        {renaming ? (
+          <RenameInput initial={node.label ?? ""} placeholder={typeName} onDone={finishRename} />
+        ) : (
+          <button
+            type="button"
+            className="emvb-layer-select"
+            aria-current={selected ? "true" : undefined}
+            title={node.label ? typeName : undefined}
+            data-emvb-layer-label={node.label ? "" : undefined}
+            onDoubleClick={startRename}
+            onKeyDown={(event) => {
+              if (event.key === "F2") {
+                event.preventDefault();
+                event.stopPropagation();
+                startRename();
+              }
+            }}
+            draggable={!isRoot}
+            onDragStart={(event) => {
+              if (isRoot) {
+                event.preventDefault();
+                return;
+              }
+              event.dataTransfer.setData(EXISTING_ELEMENT_MIME, node.id);
+              event.dataTransfer.effectAllowed = "move";
+              dragStash.existing(node.id);
+            }}
+            onClick={() => actions.onSelect(node.id)}
+          >
+            <Icon size={16} aria-hidden="true" />
+            <span>{name}</span>
+            {preview ? <span className="emvb-layer-preview">{preview}</span> : null}
+            {hasStateStyles(node) && <StateDot />}
+          </button>
+        )}
         {(!isRoot || actions.clipboard) && (
           <span className="emvb-layer-menu">
             <button
@@ -332,22 +367,24 @@ function LayerRow({
             </button>
             {menuOpen && (
               <div className="emvb-layer-menu-list" role="menu">
-                {menuItems(node, isRoot, actions).map(({ label, run, className, disabled }) => (
-                  <button
-                    key={label}
-                    type="button"
-                    role="menuitem"
-                    className={className}
-                    disabled={disabled}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onMenu(false);
-                      run(node.id);
-                    }}
-                  >
-                    {label}
-                  </button>
-                ))}
+                {menuItems(node, isRoot, actions, startRename).map(
+                  ({ label, run, className, disabled }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      role="menuitem"
+                      className={className}
+                      disabled={disabled}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onMenu(false);
+                        run(node.id);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ),
+                )}
                 {pasteHint(actions.clipboard) && (
                   <p className="emvb-layer-menu-hint" data-emvb-paste-hint="">
                     {pasteHint(actions.clipboard)}
@@ -359,5 +396,48 @@ function LayerRow({
         )}
       </div>
     </li>
+  );
+}
+
+/** The inline name field (W-157): Enter or leaving saves, Escape cancels, empty clears the name. */
+function RenameInput({
+  initial,
+  placeholder,
+  onDone,
+}: {
+  initial: string;
+  placeholder: string;
+  onDone: (text: string | null) => void;
+}) {
+  const [text, setText] = React.useState(initial);
+  const done = React.useRef(false);
+  const finish = (value: string | null) => {
+    if (done.current) return;
+    done.current = true;
+    onDone(value);
+  };
+  return (
+    <input
+      className="emvb-layer-rename"
+      aria-label="Layer name"
+      data-emvb-layer-rename=""
+      value={text}
+      placeholder={placeholder}
+      maxLength={80}
+      ref={(el) => {
+        if (el && !done.current && document.activeElement !== el) {
+          el.focus();
+          el.select();
+        }
+      }}
+      onClick={(event) => event.stopPropagation()}
+      onChange={(event) => setText(event.target.value)}
+      onBlur={() => finish(text)}
+      onKeyDown={(event) => {
+        event.stopPropagation();
+        if (event.key === "Enter") finish(text);
+        if (event.key === "Escape") finish(null);
+      }}
+    />
   );
 }

@@ -66,7 +66,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | `grid` | `columns` (1–12); optional `columnsTablet` and `columnsMobile` (1–12, W-139) | `children: Node[]` | `display: grid` with that many equal columns; the device counts go in the tablet and mobile media queries, and an unset one follows the next wider device |
 | `section` (shown as "Theme section") | optional `partId` | `children: Node[]` (inline contents when no part id) | When `partId` is set, the published Section theme part's children replace the local ones |
 
-Every node may also carry optional `htmlId` (CSS `id`, unique on the page), `classes` (style-class ids from the design system, S4), `devices` and `hiddenOn` (W-096, below).
+Every node may also carry an optional `label` (1–80 characters, trimmed; an editor-only name shown in Layers and on the canvas, never rendered, W-157), optional `htmlId` (CSS `id`, unique on the page), `classes` (style-class ids from the design system, S4), `devices` and `hiddenOn` (W-096, below).
 
 **Forms (S5):** form fields are only valid inside a `form` (or under one). Pages with a form set `needsFormsRuntime`; the host route loads `EmVBFormsRuntime` so `initForms` handles AJAX submit. Pages without a form stay zero EmVB JS (R-031).
 
