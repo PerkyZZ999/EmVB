@@ -40,12 +40,15 @@ const TEXT_SECTIONS: StyleSectionId[] = [
 /** Which Style sections appear, and which opens by default (IA table). */
 export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen: StyleSectionId }> =
   {
+    // W-159: Typography too, so a page or band sets the font and colour its children inherit,
+    // as Flexbox and Div Block already could.
     container: {
       sections: [
         "layout",
         "spacing",
         "size",
         "position",
+        "typography",
         "background",
         "border",
         "effects",

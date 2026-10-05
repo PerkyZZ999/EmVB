@@ -19374,6 +19374,24 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*the Desktop canvas lays the page out at 1280"
+    },
+    {
+      "id": "W-159/container-no-typography",
+      "requirement": "W-159",
+      "description": "Container loses its Typography section, so a page font can't be set once for its children.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "        \"position\",\n        \"typography\",\n        \"background\",\n        \"border\",\n        \"effects\",\n        \"advanced\",\n      ],\n      defaultOpen: \"layout\",\n    },\n    spacer",
+          "replace": "        \"position\",\n        \"background\",\n        \"border\",\n        \"effects\",\n        \"advanced\",\n      ],\n      defaultOpen: \"layout\",\n    },\n    spacer"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a Container's Style tab has Typography"
     }
   ]
 }

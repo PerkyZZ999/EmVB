@@ -139,6 +139,7 @@ describe("Size section (W-088)", () => {
       "spacing",
       "size",
       "position",
+      "typography",
       "background",
       "border",
       "effects",
@@ -578,5 +579,17 @@ describe("Div Block layout controls (W-144)", () => {
       "gridColumnSpan",
       "gridRowSpan",
     ]);
+  });
+});
+
+describe("Container typography (W-159)", () => {
+  test("a Container's Style tab has Typography with font family and colour", async () => {
+    await panel(box());
+    await styleTab();
+    expect(sectionIds()).toContain("typography");
+    await openSection("typography");
+    expect(styleRows("typography")).toEqual(
+      expect.arrayContaining(["fontFamily", "fontSize", "color", "lineHeight"]),
+    );
   });
 });
