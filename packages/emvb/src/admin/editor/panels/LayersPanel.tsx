@@ -1,4 +1,10 @@
-import { CaretDownIcon, CaretRightIcon, SquaresFourIcon, TextHIcon } from "@phosphor-icons/react";
+import {
+  CaretDownIcon,
+  CaretRightIcon,
+  RowsIcon,
+  SquaresFourIcon,
+  TextHIcon,
+} from "@phosphor-icons/react";
 import * as React from "react";
 import {
   firstChild,
@@ -23,6 +29,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   tabs: SquaresFourIcon,
   "tab-panel": SquaresFourIcon,
   "div-block": SquaresFourIcon,
+  "layout-section": RowsIcon,
   flexbox: SquaresFourIcon,
 };
 

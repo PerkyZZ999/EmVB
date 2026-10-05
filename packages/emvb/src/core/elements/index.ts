@@ -2,6 +2,7 @@ import type {
   ButtonNode,
   ContainerNode,
   DivBlockNode,
+  LayoutSectionNode,
   FlexboxNode,
   GridNode,
   SvgNode,
@@ -650,6 +651,57 @@ const divBlock: ElementDefinition<DivBlockNode> = {
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
 };
 
+/**
+ * A layout Section (W-156, D-045): a full-width band (background and padding on it) whose
+ * contents sit in a centred inner box at most the content width wide. The width is a custom
+ * property set by the renderer; each section resets it so a nested one doesn't inherit it.
+ */
+const layoutSection: ElementDefinition<LayoutSectionNode> = {
+  baseCss:
+    ".emvb-layout-section{--emvb-content-width:1140px;display:block;min-width:0}.emvb-layout-section-inner{box-sizing:border-box;width:100%;max-width:var(--emvb-content-width);margin-inline:auto;min-width:0}",
+  defaults: () => ({
+    type: "layout-section",
+    props: {},
+    style: {
+      paddingTop: { value: 64, unit: "px" },
+      paddingRight: { value: 24, unit: "px" },
+      paddingBottom: { value: 64, unit: "px" },
+      paddingLeft: { value: 24, unit: "px" },
+    },
+    children: [],
+  }),
+  descriptor: {
+    type: "layout-section",
+    name: "Section",
+    group: "layout",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "contentWidth",
+        kind: "number",
+        label: "Content width",
+        optional: true,
+        message: "Content width can't be negative. Leave it empty for 1140 px.",
+      },
+      { key: "fullWidth", kind: "boolean", label: "Full-width content", optional: true },
+      {
+        key: "tag",
+        kind: "select",
+        label: "HTML tag",
+        optional: true,
+        options: CONTAINER_TAGS.map((tag) => ({ value: tag, label: tag })),
+        message: "Pick a landmark or div. A section is a section by default.",
+      },
+    ],
+  },
+  build: (node, attrs, children) => {
+    const tag = node.props.tag ?? "section";
+    const safe = (CONTAINER_TAGS as readonly string[]).includes(tag) ? tag : "section";
+    const inner: VNode = { tag: "div", attrs: { class: "emvb-layout-section-inner" }, children };
+    return { tag: safe, attrs, children: [inner] };
+  },
+};
+
 const grid: ElementDefinition<GridNode> = {
   baseCss: ".emvb-grid{display:grid;min-width:0}",
   defaults: () => ({ type: "grid", props: { columns: 3 }, children: [] }),
@@ -735,6 +787,7 @@ const accordionItem: ElementDefinition<AccordionItemNode> = {
 export const ELEMENTS = {
   heading,
   container,
+  "layout-section": layoutSection,
   spacer,
   divider,
   text,

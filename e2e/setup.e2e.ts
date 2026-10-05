@@ -69,7 +69,7 @@ test("saves are validated over HTTP: an invalid layout gets 422 SAVE_REJECTED", 
   request,
 }) => {
   const invalid = {
-    schemaVersion: 10,
+    schemaVersion: 11,
     root: {
       id: "root0001",
       type: "container",
@@ -90,7 +90,7 @@ test("the standard entry editor shows the read-only widget instead of a JSON inp
   request,
 }) => {
   const layout = {
-    schemaVersion: 10,
+    schemaVersion: 11,
     root: {
       id: "root0001",
       type: "container",

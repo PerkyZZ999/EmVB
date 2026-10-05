@@ -27,7 +27,7 @@ const STYLE = {
 const STATES = { hover: { color: "#0022aa" }, focus: { backgroundColor: "#eeeeee" } };
 
 const pageWith = (children: Node[]): Stored => ({
-  schemaVersion: 10,
+  schemaVersion: 11,
   root: {
     id: "root0001",
     type: "container",
@@ -169,7 +169,7 @@ test("a paste the drop rules refuse shows the reason on the canvas and changes n
       JSON.stringify({
         format: "emvb-clipboard",
         version: 1,
-        schemaVersion: 10,
+        schemaVersion: 11,
         kind: "element",
         node: { id: "inpt0001", type: "text-input", props: { field: "email" } },
       }),

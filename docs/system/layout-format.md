@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 10,
+  "schemaVersion": 11,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `10` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141; v1–v9 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- `schemaVersion` is the literal `11` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045; v1–v10 documents are upgraded on read by steps that change nothing). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -38,6 +38,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | Type | `props` | Children | Renders as |
 | --- | --- | --- | --- |
 | `container` | optional `tag` (`div`, `section`, `header`, `footer`, `main`, `article`, `aside`, `nav`) | `children: Node[]` (required, may be empty) | that tag (default `div`) with `class="emvb-container …"` |
+| `layout-section` (shown as "Section", W-156) | optional `tag` (as `container`, default `section`), `contentWidth` length, `fullWidth` boolean | `children: Node[]` | that tag with `class="emvb-layout-section …"`, wrapping `<div class="emvb-layout-section-inner">` around the children; the inner box is at most `contentWidth` (default 1140 px, none with `fullWidth`) wide and centred |
 | `heading` | `text` (≤ 2000), `level` (1–6), optional `href` (≤ 2000) and `newTab` (W-141) | none | `<h1>`–`<h6>`; with a safe `href`, the text is wrapped in `<a class="emvb-heading-link">` (colour and decoration inherited) |
 | `spacer` | `height` length | none | `<div aria-hidden="true">` with height in CSS |
 | `divider` | `{}` | none | `<hr>` |
@@ -149,7 +150,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 10,
+  "schemaVersion": 11,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],

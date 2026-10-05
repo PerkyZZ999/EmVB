@@ -7902,7 +7902,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7922,7 +7922,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7962,7 +7962,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 10;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 11;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -8222,7 +8222,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8242,7 +8242,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8262,7 +8262,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 10;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 11;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8271,9 +8271,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 10"
+        "layout and design are at version 11"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 10"
+      "expect": "\\(fail\\).*layout and design are at version 11"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8282,7 +8282,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 10;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 11;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8291,9 +8291,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 10"
+        "layout and design are at version 11"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 10"
+      "expect": "\\(fail\\).*layout and design are at version 11"
     },
     {
       "id": "D-032/node-states-refused",
@@ -19226,6 +19226,59 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/add-panel.test.tsx"],
       "expect": "\\(fail\\).*the theme-part embed is named Theme section"
+    },
+    {
+      "id": "W-156/no-inner-box",
+      "requirement": "W-156",
+      "description": "The layout Section renders its children straight into the band, with no centred inner box.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    return { tag: safe, attrs, children: [inner] };",
+          "replace": "    void inner;\n    return { tag: safe, attrs, children };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/layout-section.test.ts"],
+      "expect": "\\(fail\\).*holds its contents in a centred inner box"
+    },
+    {
+      "id": "W-156/content-width-ignored",
+      "requirement": "W-156",
+      "description": "A Section's content width and full width are not emitted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      if (width) declarations.push({ property: \"--emvb-content-width\", value: width });",
+          "replace": "      void width;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/layout-section.test.ts"],
+      "expect": "\\(fail\\).*content width and full width set the inner box"
+    },
+    {
+      "id": "W-156/inner-box-no-drop-floor",
+      "requirement": "W-156",
+      "description": "An empty Section's inner box has no canvas drop floor, so it is 0 px tall and can't take a drop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": ",.emvb-layout-section-inner:empty\";",
+          "replace": "\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/layout-section.e2e.ts",
+        "--project=node",
+        "-g",
+        "a layout Section is added"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*a layout Section is added"
     }
   ]
 }

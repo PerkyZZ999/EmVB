@@ -147,6 +147,12 @@ export function renderPage(
       const height = cssLength((node as { props: { height: unknown } }).props.height);
       if (height) declarations.push({ property: "height", value: height });
     }
+    if (node.type === "layout-section") {
+      // The inner box's width (W-156): full width, or a length; unset keeps the 1140 px default.
+      const props = (node as { props: { contentWidth?: unknown; fullWidth?: unknown } }).props;
+      const width = props.fullWidth === true ? "none" : cssLength(props.contentWidth);
+      if (width) declarations.push({ property: "--emvb-content-width", value: width });
+    }
     if (node.type === "grid") {
       const props = (node as { props: Record<string, unknown> }).props;
       declarations.push(...gridTracks(props["columns"]));

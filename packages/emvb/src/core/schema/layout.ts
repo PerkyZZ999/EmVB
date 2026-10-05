@@ -3,11 +3,11 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /**
+ * 11 since W-156 and W-157 (D-045): the layout Section element and an editor-only node label.
  * 10 since W-138 (D-044): per-side border widths and per-corner radii, and W-139 (D-039): grid
- * columns per device. v9 → v10 changes nothing,
- * so an older EmVB shows "saved by a newer EmVB".
+ * columns per device. Each step changes nothing, so an older EmVB shows "saved by a newer EmVB".
  */
-export const LAYOUT_SCHEMA_VERSION = 10;
+export const LAYOUT_SCHEMA_VERSION = 11;
 
 export const NodeId = z
   .string()
@@ -203,6 +203,19 @@ const FieldName = z
 
 export const DivBlockNode = parentNode("div-block", z.strictObject({ ...BoxLink }));
 
+/**
+ * A layout Section (W-156, D-045): a full-width band whose contents sit in a centred inner box,
+ * `contentWidth` wide at most (1140 px when unset), or the full width with `fullWidth`.
+ */
+export const LayoutSectionNode = parentNode(
+  "layout-section",
+  z.strictObject({
+    tag: z.enum(CONTAINER_TAGS).optional(),
+    contentWidth: Length.optional(),
+    fullWidth: z.boolean().optional(),
+  }),
+);
+
 export const FlexboxNode = parentNode("flexbox", z.strictObject({ ...BoxLink }));
 
 /**
@@ -394,6 +407,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "tab-panel",
   "accordion",
   "accordion-item",
+  "layout-section",
 ] as const;
 
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
@@ -423,6 +437,7 @@ const UnknownNodeSchema = z.strictObject({
 const KnownLayoutNode = z.discriminatedUnion("type", [
   ContainerNode,
   DivBlockNode,
+  LayoutSectionNode,
   FlexboxNode,
   GridNode,
   SvgNode,
@@ -526,6 +541,24 @@ export type DivBlockNode = {
   id: IdOf;
   type: "div-block";
   props: { href?: string; newTab?: boolean };
+  style?: StyleOf;
+  states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
+  children: LayoutNode[];
+};
+
+export type LayoutSectionNode = {
+  id: IdOf;
+  type: "layout-section";
+  props: {
+    tag?: (typeof CONTAINER_TAGS)[number];
+    contentWidth?: z.infer<typeof Length>;
+    fullWidth?: boolean;
+  };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;
@@ -689,6 +722,7 @@ export type AccordionItemNode = {
 export type LayoutNode =
   | ContainerNode
   | DivBlockNode
+  | LayoutSectionNode
   | FlexboxNode
   | GridNode
   | SvgNode
@@ -794,6 +828,7 @@ export const isLayoutParentNode = (
 ): node is
   | ContainerNode
   | DivBlockNode
+  | LayoutSectionNode
   | FlexboxNode
   | GridNode
   | TabPanelNode
@@ -801,6 +836,7 @@ export const isLayoutParentNode = (
   | AccordionItemNode =>
   node.type === "container" ||
   node.type === "div-block" ||
+  node.type === "layout-section" ||
   node.type === "flexbox" ||
   node.type === "grid" ||
   node.type === "tab-panel" ||
@@ -813,6 +849,7 @@ export const isParentNode = (
 ): node is
   | ContainerNode
   | DivBlockNode
+  | LayoutSectionNode
   | FlexboxNode
   | GridNode
   | FormNode
@@ -824,6 +861,7 @@ export const isParentNode = (
   | AccordionItemNode =>
   node.type === "container" ||
   node.type === "div-block" ||
+  node.type === "layout-section" ||
   node.type === "flexbox" ||
   node.type === "grid" ||
   node.type === "form" ||

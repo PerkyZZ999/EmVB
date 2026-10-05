@@ -6,7 +6,7 @@ import type { Layout } from "../schema/layout.ts";
 import { form } from "./form-elements.ts";
 
 const layout: Layout = {
-  schemaVersion: 10,
+  schemaVersion: 11,
   root: container("root0001", [
     {
       id: "form0001",

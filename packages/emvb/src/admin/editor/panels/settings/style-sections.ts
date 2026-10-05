@@ -205,6 +205,8 @@ const TYPE_SECTION_KEYS: Record<string, Partial<Record<StyleSectionId, StyleKey[
   // A Div Block is a plain block box (Elementor v4, D-EV4-01): flex controls would do nothing on
   // the page, so Layout offers only the grid spans (W-144). Use Flexbox or Container for flex.
   "div-block": { layout: ["gridColumnSpan", "gridRowSpan"] },
+  // A block box too: its contents sit in the centred inner box (W-156).
+  "layout-section": { layout: ["gridColumnSpan", "gridRowSpan"] },
 };
 
 const OFFSETS = new Set<StyleKey>(["top", "right", "bottom", "left"]);

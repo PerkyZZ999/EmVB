@@ -49,7 +49,8 @@ const DROP_BOXES = ["container", "div-block", "flexbox", "grid", "section", "for
  * Empty boxes whose display the page controls (a hidden tab panel stays hidden), so the
  * placeholder must not set it (W-130).
  */
-const DROP_BODIES = ".emvb-tab-panel:empty,.emvb-accordion-body:empty";
+const DROP_BODIES =
+  ".emvb-tab-panel:empty,.emvb-accordion-body:empty,.emvb-layout-section-inner:empty";
 /** An Accordion or Tabs with no items: only items go in, so it points at the item list (W-130). */
 const NO_ITEMS = ".emvb-accordion:empty,.emvb-tabs:not(:has(.emvb-tab-panel))";
 const HINT = "color:#64748b;font:13px/1.4 system-ui,sans-serif;pointer-events:none";

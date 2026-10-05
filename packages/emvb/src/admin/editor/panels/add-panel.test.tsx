@@ -8,6 +8,7 @@ import {
   isContainerNode,
   parentOf,
   type Layout,
+  validateLayout,
 } from "../../../core/index.ts";
 import { newElement } from "../dnd/new-element.ts";
 import { editorReducer, type EditorState } from "../store.ts";
@@ -22,7 +23,7 @@ afterEach(async () => {
 });
 
 const layout: Layout = {
-  schemaVersion: 10,
+  schemaVersion: 11,
   root: {
     id: "root0001",
     type: "container",
@@ -82,6 +83,19 @@ describe("Add panel (W-018)", () => {
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="theme" />);
     const tile = document.querySelector('[data-emvb-add-tile="section"]');
     expect(tile?.textContent).toContain("Theme section");
+  });
+
+  test("a new Section from the Add panel (W-156) has padding and validates", () => {
+    const node = newElement("layout-section");
+    if (!node || node.type !== "layout-section") throw new Error("expected a layout section");
+    expect(node.style?.paddingTop).toEqual({ value: 64, unit: "px" });
+    expect(node.style?.paddingLeft).toEqual({ value: 24, unit: "px" });
+    expect(
+      validateLayout({
+        schemaVersion: 11,
+        root: { id: "root0001", type: "container", props: {}, children: [node] },
+      }).ok,
+    ).toBe(true);
   });
 
   test("clicking a tile calls onAdd with that type", async () => {

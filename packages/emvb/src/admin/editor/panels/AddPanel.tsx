@@ -21,6 +21,7 @@ import {
   PaperPlaneTiltIcon,
   ClipboardTextIcon,
   NotePencilIcon,
+  RowsIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
 import { ELEMENT_DESCRIPTORS, type ElementType } from "../../../core/index.ts";
@@ -31,6 +32,7 @@ import { dragStash } from "../dnd/drag-stash.ts";
 const ICONS: Record<string, typeof TextHIcon> = {
   container: SquareIcon,
   "div-block": SquareIcon,
+  "layout-section": RowsIcon,
   flexbox: SquaresFourIcon,
   spacer: RectangleIcon,
   divider: MinusIcon,

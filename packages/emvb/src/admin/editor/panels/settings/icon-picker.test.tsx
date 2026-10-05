@@ -10,7 +10,7 @@ const stubFetcher: Fetcher = async () => new Response("{}", { status: 200 });
 afterEach(cleanup);
 
 const layout = {
-  schemaVersion: 10 as const,
+  schemaVersion: 11 as const,
   root: {
     id: "root0001",
     type: "container" as const,

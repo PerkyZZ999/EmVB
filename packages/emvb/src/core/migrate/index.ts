@@ -9,7 +9,8 @@ export type Migration = (doc: Record<string, unknown>) => Record<string, unknown
  * v6 → v7 (D-039) CSS Grid, v7 → v8 (D-041) entrance animations, and v8 → v9
  * (D-042) attributes, accordion, richer entrances, post date and author, background video,
  * a link on a box, and tag defaults, and v9 → v10 (D-044, D-039) per-side border widths,
- * per-corner radii and grid columns per device. Every older value is valid in the newer version.
+ * per-corner radii and grid columns per device, and v10 → v11 (D-045) the layout Section and node
+ * labels. Every older value is valid in the newer version.
  */
 const unchanged: Migration = (doc) => doc;
 
@@ -24,6 +25,7 @@ export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {
   7: unchanged,
   8: unchanged,
   9: unchanged,
+  10: unchanged,
 };
 
 /** `DESIGN_MIGRATIONS[n]` upgrades a version-n design document to version n + 1. */
@@ -37,6 +39,7 @@ export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {
   7: unchanged,
   8: unchanged,
   9: unchanged,
+  10: unchanged,
 };
 
 export type UpgradeResult =

@@ -28,7 +28,7 @@ test("S8 Add panel exposes Flexbox, Div Block, SVG, and Tabs", async ({ page, re
     request,
     "S8 tiles",
     {
-      schemaVersion: 10,
+      schemaVersion: 11,
       root: {
         id: "root0001",
         type: "container",
@@ -50,7 +50,7 @@ test("Site styles Classes Manager tab is reachable", async ({ page, request }) =
     request,
     "Classes manager",
     {
-      schemaVersion: 10,
+      schemaVersion: 11,
       root: {
         id: "root0001",
         type: "container",
