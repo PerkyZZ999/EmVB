@@ -43,6 +43,12 @@ export function BoxControl({
   const normal = inherited ? sideValues(group, inherited) : [];
   const same = allSame(values);
   const [linkWanted, setLinkWanted] = React.useState(same);
+  // Linked only while all four match (W-149). Cleared to all empty (Reset, undo), it links again.
+  const signature = JSON.stringify(values);
+  const allEmpty = values.every((value) => value === undefined);
+  React.useEffect(() => {
+    if (allEmpty) setLinkWanted(true);
+  }, [signature, allEmpty]);
   const linked = linkWanted && same;
   const units = unitsFor(group.sides[0]).filter((u): u is LengthUnit => u !== "auto");
   const [fallbackUnit, setFallbackUnit] = React.useState<LengthUnit>(units[0] ?? "px");

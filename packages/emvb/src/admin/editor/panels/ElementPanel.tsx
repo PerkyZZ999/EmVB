@@ -543,7 +543,7 @@ function KnownElementPanel({
                     if (keys.find((k) => boxGroupOf(k) === group) !== key) return null;
                     return (
                       <BoxControl
-                        key={`${node.id}:${responsive ?? "desktop"}:${styleState}:${group.id}`}
+                        key={`${node.id}:${cls?.id ?? "local"}:${responsive ?? "desktop"}:${styleState}:${group.id}`}
                         group={group}
                         style={style}
                         inherited={inherited}

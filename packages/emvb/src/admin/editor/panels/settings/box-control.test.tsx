@@ -209,6 +209,39 @@ describe("linked four-box control (W-138)", () => {
   });
 });
 
+describe("link state follows the values (W-149)", () => {
+  test("unlinked and then Reset, the cleared group shows linked again", async () => {
+    await panel(box({ paddingTop: px(4), paddingLeft: px(9) }));
+    expect(link("padding").getAttribute("aria-pressed")).toBe("false");
+    const reset = document.querySelector(
+      '[aria-label="Reset Padding to default"]',
+    ) as HTMLButtonElement;
+    await act(async () => reset.click());
+    expect(nodes.at(-1)?.style).toBeUndefined();
+    expect(link("padding").getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("unlinking the element's own padding doesn't carry over to editing a class", async () => {
+    localStorage.setItem("emvb-style-sections:container", JSON.stringify(["spacing", "border"]));
+    const design: DesignSystem = {
+      ...emptyDesign(),
+      classes: [{ id: "card", name: "Card", style: {} }],
+    };
+    await mount(<Harness start={{ ...box(), classes: ["card"] }} design={design} />);
+    const tab = [...document.querySelectorAll('[role="tab"]')].find(
+      (el) => el.textContent === "Style",
+    ) as HTMLElement;
+    await act(async () => tab.click());
+    await act(async () => link("padding").click());
+    expect(link("padding").getAttribute("aria-pressed")).toBe("false");
+    const chip = document.querySelector(
+      '[data-emvb-class-id="card"] .emvb-chip-main',
+    ) as HTMLButtonElement;
+    await act(async () => chip.click());
+    expect(link("padding").getAttribute("aria-pressed")).toBe("true");
+  });
+});
+
 describe("four-box patches (W-138)", () => {
   test("a side falls back to the all-sides value", () => {
     expect(

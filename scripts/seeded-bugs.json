@@ -19033,6 +19033,42 @@
         "CI": "1"
       },
       "expect": "✘.*\\[cloudflare\\].*a Button looks like a button"
+    },
+    {
+      "id": "W-149/reset-stays-unlinked",
+      "requirement": "W-149",
+      "description": "After Reset clears an unlinked four-box group, it still shows unlinked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BoxControl.tsx",
+          "search": "    if (allEmpty) setLinkWanted(true);",
+          "replace": "    void allEmpty;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*the cleared group shows linked again"
+    },
+    {
+      "id": "W-149/class-shares-link-state",
+      "requirement": "W-149",
+      "description": "The four-box link state carries over from the element's own styles to a class being edited.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "${node.id}:${cls?.id ?? \"local\"}:",
+          "replace": "${node.id}:"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/box-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*doesn't carry over to editing a class"
     }
   ]
 }
