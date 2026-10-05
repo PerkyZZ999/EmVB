@@ -315,7 +315,7 @@ describe("VariableSection", () => {
     ]);
   });
 
-  test("shows page usage, with class usage in the tooltip", async () => {
+  test("shows page usage and the classes that use it", async () => {
     const used: DesignSystem = {
       ...design,
       classes: [
@@ -344,7 +344,7 @@ describe("VariableSection", () => {
     await mountVars("color", "Colors", used, page);
     const usage = (id: string) =>
       host.querySelector(`[data-emvb-var-id="${id}"] [data-emvb-usage]`);
-    expect(usage("brand")?.textContent).toBe("1 on page");
+    expect(usage("brand")?.textContent).toBe("1 on page · 2 classes");
     expect(usage("brand")?.getAttribute("title")).toBe("Used 1 time on this page and in 2 classes");
     expect(usage("ink")?.textContent).toBe("0 on page");
     expect(usage("ink")?.getAttribute("title")).toBe("Used 0 times on this page");

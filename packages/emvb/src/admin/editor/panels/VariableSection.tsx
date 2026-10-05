@@ -218,6 +218,12 @@ function ValueEditor({
   );
 }
 
+/** "2 on page", and the classes that use it too: "2 on page · 1 class" (W-150). */
+const usageText = (onPage: number, inClasses: number) =>
+  inClasses
+    ? `${onPage} on page · ${inClasses} ${inClasses === 1 ? "class" : "classes"}`
+    : `${onPage} on page`;
+
 export function VariableSection({
   title,
   kind,
@@ -410,7 +416,7 @@ export function VariableSection({
                   data-emvb-usage=""
                   aria-live="polite"
                 >
-                  {copied === item.id ? "Copied" : `${onPage} on page`}
+                  {copied === item.id ? "Copied" : usageText(onPage, inClasses)}
                 </span>
                 <RowMenu
                   label={`Actions for ${item.name}`}
