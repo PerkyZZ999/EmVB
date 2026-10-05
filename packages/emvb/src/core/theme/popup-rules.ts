@@ -12,10 +12,11 @@ export const POPUP_DEVICES = ["desktop", "tablet", "mobile"] as const;
 export type PopupDevice = (typeof POPUP_DEVICES)[number];
 
 /**
- * Widths that agree with `deviceForWidth` (W-096). The canvas previews tablet at 768 and mobile
- * at 390, with no zoom. Public CSS uses the matching max-width queries.
+ * Widths that agree with `deviceForWidth` (W-096). The canvas lays the page out at 1280 on
+ * desktop (at least), 768 on tablet and 390 on mobile, scaled to fit (W-158, D-046); Preview opens
+ * the same widths. Public CSS uses the matching max-width queries.
  */
-export const DEVICE_PREVIEW_PX = { tablet: 768, mobile: 390 } as const;
+export const DEVICE_PREVIEW_PX = { desktop: 1280, tablet: 768, mobile: 390 } as const;
 
 /** Public CSS queries. Bounds match `deviceForWidth`: 767 mobile, 1024 tablet, 1025 desktop. */
 export const DEVICE_MEDIA = {

@@ -2,7 +2,6 @@ import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@
 import { WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
-  DEVICE_PREVIEW_PX,
   findNode,
   moveDown,
   moveUp,
@@ -15,7 +14,7 @@ import {
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
 import { loadFormsCapability } from "../forms-api.ts";
-import { CanvasFrame, type CanvasSelection } from "./canvas/CanvasFrame.tsx";
+import { CanvasFrame, type CanvasSelection, type CanvasZoom } from "./canvas/CanvasFrame.tsx";
 import { DeviceBar } from "./canvas/DeviceBar.tsx";
 import type { StatePreview } from "./canvas/state-preview.ts";
 import type { StyleStateChoice } from "./panels/settings/StateSwitcher.tsx";
@@ -136,6 +135,8 @@ function EditorApp({
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const [siteStylesOpen, setSiteStylesOpen] = React.useState(false);
   const [device, setDevice] = React.useState<PopupDevice>("desktop");
+  const [zoom, setZoom] = React.useState<CanvasZoom>("fit");
+  const [scale, setScale] = React.useState(1);
   const [statePreview, setStatePreview] = React.useState<StatePreview | null>(null);
   const onStyleState = React.useCallback((id: string, choice: StyleStateChoice) => {
     setStatePreview(choice === "normal" ? null : { id, state: choice });
@@ -274,7 +275,7 @@ function EditorApp({
               onExit={() => (dirty ? setLeaveOpen(true) : exit())}
               onShortcuts={() => setShortcutsOpen(true)}
               onSiteStyles={() => setSiteStylesOpen(true)}
-              onPreview={preview}
+              onPreview={(size) => preview(size ?? device)}
               onSave={() => void save()}
               onPublish={() => void publish()}
               stylesUnpublished={state.designUnpublished === true}
@@ -314,6 +315,9 @@ function EditorApp({
                   }
                   canHide={!!state.selectedId}
                   onDevice={setDevice}
+                  zoom={zoom}
+                  scale={scale}
+                  onZoom={setZoom}
                   onToggleHidden={() => {
                     const id = state.selectedId;
                     const node =
@@ -336,7 +340,9 @@ function EditorApp({
                     vnode={rendered.vnode}
                     css={rendered.css}
                     layout={state.page.layout}
-                    previewWidth={device === "desktop" ? null : DEVICE_PREVIEW_PX[device]}
+                    device={device}
+                    zoom={zoom}
+                    onScale={setScale}
                     selection={selection}
                     statePreview={statePreview}
                     refusal={refusalShown ? refusal : null}

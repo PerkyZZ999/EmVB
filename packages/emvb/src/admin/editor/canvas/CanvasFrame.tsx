@@ -7,8 +7,10 @@ import {
   isPlainTextNode,
   isMultilineText,
   plainTextOf,
+  DEVICE_PREVIEW_PX,
   REASONS,
   type DragSource,
+  type PopupDevice,
   type Layout,
   type LayoutNode,
   type VNode,
@@ -77,6 +79,44 @@ const EDITOR_CANVAS_CSS =
  * do, so the scrollbar doesn't take width from the previewed page.
  */
 const PREVIEW_SCROLL_CSS = "html{scrollbar-width:none}html::-webkit-scrollbar{display:none}";
+
+/** Fit scales the canvas down to the stage; Actual shows it at 100% and scrolls (W-158). */
+export type CanvasZoom = "fit" | "actual";
+
+/**
+ * The canvas's page width and on-screen scale (W-158, D-046). Desktop lays the page out at least
+ * 1280 px wide (wider when the stage is), Tablet at 768 and Mobile at 390. Fit scales it down to
+ * the stage width, never up; Actual keeps 100% and the stage scrolls sideways.
+ */
+export function canvasScale(
+  device: PopupDevice,
+  stageWidth: number,
+  zoom: CanvasZoom,
+): { width: number; scale: number } {
+  const base = DEVICE_PREVIEW_PX[device];
+  const width = device === "desktop" ? Math.max(base, Math.floor(stageWidth)) : base;
+  if (zoom === "actual" || stageWidth <= 0) return { width, scale: 1 };
+  return { width, scale: Math.min(1, stageWidth / width) };
+}
+
+/** A box measured inside the canvas page, in the overlay's on-screen pixels (W-158). */
+export const zoomBox = (box: Box, scale: number): Box =>
+  scale === 1
+    ? box
+    : {
+        top: box.top * scale,
+        left: box.left * scale,
+        width: box.width * scale,
+        height: box.height * scale,
+      };
+
+const zoomOrNull = (box: Box | null, scale: number) => (box ? zoomBox(box, scale) : null);
+
+const zoomInvalid = (drop: InvalidDrop | null, scale: number): InvalidDrop | null =>
+  drop && {
+    outline: zoomBox(drop.outline, scale),
+    label: { ...drop.label, x: drop.label.x * scale, y: drop.label.y * scale },
+  };
 
 const boxOf = (doc: Document, id: string | null): Box | null => {
   if (!id) return null;
@@ -170,7 +210,9 @@ export function CanvasFrame({
   layout,
   selection,
   statePreview = null,
-  previewWidth = null,
+  device = "desktop",
+  zoom = "fit",
+  onScale,
   refusal = null,
   onDropNew,
   onMove,
@@ -182,8 +224,12 @@ export function CanvasFrame({
   selection: CanvasSelection;
   /** The style state chosen in the Style tab, shown on the selected element (W-089). */
   statePreview?: StatePreview | null;
-  /** Tablet or mobile preview width in px. Desktop is the full canvas (W-096, no zoom). */
-  previewWidth?: number | null;
+  /** The previewed device (W-096): its page width, scaled to the stage (W-158, D-046). */
+  device?: PopupDevice;
+  /** Fit to the stage or show at 100% (W-158). */
+  zoom?: CanvasZoom;
+  /** Told the on-screen scale whenever it changes, for the zoom readout (W-158). */
+  onScale?: (scale: number) => void;
   /** A refused paste, outlined on its target with the reason like an invalid drop (W-093). */
   refusal?: PasteRefusal | null;
   onDropNew: (elementType: string, parentId: string, index: number) => void;
@@ -192,6 +238,24 @@ export function CanvasFrame({
   onCommitText: (id: string, text: string) => void;
 }) {
   const frame = React.useRef<HTMLIFrameElement>(null);
+  const stage = React.useRef<HTMLDivElement>(null);
+  const [stageWidth, setStageWidth] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const element = stage.current;
+    if (!element) return;
+    const measure = () => setStageWidth(element.clientWidth);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  const { width: pageWidth, scale } = canvasScale(device, stageWidth, zoom);
+  const scaleRef = React.useRef(scale);
+  scaleRef.current = scale;
+  const scaleReport = React.useRef(onScale);
+  scaleReport.current = onScale;
+  React.useEffect(() => scaleReport.current?.(scale), [scale]);
   const [doc, setDoc] = React.useState<Document | null>(null);
   const [hoverId, setHoverId] = React.useState<string | null>(null);
   const [dropLine, setDropLine] = React.useState<Box | null>(null);
@@ -343,6 +407,7 @@ export function CanvasFrame({
     resolveDrop,
     paintDrag,
     setHoverId,
+    scale: scaleRef,
   });
 
   const [refused, setRefused] = React.useState<InvalidDrop | null>(null);
@@ -399,48 +464,66 @@ export function CanvasFrame({
   }, [doc, hoverId, selectedId]);
 
   return (
-    <div className="emvb-stage">
+    <div className="emvb-stage" ref={stage} data-emvb-zoom={zoom}>
       <div
         className="emvb-stage-frame"
-        style={previewWidth ? { width: previewWidth, maxWidth: "100%" } : undefined}
+        data-emvb-canvas-width={pageWidth}
+        data-emvb-canvas-scale={scale}
+        style={{ width: pageWidth * scale }}
       >
-        <iframe
-          ref={frame}
-          title="Page canvas"
-          data-emvb-canvas=""
-          srcDoc={SRCDOC}
-          sandbox="allow-same-origin"
-          onLoad={onLoad}
-        />
+        {/* W-158: the page is laid out at the device width and scaled as a whole, so clicks,
+            drags and text editing inside it keep page coordinates. The overlay stays unscaled
+            (readable labels and toolbar) and gets its boxes scaled instead. */}
+        <div
+          className="emvb-stage-scaler"
+          style={{
+            width: pageWidth,
+            height: `${100 / scale}%`,
+            transform: scale === 1 ? undefined : `scale(${scale})`,
+          }}
+        >
+          <iframe
+            ref={frame}
+            title="Page canvas"
+            data-emvb-canvas=""
+            srcDoc={SRCDOC}
+            sandbox="allow-same-origin"
+            onLoad={onLoad}
+          />
+          {editingId && editingText !== null && editingBox && editingEl?.nodeType === 1 && (
+            <CanvasTextEdit
+              element={editingEl}
+              box={editingBox}
+              text={editingText}
+              multiline={editingNode ? isMultilineText(editingNode) : false}
+              onCommit={(text) => {
+                onCommitText(editingId, text);
+                setEditingId(null);
+              }}
+              onCancel={() => setEditingId(null)}
+            />
+          )}
+        </div>
         <SelectionOverlay
-          hover={boxes.hover}
-          selected={boxes.selected}
+          hover={zoomOrNull(boxes.hover, scale)}
+          selected={zoomOrNull(boxes.selected, scale)}
           selectedId={selectedId}
           selection={selection}
-          dropLine={dropLine}
-          dropTarget={invalid ? null : dropTarget}
-          invalid={invalid ?? refused}
+          dropLine={zoomOrNull(dropLine, scale)}
+          dropTarget={
+            invalid || !dropTarget
+              ? null
+              : { ...dropTarget, outline: zoomBox(dropTarget.outline, scale) }
+          }
+          invalid={zoomInvalid(invalid ?? refused, scale)}
           editing={!!editingId && editingId === selectedId}
         />
-        {editingId && editingText !== null && editingBox && editingEl?.nodeType === 1 && (
-          <CanvasTextEdit
-            element={editingEl}
-            box={editingBox}
-            text={editingText}
-            multiline={editingNode ? isMultilineText(editingNode) : false}
-            onCommit={(text) => {
-              onCommitText(editingId, text);
-              setEditingId(null);
-            }}
-            onCancel={() => setEditingId(null)}
-          />
-        )}
       </div>
       {doc && createPortal(<style data-emvb-canvas-css="">{css}</style>, doc.head)}
       {doc &&
         createPortal(<style data-emvb-editor-canvas-css="">{EDITOR_CANVAS_CSS}</style>, doc.head)}
       {doc &&
-        previewWidth &&
+        device !== "desktop" &&
         createPortal(<style data-emvb-preview-css="">{PREVIEW_SCROLL_CSS}</style>, doc.head)}
       {doc && vnode && createPortal(vnodeToReact(vnode), doc.body)}
     </div>

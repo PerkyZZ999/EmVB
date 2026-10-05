@@ -1,7 +1,11 @@
-import { Button } from "@cloudflare/kumo";
+import { Button, DropdownMenu } from "@cloudflare/kumo";
 import type * as React from "react";
 import {
   ArrowSquareOutIcon,
+  CaretDownIcon,
+  DesktopIcon,
+  DeviceMobileIcon,
+  DeviceTabletIcon,
   KeyboardIcon,
   PaintBrushIcon,
   SignOutIcon,
@@ -9,6 +13,14 @@ import {
 } from "@phosphor-icons/react";
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
 import type { SaveStatus } from "./useSave.ts";
+import type { PopupDevice } from "../../core/index.ts";
+
+/** Preview sizes (W-158): the canvas device widths, in a window of that size. */
+const PREVIEW_SIZES = [
+  { device: "desktop", label: "Desktop", icon: DesktopIcon },
+  { device: "tablet", label: "Tablet (768 px)", icon: DeviceTabletIcon },
+  { device: "mobile", label: "Mobile (390 px)", icon: DeviceMobileIcon },
+] as const;
 
 export type TopBarPage = { title: string; status: string };
 
@@ -65,7 +77,8 @@ export function TopBar({
   onExit: () => void;
   onShortcuts: () => void;
   onSiteStyles?: () => void;
-  onPreview: () => void;
+  /** Opens the preview; with no device, at the device shown on the canvas (W-158). */
+  onPreview: (device?: PopupDevice) => void;
   onSave: () => void;
   onPublish: () => void;
   /** Site styles have unpublished changes (W-153): the Publish button carries a dot. */
@@ -145,14 +158,35 @@ export function TopBar({
               gap: 8,
             }}
           >
-            <Button
-              variant="secondary"
-              className={BUTTON}
-              icon={<ArrowSquareOutIcon aria-hidden="true" />}
-              onClick={onPreview}
-            >
-              Preview
-            </Button>
+            <div className="emvb-preview-split">
+              <Button
+                variant="secondary"
+                className={BUTTON}
+                icon={<ArrowSquareOutIcon aria-hidden="true" />}
+                onClick={() => onPreview()}
+              >
+                Preview
+              </Button>
+              <DropdownMenu>
+                <DropdownMenu.Trigger>
+                  <Button
+                    variant="secondary"
+                    shape="square"
+                    className={`${BUTTON} emvb-preview-sizes`}
+                    aria-label="Preview size"
+                    title="Preview size"
+                    icon={<CaretDownIcon aria-hidden="true" />}
+                  />
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content data-emvb-preview-sizes="">
+                  {PREVIEW_SIZES.map(({ device, label, icon }) => (
+                    <DropdownMenu.Item key={device} icon={icon} onClick={() => onPreview(device)}>
+                      {label}
+                    </DropdownMenu.Item>
+                  ))}
+                </DropdownMenu.Content>
+              </DropdownMenu>
+            </div>
             <Button
               variant="secondary"
               className={`${BUTTON} emvb-save-button`}

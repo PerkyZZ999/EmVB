@@ -154,8 +154,13 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-device-tabs { width: max-content; }
 .emvb-device-label { display: inline-flex; align-items: center; gap: 6px; }
 .emvb-device-hide { display: inline-flex; align-items: center; gap: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
-.emvb-stage { position: relative; display: flex; flex: 1 1 auto; justify-content: center; min-height: 0; width: 100%; overflow: hidden; }
-.emvb-stage-frame { position: relative; width: 100%; height: 100%; }
+.emvb-stage { position: relative; display: flex; flex: 1 1 auto; justify-content: safe center; min-height: 0; width: 100%; overflow: hidden; }
+/* W-158: at 100% a page wider than the stage scrolls sideways. */
+.emvb-stage[data-emvb-zoom="actual"] { overflow-x: auto; }
+.emvb-stage-frame { position: relative; flex: none; height: 100%; overflow: hidden; }
+.emvb-stage-scaler { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+.emvb-zoom { min-width: 64px; font-variant-numeric: tabular-nums; }
+.emvb-preview-split { display: inline-flex; gap: 2px; }
 .emvb-canvas iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
 .emvb-canvas-text {
   position: absolute;

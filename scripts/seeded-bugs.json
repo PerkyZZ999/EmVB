@@ -15516,8 +15516,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
-          "search": "        invalid={invalid ?? refused}",
-          "replace": "        invalid={invalid}"
+          "search": "          invalid={zoomInvalid(invalid ?? refused, scale)}",
+          "replace": "          invalid={zoomInvalid(invalid, scale)}"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
@@ -17829,8 +17829,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
-          "search": "dropTarget={invalid ? null : dropTarget}",
-          "replace": "dropTarget={null}"
+          "search": "          dropTarget={\n            invalid || !dropTarget\n              ? null\n              : { ...dropTarget, outline: zoomBox(dropTarget.outline, scale) }\n          }",
+          "replace": "          dropTarget={null}"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node", "-g", "W-128"],
@@ -19321,6 +19321,59 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
       "expect": "\\(fail\\).*double-click names a row"
+    },
+    {
+      "id": "W-158/desktop-not-1280",
+      "requirement": "W-158",
+      "description": "The Desktop canvas takes the stage width again instead of a 1280 px page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "device === \"desktop\" ? Math.max(base, Math.floor(stageWidth)) : base",
+          "replace": "device === \"desktop\" ? Math.floor(stageWidth) || base : base"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/canvas/canvas-scale.test.ts"],
+      "expect": "\\(fail\\).*Desktop lays out at 1280 and fits a narrower stage by scaling down"
+    },
+    {
+      "id": "W-158/preview-not-sized",
+      "requirement": "W-158",
+      "description": "Preview at Mobile opens an ordinary tab, not a 390 px window.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "  if (device === \"desktop\") return undefined;",
+          "replace": "  if (device) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/canvas/canvas-scale.test.ts"],
+      "expect": "\\(fail\\).*Preview sizes"
+    },
+    {
+      "id": "W-158/overlay-unscaled",
+      "requirement": "W-158",
+      "description": "The selection outline uses page pixels on the scaled canvas, so it misses the element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "          selected={zoomOrNull(boxes.selected, scale)}",
+          "replace": "          selected={boxes.selected}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/canvas-scale.e2e.ts",
+        "--project=node",
+        "-g",
+        "the Desktop canvas lays the page out at 1280"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*the Desktop canvas lays the page out at 1280"
     }
   ]
 }

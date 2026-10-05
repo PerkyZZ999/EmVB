@@ -1,4 +1,4 @@
-import { Tabs } from "@cloudflare/kumo";
+import { Button, Tabs } from "@cloudflare/kumo";
 import { DesktopIcon, DeviceMobileIcon, DeviceTabletIcon, type Icon } from "@phosphor-icons/react";
 import * as React from "react";
 import { POPUP_DEVICES, type PopupDevice } from "../../../core/index.ts";
@@ -33,6 +33,9 @@ export function DeviceBar({
   canHide,
   onDevice,
   onToggleHidden,
+  zoom = "fit",
+  scale = 1,
+  onZoom,
 }: {
   device: PopupDevice;
   /** Whether the selected element is hidden on `device`. */
@@ -40,6 +43,10 @@ export function DeviceBar({
   canHide: boolean;
   onDevice: (device: PopupDevice) => void;
   onToggleHidden: () => void;
+  /** Fit or 100% (W-158), with the current on-screen scale for the readout. */
+  zoom?: "fit" | "actual";
+  scale?: number;
+  onZoom?: (zoom: "fit" | "actual") => void;
 }) {
   const ref = React.useRef<HTMLDivElement>(null);
   React.useEffect(() => {
@@ -66,6 +73,19 @@ export function DeviceBar({
         <input type="checkbox" checked={hidden} disabled={!canHide} onChange={onToggleHidden} />
         Hide on {LABELS[device].toLowerCase()}
       </label>
+      {onZoom && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="emvb-zoom"
+          aria-pressed={zoom === "fit"}
+          aria-label={`Fit to canvas (${Math.round(scale * 100)}%)`}
+          title={zoom === "fit" ? "Scaled to fit. Show at 100%" : "At 100%. Scale to fit"}
+          onClick={() => onZoom(zoom === "fit" ? "actual" : "fit")}
+        >
+          {zoom === "fit" ? `Fit · ${Math.round(scale * 100)}%` : "100%"}
+        </Button>
+      )}
     </div>
   );
 }

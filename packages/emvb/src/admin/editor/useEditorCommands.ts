@@ -1,6 +1,6 @@
 import * as React from "react";
 import type { createKumoToastManager } from "@cloudflare/kumo";
-import type { DesignSystem } from "../../core/index.ts";
+import { DEVICE_PREVIEW_PX, type DesignSystem, type PopupDevice } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { previewUrl, publishDesign, saveDesign } from "../content-api.ts";
@@ -11,15 +11,29 @@ import type { useSave } from "./useSave.ts";
 const publicPath = (pattern: string | null | undefined, slug: string) =>
   (pattern || "/{slug}").replace("{slug}", encodeURIComponent(slug));
 
+/** Window heights for the sized Tablet and Mobile previews (W-158); widths are the canvas's. */
+const PREVIEW_HEIGHT = { tablet: 1024, mobile: 844 } as const;
+
+/**
+ * `window.open` features for a device preview (W-158): Desktop is an ordinary tab; Tablet and
+ * Mobile open a window whose page area is the device width, so the page's own media queries apply.
+ */
+export function previewWindowFeatures(device: PopupDevice): string | undefined {
+  if (device === "desktop") return undefined;
+  return `popup,width=${DEVICE_PREVIEW_PX[device]},height=${PREVIEW_HEIGHT[device]}`;
+}
+
 /**
  * Opens a tab synchronously (so pop-up blockers allow it), then points it at `url` when known.
  * `url` resolves null when it already told the user why (a failed save); a throw goes to `onError`.
+ * `features` opens a sized window instead of a tab (W-158).
  */
 export async function openInNewTab(
   url: () => Promise<string | null>,
   onError: (error: unknown) => void,
+  features?: string,
 ) {
-  const tab = window.open("", "_blank");
+  const tab = features ? window.open("", "_blank", features) : window.open("", "_blank");
   const target = await url().catch((error: unknown) => {
     onError(error);
     return null;
@@ -109,7 +123,7 @@ export function useEditorCommands({
     });
   };
 
-  const preview = () =>
+  const preview = (device: PopupDevice = "desktop") =>
     void openInNewTab(
       async () => {
         if (isDirty(latest.current) && !(await save())) return null;
@@ -120,6 +134,7 @@ export function useEditorCommands({
           title: "Couldn't open the preview",
           description: error instanceof Error ? error.message : String(error),
         }),
+      previewWindowFeatures(device),
     );
 
   const changeDesign = async (next: DesignSystem) => {

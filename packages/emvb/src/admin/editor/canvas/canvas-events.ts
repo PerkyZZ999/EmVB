@@ -48,9 +48,12 @@ export function useCanvasEvents({
   resolveDrop,
   paintDrag,
   setHoverId,
+  scale,
 }: {
   doc: Document | null;
   frame: React.RefObject<HTMLIFrameElement | null>;
+  /** The canvas zoom (W-158): the frame's on-screen size over its layout size. */
+  scale?: React.RefObject<number>;
   handlers: React.RefObject<{
     onSelect: (id: string | null) => void;
     onKeyDown: (event: KeyboardEvent) => void;
@@ -184,9 +187,11 @@ export function useCanvasEvents({
     const iframe = frame.current;
     if (!iframe || !doc) return;
     const map = (event: DragEvent) => {
+      // The iframe may be scaled (W-158): screen pixels over it map back to page pixels.
       const rect = iframe.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+      const zoom = scale?.current || 1;
+      const x = (event.clientX - rect.left) / zoom;
+      const y = (event.clientY - rect.top) / zoom;
       const target = doc.elementFromPoint(x, y) ?? doc.body;
       return { x, y, target };
     };
@@ -211,7 +216,7 @@ export function useCanvasEvents({
       iframe.removeEventListener("drop", drop);
       iframe.removeEventListener("dragleave", leave);
     };
-  }, [doc, frame, runDrop, paintDrag, clearDrag]);
+  }, [doc, frame, runDrop, paintDrag, clearDrag, scale]);
 
   // Parent-document Esc / dragend while dragging from the Move handle / Layers / Add tile.
   // dragend fires on the source in the parent document (not the iframe), so clear here too.

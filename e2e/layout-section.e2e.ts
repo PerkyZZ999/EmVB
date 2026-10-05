@@ -41,7 +41,9 @@ test("a layout Section is added, takes a dropped element in its inner box, and k
 
   const inner = canvas(page).locator(".emvb-layout-section > .emvb-layout-section-inner");
   await expect(inner).toHaveCount(1);
-  expect((await inner.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(48);
+  // Page pixels inside the (scaled, W-158) canvas.
+  const pageBox = () => inner.evaluate((el) => el.getBoundingClientRect().toJSON() as DOMRect);
+  expect((await pageBox()).height).toBeGreaterThanOrEqual(48);
 
   // Drag a Text tile into the empty inner box with real pointer events.
   const tile = overlay(page).locator('[data-emvb-add-tile="text"]');
@@ -62,7 +64,7 @@ test("a layout Section is added, takes a dropped element in its inner box, and k
   const width = overlay(page).getByLabel("Content width (px)");
   await width.fill("600");
   await width.blur();
-  await expect.poll(async () => (await inner.boundingBox())?.width).toBe(600);
+  await expect.poll(async () => (await pageBox()).width).toBe(600);
 
   await saveDraft(page);
   const stored = await storedLayout<Stored>(request, id);

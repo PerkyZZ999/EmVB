@@ -61,7 +61,11 @@ test("the Desktop canvas uses desktop styles even in a window narrower than a de
   const frameWidth = await canvas(page)
     .locator("body")
     .evaluate(() => window.innerWidth);
-  expect(frameWidth).toBeLessThan(1025);
+  // W-158: the page is laid out 1280 px wide and scaled down to fit the narrower stage.
+  expect(frameWidth).toBe(1280);
+  expect((await page.locator("iframe[data-emvb-canvas]").boundingBox())?.width ?? 0).toBeLessThan(
+    1025,
+  );
   const color = () => title.evaluate((el) => getComputedStyle(el).color);
   await expect.poll(color).toBe("rgb(51, 51, 51)");
 
