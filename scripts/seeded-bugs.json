@@ -17906,8 +17906,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
-          "search": "return outline.height >= DROP_LABEL_ROOM",
-          "replace": "return outline.height >= Infinity"
+          "search": "  if (outline.height < LABEL_HEIGHT)",
+          "replace": "  if (outline.height < Infinity)"
         }
       ],
       "command": [
@@ -17926,8 +17926,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/SelectionOverlay.tsx",
-          "search": "return outline.height >= DROP_LABEL_ROOM",
-          "replace": "return outline.height >= Infinity"
+          "search": "  if (outline.height < LABEL_HEIGHT)",
+          "replace": "  if (outline.height < Infinity)"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/drag.e2e.ts", "--project=node", "-g", "W-128"],

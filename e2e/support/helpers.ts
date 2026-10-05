@@ -23,7 +23,7 @@ export async function saveDraft(page: Page) {
 
 /** Publishes the style draft from Site styles, as a user does (W-100). */
 export async function publishSiteStyles(page: Page) {
-  await overlay(page).getByRole("button", { name: "Site styles" }).click();
+  await overlay(page).getByRole("button", { name: "Site styles", exact: true }).click();
   const publish = overlay(page).getByRole("button", { name: "Publish styles" });
   await publish.click();
   await expect(publish).toHaveCount(0);

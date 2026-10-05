@@ -24,17 +24,17 @@ export type DropTarget = { outline: Box; label: string };
 
 const LABEL_HEIGHT = 26;
 
-/** Tall enough for the drop label to sit inside the target's top-left corner. */
-const DROP_LABEL_ROOM = 40;
-
 /**
  * Where the "Inside …" label goes (W-129): inside the target's top-left corner, so it doesn't
- * cover the element above; above the outline only when the target is too short to hold it.
+ * cover the element above; above the outline only when the target is too short to hold it. On a
+ * scaled canvas (W-158) an empty 48 px box can be under 30 px on screen, so the inset shrinks
+ * rather than the label moving out.
  */
 export function dropLabelAt(outline: Box): { top: number; left: number } {
-  return outline.height >= DROP_LABEL_ROOM
-    ? { top: outline.top + 4, left: outline.left + 4 }
-    : { top: Math.max(0, outline.top - LABEL_HEIGHT), left: outline.left };
+  if (outline.height < LABEL_HEIGHT)
+    return { top: Math.max(0, outline.top - LABEL_HEIGHT), left: outline.left };
+  const inset = Math.min(4, (outline.height - LABEL_HEIGHT) / 2);
+  return { top: outline.top + inset, left: outline.left + 4 };
 }
 
 /** Tall enough for the selected element's toolbar to sit inside its top-left corner. */

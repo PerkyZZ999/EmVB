@@ -196,7 +196,7 @@ test("Site styles opens the Variables drawer", async ({ page, request }) => {
     `site-${unique()}`,
   );
   await openEditor(page, id, "Styled");
-  await overlay(page).getByRole("button", { name: "Site styles" }).click();
+  await overlay(page).getByRole("button", { name: "Site styles", exact: true }).click();
   await expect(overlay(page).locator("[data-emvb-site-styles]")).toBeVisible();
   await expect(overlay(page).locator('[data-emvb-site-tab="variables"]')).toBeVisible();
   await expect(
@@ -244,7 +244,7 @@ test("a colour variable can be created, bound and edited, and the design persist
         .variables.colors ?? [];
     expect(liveColors).not.toContainEqual(expect.objectContaining({ name, value: "#ff0000" }));
 
-    await overlay(page).getByRole("button", { name: "Site styles" }).click();
+    await overlay(page).getByRole("button", { name: "Site styles", exact: true }).click();
     await overlay(page).getByRole("button", { name: "Publish styles" }).click();
     await expect(overlay(page).getByRole("button", { name: "Publish styles" })).toHaveCount(0);
     const published = await api(request, "GET", "/_emdash/api/plugins/emvb/design");

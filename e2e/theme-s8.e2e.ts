@@ -62,7 +62,7 @@ test("Site styles Classes Manager tab is reachable", async ({ page, request }) =
     `cls-${unique()}`,
   );
   await openEditor(page, id);
-  await overlay(page).getByRole("button", { name: "Site styles" }).click();
+  await overlay(page).getByRole("button", { name: "Site styles", exact: true }).click();
   await expect(overlay(page).locator("[data-emvb-site-styles]")).toBeVisible();
   await overlay(page).getByRole("tab", { name: "Classes" }).click();
   await expect(overlay(page).locator('[data-emvb-site-tab="classes"]')).toBeVisible();

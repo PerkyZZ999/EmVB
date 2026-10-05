@@ -48,6 +48,13 @@ describe("the Inside label sits in the target's corner (W-129)", () => {
     });
   });
 
+  test("a scaled empty box just taller than the label keeps it inside, with a smaller inset (W-158)", () => {
+    expect(dropLabelAt({ top: 100, left: 20, width: 400, height: 28 })).toEqual({
+      top: 101,
+      left: 24,
+    });
+  });
+
   test("a short target puts the label above it, never off the top of the canvas", () => {
     expect(dropLabelAt({ top: 100, left: 20, width: 400, height: 18 })).toEqual({
       top: 74,

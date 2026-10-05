@@ -52,7 +52,7 @@ for (const [width, height, canvasWidth] of [
   [1280, 720, 736],
   [1920, 1080, 1376],
 ] as const) {
-  test(`at ${width}×${height} the overlay covers the admin and the canvas gets the real width between the panels`, async ({
+  test(`at ${width}×${height} the overlay covers the admin and the canvas fits a desktop page between the panels`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height });
@@ -69,7 +69,13 @@ for (const [width, height, canvasWidth] of [
       transform: getComputedStyle(el).transform,
       zoom: getComputedStyle(el).zoom,
     }));
-    expect(sizes).toEqual({ box: canvasWidth, inner: canvasWidth, transform: "none", zoom: "1" });
+    // W-158 (D-046): the page is laid out at least 1280 px wide and scaled to the stage width.
+    expect(sizes).toEqual({
+      box: canvasWidth,
+      inner: Math.max(1280, canvasWidth),
+      transform: "none",
+      zoom: "1",
+    });
     // The page's own CSS reaches the canvas: the container is a row with a 16 px gap.
     const rootStyle = await frame.evaluate((el: HTMLIFrameElement) => {
       const node = el.contentDocument?.querySelector(".emvb-root");
