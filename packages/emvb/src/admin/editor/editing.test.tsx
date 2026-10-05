@@ -250,7 +250,7 @@ describe("publishing with unpublished site styles (W-126)", () => {
   test("the Published notice says the styles are not live yet and publishes them on request", async () => {
     const { server, fetcher } = fakeServer({ designUnpublished: true });
     await render(fetcher);
-    await click(button("Publish"));
+    await click(button("Publish (site styles unpublished)"));
     await settle();
     expect(toastText()).toContain("Site styles have unpublished changes");
     await click(button("Publish site styles"));
@@ -267,6 +267,31 @@ describe("publishing with unpublished site styles (W-126)", () => {
     await settle();
     expect(toastText()).toContain("Published");
     expect(toastText()).not.toContain("Site styles have unpublished changes");
+  });
+});
+
+describe("the Publish button shows unpublished site styles (W-153)", () => {
+  const publishButton = () =>
+    editor()?.querySelector<HTMLButtonElement>(".emvb-publish-button") ?? null;
+
+  test("a dot and its name say the styles are unpublished, until they are published", async () => {
+    const { fetcher } = fakeServer({ designUnpublished: true });
+    await render(fetcher);
+    expect(publishButton()?.getAttribute("aria-label")).toBe("Publish (site styles unpublished)");
+    expect(publishButton()?.querySelector(".emvb-styles-dot")).not.toBeNull();
+    await click(publishButton());
+    await settle();
+    await click(button("Publish site styles"));
+    await settle();
+    expect(publishButton()?.getAttribute("aria-label")).toBeNull();
+    expect(publishButton()?.querySelector(".emvb-styles-dot")).toBeNull();
+  });
+
+  test("with the styles live, Publish has no dot", async () => {
+    const { fetcher } = fakeServer();
+    await render(fetcher);
+    expect(publishButton()?.textContent).toBe("Publish");
+    expect(publishButton()?.querySelector(".emvb-styles-dot")).toBeNull();
   });
 });
 

@@ -269,6 +269,7 @@ function EditorApp({
               onPreview={preview}
               onSave={() => void save()}
               onPublish={() => void publish()}
+              stylesUnpublished={state.designUnpublished === true}
             />
             <div className="emvb-frame">
               <aside className="emvb-panel emvb-panel-left" aria-label="Add and Layers">

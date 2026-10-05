@@ -56,6 +56,7 @@ export function TopBar({
   onPreview,
   onSave,
   onPublish,
+  stylesUnpublished = false,
 }: {
   page: TopBarPage | null;
   dirty: boolean;
@@ -67,6 +68,8 @@ export function TopBar({
   onPreview: () => void;
   onSave: () => void;
   onPublish: () => void;
+  /** Site styles have unpublished changes (W-153): the Publish button carries a dot. */
+  stylesUnpublished?: boolean;
 }) {
   return (
     <header className="emvb-topbar">
@@ -163,13 +166,21 @@ export function TopBar({
             </Button>
             <Button
               variant="primary"
-              className={BUTTON}
+              className={`${BUTTON} emvb-publish-button`}
               style={SOLID_PRIMARY}
               loading={busy === "publish"}
               disabled={busy !== null}
+              aria-label={stylesUnpublished ? "Publish (site styles unpublished)" : undefined}
+              title={
+                stylesUnpublished
+                  ? "Site styles have unpublished changes. After publishing the page, you can publish them too."
+                  : undefined
+              }
+              data-emvb-styles-pending={stylesUnpublished ? "true" : undefined}
               onClick={onPublish}
             >
               Publish
+              {stylesUnpublished && <span className="emvb-styles-dot" aria-hidden="true" />}
             </Button>
           </div>
         )}

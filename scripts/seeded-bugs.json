@@ -19162,6 +19162,20 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*keeps the scroll position of each tab"
+    },
+    {
+      "id": "W-153/publish-hides-pending-styles",
+      "requirement": "W-153",
+      "description": "The Publish button gives no sign that site styles are unpublished.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "              stylesUnpublished={state.designUnpublished === true}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/editing.test.tsx"],
+      "expect": "\\(fail\\).*a dot and its name say the styles are unpublished"
     }
   ]
 }

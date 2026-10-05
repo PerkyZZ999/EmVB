@@ -62,7 +62,8 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-save-status { display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); white-space: nowrap; }
 .emvb-danger-icon { color: var(--color-kumo-danger); }
 .emvb-link-button { border: 0; padding: 0; background: none; color: var(--text-color-kumo-default); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
-.emvb-save-button { position: relative; }
+.emvb-save-button, .emvb-publish-button { position: relative; }
+.emvb-styles-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; }
 .emvb-unsaved-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 9999px; background: var(--text-color-kumo-default); }
 .emvb-danger-text.emvb-danger-text { color: var(--text-color-kumo-danger); }
 .emvb-frame { display: grid; grid-template-columns: var(--emvb-panel-left) minmax(0, 1fr) var(--emvb-panel-right); min-height: 0; }
