@@ -3,8 +3,23 @@ import {
   ELEMENTS,
   newNodeId,
   type ElementType,
+  type Layout,
   type LayoutNode,
 } from "../../../core/index.ts";
+
+const hasH1 = (node: LayoutNode): boolean =>
+  ((node.type === "heading" || node.type === "post-title") &&
+    (node.props as { level?: number }).level === 1) ||
+  ("children" in node && Array.isArray(node.children) && node.children.some(hasH1));
+
+/**
+ * A new Heading is the page's H1 when the page has none yet, otherwise the default H2 (W-147).
+ * Other nodes, and headings whose level was already chosen, are returned as they are.
+ */
+export function withPageHeadingLevel(node: LayoutNode, layout: Layout): LayoutNode {
+  if (node.type !== "heading" || node.props.level !== 2 || hasH1(layout.root)) return node;
+  return { ...node, props: { ...node.props, level: 1 } };
+}
 
 const textNode = (text: string, random?: () => number): LayoutNode => ({
   ...defaultElement("text", newNodeId(random)),

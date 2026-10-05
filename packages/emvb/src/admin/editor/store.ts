@@ -14,6 +14,7 @@ import {
   type Removed,
   LAYOUT_SCHEMA_VERSION,
 } from "../../core/index.ts";
+import { withPageHeadingLevel } from "./dnd/new-element.ts";
 import type { PageDraft } from "../content-api.ts";
 
 /** Editor state (A-07): a pure reducer, so every edit is testable without a browser. */
@@ -186,7 +187,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "add-node": {
       if (!state.page.layout) return state;
       const place = { parentId: action.parentId, index: action.index };
-      return arranged(state, addNode(state.page.layout, action.node, place));
+      const node = withPageHeadingLevel(action.node, state.page.layout);
+      return arranged(state, addNode(state.page.layout, node, place));
     }
     case "move-node":
       if (!state.page.layout) return state;

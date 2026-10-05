@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { s1Page } from "../../../test/fixtures/layouts.ts";
-import { emptyDesign, findNode, isContainerNode } from "../../core/index.ts";
+import { emptyDesign, findNode, isContainerNode, type LayoutNode } from "../../core/index.ts";
 import { editorReducer, isDirty, type EditorState } from "./store.ts";
 
 const initial = (): EditorState => {
@@ -148,4 +148,48 @@ test("move-node relocates an element and refuses an invalid drop", () => {
     index: 0,
   });
   expect(refused.page.layout).toEqual(state.page.layout);
+});
+
+describe("a new Heading's level (W-147)", () => {
+  const add = (state: EditorState, node: LayoutNode) =>
+    editorReducer(state, {
+      type: "add-node",
+      node,
+      parentId: state.page.layout?.root.id ?? "",
+      index: 0,
+    });
+  const fresh = (id: string): LayoutNode => ({
+    id,
+    type: "heading",
+    props: { text: "Heading", level: 2 },
+  });
+  const levelOf = (state: EditorState, id: string) => {
+    const layout = state.page.layout;
+    if (!layout) throw new Error("no layout");
+    return (findNode(layout, id)?.props as { level?: number } | undefined)?.level;
+  };
+
+  const withoutH1 = (): EditorState => {
+    const state = initial();
+    const layout = state.page.layout;
+    if (!layout) throw new Error("no layout");
+    return {
+      ...state,
+      page: { ...state.page, layout: { ...layout, root: { ...layout.root, children: [] } } },
+    };
+  };
+
+  test("the first Heading on a page without an H1 becomes the H1; the next stays H2", () => {
+    let state = withoutH1();
+    state = add(state, fresh("headNEW1"));
+    expect(levelOf(state, "headNEW1")).toBe(1);
+    state = add(state, fresh("headNEW2"));
+    expect(levelOf(state, "headNEW2")).toBe(2);
+  });
+
+  test("a Heading whose level was chosen, and other elements, are added as they are", () => {
+    let state = withoutH1();
+    state = add(state, { id: "headNEW3", type: "heading", props: { text: "H", level: 3 } });
+    expect(levelOf(state, "headNEW3")).toBe(3);
+  });
 });

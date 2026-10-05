@@ -18980,6 +18980,34 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*an empty box keeps the min-height"
+    },
+    {
+      "id": "W-147/every-heading-h1",
+      "requirement": "W-147",
+      "description": "Every new Heading becomes an H1, even when the page already has one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": " || hasH1(layout.root)) return node;",
+          "replace": ") return node;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
+      "expect": "\\(fail\\).*the first Heading on a page without an H1 becomes the H1"
+    },
+    {
+      "id": "W-147/first-heading-stays-h2",
+      "requirement": "W-147",
+      "description": "A page's first Heading is still added as H2.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "      const node = withPageHeadingLevel(action.node, state.page.layout);",
+          "replace": "      const node = action.node;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
+      "expect": "\\(fail\\).*the first Heading on a page without an H1 becomes the H1"
     }
   ]
 }
