@@ -13515,8 +13515,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": ").refine((node) => node.props.decorative === true || (node.props.title?.length ?? 0) > 0, {",
-          "replace": ").refine((node) => node.props.decorative === true || node.props.title !== undefined, {"
+          "search": "  .refine((node) => node.props.decorative === true || (node.props.title?.length ?? 0) > 0, {",
+          "replace": "  .refine((node) => node.props.decorative === true || node.props.title !== undefined, {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
@@ -18819,6 +18819,65 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*Tablet and Mobile previews scroll"
+    },
+    {
+      "id": "W-141/heading-link-dropped",
+      "requirement": "W-141",
+      "description": "A heading's Link is stored but never rendered.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "      children: [linked ?? node.props.text],",
+          "replace": "      children: [node.props.text],"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/inner-link.test.ts"],
+      "expect": "\\(fail\\).*a linked heading keeps its tag"
+    },
+    {
+      "id": "W-141/icon-link-unnamed",
+      "requirement": "W-141",
+      "description": "A linked icon's link has no accessible name, because the svg inside is hidden.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "          \"aria-label\": title,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/inner-link.test.ts"],
+      "expect": "\\(fail\\).*a linked icon is named by its title"
+    },
+    {
+      "id": "W-141/box-link-nests-heading-link",
+      "requirement": "W-141",
+      "description": "A linked box around a linked heading or icon still becomes a link, nesting anchors.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/extras.ts",
+          "search": "  if (BOX.has(node.type) || node.type === \"heading\" || node.type === \"icon\") {",
+          "replace": "  if (BOX.has(node.type)) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/inner-link.test.ts"],
+      "expect": "\\(fail\\).*keeps a box link from nesting anchors"
+    },
+    {
+      "id": "W-141/e2e-heading-link-not-rendered",
+      "requirement": "W-141",
+      "description": "A heading's Link set in the editor never reaches the canvas or the site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "      children: [linked ?? node.props.text],",
+          "replace": "      children: [node.props.text],"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/element-links.e2e.ts", "--project=node", "-g", "W-141"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*a Heading and an Icon take a link"
     }
   ]
 }

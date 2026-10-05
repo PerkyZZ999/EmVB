@@ -48,8 +48,37 @@ const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 const newTabAttrs = (newTab: boolean | undefined): Record<string, string> =>
   newTab ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
+/** Optional Link and new-tab fields for elements that wrap their content in a link (W-141). */
+const INNER_LINK_FIELDS = [
+  {
+    key: "href",
+    kind: "href" as const,
+    label: "Link",
+    optional: true,
+    message: "Use a full URL such as https://example.com or a path such as /pricing.",
+  },
+  { key: "newTab", kind: "boolean" as const, label: "Open in a new tab", optional: true },
+];
+
+/** The safe link for an optional href, or undefined when there is none or it is refused. */
+const innerLink = (
+  href: string | undefined,
+  newTab: boolean | undefined,
+  className: string,
+  children: VNode["children"],
+  extra: Record<string, string> = {},
+): VNode | undefined => {
+  const safe = href?.trim() ? sanitizeHref(href) : undefined;
+  if (!safe) return undefined;
+  return {
+    tag: "a",
+    attrs: { class: className, href: safe, ...newTabAttrs(newTab), ...extra },
+    children,
+  };
+};
+
 const heading: ElementDefinition<HeadingNode> = {
-  baseCss: ".emvb-heading{margin:0}",
+  baseCss: ".emvb-heading{margin:0}.emvb-heading-link{color:inherit;text-decoration:inherit}",
   defaults: () => ({ type: "heading", props: { text: "Heading", level: 2 } }),
   descriptor: {
     type: "heading",
@@ -64,13 +93,19 @@ const heading: ElementDefinition<HeadingNode> = {
         label: "Level",
         options: [1, 2, 3, 4, 5, 6].map((n) => ({ value: n, label: `H${n}` })),
       },
+      ...INNER_LINK_FIELDS,
     ],
   },
-  build: (node, attrs) => ({
-    tag: HEADING_TAGS[node.props.level - 1] ?? "h2",
-    attrs,
-    children: [node.props.text],
-  }),
+  build: (node, attrs) => {
+    const linked = innerLink(node.props.href, node.props.newTab, "emvb-heading-link", [
+      node.props.text,
+    ]);
+    return {
+      tag: HEADING_TAGS[node.props.level - 1] ?? "h2",
+      attrs,
+      children: [linked ?? node.props.text],
+    };
+  },
 };
 
 const BOX_LINK_FIELDS = [
@@ -342,7 +377,7 @@ const image: ElementDefinition<ImageNode> = {
 
 const icon: ElementDefinition<IconNode> = {
   baseCss:
-    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon svg{display:block;width:1em;height:1em}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
+    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon-link{display:inline-flex;color:inherit}.emvb-icon svg{display:block;width:1em;height:1em}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({
     type: "icon",
     props: { iconId: "star", title: "Star", decorative: false, size: 24 },
@@ -368,6 +403,7 @@ const icon: ElementDefinition<IconNode> = {
         optional: true,
         message: "Size must be a positive whole number.",
       },
+      ...INNER_LINK_FIELDS,
     ],
   },
   build: (node, attrs) => {
@@ -409,11 +445,17 @@ const icon: ElementDefinition<IconNode> = {
       attrs: { ...child.attrs },
       children: [],
     }));
-    return {
-      tag: "span",
-      attrs,
-      children: [{ tag: "svg", attrs: svgAttrs, children }],
-    };
+    const svg: VNode = { tag: "svg", attrs: svgAttrs, children };
+    // A linked icon is named by its title on the link, so the svg inside is hidden.
+    const title = node.props.title?.trim();
+    const { role: _role, "aria-label": _label, ...plain } = svgAttrs;
+    const hidden: VNode = { ...svg, attrs: { ...plain, "aria-hidden": "true" } };
+    const linked = title
+      ? innerLink(node.props.href, node.props.newTab, "emvb-icon-link", [hidden], {
+          "aria-label": title,
+        })
+      : undefined;
+    return { tag: "span", attrs, children: [linked ?? svg] };
   },
 };
 

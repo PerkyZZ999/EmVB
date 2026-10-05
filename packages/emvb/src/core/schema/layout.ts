@@ -82,6 +82,9 @@ export const HeadingNode = leafNode(
   z.strictObject({
     text: z.string().max(MAX_TEXT_LENGTH),
     level: z.number().int().min(1).max(6),
+    /** Optional link around the text (W-141), like Elementor's Heading link. */
+    href: z.string().max(2000).optional(),
+    newTab: z.boolean().optional(),
   }),
 );
 
@@ -153,11 +156,19 @@ export const IconNode = leafNode(
     size: z.number().int().positive().max(512).optional(),
     decorative: z.boolean().optional(),
     title: z.string().max(200).optional(),
+    /** Optional link around the icon (W-141); the title names the link. */
+    href: z.string().max(2000).optional(),
+    newTab: z.boolean().optional(),
   }),
-).refine((node) => node.props.decorative === true || (node.props.title?.length ?? 0) > 0, {
-  message: "Title is required unless the icon is marked decorative.",
-  path: ["props", "title"],
-});
+)
+  .refine((node) => node.props.decorative === true || (node.props.title?.length ?? 0) > 0, {
+    message: "Title is required unless the icon is marked decorative.",
+    path: ["props", "title"],
+  })
+  .refine((node) => !node.props.href?.trim() || (node.props.title?.trim().length ?? 0) > 0, {
+    message: "A linked icon needs a title: it names the link.",
+    path: ["props", "title"],
+  });
 
 /** Image from the media library or a URL (W-024 / R-007). Alt required unless decorative. */
 export const ImageNode = leafNode(

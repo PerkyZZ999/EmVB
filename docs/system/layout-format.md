@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `10` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044; v1–v9 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- `schemaVersion` is the literal `10` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141; v1–v9 documents are upgraded on read by steps that change nothing). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -38,7 +38,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | Type | `props` | Children | Renders as |
 | --- | --- | --- | --- |
 | `container` | optional `tag` (`div`, `section`, `header`, `footer`, `main`, `article`, `aside`, `nav`) | `children: Node[]` (required, may be empty) | that tag (default `div`) with `class="emvb-container …"` |
-| `heading` | `text` (≤ 2000), `level` (1–6) | none | `<h1>`–`<h6>` |
+| `heading` | `text` (≤ 2000), `level` (1–6), optional `href` (≤ 2000) and `newTab` (W-141) | none | `<h1>`–`<h6>`; with a safe `href`, the text is wrapped in `<a class="emvb-heading-link">` (colour and decoration inherited) |
 | `spacer` | `height` length | none | `<div aria-hidden="true">` with height in CSS |
 | `divider` | `{}` | none | `<hr>` |
 | `text` | `text`, optional `tag` (`p` \| `div`) | none | `<p>` or `<div>` |
@@ -47,7 +47,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | `button` | `text`, optional `href` and `newTab` | none | `<a href>` when `href` is safe, else `<button type="button">` |
 | `list` | `items` (string[], ≤ 200), optional `ordered` | none | `<ul>` or `<ol>` with `<li>` |
 | `image` | `src`, `alt`, optional `decorative`, `width`, `height`, `mediaId` | none | `<img loading="lazy">` (decorative → empty `alt` + `role="presentation"`) |
-| `icon` | `iconId` (bundled Lucide id), optional `size`, `decorative`, `title` | none | Inline Lucide `<svg>` (unknown id → placeholder; never a remote URL) |
+| `icon` | `iconId` (bundled Lucide id), optional `size`, `decorative`, `title`, `href` (≤ 2000) and `newTab` (W-141); a non-empty `href` needs a `title` | none | Inline Lucide `<svg>` (unknown id → placeholder; never a remote URL); with a safe `href`, the svg is hidden inside `<a class="emvb-icon-link" aria-label="title">` |
 | `video` | `url`, `title`, optional `mediaId` | none | YouTube/Vimeo privacy `<iframe loading="lazy">` or media `<video controls>` (no autoplay) |
 | `form` | `formId` (forms-plugin id; may be empty until bound) | `children: Node[]` (form fields + submit; no nested forms) | Bound: `<form class="emvb-form ec-form" …>`. Unbound: editor placeholder `data-emvb-form-unbound`; omitted on public (no forms runtime). |
 | `text-input` | `field`, optional `label`, `placeholder` | none | labelled `<input class="ec-form-input">` + `data-error-for` |

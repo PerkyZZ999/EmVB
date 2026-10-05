@@ -47,7 +47,20 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
             "H2"
           span aria-hidden="true"
             svg
-        input id="id-6" tabindex="-1" aria-hidden="true" value="2""
+        input id="id-6" tabindex="-1" aria-hidden="true" value="2"
+    div
+      label id="id-7" for="id-8"
+        span
+          "Link"
+      input.emvb-field id="id-8" data-emvb-field="href" value="" aria-labelledby="id-7"
+    div.emvb-field-group data-emvb-field="newTab"
+      div
+        label id="id-9" for="id-10"
+          span
+            "Open in a new tab"
+        button data-unchecked="" type="button" tabindex="0" id="id-10" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open in a new tab" aria-labelledby="id-9"
+          div
+        input tabindex="-1" aria-hidden="true" type="checkbox""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="heading"
@@ -2312,7 +2325,20 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
       label id="id-8" for="id-9" data-filled=""
         span
           "Size (px)"
-      input.emvb-field.emvb-mono id="id-9" data-emvb-field="size" value="24" data-filled="" aria-labelledby="id-8""
+      input.emvb-field.emvb-mono id="id-9" data-emvb-field="size" value="24" data-filled="" aria-labelledby="id-8"
+    div
+      label id="id-10" for="id-11"
+        span
+          "Link"
+      input.emvb-field id="id-11" data-emvb-field="href" value="" aria-labelledby="id-10"
+    div.emvb-field-group data-emvb-field="newTab"
+      div
+        label id="id-12" for="id-13"
+          span
+            "Open in a new tab"
+        button data-unchecked="" type="button" tabindex="0" id="id-13" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open in a new tab" aria-labelledby="id-12"
+          div
+        input tabindex="-1" aria-hidden="true" type="checkbox""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="icon"

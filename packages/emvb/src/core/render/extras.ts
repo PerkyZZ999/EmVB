@@ -29,7 +29,7 @@ function childrenOf(node: LayoutNode): LayoutNode[] {
 /** A link, a button, or a box that is already a link. */
 function containsInteractive(node: LayoutNode): boolean {
   if (node.type === "link" || node.type === "post-link" || node.type === "button") return true;
-  if (BOX.has(node.type)) {
+  if (BOX.has(node.type) || node.type === "heading" || node.type === "icon") {
     const href = (node.props as { href?: unknown }).href;
     if (typeof href === "string" && href.trim()) return true;
   }
