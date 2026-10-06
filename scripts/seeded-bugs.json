@@ -6492,8 +6492,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
-          "search": "          label={label}\n          className={`${FIELD} emvb-length`}",
-          "replace": "          label={`${label} (${unit})`}\n          className={`${FIELD} emvb-length`}"
+          "search": "            label={label}\n            className={`${FIELD} emvb-length`}",
+          "replace": "            label={`${label} (${unit})`}\n            className={`${FIELD} emvb-length`}"
         }
       ],
       "command": [
@@ -18953,7 +18953,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "  \"div-block\": { layout: [\"gridColumnSpan\", \"gridRowSpan\"] },\n",
+          "search": "  \"div-block\": { layout: SPANS },\n",
           "replace": ""
         }
       ],
@@ -19572,6 +19572,66 @@
         "opens its panel"
       ],
       "expect": "\\(fail\\).*opens its panel"
+    },
+    {
+      "id": "W-163/grid-offers-direction",
+      "requirement": "W-163",
+      "description": "A grid offers Direction, which CSS ignores on display:grid.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "  grid: { layout: GRID_LAYOUT },\n",
+          "replace": "  grid: { layout: [\"flexDirection\", ...GRID_LAYOUT] },\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "does not offer direction"
+      ],
+      "expect": "\\(fail\\).*does not offer direction"
+    },
+    {
+      "id": "W-163/direction-not-a-button",
+      "requirement": "W-163",
+      "description": "Direction is not an icon button, so Row cannot be chosen from the group.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ChoiceGroup.tsx",
+          "search": "{ value: \"row\", label: \"Row\", icon: ArrowRightIcon },",
+          "replace": "{ value: \"column\", label: \"Row\", icon: ArrowRightIcon },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "icon buttons"
+      ],
+      "expect": "\\(fail\\).*icon buttons"
+    },
+    {
+      "id": "W-163/menu-ignores-layout",
+      "requirement": "W-163",
+      "description": "The menu list ignores the menu's flex styles, so Layout does not move the items.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "flex-direction:inherit",
+          "replace": "flex-direction:row"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/menu.test.ts",
+        "-t",
+        "refused link"
+      ],
+      "expect": "\\(fail\\).*refused link"
     }
   ]
 }

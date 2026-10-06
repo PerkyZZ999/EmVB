@@ -66,7 +66,7 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
     label: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     link: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
     list: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
-    button: { sections: TEXT_SECTIONS, defaultOpen: "background" },
+    button: { sections: ["layout", ...TEXT_SECTIONS], defaultOpen: "background" },
     image: {
       sections: ["spacing", "size", "position", "border", "effects", "advanced"],
       defaultOpen: "size",
@@ -92,9 +92,10 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
       ],
       defaultOpen: "layout",
     },
-    "text-input": { sections: TEXT_SECTIONS, defaultOpen: "typography" },
-    textarea: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
-    select: { sections: TEXT_SECTIONS, defaultOpen: "typography" },
+    // The field is a flex column (label, then control), so direction, alignment and gap apply.
+    "text-input": { sections: ["layout", ...TEXT_SECTIONS], defaultOpen: "typography" },
+    textarea: { sections: ["layout", ...TEXT_SECTIONS], defaultOpen: "typography" },
+    select: { sections: ["layout", ...TEXT_SECTIONS], defaultOpen: "typography" },
     checkbox: {
       sections: ["layout", "spacing", "size", "position", "typography", "effects", "advanced"],
       defaultOpen: "typography",
@@ -103,7 +104,7 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
       sections: ["layout", "spacing", "size", "position", "typography", "effects", "advanced"],
       defaultOpen: "typography",
     },
-    submit: { sections: TEXT_SECTIONS, defaultOpen: "background" },
+    submit: { sections: ["layout", ...TEXT_SECTIONS], defaultOpen: "background" },
   };
 
 /** Types without an entry (Flexbox, Div Block, SVG, Tabs, dynamic elements) show every section. */
@@ -201,15 +202,47 @@ const ONLY_FOR: Partial<Record<StyleKey, string[]>> = {
   objectFit: ["image", "video"],
 };
 
+const SPANS: StyleKey[] = ["gridColumnSpan", "gridRowSpan"];
+
+/**
+ * Direction, wrap, justify, align and gap only where the element's own box is a flex or grid
+ * container (W-163). A block box ignores them, which is why Div Block lost them (W-144).
+ * A grid ignores flex direction and wrap; justify, align and gap still lay out its cells.
+ */
+const GRID_LAYOUT: StyleKey[] = ["justifyContent", "alignItems", "gap", ...SPANS];
+
+/** Block and inline boxes. A stored flex value still shows, so it can be reset (W-088). */
+const SPANS_ONLY = [
+  "heading",
+  "text",
+  "label",
+  "link",
+  "list",
+  "image",
+  "video",
+  "menu-item",
+  "accordion-item",
+  "tab-panel",
+  "post-title",
+  "post-excerpt",
+  "post-content",
+  "post-image",
+  "post-link",
+  "post-date",
+  "post-author",
+] as const;
+
 /** Per-type filters so Spacer and Divider don't get every control. */
 const TYPE_SECTION_KEYS: Record<string, Partial<Record<StyleSectionId, StyleKey[]>>> = {
   spacer: { layout: [] }, // height is a content prop, shown above sections
-  divider: { size: ["width"] },
+  divider: { size: ["width"], layout: SPANS },
   // A Div Block is a plain block box (Elementor v4, D-EV4-01): flex controls would do nothing on
   // the page, so Layout offers only the grid spans (W-144). Use Flexbox or Container for flex.
-  "div-block": { layout: ["gridColumnSpan", "gridRowSpan"] },
+  "div-block": { layout: SPANS },
   // A block box too: its contents sit in the centred inner box (W-156).
-  "layout-section": { layout: ["gridColumnSpan", "gridRowSpan"] },
+  "layout-section": { layout: SPANS },
+  grid: { layout: GRID_LAYOUT },
+  ...Object.fromEntries(SPANS_ONLY.map((type) => [type, { layout: SPANS }])),
 };
 
 const OFFSETS = new Set<StyleKey>(["top", "right", "bottom", "left"]);

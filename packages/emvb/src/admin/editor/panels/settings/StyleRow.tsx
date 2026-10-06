@@ -5,6 +5,7 @@ import { FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { BackgroundFill } from "./BackgroundFill.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
+import { ChoiceGroup, LAYOUT_CHOICES } from "./ChoiceGroup.tsx";
 import { LengthRow } from "./LengthRow.tsx";
 import {
   EntranceControl,
@@ -57,32 +58,6 @@ const OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: "50", suffi
 const COLOR_KEYS = new Set<StyleKey>(["color", "backgroundColor", "borderColor"]);
 
 const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[]>> = {
-  flexDirection: [
-    { value: "column", label: "Column" },
-    { value: "row", label: "Row" },
-    { value: "column-reverse", label: "Column reverse" },
-    { value: "row-reverse", label: "Row reverse" },
-  ],
-  flexWrap: [
-    { value: "nowrap", label: "No wrap" },
-    { value: "wrap", label: "Wrap" },
-    { value: "wrap-reverse", label: "Wrap reverse" },
-  ],
-  justifyContent: [
-    { value: "flex-start", label: "Start" },
-    { value: "center", label: "Center" },
-    { value: "flex-end", label: "End" },
-    { value: "space-between", label: "Space between" },
-    { value: "space-around", label: "Space around" },
-    { value: "space-evenly", label: "Space evenly" },
-  ],
-  alignItems: [
-    { value: "stretch", label: "Stretch" },
-    { value: "flex-start", label: "Start" },
-    { value: "center", label: "Center" },
-    { value: "flex-end", label: "End" },
-    { value: "baseline", label: "Baseline" },
-  ],
   textAlign: [
     { value: "left", label: "Left" },
     { value: "center", label: "Center" },
@@ -300,6 +275,26 @@ export function StyleRow({
     );
   }
 
+  const choices = LAYOUT_CHOICES[styleKey];
+  if (choices) {
+    return (
+      <div
+        className="emvb-style-row"
+        data-emvb-style={styleKey}
+        data-set={set ? "true" : undefined}
+        data-inherited={inheriting}
+      >
+        <ChoiceGroup
+          label={label}
+          value={typeof value === "string" ? value : undefined}
+          options={choices}
+          onChange={(next) => onPatch({ [styleKey]: next })}
+        />
+        {reset}
+      </div>
+    );
+  }
+
   const options = SELECT_OPTIONS[styleKey];
   if (options) {
     const shown = value ?? normalValue;
@@ -460,6 +455,7 @@ export function StyleRow({
         design={design}
         set={set}
         placeholder={placeholder}
+        slider={styleKey === "gap"}
         onPatch={onPatch}
         reset={reset}
       />
@@ -486,4 +482,5 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "gradient",
   "overlay",
   ...(Object.keys(SELECT_OPTIONS) as StyleKey[]),
+  ...(Object.keys(LAYOUT_CHOICES) as StyleKey[]),
 ];

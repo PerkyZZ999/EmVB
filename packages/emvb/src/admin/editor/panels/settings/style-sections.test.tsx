@@ -575,6 +575,58 @@ describe("Div Block layout controls (W-144)", () => {
   });
 });
 
+describe("Items layout (W-163)", () => {
+  test("a flex box offers direction, alignment and gap; a grid does not offer direction", () => {
+    expect(keysFor("container", "layout")).toEqual(
+      expect.arrayContaining(["flexDirection", "flexWrap", "justifyContent", "alignItems", "gap"]),
+    );
+    expect(keysFor("text-input", "layout")).toEqual(
+      expect.arrayContaining(["flexDirection", "justifyContent", "alignItems", "gap"]),
+    );
+    expect(STYLE_UI["text-input"]?.sections).toContain("layout");
+    expect(keysFor("grid", "layout")).toEqual([
+      "justifyContent",
+      "alignItems",
+      "gap",
+      "gridColumnSpan",
+      "gridRowSpan",
+    ]);
+    expect(keysFor("grid", "layout")).not.toContain("flexDirection");
+    expect(keysFor("icon", "layout")).toEqual(
+      expect.arrayContaining(["flexDirection", "justifyContent", "alignItems", "gap"]),
+    );
+    expect(keysFor("heading", "layout")).toEqual(["gridColumnSpan", "gridRowSpan"]);
+    expect(keysFor("menu-item", "layout")).toEqual(["gridColumnSpan", "gridRowSpan"]);
+    expect(keysFor("post-title", "layout")).toEqual(["gridColumnSpan", "gridRowSpan"]);
+  });
+
+  test("Direction, alignment and wrap are icon buttons, and the gap slider sets the length", async () => {
+    await row("flexDirection");
+    const rowButton = document.querySelector(
+      '[data-emvb-choice="row"]',
+    ) as HTMLButtonElement | null;
+    expect(rowButton?.getAttribute("aria-checked")).toBe("false");
+    await act(async () => rowButton?.click());
+    expect(patches).toEqual([{ flexDirection: "row" }]);
+
+    await cleanup();
+    patches = [];
+    await row("gap");
+    const slider = document.querySelector('[aria-label="Gap slider"]') as HTMLInputElement | null;
+    expect(slider?.value).toBe("0");
+    slider?.focus();
+    if (slider) {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+      setter?.call(slider, "20");
+      await act(async () => {
+        slider.dispatchEvent(new Event("input", { bubbles: true }));
+        slider.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    }
+    expect(patches).toEqual([{ gap: { value: 20, unit: "px" } }]);
+  });
+});
+
 describe("Container typography (W-159)", () => {
   test("a Container's Style tab has Typography with font family and colour", async () => {
     await panel(box());

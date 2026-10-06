@@ -297,6 +297,23 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-breadcrumb-part:hover { color: var(--text-color-kumo-default); text-decoration: underline; text-underline-offset: 2px; }
 .emvb-breadcrumb-part:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 .emvb-style-row { display: flex; align-items: flex-start; gap: 4px; }
+.emvb-choice { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.emvb-choice-label { font-size: 13px; line-height: 20px; color: var(--text-color-kumo-default); }
+.emvb-style-row[data-set="true"] .emvb-choice-label { font-weight: 600; }
+.emvb-choice-group { display: flex; flex-wrap: wrap; gap: 4px; }
+.emvb-choice-group button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; padding: 0; border: 0; border-radius: 6px; cursor: pointer;
+  background: var(--color-kumo-control); color: var(--text-color-kumo-default);
+  box-shadow: inset 0 0 0 1px var(--color-kumo-line);
+}
+.emvb-choice-group button[aria-checked="true"] {
+  background: var(--color-kumo-tint); color: var(--color-kumo-brand);
+  box-shadow: inset 0 0 0 1px var(--color-kumo-brand);
+}
+.emvb-choice-group button:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
+.emvb-length-stack { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.emvb-gap-slider { width: 100%; margin: 0; accent-color: var(--color-kumo-brand); }
 .emvb-shadow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .emvb-add-shadow { align-self: flex-start; }
 .emvb-style-row[data-emvb-style="boxShadow"] > .emvb-reset-btn { margin-top: -4px; }

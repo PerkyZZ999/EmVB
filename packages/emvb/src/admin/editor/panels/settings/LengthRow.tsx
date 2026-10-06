@@ -33,6 +33,7 @@ export function LengthRow({
   design,
   set,
   placeholder,
+  slider = false,
   onPatch,
   reset,
 }: {
@@ -43,6 +44,8 @@ export function LengthRow({
   set: boolean;
   /** The Normal value, shown while a state is edited (W-089). */
   placeholder?: string;
+  /** Gap: a slider for the common range. The number field still accepts the full length. */
+  slider?: boolean;
   onPatch: (patch: Partial<StyleProps>) => void;
   reset: React.ReactNode;
 }) {
@@ -110,65 +113,83 @@ export function LengthRow({
           onDetach={(kept) => onPatch({ [styleKey]: typeof kept === "object" ? kept : undefined })}
         />
       ) : (
-        <InputGroup
-          label={label}
-          className={`${FIELD} emvb-length`}
-          error={error ? { message: error, match: true } : undefined}
-        >
-          <InputGroup.Input
-            className="emvb-mono"
-            aria-label={label}
-            inputMode="decimal"
-            value={draft}
-            placeholder={unit === "auto" ? "auto" : placeholder}
-            title={`A number in ${unit === "auto" ? lastNumeric.current : unit}, or with its own unit (2rem, 50%)${
-              units.includes("auto") ? ", or auto" : ""
-            }`}
-            aria-invalid={error ? true : undefined}
-            onChange={(event) => {
-              if (unit === "auto") setUnit(lastNumeric.current);
-              setDraft(event.target.value);
-            }}
-            onBlur={commit}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") commit();
-            }}
-          />
-          <InputGroup.Addon align="end" className="emvb-unit-addon">
-            <DropdownMenu>
-              <DropdownMenu.Trigger>
-                <button
-                  type="button"
-                  className="emvb-unit-btn"
-                  aria-label={`${label} unit (${unit})`}
-                  data-emvb-unit={unit}
-                >
-                  {unit}
-                  <CaretDownIcon size={12} aria-hidden="true" />
-                </button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content data-emvb-unit-menu={styleKey}>
-                <DropdownMenu.RadioGroup
-                  aria-label={`${label} unit`}
-                  value={unit}
-                  onValueChange={(next: UnitChoice) => pickUnit(next)}
-                >
-                  {units.map((choice) => (
-                    <DropdownMenu.RadioItem
-                      key={choice}
-                      value={choice}
-                      closeOnClick
-                      data-emvb-unit-option={choice}
-                    >
-                      <span className="emvb-mono">{choice}</span>
-                      <DropdownMenu.RadioItemIndicator />
-                    </DropdownMenu.RadioItem>
-                  ))}
-                </DropdownMenu.RadioGroup>
-              </DropdownMenu.Content>
-            </DropdownMenu>
-          </InputGroup.Addon>
-        </InputGroup>
+        <div className={slider ? "emvb-length-stack" : undefined}>
+          <InputGroup
+            label={label}
+            className={`${FIELD} emvb-length`}
+            error={error ? { message: error, match: true } : undefined}
+          >
+            <InputGroup.Input
+              className="emvb-mono"
+              aria-label={label}
+              inputMode="decimal"
+              value={draft}
+              placeholder={unit === "auto" ? "auto" : placeholder}
+              title={`A number in ${unit === "auto" ? lastNumeric.current : unit}, or with its own unit (2rem, 50%)${
+                units.includes("auto") ? ", or auto" : ""
+              }`}
+              aria-invalid={error ? true : undefined}
+              onChange={(event) => {
+                if (unit === "auto") setUnit(lastNumeric.current);
+                setDraft(event.target.value);
+              }}
+              onBlur={commit}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") commit();
+              }}
+            />
+            <InputGroup.Addon align="end" className="emvb-unit-addon">
+              <DropdownMenu>
+                <DropdownMenu.Trigger>
+                  <button
+                    type="button"
+                    className="emvb-unit-btn"
+                    aria-label={`${label} unit (${unit})`}
+                    data-emvb-unit={unit}
+                  >
+                    {unit}
+                    <CaretDownIcon size={12} aria-hidden="true" />
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content data-emvb-unit-menu={styleKey}>
+                  <DropdownMenu.RadioGroup
+                    aria-label={`${label} unit`}
+                    value={unit}
+                    onValueChange={(next: UnitChoice) => pickUnit(next)}
+                  >
+                    {units.map((choice) => (
+                      <DropdownMenu.RadioItem
+                        key={choice}
+                        value={choice}
+                        closeOnClick
+                        data-emvb-unit-option={choice}
+                      >
+                        <span className="emvb-mono">{choice}</span>
+                        <DropdownMenu.RadioItemIndicator />
+                      </DropdownMenu.RadioItem>
+                    ))}
+                  </DropdownMenu.RadioGroup>
+                </DropdownMenu.Content>
+              </DropdownMenu>
+            </InputGroup.Addon>
+          </InputGroup>
+          {slider && unit !== "auto" && (
+            <input
+              className="emvb-gap-slider"
+              type="range"
+              min={0}
+              max={200}
+              step={1}
+              aria-label={`${label} slider`}
+              value={Math.min(200, literal?.value ?? 0)}
+              onChange={(event) => {
+                const next = Number(event.target.value);
+                setDraft(String(next));
+                send({ value: next, unit });
+              }}
+            />
+          )}
+        </div>
       )}
       {kind && (
         <VariableButton
