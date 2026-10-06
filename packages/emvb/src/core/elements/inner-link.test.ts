@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { emptyDesign, renderPage, type Layout, type LayoutNode } from "../index.ts";
+import {
+  ELEMENT_DESCRIPTORS,
+  emptyDesign,
+  renderPage,
+  type Layout,
+  type LayoutNode,
+} from "../index.ts";
 import { IconNode } from "../schema/layout.ts";
 import { defaultElement } from "./index.ts";
 
@@ -84,5 +90,18 @@ describe("Heading and Icon take a link (W-141)", () => {
       children: [heading({})],
     } as LayoutNode;
     expect(html(plain)).toContain('href="/box"');
+  });
+});
+
+describe("every Link field is checked as a link (W-176)", () => {
+  test("a box's Link, like every other href, is an href field with the URL message", () => {
+    const links = ELEMENT_DESCRIPTORS.flatMap((d) =>
+      d.fields.filter((f) => f.key === "href").map((f) => `${d.type}:${f.kind}:${f.message}`),
+    );
+    const message = "Use a full URL such as https://example.com or a path such as /pricing.";
+    for (const type of ["container", "div-block", "flexbox", "grid"]) {
+      expect(links).toContain(`${type}:href:${message}`);
+    }
+    expect(links.filter((entry) => !entry.includes(":href:"))).toEqual([]);
   });
 });

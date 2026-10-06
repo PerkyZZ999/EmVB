@@ -50,15 +50,11 @@ const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 const newTabAttrs = (newTab: boolean | undefined): Record<string, string> =>
   newTab ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
+const LINK_MESSAGE = "Use a full URL such as https://example.com or a path such as /pricing.";
+
 /** Optional Link and new-tab fields for elements that wrap their content in a link (W-141). */
 const INNER_LINK_FIELDS = [
-  {
-    key: "href",
-    kind: "href" as const,
-    label: "Link",
-    optional: true,
-    message: "Use a full URL such as https://example.com or a path such as /pricing.",
-  },
+  { key: "href", kind: "href" as const, label: "Link", optional: true, message: LINK_MESSAGE },
   { key: "newTab", kind: "boolean" as const, label: "Open in a new tab", optional: true },
 ];
 
@@ -110,14 +106,9 @@ const heading: ElementDefinition<HeadingNode> = {
   },
 };
 
+/** A box link is checked like any link, so a bad URL gets an inline error, not a silent drop (W-176). */
 const BOX_LINK_FIELDS = [
-  {
-    key: "href",
-    kind: "text" as const,
-    label: "Link",
-    optional: true,
-    message: "Makes this box the link when it is a div. A link already inside stays as it is.",
-  },
+  { key: "href", kind: "href" as const, label: "Link", optional: true, message: LINK_MESSAGE },
   { key: "newTab", kind: "boolean" as const, label: "Open in new tab", optional: true },
 ];
 

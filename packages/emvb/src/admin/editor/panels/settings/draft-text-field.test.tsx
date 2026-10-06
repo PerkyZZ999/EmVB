@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import type { FieldDescriptor, LayoutNode } from "../../../../core/index.ts";
+import {
+  ELEMENT_DESCRIPTORS,
+  type FieldDescriptor,
+  type LayoutNode,
+} from "../../../../core/index.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 import { DraftTextField } from "./DraftTextField.tsx";
 
@@ -163,4 +167,21 @@ describe("multi-line fields are named by their label (W-124)", () => {
       expect(control?.labels?.[0]?.textContent).toBe(field.label);
     });
   }
+});
+
+describe("a box Link refuses a bad URL with an inline error (W-176)", () => {
+  test("the container's Link field shows the message and saves nothing for a bad URL", async () => {
+    const field = ELEMENT_DESCRIPTORS.find((d) => d.type === "container")?.fields.find(
+      (f) => f.key === "href",
+    );
+    if (!field) throw new Error("no container Link field");
+    const { sent, seen } = await run(field, undefined, [
+      { type: "javascript:alert(1)", end: "blur" },
+      { type: "//elsewhere.example", end: "enter" },
+      { type: "https://example.com/plans", end: "blur" },
+    ]);
+    const message = "Use a full URL such as https://example.com or a path such as /pricing.";
+    expect(seen.map((shown) => shown.includes(message))).toEqual([true, true, false]);
+    expect(sent).toEqual(["https://example.com/plans"]);
+  });
 });

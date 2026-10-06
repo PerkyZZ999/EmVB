@@ -20172,6 +20172,66 @@
         "goes after it, and the notice says where and why"
       ],
       "expect": "\\(fail\\).*goes after it, and the notice says where and why"
+    },
+    {
+      "id": "W-176/box-link-plain-text",
+      "requirement": "W-176",
+      "description": "A box's Link is a plain text field again, so a bad URL is stored and silently dropped on the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "const BOX_LINK_FIELDS = [\n  { key: \"href\", kind: \"href\" as const, label: \"Link\", optional: true, message: LINK_MESSAGE },",
+          "replace": "const BOX_LINK_FIELDS = [\n  { key: \"href\", kind: \"text\" as const, label: \"Link\", optional: true, message: LINK_MESSAGE },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "shows the message and saves nothing"
+      ],
+      "expect": "\\(fail\\).*shows the message and saves nothing"
+    },
+    {
+      "id": "W-176/box-link-descriptor-text",
+      "requirement": "W-176",
+      "description": "The box Link descriptor isn't an href field (core check).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "const BOX_LINK_FIELDS = [\n  { key: \"href\", kind: \"href\" as const, label: \"Link\", optional: true, message: LINK_MESSAGE },",
+          "replace": "const BOX_LINK_FIELDS = [\n  { key: \"href\", kind: \"text\" as const, label: \"Link\", optional: true, message: LINK_MESSAGE },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/inner-link.test.ts",
+        "-t",
+        "is an href field with the URL message"
+      ],
+      "expect": "\\(fail\\).*is an href field with the URL message"
+    },
+    {
+      "id": "W-176/box-link-no-message",
+      "requirement": "W-176",
+      "description": "A refused box Link shows a generic message instead of the URL hint.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "const BOX_LINK_FIELDS = [\n  { key: \"href\", kind: \"href\" as const, label: \"Link\", optional: true, message: LINK_MESSAGE },",
+          "replace": "const BOX_LINK_FIELDS = [\n  { key: \"href\", kind: \"href\" as const, label: \"Link\", optional: true, message: \"Invalid.\" },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/inner-link.test.ts",
+        "-t",
+        "is an href field with the URL message"
+      ],
+      "expect": "\\(fail\\).*is an href field with the URL message"
     }
   ]
 }
