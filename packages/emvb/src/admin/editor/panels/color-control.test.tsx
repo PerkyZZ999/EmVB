@@ -213,7 +213,9 @@ describe("colour field: label, swatches and Custom color (W-136)", () => {
     expect(view.has("OKLCH")).toBe(true);
     await view.type("RGB", "999, 0, 0");
     await view.enter("RGB");
-    expect(view.alert()).toBe("Enter RGB as 255, 128, 0.");
+    expect(view.alert()).toBe(
+      "Enter red, green and blue from 0 to 255, such as 255, 128, 0. Alpha is optional: 0–1 or 0–100%.",
+    );
     expect(view.values).toEqual([]);
     await view.type("RGB", "0, 128, 0");
     await view.enter("RGB");
@@ -257,6 +259,19 @@ describe("colour field: label, swatches and Custom color (W-136)", () => {
     await view.enter("Custom color");
     expect(marked()).toEqual(["Custom color"]);
     expect(alertFollows("Custom color")).toBe(true);
+    expect(view.values).toEqual([]);
+  });
+
+  test("a refused RGB or OKLCH entry says the valid ranges (W-181)", async () => {
+    const view = await control("#c2410c");
+    await view.type("RGB", "300, 0, 0");
+    await view.enter("RGB");
+    expect(view.alert()).toContain("from 0 to 255");
+    await view.type("OKLCH", "62.8, 0.9, 29");
+    await view.enter("OKLCH");
+    expect(view.alert()).toBe(
+      "Enter lightness 0–100 (or 0–1), chroma 0–0.5 and hue 0–360, such as 62.8, 0.150, 29.",
+    );
     expect(view.values).toEqual([]);
   });
 

@@ -20432,6 +20432,46 @@
         "falls back to automatic"
       ],
       "expect": "\\(fail\\).*falls back to automatic"
+    },
+    {
+      "id": "W-181/rgb-no-range",
+      "requirement": "W-181",
+      "description": "A refused RGB entry only shows an example, not the 0–255 range.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "\"Enter red, green and blue from 0 to 255, such as 255, 128, 0. Alpha is optional: 0–1 or 0–100%.\"",
+          "replace": "\"Enter RGB as 255, 128, 0.\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "says the valid ranges"
+      ],
+      "expect": "\\(fail\\).*says the valid ranges"
+    },
+    {
+      "id": "W-181/oklch-no-range",
+      "requirement": "W-181",
+      "description": "A refused OKLCH entry only shows an example, not the ranges.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "\"Enter lightness 0–100 (or 0–1), chroma 0–0.5 and hue 0–360, such as 62.8, 0.150, 29.\"",
+          "replace": "\"Enter OKLCH as 62.8, 0.150, 29.\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "says the valid ranges"
+      ],
+      "expect": "\\(fail\\).*says the valid ranges"
     }
   ]
 }

@@ -258,7 +258,7 @@ function CustomColor({
         onCommit={(text) => {
           const next = parseRgb(text);
           if (!next) {
-            setError({ field: "rgb", message: "Enter RGB as 255, 128, 0." });
+            setError({ field: "rgb", message: RGB_RANGE });
             return;
           }
           setError(null);
@@ -275,7 +275,7 @@ function CustomColor({
         onCommit={(text) => {
           const next = parseOklch(text);
           if (!next) {
-            setError({ field: "oklch", message: "Enter OKLCH as 62.8, 0.150, 29." });
+            setError({ field: "oklch", message: OKLCH_RANGE });
             return;
           }
           setError(null);
@@ -289,6 +289,12 @@ function CustomColor({
 }
 
 type Notation = "hex" | "rgb" | "oklch";
+
+// A refusal says the valid ranges, not only an example (W-181).
+const RGB_RANGE =
+  "Enter red, green and blue from 0 to 255, such as 255, 128, 0. Alpha is optional: 0–1 or 0–100%.";
+const OKLCH_RANGE =
+  "Enter lightness 0–100 (or 0–1), chroma 0–0.5 and hue 0–360, such as 62.8, 0.150, 29.";
 
 /** A second view of the same colour. Commits on Enter or blur, like the hex field. */
 function NotationRow({
