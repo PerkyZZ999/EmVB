@@ -19812,6 +19812,26 @@
         "links in helper text"
       ],
       "expect": "\\(fail\\).*links in helper text"
+    },
+    {
+      "id": "W-170/refusal-only-sr",
+      "requirement": "W-170",
+      "description": "A refused add only announces its reason in the screen-reader live region; no visible toast says why.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "      lastToast.current = toasts.add({ title: result.reason, timeout: NOTICE_TIMEOUT_MS });\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "outside an accordion"
+      ],
+      "expect": "\\(fail\\).*outside an accordion"
     }
   ]
 }

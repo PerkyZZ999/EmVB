@@ -425,9 +425,14 @@ describe("Add panel and Layers (W-018)", () => {
     expect(editor()?.querySelector(".emvb-sr-only")?.textContent).toBe(
       "Accordion items can only go inside an Accordion.",
     );
-    expect(document.body.textContent ?? "").toContain(
-      "Accordion items can only go inside an Accordion.",
+    // The reason is also visible (the toast), not only in the screen-reader live region (W-170).
+    const visible = [...document.body.querySelectorAll("*")].some(
+      (el) =>
+        el.children.length === 0 &&
+        (el.textContent ?? "").includes("Accordion items can only go inside an Accordion.") &&
+        !el.closest(".emvb-sr-only"),
     );
+    expect(visible).toBe(true);
     await openLayers();
     expect(layerRow("Accordion item") === undefined).toBe(true);
   });
