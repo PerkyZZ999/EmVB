@@ -8,6 +8,7 @@ import {
   defaultFloatSettings,
   defaultTriggers,
   FLOAT_CHROME_CSS,
+  floatHasOwnSurface,
   listMatchingThemeParts,
   parseThemePartType,
   pickThemePartWinner,
@@ -392,10 +393,12 @@ export async function resolveThemeParts(
     const stored = byId.get(match.id);
     if (!stored) continue;
     const { html, css } = renderOne(stored);
+    const layout = readLayout(stored.layout);
+    const surface = !layout || !floatHasOwnSurface(layout, design);
     floats.push({
       id: stored.id,
       title: stored.title,
-      html: wrapFloatMarkup(stored.id, stored.title, html, stored.float),
+      html: wrapFloatMarkup(stored.id, stored.title, html, stored.float, surface),
       css,
       settings: stored.float,
     });

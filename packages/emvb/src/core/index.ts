@@ -287,6 +287,7 @@ export {
   defaultFloatSettings,
   validateFloatSettings,
   FLOAT_CHROME_CSS,
+  floatHasOwnSurface,
   wrapFloatMarkup,
   type FloatEdge,
   type FloatSettings,

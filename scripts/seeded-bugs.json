@@ -19832,6 +19832,86 @@
         "outside an accordion"
       ],
       "expect": "\\(fail\\).*outside an accordion"
+    },
+    {
+      "id": "W-171/float-no-surface",
+      "requirement": "W-171",
+      "description": "A float has no default surface, so a new float's text is drawn straight over the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": ":where(.emvb-float--surface){background:#fff;color:#0f172a;",
+          "replace": ":where(.emvb-float--surface){"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/float.test.ts",
+        "-t",
+        "starts on a surface"
+      ],
+      "expect": "\\(fail\\).*starts on a surface"
+    },
+    {
+      "id": "W-171/float-corner-square",
+      "requirement": "W-171",
+      "description": "A corner float's surface has square corners: the radius rule is dropped.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": ".emvb-float--end-bottom)){border-radius:.75rem;",
+          "replace": ".emvb-float--end-bottom)){"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/float.test.ts",
+        "-t",
+        "starts on a surface"
+      ],
+      "expect": "\\(fail\\).*starts on a surface"
+    },
+    {
+      "id": "W-171/float-own-background-ignores-classes",
+      "requirement": "W-171",
+      "description": "A float whose class paints a background still gets the white surface over it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": "return [root, ...classes].some(",
+          "replace": "return [root].some("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/float.test.ts",
+        "-t",
+        "paints its own background"
+      ],
+      "expect": "\\(fail\\).*paints its own background"
+    },
+    {
+      "id": "W-171/float-surface-always",
+      "requirement": "W-171",
+      "description": "Public floats always get the white surface, even over a box with its own background.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "stored.float, surface)",
+          "replace": "stored.float, true)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/resolve-theme.test.ts",
+        "-t",
+        "default surface unless"
+      ],
+      "expect": "\\(fail\\).*default surface unless"
     }
   ]
 }

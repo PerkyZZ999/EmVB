@@ -254,6 +254,21 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.css).toContain(".emvb-float{");
   });
 
+  test("a float gets the default surface unless its box paints a background (W-171)", async () => {
+    const painted = layout(heading("head0002", "Red bar"));
+    themeEntries = [
+      part("FLOAT001", "float", [heading("head0001", "Plain note")]),
+      part("FLOAT002", "float", [], {
+        layout: { ...painted, root: { ...painted.root, style: { backgroundColor: "#b91c1c" } } },
+      }),
+    ];
+    const resolved = await resolveThemeParts(astro("/about"));
+    const surfaced = (id: string) =>
+      resolved.floats.find((item) => item.id === id)?.html.includes("emvb-float--surface");
+    expect([surfaced("FLOAT001"), surfaced("FLOAT002")]).toEqual([true, false]);
+    expect(resolved.css).toContain(":where(.emvb-float--surface){background:#fff");
+  });
+
   test("tabs in any winning part turn on the tabs runtime", async () => {
     const tabs: LayoutNode = {
       id: "tabs0001",
