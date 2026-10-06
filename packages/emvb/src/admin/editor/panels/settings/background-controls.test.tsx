@@ -69,4 +69,15 @@ describe("background controls (W-094)", () => {
     await act(async () => host.querySelector<HTMLElement>("[data-emvb-add-overlay]")?.click());
     expect(patches.at(-1)).toEqual({ overlay: { color: "#000000", opacity: 0.4 } });
   });
+
+  test("an Image fill with no image yet says the element has no background (W-174)", async () => {
+    patches.length = 0;
+    const host = await row("backgroundColor", { backgroundColor: "#ff0000" });
+    await act(async () => host.querySelector<HTMLElement>('[data-emvb-bg-type="image"]')?.click());
+    const helper = host.querySelector("[data-emvb-background-image] .emvb-helper")?.textContent;
+    expect(helper).toBe("No image yet, so this element has no background.");
+    // Switching to Image clears the colour (D-047), so no colour can show through.
+    const last = patches.at(-1) ?? {};
+    expect("backgroundColor" in last && last.backgroundColor === undefined).toBe(true);
+  });
 });

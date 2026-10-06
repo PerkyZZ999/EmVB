@@ -197,7 +197,8 @@ function CustomColor({
   onCommit: (hex: string) => void;
 }) {
   const [draft, setDraft] = React.useState(value);
-  const [error, setError] = React.useState<string | null>(null);
+  // The field that refused its entry is the one marked, not always the hex (W-174).
+  const [error, setError] = React.useState<{ field: Notation; message: string } | null>(null);
   const picker = React.useRef<HTMLInputElement | null>(null);
   const commit = (next: string) => {
     const hex = next.trim();
@@ -206,7 +207,7 @@ function CustomColor({
       return;
     }
     if (!HEX.test(hex)) {
-      setError(BAD_HEX);
+      setError({ field: "hex", message: BAD_HEX });
       return;
     }
     setError(null);
@@ -231,7 +232,8 @@ function CustomColor({
           className={`${FIELD} emvb-mono`}
           placeholder="#1a2b3c"
           value={draft}
-          variant={error ? "error" : undefined}
+          variant={error?.field === "hex" ? "error" : undefined}
+          aria-invalid={error?.field === "hex" ? true : undefined}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={() => commit(draft)}
           onKeyDown={(event) => {
@@ -247,15 +249,16 @@ function CustomColor({
           onChange={(event) => setDraft(event.target.value)}
         />
       </div>
-      {error && <InlineError>{error}</InlineError>}
+      {error?.field === "hex" && <InlineError>{error.message}</InlineError>}
       <NotationRow
         label="RGB"
         text={formatRgb(parseHex(HEX.test(draft) ? draft : value) ?? { r: 0, g: 0, b: 0, a: 1 })}
         placeholder="255, 128, 0"
+        error={error?.field === "rgb" ? error.message : undefined}
         onCommit={(text) => {
           const next = parseRgb(text);
           if (!next) {
-            setError("Enter RGB as 255, 128, 0.");
+            setError({ field: "rgb", message: "Enter RGB as 255, 128, 0." });
             return;
           }
           setError(null);
@@ -268,10 +271,11 @@ function CustomColor({
         label="OKLCH"
         text={formatOklch(parseHex(HEX.test(draft) ? draft : value) ?? { r: 0, g: 0, b: 0, a: 1 })}
         placeholder="62.8, 0.150, 29"
+        error={error?.field === "oklch" ? error.message : undefined}
         onCommit={(text) => {
           const next = parseOklch(text);
           if (!next) {
-            setError("Enter OKLCH as 62.8, 0.150, 29.");
+            setError({ field: "oklch", message: "Enter OKLCH as 62.8, 0.150, 29." });
             return;
           }
           setError(null);
@@ -284,16 +288,20 @@ function CustomColor({
   );
 }
 
+type Notation = "hex" | "rgb" | "oklch";
+
 /** A second view of the same colour. Commits on Enter or blur, like the hex field. */
 function NotationRow({
   label,
   text,
   placeholder,
+  error,
   onCommit,
 }: {
   label: string;
   text: string;
   placeholder: string;
+  error: string | undefined;
   onCommit: (text: string) => void;
 }) {
   const [draft, setDraft] = React.useState(text);
@@ -301,19 +309,24 @@ function NotationRow({
     setDraft(text);
   }, [text]);
   return (
-    <Input
-      label={label}
-      className={`${FIELD} emvb-mono`}
-      placeholder={placeholder}
-      value={draft}
-      onChange={(event) => setDraft(event.target.value)}
-      onBlur={() => {
-        if (draft.trim() !== text) onCommit(draft);
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") onCommit(draft);
-      }}
-    />
+    <>
+      <Input
+        label={label}
+        className={`${FIELD} emvb-mono`}
+        placeholder={placeholder}
+        value={draft}
+        variant={error ? "error" : undefined}
+        aria-invalid={error ? true : undefined}
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={() => {
+          if (draft.trim() !== text) onCommit(draft);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") onCommit(draft);
+        }}
+      />
+      {error && <InlineError>{error}</InlineError>}
+    </>
   );
 }
 

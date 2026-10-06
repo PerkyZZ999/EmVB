@@ -18488,7 +18488,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "    if (!HEX.test(hex)) {\n      setError(BAD_HEX);\n      return;\n    }\n    setError(null);\n    onCommit(hex);",
+          "search": "    if (!HEX.test(hex)) {\n      setError({ field: \"hex\", message: BAD_HEX });\n      return;\n    }\n    setError(null);\n    onCommit(hex);",
           "replace": "    setError(null);\n    onCommit(hex);"
         }
       ],
@@ -20032,6 +20032,86 @@
         "pasted CSS oklch"
       ],
       "expect": "\\(fail\\).*pasted CSS oklch"
+    },
+    {
+      "id": "W-174/refusal-marks-hex",
+      "requirement": "W-174",
+      "description": "A refused RGB or OKLCH entry turns the hex field red.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "variant={error?.field === \"hex\" ? \"error\" : undefined}",
+          "replace": "variant={error ? \"error\" : undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "marks that field, not the hex"
+      ],
+      "expect": "\\(fail\\).*marks that field, not the hex"
+    },
+    {
+      "id": "W-174/notation-error-hidden",
+      "requirement": "W-174",
+      "description": "A refused RGB entry marks nothing and shows no message by its field.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "error={error?.field === \"rgb\" ? error.message : undefined}",
+          "replace": "error={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "marks that field, not the hex"
+      ],
+      "expect": "\\(fail\\).*marks that field, not the hex"
+    },
+    {
+      "id": "W-174/error-under-hex",
+      "requirement": "W-174",
+      "description": "Every refusal message is shown under the hex field, away from the field that refused it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "{error?.field === \"hex\" && <InlineError>{error.message}</InlineError>}",
+          "replace": "{error && <InlineError>{error.message}</InlineError>}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "marks that field, not the hex"
+      ],
+      "expect": "\\(fail\\).*marks that field, not the hex"
+    },
+    {
+      "id": "W-174/image-helper-untrue",
+      "requirement": "W-174",
+      "description": "The Image fill helper says the background colour shows through, though choosing Image clears it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "No image yet, so this element has no background.",
+          "replace": "No image yet. The background colour shows through."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "no image yet says"
+      ],
+      "expect": "\\(fail\\).*no image yet says"
     }
   ]
 }

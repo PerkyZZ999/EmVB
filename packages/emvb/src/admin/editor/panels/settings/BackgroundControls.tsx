@@ -107,7 +107,7 @@ export function BackgroundImageControl({
             <span className="emvb-helper emvb-mono">{src}</span>
           </div>
         ) : (
-          <p className="emvb-helper">No image yet. The background colour shows through.</p>
+          <p className="emvb-helper">No image yet, so this element has no background.</p>
         )}
         {fetcher && (
           <div className="emvb-media-actions">

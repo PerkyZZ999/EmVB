@@ -220,6 +220,46 @@ describe("colour field: label, swatches and Custom color (W-136)", () => {
     expect(view.values).toEqual(["#008000"]);
   });
 
+  test("a refused RGB or OKLCH entry marks that field, not the hex (W-174)", async () => {
+    const view = await control("#c2410c");
+    const input = (label: string) =>
+      [...view.host.querySelectorAll("label")]
+        .find((l) => l.textContent?.trim() === label)
+        ?.getAttribute("for") ?? "";
+    const marked = () =>
+      ["Custom color", "RGB", "OKLCH"].filter((label) => {
+        const el = document.getElementById(input(label));
+        return (
+          el?.getAttribute("aria-invalid") === "true" || el?.className.includes("ring-kumo-danger")
+        );
+      });
+    const alertFollows = (label: string) => {
+      const el = document.getElementById(input(label));
+      const alert = view.host.querySelector('[role="alert"]');
+      const next = ["Custom color", "RGB", "OKLCH"]
+        .slice(["Custom color", "RGB", "OKLCH"].indexOf(label) + 1)
+        .map((l) => document.getElementById(input(l)))[0];
+      if (!el || !alert) return false;
+      const after = Boolean(el.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING);
+      const beforeNext =
+        !next || Boolean(alert.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING);
+      return after && beforeNext;
+    };
+    await view.type("RGB", "999, 0, 0");
+    await view.enter("RGB");
+    expect(marked()).toEqual(["RGB"]);
+    expect(alertFollows("RGB")).toBe(true);
+    await view.type("OKLCH", "nope");
+    await view.enter("OKLCH");
+    expect(marked()).toEqual(["OKLCH"]);
+    expect(alertFollows("OKLCH")).toBe(true);
+    await view.type("Custom color", "blue");
+    await view.enter("Custom color");
+    expect(marked()).toEqual(["Custom color"]);
+    expect(alertFollows("Custom color")).toBe(true);
+    expect(view.values).toEqual([]);
+  });
+
   test("the browser's picker previews while dragging and applies when its dialog closes", async () => {
     const view = await control("#c2410c");
     const picker = view.picker();
