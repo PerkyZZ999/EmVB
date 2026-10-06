@@ -129,7 +129,21 @@ export function formatOklch(rgba: Rgba): string {
   return `${base}, ${Math.round(a * 100)}%`;
 }
 
-/** "70, 0.15, 40" or "70% 0.15 40 / 50%". L is 0–100, C is 0–0.5, H is 0–360. */
+/**
+ * Lightness as 0–100: "62.8%" is a percent; a bare number up to 1 is CSS's 0–1 form ("0.628", as
+ * pasted from `oklch(0.628 0.2577 29.23)`), and a bigger one is EmVB's own 0–100 form (W-173).
+ * Every sRGB colour but black has L above 3, so the two bare forms don't overlap.
+ */
+function oklchLightness(raw: string): number {
+  if (raw.endsWith("%")) return Number(raw.slice(0, -1));
+  const n = Number(raw);
+  return n <= 1 ? n * 100 : n;
+}
+
+/**
+ * "70, 0.15, 40", "70% 0.15 40 / 50%" or CSS `oklch(0.7 0.15 40deg)`. L is 0–100 (or 0–1),
+ * C is 0–0.5 (or a percent of 0.4, as in CSS), H is 0–360.
+ */
 export function parseOklch(text: string): Rgba | null {
   const parts = text
     .trim()
@@ -139,10 +153,11 @@ export function parseOklch(text: string): Rgba | null {
     .split(/[\s,]+/)
     .filter(Boolean);
   if (parts.length !== 3 && parts.length !== 4) return null;
-  const lRaw = parts[0] ?? "";
-  const l = Number(lRaw.endsWith("%") ? lRaw.slice(0, -1) : lRaw);
-  const c = Number(parts[1]);
-  const h = Number(parts[2]);
+  const l = oklchLightness(parts[0] ?? "");
+  const cRaw = parts[1] ?? "";
+  const c = cRaw.endsWith("%") ? (Number(cRaw.slice(0, -1)) / 100) * 0.4 : Number(cRaw);
+  const hRaw = parts[2] ?? "";
+  const h = Number(hRaw.endsWith("deg") ? hRaw.slice(0, -3) : hRaw);
   if (!Number.isFinite(l) || l < 0 || l > 100) return null;
   if (!Number.isFinite(c) || c < 0 || c > 0.5) return null;
   if (!Number.isFinite(h) || h < 0 || h > 360) return null;

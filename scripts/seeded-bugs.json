@@ -19952,6 +19952,86 @@
         "location order"
       ],
       "expect": "\\(fail\\).*location order"
+    },
+    {
+      "id": "W-173/oklch-fraction-as-percent",
+      "requirement": "W-173",
+      "description": "Pasted CSS oklch(0.628 …) lightness is read as 0.628 of 100, so red turns near-black.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/color-space.ts",
+          "search": "return n <= 1 ? n * 100 : n;",
+          "replace": "return n;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-space.test.ts",
+        "-t",
+        "pasted CSS oklch"
+      ],
+      "expect": "\\(fail\\).*pasted CSS oklch"
+    },
+    {
+      "id": "W-173/oklch-fraction-threshold-high",
+      "requirement": "W-173",
+      "description": "Bare lightness up to 5 is taken as 0–1, so EmVB's own darkest colours (L 3.0) turn white.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/color-space.ts",
+          "search": "return n <= 1 ? n * 100 : n;",
+          "replace": "return n <= 5 ? n * 100 : n;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-space.test.ts",
+        "-t",
+        "pasted CSS oklch"
+      ],
+      "expect": "\\(fail\\).*pasted CSS oklch"
+    },
+    {
+      "id": "W-173/oklch-chroma-percent",
+      "requirement": "W-173",
+      "description": "A CSS chroma percent (64.43%) is read as a raw chroma and refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/color-space.ts",
+          "search": "(Number(cRaw.slice(0, -1)) / 100) * 0.4",
+          "replace": "Number(cRaw.slice(0, -1))"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-space.test.ts",
+        "-t",
+        "pasted CSS oklch"
+      ],
+      "expect": "\\(fail\\).*pasted CSS oklch"
+    },
+    {
+      "id": "W-173/oklch-hue-deg",
+      "requirement": "W-173",
+      "description": "A CSS hue with deg (29.23deg) is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/color-space.ts",
+          "search": "hRaw.endsWith(\"deg\") ? hRaw.slice(0, -3) : hRaw",
+          "replace": "hRaw"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-space.test.ts",
+        "-t",
+        "pasted CSS oklch"
+      ],
+      "expect": "\\(fail\\).*pasted CSS oklch"
     }
   ]
 }

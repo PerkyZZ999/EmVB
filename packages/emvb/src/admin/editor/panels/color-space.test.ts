@@ -23,4 +23,20 @@ describe("colour notations (W-160)", () => {
     expect(parseOklch("120, 0.1, 20")).toBeNull();
     expect(parseOklch("nope")).toBeNull();
   });
+
+  test("pasted CSS oklch() reads lightness as 0–1 or a percent, and EmVB's 0–100 still works (W-173)", () => {
+    const hex = (text: string) => {
+      const rgba = parseOklch(text);
+      return rgba ? toHex(rgba) : null;
+    };
+    expect(hex("oklch(0.628 0.2577 29.23)")).toBe("#ff0000");
+    expect(hex("oklch(62.8% 0.2577 29.23deg)")).toBe("#ff0000");
+    expect(hex("oklch(0.628 64.43% 29.23)")).toBe("#ff0000");
+    expect(hex("62.8, 0.2577, 29.23")).toBe("#ff0000");
+    expect(hex("oklch(1 0 0)")).toBe("#ffffff");
+    expect(hex("oklch(0 0 0)")).toBe("#000000");
+    expect(hex("oklch(101% 0 0)")).toBeNull();
+    // The darkest colour EmVB shows (L 3.038) is still read as 0–100.
+    expect(hex(formatOklch(must(parseHex("#000001"))))).toBe("#000001");
+  });
 });
