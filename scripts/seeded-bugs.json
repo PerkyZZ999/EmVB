@@ -20572,6 +20572,66 @@
         "says it was clipped"
       ],
       "expect": "\\(fail\\).*says it was clipped"
+    },
+    {
+      "id": "W-184/forgets-fill",
+      "requirement": "W-184",
+      "description": "Switching fill type and back loses what the type held.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/background-mode.ts",
+          "search": "  if (held) memory[from] = held;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "restores what the type last held"
+      ],
+      "expect": "\\(fail\\).*restores what the type last held"
+    },
+    {
+      "id": "W-184/shared-scope",
+      "requirement": "W-184",
+      "description": "Remembered fills are shared across devices and classes on one element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "memoryScope={fillScope}",
+          "replace": "memoryScope={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "restores what the type last held"
+      ],
+      "expect": "\\(fail\\).*restores what the type last held"
+    },
+    {
+      "id": "W-184/overwrites-held",
+      "requirement": "W-184",
+      "description": "A remembered fill overwrites a type that already holds a value.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/background-mode.ts",
+          "search": "if (remembered && heldFill(style, to) === undefined)",
+          "replace": "if (remembered)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "only fills an empty type"
+      ],
+      "expect": "\\(fail\\).*only fills an empty type"
     }
   ]
 }

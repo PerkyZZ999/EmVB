@@ -9,7 +9,8 @@ import {
   activeFill,
   fillIsMixed,
   fillModes,
-  switchFill,
+  switchFillRemembered,
+  type FillMemory,
   type FillMode,
 } from "./background-mode.ts";
 
@@ -22,7 +23,8 @@ const LABELS: Record<FillMode, string> = {
 
 /**
  * One background type at a time (W-160). Switching type clears the other fills.
- * An image or a video can still carry an overlay.
+ * An image or a video can still carry an overlay. Switching back to a type restores what it last
+ * held while the element stays selected (W-184).
  */
 export function BackgroundFill({
   style,
@@ -35,6 +37,7 @@ export function BackgroundFill({
   onPatch,
   onDesignChange,
   reset,
+  memoryScope = "",
 }: {
   style: StyleProps | undefined;
   elementType?: string;
@@ -46,6 +49,8 @@ export function BackgroundFill({
   onPatch: (patch: Partial<StyleProps>) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
   reset: React.ReactNode;
+  /** Keeps remembered fills apart per class, device and state on one element (W-184). */
+  memoryScope?: string;
 }) {
   const derived = activeFill(style);
   const [mode, setMode] = React.useState<FillMode>(derived);
@@ -59,9 +64,15 @@ export function BackgroundFill({
 
   const modes = fillModes(elementType, style);
   const shown = modes.includes(mode) ? mode : derived;
+  const memory = React.useRef(new Map<string, FillMemory>());
   const choose = (next: FillMode) => {
     setMode(next);
-    onPatch(switchFill(style, next));
+    let slot = memory.current.get(memoryScope);
+    if (!slot) {
+      slot = {};
+      memory.current.set(memoryScope, slot);
+    }
+    onPatch(switchFillRemembered(style, shown, next, slot));
   };
 
   return (

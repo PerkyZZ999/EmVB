@@ -186,6 +186,7 @@ export function StyleRow({
   design,
   fetcher,
   elementType = "container",
+  fillScope,
   onPatch,
   onDesignChange,
 }: {
@@ -198,6 +199,8 @@ export function StyleRow({
   fetcher?: Fetcher;
   /** Decides whether Image and Video are offered. A class editor passes a box. */
   elementType?: string;
+  /** Which class and device the background fill memory belongs to (W-184). */
+  fillScope?: string;
   onPatch: (patch: Partial<StyleProps>) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
 }) {
@@ -224,6 +227,7 @@ export function StyleRow({
         repeatOptions={SELECT_OPTIONS.backgroundRepeat ?? []}
         onPatch={onPatch}
         onDesignChange={onDesignChange}
+        memoryScope={fillScope}
         reset={
           <ResetButton
             label="Background"

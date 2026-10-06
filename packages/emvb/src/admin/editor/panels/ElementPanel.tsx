@@ -600,6 +600,7 @@ function KnownElementPanel({
                       design={design}
                       fetcher={fetcher}
                       elementType={cls ? "container" : node.type}
+                      fillScope={`${cls?.id ?? "local"}:${responsive ?? "desktop"}`}
                       onPatch={patchStyle}
                       onDesignChange={onDesignChange}
                     />

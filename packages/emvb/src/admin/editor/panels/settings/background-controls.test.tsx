@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import * as React from "react";
 import { act } from "react";
 import { emptyDesign, type StyleProps } from "../../../../core/index.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { switchFillRemembered, type FillMemory } from "./background-mode.ts";
 import { StyleRow } from "./StyleRow.tsx";
 import type { StyleKey } from "./style-sections.ts";
 
@@ -117,5 +119,71 @@ describe("background controls (W-094)", () => {
     const gradient = patches.at(-1)?.gradient;
     expect(gradient ? "angle" in gradient : null).toBe(false);
     expect(angle.getAttribute("placeholder")).toBe("180");
+  });
+
+  test("switching fill type and back restores what the type last held (W-184)", async () => {
+    const GRADIENT: StyleProps["gradient"] = {
+      type: "radial",
+      stops: [
+        { color: "#ff0000", at: 0 },
+        { color: "#0000ff", at: 100 },
+      ],
+    };
+    let device: (scope: string, style: StyleProps) => void = () => undefined;
+    let current: StyleProps = {};
+    function Live() {
+      const [style, setStyle] = React.useState<StyleProps>({ gradient: GRADIENT });
+      const [scope, setScope] = React.useState("local:desktop");
+      device = (next, nextStyle) => {
+        setScope(next);
+        setStyle(nextStyle);
+      };
+      current = style;
+      return (
+        <StyleRow
+          styleKey="backgroundColor"
+          style={style}
+          design={emptyDesign()}
+          fillScope={scope}
+          onPatch={(patch) => setStyle((before) => ({ ...before, ...patch }))}
+          onDesignChange={async () => undefined}
+        />
+      );
+    }
+    const host = await mount(<Live />);
+    const pick = async (type: string) =>
+      act(async () => host.querySelector<HTMLElement>(`[data-emvb-bg-type="${type}"]`)?.click());
+    await pick("color");
+    expect(current.gradient).toBeUndefined();
+    await pick("gradient");
+    expect(current.gradient).toEqual(GRADIENT);
+    await pick("color");
+    // Another device's fill has its own memory, so it starts from the default gradient.
+    await act(async () => device("local:tablet", {}));
+    await pick("gradient");
+    expect(current.gradient?.type).toBe("linear");
+    // Back on desktop, the desktop gradient is still remembered.
+    await act(async () => device("local:desktop", {}));
+    await pick("gradient");
+    expect(current.gradient).toEqual(GRADIENT);
+  });
+
+  test("the fill memory only fills an empty type and keeps image settings together (W-184)", () => {
+    const memory: FillMemory = {};
+    const image: StyleProps = {
+      backgroundImage: "https://cdn.example/a.png",
+      backgroundSize: "contain",
+      overlay: { color: "#000000", opacity: 0.4 },
+    };
+    const toColor = switchFillRemembered(image, "image", "color", memory);
+    expect(toColor.backgroundImage).toBeUndefined();
+    expect(switchFillRemembered({}, "color", "image", memory)).toMatchObject(image);
+    // A type that already holds something keeps it.
+    const other = { backgroundImage: "https://cdn.example/b.png" };
+    expect(switchFillRemembered(other, "color", "image", memory).backgroundImage).toBe(
+      "https://cdn.example/b.png",
+    );
+    // Nothing remembered: the usual starting values.
+    expect(switchFillRemembered({}, "color", "gradient", {}).gradient?.type).toBe("linear");
   });
 });
