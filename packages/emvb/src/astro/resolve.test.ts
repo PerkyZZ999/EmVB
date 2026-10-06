@@ -6,7 +6,12 @@ import { defaultElement, type Layout, type LayoutNode } from "../core/index.ts";
 /**
  * W-091: `resolveEmVBPage` had no unit test (only e2e:prod). bun's `mock.module` is global to the
  * process, so the fakes only answer while this file runs and fall back to EmDash afterwards.
+ * The fallbacks are taken before mocking: the mock replaces the namespace's exports in place, so
+ * `realPluginUtils.getPublicPluginApiRouteHandler` called later is the fake itself and recurses
+ * forever (resolve-theme.test.ts hung whenever it ran after this file).
  */
+const realGetEmDashEntry = realEmDash.getEmDashEntry;
+const realRouteHandler = realPluginUtils.getPublicPluginApiRouteHandler;
 let active = true;
 type Found = { entry: { id: string; data: Record<string, unknown> } | null; isPreview?: boolean };
 let lookup: (collection: string, slug: string) => Promise<Found> = async () => ({ entry: null });
@@ -17,7 +22,7 @@ const handlerCalls: Call[] = [];
 mock.module("emdash", () => ({
   ...realEmDash,
   getEmDashEntry: (...args: Parameters<typeof realEmDash.getEmDashEntry>) => {
-    if (!active) return realEmDash.getEmDashEntry(...args);
+    if (!active) return realGetEmDashEntry(...args);
     lookups.push(`${args[0]}/${String(args[1])}`);
     return lookup(args[0], String(args[1]));
   },
@@ -43,7 +48,7 @@ mock.module("emdash/plugin-utils", () => ({
             data: { name: "Contact", slug: "contact", settings: {}, pages: [] },
           };
         }
-      : realPluginUtils.getPublicPluginApiRouteHandler(locals),
+      : realRouteHandler(locals),
 }));
 
 const { resolveEmVBPage } = await import("./resolve.ts");
