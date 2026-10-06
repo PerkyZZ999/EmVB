@@ -46,6 +46,7 @@ export const UI_CSS = `
 }
 .emvb-mono { font-family: var(--font-mono); }
 .emvb-helper { margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
+.emvb-helper a { color: var(--text-color-kumo-default); text-decoration: underline; text-underline-offset: 2px; }
 .emvb-inline-error { display: flex; gap: 4px; align-items: flex-start; margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-danger); }
 .emvb-status {
   display: inline-flex;

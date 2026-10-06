@@ -19792,6 +19792,26 @@
         "ellipsizes on one line"
       ],
       "expect": "\\(fail\\).*ellipsizes on one line"
+    },
+    {
+      "id": "W-169/helper-link-unstyled",
+      "requirement": "W-169",
+      "description": "Links in helper text (Open Theme Builder, Open Forms) get no EmVB rule and show in the host's link colour without an underline.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-helper a { color: var(--text-color-kumo-default); text-decoration: underline; text-underline-offset: 2px; }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/ui.test.ts",
+        "-t",
+        "links in helper text"
+      ],
+      "expect": "\\(fail\\).*links in helper text"
     }
   ]
 }

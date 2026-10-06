@@ -13,3 +13,10 @@ test("Theme Builder filter tabs are 28 px, like every editor tab", () => {
   expect(rule(".emvb-theme-filter")).toMatch(/min-height: 28px;/);
   expect(rule(".emvb-theme-filters")).toMatch(/min-height: 28px;/);
 });
+
+test("links in helper text are underlined in the default text colour, not primary (W-169)", () => {
+  const link = rule(".emvb-helper a");
+  expect(link).toMatch(/color: var\(--text-color-kumo-default\);/);
+  expect(link).toMatch(/text-decoration: underline;/);
+  expect(link.includes("brand")).toBe(false);
+});
