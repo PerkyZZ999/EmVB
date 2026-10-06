@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { ApiError, requestJson, type Fetcher } from "./api.ts";
 import { publishPage } from "./content-api.ts";
 import { listImages, uploadImage } from "./media-api.ts";
-import { publishThemePart } from "./theme-api.ts";
+import { createThemePart, publishThemePart } from "./theme-api.ts";
 
 type Call = { path: string; method: string; body: unknown };
 
@@ -118,4 +118,24 @@ describe("publish", () => {
       ]);
     });
   }
+});
+
+describe("createThemePart", () => {
+  test("a part shown beside a page's content starts on an H2; content parts keep the H1 (W-179)", async () => {
+    const calls: Call[] = [];
+    const reply = json(200, { data: { item: { id: "01F" } } });
+    const types = ["float", "header", "footer", "popup", "section", "loop_item"] as const;
+    const owners = ["single_page", "single_post", "archive", "page_template"] as const;
+    for (const partType of [...types, ...owners]) {
+      // oxlint-disable-next-line no-await-in-loop
+      await createThemePart(answering(reply, calls), { title: "Note", slug: "note", partType });
+    }
+    const levels = calls.map(
+      (call) =>
+        JSON.stringify(call.body).match(
+          /"type":"heading","props":\{"text":"Note","level":(\d)/,
+        )?.[1],
+    );
+    expect(levels.join("")).toBe("2222221111");
+  });
 });

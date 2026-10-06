@@ -1,4 +1,5 @@
 import {
+  CONTENT_THEME_PART_TYPES,
   defaultConditionsFor,
   defaultFloatSettings,
   defaultTriggers,
@@ -118,6 +119,23 @@ export async function listThemeParts(fetcher: Fetcher): Promise<ThemePartSummary
   }));
 }
 
+/** Parts that are the page's main content (or become a page) keep the page's H1. */
+const OWNS_PAGE_HEADING: ReadonlySet<ThemePartType> = new Set([
+  ...CONTENT_THEME_PART_TYPES,
+  "page_template",
+]);
+
+/**
+ * A float, header, footer, popup, section or loop item shows on pages that have their own H1, so
+ * its starter heading is an H2: no second H1 and no skipped level (W-179).
+ */
+function starterPartLayout(title: string, partType: ThemePartType): Layout {
+  const layout = starterLayout(title);
+  if (OWNS_PAGE_HEADING.has(partType)) return layout;
+  for (const child of layout.root.children) if (child.type === "heading") child.props.level = 2;
+  return layout;
+}
+
 export async function createThemePart(
   fetcher: Fetcher,
   input: { title: string; slug: string; partType: ThemePartType },
@@ -127,7 +145,7 @@ export async function createThemePart(
     body: {
       data: {
         title: input.title,
-        layout: starterLayout(input.title),
+        layout: starterPartLayout(input.title, input.partType),
         part_type: input.partType,
         conditions: defaultConditionsFor(input.partType),
         triggers: defaultTriggers(),

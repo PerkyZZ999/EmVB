@@ -20332,6 +20332,46 @@
         "real site menu"
       ],
       "expect": "\\(fail\\).*real site menu"
+    },
+    {
+      "id": "W-179/float-starter-h1",
+      "requirement": "W-179",
+      "description": "A new float (or header, footer, popup…) starts on an H1, a second H1 on every page it shows on.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/theme-api.ts",
+          "search": "child.props.level = 2;",
+          "replace": "child.props.level = 1;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/api-client.test.ts",
+        "-t",
+        "starts on an H2"
+      ],
+      "expect": "\\(fail\\).*starts on an H2"
+    },
+    {
+      "id": "W-179/content-part-starter-h2",
+      "requirement": "W-179",
+      "description": "Content parts (Single Page, Archive…) lose their H1 starter too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/theme-api.ts",
+          "search": "  if (OWNS_PAGE_HEADING.has(partType)) return layout;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/api-client.test.ts",
+        "-t",
+        "starts on an H2"
+      ],
+      "expect": "\\(fail\\).*starts on an H2"
     }
   ]
 }
