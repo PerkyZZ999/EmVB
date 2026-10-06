@@ -20372,6 +20372,66 @@
         "starts on an H2"
       ],
       "expect": "\\(fail\\).*starts on an H2"
+    },
+    {
+      "id": "W-180/empty-stop-zero",
+      "requirement": "W-180",
+      "description": "Emptying a stop's location silently moves it to 0%.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "onCommit={(n) => setStop(index, { at: n ?? autoStopAt(index, stops.length) })}",
+          "replace": "onCommit={(n) => setStop(index, { at: n ?? 0 })}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "falls back to automatic"
+      ],
+      "expect": "\\(fail\\).*falls back to automatic"
+    },
+    {
+      "id": "W-180/empty-angle-zero",
+      "requirement": "W-180",
+      "description": "Emptying the angle silently stores 0° instead of the type's default.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "    if (angle === undefined) delete next.angle;\n",
+          "replace": "    if (angle === undefined) next.angle = 0;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "falls back to automatic"
+      ],
+      "expect": "\\(fail\\).*falls back to automatic"
+    },
+    {
+      "id": "W-180/auto-stop-not-spread",
+      "requirement": "W-180",
+      "description": "Automatic stop locations aren't spread by the stop's place in the list.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "Math.round((index / Math.max(1, count - 1)) * 100)",
+          "replace": "Math.round((1 / Math.max(1, count - 1)) * 100)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "falls back to automatic"
+      ],
+      "expect": "\\(fail\\).*falls back to automatic"
     }
   ]
 }

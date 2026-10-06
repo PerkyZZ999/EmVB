@@ -80,4 +80,42 @@ describe("background controls (W-094)", () => {
     const last = patches.at(-1) ?? {};
     expect("backgroundColor" in last && last.backgroundColor === undefined).toBe(true);
   });
+
+  test("emptying a stop location or the angle falls back to automatic, not 0 (W-180)", async () => {
+    patches.length = 0;
+    const host = await row("backgroundColor", {
+      gradient: {
+        type: "linear",
+        angle: 45,
+        stops: [
+          { color: "#ffffff", at: 10 },
+          { color: "#ff0000", at: 40 },
+          { color: "#000000", at: 90 },
+        ],
+      },
+    });
+    const clear = async (key: string) => {
+      const input = host.querySelector<HTMLInputElement>(`[data-emvb-number="${key}"]`);
+      if (!input) throw new Error(`no ${key} field`);
+      await act(async () => {
+        input.focus();
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(input, "");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await act(async () => {
+        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      });
+      return input;
+    };
+    await clear("gradient.stop.1");
+    expect(patches.at(-1)?.gradient?.stops.map((stop) => stop.at)).toEqual([10, 50, 90]);
+    await clear("gradient.stop.0");
+    expect(patches.at(-1)?.gradient?.stops.map((stop) => stop.at)).toEqual([0, 40, 90]);
+    await clear("gradient.stop.2");
+    expect(patches.at(-1)?.gradient?.stops.map((stop) => stop.at)).toEqual([10, 40, 100]);
+    const angle = await clear("gradient.angle");
+    const gradient = patches.at(-1)?.gradient;
+    expect(gradient ? "angle" in gradient : null).toBe(false);
+    expect(angle.getAttribute("placeholder")).toBe("180");
+  });
 });

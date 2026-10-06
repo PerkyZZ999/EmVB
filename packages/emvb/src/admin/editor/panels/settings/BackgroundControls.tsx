@@ -13,6 +13,14 @@ type Overlay = NonNullable<StyleProps["overlay"]>;
 
 const ANGLE: NumberSpec = { min: 0, max: 360, integer: true, example: "180", suffix: "°" };
 const OVERLAY_OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: "40", suffix: "%" };
+const STOP_AT: NumberSpec = { min: 0, max: 100, integer: true, example: "50", suffix: "%" };
+
+/**
+ * Where a stop goes when its location is cleared: spaced evenly by its place in the list, the way
+ * CSS places stops that have no location (W-180).
+ */
+const autoStopAt = (index: number, count: number) =>
+  Math.round((index / Math.max(1, count - 1)) * 100);
 
 export const NEW_GRADIENT: Gradient = {
   type: "linear",
@@ -234,6 +242,13 @@ export function GradientControl({
   onDesignChange: (design: DesignSystem) => Promise<void>;
 }) {
   const stops = value.stops;
+  const defaultAngle = value.type === "conic" ? 0 : 180;
+  // An emptied angle goes back to the type's default instead of 0 (W-180).
+  const setAngle = (angle: number | undefined) => {
+    const next = { ...value, angle };
+    if (angle === undefined) delete next.angle;
+    onChange(next);
+  };
   const setStop = (index: number, part: Partial<Gradient["stops"][number]>) => {
     onChange({
       ...value,
@@ -285,9 +300,10 @@ export function GradientControl({
           <NumberField
             fieldKey="gradient.angle"
             label="Angle"
-            value={value.angle ?? (value.type === "conic" ? 0 : 180)}
+            value={value.angle}
+            inherited={defaultAngle}
             spec={ANGLE}
-            onCommit={(n) => onChange({ ...value, angle: n ?? 0 })}
+            onCommit={setAngle}
           />
           <input
             type="range"
@@ -295,7 +311,7 @@ export function GradientControl({
             min={0}
             max={360}
             aria-label="Angle slider"
-            value={value.angle ?? (value.type === "conic" ? 0 : 180)}
+            value={value.angle ?? defaultAngle}
             onChange={(event) => onChange({ ...value, angle: Number(event.target.value) })}
           />
         </div>
@@ -313,8 +329,9 @@ export function GradientControl({
             fieldKey={`gradient.stop.${index}`}
             label={`Location ${index + 1}`}
             value={stop.at}
-            spec={{ min: 0, max: 100, integer: true, example: "50", suffix: "%" }}
-            onCommit={(n) => setStop(index, { at: n ?? 0 })}
+            inherited={autoStopAt(index, stops.length)}
+            spec={STOP_AT}
+            onCommit={(n) => setStop(index, { at: n ?? autoStopAt(index, stops.length) })}
           />
           {stops.length > 2 && (
             <Button
