@@ -152,7 +152,9 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-layer-select:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -2px; }
 .emvb-layer-select[aria-current="true"]:focus-visible { outline-color: #fff; }
 .emvb-layer-rename { flex: 1 1 auto; min-width: 0; height: var(--emvb-control); padding: 0 6px; border: 1px solid var(--color-kumo-brand); border-radius: 6px; background: transparent; color: inherit; font: inherit; font-size: 13px; }
-.emvb-layer-preview { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color-kumo-subtle); }
+.emvb-layer-select > svg { flex: none; }
+.emvb-layer-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-layer-preview { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color-kumo-subtle); }
 .emvb-layer-select[aria-current="true"] .emvb-layer-preview { color: inherit; }
 .emvb-canvas { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--color-kumo-canvas); }
 .emvb-device-bar { display: flex; flex: none; align-items: center; justify-content: center; gap: 12px; height: 36px; border-bottom: 1px solid var(--color-kumo-line); background: var(--color-kumo-surface); }

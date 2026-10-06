@@ -329,6 +329,16 @@ describe("Layers content preview (W-143)", () => {
   });
 });
 
+describe("Layers row tooltip (W-168)", () => {
+  test("an unnamed row's tooltip has the type and the preview; a box without text has its type", async () => {
+    await mount(null);
+    const title = (id: string) =>
+      document.querySelector(`[data-emvb-layer="${id}"] .emvb-layer-select`)?.getAttribute("title");
+    expect(title("head0001")).toBe("Heading: One");
+    expect(title("box00001")).toBe("Container");
+  });
+});
+
 describe("renaming a layer (W-157)", () => {
   const renames: [string, string | undefined][] = [];
   afterEach(() => {
@@ -390,7 +400,7 @@ describe("renaming a layer (W-157)", () => {
     expect(field()).toBeNull();
     expect(select("head0001").textContent).toContain("Hero title");
     expect(select("head0001").textContent).not.toContain("Heading");
-    expect(select("head0001").title).toBe("Heading");
+    expect(select("head0001").title).toBe("Hero title (Heading)");
   });
 
   test("F2 renames and Escape cancels; the menu's Rename with an empty name clears it", async () => {

@@ -19752,6 +19752,46 @@
         "adds the element once"
       ],
       "expect": "\\(fail\\).*adds the element once"
+    },
+    {
+      "id": "W-168/unnamed-row-no-tooltip",
+      "requirement": "W-168",
+      "description": "An unnamed Layers row has no tooltip, so its truncated type and preview can't be read in full.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "            title={tooltip}\n",
+          "replace": "            title={node.label ? tooltip : undefined}\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx",
+        "-t",
+        "tooltip has the type and the preview"
+      ],
+      "expect": "\\(fail\\).*tooltip has the type and the preview"
+    },
+    {
+      "id": "W-168/layer-name-wraps",
+      "requirement": "W-168",
+      "description": "A long Layers name wraps to a second line inside the 28 px row instead of ending in an ellipsis.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-layer-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }",
+          "replace": ".emvb-layer-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "ellipsizes on one line"
+      ],
+      "expect": "\\(fail\\).*ellipsizes on one line"
     }
   ]
 }

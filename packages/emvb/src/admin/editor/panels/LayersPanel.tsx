@@ -271,6 +271,12 @@ function LayerRow({
   const typeName = ELEMENT_NAMES[node.type] ?? node.type;
   // A label names the row in place of the type (W-157); the type stays in the tooltip.
   const name = node.label ?? typeName;
+  // Names and previews truncate, so the tooltip carries them in full (DESIGN.md, W-168).
+  const tooltip = node.label
+    ? `${node.label} (${typeName})`
+    : preview
+      ? `${typeName}: ${preview}`
+      : typeName;
   const hasChildren = isParentNode(node) && node.children.length > 0;
   const [renaming, setRenaming] = React.useState(false);
   const startRename = () => {
@@ -324,7 +330,7 @@ function LayerRow({
             type="button"
             className="emvb-layer-select"
             aria-current={selected ? "true" : undefined}
-            title={node.label ? typeName : undefined}
+            title={tooltip}
             data-emvb-layer-label={node.label ? "" : undefined}
             onDoubleClick={startRename}
             onKeyDown={(event) => {
@@ -347,7 +353,7 @@ function LayerRow({
             onClick={() => actions.onSelect(node.id)}
           >
             <Icon size={16} aria-hidden="true" />
-            <span>{name}</span>
+            <span className="emvb-layer-name">{name}</span>
             {preview ? <span className="emvb-layer-preview">{preview}</span> : null}
             {hasStateStyles(node) && <StateDot />}
           </button>

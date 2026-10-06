@@ -40,3 +40,12 @@ test("the Site styles actions wrap on their own row and the title takes the free
   expect(actions).toMatch(/flex-wrap: wrap;/);
   expect(rule(".emvb-site-styles-titles")).toMatch(/flex: 1 1 auto;/);
 });
+
+test("a long Layers name ellipsizes on one line instead of wrapping (W-168)", () => {
+  const name = rule(".emvb-layer-name");
+  expect(name).toMatch(/white-space: nowrap;/);
+  expect(name).toMatch(/text-overflow: ellipsis;/);
+  expect(name).toMatch(/overflow: hidden;/);
+  expect(name).toMatch(/min-width: 0;/);
+  expect(rule(".emvb-layer-select > svg")).toMatch(/flex: none;/);
+});
