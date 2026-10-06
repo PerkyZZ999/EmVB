@@ -20632,6 +20632,46 @@
         "only fills an empty type"
       ],
       "expect": "\\(fail\\).*only fills an empty type"
+    },
+    {
+      "id": "W-185/no-hover-rise",
+      "requirement": "W-185",
+      "description": "Stacked floats stay at one z-index, so a covered Close cannot be clicked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": ".emvb-float:hover,.emvb-float:focus-within{z-index:9001}",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/float.test.ts",
+        "-t",
+        "rises above another"
+      ],
+      "expect": "\\(fail\\).*rises above another"
+    },
+    {
+      "id": "W-185/wrong-z",
+      "requirement": "W-185",
+      "description": "Hover rise uses a z-index at or below the resting float stack.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": ".emvb-float:hover,.emvb-float:focus-within{z-index:9001}",
+          "replace": ".emvb-float:hover,.emvb-float:focus-within{z-index:9000}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/float.test.ts",
+        "-t",
+        "rises above another"
+      ],
+      "expect": "\\(fail\\).*rises above another"
     }
   ]
 }

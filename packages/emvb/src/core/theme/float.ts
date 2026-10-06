@@ -46,7 +46,7 @@ export function validateFloatSettings(raw: unknown): FloatValidation {
  * Bars reserve their height through the two custom properties the runtime sets.
  */
 export const FLOAT_CHROME_CSS = `
-.emvb-float{position:fixed;z-index:9000;box-sizing:border-box;max-width:100%;display:flex;align-items:flex-start;gap:.35rem}
+.emvb-float{position:fixed;z-index:9000;box-sizing:border-box;max-width:100%;display:flex;align-items:flex-start;gap:.35rem}.emvb-float:hover,.emvb-float:focus-within{z-index:9001}
 .emvb-float[hidden]{display:none!important}
 .emvb-float--top{top:0;inset-inline:0}
 .emvb-float--bottom{bottom:0;inset-inline:0}

@@ -22,6 +22,10 @@ describe("float settings", () => {
     expect(bad.ok).toBe(false);
   });
 
+  test("a hovered or focused float rises above another on the same edge (W-185)", () => {
+    expect(FLOAT_CHROME_CSS).toContain(".emvb-float:hover,.emvb-float:focus-within{z-index:9001}");
+  });
+
   test("markup pins the edge and adds a close button only when dismiss is on", () => {
     const open = wrapFloatMarkup("float1", "Sale", "<p>Half off</p>", {
       schemaVersion: 1,
