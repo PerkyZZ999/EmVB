@@ -145,6 +145,23 @@ function oklchLightness(raw: string): number {
  * C is 0–0.5 (or a percent of 0.4, as in CSS), H is 0–360.
  */
 export function parseOklch(text: string): Rgba | null {
+  const oklch = readOklch(text);
+  return oklch ? oklchToRgba(oklch) : null;
+}
+
+/**
+ * Whether a typed OKLCH colour lies outside sRGB, so saving it as hex clipped a channel (W-183).
+ * The slack is half an 8-bit step, so a value EmVB formatted itself never counts as clipped.
+ */
+export function oklchClipped(text: string): boolean {
+  const oklch = readOklch(text);
+  if (!oklch) return false;
+  const rad = (oklch.h * Math.PI) / 180;
+  const linear = oklabToLinearSrgb(oklch.l / 100, oklch.c * Math.cos(rad), oklch.c * Math.sin(rad));
+  return linear.some((v) => v < -0.00015 || v > 1.0045);
+}
+
+function readOklch(text: string): Oklch | null {
   const parts = text
     .trim()
     .replace(/^oklch\(/i, "")
@@ -174,5 +191,5 @@ export function parseOklch(text: string): Rgba | null {
       a = n;
     }
   }
-  return oklchToRgba({ l, c, h, a });
+  return { l, c, h, a };
 }

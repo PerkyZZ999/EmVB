@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import * as React from "react";
 import { act } from "react";
 import type { DesignSystem, StyleProps } from "../../../core/index.ts";
 import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
@@ -273,6 +274,57 @@ describe("colour field: label, swatches and Custom color (W-136)", () => {
       "Enter lightness 0–100 (or 0–1), chroma 0–0.5 and hue 0–360, such as 62.8, 0.150, 29.",
     );
     expect(view.values).toEqual([]);
+  });
+
+  test("an out-of-gamut OKLCH entry saves the clipped hex and says it was clipped (W-183)", async () => {
+    const view = await control("#c2410c");
+    const hint = () => document.querySelector("[data-emvb-clipped]")?.textContent ?? null;
+    await view.type("OKLCH", "62.8, 0.4, 29");
+    await view.enter("OKLCH");
+    expect(view.values).toEqual(["#ff0000"]);
+    expect(hint()).toBe(
+      "Clipped to #ff0000: that OKLCH colour is outside sRGB, so its out-of-range channels were cut to fit.",
+    );
+    await view.type("OKLCH", "62.8, 0.1, 29");
+    await view.enter("OKLCH");
+    expect(view.values).toHaveLength(2);
+    expect(hint()).toBeNull();
+  });
+
+  test("the clipped hint stays when the saved colour comes back and remounts the field (W-183)", async () => {
+    function Live() {
+      const [value, setValue] = React.useState<StyleProps["color"]>("#c2410c");
+      return (
+        <ColorControl
+          label="Text color"
+          value={value}
+          design={DESIGN}
+          onChange={setValue}
+          onDesignChange={async () => {}}
+        />
+      );
+    }
+    const host = await mount(<Live />);
+    const label = [...host.querySelectorAll("label")].find(
+      (l) => l.textContent?.trim() === "OKLCH",
+    );
+    const input = document.getElementById(label?.getAttribute("for") ?? "");
+    if (!(input instanceof HTMLInputElement)) throw new Error("no OKLCH field");
+    await act(async () => {
+      input.focus();
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+        input,
+        "62.8, 0.4, 29",
+      );
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    });
+    await settle();
+    expect(host.querySelector("[data-emvb-clipped]")?.textContent ?? null).toStartWith(
+      "Clipped to #ff0000:",
+    );
   });
 
   test("the browser's picker previews while dragging and applies when its dialog closes", async () => {

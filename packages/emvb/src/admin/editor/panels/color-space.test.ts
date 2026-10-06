@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { formatOklch, formatRgb, parseHex, parseOklch, parseRgb, toHex } from "./color-space.ts";
+import {
+  formatOklch,
+  formatRgb,
+  oklchClipped,
+  parseHex,
+  parseOklch,
+  parseRgb,
+  toHex,
+} from "./color-space.ts";
 
 function must<T>(value: T | null): T {
   if (value === null) throw new Error("expected a colour");
@@ -38,5 +46,26 @@ describe("colour notations (W-160)", () => {
     expect(hex("oklch(101% 0 0)")).toBeNull();
     // The darkest colour EmVB shows (L 3.038) is still read as 0–100.
     expect(hex(formatOklch(must(parseHex("#000001"))))).toBe("#000001");
+  });
+
+  test("an OKLCH colour outside sRGB counts as clipped; one EmVB formatted never does (W-183)", () => {
+    expect(oklchClipped("62.8, 0.4, 29")).toBe(true);
+    expect(toHex(must(parseOklch("62.8, 0.4, 29")))).toBe("#ff0000");
+    expect(oklchClipped("oklch(0.9 0.3 140)")).toBe(true);
+    expect(oklchClipped("62.8, 0.1, 29")).toBe(false);
+    expect(oklchClipped("nope")).toBe(false);
+    for (const hex of [
+      "#000000",
+      "#ffffff",
+      "#ff0000",
+      "#00ff00",
+      "#0000ff",
+      "#ffff00",
+      "#c2410c",
+      "#010101",
+      "#fefefe",
+    ]) {
+      expect([hex, oklchClipped(formatOklch(must(parseHex(hex))))]).toEqual([hex, false]);
+    }
   });
 });

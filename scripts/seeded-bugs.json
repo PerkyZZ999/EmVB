@@ -20512,6 +20512,66 @@
         "names the first bad path"
       ],
       "expect": "\\(fail\\).*names the first bad path"
+    },
+    {
+      "id": "W-183/never-clipped",
+      "requirement": "W-183",
+      "description": "An out-of-gamut OKLCH entry is saved clipped with no hint.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "onClipped(oklchClipped(text) ? hex : null);",
+          "replace": "onClipped(null);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "says it was clipped"
+      ],
+      "expect": "\\(fail\\).*says it was clipped"
+    },
+    {
+      "id": "W-183/no-slack",
+      "requirement": "W-183",
+      "description": "Gamut detection has no rounding slack, so EmVB's own OKLCH text can count as clipped.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/color-space.ts",
+          "search": "v < -0.00015 || v > 1.0045",
+          "replace": "v < 0 || v > 1"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-space.test.ts",
+        "-t",
+        "counts as clipped"
+      ],
+      "expect": "\\(fail\\).*counts as clipped"
+    },
+    {
+      "id": "W-183/hint-on-value",
+      "requirement": "W-183",
+      "description": "The clipped hint compares against the stored value, so it never shows until a re-render.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "clipped !== null && clipped === draft && !error",
+          "replace": "clipped !== null && clipped === value && !error"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "says it was clipped"
+      ],
+      "expect": "\\(fail\\).*says it was clipped"
     }
   ]
 }

@@ -5,7 +5,15 @@ import { slugify, type DesignSystem, type StyleProps } from "../../../core/index
 
 type ColorValue = StyleProps["color"];
 import { BUTTON, FIELD } from "../../ui.ts";
-import { formatOklch, formatRgb, parseHex, parseOklch, parseRgb, toHex } from "./color-space.ts";
+import {
+  formatOklch,
+  formatRgb,
+  oklchClipped,
+  parseHex,
+  parseOklch,
+  parseRgb,
+  toHex,
+} from "./color-space.ts";
 import { pickerHex } from "./variable-values.ts";
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -65,6 +73,9 @@ export function ColorControl({
   const bound = value && typeof value === "object" ? colors.find((c) => c.id === value.var) : null;
   const [creating, setCreating] = React.useState(false);
   const [customOpen, setCustomOpen] = React.useState(false);
+  // The hex an out-of-gamut OKLCH entry was clipped to. It lives here because committing a custom
+  // colour remounts CustomColor (W-183).
+  const [clipped, setClipped] = React.useState<string | null>(null);
   const custom = typeof value === "string" ? value : null;
   const showCustom = custom !== null || customOpen;
 
@@ -141,7 +152,14 @@ export function ColorControl({
         </div>
       )}
       {showCustom && (
-        <CustomColor key={custom ?? "new"} value={custom ?? ""} label={label} onCommit={onChange} />
+        <CustomColor
+          key={custom ?? "new"}
+          value={custom ?? ""}
+          label={label}
+          clipped={clipped}
+          onClipped={setClipped}
+          onCommit={onChange}
+        />
       )}
       {bound && (
         <VariableValue
@@ -190,10 +208,14 @@ export function ColorControl({
 function CustomColor({
   value,
   label,
+  clipped,
+  onClipped,
   onCommit,
 }: {
   value: string;
   label: string;
+  clipped: string | null;
+  onClipped: (hex: string | null) => void;
   onCommit: (hex: string) => void;
 }) {
   const [draft, setDraft] = React.useState(value);
@@ -280,10 +302,17 @@ function CustomColor({
           }
           setError(null);
           const hex = toHex(next);
+          onClipped(oklchClipped(text) ? hex : null);
           setDraft(hex);
           onCommit(hex);
         }}
       />
+      {clipped !== null && clipped === draft && !error && (
+        <p className="emvb-helper" role="status" data-emvb-clipped="">
+          Clipped to {clipped}: that OKLCH colour is outside sRGB, so its out-of-range channels were
+          cut to fit.
+        </p>
+      )}
     </div>
   );
 }
