@@ -60,6 +60,8 @@ export const REASONS = {
   onlyTabPanels: "Tabs can only hold tab panels.",
   itemOutsideAccordion: "Accordion items can only go inside an Accordion.",
   onlyAccordionItems: "An accordion can only hold accordion items.",
+  itemOutsideMenu: "Menu items can only go inside a Menu.",
+  onlyMenuItems: "A menu can only hold menu items.",
 } as const;
 
 const refuse = (reason: string): Refusal => ({ ok: false, reason });
@@ -134,6 +136,15 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
   [
     ({ node, into }) => into.node.type === "accordion" && node.type !== "accordion-item",
     REASONS.onlyAccordionItems,
+  ],
+  [
+    ({ node, into }) =>
+      node.type === "menu-item" && into.node.type !== "menu" && into.node.type !== "menu-item",
+    REASONS.itemOutsideMenu,
+  ],
+  [
+    ({ node, into }) => into.node.type === "menu" && node.type !== "menu-item",
+    REASONS.onlyMenuItems,
   ],
   [
     ({ node, into, layout }) => isFormNode(node) && underForm(layout, into.node.id),

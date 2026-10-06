@@ -247,6 +247,28 @@ export const AccordionItemNode = parentNode(
   }),
 );
 
+/** A row or column of menu items. Dropdowns and wide panels are the items' children (W-162). */
+export const MenuNode = parentNode(
+  "menu",
+  z.strictObject({
+    direction: z.enum(["row", "column"]),
+    /** Names the navigation landmark. Omitted uses "Menu". */
+    label: z.string().max(80).optional(),
+  }),
+);
+
+/** A link, and, when it has children, the dropdown or wide panel under it. */
+export const MenuItemNode = parentNode(
+  "menu-item",
+  z.strictObject({
+    text: z.string().min(1).max(MAX_TEXT_LENGTH),
+    href: z.string().max(2000).optional(),
+    newTab: z.boolean().optional(),
+    /** The panel stretches across the menu instead of sitting under the item. */
+    wide: z.boolean().optional(),
+  }),
+);
+
 export const SvgNode = leafNode(
   "svg",
   z.strictObject({
@@ -411,6 +433,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "tab-panel",
   "accordion",
   "accordion-item",
+  "menu",
+  "menu-item",
   "layout-section",
 ] as const;
 
@@ -477,6 +501,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   SectionNode,
   AccordionNode,
   AccordionItemNode,
+  MenuNode,
+  MenuItemNode,
 ]);
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
@@ -723,6 +749,36 @@ export type AccordionNode = {
   children: LayoutNode[];
 };
 
+export type MenuNode = {
+  id: IdOf;
+  type: "menu";
+  props: { direction: "row" | "column"; label?: string };
+  style?: StyleOf;
+  states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
+  label?: string;
+  children: LayoutNode[];
+};
+
+export type MenuItemNode = {
+  id: IdOf;
+  type: "menu-item";
+  props: { text: string; href?: string; newTab?: boolean; wide?: boolean };
+  style?: StyleOf;
+  states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
+  label?: string;
+  children: LayoutNode[];
+};
+
 export type AccordionItemNode = {
   id: IdOf;
   type: "accordion-item";
@@ -776,6 +832,8 @@ export type LayoutNode =
   | PostAuthorNode
   | AccordionNode
   | AccordionItemNode
+  | MenuNode
+  | MenuItemNode
   | UnknownNode;
 
 /**
@@ -852,7 +910,8 @@ export const isLayoutParentNode = (
   | GridNode
   | TabPanelNode
   | SectionNode
-  | AccordionItemNode =>
+  | AccordionItemNode
+  | MenuItemNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -860,7 +919,8 @@ export const isLayoutParentNode = (
   node.type === "grid" ||
   node.type === "tab-panel" ||
   node.type === "section" ||
-  node.type === "accordion-item";
+  node.type === "accordion-item" ||
+  node.type === "menu-item";
 
 /** Nodes that may hold children. */
 export const isParentNode = (
@@ -877,7 +937,9 @@ export const isParentNode = (
   | TabsNode
   | TabPanelNode
   | AccordionNode
-  | AccordionItemNode =>
+  | AccordionItemNode
+  | MenuNode
+  | MenuItemNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -889,7 +951,9 @@ export const isParentNode = (
   node.type === "tabs" ||
   node.type === "tab-panel" ||
   node.type === "accordion" ||
-  node.type === "accordion-item";
+  node.type === "accordion-item" ||
+  node.type === "menu" ||
+  node.type === "menu-item";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

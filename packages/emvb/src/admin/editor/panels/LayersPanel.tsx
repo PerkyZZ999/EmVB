@@ -154,6 +154,7 @@ const PREVIEW_PROP: Partial<Record<string, string>> = {
   button: "text",
   "accordion-item": "summary",
   "tab-panel": "label",
+  "menu-item": "text",
 };
 
 /** The first line of the element's own text, or undefined when it has none. */

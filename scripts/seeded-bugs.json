@@ -19512,6 +19512,66 @@
         "reserves"
       ],
       "expect": "\\(fail\\).*reserves"
+    },
+    {
+      "id": "W-162/menu-panel-dropped",
+      "requirement": "R-031",
+      "description": "a menu item with children renders no dropdown panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "const panelClass = wide ? \"emvb-menu-panel emvb-menu-panel--wide\" : \"emvb-menu-panel\";",
+          "replace": "const panelClass = wide ? \"emvb-menu-wide\" : \"emvb-menu-plain\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/menu.test.ts",
+        "-t",
+        "opens a panel"
+      ],
+      "expect": "\\(fail\\).*opens a panel"
+    },
+    {
+      "id": "W-162/menu-item-drops-anywhere",
+      "requirement": "R-003",
+      "description": "a menu item can be dropped outside a menu",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "node.type === \"menu-item\" && into.node.type !== \"menu\" && into.node.type !== \"menu-item\"",
+          "replace": "false"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/menu.test.ts",
+        "-t",
+        "only drops inside"
+      ],
+      "expect": "\\(fail\\).*only drops inside"
+    },
+    {
+      "id": "W-162/menu-stays-closed",
+      "requirement": "R-031",
+      "description": "selecting inside a menu does not open its panel on the canvas",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/tab-reveal.ts",
+          "search": ":scope > .emvb-menu-item__bar > details",
+          "replace": ":scope > details"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/menu-reveal.test.ts",
+        "-t",
+        "opens its panel"
+      ],
+      "expect": "\\(fail\\).*opens its panel"
     }
   ]
 }

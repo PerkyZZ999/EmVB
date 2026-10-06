@@ -31,6 +31,7 @@ import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import type { VNode } from "../render/vnode.ts";
 
 import type { ElementDefinition } from "./definition.ts";
+import { menu, menuItem } from "./menu.ts";
 import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
 import {
   loop,
@@ -822,6 +823,8 @@ export const ELEMENTS = {
   "tab-panel": tabPanel,
   accordion,
   "accordion-item": accordionItem,
+  menu,
+  "menu-item": menuItem,
 } as const;
 
 export type ElementType = keyof typeof ELEMENTS;

@@ -235,6 +235,9 @@ const ITEM_NOTES: Record<string, string> = {
     "The item's content is the elements in its body. Select this item, then add elements, or drag them into its body on the canvas.",
   "tab-panel":
     "The tab's content is the elements in its panel. Select this tab, then add elements, or drag them into its panel on the canvas.",
+  menu: "Add Menu items. An item that holds other elements opens a dropdown. Wide panel stretches that dropdown across the menu.",
+  "menu-item":
+    "The label is the link. Elements inside this item are its dropdown. Wide panel stretches the dropdown across the menu.",
 };
 
 const FORM_TYPES = new Set([

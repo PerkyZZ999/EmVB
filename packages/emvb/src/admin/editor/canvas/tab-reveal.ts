@@ -67,3 +67,35 @@ export function revealInAccordions(
     item.open = true;
   }
 }
+
+/**
+ * Opens the menu disclosures that hold element `id` on the canvas, and closes the ones it
+ * opened before once the selection leaves them. The public page stays closed until the visitor
+ * opens it.
+ */
+export function revealInMenus(doc: Document, id: string | null): void {
+  const element = id ? doc.querySelector(`[data-emvb-id="${CSS.escape(id)}"]`) : null;
+  const holders = new Set<HTMLDetailsElement>();
+  for (
+    let item = element?.closest("li.emvb-menu-item");
+    item;
+    item = item.parentElement?.closest("li.emvb-menu-item")
+  ) {
+    const details = item.querySelector<HTMLDetailsElement>(
+      ":scope > .emvb-menu-item__bar > details",
+    );
+    if (details) holders.add(details);
+  }
+  for (const details of doc.querySelectorAll<HTMLDetailsElement>(
+    `details.emvb-menu-item__disclosure[${AUTO_OPEN}]`,
+  )) {
+    if (holders.has(details)) continue;
+    details.removeAttribute(AUTO_OPEN);
+    details.open = false;
+  }
+  for (const details of holders) {
+    if (details.open) continue;
+    details.setAttribute(AUTO_OPEN, "");
+    details.open = true;
+  }
+}

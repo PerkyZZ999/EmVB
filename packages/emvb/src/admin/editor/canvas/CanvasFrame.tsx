@@ -35,7 +35,7 @@ import {
   type InvalidDrop,
 } from "./SelectionOverlay.tsx";
 import { applyStatePreview, type StatePreview } from "./state-preview.ts";
-import { revealInAccordions, revealInTabs } from "./tab-reveal.ts";
+import { revealInAccordions, revealInMenus, revealInTabs } from "./tab-reveal.ts";
 import { CanvasTextEdit } from "./CanvasTextEdit.tsx";
 import { vnodeToReact } from "./vnode-react.tsx";
 import type { ClipboardActions, PasteRefusal } from "../useClipboardActions.ts";
@@ -435,6 +435,7 @@ export function CanvasFrame({
       const item = layout ? findNode(layout, itemId) : undefined;
       return item?.type === "accordion-item" && item.props.open === true;
     });
+    revealInMenus(doc, selectedId);
   }, [doc, selectedId, vnode, layout]);
   const previewId = statePreview?.id === selectedId ? statePreview.id : null;
   const previewState = previewId ? statePreview?.state : undefined;

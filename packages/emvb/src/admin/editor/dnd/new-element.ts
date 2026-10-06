@@ -76,6 +76,26 @@ export function newElement(type: string, random?: () => number): LayoutNode | nu
       children: [panel("Tab 1", "First tab"), panel("Tab 2", "Second tab")],
     };
   }
+  if (type === "menu") {
+    const menuNode = defaultElement("menu", newNodeId(random));
+    const item = (text: string, href: string, children: LayoutNode[] = []): LayoutNode => ({
+      id: newNodeId(random),
+      type: "menu-item",
+      props: { text, href },
+      children,
+    });
+    return {
+      ...menuNode,
+      children: [
+        item("Home", "/"),
+        item("Work", "/work", [
+          item("Selected", "/work/selected"),
+          item("Archive", "/work/archive"),
+        ]),
+        item("About", "/about"),
+      ],
+    };
+  }
   if (type === "accordion") {
     const accordion = defaultElement("accordion", newNodeId(random));
     return {
