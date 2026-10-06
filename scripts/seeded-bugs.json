@@ -20312,6 +20312,26 @@
         "schema checks"
       ],
       "expect": "\\(fail\\).*schema checks"
+    },
+    {
+      "id": "W-178/menu-selected-item",
+      "requirement": "W-178",
+      "description": "A new Menu's Work dropdown starts with the confusing \"Selected\" item again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "item(\"Projects\", \"/work/projects\"),",
+          "replace": "item(\"Selected\", \"/work/selected\"),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx",
+        "-t",
+        "real site menu"
+      ],
+      "expect": "\\(fail\\).*real site menu"
     }
   ]
 }

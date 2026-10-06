@@ -8,6 +8,7 @@ import {
   isContainerNode,
   parentOf,
   type Layout,
+  type LayoutNode,
   validateLayout,
 } from "../../../core/index.ts";
 import { newElement } from "../dnd/new-element.ts";
@@ -96,6 +97,20 @@ describe("Add panel (W-018)", () => {
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }).ok,
     ).toBe(true);
+  });
+
+  test("a new Menu reads as a real site menu: Work opens Projects and Archive (W-178)", () => {
+    const node = newElement("menu");
+    const labels = (n: LayoutNode | null | undefined): string[] =>
+      n && "children" in n && n.children
+        ? n.children.map((child) => {
+            const text = String((child.props as { text?: string }).text);
+            const kids = labels(child);
+            return kids.length > 0 ? `${text} (${kids.join(", ")})` : text;
+          })
+        : [];
+    expect(labels(node)).toEqual(["Home", "Work (Projects, Archive)", "About"]);
+    expect(JSON.stringify(node).includes("Selected")).toBe(false);
   });
 
   test("clicking a tile calls onAdd with that type", async () => {

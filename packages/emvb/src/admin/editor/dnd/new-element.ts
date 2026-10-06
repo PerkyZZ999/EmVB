@@ -89,7 +89,7 @@ export function newElement(type: string, random?: () => number): LayoutNode | nu
       children: [
         item("Home", "/"),
         item("Work", "/work", [
-          item("Selected", "/work/selected"),
+          item("Projects", "/work/projects"),
           item("Archive", "/work/archive"),
         ]),
         item("About", "/about"),
