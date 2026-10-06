@@ -27,6 +27,7 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "section", label: "Sections" },
   { value: "page_template", label: "Page templates" },
   { value: "popup", label: "Popups" },
+  { value: "float", label: "Floats" },
 ];
 
 function countByType(items: readonly { partType: ThemePartType }[]): Map<Filter, number> {
@@ -139,7 +140,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
           <Empty
             icon={<SquaresFourIcon size={32} aria-hidden="true" />}
             title="No site parts yet"
-            description="Create a Header, Footer, content template, or Popup."
+            description="Create a Header, Footer, content template, Popup, or Float."
             contents={newPart}
           />
         </div>

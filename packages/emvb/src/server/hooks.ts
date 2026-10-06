@@ -2,6 +2,7 @@ import { ContentSaveRejectedError, type ContentHookEvent, type PluginContext } f
 import {
   summarizeIssues,
   validateConditions,
+  validateFloatSettings,
   validateLayout,
   validateTriggers,
 } from "../core/index.ts";
@@ -36,6 +37,13 @@ const THEME_PART_FIELDS: [string, (raw: unknown) => FieldValidation][] = [
     (raw) => {
       const result = validateTriggers(raw);
       return result.ok ? { ok: true, value: result.triggers } : result;
+    },
+  ],
+  [
+    "float",
+    (raw) => {
+      const result = validateFloatSettings(raw);
+      return result.ok ? { ok: true, value: result.settings } : result;
     },
   ],
 ];

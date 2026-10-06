@@ -136,16 +136,16 @@ describe("ThemePartList", () => {
     expect((document.activeElement as HTMLElement | null)?.id).toBe("emvb-theme-filter-header");
     await press("ArrowLeft");
     await press("ArrowLeft");
-    expect(selected()).toEqual(["Popups"]);
+    expect(selected()).toEqual(["Floats"]);
     await press("Home");
     expect(selected()).toEqual(["All"]);
     await press("End");
-    expect(selected()).toEqual(["Popups"]);
-    expect((document.activeElement as HTMLElement | null)?.id).toBe("emvb-theme-filter-popup");
+    expect(selected()).toEqual(["Floats"]);
+    expect((document.activeElement as HTMLElement | null)?.id).toBe("emvb-theme-filter-float");
     expect(await press("a")).toBe(false);
-    expect(selected()).toEqual(["Popups"]);
+    expect(selected()).toEqual(["Floats"]);
     const panel = host.querySelector('[role="tabpanel"]');
-    expect(panel?.getAttribute("aria-labelledby")).toBe("emvb-theme-filter-popup");
+    expect(panel?.getAttribute("aria-labelledby")).toBe("emvb-theme-filter-float");
     expect(tabs().every((t) => t.getAttribute("aria-controls") === panel?.id)).toBe(true);
   });
 
@@ -165,6 +165,7 @@ describe("ThemePartList", () => {
       "Sections",
       "Page templates",
       "Popups1",
+      "Floats",
     ]);
   });
 });

@@ -11,6 +11,7 @@ export const THEME_PART_TYPES = [
   "section",
   "page_template",
   "popup",
+  "float",
 ] as const;
 
 export type ThemePartType = (typeof THEME_PART_TYPES)[number];
@@ -52,6 +53,7 @@ export const THEME_PART_TYPE_LABELS: Record<ThemePartType, string> = {
   section: "Section",
   page_template: "Page template",
   popup: "Popup",
+  float: "Float",
 };
 
 export function isThemePartType(value: unknown): value is ThemePartType {

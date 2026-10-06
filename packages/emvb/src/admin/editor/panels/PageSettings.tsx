@@ -1,7 +1,12 @@
-import { Collapsible, Input, Select } from "@cloudflare/kumo";
+import { Collapsible, Input, Select, Switch } from "@cloudflare/kumo";
 import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { THEME_PART_TYPE_LABELS } from "../../../core/index.ts";
+import {
+  defaultFloatSettings,
+  FLOAT_EDGES,
+  THEME_PART_TYPE_LABELS,
+  type FloatEdge,
+} from "../../../core/index.ts";
 import type { PageDraft } from "../../content-api.ts";
 import { FIELD } from "../../ui.ts";
 import type { PagePatch } from "../store.ts";
@@ -52,6 +57,12 @@ export function PageSettings({
           <TriggersEditor
             triggers={page.triggers}
             onChange={(triggers) => onChange({ triggers })}
+          />
+        )}
+        {page.partType === "float" && (
+          <FloatSettingsFields
+            settings={page.float ?? defaultFloatSettings()}
+            onChange={(float) => onChange({ float })}
           />
         )}
       </div>
@@ -121,6 +132,56 @@ export function PageSettings({
           />
         </Collapsible.Panel>
       </Collapsible.Root>
+    </div>
+  );
+}
+
+const FLOAT_EDGE_LABELS: Record<FloatEdge, string> = {
+  top: "Top bar",
+  bottom: "Bottom bar",
+  "start-top": "Corner, top start",
+  "end-top": "Corner, top end",
+  "start-bottom": "Corner, bottom start",
+  "end-bottom": "Corner, bottom end",
+};
+
+/** Edge and close button for a Float theme part. The layout itself is the bar or button. */
+function FloatSettingsFields({
+  settings,
+  onChange,
+}: {
+  settings: NonNullable<PageDraft["float"]>;
+  onChange: (settings: NonNullable<PageDraft["float"]>) => void;
+}) {
+  return (
+    <div data-emvb-panel="float">
+      <Select
+        label="Place"
+        className={FIELD}
+        value={settings.edge}
+        onValueChange={(value) => {
+          const edge = FLOAT_EDGES.find((item) => item === value);
+          if (edge) onChange({ ...settings, edge });
+        }}
+        renderValue={(value: unknown) => FLOAT_EDGE_LABELS[value as FloatEdge] ?? String(value)}
+      >
+        {FLOAT_EDGES.map((edge) => (
+          <Select.Option key={edge} value={edge}>
+            {FLOAT_EDGE_LABELS[edge]}
+          </Select.Option>
+        ))}
+      </Select>
+      <p className="emvb-helper">
+        A bar stays on that edge and leaves room for the page. A corner sits over the page.
+      </p>
+      <Switch
+        label="Close button"
+        checked={settings.dismiss}
+        onCheckedChange={(checked) => onChange({ ...settings, dismiss: checked === true })}
+      />
+      <p className="emvb-helper">
+        Closing hides it until the next visit. Nothing is stored in a cookie.
+      </p>
     </div>
   );
 }

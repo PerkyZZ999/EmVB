@@ -117,6 +117,7 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
               "section",
               "page_template",
               "popup",
+              "float",
             ],
           },
         },
@@ -158,6 +159,21 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
           },
           "label": "Triggers",
           "slug": "triggers",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "defaultValue": {
+            "dismiss": false,
+            "edge": "top",
+            "schemaVersion": 1,
+          },
+          "label": "Float",
+          "slug": "float",
           "type": "json",
           "validation": null,
         },
@@ -412,6 +428,7 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
               "section",
               "page_template",
               "popup",
+              "float",
             ],
           },
         },
@@ -453,6 +470,21 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
           },
           "label": "Triggers",
           "slug": "triggers",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+      {
+        "body": {
+          "defaultValue": {
+            "dismiss": false,
+            "edge": "top",
+            "schemaVersion": 1,
+          },
+          "label": "Float",
+          "slug": "float",
           "type": "json",
           "validation": null,
         },
@@ -735,6 +767,97 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
       },
     ],
   },
+  "parts float default changed": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts float missing": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "dismiss": false,
+            "edge": "top",
+            "schemaVersion": 1,
+          },
+          "label": "Float",
+          "slug": "float",
+          "type": "json",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "create-field",
+      },
+    ],
+  },
+  "parts float options changed": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "dismiss": false,
+            "edge": "top",
+            "schemaVersion": 1,
+          },
+          "label": "Float",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "float",
+      },
+    ],
+  },
+  "parts float options reordered": {
+    "conflicts": [],
+    "steps": [],
+  },
+  "parts float other type": {
+    "conflicts": [
+      "Field "float" on emvb_theme_parts is string; EmVB needs json.",
+    ],
+    "steps": [],
+  },
+  "parts float other widget": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "dismiss": false,
+            "edge": "top",
+            "schemaVersion": 1,
+          },
+          "label": "Float",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "float",
+      },
+    ],
+  },
+  "parts float required flipped": {
+    "conflicts": [],
+    "steps": [
+      {
+        "body": {
+          "defaultValue": {
+            "dismiss": false,
+            "edge": "top",
+            "schemaVersion": 1,
+          },
+          "label": "Float",
+          "validation": null,
+        },
+        "collection": "emvb_theme_parts",
+        "kind": "update-field",
+        "slug": "float",
+      },
+    ],
+  },
   "parts hidden unset": {
     "conflicts": [],
     "steps": [
@@ -908,6 +1031,7 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
               "section",
               "page_template",
               "popup",
+              "float",
             ],
           },
         },
@@ -936,6 +1060,7 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
               "section",
               "page_template",
               "popup",
+              "float",
             ],
           },
         },
@@ -975,6 +1100,7 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
               "section",
               "page_template",
               "popup",
+              "float",
             ],
           },
         },
@@ -1004,6 +1130,7 @@ exports[`planSetup over collection and field variants matches the snapshot (W-08
               "section",
               "page_template",
               "popup",
+              "float",
             ],
           },
         },

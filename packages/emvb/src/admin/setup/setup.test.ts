@@ -132,7 +132,14 @@ describe("planSetup", () => {
     const themeFields = steps
       .filter((s) => s.kind === "create-field" && s.collection === THEME_PARTS_COLLECTION)
       .map((s) => (s.kind === "create-field" ? s.body.slug : ""));
-    expect(themeFields).toEqual(["title", "layout", "part_type", "conditions", "triggers"]);
+    expect(themeFields).toEqual([
+      "title",
+      "layout",
+      "part_type",
+      "conditions",
+      "triggers",
+      "float",
+    ]);
   });
 
   test("the layout field is bound to the read-only EmVB widget on both collections", () => {
@@ -164,6 +171,7 @@ describe("planSetup", () => {
           "section",
           "page_template",
           "popup",
+          "float",
         ],
       },
     });

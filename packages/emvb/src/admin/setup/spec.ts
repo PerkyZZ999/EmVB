@@ -97,4 +97,11 @@ export const THEME_PARTS_FIELD_SPECS: readonly FieldSpec[] = [
     validation: null,
     defaultValue: DEFAULT_THEME_TRIGGERS,
   },
+  {
+    slug: "float",
+    label: "Float",
+    type: "json",
+    validation: null,
+    defaultValue: { schemaVersion: 1, edge: "top", dismiss: false },
+  },
 ];

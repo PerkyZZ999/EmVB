@@ -94,8 +94,10 @@ describe("resolveThemeParts (R-062)", () => {
       footer: null,
       content: null,
       popups: [],
+      floats: [],
       css: "",
       needsPopupsRuntime: false,
+      needsFloatsRuntime: false,
       needsTabsRuntime: false,
     });
   });
@@ -231,6 +233,25 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.popups[0]?.triggers).toEqual(defaultTriggers());
     expect(resolved.css.endsWith(POPUP_CHROME_CSS)).toBe(true);
     expect(resolved.needsPopupsRuntime).toBe(true);
+  });
+
+  test("a float pins with chrome and can be dismissed; bad settings are skipped", async () => {
+    themeEntries = [
+      part("FLOAT001", "float", [heading("head0001", "We ship Tuesday")], {
+        title: "Tuesday notice",
+        float: { schemaVersion: 1, edge: "bottom", dismiss: true },
+      }),
+      part("FLOAT002", "float", [heading("head0002", "Broken")], { float: "{not json" }),
+    ];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect(resolved.floats.map((item) => item.id)).toEqual(["FLOAT001"]);
+    expect(resolved.floats[0]?.html).toContain('data-emvb-float="FLOAT001"');
+    expect(resolved.floats[0]?.html).toContain("emvb-float--bottom");
+    expect(resolved.floats[0]?.html).toContain('aria-label="Tuesday notice"');
+    expect(resolved.floats[0]?.html).toContain("data-emvb-float-dismiss");
+    expect(resolved.floats[0]?.html).toContain("We ship Tuesday");
+    expect(resolved.needsFloatsRuntime).toBe(true);
+    expect(resolved.css).toContain(".emvb-float{");
   });
 
   test("tabs in any winning part turn on the tabs runtime", async () => {

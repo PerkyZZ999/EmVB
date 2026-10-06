@@ -522,59 +522,59 @@
   "locations": {
     "front": {
       "content": null,
-      "applies": ["header", "footer", "popup"]
+      "applies": ["header", "footer", "popup", "float"]
     },
     "frontPage": {
       "content": null,
-      "applies": ["header", "footer", "popup"]
+      "applies": ["header", "footer", "popup", "float"]
     },
     "notFound": {
       "content": "error_404",
-      "applies": ["header", "footer", "error_404", "popup"]
+      "applies": ["header", "footer", "error_404", "popup", "float"]
     },
     "search": {
       "content": "search_results",
-      "applies": ["header", "footer", "search_results", "popup"]
+      "applies": ["header", "footer", "search_results", "popup", "float"]
     },
     "page": {
       "content": "single_page",
-      "applies": ["header", "footer", "single_page", "popup"]
+      "applies": ["header", "footer", "single_page", "popup", "float"]
     },
     "pageEntry": {
       "content": "single_page",
-      "applies": ["header", "footer", "single_page", "popup"]
+      "applies": ["header", "footer", "single_page", "popup", "float"]
     },
     "post": {
       "content": "single_post",
-      "applies": ["header", "footer", "single_post", "popup"]
+      "applies": ["header", "footer", "single_post", "popup", "float"]
     },
     "otherPost": {
       "content": "single_post",
-      "applies": ["header", "footer", "single_post", "popup"]
+      "applies": ["header", "footer", "single_post", "popup", "float"]
     },
     "postsArchive": {
       "content": "archive",
-      "applies": ["header", "footer", "archive", "popup"]
+      "applies": ["header", "footer", "archive", "popup", "float"]
     },
     "category": {
       "content": "archive",
-      "applies": ["header", "footer", "archive", "popup"]
+      "applies": ["header", "footer", "archive", "popup", "float"]
     },
     "otherCategory": {
       "content": "archive",
-      "applies": ["header", "footer", "archive", "popup"]
+      "applies": ["header", "footer", "archive", "popup", "float"]
     },
     "tag": {
       "content": "archive",
-      "applies": ["header", "footer", "archive", "popup"]
+      "applies": ["header", "footer", "archive", "popup", "float"]
     },
     "other": {
       "content": null,
-      "applies": ["header", "footer", "popup"]
+      "applies": ["header", "footer", "popup", "float"]
     },
     "singularNoCollection": {
       "content": null,
-      "applies": ["header", "footer", "popup"]
+      "applies": ["header", "footer", "popup", "float"]
     }
   },
   "defaults": {
@@ -713,6 +713,18 @@
           "args": {}
         }
       ]
+    },
+    "float": {
+      "schemaVersion": 1,
+      "rules": [
+        {
+          "id": "default-entire-site",
+          "op": "include",
+          "group": "general",
+          "name": "entire_site",
+          "args": {}
+        }
+      ]
     }
   },
   "winners": {
@@ -760,6 +772,10 @@
       "popup": {
         "winner": "popup-c",
         "all": ["popup-b", "popup-c", "popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "frontPage": {
@@ -806,6 +822,10 @@
       "popup": {
         "winner": "popup-c",
         "all": ["popup-b", "popup-c", "popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "notFound": {
@@ -852,6 +872,10 @@
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "search": {
@@ -898,6 +922,10 @@
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "page": {
@@ -944,6 +972,10 @@
       "popup": {
         "winner": "popup-b",
         "all": ["popup-b", "popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "pageEntry": {
@@ -990,6 +1022,10 @@
       "popup": {
         "winner": "popup-b",
         "all": ["popup-b", "popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "post": {
@@ -1036,6 +1072,10 @@
       "popup": {
         "winner": "popup-b",
         "all": ["popup-b", "popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "otherPost": {
@@ -1082,6 +1122,10 @@
       "popup": {
         "winner": "popup-b",
         "all": ["popup-b", "popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "postsArchive": {
@@ -1128,6 +1172,10 @@
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "category": {
@@ -1174,6 +1222,10 @@
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "otherCategory": {
@@ -1220,6 +1272,10 @@
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "tag": {
@@ -1266,6 +1322,10 @@
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "other": {
@@ -1312,6 +1372,10 @@
       "popup": {
         "winner": "popup-a",
         "all": ["popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     },
     "singularNoCollection": {
@@ -1358,6 +1422,10 @@
       "popup": {
         "winner": "popup-b",
         "all": ["popup-b", "popup-a"]
+      },
+      "float": {
+        "winner": null,
+        "all": []
       }
     }
   }

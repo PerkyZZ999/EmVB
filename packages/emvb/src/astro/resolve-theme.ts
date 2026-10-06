@@ -5,14 +5,19 @@ import {
   collectSectionPartIds,
   contentPartTypeForContext,
   defaultConditions,
+  defaultFloatSettings,
   defaultTriggers,
+  FLOAT_CHROME_CSS,
   listMatchingThemeParts,
   parseThemePartType,
   pickThemePartWinner,
   POPUP_CHROME_CSS,
   validateConditions,
+  validateFloatSettings,
   validateTriggers,
+  wrapFloatMarkup,
   wrapPopupMarkup,
+  type FloatSettings,
   type Layout,
   type ThemeDynamicData,
   type ThemePartCandidate,
@@ -42,6 +47,14 @@ export type RenderedPopup = {
   triggers: TriggersDoc;
 };
 
+export type RenderedFloat = {
+  id: string;
+  title: string;
+  html: string;
+  css: string;
+  settings: FloatSettings;
+};
+
 export type ResolvedThemeParts = {
   header: RenderedThemePart | null;
   footer: RenderedThemePart | null;
@@ -52,10 +65,14 @@ export type ResolvedThemeParts = {
   content: RenderedThemePart | null;
   /** Matching published popups for this request (S7b). May be more than one. */
   popups: RenderedPopup[];
+  /** Matching published floats. May be more than one. Not dialogs. */
+  floats: RenderedFloat[];
   /** Concatenated CSS for all winners (empty when none match). */
   css: string;
   /** Hosts load `EmVBPopupsRuntime` only when this is true (R-031). */
   needsPopupsRuntime: boolean;
+  /** Hosts load `EmVBFloatsRuntime` only when a float matches (R-031). */
+  needsFloatsRuntime: boolean;
   /** Hosts load `EmVBTabsRuntime` only when Tabs appear in a winning part (R-031 / W-078). */
   needsTabsRuntime: boolean;
 };
@@ -73,6 +90,7 @@ type StoredPart = {
   layout: unknown;
   conditions: ReturnType<typeof defaultConditions>;
   triggers: TriggersDoc;
+  float: FloatSettings;
   updatedAt: string;
 };
 
@@ -90,6 +108,9 @@ function storedPartFrom(entry: { id: string; data: unknown }): StoredPart | unde
   const triggers = validateTriggers(storedOr(data["triggers"], defaultTriggers));
   // Invalid triggers fail closed for popups; other part types ignore triggers.
   if (partType === "popup" && !triggers.ok) return undefined;
+  const float = validateFloatSettings(storedOr(data["float"], defaultFloatSettings));
+  // Invalid float settings fail closed for floats; other part types ignore them.
+  if (partType === "float" && !float.ok) return undefined;
   return {
     id: String(data["id"] ?? entry.id),
     title: typeof data["title"] === "string" ? data["title"] : "",
@@ -97,6 +118,7 @@ function storedPartFrom(entry: { id: string; data: unknown }): StoredPart | unde
     layout: data["layout"],
     conditions: conditions.conditions,
     triggers: triggers.ok ? triggers.triggers : defaultTriggers(),
+    float: float.ok ? float.settings : defaultFloatSettings(),
     updatedAt: String(data["updatedAt"] ?? data["updated_at"] ?? ""),
   };
 }
@@ -273,8 +295,10 @@ export async function resolveThemeParts(
     footer: null,
     content: null,
     popups: [],
+    floats: [],
     css: "",
     needsPopupsRuntime: false,
+    needsFloatsRuntime: false,
     needsTabsRuntime: false,
   };
 
@@ -293,8 +317,15 @@ export async function resolveThemeParts(
   const contentType = contentPartTypeForContext(context);
   const contentWinner = contentType ? pickThemePartWinner(candidates, contentType, context) : null;
   const popupMatches = listMatchingThemeParts(candidates, "popup", context);
+  const floatMatches = listMatchingThemeParts(candidates, "float", context);
 
-  if (!headerWinner && !footerWinner && !contentWinner && popupMatches.length === 0) {
+  if (
+    !headerWinner &&
+    !footerWinner &&
+    !contentWinner &&
+    popupMatches.length === 0 &&
+    floatMatches.length === 0
+  ) {
     return empty;
   }
 
@@ -356,16 +387,39 @@ export async function resolveThemeParts(
     });
   }
 
-  const cssParts = [header?.css, content?.css, footer?.css, ...popups.map((p) => p.css)];
+  const floats: RenderedFloat[] = [];
+  for (const match of floatMatches) {
+    const stored = byId.get(match.id);
+    if (!stored) continue;
+    const { html, css } = renderOne(stored);
+    floats.push({
+      id: stored.id,
+      title: stored.title,
+      html: wrapFloatMarkup(stored.id, stored.title, html, stored.float),
+      css,
+      settings: stored.float,
+    });
+  }
+
+  const cssParts = [
+    header?.css,
+    content?.css,
+    footer?.css,
+    ...popups.map((p) => p.css),
+    ...floats.map((item) => item.css),
+  ];
   if (popups.length > 0) cssParts.push(POPUP_CHROME_CSS);
+  if (floats.length > 0) cssParts.push(FLOAT_CHROME_CSS);
   const css = cssParts.filter(Boolean).join("\n");
   return {
     header,
     footer,
     content,
     popups,
+    floats,
     css,
     needsPopupsRuntime: popups.length > 0,
+    needsFloatsRuntime: floats.length > 0,
     needsTabsRuntime: rendered.some((page) => page.needsTabsRuntime),
   };
 }

@@ -120,7 +120,14 @@ describe("useSave for theme parts (W-091, R-061, R-063)", () => {
         method: "PUT",
         path: PART,
         body: {
-          data: { title: "Site header", layout, part_type: "footer", conditions, triggers },
+          data: {
+            title: "Site header",
+            layout,
+            part_type: "footer",
+            conditions,
+            triggers,
+            float: { schemaVersion: 1, edge: "top", dismiss: false },
+          },
           slug: "site-header",
           _rev: "r1",
         },
@@ -144,6 +151,7 @@ describe("useSave for theme parts (W-091, R-061, R-063)", () => {
       part_type: "header",
       conditions: { schemaVersion: 1, rules: [] },
       triggers: { schemaVersion: 1, open: [{ type: "page_load" }], advanced: {} },
+      float: { schemaVersion: 1, edge: "top", dismiss: false },
     });
   });
 

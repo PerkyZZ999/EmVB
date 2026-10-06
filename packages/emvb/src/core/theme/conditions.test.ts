@@ -306,6 +306,8 @@ describe("S7c content part types", () => {
     expect(themePartLocationApplies("archive", search)).toBe(false);
     expect(themePartLocationApplies("popup", post)).toBe(true);
     expect(themePartLocationApplies("popup", front)).toBe(true);
+    expect(themePartLocationApplies("float", post)).toBe(true);
+    expect(themePartLocationApplies("float", front)).toBe(true);
     expect(themePartLocationApplies("loop_item", postsArchive)).toBe(false);
     expect(themePartLocationApplies("loop_item", post)).toBe(false);
     expect(themePartLocationApplies("header", notFound)).toBe(true);

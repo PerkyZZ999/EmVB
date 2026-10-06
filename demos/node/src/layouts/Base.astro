@@ -10,6 +10,7 @@ import {
 	themeContextFront,
 	themeContextSearch,
 } from "@perkyzz/emvb/astro";
+import { EmVBFloatsRuntime } from "@perkyzz/emvb/astro/floats";
 import { EmVBPopupsRuntime } from "@perkyzz/emvb/astro/popups";
 import { EmVBTabsRuntime } from "@perkyzz/emvb/astro/tabs";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
@@ -140,7 +141,13 @@ const theme = await resolveThemeParts(Astro, themeCtx);
 				<Fragment set:html={popup.html} />
 			))
 		}
+		{
+			theme.floats.map((float) => (
+				<Fragment set:html={float.html} />
+			))
+		}
 		{theme.needsPopupsRuntime && <EmVBPopupsRuntime />}
+		{theme.needsFloatsRuntime && <EmVBFloatsRuntime />}
 		{theme.needsTabsRuntime && <EmVBTabsRuntime />}
 
 		<EmDashBodyEnd page={pageCtx} />

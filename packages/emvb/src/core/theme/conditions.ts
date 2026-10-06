@@ -190,7 +190,8 @@ export function themePartLocationApplies(
     case "header":
     case "footer":
     case "popup":
-      // Overlays compete on every route; conditions decide (S7b).
+    case "float":
+      // Overlays and floats compete on every route; conditions decide.
       return true;
     case "error_404":
       return ctx.is404;

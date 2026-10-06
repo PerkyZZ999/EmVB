@@ -1,6 +1,7 @@
 import type {
   ConditionsDoc,
   DesignSystem,
+  FloatSettings,
   Layout,
   ThemePartType,
   TriggersDoc,
@@ -69,6 +70,8 @@ export type PageDraft = {
   conditions?: ConditionsDoc;
   /** Popups only — open triggers + thin advanced rules. */
   triggers?: TriggersDoc;
+  /** Floats only — edge and whether a close button is offered. */
+  float?: FloatSettings;
 };
 
 /** Saves the draft with `_rev`, so a concurrent change fails with 409 instead of being overwritten. */

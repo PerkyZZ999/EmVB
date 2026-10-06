@@ -283,6 +283,17 @@ export {
 export { POPUP_CHROME_CSS, wrapPopupMarkup, type PopupPublicConfig } from "./theme/popup-markup.ts";
 
 export {
+  FLOAT_EDGES,
+  defaultFloatSettings,
+  validateFloatSettings,
+  FLOAT_CHROME_CSS,
+  wrapFloatMarkup,
+  type FloatEdge,
+  type FloatSettings,
+  type FloatValidation,
+} from "./theme/float.ts";
+
+export {
   SAMPLE_POST,
   portableTextToVNodes,
   collectLoopItemPartIds,

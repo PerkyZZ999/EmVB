@@ -2603,8 +2603,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/theme/conditions.ts",
-          "search": "case \"popup\":\n      // Overlays compete on every route; conditions decide (S7b).\n      return true;",
-          "replace": "case \"popup\":\n      return false;"
+          "search": "case \"popup\":\n    case \"float\":\n      // Overlays and floats compete on every route; conditions decide.\n      return true;",
+          "replace": "case \"popup\":\n    case \"float\":\n      return false;"
         }
       ],
       "command": [
@@ -19472,6 +19472,46 @@
         "two stops"
       ],
       "expect": "\\(fail\\).*two stops"
+    },
+    {
+      "id": "W-161/float-close-dropped",
+      "requirement": "R-031",
+      "description": "a dismissible float renders no close button",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": "const close = settings.dismiss",
+          "replace": "const close = false"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/float.test.ts",
+        "-t",
+        "close button"
+      ],
+      "expect": "\\(fail\\).*close button"
+    },
+    {
+      "id": "W-161/float-bar-covers-page",
+      "requirement": "R-031",
+      "description": "a top bar does not reserve its height",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/floats/runtime.ts",
+          "search": "root.style.setProperty(\"--emvb-float-top\", `${top}px`);",
+          "replace": "root.style.setProperty(\"--emvb-float-top\", \"0px\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/floats/runtime.test.ts",
+        "-t",
+        "reserves"
+      ],
+      "expect": "\\(fail\\).*reserves"
     }
   ]
 }

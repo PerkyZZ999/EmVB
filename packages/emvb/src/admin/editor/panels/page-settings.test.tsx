@@ -86,6 +86,22 @@ describe("theme part settings (W-091)", () => {
     expect(view.host.querySelector('[data-emvb-panel="conditions"]')).not.toBeNull();
   });
 
+  test("a float offers a place and a close button, and no Triggers", async () => {
+    const view = await settings(
+      {
+        ...PAGE,
+        partType: "float",
+        float: { schemaVersion: 1, edge: "top", dismiss: false },
+      },
+      "theme-part",
+    );
+    expect(view.field("Type")?.value).toBe("Float");
+    expect(view.host.querySelector('[data-emvb-panel="float"]') !== null).toBe(true);
+    expect(view.host.querySelector('[data-emvb-panel="triggers"]') !== null).toBe(false);
+    expect(view.host.textContent?.includes("Top bar")).toBe(true);
+    expect(view.host.textContent?.includes("Close button")).toBe(true);
+  });
+
   test("a footer has conditions but no Triggers", async () => {
     const view = await settings({ ...PAGE, partType: "footer" }, "theme-part");
     expect(view.field("Type")?.value).toBe("Footer");

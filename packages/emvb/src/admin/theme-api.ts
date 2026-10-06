@@ -1,11 +1,13 @@
 import {
   defaultConditionsFor,
+  defaultFloatSettings,
   defaultTriggers,
   parseThemePartType,
   starterLayout,
   THEME_PART_TYPE_LABELS,
   validateLayout,
   type ConditionsDoc,
+  type FloatSettings,
   type Layout,
   type ThemePartType,
   type TriggersDoc,
@@ -39,6 +41,7 @@ export type ThemePartDraft = {
   partType: ThemePartType;
   conditions: ConditionsDoc;
   triggers: TriggersDoc;
+  float: FloatSettings;
   layout: Layout | null;
 };
 
@@ -128,6 +131,7 @@ export async function createThemePart(
         part_type: input.partType,
         conditions: defaultConditionsFor(input.partType),
         triggers: defaultTriggers(),
+        float: defaultFloatSettings(),
       },
       slug: input.slug,
     },
@@ -153,6 +157,7 @@ export async function saveThemePart(
           part_type: draft.partType,
           conditions: draft.conditions,
           triggers: draft.triggers,
+          float: draft.float,
         },
         slug: draft.slug,
         ...(rev ? { _rev: rev } : {}),

@@ -8,9 +8,10 @@ Post-MVP slices **S7a** (Headers/Footers), **S7c** (Error 404, Search Results, S
 |---|---|---|
 | `title` | string | Required |
 | `layout` | json + `emvb:layout` | Same layout schema as Visual pages |
-| `part_type` | select | `header` \| `footer` \| `error_404` \| `search_results` \| `single_page` \| `single_post` \| `archive` \| `loop_item` \| `section` \| `page_template` \| `popup` |
+| `part_type` | select | `header` \| `footer` \| `error_404` \| `search_results` \| `single_page` \| `single_post` \| `archive` \| `loop_item` \| `section` \| `page_template` \| `popup` \| `float` |
 | `conditions` | json | Conditions doc v1 (see below) |
 | `triggers` | json | Triggers doc v1 — meaningful for `popup` (see below) |
+| `float` | json | Float settings v1 — meaningful for `float` (edge and close button) |
 
 No SEO. No public `urlPattern` (parts are not catch-all pages).
 
@@ -29,6 +30,7 @@ No SEO. No public `urlPattern` (parts are not catch-all pages).
 | `section` | Reusable synced block | **Never** a page location; referenced by `section.partId`. Pages render the part's children live |
 | `page_template` | Starting layout for a new page | **Never** a page location. New page copies the layout with fresh ids |
 | `popup` | Overlay dialog at body end | Always competes; conditions decide; **not** a content replace |
+| `float` | Bar or corner pinned to the viewport | Always competes; every match shows; **not** a dialog |
 
 Default Include on create: Entire Site (header/footer/loop_item/section/page_template/popup); 404 page (`error_404`); Search results (`search_results`); Pages all (`single_page`); Posts all (`single_post`); All archives (`archive` — posts index + category/tag; search excluded by location gate).
 
@@ -80,7 +82,7 @@ Default on create: `{ open: [{ type: "page_load" }], advanced: {} }`.
 
 ## Dynamic bindings (S7d)
 
-Public HTML stays JS-free (R-031) **except** when a matching popup is present — then hosts load `emvb/astro/popups` (`EmVBPopupsRuntime`), the same optional pattern as Forms. When resolving a winning `single_post` or `archive` part, `resolveThemeParts` loads EmDash posts and passes `ThemeDynamicData` into `renderPage`:
+Public HTML stays JS-free (R-031) except in two cases: a matching popup loads `emvb/astro/popups` (`EmVBPopupsRuntime`), and a matching float loads `emvb/astro/floats` (`EmVBFloatsRuntime`). Same optional pattern as Forms. When resolving a winning `single_post` or `archive` part, `resolveThemeParts` loads EmDash posts and passes `ThemeDynamicData` into `renderPage`:
 
 | Element | Public output |
 |---|---|
@@ -104,10 +106,16 @@ Hosts call `resolveThemeParts(Astro, ctx)` from `emvb/astro`. Return value:
 - `header` / `footer` — chrome (S7a)
 - `content` — body template when Error 404 / Search / Single Page / Single Post / Archive wins
 - `popups` — array of matching popup HTML (dialog chrome + body) + trigger config (S7b)
-- `css` — concatenated CSS for all winners (includes popup chrome CSS when popups match)
+- `floats` — array of matching float HTML (pinned bar or corner). Not a dialog
+- `css` — concatenated CSS for all winners (includes popup chrome CSS when popups match, and float chrome when floats match)
 - `needsPopupsRuntime` — when true, host renders `<EmVBPopupsRuntime />` from `emvb/astro/popups`
+- `needsFloatsRuntime` — when true, host renders `<EmVBFloatsRuntime />` from `emvb/astro/floats`
 
-Demos' `Base.astro` **replace** the starter `<header>` when a header wins, insert footer HTML after `<main>` when a footer wins, replace `<main>` slot content when `content` wins, and append popup markup before `EmDashBodyEnd` when popups match. Pages without popups load **no** popup JS. Headers/footers/content templates are unchanged by S7b. Helpers: `themeContext404`, `themeContextSearch`, `themeContextFront`, `themeContextFrom`.
+Demos' `Base.astro` **replace** the starter `<header>` when a header wins, insert footer HTML after `<main>` when a footer wins, replace `<main>` slot content when `content` wins, append popup markup before `EmDashBodyEnd` when popups match, and append float markup the same way when floats match. Pages without popups load **no** popup JS. Pages without floats load **no** float JS. Headers/footers/content templates are unchanged. Helpers: `themeContext404`, `themeContextSearch`, `themeContextFront`, `themeContextFrom`.
+
+### Floats (D-048)
+
+A `float` part is a bar or a corner pinned to the viewport. It is not a dialog: no backdrop, no focus trap, `role="region"`. Settings (`float` JSON, schema 1): `edge` (`top`, `bottom`, `start-top`, `end-top`, `start-bottom`, `end-bottom`) and `dismiss` (close button). Start and end follow writing direction. Every matching float shows. Bars on one edge stack and reserve their height (`--emvb-float-top`, `--emvb-float-bottom`). Corners sit 1rem in and do not reserve space. Closing writes `sessionStorage` (`emvb-float-closed:<id>`) for this visit only. Invalid settings skip that part. An existing site needs **Upgrade EmVB** before the field and the type exist.
 
 ### Popup a11y (runtime)
 

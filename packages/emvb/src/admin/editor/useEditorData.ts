@@ -1,7 +1,9 @@
 import * as React from "react";
 import {
   defaultConditions,
+  defaultFloatSettings,
   defaultTriggers,
+  validateFloatSettings,
   emptyDesign,
   parseThemePartType,
   validateConditions,
@@ -10,6 +12,7 @@ import {
   validateTriggers,
   type ConditionsDoc,
   type DesignSystem,
+  type FloatSettings,
   type Layout,
   type ThemePartType,
   type TriggersDoc,
@@ -31,6 +34,7 @@ export type EditorEntry = {
   partType?: ThemePartType;
   conditions?: ConditionsDoc;
   triggers?: TriggersDoc;
+  float?: FloatSettings;
 };
 
 export type LoadedDesign = {
@@ -101,7 +105,15 @@ export async function loadEntry(
     partType: parseThemePartType(data["part_type"]) ?? "header",
     conditions: validated.ok ? validated.conditions : defaultConditions(),
     triggers: triggersValidated.ok ? triggersValidated.triggers : defaultTriggers(),
+    float: readFloat(data["float"]),
   };
+}
+
+function readFloat(raw: unknown): FloatSettings {
+  const validated = validateFloatSettings(
+    raw === undefined || raw === null || raw === "" ? defaultFloatSettings() : raw,
+  );
+  return validated.ok ? validated.settings : defaultFloatSettings();
 }
 
 function readLayout(raw: unknown): Layout | null {

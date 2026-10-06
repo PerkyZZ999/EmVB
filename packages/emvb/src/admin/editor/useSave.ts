@@ -115,6 +115,11 @@ export function useSave(
                     open: [{ type: "page_load" }],
                     advanced: {},
                   },
+                  float: current.page.float ?? {
+                    schemaVersion: 1,
+                    edge: "top",
+                    dismiss: false,
+                  },
                   layout: current.page.layout,
                 },
                 rev,

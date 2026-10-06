@@ -100,6 +100,7 @@ const initialState = (entry: EditorEntry, design: LoadedDesign): EditorState => 
     partType: entry.partType,
     conditions: entry.conditions,
     triggers: entry.triggers,
+    float: entry.float,
   },
   status: entry.status,
   rev: entry.rev,
