@@ -303,6 +303,42 @@ export function insertionPoint(layout: Layout, selectedId: string | null): Place
   return { parentId: layout.root.id, index: layout.root.children.length };
 }
 
+/** Where an Add-panel element went. `after` and `refused` are set when it fell back (W-175). */
+export type Added = {
+  ok: true;
+  layout: Layout;
+  selected: string;
+  parentId: string;
+  fallback?: { after: string; refused: string };
+};
+
+/**
+ * Adds a new element where `insertionPoint` says. When that place refuses it, the element goes
+ * right after the nearest ancestor of that place whose own parent takes it, and `fallback` keeps
+ * the first reason so the editor can say where it went and why (W-175). Refused only when no
+ * ancestor can take it (a form field with no form on the way up, say).
+ */
+export function addNodeNear(
+  layout: Layout,
+  node: LayoutNode,
+  selectedId: string | null,
+): Added | Refusal {
+  const first = insertionPoint(layout, selectedId);
+  const tried = addNode(layout, node, first);
+  if (tried.ok) return { ...tried, parentId: first.parentId };
+  let refusing = locate(layout, first.parentId);
+  while (refusing?.parent) {
+    const place = { parentId: refusing.parent.id, index: refusing.index + 1 };
+    const next = addNode(layout, node, place);
+    if (next.ok) {
+      const fallback = { after: refusing.node.id, refused: tried.reason };
+      return { ...next, parentId: place.parentId, fallback };
+    }
+    refusing = locate(layout, refusing.parent.id);
+  }
+  return tried;
+}
+
 type Child = Located & { parent: NonNullable<Located["parent"]> };
 
 /** Moves a non-root element to where `place` says, or returns the first refusal. */

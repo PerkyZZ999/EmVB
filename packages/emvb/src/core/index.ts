@@ -188,6 +188,7 @@ export {
 export {
   REASONS,
   addNode,
+  addNodeNear,
   canDrop,
   duplicateNode,
   firstChild,

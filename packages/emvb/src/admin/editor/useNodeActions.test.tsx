@@ -4,11 +4,13 @@ import * as React from "react";
 import { act } from "react";
 import {
   CSS_ID_KEPT,
+  defaultElement,
   emptyDesign,
   moveDown,
   moveUp,
   REASONS,
   type Layout,
+  type LayoutNode,
 } from "../../core/index.ts";
 import { container, heading } from "../../../test/fixtures/layouts.ts";
 import type { EditorAction, EditorState } from "./store.ts";
@@ -120,5 +122,35 @@ describe("useNodeActions arrange (R-003)", () => {
     act(() => api.duplicate("root0001"));
     expect(announced).toEqual([REASONS.rootCopy]);
     expect(actions).toEqual([]);
+  });
+});
+
+describe("useNodeActions add from the panel (W-175)", () => {
+  const withTabs: Layout = {
+    schemaVersion: 12,
+    root: container("root0001", [
+      { ...defaultElement("tabs", "tabs0001"), children: [] } as LayoutNode,
+      heading("head0002", "B"),
+    ]) as Layout["root"],
+  };
+
+  test("an element the selection can't hold goes after it, and the notice says where and why", async () => {
+    const { api, actions, announced } = await mount({
+      ...state,
+      page: { ...state.page, layout: withTabs },
+      selectedId: "tabs0001",
+    });
+    act(() => api.addFromPanel("heading"));
+    expect(announced).toEqual([`Heading added after Tabs instead. ${REASONS.onlyTabPanels}`]);
+    const applied = actions[0];
+    const order =
+      applied?.type === "apply-arranged" ? applied.layout.root.children.map((c) => c.type) : [];
+    expect(order).toEqual(["tabs", "heading", "heading"]);
+  });
+
+  test("an element that fits is added inside the selection and announced as before", async () => {
+    const { api, announced } = await mount({ ...state, selectedId: "root0001" });
+    act(() => api.addFromPanel("heading"));
+    expect(announced).toEqual(["Heading added inside Container"]);
   });
 });

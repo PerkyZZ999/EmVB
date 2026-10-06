@@ -4,6 +4,7 @@ import {
   CSS_ID_KEPT,
   REASONS,
   addNode,
+  addNodeNear,
   canDrop,
   duplicateNode,
   firstChild,
@@ -22,6 +23,7 @@ import {
 } from "./arrange.ts";
 import { MAX_DEPTH, MAX_NODES } from "./limits.ts";
 import { isContainerNode, type Layout, type LayoutNode } from "./schema/layout.ts";
+import { defaultElement } from "./elements/index.ts";
 import { findNode } from "./tree-ops.ts";
 import { validateLayout } from "./validate.ts";
 
@@ -190,6 +192,53 @@ describe("addNode and insertionPoint (click to add)", () => {
       "newh0001",
       "inner001",
     ]);
+  });
+});
+
+describe("addNodeNear (Add falls back to the nearest ancestor, W-175)", () => {
+  /** root ├─ a (heading) ├─ tabs ─ panel ─ p (heading) └─ d (heading) */
+  const tabsPage = (): Layout => ({
+    schemaVersion: 12,
+    root: container("root0001", [
+      heading("aaaa0001"),
+      {
+        ...defaultElement("tabs", "tabs0001"),
+        children: [{ ...defaultElement("tab-panel", "tabp0001"), children: [heading("pppp0001")] }],
+      } as LayoutNode,
+      heading("dddd0001"),
+    ]) as Layout["root"],
+  });
+
+  test("a place that takes the element is used as is, with no fallback", () => {
+    const result = addNodeNear(page(), heading("newh0001"), "bbbb0001");
+    expect(result.ok && result.parentId).toBe("box00001");
+    expect(result.ok && result.fallback).toBeUndefined();
+  });
+
+  test("a refused place falls back to right after the nearest ancestor that takes it", () => {
+    const result = addNodeNear(tabsPage(), heading("newh0001"), "tabs0001");
+    if (!result.ok) throw new Error(result.reason);
+    expect(result.fallback).toEqual({ after: "tabs0001", refused: REASONS.onlyTabPanels });
+    expect(result.parentId).toBe("root0001");
+    expect(ids(result.layout.root)).toEqual(["aaaa0001", "tabs0001", "newh0001", "dddd0001"]);
+    expect(result.selected).toBe("newh0001");
+  });
+
+  test("a tab panel added from inside a panel goes after that panel, in the Tabs", () => {
+    const result = addNodeNear(tabsPage(), defaultElement("tab-panel", "tabp0002"), "pppp0001");
+    if (!result.ok) throw new Error(result.reason);
+    expect(result.fallback).toEqual({ after: "tabp0001", refused: REASONS.tabOutsideTabs });
+    expect(result.parentId).toBe("tabs0001");
+  });
+
+  test("an element no ancestor takes is still refused with the first reason", () => {
+    const before = tabsPage();
+    const snapshot = structuredClone(before);
+    expect(addNodeNear(before, defaultElement("accordion-item", "acci0001"), "pppp0001")).toEqual({
+      ok: false,
+      reason: REASONS.itemOutsideAccordion,
+    });
+    expect(before).toEqual(snapshot);
   });
 });
 

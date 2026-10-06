@@ -2,10 +2,10 @@ import * as React from "react";
 import type { createKumoToastManager } from "@cloudflare/kumo";
 import {
   addNode,
+  addNodeNear,
   duplicateNode,
   ELEMENT_DESCRIPTORS,
   findNode,
-  insertionPoint,
   moveDown,
   moveUp,
   subtreeSize,
@@ -147,19 +147,26 @@ export function useNodeActions({
     }
     const node = newElement(type);
     if (!node) return;
-    const place = insertionPoint(layout, latest.current.selectedId);
-    const result = addNode(layout, node, place);
-    if (!result.ok) {
-      announce(result.reason);
+    const notice = (message: string) => {
+      announce(message);
       if (lastToast.current) toasts.close(lastToast.current);
-      lastToast.current = toasts.add({ title: result.reason, timeout: NOTICE_TIMEOUT_MS });
+      lastToast.current = toasts.add({ title: message, timeout: NOTICE_TIMEOUT_MS });
+    };
+    const result = addNodeNear(layout, node, latest.current.selectedId);
+    if (!result.ok) {
+      notice(result.reason);
       return;
     }
     dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
-    const parent = findNode(layout, place.parentId);
-    const parentName = ELEMENT_NAMES[parent?.type ?? "container"] ?? "Container";
+    const nameOf = (id: string) => ELEMENT_NAMES[findNode(layout, id)?.type ?? "container"];
     const label = ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name ?? type;
-    announce(`${label} added inside ${parentName}`);
+    if (result.fallback) {
+      // Added next to the nearest ancestor that takes it, rather than refused (W-175).
+      const after = nameOf(result.fallback.after) ?? "the selection";
+      notice(`${label} added after ${after} instead. ${result.fallback.refused}`);
+      return;
+    }
+    announce(`${label} added inside ${nameOf(result.parentId) ?? "Container"}`);
   };
 
   return {

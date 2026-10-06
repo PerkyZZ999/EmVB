@@ -19640,8 +19640,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
-          "search": "    if (!result.ok) {\n      announce(result.reason);\n      if (lastToast.current) toasts.close(lastToast.current);",
-          "replace": "    if (false) {\n      announce(result.reason);\n      if (lastToast.current) toasts.close(lastToast.current);"
+          "search": "    if (!result.ok) {\n      notice(result.reason);",
+          "replace": "    if (false) {\n      notice(result.reason);"
         }
       ],
       "command": [
@@ -19820,7 +19820,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
-          "search": "      lastToast.current = toasts.add({ title: result.reason, timeout: NOTICE_TIMEOUT_MS });\n",
+          "search": "      lastToast.current = toasts.add({ title: message, timeout: NOTICE_TIMEOUT_MS });\n",
           "replace": ""
         }
       ],
@@ -20112,6 +20112,66 @@
         "no image yet says"
       ],
       "expect": "\\(fail\\).*no image yet says"
+    },
+    {
+      "id": "W-175/add-refuses-no-fallback",
+      "requirement": "W-175",
+      "description": "Add refuses an element the selection can't hold instead of placing it after the nearest ancestor.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "if (tried.ok) return { ...tried, parentId: first.parentId };",
+          "replace": "return tried.ok ? { ...tried, parentId: first.parentId } : tried;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/arrange.test.ts",
+        "-t",
+        "falls back to right after the nearest ancestor"
+      ],
+      "expect": "\\(fail\\).*falls back to right after the nearest ancestor"
+    },
+    {
+      "id": "W-175/fallback-before-ancestor",
+      "requirement": "W-175",
+      "description": "The fallback puts the element before the ancestor instead of right after it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "const place = { parentId: refusing.parent.id, index: refusing.index + 1 };",
+          "replace": "const place = { parentId: refusing.parent.id, index: refusing.index };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/arrange.test.ts",
+        "-t",
+        "falls back to right after the nearest ancestor"
+      ],
+      "expect": "\\(fail\\).*falls back to right after the nearest ancestor"
+    },
+    {
+      "id": "W-175/fallback-silent",
+      "requirement": "W-175",
+      "description": "The editor adds the element elsewhere without saying where it went or why.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "if (result.fallback) {",
+          "replace": "if (result.fallback === null) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/useNodeActions.test.tsx",
+        "-t",
+        "goes after it, and the notice says where and why"
+      ],
+      "expect": "\\(fail\\).*goes after it, and the notice says where and why"
     }
   ]
 }
