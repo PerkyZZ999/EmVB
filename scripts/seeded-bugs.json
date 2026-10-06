@@ -19732,6 +19732,26 @@
         "copies its label"
       ],
       "expect": "\\(fail\\).*copies its label"
+    },
+    {
+      "id": "W-167/enter-adds-twice",
+      "requirement": "W-167",
+      "description": "An Add tile also adds on Enter keydown, so the browser's own Enter click adds the element a second time.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "onClick={() => onAdd(tile.type as ElementType)}",
+          "replace": "onClick={() => onAdd(tile.type as ElementType)}\n                      onKeyDown={(event) => {\n                        if (event.key === \"Enter\") onAdd(tile.type as ElementType);\n                      }}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx",
+        "-t",
+        "adds the element once"
+      ],
+      "expect": "\\(fail\\).*adds the element once"
     }
   ]
 }

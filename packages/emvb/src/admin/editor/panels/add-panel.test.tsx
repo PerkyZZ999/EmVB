@@ -106,6 +106,18 @@ describe("Add panel (W-018)", () => {
     expect(seen).toEqual(["heading"]);
   });
 
+  test("Enter on a tile adds the element once (W-167)", async () => {
+    const seen: string[] = [];
+    await mount(<AddPanel onAdd={(type) => seen.push(type)} />);
+    const tile = document.querySelector('[data-emvb-add-tile="heading"]') as HTMLButtonElement;
+    await act(async () => {
+      // The browser turns Enter on a button into a click after the keydown.
+      tile.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      tile.click();
+    });
+    expect(seen.join(",")).toBe("heading");
+  });
+
   test("click-add inserts inside the selected container, not the root", () => {
     const state = baseState("box00001");
     const pageLayout = state.page.layout;

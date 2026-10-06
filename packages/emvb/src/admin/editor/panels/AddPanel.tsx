@@ -128,9 +128,6 @@ export function AddPanel({
                         dragStash.new(tile.type);
                       }}
                       onClick={() => onAdd(tile.type as ElementType)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") onAdd(tile.type as ElementType);
-                      }}
                     >
                       <Icon size={20} aria-hidden="true" />
                       <span>{tile.name}</span>
