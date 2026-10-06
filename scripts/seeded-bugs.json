@@ -10229,8 +10229,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/render.ts",
-          "search": "    console.error(\"emvb: stored layout is unreadable\", { pageId });",
-          "replace": "    console.error(\"emvb: stored layout is unreadable\", { pageId, raw });"
+          "search": "      console.error(\"emvb: stored layout is unreadable\", { pageId, ...problem });",
+          "replace": "      console.error(\"emvb: stored layout is unreadable\", { pageId, ...problem, raw });"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
@@ -20472,6 +20472,46 @@
         "says the valid ranges"
       ],
       "expect": "\\(fail\\).*says the valid ranges"
+    },
+    {
+      "id": "W-182/no-path",
+      "requirement": "W-182",
+      "description": "The unreadable-layout log names only the page, not where the layout fails.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "{ pageId, ...problem }",
+          "replace": "{ pageId }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/render.test.ts",
+        "-t",
+        "names the first bad path"
+      ],
+      "expect": "\\(fail\\).*names the first bad path"
+    },
+    {
+      "id": "W-182/blank-path",
+      "requirement": "W-182",
+      "description": "The unreadable-layout log drops the issue path.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "problem: { path: first?.path ?? \"\",",
+          "replace": "problem: { path: \"\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/render.test.ts",
+        "-t",
+        "names the first bad path"
+      ],
+      "expect": "\\(fail\\).*names the first bad path"
     }
   ]
 }

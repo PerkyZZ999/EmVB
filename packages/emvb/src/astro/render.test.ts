@@ -71,6 +71,25 @@ describe("rendering a stored layout (R-031, R-033)", () => {
     expect(page.css).toStartWith(":where(.emvb-scope){display:contents}");
   });
 
+  test("the unreadable-layout log names the first bad path and code, not the content (W-182)", () => {
+    const logged = spyOn(console, "error").mockImplementation(() => undefined);
+    try {
+      const layout = s1Page();
+      const heading = layout.root.children?.[0] as { props: { text: string; level: number } };
+      heading.props = { text: "Private draft words", level: 9 };
+      expect(renderStored(JSON.stringify(layout), DESIGN, "01PAGE").html).toBe("");
+      expect(logged.mock.calls).toEqual([
+        [
+          "emvb: stored layout is unreadable",
+          { pageId: "01PAGE", path: "root.children[0].props.level", code: "too_big" },
+        ],
+      ]);
+      expect(JSON.stringify(logged.mock.calls)).not.toContain("Private draft words");
+    } finally {
+      logged.mockRestore();
+    }
+  });
+
   test("an unreadable or missing layout renders an empty page", () => {
     const empty = { html: "", css: "", needsFormsRuntime: false, needsTabsRuntime: false };
     const logged = spyOn(console, "error").mockImplementation(() => undefined);
@@ -81,10 +100,13 @@ describe("rendering a stored layout (R-031, R-033)", () => {
       expect(renderStored(null, DESIGN, "01PAGE")).toEqual(empty);
       expect(renderStored(undefined, DESIGN, "01PAGE")).toEqual(empty);
       expect(renderStored("", DESIGN, "01PAGE")).toEqual(empty);
-      // Only the page id is logged, never layout content.
+      // The page id and where it fails are logged, never layout content.
       expect(logged.mock.calls).toEqual([
-        ["emvb: stored layout is unreadable", { pageId: "01PAGE" }],
-        ["emvb: stored layout is unreadable", { pageId: "01PAGE" }],
+        ["emvb: stored layout is unreadable", { pageId: "01PAGE", path: "", code: "invalid_json" }],
+        [
+          "emvb: stored layout is unreadable",
+          { pageId: "01PAGE", path: "root", code: "invalid_type" },
+        ],
       ]);
     } finally {
       logged.mockRestore();

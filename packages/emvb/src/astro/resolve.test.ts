@@ -150,7 +150,7 @@ describe("resolveEmVBPage (W-091, R-030, R-052)", () => {
       expect([resolved?.html, resolved?.css]).toEqual(["", ""]);
       expect(handlerCalls.map((c) => c.path)).toEqual(["/design"]);
       expect(error.mock.calls).toEqual([
-        ["emvb: stored layout is unreadable", { pageId: "about" }],
+        ["emvb: stored layout is unreadable", { pageId: "about", path: "", code: "invalid_json" }],
       ]);
     } finally {
       error.mockRestore();
