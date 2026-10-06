@@ -129,6 +129,26 @@ describe("background images, gradients and overlays (W-094)", () => {
     ).toBe(false);
   });
 
+  test("stops are drawn in location order, whatever order they were added in (W-172)", () => {
+    const css = (stops: { color: string; at: number }[]) =>
+      styleDeclarations({ gradient: { type: "linear", angle: 90, stops } }).declarations[0]?.value;
+    expect(
+      css([
+        { color: "#000000", at: 100 },
+        { color: "#ffffff", at: 0 },
+        { color: "#ff0000", at: 50 },
+      ]),
+    ).toBe("linear-gradient(90deg, #ffffff 0%, #ff0000 50%, #000000 100%)");
+    expect(
+      css([
+        { color: "#ffffff", at: 0 },
+        { color: "#00ff00", at: 50 },
+        { color: "#ff0000", at: 50 },
+        { color: "#000000", at: 100 },
+      ]),
+    ).toBe("linear-gradient(90deg, #ffffff 0%, #00ff00 50%, #ff0000 50%, #000000 100%)");
+  });
+
   test("an overlay is the top layer, then the image, then the gradient", () => {
     const { declarations } = styleDeclarations({
       backgroundImage: image,

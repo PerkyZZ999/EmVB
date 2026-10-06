@@ -19912,6 +19912,46 @@
         "default surface unless"
       ],
       "expect": "\\(fail\\).*default surface unless"
+    },
+    {
+      "id": "W-172/stops-stored-order",
+      "requirement": "W-172",
+      "description": "Gradient stops are written to CSS in stored order, so a stop added at 50% after the 100% stop vanishes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  parts.sort((a, b) => a.at - b.at);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/background.test.ts",
+        "-t",
+        "location order"
+      ],
+      "expect": "\\(fail\\).*location order"
+    },
+    {
+      "id": "W-172/stops-unstable-order",
+      "requirement": "W-172",
+      "description": "Stops at the same location swap places (sorted the wrong way round), so the hard edge flips.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "parts.sort((a, b) => a.at - b.at);",
+          "replace": "parts.sort((a, b) => a.at - b.at || -1);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/background.test.ts",
+        "-t",
+        "location order"
+      ],
+      "expect": "\\(fail\\).*location order"
     }
   ]
 }

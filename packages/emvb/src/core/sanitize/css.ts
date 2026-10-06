@@ -358,7 +358,7 @@ function cssGradient(value: unknown): string | undefined {
   const { type, stops } = value;
   if (type !== "linear" && type !== "radial" && type !== "conic") return undefined;
   if (!Array.isArray(stops) || stops.length < 2 || stops.length > 10) return undefined;
-  const parts: string[] = [];
+  const parts: { color: string; at: number }[] = [];
   for (const stop of stops) {
     if (!isRecord(stop) || Object.keys(stop).some((key) => key !== "color" && key !== "at"))
       return undefined;
@@ -366,9 +366,11 @@ function cssGradient(value: unknown): string | undefined {
     const at = stop["at"];
     if (!color || !Number.isInteger(at) || (at as number) < 0 || (at as number) > 100)
       return undefined;
-    parts.push(`${color} ${at as number}%`);
+    parts.push({ color, at: at as number });
   }
-  const list = parts.join(", ");
+  // Stops are kept in the order they were added; CSS needs them by location (W-172).
+  parts.sort((a, b) => a.at - b.at);
+  const list = parts.map((part) => `${part.color} ${part.at}%`).join(", ");
   let css: string;
   if (type === "radial") {
     const position = value["position"] === undefined ? "center" : value["position"];
