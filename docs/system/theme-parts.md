@@ -87,7 +87,7 @@ Public HTML stays JS-free (R-031) except in two cases: a matching popup loads `e
 | Element | Public output |
 |---|---|
 | `post-title` | Escaped title as `h1`–`h6` |
-| `post-excerpt` | Escaped excerpt paragraph (omitted if empty) |
+| `post-excerpt` | Escaped excerpt paragraph (omitted if empty), cut to `maxWords` words with "…" when set |
 | `post-content` | Portable Text / string → safe VNodes (`p`/`h*`), escaped text |
 | `post-image` | `<img>` when a media `src`/`url` exists (sanitized) |
 | `post-link` | Permalink `<a>`; blank text uses the title |

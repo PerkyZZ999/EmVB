@@ -1,4 +1,4 @@
-import type { LayoutNode } from "../schema/layout.ts";
+import type { LayoutNode, POST_DATE_FORMATS } from "../schema/layout.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { portableTextToVNodes, type ThemePostFields } from "../theme/dynamic.ts";
@@ -18,6 +18,15 @@ type PostField = {
 
 const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 
+type PostDateFormat = (typeof POST_DATE_FORMATS)[number];
+
+/** In UTC, so the date doesn't move with the server's time zone. */
+function formatPostDate(time: number, format: PostDateFormat): string {
+  const date = new Date(time);
+  if (format === "numeric") return date.toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en", { dateStyle: format, timeZone: "UTC" }).format(date);
+}
+
 const props = <T>(node: LayoutNode) => node.props as T;
 
 const POST_FIELDS = new Map<string, PostField>([
@@ -36,8 +45,13 @@ const POST_FIELDS = new Map<string, PostField>([
     "post-excerpt",
     {
       placeholder: (attrs) => ({ tag: "p", attrs, children: ["Post excerpt…"] }),
-      render: (_node, attrs, post) =>
-        post.excerpt ? { tag: "p", attrs, children: [post.excerpt] } : undefined,
+      render: (node, attrs, post) => {
+        if (!post.excerpt) return undefined;
+        const max = props<{ maxWords?: number }>(node).maxWords;
+        const words = post.excerpt.trim().split(/\s+/);
+        const text = max && words.length > max ? `${words.slice(0, max).join(" ")}…` : post.excerpt;
+        return { tag: "p", attrs, children: [text] };
+      },
     },
   ],
   [
@@ -103,15 +117,12 @@ const POST_FIELDS = new Map<string, PostField>([
     {
       placeholder: (attrs) => ({ tag: "time", attrs, children: ["Post date"] }),
       has: (post) => !!post.publishedAt?.trim(),
-      render: (_node, attrs, post) => {
+      render: (node, attrs, post) => {
         const raw = post.publishedAt?.trim();
         if (!raw) return undefined;
         const parsed = Date.parse(raw);
-        const text = Number.isNaN(parsed)
-          ? raw.slice(0, 80)
-          : new Intl.DateTimeFormat("en", { dateStyle: "medium", timeZone: "UTC" }).format(
-              new Date(parsed),
-            );
+        const format = props<{ format?: PostDateFormat }>(node).format ?? "medium";
+        const text = Number.isNaN(parsed) ? raw.slice(0, 80) : formatPostDate(parsed, format);
         return { tag: "time", attrs: { ...attrs, datetime: raw.slice(0, 80) }, children: [text] };
       },
     },

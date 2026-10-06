@@ -20232,6 +20232,86 @@
         "is an href field with the URL message"
       ],
       "expect": "\\(fail\\).*is an href field with the URL message"
+    },
+    {
+      "id": "W-177/date-format-ignored",
+      "requirement": "W-177",
+      "description": "A Post Date ignores its format and always reads medium.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/dynamic-post.ts",
+          "search": "props<{ format?: PostDateFormat }>(node).format ?? \"medium\"",
+          "replace": "\"medium\" as PostDateFormat"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/dynamic-post.test.ts",
+        "-t",
+        "reads in the chosen format"
+      ],
+      "expect": "\\(fail\\).*reads in the chosen format"
+    },
+    {
+      "id": "W-177/date-numeric-not-iso",
+      "requirement": "W-177",
+      "description": "Numeric dates go through Intl, which has no numeric dateStyle.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/dynamic-post.ts",
+          "search": "  if (format === \"numeric\") return date.toISOString().slice(0, 10);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/dynamic-post.test.ts",
+        "-t",
+        "reads in the chosen format"
+      ],
+      "expect": "\\(fail\\).*reads in the chosen format"
+    },
+    {
+      "id": "W-177/excerpt-not-cut",
+      "requirement": "W-177",
+      "description": "A Post Excerpt ignores its word count.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/dynamic-post.ts",
+          "search": "const max = props<{ maxWords?: number }>(node).maxWords;",
+          "replace": "const max = undefined as number | undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/dynamic-post.test.ts",
+        "-t",
+        "cut to its word count"
+      ],
+      "expect": "\\(fail\\).*cut to its word count"
+    },
+    {
+      "id": "W-177/excerpt-zero-words",
+      "requirement": "W-177",
+      "description": "The schema accepts an excerpt length of 0 words.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "maxWords: z.number().int().positive().max(10_000).optional()",
+          "replace": "maxWords: z.number().int().max(10_000).optional()"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/dynamic-post.test.ts",
+        "-t",
+        "schema checks"
+      ],
+      "expect": "\\(fail\\).*schema checks"
     }
   ]
 }

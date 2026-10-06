@@ -58,10 +58,11 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 | `radio` | `field`, optional `label`, `placeholder` | none | `<fieldset>` of radios (options from definition when available) |
 | `submit` | optional `label` | none | `<button type="submit" class="ec-form-submit">` |
 | `post-title` | optional `level` (1–6) | none | Dynamic heading from `ThemeDynamicData.post` |
-| `post-excerpt` | (none) | none | Dynamic excerpt paragraph |
+| `post-excerpt` | optional `maxWords` (whole number, 1–10000, W-177) | none | Dynamic excerpt paragraph; with `maxWords`, cut to that many words with "…" |
 | `post-content` | (none) | none | Dynamic body (Portable Text → safe blocks) |
 | `post-image` | optional `decorative` | none | Dynamic featured image when URL present |
 | `post-link` | optional `text`, `newTab` | none | Dynamic permalink; blank text → title |
+| `post-date` | optional `format`: `medium` (default), `short`, `long`, `full` or `numeric` (W-177) | none | `<time datetime>` with the published date in UTC; `numeric` is YYYY-MM-DD |
 | `loop` | optional `itemPartId` | `children: Node[]` (inline item template when no part id) | Repeats item template for each archive post |
 | `grid` | `columns` (1–12); optional `columnsTablet` and `columnsMobile` (1–12, W-139) | `children: Node[]` | `display: grid` with that many equal columns; the device counts go in the tablet and mobile media queries, and an unset one follows the next wider device |
 | `section` (shown as "Theme section") | optional `partId` | `children: Node[]` (inline contents when no part id) | When `partId` is set, the published Section theme part's children replace the local ones |

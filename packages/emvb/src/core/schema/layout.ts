@@ -343,8 +343,11 @@ export const PostTitleNode = leafNode(
   }),
 );
 
-/** Dynamic post excerpt (escaped text). */
-export const PostExcerptNode = leafNode("post-excerpt", z.strictObject({}));
+/** Dynamic post excerpt (escaped text). `maxWords` cuts it to that many words, with "…" (W-177). */
+export const PostExcerptNode = leafNode(
+  "post-excerpt",
+  z.strictObject({ maxWords: z.number().int().positive().max(10_000).optional() }),
+);
 
 /** Dynamic post body from Portable Text / string (sanitized via VNode serialize). */
 export const PostContentNode = leafNode("post-content", z.strictObject({}));
@@ -357,8 +360,14 @@ export const PostImageNode = leafNode(
   }),
 );
 
+/** How a Post Date reads (W-177). Unset is `medium`. `numeric` is YYYY-MM-DD. */
+export const POST_DATE_FORMATS = ["medium", "short", "long", "full", "numeric"] as const;
+
 /** Published date from the post, shown as a `<time>` element (W-108). */
-export const PostDateNode = leafNode("post-date", z.strictObject({}));
+export const PostDateNode = leafNode(
+  "post-date",
+  z.strictObject({ format: z.enum(POST_DATE_FORMATS).optional() }),
+);
 
 /** Author name from the post (W-108). */
 export const PostAuthorNode = leafNode("post-author", z.strictObject({}));

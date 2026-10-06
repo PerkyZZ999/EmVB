@@ -41,7 +41,15 @@ export const postExcerpt: ElementDefinition<PostExcerptNode> = {
     name: "Post Excerpt",
     group: "dynamic",
     defaultTab: "style",
-    fields: [],
+    fields: [
+      {
+        key: "maxWords",
+        kind: "int",
+        label: "Excerpt length (words)",
+        optional: true,
+        message: "Enter a whole number of words, or leave it blank for the whole excerpt.",
+      },
+    ],
   },
   build: (_node, attrs) => ({ tag: "p", attrs, children: ["Post excerpt…"] }),
 };
@@ -88,7 +96,21 @@ export const postDate: ElementDefinition<PostDateNode> = {
     name: "Post Date",
     group: "dynamic",
     defaultTab: "style",
-    fields: [],
+    fields: [
+      {
+        key: "format",
+        kind: "select",
+        label: "Date format",
+        optional: true,
+        options: [
+          { value: "medium", label: "Medium (Oct 6, 2026)" },
+          { value: "short", label: "Short (10/6/26)" },
+          { value: "long", label: "Long (October 6, 2026)" },
+          { value: "full", label: "Full (Tuesday, October 6, 2026)" },
+          { value: "numeric", label: "Numeric (2026-10-06)" },
+        ],
+      },
+    ],
   },
   build: (_node, attrs) => ({ tag: "time", attrs, children: ["Post date"] }),
 };
