@@ -7,7 +7,7 @@ test.describe.configure({ mode: "serial" });
 setUpEmvbOnce();
 
 const layoutFor = (text: string) => ({
-  schemaVersion: 11,
+  schemaVersion: 12,
   root: {
     id: "root0001",
     type: "container",
@@ -46,12 +46,12 @@ test("Background section sets an image, a gradient and an overlay on the stored 
   const header = overlay(page).locator('[data-emvb-section="background"]');
   if ((await header.getAttribute("aria-expanded")) !== "true") await header.click();
 
+  await overlay(page).getByRole("radio", { name: "Image", exact: true }).click();
   const url = overlay(page).getByLabel("Image URL", { exact: true });
   await url.fill("https://cdn.example/photo.png");
   await url.press("Enter");
   await overlay(page).getByRole("combobox", { name: "Image size", exact: true }).click();
   await page.getByRole("option", { name: "Contain", exact: true }).click();
-  await overlay(page).getByRole("button", { name: "Add gradient" }).click();
   await overlay(page).getByRole("button", { name: "Add overlay" }).click();
 
   await saveDraft(page);
@@ -62,16 +62,31 @@ test("Background section sets an image, a gradient and an overlay on the stored 
   expect(stored.root.children?.[0]?.style).toMatchObject({
     backgroundImage: "https://cdn.example/photo.png",
     backgroundSize: "contain",
-    gradient: { angle: 180, from: "#ffffff", to: "#000000" },
     overlay: { color: "#000000", opacity: 0.4 },
   });
+
+  await overlay(page).getByRole("radio", { name: "Gradient", exact: true }).click();
+  await saveDraft(page);
+  const graded = await storedLayout<{ root: { children?: { style?: Record<string, unknown> }[] } }>(
+    request,
+    id,
+  );
+  expect(graded.root.children?.[0]?.style).toMatchObject({
+    gradient: {
+      type: "linear",
+      angle: 180,
+      stops: [
+        { color: "#ffffff", at: 0 },
+        { color: "#000000", at: 100 },
+      ],
+    },
+  });
+  expect(graded.root.children?.[0]?.style?.["backgroundImage"]).toBeUndefined();
 
   await publishPage(request, id);
   await page.goto(`/${slug}`);
   const css = await page.locator("style").allTextContents();
   const sheet = css.join("\n");
-  expect(sheet).toContain('url("https://cdn.example/photo.png")');
-  expect(sheet).toContain("linear-gradient(#00000066, #00000066)");
-  expect(sheet).toContain("linear-gradient(180deg, #ffffff, #000000)");
-  expect(sheet).toContain("auto,contain,auto");
+  expect(sheet).toContain("linear-gradient(180deg, #ffffff 0%, #000000 100%)");
+  expect(sheet).not.toContain("cdn.example/photo.png");
 });

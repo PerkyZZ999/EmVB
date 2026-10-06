@@ -10,9 +10,51 @@ export type Migration = (doc: Record<string, unknown>) => Record<string, unknown
  * (D-042) attributes, accordion, richer entrances, post date and author, background video,
  * a link on a box, and tag defaults, and v9 → v10 (D-044, D-039) per-side border widths,
  * per-corner radii and grid columns per device, and v10 → v11 (D-045) the layout Section and node
- * labels. Every older value is valid in the newer version.
+ * labels, and v11 → v12 (W-160) rewrites a gradient `{ angle, from, to }` into
+ * `{ type: "linear", angle, stops }`. Every other value is unchanged.
  */
 const unchanged: Migration = (doc) => doc;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+/** v11 two-stop gradient → v12 stops. A gradient that already has `stops` is left as it is. */
+function convertGradient(value: unknown): unknown {
+  if (!isRecord(value) || Array.isArray(value["stops"])) return value;
+  if (!("from" in value) || !("to" in value)) return value;
+  const angle = value["angle"];
+  return {
+    type: "linear",
+    angle: typeof angle === "number" ? angle : 180,
+    stops: [
+      { color: value["from"], at: 0 },
+      { color: value["to"], at: 100 },
+    ],
+  };
+}
+
+function walkGradients(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    let changed = false;
+    const next = value.map((item) => {
+      const child = walkGradients(item);
+      if (child !== item) changed = true;
+      return child;
+    });
+    return changed ? next : value;
+  }
+  if (!isRecord(value)) return value;
+  let changed = false;
+  const next: Record<string, unknown> = {};
+  for (const [key, child] of Object.entries(value)) {
+    const converted = key === "gradient" ? convertGradient(child) : walkGradients(child);
+    if (converted !== child) changed = true;
+    next[key] = converted;
+  }
+  return changed ? next : value;
+}
+
+const gradients: Migration = (doc) => walkGradients(doc) as Record<string, unknown>;
 
 /** `LAYOUT_MIGRATIONS[n]` upgrades a version-n layout to version n + 1. Migrations must be pure. */
 export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {
@@ -26,6 +68,7 @@ export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {
   8: unchanged,
   9: unchanged,
   10: unchanged,
+  11: gradients,
 };
 
 /** `DESIGN_MIGRATIONS[n]` upgrades a version-n design document to version n + 1. */
@@ -40,6 +83,7 @@ export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {
   8: unchanged,
   9: unchanged,
   10: unchanged,
+  11: gradients,
 };
 
 export type UpgradeResult =

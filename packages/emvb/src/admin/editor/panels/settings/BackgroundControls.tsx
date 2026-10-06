@@ -1,4 +1,4 @@
-import { Button, Input } from "@cloudflare/kumo";
+import { Button, Input, Select } from "@cloudflare/kumo";
 import { PlusIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { sanitizeMediaUrl, type DesignSystem, type StyleProps } from "../../../../core/index.ts";
@@ -14,7 +14,14 @@ type Overlay = NonNullable<StyleProps["overlay"]>;
 const ANGLE: NumberSpec = { min: 0, max: 360, integer: true, example: "180", suffix: "°" };
 const OVERLAY_OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: "40", suffix: "%" };
 
-const NEW_GRADIENT: Gradient = { angle: 180, from: "#ffffff", to: "#000000" };
+export const NEW_GRADIENT: Gradient = {
+  type: "linear",
+  angle: 180,
+  stops: [
+    { color: "#ffffff", at: 0 },
+    { color: "#000000", at: 100 },
+  ],
+};
 const NEW_OVERLAY: Overlay = { color: "#000000", opacity: 0.4 };
 
 /** Background image: library, upload, or a URL. Without `fetcher`, only the URL is offered. */
@@ -196,69 +203,143 @@ export function BackgroundImageControl({
   );
 }
 
+const GRADIENT_TYPES: { value: Gradient["type"]; label: string }[] = [
+  { value: "linear", label: "Linear" },
+  { value: "radial", label: "Radial" },
+  { value: "conic", label: "Conic" },
+];
+
+const RADIAL_AT = [
+  "center",
+  "top",
+  "bottom",
+  "left",
+  "right",
+  "top left",
+  "top right",
+  "bottom left",
+  "bottom right",
+] as const;
+
+/** Linear, radial or conic, with 2–10 stops. Angle is a slider and a number. */
 export function GradientControl({
   value,
   design,
   onChange,
   onDesignChange,
-  reset,
 }: {
-  value: Gradient | undefined;
+  value: Gradient;
   design: DesignSystem;
-  onChange: (next: Gradient | undefined) => void;
+  onChange: (next: Gradient) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
-  reset: React.ReactNode;
 }) {
-  const patch = (part: Partial<Gradient>) => {
-    if (!value) return;
-    onChange({ ...value, ...part });
+  const stops = value.stops;
+  const setStop = (index: number, part: Partial<Gradient["stops"][number]>) => {
+    onChange({
+      ...value,
+      stops: stops.map((stop, i) => (i === index ? { ...stop, ...part } : stop)),
+    });
+  };
+  const addStop = () => {
+    if (stops.length >= 10) return;
+    const used = new Set(stops.map((stop) => stop.at));
+    let at = 50;
+    while (used.has(at) && at < 100) at += 1;
+    onChange({ ...value, stops: [...stops, { color: "#808080", at }] });
   };
   return (
-    <div
-      className="emvb-style-row"
-      data-emvb-style="gradient"
-      data-set={value ? "true" : undefined}
-    >
-      <div className="emvb-field-group">
-        <span className="emvb-var-field-label">Gradient</span>
-        {value ? (
-          <>
-            <NumberField
-              fieldKey="gradient.angle"
-              label="Angle"
-              value={value.angle}
-              spec={ANGLE}
-              onCommit={(n) => patch({ angle: n ?? 0 })}
-            />
-            <ColorControl
-              label="From"
-              value={value.from}
-              design={design}
-              onChange={(from) => from && patch({ from })}
-              onDesignChange={onDesignChange}
-            />
-            <ColorControl
-              label="To"
-              value={value.to}
-              design={design}
-              onChange={(to) => to && patch({ to })}
-              onDesignChange={onDesignChange}
-            />
-          </>
-        ) : (
-          <Button
-            type="button"
-            className={BUTTON}
-            variant="secondary"
-            icon={PlusIcon}
-            data-emvb-add-gradient=""
-            onClick={() => onChange(NEW_GRADIENT)}
-          >
-            Add gradient
-          </Button>
-        )}
-      </div>
-      {reset}
+    <div className="emvb-field-group" data-emvb-gradient="">
+      <Select
+        label="Gradient type"
+        className={FIELD}
+        value={value.type}
+        onValueChange={(next) => {
+          const type = GRADIENT_TYPES.find((option) => option.value === next)?.value;
+          if (type) onChange({ ...value, type });
+        }}
+      >
+        {GRADIENT_TYPES.map((option) => (
+          <Select.Option key={option.value} value={option.value}>
+            {option.label}
+          </Select.Option>
+        ))}
+      </Select>
+      {value.type === "radial" ? (
+        <Select
+          label="Position"
+          className={FIELD}
+          value={value.position ?? "center"}
+          onValueChange={(next) => {
+            const position = RADIAL_AT.find((option) => option === next);
+            if (position) onChange({ ...value, position });
+          }}
+        >
+          {RADIAL_AT.map((option) => (
+            <Select.Option key={option} value={option}>
+              {option}
+            </Select.Option>
+          ))}
+        </Select>
+      ) : (
+        <div className="emvb-angle">
+          <NumberField
+            fieldKey="gradient.angle"
+            label="Angle"
+            value={value.angle ?? (value.type === "conic" ? 0 : 180)}
+            spec={ANGLE}
+            onCommit={(n) => onChange({ ...value, angle: n ?? 0 })}
+          />
+          <input
+            type="range"
+            className="emvb-angle-slider"
+            min={0}
+            max={360}
+            aria-label="Angle slider"
+            value={value.angle ?? (value.type === "conic" ? 0 : 180)}
+            onChange={(event) => onChange({ ...value, angle: Number(event.target.value) })}
+          />
+        </div>
+      )}
+      {stops.map((stop, index) => (
+        <div className="emvb-gradient-stop" key={index} data-emvb-gradient-stop={index}>
+          <ColorControl
+            label={`Color ${index + 1}`}
+            value={stop.color}
+            design={design}
+            onChange={(color) => color && setStop(index, { color })}
+            onDesignChange={onDesignChange}
+          />
+          <NumberField
+            fieldKey={`gradient.stop.${index}`}
+            label={`Location ${index + 1}`}
+            value={stop.at}
+            spec={{ min: 0, max: 100, integer: true, example: "50", suffix: "%" }}
+            onCommit={(n) => setStop(index, { at: n ?? 0 })}
+          />
+          {stops.length > 2 && (
+            <Button
+              type="button"
+              variant="secondary"
+              className={BUTTON}
+              onClick={() => onChange({ ...value, stops: stops.filter((_, i) => i !== index) })}
+            >
+              Remove color {index + 1}
+            </Button>
+          )}
+        </div>
+      ))}
+      {stops.length < 10 && (
+        <Button
+          type="button"
+          variant="secondary"
+          className={BUTTON}
+          data-emvb-add-stop=""
+          icon={PlusIcon}
+          onClick={addStop}
+        >
+          Add location
+        </Button>
+      )}
     </div>
   );
 }

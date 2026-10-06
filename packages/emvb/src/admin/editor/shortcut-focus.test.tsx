@@ -9,7 +9,7 @@ import { cleanup, mount } from "../../../test/dom/mount.ts";
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   root: {
     id: "root0001",
     type: "container",

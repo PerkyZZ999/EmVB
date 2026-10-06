@@ -173,12 +173,36 @@ export const StyleProps = z.strictObject({
       "Use an http(s) URL or a site path, with no spaces or parentheses",
     )
     .optional(),
-  /** Two-stop linear gradient. Stops are colours, so a variable binding is a colour use (W-094). */
+  /**
+   * Background gradient (W-160). Up to 10 stops. `angle` is the linear direction and the conic
+   * start; `position` is the radial centre. A stop colour variable is a colour use.
+   */
   gradient: z
     .strictObject({
-      angle: z.number().int().min(0).max(360),
-      from: ColorValue,
-      to: ColorValue,
+      type: z.enum(["linear", "radial", "conic"]),
+      angle: z.number().int().min(0).max(360).optional(),
+      position: z
+        .enum([
+          "center",
+          "top",
+          "bottom",
+          "left",
+          "right",
+          "top left",
+          "top right",
+          "bottom left",
+          "bottom right",
+        ])
+        .optional(),
+      stops: z
+        .array(
+          z.strictObject({
+            color: ColorValue,
+            at: z.number().int().min(0).max(100),
+          }),
+        )
+        .min(2)
+        .max(10),
     })
     .optional(),
   /** A colour laid over the image and gradient. `opacity` is 0–1 (W-094). */

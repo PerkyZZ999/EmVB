@@ -3,6 +3,7 @@ import { act } from "react";
 import { emptyDesign, type StyleProps } from "../../../../core/index.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 import { StyleRow } from "./StyleRow.tsx";
+import type { StyleKey } from "./style-sections.ts";
 
 afterEach(async () => {
   await cleanup();
@@ -10,7 +11,7 @@ afterEach(async () => {
 
 const patches: Partial<StyleProps>[] = [];
 
-const row = (styleKey: "backgroundImage" | "gradient" | "overlay", style: StyleProps = {}) =>
+const row = (styleKey: StyleKey, style: StyleProps = {}) =>
   mount(
     <StyleRow
       styleKey={styleKey}
@@ -24,7 +25,9 @@ const row = (styleKey: "backgroundImage" | "gradient" | "overlay", style: StyleP
 describe("background controls (W-094)", () => {
   test("a pasted image URL is saved, and a javascript: URL is refused", async () => {
     patches.length = 0;
-    const host = await row("backgroundImage");
+    const host = await row("backgroundColor");
+    await act(async () => host.querySelector<HTMLElement>('[data-emvb-bg-type="image"]')?.click());
+    patches.length = 0;
     const input = host.querySelector<HTMLInputElement>("[data-emvb-bg-url]");
     expect(input?.outerHTML.includes("data-emvb-bg-url")).toBe(true);
     const type = async (text: string) => {
@@ -50,13 +53,20 @@ describe("background controls (W-094)", () => {
 
   test("Add gradient and Add overlay write the starting values", async () => {
     patches.length = 0;
-    const gradient = await row("gradient");
-    await act(async () => gradient.querySelector<HTMLElement>("[data-emvb-add-gradient]")?.click());
-    expect(patches.at(-1)).toEqual({
-      gradient: { angle: 180, from: "#ffffff", to: "#000000" },
+    const host = await row("backgroundColor");
+    await act(async () =>
+      host.querySelector<HTMLElement>('[data-emvb-bg-type="gradient"]')?.click(),
+    );
+    expect(patches.at(-1)?.gradient).toEqual({
+      type: "linear",
+      angle: 180,
+      stops: [
+        { color: "#ffffff", at: 0 },
+        { color: "#000000", at: 100 },
+      ],
     });
-    const overlay = await row("overlay");
-    await act(async () => overlay.querySelector<HTMLElement>("[data-emvb-add-overlay]")?.click());
+    await act(async () => host.querySelector<HTMLElement>('[data-emvb-bg-type="image"]')?.click());
+    await act(async () => host.querySelector<HTMLElement>("[data-emvb-add-overlay]")?.click());
     expect(patches.at(-1)).toEqual({ overlay: { color: "#000000", opacity: 0.4 } });
   });
 });

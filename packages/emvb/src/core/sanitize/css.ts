@@ -328,17 +328,60 @@ function cssBackgroundImage(value: unknown): string | undefined {
   return isSafeBackground(css) ? css : undefined;
 }
 
-function cssGradient(value: unknown): string | undefined {
-  if (!isRecord(value)) return undefined;
-  if (Object.keys(value).some((key) => key !== "angle" && key !== "from" && key !== "to"))
-    return undefined;
-  const { angle, from, to } = value;
+const GRADIENT_POSITION = new Set([
+  "center",
+  "top",
+  "bottom",
+  "left",
+  "right",
+  "top left",
+  "top right",
+  "bottom left",
+  "bottom right",
+]);
+
+function cssAngle(value: unknown, fallback: number): number | undefined {
+  const angle = value === undefined ? fallback : value;
   if (!Number.isInteger(angle) || (angle as number) < 0 || (angle as number) > 360)
     return undefined;
-  const start = cssColor(from);
-  const end = cssColor(to);
-  if (!start || !end) return undefined;
-  const css = `linear-gradient(${angle as number}deg, ${start}, ${end})`;
+  return angle as number;
+}
+
+function cssGradient(value: unknown): string | undefined {
+  if (!isRecord(value)) return undefined;
+  if (
+    Object.keys(value).some(
+      (key) => key !== "type" && key !== "angle" && key !== "position" && key !== "stops",
+    )
+  )
+    return undefined;
+  const { type, stops } = value;
+  if (type !== "linear" && type !== "radial" && type !== "conic") return undefined;
+  if (!Array.isArray(stops) || stops.length < 2 || stops.length > 10) return undefined;
+  const parts: string[] = [];
+  for (const stop of stops) {
+    if (!isRecord(stop) || Object.keys(stop).some((key) => key !== "color" && key !== "at"))
+      return undefined;
+    const color = cssColor(stop["color"]);
+    const at = stop["at"];
+    if (!color || !Number.isInteger(at) || (at as number) < 0 || (at as number) > 100)
+      return undefined;
+    parts.push(`${color} ${at as number}%`);
+  }
+  const list = parts.join(", ");
+  let css: string;
+  if (type === "radial") {
+    const position = value["position"] === undefined ? "center" : value["position"];
+    if (typeof position !== "string" || !GRADIENT_POSITION.has(position)) return undefined;
+    css = `radial-gradient(circle at ${position}, ${list})`;
+  } else {
+    const angle = cssAngle(value["angle"], type === "conic" ? 0 : 180);
+    if (angle === undefined) return undefined;
+    css =
+      type === "conic"
+        ? `conic-gradient(from ${angle}deg, ${list})`
+        : `linear-gradient(${angle}deg, ${list})`;
+  }
   return isSafeBackground(css) ? css : undefined;
 }
 

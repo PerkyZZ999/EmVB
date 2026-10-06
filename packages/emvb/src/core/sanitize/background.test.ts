@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { clearVariableRefs, findVariableUsages } from "../design/variables.ts";
-import { emptyDesign } from "../schema/design.ts";
+import { DESIGN_SCHEMA_VERSION, emptyDesign } from "../schema/design.ts";
 import type { Layout } from "../schema/layout.ts";
 import { StyleProps } from "../schema/style.ts";
 import { styleDeclarations } from "./css.ts";
@@ -47,28 +47,99 @@ describe("background images, gradients and overlays (W-094)", () => {
 
   test("a gradient is a two-stop linear-gradient, including a colour variable", () => {
     expect(
-      styleDeclarations({ gradient: { angle: 90, from: "#112233", to: { var: "ink" } } }),
+      styleDeclarations({
+        gradient: {
+          type: "linear",
+          angle: 90,
+          stops: [
+            { color: "#112233", at: 0 },
+            { color: { var: "ink" }, at: 100 },
+          ],
+        },
+      }),
     ).toEqual({
       declarations: [
         {
           property: "background-image",
-          value: "linear-gradient(90deg, #112233, var(--emvb-c-ink))",
+          value: "linear-gradient(90deg, #112233 0%, var(--emvb-c-ink) 100%)",
         },
       ],
       rejected: [],
     });
     expect(
-      StyleProps.safeParse({ gradient: { angle: 361, from: "#fff", to: "#000" } }).success,
+      StyleProps.safeParse({
+        gradient: {
+          type: "linear",
+          angle: 361,
+          stops: [
+            { color: "#fff", at: 0 },
+            { color: "#000", at: 100 },
+          ],
+        },
+      }).success,
     ).toBe(false);
     expect(
-      styleDeclarations({ gradient: { angle: 361, from: "#112233", to: "#445566" } }).rejected,
+      styleDeclarations({
+        gradient: {
+          type: "linear",
+          angle: 361,
+          stops: [
+            { color: "#112233", at: 0 },
+            { color: "#445566", at: 100 },
+          ],
+        },
+      }).rejected,
     ).toEqual(["gradient"]);
+  });
+
+  test("a gradient can be radial or conic, and stops stay at their locations", () => {
+    expect(
+      styleDeclarations({
+        gradient: {
+          type: "radial",
+          position: "top left",
+          stops: [
+            { color: "#ffffff", at: 10 },
+            { color: "#000000", at: 90 },
+          ],
+        },
+      }).declarations[0]?.value,
+    ).toBe("radial-gradient(circle at top left, #ffffff 10%, #000000 90%)");
+    expect(
+      styleDeclarations({
+        gradient: {
+          type: "conic",
+          angle: 40,
+          stops: [
+            { color: "#ff0000", at: 0 },
+            { color: "#00ff00", at: 50 },
+            { color: "#0000ff", at: 100 },
+          ],
+        },
+      }).declarations[0]?.value,
+    ).toBe("conic-gradient(from 40deg, #ff0000 0%, #00ff00 50%, #0000ff 100%)");
+    expect(
+      StyleProps.safeParse({
+        gradient: {
+          type: "linear",
+          angle: 0,
+          stops: Array.from({ length: 11 }, () => ({ color: "#ffffff", at: 0 })),
+        },
+      }).success,
+    ).toBe(false);
   });
 
   test("an overlay is the top layer, then the image, then the gradient", () => {
     const { declarations } = styleDeclarations({
       backgroundImage: image,
-      gradient: { angle: 180, from: "#ffffff", to: "#000000" },
+      gradient: {
+        type: "linear",
+        angle: 180,
+        stops: [
+          { color: "#ffffff", at: 0 },
+          { color: "#000000", at: 100 },
+        ],
+      },
       overlay: { color: "#000000", opacity: 0.4 },
     });
     expect(declarations.map((d) => d.property)).toEqual([
@@ -78,7 +149,7 @@ describe("background images, gradients and overlays (W-094)", () => {
       "background-repeat",
     ]);
     expect(declarations[0]?.value).toBe(
-      `linear-gradient(#00000066, #00000066),url("${image}"),linear-gradient(180deg, #ffffff, #000000)`,
+      `linear-gradient(#00000066, #00000066),url("${image}"),linear-gradient(180deg, #ffffff 0%, #000000 100%)`,
     );
     expect(declarations[1]?.value).toBe("auto,cover,auto");
   });
@@ -98,13 +169,20 @@ describe("background images, gradients and overlays (W-094)", () => {
 
   test("deleting a colour variable clears a gradient stop and an overlay that use it", () => {
     const page: Layout = {
-      schemaVersion: 11,
+      schemaVersion: 12,
       root: {
         id: "root0001",
         type: "container",
         props: {},
         style: {
-          gradient: { angle: 180, from: { var: "brand" }, to: "#ffffff" },
+          gradient: {
+            type: "linear",
+            angle: 180,
+            stops: [
+              { color: { var: "brand" }, at: 0 },
+              { color: "#ffffff", at: 100 },
+            ],
+          },
           overlay: { color: { var: "brand" }, opacity: 0.4 },
         },
         children: [],
@@ -114,10 +192,10 @@ describe("background images, gradients and overlays (W-094)", () => {
       findVariableUsages(page, "brand", "color")
         .map((u) => u.prop)
         .toSorted(),
-    ).toEqual(["gradient.from", "overlay.color"]);
+    ).toEqual(["gradient.stops.0", "overlay.color"]);
     const cleared = clearVariableRefs(page, "brand", "color");
     expect(cleared.root.style).toBeUndefined();
     expect(findVariableUsages(cleared, "brand", "color")).toEqual([]);
-    expect(emptyDesign().schemaVersion).toBe(11);
+    expect(emptyDesign().schemaVersion).toBe(DESIGN_SCHEMA_VERSION);
   });
 });

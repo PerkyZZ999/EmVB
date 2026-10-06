@@ -23,7 +23,7 @@ test("XSS corpus strings stay inert on the published page (W-042)", async ({ pag
     },
   ]);
   const layout = {
-    schemaVersion: 11 as const,
+    schemaVersion: 12 as const,
     root: {
       id: "root0001",
       type: "container" as const,

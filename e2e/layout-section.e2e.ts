@@ -23,7 +23,7 @@ test("a layout Section is added, takes a dropped element in its inner box, and k
     request,
     "Layout section",
     {
-      schemaVersion: 11,
+      schemaVersion: 12,
       root: {
         id: "root0001",
         type: "container",

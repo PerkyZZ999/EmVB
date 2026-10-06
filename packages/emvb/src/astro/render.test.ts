@@ -4,7 +4,7 @@ import { emptyDesign, renderPage, type DesignSystem } from "../core/index.ts";
 import { loadDesign, renderStored } from "./render.ts";
 
 const DESIGN: DesignSystem = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   variables: { colors: [{ id: "brand", name: "Brand", value: "#123456" }] },
 };
 const BASE = new URL("http://example.test/pricing");

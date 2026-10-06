@@ -3,11 +3,11 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /**
+ * 12 since W-160: gradient type, stop locations, and up to 10 stops. v11 gradients
+ * (`{ angle, from, to }`) become a linear gradient on read.
  * 11 since W-156 and W-157 (D-045): the layout Section element and an editor-only node label.
- * 10 since W-138 (D-044): per-side border widths and per-corner radii, and W-139 (D-039): grid
- * columns per device. Each step changes nothing, so an older EmVB shows "saved by a newer EmVB".
  */
-export const LAYOUT_SCHEMA_VERSION = 11;
+export const LAYOUT_SCHEMA_VERSION = 12;
 
 export const NodeId = z
   .string()

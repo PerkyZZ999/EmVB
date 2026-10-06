@@ -69,7 +69,7 @@ test("saves are validated over HTTP: an invalid layout gets 422 SAVE_REJECTED", 
   request,
 }) => {
   const invalid = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: "root0001",
       type: "container",
@@ -90,7 +90,7 @@ test("the standard entry editor shows the read-only widget instead of a JSON inp
   request,
 }) => {
   const layout = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: "root0001",
       type: "container",
@@ -109,7 +109,7 @@ test("the standard entry editor shows the read-only widget instead of a JSON inp
   await page.goto(`/_emdash/admin/content/emvb_pages/${id}`);
   const widget = page.locator('[data-emvb-widget="layout"]');
   await expect(widget).toBeVisible({ timeout: 20_000 });
-  await expect(widget).toContainText("2 elements · schema 11");
+  await expect(widget).toContainText("2 elements · schema 12");
   await expect(widget.getByRole("link", { name: "Open in EmVB" })).toHaveAttribute(
     "href",
     `/_emdash/admin/plugins/emvb/editor?entry=${id}`,

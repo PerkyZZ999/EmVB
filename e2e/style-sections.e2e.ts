@@ -18,7 +18,7 @@ type Styled = { style?: Record<string, unknown>; children?: Styled[] };
 type Stored = { root: Styled };
 
 const layoutFor = (text: string, classes?: string[]) => ({
-  schemaVersion: 11,
+  schemaVersion: 12,
   root: {
     id: "root0001",
     type: "container",
@@ -190,9 +190,7 @@ test("Effects section edits a class: opacity, inset shadow, grayscale and cursor
     await type(page, "Opacity (%)", "50");
     await overlay(page).getByRole("button", { name: "Add shadow" }).click();
     await type(page, "Blur", "6");
-    const inset = overlay(page).getByRole("checkbox", { name: "Inset" });
-    await inset.click();
-    await expect(inset).toBeChecked();
+    await pick(page, "Position", "Inset");
     await type(page, "Grayscale (%)", "100");
     await pick(page, "Cursor", "Pointer");
 

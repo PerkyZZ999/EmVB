@@ -65,7 +65,7 @@ const inner = (children: Node[], extra: Partial<Node> = {}) =>
   box(children, { classes: ["inner"], ...extra });
 
 export const design = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   variables: {
     colors: [
       { id: "forest", name: "Forest", value: "#16301f" },
@@ -359,7 +359,7 @@ const faq = (summary: string, body: string, open = false) =>
 export function homeLayout(media: Media, formId: string) {
   const rootId = begin("page");
   return {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: rootId,
       type: "container",
@@ -413,7 +413,14 @@ export function homeLayout(media: Media, formId: string) {
               paddingBottom: px(112),
               backgroundImage: media.heroRidge.url,
               backgroundPosition: "center",
-              gradient: { angle: 180, from: "#0d1d1300", to: "#0d1d13" },
+              gradient: {
+                type: "linear",
+                angle: 180,
+                stops: [
+                  { color: "#0d1d1300", at: 0 },
+                  { color: "#0d1d13", at: 100 },
+                ],
+              },
               overlay: { color: color("forest"), opacity: 0.38 },
               entrance: { type: "fade", duration: 600 },
             },
@@ -719,7 +726,16 @@ export function homeLayout(media: Media, formId: string) {
           {
             classes: ["section"],
             htmlId: "enquire",
-            style: { gradient: { angle: 135, from: color("forest"), to: color("pine") } },
+            style: {
+              gradient: {
+                type: "linear",
+                angle: 135,
+                stops: [
+                  { color: color("forest"), at: 0 },
+                  { color: color("pine"), at: 100 },
+                ],
+              },
+            },
           },
           { tag: "section" },
         ),
@@ -789,7 +805,7 @@ export function headerLayout() {
       states: { hover: { textDecoration: "underline", color: color("forest") } },
     });
   return {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: rootId,
       type: "container",
@@ -862,7 +878,7 @@ export function footerLayout() {
       { style: { gap: px(10) }, devices: { mobile: { gridColumnSpan: 2 } } },
     );
   return {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: rootId,
       type: "container",
@@ -915,7 +931,7 @@ export function footerLayout() {
 export function popupLayout(media: Media) {
   const rootId = begin("popup");
   return {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: rootId,
       type: "container",
@@ -962,7 +978,7 @@ export function popupLayout(media: Media) {
 export function notFoundLayout() {
   const rootId = begin("nf404");
   return {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: rootId,
       type: "container",
@@ -994,7 +1010,7 @@ export function notFoundLayout() {
 export function templateLayout() {
   const rootId = begin("tmpl");
   return {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: rootId,
       type: "container",
@@ -1023,7 +1039,7 @@ export function templateLayout() {
 export function simplePageLayout(eyebrow: string, title: string, lead: string) {
   const rootId = begin(`pg${title.length}`);
   return {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: rootId,
       type: "container",

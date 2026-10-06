@@ -13,7 +13,7 @@ afterEach(async () => {
 });
 
 const layout: Layout = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   root: {
     id: "root0001",
     type: "container",
@@ -221,7 +221,7 @@ describe("ElementPanel (W-021)", () => {
       <ElementPanel
         node={unknown}
         layout={{
-          schemaVersion: 11,
+          schemaVersion: 12,
           root: { id: "root0001", type: "container", props: {}, children: [unknown] },
         }}
         design={emptyDesign()}

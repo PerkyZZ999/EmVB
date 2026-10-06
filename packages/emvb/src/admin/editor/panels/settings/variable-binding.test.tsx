@@ -10,7 +10,7 @@ afterEach(cleanup);
 
 const px = (value: number, unit: "px" | "rem" = "px") => ({ value, unit });
 const design: DesignSystem = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   variables: {
     colors: [],
     fonts: [

@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./style.ts";
 
-/** 10 since W-138 (D-044): per-side border widths and per-corner radii. Older documents stay valid. */
-export const DESIGN_SCHEMA_VERSION = 11;
+/** 12 since W-160: class gradients use the same stops as layouts. v11 `{ angle, from, to }` upgrades on read. */
+export const DESIGN_SCHEMA_VERSION = 12;
 
 /** Tags a site can give a starting style. Classes and local styles still win. */
 export const DEFAULT_STYLE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "a", "button"] as const;

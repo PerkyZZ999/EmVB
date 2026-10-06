@@ -3,7 +3,7 @@ import { createPage, ensureEmvbSetup } from "./support/api.ts";
 import { EDITOR, overlay } from "./support/helpers.ts";
 
 const LAYOUT = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   root: {
     id: "root0001",
     type: "container",

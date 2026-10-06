@@ -136,6 +136,12 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-custom-color-row { display: flex; align-items: flex-end; gap: 8px; }
 .emvb-custom-color-row > :first-child { flex: 1; min-width: 0; }
 .emvb-color-picker { width: 28px; height: 28px; padding: 2px; border: 0; border-radius: 6px; background: var(--color-kumo-control); box-shadow: inset 0 0 0 1px var(--color-kumo-line); cursor: pointer; }
+.emvb-fill-types { display: flex; flex-wrap: wrap; gap: 4px; }
+.emvb-fill-types button { min-height: 28px; padding: 0 10px; border: 0; border-radius: 6px; background: var(--color-kumo-control); color: var(--text-color-kumo-default); box-shadow: inset 0 0 0 1px var(--color-kumo-line); cursor: pointer; }
+.emvb-fill-types button[aria-checked="true"] { background: var(--color-kumo-brand); color: #fff; box-shadow: none; }
+.emvb-angle { display: flex; flex-direction: column; gap: 4px; }
+.emvb-angle-slider { width: 100%; accent-color: var(--color-kumo-brand); }
+.emvb-gradient-stop { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; box-shadow: inset 0 1px 0 var(--color-kumo-line); }
 .emvb-row-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .emvb-layers { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1px; }
 .emvb-layer-row { display: flex; align-items: center; gap: 6px; width: 100%; height: var(--emvb-control); padding-right: 4px; border-radius: 6px; color: var(--text-color-kumo-default); font-size: 13px; }

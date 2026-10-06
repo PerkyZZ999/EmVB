@@ -63,7 +63,7 @@ describe("dropIndex (K16 drop-target maths)", () => {
 
 describe("dropContainer", () => {
   const layout: Layout = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: container("root0001", [
       heading("head0001"),
       container("box00001", [heading("head0002")]),
@@ -99,7 +99,7 @@ describe("drop targets nest reliably (W-128)", () => {
     ],
   };
   const layout = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: container("root0001", [
       container("card0001", [
         heading("head0001"),

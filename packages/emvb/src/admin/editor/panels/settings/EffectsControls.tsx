@@ -1,4 +1,4 @@
-import { Button, Checkbox, Select } from "@cloudflare/kumo";
+import { Button, Select } from "@cloudflare/kumo";
 import { PlusIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
@@ -18,8 +18,8 @@ const OFFSET: NumberSpec = { min: -1000, max: 1000, example: "4" };
 const SHADOW_FIELDS: ReadonlyArray<
   [key: "x" | "y" | "blur" | "spread", label: string, NumberSpec]
 > = [
-  ["x", "X", OFFSET],
-  ["y", "Y", OFFSET],
+  ["x", "Horizontal", OFFSET],
+  ["y", "Vertical", OFFSET],
   ["blur", "Blur", { min: 0, max: 1000, example: "12" }],
   ["spread", "Spread", OFFSET],
 ];
@@ -54,6 +54,25 @@ export function ShadowControl({
         <span className="emvb-var-field-label">Box shadow</span>
         {value ? (
           <>
+            <ColorControl
+              label="Shadow color"
+              value={value.color}
+              design={design}
+              onChange={(color) => patch({ color })}
+              onDesignChange={onDesignChange}
+            />
+            <Select
+              label="Position"
+              className={FIELD}
+              value={value.inset === true ? "inset" : "outset"}
+              onValueChange={(next) => {
+                const checked = next === "inset";
+                patch({ inset: checked === true ? true : undefined });
+              }}
+            >
+              <Select.Option value="outset">Outset</Select.Option>
+              <Select.Option value="inset">Inset</Select.Option>
+            </Select>
             <div className="emvb-shadow-grid">
               {SHADOW_FIELDS.map(([key, label, spec]) => (
                 <NumberField
@@ -66,18 +85,6 @@ export function ShadowControl({
                 />
               ))}
             </div>
-            <ColorControl
-              label="Shadow color"
-              value={value.color}
-              design={design}
-              onChange={(color) => patch({ color })}
-              onDesignChange={onDesignChange}
-            />
-            <Checkbox
-              label="Inset"
-              checked={value.inset === true}
-              onCheckedChange={(checked) => patch({ inset: checked === true ? true : undefined })}
-            />
           </>
         ) : (
           <Button

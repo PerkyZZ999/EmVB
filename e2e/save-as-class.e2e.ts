@@ -26,7 +26,7 @@ test("Save local styles as class moves them into a class, undoes in one step and
   const text = `Save as class ${unique()}`;
   const slug = `save-class-${unique()}`;
   const layout = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: "root0001",
       type: "container",

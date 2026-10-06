@@ -44,7 +44,7 @@ describe("upgradeLayout", () => {
       ok: true,
       from: 0,
       doc: {
-        schemaVersion: 11,
+        schemaVersion: 12,
         root: {
           id: "root0001",
           type: "container",
@@ -60,12 +60,12 @@ describe("upgradeLayout", () => {
     const snapshot = structuredClone(v0);
     const once = upgradeLayout(v0, migrations);
     if (!once.ok) throw new Error("upgrade failed");
-    expect(upgradeLayout(once.doc, migrations)).toEqual({ ok: true, doc: once.doc, from: 11 });
+    expect(upgradeLayout(once.doc, migrations)).toEqual({ ok: true, doc: once.doc, from: 12 });
     expect(v0).toEqual(snapshot);
   });
 
   test("a current document is returned unchanged", () => {
-    expect(upgradeLayout(s1Page())).toEqual({ ok: true, doc: s1Page(), from: 11 });
+    expect(upgradeLayout(s1Page())).toEqual({ ok: true, doc: s1Page(), from: 12 });
   });
 
   test("a missing step is reported instead of skipped", () => {
@@ -73,12 +73,12 @@ describe("upgradeLayout", () => {
   });
 
   test("newer documents are refused, and detected for read-only mode", () => {
-    expect(upgradeLayout({ schemaVersion: 12 })).toEqual({
+    expect(upgradeLayout({ schemaVersion: 13 })).toEqual({
       ok: false,
       reason: "newer-version",
-      version: 12,
+      version: 13,
     });
-    expect(isNewerThanSupported({ schemaVersion: 12 })).toBe(true);
+    expect(isNewerThanSupported({ schemaVersion: 13 })).toBe(true);
     expect(isNewerThanSupported(s1Page())).toBe(false);
     expect(isNewerThanSupported("junk")).toBe(false);
   });
@@ -87,10 +87,10 @@ describe("upgradeLayout", () => {
     const layouts = randomLayouts(200);
     for (const layout of layouts) {
       const first = upgradeLayout(layout, migrations);
-      expect(first).toEqual({ ok: true, doc: layout, from: 11 });
+      expect(first).toEqual({ ok: true, doc: layout, from: 12 });
       if (!first.ok) continue;
       expect(upgradeLayout(first.doc, migrations)).toEqual(first);
-      expect(validateLayout(layout, migrations)).toEqual({ ok: true, layout, upgradedFrom: 11 });
+      expect(validateLayout(layout, migrations)).toEqual({ ok: true, layout, upgradedFrom: 12 });
     }
   });
 });
@@ -100,12 +100,12 @@ describe("schema versions (D-031, D-032)", () => {
     (version: number) =>
     <T extends object>(doc: T) => ({ ...doc, schemaVersion: version });
 
-  test("layout and design are at version 11", () => {
-    expect(LAYOUT_SCHEMA_VERSION).toBe(11);
-    expect(DESIGN_SCHEMA_VERSION).toBe(11);
+  test("layout and design are at version 12", () => {
+    expect(LAYOUT_SCHEMA_VERSION).toBe(12);
+    expect(DESIGN_SCHEMA_VERSION).toBe(12);
   });
 
-  test.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])(
+  test.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])(
     "a v%i layout upgrades to v8 with every value kept",
     (version) => {
       for (const layout of randomLayouts(50, 7)) {
@@ -116,11 +116,11 @@ describe("schema versions (D-031, D-032)", () => {
     },
   );
 
-  test.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])(
+  test.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])(
     "a v%i design document upgrades to v8 with its variables and classes kept",
     (version) => {
       const design = {
-        schemaVersion: 11,
+        schemaVersion: 12,
         variables: { colors: [{ id: "ink", name: "Ink", value: "#112233" }] },
         classes: [{ id: "card", name: "Card", style: { opacity: 0.5, zIndex: 2 } }],
       };
@@ -136,11 +136,39 @@ describe("schema versions (D-031, D-032)", () => {
 
   test("an older EmVB meets a v3 page as newer, not as invalid", () => {
     const page = s1Page();
-    expect(upgradeLayout(page, {}, 2)).toEqual({ ok: false, reason: "newer-version", version: 11 });
-    expect(validateLayout({ ...page, schemaVersion: 12 })).toMatchObject({
+    expect(upgradeLayout(page, {}, 2)).toEqual({ ok: false, reason: "newer-version", version: 12 });
+    expect(validateLayout({ ...page, schemaVersion: 13 })).toMatchObject({
       ok: false,
       issues: [{ path: "schemaVersion", code: "newer-version" }],
     });
+  });
+
+  test("a v11 gradient { angle, from, to } becomes a linear gradient with two stops", () => {
+    const page = {
+      schemaVersion: 11,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        style: { gradient: { angle: 90, from: "#ffffff", to: { var: "ink" } } },
+        children: [],
+      },
+    };
+    const upgraded = upgradeLayout(page);
+    expect(upgraded.ok).toBe(true);
+    if (!upgraded.ok) return;
+    expect(upgraded.doc["schemaVersion"]).toBe(12);
+    expect((upgraded.doc["root"] as { style: unknown }).style).toEqual({
+      gradient: {
+        type: "linear",
+        angle: 90,
+        stops: [
+          { color: "#ffffff", at: 0 },
+          { color: { var: "ink" }, at: 100 },
+        ],
+      },
+    });
+    expect(validateLayout(page)).toMatchObject({ ok: true, upgradedFrom: 11 });
   });
 
   test.each([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])(

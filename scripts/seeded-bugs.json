@@ -7880,8 +7880,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
-          "search": "onCheckedChange={(checked) => patch({ inset: checked === true ? true : undefined })}",
-          "replace": "onCheckedChange={() => undefined}"
+          "search": "onValueChange={(next) => {\n                const checked = next === \"inset\";\n                patch({ inset: checked === true ? true : undefined });\n              }}",
+          "replace": "onValueChange={() => undefined}"
         }
       ],
       "command": [
@@ -7902,7 +7902,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7922,7 +7922,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7962,7 +7962,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 11;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 12;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -8222,7 +8222,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8242,7 +8242,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8262,7 +8262,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 11;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 12;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8271,9 +8271,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 11"
+        "layout and design are at version 12"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 11"
+      "expect": "\\(fail\\).*layout and design are at version 12"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8282,7 +8282,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 11;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 12;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8291,9 +8291,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 11"
+        "layout and design are at version 12"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 11"
+      "expect": "\\(fail\\).*layout and design are at version 12"
     },
     {
       "id": "D-032/node-states-refused",
@@ -15222,8 +15222,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/clipboard.ts",
-          "search": "    ...Object.values(style),\n    style.boxShadow?.color,\n    style.gradient?.from,",
-          "replace": "    ...Object.values(style),\n    style.gradient?.from,"
+          "search": "    ...Object.values(style),\n    style.boxShadow?.color,\n    ...(style.gradient?.stops ?? []).map((stop) => stop.color),",
+          "replace": "    ...Object.values(style),\n    ...(style.gradient?.stops ?? []).map((stop) => stop.color),"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
@@ -15884,8 +15884,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
-          "search": "const NEW_GRADIENT: Gradient = { angle: 180, from: \"#ffffff\", to: \"#000000\" };",
-          "replace": "const NEW_GRADIENT: Gradient = { angle: 0, from: \"#ffffff\", to: \"#000000\" };"
+          "search": "export const NEW_GRADIENT: Gradient = {\n  type: \"linear\",\n  angle: 180,",
+          "replace": "export const NEW_GRADIENT: Gradient = {\n  type: \"linear\",\n  angle: 0,"
         }
       ],
       "command": [
@@ -19392,6 +19392,86 @@
         "packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx"
       ],
       "expect": "\\(fail\\).*a Container's Style tab has Typography"
+    },
+    {
+      "id": "W-160/oklch-roundtrip",
+      "requirement": "W-160",
+      "description": "OKLCH conversion drops the colour, so the stored hex no longer round-trips.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/color-space.ts",
+          "search": "return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;",
+          "replace": "return 0;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-space.test.ts",
+        "-t",
+        "views of the same stored hex"
+      ],
+      "expect": "\\(fail\\).*views of the same stored hex"
+    },
+    {
+      "id": "W-160/rgb-not-committed",
+      "requirement": "W-160",
+      "description": "An RGB value is always refused, so it never becomes a hex.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "const next = parseRgb(text);\n          if (!next) {",
+          "replace": "const next = parseRgb(text);\n          if (true) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "RGB and OKLCH"
+      ],
+      "expect": "\\(fail\\).*RGB and OKLCH"
+    },
+    {
+      "id": "W-160/radial-centre-dropped",
+      "requirement": "W-160",
+      "description": "A radial gradient ignores its centre and always paints from the middle.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "radial-gradient(circle at ${position}, ${list})",
+          "replace": "radial-gradient(circle at center, ${list})"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/background.test.ts",
+        "-t",
+        "radial or conic"
+      ],
+      "expect": "\\(fail\\).*radial or conic"
+    },
+    {
+      "id": "W-160/v11-gradient-not-migrated",
+      "requirement": "W-160",
+      "description": "A stored v11 gradient is left as from/to, so schema 12 refuses the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "if (!(\"from\" in value) || !(\"to\" in value)) return value;",
+          "replace": "return value;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/migrate/migrate.test.ts",
+        "-t",
+        "two stops"
+      ],
+      "expect": "\\(fail\\).*two stops"
     }
   ]
 }

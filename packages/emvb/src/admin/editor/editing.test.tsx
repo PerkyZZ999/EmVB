@@ -21,7 +21,7 @@ afterEach(cleanup);
 type Call = { method: string; path: string; body: Record<string, unknown> | undefined };
 
 const DESIGN: DesignSystem = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   variables: { colors: [{ id: "brand", name: "Brand", value: "#112233" }] },
 };
 
@@ -357,7 +357,7 @@ describe("colour variables (R-004 partial)", () => {
     const save = server.calls.find((c) => c.path.endsWith("/design/save"));
     expect(save?.body).toEqual({
       design: {
-        schemaVersion: 11,
+        schemaVersion: 12,
         variables: {
           colors: [
             ...DESIGN.variables.colors,

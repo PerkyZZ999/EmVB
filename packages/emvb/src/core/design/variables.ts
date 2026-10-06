@@ -46,8 +46,9 @@ function collectStyleUsages(
     if (matches(value, id, kind)) hit(prop);
   }
   if (shadowColorMatches(style, id, kind)) hit("boxShadow.color");
-  if (matches(style.gradient?.from, id, kind)) hit("gradient.from");
-  if (matches(style.gradient?.to, id, kind)) hit("gradient.to");
+  style.gradient?.stops.forEach((stop, index) => {
+    if (matches(stop.color, id, kind)) hit(`gradient.stops.${index}`);
+  });
   if (matches(style.overlay?.color, id, kind)) hit("overlay.color");
 }
 
@@ -125,10 +126,7 @@ function stripRefsFromStyle(
     next["boxShadow"] = shadow;
     changed = true;
   }
-  if (
-    style.gradient &&
-    (matches(style.gradient.from, id, kind) || matches(style.gradient.to, id, kind))
-  ) {
+  if (style.gradient?.stops.some((stop) => matches(stop.color, id, kind))) {
     delete next["gradient"];
     changed = true;
   }

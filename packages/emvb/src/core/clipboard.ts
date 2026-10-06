@@ -196,8 +196,7 @@ function refsInStyle(style: StyleProps | undefined): Ref[] {
   const values: unknown[] = [
     ...Object.values(style),
     style.boxShadow?.color,
-    style.gradient?.from,
-    style.gradient?.to,
+    ...(style.gradient?.stops ?? []).map((stop) => stop.color),
     style.overlay?.color,
   ];
   return values.map(asRef).filter((ref): ref is Ref => ref !== null);

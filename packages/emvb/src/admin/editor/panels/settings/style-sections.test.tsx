@@ -57,7 +57,7 @@ const panel = (node: LayoutNode, design: DesignSystem = emptyDesign()) =>
     <ElementPanel
       node={node}
       layout={{
-        schemaVersion: 11,
+        schemaVersion: 12,
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }}
       design={design}
@@ -404,19 +404,12 @@ describe("Effects section (W-088)", () => {
     expect(patches).toEqual([{ boxShadow: { ...lifted, x: -3 } }]);
   });
 
-  test("Inset toggles on a Kumo checkbox, and off drops the key", async () => {
-    // Clicking the label text: happy-dom forwards a click on the box twice (label activation).
-    const inset = () =>
-      [...document.querySelectorAll("label span")].find(
-        (el) => el.textContent === "Inset",
-      ) as HTMLElement;
+  test("Inset toggles on the Position select, and Outset drops the key", async () => {
     await row("boxShadow", { boxShadow: lifted });
-    expect(document.querySelector('[role="checkbox"]')?.getAttribute("aria-checked")).toBe("false");
-    await act(async () => inset().click());
+    await choose("Position", "Inset");
     expect(patches).toEqual([{ boxShadow: { ...lifted, inset: true } }]);
     await row("boxShadow", { boxShadow: { ...lifted, inset: true } });
-    expect(document.querySelector('[role="checkbox"]')?.getAttribute("aria-checked")).toBe("true");
-    await act(async () => inset().click());
+    await choose("Position", "Outset");
     expect(patches).toEqual([{ boxShadow: { ...lifted, inset: true } }, { boxShadow: lifted }]);
   });
 

@@ -14,11 +14,11 @@ import {
 // lengths, the length-variable units, the icon and image refinements, the node-shape guard
 // and the exported type guards.
 
-const design = (variables: Record<string, unknown>) => ({ schemaVersion: 11, variables });
+const design = (variables: Record<string, unknown>) => ({ schemaVersion: 12, variables });
 const colorOk = (id: string, value: string) =>
   validateDesign(design({ colors: [{ id, name: "C", value }] })).ok;
 const page = (child: unknown) => ({
-  schemaVersion: 11,
+  schemaVersion: 12,
   root: { id: "root0001", type: "container", props: {}, children: [child] },
 });
 const issues = (child: unknown) => {

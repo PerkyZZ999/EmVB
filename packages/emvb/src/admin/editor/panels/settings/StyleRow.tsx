@@ -3,7 +3,7 @@ import { isSafeFontStack, type DesignSystem, type StyleProps } from "../../../..
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
-import { BackgroundImageControl, GradientControl, OverlayControl } from "./BackgroundControls.tsx";
+import { BackgroundFill } from "./BackgroundFill.tsx";
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 import { LengthRow } from "./LengthRow.tsx";
 import {
@@ -194,12 +194,23 @@ export function placeholderOf(value: unknown, design: DesignSystem): string | un
 }
 
 /** One Style property row: control, set marker, reset (W-021). */
+const FILL_REST = new Set<StyleKey>([
+  "backgroundImage",
+  "backgroundSize",
+  "backgroundPosition",
+  "backgroundRepeat",
+  "gradient",
+  "overlay",
+  "backgroundVideo",
+]);
+
 export function StyleRow({
   styleKey,
   style,
   inherited,
   design,
   fetcher,
+  elementType = "container",
   onPatch,
   onDesignChange,
 }: {
@@ -210,6 +221,8 @@ export function StyleRow({
   design: DesignSystem;
   /** Present on an element, so a background image can use the media library. */
   fetcher?: Fetcher;
+  /** Decides whether Image and Video are offered. A class editor passes a box. */
+  elementType?: string;
   onPatch: (patch: Partial<StyleProps>) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
 }) {
@@ -224,59 +237,47 @@ export function StyleRow({
     <ResetButton label={label} set={set} onReset={() => onPatch({ [styleKey]: undefined })} />
   );
 
-  if (styleKey === "backgroundImage") {
+  if (styleKey === "backgroundColor") {
     return (
-      <BackgroundImageControl
-        value={typeof value === "string" ? value : undefined}
+      <BackgroundFill
+        style={style}
+        elementType={elementType}
+        design={design}
         fetcher={fetcher}
-        onChange={(next) => onPatch({ backgroundImage: next })}
-        reset={reset}
-      />
-    );
-  }
-
-  if (styleKey === "backgroundVideo") {
-    const video = typeof value === "string" ? value : "";
-    return (
-      <div className="emvb-style-row" data-emvb-style="backgroundVideo" data-set={set || undefined}>
-        <Input
-          label="Background video"
-          className={FIELD}
-          value={video}
-          placeholder="https:// or /path"
-          onChange={(event) => {
-            const next = event.target.value.trim();
-            onPatch({ backgroundVideo: next === "" ? undefined : next });
-          }}
-        />
-        {reset}
-      </div>
-    );
-  }
-
-  if (styleKey === "gradient") {
-    return (
-      <GradientControl
-        value={style?.gradient}
-        design={design}
-        onChange={(next) => onPatch({ gradient: next })}
+        sizeOptions={SELECT_OPTIONS.backgroundSize ?? []}
+        positionOptions={SELECT_OPTIONS.backgroundPosition ?? []}
+        repeatOptions={SELECT_OPTIONS.backgroundRepeat ?? []}
+        onPatch={onPatch}
         onDesignChange={onDesignChange}
-        reset={reset}
+        reset={
+          <ResetButton
+            label="Background"
+            set={
+              style?.backgroundColor !== undefined ||
+              style?.gradient !== undefined ||
+              style?.backgroundImage !== undefined ||
+              style?.backgroundVideo !== undefined ||
+              style?.overlay !== undefined
+            }
+            onReset={() =>
+              onPatch({
+                backgroundColor: undefined,
+                backgroundImage: undefined,
+                backgroundSize: undefined,
+                backgroundPosition: undefined,
+                backgroundRepeat: undefined,
+                gradient: undefined,
+                overlay: undefined,
+                backgroundVideo: undefined,
+              })
+            }
+          />
+        }
       />
     );
   }
 
-  if (styleKey === "overlay") {
-    return (
-      <OverlayControl
-        value={style?.overlay}
-        design={design}
-        onChange={(next) => onPatch({ overlay: next })}
-        onDesignChange={onDesignChange}
-        reset={reset}
-      />
-    );
-  }
+  if (FILL_REST.has(styleKey)) return null;
 
   if (COLOR_KEYS.has(styleKey)) {
     return (

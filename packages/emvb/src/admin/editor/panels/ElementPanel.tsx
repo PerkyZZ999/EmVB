@@ -596,6 +596,7 @@ function KnownElementPanel({
                       inherited={inherited}
                       design={design}
                       fetcher={fetcher}
+                      elementType={cls ? "container" : node.type}
                       onPatch={patchStyle}
                       onDesignChange={onDesignChange}
                     />

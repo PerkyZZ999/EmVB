@@ -10,7 +10,7 @@ afterEach(cleanup);
 // bound value, validation, failures and id collisions weren't checked.
 
 const DESIGN: DesignSystem = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   variables: {
     colors: [
       { id: "brand", name: "Brand", value: "#0055ff" },
@@ -95,7 +95,7 @@ describe("editing a bound colour variable (W-091)", () => {
     await view.blur("Brand value");
     expect(view.designs).toEqual([
       {
-        schemaVersion: 11,
+        schemaVersion: 12,
         variables: {
           colors: [
             { id: "brand", name: "Brand", value: "#112233" },
@@ -205,6 +205,19 @@ describe("colour field: label, swatches and Custom color (W-136)", () => {
     expect(view.alert()).toBeNull();
     expect(view.values).toEqual(["#123456"]);
     expect(view.designs).toEqual([]);
+  });
+
+  test("RGB and OKLCH fields commit a hex, and a bad RGB is refused", async () => {
+    const view = await control("#c2410c");
+    expect(view.has("RGB")).toBe(true);
+    expect(view.has("OKLCH")).toBe(true);
+    await view.type("RGB", "999, 0, 0");
+    await view.enter("RGB");
+    expect(view.alert()).toBe("Enter RGB as 255, 128, 0.");
+    expect(view.values).toEqual([]);
+    await view.type("RGB", "0, 128, 0");
+    await view.enter("RGB");
+    expect(view.values).toEqual(["#008000"]);
   });
 
   test("the browser's picker previews while dragging and applies when its dialog closes", async () => {

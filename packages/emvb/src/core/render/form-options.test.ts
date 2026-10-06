@@ -9,7 +9,7 @@ const field = (type: "select" | "radio", id: string, name: string): LayoutNode =
   ({ id, type, props: { field: name, label: name } }) as LayoutNode;
 
 const layout: Layout = {
-  schemaVersion: 11,
+  schemaVersion: 12,
   root: {
     id: "root0001",
     type: "container",

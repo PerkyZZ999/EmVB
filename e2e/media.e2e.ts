@@ -6,7 +6,7 @@ import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./su
 const PIXEL = path.join(process.cwd(), "e2e/fixtures/emvb-pixel.png");
 
 const imageLayout = () => ({
-  schemaVersion: 11,
+  schemaVersion: 12,
   root: {
     id: "root0001",
     type: "container",

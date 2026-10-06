@@ -5,6 +5,7 @@ import { slugify, type DesignSystem, type StyleProps } from "../../../core/index
 
 type ColorValue = StyleProps["color"];
 import { BUTTON, FIELD } from "../../ui.ts";
+import { formatOklch, formatRgb, parseHex, parseOklch, parseRgb, toHex } from "./color-space.ts";
 import { pickerHex } from "./variable-values.ts";
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -247,7 +248,72 @@ function CustomColor({
         />
       </div>
       {error && <InlineError>{error}</InlineError>}
+      <NotationRow
+        label="RGB"
+        text={formatRgb(parseHex(HEX.test(draft) ? draft : value) ?? { r: 0, g: 0, b: 0, a: 1 })}
+        placeholder="255, 128, 0"
+        onCommit={(text) => {
+          const next = parseRgb(text);
+          if (!next) {
+            setError("Enter RGB as 255, 128, 0.");
+            return;
+          }
+          setError(null);
+          const hex = toHex(next);
+          setDraft(hex);
+          onCommit(hex);
+        }}
+      />
+      <NotationRow
+        label="OKLCH"
+        text={formatOklch(parseHex(HEX.test(draft) ? draft : value) ?? { r: 0, g: 0, b: 0, a: 1 })}
+        placeholder="62.8, 0.150, 29"
+        onCommit={(text) => {
+          const next = parseOklch(text);
+          if (!next) {
+            setError("Enter OKLCH as 62.8, 0.150, 29.");
+            return;
+          }
+          setError(null);
+          const hex = toHex(next);
+          setDraft(hex);
+          onCommit(hex);
+        }}
+      />
     </div>
+  );
+}
+
+/** A second view of the same colour. Commits on Enter or blur, like the hex field. */
+function NotationRow({
+  label,
+  text,
+  placeholder,
+  onCommit,
+}: {
+  label: string;
+  text: string;
+  placeholder: string;
+  onCommit: (text: string) => void;
+}) {
+  const [draft, setDraft] = React.useState(text);
+  React.useEffect(() => {
+    setDraft(text);
+  }, [text]);
+  return (
+    <Input
+      label={label}
+      className={`${FIELD} emvb-mono`}
+      placeholder={placeholder}
+      value={draft}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={() => {
+        if (draft.trim() !== text) onCommit(draft);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") onCommit(draft);
+      }}
+    />
   );
 }
 

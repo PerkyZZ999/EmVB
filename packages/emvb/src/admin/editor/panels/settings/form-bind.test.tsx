@@ -160,7 +160,7 @@ describe("AddPanel forms group (W-036)", () => {
 
 describe("ElementPanel forms missing (W-036)", () => {
   const formLayout: Layout = {
-    schemaVersion: 11,
+    schemaVersion: 12,
     root: {
       id: "root0001",
       type: "container",
