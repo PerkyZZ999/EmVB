@@ -19692,6 +19692,26 @@
         "how to design the item"
       ],
       "expect": "\\(fail\\).*how to design the item"
+    },
+    {
+      "id": "W-165/float-close-overlaps",
+      "requirement": "W-165",
+      "description": "The float close button is position:absolute over the body instead of sitting beside it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": "max-width:100%;display:flex;align-items:flex-start;gap:.35rem}",
+          "replace": "max-width:100%}.emvb-float__close{position:absolute;top:.35rem;inset-inline-end:.35rem}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/float.test.ts",
+        "-t",
+        "beside the body"
+      ],
+      "expect": "\\(fail\\).*beside the body"
     }
   ]
 }

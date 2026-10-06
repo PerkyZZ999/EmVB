@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { defaultFloatSettings, validateFloatSettings, wrapFloatMarkup } from "./float.ts";
+import {
+  defaultFloatSettings,
+  FLOAT_CHROME_CSS,
+  validateFloatSettings,
+  wrapFloatMarkup,
+} from "./float.ts";
 
 describe("float settings", () => {
   test("a top bar without a close button is the default", () => {
@@ -30,5 +35,19 @@ describe("float settings", () => {
     });
     expect(closing).toContain("data-emvb-float-dismiss");
     expect(closing).toContain('aria-label="Close"');
+  });
+
+  test("a close button sits beside the body, not over it (W-165)", () => {
+    expect(FLOAT_CHROME_CSS).toContain("display:flex");
+    expect(FLOAT_CHROME_CSS.includes("position:absolute")).toBe(false);
+    const html = wrapFloatMarkup("float1", "Note", "<p>Saturday</p>", {
+      schemaVersion: 1,
+      edge: "end-bottom",
+      dismiss: true,
+    });
+    const bodyAt = html.indexOf('class="emvb-float__body"');
+    const closeAt = html.indexOf("emvb-float__close");
+    expect(bodyAt).toBeGreaterThan(-1);
+    expect(closeAt).toBeGreaterThan(bodyAt);
   });
 });
