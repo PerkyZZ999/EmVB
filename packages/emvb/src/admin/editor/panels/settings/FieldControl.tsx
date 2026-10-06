@@ -76,7 +76,10 @@ export function FieldControl({
         value={typeof raw === "string" ? raw : ""}
         formId={parentFormId}
         fetcher={fetcher}
-        onChange={(name) => onChange(withProp(node, "field", name))}
+        onChange={(name, label) => {
+          const next = withProp(node, "field", name);
+          onChange(label ? withProp(next, "label", label) : next);
+        }}
       />
     );
   }

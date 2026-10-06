@@ -19712,6 +19712,26 @@
         "beside the body"
       ],
       "expect": "\\(fail\\).*beside the body"
+    },
+    {
+      "id": "W-166/field-pick-keeps-name",
+      "requirement": "W-166",
+      "description": "Picking a form field from the definition list updates the field name but leaves the visible label as Name or Message.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "onChange(label ? withProp(next, \"label\", label) : next);",
+          "replace": "onChange(withProp(node, \"field\", name));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx",
+        "-t",
+        "copies its label"
+      ],
+      "expect": "\\(fail\\).*copies its label"
     }
   ]
 }

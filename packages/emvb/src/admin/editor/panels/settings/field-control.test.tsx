@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import type { FieldDescriptor, LayoutNode } from "../../../../core/index.ts";
+import type { Fetcher } from "../../../api.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 import { FieldControl } from "./FieldControl.tsx";
 
@@ -86,5 +87,40 @@ describe("FieldControl (W-091)", () => {
     expect(view.host.querySelector("[data-emvb-field='src']")?.textContent).toBe(
       "Media library needs a signed-in session.",
     );
+  });
+});
+
+describe("picking a form field copies its label (W-166)", () => {
+  test("Email from the definition replaces the default Name label", async () => {
+    const sent: Record<string, unknown>[] = [];
+    const fetcher: Fetcher = async () =>
+      new Response(
+        JSON.stringify({
+          data: {
+            pages: [{ fields: [{ name: "email", type: "email", label: "Email", required: true }] }],
+          },
+        }),
+        { status: 200 },
+      );
+    const input = {
+      id: "inp00001",
+      type: "text-input",
+      props: { field: "name", label: "Name" },
+    } as LayoutNode;
+    await mount(
+      <FieldControl
+        field={{ key: "field", kind: "text", label: "Field name" }}
+        node={input}
+        fetcher={fetcher}
+        parentFormId="01FORM"
+        onChange={(next) => sent.push({ ...(next.props as Record<string, unknown>) })}
+      />,
+    );
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    await choose("Field", "Email *");
+    expect(sent).toStrictEqual([{ field: "email", label: "Email" }]);
   });
 });

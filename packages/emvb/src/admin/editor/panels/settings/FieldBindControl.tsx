@@ -19,7 +19,7 @@ export function FieldBindControl({
   value: string;
   formId: string | undefined;
   fetcher: Fetcher;
-  onChange: (field: string) => void;
+  onChange: (field: string, label?: string) => void;
 }) {
   const [fields, setFields] = React.useState<DefinitionField[] | null>(null);
 
@@ -47,7 +47,8 @@ export function FieldBindControl({
           value={known ? value : MANUAL}
           onValueChange={(next) => {
             if (!next || next === MANUAL) return;
-            onChange(next);
+            const picked = fields.find((each) => each.name === next);
+            onChange(next, picked?.label);
           }}
           renderValue={(current: unknown) => {
             const field = fields.find((each) => each.name === current);
