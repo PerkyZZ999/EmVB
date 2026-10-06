@@ -102,6 +102,13 @@ describe("renderLoop (W-091)", () => {
     );
   });
 
+  test("an empty loop in the editor explains how to design the item", () => {
+    const editor = renderPage(page(loop({}, [])), design, { mode: "editor" }).html;
+    expect(editor).toContain("data-emvb-loop-empty");
+    expect(editor).toContain("Choose a Loop Item, or add elements here to design the item.");
+    expect(renderPage(page(loop({}, [])), design).html).not.toContain("emvb-loop");
+  });
+
   test("a public loop with no posts renders nothing, not an editor placeholder", () => {
     const { html } = renderPage(page(loop({})), design, { dynamic: { posts: [] } });
     expect(html).toBe('<div class="emvb-root emvb-container"></div>');

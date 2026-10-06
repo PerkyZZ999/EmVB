@@ -148,10 +148,17 @@ export function useNodeActions({
     const node = newElement(type);
     if (!node) return;
     const place = insertionPoint(layout, latest.current.selectedId);
+    const result = addNode(layout, node, place);
+    if (!result.ok) {
+      announce(result.reason);
+      if (lastToast.current) toasts.close(lastToast.current);
+      lastToast.current = toasts.add({ title: result.reason, timeout: NOTICE_TIMEOUT_MS });
+      return;
+    }
+    dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
     const parent = findNode(layout, place.parentId);
     const parentName = ELEMENT_NAMES[parent?.type ?? "container"] ?? "Container";
     const label = ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name ?? type;
-    dispatch({ type: "add-node", node, parentId: place.parentId, index: place.index });
     announce(`${label} added inside ${parentName}`);
   };
 

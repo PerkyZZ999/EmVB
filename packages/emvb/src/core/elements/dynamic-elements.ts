@@ -129,7 +129,8 @@ export const postLink: ElementDefinition<PostLinkNode> = {
 };
 
 export const loop: ElementDefinition<LoopNode> = {
-  baseCss: ".emvb-loop{display:flex;flex-direction:column;min-width:0;gap:1rem}",
+  baseCss:
+    ".emvb-loop{display:flex;flex-direction:column;min-width:0;gap:1rem}.emvb-loop[data-emvb-loop-empty]{min-height:48px;padding:12px;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({ type: "loop", props: {}, children: [] }),
   descriptor: {
     type: "loop",

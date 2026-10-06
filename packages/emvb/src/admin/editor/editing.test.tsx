@@ -414,6 +414,24 @@ describe("Add panel and Layers (W-018)", () => {
     expect(box?.type === "container" && box.children?.[0]?.type).toBe("heading");
   });
 
+  test("an accordion item outside an accordion is refused and not added", async () => {
+    const { fetcher } = fakeServer();
+    await render(fetcher);
+    const addTab = [...document.querySelectorAll('[role="tab"]')].find((el) =>
+      (el.textContent ?? "").includes("Add"),
+    );
+    await click(addTab);
+    await click(document.querySelector('[data-emvb-add-tile="accordion-item"]'));
+    expect(editor()?.querySelector(".emvb-sr-only")?.textContent).toBe(
+      "Accordion items can only go inside an Accordion.",
+    );
+    expect(document.body.textContent ?? "").toContain(
+      "Accordion items can only go inside an Accordion.",
+    );
+    await openLayers();
+    expect(layerRow("Accordion item") === undefined).toBe(true);
+  });
+
   test("an empty page shows Add a container to start", async () => {
     const { fetcher } = fakeServer({ layout: null });
     await render(fetcher);

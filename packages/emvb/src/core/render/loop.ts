@@ -16,12 +16,13 @@ export function renderLoop(
   const templateLayout =
     itemPartId && dynamic?.loopTemplates ? dynamic.loopTemplates[itemPartId] : undefined;
   const templateNodes: LayoutNode[] = templateLayout ? templateLayout.root.children : node.children;
-  if (posts.length === 0) {
+  // Editor mode always has a sample post, so an empty item template would paint a zero-height box.
+  if (posts.length === 0 || (ctx.mode === "editor" && templateNodes.length === 0)) {
     if (ctx.mode !== "editor") return undefined;
     return {
       tag: "div",
       attrs: { ...attrs, "data-emvb-loop-empty": "" },
-      children: ["Loop — add posts on the public archive to see items."],
+      children: ["Choose a Loop Item, or add elements here to design the item."],
     };
   }
   const children: VNode[] = [];

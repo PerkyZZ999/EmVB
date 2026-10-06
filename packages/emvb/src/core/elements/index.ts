@@ -380,7 +380,7 @@ const image: ElementDefinition<ImageNode> = {
 
 const icon: ElementDefinition<IconNode> = {
   baseCss:
-    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon-link{display:inline-flex;color:inherit}.emvb-icon svg{display:block;width:1em;height:1em}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
+    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon-link{display:inline-flex;color:inherit}.emvb-icon svg{display:block}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({
     type: "icon",
     props: { iconId: "star", title: "Star", decorative: false, size: 24 },
@@ -531,7 +531,7 @@ const DEFAULT_SVG =
 
 const svgEl: ElementDefinition<SvgNode> = {
   baseCss:
-    ".emvb-svg{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-svg svg{display:block;width:1em;height:1em}.emvb-svg-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
+    ".emvb-svg{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-svg svg{display:block}.emvb-svg-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({
     type: "svg",
     props: { markup: DEFAULT_SVG, title: "SVG", decorative: false, size: 48 },

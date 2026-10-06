@@ -19632,6 +19632,66 @@
         "refused link"
       ],
       "expect": "\\(fail\\).*refused link"
+    },
+    {
+      "id": "W-164/add-claims-success",
+      "requirement": "W-164",
+      "description": "Adding an element the parent cannot hold still says it was added.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "    if (!result.ok) {\n      announce(result.reason);\n      if (lastToast.current) toasts.close(lastToast.current);",
+          "replace": "    if (false) {\n      announce(result.reason);\n      if (lastToast.current) toasts.close(lastToast.current);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "outside an accordion"
+      ],
+      "expect": "\\(fail\\).*outside an accordion"
+    },
+    {
+      "id": "W-164/svg-size-ignored",
+      "requirement": "W-164",
+      "description": "Icon and SVG CSS forces 1em, so the Size field does not paint.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ".emvb-icon svg{display:block}.emvb-icon-missing",
+          "replace": ".emvb-icon svg{display:block;width:1em;height:1em}.emvb-icon-missing"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/media-elements.test.ts",
+        "-t",
+        "do not force 1em"
+      ],
+      "expect": "\\(fail\\).*do not force 1em"
+    },
+    {
+      "id": "W-164/empty-loop-invisible",
+      "requirement": "W-164",
+      "description": "A new Loop with no item template paints nothing in the editor.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "posts.length === 0 || (ctx.mode === \"editor\" && templateNodes.length === 0)",
+          "replace": "posts.length === 0"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/tabs-loop.test.ts",
+        "-t",
+        "how to design the item"
+      ],
+      "expect": "\\(fail\\).*how to design the item"
     }
   ]
 }

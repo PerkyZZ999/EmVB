@@ -143,6 +143,29 @@ describe("image and video fallbacks (W-091)", () => {
   });
 });
 
+describe("icon and svg size (canvas)", () => {
+  test("size attributes paint because icon and svg CSS do not force 1em", () => {
+    const { css } = renderPage(
+      {
+        schemaVersion: 12,
+        root: {
+          id: "root0001",
+          type: "container",
+          props: {},
+          children: [
+            iconNode({ iconId: "star", title: "Star" }),
+            svgNode({ markup: '<svg viewBox="0 0 1 1"><path d="M0 0"/></svg>' }),
+          ],
+        },
+      },
+      design,
+    );
+    expect(css.includes("svg{display:block;width:1em")).toBe(false);
+    expect(css.includes(".emvb-icon svg{display:block}.emvb-icon-missing")).toBe(true);
+    expect(css.includes(".emvb-svg svg{display:block}.emvb-svg-missing")).toBe(true);
+  });
+});
+
 describe("dynamic element defaults (W-091)", () => {
   test("a new Post Title is an h1 and a new Post Image isn't decorative", () => {
     expect(defaultElement("post-title", "ptit0001").props).toEqual({ level: 1 });
