@@ -6,7 +6,16 @@ import { THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
 import { listThemeParts, partTypeLabel } from "../theme-api.ts";
 import { editorUrl } from "../editor/exit.ts";
-import { EditedTime, ListError, NewButton, StatusBadge, useList } from "./list-kit.tsx";
+import {
+  EditedTime,
+  ListError,
+  ListSearch,
+  matchesSearch,
+  NewButton,
+  NoMatches,
+  StatusBadge,
+  useList,
+} from "./list-kit.tsx";
 import { NewThemePartDialog } from "./NewThemePartDialog.tsx";
 
 type Filter = "all" | ThemePartType;
@@ -109,6 +118,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
   const list = useList(fetcher, listThemeParts);
   const [creating, setCreating] = React.useState(false);
   const [filter, setFilter] = React.useState<Filter>("all");
+  const [query, setQuery] = React.useState("");
 
   const newPart = <NewButton label="New theme part" onClick={() => setCreating(true)} />;
 
@@ -118,6 +128,9 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
         ? list.items
         : list.items.filter((p) => p.partType === filter)
       : [];
+  const shown = visible.filter((p) =>
+    matchesSearch(query, p.title, partTypeLabel(p.partType), p.conditionsSummary),
+  );
 
   const emptyFilterLabel =
     filter === "all" ? "theme parts" : FILTERS.find((f) => f.value === filter)?.label.toLowerCase();
@@ -129,7 +142,10 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
         {list.state === "ready" && list.items.length > 0 && newPart}
       </div>
       {list.state === "ready" && list.items.length > 0 && (
-        <FilterTabs filter={filter} counts={countByType(list.items)} onChange={setFilter} />
+        <>
+          <FilterTabs filter={filter} counts={countByType(list.items)} onChange={setFilter} />
+          <ListSearch value={query} onChange={setQuery} label="Search theme parts" />
+        </>
       )}
       {list.state === "loading" && <Loader />}
       {list.state === "error" && (
@@ -156,6 +172,8 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
                 contents={newPart}
               />
             </div>
+          ) : shown.length === 0 ? (
+            <NoMatches query={query} />
           ) : (
             <div className="emvb-surface-card" data-emvb-list="theme-parts">
               <Table data-emvb-list="theme-parts">
@@ -169,7 +187,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                  {visible.map((part) => (
+                  {shown.map((part) => (
                     <Table.Row key={part.id} data-emvb-row={part.id}>
                       <Table.Cell>
                         <a

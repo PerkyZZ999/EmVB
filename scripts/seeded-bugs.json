@@ -21388,6 +21388,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-207/search-ignored",
+      "requirement": "W-207",
+      "description": "The Visual pages search box doesn't filter the rows.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/PageList.tsx",
+          "search": "              {shown.map((page) => (",
+          "replace": "              {list.items.map((page) => ("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/list-search.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-207/accent-sensitive",
+      "requirement": "W-207",
+      "description": "Searching CAFE doesn't find Café.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "const fold = (text: string) => text.normalize(\"NFD\").replace(/\\p{M}/gu, \"\").toLocaleLowerCase();",
+          "replace": "const fold = (text: string) => text.toLocaleLowerCase();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/list-search.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

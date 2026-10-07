@@ -4,13 +4,27 @@ import * as React from "react";
 import type { Fetcher } from "../api.ts";
 import { listPages } from "../content-api.ts";
 import { editorUrl } from "../editor/exit.ts";
-import { EditedTime, ListError, NewButton, StatusBadge, useList } from "./list-kit.tsx";
+import {
+  EditedTime,
+  ListError,
+  ListSearch,
+  matchesSearch,
+  NewButton,
+  NoMatches,
+  StatusBadge,
+  useList,
+} from "./list-kit.tsx";
 import { NewPageDialog } from "./NewPageDialog.tsx";
 
 /** The Visual pages list (IA): title and slug, status, last edited; New page. */
 export function PageList({ fetcher }: { fetcher: Fetcher }) {
   const list = useList(fetcher, listPages);
   const [creating, setCreating] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+  const shown =
+    list.state === "ready"
+      ? list.items.filter((page) => matchesSearch(query, page.title, `/${page.slug}`))
+      : [];
 
   const newPage = <NewButton label="New page" onClick={() => setCreating(true)} />;
 
@@ -35,6 +49,12 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
         </div>
       )}
       {list.state === "ready" && list.items.length > 0 && (
+        <ListSearch value={query} onChange={setQuery} label="Search pages" />
+      )}
+      {list.state === "ready" && list.items.length > 0 && shown.length === 0 && (
+        <NoMatches query={query} />
+      )}
+      {list.state === "ready" && shown.length > 0 && (
         <div className="emvb-surface-card" data-emvb-list="pages">
           <Table data-emvb-list="pages">
             <Table.Header>
@@ -45,7 +65,7 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {list.items.map((page) => (
+              {shown.map((page) => (
                 <Table.Row key={page.id} data-emvb-row={page.id}>
                   <Table.Cell>
                     <a className="emvb-row-title" href={editorUrl(page.id)}>

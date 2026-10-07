@@ -69,6 +69,7 @@ export const UI_CSS = `
 /* List / setup pages */
 .emvb-pages { display: flex; flex-direction: column; gap: 16px; }
 .emvb-list-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.emvb-list-search { max-width: 320px; margin: 12px 0; }
 .emvb-page-title { margin: 0; font-size: 24px; line-height: 1.25; font-weight: 600; color: var(--text-color-kumo-default); }
 .emvb-row-title { color: var(--text-color-kumo-default); font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; }
 .emvb-row-title:hover { text-decoration: underline; text-underline-offset: 2px; }

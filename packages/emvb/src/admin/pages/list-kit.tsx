@@ -1,4 +1,4 @@
-import { Banner, Button } from "@cloudflare/kumo";
+import { Banner, Button, Input } from "@cloudflare/kumo";
 import { PlusIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { Fetcher } from "../api.ts";
@@ -72,5 +72,53 @@ export function EditedTime({ iso }: { iso: string }) {
     <time dateTime={iso} title={iso} className="emvb-tabular">
       {iso ? formatter.format(new Date(iso)) : ""}
     </time>
+  );
+}
+
+const fold = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+
+/**
+ * W-207: does an entry match the list search? Every word must appear in one of the fields,
+ * ignoring case and accents, so "about us" finds "About Us" and "/about-us".
+ */
+export function matchesSearch(query: string, ...fields: string[]): boolean {
+  const haystack = fold(fields.join(" "));
+  return fold(query)
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((word) => haystack.includes(word));
+}
+
+/** The search box above a list (W-207). */
+export function ListSearch({
+  value,
+  onChange,
+  label,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+}) {
+  return (
+    <div className="emvb-list-search">
+      <Input
+        type="search"
+        id="emvb-list-search"
+        aria-label={label}
+        placeholder={label}
+        value={value}
+        maxLength={200}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </div>
+  );
+}
+
+/** Shown when a search finds nothing (W-207). */
+export function NoMatches({ query }: { query: string }) {
+  return (
+    <p className="emvb-helper" role="status" data-emvb-no-matches>
+      Nothing matches "{query.trim()}".
+    </p>
   );
 }
