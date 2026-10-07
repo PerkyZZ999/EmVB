@@ -22161,6 +22161,48 @@
         "./packages/emvb/src/admin/editor/panels/settings/loop-per-page.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-224/page1-no-redirect",
+      "requirement": "W-224",
+      "description": "/posts/page/1 renders a duplicate of /posts instead of moving to it.",
+      "edits": [
+        {
+          "file": "demos/node/src/utils/archive-page.ts",
+          "search": "theme.canonicalPath !== path",
+          "replace": "false"
+        }
+      ],
+      "command": ["bun", "test", "./test/demos/archive-pages.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-224/past-last-renders",
+      "requirement": "W-224",
+      "description": "A page past the last one renders an empty archive with 200.",
+      "edits": [
+        {
+          "file": "demos/node/src/utils/archive-page.ts",
+          "search": "if (!theme.content || theme.notFound)",
+          "replace": "if (!theme.content)"
+        }
+      ],
+      "command": ["bun", "test", "./test/demos/archive-pages.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-224/not-found-200",
+      "requirement": "W-224",
+      "description": "The not-found page answers 200.",
+      "edits": [
+        {
+          "file": "demos/node/src/utils/archive-page.ts",
+          "search": "status: 404",
+          "replace": "status: 200"
+        }
+      ],
+      "command": ["bun", "test", "./test/demos/archive-pages.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

@@ -9,6 +9,7 @@ import {
 	themeContextFrom,
 	themeContextFront,
 	themeContextSearch,
+	type ResolvedThemeParts,
 } from "@perkyzz/emvb/astro";
 import { EmVBFloatsRuntime } from "@perkyzz/emvb/astro/floats";
 import { EmVBPopupsRuntime } from "@perkyzz/emvb/astro/popups";
@@ -30,10 +31,11 @@ interface Props {
 	isFront?: boolean;
 	/** When true, theme conditions treat this as the search results route. */
 	isSearch?: boolean;
+	/** Theme parts the route already resolved (numbered archive pages, W-223). */
+	theme?: ResolvedThemeParts;
 }
 
-const { title, pageTitle, description, image, canonical, content, is404, isFront, isSearch } =
-	Astro.props;
+const { title, pageTitle, description, image, content, is404, isFront, isSearch } = Astro.props;
 const [settingsResult, menuResult] = await Promise.all([
 	getSiteSettingsWithCacheHint(),
 	getMenuWithCacheHint("primary"),
@@ -54,6 +56,19 @@ const fullTitle = titleIncludesSiteName ? title : `${title} — ${siteTitle}`;
 const pageDescription = description ?? siteTagline;
 const menu = menuResult.data;
 
+const themeCtx = is404
+	? themeContext404(Astro.url.pathname)
+	: isSearch
+		? themeContextSearch(Astro.url.pathname)
+		: isFront
+			? themeContextFront()
+			: themeContextFrom(Astro.url, { content: content ?? null });
+const theme = Astro.props.theme ?? (await resolveThemeParts(Astro, themeCtx));
+// An EmVB archive page's canonical URL: page 1 is the bare archive URL (W-223).
+const canonical =
+	Astro.props.canonical ??
+	(theme.content && theme.canonicalPath ? new URL(theme.canonicalPath, Astro.url).href : undefined);
+
 const pageCtx = createPublicPageContext({
 	Astro,
 	kind: content ? "content" : "custom",
@@ -67,14 +82,6 @@ const pageCtx = createPublicPageContext({
 	siteName: siteTitle,
 });
 
-const themeCtx = is404
-	? themeContext404(Astro.url.pathname)
-	: isSearch
-		? themeContextSearch(Astro.url.pathname)
-		: isFront
-			? themeContextFront()
-			: themeContextFrom(Astro.url, { content: content ?? null });
-const theme = await resolveThemeParts(Astro, themeCtx);
 ---
 
 <!doctype html>

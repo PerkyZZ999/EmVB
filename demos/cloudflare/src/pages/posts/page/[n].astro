@@ -1,0 +1,10 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { resolveArchivePage } from "../../../utils/archive-page";
+
+const result = await resolveArchivePage(Astro);
+if (result instanceof Response) return result;
+const { theme, page } = result;
+---
+
+<Base title={`Page ${page}`} theme={theme} />
