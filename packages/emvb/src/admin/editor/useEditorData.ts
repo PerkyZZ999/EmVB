@@ -133,7 +133,7 @@ function readLayout(raw: unknown): Layout | null {
   return result.layout;
 }
 
-async function loadDesign(fetcher: Fetcher): Promise<LoadedDesign> {
+export async function loadDesign(fetcher: Fetcher): Promise<LoadedDesign> {
   const body = await requestJson<{
     design?: unknown;
     revision?: string | null;

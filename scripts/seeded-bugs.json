@@ -21573,6 +21573,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/arrange-keyboard-in.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-212/no-reload",
+      "requirement": "W-212",
+      "description": "A refused site-styles save keeps the stale styles, so every later change fails too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "          dispatch({ type: \"load-design\", ...fresh });\n",
+          "replace": "          void fresh;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/design-conflict.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-212/old-message",
+      "requirement": "W-212",
+      "description": "After loading the latest styles the editor still says to reload.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "The latest styles are loaded now: make your change again.",
+          "replace": "Reload the editor and try again."
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/design-conflict.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

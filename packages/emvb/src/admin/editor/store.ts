@@ -53,6 +53,14 @@ export type EditorAction =
   | { type: "published"; rev: string }
   | { type: "set-design"; design: DesignSystem; revision: string | null }
   | { type: "publish-design"; revision: string }
+  /** The site styles as saved elsewhere, after a refused save (W-212). */
+  | {
+      type: "load-design";
+      design: DesignSystem;
+      revision: string | null;
+      publishedRevision: string | null;
+      unpublished: boolean;
+    }
   | { type: "reset"; state: EditorState };
 
 export const isDirty = (state: EditorState) => state.version !== state.savedVersion;
@@ -214,6 +222,14 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       };
     case "publish-design":
       return { ...state, designUnpublished: false, publishedRevision: action.revision };
+    case "load-design":
+      return {
+        ...state,
+        design: action.design,
+        designRevision: action.revision,
+        publishedRevision: action.publishedRevision,
+        designUnpublished: action.unpublished,
+      };
     case "reset":
       return action.state;
   }

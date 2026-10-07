@@ -6,6 +6,7 @@ import { ApiError, type Fetcher } from "../api.ts";
 import { previewUrl, publishDesign, saveDesign } from "../content-api.ts";
 import { readCollection } from "../setup/run.ts";
 import { isDirty, type EditorAction, type EditorState } from "./store.ts";
+import { loadDesign } from "./useEditorData.ts";
 import type { useSave } from "./useSave.ts";
 
 const publicPath = (pattern: string | null | undefined, slug: string) =>
@@ -143,8 +144,19 @@ export function useEditorCommands({
       dispatch({ type: "set-design", design: next, revision });
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
+        // W-212: take the styles saved elsewhere (another editor tab, say), so the next change
+        // can save, instead of every change failing until a reload that drops page edits.
+        try {
+          const fresh = await loadDesign(fetcher);
+          dispatch({ type: "load-design", ...fresh });
+        } catch {
+          throw new Error(
+            "Site styles were changed somewhere else. Reload the editor and try again.",
+            { cause: error },
+          );
+        }
         throw new Error(
-          "Site styles were changed somewhere else. Reload the editor and try again.",
+          "Site styles were changed in another tab or window. The latest styles are loaded now: make your change again.",
           { cause: error },
         );
       }
