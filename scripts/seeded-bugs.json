@@ -21581,8 +21581,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
-          "search": "          dispatch({ type: \"load-design\", ...fresh });\n",
-          "replace": "          void fresh;\n"
+          "search": "drops page edits.\n        try {\n          const fresh = await loadDesign(fetcher);\n          dispatch({ type: \"load-design\", ...fresh });\n",
+          "replace": "drops page edits.\n        try {\n          const fresh = await loadDesign(fetcher);\n          void fresh;\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/design-conflict.test.tsx"],
@@ -21596,6 +21596,20 @@
         {
           "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
           "search": "The latest styles are loaded now: make your change again.",
+          "replace": "Reload the editor and try again."
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/design-conflict.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-212/publish-no-reload",
+      "requirement": "W-212",
+      "description": "A refused Publish styles keeps the stale published revision, so Publish keeps failing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "check them, then publish again.",
           "replace": "Reload the editor and try again."
         }
       ],

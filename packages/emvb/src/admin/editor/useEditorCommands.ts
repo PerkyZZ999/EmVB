@@ -175,8 +175,18 @@ export function useEditorCommands({
       dispatch({ type: "publish-design", revision });
     } catch (error) {
       if (error instanceof ApiError && error.status === 409) {
+        // W-212: as for a save, take what the other tab published so Publish can work again.
+        try {
+          const fresh = await loadDesign(fetcher);
+          dispatch({ type: "load-design", ...fresh });
+        } catch {
+          throw new Error(
+            "Site styles were published somewhere else. Reload the editor and try again.",
+            { cause: error },
+          );
+        }
         throw new Error(
-          "Site styles were published somewhere else. Reload the editor and try again.",
+          "Site styles were published in another tab or window. The latest styles are loaded now: check them, then publish again.",
           { cause: error },
         );
       }
