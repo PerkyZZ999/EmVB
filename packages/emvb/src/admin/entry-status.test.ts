@@ -64,4 +64,10 @@ describe("a saved draft on a published page is shown as not live (W-190)", () =>
     expect((await loadEntry(answering({ item, _rev: "r" }), "01PAGE")).status).toBe("changed");
     expect((await listPages(answering({ items: [item] })))[0]?.status).toBe("changed");
   });
+
+  test("a scheduled entry reads Scheduled, not Draft (W-201)", () => {
+    expect(statusLabel(entryStatus({ status: "scheduled", draftRevisionId: null }))).toBe(
+      "Scheduled",
+    );
+  });
 });

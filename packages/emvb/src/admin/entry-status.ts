@@ -13,5 +13,7 @@ export function entryStatus(
 export function statusLabel(status: string): string {
   if (status === "published") return "Published";
   if (status === "changed") return "Changes not published";
+  // W-201: EmDash's scheduled publish; the page isn't live until its time.
+  if (status === "scheduled") return "Scheduled";
   return "Draft";
 }

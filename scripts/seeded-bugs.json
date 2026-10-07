@@ -21254,6 +21254,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-201/scheduled-as-draft",
+      "requirement": "W-201",
+      "description": "A scheduled entry is labelled Draft.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/entry-status.ts",
+          "search": "  if (status === \"scheduled\") return \"Scheduled\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/entry-status.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
