@@ -1,5 +1,6 @@
 import { Input } from "@cloudflare/kumo";
 import {
+  ArrowsLeftRightIcon,
   LinkSimpleIcon,
   MinusIcon,
   RectangleIcon,
@@ -66,6 +67,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   "post-date": TextTIcon,
   "post-author": TextTIcon,
   loop: ListBulletsIcon,
+  pagination: ArrowsLeftRightIcon,
 };
 
 const GROUPS = [

@@ -399,6 +399,18 @@ export const LoopNode = parentNode(
 );
 
 /**
+ * Previous / page numbers / Next links for an archive (W-222). Renders only on an archive with
+ * more than one page; the host supplies `ThemeDynamicData.pagination`.
+ */
+export const PaginationNode = leafNode(
+  "pagination",
+  z.strictObject({
+    prevText: z.string().max(40).optional(),
+    nextText: z.string().max(40).optional(),
+  }),
+);
+
+/**
  * A reusable block. When `partId` is set, the host supplies that Section theme part in
  * `sectionTemplates` and the part's children render in place of `children`.
  */
@@ -438,6 +450,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "post-date",
   "post-author",
   "loop",
+  "pagination",
   "section",
   "div-block",
   "flexbox",
@@ -512,6 +525,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   PostDateNode,
   PostAuthorNode,
   LoopNode,
+  PaginationNode,
   SectionNode,
   AccordionNode,
   AccordionItemNode,
@@ -541,6 +555,7 @@ export type PostExcerptNode = z.infer<typeof PostExcerptNode>;
 export type PostContentNode = z.infer<typeof PostContentNode>;
 export type PostImageNode = z.infer<typeof PostImageNode>;
 export type PostLinkNode = z.infer<typeof PostLinkNode>;
+export type PaginationNode = z.infer<typeof PaginationNode>;
 export type PostDateNode = z.infer<typeof PostDateNode>;
 export type PostAuthorNode = z.infer<typeof PostAuthorNode>;
 
@@ -844,6 +859,7 @@ export type LayoutNode =
   | PostLinkNode
   | PostDateNode
   | PostAuthorNode
+  | PaginationNode
   | AccordionNode
   | AccordionItemNode
   | MenuNode

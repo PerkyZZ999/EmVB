@@ -12,6 +12,7 @@ import {
   isTabsNode,
   type Layout,
   type LayoutNode,
+  type PaginationNode,
 } from "../schema/layout.ts";
 import {
   cssLength,
@@ -31,6 +32,7 @@ import type { RenderContext, RenderMode } from "./context.ts";
 import { isDynamicPostNode, renderDynamicPost } from "./dynamic-post.ts";
 import { renderForm, withFieldOptions } from "./form.ts";
 import { renderLoop } from "./loop.ts";
+import { renderPagination } from "./pagination.ts";
 import { renderSection } from "./section.ts";
 import { renderTabs } from "./tabs.ts";
 import { serialize, type VNode } from "./vnode.ts";
@@ -221,6 +223,9 @@ export function renderPage(
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
     if (isFormNode(node)) return finish(node, renderForm(node, attrs, ctx, dynamic));
     if (isLoopNode(node)) return finish(node, renderLoop(node, attrs, ctx, dynamic));
+    if (node.type === "pagination") {
+      return finish(node, renderPagination(node as PaginationNode, attrs, dynamic, mode));
+    }
     if (isSectionNode(node)) return finish(node, renderSection(node, attrs, ctx, dynamic));
     if (isDynamicPostNode(node)) {
       return finish(

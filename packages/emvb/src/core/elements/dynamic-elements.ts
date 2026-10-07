@@ -8,6 +8,7 @@ import type {
   PostImageNode,
   PostLinkNode,
   PostTitleNode,
+  PaginationNode,
 } from "../schema/layout.ts";
 import type { ElementDefinition } from "./definition.ts";
 
@@ -179,6 +180,24 @@ export const loop: ElementDefinition<LoopNode> = {
     ],
   },
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),
+};
+
+export const pagination: ElementDefinition<PaginationNode> = {
+  baseCss:
+    ".emvb-pagination{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}.emvb-pagination a{color:inherit}.emvb-pagination a[aria-current=page]{font-weight:700;text-decoration:none}",
+  defaults: () => ({ type: "pagination", props: {} }),
+  descriptor: {
+    type: "pagination",
+    name: "Pagination",
+    group: "dynamic",
+    defaultTab: "content",
+    fields: [
+      { key: "prevText", kind: "text", label: "Previous text", optional: true },
+      { key: "nextText", kind: "text", label: "Next text", optional: true },
+    ],
+  },
+  // Rendered by core/render/pagination.ts from the archive's page data (W-222).
+  build: (_node, attrs) => ({ tag: "nav", attrs, children: [] }),
 };
 
 export const section: ElementDefinition<SectionNode> = {

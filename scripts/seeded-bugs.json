@@ -22055,6 +22055,76 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/theme-context.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-222/single-page-notice-public",
+      "requirement": "W-222",
+      "description": "A one-page archive shows the editor notice on the public page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/pagination.ts",
+          "search": "    if (!editor) return undefined;\n    return {",
+          "replace": "    return {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/pagination.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-222/editor-links-navigate",
+      "requirement": "W-222",
+      "description": "Pagination links in the editor canvas point at real pages.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/pagination.ts",
+          "search": "const href = (path: string) => (editor ? \"#\" : path);",
+          "replace": "const href = (path: string) => path;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/pagination.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-222/no-rel-next",
+      "requirement": "W-222",
+      "description": "Next link loses rel=next.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/pagination.ts",
+          "search": "attrs: { class: \"emvb-pagination-next\", href: href(item.href), rel: \"next\" },",
+          "replace": "attrs: { class: \"emvb-pagination-next\", href: href(item.href) },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/pagination.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-222/no-aria-current",
+      "requirement": "W-222",
+      "description": "The current page number isn't marked aria-current.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/pagination.ts",
+          "search": "...(item.current ? { \"aria-current\": \"page\" } : {}),",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/pagination.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-222/resolver-drops-pagination",
+      "requirement": "W-222",
+      "description": "Archive page data never reaches the Pagination element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "return { ...referenced, posts, archiveTitle, ...(pagination ? { pagination } : {}) };",
+          "replace": "return { ...referenced, posts, archiveTitle };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

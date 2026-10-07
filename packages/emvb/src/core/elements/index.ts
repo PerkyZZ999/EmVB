@@ -35,6 +35,7 @@ import { menu, menuItem } from "./menu.ts";
 import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
 import {
   loop,
+  pagination,
   section,
   postContent,
   postExcerpt,
@@ -805,6 +806,7 @@ export const ELEMENTS = {
   "post-date": postDate,
   "post-author": postAuthor,
   loop,
+  pagination,
   section,
   "div-block": divBlock,
   flexbox,

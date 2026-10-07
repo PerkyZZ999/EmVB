@@ -54,6 +54,7 @@ export {
   PostContentNode,
   PostImageNode,
   PostLinkNode,
+  PaginationNode,
 } from "./schema/layout.ts";
 export {
   type FieldKind,
