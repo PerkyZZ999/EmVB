@@ -1,6 +1,6 @@
 # Third-party notices
 
-EmVB is MIT licensed. The editor's **Icon library** (`src/admin/editor/icons/sets/*.json`) contains icons from the projects below. They keep their own licenses, copied in full in [`licenses/`](licenses/). `scripts/build-icon-sets.ts` in the EmVB repository builds the set files from the pinned npm packages. It refuses to build when a package's license file changes.
+EmVB (<https://emvb.dev>) is MIT licensed. The editor's **Icon library** (`src/admin/editor/icons/sets/*.json`) contains icons from the projects below. They keep their own licenses, copied in full in [`licenses/`](licenses/). `scripts/build-icon-sets.ts` in the EmVB repository builds the set files from the pinned npm packages. It refuses to build when a package's license file changes.
 
 Changes made to every set: the SVG markup is reformatted into compact JSON, and only elements and attributes in EmVB's SVG allowlist are kept. Class attributes and comments are removed. Shared presentation attributes (stroke or fill, viewBox) move to the root `<svg>`. Set-specific changes are listed with each set.
 

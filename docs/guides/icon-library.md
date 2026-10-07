@@ -1,7 +1,7 @@
 # The icon library
 
 The Icon element's **Icon** field opens a library of about 14,400 open-source icons, in the style
-of the icon libraries other page builders have, with EmVB's own look.
+of the icon libraries other page builders have, with EmVB's own look. More about EmVB: <https://emvb.dev>.
 
 ## Picking an icon
 

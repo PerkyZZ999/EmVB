@@ -1,6 +1,6 @@
 # @perkyzz/emvb
 
-[![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
+[![Website](https://img.shields.io/badge/website-emvb.dev-1f6feb)](https://emvb.dev) [![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
 
 A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
@@ -53,7 +53,7 @@ Without the forms plugin, leave out the `EmVBFormsRuntime` import and element; t
 
 Then sign in as an admin, open **Pages VisualBuilder** and click **Set up EmVB** once.
 
-The full guide, the demos and the source are on GitHub: <https://github.com/PerkyZZ999/EmVB>.
+Website: <https://emvb.dev>. The full guide, the demos and the source are on GitHub: <https://github.com/PerkyZZ999/EmVB>.
 
 ## License
 

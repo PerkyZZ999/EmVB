@@ -1,8 +1,10 @@
 # EmVB
 
-[![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
+[![Website](https://img.shields.io/badge/website-emvb.dev-1f6feb)](https://emvb.dev) [![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
 
 A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0.x. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS, with no EmVB JavaScript on the public site except the optional popups and tabs scripts, which load only on pages that have a popup or Tabs. Forms use the forms plugin's own script. It runs on Node (SQLite) and Cloudflare Workers (D1).
+
+**Website:** <https://emvb.dev>.
 
 **Status:** 0.1.0 is on npm as [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb). The MVP is complete.
 
@@ -59,14 +61,14 @@ Then add the public route and run **Set up EmVB** once, as [docs/guides/install-
 
 ## Development and testing
 
-| Task                                                 | Command                                                      |
-| ---------------------------------------------------- | ------------------------------------------------------------ |
-| Lint, format, types, dead code, unit and Astro tests | `bun run check`                                              |
-| Unit tests only                                      | `bun run test`                                               |
-| End to end, both demos (Playwright)                  | `bun run e2e`                                                |
-| Public pages on production builds                    | `bun run e2e:prod`                                           |
-| Seeded bugs (prove the tests catch real defects)     | `bun run seeded-bugs`                                        |
-| Project site                                         | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |
+| Task                                                           | Command                                                      |
+| -------------------------------------------------------------- | ------------------------------------------------------------ |
+| Lint, format, types, dead code, unit and Astro tests           | `bun run check`                                              |
+| Unit tests only                                                | `bun run test`                                               |
+| End to end, both demos (Playwright)                            | `bun run e2e`                                                |
+| Public pages on production builds                              | `bun run e2e:prod`                                           |
+| Seeded bugs (prove the tests catch real defects)               | `bun run seeded-bugs`                                        |
+| Project site ([emvb.dev](https://emvb.dev), source in `site/`) | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |
 
 [CONTRIBUTING.md](CONTRIBUTING.md) covers setup, pull requests and troubleshooting, and [SECURITY.md](SECURITY.md) how to report a vulnerability.
 

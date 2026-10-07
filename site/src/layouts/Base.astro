@@ -11,6 +11,26 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+const site = Astro.site ?? new URL("https://emvb.dev");
+const canonical = new URL(Astro.url.pathname, site).href;
+const image = new URL("/screenshots/editor-1600.webp", site).href;
+const imageAlt = "The EmVB editor: the element tree, the canvas and the Style panel";
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebSite", name: "EmVB", url: site.href, inLanguage: "en-CA" },
+    {
+      "@type": "SoftwareSourceCode",
+      name: "EmVB",
+      description,
+      url: site.href,
+      codeRepository: "https://github.com/PerkyZZ999/EmVB",
+      programmingLanguage: "TypeScript",
+      license: "https://opensource.org/licenses/MIT",
+      image,
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -23,9 +43,23 @@ const { title, description } = Astro.props;
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href={canonical} />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <meta property="og:site_name" content="EmVB" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1600" />
+    <meta property="og:image:height" content="1000" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>

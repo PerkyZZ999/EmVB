@@ -2,6 +2,8 @@
 
 EmVB is a **native** EmDash plugin: add the package, register it in `astro.config`, and add one public route. The EmDash plugin registry installs sandboxed plugins only; native plugins like EmVB are npm packages.
 
+Project website: <https://emvb.dev>. Package: [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb).
+
 Verified against EmDash `^1.0.0` (1.0.1) and the EmVB TypeScript-source package shape (no `bun build` step for the plugin).
 
 ## 1. Install the package
