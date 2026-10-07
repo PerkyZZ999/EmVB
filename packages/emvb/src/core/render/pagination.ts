@@ -19,6 +19,15 @@ export function renderPagination(
   mode: "editor" | "public",
 ): VNode | undefined {
   const editor = mode === "editor";
+  // Inside a Loop's item it would repeat once per post; it goes after the Loop (W-228).
+  if (dynamic?.inLoopItem) {
+    if (!editor) return undefined;
+    return {
+      tag: "div",
+      attrs: { ...attrs, "data-emvb-pagination-empty": "" },
+      children: ["Put Pagination after the Loop, not inside its item."],
+    };
+  }
   const data = dynamic?.pagination ?? (editor ? EDITOR_SAMPLE : undefined);
   if (!data) return undefined;
   const items = paginationItems(data);

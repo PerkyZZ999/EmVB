@@ -22063,8 +22063,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/pagination.ts",
-          "search": "    if (!editor) return undefined;\n    return {",
-          "replace": "    return {"
+          "search": "  if (items.length === 0) {\n    if (!editor) return undefined;\n    return {",
+          "replace": "  if (items.length === 0) {\n    return {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/pagination.test.ts"],
@@ -22342,6 +22342,34 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-start.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-228/pagination-per-item",
+      "requirement": "W-228",
+      "description": "A Pagination inside a Loop's item repeats once per post (duplicate Pagination landmarks).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "children: ctx.children(templateNodes, { ...itemDynamic, post, inLoopItem: true }),",
+          "replace": "children: ctx.children(templateNodes, { ...dynamic, post }),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/pagination.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-228/no-editor-hint",
+      "requirement": "W-228",
+      "description": "The editor shows a sample Pagination inside a Loop item instead of saying where it goes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/pagination.ts",
+          "search": "  if (dynamic?.inLoopItem) {",
+          "replace": "  if (false) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/pagination.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]

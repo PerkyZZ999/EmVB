@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { emptyDesign } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { validateLayout } from "../validate.ts";
+import { SAMPLE_POST } from "../theme/dynamic.ts";
 import { renderPage } from "./index.ts";
 
 const design = emptyDesign();
@@ -63,5 +64,33 @@ describe("Pagination element (W-222)", () => {
     const hrefs = [...host.querySelectorAll("nav a")].map((a) => a.getAttribute("href"));
     expect(hrefs.length).toBeGreaterThan(2);
     expect(new Set(hrefs)).toEqual(new Set(["#"]));
+  });
+
+  test("inside a Loop's item it renders nothing on the page and a hint in the editor (W-228)", () => {
+    const inLoop = {
+      schemaVersion: 12,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "loop0001",
+            type: "loop",
+            props: {},
+            children: [{ id: "pagi0001", type: "pagination", props: {} }],
+          },
+        ],
+      },
+    } as unknown as Layout;
+    const posts = [1, 2, 3].map((n) =>
+      Object.assign({}, SAMPLE_POST, { id: `p${n}`, title: `P${n}` }),
+    );
+    const pub = renderPage(inLoop, design, {
+      dynamic: { posts, pagination: { page: 2, hasMore: true, basePath: "/posts" } },
+    });
+    expect(parse(pub.html).querySelectorAll("nav")).toHaveLength(0);
+    const editor = renderPage(inLoop, design, { mode: "editor" }).html;
+    expect(editor).toContain("Put Pagination after the Loop");
   });
 });

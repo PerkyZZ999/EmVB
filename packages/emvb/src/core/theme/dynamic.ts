@@ -33,6 +33,8 @@ export type ThemeDynamicData = {
   archiveTitle?: string;
   /** Which archive page is showing, for the Pagination element (W-221). */
   pagination?: ArchivePagination;
+  /** Set inside a Loop's item, where a Pagination would repeat once per post (W-228). */
+  inLoopItem?: boolean;
 };
 
 /** Editor canvas placeholders when no live post is bound. */

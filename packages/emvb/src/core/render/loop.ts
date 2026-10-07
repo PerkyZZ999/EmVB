@@ -26,11 +26,13 @@ export function renderLoop(
     };
   }
   const children: VNode[] = [];
+  // Items don't get the archive's page data: a Pagination belongs after the Loop (W-228).
+  const { pagination: _pagination, ...itemDynamic } = dynamic ?? {};
   for (const post of posts) {
     children.push({
       tag: "div",
       attrs: { class: "emvb-loop-item", "data-emvb-loop-item": post.id },
-      children: ctx.children(templateNodes, { ...dynamic, post }),
+      children: ctx.children(templateNodes, { ...itemDynamic, post, inLoopItem: true }),
     });
   }
   return ELEMENTS.loop.build(node as never, attrs, children);
