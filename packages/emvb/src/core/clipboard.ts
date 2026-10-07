@@ -267,6 +267,19 @@ function withSafeProps(node: LayoutNode, dropped: Dropped): LayoutNode {
       changed = true;
     }
   }
+  // W-234: a library icon's SVG gets the same check; a refused one leaves the icon on its id.
+  if (type === "icon" && typeof props["iconSvg"] === "string") {
+    const report = sanitizeSvgReport(props["iconSvg"]);
+    if (!report.tree) {
+      dropped.unsafe++;
+      changed = true;
+      delete props["iconSvg"];
+    } else if (report.images > 0) {
+      props["iconSvg"] = serialize(report.tree);
+      dropped.images = (dropped.images ?? 0) + report.images;
+      changed = true;
+    }
+  }
   if (type === "svg" && typeof props["markup"] === "string") {
     const report = sanitizeSvgReport(props["markup"]);
     if (!report.tree) fallBack("markup", false);

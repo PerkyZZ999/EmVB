@@ -1742,8 +1742,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "    if (!bundled) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
-          "replace": "    if (!bundled) {\n      return {\n        tag: \"img\",\n        attrs: {\n          ...attrs,\n          src: node.props.iconId,\n          alt: \"\",\n        },\n        children: [],\n      };\n    }"
+          "search": "    if (!picked && !bundled) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
+          "replace": "    if (!picked && !bundled) {\n      return {\n        tag: \"img\",\n        attrs: {\n          ...attrs,\n          src: node.props.iconId,\n          alt: \"\",\n        },\n        children: [],\n      };\n    }"
         }
       ],
       "command": [
@@ -1767,8 +1767,8 @@
         },
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "    if (!bundled) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
-          "replace": "    if (!bundled) {\n      return {\n        tag: \"script\",\n        attrs: {},\n        children: [\"alert(1)\"],\n      };\n    }"
+          "search": "    if (!picked && !bundled) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
+          "replace": "    if (!picked && !bundled) {\n      return {\n        tag: \"script\",\n        attrs: {},\n        children: [\"alert(1)\"],\n      };\n    }"
         }
       ],
       "command": [
@@ -22603,6 +22603,90 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-tree-key.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-234/picked-svg-ignored",
+      "requirement": "W-234",
+      "description": "A library icon's stored SVG is ignored, so picked icons render as placeholders",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    const picked = node.props.iconSvg ? sanitizeSvgMarkup(node.props.iconSvg) : undefined;",
+          "replace": "    const picked = node.props.iconSvg && false ? sanitizeSvgMarkup(node.props.iconSvg) : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-234/picked-size-doubled",
+      "requirement": "W-234",
+      "description": "The stored SVG's own width, height and id are kept next to the element's",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    if (name === \"width\" || name === \"height\" || name === \"id\" || name === \"role\") continue;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-234/picked-aria-spoof",
+      "requirement": "W-234",
+      "description": "aria-* and focusable from the stored SVG override the element's name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    if (name.startsWith(\"aria-\") || name === \"focusable\") continue;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-234/picked-no-viewbox",
+      "requirement": "W-234",
+      "description": "A stored SVG without viewBox renders without one",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "  if (!kept.viewBox) kept.viewBox = \"0 0 24 24\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-234/icon-svg-uncapped",
+      "requirement": "W-234",
+      "description": "iconSvg has no length cap",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    iconSvg: z.string().max(ICON_SVG_MAX).optional(),",
+          "replace": "    iconSvg: z.string().optional(),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-234/paste-unsafe-icon-svg",
+      "requirement": "W-234",
+      "description": "Paste keeps an icon SVG the sanitizer refuses",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "      delete props[\"iconSvg\"];\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]

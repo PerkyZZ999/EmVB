@@ -405,8 +405,10 @@ const icon: ElementDefinition<IconNode> = {
     ],
   },
   build: (node, attrs) => {
-    const bundled = getBundledIcon(node.props.iconId);
-    if (!bundled) {
+    // W-234: a picked library icon carries its own SVG; the allowlist checks it on every render.
+    const picked = node.props.iconSvg ? sanitizeSvgMarkup(node.props.iconSvg) : undefined;
+    const bundled = picked ? undefined : getBundledIcon(node.props.iconId);
+    if (!picked && !bundled) {
       // Never treat iconId as a URL or raw HTML (R-032 / R-033).
       return {
         tag: "span",
@@ -420,29 +422,38 @@ const icon: ElementDefinition<IconNode> = {
     }
     const decorative = node.props.decorative === true;
     const size = node.props.size ?? 24;
-    const svgAttrs: Record<string, string> = {
-      xmlns: "http://www.w3.org/2000/svg",
-      width: String(size),
-      height: String(size),
-      viewBox: "0 0 24 24",
-      fill: "none",
-      stroke: "currentColor",
-      "stroke-width": "2",
-      "stroke-linecap": "round",
-      "stroke-linejoin": "round",
-      focusable: "false",
-    };
+    const svgAttrs: Record<string, string> = picked
+      ? {
+          ...pickedIconAttrs(picked.attrs),
+          width: String(size),
+          height: String(size),
+          focusable: "false",
+        }
+      : {
+          xmlns: "http://www.w3.org/2000/svg",
+          width: String(size),
+          height: String(size),
+          viewBox: "0 0 24 24",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-width": "2",
+          "stroke-linecap": "round",
+          "stroke-linejoin": "round",
+          focusable: "false",
+        };
     if (decorative) {
       svgAttrs["aria-hidden"] = "true";
     } else {
       svgAttrs.role = "img";
       if (node.props.title) svgAttrs["aria-label"] = node.props.title;
     }
-    const children: VNode[] = bundled.children.map((child) => ({
-      tag: child.tag,
-      attrs: { ...child.attrs },
-      children: [],
-    }));
+    const children: (VNode | string)[] = picked
+      ? picked.children
+      : (bundled?.children ?? []).map((child) => ({
+          tag: child.tag,
+          attrs: { ...child.attrs },
+          children: [],
+        }));
     const svg: VNode = { tag: "svg", attrs: svgAttrs, children };
     // A linked icon is named by its title on the link, so the svg inside is hidden.
     const title = node.props.title?.trim();
@@ -456,6 +467,18 @@ const icon: ElementDefinition<IconNode> = {
     return { tag: "span", attrs, children: [linked ?? svg] };
   },
 };
+
+/** A picked icon's root attributes minus what the element sets itself (size, name, id). */
+function pickedIconAttrs(attrs: Record<string, string>): Record<string, string> {
+  const kept: Record<string, string> = { xmlns: "http://www.w3.org/2000/svg" };
+  for (const [name, value] of Object.entries(attrs)) {
+    if (name === "width" || name === "height" || name === "id" || name === "role") continue;
+    if (name.startsWith("aria-") || name === "focusable") continue;
+    kept[name] = value;
+  }
+  if (!kept.viewBox) kept.viewBox = "0 0 24 24";
+  return kept;
+}
 
 const video: ElementDefinition<VideoNode> = {
   baseCss:

@@ -152,11 +152,18 @@ export const VideoNode = leafNode(
   }),
 );
 
-/** Bundled Lucide icon by id (W-025 / A-04). Unknown ids stay on save; renderer shows a placeholder. */
+/**
+ * An icon (W-025 / A-04). `iconId` names it: a bundled Lucide id ("star") or, from the Icon library
+ * (W-234), `<set prefix>:<name>` ("fa-solid:rocket"), so the picker can reopen on it. `iconSvg` is
+ * that icon's SVG, stored with the page so public pages load no icon library; it's sanitized on
+ * every render. Unknown ids without SVG stay on save; the renderer shows a placeholder.
+ */
+export const ICON_SVG_MAX = 16_384;
 export const IconNode = leafNode(
   "icon",
   z.strictObject({
     iconId: z.string().min(1).max(64),
+    iconSvg: z.string().max(ICON_SVG_MAX).optional(),
     size: z.number().int().positive().max(512).optional(),
     decorative: z.boolean().optional(),
     title: z.string().max(200).optional(),
