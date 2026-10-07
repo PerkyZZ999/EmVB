@@ -20,6 +20,7 @@ import {
   YoutubeLogoIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
+import { duplicateFieldName } from "./settings/form-names.ts";
 import { hasItemList, ItemList, type ItemActions } from "./settings/ItemList.tsx";
 import {
   ELEMENT_DESCRIPTORS,
@@ -494,6 +495,9 @@ function KnownElementPanel({
                 onChange={onChange}
                 fetcher={fetcher}
                 parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
+                duplicateName={
+                  field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
+                }
                 device={device}
               />
             ))

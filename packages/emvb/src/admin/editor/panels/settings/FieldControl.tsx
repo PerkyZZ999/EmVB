@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Select, Switch } from "@cloudflare/kumo";
 import type { FieldDescriptor, LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
@@ -18,6 +19,7 @@ export function FieldControl({
   fetcher,
   parentFormId,
   device = "desktop",
+  duplicateName = false,
 }: {
   field: FieldDescriptor;
   node: LayoutNode;
@@ -28,6 +30,8 @@ export function FieldControl({
   fetcher?: Fetcher;
   /** Enclosing form's formId for field pickers (W-036). */
   parentFormId?: string;
+  /** Another control in the same form uses this field name (W-194). */
+  duplicateName?: boolean;
 }) {
   const props = propsOf(node);
   const raw = props[field.key];
@@ -71,16 +75,24 @@ export function FieldControl({
 
   if (field.key === "field" && fetcher) {
     return (
-      <FieldBindControl
-        key={field.key}
-        value={typeof raw === "string" ? raw : ""}
-        formId={parentFormId}
-        fetcher={fetcher}
-        onChange={(name, label) => {
-          const next = withProp(node, "field", name);
-          onChange(label ? withProp(next, "label", label) : next);
-        }}
-      />
+      <React.Fragment key={field.key}>
+        <FieldBindControl
+          key={field.key}
+          value={typeof raw === "string" ? raw : ""}
+          formId={parentFormId}
+          fetcher={fetcher}
+          onChange={(name, label) => {
+            const next = withProp(node, "field", name);
+            onChange(label ? withProp(next, "label", label) : next);
+          }}
+        />
+        {duplicateName && (
+          <p className="emvb-inline-error" role="alert" data-emvb-duplicate-field>
+            Another field in this form uses this name, so only one value is submitted. Give each
+            field its own name.
+          </p>
+        )}
+      </React.Fragment>
     );
   }
 

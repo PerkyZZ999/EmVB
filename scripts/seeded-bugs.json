@@ -21064,6 +21064,42 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/revert.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-194/no-duplicate-check",
+      "requirement": "W-194",
+      "description": "Duplicate field names in one form are never flagged.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/form-names.ts",
+          "search": "      return count > 1;",
+          "replace": "      return count > 99;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-names.test.ts"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-194/crosses-forms",
+      "requirement": "W-194",
+      "description": "Names in a different form or outside forms count as duplicates.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/form-names.ts",
+          "search": "    if (form && isFormNode(form)) {",
+          "replace": "    if (form && form.type === \"container\") {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-names.test.ts"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
