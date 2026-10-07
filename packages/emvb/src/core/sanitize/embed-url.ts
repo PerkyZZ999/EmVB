@@ -31,22 +31,44 @@ function youtubeId(parsed: URL): string | undefined {
   const host = parsed.hostname.toLowerCase();
   const path = parsed.pathname;
   if (host === "youtu.be" || host === "www.youtu.be") return matching(firstSegment(path), YT_ID);
-  for (const prefix of ["/embed/", "/shorts/"]) {
+  // W-215: /live/ links (a stream or its replay) too.
+  for (const prefix of ["/embed/", "/shorts/", "/live/"]) {
     if (path.startsWith(prefix)) return matching(path.slice(prefix.length).split("/")[0], YT_ID);
   }
   return matching(parsed.searchParams.get("v") ?? undefined, YT_ID);
 }
 
+/** An unlisted Vimeo video's privacy hash: the player refuses the video without it (W-215). */
+const VIMEO_HASH = /^[0-9a-f]{6,32}$/i;
+
+/**
+ * The Vimeo id, plus `?h=<hash>` for an unlisted video (W-215): `vimeo.com/<id>/<hash>`,
+ * `player.vimeo.com/video/<id>?h=<hash>`, `vimeo.com/channels/<name>/<id>` and
+ * `vimeo.com/groups/<name>/videos/<id>`.
+ */
 function vimeoId(parsed: URL): string | undefined {
-  if (parsed.hostname.toLowerCase() !== "player.vimeo.com") {
-    return matching(firstSegment(parsed.pathname), VIMEO_ID);
-  }
   const parts = parsed.pathname.split("/").filter(Boolean);
+  const player = parsed.hostname.toLowerCase() === "player.vimeo.com";
   const videoIdx = parts.indexOf("video");
-  return matching(videoIdx >= 0 ? parts[videoIdx + 1] : parts[0], VIMEO_ID);
+  const at = player
+    ? videoIdx >= 0
+      ? videoIdx + 1
+      : 0
+    : parts[0] === "channels"
+      ? 2
+      : parts[0] === "groups" && parts[2] === "videos"
+        ? 3
+        : 0;
+  const id = matching(parts[at], VIMEO_ID);
+  if (!id) return undefined;
+  const hash = player ? parsed.searchParams.get("h") : at === 0 ? parts[1] : undefined;
+  return hash && VIMEO_HASH.test(hash) ? `${id}?h=${hash}` : id;
 }
 
-/** Embed URLs are built from the id alone, so no query param (autoplay included) carries over. */
+/**
+ * Embed URLs are built from the id alone (and an unlisted Vimeo hash), so no other query param
+ * (autoplay included) carries over.
+ */
 const PROVIDERS = [
   {
     provider: "youtube",

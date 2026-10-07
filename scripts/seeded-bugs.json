@@ -21735,6 +21735,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/design-import.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-215/vimeo-hash-dropped",
+      "requirement": "W-215",
+      "description": "An unlisted Vimeo link loses its privacy hash, so the video won't play.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "  return hash && VIMEO_HASH.test(hash) ? `${id}?h=${hash}` : id;",
+          "replace": "  return id;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-vimeo-hash.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-215/vimeo-hash-unchecked",
+      "requirement": "W-215",
+      "description": "Any text after a Vimeo id goes into the embed URL as the hash.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "  return hash && VIMEO_HASH.test(hash) ? `${id}?h=${hash}` : id;",
+          "replace": "  return hash ? `${id}?h=${hash}` : id;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-vimeo-hash.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-215/youtube-live",
+      "requirement": "W-215",
+      "description": "A YouTube /live/ link is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "\"/embed/\", \"/shorts/\", \"/live/\"",
+          "replace": "\"/embed/\", \"/shorts/\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-vimeo-hash.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-215/vimeo-channels",
+      "requirement": "W-215",
+      "description": "A Vimeo channel link is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "    : parts[0] === \"channels\"\n      ? 2\n",
+          "replace": "    : parts[0] === \"channels\"\n      ? 0\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-vimeo-hash.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
