@@ -42,7 +42,7 @@ describe("sanitizeSvgMarkup (W-073 / W-079)", () => {
         <symbol id="dot"><circle cx="2" cy="2" r="2" fill="url(#g1)"/></symbol>
       </defs>
       <use href="#dot" x="4" y="4"/>
-      <image href="/media/icon.png" x="0" y="0" width="12" height="12"/>
+      <image href="/_emdash/api/media/file/icon.png" x="0" y="0" width="12" height="12"/>
       <text x="0" y="20" font-size="8">Hi</text>
     </svg>`;
     const tree = sanitizeSvgMarkup(markup);
@@ -52,7 +52,7 @@ describe("sanitizeSvgMarkup (W-073 / W-079)", () => {
     expect(html).toContain("<use");
     expect(html).toContain('href="#dot"');
     expect(html).toContain("<image");
-    expect(html).toContain('href="/media/icon.png"');
+    expect(html).toContain('href="/_emdash/api/media/file/icon.png"');
     expect(html).toContain("<lineargradient");
     expect(html).toContain("<text");
   });

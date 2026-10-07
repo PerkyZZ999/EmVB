@@ -12,9 +12,10 @@ import type { VariableKind } from "./design/variables.ts";
 import { clearVariableRefs } from "./design/variables.ts";
 import { ELEMENT_DESCRIPTORS, ELEMENTS, type ElementType } from "./elements/index.ts";
 import { MAX_LAYOUT_BYTES } from "./limits.ts";
+import { serialize } from "./render/vnode.ts";
 import { sanitizeHref } from "./sanitize/href.ts";
 import { sanitizeMediaUrl } from "./sanitize/media-url.ts";
-import { isSafeSvgMarkup } from "./sanitize/svg.ts";
+import { sanitizeSvgReport } from "./sanitize/svg.ts";
 import type { DesignSystem } from "./schema/design.ts";
 import {
   isParentNode,
@@ -172,7 +173,14 @@ export const clipStyle = (clip: Clip): CopiedStyle =>
   clip.kind === "style" ? clip.style : styleOf(clip.node);
 
 /** What a paste left out because the target page or site doesn't allow or have it. */
-export type Dropped = { classes: number; variables: number; htmlIds: number; unsafe: number };
+export type Dropped = {
+  classes: number;
+  variables: number;
+  htmlIds: number;
+  unsafe: number;
+  /** W-231: `<image>`s left out of pasted SVGs because they point outside the site. */
+  images?: number;
+};
 
 const none = (): Dropped => ({ classes: 0, variables: 0, htmlIds: 0, unsafe: 0 });
 
@@ -259,8 +267,16 @@ function withSafeProps(node: LayoutNode, dropped: Dropped): LayoutNode {
       changed = true;
     }
   }
-  if (type === "svg" && typeof props["markup"] === "string" && !isSafeSvgMarkup(props["markup"]))
-    fallBack("markup", false);
+  if (type === "svg" && typeof props["markup"] === "string") {
+    const report = sanitizeSvgReport(props["markup"]);
+    if (!report.tree) fallBack("markup", false);
+    else if (report.images > 0) {
+      // Store what will render, so the pasted copy no longer names the external picture.
+      props["markup"] = serialize(report.tree);
+      dropped.images = (dropped.images ?? 0) + report.images;
+      changed = true;
+    }
+  }
   return changed ? ({ ...node, props } as LayoutNode) : node;
 }
 
@@ -410,6 +426,7 @@ export function droppedNotice(dropped: Dropped): string | null {
     "link, image or SVG that isn't allowed",
     "links, images or SVGs that aren't allowed",
   );
+  count(dropped.images ?? 0, "external image", "external images");
   if (parts.length === 0) return null;
   const list =
     parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;

@@ -22,6 +22,7 @@ import {
 import * as React from "react";
 import type { ThemePartType } from "../../../core/theme/part-types.ts";
 import { sharedPartH1 } from "./settings/heading-warning.ts";
+import { svgImagesLeftOut, svgImagesNotice } from "./settings/svg-images.ts";
 import { duplicateFieldName } from "./settings/form-names.ts";
 import { hasItemList, ItemList, type ItemActions } from "./settings/ItemList.tsx";
 import {
@@ -508,6 +509,11 @@ function KnownElementPanel({
             ))
           )}
           {ITEM_NOTES[node.type] && <p className="emvb-helper">{ITEM_NOTES[node.type]}</p>}
+          {svgImagesLeftOut(node) > 0 && (
+            <p className="emvb-helper" data-emvb-svg-images>
+              {svgImagesNotice(svgImagesLeftOut(node))}
+            </p>
+          )}
           {sharedPartH1(node, partType) && (
             <p className="emvb-helper" data-emvb-shared-h1>
               This part shows on pages that already have their own H1, so they would get two. Use H2

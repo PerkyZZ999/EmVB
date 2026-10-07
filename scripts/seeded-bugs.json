@@ -2663,8 +2663,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/svg.ts",
-          "search": "export function sanitizeSvgMarkup(raw: string): VNode | undefined {\n  if (typeof raw !== \"string\") return undefined;\n  const trimmed = raw.trim();\n  if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;\n  if (FORBIDDEN.test(trimmed)) return undefined;",
-          "replace": "export function sanitizeSvgMarkup(raw: string): VNode | undefined {\n  if (typeof raw !== \"string\") return undefined;\n  const trimmed = raw.trim();\n  if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;\n  // seeded: skip FORBIDDEN gate\n  if (false && FORBIDDEN.test(trimmed)) return undefined;"
+          "search": "  if (typeof raw !== \"string\") return undefined;\n  const trimmed = raw.trim();\n  if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;\n  if (FORBIDDEN.test(trimmed)) return undefined;",
+          "replace": "  if (typeof raw !== \"string\") return undefined;\n  const trimmed = raw.trim();\n  if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;\n  // seeded: skip FORBIDDEN gate\n  if (false && FORBIDDEN.test(trimmed)) return undefined;"
         },
         {
           "file": "packages/emvb/src/core/sanitize/svg.ts",
@@ -2721,8 +2721,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/svg.ts",
-          "search": "  if (tag === \"use\") return FRAGMENT_HREF.test(value);\n  if (tag === \"image\") return sanitizeMediaUrl(value) !== undefined;",
-          "replace": "  if (tag === \"use\") return true; // seeded: allow any use href\n  if (tag === \"image\") return sanitizeMediaUrl(value) !== undefined;"
+          "search": "  if (tag === \"use\") return FRAGMENT_HREF.test(value);",
+          "replace": "  if (tag === \"use\") return true; // seeded: allow any use href"
         }
       ],
       "command": [
@@ -13674,7 +13674,7 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
-      "expect": "\\(fail\\).*data: in text"
+      "expect": "\\(fail\\).*javascript: in text"
     },
     {
       "id": "W-091/svg-forbidden-handler-loose",
@@ -15306,8 +15306,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/clipboard.ts",
-          "search": "  if (type === \"svg\" && typeof props[\"markup\"] === \"string\" && !isSafeSvgMarkup(props[\"markup\"]))",
-          "replace": "  if (type === \"svg\" && typeof props[\"markup\"] === \"string\" && !props[\"markup\"])"
+          "search": "    if (!report.tree) fallBack(\"markup\", false);",
+          "replace": "    if (!report.tree && !props[\"markup\"]) fallBack(\"markup\", false);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
@@ -22468,6 +22468,108 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-231/svg-external-image-kept",
+      "requirement": "W-231",
+      "description": "An SVG <image> with an https href is kept, so a pasted SVG can load a remote picture or tracking pixel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  if (SVG_IMAGE_DATA.test(trimmed)) return true;",
+          "replace": "  if (SVG_IMAGE_DATA.test(trimmed) || /^https?:/.test(trimmed)) return true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-images.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-231/svg-media-traversal",
+      "requirement": "W-231",
+      "description": "A media-library path with ../ segments is accepted as an SVG image source",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  return SVG_IMAGE_MEDIA.test(trimmed) && !/(?:^|\\/)\\.\\.?(?:\\/|$)/.test(trimmed);",
+          "replace": "  return SVG_IMAGE_MEDIA.test(trimmed);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-images.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-231/svg-data-svg-image",
+      "requirement": "W-231",
+      "description": "An embedded data:image/svg+xml (or other non-raster data:) image href is dropped quietly instead of refusing the SVG",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "      if (/data:/i.test(value)) return undefined;\n      external = true;",
+          "replace": "      external = true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-images.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-231/svg-external-image-children-kept",
+      "requirement": "W-231",
+      "description": "A non-self-closing external <image> is kept with its children",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "    if (tok.external) {\n      images += 1;\n      return LEFT_OUT;\n    }\n    return { tag: tok.tag, attrs: { ...tok.attrs }, children };",
+          "replace": "    return { tag: tok.tag, attrs: { ...tok.attrs }, children };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-images.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-231/paste-keeps-external-markup",
+      "requirement": "W-231",
+      "description": "Paste counts the external image but stores the original markup, which still names the remote URL",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "      props[\"markup\"] = serialize(report.tree);\n",
+          "replace": "      void serialize;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-images.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-231/paste-notice-missing",
+      "requirement": "W-231",
+      "description": "The paste notice doesn't mention external images left out of an SVG",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  count(dropped.images ?? 0, \"external image\", \"external images\");\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-images.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-231/panel-note-wrong-count",
+      "requirement": "W-231",
+      "description": "The SVG panel note never shows because it reads the wrong prop",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/svg-images.ts",
+          "search": "(node.props as { markup?: unknown }).markup;",
+          "replace": "(node.props as { svg?: unknown }).svg;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/svg-images.test.ts"
+      ],
       "expect": "\\(fail\\)"
     }
   ]

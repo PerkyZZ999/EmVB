@@ -1,4 +1,3 @@
-import { sanitizeMediaUrl } from "./media-url.ts";
 import type { VNode } from "../render/vnode.ts";
 
 /**
@@ -101,9 +100,23 @@ const ATTR_ALLOW = new Set([
   "mask",
 ]);
 
-/** Hard reject before parse — script/handlers/foreignObject/style/a/iframe and data: urls. */
+/**
+ * Hard reject before parse — script/handlers/foreignObject/style/a/iframe. `data:` is checked per
+ * attribute value instead (only an `<image>` may carry an embedded raster, W-231).
+ */
 const FORBIDDEN =
-  /<script\b|<\/script\b|\bon[a-z]+\s*=|javascript:|data:|<\s*foreignObject\b|<\s*style\b|<\s*iframe\b|<\s*a\b/i;
+  /<script\b|<\/script\b|\bon[a-z]+\s*=|javascript:|<\s*foreignObject\b|<\s*style\b|<\s*iframe\b|<\s*a\b/i;
+
+/** W-231: the image sources an SVG may show — the site's media library, or an embedded raster. */
+const SVG_IMAGE_MEDIA = /^\/_emdash\/api\/media\/file\/[\w.~%-]+(?:\/[\w.~%-]+)*$/;
+const SVG_IMAGE_DATA = /^data:image\/(?:png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$/;
+
+/** True for an `<image>` href the site serves itself (media library) or embeds (raster data). */
+export function isAllowedSvgImageHref(value: string): boolean {
+  const trimmed = value.trim();
+  if (SVG_IMAGE_DATA.test(trimmed)) return true;
+  return SVG_IMAGE_MEDIA.test(trimmed) && !/(?:^|\/)\.\.?(?:\/|$)/.test(trimmed);
+}
 
 /** Transform attributes take only a list of SVG transform functions with the right arity. */
 const TRANSFORM_ATTRS = new Set(["transform", "gradientTransform", "patternTransform"]);
@@ -142,7 +155,14 @@ const URL_HASH_REF = /^url\(\s*#[A-Za-z_][\w.-]*\s*\)$/i;
 const MAX_MARKUP = 32_768;
 
 type Tok =
-  | { kind: "open"; tag: string; attrs: Record<string, string>; selfClosing: boolean }
+  | {
+      kind: "open";
+      tag: string;
+      attrs: Record<string, string>;
+      selfClosing: boolean;
+      /** W-231: an `<image>` pointing outside the site; left out with everything inside it. */
+      external?: boolean;
+    }
   | { kind: "close"; tag: string }
   | { kind: "text"; value: string };
 
@@ -169,10 +189,13 @@ function decodeEntities(raw: string): string {
 function isSafeHref(tag: string, name: string, value: string): boolean {
   if (name !== "href" && name !== "xlink:href") return true;
   if (tag === "use") return FRAGMENT_HREF.test(value);
-  if (tag === "image") return sanitizeMediaUrl(value) !== undefined;
+  // Image hrefs are judged in parseAttrs: an external one drops the image, not the whole SVG.
+  if (tag === "image") return true;
   // Other tags should not carry href.
   return false;
 }
+
+const isHrefName = (name: string) => name === "href" || name === "xlink:href";
 
 function isSafeUrlRefAttr(name: string, value: string): boolean {
   if (name !== "clip-path" && name !== "mask") return true;
@@ -180,8 +203,11 @@ function isSafeUrlRefAttr(name: string, value: string): boolean {
   return URL_HASH_REF.test(value);
 }
 
-function parseAttrs(tag: string, raw: string): Record<string, string> | undefined {
+type ParsedAttrs = { attrs: Record<string, string>; external: boolean };
+
+function parseAttrs(tag: string, raw: string): ParsedAttrs | undefined {
   const attrs: Record<string, string> = {};
+  let external = false;
   const re = /([A-Za-z_:][-A-Za-z0-9_:]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/g;
   let match: RegExpExecArray | null;
   while ((match = re.exec(raw))) {
@@ -189,6 +215,14 @@ function parseAttrs(tag: string, raw: string): Record<string, string> | undefine
     if (!ATTR_ALLOW.has(name)) continue;
     const value = decodeEntities(match[2] ?? match[3] ?? "");
     if (/[<>`]|javascript:/i.test(value)) return undefined;
+    const imageHref = tag === "image" && isHrefName(name);
+    if (imageHref && !isAllowedSvgImageHref(value)) {
+      // An embedded non-raster (data:image/svg+xml, data:text/html…) still refuses the whole SVG.
+      if (/data:/i.test(value)) return undefined;
+      external = true;
+      continue;
+    }
+    if (!imageHref && /data:/i.test(value)) return undefined;
     if (TRANSFORM_ATTRS.has(name) && !isTransformList(value)) return undefined;
     if (!isSafeHref(tag, name, value)) return undefined;
     if (!isSafeUrlRefAttr(name, value)) return undefined;
@@ -198,7 +232,7 @@ function parseAttrs(tag: string, raw: string): Record<string, string> | undefine
   }
   if (/\bon[a-z]+\s*=/i.test(raw)) return undefined;
   if (/\bstyle\s*=/i.test(raw)) return undefined;
-  return attrs;
+  return { attrs, external };
 }
 
 /** One tag's inner text (between `<` and `>`) as a token, or undefined when it isn't allowed. */
@@ -212,8 +246,12 @@ function tagToken(body: string): Tok | undefined {
   const space = openBody.search(/\s/);
   const tag = (space < 0 ? openBody : openBody.slice(0, space)).toLowerCase();
   if (!SVG_TAGS.has(tag)) return undefined;
-  const attrs = parseAttrs(tag, space < 0 ? "" : openBody.slice(space));
-  return attrs ? { kind: "open", tag, attrs, selfClosing } : undefined;
+  const parsed = parseAttrs(tag, space < 0 ? "" : openBody.slice(space));
+  if (!parsed) return undefined;
+  const { attrs, external } = parsed;
+  return external
+    ? { kind: "open", tag, attrs, selfClosing, external }
+    : { kind: "open", tag, attrs, selfClosing };
 }
 
 function tokenize(input: string): Tok[] | undefined {
@@ -224,6 +262,8 @@ function tokenize(input: string): Tok[] | undefined {
       const next = input.indexOf("<", i);
       const end = next < 0 ? input.length : next;
       const text = input.slice(i, end);
+      // `data:` stays refused in text, as it was before image data was allowed (W-091).
+      if (/data:/i.test(text)) return undefined;
       if (text.trim()) tokens.push({ kind: "text", value: decodeEntities(text) });
       i = end;
       continue;
@@ -245,8 +285,12 @@ function tokenize(input: string): Tok[] | undefined {
   return tokens;
 }
 
-function build(tokens: Tok[]): VNode | undefined {
+/** Stands in for an external `<image>` while building; its parent leaves it out. */
+const LEFT_OUT: VNode = { tag: "image", attrs: {}, children: [] };
+
+function build(tokens: Tok[]): { tree: VNode; images: number } | undefined {
   let index = 0;
+  let images = 0;
 
   const read = (): VNode | string | undefined => {
     const tok = tokens[index];
@@ -258,6 +302,10 @@ function build(tokens: Tok[]): VNode | undefined {
     if (tok.kind === "close") return undefined;
     index += 1;
     if (tok.selfClosing) {
+      if (tok.external) {
+        images += 1;
+        return LEFT_OUT;
+      }
       return { tag: tok.tag, attrs: { ...tok.attrs }, children: [] };
     }
     const children: (VNode | string)[] = [];
@@ -271,7 +319,12 @@ function build(tokens: Tok[]): VNode | undefined {
       }
       const child = read();
       if (child === undefined) return undefined;
+      if (child === LEFT_OUT) continue;
       if (typeof child !== "string" || TEXT_TAGS.has(tok.tag)) children.push(child);
+    }
+    if (tok.external) {
+      images += 1;
+      return LEFT_OUT;
     }
     return { tag: tok.tag, attrs: { ...tok.attrs }, children };
   };
@@ -279,15 +332,32 @@ function build(tokens: Tok[]): VNode | undefined {
   const root = read();
   if (!root || typeof root === "string" || root.tag !== "svg") return undefined;
   if (index !== tokens.length) return undefined;
-  return root;
+  return { tree: root, images };
 }
+
+/** A sanitized SVG and how many external `<image>`s were left out of it (W-231). */
+export type SvgReport = { tree: VNode | undefined; images: number };
 
 /**
  * Parse pasted SVG into an allowlisted VNode tree (R-032 / W-073 / W-079).
  * Rejects scripts, handlers, foreignObject, style, anchors, and unsafe urls.
- * Allows fragment-only `use` and media-policy `image` hrefs.
+ * Allows fragment-only `use` hrefs; `image` keeps only media-library or raster-data hrefs (W-231).
  */
 export function sanitizeSvgMarkup(raw: string): VNode | undefined {
+  return sanitizeSvgReport(raw).tree;
+}
+
+/**
+ * `sanitizeSvgMarkup` plus the number of `<image>`s left out because they point outside the site
+ * (W-231). Only media-library paths (`/_emdash/api/media/file/…`) and embedded PNG, JPEG, WebP or
+ * GIF data are kept, so a pasted SVG can't load a tracking pixel or a remote picture. Render calls
+ * this on every build, so stored SVGs follow without a migration.
+ */
+export function sanitizeSvgReport(raw: string): SvgReport {
+  return parseSvg(raw) ?? { tree: undefined, images: 0 };
+}
+
+function parseSvg(raw: string): { tree: VNode; images: number } | undefined {
   if (typeof raw !== "string") return undefined;
   const trimmed = raw.trim();
   if (!trimmed || trimmed.length > MAX_MARKUP) return undefined;

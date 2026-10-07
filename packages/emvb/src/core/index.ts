@@ -186,7 +186,13 @@ export { escapeAttr, escapeText } from "./sanitize/escape.ts";
 export { sanitizeHref } from "./sanitize/href.ts";
 export { isSafeFontStack } from "./sanitize/css.ts";
 export { sanitizeMediaUrl } from "./sanitize/media-url.ts";
-export { sanitizeSvgMarkup, isSafeSvgMarkup } from "./sanitize/svg.ts";
+export {
+  sanitizeSvgMarkup,
+  sanitizeSvgReport,
+  isSafeSvgMarkup,
+  isAllowedSvgImageHref,
+  type SvgReport,
+} from "./sanitize/svg.ts";
 export { resolveEmbedUrl, type EmbedTarget } from "./sanitize/embed-url.ts";
 export { summarizeLayout, type LayoutSummary } from "./stats.ts";
 export {

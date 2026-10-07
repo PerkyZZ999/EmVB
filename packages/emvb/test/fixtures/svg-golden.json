@@ -261,15 +261,7 @@
     "output": {
       "tag": "svg",
       "attrs": {},
-      "children": [
-        {
-          "tag": "image",
-          "attrs": {
-            "href": "https://example.com/a.png"
-          },
-          "children": []
-        }
-      ]
+      "children": []
     }
   },
   {
@@ -277,20 +269,16 @@
     "output": {
       "tag": "svg",
       "attrs": {},
-      "children": [
-        {
-          "tag": "image",
-          "attrs": {
-            "href": "/media/a.png"
-          },
-          "children": []
-        }
-      ]
+      "children": []
     }
   },
   {
     "input": "<svg><image href=\"//evil.example/a.png\"/></svg>",
-    "output": null
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": []
+    }
   },
   {
     "input": "<svg><rect href=\"#a\"/></svg>",
@@ -431,6 +419,64 @@
           "tag": "g",
           "attrs": {},
           "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><image href=\"/_emdash/api/media/file/01ABC.png\" width=\"4\" height=\"4\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "image",
+          "attrs": {
+            "href": "/_emdash/api/media/file/01ABC.png",
+            "width": "4",
+            "height": "4"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><image href=\"data:image/png;base64,iVBORw0KGgo=\" width=\"4\" height=\"4\"/></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "image",
+          "attrs": {
+            "href": "data:image/png;base64,iVBORw0KGgo=",
+            "width": "4",
+            "height": "4"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "input": "<svg><g><image xlink:href=\"https://track.example/p.gif\"></image><circle r=\"1\"/></g></svg>",
+    "output": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {},
+          "children": [
+            {
+              "tag": "circle",
+              "attrs": {
+                "r": "1"
+              },
+              "children": []
+            }
+          ]
         }
       ]
     }
