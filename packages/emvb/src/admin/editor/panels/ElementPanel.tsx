@@ -20,6 +20,8 @@ import {
   YoutubeLogoIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
+import type { ThemePartType } from "../../../core/theme/part-types.ts";
+import { sharedPartH1 } from "./settings/heading-warning.ts";
 import { duplicateFieldName } from "./settings/form-names.ts";
 import { hasItemList, ItemList, type ItemActions } from "./settings/ItemList.tsx";
 import {
@@ -228,6 +230,8 @@ type Props = {
   device?: PopupDevice;
   /** Add, move and delete for Accordion items and Tabs panels (W-130). */
   items?: ItemActions;
+  /** The theme part being edited, if any, for the H1 warning (W-208). */
+  partType?: ThemePartType;
 };
 
 /** What an item's content is, since it has no content field of its own (W-130). */
@@ -346,6 +350,7 @@ function KnownElementPanel({
   onStyleState,
   device = "desktop",
   items,
+  partType,
   descriptor,
 }: Props & { descriptor: ElementDescriptor }) {
   const ui = STYLE_UI[node.type] ?? DEFAULT_UI;
@@ -503,6 +508,12 @@ function KnownElementPanel({
             ))
           )}
           {ITEM_NOTES[node.type] && <p className="emvb-helper">{ITEM_NOTES[node.type]}</p>}
+          {sharedPartH1(node, partType) && (
+            <p className="emvb-helper" data-emvb-shared-h1>
+              This part shows on pages that already have their own H1, so they would get two. Use H2
+              or lower here unless this part is the page's only main heading.
+            </p>
+          )}
         </div>
       )}
       {tab === "style" && (

@@ -89,6 +89,7 @@ export function SettingsPanel({
           onStyleState={onStyleState}
           device={device}
           items={items}
+          partType={state.page.partType}
         />
       ) : (
         <PageSettings

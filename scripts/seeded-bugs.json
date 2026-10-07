@@ -21416,6 +21416,65 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/pages/list-search.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-208/no-note",
+      "requirement": "W-208",
+      "description": "The H1 note never shows in a header.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SettingsPanel.tsx",
+          "search": "          partType={state.page.partType}\n",
+          "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "          {sharedPartH1(node, partType) && (",
+          "replace": "          {sharedPartH1(node, undefined) && partType && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/heading-warning.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-208/content-templates",
+      "requirement": "W-208",
+      "description": "An H1 in a single post template is flagged, though it is the page's main heading.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/heading-warning.ts",
+          "search": "  if (!partType || !SHARED_PARTS.has(partType)) return false;",
+          "replace": "  if (!partType) return false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/heading-warning.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-208/post-title-default",
+      "requirement": "W-208",
+      "description": "A Post title with no level (renders H1) in a loop item is not flagged.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/heading-warning.ts",
+          "search": "(level ?? 1) === 1",
+          "replace": "level === 1"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/heading-warning.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
