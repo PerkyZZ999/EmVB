@@ -32,18 +32,23 @@
     "seeded-bugs": "bun scripts/seeded-bug.ts",
     "bench:render": "bun scripts/bench-render.ts",
     "bench:css": "bun scripts/css-budget.ts",
-    "pack:smoke": "bun scripts/pack-smoke.ts"
+    "pack:smoke": "bun scripts/pack-smoke.ts",
+    "icons:build": "bun scripts/build-icon-sets.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@fortawesome/fontawesome-free": "7.3.1",
     "@happy-dom/global-registrator": "20.14.5",
     "@playwright/test": "1.63.0",
+    "@tabler/icons": "3.49.0",
     "@types/bun": "1.4.2",
     "evlog": "2.29.0",
     "fallow": "3.30.0",
     "happy-dom": "20.14.5",
+    "lucide-static": "1.52.0",
     "oxfmt": "0.71.0",
     "oxlint": "1.86.0",
+    "remixicon": "4.8.0",
     "typescript": "7.0.2"
   }
 }

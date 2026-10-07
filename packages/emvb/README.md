@@ -57,4 +57,4 @@ The full guide, the demos and the source are on GitHub: <https://github.com/Perk
 
 ## License
 
-MIT
+MIT. The editor's Icon library includes Lucide (ISC), Font Awesome Free (icons CC BY 4.0, by Fonticons, Inc.), Tabler Icons (MIT) and Remix Icon 4.8.0 (Apache-2.0). Their notices and license texts are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and `licenses/`.

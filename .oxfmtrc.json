@@ -1,5 +1,11 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "printWidth": 100,
-  "ignorePatterns": ["spikes/**", "docs/**", "**/dist/**", "**/.astro/**"]
+  "ignorePatterns": [
+    "spikes/**",
+    "docs/**",
+    "**/dist/**",
+    "**/.astro/**",
+    "packages/emvb/src/admin/editor/icons/sets/**"
+  ]
 }

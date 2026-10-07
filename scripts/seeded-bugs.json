@@ -17526,13 +17526,8 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "    \"!src/**/*.test.ts\",\n    \"!src/**/*.test.tsx\",\n    \"!src/**/__snapshots__\"\n",
+          "search": "    \"!src/**/*.test.ts\",\n    \"!src/**/*.test.tsx\",\n    \"!src/**/__snapshots__\",\n",
           "replace": ""
-        },
-        {
-          "file": "packages/emvb/package.json",
-          "search": "    \"src\",\n",
-          "replace": "    \"src\"\n"
         }
       ],
       "command": [
@@ -21415,8 +21410,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/list-kit.tsx",
-          "search": "const fold = (text: string) => text.normalize(\"NFD\").replace(/\\p{M}/gu, \"\").toLocaleLowerCase();",
-          "replace": "const fold = (text: string) => text.toLocaleLowerCase();"
+          "search": "export const fold = (text: string) =>\n  text.normalize(\"NFD\").replace(/\\p{M}/gu, \"\").toLocaleLowerCase();",
+          "replace": "export const fold = (text: string) => text.toLocaleLowerCase();"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/pages/list-search.test.tsx"],
@@ -22687,6 +22682,90 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-235/set-loaded-twice",
+      "requirement": "W-235",
+      "description": "Every call loads the set again instead of sharing the first load",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/library.ts",
+          "search": "    loaded.set(id, pending);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-235/style-filter-ignored",
+      "requirement": "W-235",
+      "description": "A style category (Solid, Fill) shows every style of the set",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/library.ts",
+          "search": "      (!category.style || icon.style === category.style) &&\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-235/tags-not-searched",
+      "requirement": "W-235",
+      "description": "Search ignores the icon tags, so 'launch' doesn't find the rocket",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/library.ts",
+          "search": "${name.replaceAll(\"-\", \" \")} ${tags} ${file.label}",
+          "replace": "${name.replaceAll(\"-\", \" \")} ${file.label}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-235/own-viewbox-ignored",
+      "requirement": "W-235",
+      "description": "An icon's own viewBox (Font Awesome widths) is replaced by the set default",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/library.ts",
+          "search": "    const viewBox = entry[5] ?? style.viewBox;",
+          "replace": "    const viewBox = style.viewBox;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-235/legacy-id-lost",
+      "requirement": "W-235",
+      "description": "A bundled icon id from before the library points nowhere, so the picker can't reopen on it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/library.ts",
+          "search": "      ? { set: \"lucide\", style: \"lucide\", id: `lucide:${iconId}` }",
+          "replace": "      ? undefined"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-235/remix-fill-as-line",
+      "requirement": "W-235",
+      "description": "Remix fill icons are located under Line",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/library.ts",
+          "search": "      ? iconId.endsWith(\"-fill\")",
+          "replace": "      ? iconId.endsWith(\"-none\")"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]

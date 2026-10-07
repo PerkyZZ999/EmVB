@@ -75,7 +75,8 @@ export function EditedTime({ iso }: { iso: string }) {
   );
 }
 
-const fold = (text: string) => text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+export const fold = (text: string) =>
+  text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
 
 /**
  * W-207: does an entry match the list search? Every word must appear in one of the fields,

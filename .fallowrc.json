@@ -2,6 +2,12 @@
   "$schema": "https://fallow.tools/schema.json",
   "entry": ["demos/*/src/live.config.ts"],
   "ignorePatterns": ["spikes/**", "site/**"],
+  "ignoreDependencies": [
+    "@fortawesome/fontawesome-free",
+    "@tabler/icons",
+    "lucide-static",
+    "remixicon"
+  ],
   "boundaries": {
     "zones": [
       {
