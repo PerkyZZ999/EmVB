@@ -416,11 +416,13 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-media-card img { display: block; width: 100%; height: 64px; object-fit: cover; border-radius: 4px; background: var(--color-kumo-canvas); }
 .emvb-media-card span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.emvb-icon-grid { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; max-height: 256px; overflow: auto; }
-.emvb-icon-tile { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; padding: 8px 4px; border: 1px solid var(--color-kumo-hairline); border-radius: 6px; background: var(--emvb-glass-strong); color: var(--text-color-kumo-default); font: inherit; font-size: 11px; line-height: 14px; cursor: pointer; }
-.emvb-icon-tile:hover { background: var(--color-kumo-tint); }
-.emvb-icon-tile[data-selected="true"] { border-color: var(--color-kumo-brand); background: var(--color-kumo-tint); }
-.emvb-icon-tile span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.emvb-icon-current { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.emvb-icon-current-preview { flex: none; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0; border: 1px solid var(--color-kumo-hairline); border-radius: 8px; background: var(--emvb-glass-strong); color: var(--text-color-kumo-default); cursor: pointer; }
+.emvb-icon-current-preview:hover { border-color: var(--color-kumo-brand); }
+.emvb-icon-current-preview span { display: flex; }
+.emvb-icon-current-text { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 12px; line-height: 16px; }
+.emvb-icon-current-text strong { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-icon-current-text span { color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Class chip input (W-087): one 28 px box holding the chips and the text input */
 .emvb-class-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
@@ -601,7 +603,7 @@ export const EDITOR_CSS = `${UI_CSS}
   .emvb-layer-menu-list,
   .emvb-media-dialog,
   .emvb-media-card,
-  .emvb-icon-tile,
+  .emvb-icon-current-preview,
   .emvb-site-confirm,
   .emvb-invalid-label {
     background: var(--color-kumo-base);

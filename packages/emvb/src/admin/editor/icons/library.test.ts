@@ -94,6 +94,35 @@ describe("Icon library sets (W-235)", () => {
     expect(filterIcons(all, category("lucide"), "zzzz-nothing")).toEqual([]);
   });
 
+  test("icons named for the search come before icons only tagged with it (W-236)", async () => {
+    const icons = (await Promise.all(ICON_SETS.map((set) => loadIconSet(set.id)))).flat();
+    const everything = ICON_CATEGORIES[0];
+    if (!everything) throw new Error("no All category");
+    const hits = filterIcons(icons, everything, "heart");
+    const named = (icon: { label: string; name: string }) =>
+      `${icon.label} ${icon.name}`.toLowerCase().includes("heart");
+    const firstTagOnly = hits.findIndex((icon) => !named(icon));
+    expect(firstTagOnly).toBeGreaterThan(0);
+    expect(hits.slice(firstTagOnly).every((icon) => !named(icon))).toBe(true);
+    // Exactly "Heart" first, in set order: Lucide before Font Awesome.
+    const exact = hits.slice(
+      0,
+      hits.findIndex((icon) => icon.label.toLowerCase() !== "heart"),
+    );
+    expect(exact.length).toBeGreaterThanOrEqual(4);
+    expect(exact[0]?.id).toBe("lucide:heart");
+    expect(exact.map((icon) => icon.set)).toEqual(
+      exact
+        .map((icon) => icon.set)
+        .toSorted(
+          (a, b) =>
+            ICON_SETS.findIndex((set) => set.id === a) - ICON_SETS.findIndex((set) => set.id === b),
+        ),
+    );
+    // No search: plain set order.
+    expect(filterIcons(icons, everything, "")[0]?.set).toBe("lucide");
+  });
+
   test("categories narrow to a set and a style", () => {
     const solid = filterIcons(all, category("fontawesome/solid"), "rocket");
     expect(solid.length).toBeGreaterThan(0);

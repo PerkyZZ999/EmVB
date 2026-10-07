@@ -91,6 +91,8 @@ export type LibraryIcon = {
   label: string;
   /** Folded label, name, tags, set and style, for the word search. */
   haystack: string;
+  /** Folded label and name only, to rank icons named for a search above icons tagged with it. */
+  named: string;
   /** The complete `<svg>` stored on the node and shown in the tile. */
   markup: string;
 };
@@ -125,6 +127,7 @@ function iconsOf(file: IconSetFile): LibraryIcon[] {
       name,
       label,
       haystack: fold(`${label} ${name.replaceAll("-", " ")} ${tags} ${file.label} ${style.label}`),
+      named: fold(`${label} | ${name.replaceAll("-", " ")}`),
       markup: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}"${root}>${body}</svg>`,
     };
   });
@@ -148,19 +151,33 @@ export function loadIconSet(id: IconSetId): Promise<LibraryIcon[]> {
 export const setsFor = (category: IconCategory): IconSetId[] =>
   category.set ? [category.set] : ICON_SETS.map((set) => set.id);
 
-/** Icons in a category matching the search: every word, any order (as W-217), case and accents aside. */
+/**
+ * Icons in a category matching the search: every word, any order (as W-217), case and accents
+ * aside. With a search, icons named for it come first ("heart": Heart, then Heart off, then icons
+ * only tagged heart); each group keeps the sets' order.
+ */
 export function filterIcons(
   icons: readonly LibraryIcon[],
   category: IconCategory,
   query: string,
 ): LibraryIcon[] {
   const words = fold(query).split(/\s+/).filter(Boolean);
-  return icons.filter(
+  const matched = icons.filter(
     (icon) =>
       (!category.set || icon.set === category.set) &&
       (!category.style || icon.style === category.style) &&
       words.every((word) => icon.haystack.includes(word)),
   );
+  if (words.length === 0) return matched;
+  const phrase = words.join(" ");
+  const rank = (icon: LibraryIcon) => {
+    const [label, name] = icon.named.split(" | ");
+    if (label === phrase || name === phrase) return 0;
+    return words.every((word) => icon.named.includes(word)) ? 1 : 2;
+  };
+  const ranks = new Map(matched.map((icon) => [icon, rank(icon)]));
+  // toSorted is stable, so each rank keeps the sets' order.
+  return matched.toSorted((a, b) => (ranks.get(a) ?? 2) - (ranks.get(b) ?? 2));
 }
 
 const SET_OF_PREFIX = new Map<string, IconSetId>(

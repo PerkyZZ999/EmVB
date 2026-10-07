@@ -1783,12 +1783,12 @@
     {
       "id": "QA-icon-title-sync",
       "requirement": "W-025",
-      "description": "IconPicker keeps title Star after selecting Heart",
+      "description": "Inserting Heart keeps the title Star (the old icon's name no longer follows the glyph)",
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
-          "search": "                  onClick={() => {\n                    const title = propsOf(node).title;\n                    const previous = getBundledIcon(current)?.label;\n                    const patch: Record<string, unknown> = { iconId: icon.id };\n                    // Keep title in sync with the glyph when it still matches the prior\n                    // default/label (defaults ship title \"Star\" with iconId \"star\").\n                    if (\n                      !title ||\n                      title === \"Icon\" ||\n                      (previous !== undefined && title === previous)\n                    ) {\n                      patch.title = icon.label;\n                    }\n                    onChange(withProps(node, patch));\n                  }}",
-          "replace": "                  onClick={() => {\n                    const title = propsOf(node).title;\n                    const patch: Record<string, unknown> = { iconId: icon.id };\n                    if (!title || title === \"Icon\") patch.title = icon.label;\n                    onChange(withProps(node, patch));\n                  }}"
+          "search": "    if (!title || title === \"Icon\" || title.toLowerCase() === previous) patch.title = icon.label;",
+          "replace": "    if (!title || title === \"Icon\") patch.title = icon.label;"
         }
       ],
       "command": [
@@ -1796,7 +1796,7 @@
         "test",
         "./packages/emvb/src/admin/editor/panels/settings/icon-picker.test.tsx",
         "-t",
-        "picking Heart"
+        "inserting Heart"
       ],
       "expect": "\\(fail\\)"
     },
@@ -21840,33 +21840,37 @@
       "description": "Icon search only finds the exact phrase, so \"right arrow\" finds nothing.",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
-          "search": "matchesSearch(query, icon.label, icon.id.replaceAll(\"-\", \" \"))",
-          "replace": "icon.label.toLowerCase().includes(query.trim().toLowerCase())"
+          "file": "packages/emvb/src/admin/editor/icons/library.ts",
+          "search": "      words.every((word) => icon.haystack.includes(word)),",
+          "replace": "      icon.haystack.includes(fold(query).trim()),"
         }
       ],
       "command": [
         "bun",
         "test",
-        "./packages/emvb/src/admin/editor/panels/settings/icon-search.test.tsx"
+        "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx",
+        "-t",
+        "any order"
       ],
       "expect": "\\(fail\\)"
     },
     {
       "id": "W-217/icon-listitem",
       "requirement": "W-217",
-      "description": "The icon listbox's children are list items, not options.",
+      "description": "The icon listbox's row wrapper isn't presentational, so the listbox's child isn't an option.",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
-          "search": "<li key={icon.id} role=\"presentation\">",
-          "replace": "<li key={icon.id}>"
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "        role=\"presentation\"\n        className=\"emvb-icon-library-rows\"",
+          "replace": "        className=\"emvb-icon-library-rows\""
         }
       ],
       "command": [
         "bun",
         "test",
-        "./packages/emvb/src/admin/editor/panels/settings/icon-search.test.tsx"
+        "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx",
+        "-t",
+        "screenful"
       ],
       "expect": "\\(fail\\)"
     },
@@ -22763,6 +22767,208 @@
           "file": "packages/emvb/src/admin/editor/icons/library.ts",
           "search": "      ? iconId.endsWith(\"-fill\")",
           "replace": "      ? iconId.endsWith(\"-none\")"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/stale-scroll-blank",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "A scroll offset from a longer list isn't clamped, so a short search result renders no tiles.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "  const top = Math.min(Math.max(0, scrollTop - PAD), Math.max(0, rowCount * ROW - height));",
+          "replace": "  const top = Math.max(0, scrollTop - PAD);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/not-virtualized",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "Every tile of every set is rendered at once.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "  const { first, last } = visibleRows(scrollTop, box.height, rows);",
+          "replace": "  const { first, last } = { first: 0, last: rows - 1 };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/down-stuck-above-short-row",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "ArrowDown from the row above a short last row does nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "      return index + columns <= last ? index + columns : row < lastRow ? last : index;",
+          "replace": "      return index + columns <= last ? index + columns : index;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/up-jumps-to-start",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "ArrowUp on the first row jumps to the first tile.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "      return index - columns >= 0 ? index - columns : index;",
+          "replace": "      return index - columns >= 0 ? index - columns : 0;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/enter-does-not-insert",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "Enter in the grid doesn't insert the active icon.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "        if (event.key === \"Enter\") {",
+          "replace": "        if (event.key === \"Enter\" && event.shiftKey) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/reopens-on-all",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "The library forgets the stored icon's set and style and opens on All icons.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "  return style?.id ?? at.set;",
+          "replace": "  return ALL_ICONS;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/silent-tiles",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "Screen readers hear only the icon name, not its set and style.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "const iconSpokenName = (icon: LibraryIcon) => `${icon.label}, ${iconSource(icon)}`;",
+          "replace": "const iconSpokenName = (icon: LibraryIcon) => icon.label;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/style-category-shows-whole-set",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "Choosing Brands (or any style) still shows the whole set.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "            needed.flatMap((id) => sets[id] ?? []),\n            category,\n",
+          "replace": "            needed.flatMap((id) => sets[id] ?? []),\n            ICON_CATEGORIES[0] as IconCategory,\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/svg-not-stored",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "Inserting stores only the id, so the public page has no SVG to render.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
+          "search": "    const patch: Record<string, unknown> = { iconId: icon.id, iconSvg: icon.markup };",
+          "replace": "    const patch: Record<string, unknown> = { iconId: icon.id };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/custom-title-overwritten",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "Inserting replaces a title the author wrote.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
+          "search": "    if (!title || title === \"Icon\" || title.toLowerCase() === previous) patch.title = icon.label;",
+          "replace": "    patch.title = icon.label;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/stale-cursor-scroll",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "The keyboard cursor index from the last list carries into a new search, so the results open scrolled to the end.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "    cursor.list === filtered ? cursor.index : filtered.findIndex((icon) => icon.id === selectedId);",
+          "replace": "    cursor.index >= 0 ? cursor.index : filtered.findIndex((icon) => icon.id === selectedId);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx",
+        "-t",
+        "new search starts"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/focus-lost-on-close",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "Closing the library leaves focus on the page body instead of the Choose button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
+          "search": "    field.current?.querySelector<HTMLButtonElement>(\"[data-emvb-icon-open]\")?.focus();",
+          "replace": "    field.current?.querySelector<HTMLButtonElement>(\"[data-emvb-icon-open]\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-search.test.tsx",
+        "-t",
+        "Choose"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-236/tagged-before-named",
+      "requirement": "W-236: The Icon element's library dialog: sets sidebar, any-order search, virtualized keyboard grid, reopens on the stored icon; inserting stores id + SVG.",
+      "description": "Search results come in set order only, so icons merely tagged \"heart\" bury the Heart icons.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/library.ts",
+          "search": "  return matched.toSorted((a, b) => (ranks.get(a) ?? 2) - (ranks.get(b) ?? 2));",
+          "replace": "  return ranks.size >= 0 ? matched : [];"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
