@@ -21360,6 +21360,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/list-paging.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-205/signed-out-generic",
+      "requirement": "W-205",
+      "description": "A signed-out save shows the raw server message with no Retry.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "  if (error.status === 401) {",
+          "replace": "  if (error.status === 999) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

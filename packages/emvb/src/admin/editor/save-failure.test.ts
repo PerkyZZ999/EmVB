@@ -122,3 +122,17 @@ describe("save failures (R-006)", () => {
     );
   });
 });
+
+describe("signed out mid-edit (W-205)", () => {
+  test("a 401 save says to sign in again and offers Retry; a 401 publish says so too", () => {
+    const signedOut = new ApiError(401, "UNAUTHORIZED", "Not authenticated");
+    expect(saveFailure(signedOut, { slug: "a", layout: null })).toEqual({
+      status: {
+        kind: "error",
+        message: "Couldn't save. You're signed out: sign in again in another tab, then Retry.",
+        retry: true,
+      },
+    });
+    expect(publishFailureMessage(signedOut)).toContain("signed out");
+  });
+});

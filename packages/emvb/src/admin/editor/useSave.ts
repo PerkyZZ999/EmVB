@@ -43,6 +43,12 @@ export function saveFailure(
   page: { slug: string; layout: Layout | null },
 ): SaveFailure {
   if (!(error instanceof ApiError) || error.status >= 500) return { status: offline };
+  if (error.status === 401) {
+    // W-205: the session ran out. The edits stay here; signing in again in another tab and
+    // retrying saves them.
+    const message = "Couldn't save. You're signed out: sign in again in another tab, then Retry.";
+    return { status: { kind: "error", message, retry: true } };
+  }
   if (error.status === 409 && error.code === "SLUG_CONFLICT") {
     return { status: fixAndSave, slugError: slugTakenMessage(page.slug), select: null };
   }
@@ -59,6 +65,9 @@ export function saveFailure(
 }
 
 export function publishFailureMessage(error: unknown): string {
+  if (error instanceof ApiError && error.status === 401) {
+    return "Couldn't publish. You're signed out: sign in again in another tab, then publish.";
+  }
   if (error instanceof ApiError && error.status === 403) {
     return "Couldn't publish. Your role can't publish pages.";
   }
