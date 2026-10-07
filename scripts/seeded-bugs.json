@@ -21198,6 +21198,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/menu-empty.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-199/parallel-saves",
+      "requirement": "W-199",
+      "description": "A save asked for during a save races it with a stale _rev.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "    if (!pending) return start(latest.current.rev);",
+          "replace": "    if (pending || !pending) return start(latest.current.rev);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-199/stale-queued-rev",
+      "requirement": "W-199",
+      "description": "The queued save uses the pre-save revision and conflicts with itself.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "      return start(rev ?? latest.current.rev);",
+          "replace": "      return start(\"r1\");"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

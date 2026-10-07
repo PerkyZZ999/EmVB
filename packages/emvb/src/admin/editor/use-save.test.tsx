@@ -240,3 +240,31 @@ describe("useSave size limit (W-091, S0-9)", () => {
     );
   });
 });
+
+describe("one save at a time (W-199)", () => {
+  test("saves asked for during a save run once after it, with its new revision", async () => {
+    const revs: unknown[] = [];
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let n = 0;
+    const fetcher: Fetcher = async (_path, init) => {
+      revs.push((JSON.parse(String(init?.body)) as Record<string, unknown>)["_rev"]);
+      n += 1;
+      if (n === 1) await gate;
+      return Response.json({ data: { _rev: `r${n + 1}` } }, { status: 200 });
+    };
+    await start(fetcher, state());
+    const results = await run(async () => {
+      const first = hook().save();
+      const second = hook().save();
+      const third = hook().save();
+      release();
+      return Promise.all([first, second, third]);
+    });
+    expect(revs).toEqual(["r1", "r2"]);
+    expect(results).toEqual(["r2", "r3", "r3"]);
+    expect(hook().status).toEqual({ kind: "saved" });
+  });
+});

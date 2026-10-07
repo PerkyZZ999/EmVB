@@ -141,7 +141,33 @@ export function useSave(
     [fetcher, dispatch, collection],
   );
 
-  const save = React.useCallback(() => write(latest.current.rev), [write]);
+  // W-199: one save at a time. A save asked for while one is in flight (Ctrl+S, autosave) runs once
+  // after it, with the revision that save returned, instead of racing it with a stale `_rev`
+  // and reporting a conflict with itself.
+  const inFlight = React.useRef<Promise<string | null> | null>(null);
+  const queued = React.useRef<Promise<string | null> | null>(null);
+  const start = React.useCallback(
+    (rev: string | null): Promise<string | null> => {
+      const run = write(rev).finally(() => {
+        if (inFlight.current === run) inFlight.current = null;
+      });
+      inFlight.current = run;
+      return run;
+    },
+    [write],
+  );
+  const save = React.useCallback((): Promise<string | null> => {
+    if (queued.current) return queued.current;
+    const pending = inFlight.current;
+    if (!pending) return start(latest.current.rev);
+    // The state may not have re-rendered yet, so take the new revision from the save itself.
+    const after = pending.then((rev) => {
+      queued.current = null;
+      return start(rev ?? latest.current.rev);
+    });
+    queued.current = after;
+    return after;
+  }, [start]);
 
   /** Conflict → Overwrite: take the stored revision and save over it. */
   const overwrite = React.useCallback(async () => {
@@ -156,8 +182,15 @@ export function useSave(
 
   const publish = React.useCallback(async (): Promise<boolean> => {
     let rev: string | null = latest.current.rev;
+    const pending = queued.current ?? inFlight.current;
+    if (pending) {
+      // W-199: publish the revision the running save makes, never race it.
+      const saved = await pending;
+      if (!saved) return false;
+      rev = saved;
+    }
     if (latest.current.version !== latest.current.savedVersion) {
-      rev = await write(rev);
+      rev = await start(rev);
       if (!rev) return false;
     }
     try {
@@ -173,7 +206,7 @@ export function useSave(
       setStatus({ kind: "error", message: publishFailureMessage(error), retry: false });
       return false;
     }
-  }, [fetcher, dispatch, write, collection]);
+  }, [fetcher, dispatch, start, collection]);
 
   return {
     status,
