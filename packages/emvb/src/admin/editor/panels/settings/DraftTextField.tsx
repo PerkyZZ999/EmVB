@@ -2,7 +2,9 @@ import { Input } from "@cloudflare/kumo";
 import * as React from "react";
 import {
   MAX_TEXT_LENGTH,
+  LAYOUT_SCHEMA_VERSION,
   sanitizeHref,
+  validateLayout,
   type FieldDescriptor,
   type LayoutNode,
 } from "../../../../core/index.ts";
@@ -198,9 +200,34 @@ export function DraftTextField({
       }
       data-emvb-field={field.key}
       onChange={(event) => {
-        setDraft(event.target.value);
-        onChange(withProp(node, field.key, event.target.value));
+        const next = event.target.value;
+        setDraft(next);
+        if (next.trim() === "" && field.optional) {
+          setError(null);
+          onChange(withProp(node, field.key, undefined));
+          return;
+        }
+        // A value that would make a savable element unsavable (an emptied required field, an
+        // overlong one) stays in the box with its error and is not stored (W-192).
+        const candidate = withProp(node, field.key, next);
+        if (next.length > MAX_TEXT_LENGTH) return;
+        if (savableNode(node) && !savableNode(candidate)) {
+          setError(
+            next.trim() === "" ? `${field.label} can't be empty.` : "This value can't be saved.",
+          );
+          return;
+        }
+        setError(null);
+        onChange(candidate);
       }}
     />
   );
+}
+
+/** Whether `node` passes the layout schema on its own (inside a bare container). */
+function savableNode(node: LayoutNode): boolean {
+  return validateLayout({
+    schemaVersion: LAYOUT_SCHEMA_VERSION,
+    root: { id: "draftroot", type: "container", props: {}, children: [node] },
+  }).ok;
 }

@@ -185,3 +185,34 @@ describe("a box Link refuses a bad URL with an inline error (W-176)", () => {
     expect(sent).toEqual(["https://example.com/plans"]);
   });
 });
+
+describe("a required text field emptied or overlong is not stored (W-192)", () => {
+  test("Accordion item Title and Tab label keep the last savable value", async () => {
+    const summary = ELEMENT_DESCRIPTORS.find((d) => d.type === "accordion-item")?.fields.find(
+      (f) => f.key === "summary",
+    ) as FieldDescriptor;
+    const node = {
+      id: "item0001",
+      type: "accordion-item",
+      props: { summary: "Q1" },
+      children: [],
+    } as unknown as LayoutNode;
+    const sent: unknown[] = [];
+    const host = await mount(
+      <DraftTextField field={summary} node={node} onChange={(next) => sent.push(next.props)} />,
+    );
+    const input = host.querySelector("input") as HTMLInputElement;
+    for (const value of ["", "x".repeat(2001), "Q2"]) {
+      // oxlint-disable-next-line no-await-in-loop
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+          input,
+          value,
+        );
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      if (value === "") expect(host.textContent).toContain("can't be empty");
+    }
+    expect(sent).toEqual([{ summary: "Q2" }]);
+  });
+});

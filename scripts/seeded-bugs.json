@@ -20998,6 +20998,44 @@
         "rules match"
       ],
       "expect": "\\(fail\\).*rules match"
+    },
+    {
+      "id": "W-192/stores-empty-required",
+      "requirement": "W-192",
+      "description": "Emptying a required text field (Accordion item Title, Tab label) stores \"\" and the page fails to save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "        if (savableNode(node) && !savableNode(candidate)) {",
+          "replace": "        if (savableNode(node) && !savableNode(candidate) && false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "W-192"
+      ],
+      "expect": "\\(fail\\).*W-192"
+    },
+    {
+      "id": "W-192/stores-overlong",
+      "requirement": "W-192",
+      "description": "An overlong text value is stored and the page fails to save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "        if (next.length > MAX_TEXT_LENGTH) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
