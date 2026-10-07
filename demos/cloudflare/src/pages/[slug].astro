@@ -3,6 +3,7 @@ import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash"
 import { PortableText } from "emdash/ui";
 import { EmVBPage, resolveEmVBPage } from "@perkyzz/emvb/astro";
 import { EmVBFormsRuntime } from "@perkyzz/emvb/astro/forms";
+import { EmVBMenuRuntime } from "@perkyzz/emvb/astro/menu";
 import { EmVBTabsRuntime } from "@perkyzz/emvb/astro/tabs";
 import Base from "../layouts/Base.astro";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
@@ -39,6 +40,7 @@ const seo = getSeoMeta(entry, {
 		<EmVBPage page={emvb} standalone title={seo.title} description={seo.description}>
 			{emvb.needsFormsRuntime && <EmVBFormsRuntime />}
 			{emvb.needsTabsRuntime && <EmVBTabsRuntime />}
+			{emvb.needsMenuRuntime && <EmVBMenuRuntime />}
 		</EmVBPage>
 	) : (
 		<Base
@@ -52,6 +54,7 @@ const seo = getSeoMeta(entry, {
 				<EmVBPage page={emvb}>
 					{emvb.needsFormsRuntime && <EmVBFormsRuntime />}
 					{emvb.needsTabsRuntime && <EmVBTabsRuntime />}
+					{emvb.needsMenuRuntime && <EmVBMenuRuntime />}
 				</EmVBPage>
 			) : (
 				page && (

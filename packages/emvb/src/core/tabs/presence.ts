@@ -14,3 +14,12 @@ export function layoutHasTabs(layout: Layout): boolean {
   });
   return found;
 }
+
+/** A Menu with a dropdown, so hosts load the Escape-to-close menu script (W-197). */
+export function layoutHasMenuDropdown(layout: Layout): boolean {
+  let found = false;
+  walk(layout.root, (node) => {
+    if (node.type === "menu-item" && nodeChildren(node).length > 0) found = true;
+  });
+  return found;
+}

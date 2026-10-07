@@ -12,6 +12,7 @@ import {
 } from "@perkyzz/emvb/astro";
 import { EmVBFloatsRuntime } from "@perkyzz/emvb/astro/floats";
 import { EmVBPopupsRuntime } from "@perkyzz/emvb/astro/popups";
+import { EmVBMenuRuntime } from "@perkyzz/emvb/astro/menu";
 import { EmVBTabsRuntime } from "@perkyzz/emvb/astro/tabs";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
@@ -149,6 +150,7 @@ const theme = await resolveThemeParts(Astro, themeCtx);
 		{theme.needsPopupsRuntime && <EmVBPopupsRuntime />}
 		{theme.needsFloatsRuntime && <EmVBFloatsRuntime />}
 		{theme.needsTabsRuntime && <EmVBTabsRuntime />}
+		{theme.needsMenuRuntime && <EmVBMenuRuntime />}
 
 		<EmDashBodyEnd page={pageCtx} />
 	</body>

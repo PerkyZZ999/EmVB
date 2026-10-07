@@ -16,6 +16,7 @@ export type RenderedPage = {
   css: string;
   needsFormsRuntime: boolean;
   needsTabsRuntime: boolean;
+  needsMenuRuntime: boolean;
 };
 
 /** The design document through the in-process public route (no HTTP round trip, D-013). */
@@ -76,12 +77,22 @@ export function renderStored(
       // oxlint-disable-next-line no-console
       console.error("emvb: stored layout is unreadable", { pageId, ...problem });
     }
-    return { html: "", css: "", needsFormsRuntime: false, needsTabsRuntime: false };
+    return {
+      html: "",
+      css: "",
+      needsFormsRuntime: false,
+      needsTabsRuntime: false,
+      needsMenuRuntime: false,
+    };
   }
-  const { html, css, needsFormsRuntime, needsTabsRuntime } = renderPage(layout, design, {
-    formDefinitions,
-    dynamic,
-    scope: pageId,
-  });
-  return { html, css, needsFormsRuntime, needsTabsRuntime };
+  const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime } = renderPage(
+    layout,
+    design,
+    {
+      formDefinitions,
+      dynamic,
+      scope: pageId,
+    },
+  );
+  return { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime };
 }

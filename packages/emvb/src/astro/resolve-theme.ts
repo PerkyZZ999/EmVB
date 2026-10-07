@@ -76,6 +76,8 @@ export type ResolvedThemeParts = {
   needsFloatsRuntime: boolean;
   /** Hosts load `EmVBTabsRuntime` only when Tabs appear in a winning part (R-031 / W-078). */
   needsTabsRuntime: boolean;
+  /** Hosts load `EmVBMenuRuntime` only when a winning part has a Menu dropdown (W-197). */
+  needsMenuRuntime: boolean;
 };
 
 type AstroLike = {
@@ -301,6 +303,7 @@ export async function resolveThemeParts(
     needsPopupsRuntime: false,
     needsFloatsRuntime: false,
     needsTabsRuntime: false,
+    needsMenuRuntime: false,
   };
 
   const parts = await loadPublishedThemeParts();
@@ -424,5 +427,6 @@ export async function resolveThemeParts(
     needsPopupsRuntime: popups.length > 0,
     needsFloatsRuntime: floats.length > 0,
     needsTabsRuntime: rendered.some((page) => page.needsTabsRuntime),
+    needsMenuRuntime: rendered.some((page) => page.needsMenuRuntime),
   };
 }

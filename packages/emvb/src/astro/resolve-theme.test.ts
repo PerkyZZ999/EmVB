@@ -99,6 +99,7 @@ describe("resolveThemeParts (R-062)", () => {
       needsPopupsRuntime: false,
       needsFloatsRuntime: false,
       needsTabsRuntime: false,
+      needsMenuRuntime: false,
     });
   });
 

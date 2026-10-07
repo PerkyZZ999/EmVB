@@ -35,7 +35,8 @@
     "./astro/forms": "./src/astro/forms/index.ts",
     "./astro/popups": "./src/astro/popups/index.ts",
     "./astro/floats": "./src/astro/floats/index.ts",
-    "./astro/tabs": "./src/astro/tabs/index.ts"
+    "./astro/tabs": "./src/astro/tabs/index.ts",
+    "./astro/menu": "./src/astro/menu/index.ts"
   },
   "publishConfig": {
     "access": "public"

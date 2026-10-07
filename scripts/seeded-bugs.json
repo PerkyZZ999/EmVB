@@ -21142,6 +21142,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/dynamic-post.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-197/escape-ignored",
+      "requirement": "W-197",
+      "description": "Escape leaves an open Menu dropdown open.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/menu/runtime.ts",
+          "search": "  target.open = false;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-197/focus-lost",
+      "requirement": "W-197",
+      "description": "Closing a dropdown with Escape drops focus instead of returning it to the toggle.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/menu/runtime.ts",
+          "search": "  target.querySelector<HTMLElement>(\":scope > summary\")?.focus({ preventScroll: true });\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-197/runtime-never-loaded",
+      "requirement": "W-197",
+      "description": "A Menu dropdown never asks hosts for the menu script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/tabs/presence.ts",
+          "search": "node.type === \"menu-item\" && nodeChildren(node).length > 0",
+          "replace": "node.type === \"menu-item\" && nodeChildren(node).length > 99"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

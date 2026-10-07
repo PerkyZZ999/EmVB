@@ -306,7 +306,7 @@ export {
   type ThemeDynamicData,
 } from "./theme/dynamic.ts";
 
-export { layoutHasTabs } from "./tabs/presence.ts";
+export { layoutHasMenuDropdown, layoutHasTabs } from "./tabs/presence.ts";
 export {
   CLIPBOARD_FORMAT,
   CLIPBOARD_VERSION,

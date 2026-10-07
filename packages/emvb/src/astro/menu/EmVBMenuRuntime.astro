@@ -1,0 +1,9 @@
+---
+// Optional Menu Escape-to-close client (W-197). Hosts render this only when
+// `needsMenuRuntime`, so pages without a Menu dropdown stay zero EmVB JS (R-031).
+---
+
+<script>
+  import { initMenus } from "./runtime.ts";
+  initMenus();
+</script>

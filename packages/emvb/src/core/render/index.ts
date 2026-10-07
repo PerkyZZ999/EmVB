@@ -2,7 +2,7 @@ import { generateCss } from "../css/generate.ts";
 import { cssScopeToken, scopeAttribute, scopeCss, scopeWrapperCss } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import { layoutHasForm } from "../forms/binding.ts";
-import { layoutHasTabs } from "../tabs/presence.ts";
+import { layoutHasMenuDropdown, layoutHasTabs } from "../tabs/presence.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import {
   isFormNode,
@@ -55,6 +55,8 @@ export type RenderResult = {
   css: string;
   needsFormsRuntime: boolean;
   needsTabsRuntime: boolean;
+  /** A Menu has a dropdown: hosts load `EmVBMenuRuntime` (W-197). */
+  needsMenuRuntime: boolean;
   warnings: RenderWarning[];
 };
 
@@ -274,6 +276,7 @@ export function renderPage(
     css: scope ? scopeWrapperCss() + scopeCss(css, scope) : css,
     needsFormsRuntime: layoutHasForm(layout),
     needsTabsRuntime: layoutHasTabs(layout),
+    needsMenuRuntime: layoutHasMenuDropdown(layout),
     warnings,
   };
 }
