@@ -21114,6 +21114,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-196/lenient-date",
+      "requirement": "W-196",
+      "description": "Post Date reads text like 'Spring 2026' as Jan 1 and shows a wrong date.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/dynamic-post.ts",
+          "search": "        const parsed = parseIsoDate(raw);",
+          "replace": "        const parsed = Date.parse(raw);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/dynamic-post.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-196/rollover-date",
+      "requirement": "W-196",
+      "description": "An impossible ISO date (Feb 30) rolls over to another day.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/dynamic-post.ts",
+          "search": "  return day.getUTCDate() === Number(match[3]) && day.getUTCMonth() === Number(match[2]) - 1\n    ? parsed\n    : Number.NaN;",
+          "replace": "  return day ? parsed : Number.NaN;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/dynamic-post.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

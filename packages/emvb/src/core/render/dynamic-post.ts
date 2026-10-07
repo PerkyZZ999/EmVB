@@ -5,6 +5,21 @@ import { portableTextToVNodes, type ThemePostFields } from "../theme/dynamic.ts"
 import type { RenderMode } from "./context.ts";
 import type { VNode } from "./vnode.ts";
 
+/**
+ * W-196: only an ISO date (`2026-10-06`, optionally with a time) is read as a date. `Date.parse`
+ * also takes text like "Spring 2026" (as Jan 1) or "2026-02-30", which would show a wrong date.
+ */
+const parseIsoDate = (raw: string): number => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})(?:[T ][\d:.]+(?:Z|[+-]\d{2}:?\d{2})?)?$/.exec(raw);
+  if (!match) return Number.NaN;
+  const parsed = Date.parse(raw.replace(" ", "T"));
+  if (Number.isNaN(parsed)) return Number.NaN;
+  const day = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  return day.getUTCDate() === Number(match[3]) && day.getUTCMonth() === Number(match[2]) - 1
+    ? parsed
+    : Number.NaN;
+};
+
 type Attrs = Record<string, string>;
 
 type PostField = {
@@ -120,10 +135,12 @@ const POST_FIELDS = new Map<string, PostField>([
       render: (node, attrs, post) => {
         const raw = post.publishedAt?.trim();
         if (!raw) return undefined;
-        const parsed = Date.parse(raw);
+        const parsed = parseIsoDate(raw);
         const format = props<{ format?: PostDateFormat }>(node).format ?? "medium";
         const text = Number.isNaN(parsed) ? raw.slice(0, 80) : formatPostDate(parsed, format);
-        return { tag: "time", attrs: { ...attrs, datetime: raw.slice(0, 80) }, children: [text] };
+        // W-196: `datetime` must be machine-readable, so a date we can't read only shows as text.
+        const timeAttrs = Number.isNaN(parsed) ? attrs : { ...attrs, datetime: raw.slice(0, 80) };
+        return { tag: "time", attrs: timeAttrs, children: [text] };
       },
     },
   ],

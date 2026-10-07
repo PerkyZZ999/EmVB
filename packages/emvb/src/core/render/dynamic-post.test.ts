@@ -75,6 +75,14 @@ describe("Post Date format and Post Excerpt length (W-177)", () => {
     );
   });
 
+  test("a date that can't be read shows as text with no datetime (W-196)", () => {
+    expect(html("post-date", {}, { publishedAt: "Spring 2026" })).toBe("<time>Spring 2026</time>");
+    expect(html("post-date", {}, { publishedAt: "2026-02-30" })).toBe("<time>2026-02-30</time>");
+    expect(html("post-date", {}, { publishedAt: "2026-10-06 12:00" })).toBe(
+      '<time datetime="2026-10-06 12:00">Oct 6, 2026</time>',
+    );
+  });
+
   test("a Post Excerpt is cut to its word count with an ellipsis, and a short one is kept", () => {
     const excerpt = { excerpt: "One two  three\nfour five" };
     expect(html("post-excerpt", { maxWords: 3 }, excerpt)).toBe("<p>One two three…</p>");
