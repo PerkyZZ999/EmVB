@@ -1,5 +1,6 @@
 import type { DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
+import { cleanClassName } from "./classes.ts";
 import { STYLE_STATES } from "../schema/state-names.ts";
 import type { DeviceStyles, StyleProps, StyleStates } from "../schema/style.ts";
 import { nodeChildren, slugify, updateNode } from "../tree-ops.ts";
@@ -213,6 +214,14 @@ const KIND_TO_LIST = {
   spacing: "spacings",
 } as const;
 
+/** Most variables of each kind a site may have; the design schema refuses more (W-219). */
+export const MAX_VARIABLES = { color: 200, font: 50, fontSize: 50, spacing: 100 } as const;
+
+/** True when a site already has the most variables of `kind` allowed (W-219). */
+export function variableListFull(design: DesignSystem, kind: VariableKind): boolean {
+  return (design.variables[KIND_TO_LIST[kind]] ?? []).length >= MAX_VARIABLES[kind];
+}
+
 /** Drop every binding to the variable on class styles; a class left with none keeps `{}`. */
 function clearClassStyleRefs(
   classes: DesignSystem["classes"],
@@ -256,8 +265,9 @@ export function duplicateVariable(
   const key = KIND_TO_LIST[kind];
   const list = design.variables[key] ?? [];
   const source = list.find((entry) => entry.id === id);
-  if (!source) return design;
-  const name = `${source.name} copy`;
+  // A copy past the cap, or a name past 60 characters, would fail to save (W-219).
+  if (!source || variableListFull(design, kind)) return design;
+  const name = `${source.name.slice(0, 55).trim()} copy`;
   const base = slugify(name).slice(0, 34) || kind;
   const taken = new Set(list.map((entry) => entry.id));
   let nextId = base;
@@ -280,7 +290,7 @@ export function renameVariable(
   kind: VariableKind,
   name: string,
 ): DesignSystem {
-  const trimmed = name.trim();
+  const trimmed = cleanClassName(name);
   if (!trimmed) return design;
   const key = KIND_TO_LIST[kind];
   const list = design.variables[key] ?? [];

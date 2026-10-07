@@ -14,7 +14,9 @@ import {
 } from "@phosphor-icons/react";
 import * as React from "react";
 import {
+  cleanClassName,
   duplicateVariable,
+  variableListFull,
   findVariableUsages,
   findVariableUsagesInDesign,
   renameVariable,
@@ -268,8 +270,8 @@ export function VariableSection({
     : items;
 
   const create = async () => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
+    const trimmed = cleanClassName(name);
+    if (!trimmed || variableListFull(design, kind)) return;
     const parsed = parseValue(kind, value);
     if (!parsed.ok) {
       setCreateError(parsed.error);
@@ -311,6 +313,7 @@ export function VariableSection({
         count={items.length}
         countProps={{ "data-emvb-var-count": "" }}
         onNew={() => setCreating(true)}
+        newDisabled={variableListFull(design, kind)}
       />
       {items.length > 3 && (
         <SiteSearch
@@ -435,7 +438,10 @@ export function VariableSection({
                     {
                       label: "Duplicate",
                       icon: CopySimpleIcon,
-                      onSelect: () => void onSave(duplicateVariable(design, item.id, kind)),
+                      onSelect: () => {
+                        const next = duplicateVariable(design, item.id, kind);
+                        if (next !== design) void onSave(next);
+                      },
                     },
                     {
                       label: "Copy CSS variable",

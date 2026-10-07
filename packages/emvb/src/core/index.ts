@@ -113,6 +113,8 @@ export {
   type DefaultStyleTag,
 } from "./schema/design.ts";
 export {
+  MAX_VARIABLES,
+  variableListFull,
   findVariableUsages,
   findVariableUsagesInDesign,
   clearVariableRefs,

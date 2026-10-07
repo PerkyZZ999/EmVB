@@ -1,7 +1,13 @@
 import { Button, Input, Select } from "@cloudflare/kumo";
 import { PlusIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { slugify, type DesignSystem, type StyleProps } from "../../../core/index.ts";
+import {
+  cleanClassName,
+  slugify,
+  variableListFull,
+  type DesignSystem,
+  type StyleProps,
+} from "../../../core/index.ts";
 
 type ColorValue = StyleProps["color"];
 import { BUTTON, FIELD } from "../../ui.ts";
@@ -180,7 +186,10 @@ export function ColorControl({
       {creating ? (
         <NewVariable
           onCancel={() => setCreating(false)}
-          onCreate={async (name, hex) => {
+          onCreate={async (raw, hex) => {
+            const name = cleanClassName(raw);
+            // Past the cap or with no name left the save would fail (W-219).
+            if (!name || variableListFull(design, "color")) return;
             const id = uniqueId(design, name);
             await onDesignChange({
               ...design,
@@ -196,6 +205,7 @@ export function ColorControl({
           className={BUTTON}
           icon={<PlusIcon aria-hidden="true" />}
           onClick={() => setCreating(true)}
+          disabled={variableListFull(design, "color")}
         >
           New variable
         </Button>

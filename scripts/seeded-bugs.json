@@ -21911,6 +21911,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/design/class-limits.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-219/dup-name-overflow",
+      "requirement": "W-219",
+      "description": "Duplicating a variable with a 60-character name makes an invalid copy name; the save fails.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "${source.name.slice(0, 55).trim()} copy",
+          "replace": "${source.name} copy"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/variable-limits.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-219/dup-past-cap",
+      "requirement": "W-219",
+      "description": "Duplicate adds a variable past the kind's cap; the save fails.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "if (!source || variableListFull(design, kind)) return design;",
+          "replace": "if (!source) return design;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/variable-limits.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-219/rename-uncapped",
+      "requirement": "W-219",
+      "description": "Variable rename keeps names over 60 characters.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "const trimmed = cleanClassName(name);",
+          "replace": "const trimmed = name.trim();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/variable-limits.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
