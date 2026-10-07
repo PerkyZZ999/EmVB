@@ -101,6 +101,14 @@ export const menu: ElementDefinition<MenuNode> = {
   build: (node, attrs, children) => {
     const column = node.props.direction === "column";
     const classes = [attrs.class, column ? "emvb-menu--column" : ""].filter(Boolean).join(" ");
+    // W-198: a Menu with nothing in it is no navigation landmark; a plain box keeps its styles.
+    if (children.length === 0) {
+      return {
+        tag: "div",
+        attrs: { ...attrs, class: classes, "data-emvb-menu-empty": "" },
+        children: [],
+      };
+    }
     const label = node.props.label?.trim() || "Menu";
     return {
       tag: "nav",

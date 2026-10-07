@@ -21184,6 +21184,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-198/empty-nav-landmark",
+      "requirement": "W-198",
+      "description": "An empty Menu renders an empty navigation landmark.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "    if (children.length === 0) {",
+          "replace": "    if (children.length < 0) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/menu-empty.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
