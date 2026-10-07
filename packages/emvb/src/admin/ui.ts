@@ -75,6 +75,8 @@ export const UI_CSS = `
 .emvb-row-title:hover { text-decoration: underline; text-underline-offset: 2px; }
 .emvb-row-title:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; border-radius: 4px; }
 .emvb-row-slug { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
+/* W-209: a long unbroken title or slug wraps instead of pushing Status and Last edited out of the card. */
+.emvb-row-title, .emvb-row-slug { overflow-wrap: anywhere; }
 .emvb-tabular { font-variant-numeric: tabular-nums; color: var(--text-color-kumo-subtle); font-size: 13px; }
 
 /* Elevated EmVB-owned card chrome (lists, empty/setup shells) — not host sidebar/header */

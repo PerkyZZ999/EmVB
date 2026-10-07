@@ -21475,6 +21475,20 @@
         "./packages/emvb/src/admin/editor/panels/settings/heading-warning.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-209/no-wrap",
+      "requirement": "W-209",
+      "description": "A long unbroken title pushes the list's Status and Last edited columns out of the card.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-row-title, .emvb-row-slug { overflow-wrap: anywhere; }",
+          "replace": ".emvb-row-title, .emvb-row-slug { }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

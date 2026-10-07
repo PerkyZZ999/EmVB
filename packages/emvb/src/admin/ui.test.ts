@@ -20,3 +20,7 @@ test("links in helper text are underlined in the default text colour, not primar
   expect(link).toMatch(/text-decoration: underline;/);
   expect(link.includes("brand")).toBe(false);
 });
+
+test("W-209: list titles and slugs wrap anywhere so the other columns stay visible", () => {
+  expect(UI_CSS).toMatch(/\.emvb-row-title, \.emvb-row-slug \{ overflow-wrap: anywhere; \}/);
+});
