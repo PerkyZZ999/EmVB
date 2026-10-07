@@ -115,6 +115,8 @@ Hosts call `resolveThemeParts(Astro, ctx)` from `emvb/astro`. Return value:
 - `needsFloatsRuntime` — when true, host renders `<EmVBFloatsRuntime />` from `emvb/astro/floats`
 - `notFound` — an archive page past the last one (`/posts/page/9` with no posts there); answer 404. Page 1 with no posts is not a 404 (W-221)
 - `canonicalPath` — the archive page's canonical path: the bare archive path for page 1 (redirect `/page/1` there, 301), else `<archive>/page/N`
+- `archiveTitle` / `archivePage` — the winning Archive part's title (e.g. "Posts", the category name) and the page number; build the paged `<title>` with `archivePageTitle(title, page)` from `@perkyzz/emvb/astro` ("Posts – page 2", W-229)
+- `dir` — the site text direction from Site styles (`ltr`, `rtl` or `auto`; unset means ltr); put it on the host's `<html dir>`. EmVB roots carry it already. `renderStored` and `resolveEmVBPage` return it too (W-230)
 
 Numbered archive routes (demos: `pages/**/page/[n].astro` + `utils/archive-page.ts`, W-224) resolve the theme in the route, 301 when the path isn't `canonicalPath`, 404 on `notFound` or when no Archive part wins, and pass `theme` to `Base.astro`, which uses `canonicalPath` as the canonical URL. The header and footer parts render as `<header>`/`<footer>` landmarks (W-216); don't wrap them again.
 
