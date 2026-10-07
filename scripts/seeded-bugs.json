@@ -20754,6 +20754,66 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/form-ids.test.ts"],
       "expect": "\\(fail\\).*keeps every id unique"
+    },
+    {
+      "id": "W-188/no-drop-cap",
+      "requirement": "W-188",
+      "description": "A full Tabs still takes a dropped or moved 13th panel that the page never shows.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "      nodeChildren(into.node).length >= MAX_TABS,",
+          "replace": "      nodeChildren(into.node).length > 99,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/arrange-tabs.test.ts",
+        "-t",
+        "13th panel"
+      ],
+      "expect": "\\(fail\\).*13th panel"
+    },
+    {
+      "id": "W-188/no-duplicate-cap",
+      "requirement": "W-188",
+      "description": "Duplicating a panel in a full Tabs adds a 13th.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  if (found.parent.type === \"tabs\" && nodeChildren(found.parent).length >= MAX_TABS) {",
+          "replace": "  if (found.parent.type === \"tabs\" && nodeChildren(found.parent).length > 99) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/arrange-tabs.test.ts",
+        "-t",
+        "13th panel"
+      ],
+      "expect": "\\(fail\\).*13th panel"
+    },
+    {
+      "id": "W-188/reorder-blocked",
+      "requirement": "W-188",
+      "description": "The cap also blocks reordering a full Tabs' own panels.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "      !nodeChildren(into.node).some((child) => child.id === node.id) &&\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/arrange-tabs.test.ts",
+        "-t",
+        "13th panel"
+      ],
+      "expect": "\\(fail\\).*13th panel"
     }
   ]
 }

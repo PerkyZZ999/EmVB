@@ -1,4 +1,4 @@
-import { MAX_DEPTH, MAX_NODES } from "./limits.ts";
+import { MAX_DEPTH, MAX_NODES, MAX_TABS } from "./limits.ts";
 import {
   isContainerNode,
   isFormFieldType,
@@ -49,6 +49,7 @@ export const REASONS = {
   missing: "That element is no longer on the page.",
   tooDeep: `Elements can be nested at most ${MAX_DEPTH} levels deep.`,
   tooMany: `A page can have at most ${MAX_NODES} elements.`,
+  tooManyTabs: `Tabs can show up to ${MAX_TABS} tabs.`,
   first: "It's already first in its container.",
   last: "It's already last in its container.",
   top: "It's already at the top level.",
@@ -154,6 +155,14 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
   [
     ({ node, into, layout }) => isFormFieldType(node.type) && !underForm(layout, into.node.id),
     REASONS.fieldOutsideForm,
+  ],
+  // A 13th panel would be stored but never shown (W-188); moving within the same Tabs is fine.
+  [
+    ({ node, into }) =>
+      into.node.type === "tabs" &&
+      !nodeChildren(into.node).some((child) => child.id === node.id) &&
+      nodeChildren(into.node).length >= MAX_TABS,
+    REASONS.tooManyTabs,
   ],
   [({ node, into }) => into.depth + height(node) > MAX_DEPTH, REASONS.tooDeep],
   [
@@ -283,6 +292,9 @@ export function duplicateNode(
   if (!found) return refuse(REASONS.missing);
   if (!found.parent) return refuse(REASONS.rootCopy);
   if (size(layout.root) + size(found.node) > MAX_NODES) return refuse(REASONS.tooMany);
+  if (found.parent.type === "tabs" && nodeChildren(found.parent).length >= MAX_TABS) {
+    return refuse(REASONS.tooManyTabs);
+  }
   const { node: copy, dropped } = withoutHtmlIds(
     withNewIds(found.node, allIds(layout.root), random),
   );
