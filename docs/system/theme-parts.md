@@ -91,9 +91,12 @@ Public HTML stays JS-free (R-031) except in two cases: a matching popup loads `e
 | `post-content` | Portable Text / string → safe VNodes (`p`/`h*`), escaped text |
 | `post-image` | `<img>` when a media `src`/`url` exists (sanitized) |
 | `post-link` | Permalink `<a>`; blank text uses the title |
-| `loop` | Repeats item template for each archive post |
+| `loop` | Repeats item template for each archive post; `perPage` (1–50, empty = 20) sets the archive page size (W-221) |
+| `pagination` | `nav aria-label="Pagination"` with plain Previous / page numbers / Next links (`rel` prev/next, `aria-current="page"`). Nothing when there is one page or no archive data; nothing inside a Loop item (W-222, W-228) |
 
 **Loop Item:** set `loop.itemPartId` to a published `loop_item` theme-part id, or nest post-* elements under Loop as an inline template. Editor canvas shows sample placeholders when no live post is bound.
+
+**Archive pages (W-221–W-224):** `/posts/page/N`, `/category/<slug>/page/N` and `/tag/<slug>/page/N` are page N of that archive. `themeContextFrom` sets `ctx.page` and keeps `ctx.path` as the archive's own path, so conditions match every page. Posts load by offset with the first Loop's `perPage`. EmDash gives `hasMore` but no total, so the links run to one page past the current one. Page 1 is always the bare URL.
 
 **Section:** set `section.partId` to a published `section` theme-part id. The part's children render in place of the section's own children, on pages and in theme parts. A missing part renders empty (it does not fall back to local children). Leave `partId` blank to use the nested elements as an inline section.
 
@@ -110,6 +113,10 @@ Hosts call `resolveThemeParts(Astro, ctx)` from `emvb/astro`. Return value:
 - `css` — concatenated CSS for all winners (includes popup chrome CSS when popups match, and float chrome when floats match)
 - `needsPopupsRuntime` — when true, host renders `<EmVBPopupsRuntime />` from `emvb/astro/popups`
 - `needsFloatsRuntime` — when true, host renders `<EmVBFloatsRuntime />` from `emvb/astro/floats`
+- `notFound` — an archive page past the last one (`/posts/page/9` with no posts there); answer 404. Page 1 with no posts is not a 404 (W-221)
+- `canonicalPath` — the archive page's canonical path: the bare archive path for page 1 (redirect `/page/1` there, 301), else `<archive>/page/N`
+
+Numbered archive routes (demos: `pages/**/page/[n].astro` + `utils/archive-page.ts`, W-224) resolve the theme in the route, 301 when the path isn't `canonicalPath`, 404 on `notFound` or when no Archive part wins, and pass `theme` to `Base.astro`, which uses `canonicalPath` as the canonical URL. The header and footer parts render as `<header>`/`<footer>` landmarks (W-216); don't wrap them again.
 
 Demos' `Base.astro` **replace** the starter `<header>` when a header wins, insert footer HTML after `<main>` when a footer wins, replace `<main>` slot content when `content` wins, append popup markup before `EmDashBodyEnd` when popups match, and append float markup the same way when floats match. Pages without popups load **no** popup JS. Pages without floats load **no** float JS. Headers/footers/content templates are unchanged. Helpers: `themeContext404`, `themeContextSearch`, `themeContextFront`, `themeContextFrom`.
 
