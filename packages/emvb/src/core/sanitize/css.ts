@@ -34,7 +34,19 @@ const CURSOR = new Set([
   "zoom-in",
 ]);
 const ASPECT_RATIO = /^([1-9]\d{0,3})\/([1-9]\d{0,3})$/;
-const FONT_WEIGHT = new Set(["normal", "bold", "400", "500", "600", "700"]);
+const FONT_WEIGHT = new Set([
+  "normal",
+  "bold",
+  "100",
+  "200",
+  "300",
+  "400",
+  "500",
+  "600",
+  "700",
+  "800",
+  "900",
+]);
 const FORBIDDEN = /[{};<>\\"'`]|\/\*|url\(|expression\(|@import|javascript:/i;
 
 /** Last line of defence on every emitted value, even ones built by the typed validators below. */
@@ -251,6 +263,18 @@ const keyword =
   (allowed: Set<string>) =>
   (value: unknown): string | undefined =>
     typeof value === "string" && allowed.has(value) ? value : undefined;
+
+/** W-213: a length, or a unitless number 0–100. */
+function cssLineHeight(value: unknown): string | undefined {
+  if (typeof value === "number")
+    return Number.isFinite(value) && value >= 0 && value <= 100 ? String(value) : undefined;
+  return cssLength(value);
+}
+
+/** W-213: a length that may be negative (never `auto`). */
+function cssLetterSpacing(value: unknown): string | undefined {
+  return value === "auto" ? undefined : cssOffset(value);
+}
 
 function cssFontWeight(value: unknown): string | undefined {
   if (typeof value === "number" && FONT_WEIGHT.has(String(value))) return String(value);
@@ -532,8 +556,8 @@ const PROPERTY_MAP: {
   fontFamily: { css: "font-family", toValue: cssFontFamily },
   fontSize: { css: "font-size", toValue: cssLength },
   fontWeight: { css: "font-weight", toValue: cssFontWeight },
-  lineHeight: { css: "line-height", toValue: cssLength },
-  letterSpacing: { css: "letter-spacing", toValue: cssLength },
+  lineHeight: { css: "line-height", toValue: cssLineHeight },
+  letterSpacing: { css: "letter-spacing", toValue: cssLetterSpacing },
   textAlign: { css: "text-align", toValue: cssTextAlign },
   textTransform: { css: "text-transform", toValue: keyword(TEXT_TRANSFORM) },
   textDecoration: { css: "text-decoration", toValue: keyword(TEXT_DECORATION) },

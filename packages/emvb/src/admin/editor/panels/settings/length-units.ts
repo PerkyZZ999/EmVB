@@ -1,7 +1,8 @@
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 
 export type LengthUnit = "px" | "rem" | "em" | "%" | "vw" | "vh";
-export type UnitChoice = LengthUnit | "auto";
+/** `x` is a unitless number, for Line height only (W-213). */
+export type UnitChoice = LengthUnit | "auto" | "x";
 export type LengthLiteral = { value: number; unit: LengthUnit };
 
 const BOX: readonly UnitChoice[] = ["px", "%", "rem", "em", "vw", "vh"];
@@ -21,7 +22,7 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   left: BOX_AUTO,
   fontSize: ["px", "rem", "em", "%", "vw"],
   // em first, so a typed 1.5 means 1.5 times the font size, not 1.5 px (W-125).
-  lineHeight: ["em", "px", "rem", "%"],
+  lineHeight: ["em", "px", "rem", "%", "x"],
   letterSpacing: ["px", "rem", "em"],
   borderWidth: ["px", "rem", "em"],
   borderTopWidth: ["px", "rem", "em"],
@@ -37,10 +38,10 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
 
 export const unitsFor = (key: StyleKey): readonly UnitChoice[] => UNITS[key] ?? BOX;
 
-const NEGATIVE = new Set<StyleKey>(["top", "right", "bottom", "left"]);
+const NEGATIVE = new Set<StyleKey>(["top", "right", "bottom", "left", "letterSpacing"]);
 
 export type ParsedLength =
-  | { ok: true; value: LengthLiteral | "auto" | undefined }
+  | { ok: true; value: LengthLiteral | "auto" | number | undefined }
   | { ok: false; message: string };
 
 const DRAFT = /^(-?(?:\d+(?:\.\d*)?|\.\d+))\s*(px|rem|em|%|vw|vh)?$/i;
@@ -52,7 +53,11 @@ const listed = (units: readonly string[]) =>
  * Parses a length field's text: a number in `unit`, a number with its own unit ("50%",
  * "1.5rem"), `auto` where allowed, or empty for unset.
  */
-export function parseLengthDraft(draft: string, key: StyleKey, unit: LengthUnit): ParsedLength {
+export function parseLengthDraft(
+  draft: string,
+  key: StyleKey,
+  unit: LengthUnit | "x",
+): ParsedLength {
   const text = draft.trim();
   if (text === "") return { ok: true, value: undefined };
   const label = STYLE_LABELS[key];
@@ -66,6 +71,13 @@ export function parseLengthDraft(draft: string, key: StyleKey, unit: LengthUnit)
   const n = match ? Number(match[1]) : Number.NaN;
   if (!match || !Number.isFinite(n)) {
     return { ok: false, message: `Enter a number, such as 16 or 16${unit}.` };
+  }
+  if (unit === "x" && !match[2] && allowed.includes("x")) {
+    // W-213: unitless line height, 0–100.
+    if (n < 0 || n > 100) {
+      return { ok: false, message: `${label} without a unit can be from 0 to 100.` };
+    }
+    return { ok: true, value: n };
   }
   const typed = (match[2]?.toLowerCase() ?? unit) as LengthUnit;
   if (!allowed.includes(typed)) {

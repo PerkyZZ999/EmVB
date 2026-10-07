@@ -6412,8 +6412,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
-          "search": "      send({ value: parsed.value.value, unit: next });\n",
-          "replace": ""
+          "search": "      } else send({ value: n, unit: next });",
+          "replace": "      }"
         }
       ],
       "command": [
@@ -7152,8 +7152,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
-          "search": "const NEGATIVE = new Set<StyleKey>([\"top\", \"right\", \"bottom\", \"left\"]);",
-          "replace": "const NEGATIVE = new Set<StyleKey>([]);"
+          "search": "const NEGATIVE = new Set<StyleKey>([\"top\", \"right\", \"bottom\", \"left\", \"letterSpacing\"]);",
+          "replace": "const NEGATIVE = new Set<StyleKey>([\"letterSpacing\"]);"
         }
       ],
       "command": [
@@ -13291,8 +13291,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "\"normal\", \"bold\", \"400\", \"500\", \"600\", \"700\"",
-          "replace": "\"normal\", \"bold\", \"400\", \"600\", \"700\""
+          "search": "  \"400\",\n  \"500\",\n  \"600\",",
+          "replace": "  \"400\",\n  \"600\","
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
@@ -17701,8 +17701,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
-          "search": "lineHeight: [\"em\", \"px\", \"rem\", \"%\"],",
-          "replace": "lineHeight: [\"px\", \"rem\", \"em\", \"%\"],"
+          "search": "lineHeight: [\"em\", \"px\", \"rem\", \"%\", \"x\"],",
+          "replace": "lineHeight: [\"px\", \"rem\", \"em\", \"%\", \"x\"],"
         }
       ],
       "command": [
@@ -21614,6 +21614,84 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/design-conflict.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-213/weights-narrow",
+      "requirement": "W-213",
+      "description": "Font weight 800 is dropped from the CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  \"700\",\n  \"800\",\n  \"900\",\n]);",
+          "replace": "  \"700\",\n]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/typography.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-213/letter-spacing-unsigned",
+      "requirement": "W-213",
+      "description": "Negative letter spacing is dropped from the CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  return value === \"auto\" ? undefined : cssOffset(value);",
+          "replace": "  return value === \"auto\" ? undefined : cssLength(value);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/typography.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-213/editor-refuses-negative",
+      "requirement": "W-213",
+      "description": "The editor refuses a negative letter spacing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "\"left\", \"letterSpacing\"]",
+          "replace": "\"left\"]"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/typography-units.test.ts"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-213/unitless-any-key",
+      "requirement": "W-213",
+      "description": "A unitless number is accepted for Font size too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "  if (unit === \"x\" && !match[2] && allowed.includes(\"x\")) {",
+          "replace": "  if (unit === \"x\" && !match[2]) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/typography-units.test.ts"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-213/unitless-unbounded",
+      "requirement": "W-213",
+      "description": "A unitless line height of 101 reaches the CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "value >= 0 && value <= 100 ? String(value)",
+          "replace": "value >= 0 ? String(value)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/typography.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]

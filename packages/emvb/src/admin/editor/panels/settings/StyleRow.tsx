@@ -143,11 +143,17 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "repeat-x", label: "Repeat horizontally" },
     { value: "repeat-y", label: "Repeat vertically" },
   ],
+  // W-213: the full CSS weight range.
   fontWeight: [
     { value: "400", label: "Regular" },
+    { value: "100", label: "Thin" },
+    { value: "200", label: "Extra light" },
+    { value: "300", label: "Light" },
     { value: "500", label: "Medium" },
     { value: "600", label: "Semibold" },
     { value: "700", label: "Bold" },
+    { value: "800", label: "Extra bold" },
+    { value: "900", label: "Black" },
   ],
 };
 
@@ -321,7 +327,9 @@ export function StyleRow({
             if (styleKey === "fontWeight") {
               const n = Number(next);
               onPatch({
-                fontWeight: Number.isFinite(n) ? (n as 400 | 500 | 600 | 700) : undefined,
+                fontWeight: Number.isFinite(n)
+                  ? (n as NonNullable<StyleProps["fontWeight"]>)
+                  : undefined,
               });
               return;
             }

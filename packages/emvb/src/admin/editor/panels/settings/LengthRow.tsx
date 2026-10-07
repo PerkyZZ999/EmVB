@@ -22,8 +22,10 @@ const isLiteral = (value: unknown): value is LengthLiteral =>
 const same = (a: unknown, b: unknown) =>
   a === b || (isLiteral(a) && isLiteral(b) && a.value === b.value && a.unit === b.unit);
 
-const firstNumeric = (units: readonly UnitChoice[]): LengthUnit =>
-  (units.find((u) => u !== "auto") as LengthUnit | undefined) ?? "px";
+type NumericUnit = LengthUnit | "x";
+
+const firstNumeric = (units: readonly UnitChoice[]): NumericUnit =>
+  (units.find((u) => u !== "auto") as NumericUnit | undefined) ?? "px";
 
 /** A length property: number input, unit menu inside its right edge, variable button (W-088). */
 export function LengthRow({
@@ -50,11 +52,16 @@ export function LengthRow({
   reset: React.ReactNode;
 }) {
   const units = unitsFor(styleKey);
-  const literal = isLiteral(value) ? value : undefined;
+  // W-213: a plain number is a unitless line height, shown with the `x` unit.
+  const literal: { value: number; unit: NumericUnit } | undefined = isLiteral(value)
+    ? value
+    : typeof value === "number"
+      ? { value, unit: "x" }
+      : undefined;
   const numericUnit = literal?.unit ?? firstNumeric(units);
   const [draft, setDraft] = React.useState(literal ? String(literal.value) : "");
   const [unit, setUnit] = React.useState<UnitChoice>(value === "auto" ? "auto" : numericUnit);
-  const lastNumeric = React.useRef<LengthUnit>(numericUnit);
+  const lastNumeric = React.useRef<NumericUnit>(numericUnit);
   const [error, setError] = React.useState<string | null>(null);
   React.useEffect(() => {
     setDraft(literal ? String(literal.value) : "");
@@ -63,7 +70,7 @@ export function LengthRow({
     setError(null);
   }, [value, literal]);
 
-  const send = (next: LengthLiteral | "auto" | undefined) => {
+  const send = (next: LengthLiteral | "auto" | number | undefined) => {
     if (!same(next, value)) onPatch({ [styleKey]: next });
   };
 
@@ -89,7 +96,11 @@ export function LengthRow({
     lastNumeric.current = next;
     const parsed = parseLengthDraft(draft, styleKey, next);
     if (parsed.ok && parsed.value !== undefined && parsed.value !== "auto") {
-      send({ value: parsed.value.value, unit: next });
+      const n = typeof parsed.value === "number" ? parsed.value : parsed.value.value;
+      if (next === "x") {
+        if (n <= 100) send(n);
+        else setError("Line height without a unit can be from 0 to 100.");
+      } else send({ value: n, unit: next });
     }
   };
 
@@ -147,7 +158,7 @@ export function LengthRow({
                     aria-label={`${label} unit (${unit})`}
                     data-emvb-unit={unit}
                   >
-                    {unit}
+                    {unit === "x" ? "×" : unit}
                     <CaretDownIcon size={12} aria-hidden="true" />
                   </button>
                 </DropdownMenu.Trigger>
@@ -164,7 +175,7 @@ export function LengthRow({
                         closeOnClick
                         data-emvb-unit-option={choice}
                       >
-                        <span className="emvb-mono">{choice}</span>
+                        <span className="emvb-mono">{choice === "x" ? "× (no unit)" : choice}</span>
                         <DropdownMenu.RadioItemIndicator />
                       </DropdownMenu.RadioItem>
                     ))}
@@ -185,7 +196,7 @@ export function LengthRow({
               onChange={(event) => {
                 const next = Number(event.target.value);
                 setDraft(String(next));
-                send({ value: next, unit });
+                send(unit === "x" ? next : { value: next, unit });
               }}
             />
           )}

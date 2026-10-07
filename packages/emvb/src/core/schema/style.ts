@@ -121,17 +121,30 @@ export const StyleProps = z.strictObject({
     ])
     .optional(),
   fontSize: LengthValue.optional(),
+  /** W-213: any weight 100–900 in steps of 100 (the font must ship it to look different). */
   fontWeight: z
     .union([
+      z.literal(100),
+      z.literal(200),
+      z.literal(300),
       z.literal(400),
       z.literal(500),
       z.literal(600),
       z.literal(700),
+      z.literal(800),
+      z.literal(900),
       z.enum(["normal", "bold"]),
     ])
     .optional(),
-  lineHeight: LengthValue.optional(),
-  letterSpacing: LengthValue.optional(),
+  /** W-213: also a plain number (unitless, 0–100), which scales with each child's font size. */
+  lineHeight: z.union([Length, VariableRef, z.number().finite().min(0).max(100)]).optional(),
+  /** W-213: may be negative, for tight display headings. */
+  letterSpacing: z
+    .union([
+      z.strictObject({ value: z.number().finite().min(-10_000).max(10_000), unit: LengthUnit }),
+      VariableRef,
+    ])
+    .optional(),
   textAlign: z.enum(["left", "center", "right", "justify"]).optional(),
   textTransform: z.enum(["none", "uppercase", "lowercase", "capitalize"]).optional(),
   /** W-113. A button sets `none` in its base CSS, so it is not underlined unless a style says so. */

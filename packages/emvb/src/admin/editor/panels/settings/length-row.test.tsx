@@ -176,7 +176,7 @@ describe("length field unit selector (W-088)", () => {
 
 describe("Line height units (W-125)", () => {
   test("a bare number in Line height is a multiple of the font size (em), not pixels", async () => {
-    expect(unitsFor("lineHeight")).toEqual(["em", "px", "rem", "%"]);
+    expect(unitsFor("lineHeight")).toEqual(["em", "px", "rem", "%", "x"]);
     await row("lineHeight");
     expect(unitButton()?.getAttribute("aria-label")).toBe("Line height unit (em)");
     await type("1.1");
