@@ -1,5 +1,6 @@
 import { Input } from "@cloudflare/kumo";
 import * as React from "react";
+import { matchesSearch } from "../../../pages/list-kit.tsx";
 import { BUNDLED_ICONS, getBundledIcon, type LayoutNode } from "../../../../core/index.ts";
 import { serialize, type VNode } from "../../../../core/render/vnode.ts";
 import { FIELD } from "../../../ui.ts";
@@ -48,9 +49,9 @@ export function IconPicker({
 }) {
   const current = typeof propsOf(node).iconId === "string" ? String(propsOf(node).iconId) : "";
   const [query, setQuery] = React.useState("");
-  const q = query.trim().toLowerCase();
-  const matched = BUNDLED_ICONS.filter(
-    (icon) => !q || icon.id.includes(q) || icon.label.toLowerCase().includes(q),
+  // W-217: every word, in any order ("right arrow" finds Arrow right), case and accents aside.
+  const matched = BUNDLED_ICONS.filter((icon) =>
+    matchesSearch(query, icon.label, icon.id.replaceAll("-", " ")),
   );
 
   return (
@@ -69,7 +70,8 @@ export function IconPicker({
           {matched.map((icon) => {
             const selected = icon.id === current;
             return (
-              <li key={icon.id}>
+              // W-217: the listbox's children are its options, so the list item is presentational.
+              <li key={icon.id} role="presentation">
                 <button
                   type="button"
                   role="option"

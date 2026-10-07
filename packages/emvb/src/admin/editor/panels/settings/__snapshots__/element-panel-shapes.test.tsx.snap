@@ -2349,157 +2349,157 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
             "Search icons"
         input.emvb-field id="id-3" placeholder="Search icons" value="" aria-labelledby="id-2"
       ul.emvb-icon-grid role="listbox" aria-label="Icons"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="arrow-left"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Arrow Left"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="arrow-right"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Arrow Right"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="calendar"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Calendar"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="camera"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Camera"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="check"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Check"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="circle-alert"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Circle Alert"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="circle-check"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Circle Check"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="clock"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Clock"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="download"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Download"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="external-link"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "External Link"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="globe"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Globe"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="heart"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Heart"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="house"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "House"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="info"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Info"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="mail"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Mail"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="menu"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Menu"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="minus"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Minus"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="phone"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Phone"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="play"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Play"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="plus"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Plus"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="search"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Search"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="settings"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Settings"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="shopping-cart"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Shopping Cart"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="true" data-emvb-icon-id="star" data-selected="true"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "Star"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="user"
             span.emvb-icon-preview
               svg aria-hidden="true"
             span
               "User"
-        li
+        li role="presentation"
           button.emvb-icon-tile type="button" role="option" aria-selected="false" data-emvb-icon-id="x"
             span.emvb-icon-preview
               svg aria-hidden="true"

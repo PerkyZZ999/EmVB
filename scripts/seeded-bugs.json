@@ -21833,6 +21833,42 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-217/icon-substring-search",
+      "requirement": "W-217",
+      "description": "Icon search only finds the exact phrase, so \"right arrow\" finds nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
+          "search": "matchesSearch(query, icon.label, icon.id.replaceAll(\"-\", \" \"))",
+          "replace": "icon.label.toLowerCase().includes(query.trim().toLowerCase())"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-search.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-217/icon-listitem",
+      "requirement": "W-217",
+      "description": "The icon listbox's children are list items, not options.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
+          "search": "<li key={icon.id} role=\"presentation\">",
+          "replace": "<li key={icon.id}>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-search.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
