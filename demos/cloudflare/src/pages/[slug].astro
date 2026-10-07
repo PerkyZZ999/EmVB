@@ -49,6 +49,7 @@ const seo = getSeoMeta(entry, {
 			description={seo.description}
 			canonical={seo.canonical}
 			content={{ collection: emvb ? "emvb_pages" : "pages", id: entry.data.id, slug }}
+			dir={emvb?.dir}
 		>
 			{emvb ? (
 				<EmVBPage page={emvb}>

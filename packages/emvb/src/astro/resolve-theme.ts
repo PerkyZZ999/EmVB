@@ -104,6 +104,8 @@ export type ResolvedThemeParts = {
   archiveTitle?: string;
   /** The archive page number when an Archive part renders (1 for the bare URL). */
   archivePage?: number;
+  /** The site's text direction from Site styles when a part renders, for `<html dir>` (W-230). */
+  dir?: "ltr" | "rtl" | "auto";
 };
 
 type AstroLike = {
@@ -494,6 +496,7 @@ export async function resolveThemeParts(
     needsTabsRuntime: rendered.some((page) => page.needsTabsRuntime),
     needsMenuRuntime: rendered.some((page) => page.needsMenuRuntime),
     notFound: pastLastPage,
+    ...(design.direction ? { dir: design.direction } : {}),
     ...(archiveInfo?.title ? { archiveTitle: archiveInfo.title } : {}),
     ...(archiveInfo ? { archivePage: archiveInfo.page } : {}),
     ...(empty.canonicalPath ? { canonicalPath: empty.canonicalPath } : {}),

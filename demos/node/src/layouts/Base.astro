@@ -33,6 +33,8 @@ interface Props {
 	isSearch?: boolean;
 	/** Theme parts the route already resolved (numbered archive pages, W-223). */
 	theme?: ResolvedThemeParts;
+	/** The EmVB page's text direction (W-230); else the theme's. */
+	dir?: "ltr" | "rtl" | "auto";
 }
 
 const { title, pageTitle, description, image, content, is404, isFront, isSearch } = Astro.props;
@@ -85,7 +87,7 @@ const pageCtx = createPublicPageContext({
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" dir={Astro.props.dir ?? theme.dir}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />

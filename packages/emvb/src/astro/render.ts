@@ -17,6 +17,8 @@ export type RenderedPage = {
   needsFormsRuntime: boolean;
   needsTabsRuntime: boolean;
   needsMenuRuntime: boolean;
+  /** The site's text direction when set, for the host's `<html dir>` (W-230). */
+  dir?: "ltr" | "rtl" | "auto";
 };
 
 /** The design document through the in-process public route (no HTTP round trip, D-013). */
@@ -83,6 +85,7 @@ export function renderStored(
       needsFormsRuntime: false,
       needsTabsRuntime: false,
       needsMenuRuntime: false,
+      ...(design.direction ? { dir: design.direction } : {}),
     };
   }
   const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime } = renderPage(
@@ -94,5 +97,12 @@ export function renderStored(
       scope: pageId,
     },
   );
-  return { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime };
+  return {
+    html,
+    css,
+    needsFormsRuntime,
+    needsTabsRuntime,
+    needsMenuRuntime,
+    ...(design.direction ? { dir: design.direction } : {}),
+  };
 }

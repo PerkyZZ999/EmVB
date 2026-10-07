@@ -14,7 +14,7 @@ const { page, standalone = false, title = "", description } = Astro.props;
 
 {
   standalone ? (
-    <html lang="en">
+    <html lang="en" dir={page.dir}>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

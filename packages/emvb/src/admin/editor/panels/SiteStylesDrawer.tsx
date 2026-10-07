@@ -252,6 +252,7 @@ export function SiteStylesDrawer({
       )}
       {tab === "defaults" && (
         <div data-emvb-site-tab="defaults" className="emvb-site-styles-body">
+          <DirectionSelect design={design} onSave={save} />
           <DefaultsSection design={design} onSave={save} />
         </div>
       )}
@@ -456,6 +457,50 @@ function ImportConfirm({
           Replace
         </Button>
       </div>
+    </div>
+  );
+}
+
+const DIRECTIONS = [
+  { value: "ltr", label: "Left to right" },
+  { value: "rtl", label: "Right to left" },
+  { value: "auto", label: "From the content" },
+] as const;
+
+/** Site text direction (W-230): `dir` on every EmVB root and the host's `<html>`. */
+function DirectionSelect({
+  design,
+  onSave,
+}: {
+  design: DesignSystem;
+  onSave: (next: DesignSystem) => Promise<unknown> | void;
+}) {
+  return (
+    <div data-emvb-site-direction="">
+      <Select
+        label="Text direction"
+        className={FIELD}
+        value={design.direction ?? "ltr"}
+        renderValue={(v: unknown) =>
+          DIRECTIONS.find((item) => item.value === String(v))?.label ?? String(v)
+        }
+        onValueChange={(value) => {
+          const { direction: _old, ...rest } = design;
+          // Left to right is the default, so it is stored as no setting.
+          const next: DesignSystem =
+            value === "rtl" || value === "auto" ? { ...rest, direction: value } : rest;
+          if ((next.direction ?? "ltr") !== (design.direction ?? "ltr")) void onSave(next);
+        }}
+      >
+        {DIRECTIONS.map((item) => (
+          <Select.Option key={item.value} value={item.value}>
+            {item.label}
+          </Select.Option>
+        ))}
+      </Select>
+      <p className="emvb-helper">
+        Right to left mirrors the layout for Arabic, Hebrew and other right-to-left sites.
+      </p>
     </div>
   );
 }

@@ -60,6 +60,8 @@ export type RenderResult = {
   needsTabsRuntime: boolean;
   /** A Menu has a dropdown: hosts load `EmVBMenuRuntime` (W-197). */
   needsMenuRuntime: boolean;
+  /** The site's text direction when set in Site styles, for the host's `<html dir>` (W-230). */
+  dir?: "ltr" | "rtl" | "auto";
   warnings: RenderWarning[];
 };
 
@@ -198,6 +200,8 @@ export function renderPage(
     const attrs: Record<string, string> = { class: classes.join(" "), ...customAttributes(node) };
     if (mode === "editor" && id) attrs["data-emvb-id"] = id;
     if (node.htmlId && HTML_ID.test(node.htmlId)) attrs.id = node.htmlId;
+    // W-230: the site's text direction on the root, also a fallback when the host's <html> has none.
+    if (isRoot && design.direction) attrs.dir = design.direction;
     return attrs;
   };
 
@@ -288,6 +292,7 @@ export function renderPage(
     needsFormsRuntime: layoutHasForm(layout),
     needsTabsRuntime: layoutHasTabs(layout),
     needsMenuRuntime: layoutHasMenuDropdown(layout),
+    ...(design.direction ? { dir: design.direction } : {}),
     warnings,
   };
 }

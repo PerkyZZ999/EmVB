@@ -60,6 +60,11 @@ export const DesignSystem = z.strictObject({
     spacings: z.array(LengthVariable).max(100).optional(),
   }),
   classes: z.array(StyleClass).max(100).optional(),
+  /**
+   * Site text direction (W-230). Unset is left to right. Rendered as `dir` on every EmVB root
+   * and returned to hosts for `<html dir>`. Layout uses logical properties, so styles flip.
+   */
+  direction: z.enum(["ltr", "rtl", "auto"]).optional(),
   /** Starting styles for HTML tags, emitted under `:where(.emvb-root)` so a class still wins. */
   defaults: z
     .strictObject({

@@ -22413,6 +22413,62 @@
       ],
       "command": ["bun", "test", "./test/demos/archive-pages.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-230/root-no-dir",
+      "requirement": "W-230",
+      "description": "The site direction never reaches the EmVB root.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (isRoot && design.direction) attrs.dir = design.direction;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/direction.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-230/dir-attr-stripped",
+      "requirement": "W-230",
+      "description": "The renderer strips dir.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "|fetchpriority|dir|",
+          "replace": "|fetchpriority|"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/direction.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-230/schema-no-direction",
+      "requirement": "W-230",
+      "description": "The design schema refuses direction, so the setting can't save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "  direction: z.enum([\"ltr\", \"rtl\", \"auto\"]).optional(),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/direction.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-230/stored-no-dir",
+      "requirement": "W-230",
+      "description": "renderStored doesn't report the direction for <html dir>.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "    needsMenuRuntime,\n    ...(design.direction ? { dir: design.direction } : {}),\n  };",
+          "replace": "    needsMenuRuntime,\n  };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

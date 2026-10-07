@@ -120,3 +120,10 @@ describe("rendering a stored layout (R-031, R-033)", () => {
     }
   });
 });
+
+test("renderStored reports the site's text direction, also for an unreadable layout (W-230)", () => {
+  const rtl = { ...DESIGN, direction: "rtl" as const };
+  expect(renderStored(s1Page(), rtl, "01PAGE").dir).toBe("rtl");
+  expect(renderStored("{bad", rtl, "01PAGE").dir).toBe("rtl");
+  expect(renderStored(s1Page(), DESIGN, "01PAGE").dir).toBeUndefined();
+});
