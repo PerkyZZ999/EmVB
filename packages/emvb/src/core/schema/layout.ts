@@ -393,6 +393,8 @@ export const LoopNode = parentNode(
   "loop",
   z.strictObject({
     itemPartId: z.string().max(128).optional(),
+    /** Posts per archive page, 1–50 (W-221). Unset = 20. */
+    perPage: z.number().int().min(1).max(50).optional(),
   }),
 );
 
@@ -719,7 +721,7 @@ export type FormNode = {
 export type LoopNode = {
   id: IdOf;
   type: "loop";
-  props: { itemPartId?: string };
+  props: { itemPartId?: string; perPage?: number };
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;

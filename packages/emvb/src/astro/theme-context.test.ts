@@ -49,3 +49,21 @@ test("search path and helper", () => {
   });
   expect(themeContextSearch()).toMatchObject({ isSearch: true, kind: "archive" });
 });
+
+describe("archive pages (W-221)", () => {
+  const ctx = (path: string) => themeContextFrom(new URL(`http://site.test${path}`));
+  test("/page/N is that page of the archive; conditions see the archive path", () => {
+    expect(ctx("/posts/page/3")).toMatchObject({ kind: "archive", path: "/posts", page: 3 });
+    expect(ctx("/category/news/page/2")).toMatchObject({
+      path: "/category/news",
+      page: 2,
+      taxonomy: { type: "category", slug: "news" },
+    });
+    expect(ctx("/posts/page/1")).toMatchObject({ path: "/posts", page: 1 });
+    expect(ctx("/posts").page).toBeUndefined();
+  });
+  test("a bad page number is not an archive", () => {
+    expect(ctx("/posts/page/0").kind).toBe("other");
+    expect(ctx("/posts/page/abc").kind).toBe("other");
+  });
+});

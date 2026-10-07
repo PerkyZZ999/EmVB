@@ -14,6 +14,8 @@ type Entry = { id: string; data: Record<string, unknown> };
 let themeEntries: Entry[] = [];
 let postEntries: Entry[] = [];
 const collectionCalls: string[] = [];
+/** The filters the posts were read with. */
+const postFilters: unknown[] = [];
 /** When set, every theme-parts page claims there is another one. */
 let endlessCursor = false;
 /** The filters the theme parts were read with. */
@@ -24,9 +26,18 @@ let failAt: { cursor: number; how: "error" | "throw" } | undefined;
 mock.module("emdash", () => ({
   ...realEmDash,
   // Pages like EmDash: `limit` entries from `cursor`, and a `nextCursor` while more remain.
-  getEmDashCollection: async (collection: string, filter?: { limit?: number; cursor?: string }) => {
+  getEmDashCollection: async (
+    collection: string,
+    filter?: { limit?: number; cursor?: string; offset?: number },
+  ) => {
     collectionCalls.push(collection);
-    if (collection !== THEME_PARTS_COLLECTION) return { entries: postEntries };
+    if (collection !== THEME_PARTS_COLLECTION) {
+      // Offset paging with `hasMore`, like EmDash (W-221).
+      postFilters.push(filter);
+      const from = filter?.offset ?? 0;
+      const to = filter?.limit === undefined ? postEntries.length : from + filter.limit;
+      return { entries: postEntries.slice(from, to), hasMore: to < postEntries.length };
+    }
     themeFilters.push(filter);
     const start = Number(filter?.cursor ?? 0);
     if (failAt?.cursor === start) {
@@ -85,6 +96,7 @@ beforeEach(() => {
   themeEntries = [];
   postEntries = [];
   collectionCalls.length = 0;
+  postFilters.length = 0;
 });
 
 describe("resolveThemeParts (R-062)", () => {
@@ -100,6 +112,7 @@ describe("resolveThemeParts (R-062)", () => {
       needsFloatsRuntime: false,
       needsTabsRuntime: false,
       needsMenuRuntime: false,
+      notFound: false,
     });
   });
 
@@ -344,5 +357,57 @@ describe("resolveThemeParts (R-062)", () => {
     expect(html.match(/data-emvb-loop-item=/g)?.length).toBe(2);
     expect(html).toContain("Alpha");
     expect(html).toContain("Beta");
+  });
+});
+
+describe("archive pagination (W-221)", () => {
+  const posts = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({
+      id: `P${i + 1}`,
+      data: { id: `P${i + 1}`, slug: `p${i + 1}`, title: `Post ${i + 1}` },
+    }));
+  const archive = (perPage?: number) => [
+    part("ARCHIVE1", "archive", [
+      {
+        id: "loop0001",
+        type: "loop",
+        props: perPage ? { perPage } : {},
+        children: [{ id: "ptitle01", type: "post-title", props: { level: 3 } }],
+      },
+    ] as LayoutNode[]),
+  ];
+  const at = (path: string) =>
+    resolveThemeParts(astro(path), themeContextFrom(new URL(`http://site.test${path}`)));
+  const count = (html = "") => html.match(/data-emvb-loop-item=/g)?.length ?? 0;
+
+  test("the Loop's Posts per page sets the page size and /page/N the offset", async () => {
+    postEntries = posts(7);
+    themeEntries = archive(3);
+    const page2 = await at("/posts/page/2");
+    expect(postFilters.at(-1)).toMatchObject({ limit: 3, offset: 3 });
+    expect(count(page2.content?.html)).toBe(3);
+    expect(page2.content?.html).toContain("Post 4");
+    expect(page2.notFound).toBe(false);
+    expect(page2.canonicalPath).toBe("/posts/page/2");
+    const page3 = await at("/posts/page/3");
+    expect(count(page3.content?.html)).toBe(1);
+  });
+
+  test("a page past the last one is not found; page 1 with no posts is", async () => {
+    postEntries = posts(4);
+    themeEntries = archive(2);
+    expect((await at("/posts/page/3")).notFound).toBe(true);
+    postEntries = [];
+    const first = await at("/posts");
+    expect(first.notFound).toBe(false);
+    expect(first.canonicalPath).toBe("/posts");
+  });
+
+  test("page 1 has the bare canonical path, also when asked as /page/1", async () => {
+    postEntries = posts(3);
+    themeEntries = archive();
+    expect((await at("/posts/page/1")).canonicalPath).toBe("/posts");
+    expect(postFilters.at(-1)).toMatchObject({ limit: 20 });
+    expect((await at("/category/news/page/2")).canonicalPath).toBe("/category/news/page/2");
   });
 });

@@ -26,6 +26,9 @@ import {
   type ThemePostFields,
   type ThemeRequestContext,
   type TriggersDoc,
+  archivePagePath,
+  loopPerPage,
+  type ArchivePagination,
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
@@ -84,6 +87,16 @@ export type ResolvedThemeParts = {
   needsTabsRuntime: boolean;
   /** Hosts load `EmVBMenuRuntime` only when a winning part has a Menu dropdown (W-197). */
   needsMenuRuntime: boolean;
+  /**
+   * True for an archive page past the last one (`/posts/page/9` with no posts there). Hosts
+   * answer 404 (W-221). Page 1 with no posts is not a 404.
+   */
+  notFound: boolean;
+  /**
+   * The canonical path of an archive page: the bare archive path for page 1 (also for
+   * `/page/1`, which hosts should redirect there), else `<archive>/page/N` (W-221).
+   */
+  canonicalPath?: string;
 };
 
 type AstroLike = {
@@ -221,19 +234,27 @@ async function loadSingularPost(ctx: ThemeRequestContext): Promise<ThemePostFiel
   }
 }
 
-async function loadArchivePosts(ctx: ThemeRequestContext): Promise<{
+async function loadArchivePosts(
+  ctx: ThemeRequestContext,
+  perPage: number,
+): Promise<{
   posts: ThemePostFields[];
   archiveTitle?: string;
+  pagination?: ArchivePagination;
 }> {
   if (ctx.kind !== "archive" || ctx.isSearch) return { posts: [] };
+  const page = ctx.page ?? 1;
   try {
+    // Offset paging for numbered `/page/N` routes (W-221); EmDash reports `hasMore`.
     const filter: {
       orderBy: { published_at: "desc" };
       limit: number;
+      offset?: number;
       where?: Record<string, string>;
     } = {
       orderBy: { published_at: "desc" },
-      limit: 20,
+      limit: perPage,
+      ...(page > 1 ? { offset: (page - 1) * perPage } : {}),
     };
     if (ctx.taxonomy?.type === "category") {
       filter.where = { category: ctx.taxonomy.slug };
@@ -242,6 +263,7 @@ async function loadArchivePosts(ctx: ThemeRequestContext): Promise<{
     }
     const result = await getEmDashCollection("posts", filter);
     if (result.error || !result.entries) return { posts: [] };
+    const hasMore = (result as { hasMore?: boolean }).hasMore === true;
     const posts = result.entries
       .map((entry) => themePostFromEntry(entry))
       .filter((p): p is ThemePostFields => p !== null);
@@ -250,7 +272,7 @@ async function loadArchivePosts(ctx: ThemeRequestContext): Promise<{
       : ctx.collection === "posts"
         ? "Posts"
         : undefined;
-    return { posts, archiveTitle };
+    return { posts, archiveTitle, pagination: { page, hasMore, basePath: ctx.path } };
   } catch {
     return { posts: [] };
   }
@@ -274,8 +296,8 @@ async function buildDynamicForContent(
     return { ...referenced, post };
   }
   if (partType === "archive") {
-    const { posts, archiveTitle } = await loadArchivePosts(ctx);
-    return { ...referenced, posts, archiveTitle };
+    const { posts, archiveTitle, pagination } = await loadArchivePosts(ctx, loopPerPage(layout));
+    return { ...referenced, posts, archiveTitle, ...(pagination ? { pagination } : {}) };
   }
   if (Object.keys(referenced).length > 0) return referenced;
   return undefined;
@@ -310,6 +332,10 @@ export async function resolveThemeParts(
     needsFloatsRuntime: false,
     needsTabsRuntime: false,
     needsMenuRuntime: false,
+    notFound: false,
+    ...(context.kind === "archive" && !context.isSearch
+      ? { canonicalPath: archivePagePath(context.path, context.page ?? 1) }
+      : {}),
   };
 
   const parts = await loadPublishedThemeParts();
@@ -369,6 +395,7 @@ export async function resolveThemeParts(
       : undefined;
   };
 
+  let pastLastPage = false;
   const renderPart = async (
     winner: ThemePartCandidate | null,
   ): Promise<RenderedThemePart | null> => {
@@ -383,6 +410,10 @@ export async function resolveThemeParts(
             ...(await buildDynamicForContent(stored.partType, context, layout, parts)),
           }
         : referenced;
+    // A page past the last one has no posts; the host answers 404 (W-221).
+    if (winner === contentWinner && (dynamic?.pagination?.page ?? 1) > 1) {
+      pastLastPage = (dynamic?.posts ?? []).length === 0;
+    }
     const { html, css } = renderOne(stored, dynamic);
     return { id: stored.id, title: stored.title, partType: stored.partType, html, css };
   };
@@ -451,5 +482,7 @@ export async function resolveThemeParts(
     needsFloatsRuntime: floats.length > 0,
     needsTabsRuntime: rendered.some((page) => page.needsTabsRuntime),
     needsMenuRuntime: rendered.some((page) => page.needsMenuRuntime),
+    notFound: pastLastPage,
+    ...(empty.canonicalPath ? { canonicalPath: empty.canonicalPath } : {}),
   };
 }

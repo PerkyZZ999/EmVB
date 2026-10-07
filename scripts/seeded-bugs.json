@@ -21971,6 +21971,90 @@
         "./packages/emvb/src/admin/editor/panels/settings/class-suggest.test.ts"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-221/page-zero-accepted",
+      "requirement": "W-221",
+      "description": "/page/0 and /page/01 count as archive pages.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/pagination.ts",
+          "search": "/^[1-9]\\d{0,5}$/",
+          "replace": "/^\\d+$/"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/pagination.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-221/page1-canonical-suffix",
+      "requirement": "W-221",
+      "description": "Page 1 links and canonical keep /page/1.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/pagination.ts",
+          "search": "  if (n <= 1) return base;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/pagination.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-221/no-offset",
+      "requirement": "W-221",
+      "description": "/page/N shows the first posts again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "      ...(page > 1 ? { offset: (page - 1) * perPage } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-221/per-page-ignored",
+      "requirement": "W-221",
+      "description": "The Loop's Posts per page is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "      limit: perPage,",
+          "replace": "      limit: 20,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-221/past-last-found",
+      "requirement": "W-221",
+      "description": "A page past the last one renders an empty archive instead of a 404.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "pastLastPage = (dynamic?.posts ?? []).length === 0;",
+          "replace": "pastLastPage = false;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-221/context-keeps-page-path",
+      "requirement": "W-221",
+      "description": "Conditions see /posts/page/2, so archive parts stop matching on page 2.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-context.ts",
+          "search": "      return context(paged.basePath, {",
+          "replace": "      return context(path, {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-context.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

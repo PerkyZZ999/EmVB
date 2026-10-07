@@ -1,3 +1,4 @@
+import type { ArchivePagination } from "./pagination.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { isParentNode } from "../schema/layout.ts";
 import type { VNode } from "../render/vnode.ts";
@@ -30,6 +31,8 @@ export type ThemeDynamicData = {
   /** Section part ids already being expanded, so a section cannot include itself. */
   sectionStack?: readonly string[];
   archiveTitle?: string;
+  /** Which archive page is showing, for the Pagination element (W-221). */
+  pagination?: ArchivePagination;
 };
 
 /** Editor canvas placeholders when no live post is bound. */

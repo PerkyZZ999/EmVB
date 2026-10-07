@@ -318,6 +318,16 @@ export {
   type ThemePostFields,
   type ThemeDynamicData,
 } from "./theme/dynamic.ts";
+export {
+  archivePagePath,
+  DEFAULT_PER_PAGE,
+  loopPerPage,
+  MAX_ARCHIVE_PAGE,
+  paginationItems,
+  splitArchivePage,
+  type ArchivePagination,
+  type PaginationItem,
+} from "./theme/pagination.ts";
 
 export { layoutHasMenuDropdown, layoutHasTabs } from "./tabs/presence.ts";
 export {

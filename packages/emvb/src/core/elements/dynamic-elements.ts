@@ -168,6 +168,14 @@ export const loop: ElementDefinition<LoopNode> = {
         message:
           "Optional published Loop Item theme part. Leave blank to use nested elements as the item template.",
       },
+      {
+        key: "perPage",
+        kind: "number",
+        label: "Posts per page",
+        optional: true,
+        message:
+          "1 to 50 posts on each archive page. Leave it empty for 20. Add a Pagination element to link the pages.",
+      },
     ],
   },
   build: (_node, attrs, children) => ({ tag: "div", attrs, children }),

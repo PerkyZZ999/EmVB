@@ -6048,7 +6048,12 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
         "No Loop Item theme parts yet. Paste an id, or"
         a href="/_emdash/admin/plugins/emvb/theme"
           "create one in Theme Builder"
-        ".""
+        "."
+    div
+      label id="id-4" for="id-5"
+        span
+          "Posts per page (px)"
+      input.emvb-field.emvb-mono id="id-5" data-emvb-field="perPage" value="" aria-labelledby="id-4""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="loop"

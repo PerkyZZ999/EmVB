@@ -1,4 +1,4 @@
-import type { ThemeRequestContext } from "../core/index.ts";
+import { splitArchivePage, type ThemeRequestContext } from "../core/index.ts";
 
 type ContentRef = { collection: string; id: string; slug?: string | null };
 type Kind = Pick<ThemeRequestContext, "kind">;
@@ -50,9 +50,17 @@ export function themeContextFrom(
     });
   }
   if (options.isSearch === true || path === "/search") return themeContextSearch(path);
+  // `/posts/page/2` is page 2 of the `/posts` archive; conditions see `/posts` (W-221).
+  const paged = splitArchivePage(path);
   for (const [pattern, extra] of ARCHIVES) {
-    const match = pattern.exec(path);
-    if (match) return context(path, { kind: "archive", ...extra(match) });
+    const match = paged ? pattern.exec(paged.basePath) : null;
+    if (match && paged) {
+      return context(paged.basePath, {
+        kind: "archive",
+        ...extra(match),
+        ...(paged.page > 1 || paged.basePath !== path ? { page: paged.page } : {}),
+      });
+    }
   }
   if (content) {
     return context(path, { kind: "singular", collection: content.collection, entryId: content.id });

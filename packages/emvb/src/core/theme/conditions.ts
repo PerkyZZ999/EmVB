@@ -32,6 +32,8 @@ export type ThemeRequestContext = {
   collection?: string;
   entryId?: string;
   taxonomy?: { type: "category" | "tag"; slug: string };
+  /** Archive page from `/page/N` (W-221); `path` stays the archive's own path. Absent = 1. */
+  page?: number;
 };
 
 /** Entire Site include with a stable default id — used when creating a theme part. */
