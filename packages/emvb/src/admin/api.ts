@@ -46,3 +46,30 @@ export async function requestJson<T>(
   if (!response.ok) throw envelopeError(response, payload);
   return payload.data as T;
 }
+
+const LIST_PAGE = 50;
+/** Enough for any real site (1000 entries); stops a cursor that never ends. */
+const LIST_MAX_PAGES = 20;
+
+/**
+ * Every entry of a content list, newest first, page by page (W-204): one request used to stop at
+ * the 50 most recently updated, so older pages and parts never showed in the lists.
+ */
+export async function listAllItems<T>(fetcher: Fetcher, collectionPath: string): Promise<T[]> {
+  const items: T[] = [];
+  let cursor: string | undefined;
+  for (let page = 0; page < LIST_MAX_PAGES; page += 1) {
+    const query = `?limit=${LIST_PAGE}&orderBy=updatedAt&order=desc${
+      cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""
+    }`;
+    // oxlint-disable-next-line no-await-in-loop -- each page needs the previous page's cursor
+    const body = await requestJson<{ items?: T[]; nextCursor?: string }>(
+      fetcher,
+      `${collectionPath}${query}`,
+    );
+    items.push(...(body?.items ?? []));
+    cursor = body?.nextCursor || undefined;
+    if (!cursor) break;
+  }
+  return items;
+}

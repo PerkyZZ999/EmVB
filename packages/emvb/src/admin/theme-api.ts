@@ -14,7 +14,7 @@ import {
   type TriggersDoc,
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
-import { requestJson, type Fetcher } from "./api.ts";
+import { listAllItems, requestJson, type Fetcher } from "./api.ts";
 import { publishEntry } from "./content-api.ts";
 import { entryStatus } from "./entry-status.ts";
 
@@ -107,11 +107,8 @@ export function summarizeConditions(raw: unknown): string {
 }
 
 export async function listThemeParts(fetcher: Fetcher): Promise<ThemePartSummary[]> {
-  const body = await requestJson<{ items?: RawItem[] }>(
-    fetcher,
-    `${CONTENT}?limit=50&orderBy=updatedAt&order=desc`,
-  );
-  return (body?.items ?? []).map((item) => ({
+  const items = await listAllItems<RawItem>(fetcher, CONTENT);
+  return items.map((item) => ({
     id: item.id,
     title: titleOf(item),
     partType: partTypeOf(item),

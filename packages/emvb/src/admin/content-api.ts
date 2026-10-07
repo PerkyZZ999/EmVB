@@ -7,7 +7,7 @@ import type {
   TriggersDoc,
 } from "../core/index.ts";
 import { PAGES_COLLECTION, PLUGIN_ID } from "../constants.ts";
-import { requestJson, type Fetcher } from "./api.ts";
+import { listAllItems, requestJson, type Fetcher } from "./api.ts";
 import { entryStatus } from "./entry-status.ts";
 
 const CONTENT = `/_emdash/api/content/${PAGES_COLLECTION}`;
@@ -36,11 +36,8 @@ const titleOf = (item: RawItem) =>
     : "Untitled page";
 
 export async function listPages(fetcher: Fetcher): Promise<PageSummary[]> {
-  const body = await requestJson<{ items?: RawItem[] }>(
-    fetcher,
-    `${CONTENT}?limit=50&orderBy=updatedAt&order=desc`,
-  );
-  return (body?.items ?? []).map((item) => ({
+  const items = await listAllItems<RawItem>(fetcher, CONTENT);
+  return items.map((item) => ({
     id: item.id,
     title: titleOf(item),
     slug: item.slug ?? "",

@@ -21332,6 +21332,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/form-submit-label.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-204/first-page-only",
+      "requirement": "W-204",
+      "description": "Lists stop at the 50 most recently updated entries.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/api.ts",
+          "search": "    cursor = body?.nextCursor || undefined;",
+          "replace": "    cursor = undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/list-paging.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-204/endless-cursor",
+      "requirement": "W-204",
+      "description": "A cursor that never ends makes the list request forever.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/api.ts",
+          "search": "  for (let page = 0; page < LIST_MAX_PAGES; page += 1) {",
+          "replace": "  for (let page = 0; page < LIST_MAX_PAGES * 2; page += 1) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/list-paging.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
