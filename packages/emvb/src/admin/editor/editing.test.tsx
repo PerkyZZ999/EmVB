@@ -475,6 +475,58 @@ describe("keyboard and quick actions (W-020)", () => {
     expect(saved.root.children.map((c) => c.props?.text)).toEqual(["B", "A"]);
   });
 
+  test("Alt+arrows on a focused Layers row move that element and keep it selected (W-233)", async () => {
+    const row = (id: string, text: string) => ({
+      id,
+      type: "heading" as const,
+      props: { text, level: 2 },
+    });
+    const layout = {
+      schemaVersion: 1 as const,
+      root: {
+        id: "root0001",
+        type: "container" as const,
+        props: {},
+        children: [
+          row("head0001", "A"),
+          {
+            id: "box00001",
+            type: "container" as const,
+            props: {},
+            children: [row("head0009", "Inside")],
+          },
+          row("head0002", "C"),
+        ],
+      },
+    };
+    const { server, fetcher } = fakeServer({ layout });
+    await render(fetcher);
+    await openLayers();
+    const rowButton = () =>
+      document.querySelector<HTMLElement>('[data-emvb-layer="head0002"] .emvb-layer-select');
+    await click(rowButton());
+    await settle();
+    const pressOnRow = async (key: string) => {
+      await act(async () => {
+        rowButton()?.focus();
+        rowButton()?.dispatchEvent(
+          new KeyboardEvent("keydown", { key, altKey: true, bubbles: true, cancelable: true }),
+        );
+      });
+      await settle();
+      await settle();
+    };
+    await pressOnRow("ArrowUp");
+    await pressOnRow("ArrowUp");
+    expect(rowButton()?.getAttribute("aria-current")).toBe("true");
+    await press("s", { ctrlKey: true });
+    const saved = server.data["layout"] as {
+      root: { children: Array<{ id: string; children?: Array<{ id: string }> }> };
+    };
+    expect(saved.root.children.map((c) => c.id)).toEqual(["head0002", "head0001", "box00001"]);
+    expect(saved.root.children[2]?.children?.map((c) => c.id)).toEqual(["head0009"]);
+  });
+
   test("↑/↓ walk document order; Enter enters a container and Shift+Enter leaves it", async () => {
     const layout = {
       schemaVersion: 1 as const,

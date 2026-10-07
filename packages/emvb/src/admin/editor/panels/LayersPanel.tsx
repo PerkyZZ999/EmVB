@@ -118,13 +118,16 @@ function menuItems(
 }
 
 /** What a key does in the tree: select another row, toggle the selected one, or nothing. */
-function treeKey(
-  event: { key: string; shiftKey: boolean },
+export function treeKey(
+  event: { key: string; shiftKey: boolean; altKey?: boolean; ctrlKey?: boolean; metaKey?: boolean },
   layout: Layout,
   id: string,
   collapsed: Set<string>,
   node: LayoutNode | undefined,
 ): { select?: string; toggle?: true } | null {
+  // W-233: Alt+arrows move the element and Ctrl/⌘ keys are shortcuts; the editor-wide handler owns
+  // them. Selecting here first made the move act on the newly selected row instead.
+  if (event.altKey || event.ctrlKey || event.metaKey) return null;
   switch (event.key) {
     case "ArrowDown":
       return { select: nextInOrder(layout, id) };
