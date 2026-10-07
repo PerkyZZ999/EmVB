@@ -11310,7 +11310,7 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-edges.test.ts"],
-      "expect": "\\(fail\\).*fontWeight 800"
+      "expect": "\\(fail\\).*fontWeight 850"
     },
     {
       "id": "W-091/css-filter-empty-emitted",
@@ -12657,6 +12657,11 @@
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
           "search": "await onCreate(name.trim(), hex);",
           "replace": "await onCreate(name, hex);"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "            const name = cleanClassName(raw);",
+          "replace": "            const name = raw;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
@@ -15436,8 +15441,8 @@
           "replace": "    if (inDialog(event.target)) return;"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/admin/editor/clipboard.test.tsx"],
-      "expect": "\\(fail\\).*shortcuts inside a text field"
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/history.test.tsx"],
+      "expect": "\\(fail\\).*Ctrl\\+Z inside a text field"
     },
     {
       "id": "W-093/shortcut-ignores-text-selection",
