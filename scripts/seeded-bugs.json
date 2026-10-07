@@ -20814,6 +20814,102 @@
         "13th panel"
       ],
       "expect": "\\(fail\\).*13th panel"
+    },
+    {
+      "id": "W-189/stores-invalid-rows",
+      "requirement": "W-189",
+      "description": "Every attribute row is stored, so Add attribute (data-) or a refused name makes the page fail to save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/advanced-rules.ts",
+          "search": "  const kept = rows.filter((row, i) => !isFreshRow(row) && errors[i] === null);",
+          "replace": "  const kept = rows.filter(() => errors.length >= 0);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/advanced-fields.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-189"
+    },
+    {
+      "id": "W-189/no-duplicate-check",
+      "requirement": "W-189",
+      "description": "A repeated attribute name on one element is not flagged.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/advanced-rules.ts",
+          "search": "    } else if (seen.has(row.name)) {",
+          "replace": "    } else if (seen.has(row.name) && false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/advanced-fields.test.tsx",
+        "-t",
+        "rules match"
+      ],
+      "expect": "\\(fail\\).*rules match"
+    },
+    {
+      "id": "W-189/no-name-lowercase",
+      "requirement": "W-189",
+      "description": "Attribute names keep capitals the schema refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/AdvancedFields.tsx",
+          "search": "update(index, { name: event.target.value.trim().toLowerCase() })",
+          "replace": "update(index, { name: event.target.value.trim() })"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/advanced-fields.test.tsx",
+        "-t",
+        "Add attribute stores nothing"
+      ],
+      "expect": "\\(fail\\).*Add attribute stores nothing"
+    },
+    {
+      "id": "W-189/css-id-stored-raw",
+      "requirement": "W-189",
+      "description": "A CSS id the page can't save is stored anyway.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/AdvancedFields.tsx",
+          "search": "        if (htmlIdError(next, layout, node.id)) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/advanced-fields.test.tsx",
+        "-t",
+        "bad or taken CSS id"
+      ],
+      "expect": "\\(fail\\).*bad or taken CSS id"
+    },
+    {
+      "id": "W-189/css-id-dupe-allowed",
+      "requirement": "W-189",
+      "description": "Another element's CSS id is accepted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/advanced-rules.ts",
+          "search": "  if (otherHtmlIds(layout, nodeId).has(value)) return",
+          "replace": "  if (otherHtmlIds(layout, nodeId).has(value + \"x\")) return"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/advanced-fields.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-189"
     }
   ]
 }
