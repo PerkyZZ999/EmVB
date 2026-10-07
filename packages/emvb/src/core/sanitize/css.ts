@@ -654,3 +654,28 @@ export function stateDeclarations(states: unknown): {
   }
   return { states: result, rejected };
 }
+
+/** The style keys drawn together as one `background-image` stack (image, gradient, overlay). */
+const BACKGROUND_LAYER_KEYS = [
+  "backgroundImage",
+  "gradient",
+  "overlay",
+  "backgroundSize",
+  "backgroundPosition",
+  "backgroundRepeat",
+] as const;
+
+/**
+ * W-210: a tablet or mobile style that sets one background layer (say only the overlay) writes the
+ * whole `background-image` stack for that device, so the layers it inherits (the desktop image or
+ * gradient) are filled in from `inherited` here. Otherwise they vanish on that device.
+ */
+export function withInheritedLayers(device: unknown, inherited: unknown): unknown {
+  if (!isRecord(device) || !isRecord(inherited)) return device;
+  if (!BACKGROUND_LAYER_KEYS.some((key) => device[key] !== undefined)) return device;
+  const next: Record<string, unknown> = { ...device };
+  for (const key of BACKGROUND_LAYER_KEYS) {
+    if (next[key] === undefined && inherited[key] !== undefined) next[key] = inherited[key];
+  }
+  return next;
+}

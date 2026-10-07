@@ -21489,6 +21489,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-210/node-layers-dropped",
+      "requirement": "W-210",
+      "description": "A tablet overlay on an element wipes its desktop gradient on tablet.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    const tablet = styleDeclarations(withInheritedLayers(tabletStyle, base));",
+          "replace": "    const tablet = styleDeclarations(tabletStyle);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/device-layers.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-210/class-layers-dropped",
+      "requirement": "W-210",
+      "description": "A class's tablet overlay wipes the class's background image on tablet.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "withInheritedLayers(cls.devices?.tablet, cls.style ?? {})",
+          "replace": "withInheritedLayers(cls.devices?.tablet, {})"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/device-layers.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-210/mobile-skips-tablet",
+      "requirement": "W-210",
+      "description": "A mobile overlay brings back the desktop gradient instead of the tablet one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      withInheritedLayers(node.devices?.mobile, { ...base, ...tabletStyle }),",
+          "replace": "      withInheritedLayers(node.devices?.mobile, base),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/device-layers.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-210/always-fill",
+      "requirement": "W-210",
+      "description": "A device colour alone also writes the inherited background stack.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (!BACKGROUND_LAYER_KEYS.some((key) => device[key] !== undefined)) return device;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/device-layers.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

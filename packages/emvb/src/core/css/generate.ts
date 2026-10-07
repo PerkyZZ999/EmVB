@@ -10,6 +10,7 @@ import {
   stateDeclarations,
   styleClassName,
   styleDeclarations,
+  withInheritedLayers,
   type Declaration,
   type StateDeclarations,
 } from "../sanitize/css.ts";
@@ -148,8 +149,12 @@ export function generateCss({
         ? [
             {
               selector: `.${className}`,
-              tablet: styleDeclarations(cls.devices?.tablet).declarations,
-              mobile: styleDeclarations(cls.devices?.mobile).declarations,
+              // W-210: a device that sets one background layer keeps the layers it inherits.
+              tablet: styleDeclarations(withInheritedLayers(cls.devices?.tablet, cls.style ?? {}))
+                .declarations,
+              mobile: styleDeclarations(
+                withInheritedLayers(cls.devices?.mobile, { ...cls.style, ...cls.devices?.tablet }),
+              ).declarations,
               hiddenOn: cls.hiddenOn,
             },
           ]

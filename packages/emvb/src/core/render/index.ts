@@ -18,6 +18,7 @@ import {
   stateDeclarations,
   styleClassName,
   styleDeclarations,
+  withInheritedLayers,
   type Declaration,
   type StateDeclarations,
 } from "../sanitize/css.ts";
@@ -140,8 +141,13 @@ export function renderPage(
       if (name) classes.push(name);
     }
     const { declarations, rejected } = styleDeclarations(node.style);
-    const tablet = styleDeclarations(node.devices?.tablet);
-    const mobile = styleDeclarations(node.devices?.mobile);
+    // W-210: a device that sets one background layer keeps the layers it inherits.
+    const base = node.style ?? {};
+    const tabletStyle = node.devices?.tablet;
+    const tablet = styleDeclarations(withInheritedLayers(tabletStyle, base));
+    const mobile = styleDeclarations(
+      withInheritedLayers(node.devices?.mobile, { ...base, ...tabletStyle }),
+    );
     for (const key of [...rejected, ...tablet.rejected, ...mobile.rejected]) {
       warnings.push({ nodeId, code: "rejected-style", detail: key });
     }
