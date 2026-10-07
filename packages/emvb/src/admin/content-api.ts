@@ -114,6 +114,23 @@ export async function publishEntry(
   return { rev: body["_rev"], slug: body.item.slug ?? "" };
 }
 
+/**
+ * Drops the saved draft of entry `id` so it is back to its published version (W-193). EmDash's
+ * `discard-draft` checks `rev`, so a draft saved elsewhere meanwhile fails with 409.
+ */
+export async function discardDraft(
+  fetcher: Fetcher,
+  collection: string,
+  id: string,
+  rev: string | null,
+): Promise<void> {
+  await requestJson<unknown>(
+    fetcher,
+    `/_emdash/api/content/${encodeURIComponent(collection)}/${encodeURIComponent(id)}/discard-draft`,
+    { method: "POST", body: rev === null ? {} : { _rev: rev } },
+  );
+}
+
 export const publishPage = (fetcher: Fetcher, id: string, rev: string | null) =>
   publishEntry(fetcher, CONTENT, id, rev);
 

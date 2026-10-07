@@ -21036,6 +21036,34 @@
         "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-193/discard-route",
+      "requirement": "W-193",
+      "description": "Revert posts to the wrong route and never discards the draft.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "/discard-draft`",
+          "replace": "/publish`"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/revert.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-193/drops-rev",
+      "requirement": "W-193",
+      "description": "Revert omits _rev, so a stale tab can wipe a newer draft.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "body: rev === null ? {} : { _rev: rev }",
+          "replace": "body: {}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/revert.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

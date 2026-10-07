@@ -70,6 +70,8 @@ export function TopBar({
   onSave,
   onPublish,
   stylesUnpublished = false,
+  canRevert = false,
+  onRevert,
 }: {
   page: TopBarPage | null;
   dirty: boolean;
@@ -84,6 +86,10 @@ export function TopBar({
   onPublish: () => void;
   /** Site styles have unpublished changes (W-153): the Publish button carries a dot. */
   stylesUnpublished?: boolean;
+  /** Something differs from the published version (W-193). */
+  canRevert?: boolean;
+  /** Shown once the entry has a published version; asks before discarding. */
+  onRevert?: () => void;
 }) {
   return (
     <header className="emvb-topbar">
@@ -188,6 +194,18 @@ export function TopBar({
                 </DropdownMenu.Content>
               </DropdownMenu>
             </div>
+            {onRevert && (page.status === "published" || page.status === "changed") && (
+              <Button
+                variant="ghost"
+                className={`${BUTTON} emvb-revert-button`}
+                disabled={busy !== null || !canRevert}
+                title={canRevert ? "Revert to published" : "No changes since the last publish"}
+                aria-label="Revert to published"
+                onClick={onRevert}
+              >
+                Revert
+              </Button>
+            )}
             <Button
               variant="secondary"
               className={`${BUTTON} emvb-save-button`}

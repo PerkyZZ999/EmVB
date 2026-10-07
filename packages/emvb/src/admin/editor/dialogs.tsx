@@ -39,6 +39,45 @@ export function ConflictDialog({
   );
 }
 
+/** Revert to published (W-193): drops the saved draft and any unsaved edits, after a confirm. */
+export function RevertDialog({
+  open,
+  onOpenChange,
+  onRevert,
+}: OpenProps & { onRevert: () => void }) {
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog size="base" className="p-6">
+        <style>{UI_CSS}</style>
+        <div data-emvb-dialog="revert" className="emvb-dialog">
+          <Dialog.Title>Revert to the published version?</Dialog.Title>
+          <Dialog.Description>
+            Your saved draft and any unsaved changes are discarded, and the editor shows what is
+            live now. This can't be undone.
+          </Dialog.Description>
+          <div className="emvb-dialog-actions">
+            <Dialog.Close
+              render={(props) => (
+                <Button {...props} variant="secondary" className={BUTTON}>
+                  Cancel
+                </Button>
+              )}
+            />
+            <Button
+              variant="destructive"
+              className={BUTTON}
+              style={SOLID_DESTRUCTIVE}
+              onClick={onRevert}
+            >
+              Revert
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </Dialog.Root>
+  );
+}
+
 /** Exit with unsaved changes (IA "Leaving the editor"). */
 export function LeaveDialog({
   open,

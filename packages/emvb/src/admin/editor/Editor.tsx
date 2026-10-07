@@ -19,7 +19,8 @@ import { DeviceBar } from "./canvas/DeviceBar.tsx";
 import type { StatePreview } from "./canvas/state-preview.ts";
 import type { StyleStateChoice } from "./panels/settings/StateSwitcher.tsx";
 import { EmptyCanvas } from "./canvas/EmptyCanvas.tsx";
-import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog } from "./dialogs.tsx";
+import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog, RevertDialog } from "./dialogs.tsx";
+import { discardDraft } from "../content-api.ts";
 import { EditorOverlay } from "./EditorOverlay.tsx";
 import { exitTarget, PAGES_URL } from "./exit.ts";
 import { newElement } from "./dnd/new-element.ts";
@@ -146,6 +147,7 @@ function EditorApp({
   const [announcement, setAnnouncement] = React.useState("");
   const [leaveOpen, setLeaveOpen] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
+  const [revertOpen, setRevertOpen] = React.useState(false);
   const latest = React.useRef(state);
   latest.current = state;
   const { busy, save, publish, preview, changeDesign, publishStyles } = useEditorCommands({
@@ -228,7 +230,7 @@ function EditorApp({
   const reload = async () => {
     saver.closeConflict();
     try {
-      const fresh = await loadEntry(fetcher, state.id);
+      const fresh = await loadEntry(fetcher, state.id, collection);
       dispatch({
         type: "reset",
         state: initialState(fresh, {
@@ -241,6 +243,24 @@ function EditorApp({
       saver.markIdle();
     } catch {
       window.location.reload();
+    }
+  };
+
+  // W-193: a saved draft is dropped on the server; unsaved edits on a published entry only locally.
+  const canRevert = state.status === "changed" || (state.status === "published" && dirty);
+  const revert = async () => {
+    setRevertOpen(false);
+    try {
+      if (latest.current.status === "changed") {
+        await discardDraft(fetcher, collection, latest.current.id, latest.current.rev);
+      }
+      await reload();
+      toasts.add({ title: "Reverted to the published version" });
+    } catch (error) {
+      toasts.add({
+        title: "Couldn't revert",
+        description: error instanceof Error ? error.message : String(error),
+      });
     }
   };
 
@@ -280,6 +300,8 @@ function EditorApp({
               onSave={() => void save()}
               onPublish={() => void publish()}
               stylesUnpublished={state.designUnpublished === true}
+              canRevert={canRevert}
+              onRevert={() => setRevertOpen(true)}
             />
             <div className="emvb-frame">
               <aside className="emvb-panel emvb-panel-left" aria-label="Add and Layers">
@@ -404,6 +426,11 @@ function EditorApp({
           onOpenChange={(open) => !open && saver.closeConflict()}
           onReload={() => void reload()}
           onOverwrite={() => void saver.overwrite()}
+        />
+        <RevertDialog
+          open={revertOpen}
+          onOpenChange={setRevertOpen}
+          onRevert={() => void revert()}
         />
         <LeaveDialog
           open={leaveOpen}
