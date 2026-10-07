@@ -21693,6 +21693,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/typography.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-214/import-no-confirm",
+      "requirement": "W-214",
+      "description": "Import replaces site styles straight away, with no confirm.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "    setPendingImport({ name: file.name, design: result.design });",
+          "replace": "    await save(result.design);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/design-import.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-214/no-size-cap",
+      "requirement": "W-214",
+      "description": "Import reads a file of any size.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "    if (file.size > MAX_DESIGN_FILE_BYTES) {",
+          "replace": "    if (file.size > Number.MAX_SAFE_INTEGER) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/design-import.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-214/losses-ignore-variables",
+      "requirement": "W-214",
+      "description": "The Import confirm counts every current variable as lost.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/transfer.ts",
+          "search": "      if (kept.has(variable.id)) continue;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/design-import.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

@@ -155,7 +155,14 @@ export {
   localStylesToClass,
 } from "./design/classes.ts";
 export { hasStateStyles, patchClassState, patchStates } from "./design/states.ts";
-export { designFromJson, designToJson, type DesignImport } from "./design/transfer.ts";
+export {
+  designFromJson,
+  designToJson,
+  importLosses,
+  MAX_DESIGN_FILE_BYTES,
+  type DesignImport,
+  type ImportLosses,
+} from "./design/transfer.ts";
 export {
   patchClassDevices,
   patchDeviceStyle,

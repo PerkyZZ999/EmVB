@@ -9,6 +9,8 @@ import {
   findClassUsages,
   findVariableUsages,
   findVariableUsagesInDesign,
+  importLosses,
+  MAX_DESIGN_FILE_BYTES,
   removeVariable,
   DEFAULT_STYLE_TAGS,
   type DefaultStyleTag,
@@ -76,6 +78,10 @@ export function SiteStylesDrawer({
     | null
   >(null);
   const fileRef = React.useRef<HTMLInputElement>(null);
+  const [pendingImport, setPendingImport] = React.useState<{
+    name: string;
+    design: DesignSystem;
+  } | null>(null);
 
   const save = async (next: DesignSystem) => {
     setError(null);
@@ -96,15 +102,21 @@ export function SiteStylesDrawer({
     }
   };
 
+  // W-214: Import replaces every class and variable, so it reads a sane size and asks first.
   const importDesign = async (file: File) => {
     setError(null);
+    setPendingImport(null);
+    if (file.size > MAX_DESIGN_FILE_BYTES) {
+      setError("That file is too big to be an EmVB design (over 1 MB).");
+      return;
+    }
     const text = await file.text();
     const result = designFromJson(text);
     if (!result.ok) {
       setError(result.message);
       return;
     }
-    await save(result.design);
+    setPendingImport({ name: file.name, design: result.design });
   };
 
   return (
@@ -244,6 +256,18 @@ export function SiteStylesDrawer({
         </div>
       )}
       <p className="emvb-helper emvb-site-styles-footer">{STYLE_NOTE}</p>
+      {pendingImport && (
+        <ImportConfirm
+          name={pendingImport.name}
+          losses={importLosses(design, pendingImport.design, layout)}
+          onCancel={() => setPendingImport(null)}
+          onConfirm={async () => {
+            const next = pendingImport.design;
+            setPendingImport(null);
+            await save(next);
+          }}
+        />
+      )}
       {confirm && (
         <DeleteConfirm
           confirm={confirm}
@@ -388,5 +412,50 @@ function DefaultsSection({
         />
       ))}
     </>
+  );
+}
+
+/** W-214: confirms an Import, which replaces the whole design (there is no revision history). */
+function ImportConfirm({
+  name,
+  losses,
+  onCancel,
+  onConfirm,
+}: {
+  name: string;
+  losses: ReturnType<typeof importLosses>;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const lost = [
+    losses.classes > 0 ? plural(losses.classes, "class", "classes") : "",
+    losses.variables > 0 ? plural(losses.variables, "variable", "variables") : "",
+  ].filter(Boolean);
+  return (
+    <div className="emvb-site-confirm" data-emvb-import-confirm="" role="alertdialog">
+      <p className="emvb-field-label">Replace site styles with {name}?</p>
+      <p className="emvb-helper">
+        {lost.length > 0
+          ? `${lost.join(" and ")} that the file doesn't have will be removed. `
+          : "Every class and variable is replaced by the file's. "}
+        {losses.usedOnPage > 0 &&
+          `This page uses ${losses.usedOnPage} of them, so those elements lose that styling. `}
+        Export first to keep a copy.
+      </p>
+      <div className="emvb-dialog-actions">
+        <Button type="button" variant="secondary" className={BUTTON} onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          variant="destructive"
+          className={BUTTON}
+          style={SOLID_DESTRUCTIVE}
+          onClick={onConfirm}
+        >
+          Replace
+        </Button>
+      </div>
+    </div>
   );
 }
