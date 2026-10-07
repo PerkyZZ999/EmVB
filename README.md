@@ -11,7 +11,7 @@ A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emda
 ## Features
 
 - **Editor:** drag, drop and nest elements; edit text on the canvas; copy, paste, undo and redo; preview desktop, tablet and mobile.
-- **Elements:** containers (flexbox or CSS Grid), sections, headings, text, lists, links, buttons, images, video, icons, dividers, spacers, tabs, accordions, popups, forms, and post fields for theme templates.
+- **Elements:** containers (flexbox or CSS Grid), sections, headings, text, lists, links, buttons, images, video, icons (a library of about 14,400 from Lucide, Font Awesome Free, Tabler and Remix; see [the icon library guide](docs/guides/icon-library.md)), dividers, spacers, tabs, accordions, popups, forms, and post fields for theme templates.
 - **Styling:** Hover, Focus and Active states with transitions, per-device styles and hide on device, backgrounds with gradients and overlays, entrance animations, custom attributes.
 - **Site styles:** variables, classes in a clear priority order, tag defaults, changes staged until **Publish styles**, import and export as JSON.
 - **Theme Builder:** headers, footers, Error 404, Search Results, Single Page, Single Post, Archive, Loop Item and popups, with display conditions.
