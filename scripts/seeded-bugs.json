@@ -21869,6 +21869,48 @@
         "./packages/emvb/src/admin/editor/panels/settings/icon-search.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-218/dup-name-overflow",
+      "requirement": "W-218",
+      "description": "Duplicating a class with a 60-character name makes a 65-character copy name, so the design is invalid and the save fails.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "${source.name.slice(0, 55).trim()} copy",
+          "replace": "${source.name} copy"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/class-limits.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-218/dup-past-cap",
+      "requirement": "W-218",
+      "description": "Duplicate adds a 101st class, which fails to save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "if (!source || classes.length >= MAX_CLASSES) return design;",
+          "replace": "if (!source) return design;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/class-limits.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-218/rename-uncapped",
+      "requirement": "W-218",
+      "description": "Rename keeps names over 60 characters and control characters.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "const trimmed = cleanClassName(name);\n  const classes = design.classes ?? [];\n  if (!trimmed || !classes",
+          "replace": "const trimmed = name.trim();\n  const classes = design.classes ?? [];\n  if (!trimmed || !classes"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/class-limits.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

@@ -93,9 +93,21 @@ export function hasLocalStyles(node: LayoutNode): boolean {
 }
 
 /** Why "Save local styles as class" can't run, or null when it can (W-134). */
+/** Most classes a site may have; the design schema refuses more (W-218). */
+export const MAX_CLASSES = 100;
+
+/** A class name as saved: control characters gone, trimmed, at most 60 characters (W-218). */
+export function cleanClassName(name: string): string {
+  const spaced = Array.from(name, (ch) => {
+    const code = ch.charCodeAt(0);
+    return code < 32 || code === 127 ? " " : ch;
+  }).join("");
+  return spaced.replace(/ {2,}/g, " ").trim().slice(0, 60).trim();
+}
+
 export function localToClassRefusal(design: DesignSystem, node: LayoutNode): string | null {
   if (!hasLocalStyles(node)) return "This element has no local styles to save.";
-  if ((design.classes ?? []).length >= 100)
+  if ((design.classes ?? []).length >= MAX_CLASSES)
     return "This site already has 100 classes, the most allowed.";
   if ((node.classes ?? []).length >= 20) return "20 classes is the most one element can have.";
   return null;
@@ -141,8 +153,9 @@ export function duplicateClass(
 ): DesignSystem {
   const classes = design.classes ?? [];
   const source = classes.find((c) => c.id === classId);
-  if (!source) return design;
-  const baseName = `${source.name} copy`;
+  // At the cap the copy would make the design invalid and the save fail (W-218).
+  if (!source || classes.length >= MAX_CLASSES) return design;
+  const baseName = `${source.name.slice(0, 55).trim()} copy`;
   const base = slugify(baseName).slice(0, 34) || "class";
   const taken = new Set(classes.map((c) => c.id));
   let id = randomSuffix ? `${base}-${randomSuffix}`.slice(0, 40) : base;
@@ -154,7 +167,7 @@ export function duplicateClass(
 
 /** Rename a design class; the id (and so its `.emvb-k-<id>` selector) stays. Pure (W-087). */
 export function renameClass(design: DesignSystem, classId: string, name: string): DesignSystem {
-  const trimmed = name.trim();
+  const trimmed = cleanClassName(name);
   const classes = design.classes ?? [];
   if (!trimmed || !classes.some((c) => c.id === classId)) return design;
   return {

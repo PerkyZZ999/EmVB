@@ -23,11 +23,13 @@ export function SectionHead({
   count,
   countProps,
   onNew,
+  newDisabled,
 }: {
   title: React.ReactNode;
   count: number;
   countProps?: Record<string, string>;
   onNew: () => void;
+  newDisabled?: boolean;
 }) {
   return (
     <div className="emvb-site-section-head">
@@ -44,6 +46,7 @@ export function SectionHead({
         className={BUTTON}
         icon={<PlusIcon aria-hidden="true" />}
         onClick={onNew}
+        disabled={newDisabled}
       >
         New
       </Button>

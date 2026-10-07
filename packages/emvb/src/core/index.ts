@@ -140,6 +140,8 @@ export {
 export { FORMS_SUBMIT_PATH } from "./render/index.ts";
 
 export {
+  cleanClassName,
+  MAX_CLASSES,
   moveClassId,
   addClassId,
   removeClassId,

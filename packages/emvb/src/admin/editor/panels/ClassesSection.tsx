@@ -12,7 +12,9 @@ import {
 } from "@phosphor-icons/react";
 import * as React from "react";
 import {
+  cleanClassName,
   duplicateClass,
+  MAX_CLASSES,
   findClassUsages,
   moveDesignClass,
   patchClassState,
@@ -150,8 +152,8 @@ export function ClassesSection({
     : classes;
 
   const create = async () => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
+    const trimmed = cleanClassName(name);
+    if (!trimmed || classes.length >= MAX_CLASSES) return;
     const id = uniqueId(
       trimmed,
       "class",
@@ -177,7 +179,17 @@ export function ClassesSection({
         element still win. Editing a class updates every element that uses it. Tablet and mobile
         overrides stay on the Style tab.
       </p>
-      <SectionHead title="Classes" count={classes.length} onNew={() => setCreating(true)} />
+      <SectionHead
+        title="Classes"
+        count={classes.length}
+        onNew={() => setCreating(true)}
+        newDisabled={classes.length >= MAX_CLASSES}
+      />
+      {classes.length >= MAX_CLASSES ? (
+        <p className="emvb-helper" data-emvb-class-cap="">
+          This site has 100 classes, the most allowed. Delete one to add another.
+        </p>
+      ) : null}
       {classes.length > 3 && (
         <SiteSearch label="Search classes" value={filter} onChange={setFilter} />
       )}
@@ -298,7 +310,10 @@ export function ClassesSection({
                     {
                       label: "Duplicate",
                       icon: CopySimpleIcon,
-                      onSelect: () => void onSave(duplicateClass(design, cls.id)),
+                      onSelect: () => {
+                        const next = duplicateClass(design, cls.id);
+                        if (next !== design) void onSave(next);
+                      },
                     },
                     {
                       label: "Delete",
