@@ -252,4 +252,13 @@ describe("tabs runtime (W-078)", () => {
     expect(() => initTabs(document)).not.toThrow();
     expect(document.body.querySelector(".emvb-tab-panel")?.hasAttribute("aria-hidden")).toBe(false);
   });
+
+  test("after init the hidden radios are out of the Tab order (W-195)", () => {
+    const root = fixture();
+    initTabs(document);
+    for (const input of root.querySelectorAll<HTMLInputElement>(".emvb-tab-input")) {
+      expect(input.tabIndex).toBe(-1);
+      expect(input.getAttribute("aria-hidden")).toBe("true");
+    }
+  });
 });

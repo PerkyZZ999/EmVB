@@ -21100,6 +21100,20 @@
         "./packages/emvb/src/admin/editor/panels/settings/form-names.test.ts"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-195/radios-stay-focusable",
+      "requirement": "W-195",
+      "description": "Hidden tab radios stay in the keyboard Tab order after the runtime runs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "    input.tabIndex = -1;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

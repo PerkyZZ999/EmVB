@@ -80,7 +80,12 @@ function enhance(root: HTMLElement): void {
   const list = root.querySelector<HTMLElement>(":scope > .emvb-tab-list");
   if (!list) return;
   list.setAttribute("aria-orientation", "horizontal");
-  const { labels, panels } = parts(root);
+  const { inputs, labels, panels } = parts(root);
+  // W-195: the tabs now take keyboard focus, so the invisible radios leave the Tab order.
+  for (const input of inputs) {
+    input.tabIndex = -1;
+    input.setAttribute("aria-hidden", "true");
+  }
   linkTabs(root, labels, panels);
   activate(root, selectedIndex(root));
 
