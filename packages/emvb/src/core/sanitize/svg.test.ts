@@ -99,4 +99,26 @@ describe("sanitizeSvgMarkup (W-073 / W-079)", () => {
     expect(tree?.attrs.class).toBeUndefined();
     expect(tree?.children[0]).toMatchObject({ tag: "rect" });
   });
+
+  test("entities in text and attributes are decoded once, then escaped once (W-186)", () => {
+    const tree = sanitizeSvgMarkup(
+      '<svg viewBox="0 0 10 10"><text font-family="A &amp; B">Tom &amp; Jerry &lt;3 &#169; &#x2014; &bogus;</text></svg>',
+    );
+    if (!tree) throw new Error("expected tree");
+    const text = tree.children[0];
+    if (!text || typeof text === "string") throw new Error("expected text element");
+    expect(text.attrs["font-family"]).toBe("A & B");
+    expect(text.children[0]).toBe("Tom & Jerry <3 \u00a9 \u2014 &bogus;");
+    const html = serialize(tree);
+    expect(html).toContain("Tom &amp; Jerry &lt;3");
+    expect(html).not.toContain("&amp;amp;");
+    expect(html).not.toContain("&amp;lt;");
+  });
+
+  test("a decoded entity cannot sneak a javascript: or markup into an attribute (W-186)", () => {
+    expect(
+      isSafeSvgMarkup('<svg><image href="&#106;avascript:alert(1)" width="1" height="1"/></svg>'),
+    ).toBe(false);
+    expect(isSafeSvgMarkup('<svg><rect fill="&#x3c;x&#x3e;"/></svg>')).toBe(false);
+  });
 });

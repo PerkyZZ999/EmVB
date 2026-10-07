@@ -396,7 +396,7 @@
         {
           "tag": "text",
           "attrs": {},
-          "children": ["a &amp; b"]
+          "children": ["a & b"]
         }
       ]
     }

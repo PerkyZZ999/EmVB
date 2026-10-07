@@ -13823,7 +13823,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/svg.ts",
-          "search": "    .replace(/&lt;/g, \"<\")\n",
+          "search": "lt: \"<\", ",
           "replace": ""
         }
       ],
@@ -13837,7 +13837,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/svg.ts",
-          "search": "    .replace(/&quot;/g, '\"')\n",
+          "search": "quot: '\"', ",
           "replace": ""
         }
       ],
@@ -13893,8 +13893,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/svg.ts",
-          "search": "      if (text.trim()) tokens.push({ kind: \"text\", value: text });",
-          "replace": "      tokens.push({ kind: \"text\", value: text });"
+          "search": "      if (text.trim()) tokens.push({ kind: \"text\", value: decodeEntities(text) });",
+          "replace": "      tokens.push({ kind: \"text\", value: decodeEntities(text) });"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-allowlist.test.ts"],
@@ -20672,6 +20672,46 @@
         "rises above another"
       ],
       "expect": "\\(fail\\).*rises above another"
+    },
+    {
+      "id": "W-186/text-not-decoded",
+      "requirement": "W-186",
+      "description": "SVG text keeps entities encoded, so &amp; shows as &amp;amp; on the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "tokens.push({ kind: \"text\", value: decodeEntities(text) });",
+          "replace": "tokens.push({ kind: \"text\", value: text });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/svg.test.ts",
+        "-t",
+        "decoded once"
+      ],
+      "expect": "\\(fail\\).*decoded once"
+    },
+    {
+      "id": "W-186/no-numeric",
+      "requirement": "W-186",
+      "description": "Numeric character references are left encoded.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "if (ref.startsWith(\"#\")) {",
+          "replace": "if (ref.startsWith(\"#\") && false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/svg.test.ts",
+        "-t",
+        "decoded once"
+      ],
+      "expect": "\\(fail\\).*decoded once"
     }
   ]
 }

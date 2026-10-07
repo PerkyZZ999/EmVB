@@ -146,13 +146,24 @@ type Tok =
   | { kind: "close"; tag: string }
   | { kind: "text"; value: string };
 
-function decodeAttr(raw: string): string {
-  return raw
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, "&");
+const NAMED_ENTITIES: Record<string, string> = { lt: "<", gt: ">", amp: "&", quot: '"', apos: "'" };
+
+/**
+ * Decodes the XML entities pasted SVG may carry (`&lt;`, `&amp;`, `&#39;`, `&#x26;`…) once, so text
+ * and attribute values hold the characters they stand for and are escaped exactly once on output
+ * (W-186). Unknown or out-of-range references stay as written.
+ */
+function decodeEntities(raw: string): string {
+  return raw.replace(/&(#x[0-9a-f]{1,6}|#[0-9]{1,7}|[a-z]+);/gi, (whole, ref: string) => {
+    if (ref.startsWith("#")) {
+      const code =
+        ref[1] === "x" || ref[1] === "X" ? parseInt(ref.slice(2), 16) : Number(ref.slice(1));
+      return code > 0 && code <= 0x10ffff && !(code >= 0xd800 && code <= 0xdfff)
+        ? String.fromCodePoint(code)
+        : whole;
+    }
+    return NAMED_ENTITIES[ref] ?? whole;
+  });
 }
 
 function isSafeHref(tag: string, name: string, value: string): boolean {
@@ -176,7 +187,7 @@ function parseAttrs(tag: string, raw: string): Record<string, string> | undefine
   while ((match = re.exec(raw))) {
     const name = match[1] ?? "";
     if (!ATTR_ALLOW.has(name)) continue;
-    const value = decodeAttr(match[2] ?? match[3] ?? "");
+    const value = decodeEntities(match[2] ?? match[3] ?? "");
     if (/[<>`]|javascript:/i.test(value)) return undefined;
     if (TRANSFORM_ATTRS.has(name) && !isTransformList(value)) return undefined;
     if (!isSafeHref(tag, name, value)) return undefined;
@@ -213,7 +224,7 @@ function tokenize(input: string): Tok[] | undefined {
       const next = input.indexOf("<", i);
       const end = next < 0 ? input.length : next;
       const text = input.slice(i, end);
-      if (text.trim()) tokens.push({ kind: "text", value: text });
+      if (text.trim()) tokens.push({ kind: "text", value: decodeEntities(text) });
       i = end;
       continue;
     }
