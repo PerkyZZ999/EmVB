@@ -1,4 +1,4 @@
-import type { DesignSystem } from "../../../../core/index.ts";
+import { cleanClassName, type DesignSystem } from "../../../../core/index.ts";
 
 type StyleClass = NonNullable<DesignSystem["classes"]>[number];
 
@@ -35,8 +35,10 @@ export function classOptions(
         .map(({ cls }) => cls)
     : available;
   const options: ClassOption[] = found.map((cls) => ({ kind: "class", cls }));
-  const taken = catalog.some((cls) => cls.name.toLowerCase() === q);
-  if (q && !taken) options.push({ kind: "create", name: query.trim() });
+  // The new name as it will be saved: at most 60 characters, no control characters (W-220).
+  const name = cleanClassName(query);
+  const taken = catalog.some((cls) => cls.name.toLowerCase() === name.toLowerCase());
+  if (name && !taken) options.push({ kind: "create", name });
   return options;
 }
 

@@ -41,3 +41,8 @@ describe("classOptions (W-087)", () => {
     expect(appliedByName(catalog, ["muted"], "mut")).toBeUndefined();
   });
 });
+
+test("the Create class name is cut to 60 characters (W-220)", () => {
+  const option = classOptions([], [], "L".repeat(80)).at(-1);
+  expect(option).toEqual({ kind: "create", name: "L".repeat(60) });
+});

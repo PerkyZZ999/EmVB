@@ -4356,7 +4356,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/class-suggest.ts",
-          "search": "if (q && !taken)",
+          "search": "if (name && !taken)",
           "replace": "if (q)"
         }
       ],
@@ -21952,6 +21952,24 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/design/variable-limits.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-220/chip-create-uncapped",
+      "requirement": "W-220",
+      "description": "The chip input's Create class keeps a name over 60 characters, so the save fails.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/class-suggest.ts",
+          "search": "const name = cleanClassName(query);",
+          "replace": "const name = query.trim();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/class-suggest.test.ts"
+      ],
       "expect": "\\(fail\\)"
     }
   ]
