@@ -21791,6 +21791,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-vimeo-hash.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-216/header-div",
+      "requirement": "W-216",
+      "description": "A header part renders in a plain div, so the page has no banner landmark.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  header: \"header\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-216/footer-div",
+      "requirement": "W-216",
+      "description": "A footer part renders in a plain div, so the page has no contentinfo landmark.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  footer: \"footer\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-216/unclosed",
+      "requirement": "W-216",
+      "description": "The landmark wrapper closes with </div>.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "${page.html}</${tag}>`",
+          "replace": "${page.html}</div>`"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

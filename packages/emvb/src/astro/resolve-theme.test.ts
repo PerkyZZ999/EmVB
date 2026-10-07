@@ -119,10 +119,14 @@ describe("resolveThemeParts (R-062)", () => {
     const resolved = await resolveThemeParts(astro("/about"));
     expect(resolved.header?.id).toBe("HEADNEW1");
     expect(resolved.header?.title).toBe("Part HEADNEW1");
+    // W-216: header and footer parts are the page's banner and contentinfo landmarks.
     expect(resolved.header?.html).toStartWith(
-      '<div class="emvb-theme-header" data-emvb-theme-part="HEADNEW1">',
+      '<header class="emvb-theme-header" data-emvb-theme-part="HEADNEW1">',
     );
+    expect(resolved.header?.html).toEndWith("</header>");
     expect(resolved.header?.html).toContain("New header");
+    expect(resolved.footer?.html).toStartWith('<footer class="emvb-theme-footer"');
+    expect(resolved.footer?.html).toEndWith("</footer>");
     expect(resolved.footer?.html).toContain("Footer");
     expect(resolved.content).toBeNull();
     expect(resolved.popups).toEqual([]);
