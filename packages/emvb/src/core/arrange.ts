@@ -67,8 +67,6 @@ export const REASONS = {
 
 const refuse = (reason: string): Refusal => ({ ok: false, reason });
 
-const isContainer = (node: LayoutNode): node is ContainerNode => node.type === "container";
-
 function locate(layout: Layout, id: string): Located | undefined {
   const walk = (
     node: LayoutNode,
@@ -389,8 +387,12 @@ export const moveOut = (layout: Layout, id: string): Arranged =>
 export const moveIn = (layout: Layout, id: string): Arranged =>
   moveChild(layout, id, ({ parent, index }) => {
     const above = parent.children[index - 1];
-    return above && isContainer(above)
-      ? { parentId: above.id, index: above.children.length }
+    // W-211: any element that holds children (Flexbox, Grid, Form, Accordion item…), not only a
+    // Container; moveNode refuses what can't go there, with the reason.
+    const kids =
+      above && "children" in above && Array.isArray(above.children) ? above.children : null;
+    return above && kids
+      ? { parentId: above.id, index: kids.length }
       : refuse(REASONS.noContainerAbove);
   });
 
@@ -418,10 +420,12 @@ export function previousInOrder(layout: Layout, id: string): string {
   return at === -1 ? layout.root.id : (ids[at - 1] ?? id);
 }
 
-/** Enter: the first child of a container, if it has one. */
+/** Enter: the first child of any element that holds children, if it has one (W-211). */
 export function firstChild(layout: Layout, id: string): string | undefined {
   const node = findNode(layout, id);
-  return node && isContainer(node) ? node.children[0]?.id : undefined;
+  return node && "children" in node && Array.isArray(node.children)
+    ? node.children[0]?.id
+    : undefined;
 }
 
 /** Shift+Enter: the parent container, if any. */

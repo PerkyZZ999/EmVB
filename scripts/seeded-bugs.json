@@ -3715,12 +3715,12 @@
     {
       "id": "W-086/move-in-any-sibling",
       "requirement": "R-003",
-      "description": "Alt+→ moves into a non-container sibling above",
+      "description": "Alt+→ moves into a sibling above that holds no children (re-anchored for W-211)",
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "return above && isContainer(above)",
-          "replace": "return above && \"children\" in above"
+          "search": "      above && \"children\" in above && Array.isArray(above.children) ? above.children : null;",
+          "replace": "      above ? ((above as { children?: LayoutNode[] }).children ?? []) : null;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/arrange-golden.test.ts"],
@@ -21544,6 +21544,34 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/device-layers.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-211/move-in-container-only",
+      "requirement": "W-211",
+      "description": "Alt+→ only moves into a plain Container, never a Flexbox or Form above.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "    return above && kids\n",
+          "replace": "    return above && kids && above.type === \"container\"\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/arrange-keyboard-in.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-211/enter-container-only",
+      "requirement": "W-211",
+      "description": "Enter doesn't step into a Flexbox's first child.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  return node && \"children\" in node && Array.isArray(node.children)\n",
+          "replace": "  return node && node.type === \"container\" && Array.isArray(node.children)\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/arrange-keyboard-in.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]
