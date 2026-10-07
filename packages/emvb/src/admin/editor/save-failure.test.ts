@@ -136,3 +136,12 @@ describe("signed out mid-edit (W-205)", () => {
     expect(publishFailureMessage(signedOut)).toContain("signed out");
   });
 });
+
+describe("deleted while open (W-206)", () => {
+  test("a 404 save points to the Trash and offers Retry", () => {
+    const gone = new ApiError(404, "NOT_FOUND", "Content item not found: 01X");
+    const failure = saveFailure(gone, { slug: "a", layout: null });
+    expect(failure.status).toMatchObject({ kind: "error", retry: true });
+    expect(failure.status.kind === "error" ? failure.status.message : "").toContain("Trash");
+  });
+});

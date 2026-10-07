@@ -49,6 +49,12 @@ export function saveFailure(
     const message = "Couldn't save. You're signed out: sign in again in another tab, then Retry.";
     return { status: { kind: "error", message, retry: true } };
   }
+  if (error.status === 404) {
+    // W-206: deleted (moved to Trash) while open. Restoring it keeps these edits savable.
+    const message =
+      "Couldn't save. This was moved to Trash or deleted: restore it from the Trash, then Retry.";
+    return { status: { kind: "error", message, retry: true } };
+  }
   if (error.status === 409 && error.code === "SLUG_CONFLICT") {
     return { status: fixAndSave, slugError: slugTakenMessage(page.slug), select: null };
   }

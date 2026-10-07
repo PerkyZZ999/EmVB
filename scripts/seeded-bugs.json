@@ -21374,6 +21374,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-206/trashed-raw-message",
+      "requirement": "W-206",
+      "description": "Saving a page trashed elsewhere shows the raw 'Content item not found' message with no Retry.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "  if (error.status === 404) {",
+          "replace": "  if (error.status === 999) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
