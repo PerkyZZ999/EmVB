@@ -196,7 +196,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "apply-arranged":
       return withLayout(state, action.layout, action.selected);
     case "saved":
-      return { ...state, rev: action.rev, savedVersion: action.version };
+      // A saved draft on a published entry is not live until Publish (W-190).
+      return {
+        ...state,
+        rev: action.rev,
+        savedVersion: action.version,
+        status: state.status === "published" ? "changed" : state.status,
+      };
     case "published":
       return { ...state, rev: action.rev, status: "published" };
     case "set-design":

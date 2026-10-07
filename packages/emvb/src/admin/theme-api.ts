@@ -16,6 +16,7 @@ import {
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { requestJson, type Fetcher } from "./api.ts";
 import { publishEntry } from "./content-api.ts";
+import { entryStatus } from "./entry-status.ts";
 
 const CONTENT = `/_emdash/api/content/${THEME_PARTS_COLLECTION}`;
 
@@ -23,6 +24,7 @@ type RawItem = {
   id: string;
   slug?: string | null;
   status?: string;
+  draftRevisionId?: string | null;
   updatedAt?: string;
   data?: Record<string, unknown>;
 };
@@ -113,7 +115,7 @@ export async function listThemeParts(fetcher: Fetcher): Promise<ThemePartSummary
     id: item.id,
     title: titleOf(item),
     partType: partTypeOf(item),
-    status: item.status ?? "draft",
+    status: entryStatus(item),
     updatedAt: item.updatedAt ?? "",
     conditionsSummary: summarizeConditions(item.data?.["conditions"]),
   }));

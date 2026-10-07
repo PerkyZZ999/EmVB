@@ -3,6 +3,7 @@ import { PlusIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { Fetcher } from "../api.ts";
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
+import { statusLabel } from "../entry-status.ts";
 
 type ListState<T> =
   | { state: "loading" }
@@ -59,7 +60,7 @@ export function StatusBadge({ status }: { status: string }) {
   return (
     <span className="emvb-status" data-status={status}>
       <span className="emvb-status-dot" aria-hidden="true" />
-      {status === "published" ? "Published" : "Draft"}
+      {statusLabel(status)}
     </span>
   );
 }

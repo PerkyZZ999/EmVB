@@ -63,6 +63,7 @@ export const UI_CSS = `
 }
 .emvb-status-dot { width: 8px; height: 8px; border-radius: 9999px; background: var(--text-color-kumo-subtle); }
 .emvb-status[data-status="published"] .emvb-status-dot { background: var(--color-kumo-success); }
+.emvb-status[data-status="changed"] .emvb-status-dot { background: var(--color-kumo-warning, #d97706); }
 
 /* List / setup pages */
 .emvb-pages { display: flex; flex-direction: column; gap: 16px; }

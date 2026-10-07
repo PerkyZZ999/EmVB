@@ -12,6 +12,7 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
+import { statusLabel } from "../entry-status.ts";
 import type { SaveStatus } from "./useSave.ts";
 import type { PopupDevice } from "../../core/index.ts";
 
@@ -100,7 +101,7 @@ export function TopBar({
             <span className="emvb-topbar-title">{page.title || "Untitled page"}</span>
             <span className="emvb-status" data-status={page.status}>
               <span className="emvb-status-dot" aria-hidden="true" />
-              {page.status === "published" ? "Published" : "Draft"}
+              {statusLabel(page.status)}
             </span>
           </>
         )}

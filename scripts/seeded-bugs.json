@@ -3269,7 +3269,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/list-kit.tsx",
-          "search": "{status === \"published\" ? \"Published\" : \"Draft\"}",
+          "search": "{statusLabel(status)}",
           "replace": "{\"Draft\"}"
         }
       ],
@@ -20910,6 +20910,60 @@
         "./packages/emvb/src/admin/editor/panels/settings/advanced-fields.test.tsx"
       ],
       "expect": "\\(fail\\).*W-189"
+    },
+    {
+      "id": "W-190/ignores-draft-revision",
+      "requirement": "W-190",
+      "description": "A published entry with a saved draft still reads as Published.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/entry-status.ts",
+          "search": "  return status === \"published\" && item?.draftRevisionId ? \"changed\" : status;",
+          "replace": "  return status;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/entry-status.test.ts"],
+      "expect": "\\(fail\\).*W-190"
+    },
+    {
+      "id": "W-190/save-keeps-published",
+      "requirement": "W-190",
+      "description": "Save draft on a published page leaves the badge on Published.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "        status: state.status === \"published\" ? \"changed\" : state.status,",
+          "replace": "        status: state.status,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/entry-status.test.ts",
+        "-t",
+        "Save draft on a published"
+      ],
+      "expect": "\\(fail\\).*Save draft on a published"
+    },
+    {
+      "id": "W-190/list-ignores",
+      "requirement": "W-190",
+      "description": "The pages list ignores the draft revision.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "    status: entryStatus(item),",
+          "replace": "    status: item.status ?? \"draft\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/entry-status.test.ts",
+        "-t",
+        "read the draft revision"
+      ],
+      "expect": "\\(fail\\).*read the draft revision"
     }
   ]
 }

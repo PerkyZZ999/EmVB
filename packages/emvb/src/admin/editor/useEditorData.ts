@@ -19,6 +19,7 @@ import {
 } from "../../core/index.ts";
 import { PAGES_COLLECTION, PLUGIN_ID, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, requestJson, type Fetcher } from "../api.ts";
+import { entryStatus } from "../entry-status.ts";
 
 export type EditorEntry = {
   id: string;
@@ -57,6 +58,7 @@ type ContentResponse = {
     id?: string;
     slug?: string | null;
     status?: string;
+    draftRevisionId?: string | null;
     data?: Record<string, unknown>;
     seo?: { title?: string | null; description?: string | null } | null;
   };
@@ -83,7 +85,7 @@ export async function loadEntry(
     canvasMode: text(data["canvas_mode"]) || "site-layout",
     seoTitle: text(body?.item?.seo?.title),
     seoDescription: text(body?.item?.seo?.description),
-    status: body?.item?.status ?? "draft",
+    status: entryStatus(body?.item),
     rev: body?.["_rev"] ?? null,
     layout: readLayout(data["layout"]),
   };

@@ -8,6 +8,7 @@ import type {
 } from "../core/index.ts";
 import { PAGES_COLLECTION, PLUGIN_ID } from "../constants.ts";
 import { requestJson, type Fetcher } from "./api.ts";
+import { entryStatus } from "./entry-status.ts";
 
 const CONTENT = `/_emdash/api/content/${PAGES_COLLECTION}`;
 
@@ -15,6 +16,7 @@ type RawItem = {
   id: string;
   slug?: string | null;
   status?: string;
+  draftRevisionId?: string | null;
   updatedAt?: string;
   data?: Record<string, unknown>;
   seo?: { title?: string | null; description?: string | null } | null;
@@ -42,7 +44,7 @@ export async function listPages(fetcher: Fetcher): Promise<PageSummary[]> {
     id: item.id,
     title: titleOf(item),
     slug: item.slug ?? "",
-    status: item.status ?? "draft",
+    status: entryStatus(item),
     updatedAt: item.updatedAt ?? "",
   }));
 }
