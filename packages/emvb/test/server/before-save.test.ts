@@ -83,3 +83,22 @@ describe("content:beforeSave, called directly (R-006, D-020)", () => {
     ]);
   });
 });
+
+describe("elements in the wrong place are refused at save (W-225)", () => {
+  test("a menu item outside a Menu is refused with the editor's reason", async () => {
+    const layout = {
+      schemaVersion: 12,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [{ id: "mitm0001", type: "menu-item", props: { text: "Home" }, children: [] }],
+      },
+    };
+    const { result, warnings } = run(PAGES_COLLECTION, { layout });
+    expect(await failure(result)).toBe(
+      "The page layout has elements in the wrong place. Menu items can only go inside a Menu. (menu-item mitm0001)",
+    );
+    expect(warnings).toEqual([["emvb: page save rejected", { pageId: "01PAGE", code: "nesting" }]]);
+  });
+});

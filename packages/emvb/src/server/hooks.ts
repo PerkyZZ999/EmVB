@@ -3,6 +3,7 @@ import {
   summarizeIssues,
   validateConditions,
   validateFloatSettings,
+  nestingIssues,
   validateLayout,
   validateTriggers,
 } from "../core/index.ts";
@@ -75,6 +76,17 @@ export async function beforeSave(
       });
       throw new ContentSaveRejectedError(
         `The ${kind} layout is invalid. ${summarizeIssues(result.issues)}`,
+      );
+    }
+    // Elements in a parent the editor never allows (menu item outside a Menu, field outside a
+    // form…) render broken markup; refuse them with the editor's own reason (W-225).
+    const misplaced = nestingIssues(result.layout, 3);
+    if (misplaced.length > 0) {
+      ctx.log.warn(`emvb: ${kind} save rejected`, { pageId, code: "nesting" });
+      throw new ContentSaveRejectedError(
+        `The ${kind} layout has elements in the wrong place. ${misplaced
+          .map((issue) => issue.message)
+          .join("; ")}`,
       );
     }
     if (result.upgradedFrom !== result.layout.schemaVersion) {

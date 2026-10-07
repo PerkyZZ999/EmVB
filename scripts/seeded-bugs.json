@@ -22203,6 +22203,62 @@
       ],
       "command": ["bun", "test", "./test/demos/archive-pages.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-225/orphan-menu-item",
+      "requirement": "W-225",
+      "description": "A menu item outside a Menu passes the save check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/nesting.ts",
+          "search": "if (child.type === \"menu-item\" && parent.type !== \"menu\" && parent.type !== \"menu-item\") {",
+          "replace": "if (false) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/nesting.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-225/field-outside-form",
+      "requirement": "W-225",
+      "description": "A form field outside a form passes the save check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/nesting.ts",
+          "search": "  if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/nesting.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-225/form-not-inherited",
+      "requirement": "W-225",
+      "description": "A field nested in a container inside a form is refused as outside the form.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/nesting.ts",
+          "search": "walk(child, at, inForm || isFormNode(child));",
+          "replace": "walk(child, at, inForm);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/nesting.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-225/hook-skips-nesting",
+      "requirement": "W-225",
+      "description": "The save hook doesn't check nesting.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "const misplaced = nestingIssues(result.layout, 3);",
+          "replace": "const misplaced = nestingIssues(result.layout, 0);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/before-save.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

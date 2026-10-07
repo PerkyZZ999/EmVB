@@ -103,6 +103,7 @@ export {
   type LayoutValidation,
   type DesignValidation,
 } from "./validate.ts";
+export { nestingIssues } from "./nesting.ts";
 export {
   DESIGN_SCHEMA_VERSION,
   DEFAULT_STYLE_TAGS,
