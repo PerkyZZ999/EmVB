@@ -171,7 +171,8 @@ export const loop: ElementDefinition<LoopNode> = {
       },
       {
         key: "perPage",
-        kind: "number",
+        kind: "int",
+        max: 50,
         label: "Posts per page",
         optional: true,
         message:

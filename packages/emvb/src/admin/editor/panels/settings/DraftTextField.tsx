@@ -139,6 +139,11 @@ export function DraftTextField({
         );
         return;
       }
+      // A whole-number field past its schema's maximum would fail the save (W-223).
+      if (integer && field.max !== undefined && value > field.max) {
+        setError(field.message ?? `Enter a whole number from 1 to ${field.max}.`);
+        return;
+      }
       if (value > MAX_FIELD_NUMBER) {
         setError(`Enter a number up to ${MAX_FIELD_NUMBER}.`);
         return;
