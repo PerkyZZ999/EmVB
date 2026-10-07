@@ -347,21 +347,26 @@ export async function resolveThemeParts(
     return { html, css: page.css };
   };
 
+  /** Synced sections and loop items a part uses, for every part type (W-200). */
+  const templatesFor = async (stored: StoredPart): Promise<ThemeDynamicData | undefined> => {
+    const layout = readLayout(stored.layout);
+    const sectionTemplates = layout ? loadSectionTemplates(layout, parts) : {};
+    const loopTemplates = layout ? await loadLoopTemplates(layout, parts) : {};
+    return Object.keys(sectionTemplates).length > 0 || Object.keys(loopTemplates).length > 0
+      ? {
+          ...(Object.keys(loopTemplates).length > 0 ? { loopTemplates } : {}),
+          ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
+        }
+      : undefined;
+  };
+
   const renderPart = async (
     winner: ThemePartCandidate | null,
   ): Promise<RenderedThemePart | null> => {
     const stored = winner ? byId.get(winner.id) : undefined;
     if (!stored) return null;
     const layout = readLayout(stored.layout);
-    const sectionTemplates = layout ? loadSectionTemplates(layout, parts) : {};
-    const loopTemplates = layout ? await loadLoopTemplates(layout, parts) : {};
-    const referenced: ThemeDynamicData | undefined =
-      Object.keys(sectionTemplates).length > 0 || Object.keys(loopTemplates).length > 0
-        ? {
-            ...(Object.keys(loopTemplates).length > 0 ? { loopTemplates } : {}),
-            ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
-          }
-        : undefined;
+    const referenced = await templatesFor(stored);
     const dynamic =
       layout && winner === contentWinner
         ? {
@@ -377,11 +382,20 @@ export async function resolveThemeParts(
   const footer = await renderPart(footerWinner);
   const content = await renderPart(contentWinner);
 
+  const extraParts = [...popupMatches, ...floatMatches]
+    .map((match) => byId.get(match.id))
+    .filter((stored): stored is StoredPart => stored !== undefined);
+  const extraTemplates = new Map(
+    await Promise.all(
+      extraParts.map(async (stored) => [stored.id, await templatesFor(stored)] as const),
+    ),
+  );
+
   const popups: RenderedPopup[] = [];
   for (const match of popupMatches) {
     const stored = byId.get(match.id);
     if (!stored) continue;
-    const { html, css } = renderOne(stored);
+    const { html, css } = renderOne(stored, extraTemplates.get(stored.id));
     popups.push({
       id: stored.id,
       title: stored.title,
@@ -395,7 +409,7 @@ export async function resolveThemeParts(
   for (const match of floatMatches) {
     const stored = byId.get(match.id);
     if (!stored) continue;
-    const { html, css } = renderOne(stored);
+    const { html, css } = renderOne(stored, extraTemplates.get(stored.id));
     const layout = readLayout(stored.layout);
     const surface = !layout || !floatHasOwnSurface(layout, design);
     floats.push({

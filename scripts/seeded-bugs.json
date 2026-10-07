@@ -21226,6 +21226,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-200/float-no-templates",
+      "requirement": "W-200",
+      "description": "A synced section inside a float renders empty.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    const { html, css } = renderOne(stored, extraTemplates.get(stored.id));\n    const layout = readLayout(stored.layout);",
+          "replace": "    const { html, css } = renderOne(stored);\n    const layout = readLayout(stored.layout);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-200/popup-no-templates",
+      "requirement": "W-200",
+      "description": "A synced section inside a popup renders empty.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    const { html, css } = renderOne(stored, extraTemplates.get(stored.id));\n    popups.push({",
+          "replace": "    const { html, css } = renderOne(stored);\n    popups.push({"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

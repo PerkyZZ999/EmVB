@@ -236,6 +236,23 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.needsPopupsRuntime).toBe(true);
   });
 
+  test("a synced section shows inside a float and a popup too (W-200)", async () => {
+    const synced = {
+      id: "sect0001",
+      type: "section",
+      props: { partId: "SECT0001" },
+      children: [],
+    } as unknown as LayoutNode;
+    themeEntries = [
+      part("SECT0001", "section", [heading("head0009", "Shared promo")]),
+      part("FLOAT001", "float", [synced]),
+      part("POPUP001", "popup", [{ ...synced, id: "sect0002" } as LayoutNode]),
+    ];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect(resolved.floats[0]?.html).toContain("Shared promo");
+    expect(resolved.popups[0]?.html).toContain("Shared promo");
+  });
+
   test("a float pins with chrome and can be dismissed; bad settings are skipped", async () => {
     themeEntries = [
       part("FLOAT001", "float", [heading("head0001", "We ship Tuesday")], {
