@@ -6,14 +6,33 @@ import type { VNode } from "./vnode.ts";
 const ATTR_NAME = /^(?:data|aria)-[a-z][a-z0-9-]{0,40}$/;
 const BOX = new Set(["container", "div-block", "flexbox", "grid"]);
 
-/** `data-*` and `aria-*` from Advanced. `data-emvb-*` stays reserved for the editor. */
+/**
+ * Names the EmDash forms client reads (`[data-ec-form]`, `[data-page]`, `[data-error-for]`…). One of
+ * them on an element would make the client treat it as a form, a form page or an error slot (W-191).
+ */
+const FORMS_RUNTIME_ATTRS = new Set([
+  "data-condition",
+  "data-error-for",
+  "data-form-id",
+  "data-form-status",
+  "data-page",
+  "data-sitekey",
+  "data-submit-label",
+  "data-was-required",
+]);
+
+/** Custom attribute names EmVB keeps for itself: the editor's and the forms client's. */
+export const isReservedAttribute = (name: string): boolean =>
+  name.startsWith("data-emvb") || name.startsWith("data-ec-") || FORMS_RUNTIME_ATTRS.has(name);
+
+/** `data-*` and `aria-*` from Advanced, minus the reserved names (`isReservedAttribute`). */
 export function customAttributes(node: LayoutNode): Record<string, string> {
   const list = node.attributes;
   if (!list) return {};
   const attrs: Record<string, string> = {};
   const seen = new Set<string>();
   for (const item of list) {
-    if (!ATTR_NAME.test(item.name) || item.name.startsWith("data-emvb")) continue;
+    if (!ATTR_NAME.test(item.name) || isReservedAttribute(item.name)) continue;
     if (seen.has(item.name) || item.value.length > 200) continue;
     if ([...item.value].some((char) => char.charCodeAt(0) < 32)) continue;
     seen.add(item.name);

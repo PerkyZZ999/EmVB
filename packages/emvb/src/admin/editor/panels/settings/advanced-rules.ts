@@ -1,4 +1,5 @@
 import type { Layout, LayoutNode } from "../../../../core/index.ts";
+import { isReservedAttribute } from "../../../../core/render/extras.ts";
 import { nodeChildren } from "../../../../core/tree-ops.ts";
 
 /** Same rules as the layout schema and the renderer (W-105, R-032), checked while typing (W-189). */
@@ -40,8 +41,8 @@ export function attributeErrors(rows: readonly AttributeRow[]): (string | null)[
     let error: string | null = null;
     if (!ATTR_NAME.test(row.name)) {
       error = "Use data-* or aria-*, then a lowercase letter, digits or -.";
-    } else if (row.name.startsWith("data-emvb")) {
-      error = "data-emvb-* is reserved for the editor.";
+    } else if (isReservedAttribute(row.name)) {
+      error = "This name is reserved for the editor or forms.";
     } else if (seen.has(row.name)) {
       error = "This name is already used on this element.";
     } else if (row.value.length > MAX_ATTR_VALUE) {

@@ -48,10 +48,12 @@ describe("Advanced CSS id and attributes never make the page unsavable (W-189)",
       { name: "data-emvb-id", value: "x" },
       { name: "aria-label", value: "x".repeat(201) },
       { name: "data-bell", value: "a\u0007b" },
+      { name: "data-ec-form", value: "" },
     ];
     expect(attributeErrors(rows).map((e) => e !== null)).toEqual([
       false,
       false,
+      true,
       true,
       true,
       true,
