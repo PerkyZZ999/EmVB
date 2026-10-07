@@ -184,6 +184,8 @@ export const ImageNode = leafNode(
     width: z.number().int().positive().max(10000).optional(),
     height: z.number().int().positive().max(10000).optional(),
     mediaId: z.string().min(1).max(128).optional(),
+    /** Load right away (eager, high fetch priority) for the hero/LCP image (W-226). */
+    priority: z.boolean().optional(),
   }),
 ).refine((node) => node.props.decorative === true || node.props.alt.length > 0, {
   message: "Alt text is required unless the image is marked decorative.",

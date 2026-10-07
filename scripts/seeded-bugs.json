@@ -22259,6 +22259,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/before-save.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-226/priority-still-lazy",
+      "requirement": "W-226",
+      "description": "Load right away still renders a lazy image.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "? { loading: \"eager\", fetchpriority: \"high\" }",
+          "replace": "? { loading: \"lazy\", fetchpriority: \"high\" }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/image-priority.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-226/fetchpriority-stripped",
+      "requirement": "W-226",
+      "description": "The renderer strips fetchpriority.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "|loading|decoding|fetchpriority|",
+          "replace": "|loading|decoding|"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/image-priority.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-226/priority-schema-missing",
+      "requirement": "W-226",
+      "description": "The image schema refuses priority, so the toggle can't save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    priority: z.boolean().optional(),\n  }),\n).refine((node) => node.props.decorative",
+          "replace": "  }),\n).refine((node) => node.props.decorative"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/image-priority.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

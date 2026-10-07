@@ -2178,16 +2178,24 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
         button data-unchecked="" type="button" tabindex="0" id="id-7" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Decorative (empty alt)" aria-labelledby="id-6"
           div
         input tabindex="-1" aria-hidden="true" type="checkbox"
-    div
-      label id="id-8" for="id-9"
-        span
-          "Width (px)"
-      input.emvb-field.emvb-mono id="id-9" data-emvb-field="width" value="" aria-labelledby="id-8"
+    div.emvb-field-group data-emvb-field="priority"
+      div
+        label id="id-8" for="id-9"
+          span
+            "Load right away"
+        button data-unchecked="" type="button" tabindex="0" id="id-9" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Load right away" aria-labelledby="id-8"
+          div
+        input tabindex="-1" aria-hidden="true" type="checkbox"
     div
       label id="id-10" for="id-11"
         span
+          "Width (px)"
+      input.emvb-field.emvb-mono id="id-11" data-emvb-field="width" value="" aria-labelledby="id-10"
+    div
+      label id="id-12" for="id-13"
+        span
           "Height (px)"
-      input.emvb-field.emvb-mono id="id-11" data-emvb-field="height" value="" aria-labelledby="id-10""
+      input.emvb-field.emvb-mono id="id-13" data-emvb-field="height" value="" aria-labelledby="id-12""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="image"

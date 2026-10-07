@@ -330,6 +330,8 @@ const image: ElementDefinition<ImageNode> = {
         label: "Decorative (empty alt)",
         optional: true,
       },
+      // The first big image people see (hero, LCP) shouldn't wait for lazy loading (W-226).
+      { key: "priority", kind: "boolean", label: "Load right away", optional: true },
       {
         key: "width",
         kind: "int",
@@ -360,8 +362,9 @@ const image: ElementDefinition<ImageNode> = {
       ...attrs,
       src,
       alt: decorative ? "" : node.props.alt,
-      loading: "lazy",
-      decoding: "async",
+      ...(node.props.priority === true
+        ? { loading: "eager", fetchpriority: "high" }
+        : { loading: "lazy", decoding: "async" }),
     };
     if (decorative) imgAttrs.role = "presentation";
     if (node.props.width !== undefined) imgAttrs.width = String(node.props.width);
