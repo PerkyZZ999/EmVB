@@ -199,11 +199,14 @@ export const ContainerNode = parentNode(
 );
 
 /** Field name on a forms-plugin form (D-015). */
+/** Form field names (W-202 checks them as you type with the same rule). */
+export const FIELD_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
+export const MAX_FIELD_NAME = 80;
 const FieldName = z
   .string()
   .min(1)
-  .max(80)
-  .regex(/^[a-zA-Z][a-zA-Z0-9_-]*$/, "Field names start with a letter");
+  .max(MAX_FIELD_NAME)
+  .regex(FIELD_NAME_PATTERN, "Field names start with a letter");
 
 export const DivBlockNode = parentNode("div-block", z.strictObject({ ...BoxLink }));
 

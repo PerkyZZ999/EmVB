@@ -21268,6 +21268,42 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/entry-status.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-202/no-pattern-check",
+      "requirement": "W-202",
+      "description": "A field name with spaces or a leading digit passes the as-you-type check and blocks Save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "  if (!FIELD_NAME_PATTERN.test(name))",
+          "replace": "  if (false && !FIELD_NAME_PATTERN.test(name))"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-name.test.ts"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-202/no-length-check",
+      "requirement": "W-202",
+      "description": "An 81-character field name passes the as-you-type check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "  if (name.length > MAX_FIELD_NAME)",
+          "replace": "  if (name.length > MAX_FIELD_NAME + 1)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-name.test.ts"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

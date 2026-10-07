@@ -36,6 +36,8 @@ export {
   isParentNode,
   isFormFieldType,
   FORM_FIELD_TYPES,
+  FIELD_NAME_PATTERN,
+  MAX_FIELD_NAME,
   isHeadingNode,
   isUnknownNode,
   FormNode,

@@ -2,10 +2,58 @@ import { Input, Select } from "@cloudflare/kumo";
 import * as React from "react";
 import type { Fetcher } from "../../../api.ts";
 import { loadFormFields, type DefinitionField } from "../../../forms-api.ts";
+import { FIELD_NAME_PATTERN, MAX_FIELD_NAME } from "../../../../core/index.ts";
 import { FIELD } from "../../../ui.ts";
 
 const MANUAL = "__manual__";
 const CHOOSE = "Choose a field…";
+
+/** Why a typed field name can't be stored, or null (W-202: same rule as save). */
+export function fieldNameError(name: string): string | null {
+  if (!name) return "Give the field a name.";
+  if (name.length > MAX_FIELD_NAME) return `Use at most ${MAX_FIELD_NAME} characters.`;
+  if (!FIELD_NAME_PATTERN.test(name))
+    return "Start with a letter, then use letters, digits, - or _ (no spaces).";
+  return null;
+}
+
+/** The Field name box: keeps what you type, stores it only once it's a valid name (W-202). */
+function FieldNameInput({
+  value,
+  onChange,
+  manual,
+}: {
+  value: string;
+  onChange: (name: string) => void;
+  manual?: boolean;
+}) {
+  const [draft, setDraft] = React.useState(value);
+  React.useEffect(() => {
+    setDraft((current) => (fieldNameError(current.trim()) === null ? value : current));
+  }, [value]);
+  const error = fieldNameError(draft.trim());
+  return (
+    <>
+      <Input
+        label="Field name"
+        className={`${FIELD} emvb-mono`}
+        value={draft}
+        aria-invalid={error ? true : undefined}
+        {...(manual ? { "data-emvb-field-bind": "manual" } : {})}
+        onChange={(event) => {
+          const next = event.target.value;
+          setDraft(next);
+          if (fieldNameError(next.trim()) === null) onChange(next.trim());
+        }}
+      />
+      {error && (
+        <p className="emvb-inline-error" data-emvb-field-name-error>
+          {error}
+        </p>
+      )}
+    </>
+  );
+}
 
 const fieldLabel = (field: DefinitionField) => `${field.label}${field.required ? " *" : ""}`;
 
@@ -62,23 +110,10 @@ export function FieldBindControl({
             </Select.Option>
           ))}
         </Select>
-        <Input
-          label="Field name"
-          className={`${FIELD} emvb-mono`}
-          value={value}
-          onChange={(event) => onChange(event.target.value.trim())}
-        />
+        <FieldNameInput value={value} onChange={(name) => onChange(name)} />
       </div>
     );
   }
 
-  return (
-    <Input
-      label="Field name"
-      className={`${FIELD} emvb-mono`}
-      value={value}
-      data-emvb-field-bind="manual"
-      onChange={(event) => onChange(event.target.value.trim())}
-    />
-  );
+  return <FieldNameInput value={value} onChange={(name) => onChange(name)} manual />;
 }
