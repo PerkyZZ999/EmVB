@@ -6,7 +6,7 @@ import type { VNode } from "./vnode.ts";
 
 export const FORMS_SUBMIT_PATH = "/_emdash/api/plugins/emdash-forms/submit";
 
-const honeypot = (formId: string): VNode => ({
+const honeypot = (inputId: string): VNode => ({
   tag: "div",
   attrs: {
     class: "ec-form-hp",
@@ -15,14 +15,14 @@ const honeypot = (formId: string): VNode => ({
   children: [
     {
       tag: "label",
-      attrs: { for: `${formId}-_hp` },
+      attrs: { for: inputId },
       children: ["Leave blank"],
     },
     {
       tag: "input",
       attrs: {
         type: "text",
-        id: `${formId}-_hp`,
+        id: inputId,
         name: "_hp",
         tabindex: "-1",
         autocomplete: "off",
@@ -73,7 +73,8 @@ export function renderForm(
     children: [
       page,
       { tag: "input", attrs: { type: "hidden", name: "formId", value: formId }, children: [] },
-      honeypot(formId),
+      // One id per form element, so the same form placed twice keeps unique ids (W-187).
+      honeypot(`emvb-hp-${node.id}`),
       {
         tag: "div",
         attrs: { class: "ec-form-status", "data-form-status": "", "aria-live": "polite" },

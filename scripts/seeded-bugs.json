@@ -20712,6 +20712,48 @@
         "decoded once"
       ],
       "expect": "\\(fail\\).*decoded once"
+    },
+    {
+      "id": "W-187/id-from-field",
+      "requirement": "W-187",
+      "description": "Form controls take the field name as their id again, so two forms with an email field share an id.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "const controlId = (nodeId: string): string => `emvb-field-${nodeId}`;",
+          "replace": "const controlId = (_nodeId: string): string => `email`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-ids.test.ts"],
+      "expect": "\\(fail\\).*keeps every id unique"
+    },
+    {
+      "id": "W-187/label-for-name",
+      "requirement": "W-187",
+      "description": "Labels point at the field name, not their own control.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "attrs: { class: \"emvb-form-label\", for: controlFor },",
+          "replace": "attrs: { class: \"emvb-form-label\", for: name },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-ids.test.ts"],
+      "expect": "\\(fail\\).*keeps every id unique"
+    },
+    {
+      "id": "W-187/honeypot-by-form-id",
+      "requirement": "W-187",
+      "description": "The honeypot id comes from the bound form id, so the same form twice repeats it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "honeypot(`emvb-hp-${node.id}`),",
+          "replace": "honeypot(`${formId}-_hp`),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-ids.test.ts"],
+      "expect": "\\(fail\\).*keeps every id unique"
     }
   ]
 }

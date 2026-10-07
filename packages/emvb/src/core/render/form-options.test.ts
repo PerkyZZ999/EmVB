@@ -70,7 +70,7 @@ describe("form field options from the bound definition (W-035)", () => {
 
   test("a select lists the definition's options after a blank choice", () => {
     expect(html).toContain(
-      '<select class="ec-form-input" id="topic" name="topic"><option value="">Choose…</option><option value="sales">Sales</option><option value="support">Support</option></select>',
+      '<select class="ec-form-input" id="emvb-field-sele0001" name="topic"><option value="">Choose…</option><option value="sales">Sales</option><option value="support">Support</option></select>',
     );
   });
 

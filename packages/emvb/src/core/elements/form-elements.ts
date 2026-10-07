@@ -74,7 +74,15 @@ const fieldBox = (attrs: Record<string, string>, children: VNode["children"]): V
   children,
 });
 
+/**
+ * The control's HTML id, from the element's own id (W-187). A field name is not unique on a page
+ * (the same form twice, or a header and footer newsletter both asking for `email`) and can match a
+ * host theme id, so a label's `for` would focus another form's input.
+ */
+const controlId = (nodeId: string): string => `emvb-field-${nodeId}`;
+
 const fieldWrap = (
+  controlFor: string,
   name: string,
   labelText: string | undefined,
   control: VNode,
@@ -85,7 +93,7 @@ const fieldWrap = (
       ? [
           {
             tag: "label",
-            attrs: { class: "emvb-form-label", for: name },
+            attrs: { class: "emvb-form-label", for: controlFor },
             children: [labelText],
           } as VNode,
         ]
@@ -98,12 +106,13 @@ const fieldWrap = (
 const textControl = (
   tag: "input" | "textarea",
   props: { field: string; placeholder?: string | undefined },
+  id: string,
 ): VNode => ({
   tag,
   attrs: {
     ...(tag === "input" ? { type: "text" } : {}),
     class: "ec-form-input",
-    id: props.field,
+    id,
     name: props.field,
     ...(props.placeholder ? { placeholder: props.placeholder } : {}),
   },
@@ -115,7 +124,13 @@ export const textInput: ElementDefinition<TextInputNode> = {
   defaults: () => ({ type: "text-input", props: { field: "name", label: "Name" } }),
   descriptor: fieldDescriptor("text-input", "Text input", TEXT_FIELDS),
   build: (node, attrs) =>
-    fieldWrap(node.props.field, node.props.label, textControl("input", node.props), attrs),
+    fieldWrap(
+      controlId(node.id),
+      node.props.field,
+      node.props.label,
+      textControl("input", node.props, controlId(node.id)),
+      attrs,
+    ),
 };
 
 export const textareaEl: ElementDefinition<TextareaNode> = {
@@ -123,7 +138,13 @@ export const textareaEl: ElementDefinition<TextareaNode> = {
   defaults: () => ({ type: "textarea", props: { field: "message", label: "Message" } }),
   descriptor: fieldDescriptor("textarea", "Textarea", TEXT_FIELDS),
   build: (node, attrs) =>
-    fieldWrap(node.props.field, node.props.label, textControl("textarea", node.props), attrs),
+    fieldWrap(
+      controlId(node.id),
+      node.props.field,
+      node.props.label,
+      textControl("textarea", node.props, controlId(node.id)),
+      attrs,
+    ),
 };
 
 export const selectEl: ElementDefinition<SelectNode> = {
@@ -134,10 +155,10 @@ export const selectEl: ElementDefinition<SelectNode> = {
     const name = node.props.field;
     const control: VNode = {
       tag: "select",
-      attrs: { class: "ec-form-input", id: name, name },
+      attrs: { class: "ec-form-input", id: controlId(node.id), name },
       children: [{ tag: "option", attrs: { value: "" }, children: ["Choose…"] }],
     };
-    return fieldWrap(name, node.props.label, control, attrs);
+    return fieldWrap(controlId(node.id), name, node.props.label, control, attrs);
   },
 };
 
@@ -149,7 +170,7 @@ export const checkbox: ElementDefinition<CheckboxNode> = {
     const name = node.props.field;
     const input: VNode = {
       tag: "input",
-      attrs: { type: "checkbox", id: name, name, value: "true" },
+      attrs: { type: "checkbox", id: controlId(node.id), name, value: "true" },
       children: [],
     };
     const labelEl: VNode = {
@@ -182,7 +203,7 @@ export const radio: ElementDefinition<RadioNode> = {
         },
       ],
     };
-    return fieldWrap(name, node.props.label, control, attrs);
+    return fieldWrap(controlId(node.id), name, node.props.label, control, attrs);
   },
 };
 
