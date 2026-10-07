@@ -1847,8 +1847,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/embed-url.ts",
-          "search": "{ kind: \"iframe\", src: `${provider.embed}${id}`, provider: provider.provider }",
-          "replace": "{ kind: \"iframe\", src: `${provider.embed}${id}?autoplay=1`, provider: provider.provider }"
+          "search": "src: withStart(provider.provider, `${provider.embed}${id}`, startOf(parsed)),",
+          "replace": "src: `${provider.embed}${id}?autoplay=1`,"
         }
       ],
       "command": [
@@ -22300,6 +22300,48 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/image-priority.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-227/start-dropped",
+      "requirement": "W-227",
+      "description": "A video link's start time is dropped from the embed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "src: withStart(provider.provider, `${provider.embed}${id}`, startOf(parsed)),",
+          "replace": "src: `${provider.embed}${id}`,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-start.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-227/start-unchecked",
+      "requirement": "W-227",
+      "description": "Any t= text reaches the embed URL.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "return total > 0 && total <= MAX_START ? total : undefined;",
+          "replace": "return total > 0 ? total : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-start.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-227/vimeo-fragment-ignored",
+      "requirement": "W-227",
+      "description": "Vimeo #t= start times are ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "parsed.searchParams.get(\"t\") ?? parsed.searchParams.get(\"start\") ?? fragment.get(\"t\"),",
+          "replace": "parsed.searchParams.get(\"t\") ?? parsed.searchParams.get(\"start\"),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/embed-start.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]

@@ -65,9 +65,40 @@ function vimeoId(parsed: URL): string | undefined {
   return hash && VIMEO_HASH.test(hash) ? `${id}?h=${hash}` : id;
 }
 
+/** Longest start time kept, in seconds (a day). */
+const MAX_START = 86_400;
+
 /**
- * Embed URLs are built from the id alone (and an unlisted Vimeo hash), so no other query param
- * (autoplay included) carries over.
+ * A start time as whole seconds: `90`, `90s`, `1m30s`, `1h2m3s` (W-227). Undefined for anything
+ * else, zero, or past MAX_START, so nothing but digits reaches the embed URL.
+ */
+export function parseStartSeconds(raw: string | null | undefined): number | undefined {
+  const match = /^(?:(\d{1,2})h)?(?:(\d{1,4})m)?(?:(\d{1,6})s?)?$/i.exec(raw?.trim() ?? "");
+  if (!match || !raw?.trim()) return undefined;
+  const [, h = "0", m = "0", s = "0"] = match;
+  const total = Number(h) * 3600 + Number(m) * 60 + Number(s);
+  return total > 0 && total <= MAX_START ? total : undefined;
+}
+
+/** `t=` from the query or the `#t=` fragment, YouTube's `start=` too (W-227). */
+function startOf(parsed: URL): number | undefined {
+  const fragment = new URLSearchParams(parsed.hash.replace(/^#/, ""));
+  return parseStartSeconds(
+    parsed.searchParams.get("t") ?? parsed.searchParams.get("start") ?? fragment.get("t"),
+  );
+}
+
+/** Appends the start time the way each player reads it (W-227). */
+const withStart = (provider: "youtube" | "vimeo", src: string, start: number | undefined) =>
+  start === undefined
+    ? src
+    : provider === "youtube"
+      ? `${src}?start=${start}`
+      : `${src}#t=${start}s`;
+
+/**
+ * Embed URLs are built from the id alone (and an unlisted Vimeo hash and a start time in whole
+ * seconds, W-227), so no other query param (autoplay included) carries over.
  */
 const PROVIDERS = [
   {
@@ -108,7 +139,11 @@ export function resolveEmbedUrl(value: string): EmbedTarget | undefined {
   if (provider) {
     const id = provider.id(parsed);
     return id
-      ? { kind: "iframe", src: `${provider.embed}${id}`, provider: provider.provider }
+      ? {
+          kind: "iframe",
+          src: withStart(provider.provider, `${provider.embed}${id}`, startOf(parsed)),
+          provider: provider.provider,
+        }
       : undefined;
   }
 
