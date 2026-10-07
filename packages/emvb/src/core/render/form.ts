@@ -1,6 +1,7 @@
 import { fieldByName, type FormDefinitions } from "../forms/definition.ts";
 import type { FormNode, LayoutNode } from "../schema/layout.ts";
 import type { ThemeDynamicData } from "../theme/dynamic.ts";
+import { nodeChildren } from "../tree-ops.ts";
 import type { RenderContext } from "./context.ts";
 import type { VNode } from "./vnode.ts";
 
@@ -33,6 +34,16 @@ const honeypot = (inputId: string): VNode => ({
 });
 
 /** An EmDash Forms markup shell (D-006) around the form's fields; unbound forms only preview in the editor. */
+/** The text of the form's first Submit button, as the page renders it. */
+function firstSubmitLabel(nodes: readonly LayoutNode[]): string | undefined {
+  for (const child of nodes) {
+    if (child.type === "submit") return (child.props as { label?: string }).label ?? "Submit";
+    const found = firstSubmitLabel(nodeChildren(child));
+    if (found !== undefined) return found;
+  }
+  return undefined;
+}
+
 export function renderForm(
   node: FormNode,
   attrs: Record<string, string>,
@@ -53,7 +64,12 @@ export function renderForm(
       children: ["Bind a form in settings to preview it here."],
     };
   }
-  const submitLabel = ctx.definitions.get(formId)?.settings.submitLabel ?? "Submit";
+  // W-203: the forms client puts this label back on the button after each submit, so it must be
+  // the label the page shows, not the form definition's.
+  const submitLabel =
+    firstSubmitLabel(node.children) ??
+    ctx.definitions.get(formId)?.settings.submitLabel ??
+    "Submit";
   const page: VNode = {
     tag: "div",
     attrs: { "data-page": "0" },

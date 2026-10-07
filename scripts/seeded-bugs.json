@@ -21304,6 +21304,34 @@
         "./packages/emvb/src/admin/editor/panels/settings/field-name.test.ts"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-203/definition-label",
+      "requirement": "W-203",
+      "description": "The forms client relabels the designer's Submit button with the definition's label after a submit.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "    firstSubmitLabel(node.children) ??\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-submit-label.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-203/nested-submit",
+      "requirement": "W-203",
+      "description": "A Submit button inside a box inside the form is not found.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "    const found = firstSubmitLabel(nodeChildren(child));",
+          "replace": "    const found = undefined as string | undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-submit-label.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
