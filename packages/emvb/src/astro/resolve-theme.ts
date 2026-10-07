@@ -97,6 +97,13 @@ export type ResolvedThemeParts = {
    * `/page/1`, which hosts should redirect there), else `<archive>/page/N` (W-221).
    */
   canonicalPath?: string;
+  /**
+   * The archive's title when an Archive part renders: "Posts", or the category/tag slug
+   * (W-229). Hosts build "Posts – page 2" with `archivePageTitle`.
+   */
+  archiveTitle?: string;
+  /** The archive page number when an Archive part renders (1 for the bare URL). */
+  archivePage?: number;
 };
 
 type AstroLike = {
@@ -396,6 +403,7 @@ export async function resolveThemeParts(
   };
 
   let pastLastPage = false;
+  let archiveInfo: { title?: string; page: number } | undefined;
   const renderPart = async (
     winner: ThemePartCandidate | null,
   ): Promise<RenderedThemePart | null> => {
@@ -411,6 +419,9 @@ export async function resolveThemeParts(
           }
         : referenced;
     // A page past the last one has no posts; the host answers 404 (W-221).
+    if (winner === contentWinner && dynamic?.pagination) {
+      archiveInfo = { title: dynamic.archiveTitle, page: dynamic.pagination.page };
+    }
     if (winner === contentWinner && (dynamic?.pagination?.page ?? 1) > 1) {
       pastLastPage = (dynamic?.posts ?? []).length === 0;
     }
@@ -483,6 +494,8 @@ export async function resolveThemeParts(
     needsTabsRuntime: rendered.some((page) => page.needsTabsRuntime),
     needsMenuRuntime: rendered.some((page) => page.needsMenuRuntime),
     notFound: pastLastPage,
+    ...(archiveInfo?.title ? { archiveTitle: archiveInfo.title } : {}),
+    ...(archiveInfo ? { archivePage: archiveInfo.page } : {}),
     ...(empty.canonicalPath ? { canonicalPath: empty.canonicalPath } : {}),
   };
 }

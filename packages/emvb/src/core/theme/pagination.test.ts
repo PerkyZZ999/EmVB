@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   archivePagePath,
+  archivePageTitle,
   DEFAULT_PER_PAGE,
   loopPerPage,
   paginationItems,
@@ -60,4 +61,10 @@ describe("pagination items (W-221)", () => {
       6,
     ]);
   });
+});
+
+test("a paged archive title reads 'Posts – page 2'; page 1 is bare (W-229)", () => {
+  expect(archivePageTitle("Posts", 2)).toBe("Posts – page 2");
+  expect(archivePageTitle("Posts", 1)).toBe("Posts");
+  expect(archivePageTitle("news", undefined)).toBe("news");
 });

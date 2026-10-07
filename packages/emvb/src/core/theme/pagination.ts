@@ -56,6 +56,14 @@ export function loopPerPage(layout: Layout): number {
   return found ?? DEFAULT_PER_PAGE;
 }
 
+/**
+ * A paged archive's title for `<title>` and headings: "Posts – page 2"; page 1 is the bare
+ * title (W-229).
+ */
+export function archivePageTitle(title: string, page: number | undefined): string {
+  return page !== undefined && page > 1 ? `${title} – page ${page}` : title;
+}
+
 /** One entry of a Pagination bar: a page link, the current page, or a gap (W-222). */
 export type PaginationItem =
   | { kind: "prev" | "next"; href: string }

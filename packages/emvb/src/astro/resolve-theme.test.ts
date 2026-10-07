@@ -389,6 +389,10 @@ describe("archive pagination (W-221)", () => {
     expect(page2.content?.html).toContain("Post 4");
     expect(page2.notFound).toBe(false);
     expect(page2.canonicalPath).toBe("/posts/page/2");
+    // W-229: hosts title the page "Posts – page 2".
+    expect(page2.archiveTitle).toBe("Posts");
+    expect(page2.archivePage).toBe(2);
+    expect((await at("/category/news/page/2")).archiveTitle).toBe("news");
     const page3 = await at("/posts/page/3");
     expect(count(page3.content?.html)).toBe(1);
   });

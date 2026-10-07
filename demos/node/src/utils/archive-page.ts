@@ -1,5 +1,10 @@
 import type { AstroGlobal } from "astro";
-import { resolveThemeParts, themeContextFrom, type ResolvedThemeParts } from "@perkyzz/emvb/astro";
+import {
+  archivePageTitle,
+  resolveThemeParts,
+  themeContextFrom,
+  type ResolvedThemeParts,
+} from "@perkyzz/emvb/astro";
 
 /**
  * Numbered archive pages (`/posts/page/2`, `/category/x/page/2`, `/tag/x/page/2`) are EmVB's:
@@ -9,7 +14,7 @@ import { resolveThemeParts, themeContextFrom, type ResolvedThemeParts } from "@p
  */
 export async function resolveArchivePage(
   Astro: AstroGlobal,
-): Promise<Response | { theme: ResolvedThemeParts; page: number }> {
+): Promise<Response | { theme: ResolvedThemeParts; page: number; title: string }> {
   const context = themeContextFrom(Astro.url);
   if (context.kind !== "archive" || context.page === undefined) return notFound(Astro);
   const theme = await resolveThemeParts(Astro, context);
@@ -18,7 +23,9 @@ export async function resolveArchivePage(
     return Astro.redirect(theme.canonicalPath, 301);
   }
   if (!theme.content || theme.notFound) return notFound(Astro);
-  return { theme, page: context.page };
+  // "Posts – page 2" (W-229).
+  const title = archivePageTitle(theme.archiveTitle ?? "Archive", context.page);
+  return { theme, page: context.page, title };
 }
 
 async function notFound(Astro: AstroGlobal): Promise<Response> {

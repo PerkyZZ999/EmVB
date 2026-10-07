@@ -22371,6 +22371,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/pagination.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-229/title-no-page",
+      "requirement": "W-229",
+      "description": "Paged archive titles lose the page number.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/pagination.ts",
+          "search": "return page !== undefined && page > 1 ? `${title} – page ${page}` : title;",
+          "replace": "return title;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/pagination.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-229/title-not-exposed",
+      "requirement": "W-229",
+      "description": "resolveThemeParts doesn't expose the archive title.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "...(archiveInfo?.title ? { archiveTitle: archiveInfo.title } : {}),",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-229/demo-fixed-title",
+      "requirement": "W-229",
+      "description": "The demo's paged archive ignores the archive title.",
+      "edits": [
+        {
+          "file": "demos/node/src/utils/archive-page.ts",
+          "search": "archivePageTitle(theme.archiveTitle ?? \"Archive\", context.page)",
+          "replace": "`Page ${context.page}`"
+        }
+      ],
+      "command": ["bun", "test", "./test/demos/archive-pages.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

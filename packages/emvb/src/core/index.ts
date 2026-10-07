@@ -322,6 +322,7 @@ export {
 } from "./theme/dynamic.ts";
 export {
   archivePagePath,
+  archivePageTitle,
   DEFAULT_PER_PAGE,
   loopPerPage,
   MAX_ARCHIVE_PAGE,

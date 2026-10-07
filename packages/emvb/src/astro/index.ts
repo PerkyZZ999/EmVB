@@ -6,6 +6,7 @@ export {
   type RenderedPopup,
   type ResolvedThemeParts,
 } from "./resolve-theme.ts";
+export { archivePageTitle } from "../core/index.ts";
 export {
   themeContextFrom,
   themeContextFront,
