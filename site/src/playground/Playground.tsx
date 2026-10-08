@@ -111,7 +111,7 @@ function SmallScreenGate({
   tooNarrow?: boolean;
 }) {
   return (
-    <div className="pg-gate" data-pg-small-screen={tooNarrow ? "too-narrow" : "ask"}>
+    <main className="pg-gate" data-pg-small-screen={tooNarrow ? "too-narrow" : "ask"}>
       <div className="pg-gate-card">
         <Logo />
         <h1>The EmVB editor is best on a larger screen</h1>
@@ -135,7 +135,7 @@ function SmallScreenGate({
           </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -260,7 +260,9 @@ export default function Playground() {
 
   return (
     <EditorHostContext.Provider value={host}>
-      <div className="pg-bar" role="banner" data-pg-bar="">
+      {/* A header, not a div with a banner role: the role put a banner inside the editor's own
+          banner (W-293). */}
+      <header className="pg-bar" data-pg-bar="">
         <a className="pg-brand" href={SITE_HOME} title="Back to emvb.dev">
           <Logo />
           <span>
@@ -328,7 +330,7 @@ export default function Playground() {
             </div>
           </>
         )}
-      </div>
+      </header>
       {notice && (
         <div className="pg-toast" role="status">
           {notice}

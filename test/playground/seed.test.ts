@@ -38,6 +38,27 @@ describe("playground starter content", () => {
     expect(rendered.html.length).toBeGreaterThan(300);
   });
 
+  test.each([
+    ["landing", landingLayout],
+    ["journal", journalLayout],
+  ])(
+    "the %s page has one main landmark and headings that don't skip a level (W-293)",
+    (_n, make) => {
+      const result = validateLayout(make());
+      const design = validateDesign(SEED_DESIGN);
+      if (!result.ok || !design.ok) throw new Error("invalid seed");
+      const { html } = renderPage(result.layout, design.design, {
+        dynamic: { posts: [...SEED_POSTS] },
+      });
+      expect(html.match(/<main[\s>]/g)?.length).toBe(1);
+      const levels = [...html.matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]));
+      expect(levels[0]).toBe(1);
+      levels.forEach((level, i) => {
+        if (i > 0) expect(level - (levels[i - 1] as number)).toBeLessThanOrEqual(1);
+      });
+    },
+  );
+
   test("every seeded image ships with the site, at the size the library says", () => {
     for (const media of SEED_MEDIA) {
       const file = new URL(`../../site/public/playground/media/${media.filename}`, import.meta.url);

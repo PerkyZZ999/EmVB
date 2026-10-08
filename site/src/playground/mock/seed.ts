@@ -263,10 +263,13 @@ const stat = (key: string, value: string, label: string) =>
     {
       style: { flexDirection: "column", gap: px(4), alignItems: "center" },
       children: [
-        heading(`stat-${key}-v`, value, 3, {
+        // A figure, not a heading: the stats sit between the h1 and the next h2 (W-293).
+        text(`stat-${key}-v`, value, {
           style: {
             fontFamily: { var: "display", from: "font" },
             fontSize: { value: 2.2, unit: "rem" },
+            fontWeight: 700,
+            lineHeight: 1.2,
             color: { var: "brand" },
             textAlign: "center",
           },
@@ -402,441 +405,468 @@ export function landingLayout(): Layout {
               ],
             },
           ),
-          section(
-            "hero",
-            [
-              node(
-                "hero-grid",
-                "grid",
-                { columns: 2, columnsTablet: 1 },
-                {
-                  style: { gap: px(56), alignItems: "center" },
-                  children: [
+          node(
+            "main",
+            "container",
+            { tag: "main" },
+            {
+              style: { flexDirection: "column" },
+              children: [
+                section(
+                  "hero",
+                  [
                     node(
-                      "hero-copy",
-                      "flexbox",
-                      {},
+                      "hero-grid",
+                      "grid",
+                      { columns: 2, columnsTablet: 1 },
                       {
-                        style: { flexDirection: "column", gap: px(20) },
+                        style: { gap: px(56), alignItems: "center" },
                         children: [
                           node(
-                            "hero-eyebrow",
-                            "label",
-                            { text: "New · Shared notebooks" },
-                            {
-                              classes: ["eyebrow"],
-                            },
-                          ),
-                          heading("hero-title", "Notes your whole team will actually read.", 1, {
-                            devices: { mobile: { fontSize: { value: 2.4, unit: "rem" } } },
-                          }),
-                          text(
-                            "hero-lede",
-                            "Fieldnote turns meeting scraps, decisions and to-dos into one calm, searchable notebook. Write once, and everyone who needs it finds it.",
-                            { style: { fontSize: { var: "lede", from: "fontSize" } } },
-                          ),
-                          node(
-                            "hero-actions",
+                            "hero-copy",
                             "flexbox",
                             {},
                             {
-                              style: { flexDirection: "row", flexWrap: "wrap", gap: px(12) },
+                              style: { flexDirection: "column", gap: px(20) },
                               children: [
                                 node(
-                                  "hero-cta",
-                                  "button",
-                                  { text: "Start free", href: "#signup" },
+                                  "hero-eyebrow",
+                                  "label",
+                                  { text: "New · Shared notebooks" },
+                                  {
+                                    classes: ["eyebrow"],
+                                  },
+                                ),
+                                heading(
+                                  "hero-title",
+                                  "Notes your whole team will actually read.",
+                                  1,
+                                  {
+                                    devices: { mobile: { fontSize: { value: 2.4, unit: "rem" } } },
+                                  },
+                                ),
+                                text(
+                                  "hero-lede",
+                                  "Fieldnote turns meeting scraps, decisions and to-dos into one calm, searchable notebook. Write once, and everyone who needs it finds it.",
+                                  { style: { fontSize: { var: "lede", from: "fontSize" } } },
+                                ),
+                                node(
+                                  "hero-actions",
+                                  "flexbox",
+                                  {},
+                                  {
+                                    style: { flexDirection: "row", flexWrap: "wrap", gap: px(12) },
+                                    children: [
+                                      node(
+                                        "hero-cta",
+                                        "button",
+                                        { text: "Start free", href: "#signup" },
+                                        {
+                                          classes: ["button-primary"],
+                                        },
+                                      ),
+                                      node(
+                                        "hero-tour",
+                                        "button",
+                                        { text: "See how it works", href: "#features" },
+                                        {
+                                          classes: ["button-ghost"],
+                                        },
+                                      ),
+                                    ],
+                                  },
+                                ),
+                                text("hero-note", "Free for teams up to 5. No card needed.", {
+                                  style: { fontSize: { var: "small", from: "fontSize" } },
+                                }),
+                              ],
+                            },
+                          ),
+                          node(
+                            "hero-image",
+                            "image",
+                            {
+                              src: mediaUrl("fieldnote-app.webp"),
+                              alt: "The Fieldnote app: a notebook list beside an open note",
+                              width: 1200,
+                              height: 860,
+                              mediaId: "media-app",
+                              priority: true,
+                            },
+                            {
+                              style: {
+                                width: { value: 100, unit: "%" },
+                                borderRadius: px(24),
+                                boxShadow: {
+                                  x: 0,
+                                  y: 30,
+                                  blur: 60,
+                                  spread: -30,
+                                  color: "#2f5bea66",
+                                },
+                              },
+                            },
+                          ),
+                        ],
+                      },
+                    ),
+                  ],
+                  { paddingTop: px(56) },
+                  { label: "Hero" },
+                ),
+                section(
+                  "stats",
+                  [
+                    node(
+                      "stats-grid",
+                      "grid",
+                      { columns: 3, columnsMobile: 1 },
+                      {
+                        style: { gap: px(24) },
+                        children: [
+                          stat("teams", "12,000+", "teams write in Fieldnote"),
+                          stat("time", "3 hrs", "saved per person, every week"),
+                          stat("rating", "4.9 / 5", "average rating from reviewers"),
+                        ],
+                      },
+                    ),
+                  ],
+                  {
+                    paddingTop: px(40),
+                    paddingBottom: px(40),
+                    borderTopWidth: px(1),
+                    borderBottomWidth: px(1),
+                    borderStyle: "solid",
+                    borderColor: { var: "line" },
+                  },
+                  { label: "Stats" },
+                ),
+                section(
+                  "features",
+                  [
+                    node(
+                      "feat-eyebrow",
+                      "label",
+                      { text: "Features" },
+                      {
+                        classes: ["eyebrow"],
+                        style: { textAlign: "center" },
+                      },
+                    ),
+                    heading("feat-title", "Everything in one calm place", 2, {
+                      style: { textAlign: "center" },
+                    }),
+                    text(
+                      "feat-lede",
+                      "Hover a card to see a class with a Hover state. Click any element on the canvas to change it.",
+                      {
+                        style: {
+                          textAlign: "center",
+                          maxWidth: px(620),
+                          marginLeft: "auto",
+                          marginRight: "auto",
+                        },
+                      },
+                    ),
+                    node(
+                      "feat-grid",
+                      "grid",
+                      { columns: 3, columnsTablet: 2, columnsMobile: 1 },
+                      {
+                        style: { gap: px(24), marginTop: px(24) },
+                        children: [
+                          feature(
+                            "search",
+                            "search",
+                            "Find anything",
+                            "Search every notebook at once, including the text inside attached images.",
+                          ),
+                          feature(
+                            "clock",
+                            "clock",
+                            "Decisions with dates",
+                            "Every decision keeps who made it and when, so nobody re-argues last month.",
+                          ),
+                          feature(
+                            "globe",
+                            "globe",
+                            "Share a page",
+                            "Publish one note as a web page for clients, without giving them an account.",
+                          ),
+                          feature(
+                            "check",
+                            "circle-check",
+                            "To-dos that finish",
+                            "Tasks written in a note show up in one list, with owners and due dates.",
+                          ),
+                          feature(
+                            "heart",
+                            "heart",
+                            "Made for focus",
+                            "No badges, no streaks, no feed. Just your team's notes, quietly in sync.",
+                          ),
+                          feature(
+                            "settings",
+                            "settings",
+                            "Yours to shape",
+                            "Templates, tags and notebook rules per team, set up in minutes.",
+                          ),
+                        ],
+                      },
+                    ),
+                  ],
+                  { backgroundColor: { var: "brand-soft" } },
+                  { label: "Features", htmlId: "features" },
+                ),
+                section(
+                  "split",
+                  [
+                    node(
+                      "split-grid",
+                      "grid",
+                      { columns: 2, columnsTablet: 1 },
+                      {
+                        style: { gap: px(56), alignItems: "center" },
+                        children: [
+                          node(
+                            "split-image",
+                            "image",
+                            {
+                              src: mediaUrl("shared-notebooks.webp"),
+                              alt: "Shared notebooks fanned out on a blue background",
+                              width: 1000,
+                              height: 760,
+                              mediaId: "media-notebooks",
+                            },
+                            { style: { width: { value: 100, unit: "%" }, borderRadius: px(24) } },
+                          ),
+                          node(
+                            "split-copy",
+                            "flexbox",
+                            {},
+                            {
+                              style: { flexDirection: "column", gap: px(18) },
+                              children: [
+                                node(
+                                  "split-eyebrow",
+                                  "label",
+                                  { text: "Shared notebooks" },
+                                  { classes: ["eyebrow"] },
+                                ),
+                                heading(
+                                  "split-title",
+                                  "One notebook per project, open to the right people",
+                                  2,
+                                ),
+                                node(
+                                  "split-list",
+                                  "list",
+                                  {
+                                    items: [
+                                      "Invite a client to one notebook, not your whole workspace",
+                                      "See who read a note, and who still needs to",
+                                      "Pin the decisions that matter to the top",
+                                    ],
+                                  },
+                                  { style: { color: { var: "muted" }, lineHeight: 1.9 } },
+                                ),
+                                node(
+                                  "split-link",
+                                  "link",
+                                  { text: "Read how teams use notebooks →", href: "#stories" },
+                                  {
+                                    style: { fontWeight: 600 },
+                                  },
+                                ),
+                              ],
+                            },
+                          ),
+                        ],
+                      },
+                    ),
+                  ],
+                  {},
+                  { label: "Split" },
+                ),
+                section(
+                  "quote",
+                  [
+                    node(
+                      "quote-card",
+                      "flexbox",
+                      {},
+                      {
+                        style: {
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: px(20),
+                          maxWidth: px(780),
+                          marginLeft: "auto",
+                          marginRight: "auto",
+                        },
+                        children: [
+                          text(
+                            "quote-text",
+                            "“We stopped losing decisions in chat. Our Monday meeting went from an hour to fifteen minutes.”",
+                            {
+                              style: {
+                                fontFamily: { var: "display", from: "font" },
+                                fontSize: { value: 1.75, unit: "rem" },
+                                lineHeight: 1.35,
+                                color: { var: "ink" },
+                                textAlign: "center",
+                              },
+                            },
+                          ),
+                          node(
+                            "quote-avatar",
+                            "image",
+                            {
+                              src: mediaUrl("avatar-maya.webp"),
+                              alt: "Portrait illustration of Maya",
+                              width: 600,
+                              height: 600,
+                              mediaId: "media-avatar",
+                            },
+                            {
+                              style: {
+                                width: px(56),
+                                height: px(56),
+                                borderRadius: px(999),
+                                objectFit: "cover",
+                              },
+                            },
+                          ),
+                          text("quote-who", "Maya Okafor · Head of Product, Lumen Studio", {
+                            style: {
+                              fontSize: { var: "small", from: "fontSize" },
+                              textAlign: "center",
+                            },
+                          }),
+                        ],
+                      },
+                    ),
+                  ],
+                  {},
+                  { label: "Testimonial", htmlId: "stories" },
+                ),
+                section(
+                  "faq",
+                  [
+                    heading("faq-title", "Questions, answered", 2, {
+                      style: { textAlign: "center" },
+                    }),
+                    node(
+                      "faq-list",
+                      "accordion",
+                      {},
+                      {
+                        style: {
+                          maxWidth: px(760),
+                          marginLeft: "auto",
+                          marginRight: "auto",
+                          width: { value: 100, unit: "%" },
+                        },
+                        children: [
+                          faq(
+                            "free",
+                            "Is there a free plan?",
+                            "Yes. Teams of up to five people use Fieldnote free, with no time limit.",
+                            true,
+                          ),
+                          faq(
+                            "import",
+                            "Can we bring our old notes?",
+                            "Import from Markdown, Notion, Google Docs or plain text. Folders become notebooks.",
+                          ),
+                          faq(
+                            "offline",
+                            "Does it work offline?",
+                            "Every notebook you open is kept on your device and syncs when you're back online.",
+                          ),
+                        ],
+                      },
+                    ),
+                  ],
+                  { backgroundColor: "#ffffff" },
+                  { label: "FAQ", htmlId: "faq" },
+                ),
+                section(
+                  "signup",
+                  [
+                    node(
+                      "signup-grid",
+                      "grid",
+                      { columns: 2, columnsTablet: 1 },
+                      {
+                        style: { gap: px(48), alignItems: "center" },
+                        children: [
+                          node(
+                            "signup-copy",
+                            "flexbox",
+                            {},
+                            {
+                              style: { flexDirection: "column", gap: px(16) },
+                              children: [
+                                heading("signup-title", "Try Fieldnote with your team", 2, {
+                                  style: { color: { var: "paper" } },
+                                }),
+                                text(
+                                  "signup-text",
+                                  "Leave your details and we'll set up a workspace for you. (In this playground, the form shows what happens without sending anything.)",
+                                  { style: { color: "#c9cdd6" } },
+                                ),
+                              ],
+                            },
+                          ),
+                          node(
+                            "signup-form",
+                            "form",
+                            { formId: "contact" },
+                            {
+                              style: {
+                                flexDirection: "column",
+                                gap: px(14),
+                                backgroundColor: "#ffffff",
+                                ...pad(28, 28),
+                                borderRadius: px(18),
+                              },
+                              children: [
+                                node("f-name", "text-input", {
+                                  field: "name",
+                                  label: "Name",
+                                  placeholder: "Maya Okafor",
+                                }),
+                                node("f-email", "text-input", {
+                                  field: "email",
+                                  label: "Work email",
+                                  placeholder: "maya@lumen.studio",
+                                }),
+                                node("f-message", "textarea", {
+                                  field: "message",
+                                  label: "What does your team need?",
+                                }),
+                                node(
+                                  "f-submit",
+                                  "submit",
+                                  { label: "Request a workspace" },
                                   {
                                     classes: ["button-primary"],
                                   },
                                 ),
-                                node(
-                                  "hero-tour",
-                                  "button",
-                                  { text: "See how it works", href: "#features" },
-                                  {
-                                    classes: ["button-ghost"],
-                                  },
-                                ),
                               ],
                             },
                           ),
-                          text("hero-note", "Free for teams up to 5. No card needed.", {
-                            style: { fontSize: { var: "small", from: "fontSize" } },
-                          }),
                         ],
                       },
                     ),
-                    node(
-                      "hero-image",
-                      "image",
-                      {
-                        src: mediaUrl("fieldnote-app.webp"),
-                        alt: "The Fieldnote app: a notebook list beside an open note",
-                        width: 1200,
-                        height: 860,
-                        mediaId: "media-app",
-                        priority: true,
-                      },
-                      {
-                        style: {
-                          width: { value: 100, unit: "%" },
-                          borderRadius: px(24),
-                          boxShadow: { x: 0, y: 30, blur: 60, spread: -30, color: "#2f5bea66" },
-                        },
-                      },
-                    ),
                   ],
-                },
-              ),
-            ],
-            { paddingTop: px(56) },
-            { label: "Hero" },
-          ),
-          section(
-            "stats",
-            [
-              node(
-                "stats-grid",
-                "grid",
-                { columns: 3, columnsMobile: 1 },
-                {
-                  style: { gap: px(24) },
-                  children: [
-                    stat("teams", "12,000+", "teams write in Fieldnote"),
-                    stat("time", "3 hrs", "saved per person, every week"),
-                    stat("rating", "4.9 / 5", "average rating from reviewers"),
-                  ],
-                },
-              ),
-            ],
-            {
-              paddingTop: px(40),
-              paddingBottom: px(40),
-              borderTopWidth: px(1),
-              borderBottomWidth: px(1),
-              borderStyle: "solid",
-              borderColor: { var: "line" },
+                  { backgroundColor: { var: "ink" } },
+                  { label: "Sign up", htmlId: "signup" },
+                ),
+              ],
+              label: "Main content",
             },
-            { label: "Stats" },
-          ),
-          section(
-            "features",
-            [
-              node(
-                "feat-eyebrow",
-                "label",
-                { text: "Features" },
-                {
-                  classes: ["eyebrow"],
-                  style: { textAlign: "center" },
-                },
-              ),
-              heading("feat-title", "Everything in one calm place", 2, {
-                style: { textAlign: "center" },
-              }),
-              text(
-                "feat-lede",
-                "Hover a card to see a class with a Hover state. Click any element on the canvas to change it.",
-                {
-                  style: {
-                    textAlign: "center",
-                    maxWidth: px(620),
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                  },
-                },
-              ),
-              node(
-                "feat-grid",
-                "grid",
-                { columns: 3, columnsTablet: 2, columnsMobile: 1 },
-                {
-                  style: { gap: px(24), marginTop: px(24) },
-                  children: [
-                    feature(
-                      "search",
-                      "search",
-                      "Find anything",
-                      "Search every notebook at once, including the text inside attached images.",
-                    ),
-                    feature(
-                      "clock",
-                      "clock",
-                      "Decisions with dates",
-                      "Every decision keeps who made it and when, so nobody re-argues last month.",
-                    ),
-                    feature(
-                      "globe",
-                      "globe",
-                      "Share a page",
-                      "Publish one note as a web page for clients, without giving them an account.",
-                    ),
-                    feature(
-                      "check",
-                      "circle-check",
-                      "To-dos that finish",
-                      "Tasks written in a note show up in one list, with owners and due dates.",
-                    ),
-                    feature(
-                      "heart",
-                      "heart",
-                      "Made for focus",
-                      "No badges, no streaks, no feed. Just your team's notes, quietly in sync.",
-                    ),
-                    feature(
-                      "settings",
-                      "settings",
-                      "Yours to shape",
-                      "Templates, tags and notebook rules per team, set up in minutes.",
-                    ),
-                  ],
-                },
-              ),
-            ],
-            { backgroundColor: { var: "brand-soft" } },
-            { label: "Features", htmlId: "features" },
-          ),
-          section(
-            "split",
-            [
-              node(
-                "split-grid",
-                "grid",
-                { columns: 2, columnsTablet: 1 },
-                {
-                  style: { gap: px(56), alignItems: "center" },
-                  children: [
-                    node(
-                      "split-image",
-                      "image",
-                      {
-                        src: mediaUrl("shared-notebooks.webp"),
-                        alt: "Shared notebooks fanned out on a blue background",
-                        width: 1000,
-                        height: 760,
-                        mediaId: "media-notebooks",
-                      },
-                      { style: { width: { value: 100, unit: "%" }, borderRadius: px(24) } },
-                    ),
-                    node(
-                      "split-copy",
-                      "flexbox",
-                      {},
-                      {
-                        style: { flexDirection: "column", gap: px(18) },
-                        children: [
-                          node(
-                            "split-eyebrow",
-                            "label",
-                            { text: "Shared notebooks" },
-                            { classes: ["eyebrow"] },
-                          ),
-                          heading(
-                            "split-title",
-                            "One notebook per project, open to the right people",
-                            2,
-                          ),
-                          node(
-                            "split-list",
-                            "list",
-                            {
-                              items: [
-                                "Invite a client to one notebook, not your whole workspace",
-                                "See who read a note, and who still needs to",
-                                "Pin the decisions that matter to the top",
-                              ],
-                            },
-                            { style: { color: { var: "muted" }, lineHeight: 1.9 } },
-                          ),
-                          node(
-                            "split-link",
-                            "link",
-                            { text: "Read how teams use notebooks →", href: "#stories" },
-                            {
-                              style: { fontWeight: 600 },
-                            },
-                          ),
-                        ],
-                      },
-                    ),
-                  ],
-                },
-              ),
-            ],
-            {},
-            { label: "Split" },
-          ),
-          section(
-            "quote",
-            [
-              node(
-                "quote-card",
-                "flexbox",
-                {},
-                {
-                  style: {
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: px(20),
-                    maxWidth: px(780),
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                  },
-                  children: [
-                    text(
-                      "quote-text",
-                      "“We stopped losing decisions in chat. Our Monday meeting went from an hour to fifteen minutes.”",
-                      {
-                        style: {
-                          fontFamily: { var: "display", from: "font" },
-                          fontSize: { value: 1.75, unit: "rem" },
-                          lineHeight: 1.35,
-                          color: { var: "ink" },
-                          textAlign: "center",
-                        },
-                      },
-                    ),
-                    node(
-                      "quote-avatar",
-                      "image",
-                      {
-                        src: mediaUrl("avatar-maya.webp"),
-                        alt: "Portrait illustration of Maya",
-                        width: 600,
-                        height: 600,
-                        mediaId: "media-avatar",
-                      },
-                      {
-                        style: {
-                          width: px(56),
-                          height: px(56),
-                          borderRadius: px(999),
-                          objectFit: "cover",
-                        },
-                      },
-                    ),
-                    text("quote-who", "Maya Okafor · Head of Product, Lumen Studio", {
-                      style: { fontSize: { var: "small", from: "fontSize" }, textAlign: "center" },
-                    }),
-                  ],
-                },
-              ),
-            ],
-            {},
-            { label: "Testimonial", htmlId: "stories" },
-          ),
-          section(
-            "faq",
-            [
-              heading("faq-title", "Questions, answered", 2, { style: { textAlign: "center" } }),
-              node(
-                "faq-list",
-                "accordion",
-                {},
-                {
-                  style: {
-                    maxWidth: px(760),
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                    width: { value: 100, unit: "%" },
-                  },
-                  children: [
-                    faq(
-                      "free",
-                      "Is there a free plan?",
-                      "Yes. Teams of up to five people use Fieldnote free, with no time limit.",
-                      true,
-                    ),
-                    faq(
-                      "import",
-                      "Can we bring our old notes?",
-                      "Import from Markdown, Notion, Google Docs or plain text. Folders become notebooks.",
-                    ),
-                    faq(
-                      "offline",
-                      "Does it work offline?",
-                      "Every notebook you open is kept on your device and syncs when you're back online.",
-                    ),
-                  ],
-                },
-              ),
-            ],
-            { backgroundColor: "#ffffff" },
-            { label: "FAQ", htmlId: "faq" },
-          ),
-          section(
-            "signup",
-            [
-              node(
-                "signup-grid",
-                "grid",
-                { columns: 2, columnsTablet: 1 },
-                {
-                  style: { gap: px(48), alignItems: "center" },
-                  children: [
-                    node(
-                      "signup-copy",
-                      "flexbox",
-                      {},
-                      {
-                        style: { flexDirection: "column", gap: px(16) },
-                        children: [
-                          heading("signup-title", "Try Fieldnote with your team", 2, {
-                            style: { color: { var: "paper" } },
-                          }),
-                          text(
-                            "signup-text",
-                            "Leave your details and we'll set up a workspace for you. (In this playground, the form shows what happens without sending anything.)",
-                            { style: { color: "#c9cdd6" } },
-                          ),
-                        ],
-                      },
-                    ),
-                    node(
-                      "signup-form",
-                      "form",
-                      { formId: "contact" },
-                      {
-                        style: {
-                          flexDirection: "column",
-                          gap: px(14),
-                          backgroundColor: "#ffffff",
-                          ...pad(28, 28),
-                          borderRadius: px(18),
-                        },
-                        children: [
-                          node("f-name", "text-input", {
-                            field: "name",
-                            label: "Name",
-                            placeholder: "Maya Okafor",
-                          }),
-                          node("f-email", "text-input", {
-                            field: "email",
-                            label: "Work email",
-                            placeholder: "maya@lumen.studio",
-                          }),
-                          node("f-message", "textarea", {
-                            field: "message",
-                            label: "What does your team need?",
-                          }),
-                          node(
-                            "f-submit",
-                            "submit",
-                            { label: "Request a workspace" },
-                            {
-                              classes: ["button-primary"],
-                            },
-                          ),
-                        ],
-                      },
-                    ),
-                  ],
-                },
-              ),
-            ],
-            { backgroundColor: { var: "ink" } },
-            { label: "Sign up", htmlId: "signup" },
           ),
           node(
             "footer",
@@ -892,7 +922,8 @@ export function journalLayout(): Layout {
     root: rootNode(
       "j-root",
       "container",
-      {},
+      // The whole page is its main content: no header or footer here (W-293).
+      { tag: "main" },
       {
         style: {
           flexDirection: "column",

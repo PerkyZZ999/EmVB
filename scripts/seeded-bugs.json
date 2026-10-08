@@ -25294,6 +25294,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
       "expect": "\\(fail\\).*W-292"
+    },
+    {
+      "id": "W-293/stat-headings",
+      "requirement": "W-293",
+      "description": "The starter page's stat figures are h3 headings right after the h1.",
+      "edits": [
+        {
+          "file": "site/src/playground/mock/seed.ts",
+          "search": "        text(`stat-${key}-v`, value, {\n",
+          "replace": "        heading(`stat-${key}-v`, value, 3, {\n"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/seed.test.ts"],
+      "expect": "\\(fail\\).*W-293"
+    },
+    {
+      "id": "W-293/landing-no-main",
+      "requirement": "W-293",
+      "description": "The starter landing page has no main landmark.",
+      "edits": [
+        {
+          "file": "site/src/playground/mock/seed.ts",
+          "search": "            \"main\",\n            \"container\",\n            { tag: \"main\" },\n",
+          "replace": "            \"main\",\n            \"container\",\n            { tag: \"div\" },\n"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/seed.test.ts"],
+      "expect": "\\(fail\\).*W-293"
+    },
+    {
+      "id": "W-293/journal-no-main",
+      "requirement": "W-293",
+      "description": "The starter journal page has no main landmark.",
+      "edits": [
+        {
+          "file": "site/src/playground/mock/seed.ts",
+          "search": "      // The whole page is its main content: no header or footer here (W-293).\n      { tag: \"main\" },\n",
+          "replace": "      {},\n"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/seed.test.ts"],
+      "expect": "\\(fail\\).*W-293"
     }
   ]
 }

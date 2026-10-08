@@ -121,7 +121,9 @@ export function startView(): void {
     interceptForms();
     if (params.get("embed") === "1") keepEmbedLinksOut();
     if (result.draft && params.get("embed") !== "1") {
-      const badge = document.createElement("p");
+      // A landmark of its own, so the badge isn't stray content outside the page's main (W-293).
+      const badge = document.createElement("aside");
+      badge.setAttribute("aria-label", "Draft preview");
       badge.className = "pg-draft-badge";
       badge.textContent = "Preview of a saved draft · EmVB playground";
       document.body.append(badge);

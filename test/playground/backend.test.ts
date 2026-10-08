@@ -87,7 +87,10 @@ describe("playground backend: pages", () => {
     const entry = await loadEntry(fetcher, LANDING);
     expect(entry.title).toBe("Fieldnote landing page");
     expect(entry.status).toBe("published");
-    expect(entry.layout?.root.children.length).toBeGreaterThan(5);
+    // Header, main and footer (W-293), with the page's sections inside main.
+    const top = entry.layout?.root.children ?? [];
+    expect(top.map((n) => (n.props as { tag?: string }).tag)).toEqual(["header", "main", "footer"]);
+    expect((top[1] as { children?: unknown[] }).children?.length).toBeGreaterThan(5);
     const pages = await listPages(fetcher);
     expect(pages.map((p) => p.id).toSorted()).toEqual(["page-journal", LANDING]);
   });
