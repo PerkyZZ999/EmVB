@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 
-/** The site is one page; list it (and any page added later here) on the site's own domain. */
-const PATHS = ["/"];
+/** The site's pages (the home page and the playground), on the site's own domain. */
+const PATHS = ["/", "/playground/"];
 
 export const GET: APIRoute = ({ site }) => {
   const urls = PATHS.map(

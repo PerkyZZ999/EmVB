@@ -262,63 +262,67 @@ export default function Playground() {
             EmVB <span className="pg-brand-sub">playground</span>
           </span>
         </a>
-        <div className="pg-sep" aria-hidden="true" />
-        <label className="pg-page">
-          <span className="pg-label">Page</span>
-          <select
-            value={entryId}
-            onChange={(event) => openPage(event.target.value)}
-            aria-label="Page to edit"
-          >
-            {current ? null : <option value={entryId}>Loading…</option>}
-            {pages.map((page) => (
-              <option key={page.id} value={page.id}>
-                {page.title}
-              </option>
-            ))}
-          </select>
-        </label>
-        <Button
-          variant="ghost"
-          className={BUTTON}
-          icon={<PlusIcon aria-hidden="true" />}
-          onClick={() => void newPage()}
-        >
-          New page
-        </Button>
-        <p className="pg-note" role="note">
-          {storage
-            ? "Your edits stay in this browser. Nothing is uploaded."
-            : "This browser blocks storage: edits last until you close the tab."}
-        </p>
-        <div className="pg-actions">
-          <Button
-            variant="secondary"
-            className={BUTTON}
-            icon={<EyeIcon aria-hidden="true" />}
-            onClick={() => setPreview(true)}
-            title="See the page as visitors would, rendered by EmVB's public renderer"
-          >
-            Visitor view
-          </Button>
-          <Button
-            variant="ghost"
-            className={BUTTON}
-            icon={<DownloadSimpleIcon aria-hidden="true" />}
-            onClick={exportJson}
-            title="Download this page's saved layout and the site styles as JSON"
-          >
-            Export JSON
-          </Button>
-          <Button
-            variant="ghost"
-            className={BUTTON}
-            icon={<ArrowCounterClockwiseIcon aria-hidden="true" />}
-            onClick={() => setResetOpen(true)}
-          >
-            Reset
-          </Button>
-        </div>
+        {!gated && (
+          <>
+            <div className="pg-sep" aria-hidden="true" />
+            <label className="pg-page">
+              <span className="pg-label">Page</span>
+              <select
+                value={entryId}
+                onChange={(event) => openPage(event.target.value)}
+                aria-label="Page to edit"
+              >
+                {current ? null : <option value={entryId}>Loading…</option>}
+                {pages.map((page) => (
+                  <option key={page.id} value={page.id}>
+                    {page.title}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Button
+              variant="ghost"
+              className={BUTTON}
+              icon={<PlusIcon aria-hidden="true" />}
+              onClick={() => void newPage()}
+            >
+              New page
+            </Button>
+            <p className="pg-note" role="note">
+              {storage
+                ? "Your edits stay in this browser. Nothing is uploaded."
+                : "This browser blocks storage: edits last until you close the tab."}
+            </p>
+            <div className="pg-actions">
+              <Button
+                variant="secondary"
+                className={BUTTON}
+                icon={<EyeIcon aria-hidden="true" />}
+                onClick={() => setPreview(true)}
+                title="See the page as visitors would, rendered by EmVB's public renderer"
+              >
+                Visitor view
+              </Button>
+              <Button
+                variant="ghost"
+                className={BUTTON}
+                icon={<DownloadSimpleIcon aria-hidden="true" />}
+                onClick={exportJson}
+                title="Download this page's saved layout and the site styles as JSON"
+              >
+                Export JSON
+              </Button>
+              <Button
+                variant="ghost"
+                className={BUTTON}
+                icon={<ArrowCounterClockwiseIcon aria-hidden="true" />}
+                onClick={() => setResetOpen(true)}
+              >
+                Reset
+              </Button>
+            </div>
+          </>
+        )}
       </div>
       {notice && (
         <div className="pg-toast" role="status">

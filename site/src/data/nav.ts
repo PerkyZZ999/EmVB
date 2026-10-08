@@ -4,4 +4,5 @@ export const nav = [
   { href: "#theme-builder", label: "Theme Builder" },
   { href: "#under-the-hood", label: "Under the hood" },
   { href: "#faq", label: "FAQ" },
+  { href: "/playground/", label: "Playground" },
 ] as const;
