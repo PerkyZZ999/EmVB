@@ -2,9 +2,16 @@ import { Button } from "@cloudflare/kumo";
 import * as React from "react";
 import { getBundledIcon, sanitizeSvgMarkup, type LayoutNode } from "../../../../core/index.ts";
 import { serialize, type VNode } from "../../../../core/render/vnode.ts";
+import type { Fetcher } from "../../../api.ts";
 import { BUTTON } from "../../../ui.ts";
 import { IconLibraryDialog } from "../../icons/IconLibraryDialog.tsx";
-import { ICON_SETS, locateIcon, type LibraryIcon } from "../../icons/library.ts";
+import {
+  ICON_SETS,
+  locateIcon,
+  UPLOADS,
+  UPLOADS_CATEGORY,
+  type LibraryIcon,
+} from "../../icons/library.ts";
 
 const propsOf = (node: LayoutNode): Record<string, unknown> =>
   node.props as Record<string, unknown>;
@@ -64,6 +71,7 @@ export function iconNameLabel(iconId: string): string {
 function sourceLabel(iconId: string): string | undefined {
   const at = locateIcon(iconId);
   if (!at) return undefined;
+  if (at.set === UPLOADS) return UPLOADS_CATEGORY.label;
   const set = ICON_SETS.find((item) => item.id === at.set);
   if (!set) return undefined;
   const style = set.styles.find((item) => item.id === at.style);
@@ -77,9 +85,12 @@ function sourceLabel(iconId: string): string | undefined {
  */
 export function IconPicker({
   node,
+  fetcher,
   onChange,
 }: {
   node: LayoutNode;
+  /** Enables My uploads in the library (W-239). */
+  fetcher?: Fetcher;
   onChange: (node: LayoutNode) => void;
 }) {
   const props = propsOf(node);
@@ -91,11 +102,18 @@ export function IconPicker({
   const refocus = () =>
     field.current?.querySelector<HTMLButtonElement>("[data-emvb-icon-open]")?.focus();
   const markup = currentIconPreview(current, props.iconSvg);
+  // An upload's id is random; its title names it (set from the file name on insert).
+  const name =
+    current && locateIcon(current)?.set === UPLOADS
+      ? (typeof props.title === "string" && props.title) || UPLOADS_CATEGORY.label
+      : current
+        ? iconNameLabel(current)
+        : undefined;
   const source = current ? sourceLabel(current) : undefined;
 
   const insert = (icon: LibraryIcon) => {
     const title = typeof props.title === "string" ? props.title : "";
-    const previous = current ? iconNameLabel(current).toLowerCase() : undefined;
+    const previous = name?.toLowerCase();
     const patch: Record<string, unknown> = { iconId: icon.id, iconSvg: icon.markup };
     // Keep the title in step with the glyph while it is still a default or the old icon's name
     // (new Icon elements ship title "Star" with iconId "star"); a written title stays.
@@ -110,7 +128,7 @@ export function IconPicker({
         <button
           type="button"
           className="emvb-icon-current-preview"
-          aria-label={`Change icon (now ${current ? iconNameLabel(current) : "none"})`}
+          aria-label={`Change icon (now ${name ?? "none"})`}
           onClick={() => setOpen(true)}
         >
           {markup ? (
@@ -120,7 +138,7 @@ export function IconPicker({
           )}
         </button>
         <span className="emvb-icon-current-text">
-          <strong>{current ? iconNameLabel(current) : "No icon"}</strong>
+          <strong>{name ?? "No icon"}</strong>
           <span>
             {markup
               ? (source ?? "Saved SVG")
@@ -144,6 +162,7 @@ export function IconPicker({
         onOpenChange={setOpen}
         onClosed={refocus}
         currentId={current || undefined}
+        fetcher={fetcher}
         onInsert={insert}
       />
     </div>

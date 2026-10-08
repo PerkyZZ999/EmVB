@@ -130,3 +130,24 @@ describe("Icon field and library (W-236)", () => {
     expect(state.current.props).toMatchObject({ iconId: "tabler:anchor", title: "Anchor" });
   });
 });
+
+describe("an uploaded icon in the field (W-239)", () => {
+  test("is named by its title and sourced from My uploads", async () => {
+    await mountPanel(
+      iconNode({
+        iconId: "upload:aaaa000011112222",
+        title: "Brand logo",
+        iconSvg: '<svg viewBox="0 0 10 10"><path d="M0 0h10" fill="#e11d48"/></svg>',
+      }),
+    );
+    const current = await until(
+      () => document.querySelector("[data-emvb-icon-current]"),
+      "the icon field",
+    );
+    expect(current.querySelector("strong")?.textContent).toBe("Brand logo");
+    expect(current.textContent).toContain("My uploads");
+    expect(current.querySelector(".emvb-icon-current-preview")?.getAttribute("aria-label")).toBe(
+      "Change icon (now Brand logo)",
+    );
+  });
+});

@@ -22877,8 +22877,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
-          "search": "            needed.flatMap((id) => sets[id] ?? []),\n            category,\n",
-          "replace": "            needed.flatMap((id) => sets[id] ?? []),\n            ICON_CATEGORIES[0] as IconCategory,\n"
+          "search": "            inUploads ? (uploads ?? []) : needed.flatMap((id) => sets[id] ?? []),\n            category,\n",
+          "replace": "            inUploads ? (uploads ?? []) : needed.flatMap((id) => sets[id] ?? []),\n            ICON_CATEGORIES[0] as IconCategory,\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
@@ -23064,6 +23064,62 @@
         "test",
         "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
       ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-239/server-stores-raw",
+      "requirement": "W-239: Upload SVG: My uploads in the icon library; files tidied and sanitized (W-073/W-231) in the browser and again on the server, stored in EmVB plugin storage; Icons store upload:<id> + SVG; 32 KB stored cap.",
+      "description": "The upload route stores the file as sent, so a crafted request skips the sanitizer.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/icon-routes.ts",
+          "search": "      svg: prepared.svg,",
+          "replace": "      svg: ctx.input.svg,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/icon-uploads.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-239/title-kept",
+      "requirement": "W-239: Upload SVG: My uploads in the icon library; files tidied and sanitized (W-073/W-231) in the browser and again on the server, stored in EmVB plugin storage; Icons store upload:<id> + SVG; 32 KB stored cap.",
+      "description": "An upload keeps its file's <title>, which shows a stray tooltip over the icon.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "  text = text.replace(/<(title|desc)\\b[^>]*>[\\s\\S]*?<\\/\\1\\s*>/gi, \"\");",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-239/size-says-unusable",
+      "requirement": "W-239: Upload SVG: My uploads in the icon library; files tidied and sanitized (W-073/W-231) in the browser and again on the server, stored in EmVB plugin storage; Icons store upload:<id> + SVG; 32 KB stored cap.",
+      "description": "An SVG over the icon cap gets the generic 'couldn't use' message instead of its size.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "  if (text.length > ICON_SVG_MAX) return tooBig(utf8(text));",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-239/new-upload-last",
+      "requirement": "W-239: Upload SVG: My uploads in the icon library; files tidied and sanitized (W-073/W-231) in the browser and again on the server, stored in EmVB plugin storage; Icons store upload:<id> + SVG; 32 KB stored cap.",
+      "description": "A new upload is added at the end of My uploads instead of first.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "      setUploads((prev) => [icon, ...(prev ?? []).filter((other) => other.id !== icon.id)]);",
+          "replace": "      setUploads((prev) => [...(prev ?? []).filter((other) => other.id !== icon.id), icon]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
       "expect": "\\(fail\\)"
     }
   ]

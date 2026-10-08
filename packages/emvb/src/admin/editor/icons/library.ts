@@ -1,4 +1,6 @@
-import { getBundledIcon } from "../../../core/index.ts";
+import { getBundledIcon, sanitizeSvgMarkup } from "../../../core/index.ts";
+import { serialize } from "../../../core/render/vnode.ts";
+import type { UploadedIconItem } from "../../icon-uploads-api.ts";
 import { fold } from "../../pages/list-kit.tsx";
 import type { IconEntry, IconSetFile } from "./set-format.ts";
 
@@ -64,6 +66,11 @@ export type IconCategory = {
 
 export const ALL_ICONS = "all";
 
+/** W-239: the author's uploaded SVGs, stored as `upload:<id>`. */
+export const UPLOADS = "uploads";
+export const UPLOADS_CATEGORY: IconCategory = { id: UPLOADS, label: "My uploads" };
+const UPLOAD_PREFIX = "upload:";
+
 export const ICON_CATEGORIES: readonly IconCategory[] = [
   { id: ALL_ICONS, label: "All icons" },
   ...ICON_SETS.flatMap((set): IconCategory[] => [
@@ -83,7 +90,7 @@ export const ICON_CATEGORIES: readonly IconCategory[] = [
 export type LibraryIcon = {
   /** Stored as the node's iconId: `${prefix}:${name}`. */
   id: string;
-  set: IconSetId;
+  set: IconSetId | typeof UPLOADS;
   setLabel: string;
   style: string;
   styleLabel: string;
@@ -190,7 +197,8 @@ const SET_OF_PREFIX = new Map<string, IconSetId>(
  */
 export function locateIcon(
   iconId: string,
-): { set: IconSetId; style: string; id: string } | undefined {
+): { set: IconSetId | typeof UPLOADS; style: string; id: string } | undefined {
+  if (iconId.startsWith(UPLOAD_PREFIX)) return { set: UPLOADS, style: UPLOADS, id: iconId };
   const colon = iconId.indexOf(":");
   if (colon < 0)
     return getBundledIcon(iconId)
@@ -207,4 +215,29 @@ export function locateIcon(
         : "line"
       : (styles.find((item) => item.prefix === prefix)?.id ?? set);
   return { set, style, id: iconId };
+}
+
+/**
+ * Uploaded icons as grid tiles (W-239). The server stored them sanitized; they are sanitized
+ * again here before the tile shows them, and one that no longer passes is left out.
+ */
+export function uploadedIcons(items: readonly UploadedIconItem[]): LibraryIcon[] {
+  return items.flatMap((item): LibraryIcon[] => {
+    const tree = sanitizeSvgMarkup(item.svg);
+    if (!tree) return [];
+    return [
+      {
+        id: `${UPLOAD_PREFIX}${item.id}`,
+        set: UPLOADS,
+        setLabel: UPLOADS_CATEGORY.label,
+        style: UPLOADS,
+        styleLabel: UPLOADS_CATEGORY.label,
+        name: item.id,
+        label: item.name,
+        haystack: fold(item.name),
+        named: fold(`${item.name} | ${item.id}`),
+        markup: serialize(tree),
+      },
+    ];
+  });
 }

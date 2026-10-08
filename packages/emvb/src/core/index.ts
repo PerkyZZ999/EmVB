@@ -195,6 +195,13 @@ export {
   isAllowedSvgImageHref,
   type SvgReport,
 } from "./sanitize/svg.ts";
+export {
+  prepareUploadedSvg,
+  UPLOAD_SVG_MAX_BYTES,
+  type PreparedSvg,
+  type UploadedIcon,
+  type UploadedIconItem,
+} from "./sanitize/svg-upload.ts";
 export { resolveEmbedUrl, type EmbedTarget } from "./sanitize/embed-url.ts";
 export { summarizeLayout, type LayoutSummary } from "./stats.ts";
 export {

@@ -157,8 +157,11 @@ export const VideoNode = leafNode(
  * (W-234), `<set prefix>:<name>` ("fa-solid:rocket"), so the picker can reopen on it. `iconSvg` is
  * that icon's SVG, stored with the page so public pages load no icon library; it's sanitized on
  * every render. Unknown ids without SVG stay on save; the renderer shows a placeholder.
+ * W-239: an uploaded SVG is `upload:<id>` (EmVB's icon uploads); the cap rose from 16 KB to
+ * 32 KB for uploaded logos and illustrations: the SVG sanitizer's own limit (and the SVG
+ * element's), so a stored icon always renders.
  */
-export const ICON_SVG_MAX = 16_384;
+export const ICON_SVG_MAX = 32_768;
 export const IconNode = leafNode(
   "icon",
   z.strictObject({

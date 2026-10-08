@@ -1,6 +1,8 @@
 import { Button, Dialog } from "@cloudflare/kumo";
-import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
+import { MagnifyingGlassIcon, UploadSimpleIcon, XIcon } from "@phosphor-icons/react";
 import * as React from "react";
+import type { Fetcher } from "../../api.ts";
+import { listUploadedIcons, uploadIconFile } from "../../icon-uploads-api.ts";
 import { BUTTON, SOLID_PRIMARY, UI_CSS } from "../../ui.ts";
 import {
   ALL_ICONS,
@@ -10,6 +12,9 @@ import {
   loadIconSet,
   locateIcon,
   setsFor,
+  uploadedIcons,
+  UPLOADS,
+  UPLOADS_CATEGORY,
   type IconCategory,
   type IconSetId,
   type LibraryIcon,
@@ -249,9 +254,10 @@ function IconGrid({
   );
 }
 
-function initialCategory(currentId: string | undefined): string {
+function initialCategory(currentId: string | undefined, uploads: boolean): string {
   const at = currentId ? locateIcon(currentId) : undefined;
   if (!at) return ALL_ICONS;
+  if (at.set === UPLOADS) return uploads ? UPLOADS : ALL_ICONS;
   const style = ICON_CATEGORIES.find((category) => category.id === `${at.set}/${at.style}`);
   return style?.id ?? at.set;
 }
@@ -260,12 +266,26 @@ const fmt = (count: number) => count.toLocaleString("en-US");
 
 function IconLibrary({
   currentId,
+  fetcher,
   onInsert,
 }: {
   currentId: string | undefined;
+  /** With a fetcher, My uploads lists and adds uploaded SVGs (W-239). */
+  fetcher?: Fetcher;
   onInsert: (icon: LibraryIcon) => void;
 }) {
-  const [categoryId, setCategoryId] = React.useState(() => initialCategory(currentId));
+  const [categoryId, setCategoryId] = React.useState(() =>
+    initialCategory(currentId, fetcher !== undefined),
+  );
+  const categories = React.useMemo(
+    () => (fetcher ? [...ICON_CATEGORIES, UPLOADS_CATEGORY] : ICON_CATEGORIES),
+    [fetcher],
+  );
+  const [uploads, setUploads] = React.useState<LibraryIcon[]>();
+  const [uploadsFailed, setUploadsFailed] = React.useState<string>();
+  const [uploading, setUploading] = React.useState(false);
+  const [uploadNote, setUploadNote] = React.useState<{ error: boolean; text: string }>();
+  const fileRef = React.useRef<HTMLInputElement | null>(null);
   const [query, setQuery] = React.useState("");
   const [selectedId, setSelectedId] = React.useState(
     () => (currentId ? locateIcon(currentId)?.id : undefined) ?? currentId,
@@ -277,14 +297,36 @@ function IconLibrary({
   const searchId = React.useId();
 
   const category: IconCategory =
-    ICON_CATEGORIES.find((item) => item.id === categoryId) ?? (ICON_CATEGORIES[0] as IconCategory);
-  const needed = setsFor(category);
+    categories.find((item) => item.id === categoryId) ?? (ICON_CATEGORIES[0] as IconCategory);
+  const inUploads = category.id === UPLOADS;
+  const needed = inUploads ? [] : setsFor(category);
   const neededKey = needed.join(",");
+
+  // My uploads loads when first needed: its category, or a stored upload to show as picked.
+  const wantUploads =
+    fetcher !== undefined && (inUploads || locateIcon(currentId ?? "")?.set === UPLOADS);
+  React.useEffect(() => {
+    if (!wantUploads || !fetcher || uploads) return undefined;
+    let live = true;
+    setUploadsFailed(undefined);
+    listUploadedIcons(fetcher).then(
+      (items) => {
+        if (live) setUploads(uploadedIcons(items));
+      },
+      (caught: unknown) => {
+        if (live)
+          setUploadsFailed(caught instanceof Error ? caught.message : "Couldn't load uploads.");
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [wantUploads, fetcher, uploads, attempt]);
 
   React.useEffect(() => {
     let live = true;
     setFailed(undefined);
-    for (const id of neededKey.split(",") as IconSetId[]) {
+    for (const id of (neededKey ? neededKey.split(",") : []) as IconSetId[]) {
       loadIconSet(id).then(
         (icons) => {
           if (live) setSets((prev) => (prev[id] ? prev : { ...prev, [id]: icons }));
@@ -299,18 +341,18 @@ function IconLibrary({
     };
   }, [neededKey, attempt]);
 
-  const ready = needed.every((id) => sets[id]);
+  const ready = inUploads ? uploads !== undefined : needed.every((id) => sets[id]);
   const filtered = React.useMemo(
     () =>
       ready
         ? filterIcons(
-            needed.flatMap((id) => sets[id] ?? []),
+            inUploads ? (uploads ?? []) : needed.flatMap((id) => sets[id] ?? []),
             category,
             query,
           )
         : [],
-    // `needed` follows `category`; `ready` follows `sets`.
-    [ready, sets, category, query],
+    // `needed` follows `category`; `ready` follows `sets` and `uploads`.
+    [ready, sets, uploads, category, query],
   );
 
   // Matches per sidebar entry, for the sets loaded so far (a search shows where its hits are).
@@ -321,6 +363,7 @@ function IconLibrary({
       tally.set(icon.set, (tally.get(icon.set) ?? 0) + 1);
       tally.set(`${icon.set}/${icon.style}`, (tally.get(`${icon.set}/${icon.style}`) ?? 0) + 1);
     }
+    if (uploads) tally.set(UPLOADS, filterIcons(uploads, UPLOADS_CATEGORY, query).length);
     const allLoaded = ICON_SETS.every((set) => sets[set.id]);
     if (allLoaded)
       tally.set(
@@ -328,7 +371,7 @@ function IconLibrary({
         [...ICON_SETS].reduce((n, s) => n + (tally.get(s.id) ?? 0), 0),
       );
     return tally;
-  }, [sets, query]);
+  }, [sets, uploads, query]);
 
   // The keyboard cursor belongs to one list. A new list (search, category) starts from the picked
   // icon if it is in it, else nowhere, in the same render: an index left over from the last list
@@ -343,12 +386,43 @@ function IconLibrary({
 
   const selected = React.useMemo(() => {
     if (!selectedId) return undefined;
-    for (const icons of Object.values(sets)) {
+    for (const icons of [...Object.values(sets), uploads]) {
       const found = icons?.find((icon) => icon.id === selectedId);
       if (found) return found;
     }
     return undefined;
-  }, [sets, selectedId]);
+  }, [sets, uploads, selectedId]);
+
+  const onUpload = async (file: File | undefined) => {
+    if (!file || !fetcher) return;
+    setUploading(true);
+    setUploadNote(undefined);
+    try {
+      const { item, imagesLeftOut } = await uploadIconFile(fetcher, file);
+      const [icon] = uploadedIcons([item]);
+      if (!icon) throw new Error("The uploaded SVG couldn't be shown. Try another file.");
+      setUploads((prev) => [icon, ...(prev ?? []).filter((other) => other.id !== icon.id)]);
+      setQuery("");
+      setSelectedId(icon.id);
+      setCursor({ list: [], index: -1 });
+      setUploadNote({
+        error: false,
+        text: `Uploaded ${icon.label}. Insert adds it to the page.${
+          imagesLeftOut > 0
+            ? ` ${imagesLeftOut} outside image${imagesLeftOut === 1 ? " was" : "s were"} left out.`
+            : ""
+        }`,
+      });
+    } catch (caught) {
+      setUploadNote({
+        error: true,
+        text: caught instanceof Error ? caught.message : "The upload failed. Try again.",
+      });
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
 
   const activate = (index: number) => {
     setActive(index);
@@ -358,13 +432,17 @@ function IconLibrary({
 
   const status = failed
     ? `${failed} didn't load.`
-    : !ready
-      ? "Loading icons…"
-      : filtered.length === 0
-        ? query.trim()
-          ? `No icons match "${query.trim()}" in ${category.label}.`
-          : "No icons here."
-        : `${fmt(filtered.length)} icon${filtered.length === 1 ? "" : "s"}`;
+    : inUploads && uploadsFailed
+      ? "Uploads didn't load."
+      : !ready
+        ? "Loading icons…"
+        : filtered.length === 0
+          ? query.trim()
+            ? `No icons match "${query.trim()}" in ${category.label}.`
+            : inUploads
+              ? "No uploads yet."
+              : "No icons here."
+          : `${fmt(filtered.length)} icon${filtered.length === 1 ? "" : "s"}`;
 
   return (
     <div className="emvb-icon-library" data-emvb-dialog="icon-library">
@@ -394,7 +472,7 @@ function IconLibrary({
 
       <nav className="emvb-icon-library-nav" aria-label="Icon sets">
         <ul>
-          {ICON_CATEGORIES.map((item) => {
+          {categories.map((item) => {
             const count = counts.get(item.id);
             const current = item.id === categoryId;
             return (
@@ -404,6 +482,7 @@ function IconLibrary({
                   className="emvb-icon-library-cat"
                   data-emvb-icon-category={item.id}
                   data-sub={item.style ? "true" : undefined}
+                  data-uploads={item.id === UPLOADS ? "true" : undefined}
                   aria-current={current ? "true" : undefined}
                   onClick={() => setCategoryId(item.id)}
                 >
@@ -451,7 +530,55 @@ function IconLibrary({
             {status}
           </span>
         </div>
-        {failed ? (
+        {inUploads && (
+          <div className="emvb-icon-library-upload" data-emvb-icon-upload="">
+            <Button
+              variant="secondary"
+              size="sm"
+              className={BUTTON}
+              icon={<UploadSimpleIcon aria-hidden="true" />}
+              disabled={uploading}
+              data-emvb-icon-upload-btn=""
+              onClick={() => fileRef.current?.click()}
+            >
+              {uploading ? "Uploading…" : "Upload SVG"}
+            </Button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".svg,image/svg+xml"
+              className="emvb-sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
+              data-emvb-icon-upload-input=""
+              onChange={(event) => void onUpload(event.target.files?.[0])}
+            />
+            <span
+              className="emvb-helper"
+              data-emvb-icon-upload-note={uploadNote ? (uploadNote.error ? "error" : "ok") : ""}
+              role={uploadNote?.error ? "alert" : undefined}
+            >
+              {uploadNote?.text ??
+                "Up to 256 KB. Scripts, event handlers and outside images are removed or refused; the icon is saved with the page."}
+            </span>
+          </div>
+        )}
+        {inUploads && uploadsFailed ? (
+          <div className="emvb-icon-library-empty">
+            <p>Your uploads didn&apos;t load: {uploadsFailed}</p>
+            <Button
+              variant="secondary"
+              size="sm"
+              className={BUTTON}
+              onClick={() => {
+                setUploadsFailed(undefined);
+                setAttempt((n) => n + 1);
+              }}
+            >
+              Try again
+            </Button>
+          </div>
+        ) : failed ? (
           <div className="emvb-icon-library-empty">
             <p>The {failed} icons didn&apos;t load. Check the connection and try again.</p>
             <Button
@@ -540,12 +667,15 @@ export function IconLibraryDialog({
   open,
   onOpenChange,
   currentId,
+  fetcher,
   onInsert,
   onClosed,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentId: string | undefined;
+  /** Enables My uploads (W-239). */
+  fetcher?: Fetcher;
   onInsert: (icon: LibraryIcon) => void;
   /** After the close animation, once the focus trap has let go: the place to put focus back. */
   onClosed?: () => void;
@@ -570,6 +700,7 @@ export function IconLibraryDialog({
         {open ? (
           <IconLibrary
             currentId={currentId}
+            fetcher={fetcher}
             onInsert={(icon) => {
               onInsert(icon);
               onOpenChange(false);
@@ -593,6 +724,12 @@ const ICON_LIBRARY_CSS = `
   color: var(--text-color-kumo-default);
   font-size: 13px; line-height: 18px;
 }
+.emvb-icon-library-upload {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px; border-bottom: 1px solid var(--color-kumo-hairline);
+}
+.emvb-icon-library-upload [data-emvb-icon-upload-note="error"] { color: var(--text-color-kumo-danger, #b91c1c); }
+.emvb-icon-library-cat[data-uploads] { margin-top: 8px; border-top: 1px solid var(--color-kumo-hairline); padding-top: 8px; }
 .emvb-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .emvb-icon-library-head {
   grid-area: head; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;

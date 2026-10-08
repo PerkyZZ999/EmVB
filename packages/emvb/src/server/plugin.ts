@@ -6,6 +6,7 @@ import {
   designRoute,
   designSaveRoute,
 } from "./design-routes.ts";
+import { iconUploadRoute, iconsRoute } from "./icon-routes.ts";
 import { beforeSave } from "./hooks.ts";
 
 export function createPlugin() {
@@ -13,7 +14,8 @@ export function createPlugin() {
     id: PLUGIN_ID,
     version: PLUGIN_VERSION,
     capabilities: ["content:read", "content:write"],
-    storage: { design: { indexes: [] } },
+    // W-239: uploaded SVG icons (EmDash's media library refuses SVG by default).
+    storage: { design: { indexes: [] }, icons: { indexes: ["uploadedAt"] } },
     hooks: {
       "content:beforeSave": { handler: beforeSave, errorPolicy: "abort" },
     },
@@ -34,6 +36,8 @@ export function createPlugin() {
       "design/draft": designDraftRoute,
       "design/save": designSaveRoute,
       "design/publish": designPublishRoute,
+      icons: iconsRoute,
+      "icons/upload": iconUploadRoute,
     },
   });
 }

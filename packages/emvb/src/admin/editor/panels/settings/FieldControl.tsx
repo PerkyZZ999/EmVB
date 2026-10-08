@@ -97,7 +97,7 @@ export function FieldControl({
   }
 
   if (field.kind === "icon") {
-    return <IconPicker key={field.key} node={node} onChange={onChange} />;
+    return <IconPicker key={field.key} node={node} fetcher={fetcher} onChange={onChange} />;
   }
 
   if (field.kind === "media") {
