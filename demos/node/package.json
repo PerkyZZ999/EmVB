@@ -15,7 +15,7 @@
     "@emdash-cms/plugin-forms": "0.2.9",
     "@perkyzz/emvb": "workspace:*",
     "astro": "^7.3.5",
-    "emdash": "1.0.1",
+    "emdash": "1.2.0",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
