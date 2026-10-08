@@ -112,7 +112,10 @@ describe("My uploads (W-239)", () => {
   test("lists earlier uploads; Insert hands back upload:<id> with the stored SVG", async () => {
     const { fetcher, calls } = stubFetcher({ items: [logo] });
     const inserted = await open(fetcher);
-    expect(calls).toEqual([]); // nothing fetched until My uploads is opened
+    // All icons lists uploads too, so the list loads as soon as the library opens (W-295).
+    expect(calls).toEqual([
+      { method: "GET", path: "/_emdash/api/plugins/emvb/icons", body: undefined },
+    ]);
     await goUploads();
     await until(() => shown().length === 1, "the upload tile");
     expect(shown()).toEqual(["upload:aaaa000011112222"]);
@@ -286,5 +289,35 @@ describe("upload ids and tiles (W-239)", () => {
       { ...logo, id: "bad", svg: '<svg viewBox="0 0 1 1" onload="x()"><path d="M0"/></svg>' },
     ]);
     expect(icons.map((icon) => icon.id)).toEqual(["upload:aaaa000011112222"]);
+  });
+});
+
+describe("uploads in All icons (W-295)", () => {
+  test("All icons lists uploaded icons before the sets and counts them", async () => {
+    const { fetcher } = stubFetcher({ items: [logo] });
+    await open(fetcher);
+    await until(() => shown().includes("upload:aaaa000011112222"), "the upload among all icons");
+    expect(shown()[0]).toBe("upload:aaaa000011112222");
+    const all = dialog()?.querySelector('[data-emvb-icon-category="all"] .emvb-icon-library-count');
+    await until(
+      () => Number((all?.textContent ?? "0").replace(/,/g, "")) > 14_000,
+      "the all count",
+    );
+    expect(Number(all?.textContent?.replace(/,/g, ""))).toBeGreaterThan(14_001);
+  });
+
+  test("when the uploads list fails, All icons still shows the sets", async () => {
+    const { fetcher } = stubFetcher({
+      list: Response.json(
+        { success: false, error: { code: "INTERNAL_ERROR", message: "down" } },
+        { status: 500 },
+      ),
+    });
+    await open(fetcher);
+    await until(() => shown().length > 0, "a set icon");
+    expect(shown().some((id) => id?.startsWith("upload:"))).toBe(false);
+    // My uploads says why, with Try again.
+    await goUploads();
+    await until(() => dialog()?.textContent?.includes("Your uploads didn't load"), "the failure");
   });
 });

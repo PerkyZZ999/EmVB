@@ -302,9 +302,11 @@ function IconLibrary({
   const needed = inUploads ? [] : setsFor(category);
   const neededKey = needed.join(",");
 
-  // My uploads loads when first needed: its category, or a stored upload to show as picked.
+  // My uploads loads when first needed: its category, All icons (which lists them first, W-295),
+  // or a stored upload to show as picked.
+  const inAll = category.id === ALL_ICONS;
   const wantUploads =
-    fetcher !== undefined && (inUploads || locateIcon(currentId ?? "")?.set === UPLOADS);
+    fetcher !== undefined && (inUploads || inAll || locateIcon(currentId ?? "")?.set === UPLOADS);
   React.useEffect(() => {
     if (!wantUploads || !fetcher || uploads) return undefined;
     let live = true;
@@ -341,18 +343,24 @@ function IconLibrary({
     };
   }, [neededKey, attempt]);
 
-  const ready = inUploads ? uploads !== undefined : needed.every((id) => sets[id]);
+  // All icons waits for the uploads list too, unless it failed (the sets still show, W-295).
+  const uploadsSettled = !fetcher || uploads !== undefined || uploadsFailed !== undefined;
+  const ready = inUploads
+    ? uploads !== undefined
+    : needed.every((id) => sets[id]) && (!inAll || uploadsSettled);
   const filtered = React.useMemo(
     () =>
       ready
         ? filterIcons(
-            inUploads ? (uploads ?? []) : needed.flatMap((id) => sets[id] ?? []),
+            inUploads
+              ? (uploads ?? [])
+              : [...(inAll ? (uploads ?? []) : []), ...needed.flatMap((id) => sets[id] ?? [])],
             category,
             query,
           )
         : [],
     // `needed` follows `category`; `ready` follows `sets` and `uploads`.
-    [ready, sets, uploads, category, query],
+    [ready, sets, uploads, category, query, inAll],
   );
 
   // Matches per sidebar entry, for the sets loaded so far (a search shows where its hits are).
@@ -368,7 +376,7 @@ function IconLibrary({
     if (allLoaded)
       tally.set(
         ALL_ICONS,
-        [...ICON_SETS].reduce((n, s) => n + (tally.get(s.id) ?? 0), 0),
+        [...ICON_SETS].reduce((n, s) => n + (tally.get(s.id) ?? 0), 0) + (tally.get(UPLOADS) ?? 0),
       );
     return tally;
   }, [sets, uploads, query]);

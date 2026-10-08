@@ -22877,8 +22877,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
-          "search": "            inUploads ? (uploads ?? []) : needed.flatMap((id) => sets[id] ?? []),\n            category,\n",
-          "replace": "            inUploads ? (uploads ?? []) : needed.flatMap((id) => sets[id] ?? []),\n            ICON_CATEGORIES[0] as IconCategory,\n"
+          "search": "              : [...(inAll ? (uploads ?? []) : []), ...needed.flatMap((id) => sets[id] ?? [])],\n            category,\n",
+          "replace": "              : [...(inAll ? (uploads ?? []) : []), ...needed.flatMap((id) => sets[id] ?? [])],\n            ICON_CATEGORIES[0] as IconCategory,\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx"],
@@ -25390,6 +25390,34 @@
         "./packages/emvb/src/admin/editor/panels/ConditionsEditor.test.ts"
       ],
       "expect": "\\(fail\\).*W-294"
+    },
+    {
+      "id": "W-295/all-without-uploads",
+      "requirement": "W-295",
+      "description": "All icons leaves uploaded icons out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "              : [...(inAll ? (uploads ?? []) : []), ...needed.flatMap((id) => sets[id] ?? [])],\n",
+          "replace": "              : needed.flatMap((id) => sets[id] ?? []),\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
+      "expect": "\\(fail\\).*W-295"
+    },
+    {
+      "id": "W-295/failed-uploads-block-all",
+      "requirement": "W-295",
+      "description": "A failed uploads list leaves All icons loading forever.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "  const uploadsSettled = !fetcher || uploads !== undefined || uploadsFailed !== undefined;\n",
+          "replace": "  const uploadsSettled = !fetcher || uploads !== undefined;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
+      "expect": "\\(fail\\).*W-295"
     }
   ]
 }
