@@ -24395,6 +24395,42 @@
         "./packages/emvb/src/admin/editor/panels/settings/loop-context.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-272/text-input-ltr",
+      "requirement": "W-272",
+      "description": "The Text field is always left-to-right.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "      // W-272: the field follows its text's direction, so RTL text reads from the right.\n      dir=\"auto\"\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/rtl-fields.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-272/textarea-ltr",
+      "requirement": "W-272",
+      "description": "The textarea is always left-to-right.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "          // W-272: right-to-left text (Arabic, Hebrew) lines up from the right as typed.\n          dir=\"auto\"\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/rtl-fields.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

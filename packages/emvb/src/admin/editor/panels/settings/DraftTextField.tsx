@@ -107,6 +107,8 @@ export function DraftTextField({
         </label>
         <textarea
           id={areaId}
+          // W-272: right-to-left text (Arabic, Hebrew) lines up from the right as typed.
+          dir="auto"
           className={`${FIELD} emvb-textarea`}
           rows={field.kind === "list-items" ? 4 : 5}
           value={draft}
@@ -197,6 +199,8 @@ export function DraftTextField({
     <Input
       label={field.label}
       className={FIELD}
+      // W-272: the field follows its text's direction, so RTL text reads from the right.
+      dir="auto"
       value={draft}
       error={
         tooLong
