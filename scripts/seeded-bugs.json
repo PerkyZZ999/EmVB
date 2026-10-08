@@ -8482,8 +8482,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "          ? `${selector}${STATE_PSEUDO[state]},${selector}[data-emvb-state=\"${state}\"]`",
-          "replace": "          ? `${selector}${STATE_PSEUDO[state]}`"
+          "search": "          ? `${stateSelector(selector, state)},${selector}[data-emvb-state=\"${state}\"]`",
+          "replace": "          ? stateSelector(selector, state)"
         }
       ],
       "command": [
@@ -23198,6 +23198,34 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-242/inner-link-focus-missing",
+      "requirement": "W-242: a linked Heading or Icon takes its Focus state when its inner link has keyboard focus (the focus rule adds :has(> :is(.emvb-heading-link,.emvb-icon-link):focus-visible)).",
+      "description": "The Focus state of a linked Icon or Heading never applies: keyboard focus lands on the inner link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    ? `${selector}${STATE_PSEUDO.focus},${selector}${INNER_LINK_FOCUS}`",
+          "replace": "    ? `${selector}${STATE_PSEUDO.focus}`"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/states.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-242/icon-link-left-out",
+      "requirement": "W-242: a linked Heading or Icon takes its Focus state when its inner link has keyboard focus (the focus rule adds :has(> :is(.emvb-heading-link,.emvb-icon-link):focus-visible)).",
+      "description": "Only a linked Heading gets its Focus state; a linked Icon still doesn't.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "const INNER_LINK_FOCUS = \":has(> :is(.emvb-heading-link,.emvb-icon-link):focus-visible)\";",
+          "replace": "const INNER_LINK_FOCUS = \":has(> :is(.emvb-heading-link):focus-visible)\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/states.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]

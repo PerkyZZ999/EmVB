@@ -49,6 +49,10 @@ const localStates: StyleStates = {
   active: { color: "#00ffff" },
 };
 
+/** Focus also matches a Heading's or Icon's inner link (W-242). */
+const focus = (selector: string) =>
+  `${selector}:focus-visible,${selector}:has(> :is(.emvb-heading-link,.emvb-icon-link):focus-visible)`;
+
 const cssOf = (node: LayoutNode, mode: "public" | "editor" = "public") =>
   renderPage(page(node), design, { mode }).css;
 
@@ -58,11 +62,11 @@ describe("state style CSS (W-089)", () => {
     const order = [
       ".emvb-k-card{color:#000000}",
       ".emvb-k-card:hover{color:#ff0000}",
-      ".emvb-k-card:focus-visible{border-color:#00ff00}",
+      `${focus(".emvb-k-card")}{border-color:#00ff00}`,
       ".emvb-k-card:active{opacity:0.5}",
       ".emvb-e-btn00001{opacity:0.9}",
       ".emvb-e-btn00001:hover{color:#0000ff;padding-top:4px}",
-      ".emvb-e-btn00001:focus-visible{background-color:var(--emvb-c-ink)}",
+      `${focus(".emvb-e-btn00001")}{background-color:var(--emvb-c-ink)}`,
       ".emvb-e-btn00001:active{color:#00ffff}",
     ];
     const at = order.map((rule) => css.indexOf(rule));
@@ -72,8 +76,29 @@ describe("state style CSS (W-089)", () => {
 
   test("focus is keyboard focus: :focus-visible, never plain :focus", () => {
     const css = cssOf(button({ states: localStates }));
-    expect(css).toContain(":focus-visible{");
-    expect(css).not.toMatch(/:focus[{,]/);
+    expect(css).toContain(`${focus(".emvb-e-btn00001")}{`);
+    expect(css).not.toMatch(/:focus[{,)]/);
+  });
+
+  test("a linked Heading or Icon takes its Focus state when its inner link has keyboard focus (W-242)", () => {
+    const icon: LayoutNode = {
+      id: "icn00001",
+      type: "icon",
+      props: { iconId: "star", title: "Home", href: "/" },
+      states: { focus: { iconScale: 1.2 } },
+    };
+    const { html, css } = renderPage(page(icon), design);
+    expect(html).toContain('<span class="emvb-icon emvb-e-icn00001"><a class="emvb-icon-link"');
+    expect(css).toContain(`${focus(".emvb-e-icn00001")}{scale:1.2}`);
+    const heading: LayoutNode = {
+      id: "hdg00001",
+      type: "heading",
+      props: { text: "Plans", level: 2, href: "/plans" },
+      states: { focus: { color: "#ff0000" } },
+    };
+    const linked = renderPage(page(heading), design);
+    expect(linked.html).toContain('class="emvb-heading-link"');
+    expect(linked.css).toContain(`${focus(".emvb-e-hdg00001")}{color:#ff0000}`);
   });
 
   test("an element with only state styles still gets its local class and rules", () => {
@@ -87,14 +112,14 @@ describe("state style CSS (W-089)", () => {
     const node = button({ states: localStates });
     expect(cssOf(node)).not.toContain("data-emvb-state");
     const editor = cssOf(node, "editor");
-    for (const [state, pseudo] of [
-      ["hover", ":hover"],
-      ["focus", ":focus-visible"],
-      ["active", ":active"],
-    ]) {
-      expect(editor).toContain(`.emvb-k-card${pseudo},.emvb-k-card[data-emvb-state="${state}"]{`);
+    for (const [state, live] of [
+      ["hover", (sel: string) => `${sel}:hover`],
+      ["focus", focus],
+      ["active", (sel: string) => `${sel}:active`],
+    ] as const) {
+      expect(editor).toContain(`${live(".emvb-k-card")},.emvb-k-card[data-emvb-state="${state}"]{`);
       expect(editor).toContain(
-        `.emvb-e-btn00001${pseudo},.emvb-e-btn00001[data-emvb-state="${state}"]{`,
+        `${live(".emvb-e-btn00001")},.emvb-e-btn00001[data-emvb-state="${state}"]{`,
       );
     }
   });

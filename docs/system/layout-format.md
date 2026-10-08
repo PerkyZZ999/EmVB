@@ -138,7 +138,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 }
 ```
 
-- **Selectors.** `hover` is `:hover`, `focus` is `:focus-visible` (keyboard focus, so a mouse click leaves no focus style) and `active` is `:active`.
+- **Selectors.** `hover` is `:hover`, `focus` is `:focus-visible` (keyboard focus, so a mouse click leaves no focus style); a linked Heading or Icon also matches when its inner link has keyboard focus (`:has(> :is(.emvb-heading-link,.emvb-icon-link):focus-visible)`, W-242) and `active` is `:active`.
 - **Cascade.** Each selector's base rule is followed by its `:hover`, `:focus-visible` and `:active` rules, classes first and then the local rule. So a state rule beats every Normal rule (a class's Hover colour shows over a local Normal colour), within one state the local rule beats the class, and Active beats Focus, which beats Hover.
 - **Safety.** State values go through the same mappers and `isSafeCssValue` gate as `style`. A rejected value is dropped with a `rejected-style` warning naming `<state>.<key>` (such as `hover.color`); a `transition` inside a state is dropped and reported the same way, and so is an unknown state name. An unknown variable in a state is reported like one in `style`. An element whose only styles are states still gets `emvb-e-<id>`.
 - **Reduced motion.** When any rule has a `transition`, the CSS ends with one `@media (prefers-reduced-motion: reduce){…{transition:none}}` block that lists exactly those selectors. Nothing else changes under reduced motion.

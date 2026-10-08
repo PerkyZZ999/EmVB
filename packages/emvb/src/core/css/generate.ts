@@ -49,6 +49,18 @@ const STATE_PSEUDO: Readonly<Record<StyleStateName, string>> = {
   active: ":active",
 };
 
+/**
+ * Heading and Icon put their link inside the element (`innerLink`), so keyboard focus lands on
+ * that link, never on the element itself. Their Focus state also matches then (W-242).
+ */
+const INNER_LINK_FOCUS = ":has(> :is(.emvb-heading-link,.emvb-icon-link):focus-visible)";
+
+/** One state's selector list: Focus adds the inner-link form (W-242). */
+const stateSelector = (selector: string, state: StyleStateName) =>
+  state === "focus"
+    ? `${selector}${STATE_PSEUDO.focus},${selector}${INNER_LINK_FOCUS}`
+    : `${selector}${STATE_PSEUDO[state]}`;
+
 const block = (selector: string, declarations: Declaration[]) =>
   declarations.length === 0
     ? ""
@@ -118,8 +130,8 @@ export function generateCss({
     ...STYLE_STATES.map((state) =>
       block(
         previewStates
-          ? `${selector}${STATE_PSEUDO[state]},${selector}[data-emvb-state="${state}"]`
-          : `${selector}${STATE_PSEUDO[state]}`,
+          ? `${stateSelector(selector, state)},${selector}[data-emvb-state="${state}"]`
+          : stateSelector(selector, state),
         states[state] ?? [],
       ),
     ),
