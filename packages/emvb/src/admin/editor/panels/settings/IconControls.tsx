@@ -218,25 +218,39 @@ const DURATION: NumberSpec = {
   example: "2000",
   suffix: "ms",
 };
-const DEFAULT_DURATION: Record<IconAnimation["type"], number> = { spin: 2000, pulse: 1000 };
+type Looping = Extract<IconAnimation, { duration: number }>;
+const DEFAULT_DURATION: Record<Looping["type"], number> = { spin: 2000, pulse: 1000 };
+
+const looping = (a: IconAnimation | undefined): Looping | undefined =>
+  a && a.type !== "none" ? a : undefined;
 
 /** A looping spin or pulse (Normal only); visitors who prefer reduced motion see it still. */
 const ANIMATION_LABELS: Record<string, string> = { none: "None", spin: "Spin", pulse: "Pulse" };
 
+/**
+ * W-248: on Tablet or Mobile, `inherited` is the animation from a wider device. With nothing set
+ * here the select shows it, and None stores `{ type: "none" }` so the device can stop it.
+ */
 export function IconAnimationControl({
   value,
+  inherited,
   onChange,
 }: {
   value: IconAnimation | undefined;
+  inherited?: IconAnimation;
   onChange: (next: IconAnimation | undefined) => void;
 }) {
-  const [type, setType] = React.useState<string>(value?.type ?? "none");
-  React.useEffect(() => setType(value?.type ?? "none"), [value?.type]);
+  const own = looping(value);
+  const from = looping(inherited);
+  const shown = value?.type ?? inherited?.type ?? "none";
+  const [type, setType] = React.useState<string>(shown);
+  React.useEffect(() => setType(shown), [shown]);
   return (
     <div
       className="emvb-style-row"
       data-emvb-style="iconAnimation"
       data-set={value ? "true" : undefined}
+      data-inherited={!value && from ? "true" : undefined}
     >
       <div className="emvb-field-group">
         <Select
@@ -248,24 +262,34 @@ export function IconAnimationControl({
             const picked = String(next);
             setType(picked);
             if (picked === "spin" || picked === "pulse") {
-              onChange({ type: picked, duration: value?.duration ?? DEFAULT_DURATION[picked] });
-            } else onChange(undefined);
+              const duration = own?.duration ?? from?.duration ?? DEFAULT_DURATION[picked];
+              onChange({ type: picked, duration });
+            } else onChange(from ? { type: "none" } : undefined);
           }}
         >
           <Select.Option value="none">None</Select.Option>
           <Select.Option value="spin">Spin</Select.Option>
           <Select.Option value="pulse">Pulse</Select.Option>
         </Select>
-        {value && (
+        {own && (
           <NumberField
             fieldKey="iconAnimation.duration"
             label="Duration"
-            value={value.duration}
+            value={own.duration}
             spec={DURATION}
-            onCommit={(n) => onChange({ ...value, duration: n ?? DEFAULT_DURATION[value.type] })}
+            onCommit={(n) => onChange({ ...own, duration: n ?? DEFAULT_DURATION[own.type] })}
           />
         )}
-        {value && <p className="emvb-helper">Off for visitors who prefer reduced motion.</p>}
+        {own && <p className="emvb-helper">Off for visitors who prefer reduced motion.</p>}
+        {!value && from && (
+          <p className="emvb-helper">
+            Inherited from a wider device ({ANIMATION_LABELS[from.type]}, {from.duration} ms). Pick
+            None to stop it on this one.
+          </p>
+        )}
+        {value?.type === "none" && from && (
+          <p className="emvb-helper">Stopped on this device. Reset to inherit it again.</p>
+        )}
       </div>
       <ResetButton
         label="Animation"

@@ -469,6 +469,7 @@ export function StyleRow({
     return (
       <IconAnimationControl
         value={style?.iconAnimation}
+        inherited={inherited?.iconAnimation}
         onChange={(iconAnimation) => onPatch({ iconAnimation })}
       />
     );

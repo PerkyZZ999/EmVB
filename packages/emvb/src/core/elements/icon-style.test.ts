@@ -112,6 +112,19 @@ describe("icon style keys (W-237)", () => {
     }
   });
 
+  test("W-248: a device can stop an animation it inherits with { type: none }", () => {
+    const style = { iconAnimation: { type: "spin", duration: 2000 } } as const;
+    expect(StyleProps.safeParse({ iconAnimation: { type: "none" } }).success).toBe(true);
+    expect(StyleProps.safeParse({ iconAnimation: { type: "none", duration: 900 } }).success).toBe(
+      false,
+    );
+    const { css } = page(icon({ style, devices: { mobile: { iconAnimation: { type: "none" } } } }));
+    expect(css).toMatch(/\.emvb-e-icon0001\{[^}]*--emvb-icon-animation:emvb-icon-spin 2000ms/);
+    expect(css).toMatch(/@media[^{]*\{\.emvb-e-icon0001\{--emvb-icon-animation:none\}/);
+    const odd = page(icon({ style: { iconAnimation: { type: "none", duration: 9 } } as never }));
+    expect(odd.css).not.toMatch(/\.emvb-e-icon0001\{/);
+  });
+
   test("animation is Normal only: a hover animation is dropped", () => {
     const { css } = page(
       icon({ states: { hover: { iconAnimation: { type: "spin", duration: 1000 } } as never } }),

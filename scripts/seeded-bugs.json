@@ -23407,6 +23407,56 @@
         "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-248/none-renders-nothing",
+      "requirement": "W-248: a device can stop an Icon animation it inherits: { type: \"none\" } is valid and renders --emvb-icon-animation:none, and the device's Animation control shows the inherited one and stores { type: \"none\" } for None.",
+      "description": "{ type: none } emits no declaration, so the wider device's spin keeps running.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  if (type === \"none\") return duration === undefined ? \"none\" : undefined;",
+          "replace": "  if (type === \"none\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-248/none-clears-override",
+      "requirement": "W-248: a device can stop an Icon animation it inherits: { type: \"none\" } is valid and renders --emvb-icon-animation:none, and the device's Animation control shows the inherited one and stores { type: \"none\" } for None.",
+      "description": "Picking None on a device just clears the override, as before, so the inherited animation can't be stopped.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx",
+          "search": "            } else onChange(from ? { type: \"none\" } : undefined);",
+          "replace": "            } else onChange(undefined);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-248/inherited-hidden",
+      "requirement": "W-248: a device can stop an Icon animation it inherits: { type: \"none\" } is valid and renders --emvb-icon-animation:none, and the device's Animation control shows the inherited one and stores { type: \"none\" } for None.",
+      "description": "With nothing set on the device, Animation reads None although the Desktop spin still plays there.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx",
+          "search": "  const shown = value?.type ?? inherited?.type ?? \"none\";",
+          "replace": "  const shown = value?.type ?? \"none\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

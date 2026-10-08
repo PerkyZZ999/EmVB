@@ -361,6 +361,8 @@ function cssIconAnimation(value: unknown): string | undefined {
   if (!isRecord(value)) return undefined;
   if (Object.keys(value).some((key) => key !== "type" && key !== "duration")) return undefined;
   const { type, duration } = value;
+  // W-248: stops an animation inherited from a wider device.
+  if (type === "none") return duration === undefined ? "none" : undefined;
   if (typeof type !== "string" || !Object.hasOwn(ICON_ANIMATIONS, type)) return undefined;
   if (!Number.isInteger(duration) || !inRangeNumber(duration, 200, 10_000)) return undefined;
   return ICON_ANIMATIONS[type]?.replace("{ms}", `${duration}ms`);

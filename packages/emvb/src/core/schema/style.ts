@@ -274,12 +274,18 @@ export const StyleProps = z.strictObject({
       color: ColorValue.optional(),
     })
     .optional(),
-  /** A looping spin or pulse; off for visitors who prefer reduced motion. */
+  /**
+   * A looping spin or pulse; off for visitors who prefer reduced motion. `{ type: "none" }`
+   * (W-248) stops an animation a device would otherwise inherit from a wider one.
+   */
   iconAnimation: z
-    .strictObject({
-      type: z.enum(["spin", "pulse"]),
-      duration: z.number().int().min(200).max(10_000),
-    })
+    .union([
+      z.strictObject({
+        type: z.enum(["spin", "pulse"]),
+        duration: z.number().int().min(200).max(10_000),
+      }),
+      z.strictObject({ type: z.literal("none") }),
+    ])
     .optional(),
   /**
    * Plays once (W-101, W-107). `delay` waits before it starts. `view` starts as the element

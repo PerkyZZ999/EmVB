@@ -5,6 +5,7 @@ import { emptyDesign, type LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
+import { IconAnimationControl } from "./IconControls.tsx";
 import { keysFor, sectionsFor, STYLE_UI } from "./style-sections.ts";
 
 // W-237: the Icon's Style tab opens on an Icon section: colour, glyph controls, hover duration.
@@ -214,6 +215,39 @@ describe("Force single colour and Shape (W-238)", () => {
     await cleanup();
     await panel({ ...star, style: { iconAnimation: { type: "pulse", duration: 900 } } });
     expect(trigger()).toContain("Pulse");
+  });
+
+  test("W-248: on a device, Animation shows the inherited one and None stops it there", async () => {
+    const picks: unknown[] = [];
+    const spin = { type: "spin", duration: 3000 } as const;
+    const control = (value?: Parameters<typeof IconAnimationControl>[0]["value"]) => (
+      <IconAnimationControl value={value} inherited={spin} onChange={(n) => picks.push(n)} />
+    );
+    await mount(control());
+    const row = () => document.querySelector('[data-emvb-style="iconAnimation"]');
+    expect(row()?.querySelector("button")?.textContent).toContain("Spin");
+    expect(row()?.getAttribute("data-inherited")).toBe("true");
+    expect(row()?.textContent).toContain("Pick None to stop it");
+    const trigger = row()?.querySelector<HTMLElement>('[role="combobox"]');
+    await act(async () => {
+      trigger?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+      trigger?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      trigger?.click();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+    const none = [...document.querySelectorAll<HTMLElement>('[role="option"]')].find(
+      (o) => o.textContent === "None",
+    );
+    await act(async () => {
+      none?.click();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+    expect(picks.at(-1)).toEqual({ type: "none" });
+    await cleanup();
+    await mount(control({ type: "none" }));
+    expect(row()?.querySelector("button")?.textContent).toContain("None");
+    expect(row()?.textContent).toContain("Stopped on this device");
+    expect(row()?.querySelector('[data-emvb-field="iconAnimation.duration"]')).toBeNull();
   });
 
   test("Force single color shows under Colour for a multi-colour SVG and sets the prop", async () => {
