@@ -14,6 +14,7 @@
     "packages/emvb/src/**/*.test.tsx",
     "packages/emvb/test/dom",
     "packages/emvb/test/fixtures",
-    "packages/emvb/test/server"
+    "packages/emvb/test/server",
+    "site/src/playground"
   ]
 }

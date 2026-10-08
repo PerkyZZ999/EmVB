@@ -1,0 +1,258 @@
+/* The playground page around the real EmVB editor. Colours come from Kumo, as in the EmDash admin. */
+:root {
+  --pg-bar: 44px;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-kumo-recessed, #f4f4f5);
+  color: var(--text-color-kumo-default, #18181b);
+  font-family: var(--font-sans);
+}
+
+/* The editor covers the window below the playground bar. */
+[data-emvb-editor] {
+  top: var(--pg-bar) !important;
+}
+
+.pg-bar {
+  position: fixed;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--pg-bar);
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-kumo-line, #e4e4e7);
+  background: var(--color-kumo-base, #fff);
+  box-sizing: border-box;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.pg-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.pg-brand:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid var(--color-kumo-brand, #0a5ce6);
+  outline-offset: 2px;
+}
+
+.pg-brand-sub {
+  color: var(--text-color-kumo-subtle, #71717a);
+  font-weight: 500;
+}
+
+.pg-sep {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--color-kumo-line, #e4e4e7);
+}
+
+.pg-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pg-label {
+  color: var(--text-color-kumo-subtle, #71717a);
+}
+
+.pg-page select {
+  max-width: 220px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--color-kumo-line, #e4e4e7);
+  border-radius: 6px;
+  background: var(--color-kumo-base, #fff);
+  color: inherit;
+  font: inherit;
+}
+
+.pg-note {
+  overflow: hidden;
+  min-width: 0;
+  margin: 0 0 0 auto;
+  color: var(--text-color-kumo-subtle, #71717a);
+  text-overflow: ellipsis;
+}
+
+.pg-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: 8px;
+}
+
+@media (max-width: 1180px) {
+  .pg-note {
+    visibility: hidden;
+  }
+}
+
+.pg-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 60;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--color-kumo-contrast, #18181b);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 20%);
+  color: var(--text-color-kumo-inverse, #fff);
+  font-size: 13px;
+  transform: translateX(-50%);
+}
+
+.pg-gate {
+  position: fixed;
+  inset: var(--pg-bar) 0 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow: auto;
+}
+
+.pg-gate-card {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  max-width: 440px;
+  padding: 28px;
+  border: 1px solid var(--color-kumo-line, #e4e4e7);
+  border-radius: 14px;
+  background: var(--color-kumo-base, #fff);
+}
+
+.pg-gate-card h1 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.pg-gate-card p {
+  margin: 0;
+  color: var(--text-color-kumo-subtle, #52525b);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pg-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pg-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  grid-template-rows: var(--pg-bar) minmax(0, 1fr);
+  background: var(--color-kumo-recessed, #f4f4f5);
+}
+
+.pg-preview-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-kumo-line, #e4e4e7);
+  background: var(--color-kumo-base, #fff);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.pg-segment {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--color-kumo-recessed, #f4f4f5);
+}
+
+.pg-segment button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-color-kumo-subtle, #52525b);
+  font: inherit;
+  cursor: pointer;
+}
+
+.pg-segment button[aria-checked="true"] {
+  background: var(--color-kumo-base, #fff);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+  color: var(--text-color-kumo-default, #18181b);
+}
+
+.pg-segment button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pg-segment button:focus-visible,
+.pg-preview-open:focus-visible {
+  outline: 2px solid var(--color-kumo-brand, #0a5ce6);
+  outline-offset: 1px;
+}
+
+.pg-preview-note {
+  overflow: hidden;
+  min-width: 0;
+  margin: 0 auto 0 0;
+  color: var(--text-color-kumo-subtle, #71717a);
+  text-overflow: ellipsis;
+}
+
+.pg-preview-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+}
+
+.pg-preview-stage {
+  display: flex;
+  justify-content: center;
+  overflow: auto;
+  padding: 16px;
+}
+
+.pg-preview-stage iframe {
+  height: 100%;
+  max-width: 100%;
+  border: 1px solid var(--color-kumo-line, #e4e4e7);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 30px rgb(0 0 0 / 8%);
+}
+
+.pg-loading {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  color: var(--text-color-kumo-subtle, #71717a);
+  font-size: 14px;
+}

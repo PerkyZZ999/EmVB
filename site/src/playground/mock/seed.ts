@@ -231,7 +231,7 @@ const heading = (name: string, value: string, level: number, extra = {}) =>
 const feature = (key: string, icon: string, title: string, body: string) =>
   node(
     `feat-${key}`,
-    "div-block",
+    "flexbox",
     {},
     {
       classes: ["card"],
@@ -258,7 +258,7 @@ const feature = (key: string, icon: string, title: string, body: string) =>
 const stat = (key: string, value: string, label: string) =>
   node(
     `stat-${key}`,
-    "div-block",
+    "flexbox",
     {},
     {
       style: { flexDirection: "column", gap: px(4), alignItems: "center" },
@@ -268,6 +268,7 @@ const stat = (key: string, value: string, label: string) =>
             fontFamily: { var: "display", from: "font" },
             fontSize: { value: 2.2, unit: "rem" },
             color: { var: "brand" },
+            textAlign: "center",
           },
         }),
         text(`stat-${key}-l`, label, { style: { textAlign: "center" } }),
@@ -413,7 +414,7 @@ export function landingLayout(): Layout {
                   children: [
                     node(
                       "hero-copy",
-                      "div-block",
+                      "flexbox",
                       {},
                       {
                         style: { flexDirection: "column", gap: px(20) },
@@ -620,7 +621,7 @@ export function landingLayout(): Layout {
                     ),
                     node(
                       "split-copy",
-                      "div-block",
+                      "flexbox",
                       {},
                       {
                         style: { flexDirection: "column", gap: px(18) },
@@ -671,7 +672,7 @@ export function landingLayout(): Layout {
             [
               node(
                 "quote-card",
-                "div-block",
+                "flexbox",
                 {},
                 {
                   style: {
@@ -776,7 +777,7 @@ export function landingLayout(): Layout {
                   children: [
                     node(
                       "signup-copy",
-                      "div-block",
+                      "flexbox",
                       {},
                       {
                         style: { flexDirection: "column", gap: px(16) },
@@ -916,7 +917,7 @@ export function journalLayout(): Layout {
               children: [
                 node(
                   "j-card",
-                  "div-block",
+                  "flexbox",
                   {},
                   {
                     classes: ["card"],

@@ -1,0 +1,51 @@
+---
+// The admin's own stylesheet (Kumo + utilities), so the editor looks exactly as it does in EmDash.
+import "@emdash-cms/admin/styles.css";
+import "../../playground/playground.css";
+import Playground from "../../playground/Playground.tsx";
+
+const site = Astro.site ?? new URL("https://emvb.dev");
+const canonical = new URL(Astro.url.pathname, site).href;
+const image = new URL("/screenshots/editor-1600.webp", site).href;
+const title = "EmVB playground · try the visual page builder in your browser";
+const description =
+  "Try EmVB, the visual page builder for EmDash CMS, right in your browser: the real editor, a starter page, no sign-up. Your edits stay on your device.";
+---
+
+<!doctype html>
+<html lang="en-CA" data-theme="classic">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:site_name" content="EmVB" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script is:inline>
+      // Light or dark like the EmDash admin: the visitor's system setting.
+      document.documentElement.setAttribute(
+        "data-mode",
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+      );
+    </script>
+  </head>
+  <body class="isolate">
+    <Playground client:only="react">
+      <div slot="fallback" class="pg-loading" role="status">Loading the EmVB editor…</div>
+    </Playground>
+    <noscript>
+      <p class="pg-loading">
+        The EmVB playground runs the editor in your browser, so it needs JavaScript.
+        <a href="/">Back to emvb.dev</a>
+      </p>
+    </noscript>
+  </body>
+</html>

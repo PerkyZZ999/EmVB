@@ -40,9 +40,22 @@ import {
 export const STORAGE_KEY = "emvb-playground:v1";
 const STATE_VERSION = 1;
 
-/** One upload may be this big; the whole media library this big (localStorage is ~5 MB). */
-export const MEDIA_FILE_MAX_BYTES = 750 * 1024;
-export const MEDIA_TOTAL_MAX_BYTES = 2.5 * 1024 * 1024;
+/** One upload may be this big, and all uploads together this big (they stay in the browser). */
+export const MEDIA_FILE_MAX_BYTES = 2 * 1024 * 1024;
+export const MEDIA_TOTAL_MAX_BYTES = 25 * 1024 * 1024;
+
+/**
+ * Where uploaded images are served from. EmVB only renders http(s) and same-origin image URLs
+ * (R-032), so a `data:` URL won't do: the browser keeps the file (Cache Storage) and the
+ * playground's service worker answers these paths with it.
+ */
+export const UPLOADS_PATH = "/playground/uploads/";
+
+/** Keeps uploaded files; the browser one is Cache Storage, read back by the service worker. */
+export type UploadStore = {
+  put: (path: string, file: Blob) => Promise<void>;
+  clear: () => Promise<void>;
+};
 
 /** Where the editor's Preview and "View page" open: the playground's own renderer page. */
 export const VIEW_PATH = "/playground/view/";
@@ -86,6 +99,8 @@ export type KeyValueStore = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
 export type BackendOptions = {
   storage?: KeyValueStore | null;
+  /** Without one, image uploads are refused with a hint to paste a URL instead. */
+  uploads?: UploadStore | null;
   now?: () => Date;
   /** Milliseconds each answer waits, so saving feels like saving. Tests use 0. */
   latency?: number;
@@ -314,6 +329,7 @@ export type PlaygroundBackend = {
 
 export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
   const storage = options.storage ?? null;
+  const uploads = options.uploads ?? null;
   const now = options.now ?? (() => new Date());
   const latency = options.latency ?? 0;
   let state: PlaygroundState = readState(storage) ?? seedState(now());
@@ -636,23 +652,38 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
           } KB. This one is ${Math.ceil(file.size / 1024)} KB: try a smaller image or paste an image URL.`,
         );
       }
+      if (!uploads) {
+        throw new HttpError(
+          501,
+          "UPLOADS_UNAVAILABLE",
+          "This browser can't keep uploaded images for the playground. Paste an image URL instead.",
+        );
+      }
       const used = state.media.reduce(
-        (sum, m) => sum + (m.url.startsWith("data:") ? (m.size ?? 0) : 0),
+        (sum, m) => sum + (m.url.startsWith(UPLOADS_PATH) ? (m.size ?? 0) : 0),
         0,
       );
       if (used + file.size > MEDIA_TOTAL_MAX_BYTES) {
         throw new HttpError(
           413,
           "PAYLOAD_TOO_LARGE",
-          "The playground's uploads in this browser are full (2.5 MB). Use Reset to clear them, or paste an image URL.",
+          `The playground's uploads in this browser are full (${
+            MEDIA_TOTAL_MAX_BYTES / 1024 / 1024
+          } MB). Use Reset to clear them, or paste an image URL.`,
         );
       }
-      const bytes = new Uint8Array(await file.arrayBuffer());
-      let binary = "";
-      for (let i = 0; i < bytes.length; i += 0x8000) {
-        binary += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+      const id = nextId("media");
+      const extension = file.type.slice("image/".length).replace("jpeg", "jpg");
+      const url = `${UPLOADS_PATH}${id}.${extension}`;
+      try {
+        await uploads.put(url, file);
+      } catch {
+        throw new HttpError(
+          507,
+          "STORAGE_FULL",
+          "This browser wouldn't store the image. Try a smaller one, or paste an image URL.",
+        );
       }
-      const url = `data:${file.type};base64,${btoa(binary)}`;
       const number = (key: string) => {
         const value = Number(r.form?.get(key));
         return Number.isFinite(value) && value > 0 ? Math.round(value) : null;
@@ -660,7 +691,7 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
       const alt = r.form?.get("alt");
       return mutate(() => {
         const item: StoredMedia = {
-          id: nextId("media"),
+          id,
           filename: file.name || "upload",
           mimeType: file.type,
           size: file.size,
@@ -742,6 +773,7 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
     snapshot: () => copy(state),
     reset: () => {
       state = seedState(now());
+      void uploads?.clear().catch(() => undefined);
       try {
         storage?.removeItem(STORAGE_KEY);
         persist();

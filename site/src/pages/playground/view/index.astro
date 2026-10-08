@@ -1,0 +1,54 @@
+---
+/** The playground's public page: filled in the browser from the playground's saved state. */
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="description" content="A page made in the EmVB playground." />
+    <title>EmVB playground page</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <style is:inline>
+      body {
+        margin: 0;
+      }
+      .pg-view-message {
+        max-width: 34rem;
+        margin: 15vh auto;
+        padding: 0 1.5rem;
+        font: 16px/1.5 ui-sans-serif, system-ui, sans-serif;
+      }
+      .pg-demo-status {
+        margin: 0;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #e8f5ee;
+        color: #14532d;
+        font: 14px/1.4 ui-sans-serif, system-ui, sans-serif;
+      }
+      .pg-draft-badge {
+        position: fixed;
+        bottom: 12px;
+        left: 12px;
+        margin: 0;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: #18181b;
+        color: #fff;
+        font: 12px/1.3 ui-sans-serif, system-ui, sans-serif;
+        opacity: 0.85;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="pg-view"></div>
+    <noscript>This page is drawn in your browser from the EmVB playground, so it needs JavaScript.</noscript>
+    <script>
+      import { startView } from "../../../playground/view-client.ts";
+      startView();
+    </script>
+  </body>
+</html>

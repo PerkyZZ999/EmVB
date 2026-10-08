@@ -10,9 +10,19 @@
     "preview": "ASTRO_DEV_BACKGROUND=1 bun --bun astro preview --host 127.0.0.1 --port 4455"
   },
   "dependencies": {
+    "@astrojs/react": "^7.0.0",
+    "@cloudflare/kumo": "2.6.0",
+    "@emdash-cms/admin": "1.0.1",
     "@fontsource-variable/fraunces": "^5.2.9",
     "@fontsource-variable/source-serif-4": "^5.2.9",
     "@fontsource/ibm-plex-mono": "^5.2.7",
-    "astro": "^7.3.5"
+    "@phosphor-icons/react": "2.1.10",
+    "astro": "^7.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
   }
 }

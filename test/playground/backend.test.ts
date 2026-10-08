@@ -25,8 +25,10 @@ import {
   createBackend,
   MEDIA_FILE_MAX_BYTES,
   STORAGE_KEY,
+  UPLOADS_PATH,
   VIEW_PATH,
   type KeyValueStore,
+  type UploadStore,
 } from "../../site/src/playground/mock/backend.ts";
 
 // The playground on emvb.dev runs the real editor against this in-browser stand-in for EmDash.
@@ -43,6 +45,15 @@ function memoryStorage(limit = Infinity): KeyValueStore & { map: Map<string, str
       map.set(key, value);
     },
     removeItem: (key) => void map.delete(key),
+  };
+}
+
+function memoryUploads(): UploadStore & { files: Map<string, Blob> } {
+  const files = new Map<string, Blob>();
+  return {
+    files,
+    put: async (path, file) => void files.set(path, file),
+    clear: async () => files.clear(),
   };
 }
 
@@ -220,14 +231,18 @@ describe("playground backend: uploads and forms", () => {
     expect((await listUploadedIcons(fetcher)).length).toBe(1);
   });
 
-  test("an image upload is stored as a data URL; a too-big one says why", async () => {
+  test("an image upload is kept by the browser and served from a same-origin path", async () => {
     const storage = memoryStorage();
-    const { fetcher } = createBackend({ storage });
+    const uploads = memoryUploads();
+    const { fetcher, reset } = createBackend({ storage, uploads });
     const png = new File([new Uint8Array([137, 80, 78, 71, 1, 2, 3])], "dot.png", {
       type: "image/png",
     });
     const item = await uploadImage(fetcher, png, { width: 1, height: 1, alt: "A dot" });
-    expect(item.url.startsWith("data:image/png;base64,")).toBe(true);
+    // EmVB renders only http(s) and same-origin image URLs (R-032), never data: URLs.
+    expect(item.url.startsWith(UPLOADS_PATH)).toBe(true);
+    expect(uploads.files.has(item.url)).toBe(true);
+    expect(storage.map.get(STORAGE_KEY)?.length ?? 0).toBeLessThan(100_000);
     expect((await listImages(fetcher))[0]?.id).toBe(item.id);
     const big = new File([new Uint8Array(MEDIA_FILE_MAX_BYTES + 1)], "big.png", {
       type: "image/png",
@@ -235,6 +250,17 @@ describe("playground backend: uploads and forms", () => {
     const error = await rejectionOf(uploadImage(fetcher, big));
     expect(error.status).toBe(413);
     expect(error.message).toContain("limited to");
+    reset();
+    await Promise.resolve();
+    expect(uploads.files.size).toBe(0);
+  });
+
+  test("without a place to keep files, an upload says to paste a URL", async () => {
+    const { fetcher } = createBackend();
+    const png = new File([new Uint8Array([1, 2, 3])], "dot.png", { type: "image/png" });
+    const error = await rejectionOf(uploadImage(fetcher, png));
+    expect(error.status).toBe(501);
+    expect(error.message).toContain("Paste an image URL");
   });
 
   test("a change the browser can't store is undone and explained", async () => {
@@ -242,7 +268,7 @@ describe("playground backend: uploads and forms", () => {
     createBackend({ storage: seeded }).reset();
     const size = seeded.map.get(STORAGE_KEY)?.length ?? 0;
     const storage = memoryStorage(size + 50);
-    const { fetcher } = createBackend({ storage });
+    const { fetcher } = createBackend({ storage, uploads: memoryUploads() });
     const png = new File([new Uint8Array(4000)], "a.png", { type: "image/png" });
     const error = await rejectionOf(uploadImage(fetcher, png));
     expect(error.status).toBe(507);
