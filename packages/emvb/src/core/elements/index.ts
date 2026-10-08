@@ -178,7 +178,8 @@ const divider: ElementDefinition<DividerNode> = {
 };
 
 const text: ElementDefinition<TextNode> = {
-  baseCss: ".emvb-text{margin:0}",
+  // W-264: a paragraph's line breaks show (pre-line), in :where() so classes and styles win.
+  baseCss: ".emvb-text{margin:0}:where(.emvb-text){white-space:pre-line}",
   defaults: () => ({ type: "text", props: { text: "Text" } }),
   descriptor: {
     type: "text",

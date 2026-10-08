@@ -24063,6 +24063,34 @@
       ],
       "command": ["bun", "test", "./test/demos/archive-pages.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-264/breaks-collapse",
+      "requirement": "W-264",
+      "description": "A Text paragraph's line breaks collapse into spaces on the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "  baseCss: \".emvb-text{margin:0}:where(.emvb-text){white-space:pre-line}\",",
+          "replace": "  baseCss: \".emvb-text{margin:0}\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/text-breaks.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-264/breaks-rule-specific",
+      "requirement": "W-264",
+      "description": "The Text line-break rule has class specificity and beats classes that set white-space.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "  baseCss: \".emvb-text{margin:0}:where(.emvb-text){white-space:pre-line}\",",
+          "replace": "  baseCss: \".emvb-text{margin:0;white-space:pre-line}\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/text-breaks.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
