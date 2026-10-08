@@ -33,6 +33,11 @@ export type EditorState = {
   /** Bumped on every page edit. A save only clears `dirty` if nothing changed while it ran. */
   version: number;
   savedVersion: number;
+  /**
+   * The highest version handed out so far. Undo restores an older `version`, so the next edit
+   * numbers from here; reusing a number could match `savedVersion` with unsaved content (W-255).
+   */
+  lastVersion?: number;
   /** The most recent delete, for the one-step Restore toast (D-025). */
   lastDeleted: Removed | null;
 };
@@ -65,11 +70,10 @@ export type EditorAction =
 
 export const isDirty = (state: EditorState) => state.version !== state.savedVersion;
 
-const edited = (state: EditorState, page: PageDraft): EditorState => ({
-  ...state,
-  page,
-  version: state.version + 1,
-});
+const edited = (state: EditorState, page: PageDraft): EditorState => {
+  const version = Math.max(state.version, state.lastVersion ?? 0) + 1;
+  return { ...state, page, version, lastVersion: version };
+};
 
 /** A layout edit that also moves the selection. */
 const withLayout = (

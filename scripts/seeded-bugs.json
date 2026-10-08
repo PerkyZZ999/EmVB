@@ -23689,6 +23689,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-255/version-reused-after-undo",
+      "requirement": "W-255",
+      "description": "An edit after undo reuses the saved version number and reads as saved.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "  const version = Math.max(state.version, state.lastVersion ?? 0) + 1;\n",
+          "replace": "  const version = state.version + 1;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/history.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-255/high-water-not-kept",
+      "requirement": "W-255",
+      "description": "The highest handed-out version isn't remembered, so an edit after undo takes the number a running save then reports as saved.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "  return { ...state, page, version, lastVersion: version };\n",
+          "replace": "  return { ...state, page, version };\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/history.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

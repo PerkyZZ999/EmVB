@@ -112,3 +112,60 @@ describe("undo and redo (W-095)", () => {
     expect(historyReducer(history, { type: "undo" }) === history).toBe(true);
   });
 });
+
+describe("an edit after undo never reads as saved (W-255)", () => {
+  test("save, undo, then a different edit is still unsaved", () => {
+    let history = emptyHistory(initial());
+    history = historyReducer(history, { type: "set-page", patch: { title: "Saved" } });
+    history = historyReducer(history, {
+      type: "saved",
+      rev: "rev2",
+      version: history.present.version,
+    });
+    expect(isDirty(history.present)).toBe(false);
+    history = historyReducer(history, { type: "undo" });
+    expect(isDirty(history.present)).toBe(true);
+    history = historyReducer(history, { type: "set-page", patch: { title: "Different" } });
+    expect(title(history)).toBe("Different");
+    expect(isDirty(history.present)).toBe(true);
+  });
+  test("undo then redo back to the saved page is clean again", () => {
+    let history = emptyHistory(initial());
+    history = historyReducer(history, { type: "set-page", patch: { title: "Saved" } });
+    history = historyReducer(history, {
+      type: "saved",
+      rev: "rev2",
+      version: history.present.version,
+    });
+    history = historyReducer(history, { type: "undo" });
+    history = historyReducer(history, { type: "redo" });
+    expect(title(history)).toBe("Saved");
+    expect(isDirty(history.present)).toBe(false);
+  });
+  test("a save that finishes after undo and a new edit doesn't mark the new edit saved", () => {
+    let history = emptyHistory(initial());
+    history = historyReducer(history, { type: "set-page", patch: { title: "One" } });
+    history = historyReducer(history, { type: "set-page", patch: { title: "Two" } });
+    const savingVersion = history.present.version;
+    history = historyReducer(history, { type: "undo" });
+    history = historyReducer(history, { type: "set-page", patch: { title: "Other" } });
+    history = historyReducer(history, { type: "saved", rev: "rev2", version: savingVersion });
+    expect(title(history)).toBe("Other");
+    expect(isDirty(history.present)).toBe(true);
+  });
+  test("two undos and a new edit don't land on a version saved earlier", () => {
+    let history = emptyHistory(initial());
+    history = historyReducer(history, { type: "set-page", patch: { title: "One" } });
+    history = historyReducer(history, { type: "set-page", patch: { title: "Two" } });
+    history = historyReducer(history, {
+      type: "saved",
+      rev: "rev2",
+      version: history.present.version,
+    });
+    history = historyReducer(history, { type: "undo" });
+    history = historyReducer(history, { type: "undo" });
+    history = historyReducer(history, { type: "set-page", patch: { title: "Uno" } });
+    history = historyReducer(history, { type: "set-page", patch: { title: "Dos" } });
+    expect(isDirty(history.present)).toBe(true);
+  });
+});
