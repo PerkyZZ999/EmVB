@@ -1,7 +1,12 @@
 import { Button, Input, Select } from "@cloudflare/kumo";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { defaultTriggers, type PopupOpenTrigger, type TriggersDoc } from "../../../core/index.ts";
+import {
+  defaultTriggers,
+  MAX_POPUP_TRIGGERS,
+  type PopupOpenTrigger,
+  type TriggersDoc,
+} from "../../../core/index.ts";
 import { BUTTON, FIELD } from "../../ui.ts";
 import { TriggerSettings } from "./TriggerSettings.tsx";
 
@@ -92,6 +97,9 @@ export function TriggersEditor({ triggers, onChange }: Props) {
   const advanced = doc.advanced ?? {};
   /** Removing the only On page load trigger would only put it back, so it can't be removed. */
   const onlyDefault = doc.open.length === 1 && doc.open[0]?.type === "page_load";
+  /** W-280: a popup saves with at most this many triggers; one more would make the save fail. */
+  const full = doc.open.length >= MAX_POPUP_TRIGGERS;
+  const fullReason = `${MAX_POPUP_TRIGGERS} triggers is the most one popup can have. Remove one to add another.`;
 
   return (
     <div className="emvb-triggers" data-emvb-panel="triggers">
@@ -142,10 +150,19 @@ export function TriggersEditor({ triggers, onChange }: Props) {
         variant="secondary"
         className={BUTTON}
         icon={<PlusIcon aria-hidden="true" />}
-        onClick={() => setOpen([...doc.open, blankTrigger("page_load")])}
+        disabled={full}
+        title={full ? fullReason : undefined}
+        onClick={() => {
+          if (!full) setOpen([...doc.open, blankTrigger("page_load")]);
+        }}
       >
         Add trigger
       </Button>
+      {full && (
+        <p className="emvb-helper" data-emvb-triggers-full="">
+          {fullReason}
+        </p>
+      )}
 
       <h3 className="emvb-section-label">Advanced</h3>
       <p className="emvb-helper">Limit how often the popup shows, and on which devices.</p>

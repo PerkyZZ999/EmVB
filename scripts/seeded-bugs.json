@@ -24787,6 +24787,42 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
       "expect": "\\(fail\\).*W-279"
+    },
+    {
+      "id": "W-280/no-trigger-cap",
+      "requirement": "W-280",
+      "description": "Add trigger keeps adding past the 8 a popup can save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "  const full = doc.open.length >= MAX_POPUP_TRIGGERS;",
+          "replace": "  const full = false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-280"
+    },
+    {
+      "id": "W-280/cap-silent",
+      "requirement": "W-280",
+      "description": "At the trigger cap the panel doesn't say why Add is disabled.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "        <p className=\"emvb-helper\" data-emvb-triggers-full=\"\">\n          {fullReason}\n        </p>",
+          "replace": "        <p className=\"emvb-helper\" data-emvb-triggers-full=\"\" />"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-280"
     }
   ]
 }

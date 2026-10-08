@@ -42,6 +42,25 @@ describe("popup triggers editor (W-087)", () => {
     expect(sent.map((d) => d.open)).toEqual([[{ type: "page_load" }]]);
   });
 
+  test("W-280: Add trigger stops at the most a popup can save, and says why", async () => {
+    const addButton = () =>
+      [...document.querySelectorAll<HTMLButtonElement>("button")].find(
+        (b) => b.textContent === "Add trigger",
+      );
+    const delays = (n: number) =>
+      Array.from({ length: n }, (_, i) => ({ type: "delay" as const, ms: 1000 * (i + 1) }));
+    await show(doc(delays(7)));
+    expect(addButton()?.disabled).toBe(false);
+    expect(document.querySelector("[data-emvb-triggers-full]")).toBeNull();
+    await act(async () => addButton()?.click());
+    expect(sent.at(-1)?.open.length).toBe(8);
+    await show(doc(delays(8)));
+    expect(addButton()?.disabled).toBe(true);
+    expect(document.querySelector("[data-emvb-triggers-full]")?.textContent).toBe(
+      "8 triggers is the most one popup can have. Remove one to add another.",
+    );
+  });
+
   test("Show at most commits on blur: empty is no limit, and it stays within 1 to 100", async () => {
     await show(doc([{ type: "page_load" }], { showTimes: 3 }));
     const field = [...document.querySelectorAll("input")].find(
