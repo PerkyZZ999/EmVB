@@ -187,3 +187,34 @@ describe("Line height units (W-125)", () => {
     ]);
   });
 });
+
+describe("length field messages for other units (W-262)", () => {
+  test("a number with a unit the field doesn't take lists the units it does", () => {
+    expect(parseLengthDraft("100dvh", "height", "px")).toEqual({
+      ok: false,
+      message: "Height takes px, %, rem, em, vw or vh.",
+    });
+    expect(parseLengthDraft("12pt", "fontSize", "px")).toEqual({
+      ok: false,
+      message: "Font size takes px, rem, em, % or vw.",
+    });
+  });
+  test("a comma decimal asks for a dot", () => {
+    expect(parseLengthDraft("1,5", "lineHeight", "em")).toEqual({
+      ok: false,
+      message: "Use a dot for decimals, such as 1.5.",
+    });
+  });
+  test("a leading + is a plain positive number", () => {
+    expect(parseLengthDraft("+20", "width", "px")).toEqual({
+      ok: true,
+      value: { value: 20, unit: "px" },
+    });
+  });
+  test("text that isn't a number keeps the general message", () => {
+    expect(parseLengthDraft("wide", "width", "px")).toEqual({
+      ok: false,
+      message: "Enter a number, such as 16 or 16px.",
+    });
+  });
+});

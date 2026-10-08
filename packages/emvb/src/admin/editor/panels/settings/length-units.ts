@@ -44,7 +44,10 @@ export type ParsedLength =
   | { ok: true; value: LengthLiteral | "auto" | number | undefined }
   | { ok: false; message: string };
 
-const DRAFT = /^(-?(?:\d+(?:\.\d*)?|\.\d+))\s*(px|rem|em|%|vw|vh)?$/i;
+const DRAFT = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(px|rem|em|%|vw|vh)?$/i;
+/** A number with a unit EmVB doesn't take ("100dvh", "12pt"), or a comma decimal ("1,5") (W-262). */
+const OTHER_UNIT = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)\s*[a-z%]+$/i;
+const COMMA_DECIMAL = /^[+-]?\d*,\d+\s*[a-z%]*$/i;
 
 const listed = (units: readonly string[]) =>
   units.length > 1 ? `${units.slice(0, -1).join(", ")} or ${units.at(-1)}` : (units[0] ?? "");
@@ -70,6 +73,15 @@ export function parseLengthDraft(
   const match = DRAFT.exec(text);
   const n = match ? Number(match[1]) : Number.NaN;
   if (!match || !Number.isFinite(n)) {
+    if (COMMA_DECIMAL.test(text)) {
+      return { ok: false, message: "Use a dot for decimals, such as 1.5." };
+    }
+    if (OTHER_UNIT.test(text)) {
+      return {
+        ok: false,
+        message: `${label} takes ${listed(allowed.filter((u) => u !== "auto" && u !== "x"))}.`,
+      };
+    }
     return { ok: false, message: `Enter a number, such as 16 or 16${unit}.` };
   }
   if (unit === "x" && !match[2] && allowed.includes("x")) {
