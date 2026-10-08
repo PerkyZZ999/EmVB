@@ -5612,8 +5612,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
-          "search": "      setCreateError(parsed.error);\n      return;\n",
-          "replace": "      setCreateError(parsed.error);\n"
+          "search": "      setCreateError({ field: \"value\", message: parsed.error });\n      return;\n",
+          "replace": "      setCreateError({ field: \"value\", message: parsed.error });\n"
         }
       ],
       "command": [
@@ -24725,7 +24725,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
-          "search": "    if (variableNameTaken(design, kind, trimmed)) {\n      setCreateError(variableNameTakenMessage(trimmed));\n      return;\n    }\n",
+          "search": "    if (variableNameTaken(design, kind, trimmed)) {\n      setCreateError({ field: \"name\", message: variableNameTakenMessage(trimmed) });\n      return;\n    }\n",
           "replace": ""
         }
       ],
@@ -24823,6 +24823,34 @@
         "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx"
       ],
       "expect": "\\(fail\\).*W-280"
+    },
+    {
+      "id": "W-281/value-invalid-on-name-clash",
+      "requirement": "W-281",
+      "description": "A name clash in the variable create row marks the Value field invalid.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "            aria-invalid={createError?.field === \"value\" ? true : undefined}",
+          "replace": "            aria-invalid={createError ? true : undefined}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
+      "expect": "\\(fail\\).*W-27[89]|\\(fail\\).*W-281"
+    },
+    {
+      "id": "W-281/name-not-invalid",
+      "requirement": "W-281",
+      "description": "A name clash doesn't mark the Name field invalid.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "            aria-invalid={createError?.field === \"name\" ? true : undefined}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

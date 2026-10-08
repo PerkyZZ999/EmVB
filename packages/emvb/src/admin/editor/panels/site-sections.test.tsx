@@ -215,6 +215,11 @@ describe("VariableSection", () => {
     expect(host.querySelector("[data-emvb-var-create] [role=alert]")?.textContent).toBe(
       'A variable named "brand" already exists. Pick another name.',
     );
+    // W-281: only the Name field is marked invalid for a name clash.
+    expect(inputs("Name").at(-1)?.getAttribute("aria-invalid")).toBe("true");
+    expect(inputs("Value").at(-1)?.hasAttribute("aria-invalid")).toBe(false);
+    const alert = host.querySelector("[data-emvb-var-create] [role=alert]");
+    expect(alert?.previousElementSibling?.contains(inputs("Name").at(-1) ?? null)).toBe(true);
     await click(byText("Cancel"));
     await press(varRow("ink"), "F2");
     await renameTo("PAPER", "Enter");
@@ -230,6 +235,17 @@ describe("VariableSection", () => {
     await type(inputs("Name").at(-1), "Ink");
     await click(byText("Create"));
     expect(saved.at(-1)?.variables.fonts?.map((f) => f.name)).toEqual(["Brand", "Ink"]);
+  });
+
+  test("W-281: a bad value in the create row marks only the Value field", async () => {
+    await mountVars("spacing", "Spacing");
+    await click(byText("New"));
+    await type(inputs("Name").at(-1), "Gap");
+    await type(inputs("Value (px, rem, em or %)").at(-1), "wide");
+    await click(byText("Create"));
+    expect(saved).toEqual([]);
+    expect(inputs("Value (px, rem, em or %)").at(-1)?.getAttribute("aria-invalid")).toBe("true");
+    expect(inputs("Name").at(-1)?.hasAttribute("aria-invalid")).toBe(false);
   });
 
   test("rows preview each kind: swatch, font, capped type size and spacing bar", async () => {

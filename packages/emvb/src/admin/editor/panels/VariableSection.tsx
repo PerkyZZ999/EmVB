@@ -249,7 +249,11 @@ export function VariableSection({
   const [filter, setFilter] = React.useState("");
   const [name, setName] = React.useState("");
   const [value, setValue] = React.useState(NEW_VALUE[kind]);
-  const [createError, setCreateError] = React.useState<string | null>(null);
+  // W-281: a name clash and a bad value are told apart, so only the field at fault is invalid.
+  const [createError, setCreateError] = React.useState<{
+    field: "name" | "value";
+    message: string;
+  } | null>(null);
   const [nameError, setNameError] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState<string | null>(null);
   const [renaming, setRenaming] = React.useState<string | null>(null);
@@ -276,12 +280,12 @@ export function VariableSection({
     const trimmed = cleanClassName(name);
     if (!trimmed || variableListFull(design, kind)) return;
     if (variableNameTaken(design, kind, trimmed)) {
-      setCreateError(variableNameTakenMessage(trimmed));
+      setCreateError({ field: "name", message: variableNameTakenMessage(trimmed) });
       return;
     }
     const parsed = parseValue(kind, value);
     if (!parsed.ok) {
-      setCreateError(parsed.error);
+      setCreateError({ field: "value", message: parsed.error });
       return;
     }
     const id = uniqueId(
@@ -501,22 +505,24 @@ export function VariableSection({
             label="Name"
             className={FIELD}
             value={name}
+            aria-invalid={createError?.field === "name" ? true : undefined}
             onChange={(e) => {
               setName(e.target.value);
               setCreateError(null);
             }}
           />
+          {createError?.field === "name" && <InlineError>{createError.message}</InlineError>}
           <Input
             label={isLengthKind(kind) ? "Value (px, rem, em or %)" : "Value"}
             className={FIELD}
             value={value}
-            aria-invalid={createError ? true : undefined}
+            aria-invalid={createError?.field === "value" ? true : undefined}
             onChange={(e) => {
               setValue(e.target.value);
               setCreateError(null);
             }}
           />
-          {createError && <InlineError>{createError}</InlineError>}
+          {createError?.field === "value" && <InlineError>{createError.message}</InlineError>}
         </CreateRow>
       )}
     </section>
