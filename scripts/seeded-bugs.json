@@ -19301,8 +19301,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "        if (event.key === \"Enter\") finish(text);",
-          "replace": "        if (event.key === \"Enter\") finish(null);"
+          "search": "        if (event.key === \"Enter\") finish(text, true);",
+          "replace": "        if (event.key === \"Enter\") finish(null, true);"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
@@ -23716,6 +23716,48 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/history.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-256/focus-dropped-after-rename",
+      "requirement": "W-256",
+      "description": "Renaming a layer with Enter or Escape drops focus to the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "    selectButton.current?.focus();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-256/blur-steals-focus",
+      "requirement": "W-256",
+      "description": "Leaving the layer name field by clicking elsewhere pulls focus back to the row.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "    refocus.current = byKey;\n",
+          "replace": "    refocus.current = true;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-256/enter-not-by-key",
+      "requirement": "W-256",
+      "description": "Enter in the layer name field isn't treated as a key finish, so focus is lost.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "        if (event.key === \"Enter\") finish(text, true);\n",
+          "replace": "        if (event.key === \"Enter\") finish(text);\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
       "expect": "\\(fail\\)"
     }
   ]

@@ -436,4 +436,30 @@ describe("renaming a layer (W-157)", () => {
     expect(renames).toEqual([["head0001", undefined]]);
     expect(select("head0001").textContent).toContain("Heading");
   });
+
+  test("Enter or Escape in the name field returns focus to the row (W-256)", async () => {
+    await mountTree(<Live start={layout} />);
+    await act(async () => {
+      select("head0001").dispatchEvent(new KeyboardEvent("keydown", { key: "F2", bubbles: true }));
+    });
+    await typeName("Named", "Enter");
+    expect(document.activeElement).toBe(select("head0001"));
+    await act(async () => {
+      select("head0001").dispatchEvent(new KeyboardEvent("keydown", { key: "F2", bubbles: true }));
+    });
+    await typeName("Ignored", "Escape");
+    expect(document.activeElement).toBe(select("head0001"));
+  });
+
+  test("leaving the name field by focusing elsewhere keeps focus there (W-256)", async () => {
+    await mountTree(<Live start={layout} />);
+    await act(async () => {
+      select("head0001").dispatchEvent(new KeyboardEvent("keydown", { key: "F2", bubbles: true }));
+    });
+    await act(async () => {
+      select("head0002").focus();
+    });
+    expect(field()).toBeNull();
+    expect(document.activeElement).toBe(select("head0002"));
+  });
 });

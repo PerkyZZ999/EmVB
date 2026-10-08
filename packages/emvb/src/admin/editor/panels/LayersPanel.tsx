@@ -288,7 +288,16 @@ function LayerRow({
   const startRename = () => {
     if (actions.onRename) setRenaming(true);
   };
-  const finishRename = (text: string | null) => {
+  // W-256: Enter or Escape hands focus back to the row; leaving by click keeps the new focus.
+  const selectButton = React.useRef<HTMLButtonElement | null>(null);
+  const refocus = React.useRef(false);
+  React.useEffect(() => {
+    if (renaming || !refocus.current) return;
+    refocus.current = false;
+    selectButton.current?.focus();
+  }, [renaming]);
+  const finishRename = (text: string | null, byKey = false) => {
+    refocus.current = byKey;
     setRenaming(false);
     if (text === null || !actions.onRename) return;
     const next = text.trim().slice(0, 80) || undefined;
@@ -333,6 +342,7 @@ function LayerRow({
           <RenameInput initial={node.label ?? ""} placeholder={typeName} onDone={finishRename} />
         ) : (
           <button
+            ref={selectButton}
             type="button"
             className="emvb-layer-select"
             aria-current={selected ? "true" : undefined}
@@ -420,14 +430,14 @@ function RenameInput({
 }: {
   initial: string;
   placeholder: string;
-  onDone: (text: string | null) => void;
+  onDone: (text: string | null, byKey?: boolean) => void;
 }) {
   const [text, setText] = React.useState(initial);
   const done = React.useRef(false);
-  const finish = (value: string | null) => {
+  const finish = (value: string | null, byKey = false) => {
     if (done.current) return;
     done.current = true;
-    onDone(value);
+    onDone(value, byKey);
   };
   return (
     <input
@@ -448,8 +458,8 @@ function RenameInput({
       onBlur={() => finish(text)}
       onKeyDown={(event) => {
         event.stopPropagation();
-        if (event.key === "Enter") finish(text);
-        if (event.key === "Escape") finish(null);
+        if (event.key === "Enter") finish(text, true);
+        if (event.key === "Escape") finish(null, true);
       }}
     />
   );
