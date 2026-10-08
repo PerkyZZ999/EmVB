@@ -50,6 +50,21 @@ test("search path and helper", () => {
   expect(themeContextSearch()).toMatchObject({ isSearch: true, kind: "archive" });
 });
 
+describe("malformed percent-escapes (W-305)", () => {
+  test("a malformed category or tag slug is looked up as written instead of throwing", () => {
+    expect(themeContextFrom(new URL("https://example.com/category/%E0%A4%A"))).toMatchObject({
+      kind: "archive",
+      taxonomy: { type: "category", slug: "%E0%A4%A" },
+    });
+    expect(themeContextFrom(new URL("https://example.com/tag/50%"))).toMatchObject({
+      taxonomy: { type: "tag", slug: "50%" },
+    });
+    expect(themeContextFrom(new URL("https://example.com/tag/caf%C3%A9")).taxonomy?.slug).toBe(
+      "café",
+    );
+  });
+});
+
 describe("archive pages (W-221)", () => {
   const ctx = (path: string) => themeContextFrom(new URL(`http://site.test${path}`));
   test("/page/N is that page of the archive; conditions see the archive path", () => {

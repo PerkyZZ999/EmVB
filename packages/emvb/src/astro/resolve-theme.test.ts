@@ -355,6 +355,19 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.content?.html).toContain("Welcome!");
   });
 
+  test("W-305: a single-post part at a malformed /posts/<slug> renders without the post", async () => {
+    themeEntries = [
+      part("SINGLE01", "single_post", [
+        { id: "ptitle01", type: "post-title", props: { level: 1 } } as LayoutNode,
+      ]),
+    ];
+    const ctx = themeContextFrom(new URL("http://site.test/posts/%E0%A4%A"), {
+      content: { collection: "posts", id: "" },
+    });
+    const resolved = await resolveThemeParts(astro("/posts/%E0%A4%A"), ctx);
+    expect(resolved.content?.partType).toBe("single_post");
+  });
+
   test("an archive part repeats its loop item part once per post", async () => {
     postEntries = [
       { id: "01A", data: { id: "01A", slug: "a", title: "Alpha" } },

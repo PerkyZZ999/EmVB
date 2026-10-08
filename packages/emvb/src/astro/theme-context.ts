@@ -12,15 +12,27 @@ const context = (path: string, rest: Kind & Partial<ThemeRequestContext>): Theme
   ...rest,
 });
 
+/**
+ * A percent-decoded path segment, or the raw segment when its escapes are malformed (W-305), the
+ * way EmDash 1.2's `decodeSlug` stopped throwing: `/category/%E0` is a lookup that finds nothing.
+ */
+export function decodePathSegment(segment: string): string {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
 /** Archive URLs by pattern, and what each adds to the context. */
 const ARCHIVES: [RegExp, (match: RegExpExecArray) => Partial<ThemeRequestContext>][] = [
   [
     /^\/category\/([^/]+)$/,
-    ([, slug]) => ({ taxonomy: { type: "category", slug: decodeURIComponent(slug ?? "") } }),
+    ([, slug]) => ({ taxonomy: { type: "category", slug: decodePathSegment(slug ?? "") } }),
   ],
   [
     /^\/tag\/([^/]+)$/,
-    ([, slug]) => ({ taxonomy: { type: "tag", slug: decodeURIComponent(slug ?? "") } }),
+    ([, slug]) => ({ taxonomy: { type: "tag", slug: decodePathSegment(slug ?? "") } }),
   ],
   [/^\/posts$/, () => ({ collection: "posts" })],
 ];

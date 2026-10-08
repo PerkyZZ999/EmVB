@@ -32,7 +32,7 @@ import {
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
-import { themeContextFrom } from "./theme-context.ts";
+import { decodePathSegment, themeContextFrom } from "./theme-context.ts";
 import { entryTimestamp, themePostFromEntry } from "./theme-posts.ts";
 
 /** The landmark element for a part's wrapper (W-216); other parts get a plain div. */
@@ -232,7 +232,7 @@ async function loadSingularPost(ctx: ThemeRequestContext): Promise<ThemePostFiel
   const key = ctx.entryId || undefined;
   // Prefer slug from path `/posts/{slug}` when entry id is missing.
   const pathSlug = /^\/posts\/([^/]+)$/.exec(ctx.path)?.[1];
-  const lookup = key || (pathSlug ? decodeURIComponent(pathSlug) : undefined);
+  const lookup = key || (pathSlug ? decodePathSegment(pathSlug) : undefined);
   if (!lookup) return undefined;
   try {
     const { entry } = await getEmDashEntry("posts", lookup);

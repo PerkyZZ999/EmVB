@@ -3497,7 +3497,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/theme-context.ts",
-          "search": "taxonomy: { type: \"category\", slug: decodeURIComponent(slug ?? \"\") }",
+          "search": "taxonomy: { type: \"category\", slug: decodePathSegment(slug ?? \"\") }",
           "replace": "taxonomy: { type: \"category\", slug: slug ?? \"\" }"
         }
       ],
@@ -25646,6 +25646,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
       "expect": "\\(fail\\).*W-304"
+    },
+    {
+      "id": "W-305/category-decode-throws",
+      "requirement": "W-305",
+      "description": "A malformed /category/<slug> escape throws URIError while building the theme context.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-context.ts",
+          "search": "slug: decodePathSegment(slug ?? \"\") } }),\n  ],\n  [\n    /^\\/tag",
+          "replace": "slug: decodeURIComponent(slug ?? \"\") } }),\n  ],\n  [\n    /^\\/tag"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-context.test.ts"],
+      "expect": "\\(fail\\).*W-305"
+    },
+    {
+      "id": "W-305/post-path-decode-throws",
+      "requirement": "W-305",
+      "description": "A single-post part at a malformed /posts/<slug> throws URIError instead of rendering.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "(pathSlug ? decodePathSegment(pathSlug) : undefined)",
+          "replace": "(pathSlug ? decodeURIComponent(pathSlug) : undefined)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*W-305"
     }
   ]
 }
