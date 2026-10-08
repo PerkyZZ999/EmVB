@@ -19,16 +19,27 @@ html {
 }
 
 body {
+  position: relative;
   margin: 0;
   min-height: 100vh;
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: var(--step-0);
-  line-height: 1.6;
-  font-optical-sizing: auto;
+  font-size: var(--text-base);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
+}
+
+/* Paper grain: one fixed layer, painted once. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 h1,
@@ -37,10 +48,15 @@ h3 {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 500;
-  line-height: 1.08;
-  letter-spacing: -0.005em;
-  word-spacing: 0.02em;
+  font-optical-sizing: auto;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
   text-wrap: balance;
+}
+
+h3 {
+  line-height: 1.25;
+  letter-spacing: -0.005em;
 }
 
 p {
@@ -85,11 +101,56 @@ pre {
 }
 
 .section {
+  position: relative;
   padding-block: var(--space-9);
 }
 
 .section + .section {
   border-top: 1px solid var(--rule);
+}
+
+.section--sunk {
+  background: var(--paper-sunk);
+}
+
+/* The dark bands: the pipeline and the footer. */
+.night {
+  --rule: var(--night-rule);
+  --rule-strong: var(--night-faint);
+  --ink: var(--night-ink);
+  --ink-soft: var(--night-soft);
+  --ink-faint: var(--night-faint);
+  --accent: var(--night-accent);
+  --accent-ink: #08142b;
+  --paper: var(--night);
+  --paper-raised: var(--night-raised);
+  --grid-line: var(--night-grid);
+  color-scheme: dark;
+  isolation: isolate;
+  background: var(--night);
+  color: var(--ink);
+}
+
+.night + .section,
+.section + .night {
+  border-top-color: transparent;
+}
+
+/* Blueprint grid, fading out from the top. */
+.blueprint {
+  isolation: isolate;
+}
+
+.blueprint::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 100% 3rem,
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 50% 0 / 3rem 100%;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, #000 35%, transparent 100%);
 }
 
 .eyebrow {
@@ -99,42 +160,55 @@ pre {
   margin: 0;
   color: var(--accent);
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 400;
+  font-size: var(--text-xs);
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .eyebrow::before {
   content: "";
-  width: 1.5rem;
+  width: var(--space-5);
   height: 1px;
   background: currentColor;
 }
 
 .lede {
+  max-width: 62ch;
   color: var(--ink-soft);
-  font-size: var(--step-1);
-  line-height: 1.55;
+  font-size: var(--text-lead);
+  line-height: 1.5;
+}
+
+.note {
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 1.6;
 }
 
 .button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
   min-height: 2.75rem;
-  padding: 0 1.15rem;
+  padding: 0 var(--space-5);
   border: 1px solid var(--accent);
   border-radius: 999px;
   background: var(--accent);
   color: var(--accent-ink);
   font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
+  font-weight: 500;
   text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
   transition:
-    background-color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms var(--ease-out);
+    background-color var(--dur-fast) var(--ease-in-out),
+    border-color var(--dur-fast) var(--ease-in-out),
+    color var(--dur-fast) var(--ease-in-out),
+    transform var(--dur-fast) var(--ease-out);
 }
 
 .button:hover {
@@ -143,7 +217,15 @@ pre {
 }
 
 .button:active {
-  transform: translateY(1px);
+  transform: scale(0.98);
+}
+
+.button .arrow {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.button:hover .arrow {
+  transform: translateX(3px);
 }
 
 .button--ghost {
@@ -155,6 +237,91 @@ pre {
 .button--ghost:hover {
   border-color: var(--ink);
   background: transparent;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li,
+.chip {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+/*
+ * The canvas selection, as the EmVB editor draws it: a brand outline, four handles and a name tag.
+ * The tag text comes from data-tag through `content`, with empty alt text so assistive tech skips it.
+ */
+.selected {
+  position: relative;
+  display: inline-block;
+}
+
+.selected > .selected-frame {
+  position: absolute;
+  inset: -0.08em -0.2em -0.02em;
+  pointer-events: none;
+  border: 1.5px solid var(--accent);
+  border-radius: 2px;
+}
+
+.selected > .selected-frame::before {
+  content: attr(data-tag);
+  content: attr(data-tag) / "";
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: -1.5px;
+  padding: 0 var(--space-2);
+  border-radius: 4px 4px 4px 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.75;
+  white-space: nowrap;
+}
+
+.selected-frame > i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--accent);
+  border-radius: 1px;
+  background: var(--paper);
+}
+
+.selected-frame > i:nth-child(1) {
+  top: -5px;
+  left: -5px;
+}
+
+.selected-frame > i:nth-child(2) {
+  top: -5px;
+  right: -5px;
+}
+
+.selected-frame > i:nth-child(3) {
+  bottom: -5px;
+  left: -5px;
+}
+
+.selected-frame > i:nth-child(4) {
+  right: -5px;
+  bottom: -5px;
 }
 
 .visually-hidden {
@@ -172,7 +339,7 @@ pre {
     .reveal {
       animation: reveal linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 40%;
+      animation-range: entry 0% entry 35%;
     }
   }
 }
@@ -180,6 +347,16 @@ pre {
 @keyframes reveal {
   from {
     opacity: 0;
-    transform: translateY(1.75rem);
+    transform: translateY(var(--space-6));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

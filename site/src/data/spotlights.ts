@@ -49,11 +49,11 @@ export const spotlights: Spotlight[] = [
     shot: "backgrounds",
     kicker: "Backgrounds",
     title: "Layered backgrounds without custom CSS",
-    body: "Give any box an image from the media library, a two-stop gradient on top, then a colour overlay. Or a background video.",
+    body: "Give any box an image from the media library, a gradient and a colour overlay on top. Or a background video.",
     points: [
       "Size, position and repeat for images",
-      "Gradient angle and two colours, from variables or values",
-      "Overlay colour and opacity",
+      "Linear, radial and conic gradients with up to 10 stops",
+      "Colours from variables, or as HEX, RGB or OKLCH",
     ],
   },
 ];

@@ -25548,6 +25548,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/editor-overlay.test.tsx"],
       "expect": "\\(fail\\).*W-300"
+    },
+    {
+      "id": "W-301/highlight-no-escape",
+      "requirement": "W-301",
+      "description": "The home page code samples put source text into the page unescaped.",
+      "edits": [
+        {
+          "file": "site/src/scripts/highlight.ts",
+          "search": "  text.replace(/&/g, \"&amp;\").replace(/</g, \"&lt;\")",
+          "replace": "  text.replace(/&/g, \"&amp;\")"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/highlight.test.ts"],
+      "expect": "\\(fail\\).*W-301"
+    },
+    {
+      "id": "W-301/highlight-extra-lines",
+      "requirement": "W-301",
+      "description": "The code samples split into the wrong number of lines.",
+      "edits": [
+        {
+          "file": "site/src/scripts/highlight.ts",
+          "search": "    .split(\"\\n\")",
+          "replace": "    .split(/\\n|,/)"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/highlight.test.ts"],
+      "expect": "\\(fail\\).*W-301"
+    },
+    {
+      "id": "W-301/outline-plain-link",
+      "requirement": "W-301",
+      "description": "The Outline view labels every plain link as a Button.",
+      "edits": [
+        {
+          "file": "site/src/scripts/outline-blocks.ts",
+          "search": "el.classList.contains(\"button\") ? \"Button\" : undefined",
+          "replace": "\"Button\""
+        }
+      ],
+      "command": ["bun", "test", "./test/site/outline-blocks.test.ts"],
+      "expect": "\\(fail\\).*W-301"
+    },
+    {
+      "id": "W-301/outline-data-el-ignored",
+      "requirement": "W-301",
+      "description": "The Outline view ignores data-el and labels by tag only.",
+      "edits": [
+        {
+          "file": "site/src/scripts/outline-blocks.ts",
+          "search": "  if (el.dataset.el) return el.dataset.el;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./test/site/outline-blocks.test.ts"],
+      "expect": "\\(fail\\).*W-301"
     }
   ]
 }

@@ -1,9 +1,16 @@
 ---
 import { sample, steps } from "../data/pipeline";
+import { highlight } from "../scripts/highlight";
 import SectionIntro from "./SectionIntro.astro";
+
+const panes = {
+  json: highlight(sample.json, "json"),
+  html: highlight(sample.html, "html"),
+  css: highlight(sample.css, "css"),
+};
 ---
 
-<section class="section" aria-labelledby="hood-title">
+<section class="section night blueprint" aria-labelledby="hood-title">
   <div class="wrap" id="under-the-hood">
     <SectionIntro id="hood-title" eyebrow="Under the hood" title="From canvas to markup in four steps" />
 
@@ -11,7 +18,7 @@ import SectionIntro from "./SectionIntro.astro";
       {
         steps.map((step, index) => (
           <li class="reveal">
-            <span class="num" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+            <span class="node" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
             <h3>{step.title}</h3>
             <p>{step.body}</p>
           </li>
@@ -20,15 +27,19 @@ import SectionIntro from "./SectionIntro.astro";
     </ol>
 
     <div class="code reveal">
-      <figure>
-        <figcaption>Layout JSON <span>stored</span></figcaption>
-        <pre><code>{sample.json}</code></pre>
+      <figure class="pane">
+        <figcaption><span class="file">layout.json</span><span class="badge">stored</span></figcaption>
+        <pre><code set:html={panes.json} /></pre>
       </figure>
-      <div class="arrow" aria-hidden="true">→</div>
-      <figure>
-        <figcaption>HTML and CSS <span>served</span></figcaption>
-        <pre><code>{sample.html}</code></pre>
-        <pre class="css"><code>{sample.css}</code></pre>
+      <div class="render" aria-hidden="true">
+        <span class="beam"></span>
+        <span class="fn">renderPage()</span>
+        <span class="beam"></span>
+      </div>
+      <figure class="pane">
+        <figcaption><span class="file">page.html + page.css</span><span class="badge badge--live">served</span></figcaption>
+        <pre><code set:html={panes.html} /></pre>
+        <pre class="css"><code set:html={panes.css} /></pre>
       </figure>
     </div>
     <p class="note">The hero heading of the Northfold demo, as saved and as published (line breaks added).</p>
@@ -37,6 +48,7 @@ import SectionIntro from "./SectionIntro.astro";
 
 <style>
   .steps {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-5);
@@ -45,40 +57,69 @@ import SectionIntro from "./SectionIntro.astro";
     list-style: none;
   }
 
+  /* The track the four nodes sit on, with a pulse running from Edit to Serve. */
+  .steps::before {
+    content: "";
+    position: absolute;
+    top: 1.25rem;
+    left: 1.25rem;
+    right: 1.25rem;
+    height: 1px;
+    background:
+      linear-gradient(90deg, transparent, var(--accent), transparent) 0 0 / 30% 100% no-repeat,
+      var(--rule);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .steps::before {
+      animation: pulse 3.2s var(--ease-in-out) infinite;
+    }
+  }
+
+  @keyframes pulse {
+    from {
+      background-position:
+        -40% 0,
+        0 0;
+    }
+
+    to {
+      background-position:
+        140% 0,
+        0 0;
+    }
+  }
+
   .steps li {
     position: relative;
     display: grid;
     align-content: start;
     gap: var(--space-3);
-    padding-top: var(--space-5);
-    border-top: 2px solid var(--ink);
   }
 
-  .steps li:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    top: -6px;
-    right: -0.75rem;
-    width: 10px;
-    height: 10px;
-    border-top: 2px solid var(--ink);
-    border-right: 2px solid var(--ink);
-    transform: rotate(45deg);
-  }
-
-  .num {
+  .node {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-bottom: var(--space-2);
+    border: 1px solid var(--rule-strong);
+    border-radius: 50%;
+    background: var(--night);
     color: var(--accent);
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: var(--text-xs);
+    font-weight: 500;
   }
 
   h3 {
-    font-size: var(--step-2);
+    font-size: var(--text-h3);
   }
 
   .steps p {
     color: var(--ink-soft);
-    font-size: 0.98rem;
+    font-size: var(--text-sm);
+    line-height: 1.6;
   }
 
   .code {
@@ -86,13 +127,14 @@ import SectionIntro from "./SectionIntro.astro";
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: var(--space-4);
-    padding: clamp(1rem, 3vw, 2rem);
+    padding: clamp(var(--space-4), 3vw, var(--space-6));
+    border: 1px solid var(--rule);
     border-radius: var(--radius-l);
-    background: var(--code-bg);
-    color: var(--code-ink);
+    background: var(--night-raised);
+    box-shadow: 0 40px 80px -40px rgb(0 0 0 / 60%);
   }
 
-  figure {
+  .pane {
     min-width: 0;
     margin: 0;
   }
@@ -100,50 +142,119 @@ import SectionIntro from "./SectionIntro.astro";
   figcaption {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     margin-bottom: var(--space-3);
-    color: var(--code-faint);
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
+    font-size: var(--text-xs);
+  }
+
+  .file {
+    color: var(--ink-soft);
+  }
+
+  .badge {
+    padding: 0 var(--space-2);
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+    line-height: 1.6;
     text-transform: uppercase;
+  }
+
+  .badge--live {
+    border-color: color-mix(in srgb, var(--syntax-tag) 60%, transparent);
+    color: var(--syntax-tag);
   }
 
   pre {
     margin: 0;
-    padding: var(--space-4);
+    padding: var(--space-4) var(--space-4) var(--space-4) 0;
     overflow-x: auto;
-    border: 1px solid rgb(255 255 255 / 8%);
+    border: 1px solid var(--rule);
     border-radius: var(--radius-m);
-    background: rgb(255 255 255 / 3%);
-    font-size: 0.78rem;
-    line-height: 1.65;
+    background: var(--night);
+    color: var(--ink);
+    font-size: var(--text-xs);
+    line-height: 1.7;
+    counter-reset: line;
   }
 
   pre.css {
     margin-top: var(--space-3);
-    color: #9cc0ff;
   }
 
-  .arrow {
-    color: var(--code-faint);
+  pre :global(.line) {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  pre :global(.line)::before {
+    counter-increment: line;
+    content: counter(line);
+    display: inline-block;
+    width: 2.5rem;
+    margin-right: var(--space-3);
+    color: var(--syntax-punct);
+    text-align: right;
+    opacity: 0.6;
+  }
+
+  pre :global(.tok-key) {
+    color: var(--syntax-key);
+  }
+
+  pre :global(.tok-string) {
+    color: var(--syntax-string);
+  }
+
+  pre :global(.tok-number) {
+    color: var(--syntax-number);
+  }
+
+  pre :global(.tok-tag) {
+    color: var(--syntax-tag);
+  }
+
+  pre :global(.tok-punct) {
+    color: var(--syntax-punct);
+  }
+
+  .render {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+  }
+
+  .fn {
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
     font-family: var(--font-mono);
-    font-size: 1.5rem;
+    font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+
+  .beam {
+    width: 1px;
+    height: var(--space-7);
+    background: linear-gradient(var(--rule), var(--accent), var(--rule));
   }
 
   .note {
     margin-top: var(--space-4);
-    color: var(--ink-faint);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
   }
 
   @media (max-width: 1000px) {
     .steps {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      row-gap: var(--space-6);
+      row-gap: var(--space-7);
     }
 
-    .steps li::after {
+    .steps::before {
       display: none;
     }
 
@@ -151,9 +262,15 @@ import SectionIntro from "./SectionIntro.astro";
       grid-template-columns: minmax(0, 1fr);
     }
 
-    .arrow {
-      justify-self: center;
-      transform: rotate(90deg);
+    .render {
+      grid-auto-flow: column;
+      align-items: center;
+    }
+
+    .beam {
+      width: var(--space-7);
+      height: 1px;
+      background: linear-gradient(90deg, var(--rule), var(--accent), var(--rule));
     }
   }
 

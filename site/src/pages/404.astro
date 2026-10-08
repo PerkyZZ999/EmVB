@@ -20,24 +20,70 @@ import Base from "../layouts/Base.astro";
       <a class="button" href="/">Go to the home page</a>
       <a class="button button--ghost" href="/playground/">Try EmVB in your browser</a>
     </p>
+    <div class="drop selected" aria-hidden="true">
+      <span class="plus">+</span>
+      <span>This section is empty. Drop an element here.</span>
+      <span class="selected-frame" data-tag="Empty section"><i></i><i></i><i></i><i></i></span>
+    </div>
   </main>
 </Base>
 
 <style>
   .missing {
-    min-height: 70vh;
     display: grid;
     align-content: center;
+    justify-items: start;
     gap: var(--space-4);
+    min-height: 70vh;
     padding-block: var(--space-9);
   }
+
   .brand {
-    color: var(--ink);
     width: fit-content;
+    color: var(--ink);
   }
+
+  h1 {
+    font-size: var(--text-display);
+  }
+
+  .missing > p:not(.actions) {
+    max-width: 48ch;
+    color: var(--ink-soft);
+    font-size: var(--text-lead);
+  }
+
   .actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
+  }
+
+  .drop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    width: 100%;
+    margin-top: var(--space-7);
+    padding: var(--space-8) var(--space-5);
+    border: 1px dashed var(--rule-strong);
+    border-radius: var(--radius-m);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  .plus {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: var(--space-6);
+    height: var(--space-6);
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: var(--text-lead);
   }
 </style>

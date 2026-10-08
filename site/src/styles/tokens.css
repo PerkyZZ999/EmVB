@@ -2,35 +2,62 @@
 :root {
   color-scheme: light dark;
 
+  /* Two families: Fraunces for display, IBM Plex (Sans for text, Mono for code and labels). */
   --font-display: "Fraunces Variable", "Iowan Old Style", Palatino, Georgia, serif;
-  --font-body: "Source Serif 4 Variable", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-body: "IBM Plex Sans Variable", "IBM Plex Sans", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
+  /* Surfaces: page, cards and panels, recessed bands. */
   --paper: #f5f2ea;
   --paper-raised: #fffdf8;
   --paper-sunk: #ebe6da;
+  /* Text: primary, secondary, tertiary (labels and notes only). */
   --ink: #16140f;
   --ink-soft: #4d483f;
-  --ink-faint: #6f685c;
+  --ink-faint: #696256;
+  /* Borders. */
   --rule: #d9d2c3;
-  --rule-strong: #b9b0a0;
-  --accent: #0a5ce6;
-  --accent-strong: #0047c2;
+  --rule-strong: #b3aa99;
+  /* Brand: primary actions, links, the canvas selection. */
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
   --accent-ink: #ffffff;
-  --accent-wash: #e3ecfd;
-  --signal: #c2541f;
-  --code-bg: #16140f;
-  --code-ink: #efe9dc;
-  --code-faint: #a39c8d;
+  --accent-wash: #e4ebfd;
+  /* Swatches for the hero's live style demo. */
+  --swatch-ember: #c2541f;
+  --swatch-moss: #2f7550;
+  --swatch-ink: var(--ink);
+
+  /* The night band and code blocks stay dark in both schemes. */
+  --night: #121214;
+  --night-raised: #1b1c20;
+  --night-rule: #2c2d33;
+  --night-ink: #ece8df;
+  --night-soft: #bdb8ae;
+  --night-faint: #8f8a81;
+  --night-accent: #7aa2ff;
+  --night-grid: rgb(122 162 255 / 7%);
+  --syntax-key: #9cc0ff;
+  --syntax-string: #f2c48d;
+  --syntax-number: #f59d6e;
+  --syntax-tag: #8fd3b6;
+  --syntax-punct: #8a867d;
+
+  /* Elevation: resting cards, floating cards, framed screenshots. */
+  --shadow-rest: 0 1px 3px rgb(22 20 15 / 8%);
+  --shadow-float: 0 1px 2px rgb(22 20 15 / 8%), 0 16px 40px -16px rgb(22 20 15 / 28%);
   --shadow-frame:
     0 1px 0 rgb(22 20 15 / 6%), 0 24px 48px -24px rgb(22 20 15 / 35%),
-    0 60px 120px -60px rgb(10 92 230 / 30%);
-  --grid-line: rgb(22 20 15 / 5%);
+    0 64px 128px -64px rgb(37 99 235 / 32%);
+  --grid-line: rgb(22 20 15 / 5.5%);
+  --grain-opacity: 0.05;
 
+  /* Radius: controls, cards and frames, the large panels. Pills use 999px. */
   --radius-s: 6px;
   --radius-m: 12px;
-  --radius-l: 18px;
+  --radius-l: 16px;
 
+  /* Spacing, on a 4 px grid. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -38,20 +65,36 @@
   --space-5: 1.5rem;
   --space-6: 2rem;
   --space-7: 3rem;
-  --space-8: 4.5rem;
-  --space-9: clamp(4.5rem, 9vw, 8rem);
+  --space-8: 4rem;
+  --space-9: clamp(4rem, 9vw, 8rem);
 
-  --step--1: 0.875rem;
-  --step-0: 1.0625rem;
-  --step-1: 1.25rem;
-  --step-2: clamp(1.4rem, 1.2rem + 0.8vw, 1.75rem);
-  --step-3: clamp(1.9rem, 1.4rem + 2vw, 2.9rem);
-  --step-4: clamp(2.1rem, 1.3rem + 4.4vw, 4.75rem);
+  /* Type scale (Major Third), seven sizes. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lead: 1.25rem;
+  --text-h3: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem);
+  --text-h2: clamp(2rem, 1.5rem + 2vw, 3rem);
+  --text-display: clamp(2.5rem, 1.25rem + 5vw, 5.25rem);
+
+  /* Stacking. */
+  --z-raised: 10;
+  --z-outline: 150;
+  --z-sticky: 200;
+  --z-modal: 400;
+  --z-toast: 600;
+
+  /* Motion: feedback, state changes, entrances. */
+  --dur-fast: 160ms;
+  --dur-base: 240ms;
+  --dur-slow: 600ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   --page: 76rem;
   --gutter: clamp(1.25rem, 4vw, 2.5rem);
   --header-h: 4rem;
-  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -63,18 +106,22 @@
     --ink-soft: #c2bcb0;
     --ink-faint: #9b958a;
     --rule: #2b2d31;
-    --rule-strong: #43464c;
-    --accent: #6ea4ff;
-    --accent-strong: #9cc0ff;
+    --rule-strong: #474a51;
+    --accent: #7aa2ff;
+    --accent-strong: #a3bfff;
     --accent-ink: #08142b;
     --accent-wash: #15233d;
-    --signal: #f08a55;
-    --code-bg: #0b0c0d;
-    --code-ink: #e9e4d8;
-    --code-faint: #8e887d;
+    --swatch-ember: #f08a55;
+    --swatch-moss: #7cc49b;
+    --night: #08090a;
+    --night-raised: #131417;
+    --night-rule: #25272c;
+    --shadow-rest: 0 1px 0 rgb(255 255 255 / 4%), 0 1px 3px rgb(0 0 0 / 40%);
+    --shadow-float: 0 1px 0 rgb(255 255 255 / 5%), 0 20px 44px -16px rgb(0 0 0 / 70%);
     --shadow-frame:
-      0 1px 0 rgb(255 255 255 / 5%), 0 30px 60px -30px rgb(0 0 0 / 70%),
-      0 60px 140px -60px rgb(110 164 255 / 28%);
-    --grid-line: rgb(238 233 222 / 4%);
+      0 1px 0 rgb(255 255 255 / 5%), 0 32px 64px -32px rgb(0 0 0 / 70%),
+      0 64px 140px -64px rgb(122 162 255 / 28%);
+    --grid-line: rgb(238 233 222 / 4.5%);
+    --grain-opacity: 0.035;
   }
 }

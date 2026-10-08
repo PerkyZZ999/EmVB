@@ -1,0 +1,81 @@
+---
+/**
+ * The icon the editor's Add panel shows for an element type (packages/emvb AddPanel), rendered to
+ * static SVG at build time: no React reaches the browser.
+ */
+import {
+  ArrowsLeftRightIcon,
+  BrowserIcon,
+  CaretDownIcon,
+  CheckSquareIcon,
+  ClipboardTextIcon,
+  CursorClickIcon,
+  GraphIcon,
+  ImageIcon,
+  LinkSimpleIcon,
+  ListBulletsIcon,
+  MinusIcon,
+  NotePencilIcon,
+  PaperPlaneTiltIcon,
+  RadioButtonIcon,
+  RectangleIcon,
+  RowsIcon,
+  SquareIcon,
+  SquaresFourIcon,
+  StarIcon,
+  TextAlignLeftIcon,
+  TextHIcon,
+  TextTIcon,
+  TextboxIcon,
+  YoutubeLogoIcon,
+} from "@phosphor-icons/react/dist/ssr";
+
+interface Props {
+  type: string;
+  size?: number;
+}
+
+const icons: Record<string, typeof TextHIcon> = {
+  container: SquareIcon,
+  "div-block": SquareIcon,
+  "layout-section": RowsIcon,
+  flexbox: SquaresFourIcon,
+  spacer: RectangleIcon,
+  divider: MinusIcon,
+  heading: TextHIcon,
+  text: TextAlignLeftIcon,
+  label: TextTIcon,
+  link: LinkSimpleIcon,
+  button: CursorClickIcon,
+  list: ListBulletsIcon,
+  image: ImageIcon,
+  icon: StarIcon,
+  svg: GraphIcon,
+  tabs: BrowserIcon,
+  accordion: ListBulletsIcon,
+  menu: CaretDownIcon,
+  "menu-item": CaretDownIcon,
+  video: YoutubeLogoIcon,
+  form: ClipboardTextIcon,
+  "text-input": TextboxIcon,
+  textarea: NotePencilIcon,
+  select: TextboxIcon,
+  checkbox: CheckSquareIcon,
+  radio: RadioButtonIcon,
+  submit: PaperPlaneTiltIcon,
+  "post-title": TextHIcon,
+  "post-excerpt": TextAlignLeftIcon,
+  "post-content": NotePencilIcon,
+  "post-image": ImageIcon,
+  "post-link": LinkSimpleIcon,
+  "post-date": TextTIcon,
+  "post-author": TextTIcon,
+  loop: ListBulletsIcon,
+  pagination: ArrowsLeftRightIcon,
+};
+
+const { type, size = 20 } = Astro.props;
+const Icon = icons[type] ?? SquareIcon;
+---
+
+<Icon size={size} aria-hidden="true" focusable="false" />

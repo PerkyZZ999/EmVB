@@ -56,7 +56,7 @@
     },
     "packages/emvb": {
       "name": "@perkyzz/emvb",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "zod": "~4.5.4",
       },
@@ -92,9 +92,9 @@
         "@astrojs/react": "^7.0.0",
         "@cloudflare/kumo": "2.6.0",
         "@emdash-cms/admin": "1.0.1",
-        "@fontsource-variable/fraunces": "^5.2.9",
-        "@fontsource-variable/source-serif-4": "^5.2.9",
-        "@fontsource/ibm-plex-mono": "^5.2.7",
+        "@fontsource-variable/fraunces": "^5.3.0",
+        "@fontsource-variable/ibm-plex-sans": "^5.3.0",
+        "@fontsource/ibm-plex-mono": "^5.3.0",
         "@phosphor-icons/react": "2.1.10",
         "astro": "^7.3.5",
         "react": "19.3.0",
@@ -367,7 +367,7 @@
 
     "@fontsource-variable/fraunces": ["@fontsource-variable/fraunces@5.3.0", "", {}, "sha512-9BYGySn4AHEJdgp9Z28tQ3X+laJMEOITXkQarZXeloWQZDq5oOvXJ3kDA8c7MGIfpogIaZfjrQBqmda8POOCKA=="],
 
-    "@fontsource-variable/source-serif-4": ["@fontsource-variable/source-serif-4@5.3.0", "", {}, "sha512-9vch9WqxjaaA+1o9Ur8pOgIGbCYLjRReOUel23A6lOpD1syptgjtkORevvNmldJ5kGXQL29onQUqI5Ltz0s3bQ=="],
+    "@fontsource-variable/ibm-plex-sans": ["@fontsource-variable/ibm-plex-sans@5.3.0", "", {}, "sha512-agG8tXFEo0hD9+J7npa4vbbWult52eMLVaQ6WQRlhs/iCAojrMAoejru85W9HTVXHfyUj96KM7gp/KGAS87XaQ=="],
 
     "@fontsource/ibm-plex-mono": ["@fontsource/ibm-plex-mono@5.3.0", "", {}, "sha512-eTgnZjZEGk1QtD3ZstF+Vclo2HLAni8YMy34/DxllwZvyz1lR/1RF/xTiAquOBO7MvqBx8D2Ig2WCPMVfdZu7Q=="],
 

@@ -1,3 +1,5 @@
+import { project } from "./project";
+
 export const steps = [
   {
     title: "Edit",
@@ -5,7 +7,7 @@ export const steps = [
   },
   {
     title: "Store",
-    body: "Each page is one JSON layout in the emvb_pages collection, checked against schema version 9 and the 512 KB limit before it is saved.",
+    body: `Each page is one JSON layout in the emvb_pages collection, checked against schema version ${project.schemaVersion} and the ${project.layoutLimitKb} KB limit before it is saved.`,
   },
   {
     title: "Render",

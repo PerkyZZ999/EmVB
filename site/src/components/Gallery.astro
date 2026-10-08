@@ -48,28 +48,34 @@ const items: ShotId[] = ["canvasText", "pagesList", "editorDark", "grid", "forms
     border-radius: var(--radius-m);
     box-shadow: var(--shadow-frame);
     cursor: zoom-in;
+    transition: box-shadow var(--dur-base) var(--ease-in-out);
+  }
+
+  .zoom:hover {
+    box-shadow:
+      0 0 0 1.5px var(--accent),
+      var(--shadow-frame);
   }
 
   .zoom :global(img) {
     width: 100%;
-    transition: transform 400ms var(--ease-out);
+    transition: transform var(--dur-slow) var(--ease-out);
   }
 
   .zoom:hover :global(img) {
-    transform: scale(1.015);
+    transform: scale(1.02);
   }
 
   figcaption {
     margin-top: var(--space-4);
     color: var(--ink-soft);
-    font-size: 0.98rem;
+    font-size: var(--text-sm);
   }
 
   @media (max-width: 720px) {
     .grid {
       grid-template-columns: minmax(0, 1fr);
     }
-
   }
 
   @media (prefers-reduced-motion: reduce) {

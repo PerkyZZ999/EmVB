@@ -1,44 +1,49 @@
+import { project } from "./project";
+
 /**
- * Every number here is quoted from the project's validation records. Keep the source
- * next to the figure, and update both together.
+ * Measured on 2026-10-08 at release 0.2.0: `bun run bench:render`, `bun run bench:css`,
+ * `bun run test` and the seed count in scripts/seeded-bugs.json. Re-measure before changing one.
  */
 export interface Metric {
   value: string;
+  unit?: string;
   label: string;
   source: string;
 }
 
 export const metrics: Metric[] = [
   {
-    value: "0.33 ms",
-    label: "median server render of a 300-node page, p95 0.65 ms, against a 20 ms budget",
-    source: "bench:render, 200 runs (N-002)",
+    value: "1.1",
+    unit: "ms",
+    label: "median server render of a 300-element page, p95 2.3 ms, against a 20 ms budget",
+    source: "bun run bench:render, 200 runs",
   },
   {
-    value: "943 B",
-    label: "of gzipped CSS for that 300-node page, against a 15 KB budget",
-    source: "W-040 performance check",
+    value: "995",
+    unit: "B",
+    label: "of gzipped CSS for that 300-element page, against a 15 KB budget",
+    source: "bun run bench:css",
   },
   {
-    value: "1714",
-    label: "Bun tests passing, none failing, at the latest full check",
-    source: "bun run check, W-101",
+    value: "2,323",
+    label: "unit and component tests passing, none failing",
+    source: "bun run test",
   },
   {
-    value: "868 / 868",
-    label: "seeded bugs caught by the test suite in the last full seeded-bug run",
-    source: "bun run seeded-bugs, W-091",
+    value: "1,518",
+    label: "seeded bugs on record, each one proven to make a test fail",
+    source: "scripts/seeded-bugs.json",
   },
 ];
 
 export const safeguards = [
   {
     title: "Validated on save and on read",
-    body: "Every layout is checked against the schema before it is stored and again before it renders. Pages are capped at 512 KB and the design at 256 KB.",
+    body: `Every layout is checked against the schema before it is stored and again before it renders. Pages are capped at ${project.layoutLimitKb} KB and the design at ${project.designLimitKb} KB.`,
   },
   {
     title: "Sanitised output",
-    body: "The HTML serializer escapes by construction, links pass a protocol allowlist and inline SVG is sanitised. The editor canvas is a sandboxed iframe with scripts off.",
+    body: "The HTML serializer escapes by construction, links pass a protocol allowlist and SVG is sanitised. The editor canvas is a sandboxed iframe with scripts off.",
   },
   {
     title: "Role-checked writes",
@@ -46,6 +51,6 @@ export const safeguards = [
   },
   {
     title: "Accessible by default",
-    body: "Focus styles target :focus-visible, accordions are native <details>, and entrance animations and transitions stop under prefers-reduced-motion.",
+    body: "Focus styles target :focus-visible, accordions are native <details>, and animations stop under prefers-reduced-motion.",
   },
-] as const;
+];

@@ -1,9 +1,12 @@
 ---
-import { nav } from "../data/nav";
+import { externalLinks, nav } from "../data/nav";
 import Logo from "./Logo.astro";
+import OutlineIcon from "./OutlineIcon.astro";
+
+const github = externalLinks[0];
 ---
 
-<header class="header">
+<header class="header" data-outline-skip>
   <div class="wrap bar">
     <a class="brand" href="#top" aria-label="EmVB, back to top">
       <Logo />
@@ -12,37 +15,61 @@ import Logo from "./Logo.astro";
 
     <nav class="links" aria-label="Sections">
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a href={github.href}>{github.label}</a>
     </nav>
 
-    <a class="button cta" href="#get-started">Get started</a>
+    <div class="tools">
+      <button
+        class="outline-toggle"
+        type="button"
+        aria-pressed="false"
+        data-outline-toggle
+        hidden
+        title="Outline the page the way the EmVB canvas does"
+      >
+        <OutlineIcon />
+        <span class="outline-label">Outline</span>
+      </button>
+      <a class="button button--ghost cta" href="#get-started">Get started</a>
 
-    <details class="menu">
-      <summary>
-        <span class="visually-hidden">Menu</span>
-        <span class="burger" aria-hidden="true"></span>
-      </summary>
-      <nav class="sheet" aria-label="Sections">
-        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-        <a href="#get-started">Get started</a>
-      </nav>
-    </details>
+      <details class="menu">
+        <summary>
+          <span class="visually-hidden">Menu</span>
+          <span class="burger" aria-hidden="true"></span>
+        </summary>
+        <nav class="sheet" aria-label="Sections">
+          {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+          <a href={github.href}>{github.label}</a>
+          <a href="#get-started">Get started</a>
+        </nav>
+      </details>
+    </div>
   </div>
+  <span class="progress" aria-hidden="true"></span>
 </header>
+
+<script>
+  // Close the mobile sheet after a jump, so it doesn't cover the section it opened.
+  const menu = document.querySelector<HTMLDetailsElement>(".header .menu");
+  menu?.querySelector(".sheet")?.addEventListener("click", (event) => {
+    if ((event.target as Element).closest("a")) menu.open = false;
+  });
+</script>
 
 <style>
   .header {
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: var(--z-sticky);
     border-bottom: 1px solid var(--rule);
-    background: color-mix(in srgb, var(--paper) 86%, transparent);
-    backdrop-filter: saturate(1.4) blur(14px);
+    background: color-mix(in srgb, var(--paper) 84%, transparent);
+    backdrop-filter: saturate(1.4) blur(16px);
   }
 
   .bar {
     display: flex;
     align-items: center;
-    gap: var(--space-6);
+    gap: var(--space-5);
     height: var(--header-h);
   }
 
@@ -50,9 +77,10 @@ import Logo from "./Logo.astro";
     display: inline-flex;
     align-items: center;
     gap: var(--space-3);
+    min-height: 2.75rem;
     color: var(--ink);
     font-family: var(--font-display);
-    font-size: 1.35rem;
+    font-size: var(--text-lead);
     font-weight: 600;
     letter-spacing: -0.01em;
     text-decoration: none;
@@ -60,33 +88,81 @@ import Logo from "./Logo.astro";
 
   .links {
     display: flex;
-    gap: var(--space-5);
     margin-inline-start: auto;
   }
 
-  .links a,
-  .sheet a {
+  .links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: var(--space-3);
+    border-radius: var(--radius-s);
     color: var(--ink-soft);
     font-family: var(--font-mono);
-    font-size: 0.82rem;
+    font-size: var(--text-sm);
     text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-in-out);
   }
 
-  .links a:hover,
-  .sheet a:hover {
+  .links a:hover {
     color: var(--ink);
   }
 
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .outline-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0 var(--space-3);
+    border: 1px dashed var(--rule-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition:
+      color var(--dur-fast) var(--ease-in-out),
+      border-color var(--dur-fast) var(--ease-in-out),
+      background-color var(--dur-fast) var(--ease-in-out);
+  }
+
+  .outline-toggle[hidden] {
+    display: none;
+  }
+
+  .outline-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .outline-toggle[aria-pressed="true"] {
+    border-style: solid;
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
   .cta {
-    min-height: 2.25rem;
-    padding-inline: 0.95rem;
-    font-size: 0.8rem;
+    color: var(--accent);
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+
+  .cta:hover {
+    border-color: var(--accent);
+    background: var(--accent-wash);
   }
 
   .menu {
     display: none;
     position: relative;
-    margin-inline-start: auto;
   }
 
   .menu summary {
@@ -111,6 +187,7 @@ import Logo from "./Logo.astro";
     width: 1rem;
     height: 1.5px;
     background: var(--ink);
+    transition: transform var(--dur-base) var(--ease-out);
   }
 
   .burger {
@@ -137,13 +214,11 @@ import Logo from "./Logo.astro";
   }
 
   .menu[open] .burger::before {
-    top: 0;
-    transform: rotate(45deg);
+    transform: translateY(5px) rotate(45deg);
   }
 
   .menu[open] .burger::after {
-    top: 0;
-    transform: rotate(-45deg);
+    transform: translateY(-5px) rotate(-45deg);
   }
 
   .sheet {
@@ -151,32 +226,80 @@ import Logo from "./Logo.astro";
     top: calc(100% + var(--space-3));
     right: 0;
     display: grid;
-    min-width: 13rem;
+    min-width: 14rem;
     padding: var(--space-2);
     border: 1px solid var(--rule);
     border-radius: var(--radius-m);
     background: var(--paper-raised);
-    box-shadow: var(--shadow-frame);
+    box-shadow: var(--shadow-float);
   }
 
   .sheet a {
-    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 var(--space-4);
     border-radius: var(--radius-s);
-    font-size: 0.9rem;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    text-decoration: none;
   }
 
   .sheet a:hover {
     background: var(--paper-sunk);
+    color: var(--ink);
   }
 
-  @media (max-width: 860px) {
+  /* A reading-progress hairline, driven by the page scroll where the browser supports it. */
+  .progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .progress {
+      animation: progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+
+  @keyframes progress {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .links a:last-child {
+      display: none;
+    }
+  }
+
+  @media (max-width: 960px) {
     .links,
     .cta {
       display: none;
     }
 
+    .tools {
+      margin-inline-start: auto;
+    }
+
     .menu {
       display: block;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .outline-label {
+      display: none;
     }
   }
 </style>

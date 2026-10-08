@@ -1,32 +1,41 @@
 ---
+import { project } from "../data/project";
 import SectionIntro from "./SectionIntro.astro";
 
-const commands = [
-  { cmd: "bun install", note: "Bun and Node; Bun 1.4.2 and Node 24 are verified" },
-  { cmd: "bun run demo:node", note: "Node + SQLite demo on http://127.0.0.1:4411" },
+const install = [
+  { cmd: `bun add ${project.packageName}`, note: "or npm i; your site’s build compiles it" },
 ];
 
-const steps = [
-  "Sign in to the demo admin with the dev-only bypass link below.",
+const demo = [
+  { cmd: `git clone ${project.repoUrl}.git`, note: "" },
+  { cmd: "bun install", note: "Bun 1.4 and Node 24 are verified" },
+  { cmd: "bun run demo:node", note: "http://127.0.0.1:4411" },
+];
+
+const demoSteps = [
+  "Sign in with the dev-only bypass link below.",
   "Open Pages VisualBuilder and click Set up EmVB once.",
-  "Click New page, edit the heading and Publish. The page is served at /your-slug.",
+  "Click New page, edit the heading and Publish. It is served at /your-slug.",
 ];
 ---
 
-<section class="section start" aria-labelledby="start-title">
+<section class="section section--sunk" aria-labelledby="start-title">
   <div class="wrap" id="get-started">
-    <div class="grid">
-      <SectionIntro id="start-title" eyebrow="Get started" title="Run it locally in a few minutes">
-        <p>
-          From the repository root, install and start the Node demo. The Cloudflare demo, with D1
-          and R2, runs with <code>bun run demo:cf</code> on port 4412.
-        </p>
-      </SectionIntro>
+    <SectionIntro id="start-title" eyebrow="Get started" title="Install it, or run the demo first">
+      <p>
+        EmVB {project.version} is on npm as <code>{project.packageName}</code>. Or clone the
+        repository and try it on the Node demo; the Cloudflare demo with D1 and R2 runs with{" "}
+        <code>bun run demo:cf</code>.
+      </p>
+    </SectionIntro>
 
-      <div class="panel reveal">
-        <div class="terminal" role="group" aria-label="Terminal commands">
+    <div class="paths">
+      <article class="path reveal">
+        <p class="step">A</p>
+        <h3>Add it to your EmDash site</h3>
+        <div class="terminal" role="group" aria-label="Install command">
           {
-            commands.map((line) => (
+            install.map((line) => (
               <p>
                 <span class="prompt" aria-hidden="true">$</span>
                 <code>{line.cmd}</code>
@@ -35,85 +44,141 @@ const steps = [
             ))
           }
         </div>
+        <p class="body">
+          Then register <code>emvb()</code> next to your other EmDash plugins and add the public
+          route. The guide covers both, plus forms.
+        </p>
+        <a class="button" href={project.installGuideUrl}>Read the install guide <span class="arrow" aria-hidden="true">→</span></a>
+      </article>
+
+      <article class="path reveal">
+        <p class="step">B</p>
+        <h3>Run the demo locally</h3>
+        <div class="terminal" role="group" aria-label="Demo commands">
+          {
+            demo.map((line) => (
+              <p>
+                <span class="prompt" aria-hidden="true">$</span>
+                <code>{line.cmd}</code>
+                {line.note && <span class="comment"># {line.note}</span>}
+              </p>
+            ))
+          }
+        </div>
         <ol>
-          {steps.map((step) => <li>{step}</li>)}
+          {demoSteps.map((step) => <li>{step}</li>)}
         </ol>
         <p class="link">
           <code>http://127.0.0.1:4411/_emdash/api/setup/dev-bypass?redirect=/_emdash/admin</code>
         </p>
-        <p class="aside">
-          Just want to look around first? <a href="/playground/">Try the editor in your browser</a>:
-          no install, and your edits stay on your device.
-        </p>
-        <p class="aside">
-          Adding EmVB to your own EmDash site? Follow the guide at{" "}
-          <code>docs/guides/install-in-a-host-site.md</code>{" "}in the repository. The npm package is
-          private for now.
-        </p>
-      </div>
+      </article>
     </div>
+
+    <p class="aside">
+      Just looking? <a href="/playground/">Try the editor in your browser</a>: no install, and your
+      edits stay on your device.
+    </p>
   </div>
 </section>
 
 <style>
-  .start {
-    background: var(--paper-sunk);
-  }
-
-  .grid {
+  .paths {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: clamp(2rem, 5vw, 4.5rem);
-    align-items: start;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
   }
 
-  .panel {
+  .path {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-5);
+    align-content: start;
+    justify-items: start;
+    gap: var(--space-4);
+    padding: var(--space-6);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    box-shadow: var(--shadow-rest);
+  }
+
+  .path > * {
+    max-width: 100%;
+  }
+
+  .step {
+    display: grid;
+    place-items: center;
+    width: var(--space-6);
+    height: var(--space-6);
+    border-radius: var(--radius-s);
+    background: var(--accent-wash);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+
+  h3 {
+    font-size: var(--text-h3);
   }
 
   .terminal {
     display: grid;
     gap: var(--space-2);
-    padding: var(--space-5);
+    width: 100%;
+    padding: var(--space-4) var(--space-5);
     overflow-x: auto;
-    border-radius: var(--radius-m);
-    background: var(--code-bg);
-    color: var(--code-ink);
+    border-radius: var(--radius-s);
+    background: var(--night);
+    color: var(--night-ink);
     font-family: var(--font-mono);
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
   }
 
   .terminal p {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 0 var(--space-3);
   }
 
   .prompt {
-    color: var(--code-faint);
+    color: var(--night-accent);
   }
 
   .terminal code {
     font-size: inherit;
+    white-space: nowrap;
   }
 
   .comment {
-    color: var(--code-faint);
+    grid-column: 2;
+    color: var(--night-faint);
+  }
+
+  .body {
+    color: var(--ink-soft);
+  }
+
+  .body code {
+    font-size: var(--text-sm);
   }
 
   ol {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-2);
     margin: 0;
-    padding-left: 1.4rem;
+    padding-left: var(--space-5);
+    color: var(--ink-soft);
   }
 
   ol li::marker {
     color: var(--accent);
     font-family: var(--font-mono);
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
+  }
+
+  .link {
+    width: 100%;
   }
 
   .link code {
@@ -122,23 +187,29 @@ const steps = [
     overflow-x: auto;
     border: 1px dashed var(--rule-strong);
     border-radius: var(--radius-s);
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
     white-space: nowrap;
   }
 
   .aside {
+    margin-top: var(--space-6);
     color: var(--ink-soft);
-    font-size: 0.95rem;
+    text-align: center;
   }
 
-  .aside code {
-    font-size: 0.82rem;
-    overflow-wrap: anywhere;
+  .aside a {
+    color: var(--accent);
   }
 
   @media (max-width: 900px) {
-    .grid {
+    .paths {
       grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .path {
+      padding: var(--space-5);
     }
   }
 </style>

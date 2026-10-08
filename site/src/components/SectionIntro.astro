@@ -26,7 +26,7 @@ const { id, eyebrow, title, align = "start" } = Astro.props;
     display: grid;
     gap: var(--space-4);
     max-width: 44rem;
-    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: clamp(var(--space-7), 5vw, var(--space-8));
   }
 
   .intro--center {
@@ -36,6 +36,6 @@ const { id, eyebrow, title, align = "start" } = Astro.props;
   }
 
   h2 {
-    font-size: var(--step-3);
+    font-size: var(--text-h2);
   }
 </style>

@@ -1,75 +1,163 @@
 ---
-import { nav } from "../data/nav";
+import { externalLinks, nav } from "../data/nav";
+import { project } from "../data/project";
 import Logo from "./Logo.astro";
+
+const projectLinks = [
+  ...externalLinks,
+  { href: project.installGuideUrl, label: "Install guide" },
+  { href: `${project.repoUrl}/blob/main/LICENSE`, label: "MIT license" },
+];
 ---
 
-<footer class="footer">
+<footer class="footer night blueprint">
+  <div class="wrap closing">
+    <h2>Build the next page <em>on a canvas.</em></h2>
+    <p class="lede">Open the real editor in your browser, or add EmVB to your EmDash site.</p>
+    <div class="actions">
+      <a class="button" href="/playground/">Open the playground <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="button button--ghost" href={project.installGuideUrl}>Read the install guide</a>
+    </div>
+  </div>
+
   <div class="wrap grid">
     <div class="brand">
-      <Logo size={24} />
+      <Logo size={28} />
       <p>
-        <strong>EmVB</strong>, a visual page builder plugin for{" "}
+        <strong>EmVB</strong> {project.version}, a visual page builder plugin for{" "}
         <a href="https://github.com/emdash-cms/emdash">EmDash CMS</a>.
       </p>
     </div>
-    <nav aria-label="Footer">
+    <nav aria-label="Footer sections">
+      <p class="heading">On this page</p>
       {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-      <a href="#get-started">Get started</a>
     </nav>
-    <p class="small">
+    <nav aria-label="Project">
+      <p class="heading">Project</p>
+      {projectLinks.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+    <p class="note small">
       Screenshots show the real editor running on the Node demo. Northfold is a fictional company.
     </p>
   </div>
+
+  <p class="wordmark" aria-hidden="true">EmVB</p>
 </footer>
 
 <style>
   .footer {
-    padding-block: var(--space-7);
-    border-top: 1px solid var(--rule);
-    color: var(--ink-soft);
-    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--space-9);
+  }
+
+  .closing {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-5);
+    padding-bottom: var(--space-9);
+    text-align: center;
+  }
+
+  h2 {
+    max-width: 18ch;
+    font-size: var(--text-h2);
+    text-wrap: balance;
+  }
+
+  h2 em {
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
   }
 
   .grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-5);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-6);
+    padding-block: var(--space-7);
+    border-top: 1px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: var(--text-sm);
   }
 
   .brand {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--space-3);
+    max-width: 32ch;
+    color: var(--ink);
+  }
+
+  .brand p {
+    color: var(--ink-soft);
+  }
+
+  .brand strong {
     color: var(--ink);
   }
 
   nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-5);
+    display: grid;
+    align-content: start;
+  }
+
+  .heading {
+    margin-bottom: var(--space-2);
+    color: var(--ink-faint);
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   nav a {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 2.75rem;
     color: var(--ink-soft);
     text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-in-out);
   }
 
   nav a:hover {
-    color: var(--ink);
+    color: var(--accent);
   }
 
   .small {
     grid-column: 1 / -1;
-    color: var(--ink-faint);
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
   }
 
-  @media (max-width: 720px) {
+  /* An outlined wordmark, cropped by the bottom edge. */
+  .wordmark {
+    margin: 0 0 -0.22em;
+    color: transparent;
+    font-family: var(--font-display);
+    font-size: clamp(6rem, 26vw, 22rem);
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 0.8;
+    text-align: center;
+    -webkit-text-stroke: 1px var(--rule-strong);
+    user-select: none;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
+    background-clip: text;
+  }
+
+  @media (max-width: 800px) {
     .grid {
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .brand {
+      grid-column: 1 / -1;
     }
   }
 </style>

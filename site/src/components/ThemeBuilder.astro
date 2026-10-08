@@ -5,7 +5,7 @@ import SectionIntro from "./SectionIntro.astro";
 import Shot from "./Shot.astro";
 ---
 
-<section class="section theme" aria-labelledby="theme-title">
+<section class="section section--sunk" aria-labelledby="theme-title">
   <div class="wrap" id="theme-builder">
     <SectionIntro id="theme-title" eyebrow="Theme Builder" title="Headers, footers, templates and popups, shown where you say">
       <p>
@@ -29,7 +29,7 @@ import Shot from "./Shot.astro";
 
       <div class="facts">
         <div class="block">
-          <h3>Part types</h3>
+          <h3>{partTypes.length} part types</h3>
           <ul class="chips">
             {partTypes.map((type) => <li>{type}</li>)}
           </ul>
@@ -42,10 +42,17 @@ import Shot from "./Shot.astro";
           <p>Limit how often a popup shows and on which devices. Close and Escape return focus.</p>
         </div>
         <div class="block">
+          <h3>Floating bars and corners</h3>
+          <p>
+            A Float sits on the top or bottom edge, or in a corner. Visitors can close it until their
+            next visit, with no cookie.
+          </p>
+        </div>
+        <div class="block">
           <h3>Dynamic content</h3>
           <p>
-            Single, archive and loop item parts use Loop and post elements: title, excerpt, content,
-            featured image, link, date and author.
+            Single, archive and loop item parts use Loop, Pagination and post elements: title,
+            excerpt, content, featured image, link, date and author.
           </p>
         </div>
       </div>
@@ -54,15 +61,11 @@ import Shot from "./Shot.astro";
 </section>
 
 <style>
-  .theme {
-    background: var(--paper-sunk);
-  }
-
   .layout {
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
     align-items: start;
-    gap: clamp(2rem, 5vw, 4rem);
+    gap: clamp(var(--space-6), 5vw, var(--space-8));
   }
 
   .shots {
@@ -70,16 +73,16 @@ import Shot from "./Shot.astro";
   }
 
   .shots .second {
+    position: relative;
     width: 88%;
     margin: -14% 0 0 auto;
-    position: relative;
   }
 
   .facts {
-    display: grid;
-    gap: var(--space-6);
     position: sticky;
     top: calc(var(--header-h) + var(--space-6));
+    display: grid;
+    gap: var(--space-6);
   }
 
   .block {
@@ -90,30 +93,13 @@ import Shot from "./Shot.astro";
   }
 
   h3 {
-    font-size: var(--step-1);
+    font-size: var(--text-lead);
   }
 
   .block p {
     color: var(--ink-soft);
-    font-size: 0.98rem;
-  }
-
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .chips li {
-    padding: 0.2rem 0.65rem;
-    border: 1px solid var(--rule-strong);
-    border-radius: 999px;
-    background: var(--paper);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--text-sm);
+    line-height: 1.6;
   }
 
   @media (max-width: 960px) {

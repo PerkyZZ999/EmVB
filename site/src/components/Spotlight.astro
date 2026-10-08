@@ -6,17 +6,23 @@ import Shot from "./Shot.astro";
 
 interface Props {
   item: Spotlight;
+  index: number;
+  total: number;
   flip?: boolean;
 }
 
-const { item, flip = false } = Astro.props;
+const { item, index, total, flip = false } = Astro.props;
 const detail = item.detail;
 const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 2.5rem)";
+const count = (n: number) => String(n).padStart(2, "0");
 ---
 
 <article class:list={["spotlight", "reveal", flip && "spotlight--flip"]}>
   <div class="copy">
-    <p class="kicker">{item.kicker}</p>
+    <p class="kicker">
+      <span class="count">{count(index)}<span aria-hidden="true"> / {count(total)}</span></span>
+      {item.kicker}
+    </p>
     <h3>{item.title}</h3>
     <p class="body">{item.body}</p>
     <ul>
@@ -51,7 +57,7 @@ const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 
     display: grid;
     grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
     align-items: center;
-    gap: clamp(2rem, 5vw, 4.5rem);
+    gap: clamp(var(--space-6), 5vw, 4.5rem);
   }
 
   .spotlight--flip {
@@ -63,16 +69,28 @@ const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 
   }
 
   .kicker {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     color: var(--accent);
     font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-size: var(--text-xs);
+    font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
+  .count {
+    padding: 0 var(--space-2);
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    letter-spacing: 0;
+    line-height: 1.6;
+  }
+
   h3 {
-    margin-top: var(--space-3);
-    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem);
+    margin-top: var(--space-4);
+    font-size: var(--text-h3);
   }
 
   .body {
@@ -84,22 +102,23 @@ const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 
     display: grid;
     gap: var(--space-2);
     margin: var(--space-5) 0 0;
-    padding: 0;
+    padding: var(--space-5) 0 0;
+    border-top: 1px solid var(--rule-strong);
     list-style: none;
   }
 
   li {
     display: grid;
-    grid-template-columns: 1rem 1fr;
+    grid-template-columns: var(--space-4) 1fr;
     gap: var(--space-2);
-    font-size: 0.98rem;
+    font-size: var(--text-sm);
   }
 
   li::before {
     content: "";
-    width: 0.55rem;
-    height: 0.55rem;
-    margin-top: 0.55em;
+    width: 8px;
+    height: 8px;
+    margin-top: 0.45em;
     border: 1.5px solid var(--accent);
     border-radius: 2px;
   }
@@ -110,21 +129,26 @@ const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 
 
   .zoom {
     display: block;
-    border-radius: var(--radius-l);
+    border-radius: var(--radius-m);
     cursor: zoom-in;
+    transition: box-shadow var(--dur-base) var(--ease-in-out);
+  }
+
+  .zoom:hover {
+    box-shadow: 0 0 0 1.5px var(--accent);
   }
 
   .visual--detail {
-    padding-bottom: 4rem;
+    padding-bottom: var(--space-8);
   }
 
   .detail {
     position: absolute;
     bottom: 0;
-    left: -1.5rem;
+    left: calc(-1 * var(--space-5));
     width: 34%;
     margin: 0;
-    padding: 6px;
+    padding: var(--space-2);
     border: 1px solid var(--rule);
     border-radius: var(--radius-m);
     background: var(--paper-raised);
@@ -135,7 +159,7 @@ const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 
     position: relative;
     overflow: hidden;
     aspect-ratio: calc(var(--w) * 1440) / calc(var(--h) * 900);
-    border-radius: calc(var(--radius-m) - 4px);
+    border-radius: var(--radius-s);
   }
 
   .crop :global(img) {
@@ -150,7 +174,7 @@ const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 
     padding: var(--space-2) var(--space-2) var(--space-1);
     color: var(--ink-faint);
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
   }
 
   @media (max-width: 900px) {
@@ -165,7 +189,7 @@ const sizes = "(min-width: 1260px) 800px, (min-width: 900px) 64vw, calc(100vw - 
 
     .detail {
       left: auto;
-      right: -0.5rem;
+      right: calc(-1 * var(--space-2));
       width: 42%;
     }
   }

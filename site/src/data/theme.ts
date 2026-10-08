@@ -1,17 +1,10 @@
-/** Theme part types, display conditions and popup triggers, as the Theme Builder offers them. */
-export const partTypes = [
-  "Header",
-  "Footer",
-  "Single page",
-  "Single post",
-  "Archive",
-  "Search results",
-  "404 page",
-  "Loop item",
-  "Section",
-  "Page template",
-  "Popup",
-] as const;
+import {
+  THEME_PART_TYPES,
+  THEME_PART_TYPE_LABELS,
+} from "../../../packages/emvb/src/core/theme/part-types.ts";
+
+/** Theme part types as the Theme Builder names them. */
+export const partTypes = THEME_PART_TYPES.map((type) => THEME_PART_TYPE_LABELS[type]);
 
 export const popupTriggers = [
   "On page load",

@@ -1,5 +1,6 @@
 ---
-import { elementFamilies, featureGroups } from "../data/features";
+import { addPanel, elementCount, featureGroups } from "../data/features";
+import ElementIcon from "./ElementIcon.astro";
 import SectionIntro from "./SectionIntro.astro";
 ---
 
@@ -15,7 +16,7 @@ import SectionIntro from "./SectionIntro.astro";
     <div class="groups">
       {
         featureGroups.map((group, index) => (
-          <section class="group reveal" aria-labelledby={`group-${group.id}`}>
+          <section class="group reveal" aria-labelledby={`group-${group.id}`} data-el="Div Block">
             <h3 id={`group-${group.id}`}>
               <span class="index">{String(index + 1).padStart(2, "0")}</span>
               {group.label}
@@ -33,27 +34,70 @@ import SectionIntro from "./SectionIntro.astro";
       }
     </div>
 
-    <div class="elements reveal">
-      <h3>Elements</h3>
-      <dl>
+    <section class="add reveal" aria-labelledby="add-title" data-el="Div Block">
+      <header class="add-head">
+        <div>
+          <h3 id="add-title">The Add panel</h3>
+          <p>
+            All {elementCount} elements, grouped the way the editor shows them. Tab panels come with their Tabs.
+          </p>
+        </div>
+        <label class="search" hidden data-add-search>
+          <span class="visually-hidden">Filter elements</span>
+          <input type="search" placeholder="Search elements" autocomplete="off" spellcheck="false" />
+        </label>
+      </header>
+      <div class="add-groups">
         {
-          elementFamilies.map((family) => (
-            <div class="family">
-              <dt>{family.label}</dt>
-              <dd>
-                <ul>
-                  {family.items.map((item) => (
-                    <li>{item}</li>
-                  ))}
-                </ul>
-              </dd>
+          addPanel.map((group) => (
+            <div class="add-group" data-add-group>
+              <h4>{group.label}</h4>
+              <ul>
+                {group.items.map((item) => (
+                  <li data-name={item.name.toLowerCase()}>
+                    <ElementIcon type={item.type} />
+                    <span>{item.name}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))
         }
-      </dl>
-    </div>
+      </div>
+      <p class="empty" hidden data-add-empty></p>
+      <p class="visually-hidden" role="status" data-add-status></p>
+    </section>
   </div>
 </section>
+
+<script>
+  // The filter matches every typed word, like the editor's own Add panel search.
+  const search = document.querySelector<HTMLLabelElement>("[data-add-search]");
+  const input = search?.querySelector("input");
+  const empty = document.querySelector<HTMLElement>("[data-add-empty]");
+  const status = document.querySelector<HTMLElement>("[data-add-status]");
+  const groups = [...document.querySelectorAll<HTMLElement>("[data-add-group]")];
+  if (search && input && empty && status) {
+    search.hidden = false;
+    input.addEventListener("input", () => {
+      const words = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let shown = 0;
+      for (const group of groups) {
+        let inGroup = 0;
+        for (const tile of group.querySelectorAll<HTMLElement>("li")) {
+          const match = words.every((word) => tile.dataset.name?.includes(word));
+          tile.hidden = !match;
+          if (match) inGroup += 1;
+        }
+        group.hidden = inGroup === 0;
+        shown += inGroup;
+      }
+      empty.hidden = shown > 0;
+      empty.textContent = `No element matches “${input.value.trim()}”. Try “post”, “form” or “grid”.`;
+      status.textContent = words.length ? `${shown} elements match.` : "";
+    });
+  }
+</script>
 
 <style>
   .groups {
@@ -65,8 +109,17 @@ import SectionIntro from "./SectionIntro.astro";
   .group {
     padding: var(--space-6);
     border: 1px solid var(--rule);
-    border-radius: var(--radius-l);
+    border-radius: var(--radius-m);
     background: var(--paper-raised);
+    box-shadow: var(--shadow-rest);
+    transition: box-shadow var(--dur-base) var(--ease-in-out);
+  }
+
+  /* The canvas hover outline, as the editor draws it over an element. */
+  .group:hover {
+    box-shadow:
+      inset 0 0 0 1.5px var(--accent),
+      var(--shadow-rest);
   }
 
   h3 {
@@ -74,18 +127,18 @@ import SectionIntro from "./SectionIntro.astro";
     align-items: baseline;
     gap: var(--space-3);
     margin-bottom: var(--space-5);
-    font-size: var(--step-2);
+    font-size: var(--text-h3);
   }
 
   .index {
     color: var(--accent);
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
   }
 
   dl {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-4);
     margin: 0;
   }
 
@@ -96,66 +149,162 @@ import SectionIntro from "./SectionIntro.astro";
   dd {
     margin: var(--space-1) 0 0;
     color: var(--ink-soft);
-    font-size: 0.98rem;
-    line-height: 1.55;
+    font-size: var(--text-sm);
+    line-height: 1.6;
   }
 
-  .elements {
+  .add {
     margin-top: var(--space-5);
     padding: var(--space-6);
     border: 1px solid var(--rule);
     border-radius: var(--radius-l);
+    background: var(--paper-sunk);
   }
 
-  .elements dl {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-5) var(--space-6);
+  .add-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-4) var(--space-6);
+    margin-bottom: var(--space-6);
   }
 
-  .family dt {
+  .add-head h3 {
+    margin-bottom: var(--space-2);
+  }
+
+  .add-head p {
+    max-width: 52ch;
+    color: var(--ink-soft);
+    font-size: var(--text-sm);
+  }
+
+  .search[hidden] {
+    display: none;
+  }
+
+  .search input {
+    width: min(18rem, 100%);
+    min-height: 2.75rem;
+    padding: 0 var(--space-4) 0 var(--space-7);
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    background: var(--paper-raised)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 256 256' fill='%23696256'%3E%3Cpath d='M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z'/%3E%3C/svg%3E")
+      no-repeat var(--space-4) 50%;
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--text-sm);
+    transition:
+      border-color var(--dur-fast) var(--ease-in-out),
+      box-shadow var(--dur-fast) var(--ease-in-out);
+  }
+
+  .search input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-wash);
+  }
+
+  .add-groups {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-5);
+  }
+
+  .add-group[hidden],
+  .add-group li[hidden] {
+    display: none;
+  }
+
+  h4 {
+    margin: 0 0 var(--space-3);
     color: var(--ink-faint);
     font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: 400;
+    font-size: var(--text-xs);
+    font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
-  .family ul {
-    display: flex;
-    flex-wrap: wrap;
+  .add-group ul {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-2);
-    margin: var(--space-3) 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .family li {
-    padding: 0.2rem 0.6rem;
+  .add-group li {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--space-1);
+    min-height: 4.5rem;
+    padding: var(--space-2) var(--space-1);
     border: 1px solid var(--rule);
-    border-radius: 999px;
-    background: var(--paper);
+    border-radius: var(--radius-s);
+    background: var(--paper-raised);
     color: var(--ink);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
+    line-height: 1.3;
+    text-align: center;
+    transition:
+      border-color var(--dur-fast) var(--ease-in-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
+
+  .add-group li :global(svg) {
+    color: var(--ink-soft);
+  }
+
+  .add-group li:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .add-group li:hover :global(svg) {
+    color: var(--accent);
+  }
+
+  .empty {
+    padding: var(--space-6) 0;
+    color: var(--ink-soft);
+    text-align: center;
+  }
+
+  @media (max-width: 1100px) {
+    .add-groups {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   @media (max-width: 1000px) {
-    .groups,
-    .elements dl {
+    .groups {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   @media (max-width: 640px) {
     .groups,
-    .elements dl {
+    .add-groups {
       grid-template-columns: minmax(0, 1fr);
     }
 
     .group,
-    .elements {
+    .add {
       padding: var(--space-5);
+    }
+
+    .add-group ul {
+      grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    }
+
+    .search,
+    .search input {
+      width: 100%;
     }
   }
 </style>

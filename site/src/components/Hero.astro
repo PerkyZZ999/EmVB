@@ -1,4 +1,6 @@
 ---
+import { project } from "../data/project";
+import ElementIcon from "./ElementIcon.astro";
 import Frame from "./Frame.astro";
 import Shot from "./Shot.astro";
 
@@ -14,19 +16,107 @@ const columns = [
   { label: "Canvas", fr: 796 },
   { label: "Style panel", fr: 256 },
 ];
+
+/** The hero itself, as the Layers panel would list it. */
+const layers = [
+  { type: "layout-section", name: "Section", depth: 0 },
+  { type: "container", name: "Container", depth: 1 },
+  { type: "heading", name: "Heading", depth: 2, selected: true },
+  { type: "text", name: "Text", depth: 2 },
+  { type: "flexbox", name: "Flexbox", depth: 2 },
+  { type: "button", name: "Button", depth: 3 },
+  { type: "button", name: "Button", depth: 3 },
+];
+
+const colors = [
+  { id: "brand", label: "Brand blue" },
+  { id: "ember", label: "Ember" },
+  { id: "moss", label: "Moss" },
+  { id: "ink", label: "Ink" },
+];
+
+const weights = [
+  { id: "300", label: "Light" },
+  { id: "400", label: "Regular" },
+  { id: "650", label: "Bold" },
+];
 ---
 
-<section class="hero" id="top" aria-labelledby="hero-title">
+<section class="hero blueprint" id="top" aria-labelledby="hero-title">
   <div class="wrap intro">
-    <p class="eyebrow">Visual page builder for EmDash CMS 1.0</p>
-    <h1 id="hero-title">Design on a canvas. <em>Ship plain HTML.</em></h1>
+    <a class="release" href={project.npmUrl}>
+      <span class="pulse" aria-hidden="true"></span>
+      <span>v{project.version} is on npm</span>
+      <span class="sep" aria-hidden="true"></span>
+      <span class="muted">for EmDash CMS 1.0</span>
+      <span class="arrow" aria-hidden="true">→</span>
+    </a>
+
+    <h1 id="hero-title">
+      Design on a canvas.
+      <span class="selected headline">
+        <em>Ship plain HTML.</em>
+        <span class="selected-frame" data-tag="Heading"><i></i><i></i><i></i><i></i></span>
+      </span>
+    </h1>
+
+    <div class="mini mini--layers" aria-hidden="true">
+      <p class="mini-title">Layers</p>
+      <ul class="tree">
+        {
+          layers.map((layer) => (
+            <li class:list={[layer.selected && "is-selected"]} style={`--depth: ${layer.depth}`}>
+              <ElementIcon type={layer.type} size={14} />
+              {layer.name}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="mini mini--style" role="group" aria-label="Restyle the headline">
+      <p class="mini-title">Style <span>Typography</span></p>
+      <fieldset class="swatches">
+        <legend>Colour</legend>
+        {
+          colors.map((color, index) => (
+            <label class="swatch" style={`--swatch: var(--swatch-${color.id})`}>
+              <input type="radio" name="hero-color" value={color.id} checked={index === 0} />
+              <span class="visually-hidden">{color.label}</span>
+            </label>
+          ))
+        }
+      </fieldset>
+      <fieldset>
+        <legend>Style</legend>
+        <div class="segmented">
+          <label><input type="radio" name="hero-style" value="italic" checked /><span>Italic</span></label>
+          <label><input type="radio" name="hero-style" value="normal" /><span>Upright</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Weight</legend>
+        <div class="segmented">
+          {
+            weights.map((weight) => (
+              <label>
+                <input type="radio" name="hero-weight" value={weight.id} checked={weight.id === "400"} />
+                <span>{weight.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+      <p class="mini-hint">Pick a value: the selected heading restyles live, in CSS only.</p>
+    </div>
+
     <p class="lede">
       EmVB puts a full visual editor inside the EmDash admin: layers, live styles, states, devices
       and a site-wide design system. Visitors get the markup and the CSS, not the builder.
     </p>
     <div class="actions">
-      <a class="button" href="/playground/">Try it in your browser</a>
-      <a class="button button--ghost" href="#get-started">Run the demo</a>
+      <a class="button" href="/playground/">Try it in your browser <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="button button--ghost" href="#get-started">Install it</a>
     </div>
     <ul class="facts">
       {facts.map((fact) => <li>{fact}</li>)}
@@ -37,58 +127,134 @@ const columns = [
     <div class="dimensions" aria-hidden="true" style={`--cols: ${columns.map((c) => `${c.fr}fr`).join(" ")}`}>
       {columns.map((c) => <span>{c.label}</span>)}
     </div>
-    <Frame label="127.0.0.1:4411/_emdash/admin/plugins/emvb/editor">
-      <Shot id="editor" eager sizes="(min-width: 1260px) 1216px, calc(100vw - 2.5rem)" />
-    </Frame>
-    <div class="phone">
-      <Frame phone>
-        <Shot id="publicMobile" sizes="(min-width: 1260px) 200px, 16vw" />
+    <div class="tilt">
+      <div class="glow" aria-hidden="true"></div>
+      <Frame label="127.0.0.1:4411/_emdash/admin/plugins/emvb/editor">
+        <Shot id="editor" eager sizes="(min-width: 1260px) 1216px, calc(100vw - 2.5rem)" />
       </Frame>
+      <div class="phone">
+        <Frame phone>
+          <Shot id="publicMobile" sizes="(min-width: 1260px) 200px, 16vw" />
+        </Frame>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
   .hero {
+    --swatch-brand: var(--accent);
+    --headline-color: var(--swatch-brand);
+    --headline-style: italic;
+    --headline-weight: 400;
     position: relative;
-    padding-block: clamp(2.5rem, 5vw, 4rem) var(--space-9);
-    isolation: isolate;
+    padding-block: var(--space-7) var(--space-9);
   }
 
-  /* Blueprint grid, fading out from the top. */
-  .hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    background:
-      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 100% 3rem,
-      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 50% 0 / 3rem 100%;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  .hero:has(input[value="ember"]:checked) {
+    --headline-color: var(--swatch-ember);
+  }
+
+  .hero:has(input[value="moss"]:checked) {
+    --headline-color: var(--swatch-moss);
+  }
+
+  .hero:has(input[value="ink"]:checked) {
+    --headline-color: var(--swatch-ink);
+  }
+
+  .hero:has(input[value="normal"]:checked) {
+    --headline-style: normal;
+  }
+
+  .hero:has(input[value="300"]:checked) {
+    --headline-weight: 300;
+  }
+
+  .hero:has(input[value="650"]:checked) {
+    --headline-weight: 650;
   }
 
   .intro {
+    position: relative;
     display: grid;
     justify-items: center;
-    gap: var(--space-4);
+    gap: var(--space-5);
     text-align: center;
   }
 
-  h1 {
-    max-width: 15ch;
-    font-size: var(--step-4);
-    letter-spacing: -0.01em;
+  .release {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    padding: 0 var(--space-4) 0 var(--space-3);
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--paper-raised) 80%, transparent);
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-decoration: none;
+    box-shadow: var(--shadow-rest);
+    transition: border-color var(--dur-fast) var(--ease-in-out);
   }
 
-  h1 em {
-    display: block;
+  .release:hover {
+    border-color: var(--accent);
+  }
+
+  .release .muted {
+    color: var(--ink-faint);
+  }
+
+  .release .sep {
+    width: 1px;
+    height: var(--space-3);
+    background: var(--rule-strong);
+  }
+
+  .release .arrow {
     color: var(--accent);
-    font-style: italic;
-    font-weight: 400;
+    transition: transform var(--dur-fast) var(--ease-out);
+  }
+
+  .release:hover .arrow {
+    transform: translateX(3px);
+  }
+
+  .pulse {
+    position: relative;
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: 50%;
+    background: var(--swatch-moss);
+  }
+
+  h1 {
+    max-width: 17ch;
+    margin-top: var(--space-2);
+    font-size: var(--text-display);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+  }
+
+  .headline {
+    display: block;
+    width: fit-content;
+    margin: var(--space-5) auto 0;
+  }
+
+  .headline em {
+    color: var(--headline-color);
+    font-style: var(--headline-style);
+    font-weight: var(--headline-weight);
+    transition: color var(--dur-base) var(--ease-in-out);
   }
 
   .lede {
-    max-width: 46rem;
+    margin-top: var(--space-1);
+    text-wrap: balance;
   }
 
   .actions {
@@ -96,7 +262,6 @@ const columns = [
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--space-3);
-    margin-top: var(--space-2);
   }
 
   .facts {
@@ -104,11 +269,11 @@ const columns = [
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--space-2) var(--space-5);
-    margin: var(--space-3) 0 0;
+    margin: 0;
     padding: 0;
     color: var(--ink-faint);
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     list-style: none;
   }
 
@@ -126,9 +291,215 @@ const columns = [
     background: var(--accent);
   }
 
+  /* The editor's side panels, beside the headline on wide screens only. */
+  .mini {
+    display: none;
+  }
+
+  @media (min-width: 1200px) {
+    .mini {
+      position: absolute;
+      top: var(--space-8);
+      display: grid;
+      gap: var(--space-3);
+      width: 14rem;
+      margin: 0;
+      padding: var(--space-4);
+      border: 1px solid var(--rule);
+      border-radius: var(--radius-m);
+      background: color-mix(in srgb, var(--paper-raised) 88%, transparent);
+      box-shadow: var(--shadow-float);
+      backdrop-filter: blur(8px);
+      text-align: start;
+    }
+
+    .mini--layers {
+      left: 0;
+      transform: rotate(-1.5deg);
+    }
+
+    .mini--style {
+      right: 0;
+      transform: rotate(1.5deg);
+    }
+  }
+
+  .mini-title {
+    display: flex;
+    justify-content: space-between;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .mini-title span {
+    color: var(--ink-faint);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .tree {
+    display: grid;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .tree li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 1.75rem;
+    padding-inline: calc(var(--depth) * var(--space-3) + var(--space-2)) var(--space-2);
+    border-radius: var(--radius-s);
+    color: var(--ink-soft);
+    font-size: var(--text-sm);
+  }
+
+  .tree li :global(svg) {
+    flex: none;
+    color: var(--ink-faint);
+  }
+
+  .tree .is-selected {
+    background: var(--accent-wash);
+    color: var(--accent);
+    font-weight: 500;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  .tree .is-selected :global(svg) {
+    color: var(--accent);
+  }
+
+  fieldset {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    width: 100%;
+    margin-bottom: var(--space-1);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+  }
+
+  fieldset input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .swatch {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .swatch::before {
+    content: "";
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--swatch);
+    box-shadow:
+      0 0 0 2px var(--paper-raised),
+      0 0 0 3px transparent;
+    transition:
+      box-shadow var(--dur-fast) var(--ease-in-out),
+      transform var(--dur-fast) var(--ease-out);
+  }
+
+  .swatch:hover::before {
+    transform: scale(1.08);
+  }
+
+  .swatch:has(:checked)::before {
+    box-shadow:
+      0 0 0 2px var(--paper-raised),
+      0 0 0 4px var(--ink);
+  }
+
+  .swatches {
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .segmented {
+    display: flex;
+    width: 100%;
+    padding: 2px;
+    border-radius: var(--radius-s);
+    background: var(--paper-sunk);
+  }
+
+  .segmented label {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    min-height: 2.75rem;
+    border-radius: 4px;
+    color: var(--ink-soft);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease-in-out),
+      color var(--dur-fast) var(--ease-in-out);
+  }
+
+  .segmented label:hover {
+    color: var(--ink);
+  }
+
+  .segmented label:has(:checked) {
+    background: var(--paper-raised);
+    color: var(--ink);
+    font-weight: 500;
+    box-shadow: var(--shadow-rest);
+  }
+
+  .swatch:has(:focus-visible),
+  .segmented label:has(:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  .mini-hint {
+    color: var(--ink-faint);
+    font-size: var(--text-xs);
+    line-height: 1.5;
+  }
+
   .stage {
     position: relative;
-    margin-top: clamp(2.25rem, 4vw, 3.25rem);
+    margin-top: var(--space-7);
+  }
+
+  .tilt {
+    position: relative;
+    transform-origin: 50% 0;
+  }
+
+  .glow {
+    position: absolute;
+    inset: 10% 8% -6%;
+    z-index: -1;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 30%, transparent), transparent);
+    filter: blur(40px);
   }
 
   .dimensions {
@@ -137,7 +508,7 @@ const columns = [
     margin-bottom: var(--space-3);
     color: var(--ink-faint);
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: var(--text-xs);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -155,7 +526,7 @@ const columns = [
     position: absolute;
     bottom: -4px;
     width: 1px;
-    height: 9px;
+    height: 8px;
     background: var(--rule-strong);
   }
 
@@ -177,45 +548,110 @@ const columns = [
 
   @media (prefers-reduced-motion: no-preference) {
     .intro > * {
-      animation: rise 700ms var(--ease-out) both;
+      animation: rise var(--dur-slow) var(--ease-out) both;
     }
 
-    .intro > :nth-child(2) {
+    .intro > h1 {
       animation-delay: 60ms;
     }
 
-    .intro > :nth-child(3) {
+    .intro > .lede {
       animation-delay: 120ms;
     }
 
-    .intro > :nth-child(n + 4) {
+    .intro > :is(.actions, .facts) {
       animation-delay: 180ms;
+    }
+
+    .intro > .mini {
+      animation: mini-in 800ms 420ms var(--ease-out) both;
+    }
+
+    .intro > .mini--style {
+      animation-delay: 520ms;
+    }
+
+    /* The selection draws itself after the headline lands, then the name tag drops in. */
+    .headline > .selected-frame {
+      animation: select 520ms 560ms var(--ease-out) both;
+    }
+
+    .headline > .selected-frame::before {
+      animation: tag 320ms 980ms var(--ease-spring) both;
+    }
+
+    .headline > .selected-frame > i {
+      animation: handle 260ms 900ms var(--ease-spring) both;
     }
 
     .stage {
       animation: rise 900ms 240ms var(--ease-out) both;
+    }
+
+    @supports (animation-timeline: view()) {
+      .tilt {
+        animation: flatten linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 45%;
+      }
     }
   }
 
   @keyframes rise {
     from {
       opacity: 0;
-      transform: translateY(1.25rem);
+      transform: translateY(var(--space-5));
     }
   }
 
-  @media (max-width: 560px) {
-    .intro .eyebrow {
-      font-size: 0.7rem;
-      letter-spacing: 0.05em;
+  @keyframes mini-in {
+    from {
+      opacity: 0;
+      translate: 0 var(--space-6);
+    }
+  }
+
+  @keyframes select {
+    from {
+      opacity: 0;
+      clip-path: inset(0 100% 100% 0);
     }
 
-    .intro .eyebrow::before {
-      display: none;
+    to {
+      opacity: 1;
+      clip-path: inset(-2rem -1rem -1rem -1rem);
+    }
+  }
+
+  @keyframes tag {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  @keyframes handle {
+    from {
+      transform: scale(0);
+    }
+  }
+
+  @keyframes flatten {
+    from {
+      transform: perspective(2400px) rotateX(16deg) scale(0.94);
     }
   }
 
   @media (max-width: 720px) {
+    .hero {
+      padding-top: var(--space-6);
+    }
+
+    .release .muted,
+    .release .sep {
+      display: none;
+    }
+
     .dimensions {
       display: none;
     }

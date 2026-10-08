@@ -6,7 +6,7 @@ import SectionIntro from "./SectionIntro.astro";
 <section class="section" aria-labelledby="faq-title">
   <div class="wrap narrow" id="faq">
     <SectionIntro id="faq-title" eyebrow="FAQ" title="Questions people ask first" />
-    <div class="list">
+    <div class="list" data-el="Accordion">
       {
         faqs.map((item) => (
           <details>
@@ -37,11 +37,17 @@ import SectionIntro from "./SectionIntro.astro";
     justify-content: space-between;
     align-items: center;
     gap: var(--space-4);
+    min-height: 2.75rem;
     padding: var(--space-5) 0;
     font-family: var(--font-display);
-    font-size: var(--step-1);
+    font-size: var(--text-lead);
     cursor: pointer;
     list-style: none;
+    transition: color var(--dur-fast) var(--ease-in-out);
+  }
+
+  summary:hover {
+    color: var(--accent);
   }
 
   summary::-webkit-details-marker {
@@ -59,23 +65,22 @@ import SectionIntro from "./SectionIntro.astro";
     border-radius: 50%;
     color: var(--accent);
     font-family: var(--font-mono);
-    font-size: 1rem;
-    transition: transform 200ms var(--ease-out);
+    font-size: var(--text-base);
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-in-out),
+      color var(--dur-fast) var(--ease-in-out);
   }
 
   details[open] summary::after {
+    background: var(--accent);
+    color: var(--accent-ink);
     transform: rotate(45deg);
   }
 
   details p {
-    max-width: 44rem;
+    max-width: 62ch;
     padding-bottom: var(--space-5);
     color: var(--ink-soft);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    summary::after {
-      transition: none;
-    }
   }
 </style>

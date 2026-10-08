@@ -1,3 +1,5 @@
+import { ELEMENT_DESCRIPTORS } from "../../../packages/emvb/src/core/index.ts";
+
 export interface Feature {
   title: string;
   body: string;
@@ -16,7 +18,7 @@ export const featureGroups: FeatureGroup[] = [
     items: [
       {
         title: "Drag, drop, nest",
-        body: "Drop elements from the Add panel onto the canvas, then reorder and nest them in the Layers tree.",
+        body: "Drop elements from the Add panel onto the canvas, then reorder and nest them in the Layers tree or with the keyboard.",
       },
       {
         title: "Edit text in place",
@@ -24,11 +26,15 @@ export const featureGroups: FeatureGroup[] = [
       },
       {
         title: "Copy, paste, undo",
-        body: "Copy elements and styles, paste them elsewhere, and step back through up to 100 edits with Ctrl or Cmd + Z.",
+        body: "Copy elements and styles between pages, and step back through up to 100 edits with Ctrl or Cmd + Z.",
+      },
+      {
+        title: "An icon library",
+        body: "Over 14,000 icons from Lucide, Font Awesome Free, Tabler and Remix, or upload your own SVG.",
       },
       {
         title: "Synced sections and templates",
-        body: "A Section element renders a shared Section part live. New pages can start from a page template.",
+        body: "A Section element renders a shared part live. New pages can start from a page template.",
       },
     ],
   },
@@ -46,19 +52,15 @@ export const featureGroups: FeatureGroup[] = [
       },
       {
         title: "Backgrounds",
-        body: "Images, two-stop gradients, colour overlays and background video.",
+        body: "Images, linear, radial and conic gradients with up to 10 stops, overlays and background video.",
       },
       {
         title: "Grid and flexbox",
-        body: "Flexbox and CSS Grid containers, with 1 to 12 columns and column spans.",
+        body: "Flexbox and CSS Grid containers, with 1 to 12 columns and spans on the children.",
       },
       {
         title: "Entrance animations",
-        body: "Fade, fade up or down, slide up or down and scale, with a delay. Reduced motion turns them off.",
-      },
-      {
-        title: "Attributes",
-        body: "Custom data-* and aria-* attributes on any element.",
+        body: "Fade, slide and scale in, with a delay. Reduced motion turns them off.",
       },
     ],
   },
@@ -80,7 +82,7 @@ export const featureGroups: FeatureGroup[] = [
       },
       {
         title: "Staged until published",
-        body: "Site style changes wait as a draft until you press Publish styles, then update every live page.",
+        body: "Site style changes wait as a draft until you press Publish styles, then reach every live page.",
       },
       {
         title: "Import and export",
@@ -90,33 +92,22 @@ export const featureGroups: FeatureGroup[] = [
   },
 ];
 
-/** Element families from the element registry, grouped for the elements strip. */
-export const elementFamilies = [
-  {
-    label: "Layout",
-    items: ["Section", "Container", "Flexbox", "Grid", "Div block", "Spacer", "Divider"],
-  },
-  {
-    label: "Content",
-    items: ["Heading", "Text", "Label", "Link", "Button", "List", "Icon", "SVG"],
-  },
-  { label: "Media", items: ["Image", "Video"] },
-  { label: "Interactive", items: ["Tabs", "Tab panel", "Accordion", "Accordion item"] },
-  {
-    label: "Forms",
-    items: ["Form", "Text input", "Textarea", "Select", "Checkbox", "Radio", "Submit"],
-  },
-  {
-    label: "Dynamic",
-    items: [
-      "Loop",
-      "Post title",
-      "Post excerpt",
-      "Post content",
-      "Post image",
-      "Post link",
-      "Post date",
-      "Post author",
-    ],
-  },
+/** The Add panel's groups, in the editor's order. */
+const addGroups = [
+  { id: "layout", label: "Layout" },
+  { id: "content", label: "Content" },
+  { id: "dynamic", label: "Dynamic" },
+  { id: "form", label: "Form" },
 ] as const;
+
+/** Every element the Add panel offers (Tab panels come with their Tabs), grouped as it shows them. */
+export const addPanel = addGroups.map(({ id, label }) => ({
+  id,
+  label,
+  items: ELEMENT_DESCRIPTORS.filter((d) => d.group === id && d.type !== "tab-panel").map((d) => ({
+    type: d.type,
+    name: d.name,
+  })),
+}));
+
+export const elementCount = addPanel.reduce((sum, group) => sum + group.items.length, 0);
