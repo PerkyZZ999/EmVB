@@ -17584,11 +17584,11 @@
     {
       "id": "W-123/plugin-version-drifts",
       "requirement": "W-123",
-      "description": "the plugin reports 0.0.0 while the package is 0.2.0",
+      "description": "the plugin reports 0.0.0 while the package is 0.2.1",
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PLUGIN_VERSION = \"0.2.0\";",
+          "search": "export const PLUGIN_VERSION = \"0.2.1\";",
           "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
         }
       ],
@@ -17602,7 +17602,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PLUGIN_VERSION = \"0.2.0\";",
+          "search": "export const PLUGIN_VERSION = \"0.2.1\";",
           "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
         }
       ],

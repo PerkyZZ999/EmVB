@@ -1,13 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 — 2026-10-08
 
-- **EmDash 1.2:** checked against EmDash 1.2.0 (the build and both demos now run on it; the peer range stays `emdash` ^1.0.0). Nothing in EmVB needed 1.2 changes to keep working; the audit found and fixed these, which affect every 1.x version:
-  - Theme Builder: when two parts match a page equally, the most recently saved one wins again. EmDash gives dates as `Date` objects and EmVB compared their text, so the weekday decided (W-302).
-  - Post Date and Post Author show EmDash's publish date and byline; they were empty on real posts (W-303, W-304).
-  - A malformed percent-escape in a category, tag or post URL no longer throws while the theme context is built (W-305).
-  - Demos link posts with `entry.data.slug`, as EmDash 1.2 recommends for multilingual sites, and their seeds put widget options under `props`.
-- **Fix:** the box shadow's Position select shows "Outset" or "Inset" instead of the stored keyword (W-306).
+EmVB now supports EmDash CMS 1.2. This release is built and tested on EmDash 1.2.0 (unit tests, and the end-to-end suite on the Node and Cloudflare demos). The peer range stays `emdash` ^1.0.0, so sites on EmDash 1.0 and 1.1 can update too. Nothing in EmDash 1.2 broke EmVB. Checking against it turned up a few bugs that affected every 1.x version, and they're fixed here:
+
+- **Theme Builder:** when two parts match a page equally, the one saved most recently wins again. Before, the day of the week it was saved on decided (W-302).
+- **Post Date** shows the post's EmDash publish date. It was empty on real posts (W-303).
+- **Post Author** shows the post's EmDash byline. It was empty unless the post had its own author field (W-304).
+- **Odd URLs:** a category, tag or post address with a broken percent-escape (for example `/tag/50%`) no longer causes a server error in a theme-aware layout (W-305).
+- **Box shadow:** the Position menu reads "Outset" or "Inset" instead of the stored keyword (W-306).
+- **Demos:** both demo sites run on EmDash 1.2.0. They link posts by `entry.data.slug`, as EmDash 1.2 recommends for multilingual sites, and their seeds put widget options under `props`.
 
 ## 0.2.0 — 2026-10-08
 

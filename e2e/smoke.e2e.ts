@@ -5,7 +5,7 @@ test("the EmVB plugin is loaded by the host", async ({ request }) => {
   expect(res.status()).toBe(200);
   expect(await res.json()).toEqual({
     success: true,
-    data: { ok: true, plugin: "emvb", version: "0.2.0" },
+    data: { ok: true, plugin: "emvb", version: "0.2.1" },
   });
 });
 
