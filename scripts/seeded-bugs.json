@@ -25534,6 +25534,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/long-word.test.ts"],
       "expect": "\\(fail\\).*W-299"
+    },
+    {
+      "id": "W-300/shell-not-inert",
+      "requirement": "W-300",
+      "description": "Tab walks the covered admin sidebar before reaching the editor.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "    shell.inert = true;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/editor-overlay.test.tsx"],
+      "expect": "\\(fail\\).*W-300"
     }
   ]
 }

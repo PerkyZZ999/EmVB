@@ -28,6 +28,18 @@ export function EditorOverlay({
     return () => window.removeEventListener("keydown", block, true);
   }, []);
 
+  // W-300: the overlay covers the EmDash admin shell, but Tab still walked its sidebar first.
+  // Mark the shell inert while the editor is open; hosts without #admin-root (the playground) are
+  // unchanged. Toast portals stay after the overlay so they stay focusable.
+  React.useEffect(() => {
+    const shell = document.getElementById("admin-root");
+    if (!shell) return;
+    shell.inert = true;
+    return () => {
+      shell.inert = false;
+    };
+  }, []);
+
   React.useEffect(() => {
     if (!dirty) return;
     const guard = (event: BeforeUnloadEvent) => {
