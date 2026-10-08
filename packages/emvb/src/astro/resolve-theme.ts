@@ -1,4 +1,4 @@
-import { getEmDashCollection, getEmDashEntry } from "emdash";
+import { getEmDashCollection, getEmDashEntry, getTerm } from "emdash";
 import { getPublicPluginApiRouteHandler } from "emdash/plugin-utils";
 import {
   collectLoopItemPartIds,
@@ -243,6 +243,16 @@ async function loadSingularPost(ctx: ThemeRequestContext): Promise<ThemePostFiel
   }
 }
 
+/** A taxonomy term's label for archive titles; the slug when the term can't be read (W-263). */
+async function termLabel(taxonomy: string, slug: string): Promise<string> {
+  try {
+    const term = await getTerm(taxonomy, slug);
+    return term?.label?.trim() || slug;
+  } catch {
+    return slug;
+  }
+}
+
 async function loadArchivePosts(
   ctx: ThemeRequestContext,
   perPage: number,
@@ -276,8 +286,9 @@ async function loadArchivePosts(
     const posts = result.entries
       .map((entry) => themePostFromEntry(entry))
       .filter((p): p is ThemePostFields => p !== null);
+    // W-263: a category or tag archive is titled by its term's label ("News"), not its slug.
     const archiveTitle = ctx.taxonomy?.slug
-      ? ctx.taxonomy.slug
+      ? await termLabel(ctx.taxonomy.type, ctx.taxonomy.slug)
       : ctx.collection === "posts"
         ? "Posts"
         : undefined;

@@ -24021,6 +24021,48 @@
         "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-263/slug-as-title",
+      "requirement": "W-263",
+      "description": "A category or tag archive is titled by its slug instead of its label.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "      ? await termLabel(ctx.taxonomy.type, ctx.taxonomy.slug)\n",
+          "replace": "      ? ctx.taxonomy.slug\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-263/term-error-breaks-archive",
+      "requirement": "W-263",
+      "description": "A failing term lookup breaks the archive instead of falling back to the slug.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  } catch {\n    return slug;\n  }\n}",
+          "replace": "  } finally {\n    void slug;\n  }\n}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-263/demo-posts-title",
+      "requirement": "W-263",
+      "description": "The demo /posts page 1 is titled All Posts while page 2 says Posts – page 2.",
+      "edits": [
+        {
+          "file": "demos/node/src/pages/posts/index.astro",
+          "search": "<Base title=\"Posts\">",
+          "replace": "<Base title=\"All Posts\">"
+        }
+      ],
+      "command": ["bun", "test", "./test/demos/archive-pages.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

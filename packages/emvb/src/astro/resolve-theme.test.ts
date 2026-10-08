@@ -48,6 +48,11 @@ mock.module("emdash", () => ({
     const more = endlessCursor || end < themeEntries.length;
     return { entries: themeEntries.slice(start, end), nextCursor: more ? String(end) : undefined };
   },
+  // W-263: term labels for archive titles; "broken" throws, anything else is unknown.
+  getTerm: async (taxonomy: string, slug: string) => {
+    if (slug === "broken") throw new Error("taxonomy table missing");
+    return taxonomy === "category" && slug === "news" ? { slug, label: "News" } : null;
+  },
   getEmDashEntry: async (_collection: string, key: string) => ({
     entry: postEntries.find((e) => e.id === key || e.data["slug"] === key) ?? null,
   }),
@@ -392,7 +397,10 @@ describe("archive pagination (W-221)", () => {
     // W-229: hosts title the page "Posts – page 2".
     expect(page2.archiveTitle).toBe("Posts");
     expect(page2.archivePage).toBe(2);
-    expect((await at("/category/news/page/2")).archiveTitle).toBe("news");
+    // W-263: the term's label, falling back to the slug when the term can't be read.
+    expect((await at("/category/news/page/2")).archiveTitle).toBe("News");
+    expect((await at("/tag/unknown-tag/page/2")).archiveTitle).toBe("unknown-tag");
+    expect((await at("/category/broken/page/2")).archiveTitle).toBe("broken");
     const page3 = await at("/posts/page/3");
     expect(count(page3.content?.html)).toBe(1);
   });

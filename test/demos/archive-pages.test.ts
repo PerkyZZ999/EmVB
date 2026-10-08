@@ -71,3 +71,16 @@ describe("demo numbered archive pages (W-224)", () => {
     expect(resolved).toEqual(["/posts#9", "/tag/a#2"]);
   });
 });
+
+describe("demo archive titles agree across pages (W-263)", () => {
+  test("/posts page 1 is titled Posts, like Posts – page 2", async () => {
+    for (const demo of ["node", "cloudflare"]) {
+      // oxlint-disable-next-line no-await-in-loop
+      const page = await Bun.file(
+        new URL(`../../demos/${demo}/src/pages/posts/index.astro`, import.meta.url),
+      ).text();
+      expect(page).toContain('<Base title="Posts">');
+    }
+    expect(archivePageTitle("Posts", 2)).toBe("Posts – page 2");
+  });
+});
