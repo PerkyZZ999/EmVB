@@ -30,6 +30,11 @@ export type ThemeDynamicData = {
   sectionTemplates?: Record<string, Layout>;
   /** Section part ids already being expanded, so a section cannot include itself. */
   sectionStack?: readonly string[];
+  /**
+   * Where the nodes being rendered come from (W-250): unset for the page itself, else the synced
+   * section and loop item parts they were expanded from. Another layout can reuse an id.
+   */
+  idOrigin?: string;
   archiveTitle?: string;
   /** Which archive page is showing, for the Pagination element (W-221). */
   pagination?: ArchivePagination;

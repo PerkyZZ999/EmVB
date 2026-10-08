@@ -28,6 +28,10 @@ export function renderSection(
     return { tag: "div", attrs, children: ["Synced section"] };
   }
   const templateNodes = template.root.children;
-  const next: ThemeDynamicData = { ...dynamic, sectionStack: [...stack, partId] };
+  const next: ThemeDynamicData = {
+    ...dynamic,
+    sectionStack: [...stack, partId],
+    idOrigin: `${dynamic?.idOrigin ?? ""}/s:${partId}`,
+  };
   return ELEMENTS.section.build(node as never, attrs, ctx.children(templateNodes, next));
 }

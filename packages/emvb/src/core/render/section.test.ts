@@ -88,3 +88,77 @@ describe("synced sections", () => {
     expect(copy.root.children[0]?.type).toBe("heading");
   });
 });
+
+describe("an id reused by another layout keeps its own styles (W-250)", () => {
+  const styled = (id: string, text: string, color: string): LayoutNode => ({
+    id,
+    type: "heading",
+    props: { text, level: 2 },
+    style: { color },
+  });
+  const sectionNode = (id: string, partId: string): LayoutNode => ({
+    id,
+    type: "section",
+    props: { partId },
+    children: [],
+  });
+  const colorOf = (html: string, css: string, text: string) => {
+    const host = document.createElement("div");
+    host.innerHTML = html;
+    const el = [...host.querySelectorAll("h2")].find((h) => h.textContent === text);
+    const cls = [...(el?.classList ?? [])].find((c) => c.startsWith("emvb-e-"));
+    return new RegExp(`\\.${cls}\\{color:([^;}]+)`).exec(css)?.[1];
+  };
+
+  test("a page heading and a synced section heading with one id each keep their colour", () => {
+    const { html, css } = renderPage(
+      layout([styled("sameid01", "Page", "#2563eb"), sectionNode("sec00001", "p1")]),
+      emptyDesign(),
+      { dynamic: { sectionTemplates: { p1: layout([styled("sameid01", "Part", "#dc2626")]) } } },
+    );
+    expect(colorOf(html, css, "Page")).toBe("#2563eb");
+    expect(colorOf(html, css, "Part")).toBe("#dc2626");
+    // The page's own element keeps its plain class.
+    expect(html).toContain('class="emvb-heading emvb-e-sameid01"');
+  });
+
+  test("the section first, then the page: still each its own colour", () => {
+    const { html, css } = renderPage(
+      layout([sectionNode("sec00001", "p1"), styled("sameid01", "Page", "#2563eb")]),
+      emptyDesign(),
+      { dynamic: { sectionTemplates: { p1: layout([styled("sameid01", "Part", "#dc2626")]) } } },
+    );
+    expect(colorOf(html, css, "Page")).toBe("#2563eb");
+    expect(colorOf(html, css, "Part")).toBe("#dc2626");
+  });
+
+  test("the same section placed twice shares one class and rule", () => {
+    const { html } = renderPage(
+      layout([sectionNode("sec00001", "p1"), sectionNode("sec00002", "p1")]),
+      emptyDesign(),
+      { dynamic: { sectionTemplates: { p1: layout([styled("parthead", "Part", "#dc2626")]) } } },
+    );
+    expect(html.match(/emvb-e-parthead"/g)?.length).toBe(2);
+  });
+
+  test("a loop item part reusing a page id keeps its own colour", () => {
+    const loop: LayoutNode = {
+      id: "loop0001",
+      type: "loop",
+      props: { itemPartId: "item" },
+      children: [],
+    };
+    const { html, css } = renderPage(
+      layout([styled("sameid01", "Page", "#2563eb"), loop]),
+      emptyDesign(),
+      {
+        dynamic: {
+          posts: [{ id: "a", title: "A", slug: "a", url: "/posts/a" } as never],
+          loopTemplates: { item: layout([styled("sameid01", "Item", "#16a34a")]) },
+        },
+      },
+    );
+    expect(colorOf(html, css, "Page")).toBe("#2563eb");
+    expect(colorOf(html, css, "Item")).toBe("#16a34a");
+  });
+});

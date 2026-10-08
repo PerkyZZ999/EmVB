@@ -97,6 +97,16 @@ const gridTracks = (columns: unknown): Declaration[] =>
     ? [{ property: "grid-template-columns", value: `repeat(${columns}, minmax(0, 1fr))` }]
     : [];
 
+/** A short, stable hash of a node origin, for its suffixed rule id (W-250). */
+function originHash(origin: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < origin.length; i += 1) {
+    hash ^= origin.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
+}
+
 /** Form fields whose control carries an `emvb-field-<id>` HTML id (W-187). */
 const FIELD_TYPES = new Set(["text-input", "textarea", "select", "checkbox", "radio"]);
 
@@ -167,11 +177,21 @@ export function renderPage(
     },
   };
 
+  // W-250: the first origin (page, synced section, loop item part) to use each element id.
+  const idOrigins = new Map<string, string>();
+  /** The id in `.emvb-e-<id>`: suffixed when another layout already used this id here. */
+  const ruleIdFor = (id: string, origin: string): string => {
+    const first = idOrigins.get(id);
+    if (first === undefined) idOrigins.set(id, origin);
+    return first === undefined || first === origin ? id : `${id}-o${originHash(origin)}`;
+  };
+
   const nodeAttrs = (
     node: LayoutNode,
     isRoot: boolean,
     id: string | undefined,
     nodeId: string,
+    ruleId: string | undefined,
   ): Record<string, string> => {
     const classes = [...(isRoot ? ["emvb-root"] : []), `emvb-${node.type}`];
     for (const classId of node.classes ?? []) {
@@ -220,10 +240,13 @@ export function renderPage(
       tablet.declarations.length > 0 ||
       mobile.declarations.length > 0 ||
       (hiddenOn?.length ?? 0) > 0;
-    if (id && (declarations.length > 0 || Object.keys(states.states).length > 0 || responsive)) {
-      classes.push(`emvb-e-${id}`);
+    if (
+      ruleId &&
+      (declarations.length > 0 || Object.keys(states.states).length > 0 || responsive)
+    ) {
+      classes.push(`emvb-e-${ruleId}`);
       localRules.push({
-        id,
+        id: ruleId,
         declarations,
         states: states.states,
         tablet: tablet.declarations,
@@ -257,7 +280,8 @@ export function renderPage(
       };
     }
     usedTypes.add(type);
-    const attrs = nodeAttrs(node, isRoot, id, nodeId);
+    const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
+    const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId);
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
     if (isFormNode(node)) return finish(node, renderForm(node, attrs, ctx, dynamic));
     if (isLoopNode(node)) return finish(node, renderLoop(node, attrs, ctx, dynamic));

@@ -27,7 +27,11 @@ export function renderLoop(
   }
   const children: VNode[] = [];
   // Items don't get the archive's page data: a Pagination belongs after the Loop (W-228).
-  const { pagination: _pagination, ...itemDynamic } = dynamic ?? {};
+  const { pagination: _pagination, ...rest } = dynamic ?? {};
+  // A loop item part is another layout, so its ids may match the page's (W-250).
+  const itemDynamic = templateLayout
+    ? { ...rest, idOrigin: `${rest.idOrigin ?? ""}/l:${itemPartId}` }
+    : rest;
   for (const post of posts) {
     children.push({
       tag: "div",

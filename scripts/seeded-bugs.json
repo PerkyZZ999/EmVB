@@ -8562,8 +8562,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "    if (id && (declarations.length > 0 || Object.keys(states.states).length > 0 || responsive)) {",
-          "replace": "    if (id && declarations.length > 0) {"
+          "search": "      (declarations.length > 0 || Object.keys(states.states).length > 0 || responsive)\n    ) {",
+          "replace": "      declarations.length > 0\n    ) {"
         }
       ],
       "command": [
@@ -23498,6 +23498,48 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-250/shared-rule-id",
+      "requirement": "W-250: an element id reused by a synced section or loop item part keeps its own styles: the later origin's class and rule get a suffix, so neither layout's .emvb-e rule styles the other's element.",
+      "description": "Every node keeps .emvb-e-<id>, so a section's heading restyles the page heading with the same id.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    return first === undefined || first === origin ? id : `${id}-o${originHash(origin)}`;",
+          "replace": "    return first === undefined || first === origin ? id : id;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-250/section-no-origin",
+      "requirement": "W-250: an element id reused by a synced section or loop item part keeps its own styles: the later origin's class and rule get a suffix, so neither layout's .emvb-e rule styles the other's element.",
+      "description": "A synced section's nodes count as the page's own, so a reused id shares one rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/section.ts",
+          "search": "    idOrigin: `${dynamic?.idOrigin ?? \"\"}/s:${partId}`,",
+          "replace": "    idOrigin: dynamic?.idOrigin,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-250/loop-no-origin",
+      "requirement": "W-250: an element id reused by a synced section or loop item part keeps its own styles: the later origin's class and rule get a suffix, so neither layout's .emvb-e rule styles the other's element.",
+      "description": "A loop item part's nodes count as the page's own, so a reused id shares one rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "    ? { ...rest, idOrigin: `${rest.idOrigin ?? \"\"}/l:${itemPartId}` }",
+          "replace": "    ? { ...rest }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]
