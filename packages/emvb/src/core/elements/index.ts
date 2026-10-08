@@ -165,7 +165,9 @@ const spacer: ElementDefinition<SpacerNode> = {
 };
 
 const divider: ElementDefinition<DividerNode> = {
-  baseCss: ".emvb-divider{border:0;border-top:1px solid currentColor;margin:0}",
+  // W-266: full width by default; an <hr> has no content width, so in a centred column it was 0 wide.
+  baseCss:
+    ".emvb-divider{border:0;border-top:1px solid currentColor;margin:0}:where(.emvb-divider){width:100%}",
   defaults: () => ({ type: "divider", props: {} }),
   descriptor: {
     type: "divider",
@@ -566,7 +568,9 @@ function pickedIconAttrs(attrs: Record<string, string>): Record<string, string> 
 
 const video: ElementDefinition<VideoNode> = {
   baseCss:
-    ".emvb-video{display:block;max-width:100%;border:0}.emvb-video iframe,.emvb-video video{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}.emvb-video-missing,.emvb-video-preview{display:flex;align-items:center;justify-content:center;min-height:120px;padding:12px;text-align:center;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}",
+    // W-266: the iframe or <video> is the .emvb-video element itself, so the 16:9 size sits on it
+    // (the old descendant rule matched nothing: players were 300×150). :where() lets styles win.
+    ".emvb-video{display:block;max-width:100%;border:0}:where(.emvb-video){box-sizing:border-box;width:100%;aspect-ratio:16/9;background:#000}.emvb-video-missing,.emvb-video-preview{display:flex;align-items:center;justify-content:center;min-height:120px;padding:12px;text-align:center;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({
     type: "video",
     props: { url: "", title: "Video" },

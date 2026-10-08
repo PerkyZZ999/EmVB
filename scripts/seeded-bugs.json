@@ -24145,6 +24145,48 @@
         "./packages/emvb/src/admin/editor/panels/settings/image-alt.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-266/video-descendant-rule",
+      "requirement": "W-266",
+      "description": "The 16:9 size targets an iframe inside .emvb-video, which never exists.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ":where(.emvb-video){box-sizing:border-box;width:100%;aspect-ratio:16/9;background:#000}",
+          "replace": ".emvb-video iframe,.emvb-video video{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-sizes.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-266/preview-overflows",
+      "requirement": "W-266",
+      "description": "The padded canvas preview is 24px wider than its column.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ":where(.emvb-video){box-sizing:border-box;",
+          "replace": ":where(.emvb-video){"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-sizes.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-266/divider-zero-width",
+      "requirement": "W-266",
+      "description": "A divider in a centred column has no width.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ":where(.emvb-divider){width:100%}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/media-sizes.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
