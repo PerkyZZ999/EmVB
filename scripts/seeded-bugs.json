@@ -24187,6 +24187,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/media-sizes.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-267/hover-shows-nothing",
+      "requirement": "W-267",
+      "description": "Without the ::details-content rule a hovered dropdown stays hidden inside its closed details.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": ">.emvb-menu-item__disclosure::details-content{content-visibility:visible}",
+          "replace": ">.emvb-menu-item__disclosure>.emvb-menu-panel{visibility:visible}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/menu-hover.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-267/merged-rule",
+      "requirement": "W-267",
+      "description": "Folding ::details-content into the display rule makes older browsers drop the whole hover rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": ">.emvb-menu-item__disclosure>.emvb-menu-panel{display:block}}",
+          "replace": ">.emvb-menu-item__disclosure>.emvb-menu-panel,.emvb-menu-item:hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content{display:block}}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/menu-hover.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-267/focus-opens-all",
+      "requirement": "W-267",
+      "description": "focus-within shows closed dropdowns, so Tab walks into every one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "{.emvb-menu-item:hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content{",
+          "replace": "{.emvb-menu-item:hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content,.emvb-menu-item:focus-within>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content{"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/menu-hover.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

@@ -66,6 +66,11 @@ const MENU_CSS = [
   ".emvb-menu-panel{display:none;position:absolute;z-index:30;top:100%;inset-inline-start:0;min-width:12rem;padding:.75rem;background:canvas;color:canvastext;border:1px solid #00000014;box-shadow:0 12px 32px #00000029}",
   ".emvb-menu-item__disclosure[open]>.emvb-menu-panel{display:block}",
   "@media (hover:hover) and (pointer:fine){.emvb-menu-item:hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure>.emvb-menu-panel,.emvb-menu-item:focus-within>.emvb-menu-item__bar>.emvb-menu-item__disclosure>.emvb-menu-panel{display:block}}",
+  // W-267: a closed <details> hides its content (::details-content is content-visibility:hidden),
+  // so the hover rule above showed nothing until the details' content is made visible too. Its own
+  // rule: a browser without ::details-content drops only this one. Hover only: keyboard users open
+  // a dropdown with its toggle, and Tab doesn't walk through every closed dropdown's links.
+  "@media (hover:hover) and (pointer:fine){.emvb-menu-item:hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content{content-visibility:visible}}",
   ".emvb-menu-panel--wide{inset-inline:0;min-width:0}",
   ".emvb-menu--column .emvb-menu-panel{top:0;inset-inline-start:100%}",
   ".emvb-menu--column .emvb-menu-panel--wide{inset-inline:auto;inset-inline-start:100%;min-width:18rem}",
