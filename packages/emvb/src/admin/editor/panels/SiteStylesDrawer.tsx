@@ -1,4 +1,5 @@
 import { Button, Select, Tabs } from "@cloudflare/kumo";
+import { deletionOf, type Deletion } from "../restore-deleted.ts";
 import { WarningCircleIcon, XIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
@@ -35,6 +36,8 @@ type Props = {
   unpublished?: boolean;
   onPublishStyles?: () => Promise<void>;
   onLayoutChange: (layout: Layout) => void;
+  /** W-252: called with what a delete removes, before the page loses its uses. */
+  onDeleted?: (deletion: Deletion) => void;
   onClose: () => void;
 };
 
@@ -68,6 +71,7 @@ export function SiteStylesDrawer({
   unpublished = false,
   onPublishStyles,
   onLayoutChange,
+  onDeleted,
   onClose,
 }: Props) {
   const [tab, setTab] = React.useState<"variables" | "classes" | "defaults">("variables");
@@ -276,6 +280,16 @@ export function SiteStylesDrawer({
           layout={layout}
           onCancel={() => setConfirm(null)}
           onConfirm={async () => {
+            if (layout) {
+              const deletion = deletionOf(
+                design,
+                layout,
+                confirm.kind === "variable"
+                  ? { kind: "variable", id: confirm.id, variableKind: confirm.variableKind }
+                  : { kind: "class", id: confirm.id },
+              );
+              if (deletion) onDeleted?.(deletion);
+            }
             if (confirm.kind === "variable") {
               if (layout) {
                 const result = deleteVariable(design, layout, confirm.id, confirm.variableKind);

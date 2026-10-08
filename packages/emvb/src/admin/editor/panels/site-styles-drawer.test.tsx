@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import { emptyDesign, type DesignSystem, type Layout } from "../../../core/index.ts";
 import { SiteStylesDrawer } from "./SiteStylesDrawer.tsx";
+import type { Deletion } from "../restore-deleted.ts";
 import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
 
 afterEach(cleanup);
@@ -322,6 +323,7 @@ describe("deleting a variable from Site styles", () => {
     };
     const saves: DesignSystem[] = [];
     const layouts: Layout[] = [];
+    const deletions: Deletion[] = [];
     await mount(
       <SiteStylesDrawer
         design={design}
@@ -330,6 +332,7 @@ describe("deleting a variable from Site styles", () => {
           saves.push(next);
         }}
         onLayoutChange={(next) => layouts.push(next)}
+        onDeleted={(deletion) => deletions.push(deletion)}
         onClose={() => undefined}
       />,
     );
@@ -360,6 +363,10 @@ describe("deleting a variable from Site styles", () => {
     );
     await settle();
     expect(saves.at(-1)?.variables.colors).toEqual([]);
+    // W-252: the drawer reports what it removed and the page it started from, for undo.
+    expect(deletions).toHaveLength(1);
+    expect(deletions[0]).toMatchObject({ kind: "variable", variableKind: "color", index: 0 });
+    expect(deletions[0]?.before).toBe(page);
     expect(saves.at(-1)?.classes).toEqual([
       { id: "card", name: "Card", style: { opacity: 0.5 } },
       { id: "tint", name: "Tint", style: {} },

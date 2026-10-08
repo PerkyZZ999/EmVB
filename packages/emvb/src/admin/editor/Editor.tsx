@@ -40,6 +40,7 @@ import {
 } from "./useEditorData.ts";
 import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { useSectionTemplates } from "./section-templates.ts";
+import { restoreOnUndo, type Deletion } from "./restore-deleted.ts";
 import { useEditorCommands } from "./useEditorCommands.ts";
 import { useSave } from "./useSave.ts";
 import { type ShortcutHandlers, useEditorShortcuts } from "./useEditorShortcuts.ts";
@@ -158,6 +159,21 @@ function EditorApp({
     saver,
     toasts,
   });
+  // W-252: undoing a Site styles delete brings the variable or class back with its uses.
+  const deletions = React.useRef<Deletion[]>([]);
+  const changeDesignRef = React.useRef(changeDesign);
+  changeDesignRef.current = changeDesign;
+  const pageLayout = state.page.layout;
+  React.useEffect(() => {
+    if (!pageLayout) return;
+    const restored = restoreOnUndo(latest.current.design, pageLayout, deletions.current);
+    if (!restored) return;
+    changeDesignRef.current(restored).catch((error: unknown) => {
+      toasts.add({
+        title: error instanceof Error ? error.message : "Couldn't restore the deleted site style.",
+      });
+    });
+  }, [pageLayout, toasts]);
   const {
     deleteAsk,
     setDeleteAsk,
@@ -398,6 +414,9 @@ function EditorApp({
                 onCloseSiteStyles={() => setSiteStylesOpen(false)}
                 onDesignChange={changeDesign}
                 onPublishStyles={publishStyles}
+                onDesignItemDeleted={(deletion) => {
+                  deletions.current = [...deletions.current.slice(-19), deletion];
+                }}
                 fetcher={fetcher}
                 formsAvailable={formsAvailable}
                 rejection={saver.rejection}

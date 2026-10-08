@@ -23559,6 +23559,52 @@
         "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-252/restore-any-page",
+      "requirement": "W-252: undoing a Site styles delete (variable or class) puts the deleted item back into the design where it was, so the restored uses on the page are defined; only an undo back to the exact page from before the delete restores it.",
+      "description": "Any page, not just the one from before the delete, brings deleted items back, so later edits resurrect them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/restore-deleted.ts",
+          "search": "    if (deletion.before !== layout) continue;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/restore-deleted.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-252/drawer-silent",
+      "requirement": "W-252: undoing a Site styles delete (variable or class) puts the deleted item back into the design where it was, so the restored uses on the page are defined; only an undo back to the exact page from before the delete restores it.",
+      "description": "The drawer doesn't report deletions, so undo has nothing to restore and the page's uses come back undefined.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "              if (deletion) onDeleted?.(deletion);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-252/restore-at-end",
+      "requirement": "W-252: undoing a Site styles delete (variable or class) puts the deleted item back into the design where it was, so the restored uses on the page are defined; only an undo back to the exact page from before the delete restores it.",
+      "description": "A restored class goes to the end of the list, changing which class wins in the cascade.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/restore-deleted.ts",
+          "search": "      classes.splice(Math.min(deletion.index, classes.length), 0, deletion.cls);",
+          "replace": "      classes.push(deletion.cls);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/restore-deleted.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

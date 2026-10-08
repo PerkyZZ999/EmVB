@@ -1,4 +1,5 @@
 import type * as React from "react";
+import type { Deletion } from "../restore-deleted.ts";
 import type { DesignSystem, LayoutNode, PopupDevice } from "../../../core/index.ts";
 import type { Fetcher } from "../../api.ts";
 import type { EditorAction, EditorState } from "../store.ts";
@@ -18,6 +19,7 @@ export function SettingsPanel({
   onCloseSiteStyles,
   onDesignChange,
   onPublishStyles,
+  onDesignItemDeleted,
   fetcher,
   formsAvailable,
   rejection,
@@ -36,6 +38,8 @@ export function SettingsPanel({
   onCloseSiteStyles: () => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
   onPublishStyles: () => Promise<void>;
+  /** W-252: a variable or class deleted from Site styles, so undo can put it back. */
+  onDesignItemDeleted?: (deletion: Deletion) => void;
   fetcher: Fetcher;
   formsAvailable: boolean;
   rejection: string | null;
@@ -63,6 +67,7 @@ export function SettingsPanel({
           onDesignChange={onDesignChange}
           unpublished={state.designUnpublished === true}
           onPublishStyles={onPublishStyles}
+          {...(onDesignItemDeleted ? { onDeleted: onDesignItemDeleted } : {})}
           onLayoutChange={(layout) =>
             dispatch({
               type: "apply-arranged",
