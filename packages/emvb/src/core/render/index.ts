@@ -97,6 +97,12 @@ const gridTracks = (columns: unknown): Declaration[] =>
     ? [{ property: "grid-template-columns", value: `repeat(${columns}, minmax(0, 1fr))` }]
     : [];
 
+/** A node with at least one child; tolerant of a malformed node without a children array. */
+const hasChildren = (node: LayoutNode): boolean => {
+  const children: unknown = (node as { children?: unknown }).children;
+  return Array.isArray(children) && children.length > 0;
+};
+
 /** A short, stable hash of a node origin, for its suffixed rule id (W-250). */
 function originHash(origin: string): string {
   let hash = 0x811c9dc5;
@@ -163,6 +169,9 @@ export function renderPage(
   let backgroundVideo = false;
 
   const domIds = new Map<string, number>();
+  // W-253: runtimes follow what renders, including synced section and loop item contents,
+  // which the page's own layout doesn't hold.
+  const rendered = { form: false, tabs: false, menuDropdown: false };
   const ctx: RenderContext = {
     mode,
     definitions: opts.formDefinitions ?? new Map(),
@@ -280,6 +289,9 @@ export function renderPage(
       };
     }
     usedTypes.add(type);
+    if (isFormNode(node) && node.props.formId.trim()) rendered.form = true;
+    if (isTabsNode(node)) rendered.tabs = true;
+    if (type === "menu-item" && hasChildren(node)) rendered.menuDropdown = true;
     const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
     const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId);
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
@@ -351,9 +363,9 @@ export function renderPage(
     vnode,
     html: scope ? `<div ${scopeAttribute(scope)}>${html}</div>` : html,
     css: scope ? scopeWrapperCss() + scopeCss(css, scope) : css,
-    needsFormsRuntime: layoutHasForm(layout),
-    needsTabsRuntime: layoutHasTabs(layout),
-    needsMenuRuntime: layoutHasMenuDropdown(layout),
+    needsFormsRuntime: rendered.form || layoutHasForm(layout),
+    needsTabsRuntime: rendered.tabs || layoutHasTabs(layout),
+    needsMenuRuntime: rendered.menuDropdown || layoutHasMenuDropdown(layout),
     ...(design.direction ? { dir: design.direction } : {}),
     warnings,
   };

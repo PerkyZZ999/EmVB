@@ -162,3 +162,90 @@ describe("an id reused by another layout keeps its own styles (W-250)", () => {
     expect(colorOf(html, css, "Item")).toBe("#16a34a");
   });
 });
+
+describe("runtimes follow synced section and loop item contents (W-253)", () => {
+  const sectionNode: LayoutNode = {
+    id: "sec00001",
+    type: "section",
+    props: { partId: "p1" },
+    children: [],
+  };
+  const withPart = (part: LayoutNode[]) =>
+    renderPage(layout([sectionNode]), emptyDesign(), {
+      dynamic: { sectionTemplates: { p1: layout(part) } },
+    });
+
+  test("a bound form inside a synced section loads the forms runtime", () => {
+    const form = {
+      id: "form0001",
+      type: "form",
+      props: { formId: "f1" },
+      children: [{ id: "fld00001", type: "text-input", props: { field: "email", label: "Email" } }],
+    } as LayoutNode;
+    expect(withPart([form]).needsFormsRuntime).toBe(true);
+    expect(withPart([heading("h0000001", "No form")]).needsFormsRuntime).toBe(false);
+  });
+
+  test("Tabs and a menu dropdown inside a synced section load their runtimes", () => {
+    const tabs = {
+      id: "tabs0001",
+      type: "tabs",
+      props: {},
+      children: [{ id: "tabp0001", type: "tab-panel", props: { label: "One" }, children: [] }],
+    } as LayoutNode;
+    expect(withPart([tabs]).needsTabsRuntime).toBe(true);
+    const menu = {
+      id: "menu0001",
+      type: "menu",
+      props: {},
+      children: [
+        {
+          id: "mitm0001",
+          type: "menu-item",
+          props: { text: "Shop", href: "/shop" },
+          children: [
+            {
+              id: "mitm0002",
+              type: "menu-item",
+              props: { text: "Hats", href: "/hats" },
+              children: [],
+            },
+          ],
+        },
+      ],
+    } as LayoutNode;
+    expect(withPart([menu]).needsMenuRuntime).toBe(true);
+  });
+
+  test("a menu item without sub-items in a synced section doesn't load the menu runtime", () => {
+    const item = {
+      id: "mitm0003",
+      type: "menu-item",
+      props: { text: "Plain", href: "/" },
+      children: [],
+    } as unknown as LayoutNode;
+    expect(withPart([item]).needsMenuRuntime).toBe(false);
+  });
+
+  test("Tabs in a loop item part load the tabs runtime", () => {
+    const tabs = {
+      id: "tabs0001",
+      type: "tabs",
+      props: {},
+      children: [{ id: "tabp0001", type: "tab-panel", props: { label: "One" }, children: [] }],
+    } as LayoutNode;
+    const loop: LayoutNode = {
+      id: "loop0001",
+      type: "loop",
+      props: { itemPartId: "item" },
+      children: [],
+    };
+    const result = renderPage(layout([loop]), emptyDesign(), {
+      dynamic: {
+        posts: [{ id: "a", title: "A", slug: "a", url: "/posts/a" } as never],
+        loopTemplates: { item: layout([tabs]) },
+      },
+    });
+    expect(result.needsTabsRuntime).toBe(true);
+  });
+});

@@ -2147,7 +2147,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "    needsFormsRuntime: layoutHasForm(layout),",
+          "search": "    needsFormsRuntime: rendered.form || layoutHasForm(layout),",
           "replace": "    needsFormsRuntime: true,"
         }
       ],
@@ -2267,7 +2267,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "    needsFormsRuntime: layoutHasForm(layout),",
+          "search": "    needsFormsRuntime: rendered.form || layoutHasForm(layout),",
           "replace": "    needsFormsRuntime: false,"
         }
       ],
@@ -13024,7 +13024,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "needsFormsRuntime: layoutHasForm(layout),",
+          "search": "needsFormsRuntime: rendered.form || layoutHasForm(layout),",
           "replace": "needsFormsRuntime: false,"
         }
       ],
@@ -23604,6 +23604,48 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/restore-deleted.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-253/forms-page-only",
+      "requirement": "W-253: a page loads the forms, tabs and menu runtimes when a bound Form, Tabs or a menu dropdown renders anywhere on it, including inside synced sections and loop item parts.",
+      "description": "Only the page's own layout counts, so a form in a synced section posts natively and shows a raw error page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (isFormNode(node) && node.props.formId.trim()) rendered.form = true;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-253/tabs-page-only",
+      "requirement": "W-253: a page loads the forms, tabs and menu runtimes when a bound Form, Tabs or a menu dropdown renders anywhere on it, including inside synced sections and loop item parts.",
+      "description": "Tabs in a synced section or loop item get no tabs runtime (no arrow keys, stale aria-selected).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (isTabsNode(node)) rendered.tabs = true;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-253/menu-page-only",
+      "requirement": "W-253: a page loads the forms, tabs and menu runtimes when a bound Form, Tabs or a menu dropdown renders anywhere on it, including inside synced sections and loop item parts.",
+      "description": "A menu dropdown in a synced section gets no menu runtime (Escape doesn't close it).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (type === \"menu-item\" && hasChildren(node)) rendered.menuDropdown = true;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]
