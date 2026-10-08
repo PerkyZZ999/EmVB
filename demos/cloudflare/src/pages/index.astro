@@ -26,7 +26,7 @@ if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 			<ul>
 				{posts.map((post) => (
 					<li>
-						<a href={`/posts/${post.id}`}>
+						<a href={`/posts/${post.data.slug}`}>
 							{post.data.featured_image && (
 								<div {...post.edit.featured_image}><Image image={post.data.featured_image} /></div>
 							)}

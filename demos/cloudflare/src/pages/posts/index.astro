@@ -38,7 +38,7 @@ const postsWithTags = posts.map((post) => ({
 			<ul>
 				{postsWithTags.map(({ post, tags }) => (
 					<li>
-						<a href={`/posts/${post.id}`}>
+						<a href={`/posts/${post.data.slug}`}>
 							{post.data.featured_image && (
 								<div {...post.edit.featured_image}><Image image={post.data.featured_image} /></div>
 							)}
