@@ -96,6 +96,31 @@ describe("Layers panel (W-018)", () => {
     ]);
   });
 
+  test("focus follows the selection while a row has focus (W-257)", async () => {
+    function Live() {
+      const [selected, setSelected] = React.useState("head0001");
+      return (
+        <LayersPanel
+          layout={layout}
+          selectedId={selected}
+          onSelect={setSelected}
+          onDuplicate={() => undefined}
+          onMoveUp={() => undefined}
+          onMoveDown={() => undefined}
+          onDelete={() => undefined}
+        />
+      );
+    }
+    await mountTree(<Live />);
+    const button = (id: string) =>
+      document.querySelector(`[data-emvb-layer="${id}"] .emvb-layer-select`) as HTMLElement;
+    await act(async () => button("head0001").focus());
+    await press("ArrowDown");
+    expect(document.activeElement).toBe(button("box00001"));
+    await press("ArrowUp");
+    expect(document.activeElement).toBe(button("head0001"));
+  });
+
   test("← collapses an open container first, then → expands it before entering", async () => {
     await mount("box00001");
     await press("ArrowLeft");

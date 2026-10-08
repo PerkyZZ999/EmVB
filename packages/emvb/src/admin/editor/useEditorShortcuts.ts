@@ -152,7 +152,8 @@ export function useEditorShortcuts({
       return;
     }
     const traverse = TRAVERSE_KEYS.get(event.key);
-    if (!traverse) return;
+    // W-257: the Layers tree already moved the selection for this key; moving again skipped a row.
+    if (!traverse || event.defaultPrevented) return;
     event.preventDefault();
     const target = traverse(layout, selected, event.shiftKey);
     if (target) dispatch({ type: "select", id: target });

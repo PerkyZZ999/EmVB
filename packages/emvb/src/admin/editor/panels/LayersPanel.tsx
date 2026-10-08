@@ -202,6 +202,11 @@ export function LayersPanel({
     if (!selectedId || !listRef.current) return;
     const row = listRef.current.querySelector(`[data-emvb-layer="${CSS.escape(selectedId)}"]`);
     row?.scrollIntoView({ block: "nearest" });
+    // W-257: while a Layers row has focus, focus follows the selection (↑/↓, Enter).
+    const active = document.activeElement;
+    if (active?.classList.contains("emvb-layer-select") && listRef.current.contains(active)) {
+      row?.querySelector<HTMLElement>(".emvb-layer-select")?.focus({ preventScroll: true });
+    }
   }, [selectedId]);
 
   if (!layout) return <p className="emvb-helper">This page is empty.</p>;

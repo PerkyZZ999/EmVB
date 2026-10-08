@@ -23759,6 +23759,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-257/layers-key-moves-twice",
+      "requirement": "W-257",
+      "description": "An arrow key in Layers moves the selection twice (tree handler, then window shortcut).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "    if (!traverse || event.defaultPrevented) return;\n",
+          "replace": "    if (!traverse) return;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/shortcut-focus.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-257/focus-stays-behind",
+      "requirement": "W-257",
+      "description": "Arrow keys in Layers move the selection but leave focus on the old row.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "      row?.querySelector<HTMLElement>(\".emvb-layer-select\")?.focus({ preventScroll: true });\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

@@ -135,6 +135,18 @@ describe("element shortcuts only act from the canvas, Layers, or nothing focused
     ]);
   });
 
+  test("a key the Layers tree already handled doesn't move the selection again (W-257)", async () => {
+    const seen: Seen = [];
+    await mount(<Harness seen={seen} />);
+    const handled = (event: Event) => event.preventDefault();
+    target("layer").addEventListener("keydown", handled);
+    await press(target("layer"), "ArrowUp");
+    await press(target("layer"), "ArrowDown");
+    await press(target("layer"), "Enter");
+    target("layer").removeEventListener("keydown", handled);
+    expect(seen).toEqual([]);
+  });
+
   test("Save, undo and redo still work from a panel tab, but not from a text field", async () => {
     const seen: Seen = [];
     await mount(<Harness seen={seen} />);
