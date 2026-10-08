@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.0 — 2026-10-08
+
+A big update since 0.1.0: an icon library, icon styling and SVG uploads, new layout and theme elements, a try-it-now playground, and a long sweep of fixes from hands-on testing (W-124–W-300).
+
+**Upgrading:** layouts and the design document move to schema 12 (0.1.0 used schema 9). Older documents upgrade automatically when they load. Once a page is saved with 0.2.0, EmVB 0.1.0 refuses it as "saved by a newer EmVB", so update every site that shares a database together.
+
+- **Icon library:** the Icon element opens a searchable picker over four bundled sets: Lucide, Font Awesome Free, Tabler and Remix (4.8.0). It has a set and style sidebar, word search in any order and a keyboard-friendly grid. Sets load only in the editor, when the picker opens; pages store just the chosen SVG. License notices ship in the package.
+- **Icon styling and Upload SVG:** the Style tab starts with an Icon section: colour, rotate, flip, scale, stroke width, drop shadow, spin or pulse, and transitions. All of it works per state (Hover, Focus, Active) and per device, with plain CSS. Multi-colour SVGs keep their own colours unless you turn on Force single color. Shape presets add a circle, rounded or square background. Upload SVG adds your own icons under My uploads; uploads are sanitized, deduplicated and listed in All icons too.
+- **Try it in your browser:** [emvb.dev/playground](https://emvb.dev/playground/) runs the real editor in the browser against an in-browser stand-in for EmDash, with starter content, Visitor view, Export and Reset. Nothing to install.
+- **Project site:** [emvb.dev](https://emvb.dev) is the new home for EmVB, with screenshots, guides and the playground.
+- **New elements and editor features:**
+  - **Elements:** a layout Section element; a Menu element with dropdowns and a wide panel; floating elements and a Float theme part for bars and corners; Pagination for paged archives.
+  - **Editing:** grid columns per device; one linked control for padding, margin, border and radius; multi-stop gradients; font weights 100–900; links on Headings and Icons; Save local styles as class; editor-only names for elements in Layers; Revert to published; search in the Visual pages and Theme Builder lists.
+  - **Page settings and preview:** site text direction (LTR, RTL, auto); SEO settings for canonical URL, hide from search engines and a social image; a scaled 1280 px Desktop canvas and device-sized Preview.
+- **Fixes, grouped:**
+  - **Accessibility:** one H1 and no skipped heading levels on starter content; page landmarks; 4.5:1 contrast on controls; full keyboard use of Layers, menus, tabs, popups and dialogs. While the editor is open, the admin behind it is inert, so Tab stays in the editor.
+  - **Forms:** fields take the form's input type (email, phone, URL, number, date), required state and limits, so the forms script checks them before sending and shows messages next to each field. Duplicate field names get a warning. Ids stay unique when a form appears twice.
+  - **Saving and publishing:** a page changed in another tab or window raises a conflict instead of being overwritten. A page moved to Trash, a signed-out session and a dropped connection each get their own clear message. Undo never leaves edits looking saved.
+  - **Public output:** long words such as pasted URLs wrap on phones instead of widening the page. Pages print robots, canonical and Open Graph tags. Empty Tabs and Lists render nothing stray. Images keep their natural size and alt text. Archive pages have numbered URLs and correct titles.
+  - **Theme Builder and popups:** condition labels match the editor. Popups trap focus correctly, lock page scroll while open, open once per visit and are named by their first heading.
+  - **Names, classes and import:** class and variable names stay unique on rename, New and Duplicate. Import renames names a file repeats and lists the renames. Pasting a style onto another element type no longer carries icon-only settings.
+
 ## 0.1.0 — 2026-10-04
 
 The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb): a visual page builder for EmDash CMS 1.0.x on Node (SQLite) and Cloudflare Workers (D1).
