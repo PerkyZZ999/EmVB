@@ -24341,6 +24341,60 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/divider-border.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-271/panel-silent",
+      "requirement": "W-271",
+      "description": "The Loop panel on a page doesn't show the note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "          {loopContextNote(node, partType) && (",
+          "replace": "          {false && loopContextNote(node, partType) && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/loop-context.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-271/note-in-archive",
+      "requirement": "W-271",
+      "description": "An archive template's Loop is told it shows nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/loop-context.ts",
+          "search": "  if (partType && LOOP_PARTS.has(partType)) return undefined;",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/loop-context.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-271/pagination-silent",
+      "requirement": "W-271",
+      "description": "Pagination on a page gets no note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/loop-context.ts",
+          "search": "  if (node.type === \"pagination\") {",
+          "replace": "  if (node.type === \"pagination-x\") {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/loop-context.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

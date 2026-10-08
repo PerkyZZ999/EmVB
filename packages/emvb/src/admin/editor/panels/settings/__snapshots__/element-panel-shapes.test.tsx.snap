@@ -5920,7 +5920,9 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
       label id="id-4" for="id-5"
         span
           "Posts per page"
-      input.emvb-field.emvb-mono id="id-5" data-emvb-field="perPage" value="" aria-labelledby="id-4""
+      input.emvb-field.emvb-mono id="id-5" data-emvb-field="perPage" value="" aria-labelledby="id-4"
+    p.emvb-helper data-emvb-loop-note="true"
+      "A Loop lists posts only in an Archive template. Here the editor shows sample posts, but the live page shows nothing. Build post lists in Theme Builder › Archive.""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="loop"
@@ -6119,7 +6121,9 @@ exports[`element panel markup (W-021, W-086 M16) pagination renders the same con
       label id="id-4" for="id-5"
         span
           "Next text"
-      input.emvb-field id="id-5" data-emvb-field="nextText" value="" aria-labelledby="id-4""
+      input.emvb-field id="id-5" data-emvb-field="nextText" value="" aria-labelledby="id-4"
+    p.emvb-helper data-emvb-loop-note="true"
+      "Pagination shows only in an Archive template with more than one page. Here the live page shows nothing.""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="pagination"
