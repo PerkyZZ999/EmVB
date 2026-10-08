@@ -322,6 +322,14 @@ describe("Layers content preview (W-143)", () => {
     expect(layerPreview(node("tab-panel", { label: "Monthly" }))).toBe("Monthly");
   });
 
+  test("an icon shows its title, unless it's still the default Icon (W-246)", () => {
+    expect(layerPreview(node("icon", { iconId: "lucide:bell", title: "Notifications" }))).toBe(
+      "Notifications",
+    );
+    expect(layerPreview(node("icon", { iconId: "star", title: "Icon" }))).toBeUndefined();
+    expect(layerPreview(node("icon", { iconId: "star" }))).toBeUndefined();
+  });
+
   test("elements without text, or with only spaces, show no preview", () => {
     expect(layerPreview(node("container", {}))).toBeUndefined();
     expect(layerPreview(node("image", { src: "/a.png", alt: "A" }))).toBeUndefined();

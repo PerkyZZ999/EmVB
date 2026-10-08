@@ -23325,6 +23325,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-246/icon-layer-no-preview",
+      "requirement": "W-246: an Icon's Layers row previews its title (\"Notifications\"), except the default \"Icon\".",
+      "description": "Every Icon row in Layers reads just \"Icon\", so icons can't be told apart.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  icon: \"title\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-246/icon-layer-repeats-icon",
+      "requirement": "W-246: an Icon's Layers row previews its title (\"Notifications\"), except the default \"Icon\".",
+      "description": "An icon with the default title reads \"Icon Icon\" in Layers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  if (node.type === \"icon\" && first?.toLowerCase() === \"icon\") return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

@@ -158,6 +158,8 @@ const PREVIEW_PROP: Partial<Record<string, string>> = {
   "accordion-item": "summary",
   "tab-panel": "label",
   "menu-item": "text",
+  // W-246: an icon's title names it ("Bell"); the default "Icon" says nothing the row doesn't.
+  icon: "title",
 };
 
 /** The first line of the element's own text, or undefined when it has none. */
@@ -167,6 +169,7 @@ export function layerPreview(node: LayoutNode): string | undefined {
   const value = (node.props as Record<string, unknown>)[key];
   if (typeof value !== "string") return undefined;
   const first = value.trim().split("\n")[0]?.trim();
+  if (node.type === "icon" && first?.toLowerCase() === "icon") return undefined;
   return first || undefined;
 }
 
