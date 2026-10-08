@@ -1,4 +1,4 @@
-import { serialize } from "../render/vnode.ts";
+import { serialize, type VNode } from "../render/vnode.ts";
 import { ICON_SVG_MAX } from "../schema/layout.ts";
 import { sanitizeSvgReport } from "./svg.ts";
 
@@ -103,7 +103,62 @@ const tooBig = (bytes: number): PreparedSvg => ({
   message: `After cleaning, this SVG is ${kb(bytes)}; an icon can be up to ${kb(ICON_SVG_MAX)}. Simplify it (for example with SVGO) and try again.`,
 });
 
-const NUMBER = /^\s*(\d+(?:\.\d+)?)(?:px)?\s*$/;
+/** Absolute CSS units in px; em and % depend on where the file was drawn, so they can't count. */
+const UNIT_PX: Record<string, number> = {
+  "": 1,
+  px: 1,
+  pt: 4 / 3,
+  pc: 16,
+  in: 96,
+  cm: 96 / 2.54,
+  mm: 96 / 25.4,
+  q: 96 / 101.6,
+};
+const LENGTH = /^\s*(\d+(?:\.\d+)?)\s*([a-z]*)\s*$/i;
+
+/** A width or height in px (from any absolute unit), or undefined. */
+function pxLength(value: string | undefined): number | undefined {
+  const match = LENGTH.exec(value ?? "");
+  const factor = match ? UNIT_PX[match[2]?.toLowerCase() ?? ""] : undefined;
+  if (!match || factor === undefined) return undefined;
+  const px = Math.round(Number(match[1]) * factor * 1000) / 1000;
+  return px > 0 && Number.isFinite(px) ? px : undefined;
+}
+
+/** Four numbers with a positive width and height; any other viewBox draws nothing (W-241). */
+function validViewBox(value: string | undefined): boolean {
+  const parts = (value ?? "").trim().split(/[\s,]+/);
+  if (parts.length !== 4) return false;
+  const nums = parts.map(Number);
+  const [, , width = 0, height = 0] = nums;
+  return nums.every(Number.isFinite) && width > 0 && height > 0;
+}
+
+/** Tags that only hold parts for other shapes: an SVG with nothing else draws nothing (W-241). */
+const NOT_DRAWN = new Set([
+  "defs",
+  "lineargradient",
+  "radialgradient",
+  "stop",
+  "clippath",
+  "mask",
+  "pattern",
+  "filter",
+  "symbol",
+  "marker",
+]);
+const GROUPS = new Set(["g", "svg", "a", "switch"]);
+
+function draws(children: readonly (VNode | string)[]): boolean {
+  return children.some((child) => {
+    if (typeof child === "string") return false;
+    const tag = child.tag.toLowerCase();
+    if (GROUPS.has(tag)) return draws(child.children);
+    // A left-out outside image stays as an empty <image>.
+    if (tag === "image") return Boolean(child.attrs.href ?? child.attrs["xlink:href"]);
+    return !NOT_DRAWN.has(tag);
+  });
+}
 
 /**
  * An uploaded file ready to store as an icon: tidied, sanitized, a viewBox (from width and
@@ -123,16 +178,20 @@ export function prepareUploadedSvg(raw: string): PreparedSvg {
   const tree = report.tree;
   if (!tree) return { ok: false, message: refusal(text) };
   const { width, height, id: _id, class: _class, ...attrs } = tree.attrs;
-  if (!attrs.viewBox) {
-    const w = NUMBER.exec(width ?? "")?.[1];
-    const h = NUMBER.exec(height ?? "")?.[1];
-    if (!w || !h || Number(w) === 0 || Number(h) === 0)
+  if (!validViewBox(attrs.viewBox)) {
+    const w = pxLength(width);
+    const h = pxLength(height);
+    if (w === undefined || h === undefined)
       return {
         ok: false,
-        message: "This SVG has no viewBox, nor a width and height in px, so it can't be scaled.",
+        message: attrs.viewBox
+          ? "This SVG's viewBox isn't four numbers with a positive width and height, and it has no width and height in px, pt, mm, cm or in to use instead, so it can't be scaled."
+          : "This SVG has no viewBox, nor a width and height in px, pt, mm, cm or in, so it can't be scaled.",
       };
     attrs.viewBox = `0 0 ${w} ${h}`;
   }
+  if (!draws(tree.children))
+    return { ok: false, message: "This SVG has nothing to draw: it has no shapes, paths or text." };
   const svg = serialize({
     tag: "svg",
     attrs: { xmlns: "http://www.w3.org/2000/svg", ...attrs },

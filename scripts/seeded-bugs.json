@@ -23157,6 +23157,48 @@
         "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-241/broken-viewbox-kept",
+      "requirement": "W-241: an uploaded SVG that would draw nothing is refused or fixed: a viewBox that isn't four numbers with a positive width and height falls back to the size; pt/mm/cm/in sizes convert to px; an SVG with no shapes is refused.",
+      "description": "An upload with viewBox=\"0 0 0 0\" is stored as is and shows nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "  if (!validViewBox(attrs.viewBox)) {",
+          "replace": "  if (!attrs.viewBox) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-241/empty-svg-accepted",
+      "requirement": "W-241: an uploaded SVG that would draw nothing is refused or fixed: a viewBox that isn't four numbers with a positive width and height falls back to the size; pt/mm/cm/in sizes convert to px; an SVG with no shapes is refused.",
+      "description": "An SVG with nothing to draw is stored and shows an empty tile.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "  if (!draws(tree.children))",
+          "replace": "  if (tree.children.length < 0)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-241/pt-size-refused",
+      "requirement": "W-241: an uploaded SVG that would draw nothing is refused or fixed: a viewBox that isn't four numbers with a positive width and height falls back to the size; pt/mm/cm/in sizes convert to px; an SVG with no shapes is refused.",
+      "description": "An SVG sized in pt (no viewBox) is refused as unscalable.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "  pt: 4 / 3,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

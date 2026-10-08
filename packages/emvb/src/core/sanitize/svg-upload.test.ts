@@ -116,6 +116,49 @@ describe("viewBox and size (W-239)", () => {
     expect(refused('<svg><path d="M0 0"/></svg>')).toContain("no viewBox");
   });
 
+  test("pt, mm, cm and in sizes convert to px; a broken viewBox falls back to the size (W-241)", () => {
+    expect(ok('<svg width="18pt" height="24pt"><path d="M0 0"/></svg>').svg).toContain(
+      'viewBox="0 0 24 32"',
+    );
+    expect(ok('<svg width="1in" height="25.4mm"><path d="M0 0"/></svg>').svg).toContain(
+      'viewBox="0 0 96 96"',
+    );
+    for (const box of ["0 0 0 0", "0 0 -24 24", "garbage", "0 0 24", "0,0,24,NaN"])
+      expect(
+        ok(`<svg viewBox="${box}" width="20" height="10"><path d="M0 0"/></svg>`).svg,
+      ).toContain('viewBox="0 0 20 10"');
+    expect(ok('<svg viewBox="-2,-2 28,28"><path d="M0 0"/></svg>').svg).toContain(
+      'viewBox="-2,-2 28,28"',
+    );
+  });
+
+  test("a broken viewBox with no usable size is refused, and says why (W-241)", () => {
+    expect(refused('<svg viewBox="0 0 0 0"><path d="M0 0"/></svg>')).toContain(
+      "viewBox isn't four numbers",
+    );
+    expect(
+      refused('<svg viewBox="garbage" width="2em" height="2em"><path d="M0 0"/></svg>'),
+    ).toContain("can't be scaled");
+  });
+
+  test("an SVG that draws nothing is refused (W-241)", () => {
+    const empty = "This SVG has nothing to draw";
+    expect(refused('<svg viewBox="0 0 24 24"></svg>')).toContain(empty);
+    expect(
+      refused('<svg viewBox="0 0 24 24"><g><defs><linearGradient id="a"/></defs></g></svg>'),
+    ).toContain(empty);
+    expect(
+      refused('<svg viewBox="0 0 24 24"><image href="https://x.example/a.png"/></svg>'),
+    ).toContain(empty);
+    expect(ok('<svg viewBox="0 0 24 24"><g><g><circle r="2"/></g></g></svg>').svg).toContain(
+      "<circle",
+    );
+    expect(ok('<svg viewBox="0 0 24 24"><text>A</text></svg>').svg).toContain("<text>");
+    expect(
+      ok('<svg viewBox="0 0 24 24"><defs><path id="p" d="M0 0"/></defs><use href="#p"/></svg>').svg,
+    ).toContain("<use");
+  });
+
   test("the file is capped at 256 KB and what's stored at ICON_SVG_MAX, with the sizes", () => {
     const padding = `<!--${"x".repeat(UPLOAD_SVG_MAX_BYTES)}-->`;
     expect(refused(`<svg viewBox="0 0 1 1">${padding}<path d="M0 0"/></svg>`)).toBe(
