@@ -10,6 +10,11 @@ export type EditorHost = {
   exit: () => void;
   /** The way back when the editor can't open here (small screen, missing page). */
   back: { label: string; go: () => void };
+  /**
+   * Whether panels link to other EmDash admin screens (Forms, Theme Builder). A host without the
+   * admin (the playground) sets false, so those links don't lead nowhere (W-289). Default true.
+   */
+  adminLinks?: boolean;
 };
 
 const defaultEditorHost: EditorHost = {
@@ -20,3 +25,6 @@ const defaultEditorHost: EditorHost = {
 export const EditorHostContext = React.createContext<EditorHost>(defaultEditorHost);
 
 export const useEditorHost = (): EditorHost => React.useContext(EditorHostContext);
+
+/** False when the editor runs outside the EmDash admin, where admin links would lead nowhere. */
+export const useAdminLinks = (): boolean => useEditorHost().adminLinks !== false;

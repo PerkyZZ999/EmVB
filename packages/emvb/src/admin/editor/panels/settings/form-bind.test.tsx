@@ -5,6 +5,7 @@ import type { Fetcher } from "../../../api.ts";
 import { AddPanel } from "../AddPanel.tsx";
 import { ElementPanel } from "../ElementPanel.tsx";
 import { FieldBindControl } from "./FieldBindControl.tsx";
+import { EditorHostContext } from "../../host.ts";
 import { FormBindControl } from "./FormBindControl.tsx";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 
@@ -195,5 +196,49 @@ describe("ElementPanel forms missing (W-036)", () => {
       />,
     );
     expect(document.querySelector("[data-emvb-forms-missing]")).toBeTruthy();
+  });
+});
+
+describe("Forms links outside the EmDash admin (W-289)", () => {
+  const listing: Fetcher = async (path) =>
+    path.includes("/forms/list")
+      ? new Response(
+          JSON.stringify({ data: { items: [{ id: "01FORM", name: "Contact", slug: "contact" }] } }),
+          { status: 200 },
+        )
+      : new Response("{}", { status: 404 });
+  const forbidden: Fetcher = async () =>
+    new Response(JSON.stringify({ error: { code: "FORBIDDEN", message: "no" } }), { status: 403 });
+  const noAdmin = {
+    exit: () => undefined,
+    back: { label: "x", go: () => undefined },
+    adminLinks: false,
+  };
+  const hrefs = () => [...document.querySelectorAll("a")].map((a) => a.getAttribute("href"));
+
+  test("in the admin, both binders link to the Forms screen", async () => {
+    await mount(<FormBindControl value="" fetcher={listing} onChange={() => undefined} />);
+    await flush();
+    expect(hrefs()).toEqual(["/_emdash/admin/plugins/emdash-forms/pages"]);
+    await cleanup();
+    await mount(<FormBindControl value="" fetcher={forbidden} onChange={() => undefined} />);
+    await flush();
+    expect(hrefs()).toEqual(["/_emdash/admin/plugins/emdash-forms/pages"]);
+  });
+
+  const noLinks = async (fetcher: Fetcher) => {
+    await mount(
+      <EditorHostContext.Provider value={noAdmin}>
+        <FormBindControl value="" fetcher={fetcher} onChange={() => undefined} />
+      </EditorHostContext.Provider>,
+    );
+    await flush();
+    expect(hrefs()).toEqual([]);
+    await cleanup();
+  };
+
+  test("a host without the admin (the playground) shows no Forms links", async () => {
+    await noLinks(listing);
+    await noLinks(forbidden);
   });
 });

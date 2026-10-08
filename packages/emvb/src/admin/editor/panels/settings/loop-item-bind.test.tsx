@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import type { Fetcher } from "../../../api.ts";
+import { EditorHostContext } from "../../host.ts";
 import { LoopItemBindControl } from "./LoopItemBindControl.tsx";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 
@@ -60,5 +61,35 @@ describe("LoopItemBindControl (W-077)", () => {
     await flush();
     expect(document.querySelector('[data-emvb-loop-item-bind="manual"]')).toBeTruthy();
     expect((document.querySelector("input") as HTMLInputElement | null)?.value).toBe("paste-me");
+  });
+});
+
+describe("admin links outside the EmDash admin (W-289)", () => {
+  const failing: Fetcher = async () => new Response("{}", { status: 500 });
+  const adminHrefs = () =>
+    [...document.querySelectorAll("a")].map((a) => a.getAttribute("href") ?? "");
+
+  test("in the admin, the empty Loop Item binder links to the Theme Builder", async () => {
+    await mount(<LoopItemBindControl value="" fetcher={failing} onChange={() => undefined} />);
+    await flush();
+    expect(adminHrefs()).toEqual(["/_emdash/admin/plugins/emvb/theme"]);
+  });
+
+  test("a host without the admin (the playground) gets no Theme Builder link", async () => {
+    await mount(
+      <EditorHostContext.Provider
+        value={{
+          exit: () => undefined,
+          back: { label: "x", go: () => undefined },
+          adminLinks: false,
+        }}
+      >
+        <LoopItemBindControl value="" fetcher={failing} onChange={() => undefined} />
+      </EditorHostContext.Provider>,
+    );
+    await flush();
+    expect(adminHrefs()).toEqual([]);
+    expect(document.body.textContent).toContain("Paste a theme-part id.");
+    expect(document.body.textContent).not.toContain("Theme Builder");
   });
 });

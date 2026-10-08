@@ -25145,6 +25145,57 @@
       ],
       "command": ["bun", "test", "./test/playground/backend.test.ts"],
       "expect": "\\(fail\\).*W-290"
+    },
+    {
+      "id": "W-289/host-flag-ignored",
+      "requirement": "W-289",
+      "description": "Panels ignore the host's adminLinks flag and always link to admin screens.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/host.ts",
+          "search": "useEditorHost().adminLinks !== false",
+          "replace": "true"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "./packages/emvb/src/admin/editor/panels/settings/loop-item-bind.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-289"
+    },
+    {
+      "id": "W-289/form-list-link",
+      "requirement": "W-289",
+      "description": "The Forms list binder keeps its 'Create or edit forms' link in the playground.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
+          "search": "        {adminLinks && (\n          <p className=\"emvb-helper\">",
+          "replace": "        {(adminLinks || true) && (\n          <p className=\"emvb-helper\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-289"
+    },
+    {
+      "id": "W-289/playground-host",
+      "requirement": "W-289",
+      "description": "The playground's host leaves admin links on.",
+      "edits": [
+        {
+          "file": "site/src/playground/host.ts",
+          "search": "  adminLinks: false,",
+          "replace": "  adminLinks: true,"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/host.test.ts"],
+      "expect": "\\(fail\\).*W-289"
     }
   ]
 }

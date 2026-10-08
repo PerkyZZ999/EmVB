@@ -12,13 +12,11 @@ import {
   type PageSummary,
 } from "../../../packages/emvb/src/admin/content-api.ts";
 import { Editor } from "../../../packages/emvb/src/admin/editor/Editor.tsx";
-import {
-  EditorHostContext,
-  type EditorHost,
-} from "../../../packages/emvb/src/admin/editor/host.ts";
+import { EditorHostContext } from "../../../packages/emvb/src/admin/editor/host.ts";
 import { BUTTON, SOLID_DESTRUCTIVE, UI_CSS } from "../../../packages/emvb/src/admin/ui.ts";
 import { PAGES_COLLECTION } from "../../../packages/emvb/src/constants.ts";
 import { starterLayout } from "../../../packages/emvb/src/core/index.ts";
+import { playgroundHost as host, SITE_HOME } from "./host.ts";
 import { createBackend, type KeyValueStore } from "./mock/backend.ts";
 import { PreviewOverlay } from "./PreviewOverlay.tsx";
 import { browserUploads } from "./uploads.ts";
@@ -30,7 +28,6 @@ import { exportPage } from "./view.ts";
  */
 
 const STARTER_ENTRY = "page-landing";
-const SITE_HOME = "/";
 /** The editor's own minimum (EDITOR_MIN_WIDTH_QUERY). Below it, the playground asks first. */
 const SMALL_SCREEN = "(max-width: 1023px)";
 
@@ -44,11 +41,6 @@ function browserStorage(): KeyValueStore | null {
     return null;
   }
 }
-
-const host: EditorHost = {
-  exit: () => window.location.assign(SITE_HOME),
-  back: { label: "emvb.dev", go: () => window.location.assign(SITE_HOME) },
-};
 
 function useMatches(query: string): boolean {
   const [matches, setMatches] = React.useState(() => window.matchMedia(query).matches);

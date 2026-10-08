@@ -7,6 +7,7 @@ import {
   type FormsCapability,
 } from "../../../forms-api.ts";
 import { FIELD } from "../../../ui.ts";
+import { useAdminLinks } from "../../host.ts";
 
 const MANUAL = "__manual__";
 
@@ -23,6 +24,7 @@ export function FormBindControl({
   onChange: (formId: string) => void;
 }) {
   const [capability, setCapability] = React.useState<FormsCapability | null>(null);
+  const adminLinks = useAdminLinks();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -73,9 +75,11 @@ export function FormBindControl({
           value={value}
           onChange={(event) => onChange(event.target.value.trim())}
         />
-        <p className="emvb-helper">
-          <a href="/_emdash/admin/plugins/emdash-forms/pages">Create or edit forms</a>
-        </p>
+        {adminLinks && (
+          <p className="emvb-helper">
+            <a href="/_emdash/admin/plugins/emdash-forms/pages">Create or edit forms</a>
+          </p>
+        )}
       </div>
     );
   }
@@ -89,8 +93,13 @@ export function FormBindControl({
         onChange={(event) => onChange(event.target.value.trim())}
       />
       <p className="emvb-helper">
-        Paste a forms-plugin form id.{" "}
-        <a href="/_emdash/admin/plugins/emdash-forms/pages">Open Forms</a>
+        Paste a forms-plugin form id.
+        {adminLinks && (
+          <>
+            {" "}
+            <a href="/_emdash/admin/plugins/emdash-forms/pages">Open Forms</a>
+          </>
+        )}
       </p>
     </div>
   );

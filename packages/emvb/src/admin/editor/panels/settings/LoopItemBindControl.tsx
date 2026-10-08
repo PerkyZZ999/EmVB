@@ -4,6 +4,7 @@ import type { ThemePartType } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { listThemeParts, type ThemePartSummary } from "../../../theme-api.ts";
 import { FIELD } from "../../../ui.ts";
+import { useAdminLinks } from "../../host.ts";
 
 const MANUAL = "__manual__";
 const NONE = "__none__";
@@ -32,6 +33,7 @@ export function LoopItemBindControl({
 }) {
   const [parts, setParts] = React.useState<ThemePartSummary[] | null>(null);
   const [failed, setFailed] = React.useState(false);
+  const adminLinks = useAdminLinks();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -94,7 +96,7 @@ export function LoopItemBindControl({
         />
         <p className="emvb-helper">
           Optional published {label} theme part. Leave blank to use nested elements.
-          <a href="/_emdash/admin/plugins/emvb/theme"> Open Theme Builder</a>
+          {adminLinks && <a href="/_emdash/admin/plugins/emvb/theme"> Open Theme Builder</a>}
         </p>
       </div>
     );
@@ -110,9 +112,13 @@ export function LoopItemBindControl({
       />
       <p className="emvb-helper">
         {failed
-          ? `Could not load ${label} parts. Paste a theme-part id, or `
-          : `No ${label} theme parts yet. Paste an id, or `}
-        <a href="/_emdash/admin/plugins/emvb/theme">create one in Theme Builder</a>.
+          ? `Could not load ${label} parts. Paste a theme-part id${adminLinks ? ", or " : "."}`
+          : `No ${label} theme parts yet. Paste an id${adminLinks ? ", or " : "."}`}
+        {adminLinks && (
+          <>
+            <a href="/_emdash/admin/plugins/emvb/theme">create one in Theme Builder</a>.
+          </>
+        )}
       </p>
     </div>
   );
