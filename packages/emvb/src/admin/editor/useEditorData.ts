@@ -29,6 +29,8 @@ export type EditorEntry = {
   canvasMode: string;
   seoTitle: string;
   seoDescription: string;
+  seoCanonical?: string;
+  seoNoIndex?: boolean;
   status: string;
   rev: string | null;
   layout: Layout | null;
@@ -60,7 +62,12 @@ type ContentResponse = {
     status?: string;
     draftRevisionId?: string | null;
     data?: Record<string, unknown>;
-    seo?: { title?: string | null; description?: string | null } | null;
+    seo?: {
+      title?: string | null;
+      description?: string | null;
+      canonical?: string | null;
+      noIndex?: boolean | null;
+    } | null;
   };
   _rev?: string;
 };
@@ -85,6 +92,8 @@ export async function loadEntry(
     canvasMode: text(data["canvas_mode"]) || "site-layout",
     seoTitle: text(body?.item?.seo?.title),
     seoDescription: text(body?.item?.seo?.description),
+    seoCanonical: text(body?.item?.seo?.canonical),
+    seoNoIndex: body?.item?.seo?.noIndex === true,
     status: entryStatus(body?.item),
     rev: body?.["_rev"] ?? null,
     layout: readLayout(data["layout"]),

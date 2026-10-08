@@ -7,7 +7,7 @@ import {
   THEME_PART_TYPE_LABELS,
   type FloatEdge,
 } from "../../../core/index.ts";
-import type { PageDraft } from "../../content-api.ts";
+import { canonicalProblem, type PageDraft } from "../../content-api.ts";
 import { FIELD } from "../../ui.ts";
 import type { PagePatch } from "../store.ts";
 import { ConditionsEditor } from "./ConditionsEditor.tsx";
@@ -69,7 +69,13 @@ export function PageSettings({
     );
   }
 
-  const seoCount = (page.seoTitle ? 1 : 0) + (page.seoDescription ? 1 : 0);
+  const seoCount = [
+    page.seoTitle,
+    page.seoDescription,
+    page.seoCanonical?.trim(),
+    page.seoNoIndex,
+  ].filter(Boolean).length;
+  const canonicalError = canonicalProblem(page.seoCanonical ?? "");
   return (
     <div className="emvb-panel-body" data-emvb-panel="page-settings">
       <h2 className="emvb-panel-title">Page settings</h2>
@@ -130,6 +136,26 @@ export function PageSettings({
             value={page.seoDescription}
             onChange={(event) => onChange({ seoDescription: event.target.value })}
           />
+          {/* W-284: EmDash stores these; the public page prints them (W-274). */}
+          <Input
+            label="Canonical URL"
+            type="url"
+            className={FIELD}
+            maxLength={500}
+            value={page.seoCanonical ?? ""}
+            placeholder="https://"
+            error={canonicalError ?? undefined}
+            onChange={(event) => onChange({ seoCanonical: event.target.value })}
+          />
+          <p className="emvb-helper">
+            Only if this page copies another one: the address search engines should list instead.
+          </p>
+          <Switch
+            label="Hide from search engines"
+            checked={page.seoNoIndex === true}
+            onCheckedChange={(checked) => onChange({ seoNoIndex: checked === true })}
+          />
+          <p className="emvb-helper">Adds noindex, so search engines leave this page out.</p>
         </Collapsible.Panel>
       </Collapsible.Root>
     </div>

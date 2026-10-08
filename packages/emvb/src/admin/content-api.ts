@@ -19,7 +19,12 @@ type RawItem = {
   draftRevisionId?: string | null;
   updatedAt?: string;
   data?: Record<string, unknown>;
-  seo?: { title?: string | null; description?: string | null } | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    canonical?: string | null;
+    noIndex?: boolean | null;
+  } | null;
 };
 
 export type PageSummary = {
@@ -63,6 +68,10 @@ export type PageDraft = {
   canvasMode: string;
   seoTitle: string;
   seoDescription: string;
+  /** W-284: absolute http(s) URL, or "" for none. Absent = leave the saved value alone. */
+  seoCanonical?: string;
+  /** W-284: ask search engines not to index the page. Absent = leave the saved value alone. */
+  seoNoIndex?: boolean;
   layout: Layout | null;
   /** Theme parts only (emvb_theme_parts). */
   partType?: ThemePartType;
@@ -72,6 +81,34 @@ export type PageDraft = {
   /** Floats only — edge and whether a close button is offered. */
   float?: FloatSettings;
 };
+
+/**
+ * W-284: EmDash accepts only an absolute http(s) canonical URL (or null) and refuses the whole
+ * save otherwise, so the panel flags anything else and the save leaves the stored one alone.
+ */
+export function canonicalProblem(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol === "https:" || url.protocol === "http:") return null;
+  } catch {
+    // fall through
+  }
+  return "Not saved: use a full address starting with https://";
+}
+
+function seoBody(draft: PageDraft) {
+  const canonical = draft.seoCanonical;
+  return {
+    title: draft.seoTitle || null,
+    description: draft.seoDescription || null,
+    ...(canonical !== undefined && !canonicalProblem(canonical)
+      ? { canonical: canonical.trim() || null }
+      : {}),
+    ...(draft.seoNoIndex !== undefined ? { noIndex: draft.seoNoIndex } : {}),
+  };
+}
 
 /** Saves the draft with `_rev`, so a concurrent change fails with 409 instead of being overwritten. */
 export async function savePage(
@@ -88,7 +125,7 @@ export async function savePage(
       body: {
         data: { title: draft.title, layout: draft.layout, canvas_mode: draft.canvasMode },
         slug: draft.slug,
-        seo: { title: draft.seoTitle || null, description: draft.seoDescription || null },
+        seo: seoBody(draft),
         ...(rev ? { _rev: rev } : {}),
       },
     },

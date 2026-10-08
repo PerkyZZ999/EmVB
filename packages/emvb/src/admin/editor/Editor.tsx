@@ -96,6 +96,8 @@ const initialState = (entry: EditorEntry, design: LoadedDesign): EditorState => 
     canvasMode: entry.canvasMode,
     seoTitle: entry.seoTitle,
     seoDescription: entry.seoDescription,
+    seoCanonical: entry.seoCanonical,
+    seoNoIndex: entry.seoNoIndex,
     layout: entry.layout,
     partType: entry.partType,
     conditions: entry.conditions,

@@ -12738,8 +12738,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/content-api.ts",
-          "search": "seo: { title: draft.seoTitle || null,",
-          "replace": "seo: { title: null,"
+          "search": "    title: draft.seoTitle || null,",
+          "replace": "    title: null,"
         }
       ],
       "command": [
@@ -24949,6 +24949,76 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/design-import.test.tsx"],
       "expect": "\\(fail\\).*W-283"
+    },
+    {
+      "id": "W-284/canonical-not-loaded",
+      "requirement": "W-284",
+      "description": "The editor doesn't read the stored canonical URL.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "    seoCanonical: text(body?.item?.seo?.canonical),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-284/noindex-not-sent",
+      "requirement": "W-284",
+      "description": "Hide from search engines isn't saved.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "    ...(draft.seoNoIndex !== undefined ? { noIndex: draft.seoNoIndex } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/seo-fields.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-284/bad-canonical-sent",
+      "requirement": "W-284",
+      "description": "A canonical EmDash refuses is sent and fails the whole save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "    ...(canonical !== undefined && !canonicalProblem(canonical)",
+          "replace": "    ...(canonical !== undefined"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/seo-fields.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-284/canonical-field-dead",
+      "requirement": "W-284",
+      "description": "Typing in Canonical URL changes nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "onChange({ seoCanonical: event.target.value })",
+          "replace": "void event"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*W-284"
+    },
+    {
+      "id": "W-284/bad-canonical-silent",
+      "requirement": "W-284",
+      "description": "The panel doesn't flag a canonical that won't be saved.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "            error={canonicalError ?? undefined}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*W-284"
     }
   ]
 }

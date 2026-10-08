@@ -73,6 +73,34 @@ describe("page settings (W-091)", () => {
     await view.type("Meta description", "Search text");
     expect(view.sent).toEqual([{ seoTitle: "Search title" }, { seoDescription: "Search text" }]);
   });
+
+  test("W-284: Canonical URL and Hide from search engines send patches and count as set", async () => {
+    const set = await settings({
+      ...PAGE,
+      seoCanonical: "https://example.com/a",
+      seoNoIndex: true,
+    });
+    expect(set.host.querySelector('[data-emvb-section="seo"]')?.textContent).toBe("SEO · 2");
+    const view = await settings(PAGE);
+    await view.openSeo();
+    expect(view.field("Canonical URL")?.type).toBe("url");
+    await view.type("Canonical URL", "https://example.com/original");
+    const toggle = view.host.querySelector<HTMLElement>('[role="switch"]');
+    await act(async () => toggle?.click());
+    expect(view.sent).toEqual([
+      { seoCanonical: "https://example.com/original" },
+      { seoNoIndex: true },
+    ]);
+  });
+
+  test("W-284: a canonical that isn't a full http(s) address says it won't be saved", async () => {
+    const view = await settings({ ...PAGE, seoCanonical: "/about" });
+    await view.openSeo();
+    expect(view.host.textContent).toContain("Not saved: use a full address starting with https://");
+    const fine = await settings({ ...PAGE, seoCanonical: "https://example.com/about" });
+    await fine.openSeo();
+    expect(fine.host.textContent?.includes("Not saved")).toBe(false);
+  });
 });
 
 describe("theme part settings (W-091)", () => {
