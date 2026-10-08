@@ -164,6 +164,8 @@ export const IconNode = leafNode(
   z.strictObject({
     iconId: z.string().min(1).max(64),
     iconSvg: z.string().max(ICON_SVG_MAX).optional(),
+    /** W-238: paint a multi-colour SVG in the icon's colour (fills and strokes → currentColor). */
+    singleColor: z.boolean().optional(),
     size: z.number().int().positive().max(512).optional(),
     decorative: z.boolean().optional(),
     title: z.string().max(200).optional(),

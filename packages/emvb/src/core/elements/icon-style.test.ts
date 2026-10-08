@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import {
   emptyDesign,
   iconHasAdjustableStroke,
+  iconHasOwnColors,
+  IconNode,
   renderPage,
   StyleProps,
   type Layout,
@@ -169,5 +171,67 @@ describe("icon stroke width (W-237)", () => {
     ).toBe("1.75");
     expect(iconHasAdjustableStroke(odd)).toBe(false);
     expect(iconHasAdjustableStroke(undefined)).toBe(true);
+  });
+});
+
+describe("force single colour (W-238)", () => {
+  const multi =
+    '<svg viewBox="0 0 24 24"><defs><linearGradient id="g"><stop offset="0" stop-color="#f00"/><stop offset="1" stop-color="#00f"/></linearGradient></defs><circle cx="12" cy="12" r="10" fill="url(#g)"/><path d="M0 0h4" stroke="#0a0" fill="none"/><rect width="4" height="4"/></svg>';
+  const paints = (html: string) => {
+    const svg = svgOf(html);
+    return [svg, ...(svg?.querySelectorAll("*") ?? [])].map((el) =>
+      ["fill", "stroke", "stop-color"].map((name) => el?.getAttribute(name)).join("|"),
+    );
+  };
+
+  test("off: a multi-colour upload keeps its colours", () => {
+    const html = page(icon({}, { iconId: "upload:m1", iconSvg: multi })).html;
+    expect(paints(html)).toEqual([
+      "||",
+      "||",
+      "||",
+      "||#f00",
+      "||#00f",
+      "url(#g)||",
+      "none|#0a0|",
+      "||",
+    ]);
+  });
+
+  test("on: every fill, stroke and stop is the icon colour; none stays none", () => {
+    const html = page(icon({}, { iconId: "upload:m1", iconSvg: multi, singleColor: true })).html;
+    expect(paints(html)).toEqual([
+      "currentColor||",
+      "||",
+      "||",
+      "||currentColor",
+      "||currentColor",
+      "currentColor||",
+      "none|currentColor|",
+      "||",
+    ]);
+  });
+
+  test("a bundled icon ignores it and the schema takes only a boolean", () => {
+    const html = page(icon({}, { singleColor: true })).html;
+    expect(svgOf(html)?.getAttribute("fill")).toBe("none");
+    expect(svgOf(html)?.getAttribute("stroke")).toBe("currentColor");
+    const node = icon({}, { singleColor: true });
+    expect(IconNode.safeParse(node).success).toBe(true);
+    expect(IconNode.safeParse(icon({}, { singleColor: "yes" })).success).toBe(false);
+  });
+
+  test("Force single colour is offered only for SVGs with their own colours", () => {
+    expect(iconHasOwnColors(multi)).toBe(true);
+    expect(iconHasOwnColors('<svg viewBox="0 0 24 24"><path d="M0 0h1"/></svg>')).toBe(true);
+    expect(
+      iconHasOwnColors('<svg viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h1"/></svg>'),
+    ).toBe(false);
+    expect(
+      iconHasOwnColors(
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M0 0h1"/></svg>',
+      ),
+    ).toBe(false);
+    expect(iconHasOwnColors(undefined)).toBe(false);
   });
 });

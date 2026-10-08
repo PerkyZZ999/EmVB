@@ -1,5 +1,10 @@
-import { Button, Select } from "@cloudflare/kumo";
-import { FlipHorizontalIcon, FlipVerticalIcon, PlusIcon } from "@phosphor-icons/react";
+import { Button, Select, Switch } from "@cloudflare/kumo";
+import {
+  FlipHorizontalIcon,
+  FlipVerticalIcon,
+  PlusIcon,
+  ProhibitIcon,
+} from "@phosphor-icons/react";
 import * as React from "react";
 import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
@@ -263,6 +268,136 @@ export function IconAnimationControl({
         set={value !== undefined}
         onReset={() => onChange(undefined)}
       />
+    </div>
+  );
+}
+
+/** W-238: Force single colour, a content prop shown under Colour for multi-colour SVGs. */
+export function IconSingleColorRow({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <div className="emvb-field-group" data-emvb-icon-single-color="">
+      <Switch label="Force single color" checked={checked} onCheckedChange={onChange} />
+      <p className="emvb-helper">
+        {checked
+          ? "Every part of this SVG uses the icon color."
+          : "This SVG keeps its own colors. Turn on to paint it in the icon color."}
+      </p>
+    </div>
+  );
+}
+
+type IconShape = "none" | "circle" | "rounded" | "square";
+
+const SHAPE_PADDING = { value: 12, unit: "px" } as const;
+/** A light neutral, so the default icon colour (the text colour) reads on it. */
+const SHAPE_BACKGROUND = "#f1f5f9";
+const SHAPE_RADIUS: Record<Exclude<IconShape, "none">, StyleProps["borderRadius"]> = {
+  circle: { value: 50, unit: "%" },
+  rounded: { value: 12, unit: "px" },
+  square: { value: 0, unit: "px" },
+};
+const PADDINGS = ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"] as const;
+const CORNERS = [
+  "borderTopLeftRadius",
+  "borderTopRightRadius",
+  "borderBottomRightRadius",
+  "borderBottomLeftRadius",
+] as const;
+
+/** The shape the styles in effect make: a background or border, and the corner radius. */
+function iconShapeOf(style: StyleProps | undefined): IconShape {
+  if (!style || (style.backgroundColor === undefined && style.borderWidth === undefined))
+    return "none";
+  const radius = style.borderRadius;
+  if (radius && typeof radius === "object" && "value" in radius) {
+    if (radius.unit === "%" && radius.value >= 50) return "circle";
+    if (radius.value === 0) return "square";
+    return "rounded";
+  }
+  return radius === undefined ? "square" : "rounded";
+}
+
+/**
+ * The patch a shape choice makes (Elementor's Shape: None, Circle, Rounded, Square). A shape
+ * keeps a background or border already set, and adds 12 px padding only where none is set.
+ * None clears the background, radius and padding it would have added.
+ */
+function iconShapePatch(shape: IconShape, style: StyleProps | undefined): Partial<StyleProps> {
+  const patch: Partial<StyleProps> = {};
+  for (const corner of CORNERS) if (style?.[corner] !== undefined) patch[corner] = undefined;
+  if (shape === "none") {
+    patch.backgroundColor = undefined;
+    patch.borderRadius = undefined;
+    for (const side of PADDINGS) patch[side] = undefined;
+    return patch;
+  }
+  if (style?.backgroundColor === undefined && style?.borderWidth === undefined)
+    patch.backgroundColor = SHAPE_BACKGROUND;
+  patch.borderRadius = SHAPE_RADIUS[shape];
+  if (PADDINGS.every((side) => style?.[side] === undefined))
+    for (const side of PADDINGS) patch[side] = SHAPE_PADDING;
+  return patch;
+}
+
+const SHAPES: { value: IconShape; label: string }[] = [
+  { value: "none", label: "None" },
+  { value: "circle", label: "Circle" },
+  { value: "rounded", label: "Rounded square" },
+  { value: "square", label: "Square" },
+];
+
+/** Background shape presets; colour, padding and border stay editable in their sections. */
+export function IconShapeRow({
+  style,
+  inherited,
+  onPatch,
+}: {
+  style: StyleProps | undefined;
+  inherited?: StyleProps;
+  onPatch: (patch: Partial<StyleProps>) => void;
+}) {
+  const effective = { ...inherited, ...style };
+  const current = iconShapeOf(effective);
+  return (
+    <div className="emvb-style-row" data-emvb-icon-shape={current}>
+      <div className="emvb-choice">
+        <span className="emvb-choice-label" id="emvb-icon-shape-label">
+          Shape
+        </span>
+        <div
+          className="emvb-choice-group"
+          role="radiogroup"
+          aria-labelledby="emvb-icon-shape-label"
+        >
+          {SHAPES.map((shape) => (
+            <button
+              key={shape.value}
+              type="button"
+              role="radio"
+              aria-checked={current === shape.value}
+              aria-label={shape.label}
+              title={shape.label}
+              data-emvb-choice={shape.value}
+              onClick={() => onPatch(iconShapePatch(shape.value, effective))}
+            >
+              {shape.value === "none" ? (
+                <ProhibitIcon size={16} aria-hidden="true" />
+              ) : (
+                <span className="emvb-shape-swatch" data-shape={shape.value} aria-hidden="true" />
+              )}
+            </button>
+          ))}
+        </div>
+        <p className="emvb-helper">
+          Color, padding and border: Background, Spacing and Border below.
+        </p>
+      </div>
     </div>
   );
 }

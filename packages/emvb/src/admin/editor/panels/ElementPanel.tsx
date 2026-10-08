@@ -47,6 +47,7 @@ import {
   type ResponsiveDevice,
   classStylesInListOrder,
   iconHasAdjustableStroke,
+  iconHasOwnColors,
   resolveCascade,
   STYLE_STATES,
   type StyleProps,
@@ -55,6 +56,7 @@ import {
 import { FieldControl } from "./settings/FieldControl.tsx";
 import { BoxControl } from "./settings/BoxControl.tsx";
 import { boxGroupOf } from "./settings/box-sides.ts";
+import { IconShapeRow, IconSingleColorRow } from "./settings/IconControls.tsx";
 import { StyleRow } from "./settings/StyleRow.tsx";
 import { AttributesEditor, HtmlIdField } from "./settings/AdvancedFields.tsx";
 import { ClassChipInput } from "./settings/ClassChipInput.tsx";
@@ -387,12 +389,15 @@ function KnownElementPanel({
       ? undefined
       : normal;
   const position = positionInEffect(node, design, cls);
-  const strokeAdjustable =
-    node.type === "icon" && !cls
-      ? iconHasAdjustableStroke(
-          typeof node.props.iconSvg === "string" ? node.props.iconSvg : undefined,
-        )
-      : true;
+  const iconSvg =
+    node.type === "icon" && typeof node.props.iconSvg === "string" ? node.props.iconSvg : undefined;
+  const strokeAdjustable = node.type === "icon" && !cls ? iconHasAdjustableStroke(iconSvg) : true;
+  const singleColorOffered =
+    node.type === "icon" &&
+    !cls &&
+    !responsive &&
+    styleState === "normal" &&
+    (node.props.singleColor === true || iconHasOwnColors(iconSvg));
   const patchStyle = (patch: Partial<StyleProps>) => {
     if (responsive) {
       if (!cls) {
@@ -620,7 +625,7 @@ function KnownElementPanel({
                       />
                     );
                   }
-                  return (
+                  const row = (
                     <StyleRow
                       key={`${styleState}:${key}`}
                       styleKey={key}
@@ -633,6 +638,30 @@ function KnownElementPanel({
                       onPatch={patchStyle}
                       onDesignChange={onDesignChange}
                     />
+                  );
+                  if (id !== "icon" || key !== "color") return row;
+                  // W-238: under Colour, Force single colour (a content prop, so Normal on
+                  // Desktop only) and the background Shape presets.
+                  return (
+                    <React.Fragment key={`${styleState}:${key}`}>
+                      {row}
+                      {singleColorOffered && (
+                        <IconSingleColorRow
+                          checked={node.props.singleColor === true}
+                          onChange={(checked) => {
+                            const { singleColor: _was, ...props } = node.props as Record<
+                              string,
+                              unknown
+                            >;
+                            onChange({
+                              ...node,
+                              props: checked ? { ...props, singleColor: true } : props,
+                            } as LayoutNode);
+                          }}
+                        />
+                      )}
+                      <IconShapeRow style={style} inherited={inherited} onPatch={patchStyle} />
+                    </React.Fragment>
                   );
                 })}
                 {id === "position" && !offsetsApply(position) && (

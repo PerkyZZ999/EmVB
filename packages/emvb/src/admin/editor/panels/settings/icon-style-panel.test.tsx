@@ -193,3 +193,69 @@ describe("Icon section (W-237)", () => {
     expect(rows("icon")).toContain("iconStrokeWidth");
   });
 });
+
+describe("Force single colour and Shape (W-238)", () => {
+  const upload: LayoutNode = {
+    ...star,
+    props: {
+      ...star.props,
+      iconId: "upload:abc",
+      iconSvg: '<svg viewBox="0 0 24 24"><path d="M0 0h4" fill="#e11d48"/></svg>',
+    },
+  };
+
+  test("Force single color shows under Colour for a multi-colour SVG and sets the prop", async () => {
+    await panel(upload);
+    const toggle = () =>
+      document.querySelector<HTMLElement>('[data-emvb-icon-single-color] [role="switch"]');
+    expect(toggle()).not.toBeNull();
+    await act(async () => toggle()?.click());
+    expect(nodes.at(-1)?.props).toMatchObject({ singleColor: true });
+    await act(async () => toggle()?.click());
+    expect(nodes.at(-1)?.props).not.toHaveProperty("singleColor");
+  });
+
+  test("it's not offered for a currentColor icon, nor in Hover", async () => {
+    await panel();
+    expect(document.querySelector("[data-emvb-icon-single-color]")).toBeNull();
+    await cleanup();
+    await panel(upload);
+    await pickState("Hover");
+    expect(document.querySelector("[data-emvb-icon-single-color]")).toBeNull();
+  });
+
+  test("Shape: Circle adds a background, 50% radius and padding; None takes them away", async () => {
+    await panel();
+    expect(
+      document.querySelector("[data-emvb-icon-shape]")?.getAttribute("data-emvb-icon-shape"),
+    ).toBe("none");
+    await click('[data-emvb-icon-shape] [data-emvb-choice="circle"]');
+    const px12 = { value: 12, unit: "px" } as const;
+    expect(nodes.at(-1)?.style).toEqual({
+      backgroundColor: "#f1f5f9",
+      borderRadius: { value: 50, unit: "%" },
+      paddingTop: px12,
+      paddingRight: px12,
+      paddingBottom: px12,
+      paddingLeft: px12,
+    });
+    expect(
+      document.querySelector("[data-emvb-icon-shape]")?.getAttribute("data-emvb-icon-shape"),
+    ).toBe("circle");
+    await click('[data-emvb-icon-shape] [data-emvb-choice="rounded"]');
+    expect(nodes.at(-1)?.style?.borderRadius).toEqual({ value: 12, unit: "px" });
+    await click('[data-emvb-icon-shape] [data-emvb-choice="none"]');
+    expect(nodes.at(-1)?.style ?? {}).toEqual({});
+  });
+
+  test("a shape keeps a colour and padding already set", async () => {
+    const px4 = { value: 4, unit: "px" } as const;
+    await panel({ ...star, style: { backgroundColor: "#111111", paddingTop: px4 } });
+    await click('[data-emvb-icon-shape] [data-emvb-choice="square"]');
+    expect(nodes.at(-1)?.style).toEqual({
+      backgroundColor: "#111111",
+      paddingTop: px4,
+      borderRadius: { value: 0, unit: "px" },
+    });
+  });
+});

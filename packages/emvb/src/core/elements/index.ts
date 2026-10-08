@@ -465,7 +465,13 @@ const icon: ElementDefinition<IconNode> = {
           children: [],
         }));
     strokeClass(svgAttrs);
-    const svg: VNode = { tag: "svg", attrs: svgAttrs, children };
+    const single = picked !== undefined && node.props.singleColor === true;
+    if (single) monochromeRoot(svgAttrs);
+    const svg: VNode = {
+      tag: "svg",
+      attrs: svgAttrs,
+      children: single ? monochrome(children) : children,
+    };
     // A linked icon is named by its title on the link, so the svg inside is hidden.
     const title = node.props.title?.trim();
     const { role: _role, "aria-label": _label, ...plain } = svgAttrs;
@@ -501,6 +507,48 @@ export function iconHasAdjustableStroke(svg: string | undefined): boolean {
   const before = attrs["stroke-width"];
   strokeClass(attrs);
   return before !== undefined && attrs["stroke-width"] === undefined;
+}
+
+/** Paint attributes a multi-colour SVG sets its colours with (W-238). */
+const PAINT_ATTRS = ["fill", "stroke", "stop-color"] as const;
+
+const ownColor = (value: string | undefined) =>
+  value !== undefined && value !== "none" && value.toLowerCase() !== "currentcolor";
+
+/** W-238: every fill, stroke and gradient stop becomes the icon's colour; `none` stays none. */
+function monochrome(nodes: (VNode | string)[]): (VNode | string)[] {
+  return nodes.map((child) => {
+    if (typeof child === "string") return child;
+    const attrs = { ...child.attrs };
+    for (const name of PAINT_ATTRS) if (ownColor(attrs[name])) attrs[name] = "currentColor";
+    return { ...child, attrs, children: monochrome(child.children) };
+  });
+}
+
+/** The root too; without a fill, SVG paints black, so it gets the icon's colour. */
+function monochromeRoot(attrs: Record<string, string>): void {
+  if (attrs.fill === undefined || ownColor(attrs.fill)) attrs.fill = "currentColor";
+  if (ownColor(attrs.stroke)) attrs.stroke = "currentColor";
+}
+
+/**
+ * Whether an icon's SVG paints with its own colours (W-238): any fill, stroke or stop other than
+ * `none`/`currentColor`, or a root without a fill (SVG's default is black). The panel offers
+ * Force single colour only then. Bundled Lucide icons follow the icon's colour already.
+ */
+export function iconHasOwnColors(svg: string | undefined): boolean {
+  if (!svg) return false;
+  const picked = sanitizeSvgMarkup(svg);
+  if (!picked) return false;
+  if (picked.attrs.fill === undefined || PAINT_ATTRS.some((name) => ownColor(picked.attrs[name])))
+    return true;
+  const walk = (nodes: (VNode | string)[]): boolean =>
+    nodes.some(
+      (child) =>
+        typeof child !== "string" &&
+        (PAINT_ATTRS.some((name) => ownColor(child.attrs[name])) || walk(child.children)),
+    );
+  return walk(picked.children);
 }
 
 /** A picked icon's root attributes minus what the element sets itself (size, name, id). */

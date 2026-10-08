@@ -23019,6 +23019,52 @@
         "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-238/single-color-always",
+      "requirement": "W-238: Icon Force single colour (multi-colour SVG fills/strokes/stops → currentColor, only when on) and background Shape presets in the Icon section.",
+      "description": "Uploaded multi-colour SVGs lose their colours even with Force single colour off.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    const single = picked !== undefined && node.props.singleColor === true;",
+          "replace": "    const single = picked !== undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-238/single-color-keeps-root-black",
+      "requirement": "W-238: Icon Force single colour (multi-colour SVG fills/strokes/stops → currentColor, only when on) and background Shape presets in the Icon section.",
+      "description": "With Force single colour on, an SVG root without a fill still paints black.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "  if (attrs.fill === undefined || ownColor(attrs.fill)) attrs.fill = \"currentColor\";",
+          "replace": "  if (ownColor(attrs.fill)) attrs.fill = \"currentColor\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-238/shape-overwrites-padding",
+      "requirement": "W-238: Icon Force single colour (multi-colour SVG fills/strokes/stops → currentColor, only when on) and background Shape presets in the Icon section.",
+      "description": "Picking a shape replaces padding the author already set.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx",
+          "search": "  if (PADDINGS.every((side) => style?.[side] === undefined))",
+          "replace": "  if (PADDINGS.length > 0)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

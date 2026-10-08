@@ -315,6 +315,9 @@ export const EDITOR_CSS = `${UI_CSS}
   box-shadow: inset 0 0 0 1px var(--color-kumo-brand);
 }
 .emvb-choice-group button:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
+.emvb-shape-swatch { display: block; width: 14px; height: 14px; background: currentColor; opacity: 0.85; }
+.emvb-shape-swatch[data-shape="circle"] { border-radius: 50%; }
+.emvb-shape-swatch[data-shape="rounded"] { border-radius: 4px; }
 .emvb-length-stack { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .emvb-gap-slider { width: 100%; margin: 0; accent-color: var(--color-kumo-brand); }
 .emvb-shadow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

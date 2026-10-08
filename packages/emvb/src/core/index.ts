@@ -67,6 +67,7 @@ export {
   ELEMENT_DESCRIPTORS,
   defaultElement,
   iconHasAdjustableStroke,
+  iconHasOwnColors,
   type ElementType,
 } from "./elements/index.ts";
 export {
