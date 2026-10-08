@@ -23541,6 +23541,24 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-251/no-not-checked-note",
+      "requirement": "W-251: deleting a class or variable from Site styles says that other pages and theme parts aren't checked (they lose that styling), instead of implying it is unused.",
+      "description": "The delete dialog says only 'Not used on this page', as if nothing else used it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "        {NOT_CHECKED}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

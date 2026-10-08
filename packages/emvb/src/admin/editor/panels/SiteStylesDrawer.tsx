@@ -299,6 +299,13 @@ export function SiteStylesDrawer({
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
+/**
+ * W-251: only this page and the design are checked; other pages and theme parts that use the
+ * class or variable lose that styling, so the dialog says so instead of implying it is unused.
+ */
+const NOT_CHECKED =
+  "Other pages and theme parts aren't checked; any that use it lose that styling.";
+
 /** "2 places on this page and 1 class", or null when nothing uses it. */
 function usedIn(pageUses: number, classUses: number): string | null {
   const parts = [
@@ -343,7 +350,8 @@ function DeleteConfirm({
           ? `In use in ${where}. Deleting drops those bindings.`
           : variable
             ? "Not used on this page or by any class."
-            : "Not used on this page."}
+            : "Not used on this page."}{" "}
+        {NOT_CHECKED}
       </p>
       <div className="emvb-dialog-actions">
         <Button type="button" variant="secondary" className={BUTTON} onClick={onCancel}>

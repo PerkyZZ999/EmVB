@@ -349,6 +349,10 @@ describe("deleting a variable from Site styles", () => {
     expect(dialog?.textContent ?? "").toContain(
       "In use in 1 place on this page and 2 classes. Deleting drops those bindings.",
     );
+    // W-251: other pages and theme parts aren't checked, and the dialog says so.
+    expect(dialog?.textContent ?? "").toContain(
+      "Other pages and theme parts aren't checked; any that use it lose that styling.",
+    );
     await act(async () =>
       [...(dialog?.querySelectorAll<HTMLButtonElement>("button") ?? [])]
         .find((b) => b.textContent === "Delete")
@@ -361,5 +365,47 @@ describe("deleting a variable from Site styles", () => {
       { id: "tint", name: "Tint", style: {} },
     ]);
     expect(layouts.at(-1)?.root.children[0]?.style).toBeUndefined();
+  });
+});
+
+describe("deleting what this page doesn't use (W-251)", () => {
+  test("an unused variable's dialog says other pages and theme parts aren't checked", async () => {
+    const design: DesignSystem = {
+      ...emptyDesign(),
+      variables: {
+        ...emptyDesign().variables,
+        colors: [{ id: "brand", name: "Brand", value: "#0055ff" }],
+      },
+    };
+    const page: Layout = {
+      schemaVersion: 12,
+      root: { id: "root0001", type: "container", props: {}, children: [] },
+    };
+    await mount(
+      <SiteStylesDrawer
+        design={design}
+        layout={page}
+        onDesignChange={async () => undefined}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    await act(async () =>
+      [...document.querySelectorAll<HTMLButtonElement>("button")]
+        .find((b) => b.getAttribute("aria-label") === "Actions for Brand")
+        ?.click(),
+    );
+    await settle();
+    await act(async () =>
+      [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')]
+        .find((el) => el.textContent === "Delete")
+        ?.click(),
+    );
+    await settle();
+    const text = document.querySelector("[data-emvb-site-confirm]")?.textContent ?? "";
+    expect(text).toContain("Not used on this page or by any class.");
+    expect(text).toContain(
+      "Other pages and theme parts aren't checked; any that use it lose that styling.",
+    );
   });
 });
