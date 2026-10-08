@@ -65,6 +65,8 @@ export function ShadowControl({
               label="Position"
               className={FIELD}
               value={value.inset === true ? "inset" : "outset"}
+              // W-306: Kumo's Select shows the raw value ("inset") without a renderValue.
+              renderValue={(v: unknown) => (v === "inset" ? "Inset" : "Outset")}
               onValueChange={(next) => {
                 const checked = next === "inset";
                 patch({ inset: checked === true ? true : undefined });

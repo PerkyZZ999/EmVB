@@ -25674,6 +25674,24 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*W-305"
+    },
+    {
+      "id": "W-306/shadow-position-raw-value",
+      "requirement": "W-306",
+      "description": "The box shadow Position select shows the stored keyword (inset) instead of its label.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "              renderValue={(v: unknown) => (v === \"inset\" ? \"Inset\" : \"Outset\")}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-306"
     }
   ]
 }

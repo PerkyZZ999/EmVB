@@ -413,6 +413,18 @@ describe("Effects section (W-088)", () => {
     expect(patches).toEqual([{ boxShadow: { ...lifted, inset: true } }, { boxShadow: lifted }]);
   });
 
+  test("W-306: Position shows Outset or Inset, not the stored keyword", async () => {
+    const trigger = () =>
+      document.querySelector('[role="combobox"][aria-label="Position"]')?.textContent ?? "";
+    await row("boxShadow", { boxShadow: lifted });
+    expect(trigger()).toContain("Outset");
+    expect(trigger()).not.toContain("outset");
+    await cleanup();
+    await row("boxShadow", { boxShadow: { ...lifted, inset: true } });
+    expect(trigger()).toContain("Inset");
+    expect(trigger()).not.toContain("inset");
+  });
+
   test("the shadow colour binds a colour variable, and Default drops it", async () => {
     const design = {
       ...emptyDesign(),
