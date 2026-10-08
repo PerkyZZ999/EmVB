@@ -22,7 +22,7 @@ import { EmptyCanvas } from "./canvas/EmptyCanvas.tsx";
 import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog, RevertDialog } from "./dialogs.tsx";
 import { discardDraft } from "../content-api.ts";
 import { EditorOverlay } from "./EditorOverlay.tsx";
-import { exitTarget, PAGES_URL } from "./exit.ts";
+import { useEditorHost } from "./host.ts";
 import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./panels/ElementPanel.tsx";
 import { LeftPanel } from "./panels/LeftPanel.tsx";
@@ -88,8 +88,6 @@ export function Editor({
 /** How long a refused paste stays outlined on the canvas (W-093). */
 const REFUSAL_MS = 4000;
 
-const exit = () => window.location.assign(exitTarget(document.referrer, window.location.origin));
-
 const initialState = (entry: EditorEntry, design: LoadedDesign): EditorState => ({
   id: entry.id,
   page: {
@@ -134,6 +132,7 @@ function EditorApp({
   );
   const state = history.present;
   const dirty = isDirty(state);
+  const { exit } = useEditorHost();
   const saver = useSave(fetcher, state, dispatch, collection);
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const [siteStylesOpen, setSiteStylesOpen] = React.useState(false);
@@ -213,7 +212,7 @@ function EditorApp({
 
   React.useEffect(() => {
     if (leaving) exit();
-  }, [leaving]);
+  }, [leaving, exit]);
 
   const sectionTemplates = useSectionTemplates(state.page.layout, fetcher);
   const rendered = React.useMemo(
@@ -470,6 +469,7 @@ function EditorApp({
 const noop = () => undefined;
 
 function LoadState({ data }: { data: EditorData }) {
+  const { exit } = useEditorHost();
   return (
     <>
       <TopBar
@@ -489,6 +489,7 @@ function LoadState({ data }: { data: EditorData }) {
 }
 
 function LoadBody({ data }: { data: EditorData }) {
+  const { back } = useEditorHost();
   if (data.state === "not-found" || data.state === "forbidden") {
     return (
       <div className="emvb-state" data-emvb-editor-state={data.state}>
@@ -496,12 +497,12 @@ function LoadBody({ data }: { data: EditorData }) {
           title={data.state === "not-found" ? "Page not found" : "You can't open this page"}
           description={
             data.state === "not-found"
-              ? "It may have been deleted. Choose another page from Visual pages."
+              ? `It may have been deleted. Choose another page from ${back.label}.`
               : "Your role doesn't allow editing this page."
           }
           contents={
-            <Button variant="secondary" onClick={() => window.location.assign(PAGES_URL)}>
-              Go to Visual pages
+            <Button variant="secondary" onClick={back.go}>
+              Go to {back.label}
             </Button>
           }
         />
