@@ -24,6 +24,7 @@ type RawItem = {
     description?: string | null;
     canonical?: string | null;
     noIndex?: boolean | null;
+    image?: string | null;
   } | null;
 };
 
@@ -72,6 +73,11 @@ export type PageDraft = {
   seoCanonical?: string;
   /** W-284: ask search engines not to index the page. Absent = leave the saved value alone. */
   seoNoIndex?: boolean;
+  /**
+   * W-287: social (OG) image as EmDash reads it: an absolute URL or a site path (the media
+   * library's `/_emdash/api/media/file/…`); "" for none. Absent = leave the saved value alone.
+   */
+  seoImage?: string;
   layout: Layout | null;
   /** Theme parts only (emvb_theme_parts). */
   partType?: ThemePartType;
@@ -107,6 +113,7 @@ function seoBody(draft: PageDraft) {
       ? { canonical: canonical.trim() || null }
       : {}),
     ...(draft.seoNoIndex !== undefined ? { noIndex: draft.seoNoIndex } : {}),
+    ...(draft.seoImage !== undefined ? { image: draft.seoImage.trim() || null } : {}),
   };
 }
 

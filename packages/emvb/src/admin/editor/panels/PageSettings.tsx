@@ -1,4 +1,4 @@
-import { Collapsible, Input, Select, Switch } from "@cloudflare/kumo";
+import { Button, Collapsible, Input, Select, Switch } from "@cloudflare/kumo";
 import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
@@ -6,11 +6,14 @@ import {
   FLOAT_EDGES,
   THEME_PART_TYPE_LABELS,
   type FloatEdge,
+  type LayoutNode,
 } from "../../../core/index.ts";
+import type { Fetcher } from "../../api.ts";
 import { canonicalProblem, type PageDraft } from "../../content-api.ts";
-import { FIELD } from "../../ui.ts";
+import { BUTTON, FIELD } from "../../ui.ts";
 import type { PagePatch } from "../store.ts";
 import { ConditionsEditor } from "./ConditionsEditor.tsx";
+import { MediaPicker } from "./settings/MediaPicker.tsx";
 import { TriggersEditor } from "./TriggersEditor.tsx";
 
 const LAYOUTS = [
@@ -24,11 +27,14 @@ export function PageSettings({
   slugError,
   onChange,
   kind = "page",
+  fetcher,
 }: {
   page: PageDraft;
   slugError: string | null;
   onChange: (patch: PagePatch) => void;
   kind?: "page" | "theme-part";
+  /** For the Social image picker (W-287); without it the field isn't offered. */
+  fetcher?: Fetcher;
 }) {
   // Hooks run before the theme-part branch, so switching `kind` keeps the hook order (W-092).
   const [seoOpen, setSeoOpen] = React.useState(false);
@@ -74,6 +80,7 @@ export function PageSettings({
     page.seoDescription,
     page.seoCanonical?.trim(),
     page.seoNoIndex,
+    page.seoImage?.trim(),
   ].filter(Boolean).length;
   const canonicalError = canonicalProblem(page.seoCanonical ?? "");
   return (
@@ -150,6 +157,39 @@ export function PageSettings({
           <p className="emvb-helper">
             Only if this page copies another one: the address search engines should list instead.
           </p>
+          {fetcher && (
+            <div data-emvb-seo-image="">
+              {/* W-287: the Image element's picker on a stand-in node; only `src` is kept. */}
+              <MediaPicker
+                label="Social image"
+                node={
+                  {
+                    id: "seo-image",
+                    type: "image",
+                    props: { src: page.seoImage ?? "" },
+                  } as LayoutNode
+                }
+                fetcher={fetcher}
+                onChange={(next) => {
+                  const src = (next.props as { src?: unknown }).src;
+                  onChange({ seoImage: typeof src === "string" ? src : "" });
+                }}
+              />
+              <p className="emvb-helper">
+                Shown when the page is shared on social sites. 1200 × 630 px works best.
+              </p>
+              {page.seoImage?.trim() && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className={BUTTON}
+                  onClick={() => onChange({ seoImage: "" })}
+                >
+                  Remove social image
+                </Button>
+              )}
+            </div>
+          )}
           <Switch
             label="Hide from search engines"
             checked={page.seoNoIndex === true}

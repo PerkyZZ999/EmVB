@@ -31,6 +31,7 @@ export type EditorEntry = {
   seoDescription: string;
   seoCanonical?: string;
   seoNoIndex?: boolean;
+  seoImage?: string;
   status: string;
   rev: string | null;
   layout: Layout | null;
@@ -67,6 +68,7 @@ type ContentResponse = {
       description?: string | null;
       canonical?: string | null;
       noIndex?: boolean | null;
+      image?: string | null;
     } | null;
   };
   _rev?: string;
@@ -94,6 +96,7 @@ export async function loadEntry(
     seoDescription: text(body?.item?.seo?.description),
     seoCanonical: text(body?.item?.seo?.canonical),
     seoNoIndex: body?.item?.seo?.noIndex === true,
+    seoImage: text(body?.item?.seo?.image),
     status: entryStatus(body?.item),
     rev: body?.["_rev"] ?? null,
     layout: readLayout(data["layout"]),

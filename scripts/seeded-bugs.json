@@ -25061,6 +25061,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
       "expect": "\\(fail\\).*W-284"
+    },
+    {
+      "id": "W-287/image-not-sent",
+      "requirement": "W-287",
+      "description": "The social image isn't saved.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "    ...(draft.seoImage !== undefined ? { image: draft.seoImage.trim() || null } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/seo-fields.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-287/image-not-loaded",
+      "requirement": "W-287",
+      "description": "The editor doesn't read the stored social image.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "    seoImage: text(body?.item?.seo?.image),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/load-entry.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-287/no-remove",
+      "requirement": "W-287",
+      "description": "A social image can't be removed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "onClick={() => onChange({ seoImage: \"\" })}",
+          "replace": "onClick={() => undefined}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*W-287"
+    },
+    {
+      "id": "W-287/picker-label",
+      "requirement": "W-287",
+      "description": "The social image picker is labelled plain \"Image\".",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "                label=\"Social image\"\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*W-287"
     }
   ]
 }

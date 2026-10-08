@@ -20,13 +20,15 @@ type Props = {
   node: LayoutNode;
   fetcher: Fetcher;
   onChange: (node: LayoutNode) => void;
+  /** Field label; Page settings uses "Social image" (W-287). */
+  label?: string;
 };
 
 /**
  * Image source control (W-024 / R-007): pick from EmDash media library, upload a file,
  * or paste a URL. Upload uses the same POST /_emdash/api/media path on both demos.
  */
-export function MediaPicker({ node, fetcher, onChange }: Props) {
+export function MediaPicker({ node, fetcher, onChange, label = "Image" }: Props) {
   const props = propsOf(node);
   const src = typeof props.src === "string" ? props.src : "";
   const [open, setOpen] = React.useState(false);
@@ -108,7 +110,7 @@ export function MediaPicker({ node, fetcher, onChange }: Props) {
 
   return (
     <div className="emvb-field-group" data-emvb-field="src" data-emvb-media-picker="">
-      <label className="emvb-field-label">Image</label>
+      <label className="emvb-field-label">{label}</label>
       {src ? (
         <div className="emvb-media-preview">
           <img src={src} alt="" className="emvb-media-thumb" />

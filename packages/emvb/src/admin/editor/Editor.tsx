@@ -98,6 +98,7 @@ const initialState = (entry: EditorEntry, design: LoadedDesign): EditorState => 
     seoDescription: entry.seoDescription,
     seoCanonical: entry.seoCanonical,
     seoNoIndex: entry.seoNoIndex,
+    seoImage: entry.seoImage,
     layout: entry.layout,
     partType: entry.partType,
     conditions: entry.conditions,

@@ -101,6 +101,7 @@ export function SettingsPanel({
           page={state.page}
           slugError={slugError}
           kind={kind}
+          fetcher={fetcher}
           onChange={(patch) => {
             if (patch.slug !== undefined) onSlugEdit();
             dispatch({ type: "set-page", patch });

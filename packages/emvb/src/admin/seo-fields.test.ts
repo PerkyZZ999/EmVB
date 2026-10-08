@@ -45,6 +45,19 @@ describe("W-284: canonical URL and noindex on save", () => {
     });
   });
 
+  test("W-287: the social image is sent as EmDash reads it; empty clears it, absent leaves it", async () => {
+    expect(await sentSeo({ ...PAGE, seoImage: " /_emdash/api/media/file/og.png " })).toEqual({
+      title: "T",
+      description: null,
+      image: "/_emdash/api/media/file/og.png",
+    });
+    expect(await sentSeo({ ...PAGE, seoImage: "" })).toEqual({
+      title: "T",
+      description: null,
+      image: null,
+    });
+  });
+
   test("a canonical EmDash would refuse is left out, so the rest of the save still lands", async () => {
     expect(await sentSeo({ ...PAGE, seoCanonical: "/about" })).toEqual({
       title: "T",

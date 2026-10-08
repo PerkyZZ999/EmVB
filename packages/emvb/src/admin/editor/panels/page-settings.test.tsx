@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
+import type { Fetcher } from "../../api.ts";
 import type { PageDraft } from "../../content-api.ts";
 import { cleanup, mount, rerender, settle } from "../../../../test/dom/mount.ts";
 import type { PagePatch } from "../store.ts";
@@ -19,13 +20,14 @@ const PAGE: PageDraft = {
   layout: null,
 };
 
-async function settings(page: PageDraft, kind: "page" | "theme-part" = "page") {
+async function settings(page: PageDraft, kind: "page" | "theme-part" = "page", fetcher?: Fetcher) {
   const sent: PagePatch[] = [];
   const host = await mount(
     <PageSettings
       page={page}
       slugError={null}
       kind={kind}
+      fetcher={fetcher}
       onChange={(patch) => sent.push(patch)}
     />,
   );
@@ -95,6 +97,43 @@ describe("page settings (W-091)", () => {
       { seoCanonical: "https://example.com/original" },
       { seoNoIndex: true },
     ]);
+  });
+
+  test("W-287: Social image uses the media picker, keeps only the URL, and can be removed", async () => {
+    const fetcher: Fetcher = async () =>
+      new Response(JSON.stringify({ data: { items: [] } }), { status: 200 });
+    const none = await settings(PAGE);
+    await none.openSeo();
+    expect(none.host.querySelector("[data-emvb-seo-image]")).toBeNull();
+    const view = await settings(PAGE, "page", fetcher);
+    await view.openSeo();
+    const box = view.host.querySelector("[data-emvb-seo-image]");
+    expect(box?.querySelector(".emvb-field-label")?.textContent).toBe("Social image");
+    const url = box?.querySelector<HTMLInputElement>("[data-emvb-media-url]");
+    if (!url) throw new Error("no URL field");
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+        url,
+        "https://cdn.example.com/og.png",
+      );
+      url.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      url.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    });
+    expect(view.sent).toEqual([{ seoImage: "https://cdn.example.com/og.png" }]);
+    const set = await settings(
+      { ...PAGE, seoImage: "/_emdash/api/media/file/og.png" },
+      "page",
+      fetcher,
+    );
+    expect(set.host.querySelector('[data-emvb-section="seo"]')?.textContent).toBe("SEO · 1");
+    await set.openSeo();
+    const remove = [...set.host.querySelectorAll("button")].find(
+      (b) => b.textContent === "Remove social image",
+    );
+    await act(async () => remove?.click());
+    expect(set.sent).toEqual([{ seoImage: "" }]);
   });
 
   test("W-284: a canonical that isn't a full http(s) address says it won't be saved", async () => {
