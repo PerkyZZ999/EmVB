@@ -8,9 +8,11 @@ import "../styles/global.css";
 interface Props {
   title: string;
   description: string;
+  /** A page search engines shouldn't list (the 404 page): robots noindex, no canonical. */
+  noindex?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, noindex = false } = Astro.props;
 const site = Astro.site ?? new URL("https://emvb.dev");
 const canonical = new URL(Astro.url.pathname, site).href;
 const image = new URL("/screenshots/editor-1600.webp", site).href;
@@ -43,7 +45,7 @@ const jsonLd = {
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f5f2ea" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#111214" media="(prefers-color-scheme: dark)" />
-    <link rel="canonical" href={canonical} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <link rel="sitemap" href="/sitemap.xml" />
     <meta property="og:site_name" content="EmVB" />
     <meta property="og:title" content={title} />

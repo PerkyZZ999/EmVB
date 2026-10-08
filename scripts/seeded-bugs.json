@@ -25224,6 +25224,34 @@
       ],
       "command": ["bun", "test", "./test/playground/host.test.ts"],
       "expect": "\\(fail\\).*W-291"
+    },
+    {
+      "id": "W-288/no-404",
+      "requirement": "W-288",
+      "description": "The site has no 404 page, so Cloudflare Pages answers unknown paths with the home page and a 200.",
+      "edits": [
+        {
+          "file": "site/src/pages/404.astro",
+          "search": "<h1>Page not found</h1>",
+          "replace": "<h1>Page missing</h1>"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/not-found.test.ts"],
+      "expect": "\\(fail\\).*W-288"
+    },
+    {
+      "id": "W-288/indexed",
+      "requirement": "W-288",
+      "description": "The 404 page is listed by search engines and carries a canonical link.",
+      "edits": [
+        {
+          "file": "site/src/layouts/Base.astro",
+          "search": "noindex ? <meta name=\"robots\" content=\"noindex\" /> : <link rel=\"canonical\"",
+          "replace": "false ? <meta name=\"robots\" content=\"noindex\" /> : <link rel=\"canonical\""
+        }
+      ],
+      "command": ["bun", "test", "./test/site/not-found.test.ts"],
+      "expect": "\\(fail\\).*W-288"
     }
   ]
 }

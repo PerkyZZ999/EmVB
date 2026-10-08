@@ -1,0 +1,43 @@
+---
+import Logo from "../components/Logo.astro";
+import Base from "../layouts/Base.astro";
+
+// Cloudflare Pages serves this file, with a 404 status, for any path the site doesn't have.
+// Without it, Pages treats the site as a single-page app and answers every unknown path with the
+// home page and a 200 (W-288).
+---
+
+<Base
+  title="Page not found · EmVB"
+  description="This page doesn't exist on emvb.dev."
+  noindex
+>
+  <main id="content" class="wrap missing" data-site-404="">
+    <a class="brand" href="/" aria-label="EmVB home"><Logo size={32} /></a>
+    <h1>Page not found</h1>
+    <p>There's nothing at this address on emvb.dev. The link may be old or mistyped.</p>
+    <p class="actions">
+      <a class="button" href="/">Go to the home page</a>
+      <a class="button button--ghost" href="/playground/">Try EmVB in your browser</a>
+    </p>
+  </main>
+</Base>
+
+<style>
+  .missing {
+    min-height: 70vh;
+    display: grid;
+    align-content: center;
+    gap: var(--space-4);
+    padding-block: var(--space-9);
+  }
+  .brand {
+    color: var(--ink);
+    width: fit-content;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+</style>
