@@ -23829,6 +23829,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/shortcut-focus.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-259/escape-leaks-to-editor",
+      "requirement": "W-259",
+      "description": "Escape in a Layers row menu also reaches the editor and clears the selection.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "    if (event.key !== \"Escape\" || !menuOpen) return;\n    event.preventDefault();\n    event.stopPropagation();\n",
+          "replace": "    if (event.key !== \"Escape\" || !menuOpen) return;\n    event.preventDefault();\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-259/escape-keeps-menu-open",
+      "requirement": "W-259",
+      "description": "Escape leaves a Layers row menu open.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "    event.stopPropagation();\n    onMenu(false);\n    const button",
+          "replace": "    event.stopPropagation();\n    const button"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-259/escape-drops-focus",
+      "requirement": "W-259",
+      "description": "Closing a Layers row menu with Escape drops focus instead of returning it to the ··· button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "    button?.focus();\n",
+          "replace": "    void button;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

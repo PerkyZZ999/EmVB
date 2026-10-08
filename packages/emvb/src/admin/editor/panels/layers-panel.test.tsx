@@ -147,6 +147,30 @@ describe("Layers panel (W-018)", () => {
     );
   });
 
+  test("Escape in an open row menu closes it, refocuses ··· and doesn't reach the editor (W-259)", async () => {
+    await mount("head0001");
+    const menuButton = document.querySelector(
+      '[data-emvb-layer="head0001"] .emvb-layer-menu-btn',
+    ) as HTMLElement;
+    await clickEl(menuButton);
+    const item = document.querySelector('[role="menuitem"]') as HTMLElement;
+    await act(async () => item.focus());
+    let reachedWindow = false;
+    const onWindow = () => {
+      reachedWindow = true;
+    };
+    window.addEventListener("keydown", onWindow);
+    await act(async () => {
+      item.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
+      );
+    });
+    window.removeEventListener("keydown", onWindow);
+    expect(document.querySelector('[role="menu"]')).toBeNull();
+    expect(document.activeElement).toBe(menuButton);
+    expect(reachedWindow).toBe(false);
+  });
+
   test("← collapses an open container first, then → expands it before entering", async () => {
     await mount("box00001");
     await press("ArrowLeft");

@@ -309,6 +309,18 @@ function LayerRow({
   const startRename = () => {
     if (actions.onRename) setRenaming(true);
   };
+  // W-259: Escape in an open row menu closes it and returns to its ··· button; it doesn't also
+  // reach the editor, which would clear the selection.
+  const closeMenuOnEscape = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key !== "Escape" || !menuOpen) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onMenu(false);
+    const button = event.currentTarget
+      .closest(".emvb-layer-menu")
+      ?.querySelector<HTMLElement>(".emvb-layer-menu-btn");
+    button?.focus();
+  };
   // W-256: Enter or Escape hands focus back to the row; leaving by click keeps the new focus.
   const selectButton = React.useRef<HTMLButtonElement | null>(null);
   const refocus = React.useRef(false);
@@ -406,11 +418,12 @@ function LayerRow({
                 event.stopPropagation();
                 onMenu(!menuOpen);
               }}
+              onKeyDown={closeMenuOnEscape}
             >
               ···
             </button>
             {menuOpen && (
-              <div className="emvb-layer-menu-list" role="menu">
+              <div className="emvb-layer-menu-list" role="menu" onKeyDown={closeMenuOnEscape}>
                 {menuItems(node, isRoot, actions, startRename).map(
                   ({ label, run, className, disabled }) => (
                     <button
