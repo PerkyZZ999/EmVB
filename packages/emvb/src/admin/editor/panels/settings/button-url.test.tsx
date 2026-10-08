@@ -51,3 +51,13 @@ describe("Button without a URL (W-273)", () => {
     expect(document.querySelector("[data-emvb-button-url]")?.textContent).toContain("No URL");
   });
 });
+
+describe("Link without a URL (W-276)", () => {
+  const link = (href: string) =>
+    ({ id: "link0001", type: "link", props: { text: "Docs", href } }) as LayoutNode;
+  test("an empty or refused URL gets a note; a real one doesn't", () => {
+    expect(buttonUrlNote(link(""))).toContain("No URL");
+    expect(buttonUrlNote(link("javascript:alert(1)"))).toContain("isn't allowed");
+    expect(buttonUrlNote(link("/docs"))).toBeUndefined();
+  });
+});

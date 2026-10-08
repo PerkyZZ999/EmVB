@@ -24457,8 +24457,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/button-url.ts",
-          "search": "  if (href && sanitizeHref(href)) return undefined;",
-          "replace": "  if (href) return undefined;"
+          "search": "  const href = props.href?.trim();\n  if (href && sanitizeHref(href)) return undefined;",
+          "replace": "  const href = props.href?.trim();\n  if (href) return undefined;"
         }
       ],
       "command": [
@@ -24554,6 +24554,38 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/empty-items.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-276/hash-new-tab",
+      "requirement": "W-276",
+      "description": "A link without a URL renders # with target=_blank.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "...(safe ? newTabAttrs(node.props.newTab) : {})",
+          "replace": "...newTabAttrs(node.props.newTab)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/link-new-tab.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-276/link-note-silent",
+      "requirement": "W-276",
+      "description": "A Link without a URL gets no panel note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/button-url.ts",
+          "search": "  if (node.type === \"link\") return linkUrlNote(node);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/button-url.test.tsx"
+      ],
       "expect": "\\(fail\\)"
     }
   ]

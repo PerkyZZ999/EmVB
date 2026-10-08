@@ -241,10 +241,11 @@ const link: ElementDefinition<LinkNode> = {
     ],
   },
   build: (node, attrs) => {
-    const href = sanitizeHref(node.props.href) ?? "#";
+    const safe = sanitizeHref(node.props.href);
+    // W-276: without a usable URL the link falls back to "#", which mustn't open a new tab.
     return {
       tag: "a",
-      attrs: { ...attrs, href, ...newTabAttrs(node.props.newTab) },
+      attrs: { ...attrs, href: safe ?? "#", ...(safe ? newTabAttrs(node.props.newTab) : {}) },
       children: [node.props.text],
     };
   },
