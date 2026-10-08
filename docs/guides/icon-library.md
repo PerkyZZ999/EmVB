@@ -24,6 +24,65 @@ of the icon libraries other page builders have, with EmVB's own look. More about
 If the element's **Title** is still the old icon's name (or empty, or "Icon"), it changes to the
 new icon's name. A title you wrote yourself is kept.
 
+## Uploading your own SVG
+
+**My uploads**, at the bottom of the sidebar, lists the SVGs your site's editors have uploaded,
+newest first.
+
+1. Open the library and click **My uploads**, then **Upload SVG**, and choose an `.svg` file.
+2. EmVB cleans the file and checks it. If it passes, it goes to the top of the list, selected,
+   and **Insert** adds it to the page. If it fails, a message in red says why, and nothing is
+   stored.
+
+What EmVB does with the file:
+
+- **Cleans editor leftovers.** Exports from Illustrator, Inkscape, Figma and similar tools work:
+  the XML prolog, comments, `<metadata>`, `<title>`/`<desc>` and editor-only attributes are
+  removed, and inline `style="fill:…"` paint becomes plain attributes.
+- **Refuses anything unsafe.** A file with scripts, event handlers (`onload`…), embedded HTML,
+  a `<style>` block or links is refused as a whole, with the reason. Images that point outside
+  the file are left out, and the message says how many.
+- **Keeps the shape.** The viewBox is kept (or made from the file's px width and height), so the
+  icon scales to the Size you set. A file with neither can't be scaled and is refused.
+- **Limits the size.** Files up to 256 KB are accepted; after cleaning, the icon can be up to
+  **32 KB**. A bigger one is refused with its size: simplify it, for example with
+  [SVGO](https://svgo.dev), and try again.
+
+An uploaded SVG keeps its own colours. To paint it in the icon colour instead, turn on **Force
+single color** (see below). Uploads are stored by EmVB, not in the EmDash media library: EmDash
+doesn't accept SVG uploads, because an SVG opened from its URL could run a script. The page stores
+the cleaned SVG itself (with the id `upload:<id>`), so it keeps working even if the upload list
+changes. Uploads can't be renamed or deleted yet.
+
+## Styling an icon
+
+Select an Icon element and open the **Style** tab. The **Icon** section comes first:
+
+| Control | Does |
+| --- | --- |
+| **Color** | The icon colour; pick a global colour variable or any colour. Single-colour icons follow it. |
+| **Force single color** | Only for SVGs with their own colours (usually uploads). Paints every part in the icon colour. Details drawn over filled shapes can disappear. |
+| **Shape** | None, Circle, Rounded or Square: a background behind the icon. Its colour, padding and border are the **Background**, **Spacing** and **Border** sections below. |
+| **Rotate (°)** | −360 to 360, with a slider. |
+| **Flip** | Horizontal and/or vertical. |
+| **Scale (×)** | Grows or shrinks the icon and its shape, 0.1 to 4. Size (in the Content tab) stays as it is. |
+| **Stroke width** | Only for outline icons (Lucide, Tabler Outline, and so on): line thickness, 0.25 to 6. |
+| **Drop shadow** | **Add drop shadow** gives a soft shadow that follows the icon's outline; set its colour, offsets and blur. |
+| **Animation** | None, **Spin** or **Pulse**, with a duration. Off for visitors whose device asks for reduced motion. |
+| **Transition** | How long hover and focus changes take to animate. |
+
+**Hover, focus and pressed.** Pick **Hover** (or Focus, Active) above the sections to style that
+state: colour, rotate, flip, scale, stroke width, drop shadow, and the background in the
+Background section. For example, Color white, Background your brand colour and Scale 1.15, with a
+300 ms transition on Normal. Animation, Transition and Shape are set on Normal only.
+
+**Tablet and mobile.** Switch the device at the top of the canvas to set different values for
+tablet and mobile, as for any other style: for example a smaller Scale on mobile. Icon size is
+the same on every device for now.
+
+All of this is CSS in the published page; nothing runs in the visitor's browser. It also works in
+classes, so you can style many icons the same way.
+
 ## Keyboard
 
 | Key | Where | Does |
@@ -46,7 +105,7 @@ back to **Choose…**.
 The element stores the icon's id (`fa-solid:rocket`, so the library can reopen on it) and the
 icon's SVG. The published page contains that SVG inline: visitors never download an icon font or
 an icon set. The SVG is checked against EmVB's SVG allowlist when pasted or rendered (no scripts,
-event handlers, styles or external links), and is limited to 16 KB.
+event handlers, styles or external links), and is limited to 32 KB.
 
 The icon sets themselves load only in the editor, each as its own file, the first time you open
 it in the library (Lucide about 130 KB compressed; All icons loads all four, about 1.6 MB
