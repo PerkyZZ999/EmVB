@@ -49,3 +49,11 @@ test("a long Layers name ellipsizes on one line instead of wrapping (W-168)", ()
   expect(name).toMatch(/min-width: 0;/);
   expect(rule(".emvb-layer-select > svg")).toMatch(/flex: none;/);
 });
+
+test("unselected device and state options use the default text colour, for 4.5:1 contrast (W-244)", () => {
+  expect(
+    rule(
+      '.emvb-device-tabs [role="tab"][aria-selected="false"], .emvb-state-tabs [role="tab"][aria-selected="false"]',
+    ),
+  ).toMatch(/color: var\(--text-color-kumo-default\);/);
+});

@@ -189,6 +189,17 @@ describe("My uploads (W-239)", () => {
     expect(calls.filter((call) => call.method === "POST")).toHaveLength(1);
   });
 
+  test("the current entry's count uses the default text colour, for 4.5:1 contrast (W-244)", async () => {
+    await open(undefined);
+    const css = await until(
+      () => document.querySelector(".emvb-icon-library-popup style")?.textContent,
+      "the dialog CSS",
+    );
+    expect(css).toContain(
+      '.emvb-icon-library-cat[aria-current="true"] .emvb-icon-library-count { color: var(--text-color-kumo-default); }',
+    );
+  });
+
   test("a hostile file is refused in the browser with the reason, without a request", async () => {
     const { fetcher, calls } = stubFetcher({});
     await open(fetcher);

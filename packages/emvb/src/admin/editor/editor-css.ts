@@ -160,6 +160,9 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-device-bar { display: flex; flex: none; align-items: center; justify-content: center; gap: 12px; height: 36px; border-bottom: 1px solid var(--color-kumo-line); background: var(--color-kumo-surface); }
 /* W-127: the segmented control hugs its three options; a fixed width left a gap on the right. */
 .emvb-device-tabs { width: max-content; }
+/* W-244: an unselected segmented option (Desktop | Tablet | Mobile, Normal | Hover | Focus | Active) takes the
+   default text colour: Kumo's subtle grey on the segmented track is 4.0:1. The raised white pill marks the selected one. */
+.emvb-device-tabs [role="tab"][aria-selected="false"], .emvb-state-tabs [role="tab"][aria-selected="false"] { color: var(--text-color-kumo-default); }
 .emvb-device-label { display: inline-flex; align-items: center; gap: 6px; }
 .emvb-device-hide { display: inline-flex; align-items: center; gap: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
 .emvb-stage { position: relative; display: flex; flex: 1 1 auto; justify-content: safe center; min-height: 0; width: 100%; overflow: hidden; }

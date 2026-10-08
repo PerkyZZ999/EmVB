@@ -772,6 +772,8 @@ const ICON_LIBRARY_CSS = `
   outline: 2px solid var(--color-kumo-brand); outline-offset: -2px;
 }
 .emvb-icon-library-count { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--text-color-kumo-subtle); }
+/* W-244: on the current entry's tinted background the subtle grey is 4.1:1. */
+.emvb-icon-library-cat[aria-current="true"] .emvb-icon-library-count { color: var(--text-color-kumo-default); }
 .emvb-icon-library-licenses { margin: 0; padding: 0 10px; white-space: pre-line; font-size: 11px; line-height: 16px; color: var(--text-color-kumo-subtle); }
 .emvb-icon-library-main { grid-area: main; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
 .emvb-icon-library-search {

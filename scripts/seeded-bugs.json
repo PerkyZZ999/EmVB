@@ -23255,6 +23255,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-244/segmented-subtle-text",
+      "requirement": "W-244: unselected device and state options, and the current icon-library entry's count, use the default text colour (were 4.0:1 and 4.1:1, under 4.5:1).",
+      "description": "Unselected Desktop/Tablet/Mobile and Normal/Hover/Focus/Active options are grey at 4.0:1.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-state-tabs [role=\"tab\"][aria-selected=\"false\"] { color: var(--text-color-kumo-default); }",
+          "replace": ".emvb-state-tabs [role=\"tab\"][aria-selected=\"false\"] { color: var(--text-color-kumo-subtle); }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/editor-css.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-244/library-count-subtle",
+      "requirement": "W-244: unselected device and state options, and the current icon-library entry's count, use the default text colour (were 4.0:1 and 4.1:1, under 4.5:1).",
+      "description": "The current icon-library entry's count stays subtle grey on the tinted background (4.1:1).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": ".emvb-icon-library-cat[aria-current=\"true\"] .emvb-icon-library-count { color: var(--text-color-kumo-default); }",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
