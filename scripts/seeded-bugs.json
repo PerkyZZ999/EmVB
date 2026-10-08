@@ -25506,6 +25506,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
       "expect": "\\(fail\\).*W-297"
+    },
+    {
+      "id": "W-298/publish-404-offline",
+      "requirement": "W-298",
+      "description": "Publishing a page moved to Trash says to check the connection.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "  if (error instanceof ApiError && error.status === 404) {\n    return \"Couldn't publish. This was moved",
+          "replace": "  if (error instanceof ApiError && error.status === 4040) {\n    return \"Couldn't publish. This was moved"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

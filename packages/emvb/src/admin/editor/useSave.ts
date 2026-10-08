@@ -74,6 +74,10 @@ export function publishFailureMessage(error: unknown): string {
   if (error instanceof ApiError && error.status === 401) {
     return "Couldn't publish. You're signed out: sign in again in another tab, then publish.";
   }
+  // W-298: a 404 means the page is gone (moved to Trash while open), not a dropped connection.
+  if (error instanceof ApiError && error.status === 404) {
+    return "Couldn't publish. This was moved to Trash or deleted: restore it from the Trash, then publish.";
+  }
   if (error instanceof ApiError && error.status === 403) {
     return "Couldn't publish. Your role can't publish pages.";
   }

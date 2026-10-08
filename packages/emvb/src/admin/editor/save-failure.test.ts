@@ -114,6 +114,10 @@ describe("save failures (R-006)", () => {
     expect(publishFailureMessage(new ApiError(409, "CONFLICT", "x"))).toBe(
       "Couldn't publish. This page was changed somewhere else.",
     );
+    // W-298: a 404 is the page gone, not a dropped connection.
+    expect(publishFailureMessage(new ApiError(404, "NOT_FOUND", "Content item not found"))).toBe(
+      "Couldn't publish. This was moved to Trash or deleted: restore it from the Trash, then publish.",
+    );
     expect(publishFailureMessage(new ApiError(500, "ERR", "x"))).toBe(
       "Couldn't publish. Check your connection and try again.",
     );
