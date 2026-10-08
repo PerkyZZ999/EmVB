@@ -171,6 +171,7 @@ describe("Icon section (W-237)", () => {
       "iconShadow",
     ]);
     const rotate = document.querySelector<HTMLInputElement>('input[data-emvb-number="iconRotate"]');
+    expect(document.querySelector("[data-emvb-icon-shape]")).toBeNull();
     expect(rotate?.placeholder).toBe("10");
     await commitText(rotate, "45");
     expect(nodes.at(-1)?.states).toEqual({ hover: { iconRotate: 45 } });
@@ -203,6 +204,17 @@ describe("Force single colour and Shape (W-238)", () => {
       iconSvg: '<svg viewBox="0 0 24 24"><path d="M0 0h4" fill="#e11d48"/></svg>',
     },
   };
+
+  test("Animation shows its label, not the stored value", async () => {
+    await panel();
+    const trigger = () =>
+      document.querySelector('[data-emvb-style="iconAnimation"] button')?.textContent ?? "";
+    expect(trigger()).toContain("None");
+    expect(trigger()).not.toContain("none");
+    await cleanup();
+    await panel({ ...star, style: { iconAnimation: { type: "pulse", duration: 900 } } });
+    expect(trigger()).toContain("Pulse");
+  });
 
   test("Force single color shows under Colour for a multi-colour SVG and sets the prop", async () => {
     await panel(upload);

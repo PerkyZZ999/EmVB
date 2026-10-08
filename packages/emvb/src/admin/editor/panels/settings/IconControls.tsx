@@ -220,6 +220,8 @@ const DURATION: NumberSpec = {
 const DEFAULT_DURATION: Record<IconAnimation["type"], number> = { spin: 2000, pulse: 1000 };
 
 /** A looping spin or pulse (Normal only); visitors who prefer reduced motion see it still. */
+const ANIMATION_LABELS: Record<string, string> = { none: "None", spin: "Spin", pulse: "Pulse" };
+
 export function IconAnimationControl({
   value,
   onChange,
@@ -240,6 +242,7 @@ export function IconAnimationControl({
           label="Animation"
           className={FIELD}
           value={type}
+          renderValue={(v: unknown) => ANIMATION_LABELS[String(v)] ?? "None"}
           onValueChange={(next) => {
             const picked = String(next);
             setType(picked);
@@ -285,7 +288,7 @@ export function IconSingleColorRow({
       <Switch label="Force single color" checked={checked} onCheckedChange={onChange} />
       <p className="emvb-helper">
         {checked
-          ? "Every part of this SVG uses the icon color."
+          ? "Every part of this SVG uses the icon color, so details drawn over filled shapes can disappear."
           : "This SVG keeps its own colors. Turn on to paint it in the icon color."}
       </p>
     </div>

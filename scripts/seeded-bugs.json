@@ -23121,6 +23121,42 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-240/animation-shows-raw-value",
+      "requirement": "W-240: Icon Style polish from live verification: Animation select shows its label; Shape is Normal-only; Force single color warns that details over filled shapes can disappear.",
+      "description": "The Animation select shows the stored value (\"none\") instead of its label.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx",
+          "search": "          renderValue={(v: unknown) => ANIMATION_LABELS[String(v)] ?? \"None\"}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-240/shape-in-hover",
+      "requirement": "W-240: Icon Style polish from live verification: Animation select shows its label; Shape is Normal-only; Force single color warns that details over filled shapes can disappear.",
+      "description": "The Shape presets show in the Hover state, where they would write a hover background and radius.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "                      {styleState === \"normal\" && (\n                        <IconShapeRow",
+          "replace": "                      {styleState !== \"none\" && (\n                        <IconShapeRow"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

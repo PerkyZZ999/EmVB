@@ -660,7 +660,9 @@ function KnownElementPanel({
                           }}
                         />
                       )}
-                      <IconShapeRow style={style} inherited={inherited} onPatch={patchStyle} />
+                      {styleState === "normal" && (
+                        <IconShapeRow style={style} inherited={inherited} onPatch={patchStyle} />
+                      )}
                     </React.Fragment>
                   );
                 })}
