@@ -24285,6 +24285,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-memo.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-269/image-stretched",
+      "requirement": "W-269",
+      "description": "Without the fit-content rule a small image is stretched to the container's width.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ":where(img.emvb-image:not([width])){width:fit-content}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/image-size.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-269/rule-overrides-width",
+      "requirement": "W-269",
+      "description": "A rule that also matches images with a width attribute overrides Width (px).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ":where(img.emvb-image:not([width])){width:fit-content}",
+          "replace": ":where(img.emvb-image){width:fit-content}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/image-size.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

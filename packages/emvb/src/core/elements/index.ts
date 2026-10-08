@@ -308,7 +308,10 @@ const list: ElementDefinition<ListNode> = {
 };
 
 const image: ElementDefinition<ImageNode> = {
-  baseCss: ".emvb-image{display:block;max-width:100%;height:auto}",
+  // W-269: natural size, at most the container's width. A container's default stretch made a
+  // 400 px image 1184 px wide (blurry); a Width (px) attribute or a style width still sets it.
+  baseCss:
+    ".emvb-image{display:block;max-width:100%;height:auto}:where(img.emvb-image:not([width])){width:fit-content}",
   defaults: () => ({
     type: "image",
     props: { src: "", alt: "Image", decorative: false },
