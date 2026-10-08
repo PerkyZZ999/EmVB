@@ -146,6 +146,20 @@ export function treeKey(
   }
 }
 
+/** Whether a key or click target sits in a row's ··· button or its menu (W-258). */
+const inRowMenu = (target: EventTarget | null): boolean =>
+  target instanceof Element && target.closest(".emvb-layer-menu") !== null;
+
+/**
+ * After a row menu action the menu is gone and focus with it (W-258): put focus on the selected
+ * row, unless the action moved focus somewhere on purpose (Rename's name field).
+ */
+function focusSelectedRow(tree: Element | null): void {
+  const active = document.activeElement;
+  if (active && active !== document.body && active.isConnected) return;
+  tree?.querySelector<HTMLElement>('.emvb-layer-select[aria-current="true"]')?.focus();
+}
+
 /** Layers list (IA / W-018): tree with collapse, keyboard navigation, auto-expand to selection. */
 
 /** Props whose text tells same-type elements apart in Layers (the layer-row preview, W-143). */
@@ -229,6 +243,8 @@ export function LayersPanel({
         aria-label="Layers"
         onKeyDown={(event) => {
           if (!selectedId) return;
+          // W-258: keys on a row's ··· button or its menu belong to them (Enter opens the menu).
+          if (inRowMenu(event.target)) return;
           const node = items.find((row) => row.node.id === selectedId)?.node;
           const action = treeKey(event, layout, selectedId, collapsed, node);
           if (!action) return;
@@ -405,8 +421,10 @@ function LayerRow({
                       disabled={disabled}
                       onClick={(event) => {
                         event.stopPropagation();
+                        const tree = event.currentTarget.closest('[role="tree"]');
                         onMenu(false);
                         run(node.id);
+                        window.setTimeout(() => focusSelectedRow(tree), 0);
                       }}
                     >
                       {label}

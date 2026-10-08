@@ -23767,8 +23767,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
-          "search": "    if (!traverse || event.defaultPrevented) return;\n",
-          "replace": "    if (!traverse) return;\n"
+          "search": "    if (!traverse || event.defaultPrevented || ownsKey(event.target, event.key)) return;\n",
+          "replace": "    if (!traverse || ownsKey(event.target, event.key)) return;\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/shortcut-focus.test.tsx"],
@@ -23786,6 +23786,48 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-258/tree-takes-menu-enter",
+      "requirement": "W-258",
+      "description": "Enter on a selected row's ··· button walks the tree instead of opening the menu.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "          if (inRowMenu(event.target)) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-258/no-focus-after-menu-action",
+      "requirement": "W-258",
+      "description": "After a Layers row menu action focus falls to the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "                        window.setTimeout(() => focusSelectedRow(tree), 0);\n",
+          "replace": "                        void focusSelectedRow;\n                        void tree;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-258/window-takes-button-enter",
+      "requirement": "W-258",
+      "description": "Enter on a focused toolbar button walks the tree instead of pressing the button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorShortcuts.ts",
+          "search": "    if (!traverse || event.defaultPrevented || ownsKey(event.target, event.key)) return;\n",
+          "replace": "    if (!traverse || event.defaultPrevented) return;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/shortcut-focus.test.tsx"],
       "expect": "\\(fail\\)"
     }
   ]

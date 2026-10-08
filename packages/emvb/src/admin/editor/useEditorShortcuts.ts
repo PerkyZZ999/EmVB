@@ -43,6 +43,18 @@ const onCanvasOrLayers = (target: EventTarget | null) => {
   );
 };
 
+/**
+ * A focused control that owns the key (W-258): Enter on a button other than a Layers row
+ * activates it, and keys in a Layers row menu stay there, instead of walking the tree.
+ */
+const ownsKey = (target: EventTarget | null, key: string): boolean => {
+  const element = target as Element | null;
+  if (!element || typeof element.closest !== "function") return false;
+  if (element.closest(".emvb-layer-menu")) return true;
+  if (key !== "Enter" || element.closest(".emvb-layer-select")) return false;
+  return !!element.closest('button, a[href], summary, [role="button"], [role="menuitem"]');
+};
+
 /** Selected text on the page or the canvas: Ctrl/Cmd+C then copies the text, as usual (W-093). */
 const hasTextSelection = (target: EventTarget | null) => {
   const docs = new Set([document, (target as Node | null)?.ownerDocument ?? document]);
@@ -153,7 +165,7 @@ export function useEditorShortcuts({
     }
     const traverse = TRAVERSE_KEYS.get(event.key);
     // W-257: the Layers tree already moved the selection for this key; moving again skipped a row.
-    if (!traverse || event.defaultPrevented) return;
+    if (!traverse || event.defaultPrevented || ownsKey(event.target, event.key)) return;
     event.preventDefault();
     const target = traverse(layout, selected, event.shiftKey);
     if (target) dispatch({ type: "select", id: target });

@@ -121,6 +121,32 @@ describe("Layers panel (W-018)", () => {
     expect(document.activeElement).toBe(button("head0001"));
   });
 
+  test("Enter on a selected row's ··· button is left to the button (W-258)", async () => {
+    await mount("box00001");
+    const menuButton = document.querySelector(
+      '[data-emvb-layer="box00001"] .emvb-layer-menu-btn',
+    ) as HTMLElement;
+    const enter = new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true });
+    await act(async () => menuButton.dispatchEvent(enter));
+    expect(enter.defaultPrevented).toBe(false);
+    expect(calls).toEqual([]);
+  });
+
+  test("after a row menu action, focus lands on the selected row (W-258)", async () => {
+    await mount("head0001");
+    await clickEl(document.querySelector('[data-emvb-layer="head0001"] .emvb-layer-menu-btn'));
+    const duplicate = [...document.querySelectorAll('[role="menuitem"]')].find(
+      (el) => el.textContent === "Duplicate",
+    ) as HTMLElement;
+    await act(async () => duplicate.focus());
+    await clickEl(duplicate);
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 5)));
+    expect(calls).toEqual(["duplicate:head0001"]);
+    expect(document.activeElement).toBe(
+      document.querySelector('[data-emvb-layer="head0001"] .emvb-layer-select'),
+    );
+  });
+
   test("← collapses an open container first, then → expands it before entering", async () => {
     await mount("box00001");
     await press("ArrowLeft");

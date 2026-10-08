@@ -147,6 +147,21 @@ describe("element shortcuts only act from the canvas, Layers, or nothing focused
     expect(seen).toEqual([]);
   });
 
+  test("Enter on a toolbar button and keys in a Layers row menu don't walk the tree (W-258)", async () => {
+    const seen: Seen = [];
+    await mount(<Harness seen={seen} />);
+    const menu = document.createElement("span");
+    menu.className = "emvb-layer-menu";
+    menu.innerHTML = '<button type="button" data-target="row-menu">···</button>';
+    document.querySelector('[data-emvb-panel="layers"]')?.append(menu);
+    await press(target("toolbar"), "Enter");
+    await press(target("row-menu"), "Enter");
+    await press(target("row-menu"), "ArrowDown");
+    expect(seen).toEqual([]);
+    await press(target("layer"), "Enter", { shiftKey: true });
+    expect(seen).toEqual(["select root0001"]);
+  });
+
   test("Save, undo and redo still work from a panel tab, but not from a text field", async () => {
     const seen: Seen = [];
     await mount(<Harness seen={seen} />);
