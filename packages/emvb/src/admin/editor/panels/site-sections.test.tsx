@@ -193,7 +193,7 @@ describe("VariableSection", () => {
       await pick(`Actions for ${design.variables.colors[0]?.name}`, "Delete");
       await click(byText("New"));
       expect(html()).toMatchSnapshot("create row");
-      await type(inputs("Name").at(-1), "Brand");
+      await type(inputs("Name").at(-1), "Fresh");
       await click(byText("Create"));
       await click(byText("New"));
       await type(inputs("Name").at(-1), "  ");
@@ -203,6 +203,34 @@ describe("VariableSection", () => {
       expect(html()).toMatchSnapshot("after");
     });
   }
+
+  test("W-278: New and Rename refuse a name another variable of the kind has (any case)", async () => {
+    await mountVars("color", "Colors");
+    const nameError = () =>
+      host.querySelector("[data-emvb-var-name-error]")?.textContent?.trim() ?? null;
+    await click(byText("New"));
+    await type(inputs("Name").at(-1), " brand ");
+    await click(byText("Create"));
+    expect(saved).toEqual([]);
+    expect(host.querySelector("[data-emvb-var-create] [role=alert]")?.textContent).toBe(
+      'A variable named "brand" already exists. Pick another name.',
+    );
+    await click(byText("Cancel"));
+    await press(varRow("ink"), "F2");
+    await renameTo("PAPER", "Enter");
+    expect(saved).toEqual([]);
+    expect(nameError()).toBe('A variable named "PAPER" already exists. Pick another name.');
+    await press(varRow("ink"), "F2");
+    await renameTo("INK", "Enter");
+    expect(saved.map((d) => d.variables.colors[1]?.name)).toEqual(["INK"]);
+    expect(nameError()).toBeNull();
+    // A font named like a color is fine: names are unique per kind.
+    await mountVars("font", "Fonts");
+    await click(byText("New"));
+    await type(inputs("Name").at(-1), "Ink");
+    await click(byText("Create"));
+    expect(saved.at(-1)?.variables.fonts?.map((f) => f.name)).toEqual(["Brand", "Ink"]);
+  });
 
   test("rows preview each kind: swatch, font, capped type size and spacing bar", async () => {
     const preview = (id: string) =>

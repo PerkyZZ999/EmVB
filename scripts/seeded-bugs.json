@@ -21923,7 +21923,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/variables.ts",
-          "search": "${source.name.slice(0, 55).trim()} copy",
+          "search": "${source.name.slice(0, 52).trim()} copy",
           "replace": "${source.name} copy"
         }
       ],
@@ -24671,6 +24671,76 @@
           "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
           "search": "    if (next && classNameTaken(design, next, id)) {",
           "replace": "    if (false) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-278/rename-dupe",
+      "requirement": "W-278",
+      "description": "renameVariable accepts another variable's name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  if (!trimmed || variableNameTaken(design, kind, trimmed, id)) return design;",
+          "replace": "  if (!trimmed) return design;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/variable-names.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-278/across-kinds",
+      "requirement": "W-278",
+      "description": "A color name blocks a font of the same name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  return (design.variables[KIND_TO_LIST[kind]] ?? []).some(\n",
+          "replace": "  return Object.values(design.variables).flat().some(\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/variable-names.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-278/copy-name-dupe",
+      "requirement": "W-278",
+      "description": "Duplicate reuses a taken \"X copy\" variable name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "    name = `${stem} ${n}`;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/variable-names.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-278/create-dupe",
+      "requirement": "W-278",
+      "description": "Site styles New creates a second variable with an existing name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "    if (variableNameTaken(design, kind, trimmed)) {\n      setCreateError(variableNameTakenMessage(trimmed));\n      return;\n    }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-278/rename-silent",
+      "requirement": "W-278",
+      "description": "Renaming a variable to a taken name gives no message.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "      setNameError(variableNameTakenMessage(next));\n",
+          "replace": ""
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],

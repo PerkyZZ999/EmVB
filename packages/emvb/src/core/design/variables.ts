@@ -274,7 +274,12 @@ export function duplicateVariable(
   const source = list.find((entry) => entry.id === id);
   // A copy past the cap, or a name past 60 characters, would fail to save (W-219).
   if (!source || variableListFull(design, kind)) return design;
-  const name = `${source.name.slice(0, 55).trim()} copy`;
+  // W-278: "Brand copy", then "Brand copy 2"…, so the copy's name is free too.
+  const stem = `${source.name.slice(0, 52).trim()} copy`;
+  let name = stem;
+  for (let n = 2; n <= MAX_VARIABLES[kind] && variableNameTaken(design, kind, name); n++) {
+    name = `${stem} ${n}`;
+  }
   const base = slugify(name).slice(0, 34) || kind;
   const taken = new Set(list.map((entry) => entry.id));
   let nextId = base;
@@ -290,7 +295,27 @@ export function duplicateVariable(
   };
 }
 
-/** Rename is name-only; variable ids stay stable (slug at create time). */
+/**
+ * W-278: whether another variable of this kind already has the name (case-insensitive). Pickers
+ * list variables by name, so two with one name can't be told apart.
+ */
+export function variableNameTaken(
+  design: DesignSystem,
+  kind: VariableKind,
+  name: string,
+  exceptId?: string,
+): boolean {
+  const wanted = cleanClassName(name).toLowerCase();
+  return (design.variables[KIND_TO_LIST[kind]] ?? []).some(
+    (v) => v.id !== exceptId && v.name.toLowerCase() === wanted,
+  );
+}
+
+/** The message shown when a new or renamed variable would take another's name (W-278). */
+export const variableNameTakenMessage = (name: string) =>
+  `A variable named "${cleanClassName(name)}" already exists. Pick another name.`;
+
+/** Rename is name-only; variable ids stay stable (slug at create time). A taken name is refused (W-278). */
 export function renameVariable(
   design: DesignSystem,
   id: string,
@@ -298,7 +323,7 @@ export function renameVariable(
   name: string,
 ): DesignSystem {
   const trimmed = cleanClassName(name);
-  if (!trimmed) return design;
+  if (!trimmed || variableNameTaken(design, kind, trimmed, id)) return design;
   const key = KIND_TO_LIST[kind];
   const list = design.variables[key] ?? [];
   let changed = false;

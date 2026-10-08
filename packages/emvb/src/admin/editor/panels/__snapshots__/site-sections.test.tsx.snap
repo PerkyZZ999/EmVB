@@ -269,8 +269,8 @@ exports[`VariableSection color: list, filter, rename, value, create: saves 1`] =
             "value": "#ff0000",
           },
           {
-            "id": "brand-2",
-            "name": "Brand",
+            "id": "fresh",
+            "name": "Fresh",
             "value": "#0055ff",
           },
         ],
@@ -741,8 +741,8 @@ exports[`VariableSection font: list, filter, rename, value, create: saves 1`] = 
             "value": "Inter, sans-serif",
           },
           {
-            "id": "brand-2",
-            "name": "Brand",
+            "id": "fresh",
+            "name": "Fresh",
             "value": "Noto Sans, sans-serif",
           },
         ],
@@ -1067,8 +1067,8 @@ exports[`VariableSection fontSize: list, filter, rename, value, create: saves 1`
             },
           },
           {
-            "id": "brand-2",
-            "name": "Brand",
+            "id": "fresh",
+            "name": "Fresh",
             "value": {
               "unit": "px",
               "value": 16,
@@ -1416,8 +1416,8 @@ exports[`VariableSection spacing: list, filter, rename, value, create: saves 1`]
             },
           },
           {
-            "id": "brand-2",
-            "name": "Brand",
+            "id": "fresh",
+            "name": "Fresh",
             "value": {
               "unit": "px",
               "value": 16,

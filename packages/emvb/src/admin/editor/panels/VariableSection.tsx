@@ -20,6 +20,8 @@ import {
   findVariableUsages,
   findVariableUsagesInDesign,
   renameVariable,
+  variableNameTaken,
+  variableNameTakenMessage,
   type DesignSystem,
   type Layout,
   type VariableKind,
@@ -248,6 +250,7 @@ export function VariableSection({
   const [name, setName] = React.useState("");
   const [value, setValue] = React.useState(NEW_VALUE[kind]);
   const [createError, setCreateError] = React.useState<string | null>(null);
+  const [nameError, setNameError] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState<string | null>(null);
   const [renaming, setRenaming] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState<string | null>(null);
@@ -272,6 +275,10 @@ export function VariableSection({
   const create = async () => {
     const trimmed = cleanClassName(name);
     if (!trimmed || variableListFull(design, kind)) return;
+    if (variableNameTaken(design, kind, trimmed)) {
+      setCreateError(variableNameTakenMessage(trimmed));
+      return;
+    }
     const parsed = parseValue(kind, value);
     if (!parsed.ok) {
       setCreateError(parsed.error);
@@ -292,6 +299,11 @@ export function VariableSection({
   const rename = (id: string, next: string | null) => {
     setRenaming(null);
     requestAnimationFrame(() => rows.current.get(id)?.focus());
+    if (next && variableNameTaken(design, kind, next, id)) {
+      setNameError(variableNameTakenMessage(next));
+      return;
+    }
+    setNameError(null);
     if (next) void onSave(renameVariable(design, id, kind, next));
   };
 
@@ -470,6 +482,11 @@ export function VariableSection({
           );
         })}
       </ul>
+      {nameError && (
+        <div data-emvb-var-name-error="">
+          <InlineError>{nameError}</InlineError>
+        </div>
+      )}
       {creating && (
         <CreateRow
           rowProps={{ "data-emvb-var-create": kind }}
@@ -484,7 +501,10 @@ export function VariableSection({
             label="Name"
             className={FIELD}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setCreateError(null);
+            }}
           />
           <Input
             label={isLengthKind(kind) ? "Value (px, rem, em or %)" : "Value"}

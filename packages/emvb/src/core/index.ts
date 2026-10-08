@@ -124,6 +124,8 @@ export {
   clearVariableRefs,
   removeVariable,
   renameVariable,
+  variableNameTaken,
+  variableNameTakenMessage,
   duplicateVariable,
   deleteVariable,
   refMatchesKind,
