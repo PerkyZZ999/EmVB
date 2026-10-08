@@ -74,14 +74,14 @@ describe("summarizeConditions", () => {
     ).toEqual([
       "Entire site",
       "Front page",
-      "404",
-      "Singular: posts",
-      "Singular: ?",
-      "Entry in pages",
-      "Archive: posts",
+      "404 page",
+      "Posts (all)",
+      "? (all)",
+      "One entry in Pages",
+      "Posts archive",
       "Search results",
-      "category:news",
-      "All tag",
+      "Category: news",
+      "All tags",
       "All ?",
       "All singular",
       "All archives",
@@ -107,6 +107,54 @@ describe("summarizeConditions", () => {
           ],
         }),
       ),
-    ).toBe("Front page · Search results · Exclude: 404");
+    ).toBe("Front page · Search results · Exclude: 404 page");
+  });
+});
+
+describe("Theme Builder list labels match the conditions editor (W-294)", () => {
+  const one = (r: object) => summarizeConditions({ rules: [{ op: "include", ...r }] });
+
+  test("built-in collections read as the editor names them, not by slug", () => {
+    expect(one({ group: "singular", name: "collection", args: { collection: "emvb_pages" } })).toBe(
+      "Visual pages (all)",
+    );
+    expect(
+      one({ group: "singular", name: "entry", args: { collection: "emvb_pages", id: "01A" } }),
+    ).toBe("One entry in Visual pages");
+    expect(one({ group: "archive", name: "taxonomy", args: { taxonomy: "category" } })).toBe(
+      "All categories",
+    );
+  });
+
+  test("the editor's options read the same in the list", () => {
+    // value → the label the conditions editor shows for it
+    const options: [string, string][] = [
+      ["general:entire_site", "Entire site"],
+      ["singular:front", "Front page"],
+      ["singular:all", "All singular"],
+      ["singular:not_found", "404 page"],
+      ["singular:collection:pages", "Pages (all)"],
+      ["singular:collection:posts", "Posts (all)"],
+      ["singular:collection:emvb_pages", "Visual pages (all)"],
+      ["archive:collection:posts", "Posts archive"],
+      ["archive:search", "Search results"],
+      ["archive:taxonomy:category", "All categories"],
+      ["archive:taxonomy:tag", "All tags"],
+    ];
+    for (const [value, label] of options) {
+      expect(summarizeConditions({ rules: [ruleFromOption(value, "include", "x")] })).toBe(label);
+    }
+  });
+
+  test("one category or tag reads with its taxonomy's name", () => {
+    expect(
+      one({ group: "archive", name: "taxonomy", args: { taxonomy: "category", slug: "news" } }),
+    ).toBe("Category: news");
+  });
+
+  test("a collection the list doesn't know shows its slug", () => {
+    expect(one({ group: "archive", name: "collection", args: { collection: "recipes" } })).toBe(
+      "recipes archive",
+    );
   });
 });

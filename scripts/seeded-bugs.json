@@ -3041,8 +3041,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/theme-api.ts",
-          "search": "args?.[\"slug\"] ? `${arg(args, \"taxonomy\")}:${args[\"slug\"]}` : `All ${arg(args, \"taxonomy\")}`",
-          "replace": "`All ${arg(args, \"taxonomy\")}`"
+          "search": "  if (args?.[\"slug\"]) return `${names?.one ?? slug}: ${String(args[\"slug\"])}`;\n",
+          "replace": ""
         }
       ],
       "command": [
@@ -25336,6 +25336,60 @@
       ],
       "command": ["bun", "test", "./test/playground/seed.test.ts"],
       "expect": "\\(fail\\).*W-293"
+    },
+    {
+      "id": "W-294/raw-slugs",
+      "requirement": "W-294",
+      "description": "The Theme Builder list shows collection slugs instead of the editor's names.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/theme-api.ts",
+          "search": "  return Object.hasOwn(COLLECTION_NAMES, slug) ? (COLLECTION_NAMES[slug] as string) : slug;\n",
+          "replace": "  return slug;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/ConditionsEditor.test.ts"
+      ],
+      "expect": "\\(fail\\).*W-294"
+    },
+    {
+      "id": "W-294/taxonomy-raw",
+      "requirement": "W-294",
+      "description": "A taxonomy condition reads 'category:news' instead of 'Category: news'.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/theme-api.ts",
+          "search": "  if (args?.[\"slug\"]) return `${names?.one ?? slug}: ${String(args[\"slug\"])}`;\n",
+          "replace": "  if (args?.[\"slug\"]) return `${slug}:${String(args[\"slug\"])}`;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/ConditionsEditor.test.ts"
+      ],
+      "expect": "\\(fail\\).*W-294"
+    },
+    {
+      "id": "W-294/singular-all-label",
+      "requirement": "W-294",
+      "description": "A 'Pages (all)' condition reads as a single entry.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/theme-api.ts",
+          "search": "  \"singular/collection\": (args) => `${collectionName(args)} (all)`,\n",
+          "replace": "  \"singular/collection\": (args) => `One entry in ${collectionName(args)}`,\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/ConditionsEditor.test.ts"
+      ],
+      "expect": "\\(fail\\).*W-294"
     }
   ]
 }

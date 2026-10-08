@@ -65,18 +65,43 @@ type RuleArgs = Record<string, unknown> | undefined;
 
 const arg = (args: RuleArgs, key: string) => String(args?.[key] ?? "?");
 
+/**
+ * The names the conditions editor uses for EmDash's built-in collections and taxonomies, so the
+ * list reads "Visual pages", not "emvb_pages" (W-294). Others show their slug.
+ */
+const COLLECTION_NAMES: Record<string, string> = {
+  pages: "Pages",
+  posts: "Posts",
+  emvb_pages: "Visual pages",
+};
+const TAXONOMY_NAMES: Record<string, { one: string; all: string }> = {
+  category: { one: "Category", all: "All categories" },
+  tag: { one: "Tag", all: "All tags" },
+};
+
+const collectionName = (args: RuleArgs) => {
+  const slug = arg(args, "collection");
+  return Object.hasOwn(COLLECTION_NAMES, slug) ? (COLLECTION_NAMES[slug] as string) : slug;
+};
+
+function taxonomyLabel(args: RuleArgs): string {
+  const slug = arg(args, "taxonomy");
+  const names = Object.hasOwn(TAXONOMY_NAMES, slug) ? TAXONOMY_NAMES[slug] : undefined;
+  if (args?.["slug"]) return `${names?.one ?? slug}: ${String(args["slug"])}`;
+  return names?.all ?? `All ${slug}`;
+}
+
 /** Short labels for the Theme Builder list, keyed by `group/name`. */
 const RULE_LABELS: Record<string, (args: RuleArgs) => string> = {
   "general/entire_site": () => "Entire site",
   "singular/front": () => "Front page",
-  "singular/not_found": () => "404",
-  "singular/collection": (args) => `Singular: ${arg(args, "collection")}`,
-  "singular/entry": (args) => `Entry in ${arg(args, "collection")}`,
+  "singular/not_found": () => "404 page",
+  "singular/collection": (args) => `${collectionName(args)} (all)`,
+  "singular/entry": (args) => `One entry in ${collectionName(args)}`,
   "singular/all": () => "All singular",
-  "archive/collection": (args) => `Archive: ${arg(args, "collection")}`,
+  "archive/collection": (args) => `${collectionName(args)} archive`,
   "archive/search": () => "Search results",
-  "archive/taxonomy": (args) =>
-    args?.["slug"] ? `${arg(args, "taxonomy")}:${args["slug"]}` : `All ${arg(args, "taxonomy")}`,
+  "archive/taxonomy": taxonomyLabel,
   "archive/all": () => "All archives",
 };
 
