@@ -23227,6 +23227,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/css/states.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-243/duplicate-upload-stored",
+      "requirement": "W-243: uploading an SVG whose cleaned markup matches an earlier upload selects that upload and says so, without storing a copy.",
+      "description": "Picking the same SVG twice stores two identical uploads.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/icon-uploads-api.ts",
+          "search": "  if (existingId) return { existingId };\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-243/duplicate-compares-ids",
+      "requirement": "W-243: uploading an SVG whose cleaned markup matches an earlier upload selects that upload and says so, without storing a copy.",
+      "description": "The duplicate check compares ids instead of the cleaned SVG, so a re-export of the same drawing is stored again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "other.markup === probe?.markup",
+          "replace": "other.id === probe?.id"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

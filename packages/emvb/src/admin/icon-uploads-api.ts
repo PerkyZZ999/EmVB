@@ -12,14 +12,19 @@ export async function listUploadedIcons(fetcher: Fetcher): Promise<UploadedIconI
   return data?.items ?? [];
 }
 
+/** A new upload, or the id of an upload that already has this SVG (W-243). */
+type IconUpload = { item: UploadedIconItem; imagesLeftOut: number } | { existingId: string };
+
 /**
  * Uploads an .svg file. It is checked here first, so a refused file says why at once; the server
- * sanitizes it again whatever the browser sent.
+ * sanitizes it again whatever the browser sent. `existing` names an upload that already has the
+ * cleaned SVG; then nothing is sent, so picking the same file twice doesn't store it twice.
  */
 export async function uploadIconFile(
   fetcher: Fetcher,
   file: File,
-): Promise<{ item: UploadedIconItem; imagesLeftOut: number }> {
+  existing?: (svg: string) => string | undefined,
+): Promise<IconUpload> {
   if (!/\.svg$/i.test(file.name) && file.type !== "image/svg+xml")
     throw new Error("Choose an .svg file.");
   if (file.size > UPLOAD_SVG_MAX_BYTES)
@@ -29,6 +34,8 @@ export async function uploadIconFile(
   const svg = await file.text();
   const local = prepareUploadedSvg(svg);
   if (!local.ok) throw new Error(local.message);
+  const existingId = existing?.(local.svg);
+  if (existingId) return { existingId };
   return requestJson<{ item: UploadedIconItem; imagesLeftOut: number }>(
     fetcher,
     `${BASE}/icons/upload`,

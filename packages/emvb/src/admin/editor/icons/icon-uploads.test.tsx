@@ -155,6 +155,40 @@ describe("My uploads (W-239)", () => {
     );
   });
 
+  test("the same SVG again selects the earlier upload instead of storing a copy (W-243)", async () => {
+    const { fetcher, calls } = stubFetcher({ items: [logo] });
+    await open(fetcher);
+    await goUploads();
+    await until(() => shown().length === 1, "the upload tile");
+    // Same drawing, as a design tool would export it again: prolog, width/height, a comment.
+    await pickFile(
+      new File(
+        [
+          '<?xml version="1.0"?><!-- again --><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><path d="M0 0h10" fill="#e11d48"/></svg>',
+        ],
+        "logo-copy.svg",
+        { type: "image/svg+xml" },
+      ),
+    );
+    await until(() => note()?.getAttribute("data-emvb-icon-upload-note") === "ok", "the note");
+    expect(calls.some((call) => call.method === "POST")).toBe(false);
+    expect(shown()).toEqual(["upload:aaaa000011112222"]);
+    expect(
+      dialog()?.querySelector("[data-emvb-icon-picked]")?.getAttribute("data-emvb-icon-picked"),
+    ).toBe("upload:aaaa000011112222");
+    expect(note()?.textContent).toBe(
+      "You already uploaded this SVG as Brand logo, so it's selected. Insert adds it to the page.",
+    );
+    // A different drawing still uploads.
+    await pickFile(
+      new File(['<svg viewBox="0 0 24 24"><path d="M1 1h2"/></svg>'], "rocket.svg", {
+        type: "image/svg+xml",
+      }),
+    );
+    await until(() => shown().length === 2, "the new tile");
+    expect(calls.filter((call) => call.method === "POST")).toHaveLength(1);
+  });
+
   test("a hostile file is refused in the browser with the reason, without a request", async () => {
     const { fetcher, calls } = stubFetcher({});
     await open(fetcher);

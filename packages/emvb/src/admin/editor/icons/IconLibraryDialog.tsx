@@ -398,13 +398,26 @@ function IconLibrary({
     setUploading(true);
     setUploadNote(undefined);
     try {
-      const { item, imagesLeftOut } = await uploadIconFile(fetcher, file);
+      const result = await uploadIconFile(fetcher, file, (svg) => {
+        const [probe] = uploadedIcons([{ id: "new", name: "", svg, uploadedAt: "" }]);
+        return uploads?.find((other) => other.markup === probe?.markup)?.id;
+      });
+      setQuery("");
+      setCursor({ list: [], index: -1 });
+      if ("existingId" in result) {
+        const known = uploads?.find((other) => other.id === result.existingId);
+        setSelectedId(result.existingId);
+        setUploadNote({
+          error: false,
+          text: `You already uploaded this SVG as ${known?.label ?? "an icon"}, so it's selected. Insert adds it to the page.`,
+        });
+        return;
+      }
+      const { item, imagesLeftOut } = result;
       const [icon] = uploadedIcons([item]);
       if (!icon) throw new Error("The uploaded SVG couldn't be shown. Try another file.");
       setUploads((prev) => [icon, ...(prev ?? []).filter((other) => other.id !== icon.id)]);
-      setQuery("");
       setSelectedId(icon.id);
-      setCursor({ list: [], index: -1 });
       setUploadNote({
         error: false,
         text: `Uploaded ${icon.label}. Insert adds it to the page.${
