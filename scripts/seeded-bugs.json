@@ -24851,6 +24851,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-282/no-scroll-lock",
+      "requirement": "W-282",
+      "description": "The page behind an open popup still scrolls.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      lockScroll();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*W-282"
+    },
+    {
+      "id": "W-282/lock-not-restored",
+      "requirement": "W-282",
+      "description": "Closing the last popup leaves the page unable to scroll.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "  if (!anyPopupOpen()) document.documentElement.style.overflow = savedOverflow;",
+          "replace": "  void savedOverflow;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*W-282"
+    },
+    {
+      "id": "W-282/no-heading-name",
+      "requirement": "W-282",
+      "description": "The popup dialog isn't named by its first heading.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      labelFromHeading(dialog);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*W-282"
+    },
+    {
+      "id": "W-282/content-as-name",
+      "requirement": "W-282",
+      "description": "The popup dialog is named by its whole content.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-markup.ts",
+          "search": "aria-modal=\"true\" aria-label=\"Popup\" tabindex",
+          "replace": "aria-modal=\"true\" aria-labelledby=\"${titleId}\" tabindex"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/popup-markup.test.ts"],
+      "expect": "\\(fail\\).*W-282"
     }
   ]
 }

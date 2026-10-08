@@ -97,6 +97,35 @@ type Controller = {
   opened: boolean;
 };
 
+/**
+ * W-282: the dialog takes its name from the first heading in the popup, given an id if it has
+ * none; without a heading it keeps the markup's aria-label.
+ */
+function labelFromHeading(dialog: HTMLElement): void {
+  if (dialog.hasAttribute("aria-labelledby")) return;
+  const heading = dialog.querySelector<HTMLElement>("h1, h2, h3, h4, h5, h6");
+  if (!heading || !heading.textContent?.trim()) return;
+  if (!heading.id) {
+    const popupId = dialog.closest("[data-emvb-popup]")?.getAttribute("data-emvb-popup") ?? "";
+    heading.id = `emvb-popup-heading-${popupId}`;
+  }
+  dialog.setAttribute("aria-labelledby", heading.id);
+}
+
+/** W-282: the page behind an open popup doesn't scroll; restored when the last one closes. */
+let savedOverflow = "";
+const anyPopupOpen = () => document.querySelector("[data-emvb-popup]:not([hidden])") !== null;
+/** Call before showing a popup. */
+function lockScroll(): void {
+  const html = document.documentElement;
+  if (!anyPopupOpen()) savedOverflow = html.style.overflow;
+  html.style.overflow = "hidden";
+}
+/** Call after hiding a popup. */
+function unlockScroll(): void {
+  if (!anyPopupOpen()) document.documentElement.style.overflow = savedOverflow;
+}
+
 function createController(root: HTMLElement): Controller | null {
   const dialog = root.querySelector<HTMLElement>(".emvb-popup__dialog");
   if (!dialog) return null;
@@ -107,6 +136,8 @@ function createController(root: HTMLElement): Controller | null {
     opened: false,
     open() {
       ctrl.lastFocus = document.activeElement as HTMLElement | null;
+      labelFromHeading(dialog);
+      lockScroll();
       root.hidden = false;
       ctrl.opened = true;
       dialog.focus({ preventScroll: true });
@@ -115,6 +146,7 @@ function createController(root: HTMLElement): Controller | null {
       if (!ctrl.opened) return;
       root.hidden = true;
       ctrl.opened = false;
+      unlockScroll();
       const prev = ctrl.lastFocus;
       if (prev && typeof prev.focus === "function") prev.focus({ preventScroll: true });
     },

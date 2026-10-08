@@ -31,7 +31,9 @@ export function wrapPopupMarkup(id: string, bodyHtml: string, triggers: Triggers
   return [
     `<div class="emvb-popup" id="emvb-popup-${safeId}" data-emvb-popup="${safeId}" data-emvb-popup-config="${configJson}" hidden>`,
     `<div class="emvb-popup__backdrop" data-emvb-popup-dismiss tabindex="-1"></div>`,
-    `<div class="emvb-popup__dialog" role="dialog" aria-modal="true" aria-labelledby="${titleId}" tabindex="-1">`,
+    // W-282: named "Popup" until the runtime points the name at the content's first heading;
+    // naming it after the whole content read every word as the dialog's name.
+    `<div class="emvb-popup__dialog" role="dialog" aria-modal="true" aria-label="Popup" tabindex="-1">`,
     `<button type="button" class="emvb-popup__close" data-emvb-popup-dismiss aria-label="Close"><span aria-hidden="true">×</span></button>`,
     `<div class="emvb-popup__content" id="${titleId}">${bodyHtml}</div>`,
     `</div></div>`,

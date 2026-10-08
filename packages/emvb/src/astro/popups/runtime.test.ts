@@ -492,6 +492,36 @@ describe("public popup runtime details (W-091)", () => {
     expect(document.activeElement === join).toBe(true);
   });
 
+  test("W-282: an open popup locks page scrolling; the last one to close restores it", () => {
+    document.documentElement.style.overflow = "clip";
+    const a = openablePopup("lock-a", "<button>A</button>");
+    const b = openablePopup("lock-b", "<button>B</button>");
+    a.open();
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    b.open();
+    escape(a.root);
+    expect(document.documentElement.style.overflow).toBe("hidden");
+    escape(b.root);
+    expect(document.documentElement.style.overflow).toBe("clip");
+    escape(b.root);
+    expect(document.documentElement.style.overflow).toBe("clip");
+    document.documentElement.style.overflow = "";
+  });
+
+  test("W-282: the dialog is named by the first heading in the popup", () => {
+    const named = openablePopup("name", "<p>Intro</p><h2>Join the list</h2><h3>Later</h3>");
+    named.open();
+    const heading = named.dialog.querySelector("h2");
+    expect(heading?.id.startsWith("emvb-popup-heading-")).toBe(true);
+    expect(named.dialog.getAttribute("aria-labelledby")).toBe(heading?.id ?? "x");
+    const own = openablePopup("own", '<h3 id="mine">Deal</h3>');
+    own.open();
+    expect(own.dialog.getAttribute("aria-labelledby")).toBe("mine");
+    const plain = openablePopup("plain", "<p>Just text</p><h2> </h2>");
+    plain.open();
+    expect(plain.dialog.hasAttribute("aria-labelledby")).toBe(false);
+  });
+
   test("scroll and activity listeners are passive", () => {
     const listen = spyOn(window, "addEventListener");
     try {
