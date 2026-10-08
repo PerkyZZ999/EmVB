@@ -173,6 +173,8 @@ export {
   importLosses,
   MAX_DESIGN_FILE_BYTES,
   type DesignImport,
+  type ImportRename,
+  uniqueImportNames,
   type ImportLosses,
 } from "./design/transfer.ts";
 export {

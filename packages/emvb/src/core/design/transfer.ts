@@ -10,7 +10,58 @@ export function designToJson(design: DesignSystem): string {
   return JSON.stringify(design, null, 2);
 }
 
-export type DesignImport = { ok: true; design: DesignSystem } | { ok: false; message: string };
+/** A name Import changed so names stay unique (W-283). */
+export type ImportRename = { from: string; to: string };
+
+export type DesignImport =
+  | { ok: true; design: DesignSystem; renamed: ImportRename[] }
+  | { ok: false; message: string };
+
+/** Names are capped at 60 characters; "Card 2" keeps the number inside the cap. */
+function freeName(name: string, taken: Set<string>): string {
+  for (let n = 2; ; n++) {
+    const suffix = ` ${n}`;
+    const next = `${name.slice(0, 60 - suffix.length).trim()}${suffix}`;
+    if (!taken.has(next.toLowerCase())) return next;
+  }
+}
+
+function dedupe<T extends { name: string }>(items: T[], renamed: ImportRename[]): T[] {
+  const taken = new Set(items.map((item) => item.name.toLowerCase()));
+  const seen = new Set<string>();
+  return items.map((item) => {
+    const key = item.name.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      return item;
+    }
+    const to = freeName(item.name, taken);
+    taken.add(to.toLowerCase());
+    seen.add(to.toLowerCase());
+    renamed.push({ from: item.name, to });
+    return { ...item, name: to };
+  });
+}
+
+/**
+ * W-283: the editor keeps class names, and variable names within a kind, unique (W-277, W-278).
+ * A hand-edited file can still repeat one, so Import renames the later ones ("Card 2") and the
+ * confirm lists them. Ids, and so every reference, stay as they are.
+ */
+export function uniqueImportNames(design: DesignSystem): {
+  design: DesignSystem;
+  renamed: ImportRename[];
+} {
+  const renamed: ImportRename[] = [];
+  const classes = design.classes ? dedupe(design.classes, renamed) : design.classes;
+  const variables = { ...design.variables };
+  for (const [group] of VARIABLE_GROUPS) {
+    const list = design.variables[group];
+    if (list) Object.assign(variables, { [group]: dedupe<{ name: string }>(list, renamed) });
+  }
+  if (renamed.length === 0) return { design, renamed };
+  return { design: { ...design, variables, ...(classes ? { classes } : {}) }, renamed };
+}
 
 /** Parse an exported design. Older schema versions are upgraded. A newer file is refused. */
 export function designFromJson(text: string): DesignImport {
@@ -32,7 +83,7 @@ export function designFromJson(text: string): DesignImport {
   }
   const result = DesignSystemSchema.safeParse(upgraded.doc);
   if (!result.success) return { ok: false, message: "That file is not an EmVB design document." };
-  return { ok: true, design: result.data };
+  return { ok: true, ...uniqueImportNames(result.data) };
 }
 
 /** The largest design file Import reads (W-214); the saved design is capped far lower. */

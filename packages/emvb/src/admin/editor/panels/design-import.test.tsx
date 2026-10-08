@@ -104,6 +104,56 @@ describe("design Import (W-214)", () => {
     expect(document.querySelector("[data-emvb-import-confirm]")).toBeNull();
   });
 
+  test("W-283: the confirm lists names the file repeats, and Replace saves them renamed", async () => {
+    const saved: DesignSystem[] = [];
+    await mount(
+      <SiteStylesDrawer
+        design={current}
+        layout={layout}
+        onDesignChange={async (d) => {
+          saved.push(d);
+        }}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    const twice = {
+      ...incoming,
+      classes: [
+        { id: "hero", name: "Hero", style: {} },
+        { id: "hero-b", name: "hero", style: {} },
+      ],
+    } as DesignSystem;
+    await pick(new File([designToJson(twice)], "twice.json", { type: "application/json" }));
+    expect(document.querySelector("[data-emvb-import-renamed]")?.textContent).toBe(
+      "The file repeats some names, so one is renamed: hero → hero 2.",
+    );
+    const dialog = document.querySelector("[data-emvb-import-confirm]");
+    const replace = [...(dialog?.querySelectorAll("button") ?? [])].find(
+      (b) => b.textContent === "Replace",
+    );
+    await act(async () => {
+      replace?.click();
+    });
+    await settle();
+    expect(saved.map((d) => d.classes?.map((c) => c.name))).toEqual([["Hero", "hero 2"]]);
+  });
+
+  test("W-283: a file with no repeats doesn't mention renaming", async () => {
+    await mount(
+      <SiteStylesDrawer
+        design={current}
+        layout={layout}
+        onDesignChange={async () => undefined}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    await pick(new File([designToJson(incoming)], "theirs.json", { type: "application/json" }));
+    expect(document.querySelector("[data-emvb-import-confirm]")).not.toBeNull();
+    expect(document.querySelector("[data-emvb-import-renamed]")).toBeNull();
+  });
+
   test("a file over 1 MB is refused before it is read", async () => {
     await mount(
       <SiteStylesDrawer

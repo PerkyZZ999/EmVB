@@ -11,6 +11,7 @@ import {
   findVariableUsages,
   findVariableUsagesInDesign,
   importLosses,
+  type ImportRename,
   MAX_DESIGN_FILE_BYTES,
   removeVariable,
   DEFAULT_STYLE_TAGS,
@@ -85,6 +86,7 @@ export function SiteStylesDrawer({
   const [pendingImport, setPendingImport] = React.useState<{
     name: string;
     design: DesignSystem;
+    renamed: ImportRename[];
   } | null>(null);
 
   const save = async (next: DesignSystem) => {
@@ -120,7 +122,7 @@ export function SiteStylesDrawer({
       setError(result.message);
       return;
     }
-    setPendingImport({ name: file.name, design: result.design });
+    setPendingImport({ name: file.name, design: result.design, renamed: result.renamed });
   };
 
   return (
@@ -264,6 +266,7 @@ export function SiteStylesDrawer({
       {pendingImport && (
         <ImportConfirm
           name={pendingImport.name}
+          renamed={pendingImport.renamed}
           losses={importLosses(design, pendingImport.design, layout)}
           onCancel={() => setPendingImport(null)}
           onConfirm={async () => {
@@ -439,13 +442,18 @@ function DefaultsSection({
 }
 
 /** W-214: confirms an Import, which replaces the whole design (there is no revision history). */
+/** W-283: how many renamed names the Import confirm lists before "and N more". */
+const MAX_RENAMES_LISTED = 5;
+
 function ImportConfirm({
   name,
+  renamed,
   losses,
   onCancel,
   onConfirm,
 }: {
   name: string;
+  renamed: ImportRename[];
   losses: ReturnType<typeof importLosses>;
   onCancel: () => void;
   onConfirm: () => void;
@@ -465,6 +473,18 @@ function ImportConfirm({
           `This page uses ${losses.usedOnPage} of them, so those elements lose that styling. `}
         Export first to keep a copy.
       </p>
+      {renamed.length > 0 && (
+        <p className="emvb-helper" data-emvb-import-renamed="">
+          {`The file repeats some names, so ${renamed.length === 1 ? "one is" : "these are"} renamed: `}
+          {renamed
+            .slice(0, MAX_RENAMES_LISTED)
+            .map((r) => `${r.from} → ${r.to}`)
+            .join(", ")}
+          {renamed.length > MAX_RENAMES_LISTED
+            ? ` and ${renamed.length - MAX_RENAMES_LISTED} more.`
+            : "."}
+        </p>
+      )}
       <div className="emvb-dialog-actions">
         <Button type="button" variant="secondary" className={BUTTON} onClick={onCancel}>
           Cancel

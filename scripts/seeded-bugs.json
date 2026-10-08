@@ -21701,7 +21701,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
-          "search": "    setPendingImport({ name: file.name, design: result.design });",
+          "search": "    setPendingImport({ name: file.name, design: result.design, renamed: result.renamed });",
           "replace": "    await save(result.design);"
         }
       ],
@@ -24907,6 +24907,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/theme/popup-markup.test.ts"],
       "expect": "\\(fail\\).*W-282"
+    },
+    {
+      "id": "W-283/no-dedupe",
+      "requirement": "W-283",
+      "description": "Import keeps names the file repeats.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/transfer.ts",
+          "search": "  return { ok: true, ...uniqueImportNames(result.data) };",
+          "replace": "  return { ok: true, design: result.data, renamed: [] };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/import-names.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-283/rename-collides",
+      "requirement": "W-283",
+      "description": "A renamed import name can take a name already in the file (\"Brand 2\").",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/transfer.ts",
+          "search": "    if (!taken.has(next.toLowerCase())) return next;",
+          "replace": "    return next;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/import-names.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-283/renames-unlisted",
+      "requirement": "W-283",
+      "description": "The Import confirm doesn't list the renamed names.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "      {renamed.length > 0 && (",
+          "replace": "      {renamed.length < 0 && ("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/design-import.test.tsx"],
+      "expect": "\\(fail\\).*W-283"
     }
   ]
 }
