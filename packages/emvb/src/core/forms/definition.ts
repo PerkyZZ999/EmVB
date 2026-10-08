@@ -6,6 +6,17 @@ export type PublicFormField = {
   required: boolean;
   options?: ReadonlyArray<{ label: string; value: string }>;
   placeholder?: string;
+  /** Constraints the forms plugin's own embed puts on the control (W-297). */
+  validation?: PublicFieldValidation;
+};
+
+/** The constraint subset the renderer can apply; anything else is ignored. */
+export type PublicFieldValidation = {
+  minLength?: number;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  pattern?: string;
 };
 
 export type PublicFormDefinition = {

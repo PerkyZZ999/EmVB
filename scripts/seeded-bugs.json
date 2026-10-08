@@ -2887,8 +2887,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/form.ts",
-          "search": "    if (node.type === \"select\") {\n      return replaceChildren(",
-          "replace": "    if (node.type === \"select\") {\n      return vnode;\n      return replaceChildren("
+          "search": "  if (node.type === \"select\") {\n    return replaceChildren(",
+          "replace": "  if (node.type === \"select\") {\n    return vnode;\n    return replaceChildren("
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
@@ -2901,8 +2901,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/form.ts",
-          "search": "      meta.options.map((option) => ({",
-          "replace": "      meta.options.slice(0, 1).map((option) => ({"
+          "search": "    meta.options.map((option) => ({",
+          "replace": "    meta.options.slice(0, 1).map((option) => ({"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
@@ -25436,6 +25436,76 @@
         "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
       ],
       "expect": "\\(fail\\).*W-296"
+    },
+    {
+      "id": "W-297/type-dropped",
+      "requirement": "W-297",
+      "description": "A text input keeps type=text whatever the form field says.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "          ...(type ? { type } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
+      "expect": "\\(fail\\).*W-297"
+    },
+    {
+      "id": "W-297/required-dropped",
+      "requirement": "W-297",
+      "description": "A required field renders without required.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "          ...(meta.required ? { required: \"\" } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
+      "expect": "\\(fail\\).*W-297"
+    },
+    {
+      "id": "W-297/limits-dropped",
+      "requirement": "W-297",
+      "description": "Length, range and pattern limits never reach the control.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "          ...limits,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
+      "expect": "\\(fail\\).*W-297"
+    },
+    {
+      "id": "W-297/validation-ignored",
+      "requirement": "W-297",
+      "description": "The definition loader drops the field's validation.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "  if (minLength !== undefined) validation.minLength = minLength;\n",
+          "replace": "  if (false) validation.minLength = minLength;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*W-297"
+    },
+    {
+      "id": "W-297/no-novalidate",
+      "requirement": "W-297",
+      "description": "The form lets the browser's bubble come before the inline errors.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "      novalidate: \"\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-options.test.ts"],
+      "expect": "\\(fail\\).*W-297"
     }
   ]
 }

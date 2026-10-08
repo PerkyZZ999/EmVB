@@ -85,3 +85,108 @@ describe("form field options from the bound definition (W-035)", () => {
     expect(html).toContain('name="unbound" value="a"> Option A');
   });
 });
+
+describe("form fields take the definition's type and limits (W-297)", () => {
+  const typed: PublicFormDefinition = {
+    name: "Contact",
+    slug: "contact",
+    status: "active",
+    settings: {},
+    pages: [
+      {
+        fields: [
+          { name: "topic", type: "select", label: "Topic", required: true },
+          {
+            name: "email",
+            type: "email",
+            label: "Email",
+            required: true,
+            validation: { minLength: 5, maxLength: 80, pattern: ".+@example.com" },
+          },
+          {
+            name: "age",
+            type: "number",
+            label: "Age",
+            required: false,
+            validation: { min: 18, max: 99 },
+          },
+          { name: "agree", type: "checkbox", label: "I agree", required: true },
+          { name: "when", type: "date", label: "When", required: false },
+        ],
+      },
+    ],
+  };
+  const typedLayout: Layout = {
+    schemaVersion: 12,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          ...defaultElement("form", "form0001"),
+          props: { formId: "contact" },
+          children: [
+            field("select", "sele0001", "topic"),
+            { id: "text0001", type: "text-input", props: { field: "email", label: "Email" } },
+            { id: "text0002", type: "text-input", props: { field: "age", label: "Age" } },
+            { id: "chek0001", type: "checkbox", props: { field: "agree", label: "I agree" } },
+            { id: "text0003", type: "text-input", props: { field: "when", label: "When" } },
+          ],
+        } as LayoutNode,
+      ],
+    },
+  };
+
+  const html = renderPage(typedLayout, emptyDesign(), {
+    formDefinitions: new Map([["contact", typed]]),
+  }).html;
+
+  test("the input type, required, limits and a mark reach the markup, and the form skips the browser bubble", () => {
+    expect(html).toContain('<form class="emvb-form ec-form" method="POST"');
+    expect(html).toContain('novalidate=""');
+    expect(html).toContain(
+      '<select class="ec-form-input" id="emvb-field-sele0001" name="topic" required="">',
+    );
+    expect(html).toContain(
+      '<input type="email" class="ec-form-input" id="emvb-field-text0001" name="email" required="" minlength="5" maxlength="80" pattern=".+@example.com">',
+    );
+    expect(html).toContain(
+      '<input type="number" class="ec-form-input" id="emvb-field-text0002" name="age" min="18" max="99">',
+    );
+    expect(html).toContain(
+      '<input type="date" class="ec-form-input" id="emvb-field-text0003" name="when">',
+    );
+    expect(html).toContain(
+      '<input type="checkbox" id="emvb-field-chek0001" name="agree" value="true" required="">',
+    );
+    expect(html).toContain('class="emvb-form-required" aria-hidden="true"> *</span>');
+    // Topic and Email carry the mark and I agree ends in one; Age and When don't.
+    const marks = html.split('class="emvb-form-required"').length - 1;
+    expect(marks).toBe(2);
+    expect(html).toContain("> I agree *<");
+  });
+
+  test("a field the definition doesn't have keeps a plain, optional text input", () => {
+    const extra = renderPage(
+      {
+        ...typedLayout,
+        root: {
+          ...typedLayout.root,
+          children: [
+            {
+              ...defaultElement("form", "form0001"),
+              props: { formId: "contact" },
+              children: [{ id: "text0009", type: "text-input", props: { field: "nick" } }],
+            } as LayoutNode,
+          ],
+        },
+      } as Layout,
+      emptyDesign(),
+      { formDefinitions: new Map([["contact", typed]]) },
+    ).html;
+    expect(extra).toContain(
+      '<input type="text" class="ec-form-input" id="emvb-field-text0009" name="nick">',
+    );
+  });
+});

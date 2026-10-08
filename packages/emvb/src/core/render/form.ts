@@ -1,4 +1,4 @@
-import { fieldByName, type FormDefinitions } from "../forms/definition.ts";
+import { fieldByName, type FormDefinitions, type PublicFormField } from "../forms/definition.ts";
 import type { FormNode, LayoutNode } from "../schema/layout.ts";
 import type { ThemeDynamicData } from "../theme/dynamic.ts";
 import { nodeChildren } from "../tree-ops.ts";
@@ -84,6 +84,9 @@ export function renderForm(
       action: FORMS_SUBMIT_PATH,
       "data-ec-form": "",
       "data-form-id": formId,
+      // W-297: the forms client checks each control itself and writes the message next to the
+      // field, as the server's errors are; without this the browser's bubble would come first.
+      novalidate: "",
       "data-submit-label": submitLabel,
     },
     children: [
@@ -112,44 +115,121 @@ function replaceChildren(vnode: VNode, match: (node: VNode) => boolean, children
   };
 }
 
-/** Fills a select or radio field with the options of the first bound form definition that has it. */
+/** Applies `edit` to every element node in the tree, children first. */
+function mapNodes(vnode: VNode, edit: (node: VNode) => VNode): VNode {
+  return edit({
+    ...vnode,
+    children: vnode.children.map((child) =>
+      typeof child === "string" ? child : mapNodes(child, edit),
+    ),
+  });
+}
+
+/** Definition types a Text input can take on; the rest stay `text`. */
+const INPUT_TYPES = new Set(["email", "tel", "url", "number", "date"]);
+const LENGTH_TYPES = new Set(["text", "email", "tel", "url", "textarea"]);
+const isControl = (node: VNode) =>
+  ["input", "select", "textarea"].includes(node.tag) && node.attrs.type !== "hidden";
+
+/**
+ * W-297: what the forms plugin's own embed puts on a control: the input type (so phones show the
+ * right keyboard), `required`, and the length, range and pattern limits, plus a visible mark on
+ * the label. Without them the forms client found nothing to check before sending.
+ */
+function withFieldMeta(vnode: VNode, node: LayoutNode, meta: PublicFormField): VNode {
+  const type = node.type === "text-input" && INPUT_TYPES.has(meta.type) ? meta.type : undefined;
+  const rules = meta.validation ?? {};
+  const kind = type ?? (node.type === "textarea" ? "textarea" : meta.type);
+  const limits: Record<string, string> = {};
+  if (node.type === "text-input" || node.type === "textarea") {
+    if (LENGTH_TYPES.has(kind)) {
+      if (rules.minLength !== undefined) limits.minlength = String(rules.minLength);
+      if (rules.maxLength !== undefined) limits.maxlength = String(rules.maxLength);
+    }
+    if (kind === "number") {
+      if (rules.min !== undefined) limits.min = String(rules.min);
+      if (rules.max !== undefined) limits.max = String(rules.max);
+    }
+    if (node.type === "text-input" && kind !== "number" && kind !== "date" && rules.pattern) {
+      limits.pattern = rules.pattern;
+    }
+  }
+  const mark: VNode = {
+    tag: "span",
+    attrs: { class: "emvb-form-required", "aria-hidden": "true" },
+    children: [" *"],
+  };
+  return mapNodes(vnode, (child) => {
+    if (isControl(child)) {
+      return {
+        ...child,
+        attrs: {
+          ...child.attrs,
+          ...(type ? { type } : {}),
+          ...(meta.required ? { required: "" } : {}),
+          ...limits,
+        },
+      };
+    }
+    if (!meta.required || child.tag !== "label") return child;
+    if (child.attrs.class === "emvb-form-label") {
+      return { ...child, children: [...child.children, mark] };
+    }
+    // The checkbox label wraps the input and the label text; the mark follows the text.
+    if (child.attrs.class === "emvb-form-checkbox-label") {
+      return {
+        ...child,
+        children: child.children.map((part) => (typeof part === "string" ? `${part} *` : part)),
+      };
+    }
+    return child;
+  });
+}
+
+/** Fills a field from the first bound form definition that has it: options, type, limits. */
 export function withFieldOptions(
   vnode: VNode,
   node: LayoutNode,
   definitions: FormDefinitions,
 ): VNode {
-  if (node.type !== "select" && node.type !== "radio") return vnode;
-  const field = (node.props as { field: string }).field;
+  const field = (node.props as { field?: unknown }).field;
+  if (typeof field !== "string") return vnode;
   for (const definition of definitions.values()) {
     const meta = fieldByName(definition, field);
     if (!meta) continue;
-    if (!meta.options?.length) return vnode;
-    if (node.type === "select") {
-      return replaceChildren(vnode, (child) => child.tag === "select", [
-        { tag: "option", attrs: { value: "" }, children: ["Choose…"] },
-        ...meta.options.map((option): VNode => ({
-          tag: "option",
-          attrs: { value: option.value },
-          children: [option.label],
-        })),
-      ]);
-    }
-    return replaceChildren(
-      vnode,
-      (child) => child.tag === "fieldset" && (child.attrs.class ?? "").includes("emvb-radio-group"),
-      meta.options.map((option) => ({
-        tag: "label",
-        attrs: { class: "emvb-form-radio-label" },
-        children: [
-          {
-            tag: "input",
-            attrs: { type: "radio", name: field, value: option.value },
-            children: [],
-          },
-          ` ${option.label}`,
-        ],
-      })),
-    );
+    return withFieldMeta(withOptions(vnode, node, meta), node, meta);
   }
   return vnode;
+}
+
+/** A select or radio field filled with the definition's options. */
+function withOptions(vnode: VNode, node: LayoutNode, meta: PublicFormField): VNode {
+  const field = meta.name;
+  if ((node.type !== "select" && node.type !== "radio") || !meta.options?.length) return vnode;
+  if (node.type === "select") {
+    return replaceChildren(vnode, (child) => child.tag === "select", [
+      { tag: "option", attrs: { value: "" }, children: ["Choose…"] },
+      ...meta.options.map((option): VNode => ({
+        tag: "option",
+        attrs: { value: option.value },
+        children: [option.label],
+      })),
+    ]);
+  }
+  return replaceChildren(
+    vnode,
+    (child) => child.tag === "fieldset" && (child.attrs.class ?? "").includes("emvb-radio-group"),
+    meta.options.map((option) => ({
+      tag: "label",
+      attrs: { class: "emvb-form-radio-label" },
+      children: [
+        {
+          tag: "input",
+          attrs: { type: "radio", name: field, value: option.value },
+          children: [],
+        },
+        ` ${option.label}`,
+      ],
+    })),
+  );
 }

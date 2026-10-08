@@ -30,6 +30,26 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isOption = (value: unknown): value is { label: string; value: string } =>
   isRecord(value) && typeof value.label === "string" && typeof value.value === "string";
 
+/** Only the numbers and pattern the renderer sets on the control; the rest is dropped. */
+function asValidation(value: unknown): PublicFormField["validation"] | undefined {
+  if (!isRecord(value)) return undefined;
+  const number = (key: string): number | undefined =>
+    typeof value[key] === "number" && Number.isFinite(value[key])
+      ? (value[key] as number)
+      : undefined;
+  const validation: NonNullable<PublicFormField["validation"]> = {};
+  const minLength = number("minLength");
+  const maxLength = number("maxLength");
+  const min = number("min");
+  const max = number("max");
+  if (minLength !== undefined) validation.minLength = minLength;
+  if (maxLength !== undefined) validation.maxLength = maxLength;
+  if (min !== undefined) validation.min = min;
+  if (max !== undefined) validation.max = max;
+  if (typeof value.pattern === "string") validation.pattern = value.pattern;
+  return Object.keys(validation).length > 0 ? validation : undefined;
+}
+
 /** A field the renderer can use, or null; options that aren't label/value text are left out. */
 function asField(value: unknown): PublicFormField | null {
   if (!isRecord(value) || typeof value.name !== "string") return null;
@@ -43,6 +63,8 @@ function asField(value: unknown): PublicFormField | null {
   if (Array.isArray(value.options)) field.options = value.options.filter(isOption);
   else delete field.options;
   if (typeof value.placeholder !== "string") delete field.placeholder;
+  field.validation = asValidation(value.validation);
+  if (!field.validation) delete field.validation;
   return field;
 }
 

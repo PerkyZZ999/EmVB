@@ -171,3 +171,35 @@ describe("form definitions the forms plugin answers oddly (W-092)", () => {
     expect(html).toContain('data-submit-label="Send"');
   });
 });
+
+describe("field limits from the forms plugin (W-297)", () => {
+  test("only finite numbers and a text pattern are kept", async () => {
+    const field = (name: string, validation: unknown) => ({
+      name,
+      type: "text",
+      label: name,
+      required: false,
+      validation,
+    });
+    const handler: Answer = async () => ({
+      ...definition("contact"),
+      pages: [
+        {
+          fields: [
+            field("a", { min: 1, maxLength: "9", pattern: 5, accept: ".pdf", max: Infinity }),
+            field("b", "junk"),
+            field("c", { minLength: 2, pattern: "[a-z]+" }),
+          ],
+        },
+      ],
+    });
+    const defs = await loadFormDefinitions(asHandler(handler), BASE, ["contact"]);
+    const fields = defs.get("contact")?.pages[0]?.fields ?? [];
+    expect(fields.map((f) => f.validation)).toEqual([
+      { min: 1 },
+      undefined,
+      { minLength: 2, pattern: "[a-z]+" },
+    ]);
+    expect(fields[1]).not.toHaveProperty("validation");
+  });
+});

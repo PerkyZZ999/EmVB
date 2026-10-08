@@ -9,6 +9,10 @@ const REACT_ATTR: Record<string, string> = {
   autocomplete: "autoComplete",
   allowfullscreen: "allowFullScreen",
   referrerpolicy: "referrerPolicy",
+  // W-297: form field limits from the bound form definition.
+  minlength: "minLength",
+  maxlength: "maxLength",
+  novalidate: "noValidate",
   // The canvas never updates a radio from props, so a tab chosen there stays chosen (QA-5).
   checked: "defaultChecked",
 };
@@ -25,6 +29,8 @@ const BOOLEAN_ATTRS = new Set([
   "loop",
   "playsinline",
   "autoplay",
+  "required",
+  "novalidate",
 ]);
 
 /** SVG tags the core keeps lowercase; the SVG namespace only knows their camelCase names. */
