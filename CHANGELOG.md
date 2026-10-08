@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **EmDash 1.2:** checked against EmDash 1.2.0 (the build and both demos now run on it; the peer range stays `emdash` ^1.0.0). Nothing in EmVB needed 1.2 changes to keep working; the audit found and fixed these, which affect every 1.x version:
+  - Theme Builder: when two parts match a page equally, the most recently saved one wins again. EmDash gives dates as `Date` objects and EmVB compared their text, so the weekday decided (W-302).
+  - Post Date and Post Author show EmDash's publish date and byline; they were empty on real posts (W-303, W-304).
+  - A malformed percent-escape in a category, tag or post URL no longer throws while the theme context is built (W-305).
+  - Demos link posts with `entry.data.slug`, as EmDash 1.2 recommends for multilingual sites, and their seeds put widget options under `props`.
+- **Fix:** the box shadow's Position select shows "Outset" or "Inset" instead of the stored keyword (W-306).
+
 ## 0.2.0 — 2026-10-08
 
 A big update since 0.1.0: an icon library, icon styling and SVG uploads, new layout and theme elements, a try-it-now playground, and a long sweep of fixes from hands-on testing (W-124–W-300).

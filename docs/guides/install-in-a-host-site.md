@@ -4,7 +4,7 @@ EmVB is a **native** EmDash plugin: add the package, register it in `astro.confi
 
 Project website: <https://emvb.dev>. Package: [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb).
 
-Verified against EmDash `^1.0.0` (1.0.1) and the EmVB TypeScript-source package shape (no `bun build` step for the plugin).
+Verified against EmDash `^1.0.0` (1.0.1 and 1.2.0) and the EmVB TypeScript-source package shape (no `bun build` step for the plugin).
 
 ## 1. Install the package
 
@@ -15,7 +15,7 @@ npm i @perkyzz/emvb
 # or: bun add @perkyzz/emvb
 ```
 
-EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.0 site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash's exact pin) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own.
+EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash's exact pin) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own.
 
 Optional (forms on EmVB pages):
 
