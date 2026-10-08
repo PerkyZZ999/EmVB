@@ -155,7 +155,12 @@ export function duplicateClass(
   const source = classes.find((c) => c.id === classId);
   // At the cap the copy would make the design invalid and the save fail (W-218).
   if (!source || classes.length >= MAX_CLASSES) return design;
-  const baseName = `${source.name.slice(0, 55).trim()} copy`;
+  // W-277: "Card copy", then "Card copy 2"…, so the copy's name is free too.
+  const stem = `${source.name.slice(0, 52).trim()} copy`;
+  let baseName = stem;
+  for (let n = 2; n <= MAX_CLASSES && classNameTaken(design, baseName); n++) {
+    baseName = `${stem} ${n}`;
+  }
   const base = slugify(baseName).slice(0, 34) || "class";
   const taken = new Set(classes.map((c) => c.id));
   let id = randomSuffix ? `${base}-${randomSuffix}`.slice(0, 40) : base;
@@ -165,11 +170,28 @@ export function duplicateClass(
   return { ...design, classes: [...classes, copy] };
 }
 
-/** Rename a design class; the id (and so its `.emvb-k-<id>` selector) stays. Pure (W-087). */
+/**
+ * W-277: whether another class already has this name (case-insensitive). Two classes with one
+ * name can't be told apart in the class picker or the Site styles list.
+ */
+export function classNameTaken(design: DesignSystem, name: string, exceptId?: string): boolean {
+  const wanted = cleanClassName(name).toLowerCase();
+  return (design.classes ?? []).some((c) => c.id !== exceptId && c.name.toLowerCase() === wanted);
+}
+
+/** The message shown when a new or renamed class would take another class's name (W-277). */
+export const classNameTakenMessage = (name: string) =>
+  `A class named "${cleanClassName(name)}" already exists. Pick another name.`;
+
+/**
+ * Rename a design class; the id (and so its `.emvb-k-<id>` selector) stays. A name another class
+ * has is refused (W-277). Pure (W-087).
+ */
 export function renameClass(design: DesignSystem, classId: string, name: string): DesignSystem {
   const trimmed = cleanClassName(name);
   const classes = design.classes ?? [];
   if (!trimmed || !classes.some((c) => c.id === classId)) return design;
+  if (classNameTaken(design, trimmed, classId)) return design;
   return {
     ...design,
     classes: classes.map((c) => (c.id === classId ? Object.assign({}, c, { name: trimmed }) : c)),

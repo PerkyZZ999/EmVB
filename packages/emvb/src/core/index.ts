@@ -156,6 +156,8 @@ export {
   duplicateClass,
   moveDesignClass,
   renameClass,
+  classNameTaken,
+  classNameTakenMessage,
   patchClassStyle,
   replaceClassId,
   hasLocalStyles,

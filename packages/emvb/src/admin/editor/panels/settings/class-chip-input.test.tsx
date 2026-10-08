@@ -615,6 +615,21 @@ describe("class chip input: chip menu (W-087)", () => {
     expect(log.designs.map((d) => d.classes?.[0]?.name)).toEqual(["Box"]);
   });
 
+  test("W-277: renaming to another class's name (any case) is refused with a message", async () => {
+    const log = newLog();
+    await mount(<Harness initial={["card", "accent"]} log={log} />);
+    await press(chipButton("card"), "F2");
+    await renameTo(" accent ", "Enter");
+    expect(log.designs).toEqual([]);
+    expect(document.querySelector("[data-emvb-class-error]")?.textContent).toBe(
+      'A class named "accent" already exists. Pick another name.',
+    );
+    expect(chipButton("card").textContent).toBe("Card");
+    await press(chipButton("card"), "F2");
+    await renameTo("CARD", "Enter");
+    expect(log.designs.map((d) => d.classes?.[0]?.name)).toEqual(["CARD"]);
+  });
+
   test("F2 renames too, and Escape cancels without saving", async () => {
     const log = newLog();
     await mount(<Harness initial={["card"]} log={log} />);

@@ -20,6 +20,8 @@ import {
   patchClassState,
   patchClassStyle,
   renameClass,
+  classNameTaken,
+  classNameTakenMessage,
   type DesignSystem,
   type Layout,
   type StyleProps,
@@ -146,6 +148,7 @@ export function ClassesSection({
   const [editing, setEditing] = React.useState<string | null>(null);
   const [renaming, setRenaming] = React.useState<string | null>(null);
   const [filter, setFilter] = React.useState("");
+  const [nameError, setNameError] = React.useState<string | null>(null);
   const rows = React.useRef(new Map<string, HTMLButtonElement>());
 
   const q = filter.trim().toLowerCase();
@@ -156,6 +159,11 @@ export function ClassesSection({
   const create = async () => {
     const trimmed = cleanClassName(name);
     if (!trimmed || classes.length >= MAX_CLASSES) return;
+    if (classNameTaken(design, trimmed)) {
+      setNameError(classNameTakenMessage(trimmed));
+      return;
+    }
+    setNameError(null);
     const id = uniqueId(
       trimmed,
       "class",
@@ -171,6 +179,11 @@ export function ClassesSection({
   const rename = (id: string, next: string | null) => {
     setRenaming(null);
     requestAnimationFrame(() => rows.current.get(id)?.focus());
+    if (next && classNameTaken(design, next, id)) {
+      setNameError(classNameTakenMessage(next));
+      return;
+    }
+    setNameError(null);
     if (next) void onSave(renameClass(design, id, next));
   };
 
@@ -331,11 +344,19 @@ export function ClassesSection({
           );
         })}
       </ul>
+      {nameError && (
+        <p className="emvb-inline-error" role="alert" data-emvb-class-name-error="">
+          {nameError}
+        </p>
+      )}
       {creating && (
         <CreateRow
           rowProps={{ "data-emvb-class-create": "" }}
           submitLabel="Create class"
-          onCancel={() => setCreating(false)}
+          onCancel={() => {
+            setCreating(false);
+            setNameError(null);
+          }}
           onCreate={() => void create()}
         >
           <Input

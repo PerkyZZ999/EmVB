@@ -8,6 +8,8 @@ import {
   moveClassId,
   removeClassId,
   renameClass,
+  classNameTaken,
+  classNameTakenMessage,
   replaceClassId,
   type DesignSystem,
 } from "../../../../core/index.ts";
@@ -131,7 +133,13 @@ export function ClassChipInput({
     }
   };
 
-  const rename = (id: string, name: string) => void saveDesign(renameClass(design, id, name));
+  const rename = (id: string, name: string) => {
+    if (classNameTaken(design, name, id)) {
+      setError(classNameTakenMessage(name));
+      return;
+    }
+    void saveDesign(renameClass(design, id, name));
+  };
 
   /** Copies the class and swaps the copy in on this element only, ready to edit. */
   const duplicate = async (id: string) => {

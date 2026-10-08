@@ -436,10 +436,30 @@ describe("ClassesSection", () => {
     await act(async () => classRow("card")?.click());
     expect(classRow("card")?.getAttribute("aria-expanded")).toBe("false");
     await click(byText("New"));
-    await type(inputs("Name").at(-1), "Card");
+    await type(inputs("Name").at(-1), "Panel");
     await click(byText("Create class"));
     expect({ saved, asked }).toMatchSnapshot("saves");
     expect(html()).toMatchSnapshot("after");
+  });
+
+  test("W-277: New and Rename refuse a name another class has (any case)", async () => {
+    await mountClasses();
+    const error = () => host.querySelector("[data-emvb-class-name-error]")?.textContent ?? null;
+    await click(byText("New"));
+    await type(inputs("Name").at(-1), " card ");
+    await click(byText("Create class"));
+    expect(saved).toEqual([]);
+    expect(error()).toBe('A class named "card" already exists. Pick another name.');
+    await click(byText("Cancel"));
+    expect(error()).toBeNull();
+    await press(classRow("hero"), "F2");
+    await renameTo("NOTE", "Enter");
+    expect(saved).toEqual([]);
+    expect(error()).toBe('A class named "NOTE" already exists. Pick another name.');
+    await press(classRow("hero"), "F2");
+    await renameTo("HERO", "Enter");
+    expect(saved.map((d) => d.classes?.[1]?.name)).toEqual(["HERO"]);
+    expect(error()).toBeNull();
   });
 
   test("the row menu offers Edit styles, Rename, Duplicate, then Delete after a separator", async () => {

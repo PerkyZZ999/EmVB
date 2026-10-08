@@ -1578,8 +1578,8 @@ exports[`ClassesSection list, filter, duplicate, delete, create: saves 1`] = `
           "style": {},
         },
         {
-          "id": "card-2",
-          "name": "Card",
+          "id": "panel",
+          "name": "Panel",
           "style": {},
         },
       ],
