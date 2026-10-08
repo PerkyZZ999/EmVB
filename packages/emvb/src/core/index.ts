@@ -66,6 +66,7 @@ export {
   ELEMENTS,
   ELEMENT_DESCRIPTORS,
   defaultElement,
+  iconHasAdjustableStroke,
   type ElementType,
 } from "./elements/index.ts";
 export {

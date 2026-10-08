@@ -1,6 +1,7 @@
 import type { StyleProps } from "../../../../core/index.ts";
 
 export type StyleSectionId =
+  | "icon"
   | "layout"
   | "spacing"
   | "size"
@@ -15,6 +16,7 @@ export type StyleKey = keyof StyleProps;
 
 /** Elementor v4 order (W-088); every list below follows it. */
 const SECTION_ORDER: StyleSectionId[] = [
+  "icon", // W-237: Icon only, first like Elementor's Icon style
   "layout",
   "spacing",
   "size",
@@ -71,9 +73,20 @@ export const STYLE_UI: Record<string, { sections: StyleSectionId[]; defaultOpen:
       sections: ["spacing", "size", "position", "border", "effects", "advanced"],
       defaultOpen: "size",
     },
+    // W-237: Icon first (colour, glyph, hover duration), then the wrapper's box: background,
+    // padding and border make the shape behind the glyph.
     icon: {
-      sections: ["spacing", "size", "position", "typography", "effects", "advanced"],
-      defaultOpen: "typography",
+      sections: [
+        "icon",
+        "spacing",
+        "size",
+        "position",
+        "background",
+        "border",
+        "effects",
+        "advanced",
+      ],
+      defaultOpen: "icon",
     },
     video: {
       sections: ["spacing", "size", "position", "border", "effects", "advanced"],
@@ -114,6 +127,7 @@ export const DEFAULT_UI = {
 };
 
 export const SECTION_LABELS: Record<StyleSectionId, string> = {
+  icon: "Icon",
   layout: "Layout",
   spacing: "Spacing",
   size: "Size",
@@ -194,12 +208,24 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "borderBottomLeftRadius",
   ],
   effects: ["opacity", "boxShadow", "filter", "cursor", "entrance", "transition"],
+  icon: ["iconRotate", "iconFlip", "iconScale", "iconStrokeWidth", "iconShadow", "iconAnimation"],
   advanced: [],
 };
+
+/**
+ * W-237: an Icon shows Colour and Transition in its Icon section (colour first, hover duration
+ * last), so Typography and Effects leave them out for it.
+ */
+const ICON_MOVED: StyleKey[] = ["color", "transition"];
 
 /** Keys that only make sense on some element types. */
 const ONLY_FOR: Partial<Record<StyleKey, string[]>> = {
   objectFit: ["image", "video"],
+  ...Object.fromEntries(
+    ["iconRotate", "iconFlip", "iconScale", "iconStrokeWidth", "iconShadow", "iconAnimation"].map(
+      (key) => [key, ["icon"]],
+    ),
+  ),
 };
 
 const SPANS: StyleKey[] = ["gridColumnSpan", "gridRowSpan"];
@@ -268,16 +294,25 @@ export function keysFor(
       SECTION_KEYS[section].filter((key) => ONLY_FOR[key]?.includes(type) ?? true)
     ).filter((key) => !OFFSETS.has(key) || offsetsApply(position)),
   );
-  return SECTION_KEYS[section].filter((key) => offered.has(key) || style?.[key] !== undefined);
+  const keys = SECTION_KEYS[section].filter(
+    (key) => offered.has(key) || style?.[key] !== undefined,
+  );
+  if (type !== "icon") return keys;
+  if (section !== "icon") return keys.filter((key) => !ICON_MOVED.includes(key));
+  return ["color", ...keys, "transition"];
 }
 
 /** The type's sections, plus any other section holding a set value, in section order. */
 export function sectionsFor(
   sections: StyleSectionId[],
   style: StyleProps | undefined,
+  type?: string,
 ): StyleSectionId[] {
+  const moved = type === "icon" ? ICON_MOVED : [];
   return SECTION_ORDER.filter(
-    (id) => sections.includes(id) || SECTION_KEYS[id].some((key) => style?.[key] !== undefined),
+    (id) =>
+      sections.includes(id) ||
+      SECTION_KEYS[id].some((key) => style?.[key] !== undefined && !moved.includes(key)),
   );
 }
 
@@ -346,6 +381,12 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   filter: "Filters",
   cursor: "Cursor",
   entrance: "Entrance",
+  iconRotate: "Rotate",
+  iconFlip: "Flip",
+  iconScale: "Scale",
+  iconStrokeWidth: "Stroke width",
+  iconShadow: "Drop shadow",
+  iconAnimation: "Animation",
   transition: "Transition",
 };
 

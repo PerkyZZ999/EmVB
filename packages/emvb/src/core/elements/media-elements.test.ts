@@ -161,7 +161,9 @@ describe("icon and svg size (canvas)", () => {
       design,
     );
     expect(css.includes("svg{display:block;width:1em")).toBe(false);
-    expect(css.includes(".emvb-icon svg{display:block}.emvb-icon-missing")).toBe(true);
+    const iconSvgRule = /\.emvb-icon svg\{([^}]*)\}/.exec(css)?.[1] ?? "";
+    expect(iconSvgRule.startsWith("display:block;")).toBe(true);
+    expect(/(^|;)(width|height):/.test(iconSvgRule)).toBe(false);
     expect(css.includes(".emvb-svg svg{display:block}.emvb-svg-missing")).toBe(true);
   });
 });

@@ -46,6 +46,7 @@ import {
   type PopupDevice,
   type ResponsiveDevice,
   classStylesInListOrder,
+  iconHasAdjustableStroke,
   resolveCascade,
   STYLE_STATES,
   type StyleProps,
@@ -64,6 +65,7 @@ import {
   offsetsApply,
   SECTION_LABELS,
   sectionsFor,
+  type StyleKey,
   STYLE_UI,
   type StyleSectionId,
 } from "./settings/style-sections.ts";
@@ -158,6 +160,9 @@ const sectionHasStates = (type: string, states: StyleStates | undefined, section
 
 /** Sections where a state change moves things around. */
 const JUMPY = new Set<StyleSectionId>(["layout", "size", "position"]);
+
+/** Set on Normal only (W-089, W-101, W-237); a state's Style tab leaves them out. */
+const NORMAL_ONLY_KEYS = new Set<StyleKey>(["transition", "entrance", "iconAnimation"]);
 
 const JUMP_HELP: Record<Exclude<StyleStateChoice, "normal">, string> = {
   hover: "Changing size or position on hover can make the page jump.",
@@ -382,6 +387,12 @@ function KnownElementPanel({
       ? undefined
       : normal;
   const position = positionInEffect(node, design, cls);
+  const strokeAdjustable =
+    node.type === "icon" && !cls
+      ? iconHasAdjustableStroke(
+          typeof node.props.iconSvg === "string" ? node.props.iconSvg : undefined,
+        )
+      : true;
   const patchStyle = (patch: Partial<StyleProps>) => {
     if (responsive) {
       if (!cls) {
@@ -560,7 +571,7 @@ function KnownElementPanel({
           {!cls && styleState === "normal" && node.type === "spacer" && (
             <FieldControl field={SPACER_HEIGHT} node={node} onChange={onChange} fetcher={fetcher} />
           )}
-          {sectionsFor(ui.sections, style).map((id) => {
+          {sectionsFor(ui.sections, style, node.type).map((id) => {
             if (id === "advanced") {
               if (cls || styleState !== "normal") return null;
               return section(
@@ -576,7 +587,12 @@ function KnownElementPanel({
               );
             }
             const keys = keysFor(node.type, id, style, position).filter(
-              (key) => styleState === "normal" || (key !== "transition" && key !== "entrance"),
+              (key) =>
+                (styleState === "normal" || !NORMAL_ONLY_KEYS.has(key)) &&
+                // W-237: Stroke width only for stroke-drawn icons (or once set, so it can be reset).
+                (key !== "iconStrokeWidth" ||
+                  strokeAdjustable ||
+                  style?.iconStrokeWidth !== undefined),
             );
             if (keys.length === 0) return null;
             return section(

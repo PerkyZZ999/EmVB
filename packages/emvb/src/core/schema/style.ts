@@ -257,6 +257,31 @@ export const StyleProps = z.strictObject({
     .optional(),
   transition: Transition.optional(),
   /**
+   * Icon element glyph styling (W-237). Emitted as custom properties on the icon's wrapper, so
+   * they work in states, devices and classes; the Icon's base CSS applies them to its `<svg>`.
+   * Elsewhere they do nothing. `iconScale` scales the whole icon (with its background shape).
+   */
+  iconRotate: z.number().int().min(-360).max(360).optional(),
+  iconFlip: z.enum(["none", "horizontal", "vertical", "both"]).optional(),
+  iconScale: num(0.1, 4).optional(),
+  iconStrokeWidth: num(0.25, 6).optional(),
+  /** A drop shadow that follows the glyph's shape (CSS `drop-shadow`), in px. */
+  iconShadow: z
+    .strictObject({
+      x: num(-100, 100),
+      y: num(-100, 100),
+      blur: num(0, 100),
+      color: ColorValue.optional(),
+    })
+    .optional(),
+  /** A looping spin or pulse; off for visitors who prefer reduced motion. */
+  iconAnimation: z
+    .strictObject({
+      type: z.enum(["spin", "pulse"]),
+      duration: z.number().int().min(200).max(10_000),
+    })
+    .optional(),
+  /**
    * Plays once (W-101, W-107). `delay` waits before it starts. `view` starts as the element
    * scrolls into view, using CSS scroll-driven animations, and falls back to playing on load.
    * Not a state style.
@@ -275,9 +300,10 @@ export type StyleProps = z.infer<typeof StyleProps>;
 
 /**
  * `states` on a node or class (D-032, W-089): hover, focus (`:focus-visible`) and active, each with
- * the same keys and limits as `style` except `transition` and `entrance`. Unknown states are refused.
+ * the same keys and limits as `style` except `transition`, `entrance` and `iconAnimation`. Unknown
+ * states are refused.
  */
-const StateStyle = StyleProps.omit({ transition: true, entrance: true });
+const StateStyle = StyleProps.omit({ transition: true, entrance: true, iconAnimation: true });
 
 export const StyleStates = z.strictObject({
   hover: StateStyle.optional(),

@@ -6752,8 +6752,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "  return SECTION_KEYS[section].filter((key) => offered.has(key) || style?.[key] !== undefined);",
-          "replace": "  return SECTION_KEYS[section].filter((key) => offered.has(key));"
+          "search": "    (key) => offered.has(key) || style?.[key] !== undefined,",
+          "replace": "    (key) => offered.has(key),"
         }
       ],
       "command": [
@@ -6772,8 +6772,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "    (id) => sections.includes(id) || SECTION_KEYS[id].some((key) => style?.[key] !== undefined),",
-          "replace": "    (id) => sections.includes(id),"
+          "search": "      SECTION_KEYS[id].some((key) => style?.[key] !== undefined && !moved.includes(key)),",
+          "replace": "      false,"
         }
       ],
       "command": [
@@ -8802,7 +8802,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "const StateStyle = StyleProps.omit({ transition: true, entrance: true });",
+          "search": "const StateStyle = StyleProps.omit({ transition: true, entrance: true, iconAnimation: true });",
           "replace": "const StateStyle = StyleProps;"
         }
       ],
@@ -9102,8 +9102,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "              (key) => styleState === \"normal\" || (key !== \"transition\" && key !== \"entrance\"),",
-          "replace": "              () => true,"
+          "search": "                (styleState === \"normal\" || !NORMAL_ONLY_KEYS.has(key)) &&",
+          "replace": "                true &&"
         }
       ],
       "command": [
@@ -13422,8 +13422,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "  if (typeof style !== \"object\" || style === null || !(\"transition\" in style)) return style;",
-          "replace": "  if (style === null || !(\"transition\" in (style as object))) return style;"
+          "search": "  if (typeof style !== \"object\" || style === null) return style;",
+          "replace": "  if (style === null) return style;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
@@ -19660,8 +19660,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": ".emvb-icon svg{display:block}.emvb-icon-missing",
-          "replace": ".emvb-icon svg{display:block;width:1em;height:1em}.emvb-icon-missing"
+          "search": ".emvb-icon svg{display:block;",
+          "replace": ".emvb-icon svg{display:block;width:1em;height:1em;"
         }
       ],
       "command": [
@@ -22972,6 +22972,52 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/library.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-237/flip-swapped",
+      "requirement": "W-237: Icon style: glyph rotate/flip/scale/stroke/drop shadow/spin-pulse as CSS custom properties on the wrapper (states, devices), reduced motion respected; Icon section in the Style tab.",
+      "description": "Flip horizontal mirrors the icon top to bottom.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  horizontal: \"-1 1\",",
+          "replace": "  horizontal: \"1 -1\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-237/spin-ignores-reduced-motion",
+      "requirement": "W-237: Icon style: glyph rotate/flip/scale/stroke/drop shadow/spin-pulse as CSS custom properties on the wrapper (states, devices), reduced motion respected; Icon section in the Style tab.",
+      "description": "A spinning icon keeps spinning for visitors who ask for reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "@media (prefers-reduced-motion: reduce){.emvb-icon svg{animation:none}}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-237/hover-animation-row",
+      "requirement": "W-237: Icon style: glyph rotate/flip/scale/stroke/drop shadow/spin-pulse as CSS custom properties on the wrapper (states, devices), reduced motion respected; Icon section in the Style tab.",
+      "description": "Hover offers Animation, which the schema refuses there, so the edit is lost on save.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "const NORMAL_ONLY_KEYS = new Set<StyleKey>([\"transition\", \"entrance\", \"iconAnimation\"]);",
+          "replace": "const NORMAL_ONLY_KEYS = new Set<StyleKey>([\"transition\", \"entrance\"]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
       "expect": "\\(fail\\)"
     }
   ]

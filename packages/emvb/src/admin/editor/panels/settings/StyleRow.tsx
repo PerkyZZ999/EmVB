@@ -13,6 +13,14 @@ import {
   ShadowControl,
   TransitionControl,
 } from "./EffectsControls.tsx";
+import {
+  ICON_SCALE,
+  ICON_STROKE,
+  IconAnimationControl,
+  IconFlipRow,
+  IconRotateRow,
+  IconShadowControl,
+} from "./IconControls.tsx";
 import { NumberRow, ResetButton, type NumberSpec } from "./NumberRow.tsx";
 import { boundRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
 
@@ -416,6 +424,56 @@ export function StyleRow({
     );
   }
 
+  // W-237: the Icon section.
+  if (styleKey === "iconRotate") {
+    return (
+      <IconRotateRow
+        value={style?.iconRotate}
+        inherited={inherited?.iconRotate}
+        onChange={(iconRotate) => onPatch({ iconRotate })}
+      />
+    );
+  }
+  if (styleKey === "iconFlip") {
+    return (
+      <IconFlipRow
+        value={style?.iconFlip}
+        inherited={inherited?.iconFlip}
+        onChange={(iconFlip) => onPatch({ iconFlip })}
+      />
+    );
+  }
+  if (styleKey === "iconScale" || styleKey === "iconStrokeWidth") {
+    return (
+      <NumberRow
+        rowKey={styleKey}
+        label={label}
+        value={typeof value === "number" ? value : undefined}
+        inherited={typeof normalValue === "number" ? normalValue : undefined}
+        spec={styleKey === "iconScale" ? ICON_SCALE : ICON_STROKE}
+        onCommit={(next) => onPatch({ [styleKey]: next })}
+      />
+    );
+  }
+  if (styleKey === "iconShadow") {
+    return (
+      <IconShadowControl
+        value={style?.iconShadow}
+        design={design}
+        onChange={(iconShadow) => onPatch({ iconShadow })}
+        onDesignChange={onDesignChange}
+      />
+    );
+  }
+  if (styleKey === "iconAnimation") {
+    return (
+      <IconAnimationControl
+        value={style?.iconAnimation}
+        onChange={(iconAnimation) => onPatch({ iconAnimation })}
+      />
+    );
+  }
+
   if (styleKey === "boxShadow") {
     return (
       <ShadowControl
@@ -489,6 +547,12 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "filter",
   "entrance",
   "transition",
+  "iconRotate",
+  "iconFlip",
+  "iconScale",
+  "iconStrokeWidth",
+  "iconShadow",
+  "iconAnimation",
   "backgroundImage",
   "backgroundVideo",
   "gradient",

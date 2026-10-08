@@ -373,9 +373,19 @@ const image: ElementDefinition<ImageNode> = {
   },
 };
 
+/** Root stroke widths the Stroke width control can override (W-237); Lucide and Tabler use 2. */
+const ICON_STROKE_WIDTHS = ["1", "1.5", "2", "2.5", "3"] as const;
+
 const icon: ElementDefinition<IconNode> = {
   baseCss:
-    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon-link{display:inline-flex;color:inherit}.emvb-icon svg{display:block}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
+    // W-237: the glyph reads the wrapper's icon custom properties (rotate, flip, shadow, loop,
+    // stroke); unset they change nothing. The svg inherits the wrapper's transition for hover.
+    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon-link{display:inline-flex;color:inherit}.emvb-icon svg{display:block;rotate:var(--emvb-icon-rotate,0deg);scale:var(--emvb-icon-flip,1 1);filter:var(--emvb-icon-shadow,none);animation:var(--emvb-icon-animation,none);transition:inherit}" +
+    ICON_STROKE_WIDTHS.map(
+      (width) =>
+        `.emvb-icon-sw${width.replace(".", "_")}{stroke-width:var(--emvb-icon-stroke,${width})}`,
+    ).join("") +
+    "@keyframes emvb-icon-spin{to{transform:rotate(360deg)}}@keyframes emvb-icon-pulse{from{transform:scale(1)}to{transform:scale(1.15)}}@media (prefers-reduced-motion: reduce){.emvb-icon svg{animation:none}}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({
     type: "icon",
     props: { iconId: "star", title: "Star", decorative: false, size: 24 },
@@ -454,6 +464,7 @@ const icon: ElementDefinition<IconNode> = {
           attrs: { ...child.attrs },
           children: [],
         }));
+    strokeClass(svgAttrs);
     const svg: VNode = { tag: "svg", attrs: svgAttrs, children };
     // A linked icon is named by its title on the link, so the svg inside is hidden.
     const title = node.props.title?.trim();
@@ -467,6 +478,30 @@ const icon: ElementDefinition<IconNode> = {
     return { tag: "span", attrs, children: [linked ?? svg] };
   },
 };
+
+/**
+ * W-237: a stroke icon's root `stroke-width` moves into a class whose CSS reads the wrapper's
+ * `--emvb-icon-stroke` with the original width as fallback; any other width stays as it was.
+ */
+function strokeClass(svgAttrs: Record<string, string>): void {
+  const width = svgAttrs["stroke-width"];
+  if (!width || !(ICON_STROKE_WIDTHS as readonly string[]).includes(width)) return;
+  if (!svgAttrs.stroke || svgAttrs.stroke === "none") return;
+  delete svgAttrs["stroke-width"];
+  const cls = `emvb-icon-sw${width.replace(".", "_")}`;
+  svgAttrs.class = svgAttrs.class ? `${svgAttrs.class} ${cls}` : cls;
+}
+
+/** Whether an icon's SVG is stroke-drawn with an adjustable width (the panel shows the control). */
+export function iconHasAdjustableStroke(svg: string | undefined): boolean {
+  if (!svg) return true; // bundled Lucide
+  const picked = sanitizeSvgMarkup(svg);
+  if (!picked) return false;
+  const attrs = pickedIconAttrs(picked.attrs);
+  const before = attrs["stroke-width"];
+  strokeClass(attrs);
+  return before !== undefined && attrs["stroke-width"] === undefined;
+}
 
 /** A picked icon's root attributes minus what the element sets itself (size, name, id). */
 function pickedIconAttrs(attrs: Record<string, string>): Record<string, string> {

@@ -309,7 +309,8 @@ export const EDITOR_CSS = `${UI_CSS}
   background: var(--color-kumo-control); color: var(--text-color-kumo-default);
   box-shadow: inset 0 0 0 1px var(--color-kumo-line);
 }
-.emvb-choice-group button[aria-checked="true"] {
+.emvb-choice-group button[aria-checked="true"],
+.emvb-choice-group button[aria-pressed="true"] {
   background: var(--color-kumo-tint); color: var(--color-kumo-brand);
   box-shadow: inset 0 0 0 1px var(--color-kumo-brand);
 }

@@ -311,6 +311,61 @@ function cssTransition(value: unknown): string | undefined {
   return properties.map((property) => `${property} ${timing}`).join(",");
 }
 
+const inRangeNumber = (value: unknown, min: number, max: number): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= min && value <= max;
+
+/** Up to 3 decimals, without float noise or a trailing zero (`1.5`, not `1.5000000001`). */
+const decimal = (n: number) => String(Math.round(n * 1000) / 1000);
+
+/** W-237: glyph rotation in degrees, -360 to 360. */
+const cssIconRotate = (value: unknown): string | undefined =>
+  Number.isInteger(value) && inRangeNumber(value, -360, 360) ? `${value}deg` : undefined;
+
+const ICON_FLIPS: Readonly<Record<string, string>> = {
+  none: "1 1",
+  horizontal: "-1 1",
+  vertical: "1 -1",
+  both: "-1 -1",
+};
+
+/** W-237: a flip as the svg's `scale` (`none` too, so a device can undo a Desktop flip). */
+const cssIconFlip = (value: unknown): string | undefined =>
+  typeof value === "string" && Object.hasOwn(ICON_FLIPS, value) ? ICON_FLIPS[value] : undefined;
+
+const cssIconScale = (value: unknown): string | undefined =>
+  inRangeNumber(value, 0.1, 4) ? decimal(value) : undefined;
+
+const cssIconStroke = (value: unknown): string | undefined =>
+  inRangeNumber(value, 0.25, 6) ? decimal(value) : undefined;
+
+/** W-237: `drop-shadow(x y blur [color])` in px; no colour means the icon's own colour. */
+function cssIconShadow(value: unknown): string | undefined {
+  if (!isRecord(value)) return undefined;
+  if (Object.keys(value).some((key) => !["x", "y", "blur", "color"].includes(key)))
+    return undefined;
+  const { x, y, blur } = value;
+  if (!inRangeNumber(x, -100, 100) || !inRangeNumber(y, -100, 100) || !inRangeNumber(blur, 0, 100))
+    return undefined;
+  const color = value["color"] === undefined ? "" : cssColor(value["color"]);
+  if (color === undefined) return undefined;
+  return `drop-shadow(${decimal(x)}px ${decimal(y)}px ${decimal(blur)}px${color ? ` ${color}` : ""})`;
+}
+
+const ICON_ANIMATIONS: Readonly<Record<string, string>> = {
+  spin: "emvb-icon-spin {ms} linear infinite",
+  pulse: "emvb-icon-pulse {ms} ease-in-out infinite alternate",
+};
+
+/** W-237: a looping spin or pulse; the Icon's base CSS turns it off for reduced motion. */
+function cssIconAnimation(value: unknown): string | undefined {
+  if (!isRecord(value)) return undefined;
+  if (Object.keys(value).some((key) => key !== "type" && key !== "duration")) return undefined;
+  const { type, duration } = value;
+  if (typeof type !== "string" || !Object.hasOwn(ICON_ANIMATIONS, type)) return undefined;
+  if (!Number.isInteger(duration) || !inRangeNumber(duration, 200, 10_000)) return undefined;
+  return ICON_ANIMATIONS[type]?.replace("{ms}", `${duration}ms`);
+}
+
 export type Declaration = { property: string; value: string };
 
 const BACKGROUND_SIZE = new Set(["auto", "cover", "contain"]);
@@ -588,6 +643,12 @@ const PROPERTY_MAP: {
   cursor: { css: "cursor", toValue: keyword(CURSOR) },
   transition: { css: "transition", toValue: cssTransition },
   entrance: { css: "animation", toValue: cssEntrance },
+  iconRotate: { css: "--emvb-icon-rotate", toValue: cssIconRotate },
+  iconFlip: { css: "--emvb-icon-flip", toValue: cssIconFlip },
+  iconScale: { css: "scale", toValue: cssIconScale },
+  iconStrokeWidth: { css: "--emvb-icon-stroke", toValue: cssIconStroke },
+  iconShadow: { css: "--emvb-icon-shadow", toValue: cssIconShadow },
+  iconAnimation: { css: "--emvb-icon-animation", toValue: cssIconAnimation },
 };
 
 /** Exported for table-driven tests (W-017). */
@@ -644,10 +705,12 @@ export function styleDeclarations(style: unknown): {
   return { declarations, rejected };
 }
 
-/** Transitions are Normal only (W-089): a state's `transition` is dropped and reported. */
+/** Normal only (W-089, W-237): a state's `transition` and `iconAnimation` are dropped and reported. */
+const NORMAL_ONLY = ["transition", "iconAnimation"] as const;
 const withoutTransition = (style: unknown): unknown => {
-  if (typeof style !== "object" || style === null || !("transition" in style)) return style;
-  const { transition: _drop, ...rest } = style as Record<string, unknown>;
+  if (typeof style !== "object" || style === null) return style;
+  if (!NORMAL_ONLY.some((key) => key in style)) return style;
+  const { transition: _drop, iconAnimation: _loop, ...rest } = style as Record<string, unknown>;
   return rest;
 };
 
@@ -671,8 +734,9 @@ export function stateDeclarations(states: unknown): {
     const style = (states as Record<string, unknown>)[state];
     if (style === undefined) continue;
     const { declarations, rejected: bad } = styleDeclarations(withoutTransition(style));
-    if (typeof style === "object" && style !== null && "transition" in style)
-      bad.push("transition");
+    for (const key of NORMAL_ONLY) {
+      if (typeof style === "object" && style !== null && key in style) bad.push(key);
+    }
     if (declarations.length > 0) result[state] = declarations;
     for (const key of bad) rejected.push(`${state}.${key}`);
   }
