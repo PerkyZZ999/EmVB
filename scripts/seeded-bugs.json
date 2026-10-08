@@ -25047,6 +25047,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
       "expect": "\\(fail\\).*W-285"
+    },
+    {
+      "id": "W-286/helper-omits-nofollow",
+      "requirement": "W-286",
+      "description": "The Hide from search engines helper doesn't mention nofollow.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "follow its links (noindex, nofollow).",
+          "replace": "follow its links (noindex)."
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
+      "expect": "\\(fail\\).*W-284"
     }
   ]
 }

@@ -84,6 +84,10 @@ describe("page settings (W-091)", () => {
     const view = await settings(PAGE);
     await view.openSeo();
     expect(view.field("Canonical URL")?.type).toBe("url");
+    // W-286: EmDash prints "noindex, nofollow", so the helper names both.
+    expect(view.host.querySelector("[data-emvb-noindex-help]")?.textContent?.trim()).toBe(
+      "Search engines are asked not to list this page or follow its links (noindex, nofollow).",
+    );
     await view.type("Canonical URL", "https://example.com/original");
     const toggle = view.host.querySelector<HTMLElement>('[role="switch"]');
     await act(async () => toggle?.click());

@@ -155,7 +155,9 @@ export function PageSettings({
             checked={page.seoNoIndex === true}
             onCheckedChange={(checked) => onChange({ seoNoIndex: checked === true })}
           />
-          <p className="emvb-helper">Adds noindex, so search engines leave this page out.</p>
+          <p className="emvb-helper" data-emvb-noindex-help="">
+            Search engines are asked not to list this page or follow its links (noindex, nofollow).
+          </p>
         </Collapsible.Panel>
       </Collapsible.Root>
     </div>
