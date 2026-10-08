@@ -25604,6 +25604,20 @@
       ],
       "command": ["bun", "test", "./test/site/outline-blocks.test.ts"],
       "expect": "\\(fail\\).*W-301"
+    },
+    {
+      "id": "W-302/updatedat-string-of-date",
+      "requirement": "W-302",
+      "description": "Theme part winners compare String(Date) text, so a Sunday edit loses to an older Tuesday one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    updatedAt: entryTimestamp(data[\"updatedAt\"] ?? data[\"updated_at\"]) ?? \"\",\n",
+          "replace": "    updatedAt: String(data[\"updatedAt\"] ?? data[\"updated_at\"] ?? \"\"),\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*W-302"
     }
   ]
 }

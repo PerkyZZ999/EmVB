@@ -233,6 +233,20 @@ describe("resolveThemeParts (R-062)", () => {
     expect(reversed.header?.id).toBe("HEADTIE2");
   });
 
+  test("W-302: updatedAt as EmDash's Date objects orders by time, not by weekday name", async () => {
+    // EmDash gives templates `Date`s. "Sun Sep 06 2026" sorts before "Tue Sep 01 2026" as text.
+    const at = (day: string) => ({ updatedAt: new Date(`2026-09-${day}T00:00:00Z`) });
+    themeEntries = [
+      part("HEADOLD1", "header", [heading("head0001", "Old")], at("01")),
+      part("HEADNEW1", "header", [heading("head0002", "New")], at("06")),
+      part("POPOLD01", "popup", [heading("head0003", "Old")], at("01")),
+      part("POPNEW01", "popup", [heading("head0004", "New")], at("06")),
+    ];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect(resolved.header?.id).toBe("HEADNEW1");
+    expect(resolved.popups.map((p) => p.id)).toEqual(["POPNEW01", "POPOLD01"]);
+  });
+
   test("a 404 part replaces the content on 404s only", async () => {
     themeEntries = [part("NOTF0001", "error_404", [heading("head0001", "Lost?")])];
     const ctx404 = themeContextFrom(new URL("http://site.test/missing"), { is404: true });

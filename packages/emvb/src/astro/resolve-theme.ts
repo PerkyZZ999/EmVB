@@ -33,7 +33,7 @@ import {
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
 import { themeContextFrom } from "./theme-context.ts";
-import { themePostFromEntry } from "./theme-posts.ts";
+import { entryTimestamp, themePostFromEntry } from "./theme-posts.ts";
 
 /** The landmark element for a part's wrapper (W-216); other parts get a plain div. */
 const WRAPPER_TAGS: Partial<Record<string, "header" | "footer">> = {
@@ -150,7 +150,7 @@ function storedPartFrom(entry: { id: string; data: unknown }): StoredPart | unde
     conditions: conditions.conditions,
     triggers: triggers.ok ? triggers.triggers : defaultTriggers(),
     float: float.ok ? float.settings : defaultFloatSettings(),
-    updatedAt: String(data["updatedAt"] ?? data["updated_at"] ?? ""),
+    updatedAt: entryTimestamp(data["updatedAt"] ?? data["updated_at"]) ?? "",
   };
 }
 

@@ -28,6 +28,15 @@ export function mediaFieldsFrom(value: unknown): {
 }
 
 /**
+ * An entry timestamp as an ISO string (W-302). EmDash hands system dates (`updatedAt`,
+ * `publishedAt`) to templates as `Date` objects, so `String()` gave "Sun Sep 06 2026 …".
+ */
+export function entryTimestamp(value: unknown): string | undefined {
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? undefined : value.toISOString();
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+/**
  * Normalize an EmDash posts collection entry (or plain data bag) into ThemePostFields.
  * Permalink defaults to `/posts/{slug}` to match the demo routes.
  */
