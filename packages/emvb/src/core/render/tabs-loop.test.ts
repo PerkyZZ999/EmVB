@@ -133,3 +133,80 @@ describe("renderLoop (W-091)", () => {
     );
   });
 });
+
+describe("one element rendered twice keeps its HTML ids unique (W-249)", () => {
+  const tabs = tabsOf("tabs0001", [panel("tabp0001", "One"), panel("tabp0002", "Two")]);
+  const field = {
+    id: "field001",
+    type: "text-input",
+    props: { field: "email", label: "Email" },
+  } as LayoutNode;
+  const form = {
+    id: "form0001",
+    type: "form",
+    props: { formId: "f1" },
+    children: [field],
+  } as LayoutNode;
+  const twice = (part: Layout) =>
+    renderPage(
+      page(
+        { id: "sec00001", type: "section", props: { partId: "p1" }, children: [] } as LayoutNode,
+        { id: "sec00002", type: "section", props: { partId: "p1" }, children: [] } as LayoutNode,
+      ),
+      design,
+      { dynamic: { sectionTemplates: { p1: part } } },
+    ).html;
+  const duplicateIds = (dom: HTMLElement) => {
+    const ids = [...dom.querySelectorAll("[id]")].map((el) => el.id);
+    return ids.filter((id, i) => ids.indexOf(id) !== i);
+  };
+  const resolves = (dom: HTMLElement, attr: string) =>
+    [...dom.querySelectorAll(`[${attr}]`)].every((el) =>
+      (el.getAttribute(attr) ?? "").split(" ").every((ref) => dom.querySelector(`#${ref}`)),
+    );
+
+  test("a synced section with Tabs placed twice: two radio groups, labels point at their own copy", () => {
+    const dom = parse(twice(page(tabs)));
+    expect(duplicateIds(dom)).toEqual([]);
+    const [first, second] = [...dom.querySelectorAll(".emvb-tabs")];
+    const names = (el: Element | undefined) =>
+      [...(el?.querySelectorAll(".emvb-tab-input") ?? [])].map((i) => i.getAttribute("name"));
+    expect(names(first)).toEqual(["emvb-tabs-tabs0001", "emvb-tabs-tabs0001"]);
+    expect(names(second)).toEqual(["emvb-tabs-tabs0001-r2", "emvb-tabs-tabs0001-r2"]);
+    const label = second?.querySelector(".emvb-tab-label");
+    expect(second?.querySelector(`#${label?.getAttribute("for")}`)).not.toBeNull();
+    for (const attr of ["for", "aria-controls", "aria-labelledby"]) {
+      expect(resolves(dom, attr)).toBe(true);
+    }
+  });
+
+  test("a synced section with a form placed twice: each label focuses its own input", () => {
+    const dom = parse(twice(page(form)));
+    expect(duplicateIds(dom)).toEqual([]);
+    const forms = [...dom.querySelectorAll("form")];
+    expect(forms).toHaveLength(2);
+    for (const f of forms) {
+      for (const label of f.querySelectorAll("label[for]")) {
+        expect(f.querySelector(`#${label.getAttribute("for")}`)).not.toBeNull();
+      }
+    }
+    expect(forms[1]?.querySelector(".ec-form-input")?.getAttribute("id")).toBe(
+      "emvb-field-field001-r2",
+    );
+    expect(forms[1]?.querySelector(".ec-form-input")?.getAttribute("name")).toBe("email");
+  });
+
+  test("Tabs inside a loop item get one radio group per post", () => {
+    const posts: ThemePostFields[] = [
+      { ...SAMPLE_POST, id: "a", title: "Alpha" },
+      { ...SAMPLE_POST, id: "b", title: "Beta" },
+    ];
+    const loop = { id: "loop0001", type: "loop", props: {}, children: [tabs] } as LayoutNode;
+    const dom = parse(renderPage(page(loop), design, { dynamic: { posts } }).html);
+    expect(duplicateIds(dom)).toEqual([]);
+    const groups = new Set(
+      [...dom.querySelectorAll(".emvb-tab-input")].map((i) => i.getAttribute("name")),
+    );
+    expect(groups.size).toBe(2);
+  });
+});

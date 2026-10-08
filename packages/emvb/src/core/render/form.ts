@@ -89,8 +89,9 @@ export function renderForm(
     children: [
       page,
       { tag: "input", attrs: { type: "hidden", name: "formId", value: formId }, children: [] },
-      // One id per form element, so the same form placed twice keeps unique ids (W-187).
-      honeypot(`emvb-hp-${node.id}`),
+      // One id per form element, so the same form placed twice keeps unique ids (W-187), also
+      // when one form element renders twice, from a synced section or a loop item (W-249).
+      honeypot(ctx.uniqueId(`emvb-hp-${node.id}`)),
       {
         tag: "div",
         attrs: { class: "ec-form-status", "data-form-status": "", "aria-live": "polite" },

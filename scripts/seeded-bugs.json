@@ -11793,8 +11793,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/tabs.ts",
-          "search": "const group = `emvb-tabs-${id ?? \"x\"}`;",
-          "replace": "const group = `emvb-tabs-${id ?? \"\"}`;"
+          "search": "const group = ctx.uniqueId(`emvb-tabs-${id ?? \"x\"}`);",
+          "replace": "const group = ctx.uniqueId(`emvb-tabs-${id ?? \"\"}`);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
@@ -20719,9 +20719,9 @@
       "description": "Form controls take the field name as their id again, so two forms with an email field share an id.",
       "edits": [
         {
-          "file": "packages/emvb/src/core/elements/form-elements.ts",
-          "search": "const controlId = (nodeId: string): string => `emvb-field-${nodeId}`;",
-          "replace": "const controlId = (_nodeId: string): string => `email`;"
+          "file": "packages/emvb/src/core/elements/field-id.ts",
+          "search": "export const controlId = (nodeId: string): string => `emvb-field-${nodeId}`;",
+          "replace": "export const controlId = (_nodeId: string): string => `email`;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/form-ids.test.ts"],
@@ -20748,8 +20748,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/form.ts",
-          "search": "honeypot(`emvb-hp-${node.id}`),",
-          "replace": "honeypot(`${formId}-_hp`),"
+          "search": "honeypot(ctx.uniqueId(`emvb-hp-${node.id}`)),",
+          "replace": "honeypot(ctx.uniqueId(`${formId}-_hp`)),"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/form-ids.test.ts"],
@@ -23456,6 +23456,48 @@
         "test",
         "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
       ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-249/tabs-shared-group",
+      "requirement": "W-249: one element rendered twice in a page (a synced section placed twice, a loop item per post) keeps HTML ids unique: Tabs get their own radio group, form fields and the honeypot their own ids, and labels and ARIA references point at their own copy.",
+      "description": "Tabs always use emvb-tabs-<id>, so two copies share one radio group and one copy's labels switch the other.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "  const group = ctx.uniqueId(`emvb-tabs-${id ?? \"x\"}`);",
+          "replace": "  const group = `emvb-tabs-${id ?? \"x\"}`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-249/field-id-repeats",
+      "requirement": "W-249: one element rendered twice in a page (a synced section placed twice, a loop item per post) keeps HTML ids unique: Tabs get their own radio group, form fields and the honeypot their own ids, and labels and ARIA references point at their own copy.",
+      "description": "A form field rendered again keeps emvb-field-<id>, so the second form's label focuses the first form's input.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    return unique === base ? vnode : renameIds(vnode, base, unique);",
+          "replace": "    return unique === base ? vnode : vnode;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-249/honeypot-repeats",
+      "requirement": "W-249: one element rendered twice in a page (a synced section placed twice, a loop item per post) keeps HTML ids unique: Tabs get their own radio group, form fields and the honeypot their own ids, and labels and ARIA references point at their own copy.",
+      "description": "The honeypot id repeats when one form element renders twice.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "      honeypot(ctx.uniqueId(`emvb-hp-${node.id}`)),",
+          "replace": "      honeypot(`emvb-hp-${node.id}`),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]

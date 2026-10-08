@@ -1,6 +1,7 @@
 import { generateCss } from "../css/generate.ts";
 import { cssScopeToken, scopeAttribute, scopeCss, scopeWrapperCss } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
+import { controlId } from "../elements/field-id.ts";
 import { layoutHasForm } from "../forms/binding.ts";
 import { layoutHasMenuDropdown, layoutHasTabs } from "../tabs/presence.ts";
 import type { DesignSystem } from "../schema/design.ts";
@@ -96,6 +97,33 @@ const gridTracks = (columns: unknown): Declaration[] =>
     ? [{ property: "grid-template-columns", value: `repeat(${columns}, minmax(0, 1fr))` }]
     : [];
 
+/** Form fields whose control carries an `emvb-field-<id>` HTML id (W-187). */
+const FIELD_TYPES = new Set(["text-input", "textarea", "select", "checkbox", "radio"]);
+
+const ID_ATTRS = ["id", "for", "aria-controls", "aria-labelledby", "aria-describedby"] as const;
+
+/** Rewrites `base` (or `base-…`) to `next` in the id and id-reference attributes of a subtree. */
+function renameIds(vnode: VNode, base: string, next: string): VNode {
+  const attrs = { ...vnode.attrs };
+  for (const key of ID_ATTRS) {
+    const value = attrs[key];
+    if (value === undefined) continue;
+    attrs[key] = value
+      .split(" ")
+      .map((ref) =>
+        ref === base || ref.startsWith(`${base}-`) ? next + ref.slice(base.length) : ref,
+      )
+      .join(" ");
+  }
+  return {
+    ...vnode,
+    attrs,
+    children: vnode.children.map((child) =>
+      typeof child === "string" ? child : renameIds(child, base, next),
+    ),
+  };
+}
+
 export function renderPage(
   layout: Layout,
   design: DesignSystem,
@@ -124,6 +152,7 @@ export function renderPage(
   const knownVariables = new Set(design.variables.colors.map((c) => c.id));
   let backgroundVideo = false;
 
+  const domIds = new Map<string, number>();
   const ctx: RenderContext = {
     mode,
     definitions: opts.formDefinitions ?? new Map(),
@@ -131,6 +160,11 @@ export function renderPage(
       nodes
         .map((child) => visit(child, false, dynamic))
         .filter((child): child is VNode => child !== undefined),
+    uniqueId: (base) => {
+      const count = (domIds.get(base) ?? 0) + 1;
+      domIds.set(base, count);
+      return count === 1 ? base : `${base}-r${count}`;
+    },
   };
 
   const nodeAttrs = (
@@ -245,10 +279,14 @@ export function renderPage(
       const preview = videoPreview(node, attrs);
       if (preview) return finish(node, preview);
     }
-    return finish(
-      node,
-      withFieldOptions(def.build(node as never, attrs, []), node, ctx.definitions),
-    );
+    const built = withFieldOptions(def.build(node as never, attrs, []), node, ctx.definitions);
+    return finish(node, FIELD_TYPES.has(type) && id ? uniqueField(built, controlId(id)) : built);
+  }
+
+  /** W-249: a field rendered again (synced section, loop item) moves its control to a new id. */
+  function uniqueField(vnode: VNode, base: string): VNode {
+    const unique = ctx.uniqueId(base);
+    return unique === base ? vnode : renameIds(vnode, base, unique);
   }
 
   function videoOf(node: LayoutNode): string | undefined {

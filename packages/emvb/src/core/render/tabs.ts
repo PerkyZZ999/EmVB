@@ -13,7 +13,7 @@ export function renderTabs(
   dynamic: ThemeDynamicData | undefined,
 ): VNode {
   const panels = node.children.filter(isTabPanelNode).slice(0, MAX_TABS);
-  const group = `emvb-tabs-${id ?? "x"}`;
+  const group = ctx.uniqueId(`emvb-tabs-${id ?? "x"}`);
   const inputs: VNode[] = [];
   const labels: VNode[] = [];
   const panelNodes: VNode[] = [];
