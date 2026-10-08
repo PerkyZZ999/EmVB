@@ -167,7 +167,9 @@ const spacer: ElementDefinition<SpacerNode> = {
 const divider: ElementDefinition<DividerNode> = {
   // W-266: full width by default; an <hr> has no content width, so in a centred column it was 0 wide.
   baseCss:
-    ".emvb-divider{border:0;border-top:1px solid currentColor;margin:0}:where(.emvb-divider){width:100%}",
+    // W-270: a Divider is its top border. Border style on the other sides stays none (the tag in
+    // the selector outranks an element's class), so "dashed" draws a dashed line, not a box.
+    ".emvb-divider{border:0;border-top:1px solid currentColor;margin:0}:where(.emvb-divider){width:100%}hr.emvb-divider{border-right-style:none;border-bottom-style:none;border-left-style:none}",
   defaults: () => ({ type: "divider", props: {} }),
   descriptor: {
     type: "divider",

@@ -24313,6 +24313,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/image-size.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-270/dashed-box",
+      "requirement": "W-270",
+      "description": "A divider's border style applies to all four sides, drawing a box.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "hr.emvb-divider{border-right-style:none;border-bottom-style:none;border-left-style:none}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/divider-border.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-270/rule-too-weak",
+      "requirement": "W-270",
+      "description": "A plain class rule loses to the element's own border style.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "hr.emvb-divider{border-right-style:none;",
+          "replace": ".emvb-divider{border-right-style:none;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/divider-border.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }
