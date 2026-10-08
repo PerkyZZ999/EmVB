@@ -12,7 +12,7 @@ export const faqs: Faq[] = [
   },
   {
     q: "Which EmDash version does it need?",
-    a: "EmDash CMS 1.0.x. EmVB is a native plugin. It adds its own section to the admin sidebar with Pages VisualBuilder and Theme Builder.",
+    a: "EmDash CMS 1.0 to 1.2 (built and tested on 1.2). EmVB is a native plugin. It adds its own section to the admin sidebar with Pages VisualBuilder and Theme Builder.",
   },
   {
     q: "Where does it run?",
