@@ -16,7 +16,8 @@ export async function uploadEmvbPixel(request: APIRequestContext) {
       alt: "Hero",
     },
   });
-  expect(response.status(), await response.text()).toBe(200);
+  // 201 for a new item, 200 when EmDash deduplicates it to one already in the library.
+  expect([200, 201], await response.text()).toContain(response.status());
   const json = (await response.json()) as {
     data?: {
       item?: {

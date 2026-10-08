@@ -71,14 +71,21 @@ test("upload stores media id, URL, alt, and dimensions on both platforms", async
   const image = layout.root.children[0];
   expect(image?.type).toBe("image");
   expect(image?.props.src).toMatch(/^\/_emdash\/api\/media\/file\//);
-  // The layout starts with the placeholder alt "Image"; an upload replaces it with the file name.
-  expect(image?.props.alt).toBe("emvb-pixel");
+  // The layout starts with the placeholder alt "Image"; an upload replaces it with the library
+  // item's alt, or the file name when it has none. EmDash 1.2 stores the alt sent with an upload,
+  // and the pixel deduplicates to the item the a11y and success specs upload with alt "Hero".
+  const mediaResponse = await request.get(`/_emdash/api/media/${image?.props.mediaId ?? ""}`);
+  expect(mediaResponse.ok()).toBe(true);
+  const libraryAlt = ((await mediaResponse.json()) as { data?: { item?: { alt?: string | null } } })
+    .data?.item?.alt;
+  const expectedAlt = libraryAlt || "emvb-pixel";
+  expect(image?.props.alt).toBe(expectedAlt);
   expect(image?.props.width).toBe(1);
   expect(image?.props.height).toBe(1);
 
   await expect(
     canvas(page).locator('img.emvb-image[src*="/_emdash/api/media/file/"]'),
-  ).toHaveAttribute("alt", "emvb-pixel");
+  ).toHaveAttribute("alt", expectedAlt);
 
   // The stored media id names a real library item with the stored URL.
   const mediaId = image?.props.mediaId ?? "";
