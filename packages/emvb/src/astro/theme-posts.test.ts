@@ -25,6 +25,22 @@ describe("themePostFromEntry", () => {
     });
   });
 
+  test("W-303: EmDash's publishedAt Date becomes an ISO publish date", () => {
+    const post = themePostFromEntry({
+      id: "welcome",
+      data: { id: "01WELCOME", slug: "welcome", publishedAt: new Date("2026-09-06T12:00:00Z") },
+    });
+    expect(post?.publishedAt).toBe("2026-09-06T12:00:00.000Z");
+    // A text date field still wins, and an invalid Date is no date.
+    expect(
+      themePostFromEntry({ slug: "a", published_at: "2026-01-02", publishedAt: new Date(0) })
+        ?.publishedAt,
+    ).toBe("2026-01-02");
+    expect(themePostFromEntry({ slug: "a", publishedAt: new Date("nope") })?.publishedAt).toBe(
+      undefined,
+    );
+  });
+
   test("a plain data bag with missing fields gets empty text and the given permalink prefix", () => {
     expect(themePostFromEntry({ slug: "hello", title: 5 }, { permalinkPrefix: "/blog/" })).toEqual({
       id: "hello",

@@ -57,7 +57,10 @@ export function themePostFromEntry(
   const prefix = options.permalinkPrefix ?? "/posts";
   const permalink = `${prefix.replace(/\/$/, "")}/${slug || id}`;
   const media = mediaFieldsFrom(data["featured_image"]);
-  const publishedAt = firstString(data, ["published_at", "publishedAt", "date"]);
+  // W-303: EmDash's own publish date is `data.publishedAt`, a `Date`; a custom field may be text.
+  const publishedAt = ["published_at", "publishedAt", "date"]
+    .map((key) => entryTimestamp(data[key]))
+    .find(Boolean);
   const authorName = authorFrom(data);
   return {
     id: id || slug,

@@ -25618,6 +25618,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*W-302"
+    },
+    {
+      "id": "W-303/published-date-object",
+      "requirement": "W-303",
+      "description": "Post Date stays empty on real EmDash posts: publishedAt is a Date, not text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "  // W-303: EmDash's own publish date is `data.publishedAt`, a `Date`; a custom field may be text.\n  const publishedAt = [\"published_at\", \"publishedAt\", \"date\"]\n    .map((key) => entryTimestamp(data[key]))\n    .find(Boolean);\n",
+          "replace": "  const publishedAt = firstString(data, [\"published_at\", \"publishedAt\", \"date\"]);\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
+      "expect": "\\(fail\\).*W-303"
     }
   ]
 }
