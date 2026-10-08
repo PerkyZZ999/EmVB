@@ -463,6 +463,35 @@ describe("public popup runtime details (W-091)", () => {
     expect(left.hidden).toBe(true);
   });
 
+  test("W-279: inactivity opens once; after closing, more idling doesn't reopen", () => {
+    const root = popup("once-i", doc([{ type: "inactivity", ms: 2000 }]));
+    timers.at(-1)?.run();
+    expect(root.hidden).toBe(false);
+    escape(root);
+    const before = timers.length;
+    window.dispatchEvent(new Event("mousemove"));
+    window.dispatchEvent(new Event("keydown"));
+    // Popups from earlier tests still listen on window; run every new timer.
+    for (const timer of timers.slice(before)) timer.run();
+    expect(root.hidden).toBe(true);
+  });
+
+  test("W-279: Tab wraps from the last control that can take focus, past hidden inputs", () => {
+    const { dialog, open } = openablePopup(
+      "form",
+      '<input name="email"><button>Join</button><input type="hidden" name="formId" value="f">' +
+        '<div hidden><button>Hidden</button></div><div inert><a href="/x">Inert</a></div>',
+    );
+    open();
+    const [email, join] = [...dialog.querySelectorAll<HTMLElement>("input, button")];
+    if (!email || !join) throw new Error("missing controls");
+    join.focus();
+    expect(key(join, "Tab").defaultPrevented).toBe(true);
+    expect(document.activeElement === email).toBe(true);
+    expect(key(email, "Tab", true).defaultPrevented).toBe(true);
+    expect(document.activeElement === join).toBe(true);
+  });
+
   test("scroll and activity listeners are passive", () => {
     const listen = spyOn(window, "addEventListener");
     try {

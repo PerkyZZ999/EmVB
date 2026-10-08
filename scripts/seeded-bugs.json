@@ -3637,7 +3637,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/popups/runtime.ts",
-          "search": "      window.clearTimeout(timer);\n      timer = window.setTimeout(open, ms);\n",
+          "search": "      window.clearTimeout(timer);\n      timer = window.setTimeout(fire, ms);\n",
           "replace": ""
         }
       ],
@@ -12073,8 +12073,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/popups/runtime.ts",
-          "search": "return [...nodes].filter((el) => !el.hasAttribute(\"disabled\") && el.tabIndex >= 0);",
-          "replace": "return [...nodes];"
+          "search": "      !el.hasAttribute(\"disabled\") &&\n      el.tabIndex >= 0 &&\n",
+          "replace": ""
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
@@ -24745,6 +24745,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-279/hidden-input-last",
+      "requirement": "W-279",
+      "description": "A form's hidden input counts as the popup's last focusable control, so Tab escapes the dialog.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      !(el instanceof HTMLInputElement && el.type === \"hidden\") &&\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*W-279"
+    },
+    {
+      "id": "W-279/hidden-ancestor",
+      "requirement": "W-279",
+      "description": "Controls inside hidden or inert parts count as focusable in the popup trap.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      !el.closest(\"[hidden], [inert]\") &&\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*W-279"
+    },
+    {
+      "id": "W-279/inactivity-rearm",
+      "requirement": "W-279",
+      "description": "After an inactivity popup is closed, more idling reopens it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      for (const eventName of IDLE_EVENTS) window.removeEventListener(eventName, reset);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*W-279"
     }
   ]
 }

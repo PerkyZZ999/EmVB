@@ -126,7 +126,16 @@ function focusables(container: HTMLElement): HTMLElement[] {
   const nodes = container.querySelectorAll<HTMLElement>(
     'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
   );
-  return [...nodes].filter((el) => !el.hasAttribute("disabled") && el.tabIndex >= 0);
+  // W-279: a form's hidden inputs and controls hidden on this device can't take focus; counting
+  // one as the last control let Tab leave the dialog from the real last one.
+  return [...nodes].filter(
+    (el) =>
+      !el.hasAttribute("disabled") &&
+      el.tabIndex >= 0 &&
+      !(el instanceof HTMLInputElement && el.type === "hidden") &&
+      !el.closest("[hidden], [inert]") &&
+      (typeof el.checkVisibility !== "function" || el.checkVisibility()),
+  );
 }
 
 function bindA11y(ctrl: Controller): void {
@@ -215,10 +224,15 @@ const ARM: { [T in OpenTrigger["type"]]: Arm<T> } = {
   },
   inactivity: (open, trigger) => {
     const ms = Math.max(TRIGGER_LIMITS.minIdleMs, Number(trigger.ms) || 30_000);
-    let timer = window.setTimeout(open, ms);
+    // W-279: opens once per visit, like scroll and exit intent; closing it doesn't re-arm the wait.
+    const fire = () => {
+      for (const eventName of IDLE_EVENTS) window.removeEventListener(eventName, reset);
+      open();
+    };
+    let timer = window.setTimeout(fire, ms);
     const reset = () => {
       window.clearTimeout(timer);
-      timer = window.setTimeout(open, ms);
+      timer = window.setTimeout(fire, ms);
     };
     for (const eventName of IDLE_EVENTS) {
       window.addEventListener(eventName, reset, { passive: true });
