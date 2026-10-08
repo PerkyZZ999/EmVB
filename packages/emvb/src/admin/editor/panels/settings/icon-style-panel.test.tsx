@@ -25,7 +25,7 @@ const star: LayoutNode = {
   props: { iconId: "star", title: "Star", size: 24 },
 };
 
-function Harness({ start }: { start: LayoutNode }) {
+function Harness({ start, device }: { start: LayoutNode; device?: "mobile" }) {
   const [node, set] = React.useState(start);
   return (
     <ElementPanel
@@ -43,12 +43,13 @@ function Harness({ start }: { start: LayoutNode }) {
       }}
       onDesignChange={async () => undefined}
       onSelect={() => undefined}
+      device={device}
     />
   );
 }
 
-async function panel(node: LayoutNode = star) {
-  await mount(<Harness start={node} />);
+async function panel(node: LayoutNode = star, device?: "mobile") {
+  await mount(<Harness start={node} device={device} />);
   const tab = [...document.querySelectorAll('[role="tab"]')].find(
     (el) => el.textContent === "Style",
   ) as HTMLElement | undefined;
@@ -268,6 +269,25 @@ describe("Force single colour and Shape (W-238)", () => {
     await panel(upload);
     await pickState("Hover");
     expect(document.querySelector("[data-emvb-icon-single-color]")).toBeNull();
+  });
+
+  test("W-296: Hover and Mobile say the colour is ignored until Force single color is on", async () => {
+    await panel(upload);
+    expect(document.querySelector("[data-emvb-icon-color-ignored]")).toBeNull();
+    await pickState("Hover");
+    expect(document.querySelector("[data-emvb-icon-color-ignored]")?.textContent).toContain(
+      "Force single color",
+    );
+    await cleanup();
+    await panel(upload, "mobile");
+    expect(document.querySelector("[data-emvb-icon-color-ignored]")?.textContent).toContain(
+      "Normal state, Desktop",
+    );
+    await cleanup();
+    // A currentColor icon paints from the colour, so there is nothing to warn about.
+    await panel();
+    await pickState("Hover");
+    expect(document.querySelector("[data-emvb-icon-color-ignored]")).toBeNull();
   });
 
   test("Shape: Circle adds a background, 50% radius and padding; None takes them away", async () => {

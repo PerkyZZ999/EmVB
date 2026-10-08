@@ -25418,6 +25418,24 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
       "expect": "\\(fail\\).*W-295"
+    },
+    {
+      "id": "W-296/no-hint",
+      "requirement": "W-296",
+      "description": "Hover colour on a multi-colour SVG says nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "                      {colorIgnoredHere && (\n                        <p className=\"emvb-helper\" data-emvb-icon-color-ignored=\"\">\n",
+          "replace": "                      {false && (\n                        <p className=\"emvb-helper\" data-emvb-icon-color-ignored=\"\">\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-296"
     }
   ]
 }

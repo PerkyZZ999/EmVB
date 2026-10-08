@@ -402,6 +402,14 @@ function KnownElementPanel({
     !responsive &&
     styleState === "normal" &&
     (node.props.singleColor === true || iconHasOwnColors(iconSvg));
+  // W-296: elsewhere (Hover, Focus, a device) Colour does nothing on such an SVG until Force single
+  // colour is on, and that switch only lives in Normal on Desktop, so say so there.
+  const colorIgnoredHere =
+    node.type === "icon" &&
+    !cls &&
+    !singleColorOffered &&
+    node.props.singleColor !== true &&
+    iconHasOwnColors(iconSvg);
   const patchStyle = (patch: Partial<StyleProps>) => {
     if (responsive) {
       if (!cls) {
@@ -683,6 +691,12 @@ function KnownElementPanel({
                             } as LayoutNode);
                           }}
                         />
+                      )}
+                      {colorIgnoredHere && (
+                        <p className="emvb-helper" data-emvb-icon-color-ignored="">
+                          This SVG keeps its own colors, so this color shows only once Force single
+                          color is on (Normal state, Desktop).
+                        </p>
                       )}
                       {styleState === "normal" && (
                         <IconShapeRow style={style} inherited={inherited} onPatch={patchStyle} />
