@@ -132,6 +132,39 @@ describe("public popup runtime (S7b, W-081)", () => {
     expect(root.hidden).toBe(false);
   });
 
+  test("W-285: a trigger link to # opens the popup without jumping the page; real links still go", () => {
+    const hash = document.createElement("a");
+    hash.href = "#";
+    hash.className = "offer";
+    hash.innerHTML = "<span>Offer</span>";
+    const real = document.createElement("a");
+    real.href = "/pricing";
+    real.className = "offer";
+    const root = popup("c-hash", doc([{ type: "click", selector: ".offer" }]));
+    document.body.append(hash, real);
+    // Read defaultPrevented after the runtime's listener, then stop happy-dom navigating, so
+    // the page URL doesn't change for later tests.
+    let prevented: boolean | null = null;
+    const spy = (event: Event) => {
+      prevented = event.defaultPrevented;
+      event.preventDefault();
+    };
+    window.addEventListener("click", spy);
+    const click = (el: Element) => {
+      prevented = null;
+      el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+      return { defaultPrevented: prevented as boolean | null };
+    };
+    expect(click(hash.querySelector("span") as Element).defaultPrevented).toBe(true);
+    expect(root.hidden).toBe(false);
+    const other = document.createElement("a");
+    other.href = "#";
+    document.body.append(other);
+    expect(click(other).defaultPrevented).toBe(false);
+    expect(click(real).defaultPrevented).toBe(false);
+    window.removeEventListener("click", spy);
+  });
+
   test("a broken click selector is dropped once instead of throwing on every click", () => {
     const listen = spyOn(document, "addEventListener");
     popup(

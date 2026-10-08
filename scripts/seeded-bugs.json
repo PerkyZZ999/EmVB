@@ -3651,8 +3651,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/popups/runtime.ts",
-          "search": "if (target?.closest?.(selector)) open();",
-          "replace": "if (target?.matches?.(selector)) open();"
+          "search": "if (!target?.closest?.(selector)) return;",
+          "replace": "if (!target?.matches?.(selector)) return;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
@@ -25019,6 +25019,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
       "expect": "\\(fail\\).*W-284"
+    },
+    {
+      "id": "W-285/hash-jumps",
+      "requirement": "W-285",
+      "description": "A popup trigger link to # also jumps the page to the top.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      if (target.closest(\"a[href]\")?.getAttribute(\"href\") === \"#\") event.preventDefault();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*W-285"
+    },
+    {
+      "id": "W-285/every-hash-blocked",
+      "requirement": "W-285",
+      "description": "Every # link on the page stops working once a click trigger exists.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "      if (!target?.closest?.(selector)) return;\n      // W-285",
+          "replace": "      if (target?.closest(\"a[href]\")?.getAttribute(\"href\") === \"#\") event.preventDefault();\n      if (!target?.closest?.(selector)) return;\n      // W-285"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
+      "expect": "\\(fail\\).*W-285"
     }
   ]
 }

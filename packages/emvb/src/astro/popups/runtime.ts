@@ -242,7 +242,11 @@ const ARM: { [T in OpenTrigger["type"]]: Arm<T> } = {
     if (!selector || !isValidSelector(selector)) return;
     document.addEventListener("click", (event) => {
       const target = event.target as Element | null;
-      if (target?.closest?.(selector)) open();
+      if (!target?.closest?.(selector)) return;
+      // W-285: a trigger link with the URL "#" (a common way to make one) would also jump the
+      // page to the top behind the popup.
+      if (target.closest("a[href]")?.getAttribute("href") === "#") event.preventDefault();
+      open();
     });
   },
   exit_intent: (open) => {
