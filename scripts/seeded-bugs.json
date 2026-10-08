@@ -23647,6 +23647,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/section.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-254/focus-out-stays-open",
+      "requirement": "W-254",
+      "description": "An open Menu dropdown stays open after focus moves outside its menu item.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/menu/runtime.ts",
+          "search": "  root.addEventListener(\"focusin\", closeOthers);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-254/outside-press-stays-open",
+      "requirement": "W-254",
+      "description": "A press outside an open Menu dropdown leaves it open.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/menu/runtime.ts",
+          "search": "  root.addEventListener(\"pointerdown\", closeOthers);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-254/inside-press-closes",
+      "requirement": "W-254",
+      "description": "A press inside an open dropdown's own panel closes it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/menu/runtime.ts",
+          "search": "    if (target && item.contains(target)) continue;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

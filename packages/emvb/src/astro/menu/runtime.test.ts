@@ -37,6 +37,35 @@ describe("menu runtime (W-197)", () => {
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     expect(details.open).toBe(true);
   });
+  test("focus moving outside the dropdown's menu item closes it (W-254)", () => {
+    const details = fixture();
+    (document.getElementById("sub") as HTMLElement).focus();
+    expect(details.open).toBe(true);
+    (document.getElementById("outside") as HTMLElement).focus();
+    expect(details.open).toBe(false);
+  });
+  test("a press outside the menu item closes it; a press inside keeps it open (W-254)", () => {
+    const details = fixture();
+    const press = (id: string) =>
+      (document.getElementById(id) as HTMLElement).dispatchEvent(
+        new Event("pointerdown", { bubbles: true }),
+      );
+    press("sub");
+    expect(details.open).toBe(true);
+    press("outside");
+    expect(details.open).toBe(false);
+  });
+  test("focus on the next top-level item closes the previous dropdown (W-254)", () => {
+    fixture();
+    const nav = document.querySelector(".emvb-menu__list") as HTMLElement;
+    nav.insertAdjacentHTML(
+      "beforeend",
+      '<li class="emvb-menu-item"><div class="emvb-menu-item__bar"><a href="/b" id="next">B</a></div></li>',
+    );
+    const details = document.querySelector("details") as HTMLDetailsElement;
+    (document.getElementById("next") as HTMLElement).focus();
+    expect(details.open).toBe(false);
+  });
   test("only layouts with a Menu dropdown ask for the script", () => {
     const item = (children: unknown[]) => ({
       id: "item0001",
