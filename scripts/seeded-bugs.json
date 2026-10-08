@@ -24091,6 +24091,60 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/text-breaks.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-265/placeholder-alt-silent",
+      "requirement": "W-265",
+      "description": "An Image whose alt is the 'Image' placeholder gets no note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/image-alt.ts",
+          "search": "  if (PLACEHOLDER.test(alt) || FILE_NAME.test(alt)) {",
+          "replace": "  if (FILE_NAME.test(alt)) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/image-alt.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-265/empty-alt-silent",
+      "requirement": "W-265",
+      "description": "A non-decorative Image with no alt gets no note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/image-alt.ts",
+          "search": "  if (!alt) {\n",
+          "replace": "  if (!alt && false) {\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/image-alt.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-265/decorative-flagged",
+      "requirement": "W-265",
+      "description": "A decorative Image with empty alt is told to add alt text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/image-alt.ts",
+          "search": "  if (props.decorative === true || !props.src?.trim()) return undefined;",
+          "replace": "  if (!props.src?.trim()) return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/image-alt.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
