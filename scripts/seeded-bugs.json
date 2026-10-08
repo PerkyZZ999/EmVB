@@ -25520,6 +25520,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-299/no-break",
+      "requirement": "W-299",
+      "description": "A word longer than the line widens the page on a phone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "min-width:0;overflow-wrap:break-word}\",",
+          "replace": "min-width:0}\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/long-word.test.ts"],
+      "expect": "\\(fail\\).*W-299"
     }
   ]
 }

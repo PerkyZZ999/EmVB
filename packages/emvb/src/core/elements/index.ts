@@ -114,7 +114,9 @@ const BOX_LINK_FIELDS = [
 ];
 
 const container: ElementDefinition<ContainerNode> = {
-  baseCss: ".emvb-container{display:flex;flex-direction:column;min-width:0}",
+  // W-299: a word longer than the line (a pasted URL) breaks instead of widening the page on a phone.
+  baseCss:
+    ".emvb-container{display:flex;flex-direction:column;min-width:0;overflow-wrap:break-word}",
   defaults: () => ({ type: "container", props: {}, children: [] }),
   descriptor: {
     type: "container",
