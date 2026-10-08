@@ -232,6 +232,41 @@ describe("box shadow colour refs (W-088)", () => {
   });
 });
 
+describe("icon shadow colour refs (W-245)", () => {
+  const iconPage = (): Layout => ({
+    schemaVersion: 12,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "icon0001",
+          type: "icon",
+          props: { iconId: "star" },
+          style: { iconShadow: { x: 0, y: 2, blur: 4, color: { var: "brand" } } },
+          states: { hover: { iconShadow: { x: 0, y: 4, blur: 8, color: { var: "brand" } } } },
+        },
+      ],
+    },
+  });
+
+  test("the managers count a colour variable used by an icon shadow, in states too", () => {
+    expect(findVariableUsages(iconPage(), "brand", "color")).toEqual([
+      { nodeId: "icon0001", prop: "iconShadow.color" },
+      { nodeId: "icon0001", prop: "hover.iconShadow.color" },
+    ]);
+  });
+
+  test("deleting the variable clears only the shadow's colour", () => {
+    const next = clearVariableRefs(iconPage(), "brand", "color");
+    const icon = next.root.children[0];
+    expect(icon?.style).toEqual({ iconShadow: { x: 0, y: 2, blur: 4 } });
+    expect(icon?.states).toEqual({ hover: { iconShadow: { x: 0, y: 4, blur: 8 } } });
+    expect(findVariableUsages(next, "brand", "color")).toEqual([]);
+  });
+});
+
 describe("deleting a variable clears class styles too", () => {
   const withClasses = () => ({
     ...emptyDesign(),

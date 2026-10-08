@@ -15227,8 +15227,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/clipboard.ts",
-          "search": "    ...Object.values(style),\n    style.boxShadow?.color,\n    ...(style.gradient?.stops ?? []).map((stop) => stop.color),",
-          "replace": "    ...Object.values(style),\n    ...(style.gradient?.stops ?? []).map((stop) => stop.color),"
+          "search": "    ...Object.values(style),\n    style.boxShadow?.color,\n    style.iconShadow?.color,\n    ...(style.gradient?.stops ?? []).map((stop) => stop.color),",
+          "replace": "    ...Object.values(style),\n    style.iconShadow?.color,\n    ...(style.gradient?.stops ?? []).map((stop) => stop.color),"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
@@ -23282,6 +23282,48 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-245/icon-shadow-usage-uncounted",
+      "requirement": "W-245: a colour variable used by an icon drop shadow (iconShadow.color) counts as a usage, is cleared when the variable is deleted (the shadow stays), and is dropped from a style paste when the design lacks it.",
+      "description": "Site styles says a colour is unused although an icon's drop shadow uses it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  if (matches(style.iconShadow?.color, id, kind)) hit(\"iconShadow.color\");\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/variables.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-245/icon-shadow-ref-left",
+      "requirement": "W-245: a colour variable used by an icon drop shadow (iconShadow.color) counts as a usage, is cleared when the variable is deleted (the shadow stays), and is dropped from a style paste when the design lacks it.",
+      "description": "Deleting a colour variable leaves a dangling ref in icon drop shadows, so the shadow disappears.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "  if (style.iconShadow && matches(style.iconShadow.color, id, kind)) {",
+          "replace": "  if (style.iconShadow && matches(style.iconShadow.color, id, kind) && id === \"\") {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/variables.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-245/icon-shadow-paste-keeps-missing",
+      "requirement": "W-245: a colour variable used by an icon drop shadow (iconShadow.color) counts as a usage, is cleared when the variable is deleted (the shadow stays), and is dropped from a style paste when the design lacks it.",
+      "description": "Pasting a style onto a page whose design lacks the icon shadow's colour variable keeps the dangling ref.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "    style.iconShadow?.color,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
       "expect": "\\(fail\\)"
     }
   ]

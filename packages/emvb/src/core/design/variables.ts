@@ -47,6 +47,7 @@ function collectStyleUsages(
     if (matches(value, id, kind)) hit(prop);
   }
   if (shadowColorMatches(style, id, kind)) hit("boxShadow.color");
+  if (matches(style.iconShadow?.color, id, kind)) hit("iconShadow.color");
   style.gradient?.stops.forEach((stop, index) => {
     if (matches(stop.color, id, kind)) hit(`gradient.stops.${index}`);
   });
@@ -125,6 +126,12 @@ function stripRefsFromStyle(
   if (style.boxShadow && shadowColorMatches(style, id, kind)) {
     const { color: _drop, ...shadow } = style.boxShadow;
     next["boxShadow"] = shadow;
+    changed = true;
+  }
+  // W-245: the icon drop shadow (W-237) keeps its offsets and blur, like the box shadow.
+  if (style.iconShadow && matches(style.iconShadow.color, id, kind)) {
+    const { color: _drop, ...shadow } = style.iconShadow;
+    next["iconShadow"] = shadow;
     changed = true;
   }
   if (style.gradient?.stops.some((stop) => matches(stop.color, id, kind))) {

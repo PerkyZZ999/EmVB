@@ -288,6 +288,21 @@ describe("preparing a pasted element (W-093)", () => {
     expect(dropped.variables).toBe(1);
   });
 
+  test("a style paste drops a missing variable in the icon shadow's colour, keeping the shadow (W-245)", () => {
+    const { style, dropped } = prepareStyle(
+      {
+        style: { iconShadow: { x: 0, y: 2, blur: 4, color: { var: "gone" } } },
+        states: { hover: { iconShadow: { x: 1, y: 1, blur: 2, color: { var: "brand" } } } },
+      },
+      design(),
+    );
+    expect(style).toEqual({
+      style: { iconShadow: { x: 0, y: 2, blur: 4 } },
+      states: { hover: { iconShadow: { x: 1, y: 1, blur: 2, color: { var: "brand" } } } },
+    });
+    expect(dropped.variables).toBe(1);
+  });
+
   test("the notice lists what was left out, or is null", () => {
     expect(droppedNotice({ classes: 0, variables: 0, htmlIds: 0, unsafe: 0 })).toBeNull();
     expect(droppedNotice({ classes: 2, variables: 1, htmlIds: 0, unsafe: 0 })).toBe(
