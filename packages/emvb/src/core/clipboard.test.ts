@@ -438,3 +438,31 @@ describe("pasting a style (W-093)", () => {
     expect("style" in cleared || "states" in cleared).toBe(false);
   });
 });
+
+describe("pasting an Icon's style elsewhere (W-292)", () => {
+  const iconStyle = {
+    style: { color: "#ff0000", iconRotate: 45, iconShadow: { x: 0, y: 2, blur: 4 } },
+    states: { hover: { iconScale: 1.2 }, focus: { color: "#00ff00", iconFlip: "both" as const } },
+    devices: { mobile: { iconAnimation: { type: "spin" as const, duration: 1000 } } },
+  };
+
+  test("a Heading gets the colour but not the Icon glyph keys", () => {
+    const out = applyStyle(heading("head0009"), iconStyle);
+    expect(out.style).toEqual({ color: "#ff0000" });
+    expect(out.states).toEqual({ focus: { color: "#00ff00" } });
+    expect("devices" in out).toBe(false);
+  });
+
+  test("an Icon keeps every key", () => {
+    const icon = { id: "icon0009", type: "icon", props: { iconId: "lucide:star" } } as LayoutNode;
+    const out = applyStyle(icon, iconStyle);
+    expect(out.style).toEqual(iconStyle.style);
+    expect(out.states).toEqual(iconStyle.states);
+    expect(out.devices).toEqual(iconStyle.devices);
+  });
+
+  test("a style with only glyph keys leaves a Heading with no local style", () => {
+    const out = applyStyle(heading("head0010"), { style: { iconRotate: 90 } });
+    expect("style" in out).toBe(false);
+  });
+});

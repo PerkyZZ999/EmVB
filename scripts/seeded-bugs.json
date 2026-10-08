@@ -25252,6 +25252,48 @@
       ],
       "command": ["bun", "test", "./test/site/not-found.test.ts"],
       "expect": "\\(fail\\).*W-288"
+    },
+    {
+      "id": "W-292/icon-keys-kept",
+      "requirement": "W-292",
+      "description": "Paste style carries Icon glyph keys onto a Heading.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  if (type === \"icon\") return style;\n",
+          "replace": "  if (type !== \"\") return style;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*W-292"
+    },
+    {
+      "id": "W-292/states-not-cleaned",
+      "requirement": "W-292",
+      "description": "Glyph keys in hover/focus states and devices survive a paste onto a Heading.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "      const cleaned = withoutIconKeys(value);\n",
+          "replace": "      const cleaned = value as object | undefined;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*W-292"
+    },
+    {
+      "id": "W-292/empty-style-kept",
+      "requirement": "W-292",
+      "description": "A style holding only glyph keys leaves an empty style object on a Heading.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/clipboard.ts",
+          "search": "  return Object.keys(next).length > 0 ? next : undefined;\n",
+          "replace": "  return next;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/clipboard.test.ts"],
+      "expect": "\\(fail\\).*W-292"
     }
   ]
 }

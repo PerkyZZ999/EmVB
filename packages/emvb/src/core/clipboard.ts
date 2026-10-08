@@ -360,8 +360,60 @@ export function prepareStyle(
   return { style: styleOf(holder), dropped };
 }
 
-/** Replaces the node's local style, states and device overrides; props, classes and children stay. */
-export function applyStyle<T extends LayoutNode>(node: T, style: CopiedStyle): T {
+/** The Icon's glyph keys (W-237): they style an Icon's `<svg>` and do nothing anywhere else. */
+const ICON_STYLE_KEYS = [
+  "iconRotate",
+  "iconFlip",
+  "iconScale",
+  "iconStrokeWidth",
+  "iconShadow",
+  "iconAnimation",
+] as const;
+
+/** `style` without the Icon glyph keys; undefined when nothing else was set. */
+function withoutIconKeys(style: object | undefined): object | undefined {
+  if (!style) return style;
+  const next: Record<string, unknown> = { ...style };
+  let removed = false;
+  for (const key of ICON_STYLE_KEYS) {
+    if (key in next) {
+      delete next[key];
+      removed = true;
+    }
+  }
+  if (!removed) return style;
+  return Object.keys(next).length > 0 ? next : undefined;
+}
+
+/** A copied style ready for `type`: Icon glyph keys stay only on an Icon (W-292). */
+function styleFor(type: string, style: CopiedStyle): CopiedStyle {
+  if (type === "icon") return style;
+  const out: CopiedStyle = { ...style };
+  out.style = withoutIconKeys(style.style) as CopiedStyle["style"];
+  for (const [field, groups] of [
+    ["states", style.states],
+    ["devices", style.devices],
+  ] as const) {
+    if (!groups) continue;
+    const kept: Record<string, unknown> = {};
+    for (const [name, value] of Object.entries(groups)) {
+      const cleaned = withoutIconKeys(value);
+      if (cleaned) kept[name] = cleaned;
+    }
+    (out as Record<string, unknown>)[field] = Object.keys(kept).length > 0 ? kept : undefined;
+  }
+  for (const key of ["style", "states", "devices"] as const) {
+    if (out[key] === undefined) delete out[key];
+  }
+  return out;
+}
+
+/**
+ * Replaces the node's local style, states and device overrides; props, classes and children stay.
+ * Icon glyph keys are left out on anything but an Icon (W-292).
+ */
+export function applyStyle<T extends LayoutNode>(node: T, copied: CopiedStyle): T {
+  const style = styleFor(node.type, copied);
   const next = { ...node };
   delete next.style;
   delete next.states;
