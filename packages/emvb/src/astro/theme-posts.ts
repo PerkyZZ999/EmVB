@@ -92,5 +92,11 @@ function authorFrom(data: Record<string, unknown>): string | undefined {
     const name = (author as { name?: unknown }).name;
     if (typeof name === "string" && name.trim()) return name.trim();
   }
+  // W-304: EmDash hydrates the primary byline onto `data.byline` (a BylineSummary).
+  const byline = data["byline"];
+  if (byline && typeof byline === "object" && "displayName" in byline) {
+    const name = (byline as { displayName?: unknown }).displayName;
+    if (typeof name === "string" && name.trim()) return name.trim();
+  }
   return undefined;
 }

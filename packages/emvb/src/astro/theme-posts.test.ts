@@ -41,6 +41,18 @@ describe("themePostFromEntry", () => {
     );
   });
 
+  test("W-304: the author comes from EmDash's hydrated byline", () => {
+    const post = themePostFromEntry({
+      id: "welcome",
+      data: { id: "01WELCOME", slug: "welcome", byline: { id: "b1", displayName: " Ada " } },
+    });
+    expect(post?.authorName).toBe("Ada");
+    expect(
+      themePostFromEntry({ slug: "a", author_name: "Field", byline: { displayName: "Byline" } })
+        ?.authorName,
+    ).toBe("Field");
+  });
+
   test("a plain data bag with missing fields gets empty text and the given permalink prefix", () => {
     expect(themePostFromEntry({ slug: "hello", title: 5 }, { permalinkPrefix: "/blog/" })).toEqual({
       id: "hello",

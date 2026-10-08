@@ -25632,6 +25632,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
       "expect": "\\(fail\\).*W-303"
+    },
+    {
+      "id": "W-304/byline-author",
+      "requirement": "W-304",
+      "description": "Post Author stays empty on real EmDash posts: the byline is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "  // W-304: EmDash hydrates the primary byline onto `data.byline` (a BylineSummary).\n  const byline = data[\"byline\"];\n  if (byline && typeof byline === \"object\" && \"displayName\" in byline) {\n    const name = (byline as { displayName?: unknown }).displayName;\n    if (typeof name === \"string\" && name.trim()) return name.trim();\n  }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
+      "expect": "\\(fail\\).*W-304"
     }
   ]
 }
