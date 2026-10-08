@@ -25,6 +25,7 @@ import { sharedPartH1 } from "./settings/heading-warning.ts";
 import { UNNAMED_BOX_LINK_NOTE, unnamedBoxLink } from "./settings/box-link-name.ts";
 import { imageAltNote } from "./settings/image-alt.ts";
 import { loopContextNote } from "./settings/loop-context.ts";
+import { buttonUrlNote } from "./settings/button-url.ts";
 import { svgImagesLeftOut, svgImagesNotice } from "./settings/svg-images.ts";
 import { duplicateFieldName } from "./settings/form-names.ts";
 import { hasItemList, ItemList, type ItemActions } from "./settings/ItemList.tsx";
@@ -537,6 +538,11 @@ function KnownElementPanel({
             <p className="emvb-helper" data-emvb-shared-h1>
               This part shows on pages that already have their own H1, so they would get two. Use H2
               or lower here unless this part is the page's only main heading.
+            </p>
+          )}
+          {buttonUrlNote(node) && (
+            <p className="emvb-helper" data-emvb-button-url>
+              {buttonUrlNote(node)}
             </p>
           )}
           {loopContextNote(node, partType) && (

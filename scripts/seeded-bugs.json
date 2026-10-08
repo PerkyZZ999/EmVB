@@ -24431,6 +24431,60 @@
         "./packages/emvb/src/admin/editor/panels/settings/rtl-fields.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-273/panel-silent",
+      "requirement": "W-273",
+      "description": "The Button panel doesn't show the no-URL note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "          {buttonUrlNote(node) && (",
+          "replace": "          {false && buttonUrlNote(node) && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/button-url.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-273/refused-url-silent",
+      "requirement": "W-273",
+      "description": "A refused URL counts as a URL, so the dead button gets no note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/button-url.ts",
+          "search": "  if (href && sanitizeHref(href)) return undefined;",
+          "replace": "  if (href) return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/button-url.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-273/popup-target-nagged",
+      "requirement": "W-273",
+      "description": "A button with an HTML id (a popup trigger target) is told it does nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/button-url.ts",
+          "search": "  if (node.htmlId || (node.classes?.length ?? 0) > 0) return undefined;",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/button-url.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }
