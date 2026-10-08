@@ -23353,6 +23353,60 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-247/every-radio-tab-stop",
+      "requirement": "W-247: icon choice rows (Direction, Wrap, Justify, Align, icon Shape) follow the radio group pattern: arrows move and pick (wrapping), Home/End jump, and only the picked (or first) option is a Tab stop.",
+      "description": "Every option of a choice row is a Tab stop, so Tab walks through each icon button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ChoiceGroup.tsx",
+          "search": "    tabIndexOf: (value: string) => (value === stop ? 0 : -1),",
+          "replace": "    tabIndexOf: (_value: string) => (stop === undefined ? -1 : 0),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/choice-group.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-247/arrows-stop-at-ends",
+      "requirement": "W-247: icon choice rows (Direction, Wrap, Justify, Align, icon Shape) follow the radio group pattern: arrows move and pick (wrapping), Home/End jump, and only the picked (or first) option is a Tab stop.",
+      "description": "Arrow keys stop at the last option instead of wrapping to the first.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ChoiceGroup.tsx",
+          "search": "(at + (NEXT[event.key] ?? 0) + values.length) % values.length;",
+          "replace": "Math.min(Math.max(at + (NEXT[event.key] ?? 0), 0), values.length - 1);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/choice-group.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-247/shape-no-arrows",
+      "requirement": "W-247: icon choice rows (Direction, Wrap, Justify, Align, icon Shape) follow the radio group pattern: arrows move and pick (wrapping), Home/End jump, and only the picked (or first) option is a Tab stop.",
+      "description": "The icon Shape radios ignore the arrow keys.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx",
+          "search": "          onKeyDown={keys.onKeyDown}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

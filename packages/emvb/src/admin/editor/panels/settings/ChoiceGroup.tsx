@@ -1,3 +1,4 @@
+import type * as React from "react";
 import {
   AlignBottomIcon,
   AlignCenterHorizontalIcon,
@@ -51,6 +52,38 @@ export const LAYOUT_CHOICES: Record<string, Choice[]> = {
   ],
 };
 
+const NEXT: Record<string, number> = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
+
+/**
+ * The radio group keys (W-247, WAI-ARIA radio pattern): the arrows move to the next or previous
+ * option and pick it, wrapping; Home and End go to the first and last. Only the picked option (or
+ * the first, when none is) is a Tab stop, so Tab leaves the group in one step.
+ */
+export function radioGroupKeys(
+  values: readonly string[],
+  current: string | undefined,
+  pick: (value: string) => void,
+) {
+  const stop = values.includes(current ?? "") ? current : values[0];
+  return {
+    tabIndexOf: (value: string) => (value === stop ? 0 : -1),
+    onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
+      const at = values.indexOf(current ?? "");
+      let index: number;
+      if (event.key === "Home") index = 0;
+      else if (event.key === "End") index = values.length - 1;
+      else if (event.key in NEXT)
+        index = at < 0 ? 0 : (at + (NEXT[event.key] ?? 0) + values.length) % values.length;
+      else return;
+      event.preventDefault();
+      const value = values[index];
+      if (value === undefined) return;
+      pick(value);
+      event.currentTarget.querySelector<HTMLElement>(`[data-emvb-choice="${value}"]`)?.focus();
+    },
+  };
+}
+
 /** One property as a row of icon buttons. Nothing is pressed until the author sets a value. */
 export function ChoiceGroup({
   label,
@@ -64,12 +97,22 @@ export function ChoiceGroup({
   onChange: (value: string) => void;
 }) {
   const labelId = `emvb-choice-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  const keys = radioGroupKeys(
+    options.map((option) => option.value),
+    value,
+    onChange,
+  );
   return (
     <div className="emvb-choice">
       <span className="emvb-choice-label" id={labelId}>
         {label}
       </span>
-      <div className="emvb-choice-group" role="radiogroup" aria-labelledby={labelId}>
+      <div
+        className="emvb-choice-group"
+        role="radiogroup"
+        aria-labelledby={labelId}
+        onKeyDown={keys.onKeyDown}
+      >
         {options.map((option) => {
           const Icon = option.icon;
           const checked = value === option.value;
@@ -82,6 +125,7 @@ export function ChoiceGroup({
               aria-label={option.label}
               title={option.label}
               data-emvb-choice={option.value}
+              tabIndex={keys.tabIndexOf(option.value)}
               onClick={() => onChange(option.value)}
             >
               <Icon size={16} aria-hidden="true" />

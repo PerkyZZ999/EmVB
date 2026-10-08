@@ -260,6 +260,22 @@ describe("Force single colour and Shape (W-238)", () => {
     expect(nodes.at(-1)?.style ?? {}).toEqual({});
   });
 
+  test("Shape takes the radio keys: an arrow picks the next shape (W-247)", async () => {
+    await panel();
+    const none = document.querySelector<HTMLElement>(
+      '[data-emvb-icon-shape] [data-emvb-choice="none"]',
+    );
+    expect(none?.tabIndex).toBe(0);
+    await act(async () => {
+      none?.focus();
+      none?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    });
+    expect((document.activeElement as HTMLElement | null)?.getAttribute("data-emvb-choice")).toBe(
+      "circle",
+    );
+    expect(nodes.at(-1)?.style).toMatchObject({ borderRadius: { value: 50, unit: "%" } });
+  });
+
   test("a shape keeps a colour and padding already set", async () => {
     const px4 = { value: 4, unit: "px" } as const;
     await panel({ ...star, style: { backgroundColor: "#111111", paddingTop: px4 } });

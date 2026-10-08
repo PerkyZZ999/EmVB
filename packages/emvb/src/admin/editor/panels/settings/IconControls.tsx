@@ -9,6 +9,7 @@ import * as React from "react";
 import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
+import { radioGroupKeys } from "./ChoiceGroup.tsx";
 import { NumberField, ResetButton, type NumberSpec } from "./NumberRow.tsx";
 
 /** W-237: the Icon section's own controls (glyph rotation, flip, drop shadow, loop). */
@@ -367,6 +368,11 @@ export function IconShapeRow({
 }) {
   const effective = { ...inherited, ...style };
   const current = iconShapeOf(effective);
+  const keys = radioGroupKeys(
+    SHAPES.map((shape) => shape.value),
+    current,
+    (value) => onPatch(iconShapePatch(value as IconShape, effective)),
+  );
   return (
     <div className="emvb-style-row" data-emvb-icon-shape={current}>
       <div className="emvb-choice">
@@ -377,6 +383,7 @@ export function IconShapeRow({
           className="emvb-choice-group"
           role="radiogroup"
           aria-labelledby="emvb-icon-shape-label"
+          onKeyDown={keys.onKeyDown}
         >
           {SHAPES.map((shape) => (
             <button
@@ -387,6 +394,7 @@ export function IconShapeRow({
               aria-label={shape.label}
               title={shape.label}
               data-emvb-choice={shape.value}
+              tabIndex={keys.tabIndexOf(shape.value)}
               onClick={() => onPatch(iconShapePatch(shape.value, effective))}
             >
               {shape.value === "none" ? (
