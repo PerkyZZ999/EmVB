@@ -16,7 +16,7 @@ import { EditorHostContext } from "../../../packages/emvb/src/admin/editor/host.
 import { BUTTON, SOLID_DESTRUCTIVE, UI_CSS } from "../../../packages/emvb/src/admin/ui.ts";
 import { PAGES_COLLECTION } from "../../../packages/emvb/src/constants.ts";
 import { starterLayout } from "../../../packages/emvb/src/core/index.ts";
-import { playgroundHost as host, SITE_HOME } from "./host.ts";
+import { playgroundHost as host, SITE_HOME, smallScreenStep, TOO_NARROW } from "./host.ts";
 import { createBackend, type KeyValueStore } from "./mock/backend.ts";
 import { PreviewOverlay } from "./PreviewOverlay.tsx";
 import { browserUploads } from "./uploads.ts";
@@ -103,9 +103,15 @@ function Logo() {
   );
 }
 
-function SmallScreenGate({ onContinue }: { onContinue: () => void }) {
+function SmallScreenGate({
+  onContinue,
+  tooNarrow = false,
+}: {
+  onContinue: () => void;
+  tooNarrow?: boolean;
+}) {
   return (
-    <div className="pg-gate" data-pg-small-screen="">
+    <div className="pg-gate" data-pg-small-screen={tooNarrow ? "too-narrow" : "ask"}>
       <div className="pg-gate-card">
         <Logo />
         <h1>The EmVB editor is best on a larger screen</h1>
@@ -113,11 +119,17 @@ function SmallScreenGate({ onContinue }: { onContinue: () => void }) {
           It's a desktop page builder: layers on the left, the canvas in the middle and styles on
           the right. A window at least 1280 px wide works best.
         </p>
-        <p>You can still look around here: the editor opens zoomed out.</p>
+        {tooNarrow ? (
+          <p role="status">{TOO_NARROW}</p>
+        ) : (
+          <p>You can still look around here: the editor opens zoomed out.</p>
+        )}
         <div className="pg-gate-actions">
-          <Button variant="primary" onClick={onContinue}>
-            Continue anyway
-          </Button>
+          {!tooNarrow && (
+            <Button variant="primary" onClick={onContinue}>
+              Continue anyway
+            </Button>
+          )}
           <Button variant="secondary" onClick={host.back.go}>
             Back to emvb.dev
           </Button>
@@ -243,7 +255,8 @@ export default function Playground() {
   };
 
   const current = pages.find((p) => p.id === entryId);
-  const gated = small && !continued;
+  const step = smallScreenStep(small, continued);
+  const gated = step !== "editor";
 
   return (
     <EditorHostContext.Provider value={host}>
@@ -322,7 +335,7 @@ export default function Playground() {
         </div>
       )}
       {gated ? (
-        <SmallScreenGate onContinue={continueSmall} />
+        <SmallScreenGate onContinue={continueSmall} tooNarrow={step === "too-narrow"} />
       ) : (
         <Editor
           key={`${entryId}:${generation}`}

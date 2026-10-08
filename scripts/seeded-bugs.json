@@ -25196,6 +25196,34 @@
       ],
       "command": ["bun", "test", "./test/playground/host.test.ts"],
       "expect": "\\(fail\\).*W-289"
+    },
+    {
+      "id": "W-291/continue-loops",
+      "requirement": "W-291",
+      "description": "A narrow desktop window that stays narrow after Continue anyway opens the editor's dead-end notice.",
+      "edits": [
+        {
+          "file": "site/src/playground/host.ts",
+          "search": "  return continued ? \"too-narrow\" : \"ask\";\n",
+          "replace": "  return \"editor\";\n"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/host.test.ts"],
+      "expect": "\\(fail\\).*W-291"
+    },
+    {
+      "id": "W-291/no-hint",
+      "requirement": "W-291",
+      "description": "The too-narrow notice doesn't say how to make room.",
+      "edits": [
+        {
+          "file": "site/src/playground/host.ts",
+          "search": "narrower than 1024 px",
+          "replace": "small"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/host.test.ts"],
+      "expect": "\\(fail\\).*W-291"
     }
   ]
 }

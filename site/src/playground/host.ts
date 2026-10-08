@@ -10,3 +10,21 @@ export const playgroundHost: EditorHost = {
   // No EmDash admin here: links to Forms or the Theme Builder would land on a missing page (W-289).
   adminLinks: false,
 };
+
+/**
+ * What a window narrower than the editor's 1024 px shows. "ask": the playground's notice with
+ * Continue anyway. Continuing sets a 1280 px layout viewport, which phones honour (the window is
+ * then wide enough and the editor opens); desktop browsers ignore it, so a narrow desktop window
+ * gets "too-narrow" (how to make room) instead of the editor's dead-end notice (W-291).
+ */
+export function smallScreenStep(
+  small: boolean,
+  continued: boolean,
+): "editor" | "ask" | "too-narrow" {
+  if (!small) return "editor";
+  return continued ? "too-narrow" : "ask";
+}
+
+/** The notice for "too-narrow": Continue anyway can't help, so it says how to make room. */
+export const TOO_NARROW =
+  "This window is still narrower than 1024 px, the least the editor needs. Make the window wider, or zoom the page out (Ctrl or ⌘ and −), and the editor opens.";
