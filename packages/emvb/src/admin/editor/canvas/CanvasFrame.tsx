@@ -258,6 +258,10 @@ export function CanvasFrame({
   React.useEffect(() => scaleReport.current?.(scale), [scale]);
   const [doc, setDoc] = React.useState<Document | null>(null);
   const [hoverId, setHoverId] = React.useState<string | null>(null);
+  // W-268: the page's React tree is built once per render of the layout, not on every hover,
+  // selection or overlay change. With the same element objects React skips the whole canvas
+  // subtree; rebuilding it walked every element on each mouse move (300+ elements: ~20 ms a move).
+  const pageTree = React.useMemo(() => (vnode ? vnodeToReact(vnode) : null), [vnode]);
   const [dropLine, setDropLine] = React.useState<Box | null>(null);
   const [invalid, setInvalid] = React.useState<InvalidDrop | null>(null);
   const [dropTarget, setDropTarget] = React.useState<DropTarget | null>(null);
@@ -526,7 +530,7 @@ export function CanvasFrame({
       {doc &&
         device !== "desktop" &&
         createPortal(<style data-emvb-preview-css="">{PREVIEW_SCROLL_CSS}</style>, doc.head)}
-      {doc && vnode && createPortal(vnodeToReact(vnode), doc.body)}
+      {doc && pageTree && createPortal(pageTree, doc.body)}
     </div>
   );
 }

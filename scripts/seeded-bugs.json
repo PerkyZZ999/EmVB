@@ -15605,7 +15605,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "        {(!isRoot || actions.clipboard) && (",
+          "search": "        {(!isRoot || hasClipboard) && (",
           "replace": "        {!isRoot && ("
         }
       ],
@@ -24228,6 +24228,62 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/menu-hover.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-268/canvas-rebuilt-each-render",
+      "requirement": "W-268",
+      "description": "The canvas rebuilds its whole page tree on every hover or selection render.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "createPortal(pageTree, doc.body)",
+          "replace": "createPortal(vnodeToReact(vnode), doc.body)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/canvas-memo.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-268/rows-not-memoized",
+      "requirement": "W-268",
+      "description": "Every Layers row re-renders when the selection moves.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "const LayerRow = React.memo(function LayerRow({",
+          "replace": "const LayerRow = (function LayerRow({"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-memo.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-268/row-actions-unstable",
+      "requirement": "W-268",
+      "description": "Row actions are a new object each render, so memoized rows re-render anyway.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "    [canRename],",
+          "replace": "    [canRename, actions],"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-memo.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-268/stale-onselect",
+      "requirement": "W-268",
+      "description": "A memoized row keeps the onSelect from its first render.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "onSelect: (id) => live.current.onSelect(id),",
+          "replace": "onSelect: actions.onSelect,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-memo.test.tsx"],
       "expect": "\\(fail\\)"
     }
   ]

@@ -71,9 +71,9 @@ function menuItems(
   node: LayoutNode,
   isRoot: boolean,
   actions: LayerActions,
+  clip: ClipboardActions | undefined,
   rename: () => void,
 ): MenuItem[] {
-  const clip = actions.clipboard;
   const naming: MenuItem[] = actions.onRename ? [{ label: "Rename", run: rename }] : [];
   const parent = isParentNode(node);
   const clipboard: MenuItem[] = clip
@@ -198,6 +198,27 @@ export function LayersPanel({
   const [collapsed, setCollapsed] = React.useState<Set<string>>(() => new Set());
   const [menuId, setMenuId] = React.useState<string | null>(null);
   const listRef = React.useRef<HTMLUListElement>(null);
+  // W-268: rows are memoized, so they get callbacks that never change and call the latest
+  // actions. Selecting a row then re-renders two rows, not all of them (300+ on a long page).
+  const live = React.useRef(actions);
+  live.current = actions;
+  const canRename = !!actions.onRename;
+  const rowActions = React.useMemo<LayerActions>(
+    () => ({
+      onSelect: (id) => live.current.onSelect(id),
+      onDuplicate: (id) => live.current.onDuplicate(id),
+      onMoveUp: (id) => live.current.onMoveUp(id),
+      onMoveDown: (id) => live.current.onMoveDown(id),
+      onDelete: (id) => live.current.onDelete(id),
+      onRename: canRename ? (id, label) => live.current.onRename?.(id, label) : undefined,
+    }),
+    [canRename],
+  );
+  const onRowMenu = React.useCallback(
+    (id: string, open: boolean) => setMenuId(open ? id : null),
+    [],
+  );
+  const toggle = React.useMemo(() => toggleIn(setCollapsed), []);
 
   React.useEffect(() => {
     if (!layout || !selectedId) return;
@@ -226,13 +247,6 @@ export function LayersPanel({
   if (!layout) return <p className="emvb-helper">This page is empty.</p>;
 
   const items = rows(layout.root, 0, collapsed);
-  const toggle = (id: string) =>
-    setCollapsed((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
 
   return (
     <div className="emvb-panel-body" data-emvb-panel="layers">
@@ -262,9 +276,11 @@ export function LayersPanel({
             selected={node.id === selectedId}
             collapsed={collapsed.has(node.id)}
             menuOpen={menuId === node.id}
-            onToggle={() => toggle(node.id)}
-            onMenu={(open) => setMenuId(open ? node.id : null)}
-            actions={actions}
+            onToggle={toggle}
+            onMenu={onRowMenu}
+            actions={rowActions}
+            hasClipboard={!!actions.clipboard}
+            clip={menuId === node.id ? actions.clipboard : undefined}
           />
         ))}
       </ul>
@@ -272,16 +288,28 @@ export function LayersPanel({
   );
 }
 
-function LayerRow({
+/** Collapses or expands a row; the same function every render (setState is stable). */
+const toggleIn =
+  (setCollapsed: React.Dispatch<React.SetStateAction<Set<string>>>) => (id: string) =>
+    setCollapsed((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+const LayerRow = React.memo(function LayerRow({
   node,
   depth,
   isRoot,
   selected,
   collapsed,
   menuOpen,
-  onToggle,
-  onMenu,
+  onToggle: toggleRow,
+  onMenu: menuRow,
   actions,
+  hasClipboard,
+  clip,
 }: {
   node: LayoutNode;
   depth: number;
@@ -289,10 +317,16 @@ function LayerRow({
   selected: boolean;
   collapsed: boolean;
   menuOpen: boolean;
-  onToggle: () => void;
-  onMenu: (open: boolean) => void;
+  onToggle: (id: string) => void;
+  onMenu: (id: string, open: boolean) => void;
   actions: LayerActions;
+  /** Whether copy and paste exist (the root row's menu has only those). */
+  hasClipboard: boolean;
+  /** The clipboard, passed only to the row whose menu is open so the other rows stay memoized. */
+  clip: ClipboardActions | undefined;
 }) {
+  const onToggle = () => toggleRow(node.id);
+  const onMenu = (open: boolean) => menuRow(node.id, open);
   const Icon = ICONS[node.type] ?? SquaresFourIcon;
   const preview = layerPreview(node);
   const typeName = ELEMENT_NAMES[node.type] ?? node.type;
@@ -444,7 +478,7 @@ function LayerRow({
             {hasStateStyles(node) && <StateDot />}
           </button>
         )}
-        {(!isRoot || actions.clipboard) && (
+        {(!isRoot || hasClipboard) && (
           <span className="emvb-layer-menu">
             <button
               type="button"
@@ -461,7 +495,7 @@ function LayerRow({
             </button>
             {menuOpen && (
               <div ref={menuList} className="emvb-layer-menu-list" role="menu" onKeyDown={menuKeys}>
-                {menuItems(node, isRoot, actions, startRename).map(
+                {menuItems(node, isRoot, actions, clip, startRename).map(
                   ({ label, run, className, disabled }) => (
                     <button
                       key={label}
@@ -481,9 +515,9 @@ function LayerRow({
                     </button>
                   ),
                 )}
-                {pasteHint(actions.clipboard) && (
+                {pasteHint(clip) && (
                   <p className="emvb-layer-menu-hint" data-emvb-paste-hint="">
-                    {pasteHint(actions.clipboard)}
+                    {pasteHint(clip)}
                   </p>
                 )}
               </div>
@@ -493,7 +527,7 @@ function LayerRow({
       </div>
     </li>
   );
-}
+});
 
 /** The inline name field (W-157): Enter or leaving saves, Escape cancels, empty clears the name. */
 function RenameInput({
