@@ -54,7 +54,7 @@ const DROP_BOXES = ["container", "div-block", "flexbox", "grid", "section", "for
 const DROP_BODIES =
   ".emvb-tab-panel:empty,.emvb-accordion-body:empty,.emvb-layout-section-inner:empty";
 /** An Accordion or Tabs with no items: only items go in, so it points at the item list (W-130). */
-const NO_ITEMS = ".emvb-accordion:empty,.emvb-tabs:not(:has(.emvb-tab-panel))";
+const NO_ITEMS = ".emvb-accordion:empty,.emvb-tabs:not(:has(.emvb-tab-panel)),.emvb-list:empty";
 const HINT = "color:#64748b;font:13px/1.4 system-ui,sans-serif;pointer-events:none";
 
 /**

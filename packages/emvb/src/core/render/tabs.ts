@@ -62,7 +62,12 @@ export function renderTabs(
       ...inputs,
       {
         tag: "div",
-        attrs: { class: "emvb-tab-list", role: "tablist", "aria-orientation": "horizontal" },
+        // W-275: a tablist needs tabs (axe aria-required-children); Tabs with no panels yet get
+        // a plain box.
+        attrs:
+          labels.length > 0
+            ? { class: "emvb-tab-list", role: "tablist", "aria-orientation": "horizontal" }
+            : { class: "emvb-tab-list" },
         children: labels,
       },
       { tag: "div", attrs: { class: "emvb-tab-panels" }, children: panelNodes },

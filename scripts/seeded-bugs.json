@@ -24527,6 +24527,34 @@
       ],
       "command": ["bun", "test", "./test/demos/blank-seo.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-275/empty-tablist",
+      "requirement": "W-275",
+      "description": "Tabs without panels render an empty role=tablist (axe aria-required-children).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "          labels.length > 0\n",
+          "replace": "          labels.length >= 0\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/empty-items.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-275/blank-bullets",
+      "requirement": "W-275",
+      "description": "Blank list items render as empty bullets.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "      .filter((item) => item.trim() !== \"\")\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/empty-items.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

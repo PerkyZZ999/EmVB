@@ -305,7 +305,10 @@ const list: ElementDefinition<ListNode> = {
   build: (node, attrs) => ({
     tag: node.props.ordered ? "ol" : "ul",
     attrs,
-    children: node.props.items.map((item) => ({ tag: "li", attrs: {}, children: [item] })),
+    // W-275: blank items would be empty bullets on the page; a list of only blanks has none.
+    children: node.props.items
+      .filter((item) => item.trim() !== "")
+      .map((item) => ({ tag: "li", attrs: {}, children: [item] })),
   }),
 };
 
