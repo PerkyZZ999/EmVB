@@ -23837,8 +23837,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "    if (event.key !== \"Escape\" || !menuOpen) return;\n    event.preventDefault();\n    event.stopPropagation();\n",
-          "replace": "    if (event.key !== \"Escape\" || !menuOpen) return;\n    event.preventDefault();\n"
+          "search": "      event.preventDefault();\n      event.stopPropagation();\n      onMenu(false);\n",
+          "replace": "      event.preventDefault();\n      onMenu(false);\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
@@ -23851,8 +23851,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "    event.stopPropagation();\n    onMenu(false);\n    const button",
-          "replace": "    event.stopPropagation();\n    const button"
+          "search": "      event.stopPropagation();\n      onMenu(false);\n      const button",
+          "replace": "      event.stopPropagation();\n      const button"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
@@ -23865,8 +23865,50 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "    button?.focus();\n",
-          "replace": "    void button;\n"
+          "search": "      button?.focus();\n",
+          "replace": "      void button;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-260/menu-opens-unfocused",
+      "requirement": "W-260",
+      "description": "Opening a Layers row menu leaves focus on the ··· button instead of the first item.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "    if (menuOpen) menuItemsEls()[0]?.focus();\n",
+          "replace": "    void menuItemsEls;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-260/arrows-ignored",
+      "requirement": "W-260",
+      "description": "Arrow keys don't move between Layers row menu items.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "    items[next]?.focus();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-260/no-wrap",
+      "requirement": "W-260",
+      "description": "ArrowDown past the last Layers row menu item doesn't wrap to the first.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "? (at + 1) % items.length",
+          "replace": "? Math.min(at + 1, items.length - 1)"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx"],

@@ -310,16 +310,53 @@ function LayerRow({
     if (actions.onRename) setRenaming(true);
   };
   // W-259: Escape in an open row menu closes it and returns to its ··· button; it doesn't also
-  // reach the editor, which would clear the selection.
-  const closeMenuOnEscape = (event: React.KeyboardEvent<HTMLElement>) => {
-    if (event.key !== "Escape" || !menuOpen) return;
+  // reach the editor, which would clear the selection. W-260: ↑/↓/Home/End move between items.
+  const menuList = React.useRef<HTMLDivElement | null>(null);
+  const menuItemsEls = () =>
+    [...(menuList.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])].filter(
+      (item) => !(item as HTMLButtonElement).disabled,
+    );
+  React.useEffect(() => {
+    if (menuOpen) menuItemsEls()[0]?.focus();
+  }, [menuOpen]);
+  const menuKeys = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (!menuOpen) {
+      if (
+        event.key === "ArrowDown" &&
+        event.currentTarget.classList.contains("emvb-layer-menu-btn")
+      ) {
+        event.preventDefault();
+        onMenu(true);
+      }
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      onMenu(false);
+      const button = event.currentTarget
+        .closest(".emvb-layer-menu")
+        ?.querySelector<HTMLElement>(".emvb-layer-menu-btn");
+      button?.focus();
+      return;
+    }
+    const items = menuItemsEls();
+    if (items.length === 0) return;
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    const next =
+      event.key === "ArrowDown"
+        ? (at + 1) % items.length
+        : event.key === "ArrowUp"
+          ? (at <= 0 ? items.length : at) - 1
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? items.length - 1
+              : -1;
+    if (next < 0) return;
     event.preventDefault();
     event.stopPropagation();
-    onMenu(false);
-    const button = event.currentTarget
-      .closest(".emvb-layer-menu")
-      ?.querySelector<HTMLElement>(".emvb-layer-menu-btn");
-    button?.focus();
+    items[next]?.focus();
   };
   // W-256: Enter or Escape hands focus back to the row; leaving by click keeps the new focus.
   const selectButton = React.useRef<HTMLButtonElement | null>(null);
@@ -418,12 +455,12 @@ function LayerRow({
                 event.stopPropagation();
                 onMenu(!menuOpen);
               }}
-              onKeyDown={closeMenuOnEscape}
+              onKeyDown={menuKeys}
             >
               ···
             </button>
             {menuOpen && (
-              <div className="emvb-layer-menu-list" role="menu" onKeyDown={closeMenuOnEscape}>
+              <div ref={menuList} className="emvb-layer-menu-list" role="menu" onKeyDown={menuKeys}>
                 {menuItems(node, isRoot, actions, startRename).map(
                   ({ label, run, className, disabled }) => (
                     <button

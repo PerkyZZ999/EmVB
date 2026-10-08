@@ -171,6 +171,37 @@ describe("Layers panel (W-018)", () => {
     expect(reachedWindow).toBe(false);
   });
 
+  test("a row menu takes ↑/↓/Home/End and opens on its first item (W-260)", async () => {
+    await mount("head0001");
+    const menuButton = document.querySelector(
+      '[data-emvb-layer="head0001"] .emvb-layer-menu-btn',
+    ) as HTMLElement;
+    const key = async (on: Element, k: string) =>
+      act(async () => {
+        on.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, cancelable: true }));
+      });
+    await act(async () => menuButton.focus());
+    await key(menuButton, "ArrowDown");
+    const items = () =>
+      [...document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')].filter(
+        (item) => !item.disabled,
+      );
+    expect(items().length).toBeGreaterThan(2);
+    expect(document.activeElement).toBe(items()[0] ?? null);
+    await key(document.activeElement as Element, "ArrowDown");
+    expect(document.activeElement).toBe(items()[1] ?? null);
+    await key(document.activeElement as Element, "ArrowUp");
+    await key(document.activeElement as Element, "ArrowUp");
+    expect(document.activeElement).toBe(items().at(-1) ?? null);
+    await key(document.activeElement as Element, "Home");
+    expect(document.activeElement).toBe(items()[0] ?? null);
+    await key(document.activeElement as Element, "End");
+    expect(document.activeElement).toBe(items().at(-1) ?? null);
+    await key(document.activeElement as Element, "ArrowDown");
+    expect(document.activeElement).toBe(items()[0] ?? null);
+    expect(calls).toEqual([]);
+  });
+
   test("← collapses an open container first, then → expands it before entering", async () => {
     await mount("box00001");
     await press("ArrowLeft");
