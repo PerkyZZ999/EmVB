@@ -24485,6 +24485,48 @@
         "./packages/emvb/src/admin/editor/panels/settings/button-url.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-274/blank-no-robots",
+      "requirement": "W-274",
+      "description": "A No index blank canvas page has no robots tag, so search engines index it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/EmVBPage.astro",
+          "search": "        {seo?.robots && <meta name=\"robots\" content={seo.robots} />}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "FAIL.*emvb-page\\.vitest\\.ts.*W-274"
+    },
+    {
+      "id": "W-274/blank-no-og",
+      "requirement": "W-274",
+      "description": "A blank canvas page has no Open Graph image.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/EmVBPage.astro",
+          "search": "        {seo?.ogImage && <meta property=\"og:image\" content={seo.ogImage} />}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "FAIL.*emvb-page\\.vitest\\.ts.*W-274"
+    },
+    {
+      "id": "W-274/demo-drops-seo",
+      "requirement": "W-274",
+      "description": "The node demo's blank page doesn't pass the SEO meta.",
+      "edits": [
+        {
+          "file": "demos/node/src/pages/[slug].astro",
+          "search": " description={seo.description} seo={seo}>",
+          "replace": " description={seo.description}>"
+        }
+      ],
+      "command": ["bun", "test", "./test/demos/blank-seo.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

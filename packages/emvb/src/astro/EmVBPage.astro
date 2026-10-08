@@ -1,15 +1,31 @@
 ---
 import type { RenderedPage } from "./render.ts";
 
+/** The resolved meta of the page (EmDash's `getSeoMeta` result fits), for blank canvas mode. */
+interface PageMeta {
+  ogTitle?: string | null;
+  ogDescription?: string | null;
+  ogImage?: string | null;
+  canonical?: string | null;
+  robots?: string | null;
+}
+
 interface Props {
   page: RenderedPage;
   /** Blank canvas mode: a whole document, without the site's layout. The slot ends the body. */
   standalone?: boolean;
   title?: string;
   description?: string | null;
+  /**
+   * W-274: blank canvas mode has no site layout to print the page's SEO tags, so it prints them:
+   * canonical, robots (No index), Open Graph and Twitter card. Pass `getSeoMeta(entry, …)`.
+   */
+  seo?: PageMeta;
 }
 
-const { page, standalone = false, title = "", description } = Astro.props;
+const { page, standalone = false, title = "", description, seo } = Astro.props;
+const ogTitle = seo?.ogTitle || title;
+const ogDescription = seo?.ogDescription ?? description;
 ---
 
 {
@@ -20,6 +36,16 @@ const { page, standalone = false, title = "", description } = Astro.props;
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{title}</title>
         {description && <meta name="description" content={description} />}
+        {seo?.robots && <meta name="robots" content={seo.robots} />}
+        {seo?.canonical && <link rel="canonical" href={seo.canonical} />}
+        {seo && <meta property="og:type" content="website" />}
+        {seo && ogTitle && <meta property="og:title" content={ogTitle} />}
+        {seo && ogDescription && <meta property="og:description" content={ogDescription} />}
+        {seo?.canonical && <meta property="og:url" content={seo.canonical} />}
+        {seo?.ogImage && <meta property="og:image" content={seo.ogImage} />}
+        {seo && (
+          <meta name="twitter:card" content={seo.ogImage ? "summary_large_image" : "summary"} />
+        )}
         <style is:inline set:html={page.css} />
       </head>
       <body>

@@ -37,7 +37,7 @@ const seo = getSeoMeta(entry, {
 
 {
 	emvb?.canvasMode === "blank" ? (
-		<EmVBPage page={emvb} standalone title={seo.title} description={seo.description}>
+		<EmVBPage page={emvb} standalone title={seo.title} description={seo.description} seo={seo}>
 			{emvb.needsFormsRuntime && <EmVBFormsRuntime />}
 			{emvb.needsTabsRuntime && <EmVBTabsRuntime />}
 			{emvb.needsMenuRuntime && <EmVBMenuRuntime />}
