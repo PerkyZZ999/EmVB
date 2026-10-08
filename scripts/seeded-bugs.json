@@ -25117,6 +25117,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx"],
       "expect": "\\(fail\\).*W-287"
+    },
+    {
+      "id": "W-290/no-refresh",
+      "requirement": "W-290",
+      "description": "The playground backend never re-reads storage, so a second tab overwrites the first tab's save.",
+      "edits": [
+        {
+          "file": "site/src/playground/mock/backend.ts",
+          "search": "      refresh();\n      const data = await route({",
+          "replace": "      const data = await route({"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/backend.test.ts"],
+      "expect": "\\(fail\\).*W-290"
+    },
+    {
+      "id": "W-290/refresh-ignored",
+      "requirement": "W-290",
+      "description": "The refresh sees the other tab's save but keeps the old copy.",
+      "edits": [
+        {
+          "file": "site/src/playground/mock/backend.ts",
+          "search": "    if (stored) state = stored;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/backend.test.ts"],
+      "expect": "\\(fail\\).*W-290"
     }
   ]
 }

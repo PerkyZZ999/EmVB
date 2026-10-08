@@ -167,6 +167,14 @@ export function seedState(now: Date = new Date()): PlaygroundState {
   };
 }
 
+const storedText = (storage: KeyValueStore | null | undefined): string | null => {
+  try {
+    return storage?.getItem(STORAGE_KEY) ?? null;
+  } catch {
+    return null;
+  }
+};
+
 /** Saved state when it is ours and readable; otherwise null (a fresh seed is used). */
 export function readState(storage: KeyValueStore | null | undefined): PlaygroundState | null {
   if (!storage) return null;
@@ -334,10 +342,26 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
   const latency = options.latency ?? 0;
   let state: PlaygroundState = readState(storage) ?? seedState(now());
   const listeners = new Set<() => void>();
+  /** The stored text this backend last wrote or read, so another tab's save is noticed (W-290). */
+  let seen: string | null = storedText(storage);
 
   const persist = () => {
     if (!storage) return;
-    storage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const text = JSON.stringify(state);
+    storage.setItem(STORAGE_KEY, text);
+    seen = text;
+  };
+
+  /**
+   * Picks up what another tab of the playground saved since this one last looked, so a save made
+   * on an older copy gets EmDash's 409 instead of silently replacing the other tab's work (W-290).
+   */
+  const refresh = () => {
+    const text = storedText(storage);
+    if (text === null || text === seen) return;
+    const stored = readState(storage);
+    seen = text;
+    if (stored) state = stored;
   };
 
   /** Runs a change; when the browser refuses to store the result, the change is undone. */
@@ -743,6 +767,7 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
       }
     }
     try {
+      refresh();
       const data = await route({
         method: (init?.method ?? "GET").toUpperCase(),
         segments,
@@ -770,7 +795,10 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
 
   return {
     fetcher,
-    snapshot: () => copy(state),
+    snapshot: () => {
+      refresh();
+      return copy(state);
+    },
     reset: () => {
       state = seedState(now());
       void uploads?.clear().catch(() => undefined);

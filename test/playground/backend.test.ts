@@ -116,6 +116,43 @@ describe("playground backend: pages", () => {
     expect(error.status).toBe(409);
   });
 
+  test("a save from a second tab on an older copy is a 409, not a silent overwrite (W-290)", async () => {
+    const storage = memoryStorage();
+    const tabA = createBackend({ storage });
+    const tabB = createBackend({ storage });
+    const atA = await loadEntry(tabA.fetcher, LANDING);
+    const atB = await loadEntry(tabB.fetcher, LANDING);
+    await savePage(
+      tabA.fetcher,
+      LANDING,
+      { ...(await draftOf(tabA.fetcher)), title: "From A" },
+      atA.rev,
+    );
+
+    const draftB = { ...(await draftOf(tabB.fetcher)), title: "From B" };
+    // Tab B already sees what tab A saved.
+    expect(draftB.title).toBe("From B");
+    expect((await loadEntry(tabB.fetcher, LANDING)).title).toBe("From A");
+    const error = await rejectionOf(savePage(tabB.fetcher, LANDING, draftB, atB.rev));
+    expect(error.status).toBe(409);
+    expect((await loadEntry(createBackend({ storage }).fetcher, LANDING)).title).toBe("From A");
+    expect(tabB.snapshot().entries.find((e) => e.id === LANDING)?.draft.data["title"]).toBe(
+      "From A",
+    );
+  });
+
+  test("site styles saved in another tab are picked up before the next save (W-290)", async () => {
+    const storage = memoryStorage();
+    const tabA = createBackend({ storage });
+    const tabB = createBackend({ storage });
+    const atA = await loadDesign(tabA.fetcher);
+    const atB = await loadDesign(tabB.fetcher);
+    await saveDesign(tabA.fetcher, atA.design, atA.revision);
+    expect((await rejectionOf(saveDesign(tabB.fetcher, atB.design, atB.revision))).status).toBe(
+      409,
+    );
+  });
+
   test("publish, change, then Revert to published brings the published page back", async () => {
     const { fetcher } = createBackend();
     let { rev } = await loadEntry(fetcher, LANDING);
