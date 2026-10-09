@@ -13,6 +13,7 @@ export function LeftPanel({
   selectedId,
   onSelect,
   onAdd,
+  onRecipe,
   onDuplicate,
   onMoveUp,
   onMoveDown,
@@ -25,6 +26,8 @@ export function LeftPanel({
   selectedId: string | null;
   onSelect: (id: string) => void;
   onAdd: (type: ElementType) => void;
+  /** Adds a section recipe (W-320). */
+  onRecipe?: (id: string) => void;
   onDuplicate: (id: string) => void;
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
@@ -62,7 +65,7 @@ export function LeftPanel({
         onValueChange={changeTab}
       />
       {tab === "add" ? (
-        <AddPanel onAdd={onAdd} formsAvailable={formsAvailable} />
+        <AddPanel onAdd={onAdd} onRecipe={onRecipe} formsAvailable={formsAvailable} />
       ) : (
         <LayersPanel
           layout={layout}

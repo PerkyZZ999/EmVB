@@ -1,5 +1,6 @@
 import {
   ELEMENT_DESCRIPTORS,
+  SECTION_RECIPES,
   type DesignSystem,
   type ElementType,
   type Layout,
@@ -14,6 +15,8 @@ export type PaletteActions = {
   selected: LayoutNode | null;
   formsAvailable: boolean;
   insert: (type: ElementType) => void;
+  /** Adds a section recipe (W-320). */
+  insertRecipe?: (id: string) => void;
   select: (id: string) => void;
   applyClass: (nodeId: string, classId: string) => void;
   actions: { id: string; label: string; hint?: string; keywords?: string; run: () => void }[];
@@ -49,6 +52,19 @@ export function paletteItems(ctx: PaletteActions): PaletteItem[] {
       keywords: `${descriptor.type} ${descriptor.group}`,
       run: () => ctx.insert(descriptor.type as ElementType),
     });
+  }
+  const insertRecipe = ctx.insertRecipe;
+  if (insertRecipe && ctx.layout) {
+    for (const recipe of SECTION_RECIPES) {
+      items.push({
+        id: `recipe:${recipe.id}`,
+        group: "Insert",
+        label: `Insert ${recipe.name} section`,
+        hint: "Recipe",
+        keywords: `recipe section block template ${recipe.description}`,
+        run: () => insertRecipe(recipe.id),
+      });
+    }
   }
   if (ctx.layout) {
     let count = 0;

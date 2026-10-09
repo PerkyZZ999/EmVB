@@ -19839,7 +19839,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
-          "search": "      lastToast.current = toasts.add({ title: message, timeout: NOTICE_TIMEOUT_MS });\n",
+          "search": "    lastToast.current = toasts.add({ title: message, timeout: NOTICE_TIMEOUT_MS });\n",
           "replace": ""
         }
       ],
@@ -26516,6 +26516,76 @@
         "./packages/emvb/src/admin/editor/panels/settings/motion-control.test.tsx"
       ],
       "expect": "\\(fail\\).*W-319"
+    },
+    {
+      "id": "W-320/second-h1",
+      "requirement": "W-320",
+      "description": "A hero added to a page with an H1 adds a second H1.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/recipes/index.ts",
+          "search": "  const topLevel = layout && hasH1(layout.root) ? 2 : 1;",
+          "replace": "  const topLevel = layout && hasH1(layout.root) ? 1 : 1;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/recipes/recipes.test.ts"],
+      "expect": "\\(fail\\).*W-320"
+    },
+    {
+      "id": "W-320/var-without-kind",
+      "requirement": "W-320",
+      "description": "Size tokens are referenced without saying they are sizes, so the CSS drops them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/recipes/index.ts",
+          "search": "      return { var: v.id, from };",
+          "replace": "      return { var: v.id };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/recipes/recipes.test.ts"],
+      "expect": "\\(fail\\).*W-320"
+    },
+    {
+      "id": "W-320/white-on-yellow",
+      "requirement": "W-320",
+      "description": "Text on a light accent is white.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/recipes/index.ts",
+          "search": "        : \"#111111\";",
+          "replace": "        : \"#ffffff\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/recipes/recipes.test.ts"],
+      "expect": "\\(fail\\).*W-320"
+    },
+    {
+      "id": "W-320/button-class-ignored",
+      "requirement": "W-320",
+      "description": "The site's Button class is not used.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/recipes/index.ts",
+          "search": "  const buttonCls = pick(design.classes,",
+          "replace": "  const buttonCls = undefined && pick(design.classes,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/recipes/recipes.test.ts"],
+      "expect": "\\(fail\\).*W-320"
+    },
+    {
+      "id": "W-320/recipes-unsearchable",
+      "requirement": "W-320",
+      "description": "Searching hides every recipe.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "(r) => !q || `${r.name} ${r.description} recipe section`",
+          "replace": "(r) => !q && `${r.name} ${r.description} recipe section`"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/recipes-panel.test.tsx"],
+      "expect": "\\(fail\\).*W-320"
     }
   ]
 }

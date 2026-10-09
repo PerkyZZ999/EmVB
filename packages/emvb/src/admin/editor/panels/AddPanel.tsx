@@ -26,7 +26,12 @@ import {
   RowsIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
-import { ELEMENT_DESCRIPTORS, typeMayAddScript, type ElementType } from "../../../core/index.ts";
+import {
+  ELEMENT_DESCRIPTORS,
+  SECTION_RECIPES,
+  typeMayAddScript,
+  type ElementType,
+} from "../../../core/index.ts";
 import { NEW_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { FIELD } from "../../ui.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
@@ -80,10 +85,13 @@ const GROUPS = [
 
 export function AddPanel({
   onAdd,
+  onRecipe,
   defaultQuery = "",
   formsAvailable = true,
 }: {
   onAdd: (type: ElementType) => void;
+  /** Adds a section recipe (W-320); without it, recipes are not offered. */
+  onRecipe?: (id: string) => void;
   /** Test-only initial search string. */
   defaultQuery?: string;
   /** Hide the Form group when the forms plugin is missing (W-036). */
@@ -97,6 +105,11 @@ export function AddPanel({
       (formsAvailable || d.group !== "form") &&
       (!q || d.name.toLowerCase().includes(q)),
   );
+  const recipes = onRecipe
+    ? SECTION_RECIPES.filter(
+        (r) => !q || `${r.name} ${r.description} recipe section`.toLowerCase().includes(q),
+      )
+    : [];
   return (
     <div className="emvb-panel-body" data-emvb-panel="add">
       <Input
@@ -106,7 +119,7 @@ export function AddPanel({
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Search elements"
       />
-      {matched.length === 0 ? (
+      {matched.length === 0 && recipes.length === 0 ? (
         <p className="emvb-helper">No elements match &quot;{query.trim()}&quot;.</p>
       ) : (
         GROUPS.map((group) => {
@@ -150,6 +163,28 @@ export function AddPanel({
             </div>
           );
         })
+      )}
+      {onRecipe && recipes.length > 0 && (
+        <div className="emvb-add-group" data-emvb-recipes="">
+          <h3 className="emvb-add-group-title">Section recipes</h3>
+          <p className="emvb-helper">
+            Whole sections that use your Site styles colours, sizes and classes.
+          </p>
+          <div className="emvb-recipe-list" aria-label="Section recipes">
+            {recipes.map((recipe) => (
+              <button
+                key={recipe.id}
+                type="button"
+                className="emvb-recipe-tile"
+                data-emvb-recipe={recipe.id}
+                onClick={() => onRecipe(recipe.id)}
+              >
+                <span className="emvb-recipe-name">{recipe.name}</span>
+                <span className="emvb-recipe-desc">{recipe.description}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

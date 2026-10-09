@@ -92,4 +92,11 @@ export const FEATURE_CSS = `
 .emvb-sources-value { font-family: ui-monospace, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
 .emvb-sources-from, .emvb-sources-over { grid-column: 1 / -1; color: var(--text-color-kumo-subtle); }
 .emvb-sources-over { text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
+.emvb-recipe-list { display: grid; gap: 6px; }
+.emvb-recipe-tile { display: grid; gap: 2px; text-align: start; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--color-kumo-line); background: var(--color-kumo-base, transparent); cursor: pointer; font: inherit; color: inherit; }
+.emvb-recipe-tile:hover, .emvb-recipe-tile:focus-visible { border-color: var(--color-kumo-brand); }
+.emvb-recipe-name { font-weight: 600; font-size: 13px; }
+.emvb-recipe-desc { font-size: 12px; color: var(--text-color-kumo-subtle); }
+.emvb-motion-effect { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; align-items: end; }
+.emvb-motion-name { grid-column: 1 / -1; font-size: 12px; font-weight: 600; }
 `;

@@ -201,6 +201,7 @@ function EditorApp({
     arrange,
     duplicate,
     addFromPanel,
+    addRecipe,
     items: itemActions,
   } = useNodeActions({ state, latest, dispatch, announce: setAnnouncement, toasts });
   const [refusal, setRefusal] = React.useState<PasteRefusal | null>(null);
@@ -402,6 +403,7 @@ function EditorApp({
                   selectedId={state.selectedId}
                   onSelect={(id) => dispatch({ type: "select", id })}
                   onAdd={addFromPanel}
+                  onRecipe={addRecipe}
                   formsAvailable={formsAvailable}
                   onDuplicate={duplicate}
                   onMoveUp={(id) => arrange(id, moveUp)}
@@ -527,6 +529,7 @@ function EditorApp({
                   selected: selectedNode ?? null,
                   formsAvailable,
                   insert: addFromPanel,
+                  insertRecipe: addRecipe,
                   select: (id) => dispatch({ type: "select", id }),
                   applyClass: (nodeId, classId) =>
                     dispatch({

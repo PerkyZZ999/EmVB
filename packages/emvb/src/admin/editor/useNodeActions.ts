@@ -8,10 +8,13 @@ import {
   findNode,
   moveDown,
   moveUp,
+  recipeNode,
+  withFreshIds,
   subtreeSize,
   type Arranged,
   type ElementType,
   type Layout,
+  type LayoutNode,
 } from "../../core/index.ts";
 import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./panels/ElementPanel.tsx";
@@ -139,6 +142,30 @@ export function useNodeActions({
     },
   };
 
+  const notice = (message: string) => {
+    announce(message);
+    if (lastToast.current) toasts.close(lastToast.current);
+    lastToast.current = toasts.add({ title: message, timeout: NOTICE_TIMEOUT_MS });
+  };
+
+  /** Puts a new element (or a recipe's section) where the selection says (W-175). */
+  const place = (layout: Layout, node: LayoutNode, label: string) => {
+    const result = addNodeNear(layout, node, latest.current.selectedId);
+    if (!result.ok) {
+      notice(result.reason);
+      return;
+    }
+    dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
+    const nameOf = (id: string) => ELEMENT_NAMES[findNode(layout, id)?.type ?? "container"];
+    if (result.fallback) {
+      // Added next to the nearest ancestor that takes it, rather than refused (W-175).
+      const after = nameOf(result.fallback.after) ?? "the selection";
+      notice(`${label} added after ${after} instead. ${result.fallback.refused}`);
+      return;
+    }
+    announce(`${label} added inside ${nameOf(result.parentId) ?? "Container"}`);
+  };
+
   const addFromPanel = (type: ElementType) => {
     const layout = latest.current.page.layout;
     if (!layout) {
@@ -147,26 +174,16 @@ export function useNodeActions({
     }
     const node = newElement(type);
     if (!node) return;
-    const notice = (message: string) => {
-      announce(message);
-      if (lastToast.current) toasts.close(lastToast.current);
-      lastToast.current = toasts.add({ title: message, timeout: NOTICE_TIMEOUT_MS });
-    };
-    const result = addNodeNear(layout, node, latest.current.selectedId);
-    if (!result.ok) {
-      notice(result.reason);
-      return;
-    }
-    dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
-    const nameOf = (id: string) => ELEMENT_NAMES[findNode(layout, id)?.type ?? "container"];
-    const label = ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name ?? type;
-    if (result.fallback) {
-      // Added next to the nearest ancestor that takes it, rather than refused (W-175).
-      const after = nameOf(result.fallback.after) ?? "the selection";
-      notice(`${label} added after ${after} instead. ${result.fallback.refused}`);
-      return;
-    }
-    announce(`${label} added inside ${nameOf(result.parentId) ?? "Container"}`);
+    place(layout, node, ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name ?? type);
+  };
+
+  /** A section recipe built from the site's styles (W-320). */
+  const addRecipe = (id: string) => {
+    const layout = latest.current.page.layout;
+    if (!layout) return;
+    const node = recipeNode(id, latest.current.design, layout);
+    if (!node) return;
+    place(layout, withFreshIds(layout, node), `${node.label ?? "Section"} section`);
   };
 
   return {
@@ -179,6 +196,7 @@ export function useNodeActions({
     arrange,
     duplicate,
     addFromPanel,
+    addRecipe,
     items,
   };
 }
