@@ -26740,6 +26740,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*W-312"
+    },
+    {
+      "id": "W-307/bad-bound-href-blanks",
+      "requirement": "W-307",
+      "description": "A refused bound link replaces the typed link, so the button loses its href.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    if (field.kind === \"url\" && !sanitizeHref(value)) continue;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
+      "expect": "\\(fail\\).*W-307 a refused bound link"
+    },
+    {
+      "id": "W-307/bad-bound-image-blanks",
+      "requirement": "W-307",
+      "description": "A refused bound image replaces the typed image, so it disappears.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    if (field.kind === \"image\" && !sanitizeMediaUrl(value)) continue;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
+      "expect": "\\(fail\\).*W-307 a refused bound link"
     }
   ]
 }

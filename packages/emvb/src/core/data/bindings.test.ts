@@ -70,6 +70,33 @@ describe("data bindings (W-307)", () => {
     expect(html).not.toContain("javascript:");
   });
 
+  test("W-307 a refused bound link or image keeps the typed one instead of blanking", () => {
+    const button: LayoutNode = {
+      id: "butt0001",
+      type: "button",
+      props: { text: "Go", href: "/safe" },
+      bind: { href: { source: "param", key: "next" } },
+    };
+    const image: LayoutNode = {
+      id: "imag0001",
+      type: "image",
+      props: { src: "/hero.png", alt: "Hero" },
+      bind: { src: { source: "param", key: "next" } },
+    };
+    for (const next of ["javascript:alert(1)", "data:image/svg+xml,x", "//evil.test/x"]) {
+      const html = renderPage(page(button, image), emptyDesign(), {
+        dynamic: { params: { next } },
+      }).html;
+      expect(html).toContain('href="/safe"');
+      expect(html).toContain('src="/hero.png"');
+    }
+    const ok = renderPage(page(button, image), emptyDesign(), {
+      dynamic: { params: { next: "/other.png" } },
+    }).html;
+    expect(ok).toContain('href="/other.png"');
+    expect(ok).toContain('src="/other.png"');
+  });
+
   test("bindings on fields an element can't bind are ignored", () => {
     const node = { ...heading, bind: { level: { source: "param", key: "x" } } } as LayoutNode;
     expect(applyBindings(node, { params: { x: "9" } })).toBe(node);

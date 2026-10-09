@@ -1,4 +1,6 @@
 import type { Binding, BindSource, LayoutNode } from "../schema/layout.ts";
+import { sanitizeHref } from "../sanitize/href.ts";
+import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import type { ThemePostFields } from "../theme/dynamic.ts";
 
 /**
@@ -125,8 +127,9 @@ export function hasBindings(node: LayoutNode): boolean {
 }
 
 /**
- * The node with its bound props replaced by live values (W-307). Unbindable keys and empty values
- * leave the typed prop as it is. A bound text field that is single-line stays single-line.
+ * The node with its bound props replaced by live values (W-307). Unbindable keys, empty values and
+ * links or images the sanitizer would refuse leave the typed prop as it is, so a bad URL parameter
+ * can't blank a button or an image. A bound text field that is single-line stays single-line.
  */
 export function applyBindings(node: LayoutNode, data: BindingData): LayoutNode {
   const bind = node.bind;
@@ -138,6 +141,8 @@ export function applyBindings(node: LayoutNode, data: BindingData): LayoutNode {
     let value = resolveBinding(binding, data);
     if (value === undefined) continue;
     if (field.kind !== "text" || node.type !== "text") value = value.replace(/\s*\n\s*/g, " ");
+    if (field.kind === "url" && !sanitizeHref(value)) continue;
+    if (field.kind === "image" && !sanitizeMediaUrl(value)) continue;
     props ??= { ...(node.props as Record<string, unknown>) };
     props[field.key] = value;
     // A bound image is no longer the media library item it was picked from.
