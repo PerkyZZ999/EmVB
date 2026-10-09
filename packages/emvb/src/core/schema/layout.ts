@@ -90,6 +90,38 @@ export const Variant = z.strictObject({
 });
 export type Variant = z.infer<typeof Variant>;
 
+export const AUDIENCE_DEVICES = ["mobile", "tablet", "desktop"] as const;
+
+/**
+ * Who sees an element (W-313): visitors from these countries, on these devices, new or
+ * returning, at these hours and days. Every rule set must match; `hide` flips it to "everyone
+ * except". Hosts evaluate it on the server; a rule the host can't read (no country header) does
+ * not match.
+ */
+export const Audience = z.strictObject({
+  countries: z
+    .array(z.string().regex(/^[A-Z]{2}$/, "Two-letter country codes, e.g. CA"))
+    .min(1)
+    .max(50)
+    .optional(),
+  devices: z.array(z.enum(AUDIENCE_DEVICES)).min(1).max(3).optional(),
+  visitor: z.enum(["new", "returning"]).optional(),
+  /** From hour `from` up to (not including) hour `to`, 0–24; wraps past midnight when to < from. */
+  hours: z
+    .strictObject({ from: z.number().int().min(0).max(23), to: z.number().int().min(0).max(24) })
+    .optional(),
+  /** Days of the week, 0 = Sunday. */
+  days: z.array(z.number().int().min(0).max(6)).min(1).max(7).optional(),
+  /** IANA time zone for hours and days, e.g. America/Toronto. Unset = UTC. */
+  timeZone: z
+    .string()
+    .regex(/^[A-Za-z][A-Za-z0-9_+-]*(\/[A-Za-z0-9_+-]+){0,2}$/)
+    .max(64)
+    .optional(),
+  hide: z.boolean().optional(),
+});
+export type Audience = z.infer<typeof Audience>;
+
 /** A box may be the link. A link inside a link is dropped at render time (W-111). */
 const BoxLink = {
   href: z.string().max(2000).optional(),
@@ -111,6 +143,7 @@ const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) =>
   label: NodeLabel.optional(),
   bind: Bindings.optional(),
   variant: Variant.optional(),
+  audience: Audience.optional(),
 });
 
 const leafNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
@@ -574,6 +607,7 @@ const UnknownNodeSchema = z.strictObject({
   label: NodeLabel.optional(),
   bind: Bindings.optional(),
   variant: Variant.optional(),
+  audience: Audience.optional(),
   get children(): z.ZodType<LayoutNode[] | undefined> {
     return z.array(LayoutNode).optional();
   },
@@ -662,6 +696,7 @@ type IdOf = z.infer<typeof NodeId>;
 export type NodeExtras = {
   bind?: Record<string, Binding>;
   variant?: Variant;
+  audience?: Audience;
 };
 
 /** Manual recursive types so UnknownNode does not poison `z.infer` of the tree. */

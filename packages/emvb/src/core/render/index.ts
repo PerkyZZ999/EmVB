@@ -1,4 +1,5 @@
 import { variantShows } from "../audience/variants.ts";
+import { audienceShows, audienceSummary } from "../audience/rules.ts";
 import { generateCss } from "../css/generate.ts";
 import { cssScopeToken, scopeAttribute, scopeCss, scopeWrapperCss } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
@@ -294,6 +295,8 @@ export function renderPage(
     const node = stored.bind ? applyBindings(stored, bindingData(dynamic)) : stored;
     // W-312: only the visitor's arm of an A/B test renders; the editor shows every arm.
     if (mode === "public" && !variantShows(stored, dynamic?.abArms)) return undefined;
+    // W-313: visitor-aware elements render only for their audience; the editor shows them all.
+    if (mode === "public" && !audienceShows(stored, dynamic?.visitor)) return undefined;
     const id = ID.test(node.id) ? node.id : undefined;
     const nodeId = id ?? "(invalid id)";
     const type: string = node.type;
@@ -313,6 +316,9 @@ export function renderPage(
     const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
     const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId);
     if (mode === "editor" && hasBindings(stored)) attrs["data-emvb-bound"] = "";
+    if (mode === "editor" && stored.audience) {
+      attrs["data-emvb-audience"] = audienceSummary(stored.audience);
+    }
     if (mode === "editor" && stored.variant) {
       attrs["data-emvb-variant"] = `${stored.variant.test} · ${stored.variant.arm.toUpperCase()}`;
     }

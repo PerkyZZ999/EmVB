@@ -62,6 +62,7 @@ import {
 import { FieldControl } from "./settings/FieldControl.tsx";
 import { BindingsEditor } from "./settings/BindingsEditor.tsx";
 import { VariantEditor } from "./settings/VariantEditor.tsx";
+import { AudienceEditor } from "./settings/AudienceEditor.tsx";
 import { BoxControl } from "./settings/BoxControl.tsx";
 import { boxGroupOf } from "./settings/box-sides.ts";
 import { IconShapeRow, IconSingleColorRow } from "./settings/IconControls.tsx";
@@ -544,6 +545,7 @@ function KnownElementPanel({
             ))
           )}
           <BindingsEditor node={node} onChange={onChange} post={SAMPLE_POST} />
+          <AudienceEditor node={node} isRoot={layout?.root.id === node.id} onChange={onChange} />
           <VariantEditor
             node={node}
             isRoot={layout?.root.id === node.id}

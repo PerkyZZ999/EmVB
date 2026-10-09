@@ -77,6 +77,8 @@ const EDITOR_CANVAS_CSS =
   "[data-emvb-bound]{text-decoration-line:underline;text-decoration-style:dotted;text-decoration-color:#7c3aed;text-underline-offset:3px}" +
   // W-312: every A/B arm shows on the canvas, outlined so it's clear visitors see only one.
   "[data-emvb-variant]{outline:1px dashed #d97706;outline-offset:2px}" +
+  // W-313: visitor-aware elements show on the canvas, outlined in teal.
+  "[data-emvb-audience]{outline:1px dashed #0d9488;outline-offset:2px}" +
   // W-308: the Loop's Empty state shows under its items in the editor, marked as such.
   ".emvb-loop-item~.emvb-loop-empty{outline:1px dashed #94a3b8;outline-offset:2px;position:relative}" +
   `.emvb-loop-item~.emvb-loop-empty::before{content:"Empty state: shown when there are no entries";display:block;${HINT}}`;

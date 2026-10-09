@@ -45,6 +45,8 @@ export {
   LoopEmptyNode,
   Variant,
   AB_TEST_NAME,
+  Audience,
+  AUDIENCE_DEVICES,
   LOOP_DISPLAYS,
   LOOP_ORDERS,
   SectionNode,
@@ -433,3 +435,11 @@ export {
   type AbArm,
   type AbTest,
 } from "./audience/variants.ts";
+export {
+  audienceShows,
+  audienceSummary,
+  clockIn,
+  deviceFromUserAgent,
+  layoutUsesAudience,
+  type VisitorInfo,
+} from "./audience/rules.ts";

@@ -7,15 +7,17 @@ import {
   type CollectionLoop,
   type Layout,
   type ThemePostFields,
+  type VisitorInfo,
 } from "../core/index.ts";
 import { themePostFromEntry } from "./theme-posts.ts";
-import { abArmsFor, type VisitorAstro } from "./visitor.ts";
+import { abArmsFor, visitorFor, type VisitorAstro } from "./visitor.ts";
 
 type RequestData = {
   site?: Record<string, string>;
   params?: Record<string, string>;
   collections?: Record<string, ThemePostFields[]>;
   abArms?: Record<string, "a" | "b">;
+  visitor?: VisitorInfo;
 };
 
 // D1/SQLite columns are snake_case, so orderBy names the columns as stored.
@@ -57,6 +59,9 @@ export async function bindingDataFor(
   // W-312: the visitor's arm of each A/B test, picked here on the server.
   const abArms = astro ? abArmsFor(layout, astro) : undefined;
   if (abArms) data.abArms = abArms;
+  // W-313: what the server knows about the visitor, for visitor-aware elements.
+  const visitor = astro ? visitorFor(layout, astro) : undefined;
+  if (visitor) data.visitor = visitor;
   const loops = collectCollectionLoops(layout);
   if (loops.length > 0) {
     const lists = await Promise.all(loops.map(loopEntries));

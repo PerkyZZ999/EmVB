@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { Layout } from "../core/index.ts";
-import { abArmsFor } from "./visitor.ts";
+import { abArmsFor, visitorFor } from "./visitor.ts";
 
 const layout = {
   schemaVersion: 13,
@@ -71,5 +71,55 @@ describe("server-side A/B picks (W-312)", () => {
     const plain = { ...layout, root: { ...layout.root, children: [] } } as Layout;
     expect(abArmsFor(plain, astroWith().astro)).toBeUndefined();
     expect(abArmsFor(layout, { url: new URL("https://example.com/") })).toBeUndefined();
+  });
+});
+
+describe("server-side visitor facts (W-313)", () => {
+  const withAudience = {
+    schemaVersion: 13,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "head0001",
+          type: "heading",
+          props: { text: "A", level: 2 },
+          audience: { countries: ["CA"] },
+        },
+      ],
+    },
+  } as Layout;
+
+  test("country from Cloudflare, device from the UA, and a first-visit cookie", () => {
+    const { astro, jar, headers } = astroWith();
+    const request = new Request("https://example.com/", {
+      headers: { "cf-ipcountry": "ca", "user-agent": "Mozilla/5.0 (iPhone) Mobile" },
+    });
+    const visitor = visitorFor(withAudience, { ...astro, request });
+    expect(visitor).toMatchObject({ country: "CA", device: "mobile", returning: false });
+    expect(typeof visitor?.now).toBe("number");
+    expect(jar.get("emvb_seen")?.value).toBe("1");
+    expect(headers.get("Cache-Control")).toBe("private, no-store");
+  });
+
+  test("a seen visitor is returning; XX and Tor are no country; the cf object is read too", () => {
+    const { astro, jar } = astroWith();
+    jar.set("emvb_seen", { value: "1" });
+    const request = new Request("https://example.com/", { headers: { "cf-ipcountry": "XX" } });
+    const visitor = visitorFor(withAudience, {
+      ...astro,
+      request,
+      locals: { runtime: { cf: { country: "FR" } } },
+    });
+    expect(visitor?.returning).toBe(true);
+    expect(visitor?.country).toBe("FR");
+  });
+
+  test("layouts without visitor rules read nothing and stay cacheable", () => {
+    const { astro, headers } = astroWith();
+    expect(visitorFor(layout, astro)).toBeUndefined();
+    expect(headers.get("Cache-Control")).toBeNull();
   });
 });

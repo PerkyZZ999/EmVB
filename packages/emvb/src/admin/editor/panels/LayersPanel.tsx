@@ -16,6 +16,7 @@ import {
   type Layout,
   type LayoutNode,
   nodeScript,
+  audienceSummary,
   SCRIPT_LABELS,
   type PageScript,
 } from "../../../core/index.ts";
@@ -494,6 +495,15 @@ const LayerRow = React.memo(function LayerRow({
             {preview ? <span className="emvb-layer-preview">{preview}</span> : null}
             {hasStateStyles(node) && <StateDot />}
             <JsBadge script={nodeScript(node)} />
+            {node.audience && (
+              <span
+                className="emvb-js-badge emvb-ab-badge"
+                title={audienceSummary(node.audience)}
+                aria-hidden="true"
+              >
+                ◎
+              </span>
+            )}
             {node.variant && (
               <span
                 className="emvb-js-badge emvb-ab-badge"

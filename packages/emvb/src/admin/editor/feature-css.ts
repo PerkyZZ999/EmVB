@@ -38,4 +38,6 @@ export const FEATURE_CSS = `
 .emvb-topbar-meter { font-variant-numeric: tabular-nums; font-size: 12px; }
 .emvb-js-badge + .emvb-ab-badge { margin-left: 2px; }
 .emvb-ab-badge { background: var(--color-kumo-info-tint, #dbeafe); }
+.emvb-aud-checks { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0; padding: 0; border: 0; font-size: 12px; }
+.emvb-aud-checks > legend { width: 100%; padding: 0; margin-bottom: 2px; }
 `;

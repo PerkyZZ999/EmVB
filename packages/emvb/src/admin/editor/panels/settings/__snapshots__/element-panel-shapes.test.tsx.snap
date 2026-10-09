@@ -91,7 +91,20 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
             "Site setting"
           option value="param"
             "URL parameter"
-        span"
+        span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="heading"
@@ -602,7 +615,20 @@ exports[`element panel markup (W-021, W-086 M16) layout-section renders the same
             "div"
           span aria-hidden="true"
             svg
-        input id="id-8" tabindex="-1" aria-hidden="true" value="div""
+        input id="id-8" tabindex="-1" aria-hidden="true" value="div"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="layout-section"
@@ -1248,7 +1274,20 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
             "Site setting"
           option value="param"
             "URL parameter"
-        span"
+        span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="text"
@@ -1447,7 +1486,20 @@ exports[`element panel markup (W-021, W-086 M16) label renders the same content 
             "Site setting"
           option value="param"
             "URL parameter"
-        span"
+        span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="label"
@@ -1672,7 +1724,20 @@ exports[`element panel markup (W-021, W-086 M16) link renders the same content a
             "Site setting"
           option value="param"
             "URL parameter"
-        span"
+        span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="link"
@@ -1897,7 +1962,20 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
             "Site setting"
           option value="param"
             "URL parameter"
-        span"
+        span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="button"
@@ -2099,7 +2177,20 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
       label.emvb-field-label for="id-4"
         "Items"
       textarea.emvb-field.emvb-textarea id="id-4"
-        "Item""
+        "Item"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="list"
@@ -2355,7 +2446,20 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
             "Site setting"
           option value="param"
             "URL parameter"
-        span"
+        span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="image"
@@ -2586,7 +2690,20 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
             "Site setting"
           option value="param"
             "URL parameter"
-        span"
+        span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="icon"
@@ -2762,7 +2879,20 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
       label id="id-4" for="id-5" data-filled=""
         span
           "Title"
-      input.emvb-field id="id-5" data-emvb-field="title" value="Video" data-filled="" aria-labelledby="id-4""
+      input.emvb-field id="id-5" data-emvb-field="title" value="Video" data-filled="" aria-labelledby="id-4"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="video"
@@ -2929,7 +3059,20 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
       p.emvb-helper
         "Paste a forms-plugin form id."
         a href="/_emdash/admin/plugins/emdash-forms/pages"
-          "Open Forms""
+          "Open Forms"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="form"
@@ -3124,7 +3267,20 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
       label id="id-6" for="id-7"
         span
           "Placeholder"
-      input.emvb-field id="id-7" data-emvb-field="placeholder" value="" aria-labelledby="id-6""
+      input.emvb-field id="id-7" data-emvb-field="placeholder" value="" aria-labelledby="id-6"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="text-input"
@@ -3334,7 +3490,20 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
       label id="id-6" for="id-7"
         span
           "Placeholder"
-      input.emvb-field id="id-7" data-emvb-field="placeholder" value="" aria-labelledby="id-6""
+      input.emvb-field id="id-7" data-emvb-field="placeholder" value="" aria-labelledby="id-6"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="textarea"
@@ -3539,7 +3708,20 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
       label id="id-4" for="id-5" data-filled=""
         span
           "Label"
-      input.emvb-field id="id-5" data-emvb-field="label" value="Choice" data-filled="" aria-labelledby="id-4""
+      input.emvb-field id="id-5" data-emvb-field="label" value="Choice" data-filled="" aria-labelledby="id-4"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="select"
@@ -3744,7 +3926,20 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
       label id="id-4" for="id-5" data-filled=""
         span
           "Label"
-      input.emvb-field id="id-5" data-emvb-field="label" value="I agree" data-filled="" aria-labelledby="id-4""
+      input.emvb-field id="id-5" data-emvb-field="label" value="I agree" data-filled="" aria-labelledby="id-4"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="checkbox"
@@ -3932,7 +4127,20 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
       label id="id-4" for="id-5" data-filled=""
         span
           "Label"
-      input.emvb-field id="id-5" data-emvb-field="label" value="Option" data-filled="" aria-labelledby="id-4""
+      input.emvb-field id="id-5" data-emvb-field="label" value="Option" data-filled="" aria-labelledby="id-4"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="radio"
@@ -4115,7 +4323,20 @@ exports[`element panel markup (W-021, W-086 M16) submit renders the same content
       label id="id-2" for="id-3" data-filled=""
         span
           "Label"
-      input.emvb-field id="id-3" data-emvb-field="label" value="Submit" data-filled="" aria-labelledby="id-2""
+      input.emvb-field id="id-3" data-emvb-field="label" value="Submit" data-filled="" aria-labelledby="id-2"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="submit"
@@ -4318,7 +4539,20 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
             "H1"
           span aria-hidden="true"
             svg
-        input id="id-4" tabindex="-1" aria-hidden="true" value="1""
+        input id="id-4" tabindex="-1" aria-hidden="true" value="1"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="post-title"
@@ -5112,7 +5346,20 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
             "Decorative"
         button data-unchecked="" type="button" tabindex="0" id="id-3" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Decorative" aria-labelledby="id-2"
           div
-        input tabindex="-1" aria-hidden="true" type="checkbox""
+        input tabindex="-1" aria-hidden="true" type="checkbox"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="post-image"
@@ -5309,7 +5556,20 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
             "Open in new tab"
         button data-unchecked="" type="button" tabindex="0" id="id-5" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open in new tab" aria-labelledby="id-4"
           div
-        input tabindex="-1" aria-hidden="true" type="checkbox""
+        input tabindex="-1" aria-hidden="true" type="checkbox"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="post-link"
@@ -6149,6 +6409,19 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
         span
           "Posts per page"
       input.emvb-field.emvb-mono id="id-17" data-emvb-field="perPage" value="" aria-labelledby="id-16"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match"
     p.emvb-helper data-emvb-loop-note="true"
       "A Loop lists posts only in an Archive template. Here the editor shows sample posts, but the live page shows nothing. Build post lists in Theme Builder › Archive.""
 ,
@@ -6674,6 +6947,19 @@ exports[`element panel markup (W-021, W-086 M16) pagination renders the same con
         span
           "Count text"
       input.emvb-field id="id-9" data-emvb-field="countText" value="" aria-labelledby="id-8"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match"
     p.emvb-helper data-emvb-loop-note="true"
       "Pagination shows only in an Archive template with more than one page. Here the live page shows nothing.""
 ,
@@ -6875,7 +7161,20 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
         "No Section part theme parts yet. Paste an id, or"
         a href="/_emdash/admin/plugins/emvb/theme"
           "create one in Theme Builder"
-        ".""
+        "."
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="section"
@@ -7722,7 +8021,20 @@ exports[`element panel markup (W-021, W-086 M16) grid renders the same content a
             "Site setting"
           option value="param"
             "URL parameter"
-        span"
+        span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="grid"
@@ -7932,7 +8244,20 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
       label id="id-7" for="id-8" data-filled=""
         span
           "Size (px)"
-      input.emvb-field.emvb-mono id="id-8" data-emvb-field="size" value="48" data-filled="" aria-labelledby="id-7""
+      input.emvb-field.emvb-mono id="id-8" data-emvb-field="size" value="48" data-filled="" aria-labelledby="id-7"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="svg"
@@ -8159,7 +8484,20 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
       button.emvb-btn data-kumo-component="Button" type="button"
         svg aria-hidden="true"
         span
-          "Add tab""
+          "Add tab"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="tabs"
@@ -8354,6 +8692,19 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
         span
           "Tab label"
       input.emvb-field id="id-3" data-emvb-field="label" value="Tab" data-filled="" aria-labelledby="id-2"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match"
     p.emvb-helper
       "The tab's content is the elements in its panel. Select this tab, then add elements, or drag them into its panel on the canvas.""
 ,
@@ -8592,7 +8943,20 @@ exports[`element panel markup (W-021, W-086 M16) accordion renders the same cont
       button.emvb-btn data-kumo-component="Button" type="button"
         svg aria-hidden="true"
         span
-          "Add item""
+          "Add item"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="accordion"
@@ -8795,6 +9159,19 @@ exports[`element panel markup (W-021, W-086 M16) accordion-item renders the same
         button data-unchecked="" type="button" tabindex="0" id="id-5" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open" aria-labelledby="id-4"
           div
         input tabindex="-1" aria-hidden="true" type="checkbox"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match"
     p.emvb-helper
       "The item's content is the elements in its body. Select this item, then add elements, or drag them into its body on the canvas.""
 ,
@@ -8997,6 +9374,19 @@ exports[`element panel markup (W-021, W-086 M16) menu renders the same content a
           span aria-hidden="true"
             svg
         input id="id-6" tabindex="-1" aria-hidden="true" value="row"
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match"
     p.emvb-helper
       "Add Menu items. An item that holds other elements opens a dropdown. Wide panel stretches that dropdown across the menu.""
 ,
@@ -9245,6 +9635,19 @@ exports[`element panel markup (W-021, W-086 M16) menu-item renders the same cont
           option value="param"
             "URL parameter"
         span
+    section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
+      h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
+        "Visitors"
+      label.emvb-bind-row
+        span.emvb-bind-label
+          "Show to"
+        select.emvb-native-select data-emvb-audience-mode=""
+          option value="everyone"
+            "Everyone"
+          option value="only"
+            "Only visitors who match"
+          option value="except"
+            "Everyone except visitors who match"
     p.emvb-helper
       "The label is the link. Elements inside this item are its dropdown. Wide panel stretches the dropdown across the menu.""
 ,

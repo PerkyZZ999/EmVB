@@ -1,3 +1,4 @@
+import type { VisitorInfo } from "../audience/rules.ts";
 import type { ArchivePagination } from "./pagination.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { isParentNode } from "../schema/layout.ts";
@@ -45,6 +46,8 @@ export type ThemeDynamicData = {
   pagination?: ArchivePagination;
   /** Set inside a Loop's item, where a Pagination would repeat once per post (W-228). */
   inLoopItem?: boolean;
+  /** What the host knows about the visitor, for visitor-aware elements (W-313). */
+  visitor?: VisitorInfo;
   /** The visitor's arm per A/B test (W-312); hosts pick it on the server. */
   abArms?: Readonly<Record<string, "a" | "b">>;
   /** Entries for collection Loops (W-308), keyed by the Loop's node id. Hosts fill this. */

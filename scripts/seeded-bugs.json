@@ -19301,8 +19301,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "  attributes: HtmlAttributes.optional(),\n  label: NodeLabel.optional(),\n  bind: Bindings.optional(),\n  variant: Variant.optional(),\n});",
-          "replace": "  attributes: HtmlAttributes.optional(),\n  bind: Bindings.optional(),\n  variant: Variant.optional(),\n});"
+          "search": "  attributes: HtmlAttributes.optional(),\n  label: NodeLabel.optional(),\n  bind: Bindings.optional(),\n  variant: Variant.optional(),\n  audience: Audience.optional(),\n});",
+          "replace": "  attributes: HtmlAttributes.optional(),\n  bind: Bindings.optional(),\n  variant: Variant.optional(),\n  audience: Audience.optional(),\n});"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/schema/node-label.test.ts"],
@@ -26037,6 +26037,90 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/audience/variants.test.ts"],
       "expect": "\\(fail\\).*W-312"
+    },
+    {
+      "id": "W-313/unknown-matches",
+      "requirement": "W-313",
+      "description": "A visitor with no country matches a country rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/audience/rules.ts",
+          "search": "if (audience.countries && !(visitor.country && audience.countries.includes(visitor.country))) {",
+          "replace": "if (audience.countries && visitor.country && !audience.countries.includes(visitor.country)) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/rules.test.ts"],
+      "expect": "\\(fail\\).*W-313"
+    },
+    {
+      "id": "W-313/hide-ignored",
+      "requirement": "W-313",
+      "description": "Hide shows the element to matching visitors anyway.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/audience/rules.ts",
+          "search": "return audience.hide ? !match : match;",
+          "replace": "return match;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/rules.test.ts"],
+      "expect": "\\(fail\\).*W-313"
+    },
+    {
+      "id": "W-313/no-wrap",
+      "requirement": "W-313",
+      "description": "Night hours don't wrap past midnight.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/audience/rules.ts",
+          "search": "return from < to ? hour >= from && hour < to : hour >= from || hour < to;",
+          "replace": "return hour >= from && hour < to;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/rules.test.ts"],
+      "expect": "\\(fail\\).*W-313"
+    },
+    {
+      "id": "W-313/utc-only",
+      "requirement": "W-313",
+      "description": "The time zone is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/audience/rules.ts",
+          "search": "    return read(timeZone ?? \"UTC\");",
+          "replace": "    return read(\"UTC\");"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/rules.test.ts"],
+      "expect": "\\(fail\\).*W-313"
+    },
+    {
+      "id": "W-313/xx-country",
+      "requirement": "W-313",
+      "description": "Cloudflare's XX is taken as a country.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "if (COUNTRY.test(code) && code !== \"XX\" && code !== \"T1\") return code;",
+          "replace": "if (COUNTRY.test(code)) return code;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor.test.ts"],
+      "expect": "\\(fail\\).*W-313"
+    },
+    {
+      "id": "W-313/public-ignores-audience",
+      "requirement": "W-313",
+      "description": "The public page shows visitor-aware elements to everyone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (mode === \"public\" && !audienceShows(stored, dynamic?.visitor)) return undefined;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/rules.test.ts"],
+      "expect": "\\(fail\\).*W-313"
     }
   ]
 }
