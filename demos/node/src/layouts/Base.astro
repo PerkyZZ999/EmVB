@@ -42,10 +42,6 @@ const [settingsResult, menuResult] = await Promise.all([
 	getSiteSettingsWithCacheHint(),
 	getMenuWithCacheHint("primary"),
 ]);
-if (Astro.cache?.enabled) {
-	Astro.cache.set(settingsResult.cacheHint);
-	Astro.cache.set(menuResult.cacheHint);
-}
 
 const { siteTitle, siteTagline, siteLogo } = resolveStarterSiteIdentity(
 	settingsResult.data,
@@ -66,6 +62,12 @@ const themeCtx = is404
 			? themeContextFront()
 			: themeContextFrom(Astro.url, { content: content ?? null });
 const theme = Astro.props.theme ?? (await resolveThemeParts(Astro, themeCtx));
+// A/B tests and visitor rules (W-312, W-313) mark the response private: never route-cache it.
+const personalized = /\bprivate\b/.test(Astro.response.headers.get("Cache-Control") ?? "");
+if (Astro.cache?.enabled && !personalized) {
+	Astro.cache.set(settingsResult.cacheHint);
+	Astro.cache.set(menuResult.cacheHint);
+}
 // An EmVB archive page's canonical URL: page 1 is the bare archive URL (W-223).
 const canonical =
 	Astro.props.canonical ??

@@ -26768,6 +26768,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
       "expect": "\\(fail\\).*W-307 a refused bound link"
+    },
+    {
+      "id": "W-312/route-cache-kept",
+      "requirement": "W-312",
+      "description": "A personalized response stays in Astro's route cache, so one visitor's arm is served to others.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "  if (astro.cache?.enabled) astro.cache.set(false);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor.test.ts"],
+      "expect": "\\(fail\\).*W-312 a personalized response opts out"
+    },
+    {
+      "id": "W-312/demo-base-caches-private",
+      "requirement": "W-312",
+      "description": "The Node demo's Base layout route-caches a private, personalized page.",
+      "edits": [
+        {
+          "file": "demos/node/src/layouts/Base.astro",
+          "search": "if (Astro.cache?.enabled && !personalized) {",
+          "replace": "if (Astro.cache?.enabled) {"
+        }
+      ],
+      "command": ["bun", "test", "./test/demos/personalized-cache.test.ts"],
+      "expect": "\\(fail\\).*node: Base sets cache hints"
     }
   ]
 }

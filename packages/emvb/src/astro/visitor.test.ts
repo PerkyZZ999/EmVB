@@ -117,6 +117,16 @@ describe("server-side visitor facts (W-313)", () => {
     expect(visitor?.country).toBe("FR");
   });
 
+  test("W-312 a personalized response opts out of Astro's route cache; a static one doesn't", () => {
+    const calls: unknown[] = [];
+    const cache = { enabled: true, set: (input: false) => void calls.push(input) };
+    abArmsFor(layout, { ...astroWith().astro, cache });
+    visitorFor(withAudience, { ...astroWith().astro, cache });
+    expect(calls).toEqual([false, false]);
+    visitorFor(layout, { ...astroWith().astro, cache });
+    expect(calls).toHaveLength(2);
+  });
+
   test("layouts without visitor rules read nothing and stay cacheable", () => {
     const { astro, headers } = astroWith();
     expect(visitorFor(layout, astro)).toBeUndefined();

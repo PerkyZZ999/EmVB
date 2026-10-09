@@ -19,6 +19,8 @@ export type VisitorAstro = {
   };
   response?: { headers: Headers };
   locals?: unknown;
+  /** Astro's route cache, when the host configured a provider. */
+  cache?: { enabled: boolean; set(input: false): void };
 };
 
 const AB_COOKIE_DAYS = 30;
@@ -31,9 +33,11 @@ const random = (): number => {
 
 /**
  * The response varies per visitor: keep shared caches from serving one visitor's arm or
- * audience to another (W-312).
+ * audience to another (W-312), including Astro's route cache. A host that sets cache hints
+ * after this should skip them when `Cache-Control` is private (the demos' Base layout does).
  */
 function markPersonalized(astro: VisitorAstro): void {
+  if (astro.cache?.enabled) astro.cache.set(false);
   const headers = astro.response?.headers;
   if (!headers) return;
   headers.set("Cache-Control", "private, no-store");
