@@ -26824,6 +26824,24 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/visitor.test.ts"],
       "expect": "\\(fail\\).*W-313 a seen visitor"
+    },
+    {
+      "id": "W-307/bind-label-clash",
+      "requirement": "W-307",
+      "description": "The Dynamic data source select is labelled just like the field it binds, so two controls are named Text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BindingsEditor.tsx",
+          "search": "{`${field.label} source`}",
+          "replace": "{field.label}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/bindings-editor.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-307 its controls never share a name"
     }
   ]
 }

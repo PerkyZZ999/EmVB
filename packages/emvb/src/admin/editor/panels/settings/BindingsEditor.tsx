@@ -65,8 +65,9 @@ export function BindingsEditor({
         const selectId = `${listId}-${field.key}`;
         return (
           <div className="emvb-bind-row" key={field.key} data-emvb-bind-field={field.key}>
+            {/* "Text source", not "Text": the field's own input is already named "Text". */}
             <label className="emvb-bind-label" htmlFor={selectId}>
-              {field.label}
+              {`${field.label} source`}
             </label>
             <select
               id={selectId}
@@ -90,6 +91,7 @@ export function BindingsEditor({
             </select>
             {binding ? (
               <BindKeyInput
+                fieldLabel={field.label}
                 binding={binding}
                 listId={`${selectId}-keys`}
                 options={suggestions(binding.source, live.site)}
@@ -120,11 +122,13 @@ export function BindingsEditor({
 }
 
 function BindKeyInput({
+  fieldLabel,
   binding,
   listId,
   options,
   onCommit,
 }: {
+  fieldLabel: string;
   binding: Binding;
   listId: string;
   options: string[];
@@ -141,7 +145,7 @@ function BindKeyInput({
     <>
       <input
         className="emvb-native-input"
-        aria-label={binding.source === "param" ? "Parameter name" : "Field name"}
+        aria-label={`${fieldLabel} ${binding.source === "param" ? "parameter name" : "field name"}`}
         aria-invalid={valid ? undefined : true}
         list={options.length > 0 ? listId : undefined}
         value={draft}

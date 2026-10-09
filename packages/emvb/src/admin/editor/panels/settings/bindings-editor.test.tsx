@@ -41,6 +41,23 @@ describe("Dynamic data panel (W-307)", () => {
     expect(latest().bind).toEqual({ text: { source: "site", key: "title" } });
   });
 
+  test("W-307 its controls never share a name with the field they bind", async () => {
+    const both = {
+      ...heading,
+      bind: {
+        text: { source: "param" as const, key: "name" },
+        href: { source: "param" as const, key: "next" },
+      },
+    };
+    const { host } = await editor(both);
+    const labels = [...host.querySelectorAll("label.emvb-bind-label")].map((l) => l.textContent);
+    expect(labels).toEqual(["Text source", "Link source"]);
+    const keys = [...host.querySelectorAll("input.emvb-native-input[aria-label]")].map((i) =>
+      i.getAttribute("aria-label"),
+    );
+    expect(keys).toEqual(["Text parameter name", "Link parameter name"]);
+  });
+
   test("shows the live value, or says the typed value is used", async () => {
     const bound = { ...heading, bind: { text: { source: "param" as const, key: "name" } } };
     const live = await editor(bound, { name: "Ada" });
