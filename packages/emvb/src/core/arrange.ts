@@ -355,6 +355,29 @@ export function addNodeNear(
   return tried;
 }
 
+/**
+ * Adds a whole section (a W-320 recipe): right after the outermost Section the selection is in,
+ * so it never lands inside another Section; with no Section around the selection, like `addNodeNear`.
+ */
+export function addSectionNear(
+  layout: Layout,
+  node: LayoutNode,
+  selectedId: string | null,
+): Added | Refusal {
+  let outer: Located | undefined;
+  for (let at = selectedId ? locate(layout, selectedId) : undefined; at;) {
+    if (at.node.type === "layout-section") outer = at;
+    at = at.parent ? locate(layout, at.parent.id) : undefined;
+  }
+  const at = outer;
+  if (at?.parent) {
+    const place = { parentId: at.parent.id, index: at.index + 1 };
+    const added = addNode(layout, node, place);
+    if (added.ok) return { ...added, parentId: place.parentId };
+  }
+  return addNodeNear(layout, node, selectedId);
+}
+
 type Child = Located & { parent: NonNullable<Located["parent"]> };
 
 /** Moves a non-root element to where `place` says, or returns the first refusal. */

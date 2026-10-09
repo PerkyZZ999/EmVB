@@ -254,6 +254,7 @@ export {
   REASONS,
   addNode,
   addNodeNear,
+  addSectionNear,
   canDrop,
   duplicateNode,
   createVariantB,

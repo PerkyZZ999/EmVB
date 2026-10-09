@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { auditPage } from "../a11y/audit.ts";
-import { addNodeNear, withFreshIds } from "../arrange.ts";
+import { addNodeNear, addSectionNear, withFreshIds } from "../arrange.ts";
 import { spaceScale, typeScale, applyTokens } from "../design/tokens.ts";
 import { renderPage } from "../render/index.ts";
 import { DESIGN_SCHEMA_VERSION, emptyDesign, type DesignSystem } from "../schema/design.ts";
@@ -125,5 +125,37 @@ describe("W-320 adaptive section recipes", () => {
     const both = [...ids(first), ...ids(again)];
     expect(new Set(both).size).toBe(both.length);
     expect(recipeNode("nope", emptyDesign(), page())).toBeUndefined();
+  });
+
+  test("W-320 a recipe goes after the outermost Section, never inside one", () => {
+    const inner = { id: "text0001", type: "text", props: { text: "x" } } as LayoutNode;
+    const nested = {
+      id: "sect0002",
+      type: "layout-section",
+      props: {},
+      children: [inner],
+    } as unknown as LayoutNode;
+    const outer = {
+      id: "sect0001",
+      type: "layout-section",
+      props: {},
+      children: [nested],
+    } as unknown as LayoutNode;
+    const after = {
+      id: "sect0003",
+      type: "layout-section",
+      props: {},
+      children: [],
+    } as unknown as LayoutNode;
+    const layout = page([outer, after]);
+    const node = recipeNode("cta", emptyDesign(), layout);
+    if (!node) throw new Error("no node");
+    const added = addSectionNear(layout, node, "text0001");
+    if (!added.ok) throw new Error(added.reason);
+    expect(added.parentId).toBe("root0001");
+    const ids = (added.layout.root as { children: LayoutNode[] }).children.map((c) => c.id);
+    expect(ids).toEqual(["sect0001", node.id, "sect0003"]);
+    const none = addSectionNear(page([inner]), node, "text0001");
+    expect(none.ok && none.parentId).toBe("root0001");
   });
 });

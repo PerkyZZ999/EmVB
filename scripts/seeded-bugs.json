@@ -26698,6 +26698,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts"],
       "expect": "\\(fail\\).*W-317"
+    },
+    {
+      "id": "W-320/section-in-section",
+      "requirement": "W-320",
+      "description": "A recipe added from inside a Section lands inside it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "    if (at.node.type === \"layout-section\") outer = at;",
+          "replace": "    if (at.node.type === \"no-such-type\") outer = at;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/recipes/recipes.test.ts"],
+      "expect": "\\(fail\\).*W-320"
     }
   ]
 }

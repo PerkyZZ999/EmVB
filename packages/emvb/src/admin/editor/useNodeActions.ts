@@ -3,6 +3,7 @@ import type { createKumoToastManager } from "@cloudflare/kumo";
 import {
   addNode,
   addNodeNear,
+  addSectionNear,
   duplicateNode,
   ELEMENT_DESCRIPTORS,
   findNode,
@@ -149,8 +150,12 @@ export function useNodeActions({
   };
 
   /** Puts a new element (or a recipe's section) where the selection says (W-175). */
-  const place = (layout: Layout, node: LayoutNode, label: string) => {
-    const result = addNodeNear(layout, node, latest.current.selectedId);
+  const place = (layout: Layout, node: LayoutNode, label: string, section = false) => {
+    const result = (section ? addSectionNear : addNodeNear)(
+      layout,
+      node,
+      latest.current.selectedId,
+    );
     if (!result.ok) {
       notice(result.reason);
       return;
@@ -183,7 +188,7 @@ export function useNodeActions({
     if (!layout) return;
     const node = recipeNode(id, latest.current.design, layout);
     if (!node) return;
-    place(layout, withFreshIds(layout, node), `${node.label ?? "Section"} section`);
+    place(layout, withFreshIds(layout, node), `${node.label ?? "Section"} section`, true);
   };
 
   return {
