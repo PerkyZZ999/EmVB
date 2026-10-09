@@ -104,15 +104,20 @@ describe("server-side visitor facts (W-313)", () => {
     expect(headers.get("Cache-Control")).toBe("private, no-store");
   });
 
-  test("a seen visitor is returning; XX and Tor are no country; the cf object is read too", () => {
+  test("W-313 a seen visitor is returning; XX is no country; request.cf is read, locals.runtime.cf never", () => {
     const { astro, jar } = astroWith();
     jar.set("emvb_seen", { value: "1" });
-    const request = new Request("https://example.com/", { headers: { "cf-ipcountry": "XX" } });
-    const visitor = visitorFor(withAudience, {
-      ...astro,
-      request,
-      locals: { runtime: { cf: { country: "FR" } } },
-    });
+    const request = Object.assign(
+      new Request("https://example.com/", { headers: { "cf-ipcountry": "XX" } }),
+      { cf: { country: "FR" } },
+    );
+    // W-313: Astro 6's Cloudflare adapter throws when locals.runtime.cf is read; never touch it.
+    const runtime = {
+      get cf(): never {
+        throw new Error("Astro.locals.runtime.cf has been removed in Astro v6.");
+      },
+    };
+    const visitor = visitorFor(withAudience, { ...astro, request, locals: { runtime } });
     expect(visitor?.returning).toBe(true);
     expect(visitor?.country).toBe("FR");
   });

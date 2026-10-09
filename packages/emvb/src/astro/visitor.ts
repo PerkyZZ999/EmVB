@@ -88,16 +88,16 @@ const SEEN_DAYS = 365;
 
 const COUNTRY = /^[A-Z]{2}$/;
 
-/** The visitor's country from the edge: Cloudflare's header or `cf` object, or Vercel's header. */
+/**
+ * The visitor's country from the edge: Cloudflare's header or `request.cf`, or Vercel's header.
+ * Not `Astro.locals.runtime.cf`: since Astro 6 the Cloudflare adapter throws when it is read.
+ */
 function countryOf(astro: VisitorAstro): string | undefined {
   const headers = astro.request?.headers;
-  const runtime = (astro.locals as { runtime?: { cf?: { country?: unknown } } } | undefined)
-    ?.runtime;
   const cf = (astro.request as { cf?: { country?: unknown } } | undefined)?.cf;
   const candidates = [
     headers?.get("cf-ipcountry"),
     headers?.get("x-vercel-ip-country"),
-    runtime?.cf?.country,
     cf?.country,
   ];
   for (const value of candidates) {

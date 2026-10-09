@@ -26810,6 +26810,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/theme/page-count.test.ts"],
       "expect": "\\(fail\\).*W-309 a template that starts"
+    },
+    {
+      "id": "W-313/reads-locals-runtime-cf",
+      "requirement": "W-313",
+      "description": "The visitor's country is read from Astro.locals.runtime.cf, which Astro 6's Cloudflare adapter throws on, so every page with a visitor rule fails with a 500 on Cloudflare.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "    cf?.country,\n  ];",
+          "replace": "    (astro.locals as { runtime?: { cf?: { country?: unknown } } } | undefined)?.runtime?.cf\n      ?.country,\n    cf?.country,\n  ];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor.test.ts"],
+      "expect": "\\(fail\\).*W-313 a seen visitor"
     }
   ]
 }
