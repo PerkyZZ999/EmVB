@@ -130,4 +130,37 @@ describe("W-319 scroll motion", () => {
       Layout.safeParse(page({ states: { hover: { scrollMotion: rise } } as never })).success,
     ).toBe(false);
   });
+
+  test("W-319 a smaller screen's none keeps the entrance it inherits", () => {
+    const { css } = renderPage(
+      page({
+        style: { entrance: { type: "fade", duration: 300 }, scrollMotion: rise },
+        devices: { mobile: { scrollMotion: { type: "none" } } },
+      }),
+      emptyDesign(),
+    );
+    expect(css).toMatch(/\.emvb-e-head0001\{animation:emvb-fade 300ms ease-out both\}/);
+  });
+
+  test("W-319 a smaller screen's entrance keeps the motion it inherits", () => {
+    const { css } = renderPage(
+      page({
+        style: { scrollMotion: rise },
+        devices: { tablet: { entrance: { type: "scale", duration: 200 } } },
+      }),
+      emptyDesign(),
+    );
+    expect(css).toContain("animation:emvb-scale 200ms ease-out both, emvb-mo linear both");
+  });
+
+  test("W-319 an element's motion keeps its class's entrance", () => {
+    const design = {
+      ...emptyDesign(),
+      classes: [
+        { id: "pop", name: "Pop", style: { entrance: { type: "fade" as const, duration: 250 } } },
+      ],
+    };
+    const { css } = renderPage(page({ classes: ["pop"], style: { scrollMotion: rise } }), design);
+    expect(css).toContain(".emvb-e-head0001{animation:emvb-fade 250ms ease-out both, emvb-mo");
+  });
 });

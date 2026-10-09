@@ -775,7 +775,28 @@ const BACKGROUND_LAYER_KEYS = [
  * whole `background-image` stack for that device, so the layers it inherits (the desktop image or
  * gradient) are filled in from `inherited` here. Otherwise they vanish on that device.
  */
+/** Both write `animation` (W-319), so one set alone would drop the other it inherits. */
+const ANIMATION_KEYS = ["entrance", "scrollMotion"] as const;
+
+/**
+ * A style that sets an entrance or scroll motion keeps the other one it inherits from a wider
+ * device or its classes (W-319): both are one `animation` list in CSS.
+ */
+export function withInheritedAnimation(style: unknown, inherited: unknown): unknown {
+  if (!isRecord(style) || !isRecord(inherited)) return style;
+  if (!ANIMATION_KEYS.some((key) => style[key] !== undefined)) return style;
+  const next: Record<string, unknown> = { ...style };
+  for (const key of ANIMATION_KEYS) {
+    if (next[key] === undefined && inherited[key] !== undefined) next[key] = inherited[key];
+  }
+  return next;
+}
+
 export function withInheritedLayers(device: unknown, inherited: unknown): unknown {
+  return withInheritedBackground(withInheritedAnimation(device, inherited), inherited);
+}
+
+function withInheritedBackground(device: unknown, inherited: unknown): unknown {
   if (!isRecord(device) || !isRecord(inherited)) return device;
   if (!BACKGROUND_LAYER_KEYS.some((key) => device[key] !== undefined)) return device;
   const next: Record<string, unknown> = { ...device };

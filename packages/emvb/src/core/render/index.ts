@@ -22,6 +22,7 @@ import {
   stateDeclarations,
   styleClassName,
   styleDeclarations,
+  withInheritedAnimation,
   withInheritedLayers,
   type Declaration,
   type StateDeclarations,
@@ -39,7 +40,7 @@ import { renderPagination } from "./pagination.ts";
 import { renderSection } from "./section.ts";
 import { renderTabs } from "./tabs.ts";
 import { serialize, type VNode } from "./vnode.ts";
-import { classStylesInListOrder } from "../design/cascade.ts";
+import { classStylesInListOrder, resolveCascade } from "../design/cascade.ts";
 import { applyBindings, hasBindings, type BindingData } from "../data/bindings.ts";
 import {
   applyBackgroundVideo,
@@ -210,9 +211,18 @@ export function renderPage(
       const name = styleClassName(classId);
       if (name) classes.push(name);
     }
-    const { declarations, rejected } = styleDeclarations(node.style);
+    // W-319: an element's own entrance or scroll motion keeps the other one its classes set.
+    const fromClasses = resolveCascade(classStylesInListOrder(design.classes, node.classes ?? []));
+    const classAnimation = {
+      ...(fromClasses.entrance ? { entrance: fromClasses.entrance } : {}),
+      ...(fromClasses.scrollMotion ? { scrollMotion: fromClasses.scrollMotion } : {}),
+    };
+    const own = node.style
+      ? (withInheritedAnimation(node.style, classAnimation) as typeof node.style)
+      : undefined;
+    const { declarations, rejected } = styleDeclarations(own);
     // W-210: a device that sets one background layer keeps the layers it inherits.
-    const base = node.style ?? {};
+    const base = { ...classAnimation, ...own };
     const tabletStyle = node.devices?.tablet;
     const tablet = styleDeclarations(withInheritedLayers(tabletStyle, base));
     const mobile = styleDeclarations(
