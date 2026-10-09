@@ -19301,8 +19301,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "  attributes: HtmlAttributes.optional(),\n  label: NodeLabel.optional(),\n  bind: Bindings.optional(),\n});",
-          "replace": "  attributes: HtmlAttributes.optional(),\n  bind: Bindings.optional(),\n});"
+          "search": "  attributes: HtmlAttributes.optional(),\n  label: NodeLabel.optional(),\n  bind: Bindings.optional(),\n  variant: Variant.optional(),\n});",
+          "replace": "  attributes: HtmlAttributes.optional(),\n  bind: Bindings.optional(),\n  variant: Variant.optional(),\n});"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/schema/node-label.test.ts"],
@@ -25967,6 +25967,76 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/perf/perf.test.ts"],
       "expect": "\\(fail\\).*W-310"
+    },
+    {
+      "id": "W-312/both-arms-public",
+      "requirement": "W-312",
+      "description": "The public page renders every arm.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "if (mode === \"public\" && !variantShows(stored, dynamic?.abArms)) return undefined;",
+          "replace": "if (mode === \"editor\" && !variantShows(stored, dynamic?.abArms)) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/variants.test.ts"],
+      "expect": "\\(fail\\).*W-312"
+    },
+    {
+      "id": "W-312/no-decision-shows-b",
+      "requirement": "W-312",
+      "description": "Without a decision, arm B shows too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/audience/variants.ts",
+          "search": "return (arms?.[v.test] ?? \"a\") === v.arm;",
+          "replace": "return arms?.[v.test] === undefined || arms[v.test] === v.arm;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/variants.test.ts"],
+      "expect": "\\(fail\\).*W-312"
+    },
+    {
+      "id": "W-312/cookie-ignored",
+      "requirement": "W-312",
+      "description": "A returning visitor is re-picked every time.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/audience/variants.ts",
+          "search": "if (cookie === \"a\" || cookie === \"b\") return { arm: cookie, fresh: false };",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/variants.test.ts"],
+      "expect": "\\(fail\\).*W-312"
+    },
+    {
+      "id": "W-312/shared-cache",
+      "requirement": "W-312",
+      "description": "Personalized responses stay publicly cacheable.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "  markPersonalized(astro);\n  return arms;",
+          "replace": "  return arms;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor.test.ts"],
+      "expect": "\\(fail\\).*W-312"
+    },
+    {
+      "id": "W-312/split-ignored",
+      "requirement": "W-312",
+      "description": "B's split is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/audience/variants.ts",
+          "search": "if (v.arm === \"b\" && v.split !== undefined) tests.set(v.test, v.split);",
+          "replace": "if (v.arm === \"b\" && v.split !== undefined) tests.set(v.test, 50);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/variants.test.ts"],
+      "expect": "\\(fail\\).*W-312"
     }
   ]
 }

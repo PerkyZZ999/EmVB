@@ -45,6 +45,8 @@ export type ThemeDynamicData = {
   pagination?: ArchivePagination;
   /** Set inside a Loop's item, where a Pagination would repeat once per post (W-228). */
   inLoopItem?: boolean;
+  /** The visitor's arm per A/B test (W-312); hosts pick it on the server. */
+  abArms?: Readonly<Record<string, "a" | "b">>;
   /** Entries for collection Loops (W-308), keyed by the Loop's node id. Hosts fill this. */
   collections?: Readonly<Record<string, ThemePostFields[]>>;
   /** Site settings bound fields can read (W-307), e.g. `title`, `tagline`, `url`. */

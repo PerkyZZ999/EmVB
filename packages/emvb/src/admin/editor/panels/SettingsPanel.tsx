@@ -95,6 +95,18 @@ export function SettingsPanel({
           device={device}
           items={items}
           partType={state.page.partType}
+          onArrange={(run) => {
+            const layout = state.page.layout;
+            if (!layout) return;
+            const result = run(layout);
+            if (result.ok) {
+              dispatch({
+                type: "apply-arranged",
+                layout: result.layout,
+                selected: result.selected,
+              });
+            }
+          }}
         />
       ) : (
         <PageSettings

@@ -19,6 +19,7 @@ import {
   nodeChildren,
   removeNode,
   starterLayout,
+  updateNode,
 } from "./tree-ops.ts";
 
 /** A refused operation, with the reason shown or announced to the user (R-003). */
@@ -450,4 +451,66 @@ export function selectionAfterDelete(layout: Layout, id: string): string | null 
 export function subtreeSize(layout: Layout, id: string): number {
   const node = findNode(layout, id);
   return node ? size(node) : 0;
+}
+
+/** The default A/B test name for an element (W-312): `test-` and its id, lowercased. */
+export const defaultTestName = (id: string): string =>
+  `test-${
+    id
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0, 12) || "1"
+  }`;
+
+/**
+ * Edge A/B testing (W-312): the element becomes arm A of a new test and a copy right after it
+ * becomes arm B (selected, ready to edit). Visitors see one or the other, picked on the server.
+ */
+export function createVariantB(
+  layout: Layout,
+  id: string,
+  random: () => number = Math.random,
+): Arranged {
+  const found = locate(layout, id);
+  if (!found) return refuse(REASONS.missing);
+  if (found.node.variant) return refuse("This element is already in an A/B test.");
+  if (found.node.type === "loop-empty" || !found.parent) return refuse(REASONS.rootCopy);
+  const variant = { test: defaultTestName(found.node.id), arm: "a" as const };
+  const marked = updateNode(layout, id, (node) => ({ ...node, variant }) as LayoutNode);
+  const copied = duplicateNode(marked, id, random);
+  if (!copied.ok) return copied;
+  return {
+    ...copied,
+    layout: updateNode(
+      copied.layout,
+      copied.selected,
+      (node) =>
+        ({
+          ...node,
+          variant: { ...variant, arm: "b" },
+        }) as LayoutNode,
+    ),
+  };
+}
+
+/**
+ * Ends an A/B test (W-312): `keepId` stays, without its variant mark, and every other element of
+ * that test is removed.
+ */
+export function endAbTest(layout: Layout, keepId: string): Arranged {
+  const kept = locate(layout, keepId);
+  const test = kept?.node.variant?.test;
+  if (!kept || !test) return refuse(REASONS.missing);
+  const others: string[] = [];
+  const walk = (node: LayoutNode): void => {
+    if (node.id !== keepId && node.variant?.test === test) others.push(node.id);
+    else for (const child of nodeChildren(node)) walk(child);
+  };
+  walk(layout.root);
+  let next = updateNode(layout, keepId, (node) => {
+    const { variant: _variant, ...rest } = node;
+    return rest as LayoutNode;
+  });
+  for (const id of others) next = removeNode(next, id).layout;
+  return { ok: true, layout: next, selected: keepId };
 }

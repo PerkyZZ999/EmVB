@@ -40,6 +40,7 @@ import {
   type DesignSystem,
   type ElementDescriptor,
   type Layout,
+  type Arranged,
   type LayoutNode,
   patchClassDevices,
   patchClassState,
@@ -60,6 +61,7 @@ import {
 } from "../../../core/index.ts";
 import { FieldControl } from "./settings/FieldControl.tsx";
 import { BindingsEditor } from "./settings/BindingsEditor.tsx";
+import { VariantEditor } from "./settings/VariantEditor.tsx";
 import { BoxControl } from "./settings/BoxControl.tsx";
 import { boxGroupOf } from "./settings/box-sides.ts";
 import { IconShapeRow, IconSingleColorRow } from "./settings/IconControls.tsx";
@@ -246,6 +248,8 @@ type Props = {
   items?: ItemActions;
   /** The theme part being edited, if any, for the H1 warning (W-208). */
   partType?: ThemePartType;
+  /** Layout-wide changes from the panel, e.g. creating an A/B variant (W-312). */
+  onArrange?: (run: (layout: Layout) => Arranged) => void;
 };
 
 /** What an item's content is, since it has no content field of its own (W-130). */
@@ -366,6 +370,7 @@ function KnownElementPanel({
   items,
   partType,
   descriptor,
+  onArrange,
 }: Props & { descriptor: ElementDescriptor }) {
   const ui = STYLE_UI[node.type] ?? DEFAULT_UI;
   const [tab, setTab] = React.useState(descriptor.defaultTab);
@@ -539,6 +544,12 @@ function KnownElementPanel({
             ))
           )}
           <BindingsEditor node={node} onChange={onChange} post={SAMPLE_POST} />
+          <VariantEditor
+            node={node}
+            isRoot={layout?.root.id === node.id}
+            onChange={onChange}
+            onArrange={onArrange}
+          />
           {ITEM_NOTES[node.type] && <p className="emvb-helper">{ITEM_NOTES[node.type]}</p>}
           {svgImagesLeftOut(node) > 0 && (
             <p className="emvb-helper" data-emvb-svg-images>

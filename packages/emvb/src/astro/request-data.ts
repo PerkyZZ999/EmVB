@@ -9,11 +9,13 @@ import {
   type ThemePostFields,
 } from "../core/index.ts";
 import { themePostFromEntry } from "./theme-posts.ts";
+import { abArmsFor, type VisitorAstro } from "./visitor.ts";
 
 type RequestData = {
   site?: Record<string, string>;
   params?: Record<string, string>;
   collections?: Record<string, ThemePostFields[]>;
+  abArms?: Record<string, "a" | "b">;
 };
 
 // D1/SQLite columns are snake_case, so orderBy names the columns as stored.
@@ -45,9 +47,16 @@ async function loopEntries(loop: CollectionLoop): Promise<ThemePostFields[]> {
  * Live values a layout needs on this request: site settings and URL parameters for bindings
  * (W-307), and entries for collection Loops (W-308).
  */
-export async function bindingDataFor(layout: Layout | null, url: URL): Promise<RequestData> {
+export async function bindingDataFor(
+  layout: Layout | null,
+  url: URL,
+  astro?: VisitorAstro,
+): Promise<RequestData> {
   if (!layout) return {};
   const data: RequestData = {};
+  // W-312: the visitor's arm of each A/B test, picked here on the server.
+  const abArms = astro ? abArmsFor(layout, astro) : undefined;
+  if (abArms) data.abArms = abArms;
   const loops = collectCollectionLoops(layout);
   if (loops.length > 0) {
     const lists = await Promise.all(loops.map(loopEntries));

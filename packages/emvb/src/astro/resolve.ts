@@ -4,6 +4,7 @@ import { PAGES_COLLECTION } from "../constants.ts";
 import { formIdsInLayout, loadFormDefinitions } from "./forms-definitions.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
 import { bindingDataFor } from "./request-data.ts";
+import type { VisitorAstro } from "./visitor.ts";
 import { sectionTemplatesFor } from "./resolve-theme.ts";
 
 type EmDashEntry = NonNullable<Awaited<ReturnType<typeof getEmDashEntry>>["entry"]>;
@@ -17,7 +18,7 @@ export type ResolvedEmVBPage = RenderedPage & {
   isPreview: boolean;
 };
 
-type AstroLike = {
+type AstroLike = VisitorAstro & {
   params: Record<string, string | undefined>;
   url: URL;
   locals: unknown;
@@ -52,7 +53,7 @@ export async function resolveEmVBPage(
   const sectionTemplates = layout ? await sectionTemplatesFor(layout) : {};
   const dynamic = {
     ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
-    ...(await bindingDataFor(layout, astro.url)),
+    ...(await bindingDataFor(layout, astro.url, astro)),
   };
   return {
     ...renderStored(

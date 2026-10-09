@@ -32,6 +32,7 @@ import {
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
+import type { VisitorAstro } from "./visitor.ts";
 import { bindingDataFor } from "./request-data.ts";
 import { decodePathSegment, themeContextFrom } from "./theme-context.ts";
 import { entryTimestamp, themePostFromEntry } from "./theme-posts.ts";
@@ -109,7 +110,7 @@ export type ResolvedThemeParts = {
   dir?: "ltr" | "rtl" | "auto";
 };
 
-type AstroLike = {
+type AstroLike = VisitorAstro & {
   url: URL;
   locals: unknown;
   props?: Record<string, unknown>;
@@ -392,7 +393,8 @@ export async function resolveThemeParts(
   const byId = new Map(parts.map((part) => [part.id, part]));
   const rendered: RenderedPage[] = [];
   // W-307: bound fields in a part read site settings and URL parameters too.
-  const boundFor = (stored: StoredPart) => bindingDataFor(readLayout(stored.layout), astro.url);
+  const boundFor = (stored: StoredPart) =>
+    bindingDataFor(readLayout(stored.layout), astro.url, astro);
   const renderOne = (
     stored: StoredPart,
     partDynamic: ThemeDynamicData | undefined,

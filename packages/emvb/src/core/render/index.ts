@@ -1,3 +1,4 @@
+import { variantShows } from "../audience/variants.ts";
 import { generateCss } from "../css/generate.ts";
 import { cssScopeToken, scopeAttribute, scopeCss, scopeWrapperCss } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
@@ -291,6 +292,8 @@ export function renderPage(
   ): VNode | undefined {
     // W-307: bound fields read their live value; the typed value is the fallback.
     const node = stored.bind ? applyBindings(stored, bindingData(dynamic)) : stored;
+    // W-312: only the visitor's arm of an A/B test renders; the editor shows every arm.
+    if (mode === "public" && !variantShows(stored, dynamic?.abArms)) return undefined;
     const id = ID.test(node.id) ? node.id : undefined;
     const nodeId = id ?? "(invalid id)";
     const type: string = node.type;
@@ -310,6 +313,9 @@ export function renderPage(
     const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
     const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId);
     if (mode === "editor" && hasBindings(stored)) attrs["data-emvb-bound"] = "";
+    if (mode === "editor" && stored.variant) {
+      attrs["data-emvb-variant"] = `${stored.variant.test} · ${stored.variant.arm.toUpperCase()}`;
+    }
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
     if (isFormNode(node)) return finish(node, renderForm(node, attrs, ctx, dynamic));
     if (isLoopNode(node)) return finish(node, renderLoop(node, attrs, ctx, dynamic));

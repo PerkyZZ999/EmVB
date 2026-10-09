@@ -75,6 +75,21 @@ const Bindings = z
   .record(z.string().regex(/^[a-zA-Z]{1,32}$/), Binding)
   .refine((value) => Object.keys(value).length <= 8, "At most 8 bound fields per element");
 
+/** A/B test names (W-312): lowercase letters, digits and dashes, up to 32. */
+export const AB_TEST_NAME = /^[a-z0-9][a-z0-9-]{0,31}$/;
+
+/**
+ * One arm of an edge A/B test (W-312). Elements sharing a `test` are the variants; the host picks
+ * one arm per visitor on the server (a cookie keeps it), so there is no flicker and no script.
+ */
+export const Variant = z.strictObject({
+  test: z.string().regex(AB_TEST_NAME, "Lowercase letters, digits and -, up to 32"),
+  arm: z.enum(["a", "b"]),
+  /** Share of visitors who see B, 1–99 %. Read from the test's B element. Unset = 50. */
+  split: z.number().int().min(1).max(99).optional(),
+});
+export type Variant = z.infer<typeof Variant>;
+
 /** A box may be the link. A link inside a link is dropped at render time (W-111). */
 const BoxLink = {
   href: z.string().max(2000).optional(),
@@ -95,6 +110,7 @@ const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) =>
   attributes: HtmlAttributes.optional(),
   label: NodeLabel.optional(),
   bind: Bindings.optional(),
+  variant: Variant.optional(),
 });
 
 const leafNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
@@ -557,6 +573,7 @@ const UnknownNodeSchema = z.strictObject({
   attributes: HtmlAttributes.optional(),
   label: NodeLabel.optional(),
   bind: Bindings.optional(),
+  variant: Variant.optional(),
   get children(): z.ZodType<LayoutNode[] | undefined> {
     return z.array(LayoutNode).optional();
   },
@@ -644,6 +661,7 @@ type IdOf = z.infer<typeof NodeId>;
 /** Fields every node may carry beyond its props and style (W-307 onward). */
 export type NodeExtras = {
   bind?: Record<string, Binding>;
+  variant?: Variant;
 };
 
 /** Manual recursive types so UnknownNode does not poison `z.infer` of the tree. */

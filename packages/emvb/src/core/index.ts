@@ -43,6 +43,8 @@ export {
   FormNode,
   LoopNode,
   LoopEmptyNode,
+  Variant,
+  AB_TEST_NAME,
   LOOP_DISPLAYS,
   LOOP_ORDERS,
   SectionNode,
@@ -252,6 +254,9 @@ export {
   addNodeNear,
   canDrop,
   duplicateNode,
+  createVariantB,
+  endAbTest,
+  defaultTestName,
   firstChild,
   insertionPoint,
   moveDown,
@@ -420,3 +425,11 @@ export {
   type PerfReport,
   type SectionWeight,
 } from "./perf/meter.ts";
+export {
+  abCookieName,
+  collectAbTests,
+  pickArm,
+  variantShows,
+  type AbArm,
+  type AbTest,
+} from "./audience/variants.ts";

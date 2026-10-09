@@ -36,4 +36,6 @@ export const FEATURE_CSS = `
 .emvb-perf-heading { margin: 12px 0 4px; font-size: 13px; font-weight: 600; }
 .emvb-perf-sections { margin: 0 0 8px; padding-left: 18px; font-size: 13px; }
 .emvb-topbar-meter { font-variant-numeric: tabular-nums; font-size: 12px; }
+.emvb-js-badge + .emvb-ab-badge { margin-left: 2px; }
+.emvb-ab-badge { background: var(--color-kumo-info-tint, #dbeafe); }
 `;

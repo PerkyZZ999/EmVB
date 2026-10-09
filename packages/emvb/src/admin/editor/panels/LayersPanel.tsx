@@ -494,6 +494,15 @@ const LayerRow = React.memo(function LayerRow({
             {preview ? <span className="emvb-layer-preview">{preview}</span> : null}
             {hasStateStyles(node) && <StateDot />}
             <JsBadge script={nodeScript(node)} />
+            {node.variant && (
+              <span
+                className="emvb-js-badge emvb-ab-badge"
+                title={`A/B test ${node.variant.test}, variant ${node.variant.arm.toUpperCase()}`}
+                aria-hidden="true"
+              >
+                {node.variant.arm.toUpperCase()}
+              </span>
+            )}
           </button>
         )}
         {(!isRoot || hasClipboard) && (
