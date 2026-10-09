@@ -43,7 +43,8 @@ export function pageCountText(p: ArchivePagination, template: string | undefined
     cut === -1
       ? text
       : text.slice(0, cut).replace(/\s*(of|\/|from|sur|de|von|di|van|из)?\s*$/i, "");
-  return before.replaceAll("{page}", String(p.page)).trim();
+  // A template that starts with {total} ("{total} pages · page {page}") keeps at least the number.
+  return before.replaceAll("{page}", String(p.page)).trim() || String(p.page);
 }
 
 /** The URL path of page `n` of an archive; page 1 is the bare archive path (W-221). */

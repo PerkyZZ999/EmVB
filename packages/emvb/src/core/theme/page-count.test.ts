@@ -32,6 +32,14 @@ describe("Page N of M (W-309)", () => {
     expect(pageCountText({ ...p, totalPages: 2 }, undefined)).toBe("Page 4");
   });
 
+  test("W-309 a template that starts with {total} still shows the page number", () => {
+    const p = { page: 4, hasMore: true, basePath: "/p" };
+    expect(pageCountText(p, "{total} pages · page {page}")).toBe("4");
+    expect(pageCountText({ ...p, totalPages: 9 }, "{total} pages · page {page}")).toBe(
+      "9 pages · page 4",
+    );
+  });
+
   test("a known total adds the last page and stops Next on it", () => {
     const items = paginationItems({ page: 1, hasMore: true, basePath: "/p", totalPages: 9 });
     expect(items.map((i) => (i.kind === "page" ? i.n : i.kind))).toEqual([

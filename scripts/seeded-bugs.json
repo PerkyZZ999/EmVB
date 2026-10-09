@@ -26796,6 +26796,20 @@
       ],
       "command": ["bun", "test", "./test/demos/personalized-cache.test.ts"],
       "expect": "\\(fail\\).*node: Base sets cache hints"
+    },
+    {
+      "id": "W-309/leading-total-blank",
+      "requirement": "W-309",
+      "description": "A count template that starts with {total} renders an empty count when the total is unknown.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/pagination.ts",
+          "search": ".trim() || String(p.page);",
+          "replace": ".trim();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/page-count.test.ts"],
+      "expect": "\\(fail\\).*W-309 a template that starts"
     }
   ]
 }
