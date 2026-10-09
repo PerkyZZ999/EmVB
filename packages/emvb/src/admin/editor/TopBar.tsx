@@ -72,6 +72,7 @@ export function TopBar({
   stylesUnpublished = false,
   canRevert = false,
   onRevert,
+  tools,
 }: {
   page: TopBarPage | null;
   dirty: boolean;
@@ -90,6 +91,8 @@ export function TopBar({
   canRevert?: boolean;
   /** Shown once the entry has a published version; asks before discarding. */
   onRevert?: () => void;
+  /** Extra tools beside Site styles: the page weight and accessibility meters, … (W-310). */
+  tools?: React.ReactNode;
 }) {
   return (
     <header className="emvb-topbar">
@@ -153,6 +156,7 @@ export function TopBar({
               onClick={onSiteStyles}
             />
           )}
+          {page && tools}
         </div>
         {page && (
           <div

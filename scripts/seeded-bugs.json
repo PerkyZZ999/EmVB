@@ -25883,6 +25883,90 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/theme/page-count.test.ts"],
       "expect": "\\(fail\\).*W-309"
+    },
+    {
+      "id": "W-311/form-without-id-scripted",
+      "requirement": "W-311",
+      "description": "An unconnected Form is badged as adding a script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/perf/scripts.ts",
+          "search": "return typeof formId === \"string\" && formId.trim() ? \"forms\" : undefined;",
+          "replace": "return \"forms\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/perf/perf.test.ts"],
+      "expect": "\\(fail\\).*W-311"
+    },
+    {
+      "id": "W-311/menu-always-scripted",
+      "requirement": "W-311",
+      "description": "Every menu item is badged as adding the dropdown script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/perf/scripts.ts",
+          "search": "return isParentNode(node) && node.children.length > 0 ? \"menu\" : undefined;",
+          "replace": "return \"menu\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/perf/perf.test.ts"],
+      "expect": "\\(fail\\).*W-311"
+    },
+    {
+      "id": "W-311/no-add-badge",
+      "requirement": "W-311",
+      "description": "The Add panel never shows the JS badge.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "{typeMayAddScript(tile.type) && (",
+          "replace": "{typeMayAddScript(tile.type) && false && ("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/perf-meter.test.tsx"],
+      "expect": "\\(fail\\).*W-311"
+    },
+    {
+      "id": "W-310/image-size-ignored",
+      "requirement": "W-310",
+      "description": "Every image is guessed, so a 4000x3000 photo weighs like a thumbnail.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/perf/meter.ts",
+          "search": "return w > 0 && h > 0 ? Math.max(5_000, Math.round(w * h * 0.25)) : IMAGE_GUESS;",
+          "replace": "return IMAGE_GUESS;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/perf/perf.test.ts"],
+      "expect": "\\(fail\\).*W-310"
+    },
+    {
+      "id": "W-310/sections-unsorted",
+      "requirement": "W-310",
+      "description": "Sections are listed in page order, not heaviest first.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/perf/meter.ts",
+          "search": "  sections.sort((a, b) => b.bytes - a.bytes);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/perf/perf.test.ts"],
+      "expect": "\\(fail\\).*W-310"
+    },
+    {
+      "id": "W-310/embeds-free",
+      "requirement": "W-310",
+      "description": "Video embeds are not counted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/perf/meter.ts",
+          "search": "      embeds += 1;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/perf/perf.test.ts"],
+      "expect": "\\(fail\\).*W-310"
     }
   ]
 }

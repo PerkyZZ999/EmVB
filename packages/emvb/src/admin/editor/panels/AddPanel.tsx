@@ -26,7 +26,7 @@ import {
   RowsIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
-import { ELEMENT_DESCRIPTORS, type ElementType } from "../../../core/index.ts";
+import { ELEMENT_DESCRIPTORS, typeMayAddScript, type ElementType } from "../../../core/index.ts";
 import { NEW_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { FIELD } from "../../ui.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
@@ -134,6 +134,15 @@ export function AddPanel({
                     >
                       <Icon size={20} aria-hidden="true" />
                       <span>{tile.name}</span>
+                      {typeMayAddScript(tile.type) && (
+                        <span
+                          className="emvb-js-badge"
+                          title="Adds a small script to the page; everything else is zero-JS"
+                          aria-hidden="true"
+                        >
+                          JS
+                        </span>
+                      )}
                     </button>
                   );
                 })}

@@ -405,3 +405,18 @@ export {
   type PasteMode,
   type ReadClip,
 } from "./clipboard.ts";
+export {
+  layoutScripts,
+  nodeScript,
+  SCRIPT_BYTES,
+  SCRIPT_LABELS,
+  typeMayAddScript,
+  type PageScript,
+} from "./perf/scripts.ts";
+export {
+  measurePage,
+  PERF_BUDGETS,
+  type PerfKind,
+  type PerfReport,
+  type SectionWeight,
+} from "./perf/meter.ts";

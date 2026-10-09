@@ -1,5 +1,5 @@
 import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@cloudflare/kumo";
-import { WarningCircleIcon } from "@phosphor-icons/react";
+import { GaugeIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   findNode,
@@ -42,6 +42,7 @@ import {
 import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { useSectionTemplates } from "./section-templates.ts";
 import { useCollectionPreviews } from "./collection-previews.ts";
+import { PerfMeterDialog } from "./PerfMeter.tsx";
 import { restoreOnUndo, type Deletion } from "./restore-deleted.ts";
 import { useEditorCommands } from "./useEditorCommands.ts";
 import { useSave } from "./useSave.ts";
@@ -151,6 +152,7 @@ function EditorApp({
     setStatePreview(choice === "normal" ? null : { id, state: choice });
   }, []);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
+  const [perfOpen, setPerfOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [leaveOpen, setLeaveOpen] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
@@ -341,6 +343,18 @@ function EditorApp({
               stylesUnpublished={state.designUnpublished === true}
               canRevert={canRevert}
               onRevert={() => setRevertOpen(true)}
+              tools={
+                <Button
+                  variant="ghost"
+                  shape="square"
+                  className="emvb-icon-btn"
+                  aria-label="Page weight"
+                  title="Page weight"
+                  data-emvb-perf-open=""
+                  icon={<GaugeIcon aria-hidden="true" />}
+                  onClick={() => setPerfOpen(true)}
+                />
+              }
             />
             <div className="emvb-frame">
               <aside className="emvb-panel emvb-panel-left" aria-label="Add and Layers">
@@ -463,6 +477,13 @@ function EditorApp({
           onConfirm={() => deleteAsk && finishDelete(deleteAsk.id)}
         />
         <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+        <PerfMeterDialog
+          open={perfOpen}
+          onOpenChange={setPerfOpen}
+          layout={state.page.layout}
+          design={state.design}
+          onSelect={(id) => dispatch({ type: "select", id })}
+        />
         <ConflictDialog
           open={saver.conflict}
           onOpenChange={(open) => !open && saver.closeConflict()}

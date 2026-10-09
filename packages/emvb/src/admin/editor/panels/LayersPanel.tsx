@@ -15,6 +15,9 @@ import {
   previousInOrder,
   type Layout,
   type LayoutNode,
+  nodeScript,
+  SCRIPT_LABELS,
+  type PageScript,
 } from "../../../core/index.ts";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { ELEMENT_NAMES } from "./ElementPanel.tsx";
@@ -67,6 +70,20 @@ const pasteHint = (clip: ClipboardActions | undefined) =>
   clip ? (clip.pasteStyleBlocked ?? clip.pasteBlocked) : null;
 
 /** The ··· menu: clipboard items, then Duplicate and the moves; the root row gets what applies to it. */
+/** W-311: an element that makes the page load a script says so; everything else is zero-JS. */
+function JsBadge({ script }: { script: PageScript | undefined }) {
+  if (!script) return null;
+  return (
+    <span
+      className="emvb-js-badge"
+      title={`Adds a script: ${SCRIPT_LABELS[script]}`}
+      aria-hidden="true"
+    >
+      JS
+    </span>
+  );
+}
+
 function menuItems(
   node: LayoutNode,
   isRoot: boolean,
@@ -476,6 +493,7 @@ const LayerRow = React.memo(function LayerRow({
             <span className="emvb-layer-name">{name}</span>
             {preview ? <span className="emvb-layer-preview">{preview}</span> : null}
             {hasStateStyles(node) && <StateDot />}
+            <JsBadge script={nodeScript(node)} />
           </button>
         )}
         {(!isRoot || hasClipboard) && (
