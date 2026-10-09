@@ -9,7 +9,7 @@ import { Content, getHeadings } from "../../../CHANGELOG.md";
 // One entry per release ("[0.2.1] - 2026-10-08", "[Unreleased]") for the version list.
 const versions = getHeadings()
   .filter((heading) => heading.depth === 2)
-  .map((heading) => ({ slug: heading.slug, ...releaseLabel(heading.text) }));
+  .map((heading) => Object.assign(releaseLabel(heading.text), { slug: heading.slug }));
 ---
 
 <Base
