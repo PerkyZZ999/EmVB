@@ -251,6 +251,11 @@ export default function Playground() {
   const small = useMatches(SMALL_SCREEN);
   const [continued, setContinued] = React.useState(false);
   const [shared, setShared] = React.useState<SharedPage | null>(null);
+  // While a shared link is read and the visitor decides, the editor waits: its own layers would
+  // otherwise open above the question (W-321).
+  const [sharePending, setSharePending] = React.useState(
+    () => sharedFromHash(window.location.hash) !== null,
+  );
 
   // W-321: a shared link carries a page in `#p=`; it opens after the visitor says yes.
   React.useEffect(() => {
@@ -263,6 +268,7 @@ export default function Playground() {
       else {
         clearShareHash();
         setNotice(shareProblem(read));
+        setSharePending(false);
       }
     });
     return () => {
@@ -284,6 +290,7 @@ export default function Playground() {
     } catch (error) {
       clearShareHash();
       setNotice(error instanceof Error ? error.message : String(error));
+      setSharePending(false);
     }
   };
 
@@ -429,6 +436,10 @@ export default function Playground() {
       )}
       {gated ? (
         <SmallScreenGate onContinue={continueSmall} tooNarrow={step === "too-narrow"} />
+      ) : sharePending ? (
+        <main className="pg-gate" data-pg-share-pending="">
+          <p role="status">{shared ? "Opening a shared page…" : "Reading the shared link…"}</p>
+        </main>
       ) : (
         <Editor
           key={`${entryId}:${generation}`}
@@ -443,6 +454,7 @@ export default function Playground() {
         onCancel={() => {
           setShared(null);
           clearShareHash();
+          setSharePending(false);
         }}
         onOpen={(styles) => void openShared(styles)}
       />
