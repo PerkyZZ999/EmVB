@@ -72,4 +72,13 @@ export const FEATURE_CSS = `
 .emvb-tokens-sample { display: inline-block; height: 1em; line-height: 1; }
 .emvb-tokens-preview .emvb-tokens-sample:empty { height: 8px; border-radius: 2px; background: var(--color-kumo-brand); }
 .emvb-tokens-preview code { font-size: 11px; color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+.emvb-a11y-score { height: 28px; padding: 0 8px; border: 1px solid var(--color-kumo-line); border-radius: 999px; background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.emvb-a11y-score[data-band="good"] b, .emvb-a11y [data-band="good"] { color: #15803d; }
+.emvb-a11y-score[data-band="fair"] b, .emvb-a11y [data-band="fair"] { color: #b45309; }
+.emvb-a11y-score[data-band="poor"] b, .emvb-a11y [data-band="poor"] { color: #b91c1c; }
+.emvb-a11y-score:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }
+.emvb-a11y-issues { margin: 12px 0; padding: 0; list-style: none; display: grid; gap: 8px; max-height: 50vh; overflow-y: auto; }
+.emvb-a11y-issues > li { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; font-size: 13px; padding-left: 8px; border-left: 3px solid #d97706; }
+.emvb-a11y-issues > li[data-severity="error"] { border-left-color: #dc2626; }
+.emvb-a11y-actions { display: flex; gap: 8px; justify-content: flex-end; }
 `;

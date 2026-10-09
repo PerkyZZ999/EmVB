@@ -26289,6 +26289,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/design/tokens.test.ts"],
       "expect": "\\(fail\\).*W-316"
+    },
+    {
+      "id": "W-317/second-h1-ok",
+      "requirement": "W-317",
+      "description": "A second H1 is not flagged.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "        if (h1s > 1) {",
+          "replace": "        if (h1s > 99) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts"],
+      "expect": "\\(fail\\).*W-317"
+    },
+    {
+      "id": "W-317/contrast-no-inherit",
+      "requirement": "W-317",
+      "description": "Contrast ignores the parent's background.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    const nextBg = ownBg ?? bg;",
+          "replace": "    const nextBg = ownBg;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts"],
+      "expect": "\\(fail\\).*W-317"
+    },
+    {
+      "id": "W-317/contrast-vars-ignored",
+      "requirement": "W-317",
+      "description": "Colour variables are not resolved for contrast.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    return design.variables.colors.find((c) => c.id === id)?.value;",
+          "replace": "    return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts"],
+      "expect": "\\(fail\\).*W-317"
+    },
+    {
+      "id": "W-317/fix-all-partial",
+      "requirement": "W-317",
+      "description": "Fix all applies only the first fix.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "  return issues.reduce((next, issue) => applyA11yFix(next, issue), layout);",
+          "replace": "  return issues[0] ? applyA11yFix(layout, issues[0]) : layout;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts"],
+      "expect": "\\(fail\\).*W-317"
     }
   ]
 }

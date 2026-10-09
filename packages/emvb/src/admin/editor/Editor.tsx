@@ -2,12 +2,14 @@ import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@
 import { ClockCounterClockwiseIcon, GaugeIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
+  auditPage,
   findNode,
   moveDown,
   moveUp,
   renderPage,
   toggleHidden,
   withPlainText,
+  type Layout,
   type LayoutNode,
   type PopupDevice,
 } from "../../core/index.ts";
@@ -45,6 +47,7 @@ import { useCollectionPreviews } from "./collection-previews.ts";
 import { PerfMeterDialog } from "./PerfMeter.tsx";
 import { CommandPalette } from "./CommandPalette.tsx";
 import { TimelineDialog } from "./Timeline.tsx";
+import { A11yDialog, A11yScoreButton } from "./A11yCopilot.tsx";
 import { paletteItems } from "./palette-items.ts";
 import { restoreOnUndo, type Deletion } from "./restore-deleted.ts";
 import { useEditorCommands } from "./useEditorCommands.ts";
@@ -158,6 +161,7 @@ function EditorApp({
   const [perfOpen, setPerfOpen] = React.useState(false);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [timelineOpen, setTimelineOpen] = React.useState(false);
+  const [a11yOpen, setA11yOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [leaveOpen, setLeaveOpen] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
@@ -259,6 +263,21 @@ function EditorApp({
   );
   const selectedNode =
     state.selectedId && state.page.layout ? findNode(state.page.layout, state.selectedId) : null;
+  // W-317: the live accessibility score.
+  const a11y = React.useMemo(
+    () =>
+      state.page.layout ? auditPage(state.page.layout, state.design) : { score: 100, issues: [] },
+    [state.page.layout, state.design],
+  );
+  const applyEdit = (layout: Layout, note: string) => {
+    dispatch({
+      type: "apply-arranged",
+      layout,
+      selected: latest.current.selectedId ?? layout.root.id,
+    });
+    setAnnouncement(note);
+    toasts.add({ title: note, description: "Undo takes it back." });
+  };
 
   const shortcutHandlers: ShortcutHandlers = {
     save,
@@ -352,6 +371,7 @@ function EditorApp({
               onRevert={() => setRevertOpen(true)}
               tools={
                 <>
+                  <A11yScoreButton report={a11y} onOpen={() => setA11yOpen(true)} />
                   <Button
                     variant="ghost"
                     shape="square"
@@ -572,6 +592,13 @@ function EditorApp({
                       run: () => setSiteStylesOpen(true),
                     },
                     {
+                      id: "a11y",
+                      label: "Check accessibility",
+                      hint: `${a11y.score}/100`,
+                      keywords: "a11y contrast alt headings audit",
+                      run: () => setA11yOpen(true),
+                    },
+                    {
                       id: "timeline",
                       label: "Version timeline",
                       keywords: "history revisions restore diff",
@@ -607,6 +634,14 @@ function EditorApp({
                 })
               : []
           }
+        />
+        <A11yDialog
+          open={a11yOpen}
+          onOpenChange={setA11yOpen}
+          report={a11y}
+          layout={state.page.layout}
+          onSelect={(id) => dispatch({ type: "select", id })}
+          onApply={applyEdit}
         />
         <TimelineDialog
           open={timelineOpen}

@@ -453,3 +453,11 @@ export {
   typeScale,
   type ScaleInput,
 } from "./design/tokens.ts";
+export {
+  applyA11yFix,
+  applyAllA11yFixes,
+  auditPage,
+  contrastRatio,
+  type A11yIssue,
+  type A11yReport,
+} from "./a11y/audit.ts";
