@@ -36,7 +36,7 @@ A large feature release: live data, personalization on the server, a command pal
 
 ### Changed
 
-- **Changelog page on emvb.dev (W-322).** [emvb.dev/changelog](https://emvb.dev/changelog/) shows this file, built from it with each release, with a version list; the site header and footer link to it.
+- **Changelog page on emvb.dev (W-322).** [emvb.dev/changelog](https://emvb.dev/changelog/) shows this file, built from it with each release, with a version list; the site header and footer link to it, and so do the home page's version label and a **See what's new** link (W-323).
 - **Node demo dev server runs on Node** (thanks @masonjames). `bun run demo:node` no longer forces Bun, which could crash on startup on macOS.
 
 ### Accessibility

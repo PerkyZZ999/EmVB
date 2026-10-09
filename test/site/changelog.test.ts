@@ -45,3 +45,11 @@ describe("emvb.dev changelog page (W-322)", () => {
     for (const release of releases.slice(1)) expect(release.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
+
+describe("the home page leads to the changelog (W-323)", () => {
+  test("the hero's version label and a See what's new link go to /changelog/", () => {
+    const hero = read("site/src/components/Hero.astro");
+    expect(hero).toMatch(/<a class="release" href="\/changelog\/"/);
+    expect(hero).toContain('<a class="whats-new" href="/changelog/">See what\'s new');
+  });
+});

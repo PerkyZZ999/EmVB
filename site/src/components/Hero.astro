@@ -44,9 +44,9 @@ const weights = [
 
 <section class="hero blueprint" id="top" aria-labelledby="hero-title">
   <div class="wrap intro">
-    <a class="release" href={project.npmUrl}>
+    <a class="release" href="/changelog/" aria-label={`EmVB ${project.version} for EmDash CMS 1.2: see what's new in the changelog`}>
       <span class="pulse" aria-hidden="true"></span>
-      <span>v{project.version} is on npm</span>
+      <span>v{project.version} is out</span>
       <span class="sep" aria-hidden="true"></span>
       <span class="muted">for EmDash CMS 1.2</span>
       <span class="arrow" aria-hidden="true">→</span>
@@ -118,6 +118,7 @@ const weights = [
       <a class="button" href="/playground/">Try it in your browser <span class="arrow" aria-hidden="true">→</span></a>
       <a class="button button--ghost" href="#get-started">Install it</a>
     </div>
+    <a class="whats-new" href="/changelog/">See what's new <span aria-hidden="true">→</span></a>
     <ul class="facts">
       {facts.map((fact) => <li>{fact}</li>)}
     </ul>
@@ -660,5 +661,20 @@ const weights = [
       bottom: -2rem;
       right: -0.25rem;
     }
+  }
+
+  .whats-new {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 2.75rem;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    text-underline-offset: 0.25em;
+  }
+
+  .whats-new:hover {
+    color: var(--ink);
   }
 </style>

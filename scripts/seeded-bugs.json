@@ -26982,6 +26982,34 @@
       ],
       "command": ["bun", "test", "./test/site/changelog.test.ts"],
       "expect": "\\(fail\\).*W-322"
+    },
+    {
+      "id": "W-323/release-to-npm",
+      "requirement": "W-323",
+      "description": "The hero version label still goes to npm, not the changelog.",
+      "edits": [
+        {
+          "file": "site/src/components/Hero.astro",
+          "search": "<a class=\"release\" href=\"/changelog/\"",
+          "replace": "<a class=\"release\" href={project.npmUrl}"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/changelog.test.ts"],
+      "expect": "\\(fail\\).*W-323"
+    },
+    {
+      "id": "W-323/no-whats-new",
+      "requirement": "W-323",
+      "description": "The home page body has no See what's new link.",
+      "edits": [
+        {
+          "file": "site/src/components/Hero.astro",
+          "search": "<a class=\"whats-new\" href=\"/changelog/\">",
+          "replace": "<a class=\"whats-new\" href=\"#get-started\">"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/changelog.test.ts"],
+      "expect": "\\(fail\\).*W-323"
     }
   ]
 }
