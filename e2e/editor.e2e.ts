@@ -128,6 +128,11 @@ test("with the Ctrl+K block turned off, the host palette stacks above the editor
   await page.setViewportSize({ width: 1280, height: 720 });
   await openEditor(page);
   await page.keyboard.press("Control+k");
+  // EmVB's own palette (W-314) opens too; Escape closes it, the top layer, first.
+  const ours = page.getByRole("dialog", { name: "Command palette" });
+  await expect(ours).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(ours).toHaveCount(0);
   const palette = page.getByRole("dialog");
   await expect(palette).toBeVisible();
   expect(await receivesCentreClick(page, '[role="dialog"]')).toBe(true);
