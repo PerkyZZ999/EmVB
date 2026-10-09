@@ -46,15 +46,28 @@ async function loopEntries(loop: CollectionLoop): Promise<ThemePostFields[]> {
 }
 
 /**
+ * The layout plus the synced sections and Loop items it pulls in. Their elements render with the
+ * same request data, so A/B tests, visitor rules, bindings and Loops inside them count too.
+ */
+function withTemplates(layout: Layout, templates: readonly Layout[]): Layout {
+  if (templates.length === 0) return layout;
+  const children = [...layout.root.children, ...templates.flatMap((t) => t.root.children)];
+  return { ...layout, root: { ...layout.root, children } };
+}
+
+/**
  * Live values a layout needs on this request: site settings and URL parameters for bindings
- * (W-307), and entries for collection Loops (W-308).
+ * (W-307), entries for collection Loops (W-308), A/B arms (W-312) and the visitor (W-313).
+ * `templates` are the synced sections and Loop items the layout renders.
  */
 export async function bindingDataFor(
-  layout: Layout | null,
+  page: Layout | null,
   url: URL,
   astro?: VisitorAstro,
+  templates: readonly Layout[] = [],
 ): Promise<RequestData> {
-  if (!layout) return {};
+  if (!page) return {};
+  const layout = withTemplates(page, templates);
   const data: RequestData = {};
   // W-312: the visitor's arm of each A/B test, picked here on the server.
   const abArms = astro ? abArmsFor(layout, astro) : undefined;

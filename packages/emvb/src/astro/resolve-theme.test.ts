@@ -289,6 +289,49 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.popups[0]?.html).toContain("Shared promo");
   });
 
+  test("W-312/W-313 A/B tests and visitor rules inside a part's synced section apply", async () => {
+    const synced = {
+      id: "sect0001",
+      type: "section",
+      props: { partId: "SECT0001" },
+      children: [],
+    } as unknown as LayoutNode;
+    themeEntries = [
+      part("SECT0001", "section", [
+        { ...heading("head0001", "Arm A"), variant: { test: "promo", arm: "a" } },
+        { ...heading("head0002", "Arm B"), variant: { test: "promo", arm: "b" } },
+        { ...heading("head0003", "Hello Canada"), audience: { countries: ["CA"] } },
+      ]),
+    ];
+    // Variants and audiences arrived in schema 13.
+    for (const entry of themeEntries) {
+      (entry.data["layout"] as { schemaVersion: number }).schemaVersion = 13;
+    }
+    themeEntries = [
+      ...themeEntries,
+      part("HEAD0001", "header", [synced]),
+      part("FLOAT001", "float", [{ ...synced, id: "sect0002" } as LayoutNode]),
+    ];
+    // A returning visitor already on arm B.
+    const jar = new Map([["emvb_ab_promo", "b"]]);
+    const headers = new Headers();
+    const resolved = await resolveThemeParts({
+      ...astro("/about"),
+      request: new Request("http://site.test/about", { headers: { "cf-ipcountry": "CA" } }),
+      cookies: {
+        get: (name: string) => (jar.has(name) ? { value: jar.get(name) ?? "" } : undefined),
+        set: (name: string, value: string) => void jar.set(name, value),
+      },
+      response: { headers },
+    } as never);
+    for (const html of [resolved.header?.html, resolved.floats[0]?.html]) {
+      expect(html).toContain("Arm B");
+      expect(html).not.toContain("Arm A");
+      expect(html).toContain("Hello Canada");
+    }
+    expect(headers.get("Cache-Control")).toBe("private, no-store");
+  });
+
   test("a float pins with chrome and can be dismissed; bad settings are skipped", async () => {
     themeEntries = [
       part("FLOAT001", "float", [heading("head0001", "We ship Tuesday")], {

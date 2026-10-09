@@ -53,7 +53,7 @@ export async function resolveEmVBPage(
   const sectionTemplates = layout ? await sectionTemplatesFor(layout) : {};
   const dynamic = {
     ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
-    ...(await bindingDataFor(layout, astro.url, astro)),
+    ...(await bindingDataFor(layout, astro.url, astro, Object.values(sectionTemplates))),
   };
   return {
     ...renderStored(

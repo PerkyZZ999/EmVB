@@ -26712,6 +26712,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/recipes/recipes.test.ts"],
       "expect": "\\(fail\\).*W-320"
+    },
+    {
+      "id": "W-312/synced-section-arms",
+      "requirement": "W-312",
+      "description": "A/B tests, visitor rules and bindings inside a synced section are ignored because only the page's own elements are scanned.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/request-data.ts",
+          "search": "  const layout = withTemplates(page, templates);",
+          "replace": "  const layout = withTemplates(page, []);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/request-data.test.ts"],
+      "expect": "\\(fail\\).*W-312/W-313 request data covers synced sections"
+    },
+    {
+      "id": "W-312/theme-part-templates",
+      "requirement": "W-312",
+      "description": "Theme parts stop passing their synced sections and Loop items to the request data.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "      ...Object.values(referenced?.sectionTemplates ?? {}),",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*W-312"
     }
   ]
 }

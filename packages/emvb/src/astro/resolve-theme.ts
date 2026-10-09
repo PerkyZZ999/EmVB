@@ -393,8 +393,12 @@ export async function resolveThemeParts(
   const byId = new Map(parts.map((part) => [part.id, part]));
   const rendered: RenderedPage[] = [];
   // W-307: bound fields in a part read site settings and URL parameters too.
-  const boundFor = (stored: StoredPart) =>
-    bindingDataFor(readLayout(stored.layout), astro.url, astro);
+  // W-312/W-313: synced sections and Loop items the part uses count too.
+  const boundFor = (stored: StoredPart, referenced: ThemeDynamicData | undefined) =>
+    bindingDataFor(readLayout(stored.layout), astro.url, astro, [
+      ...Object.values(referenced?.sectionTemplates ?? {}),
+      ...Object.values(referenced?.loopTemplates ?? {}),
+    ]);
   const renderOne = (
     stored: StoredPart,
     partDynamic: ThemeDynamicData | undefined,
@@ -448,7 +452,7 @@ export async function resolveThemeParts(
     if (winner === contentWinner && (dynamic?.pagination?.page ?? 1) > 1) {
       pastLastPage = (dynamic?.posts ?? []).length === 0;
     }
-    const { html, css } = renderOne(stored, dynamic, await boundFor(stored));
+    const { html, css } = renderOne(stored, dynamic, await boundFor(stored, referenced));
     return { id: stored.id, title: stored.title, partType: stored.partType, html, css };
   };
 
@@ -466,7 +470,10 @@ export async function resolveThemeParts(
   );
   const extraBound = new Map(
     await Promise.all(
-      extraParts.map(async (stored) => [stored.id, await boundFor(stored)] as const),
+      extraParts.map(
+        async (stored) =>
+          [stored.id, await boundFor(stored, extraTemplates.get(stored.id))] as const,
+      ),
     ),
   );
 
