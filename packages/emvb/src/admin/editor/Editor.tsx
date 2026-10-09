@@ -30,7 +30,7 @@ import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog, RevertDialog } from "
 import { discardDraft } from "../content-api.ts";
 import { EditorOverlay } from "./EditorOverlay.tsx";
 import { useEditorHost } from "./host.ts";
-import { LiveDataProvider, useLiveData } from "./live-data.tsx";
+import { LiveDataProvider, siteOrigin, useLiveData } from "./live-data.tsx";
 import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./panels/ElementPanel.tsx";
 import { LeftPanel } from "./panels/LeftPanel.tsx";
@@ -255,6 +255,7 @@ function EditorApp({
               ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
               site: live.site,
               params: live.params,
+              ...(siteOrigin() ? { origin: siteOrigin() } : {}),
               collections,
             },
             previewDevice: device,

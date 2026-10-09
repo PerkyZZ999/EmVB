@@ -23,6 +23,9 @@ export const FEATURE_CSS = `
 .emvb-bind-row > .emvb-bind-label { grid-column: 1 / -1; font-size: 12px; color: var(--text-color-kumo-subtle); }
 .emvb-bind-live { grid-column: 1 / -1; margin: 0; font-size: 12px; color: var(--text-color-kumo-default); overflow-wrap: anywhere; }
 .emvb-bind-live > b { font-weight: 600; }
+.emvb-bind-outside { grid-column: 1 / -1; display: grid; gap: 4px; }
+.emvb-bind-outside > label { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+.emvb-bind-warning { margin: 0; padding: 6px 8px; border-radius: 6px; font-size: 12px; background: var(--color-kumo-warning-tint, #fef3c7); color: var(--text-color-kumo-default); }
 .emvb-js-badge { margin-left: auto; padding: 0 4px; border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 16px; background: var(--color-kumo-warning-tint, #fef3c7); color: var(--text-color-kumo-default); }
 .emvb-element-tile { position: relative; }
 .emvb-element-tile > .emvb-js-badge { position: absolute; top: 4px; right: 4px; }

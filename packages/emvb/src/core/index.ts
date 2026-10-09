@@ -228,6 +228,7 @@ export {
   POST_BIND_KEYS,
   SITE_BIND_KEYS,
   applyBindings,
+  boundValue,
   bindableFields,
   hasBindings,
   layoutUsesSource,

@@ -56,6 +56,8 @@ export type ThemeDynamicData = {
   site?: Readonly<Record<string, string>>;
   /** The request's URL parameters, first value per name (W-307). */
   params?: Readonly<Record<string, string>>;
+  /** The page's own origin, e.g. `https://example.com`: URL-parameter links stay on it (W-307). */
+  origin?: string;
 };
 
 /** Editor canvas placeholders when no live post is bound. */

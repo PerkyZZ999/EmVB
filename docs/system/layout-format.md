@@ -224,3 +224,8 @@ Any node may carry `bind`: prop name → `{ source, key }`. `source` is `post` (
 is fixed per element (`BINDABLE_FIELDS`: text, links, image source and alt). The typed prop stays as
 the fallback when the source has no value. Bound values are plain text, capped at 500 characters,
 and go through the element's own escaping and link and image URL checks.
+
+A link or image bound to `param` only takes same-site URLs: relative ones, or absolute ones on the
+page's origin (hosts pass it as `dynamic.origin`). Anything else shows the typed value, unless the
+binding sets `outside: true` ("Allow outside sites" in the editor). Anyone can craft a URL
+parameter, so that option lets them point the page's links and images at any site.

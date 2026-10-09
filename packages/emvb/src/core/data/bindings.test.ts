@@ -97,6 +97,72 @@ describe("data bindings (W-307)", () => {
     expect(ok).toContain('src="/other.png"');
   });
 
+  test("W-307 URL-parameter links and images stay on this site unless outside sites are allowed", () => {
+    const bind = { source: "param" as const, key: "next" };
+    const button: LayoutNode = {
+      id: "butt0001",
+      type: "button",
+      props: { text: "Go", href: "/safe" },
+      bind: { href: bind },
+    };
+    const image: LayoutNode = {
+      id: "imag0001",
+      type: "image",
+      props: { src: "/hero.png", alt: "Hero" },
+      bind: { src: bind },
+    };
+    const render = (next: string, nodes = [button, image]) =>
+      renderPage(page(...nodes), emptyDesign(), {
+        dynamic: { params: { next }, origin: "https://site.test" },
+      }).html;
+    // Another site, mailto: or a scheme-relative URL: the typed link and image stay.
+    for (const next of ["https://evil.test/login", "mailto:a@evil.test", "//evil.test/x.png"]) {
+      const html = render(next);
+      expect(html).toContain('href="/safe"');
+      expect(html).toContain('src="/hero.png"');
+    }
+    // Relative or this site's own origin: used.
+    expect(render("/pricing")).toContain('href="/pricing"');
+    expect(render("https://site.test/p.png")).toContain('src="https://site.test/p.png"');
+    // Opted in: outside sites are used (still sanitized).
+    const outside = { ...bind, outside: true };
+    const open = [
+      { ...button, bind: { href: outside } },
+      { ...image, bind: { src: outside } },
+    ] as LayoutNode[];
+    expect(render("https://other.test/a.png", open)).toContain('href="https://other.test/a.png"');
+    expect(render("https://other.test/a.png", open)).toContain('src="https://other.test/a.png"');
+    expect(render("javascript:alert(1)", open)).toContain('href="/safe"');
+    // Without an origin (no host URL), absolute URLs are refused and relative ones still work.
+    const bare = renderPage(page(button), emptyDesign(), {
+      dynamic: { params: { next: "https://site.test/x" } },
+    }).html;
+    expect(bare).toContain('href="/safe"');
+  });
+
+  test("W-307 the same-site rule is only for URL parameters, and only for links and images", () => {
+    const fromPost = { ...heading, type: "link", props: { text: "Read", href: "/" } } as LayoutNode;
+    const withSite = { ...post, fields: { site: "https://elsewhere.test/" } };
+    const html = renderPage(
+      page({ ...fromPost, bind: { href: { source: "post", key: "site" } } } as LayoutNode),
+      emptyDesign(),
+      { dynamic: { post: withSite } },
+    ).html;
+    expect(html).toContain('href="https://elsewhere.test/"');
+    const text = renderPage(page(heading), emptyDesign(), {
+      dynamic: { params: { name: "https://evil.test" } },
+    }).html;
+    expect(text).toContain("https://evil.test");
+    expect(
+      validateLayout(
+        page({
+          ...heading,
+          bind: { text: { source: "param", key: "a", outside: "yes" } },
+        } as never),
+      ).ok,
+    ).toBe(false);
+  });
+
   test("bindings on fields an element can't bind are ignored", () => {
     const node = { ...heading, bind: { level: { source: "param", key: "x" } } } as LayoutNode;
     expect(applyBindings(node, { params: { x: "9" } })).toBe(node);

@@ -58,6 +58,39 @@ describe("Dynamic data panel (W-307)", () => {
     expect(keys).toEqual(["Text parameter name", "Link parameter name"]);
   });
 
+  test("W-307 a URL-parameter link offers Allow outside sites, with a phishing warning", async () => {
+    const link: LayoutNode = {
+      id: "link0001",
+      type: "link",
+      props: { text: "Go", href: "/" },
+      bind: { href: { source: "param", key: "next" } },
+    };
+    const { host, latest } = await editor(link, { next: "https://evil.test/login" });
+    const row = host.querySelector('[data-emvb-bind-field="href"]');
+    expect(row?.querySelector("[data-emvb-bind-live]")?.textContent).toContain(
+      "Not a link on this site",
+    );
+    const box = row?.querySelector<HTMLInputElement>(
+      '[data-emvb-bind-outside] input[type="checkbox"]',
+    );
+    if (!box) throw new Error("no Allow outside sites checkbox");
+    expect(box.checked).toBe(false);
+    expect(row?.querySelector(".emvb-bind-warning")).toBeNull();
+    await act(async () => box.click());
+    expect(latest().bind?.["href"]).toEqual({ source: "param", key: "next", outside: true });
+
+    const allowed = await editor(latest(), { next: "https://evil.test/login" });
+    const allowedRow = allowed.host.querySelector('[data-emvb-bind-field="href"]');
+    expect(allowedRow?.querySelector(".emvb-bind-warning")?.textContent).toContain("Phishing");
+    expect(allowedRow?.querySelector("[data-emvb-bind-live]")?.textContent).toBe(
+      "Live: https://evil.test/login",
+    );
+    // Text fields and other sources never offer it.
+    expect(
+      allowed.host.querySelector('[data-emvb-bind-field="text"] [data-emvb-bind-outside]'),
+    ).toBeNull();
+  });
+
   test("shows the live value, or says the typed value is used", async () => {
     const bound = { ...heading, bind: { text: { source: "param" as const, key: "name" } } };
     const live = await editor(bound, { name: "Ada" });

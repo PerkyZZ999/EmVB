@@ -70,6 +70,8 @@ export type BindingData = {
   post?: ThemePostFields;
   site?: Readonly<Record<string, string>>;
   params?: Readonly<Record<string, string>>;
+  /** The page's origin; a URL-parameter link or image must stay on it unless `outside` (W-307). */
+  origin?: string;
 };
 
 /** Longest bound value an element receives; longer values are cut (URL parameters are untrusted). */
@@ -127,9 +129,53 @@ export function hasBindings(node: LayoutNode): boolean {
 }
 
 /**
+ * Whether a URL stays on this site: relative (`/path`, `?q`, `#top`, `page`), or absolute on
+ * `origin`. `//host` and other schemes are outside; without an origin, only relative URLs pass.
+ */
+function isSameSiteUrl(value: string, origin: string | undefined): boolean {
+  const url = value.trim();
+  if (/^[/\\]{2}/.test(url)) return false;
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(url)) return true;
+  if (!origin) return false;
+  try {
+    return new URL(url).origin === new URL(origin).origin;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The value a bound field shows (W-307), after every check render applies, or undefined when
+ * the typed value shows instead: nothing to read, a link or image the sanitizer refuses, or a
+ * URL-parameter link or image to another site without "Allow outside sites".
+ */
+export function boundValue(
+  field: BindableField,
+  binding: Binding,
+  data: BindingData,
+  multiline = false,
+): string | undefined {
+  let value = resolveBinding(binding, data);
+  if (value === undefined) return undefined;
+  if (!multiline) value = value.replace(/\s*\n\s*/g, " ");
+  if (field.kind === "url" && !sanitizeHref(value)) return undefined;
+  if (field.kind === "image" && !sanitizeMediaUrl(value)) return undefined;
+  if (
+    field.kind !== "text" &&
+    binding.source === "param" &&
+    !binding.outside &&
+    !isSameSiteUrl(value, data.origin)
+  ) {
+    return undefined;
+  }
+  return value;
+}
+
+/**
  * The node with its bound props replaced by live values (W-307). Unbindable keys, empty values and
  * links or images the sanitizer would refuse leave the typed prop as it is, so a bad URL parameter
- * can't blank a button or an image. A bound text field that is single-line stays single-line.
+ * can't blank a button or an image. A URL parameter can't send a link or image off the site unless
+ * the binding allows outside sites (see `boundValue`). A bound text field that is single-line stays single-line.
  */
 export function applyBindings(node: LayoutNode, data: BindingData): LayoutNode {
   const bind = node.bind;
@@ -138,11 +184,8 @@ export function applyBindings(node: LayoutNode, data: BindingData): LayoutNode {
   for (const field of bindableFields(node.type)) {
     const binding = Object.hasOwn(bind, field.key) ? bind[field.key] : undefined;
     if (!binding) continue;
-    let value = resolveBinding(binding, data);
+    const value = boundValue(field, binding, data, field.kind === "text" && node.type === "text");
     if (value === undefined) continue;
-    if (field.kind !== "text" || node.type !== "text") value = value.replace(/\s*\n\s*/g, " ");
-    if (field.kind === "url" && !sanitizeHref(value)) continue;
-    if (field.kind === "image" && !sanitizeMediaUrl(value)) continue;
     props ??= { ...(node.props as Record<string, unknown>) };
     props[field.key] = value;
     // A bound image is no longer the media library item it was picked from.

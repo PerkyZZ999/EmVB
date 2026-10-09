@@ -26744,12 +26744,17 @@
     {
       "id": "W-307/bad-bound-href-blanks",
       "requirement": "W-307",
-      "description": "A refused bound link replaces the typed link, so the button loses its href.",
+      "description": "A refused bound link replaces the typed link, so the button loses its href. (with the same-site rule off too, since it also refuses those URLs)",
       "edits": [
         {
           "file": "packages/emvb/src/core/data/bindings.ts",
-          "search": "    if (field.kind === \"url\" && !sanitizeHref(value)) continue;\n",
+          "search": "  if (field.kind === \"url\" && !sanitizeHref(value)) return undefined;\n",
           "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    !isSameSiteUrl(value, data.origin)\n",
+          "replace": "    false\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
@@ -26758,12 +26763,17 @@
     {
       "id": "W-307/bad-bound-image-blanks",
       "requirement": "W-307",
-      "description": "A refused bound image replaces the typed image, so it disappears.",
+      "description": "A refused bound image replaces the typed image, so it disappears. (with the same-site rule off too, since it also refuses those URLs)",
       "edits": [
         {
           "file": "packages/emvb/src/core/data/bindings.ts",
-          "search": "    if (field.kind === \"image\" && !sanitizeMediaUrl(value)) continue;\n",
+          "search": "  if (field.kind === \"image\" && !sanitizeMediaUrl(value)) return undefined;\n",
           "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    !isSameSiteUrl(value, data.origin)\n",
+          "replace": "    false\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
@@ -26842,6 +26852,80 @@
         "./packages/emvb/src/admin/editor/panels/settings/bindings-editor.test.tsx"
       ],
       "expect": "\\(fail\\).*W-307 its controls never share a name"
+    },
+    {
+      "id": "W-307/param-link-offsite",
+      "requirement": "W-307",
+      "description": "A URL parameter can send a bound link or image to any site (phishing from the site's own address).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    !isSameSiteUrl(value, data.origin)\n",
+          "replace": "    false\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
+      "expect": "\\(fail\\).*W-307 URL-parameter links and images stay on this site"
+    },
+    {
+      "id": "W-307/outside-optin-ignored",
+      "requirement": "W-307",
+      "description": "Allow outside sites is ignored, so an opted-in link still shows the typed value.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    !binding.outside &&\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
+      "expect": "\\(fail\\).*W-307 URL-parameter links and images stay on this site"
+    },
+    {
+      "id": "W-307/no-origin-from-host",
+      "requirement": "W-307",
+      "description": "The host never passes the page origin, so links to the site's own absolute URLs are refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/request-data.ts",
+          "search": "    data.origin = url.origin;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/request-data.test.ts"],
+      "expect": "\\(fail\\).*W-312/W-313 request data covers synced sections"
+    },
+    {
+      "id": "W-307/outside-toggle-missing",
+      "requirement": "W-307",
+      "description": "The Allow outside sites toggle never shows for a URL-parameter link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BindingsEditor.tsx",
+          "search": "const offSiteOption = binding?.source === \"param\" && field.kind !== \"text\";",
+          "replace": "const offSiteOption = false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/bindings-editor.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-307 a URL-parameter link offers Allow outside sites"
+    },
+    {
+      "id": "W-307/outside-for-post-source",
+      "requirement": "W-307",
+      "description": "The same-site rule also blocks links read from a post field, which aren't visitor-controlled.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    binding.source === \"param\" &&\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
+      "expect": "\\(fail\\).*W-307 the same-site rule is only for URL parameters"
     }
   ]
 }

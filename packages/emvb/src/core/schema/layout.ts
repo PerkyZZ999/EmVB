@@ -67,6 +67,11 @@ export const Binding = z.strictObject({
       /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/,
       "Keys start with a letter: letters, digits, _, . or -, up to 64",
     ),
+  /**
+   * A link or image bound to a URL parameter takes only same-site URLs (relative, or this site's
+   * origin) unless this is set (W-307). Anyone can craft such a link, so outside sites are opt-in.
+   */
+  outside: z.boolean().optional(),
 });
 export type Binding = z.infer<typeof Binding>;
 

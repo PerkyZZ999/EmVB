@@ -20,6 +20,12 @@ export const LiveDataContext = React.createContext<LiveData>(EMPTY);
 
 export const useLiveData = () => React.useContext(LiveDataContext);
 
+/**
+ * The site's origin while editing (W-307): the EmDash admin runs on the site itself, so a
+ * URL-parameter link to this origin counts as same-site on the canvas too.
+ */
+export const siteOrigin = (): string | undefined => globalThis.location?.origin || undefined;
+
 /** `a=1&b=two` (a leading `?` is fine) as a record, first value per name. */
 function previewParams(query: string): Record<string, string> {
   const params: Record<string, string> = {};

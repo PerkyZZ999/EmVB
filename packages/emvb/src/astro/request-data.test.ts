@@ -73,6 +73,8 @@ describe("W-312/W-313 request data covers synced sections", () => {
     expect(cookies.jar.get("emvb_ab_hero")).toBe(data.abArms?.["hero"]);
     expect(data.visitor?.country).toBe("CA");
     expect(data.params).toEqual({ ref: "news" });
+    // W-307: URL-parameter links are held to the page's own origin.
+    expect(data.origin).toBe("https://site.test");
     expect(response.headers.get("Cache-Control")).toBe("private, no-store");
   });
 

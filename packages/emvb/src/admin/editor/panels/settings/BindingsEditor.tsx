@@ -5,6 +5,7 @@ import {
   POST_BIND_KEYS,
   SITE_BIND_KEYS,
   bindableFields,
+  boundValue,
   resolveBinding,
   withBinding,
   type BindSource,
@@ -12,7 +13,7 @@ import {
   type LayoutNode,
   type ThemePostFields,
 } from "../../../../core/index.ts";
-import { useLiveData } from "../../live-data.tsx";
+import { siteOrigin, useLiveData } from "../../live-data.tsx";
 
 const KEY = /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/;
 const STATIC = "static";
@@ -59,9 +60,14 @@ export function BindingsEditor({
       {fields.map((field) => {
         const binding = node.bind?.[field.key];
         const source = binding?.source;
-        const value = binding
-          ? resolveBinding(binding, { post, site: live.site, params: live.params })
-          : undefined;
+        const data = { post, site: live.site, params: live.params, origin: siteOrigin() };
+        const value = binding ? boundValue(field, binding, data, field.kind === "text") : undefined;
+        // W-307: a value that exists but is refused (another site, or an unsafe URL).
+        const refused =
+          binding !== undefined &&
+          value === undefined &&
+          resolveBinding(binding, data) !== undefined;
+        const offSiteOption = binding?.source === "param" && field.kind !== "text";
         const selectId = `${listId}-${field.key}`;
         return (
           <div className="emvb-bind-row" key={field.key} data-emvb-bind-field={field.key}>
@@ -95,16 +101,20 @@ export function BindingsEditor({
                 binding={binding}
                 listId={`${selectId}-keys`}
                 options={suggestions(binding.source, live.site)}
-                onCommit={(key) =>
-                  onChange(withBinding(node, field.key, { source: binding.source, key }))
-                }
+                onCommit={(key) => onChange(withBinding(node, field.key, { ...binding, key }))}
               />
             ) : (
               <span />
             )}
             {binding && (
               <p className="emvb-bind-live" data-emvb-bind-live="">
-                {value === undefined ? (
+                {refused ? (
+                  <>
+                    {offSiteOption && !binding.outside
+                      ? "Not a link on this site, so the typed value shows."
+                      : "Not a usable URL, so the typed value shows."}
+                  </>
+                ) : value === undefined ? (
                   <>No value here, so the typed value shows.</>
                 ) : (
                   <>
@@ -112,6 +122,33 @@ export function BindingsEditor({
                   </>
                 )}
               </p>
+            )}
+            {binding && offSiteOption && (
+              <div className="emvb-bind-outside" data-emvb-bind-outside="">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={binding.outside === true}
+                    onChange={(event) => {
+                      const { outside: _old, ...rest } = binding;
+                      const next = event.target.checked ? { ...rest, outside: true } : rest;
+                      onChange(withBinding(node, field.key, next));
+                    }}
+                  />
+                  {`Allow outside sites for ${field.label}`}
+                </label>
+                {binding.outside ? (
+                  <p className="emvb-bind-warning" role="note">
+                    Phishing risk: anyone can share a link to this page that sends visitors to any
+                    site or shows any image under your address. Only allow this if you trust where
+                    those links come from.
+                  </p>
+                ) : (
+                  <p className="emvb-helper">
+                    Only links and images on this site are used. Others show the typed value.
+                  </p>
+                )}
+              </div>
             )}
           </div>
         );

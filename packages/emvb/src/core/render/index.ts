@@ -385,6 +385,7 @@ export function renderPage(
       post: resolvePostForRender(dynamic, mode),
       ...(dynamic?.site ? { site: dynamic.site } : {}),
       ...(dynamic?.params ? { params: dynamic.params } : {}),
+      ...(dynamic?.origin ? { origin: dynamic.origin } : {}),
     };
   }
 

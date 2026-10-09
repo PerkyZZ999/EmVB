@@ -15,6 +15,7 @@ import { abArmsFor, visitorFor, type VisitorAstro } from "./visitor.ts";
 type RequestData = {
   site?: Record<string, string>;
   params?: Record<string, string>;
+  origin?: string;
   collections?: Record<string, ThemePostFields[]>;
   abArms?: Record<string, "a" | "b">;
   visitor?: VisitorInfo;
@@ -80,7 +81,11 @@ export async function bindingDataFor(
     const lists = await Promise.all(loops.map(loopEntries));
     data.collections = Object.fromEntries(loops.map((loop, i) => [loop.nodeId, lists[i] ?? []]));
   }
-  if (layoutUsesSource(layout.root, "param")) data.params = paramsFromSearch(url.searchParams);
+  if (layoutUsesSource(layout.root, "param")) {
+    data.params = paramsFromSearch(url.searchParams);
+    // W-307: URL-parameter links and images stay on this origin unless allowed outside.
+    data.origin = url.origin;
+  }
   if (layoutUsesSource(layout.root, "site")) {
     try {
       data.site = siteBindingValues(await getSiteSettings());
