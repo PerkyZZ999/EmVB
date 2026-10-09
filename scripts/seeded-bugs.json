@@ -9036,8 +9036,13 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "  const inherited = responsive\n    ? {\n        ...normal,\n        ...(responsive === \"mobile\" ? ownerDevices?.tablet : undefined),\n      }\n    : styleState === \"normal\"\n      ? undefined\n      : normal;",
-          "replace": "  const inherited = undefined;"
+          "search": "  const ownInherited = responsive\n    ? {\n        ...normal,\n        ...(responsive === \"mobile\" ? ownerDevices?.tablet : undefined),\n      }\n    : styleState === \"normal\"\n      ? undefined\n      : normal;",
+          "replace": "  const ownInherited = undefined;"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  const fromBelow = cls ? undefined :",
+          "replace": "  const fromBelow = cls || styleState !== \"normal\" ? undefined :"
         }
       ],
       "command": [
@@ -26345,6 +26350,66 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts"],
       "expect": "\\(fail\\).*W-317"
+    },
+    {
+      "id": "W-318/class-order-written",
+      "requirement": "W-318",
+      "description": "Classes trace in the order written on the element, not the site list order the CSS uses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/trace.ts",
+          "search": "  for (const cls of design.classes ?? []) {\n    if (!applied.has(cls.id)) continue;",
+          "replace": "  for (const cls of [...(design.classes ?? [])].toReversed()) {\n    if (!applied.has(cls.id)) continue;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/trace.test.ts"],
+      "expect": "\\(fail\\).*W-318"
+    },
+    {
+      "id": "W-318/edited-layer-inherited",
+      "requirement": "W-318",
+      "description": "The element's own value being edited shows as its inherited value.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/trace.ts",
+          "search": "(l) => !(l.source.kind === \"local\" && l.source.layer === editing)",
+          "replace": "(l) => l.source.layer !== \"none\" || editing === \"\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/trace.test.ts"],
+      "expect": "\\(fail\\).*W-318"
+    },
+    {
+      "id": "W-318/mobile-on-tablet",
+      "requirement": "W-318",
+      "description": "Mobile styles appear in the Tablet trace.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/trace.ts",
+          "search": "    if (device === \"mobile\" && owner.devices?.mobile) {",
+          "replace": "    if (device !== \"desktop\" && owner.devices?.mobile) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/trace.test.ts"],
+      "expect": "\\(fail\\).*W-318"
+    },
+    {
+      "id": "W-318/no-overrides-shown",
+      "requirement": "W-318",
+      "description": "The inspector hides what a value overrides.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleSources.tsx",
+          "search": "{t.overridden.length > 0 && (",
+          "replace": "{t.overridden.length > 99 && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sources.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-318"
     }
   ]
 }

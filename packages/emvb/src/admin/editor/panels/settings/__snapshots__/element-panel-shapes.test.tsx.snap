@@ -171,6 +171,13 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -316,6 +323,13 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -469,6 +483,13 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -697,6 +718,40 @@ exports[`element panel markup (W-021, W-086 M16) layout-section renders the same
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "4 set"
+      ul
+        li data-emvb-source="paddingBottom" data-kind="local"
+          span.emvb-sources-prop
+            "Padding bottom"
+          span.emvb-sources-value
+            "64px"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="paddingLeft" data-kind="local"
+          span.emvb-sources-prop
+            "Padding left"
+          span.emvb-sources-value
+            "24px"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="paddingRight" data-kind="local"
+          span.emvb-sources-prop
+            "Padding right"
+          span.emvb-sources-value
+            "24px"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="paddingTop" data-kind="local"
+          span.emvb-sources-prop
+            "Padding top"
+          span.emvb-sources-value
+            "64px"
+          span.emvb-sources-from
+            "This element"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -850,6 +905,13 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-filled=""
       label id="id-8" for="id-9" data-filled=""
         span
@@ -940,6 +1002,13 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-filled=""
       label id="id-8" for="id-9" data-filled=""
         span
@@ -1035,6 +1104,13 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -1153,6 +1229,13 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -1354,6 +1437,13 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -1566,6 +1656,13 @@ exports[`element panel markup (W-021, W-086 M16) label renders the same content 
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -1804,6 +1901,13 @@ exports[`element panel markup (W-021, W-086 M16) link renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -2042,6 +2146,13 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -2257,6 +2368,13 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -2526,6 +2644,13 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -2770,6 +2895,13 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-closed=""
       button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="icon"
         span
@@ -2959,6 +3091,13 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span
@@ -3142,6 +3281,13 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -3350,6 +3496,13 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -3573,6 +3726,13 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -3791,6 +3951,13 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -4009,6 +4176,13 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -4210,6 +4384,13 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -4406,6 +4587,13 @@ exports[`element panel markup (W-021, W-086 M16) submit renders the same content
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -4619,6 +4807,13 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -4772,6 +4967,13 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -4920,6 +5122,13 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -5073,6 +5282,13 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -5221,6 +5437,13 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -5426,6 +5649,13 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -5636,6 +5866,13 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -5789,6 +6026,13 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -5937,6 +6181,13 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -6090,6 +6341,13 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -6238,6 +6496,13 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -6490,6 +6755,13 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -6648,6 +6920,13 @@ exports[`element panel markup (W-021, W-086 M16) loop-empty renders the same con
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -6801,6 +7080,13 @@ exports[`element panel markup (W-021, W-086 M16) loop-empty renders the same con
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -7028,6 +7314,13 @@ exports[`element panel markup (W-021, W-086 M16) pagination renders the same con
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -7241,6 +7534,13 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -7399,6 +7699,13 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -7547,6 +7854,13 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -7702,6 +8016,33 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "3 set"
+      ul
+        li data-emvb-source="flexDirection" data-kind="local"
+          span.emvb-sources-prop
+            "Flex direction"
+          span.emvb-sources-value
+            "row"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="flexWrap" data-kind="local"
+          span.emvb-sources-prop
+            "Flex wrap"
+          span.emvb-sources-value
+            "wrap"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="gap" data-kind="local"
+          span.emvb-sources-prop
+            "Gap"
+          span.emvb-sources-value
+            "16px"
+          span.emvb-sources-from
+            "This element"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -7857,6 +8198,33 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "3 set"
+      ul
+        li data-emvb-source="flexDirection" data-kind="local"
+          span.emvb-sources-prop
+            "Flex direction"
+          span.emvb-sources-value
+            "row"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="flexWrap" data-kind="local"
+          span.emvb-sources-prop
+            "Flex wrap"
+          span.emvb-sources-value
+            "wrap"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="gap" data-kind="local"
+          span.emvb-sources-prop
+            "Gap"
+          span.emvb-sources-value
+            "16px"
+          span.emvb-sources-from
+            "This element"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -8101,6 +8469,13 @@ exports[`element panel markup (W-021, W-086 M16) grid renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -8324,6 +8699,13 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -8564,6 +8946,13 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -8773,6 +9162,13 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -9023,6 +9419,13 @@ exports[`element panel markup (W-021, W-086 M16) accordion renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -9240,6 +9643,13 @@ exports[`element panel markup (W-021, W-086 M16) accordion-item renders the same
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -9455,6 +9865,13 @@ exports[`element panel markup (W-021, W-086 M16) menu renders the same content a
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -9716,6 +10133,13 @@ exports[`element panel markup (W-021, W-086 M16) menu-item renders the same cont
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-7" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "nothing set"
+      p.emvb-helper
+        "No styles apply yet beyond the element's defaults."
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-8" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="layout"
         span
@@ -9857,6 +10281,40 @@ exports[`element panel markup (W-021, W-086 M16) closed sections count the prope
           button type="button" data-orientation="horizontal" aria-disabled="false" tabindex="-1" role="tab" aria-selected="false" id="id-6" data-kumo-component="Tabs" data-kumo-part="tab"
             "Active"
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
+    details.emvb-sources data-emvb-style-sources=""
+      summary
+        "Where styles come from"
+        span.emvb-sources-count
+          "4 set"
+      ul
+        li data-emvb-source="fontSize" data-kind="local"
+          span.emvb-sources-prop
+            "Font size"
+          span.emvb-sources-value
+            "18px"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="marginTop" data-kind="local"
+          span.emvb-sources-prop
+            "Margin top"
+          span.emvb-sources-value
+            "2px"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="paddingLeft" data-kind="local"
+          span.emvb-sources-prop
+            "Padding left"
+          span.emvb-sources-value
+            "8px"
+          span.emvb-sources-from
+            "This element"
+        li data-emvb-source="paddingTop" data-kind="local"
+          span.emvb-sources-prop
+            "Padding top"
+          span.emvb-sources-value
+            "4px"
+          span.emvb-sources-from
+            "This element"
     div data-closed=""
       button.emvb-section-header type="button" tabindex="0" aria-disabled="false" aria-expanded="false" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="spacing"
         span

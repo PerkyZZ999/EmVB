@@ -41,6 +41,7 @@ import {
   type ElementDescriptor,
   type Layout,
   type Arranged,
+  inheritedStyle,
   type LayoutNode,
   patchClassDevices,
   patchClassState,
@@ -63,6 +64,7 @@ import { FieldControl } from "./settings/FieldControl.tsx";
 import { BindingsEditor } from "./settings/BindingsEditor.tsx";
 import { VariantEditor } from "./settings/VariantEditor.tsx";
 import { AudienceEditor } from "./settings/AudienceEditor.tsx";
+import { StyleSources } from "./settings/StyleSources.tsx";
 import { BoxControl } from "./settings/BoxControl.tsx";
 import { boxGroupOf } from "./settings/box-sides.ts";
 import { IconShapeRow, IconSingleColorRow } from "./settings/IconControls.tsx";
@@ -392,7 +394,7 @@ function KnownElementPanel({
     : styleState === "normal"
       ? normal
       : states?.[styleState];
-  const inherited = responsive
+  const ownInherited = responsive
     ? {
         ...normal,
         ...(responsive === "mobile" ? ownerDevices?.tablet : undefined),
@@ -400,6 +402,13 @@ function KnownElementPanel({
     : styleState === "normal"
       ? undefined
       : normal;
+  // W-318: an element's own styles sit on its classes and its tag's Site styles default, so the
+  // controls show what those give as the inherited value.
+  const fromBelow = cls ? undefined : inheritedStyle(node, design, device, styleState);
+  const inherited =
+    fromBelow && Object.keys(fromBelow).length > 0
+      ? { ...fromBelow, ...ownInherited }
+      : ownInherited;
   const position = positionInEffect(node, design, cls);
   const iconSvg =
     node.type === "icon" && typeof node.props.iconSvg === "string" ? node.props.iconSvg : undefined;
@@ -620,6 +629,7 @@ function KnownElementPanel({
               These override Desktop. State styles apply on every device.
             </p>
           )}
+          {!cls && <StyleSources node={node} design={design} device={device} state={styleState} />}
           {designError && <Alert>{designError}</Alert>}
           {!cls && styleState === "normal" && node.type === "spacer" && (
             <FieldControl field={SPACER_HEIGHT} node={node} onChange={onChange} fetcher={fetcher} />

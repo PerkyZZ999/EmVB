@@ -461,3 +461,11 @@ export {
   type A11yIssue,
   type A11yReport,
 } from "./a11y/audit.ts";
+export {
+  defaultTagFor,
+  inheritedStyle,
+  traceStyle,
+  type StyleSource,
+  type StyleTrace,
+  type TraceDevice,
+} from "./css/trace.ts";

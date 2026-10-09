@@ -81,4 +81,15 @@ export const FEATURE_CSS = `
 .emvb-a11y-issues > li { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; font-size: 13px; padding-left: 8px; border-left: 3px solid #d97706; }
 .emvb-a11y-issues > li[data-severity="error"] { border-left-color: #dc2626; }
 .emvb-a11y-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.emvb-sources { margin: 4px 0 8px; font-size: 12px; }
+.emvb-sources > summary { cursor: pointer; display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+.emvb-sources-count { font-weight: 400; color: var(--text-color-kumo-subtle); }
+.emvb-sources ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.emvb-sources li { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; padding-left: 6px; border-left: 2px solid var(--color-kumo-line); }
+.emvb-sources li[data-kind="class"] { border-left-color: #7c3aed; }
+.emvb-sources li[data-kind="default"] { border-left-color: #0d9488; }
+.emvb-sources li[data-kind="local"] { border-left-color: var(--color-kumo-brand); }
+.emvb-sources-value { font-family: ui-monospace, monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
+.emvb-sources-from, .emvb-sources-over { grid-column: 1 / -1; color: var(--text-color-kumo-subtle); }
+.emvb-sources-over { text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); }
 `;
