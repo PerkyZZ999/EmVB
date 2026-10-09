@@ -50,6 +50,18 @@ describe("W-318 Where styles come from", () => {
   test("W-318 values read short", () => {
     expect(sourceValue({ value: 12, unit: "px" })).toBe("12px");
     expect(sourceValue({ var: "brand" })).toBe("var brand");
+    expect(
+      sourceValue(
+        { var: "brand" },
+        {
+          ...design,
+          variables: {
+            ...design.variables,
+            colors: [{ id: "brand", name: "Brand blue", value: "#1d4ed8" }],
+          },
+        },
+      ),
+    ).toBe("Brand blue");
     expect(sourceValue({ a: "x".repeat(60) }).endsWith("…")).toBe(true);
   });
 });

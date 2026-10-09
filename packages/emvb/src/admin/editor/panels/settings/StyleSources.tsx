@@ -13,10 +13,17 @@ const propertyName = (key: string) => {
 };
 
 /** A short, readable value: a colour, a length, a variable, or JSON cut short. */
-export function sourceValue(value: unknown): string {
+export function sourceValue(value: unknown, design?: DesignSystem): string {
   if (typeof value === "string" || typeof value === "number") return String(value);
   if (value && typeof value === "object") {
-    if ("var" in value) return `var ${(value as { var: string }).var}`;
+    if ("var" in value) {
+      const id = (value as { var: string }).var;
+      const { colors, fonts, fontSizes, spacings } = design?.variables ?? { colors: [] };
+      const named = [...colors, ...(fonts ?? []), ...(fontSizes ?? []), ...(spacings ?? [])].find(
+        (v) => v.id === id,
+      );
+      return named ? named.name : `var ${id}`;
+    }
     if ("value" in value && "unit" in value) {
       const v = value as { value: number; unit: string };
       return `${v.value}${v.unit}`;
@@ -67,12 +74,14 @@ export function StyleSources({
             return (
               <li key={key} data-emvb-source={key} data-kind={t.winner.kind}>
                 <span className="emvb-sources-prop">{propertyName(key)}</span>
-                <span className="emvb-sources-value">{sourceValue(t.winner.value)}</span>
+                <span className="emvb-sources-value">{sourceValue(t.winner.value, design)}</span>
                 <span className="emvb-sources-from">{where(t.winner)}</span>
                 {t.overridden.length > 0 && (
                   <span className="emvb-sources-over">
                     overrides{" "}
-                    {t.overridden.map((o) => `${where(o)} (${sourceValue(o.value)})`).join(", ")}
+                    {t.overridden
+                      .map((o) => `${where(o)} (${sourceValue(o.value, design)})`)
+                      .join(", ")}
                   </span>
                 )}
               </li>
