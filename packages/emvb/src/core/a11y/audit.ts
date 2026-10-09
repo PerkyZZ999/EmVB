@@ -111,7 +111,21 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
     issues.push({ ...issue, id: `${issue.rule}:${issue.nodeId}` });
   let lastLevel = 0;
   let h1s = 0;
+  // W-312 variants are alternatives: B is judged as if it stood where A does, so a page whose
+  // A/B pair each have an H1 doesn't count two.
+  const beforeA = new Map<string, [number, number]>();
+  const afterA = new Map<string, [number, number]>();
   const walk = (node: LayoutNode, bg: string | undefined, color: string | undefined): void => {
+    const variant = node.variant;
+    if (variant?.arm === "a") beforeA.set(variant.test, [h1s, lastLevel]);
+    const before = variant?.arm === "b" ? beforeA.get(variant.test) : undefined;
+    if (before) [h1s, lastLevel] = before;
+    visitNode(node, bg, color);
+    if (variant?.arm === "a") afterA.set(variant.test, [h1s, lastLevel]);
+    const after = variant?.arm === "b" ? afterA.get(variant.test) : undefined;
+    if (after) [h1s, lastLevel] = after;
+  };
+  const visitNode = (node: LayoutNode, bg: string | undefined, color: string | undefined): void => {
     const props = node.props as Record<string, unknown>;
     const style = node.style as
       | { backgroundColor?: unknown; color?: unknown; backgroundImage?: unknown }

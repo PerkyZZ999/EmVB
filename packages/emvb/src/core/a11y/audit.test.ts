@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { emptyDesign } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
+import { createVariantB } from "../arrange.ts";
 import { findNode } from "../tree-ops.ts";
 import { validateLayout } from "../validate.ts";
 import { applyA11yFix, applyAllA11yFixes, auditPage, contrastRatio } from "./audit.ts";
@@ -104,5 +105,15 @@ describe("accessibility co-pilot (W-317)", () => {
     expect(report.score).toBe(100 - 4 - 4 - 12);
     const fixed = applyA11yFix(layout, report.issues[2] as NonNullable<(typeof report.issues)[2]>);
     expect(findNode(fixed, "link0003")?.attributes).toBeUndefined();
+  });
+
+  test("W-317 A/B variants are alternatives: their H1s count once", () => {
+    const made = createVariantB(page(h("head0001", 1), h("head0002", 2)), "head0001");
+    if (!made.ok) throw new Error(made.reason);
+    expect(rules(made.layout)).toEqual([]);
+    // A third H1 after the pair is still a second H1 on every visit.
+    const extra = createVariantB(page(h("head0001", 1), h("head0003", 1)), "head0001");
+    if (!extra.ok) throw new Error(extra.reason);
+    expect(rules(extra.layout)).toEqual(["multiple-h1:head0003"]);
   });
 });

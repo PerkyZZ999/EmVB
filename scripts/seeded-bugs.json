@@ -26684,6 +26684,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/timeline.test.tsx"],
       "expect": "\\(fail\\).*W-315"
+    },
+    {
+      "id": "W-317/variants-count-twice",
+      "requirement": "W-317",
+      "description": "An A/B pair of H1s is flagged as two H1s.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    if (before) [h1s, lastLevel] = before;",
+          "replace": "    if (before && false) [h1s, lastLevel] = before;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts"],
+      "expect": "\\(fail\\).*W-317"
     }
   ]
 }
