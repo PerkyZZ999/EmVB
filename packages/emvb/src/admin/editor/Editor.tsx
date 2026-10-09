@@ -41,6 +41,7 @@ import {
 } from "./useEditorData.ts";
 import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { useSectionTemplates } from "./section-templates.ts";
+import { useCollectionPreviews } from "./collection-previews.ts";
 import { restoreOnUndo, type Deletion } from "./restore-deleted.ts";
 import { useEditorCommands } from "./useEditorCommands.ts";
 import { useSave } from "./useSave.ts";
@@ -223,6 +224,8 @@ function EditorApp({
   const sectionTemplates = useSectionTemplates(state.page.layout, fetcher);
   // W-307: bound fields show live values on the canvas (site settings, preview URL parameters).
   const live = useLiveData();
+  // W-308: collection Loops show real entries on the canvas.
+  const collections = useCollectionPreviews(state.page.layout, fetcher);
   const rendered = React.useMemo(
     () =>
       state.page.layout
@@ -232,11 +235,20 @@ function EditorApp({
               ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
               site: live.site,
               params: live.params,
+              collections,
             },
             previewDevice: device,
           })
         : null,
-    [state.page.layout, state.design, sectionTemplates, device, live.site, live.params],
+    [
+      state.page.layout,
+      state.design,
+      sectionTemplates,
+      device,
+      live.site,
+      live.params,
+      collections,
+    ],
   );
   const selectedNode =
     state.selectedId && state.page.layout ? findNode(state.page.layout, state.selectedId) : null;

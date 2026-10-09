@@ -208,6 +208,14 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 
 Schema 13 only adds optional fields, so a v12 document upgrades unchanged.
 
+### Collection Loops (W-308)
+
+A `loop` with `props.collection` (a collection slug) lists that collection's published entries
+instead of the archive's posts. `limit` (1–50, default 6), `order` (`newest`, `oldest`, `title`),
+`display` (`list`, `grid`, `cards`) and `columns` (1–6) are optional. Hosts fill
+`dynamic.collections[loopId]` (see `collectCollectionLoops`). A `loop-empty` child is left out of
+the item design and rendered when there are no entries; it is only valid inside a `loop`.
+
 ### Data bindings (W-307)
 
 Any node may carry `bind`: prop name → `{ source, key }`. `source` is `post` (a post field such as

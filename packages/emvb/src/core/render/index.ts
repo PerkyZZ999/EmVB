@@ -229,6 +229,18 @@ export function renderPage(
       const width = props.fullWidth === true ? "none" : cssLength(props.contentWidth);
       if (width) declarations.push({ property: "--emvb-content-width", value: width });
     }
+    if (node.type === "loop") {
+      // W-308: grid and cards columns, as a custom property the Loop's base CSS reads.
+      const columns = (node as { props: { columns?: unknown } }).props.columns;
+      if (
+        typeof columns === "number" &&
+        Number.isInteger(columns) &&
+        columns >= 1 &&
+        columns <= 6
+      ) {
+        declarations.push({ property: "--emvb-loop-columns", value: String(columns) });
+      }
+    }
     if (node.type === "grid") {
       const props = (node as { props: Record<string, unknown> }).props;
       declarations.push(...gridTracks(props["columns"]));

@@ -3,7 +3,8 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /**
- * 13 since W-307: optional `bind` on a node (live data bindings). Every other value is unchanged.
+ * 13 since W-307: optional `bind` on a node (live data bindings); W-308 collection Loops and the
+ * Loop's Empty state element. Every other value is unchanged.
  * 12 since W-160: gradient type, stop locations, and up to 10 stops. v11 gradients
  * (`{ angle, from, to }`) become a linear gradient on read.
  * 11 since W-156 and W-157 (D-045): the layout Section element and an editor-only node label.
@@ -429,14 +430,39 @@ export const PostLinkNode = leafNode(
  * When `itemPartId` is set, the host supplies that Loop Item layout in loopTemplates;
  * otherwise children are the inline item template.
  */
+/** How a Loop lays out its items (W-308): one design, shown as a list, a grid or cards. */
+export const LOOP_DISPLAYS = ["list", "grid", "cards"] as const;
+/** Which entries a collection Loop shows first (W-308). */
+export const LOOP_ORDERS = ["newest", "oldest", "title"] as const;
+
 export const LoopNode = parentNode(
   "loop",
   z.strictObject({
     itemPartId: z.string().max(128).optional(),
     /** Posts per archive page, 1–50 (W-221). Unset = 20. */
     perPage: z.number().int().min(1).max(50).optional(),
+    /**
+     * A collection to list on any page (W-308), e.g. `team`. Unset lists the archive's posts on
+     * an Archive part, as before.
+     */
+    collection: z
+      .string()
+      .regex(/^[a-z][a-z0-9_]{0,63}$/, "Use the collection's slug, e.g. team")
+      .optional(),
+    /** How many entries a collection Loop shows, 1–50. Unset = 6. */
+    limit: z.number().int().min(1).max(50).optional(),
+    order: z.enum(LOOP_ORDERS).optional(),
+    display: z.enum(LOOP_DISPLAYS).optional(),
+    /** Columns for grid and cards, 1–6 (one column on phones). Unset = 3. */
+    columns: z.number().int().min(1).max(6).optional(),
   }),
 );
+
+/**
+ * What a Loop shows when it has no entries (W-308). Only inside a Loop; its children are designed
+ * like any box, and it is left out of the item template.
+ */
+export const LoopEmptyNode = parentNode("loop-empty", z.strictObject({}));
 
 /**
  * Previous / page numbers / Next links for an archive (W-222). Renders only on an archive with
@@ -490,6 +516,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "post-date",
   "post-author",
   "loop",
+  "loop-empty",
   "pagination",
   "section",
   "div-block",
@@ -566,6 +593,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   PostDateNode,
   PostAuthorNode,
   LoopNode,
+  LoopEmptyNode,
   PaginationNode,
   SectionNode,
   AccordionNode,
@@ -782,7 +810,30 @@ export type FormNode = NodeExtras & {
 export type LoopNode = NodeExtras & {
   id: IdOf;
   type: "loop";
-  props: { itemPartId?: string; perPage?: number };
+  props: {
+    itemPartId?: string;
+    perPage?: number;
+    collection?: string;
+    limit?: number;
+    order?: (typeof LOOP_ORDERS)[number];
+    display?: (typeof LOOP_DISPLAYS)[number];
+    columns?: number;
+  };
+  style?: StyleOf;
+  states?: StatesOf;
+  devices?: DevicesOf;
+  hiddenOn?: HiddenOnOf;
+  classes?: ClassesOf;
+  htmlId?: HtmlIdOf;
+  attributes?: HtmlAttributeOf[];
+  label?: string;
+  children: LayoutNode[];
+};
+
+export type LoopEmptyNode = NodeExtras & {
+  id: IdOf;
+  type: "loop-empty";
+  props: Record<string, never>;
   style?: StyleOf;
   states?: StatesOf;
   devices?: DevicesOf;
@@ -880,6 +931,7 @@ export type LayoutNode =
   | TabPanelNode
   | FormNode
   | LoopNode
+  | LoopEmptyNode
   | SectionNode
   | HeadingNode
   | SpacerNode
@@ -986,6 +1038,7 @@ export const isLayoutParentNode = (
   | GridNode
   | TabPanelNode
   | SectionNode
+  | LoopEmptyNode
   | AccordionItemNode
   | MenuItemNode =>
   node.type === "container" ||
@@ -995,6 +1048,7 @@ export const isLayoutParentNode = (
   node.type === "grid" ||
   node.type === "tab-panel" ||
   node.type === "section" ||
+  node.type === "loop-empty" ||
   node.type === "accordion-item" ||
   node.type === "menu-item";
 
@@ -1009,6 +1063,7 @@ export const isParentNode = (
   | GridNode
   | FormNode
   | LoopNode
+  | LoopEmptyNode
   | SectionNode
   | TabsNode
   | TabPanelNode
@@ -1023,6 +1078,7 @@ export const isParentNode = (
   node.type === "grid" ||
   node.type === "form" ||
   node.type === "loop" ||
+  node.type === "loop-empty" ||
   node.type === "section" ||
   node.type === "tabs" ||
   node.type === "tab-panel" ||

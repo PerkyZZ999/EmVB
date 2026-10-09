@@ -45,6 +45,8 @@ export type ThemeDynamicData = {
   pagination?: ArchivePagination;
   /** Set inside a Loop's item, where a Pagination would repeat once per post (W-228). */
   inLoopItem?: boolean;
+  /** Entries for collection Loops (W-308), keyed by the Loop's node id. Hosts fill this. */
+  collections?: Readonly<Record<string, ThemePostFields[]>>;
   /** Site settings bound fields can read (W-307), e.g. `title`, `tagline`, `url`. */
   site?: Readonly<Record<string, string>>;
   /** The request's URL parameters, first value per name (W-307). */
@@ -112,6 +114,37 @@ export function collectLoopItemPartIds(layout: Layout): string[] {
   };
   walk(layout.root);
   return [...ids];
+}
+
+/** A Loop that lists a collection (W-308): what hosts fetch for it. */
+export type CollectionLoop = {
+  nodeId: string;
+  collection: string;
+  limit: number;
+  order: "newest" | "oldest" | "title";
+};
+
+/** Every collection Loop in a layout, so hosts can fetch their entries (W-308). */
+export function collectCollectionLoops(layout: Layout): CollectionLoop[] {
+  const loops: CollectionLoop[] = [];
+  const walk = (node: LayoutNode): void => {
+    if (node.type === "loop" && loops.length < 20) {
+      const props = node.props as { collection?: unknown; limit?: unknown; order?: unknown };
+      if (typeof props.collection === "string" && /^[a-z][a-z0-9_]{0,63}$/.test(props.collection)) {
+        const limit =
+          typeof props.limit === "number" && props.limit >= 1 && props.limit <= 50
+            ? Math.floor(props.limit)
+            : 6;
+        const order = props.order === "oldest" || props.order === "title" ? props.order : "newest";
+        loops.push({ nodeId: node.id, collection: props.collection, limit, order });
+      }
+    }
+    if (isParentNode(node)) {
+      for (const child of node.children) walk(child);
+    }
+  };
+  walk(layout.root);
+  return loops;
 }
 
 /** Collect `section.partId` values so hosts can load Section templates. */

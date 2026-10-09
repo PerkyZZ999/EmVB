@@ -63,6 +63,7 @@ export const REASONS = {
   onlyAccordionItems: "An accordion can only hold accordion items.",
   itemOutsideMenu: "Menu items can only go inside a Menu.",
   onlyMenuItems: "A menu can only hold menu items.",
+  emptyOutsideLoop: "An Empty state can only go inside a Loop.",
 } as const;
 
 const refuse = (reason: string): Refusal => ({ ok: false, reason });
@@ -120,6 +121,10 @@ type Drop = { layout: Layout; node: LayoutNode; into: Located; isNew: boolean };
 
 /** Placement rules in the order their reasons take precedence (R-003, W-034, W-074). */
 const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
+  [
+    ({ node, into }) => node.type === "loop-empty" && into.node.type !== "loop",
+    REASONS.emptyOutsideLoop,
+  ],
   [
     ({ node, into }) => node.type === "tab-panel" && into.node.type !== "tabs",
     REASONS.tabOutsideTabs,

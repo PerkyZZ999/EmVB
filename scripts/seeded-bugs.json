@@ -25785,6 +25785,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-308/empty-state-in-items",
+      "requirement": "W-308",
+      "description": "The Empty state is rendered as part of every item.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "const own = node.children.filter((child) => child.type !== \"loop-empty\");",
+          "replace": "const own = node.children;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/collection-loop.test.ts"],
+      "expect": "\\(fail\\).*W-308"
+    },
+    {
+      "id": "W-308/limit-ignored",
+      "requirement": "W-308",
+      "description": "A collection Loop shows every entry the host gave it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "if (found) return found.slice(0, limit);",
+          "replace": "if (found) return found;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/collection-loop.test.ts"],
+      "expect": "\\(fail\\).*W-308"
+    },
+    {
+      "id": "W-308/empty-drops-anywhere",
+      "requirement": "W-308",
+      "description": "An Empty state can be dropped outside a Loop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "node.type === \"loop-empty\" && into.node.type !== \"loop\"",
+          "replace": "node.type === \"loop-empty\" && into.node.type === \"form\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/collection-loop.test.ts"],
+      "expect": "\\(fail\\).*W-308"
+    },
+    {
+      "id": "W-308/columns-unbounded",
+      "requirement": "W-308",
+      "description": "Loop columns accept any number.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "columns: z.number().int().min(1).max(6).optional(),\n  }),",
+          "replace": "columns: z.number().optional(),\n  }),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/collection-loop.test.ts"],
+      "expect": "\\(fail\\).*W-308"
     }
   ]
 }

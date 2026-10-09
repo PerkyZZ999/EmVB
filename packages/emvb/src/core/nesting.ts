@@ -33,6 +33,7 @@ export function nestingIssues(layout: Layout, max = 5): LayoutIssue[] {
 }
 
 function misplaced(parent: LayoutNode, child: LayoutNode, inForm: boolean): string | undefined {
+  if (child.type === "loop-empty" && parent.type !== "loop") return REASONS.emptyOutsideLoop;
   if (child.type === "tab-panel" && parent.type !== "tabs") return REASONS.tabOutsideTabs;
   if (parent.type === "tabs" && child.type !== "tab-panel") return REASONS.onlyTabPanels;
   if (child.type === "accordion-item" && parent.type !== "accordion") {

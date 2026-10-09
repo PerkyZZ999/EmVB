@@ -67,6 +67,7 @@ const ICONS: Record<string, typeof TextHIcon> = {
   "post-date": TextTIcon,
   "post-author": TextTIcon,
   loop: ListBulletsIcon,
+  "loop-empty": SquareIcon,
   pagination: ArrowsLeftRightIcon,
 };
 
