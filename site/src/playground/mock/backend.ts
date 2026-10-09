@@ -79,7 +79,13 @@ export type StoredEntry = {
   rev: number;
   createdAt: string;
   updatedAt: string;
+  /** Saved versions, newest first (W-315's timeline); at most MAX_REVISIONS. */
+  revisions?: StoredRevision[];
 };
+
+export type StoredRevision = { id: string; data: Record<string, unknown>; createdAt: string };
+/** Kept per entry: enough for the timeline, small enough for localStorage. */
+const MAX_REVISIONS = 8;
 
 type Versioned<T> = { value: T; revision: string } | null;
 
@@ -335,6 +341,16 @@ export type PlaygroundBackend = {
   subscribe: (listener: () => void) => () => void;
 };
 
+/** Keeps a copy of what was just saved, for the editor's version timeline (W-315). */
+function remember(entry: StoredEntry) {
+  const saved: StoredRevision = {
+    id: `rev-${entry.id}-${entry.rev}`,
+    data: copy(entry.draft.data),
+    createdAt: entry.updatedAt,
+  };
+  entry.revisions = [saved, ...(entry.revisions ?? [])].slice(0, MAX_REVISIONS);
+}
+
 export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
   const storage = options.storage ?? null;
   const uploads = options.uploads ?? null;
@@ -452,6 +468,7 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
             createdAt: at,
             updatedAt: at,
           };
+          remember(entry);
           state.entries.push(entry);
           return { item: itemOf(entry), _rev: revOf(entry) };
         });
@@ -477,6 +494,7 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
           entry.rev += 1;
           entry.updatedAt = now().toISOString();
           if (entry.status === "published") entry.draftRevisionId = `draft-${entry.rev}`;
+          remember(entry);
           return { item: itemOf(entry), _rev: revOf(entry) };
         });
       }
@@ -516,6 +534,22 @@ export function createBackend(options: BackendOptions = {}): PlaygroundBackend {
       if (action === "preview-url") {
         return { url: `${VIEW_PATH}?${new URLSearchParams({ entry: entry.id, draft: "1" })}` };
       }
+    }
+    if (id && action === "revisions" && r.method === "GET") {
+      const entry = findEntry(collection, decodeURIComponent(id));
+      const limit = Math.min(50, Number(r.query.get("limit") ?? 20) || 20);
+      const all = entry.revisions ?? [];
+      return {
+        items: all.slice(0, limit).map((rev) => ({
+          id: rev.id,
+          collection,
+          entryId: entry.id,
+          data: copy(rev.data),
+          authorId: null,
+          createdAt: rev.createdAt,
+        })),
+        total: all.length,
+      };
     }
     throw notFound();
   };

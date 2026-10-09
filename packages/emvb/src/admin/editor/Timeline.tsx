@@ -10,7 +10,7 @@ import {
   type Layout,
   type SectionChange,
 } from "../../core/index.ts";
-import { requestJson, type Fetcher } from "../api.ts";
+import { ApiError, requestJson, type Fetcher } from "../api.ts";
 import { ELEMENT_NAMES } from "./panels/ElementPanel.tsx";
 
 type RevisionItem = {
@@ -37,6 +37,10 @@ export function revisionLayout(data: Record<string, unknown> | undefined): Layou
   return result.ok ? result.layout : null;
 }
 
+/** A host without EmDash revisions for this collection answers 404. */
+export const NO_REVISIONS =
+  "This site doesn't keep saved versions of this page, so there's no timeline to show.";
+
 function useRevisions(fetcher: Fetcher, collection: string, entryId: string, open: boolean) {
   const [state, setState] = React.useState<
     | { kind: "loading" }
@@ -62,7 +66,10 @@ function useRevisions(fetcher: Fetcher, collection: string, entryId: string, ope
         if (!cancelled) {
           setState({
             kind: "error",
-            message: error instanceof Error ? error.message : String(error),
+            message:
+              error instanceof ApiError && error.status === 404
+                ? NO_REVISIONS
+                : `Couldn't load versions: ${error instanceof Error ? error.message : String(error)}`,
           });
         }
       });
@@ -155,7 +162,7 @@ export function TimelineDialog({
         {revisions.kind === "loading" && <p className="emvb-helper">Loading versions…</p>}
         {revisions.kind === "error" && (
           <p className="emvb-helper" role="alert">
-            Couldn't load versions: {revisions.message}
+            {revisions.message}
           </p>
         )}
         {revisions.kind === "ready" && versions.length === 0 && (

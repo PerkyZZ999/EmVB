@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import { emptyDesign, type Layout } from "../../core/index.ts";
 import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
-import { revisionLayout, TimelineDialog } from "./Timeline.tsx";
+import { NO_REVISIONS, revisionLayout, TimelineDialog } from "./Timeline.tsx";
 
 afterEach(cleanup);
 
@@ -83,5 +83,27 @@ describe("version timeline dialog (W-315)", () => {
     expect(applied[0]?.[1]).toBe("Section restored");
     expect(JSON.stringify(applied[0]?.[0])).toContain("Second");
     expect(JSON.stringify(applied[0]?.[0])).toContain("More");
+  });
+
+  test("W-315 a host without revisions says so plainly, not a raw Not found", async () => {
+    const fetcher = async () =>
+      new Response(JSON.stringify({ error: { code: "NOT_FOUND", message: "Not found" } }), {
+        status: 404,
+        headers: { "content-type": "application/json" },
+      });
+    await mount(
+      <TimelineDialog
+        open
+        onOpenChange={() => undefined}
+        fetcher={fetcher}
+        collection="emvb_pages"
+        entryId="01PAGE"
+        current={layoutWith("Now")}
+        design={emptyDesign()}
+        onApply={() => undefined}
+      />,
+    );
+    await settle();
+    expect(document.querySelector("[role=alert]")?.textContent).toBe(NO_REVISIONS);
   });
 });

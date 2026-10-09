@@ -26656,6 +26656,34 @@
       ],
       "command": ["bun", "test", "./test/playground/shared.test.ts"],
       "expect": "\\(fail\\).*W-321"
+    },
+    {
+      "id": "W-319/device-drops-entrance",
+      "requirement": "W-319",
+      "description": "A smaller screen that sets scroll motion or an entrance drops the other one it inherits.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  return withInheritedBackground(withInheritedAnimation(device, inherited), inherited);",
+          "replace": "  return withInheritedBackground(device, inherited);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
+      "expect": "\\(fail\\).*W-319"
+    },
+    {
+      "id": "W-315/raw-not-found",
+      "requirement": "W-315",
+      "description": "A host without revisions shows a raw Not found.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "error instanceof ApiError && error.status === 404",
+          "replace": "error instanceof ApiError && error.status === 999"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/timeline.test.tsx"],
+      "expect": "\\(fail\\).*W-315"
     }
   ]
 }
