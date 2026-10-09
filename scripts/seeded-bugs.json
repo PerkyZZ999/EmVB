@@ -26926,6 +26926,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
       "expect": "\\(fail\\).*W-307 the same-site rule is only for URL parameters"
+    },
+    {
+      "id": "W-322/no-changelog-link",
+      "requirement": "W-322",
+      "description": "The header and footer don't link to the changelog page.",
+      "edits": [
+        {
+          "file": "site/src/data/nav.ts",
+          "search": "  { href: \"/changelog/\", label: \"Changelog\" },\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./test/site/changelog.test.ts"],
+      "expect": "\\(fail\\).*W-322"
+    },
+    {
+      "id": "W-322/hash-only-nav",
+      "requirement": "W-322",
+      "description": "Section links are bare #anchors, so from the changelog page they go nowhere.",
+      "edits": [
+        {
+          "file": "site/src/data/nav.ts",
+          "search": "href: \"/#faq\"",
+          "replace": "href: \"#faq\""
+        }
+      ],
+      "command": ["bun", "test", "./test/site/changelog.test.ts"],
+      "expect": "\\(fail\\).*W-322"
+    },
+    {
+      "id": "W-322/not-in-sitemap",
+      "requirement": "W-322",
+      "description": "The sitemap leaves out the changelog page.",
+      "edits": [
+        {
+          "file": "site/src/pages/sitemap.xml.ts",
+          "search": ", \"/changelog/\"]",
+          "replace": "]"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/changelog.test.ts"],
+      "expect": "\\(fail\\).*W-322"
+    },
+    {
+      "id": "W-322/date-in-version",
+      "requirement": "W-322",
+      "description": "The version list prints the date as part of the version.",
+      "edits": [
+        {
+          "file": "site/src/data/changelog.ts",
+          "search": "/^\\[?([^\\]\\s]+)\\]?",
+          "replace": "/^\\[?([^\\]]+)\\]?"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/changelog.test.ts"],
+      "expect": "\\(fail\\).*W-322"
     }
   ]
 }

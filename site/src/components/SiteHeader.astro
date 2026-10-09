@@ -8,7 +8,7 @@ const github = externalLinks[0];
 
 <header class="header" data-outline-skip>
   <div class="wrap bar">
-    <a class="brand" href="#top" aria-label="EmVB, back to top">
+    <a class="brand" href="/#top" aria-label="EmVB home">
       <Logo />
       <span>EmVB</span>
     </a>
@@ -30,7 +30,7 @@ const github = externalLinks[0];
         <OutlineIcon />
         <span class="outline-label">Outline</span>
       </button>
-      <a class="button button--ghost cta" href="#get-started">Get started</a>
+      <a class="button button--ghost cta" href="/#get-started">Get started</a>
 
       <details class="menu">
         <summary>
@@ -40,7 +40,7 @@ const github = externalLinks[0];
         <nav class="sheet" aria-label="Sections">
           {nav.map((item) => <a href={item.href}>{item.label}</a>)}
           <a href={github.href}>{github.label}</a>
-          <a href="#get-started">Get started</a>
+          <a href="/#get-started">Get started</a>
         </nav>
       </details>
     </div>
@@ -101,6 +101,7 @@ const github = externalLinks[0];
     font-family: var(--font-mono);
     font-size: var(--text-sm);
     text-decoration: none;
+    white-space: nowrap;
     transition: color var(--dur-fast) var(--ease-in-out);
   }
 
@@ -277,6 +278,10 @@ const github = externalLinks[0];
   }
 
   @media (max-width: 1100px) {
+    .links a {
+      padding-inline: var(--space-2);
+    }
+
     .links a:last-child {
       display: none;
     }
