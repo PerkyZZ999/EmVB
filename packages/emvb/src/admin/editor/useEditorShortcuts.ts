@@ -12,6 +12,7 @@ import {
   previousInOrder,
 } from "../../core/index.ts";
 import type { EditorState, HistoryAction } from "./store.ts";
+import { isPaletteShortcut } from "./shortcuts.ts";
 
 const isTextField = (target: EventTarget | null) => {
   const element = target as HTMLElement | null;
@@ -92,6 +93,8 @@ export type ShortcutHandlers = {
   copy: (id: string) => void;
   paste: (id: string | null) => void;
   pasteStyle: (id: string | null) => void;
+  /** Ctrl/Cmd+K from the canvas frame, whose keys don't reach the window (W-314). */
+  palette?: () => void;
 };
 
 /**
@@ -110,6 +113,11 @@ export function useEditorShortcuts({
   handlers: React.RefObject<ShortcutHandlers>;
 }): (event: KeyboardEvent) => void {
   const onKeyDown = React.useCallback((event: KeyboardEvent) => {
+    if (isPaletteShortcut(event)) {
+      event.preventDefault();
+      handlers.current.palette?.();
+      return;
+    }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
       event.preventDefault();
       void handlers.current.save();

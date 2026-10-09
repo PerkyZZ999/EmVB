@@ -40,4 +40,14 @@ export const FEATURE_CSS = `
 .emvb-ab-badge { background: var(--color-kumo-info-tint, #dbeafe); }
 .emvb-aud-checks { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0; padding: 0; border: 0; font-size: 12px; }
 .emvb-aud-checks > legend { width: 100%; padding: 0; margin-bottom: 2px; }
+.emvb-palette { padding: 0; overflow: hidden; }
+.emvb-palette-input { width: 100%; height: 44px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--color-kumo-line); background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 15px; outline: none; }
+.emvb-palette-list { max-height: min(60vh, 420px); overflow-y: auto; margin: 0; padding: 4px; list-style: none; }
+.emvb-palette-group { padding: 8px 10px 2px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-color-kumo-subtle); }
+.emvb-palette-item { display: flex; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.emvb-palette-item[aria-selected="true"] { background: var(--color-kumo-tint); }
+.emvb-palette-hint { color: var(--text-color-kumo-subtle); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+.emvb-palette-empty { padding: 12px; color: var(--text-color-kumo-subtle); font-size: 13px; }
+.emvb-palette-tips { margin: 0; padding: 6px 12px; border-top: 1px solid var(--color-kumo-line); font-size: 11px; color: var(--text-color-kumo-subtle); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 `;

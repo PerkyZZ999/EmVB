@@ -12,17 +12,23 @@ import { isPaletteShortcut } from "./shortcuts.ts";
 export function EditorOverlay({
   label,
   dirty = false,
+  onPalette,
   children,
 }: {
   label: string;
   dirty?: boolean;
+  /** Ctrl/Cmd+K opens EmVB's own command palette instead of the host's (W-314). */
+  onPalette?: () => void;
   children: React.ReactNode;
 }) {
+  const paletteRef = React.useRef(onPalette);
+  paletteRef.current = onPalette;
   React.useEffect(() => {
     const block = (event: KeyboardEvent) => {
       if (!isPaletteShortcut(event)) return;
       event.preventDefault();
       event.stopImmediatePropagation();
+      paletteRef.current?.();
     };
     window.addEventListener("keydown", block, true);
     return () => window.removeEventListener("keydown", block, true);

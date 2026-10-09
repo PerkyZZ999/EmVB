@@ -43,6 +43,8 @@ import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { useSectionTemplates } from "./section-templates.ts";
 import { useCollectionPreviews } from "./collection-previews.ts";
 import { PerfMeterDialog } from "./PerfMeter.tsx";
+import { CommandPalette } from "./CommandPalette.tsx";
+import { paletteItems } from "./palette-items.ts";
 import { restoreOnUndo, type Deletion } from "./restore-deleted.ts";
 import { useEditorCommands } from "./useEditorCommands.ts";
 import { useSave } from "./useSave.ts";
@@ -153,6 +155,7 @@ function EditorApp({
   }, []);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
   const [perfOpen, setPerfOpen] = React.useState(false);
+  const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [leaveOpen, setLeaveOpen] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
@@ -263,6 +266,7 @@ function EditorApp({
     copy: clipboard.copy,
     paste: clipboard.paste,
     pasteStyle: clipboard.pasteStyle,
+    palette: () => setPaletteOpen(true),
   };
   const handlers = React.useRef(shortcutHandlers);
   handlers.current = shortcutHandlers;
@@ -325,6 +329,7 @@ function EditorApp({
     <EditorOverlay
       label={`EmVB editor: ${state.page.title || "Untitled page"}`}
       dirty={dirty && !leaving}
+      onPalette={() => setPaletteOpen(true)}
     >
       <Toasty toastManager={toasts}>
         {wideEnough ? (
@@ -477,6 +482,112 @@ function EditorApp({
           onConfirm={() => deleteAsk && finishDelete(deleteAsk.id)}
         />
         <ShortcutsDialog open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
+        <CommandPalette
+          open={paletteOpen}
+          onOpenChange={setPaletteOpen}
+          items={
+            paletteOpen
+              ? paletteItems({
+                  layout: state.page.layout,
+                  design: state.design,
+                  selected: selectedNode ?? null,
+                  formsAvailable,
+                  insert: addFromPanel,
+                  select: (id) => dispatch({ type: "select", id }),
+                  applyClass: (nodeId, classId) =>
+                    dispatch({
+                      type: "update-node",
+                      id: nodeId,
+                      update: (node) =>
+                        (node.classes?.length ?? 0) >= 20 || node.classes?.includes(classId)
+                          ? node
+                          : ({
+                              ...node,
+                              classes: [...(node.classes ?? []), classId],
+                            } as LayoutNode),
+                    }),
+                  actions: [
+                    { id: "save", label: "Save draft", hint: "Ctrl/Cmd+S", run: () => void save() },
+                    { id: "publish", label: "Publish", run: () => void publish() },
+                    {
+                      id: "preview",
+                      label: "Preview",
+                      keywords: "open view",
+                      run: () => preview(device),
+                    },
+                    {
+                      id: "undo",
+                      label: "Undo",
+                      hint: "Ctrl/Cmd+Z",
+                      run: () => dispatch({ type: "undo" }),
+                    },
+                    {
+                      id: "redo",
+                      label: "Redo",
+                      hint: "Ctrl/Cmd+Shift+Z",
+                      run: () => dispatch({ type: "redo" }),
+                    },
+                    ...(selectedNode &&
+                    state.page.layout &&
+                    selectedNode.id !== state.page.layout.root.id
+                      ? [
+                          {
+                            id: "duplicate",
+                            label: "Duplicate selected element",
+                            hint: "Ctrl/Cmd+D",
+                            run: () => duplicate(selectedNode.id),
+                          },
+                          {
+                            id: "delete",
+                            label: "Delete selected element",
+                            hint: "Delete",
+                            run: () => remove(selectedNode.id),
+                          },
+                        ]
+                      : []),
+                    {
+                      id: "deselect",
+                      label: "Clear selection",
+                      hint: "Esc",
+                      run: () => dispatch({ type: "select", id: null }),
+                    },
+                    {
+                      id: "site-styles",
+                      label: "Open Site styles",
+                      keywords: "design variables classes colors fonts",
+                      run: () => setSiteStylesOpen(true),
+                    },
+                    {
+                      id: "weight",
+                      label: "Show page weight",
+                      keywords: "performance budget size speed",
+                      run: () => setPerfOpen(true),
+                    },
+                    {
+                      id: "device-desktop",
+                      label: "View on desktop",
+                      run: () => setDevice("desktop"),
+                    },
+                    {
+                      id: "device-tablet",
+                      label: "View on tablet",
+                      run: () => setDevice("tablet"),
+                    },
+                    {
+                      id: "device-mobile",
+                      label: "View on mobile",
+                      run: () => setDevice("mobile"),
+                    },
+                    {
+                      id: "shortcuts",
+                      label: "Keyboard shortcuts",
+                      run: () => setShortcutsOpen(true),
+                    },
+                  ],
+                })
+              : []
+          }
+        />
         <PerfMeterDialog
           open={perfOpen}
           onOpenChange={setPerfOpen}

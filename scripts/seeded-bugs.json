@@ -26121,6 +26121,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/audience/rules.test.ts"],
       "expect": "\\(fail\\).*W-313"
+    },
+    {
+      "id": "W-314/no-prefix-filter",
+      "requirement": "W-314",
+      "description": "Group prefixes don't narrow the palette.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/palette.ts",
+          "search": "  const pool = prefix ? items.filter((item) => item.group === prefix) : items;",
+          "replace": "  const pool = items;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/palette.test.tsx"],
+      "expect": "\\(fail\\).*W-314"
+    },
+    {
+      "id": "W-314/out-of-order",
+      "requirement": "W-314",
+      "description": "Fuzzy matching accepts letters in any order.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/palette.ts",
+          "search": "    const found = t.indexOf(ch, from);",
+          "replace": "    const found = t.indexOf(ch);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/palette.test.tsx"],
+      "expect": "\\(fail\\).*W-314"
+    },
+    {
+      "id": "W-314/host-palette",
+      "requirement": "W-314",
+      "description": "Ctrl+K no longer opens EmVB's palette.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorOverlay.tsx",
+          "search": "      paletteRef.current?.();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/palette.test.tsx"],
+      "expect": "\\(fail\\).*W-314"
+    },
+    {
+      "id": "W-314/layer-text",
+      "requirement": "W-314",
+      "description": "Layers can't be found by their text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/palette-items.ts",
+          "search": "        keywords: `${node.type} ${text}`,",
+          "replace": "        keywords: node.type,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/palette.test.tsx"],
+      "expect": "\\(fail\\).*W-314"
     }
   ]
 }
