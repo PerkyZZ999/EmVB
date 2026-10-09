@@ -99,11 +99,17 @@ test("a Kumo dialog opened from the editor stacks above it and takes the click",
   await expect(dialog).toBeHidden();
 });
 
-test("Ctrl+K doesn't open the host command palette while the editor is open", async ({ page }) => {
+test("Ctrl+K opens EmVB's palette, never the host's, while the editor is open (W-314)", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await openEditor(page);
   await page.keyboard.press("Control+k");
   await page.waitForTimeout(500);
+  // The only dialog is EmVB's own command palette (S0-6 keeps EmDash's from stacking over it).
+  await expect(page.getByRole("dialog")).toHaveCount(1);
+  await expect(page.getByRole("dialog", { name: "Command palette" })).toBeVisible();
+  await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
