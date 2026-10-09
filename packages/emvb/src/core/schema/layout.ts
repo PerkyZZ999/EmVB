@@ -473,6 +473,10 @@ export const PaginationNode = leafNode(
   z.strictObject({
     prevText: z.string().max(40).optional(),
     nextText: z.string().max(40).optional(),
+    /** Show "Page N of M" beside the links (W-309). */
+    showCount: z.boolean().optional(),
+    /** The count's text; `{page}` and `{total}` are filled in. Unset = "Page {page} of {total}". */
+    countText: z.string().max(60).optional(),
   }),
 );
 

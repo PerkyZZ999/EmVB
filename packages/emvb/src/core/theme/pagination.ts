@@ -13,7 +13,38 @@ export type ArchivePagination = {
   hasMore: boolean;
   /** The archive's own path without `/page/N`, e.g. `/posts` or `/category/news`. */
   basePath: string;
+  /**
+   * How many pages there are, when the host knows (W-309). EmDash 1.2's public collection query
+   * gives no total, so its hosts leave this out and "Page N of M" shows "Page N".
+   */
+  totalPages?: number;
 };
+
+/** A usable total page count, or undefined (W-309). */
+function knownTotal(p: ArchivePagination): number | undefined {
+  const total = p.totalPages;
+  return typeof total === "number" && Number.isInteger(total) && total >= p.page && total >= 1
+    ? Math.min(total, MAX_ARCHIVE_PAGE)
+    : undefined;
+}
+
+/**
+ * The "Page N of M" text (W-309). `{page}` and `{total}` are filled in; without a known total
+ * the text stops before ` of {total}` (or drops `{total}`), so it never shows a wrong count.
+ */
+export function pageCountText(p: ArchivePagination, template: string | undefined): string {
+  const text = template?.trim() || "Page {page} of {total}";
+  const total = knownTotal(p);
+  if (total !== undefined) {
+    return text.replaceAll("{page}", String(p.page)).replaceAll("{total}", String(total));
+  }
+  const cut = text.indexOf("{total}");
+  const before =
+    cut === -1
+      ? text
+      : text.slice(0, cut).replace(/\s*(of|\/|from|sur|de|von|di|van|из)?\s*$/i, "");
+  return before.replaceAll("{page}", String(p.page)).trim();
+}
 
 /** The URL path of page `n` of an archive; page 1 is the bare archive path (W-221). */
 export function archivePagePath(basePath: string, n: number): string {
@@ -76,6 +107,8 @@ export type PaginationItem =
  * with a gap after 1 when the current page is far in (W-222).
  */
 export function paginationItems(p: ArchivePagination): PaginationItem[] {
+  const total = knownTotal(p);
+  if (total !== undefined) return totalItems(p, total);
   if (p.page <= 1 && !p.hasMore) return [];
   const items: PaginationItem[] = [];
   const page = (n: number): PaginationItem => ({
@@ -93,5 +126,27 @@ export function paginationItems(p: ArchivePagination): PaginationItem[] {
     items.push(page(p.page + 1));
     items.push({ kind: "next", href: archivePagePath(p.basePath, p.page + 1) });
   }
+  return items;
+}
+
+/** With a known total (W-309): 1, a window around the current page, and the last page. */
+function totalItems(p: ArchivePagination, total: number): PaginationItem[] {
+  if (total <= 1) return [];
+  const items: PaginationItem[] = [];
+  const page = (n: number): PaginationItem => ({
+    kind: "page",
+    n,
+    href: archivePagePath(p.basePath, n),
+    current: n === p.page,
+  });
+  if (p.page > 1) items.push({ kind: "prev", href: archivePagePath(p.basePath, p.page - 1) });
+  const from = Math.max(1, p.page - 2);
+  const to = Math.min(total, p.page + 2);
+  if (from > 1) items.push(page(1));
+  if (from > 2) items.push({ kind: "gap" });
+  for (let n = from; n <= to; n++) items.push(page(n));
+  if (to < total - 1) items.push({ kind: "gap" });
+  if (to < total) items.push(page(total));
+  if (p.page < total) items.push({ kind: "next", href: archivePagePath(p.basePath, p.page + 1) });
   return items;
 }

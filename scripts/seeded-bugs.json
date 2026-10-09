@@ -25841,6 +25841,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/collection-loop.test.ts"],
       "expect": "\\(fail\\).*W-308"
+    },
+    {
+      "id": "W-309/count-guesses-total",
+      "requirement": "W-309",
+      "description": "Without a total the count shows the template unfilled.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/pagination.ts",
+          "search": "  const cut = text.indexOf(\"{total}\");",
+          "replace": "  const cut = -1;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/page-count.test.ts"],
+      "expect": "\\(fail\\).*W-309"
+    },
+    {
+      "id": "W-309/total-ignored",
+      "requirement": "W-309",
+      "description": "Pagination ignores a known total.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/pagination.ts",
+          "search": "  if (total !== undefined) return totalItems(p, total);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/page-count.test.ts"],
+      "expect": "\\(fail\\).*W-309"
+    },
+    {
+      "id": "W-309/count-always-on",
+      "requirement": "W-309",
+      "description": "The count shows even when not asked for.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/pagination.ts",
+          "search": "  if (node.props.showCount) {",
+          "replace": "  if (node.props.showCount !== false) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/page-count.test.ts"],
+      "expect": "\\(fail\\).*W-309"
     }
   ]
 }

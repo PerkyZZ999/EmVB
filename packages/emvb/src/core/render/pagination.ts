@@ -1,6 +1,6 @@
 import type { PaginationNode } from "../schema/layout.ts";
 import type { ThemeDynamicData } from "../theme/dynamic.ts";
-import { paginationItems, type ArchivePagination } from "../theme/pagination.ts";
+import { pageCountText, paginationItems, type ArchivePagination } from "../theme/pagination.ts";
 import type { VNode } from "./vnode.ts";
 
 /** What the editor canvas shows: page 2 of several, links going nowhere (W-222). */
@@ -72,5 +72,13 @@ export function renderPagination(
         };
     }
   });
+  if (node.props.showCount) {
+    // W-309: "Page N of M", or "Page N" while the host has no total.
+    children.unshift({
+      tag: "span",
+      attrs: { class: "emvb-pagination-count" },
+      children: [pageCountText(data, node.props.countText)],
+    });
+  }
   return { tag: "nav", attrs: { ...attrs, "aria-label": "Pagination" }, children };
 }

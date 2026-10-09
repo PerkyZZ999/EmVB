@@ -261,7 +261,7 @@ export const loopEmpty: ElementDefinition<LoopEmptyNode> = {
 
 export const pagination: ElementDefinition<PaginationNode> = {
   baseCss:
-    ".emvb-pagination{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}.emvb-pagination a{color:inherit}.emvb-pagination a[aria-current=page]{font-weight:700;text-decoration:none}",
+    ".emvb-pagination{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}.emvb-pagination a{color:inherit}.emvb-pagination a[aria-current=page]{font-weight:700;text-decoration:none}.emvb-pagination-count{opacity:.75}",
   defaults: () => ({ type: "pagination", props: {} }),
   descriptor: {
     type: "pagination",
@@ -271,6 +271,15 @@ export const pagination: ElementDefinition<PaginationNode> = {
     fields: [
       { key: "prevText", kind: "text", label: "Previous text", optional: true },
       { key: "nextText", kind: "text", label: "Next text", optional: true },
+      { key: "showCount", kind: "boolean", label: "Show page count", optional: true },
+      {
+        key: "countText",
+        kind: "text",
+        label: "Count text",
+        optional: true,
+        message:
+          '{page} and {total} are filled in. EmDash 1.2 doesn\'t report a total, so the count shows "Page N" until it does.',
+      },
     ],
   },
   // Rendered by core/render/pagination.ts from the archive's page data (W-222).

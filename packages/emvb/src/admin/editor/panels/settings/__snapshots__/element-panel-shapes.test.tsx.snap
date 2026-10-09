@@ -6661,6 +6661,19 @@ exports[`element panel markup (W-021, W-086 M16) pagination renders the same con
         span
           "Next text"
       input.emvb-field id="id-5" data-emvb-field="nextText" value="" aria-labelledby="id-4"
+    div.emvb-field-group data-emvb-field="showCount"
+      div
+        label id="id-6" for="id-7"
+          span
+            "Show page count"
+        button data-unchecked="" type="button" tabindex="0" id="id-7" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Show page count" aria-labelledby="id-6"
+          div
+        input tabindex="-1" aria-hidden="true" type="checkbox"
+    div
+      label id="id-8" for="id-9"
+        span
+          "Count text"
+      input.emvb-field id="id-9" data-emvb-field="countText" value="" aria-labelledby="id-8"
     p.emvb-helper data-emvb-loop-note="true"
       "Pagination shows only in an Archive template with more than one page. Here the live page shows nothing.""
 ,
