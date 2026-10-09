@@ -26586,6 +26586,76 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/recipes-panel.test.tsx"],
       "expect": "\\(fail\\).*W-320"
+    },
+    {
+      "id": "W-321/no-unpack-cap",
+      "requirement": "W-321",
+      "description": "A small link can unpack into an unbounded page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/share/link.ts",
+          "search": "    if (size > max) {",
+          "replace": "    if (size > Number.MAX_SAFE_INTEGER) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/share/link.test.ts"],
+      "expect": "\\(fail\\).*W-321"
+    },
+    {
+      "id": "W-321/styles-unchecked",
+      "requirement": "W-321",
+      "description": "Shared Site styles skip validation.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/share/link.ts",
+          "search": "    const design = validateDesign(d);",
+          "replace": "    const design = { ok: true as const, design: d as DesignSystem };"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/share/link.test.ts"],
+      "expect": "\\(fail\\).*W-321"
+    },
+    {
+      "id": "W-321/plain-base64",
+      "requirement": "W-321",
+      "description": "Links use plain base64, whose + and / break in URLs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/share/link.ts",
+          "search": "  return btoa(binary).replaceAll(\"+\", \"-\").replaceAll(\"/\", \"_\").replace(/=+$/, \"\");",
+          "replace": "  return btoa(binary);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/share/link.test.ts"],
+      "expect": "\\(fail\\).*W-321"
+    },
+    {
+      "id": "W-321/slug-clash",
+      "requirement": "W-321",
+      "description": "A shared page takes a slug already in use.",
+      "edits": [
+        {
+          "file": "site/src/playground/shared.ts",
+          "search": "  if (!taken.has(base)) return base;",
+          "replace": "  return base;"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/shared.test.ts"],
+      "expect": "\\(fail\\).*W-321"
+    },
+    {
+      "id": "W-321/styles-always",
+      "requirement": "W-321",
+      "description": "Shared Site styles replace the playground's even when not asked.",
+      "edits": [
+        {
+          "file": "site/src/playground/shared.ts",
+          "search": "  if (options.styles && page.design) {",
+          "replace": "  if (page.design) {"
+        }
+      ],
+      "command": ["bun", "test", "./test/playground/shared.test.ts"],
+      "expect": "\\(fail\\).*W-321"
     }
   ]
 }

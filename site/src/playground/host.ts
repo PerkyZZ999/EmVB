@@ -9,6 +9,10 @@ export const playgroundHost: EditorHost = {
   back: { label: "emvb.dev", go: () => window.location.assign(SITE_HOME) },
   // No EmDash admin here: links to Forms or the Theme Builder would land on a missing page (W-289).
   adminLinks: false,
+  // W-321: links shared from here open in this same playground (local dev, previews, emvb.dev).
+  get playgroundUrl() {
+    return `${window.location.origin}/playground/`;
+  },
 };
 
 /**

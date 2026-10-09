@@ -15,6 +15,8 @@ export type EditorHost = {
    * admin (the playground) sets false, so those links don't lead nowhere (W-289). Default true.
    */
   adminLinks?: boolean;
+  /** Where shared page links open (W-321). Default emvb.dev/playground. */
+  playgroundUrl?: string;
 };
 
 const defaultEditorHost: EditorHost = {

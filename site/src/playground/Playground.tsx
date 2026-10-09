@@ -1,4 +1,4 @@
-import { Button, Dialog } from "@cloudflare/kumo";
+import { Button, Dialog, Switch } from "@cloudflare/kumo";
 import {
   ArrowCounterClockwiseIcon,
   DownloadSimpleIcon,
@@ -15,11 +15,17 @@ import { Editor } from "../../../packages/emvb/src/admin/editor/Editor.tsx";
 import { EditorHostContext } from "../../../packages/emvb/src/admin/editor/host.ts";
 import { BUTTON, SOLID_DESTRUCTIVE, UI_CSS } from "../../../packages/emvb/src/admin/ui.ts";
 import { PAGES_COLLECTION } from "../../../packages/emvb/src/constants.ts";
-import { starterLayout } from "../../../packages/emvb/src/core/index.ts";
+import {
+  decodeSharedPage,
+  sharedFromHash,
+  starterLayout,
+  type SharedPage,
+} from "../../../packages/emvb/src/core/index.ts";
 import { playgroundHost as host, SITE_HOME, smallScreenStep, TOO_NARROW } from "./host.ts";
 import { createBackend, type KeyValueStore } from "./mock/backend.ts";
 import { PreviewOverlay } from "./PreviewOverlay.tsx";
 import { browserUploads } from "./uploads.ts";
+import { importSharedPage, shareProblem } from "./shared.ts";
 import { exportPage } from "./view.ts";
 
 /**
@@ -181,6 +187,55 @@ function ResetDialog({
   );
 }
 
+/** Drops `#p=…` from the address, so a reload doesn't offer the shared page again. */
+function clearShareHash() {
+  const url = new URL(window.location.href);
+  url.hash = "";
+  window.history.replaceState(null, "", url);
+}
+
+/** A page opened from a shared link (W-321): add it, and optionally its Site styles. */
+function SharedDialog({
+  page,
+  onCancel,
+  onOpen,
+}: {
+  page: SharedPage | null;
+  onCancel: () => void;
+  onOpen: (styles: boolean) => void;
+}) {
+  const [styles, setStyles] = React.useState(true);
+  return (
+    <Dialog.Root open={page !== null} onOpenChange={(open) => !open && onCancel()}>
+      <Dialog size="base" className="p-6">
+        <style>{UI_CSS}</style>
+        <div data-emvb-dialog="playground-shared" className="emvb-dialog">
+          <Dialog.Title>Open the shared page?</Dialog.Title>
+          <Dialog.Description>
+            “{page?.title}” is added to this playground as a new page. Your other pages stay as they
+            are.
+          </Dialog.Description>
+          {page?.design && (
+            <Switch
+              label="Also use its Site styles (replaces this playground's)"
+              checked={styles}
+              onCheckedChange={(checked) => setStyles(checked === true)}
+            />
+          )}
+          <div className="emvb-dialog-actions">
+            <Button variant="secondary" className={BUTTON} onClick={onCancel}>
+              Not now
+            </Button>
+            <Button variant="primary" className={BUTTON} onClick={() => onOpen(styles)}>
+              Open it
+            </Button>
+          </div>
+        </div>
+      </Dialog>
+    </Dialog.Root>
+  );
+}
+
 export default function Playground() {
   const storage = React.useMemo(browserStorage, []);
   const backend = React.useMemo(
@@ -195,6 +250,42 @@ export default function Playground() {
   const [notice, setNotice] = React.useState<string | null>(null);
   const small = useMatches(SMALL_SCREEN);
   const [continued, setContinued] = React.useState(false);
+  const [shared, setShared] = React.useState<SharedPage | null>(null);
+
+  // W-321: a shared link carries a page in `#p=`; it opens after the visitor says yes.
+  React.useEffect(() => {
+    const encoded = sharedFromHash(window.location.hash);
+    if (!encoded) return;
+    let cancelled = false;
+    void decodeSharedPage(encoded).then((read) => {
+      if (cancelled) return;
+      if (read.ok) setShared(read.page);
+      else {
+        clearShareHash();
+        setNotice(shareProblem(read));
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const openShared = async (styles: boolean) => {
+    const page = shared;
+    setShared(null);
+    if (!page) return;
+    try {
+      const id = await importSharedPage(backend.fetcher, page, {
+        styles,
+        takenSlugs: new Set(pages.map((p) => p.slug)),
+      });
+      clearShareHash();
+      openPage(id);
+    } catch (error) {
+      clearShareHash();
+      setNotice(error instanceof Error ? error.message : String(error));
+    }
+  };
 
   React.useEffect(() => {
     const refresh = () => void listPages(backend.fetcher).then(setPages, () => setPages([]));
@@ -347,6 +438,14 @@ export default function Playground() {
         />
       )}
       <ResetDialog open={resetOpen} onOpenChange={setResetOpen} onReset={reset} />
+      <SharedDialog
+        page={shared}
+        onCancel={() => {
+          setShared(null);
+          clearShareHash();
+        }}
+        onOpen={(styles) => void openShared(styles)}
+      />
       {preview && (
         <PreviewOverlay
           entryId={entryId}

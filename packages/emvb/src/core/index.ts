@@ -477,3 +477,13 @@ export {
   type RecipeId,
   type RecipeTokens,
 } from "./recipes/index.ts";
+export {
+  decodeSharedPage,
+  encodeSharedPage,
+  LONG_LINK_CHARS,
+  PLAYGROUND_URL,
+  sharedFromHash,
+  shareUrl,
+  type SharedPage,
+  type ShareRead,
+} from "./share/link.ts";

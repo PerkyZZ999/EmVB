@@ -1,5 +1,10 @@
 import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@cloudflare/kumo";
-import { ClockCounterClockwiseIcon, GaugeIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import {
+  ClockCounterClockwiseIcon,
+  GaugeIcon,
+  ShareNetworkIcon,
+  WarningCircleIcon,
+} from "@phosphor-icons/react";
 import * as React from "react";
 import {
   auditPage,
@@ -45,6 +50,7 @@ import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { useSectionTemplates } from "./section-templates.ts";
 import { useCollectionPreviews } from "./collection-previews.ts";
 import { PerfMeterDialog } from "./PerfMeter.tsx";
+import { ShareLinkDialog } from "./ShareLink.tsx";
 import { CommandPalette } from "./CommandPalette.tsx";
 import { TimelineDialog } from "./Timeline.tsx";
 import { A11yDialog, A11yScoreButton } from "./A11yCopilot.tsx";
@@ -146,7 +152,8 @@ function EditorApp({
   );
   const state = history.present;
   const dirty = isDirty(state);
-  const { exit } = useEditorHost();
+  const host = useEditorHost();
+  const { exit } = host;
   const saver = useSave(fetcher, state, dispatch, collection);
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const [siteStylesOpen, setSiteStylesOpen] = React.useState(false);
@@ -159,6 +166,7 @@ function EditorApp({
   }, []);
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
   const [perfOpen, setPerfOpen] = React.useState(false);
+  const [shareOpen, setShareOpen] = React.useState(false);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [timelineOpen, setTimelineOpen] = React.useState(false);
   const [a11yOpen, setA11yOpen] = React.useState(false);
@@ -393,6 +401,16 @@ function EditorApp({
                     icon={<ClockCounterClockwiseIcon aria-hidden="true" />}
                     onClick={() => setTimelineOpen(true)}
                   />
+                  <Button
+                    variant="ghost"
+                    shape="square"
+                    className="emvb-icon-btn"
+                    aria-label="Share as a playground link"
+                    title="Share as a playground link"
+                    data-emvb-share-open=""
+                    icon={<ShareNetworkIcon aria-hidden="true" />}
+                    onClick={() => setShareOpen(true)}
+                  />
                 </>
               }
             />
@@ -608,6 +626,12 @@ function EditorApp({
                       run: () => setTimelineOpen(true),
                     },
                     {
+                      id: "share",
+                      label: "Share as a playground link",
+                      keywords: "copy link url playground share send",
+                      run: () => setShareOpen(true),
+                    },
+                    {
                       id: "weight",
                       label: "Show page weight",
                       keywords: "performance budget size speed",
@@ -663,6 +687,14 @@ function EditorApp({
             setAnnouncement(note);
             toasts.add({ title: note, description: "Undo takes it back. Save to keep it." });
           }}
+        />
+        <ShareLinkDialog
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          layout={state.page.layout}
+          design={state.design}
+          title={state.page.title || "Shared page"}
+          {...(host.playgroundUrl ? { base: host.playgroundUrl } : {})}
         />
         <PerfMeterDialog
           open={perfOpen}
