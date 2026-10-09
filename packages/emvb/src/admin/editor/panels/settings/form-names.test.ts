@@ -9,7 +9,7 @@ const input = (id: string, field: string) => ({
 });
 const layout = (children: unknown[]): Layout =>
   ({
-    schemaVersion: 12,
+    schemaVersion: 13,
     root: {
       id: "root",
       type: "container",

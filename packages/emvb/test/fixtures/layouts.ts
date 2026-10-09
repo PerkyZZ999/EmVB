@@ -15,7 +15,7 @@ export const container = (id: string, children: LayoutNode[] = []): LayoutNode =
 
 /** The S1 page: one container holding one heading, with a colour variable on the heading. */
 export const s1Page = (): Layout => ({
-  schemaVersion: 12,
+  schemaVersion: 13,
   root: {
     id: "root0001",
     type: "container",
@@ -30,7 +30,7 @@ export function layoutOfBytes(bytes: number, char = "x"): Layout {
   const charBytes = new TextEncoder().encode(char).length;
   const children: LayoutNode[] = [];
   const doc: Layout = {
-    schemaVersion: 12,
+    schemaVersion: 13,
     root: { id: "root0001", type: "container", props: {}, children },
   };
   const size = () => new TextEncoder().encode(JSON.stringify(doc)).length;
@@ -52,7 +52,7 @@ export function layoutOfBytes(bytes: number, char = "x"): Layout {
 export function nested(depth: number): Layout {
   let node: LayoutNode = heading("leaf0001");
   for (let d = depth - 1; d >= 1; d--) node = container(`c${String(d).padStart(7, "0")}`, [node]);
-  return { schemaVersion: 12, root: node as Layout["root"] };
+  return { schemaVersion: 13, root: node as Layout["root"] };
 }
 
 /** Deterministic pseudo-random layouts (mulberry32) for property-style tests. */
@@ -80,7 +80,7 @@ export function randomLayouts(count: number, seed = 1): Layout[] {
   return Array.from({ length: count }, () => {
     next = 0;
     return {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: container("root0001", [build(1), build(1)]) as Layout["root"],
     };
   });

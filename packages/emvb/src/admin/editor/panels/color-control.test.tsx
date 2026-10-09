@@ -11,7 +11,7 @@ afterEach(cleanup);
 // bound value, validation, failures and id collisions weren't checked.
 
 const DESIGN: DesignSystem = {
-  schemaVersion: 12,
+  schemaVersion: 13,
   variables: {
     colors: [
       { id: "brand", name: "Brand", value: "#0055ff" },
@@ -96,7 +96,7 @@ describe("editing a bound colour variable (W-091)", () => {
     await view.blur("Brand value");
     expect(view.designs).toEqual([
       {
-        schemaVersion: 12,
+        schemaVersion: 13,
         variables: {
           colors: [
             { id: "brand", name: "Brand", value: "#112233" },

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { mediaFieldsFrom, themePostFromEntry } from "./theme-posts.ts";
+import { mediaFieldsFrom, plainFieldsOf, themePostFromEntry } from "./theme-posts.ts";
 
 describe("themePostFromEntry", () => {
   test("maps EmDash entry data to ThemePostFields", () => {
@@ -81,5 +81,26 @@ describe("themePostFromEntry", () => {
       "https://cdn.example/a.jpg",
     );
     expect(mediaFieldsFrom({ src: "/a.jpg", url: "/b.jpg" }).featuredImageUrl).toBe("/a.jpg");
+  });
+});
+
+describe("plain fields for data bindings (W-307)", () => {
+  test("keeps text, numbers, booleans, dates and image URLs; drops rich text", () => {
+    const fields = plainFieldsOf({
+      role: "Engineer",
+      years: 4,
+      active: true,
+      joined: new Date("2026-01-02T00:00:00Z"),
+      photo: { src: "/team/ada.jpg" },
+      bio: [{ _type: "block" }],
+      "1bad": "x",
+    });
+    expect(fields).toEqual({
+      role: "Engineer",
+      years: 4,
+      active: true,
+      joined: "2026-01-02T00:00:00.000Z",
+      photo: "/team/ada.jpg",
+    });
   });
 });

@@ -62,6 +62,7 @@ export function themePostFromEntry(
     .map((key) => entryTimestamp(data[key]))
     .find(Boolean);
   const authorName = authorFrom(data);
+  const fields = plainFieldsOf(data);
   return {
     id: id || slug,
     slug: slug || id,
@@ -72,7 +73,38 @@ export function themePostFromEntry(
     ...(publishedAt ? { publishedAt } : {}),
     ...(authorName ? { authorName } : {}),
     ...media,
+    ...(Object.keys(fields).length > 0 ? { fields } : {}),
   };
+}
+
+/** Field names a binding may read; EmDash's internal fields are left out. */
+const FIELD_NAME = /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/;
+/** Already on ThemePostFields under their own names. */
+const MAPPED = new Set(["id", "slug", "title", "excerpt", "content"]);
+
+/**
+ * The entry's plain fields for data bindings (W-307): text, numbers, true/false, and an image
+ * field's URL. Rich text and other objects are left out; at most 100 fields, text cut at 2000.
+ */
+export function plainFieldsOf(
+  data: Record<string, unknown>,
+): Record<string, string | number | boolean> {
+  const fields: Record<string, string | number | boolean> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (Object.keys(fields).length >= 100) break;
+    if (!FIELD_NAME.test(key) || MAPPED.has(key)) continue;
+    if (typeof value === "string") fields[key] = value.slice(0, 2000);
+    else if (typeof value === "number" && Number.isFinite(value)) fields[key] = value;
+    else if (typeof value === "boolean") fields[key] = value;
+    else if (value instanceof Date) {
+      const iso = entryTimestamp(value);
+      if (iso) fields[key] = iso;
+    } else if (value && typeof value === "object" && !Array.isArray(value)) {
+      const url = mediaFieldsFrom(value).featuredImageUrl;
+      if (url) fields[key] = url;
+    }
+  }
+  return fields;
 }
 
 function firstString(data: Record<string, unknown>, keys: string[]): string | undefined {

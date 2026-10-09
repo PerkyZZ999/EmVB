@@ -203,3 +203,16 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 - **`svg`**: `props.markup` (sanitized allowlist; no scripts/handlers/`use`/`foreignObject`); optional `title`, `decorative`, `size`.
 - **`tabs` / `tab-panel`**: Tabs hold only tab-panels. Public markup is CSS-only (radio + `:has()`); no EmVB public JS (D-EV4-02).
 
+
+## Schema 13: the W-307 feature batch
+
+Schema 13 only adds optional fields, so a v12 document upgrades unchanged.
+
+### Data bindings (W-307)
+
+Any node may carry `bind`: prop name → `{ source, key }`. `source` is `post` (a post field such as
+`title`, or any plain field of the entry by name, for example `role`), `site` (a site setting:
+`title`, `tagline`, `url`, `social.github`…) or `param` (a URL parameter). Which props can be bound
+is fixed per element (`BINDABLE_FIELDS`: text, links, image source and alt). The typed prop stays as
+the fallback when the source has no value. Bound values are plain text, capped at 500 characters,
+and go through the element's own escaping and link and image URL checks.

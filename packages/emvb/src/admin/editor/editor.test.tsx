@@ -106,7 +106,7 @@ describe("canvas markup parity (A-08, R-005)", () => {
     ...XSS_CORPUS.map((text, i): [string, Parameters<typeof renderPage>[0]] => [
       `hostile text ${i}`,
       {
-        schemaVersion: 12,
+        schemaVersion: 13,
         root: {
           id: "root0001",
           type: "container",

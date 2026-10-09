@@ -37,7 +37,7 @@ describe("H1 in a shared theme part (W-208)", () => {
   test("the Heading panel shows the note in a header, not on a page", async () => {
     const node = h(1);
     const layout: Layout = {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: { id: "root0001", type: "container", props: {}, children: [node] },
     };
     const render = (partType?: ThemePartType) =>

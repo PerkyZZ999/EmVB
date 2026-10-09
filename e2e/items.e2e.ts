@@ -12,7 +12,7 @@ const find = (node: Tree, id: string): Tree | undefined =>
   node.id === id ? node : (node.children ?? []).map((c) => find(c, id)).find(Boolean);
 
 const page1 = (children: unknown[]) => ({
-  schemaVersion: 12,
+  schemaVersion: 13,
   root: {
     id: "root0001",
     type: "container",

@@ -15,7 +15,7 @@ const box = (id: string, style?: Record<string, unknown>) => ({
 });
 
 const page1 = (children: unknown[]) => ({
-  schemaVersion: 12,
+  schemaVersion: 13,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 

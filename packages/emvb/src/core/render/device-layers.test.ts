@@ -13,7 +13,7 @@ const grad = (color: string) => ({
 });
 const page = (extra: Record<string, unknown>): Layout =>
   ({
-    schemaVersion: 12,
+    schemaVersion: 13,
     root: {
       id: "root0001",
       type: "container",

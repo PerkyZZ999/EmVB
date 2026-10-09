@@ -53,11 +53,13 @@ import {
   iconHasAdjustableStroke,
   iconHasOwnColors,
   resolveCascade,
+  SAMPLE_POST,
   STYLE_STATES,
   type StyleProps,
   type StyleStates,
 } from "../../../core/index.ts";
 import { FieldControl } from "./settings/FieldControl.tsx";
+import { BindingsEditor } from "./settings/BindingsEditor.tsx";
 import { BoxControl } from "./settings/BoxControl.tsx";
 import { boxGroupOf } from "./settings/box-sides.ts";
 import { IconShapeRow, IconSingleColorRow } from "./settings/IconControls.tsx";
@@ -536,6 +538,7 @@ function KnownElementPanel({
               />
             ))
           )}
+          <BindingsEditor node={node} onChange={onChange} post={SAMPLE_POST} />
           {ITEM_NOTES[node.type] && <p className="emvb-helper">{ITEM_NOTES[node.type]}</p>}
           {svgImagesLeftOut(node) > 0 && (
             <p className="emvb-helper" data-emvb-svg-images>

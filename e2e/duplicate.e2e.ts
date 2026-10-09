@@ -11,7 +11,7 @@ type Stored = {
 const BLUE = "rgb(29, 78, 216)";
 
 const layoutFor = (text: string) => ({
-  schemaVersion: 12,
+  schemaVersion: 13,
   root: {
     id: "root0001",
     type: "container",

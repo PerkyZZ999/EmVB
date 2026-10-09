@@ -38,6 +38,7 @@ import { renderSection } from "./section.ts";
 import { renderTabs } from "./tabs.ts";
 import { serialize, type VNode } from "./vnode.ts";
 import { classStylesInListOrder } from "../design/cascade.ts";
+import { applyBindings, hasBindings, type BindingData } from "../data/bindings.ts";
 import {
   applyBackgroundVideo,
   applyBoxLink,
@@ -272,10 +273,12 @@ export function renderPage(
   };
 
   function visit(
-    node: LayoutNode,
+    stored: LayoutNode,
     isRoot: boolean,
     dynamic: ThemeDynamicData | undefined = baseDynamic,
   ): VNode | undefined {
+    // W-307: bound fields read their live value; the typed value is the fallback.
+    const node = stored.bind ? applyBindings(stored, bindingData(dynamic)) : stored;
     const id = ID.test(node.id) ? node.id : undefined;
     const nodeId = id ?? "(invalid id)";
     const type: string = node.type;
@@ -294,6 +297,7 @@ export function renderPage(
     if (type === "menu-item" && hasChildren(node)) rendered.menuDropdown = true;
     const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
     const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId);
+    if (mode === "editor" && hasBindings(stored)) attrs["data-emvb-bound"] = "";
     const def = ELEMENTS[type as keyof typeof ELEMENTS];
     if (isFormNode(node)) return finish(node, renderForm(node, attrs, ctx, dynamic));
     if (isLoopNode(node)) return finish(node, renderLoop(node, attrs, ctx, dynamic));
@@ -340,6 +344,14 @@ export function renderPage(
     const src = videoOf(node);
     if (src) backgroundVideo = true;
     return applyBackgroundVideo(applyBoxLink(node, vnode), src);
+  }
+
+  function bindingData(dynamic: ThemeDynamicData | undefined): BindingData {
+    return {
+      post: resolvePostForRender(dynamic, mode),
+      ...(dynamic?.site ? { site: dynamic.site } : {}),
+      ...(dynamic?.params ? { params: dynamic.params } : {}),
+    };
   }
 
   const vnode = visit(layout.root, true) ?? {

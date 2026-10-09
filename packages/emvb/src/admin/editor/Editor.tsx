@@ -23,6 +23,7 @@ import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog, RevertDialog } from "
 import { discardDraft } from "../content-api.ts";
 import { EditorOverlay } from "./EditorOverlay.tsx";
 import { useEditorHost } from "./host.ts";
+import { LiveDataProvider, useLiveData } from "./live-data.tsx";
 import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./panels/ElementPanel.tsx";
 import { LeftPanel } from "./panels/LeftPanel.tsx";
@@ -68,14 +69,16 @@ export function Editor({
   const data = useEditorData(fetcher, entryId, collection);
   if (data.state === "ready") {
     return (
-      <EditorApp
-        key={data.entry.id}
-        fetcher={fetcher}
-        entry={data.entry}
-        design={data.design}
-        wideEnough={wideEnough}
-        collection={collection}
-      />
+      <LiveDataProvider fetcher={fetcher}>
+        <EditorApp
+          key={data.entry.id}
+          fetcher={fetcher}
+          entry={data.entry}
+          design={data.design}
+          wideEnough={wideEnough}
+          collection={collection}
+        />
+      </LiveDataProvider>
     );
   }
   return (
@@ -218,16 +221,22 @@ function EditorApp({
   }, [leaving, exit]);
 
   const sectionTemplates = useSectionTemplates(state.page.layout, fetcher);
+  // W-307: bound fields show live values on the canvas (site settings, preview URL parameters).
+  const live = useLiveData();
   const rendered = React.useMemo(
     () =>
       state.page.layout
         ? renderPage(state.page.layout, state.design, {
             mode: "editor",
-            dynamic: Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : undefined,
+            dynamic: {
+              ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
+              site: live.site,
+              params: live.params,
+            },
             previewDevice: device,
           })
         : null,
-    [state.page.layout, state.design, sectionTemplates, device],
+    [state.page.layout, state.design, sectionTemplates, device, live.site, live.params],
   );
   const selectedNode =
     state.selectedId && state.page.layout ? findNode(state.page.layout, state.selectedId) : null;

@@ -7916,7 +7916,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7936,7 +7936,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7976,7 +7976,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 12;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 13;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -8236,7 +8236,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8256,7 +8256,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8276,7 +8276,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 12;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 13;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8285,9 +8285,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 12"
+        "layout and design are at version 13"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 12"
+      "expect": "\\(fail\\).*layout and design are at version 13"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8296,7 +8296,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 12;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 13;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8305,9 +8305,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 12"
+        "layout and design are at version 13"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 12"
+      "expect": "\\(fail\\).*layout and design are at version 13"
     },
     {
       "id": "D-032/node-states-refused",
@@ -19301,8 +19301,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "  attributes: HtmlAttributes.optional(),\n  label: NodeLabel.optional(),\n});",
-          "replace": "  attributes: HtmlAttributes.optional(),\n});"
+          "search": "  attributes: HtmlAttributes.optional(),\n  label: NodeLabel.optional(),\n  bind: Bindings.optional(),\n});",
+          "replace": "  attributes: HtmlAttributes.optional(),\n  bind: Bindings.optional(),\n});"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/schema/node-label.test.ts"],
@@ -21248,8 +21248,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "    const { html, css } = renderOne(stored, extraTemplates.get(stored.id));\n    const layout = readLayout(stored.layout);",
-          "replace": "    const { html, css } = renderOne(stored);\n    const layout = readLayout(stored.layout);"
+          "search": "    const { html, css } = renderOne(\n      stored,\n      extraTemplates.get(stored.id),\n      extraBound.get(stored.id) ?? {},\n    );\n    const layout = readLayout(stored.layout);",
+          "replace": "    const { html, css } = renderOne(stored, undefined, extraBound.get(stored.id) ?? {});\n    const layout = readLayout(stored.layout);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
@@ -21262,8 +21262,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "    const { html, css } = renderOne(stored, extraTemplates.get(stored.id));\n    popups.push({",
-          "replace": "    const { html, css } = renderOne(stored);\n    popups.push({"
+          "search": "    const { html, css } = renderOne(\n      stored,\n      extraTemplates.get(stored.id),\n      extraBound.get(stored.id) ?? {},\n    );\n    popups.push({",
+          "replace": "    const { html, css } = renderOne(stored, undefined, extraBound.get(stored.id) ?? {});\n    popups.push({"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
@@ -25706,6 +25706,85 @@
         "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx"
       ],
       "expect": "\\(fail\\).*W-306"
+    },
+    {
+      "id": "W-307/param-binding-ignored",
+      "requirement": "W-307",
+      "description": "Render ignores bindings, so a bound heading always shows its typed text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "const node = stored.bind ? applyBindings(stored, bindingData(dynamic)) : stored;",
+          "replace": "const node = stored;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
+      "expect": "\\(fail\\).*W-307"
+    },
+    {
+      "id": "W-307/bound-value-uncapped",
+      "requirement": "W-307",
+      "description": "Bound values are not capped, so a huge URL parameter lands on the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "  return out.slice(0, MAX_BOUND_LENGTH).trim();",
+          "replace": "  return value.trim();"
+        },
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    if (out.length >= MAX_BOUND_LENGTH) break;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
+      "expect": "\\(fail\\).*W-307"
+    },
+    {
+      "id": "W-307/proto-key-resolves",
+      "requirement": "W-307",
+      "description": "A site binding reads inherited keys such as constructor.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/data/bindings.ts",
+          "search": "    raw = data.site && Object.hasOwn(data.site, binding.key) ? data.site[binding.key] : undefined;",
+          "replace": "    raw = data.site ? String((data.site as Record<string, unknown>)[binding.key] ?? \"\") || undefined : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
+      "expect": "\\(fail\\).*W-307"
+    },
+    {
+      "id": "W-307/panel-static-keeps-binding",
+      "requirement": "W-307",
+      "description": "Choosing Typed value in Dynamic data leaves the binding in place.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BindingsEditor.tsx",
+          "search": "if (next === STATIC) onChange(withBinding(node, field.key, undefined));",
+          "replace": "if (next === STATIC) onChange(node);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/bindings-editor.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-307"
+    },
+    {
+      "id": "W-307/rich-fields-kept",
+      "requirement": "W-307",
+      "description": "Plain fields keep the post's own title and slug, duplicating mapped fields.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "    if (!FIELD_NAME.test(key) || MAPPED.has(key)) continue;",
+          "replace": "    if (!FIELD_NAME.test(key)) continue;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
+      "expect": "\\(fail\\)"
     }
   ]
 }

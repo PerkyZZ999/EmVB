@@ -16,7 +16,7 @@ test("a Heading and an Icon take a link from their Content tab (W-141)", async (
     request,
     text,
     {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: {
         id: "root0001",
         type: "container",
@@ -90,7 +90,7 @@ test("a Button looks like a button before it is styled, with or without a URL (W
     request,
     "Button look",
     {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: {
         id: "root0001",
         type: "container",

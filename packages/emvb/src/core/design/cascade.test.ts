@@ -66,7 +66,7 @@ describe("style classes CSS + HTML (W-030)", () => {
       classes: [{ id: "accent", name: "Accent", style: { color: "#ff0000" } }],
     };
     const layout: Layout = {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: {
         id: "root0001",
         type: "container",
@@ -108,7 +108,7 @@ describe("style classes CSS + HTML (W-030)", () => {
       classes: [{ id: "card", name: "Card", style: { color: "#111111" } }],
     };
     const layout: Layout = {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: {
         id: "root0001",
         type: "container",

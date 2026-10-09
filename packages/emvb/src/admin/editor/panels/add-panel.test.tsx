@@ -24,7 +24,7 @@ afterEach(async () => {
 });
 
 const layout: Layout = {
-  schemaVersion: 12,
+  schemaVersion: 13,
   root: {
     id: "root0001",
     type: "container",
@@ -93,7 +93,7 @@ describe("Add panel (W-018)", () => {
     expect(node.style?.paddingLeft).toEqual({ value: 24, unit: "px" });
     expect(
       validateLayout({
-        schemaVersion: 12,
+        schemaVersion: 13,
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }).ok,
     ).toBe(true);

@@ -15,7 +15,7 @@ test("a layer is renamed by double-click, F2 and the row menu, the name is saved
     request,
     "Node label",
     {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: {
         id: "root0001",
         type: "container",

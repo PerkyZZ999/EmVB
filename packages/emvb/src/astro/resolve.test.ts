@@ -37,7 +37,7 @@ mock.module("emdash/plugin-utils", () => ({
             return {
               data: {
                 design: {
-                  schemaVersion: 12,
+                  schemaVersion: 13,
                   variables: { colors: [{ id: "brand", name: "Brand", value: "#112233" }] },
                 },
               },
@@ -59,7 +59,7 @@ afterAll(() => {
 
 const heading: LayoutNode = { id: "head0001", type: "heading", props: { text: "Hello", level: 1 } };
 const layout = (...children: LayoutNode[]): Layout => ({
-  schemaVersion: 12,
+  schemaVersion: 13,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 const astro = (params: Record<string, string | undefined>) => ({

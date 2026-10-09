@@ -55,6 +55,10 @@ export {
   PostImageNode,
   PostLinkNode,
   PaginationNode,
+  BIND_SOURCES,
+  Binding,
+  type BindSource,
+  type NodeExtras,
 } from "./schema/layout.ts";
 export {
   type FieldKind,
@@ -210,6 +214,24 @@ export {
 } from "./sanitize/svg-upload.ts";
 export { resolveEmbedUrl, type EmbedTarget } from "./sanitize/embed-url.ts";
 export { summarizeLayout, type LayoutSummary } from "./stats.ts";
+export {
+  BINDABLE_FIELDS,
+  BIND_SOURCE_LABELS,
+  MAX_BOUND_LENGTH,
+  POST_BIND_KEYS,
+  SITE_BIND_KEYS,
+  applyBindings,
+  bindableFields,
+  hasBindings,
+  layoutUsesSource,
+  paramsFromSearch,
+  resolveBinding,
+  siteBindingValues,
+  withBinding,
+  type BindKind,
+  type BindableField,
+  type BindingData,
+} from "./data/bindings.ts";
 export {
   findNode,
   updateNode,

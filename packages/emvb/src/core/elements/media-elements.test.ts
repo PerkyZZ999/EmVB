@@ -8,7 +8,7 @@ import { defaultElement } from "./index.ts";
 const design = emptyDesign();
 const render = (node: LayoutNode) => {
   const layout: Layout = {
-    schemaVersion: 12,
+    schemaVersion: 13,
     root: { id: "root0001", type: "container", props: {}, children: [node] },
   };
   const host = document.createElement("div");
@@ -147,7 +147,7 @@ describe("icon and svg size (canvas)", () => {
   test("size attributes paint because icon and svg CSS do not force 1em", () => {
     const { css } = renderPage(
       {
-        schemaVersion: 12,
+        schemaVersion: 13,
         root: {
           id: "root0001",
           type: "container",

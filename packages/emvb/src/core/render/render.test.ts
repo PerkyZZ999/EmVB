@@ -7,11 +7,11 @@ import { renderPage } from "./index.ts";
 import { isAllowedAttr, isAllowedTag, serialize } from "./vnode.ts";
 
 const design: DesignSystem = {
-  schemaVersion: 12,
+  schemaVersion: 13,
   variables: { colors: [{ id: "brand", name: "Brand", value: "#0055ff" }] },
 };
 const page = (...children: LayoutNode[]): Layout => ({
-  schemaVersion: 12,
+  schemaVersion: 13,
   root: container("root0001", children) as Layout["root"],
 });
 const parse = (html: string) => {
@@ -88,7 +88,7 @@ describe("safe output (R-032)", () => {
 
   test("unsafe design variable values are not emitted", () => {
     const bad = {
-      schemaVersion: 12,
+      schemaVersion: 13,
       variables: { colors: [{ id: "x", name: "X", value: "red;}body{x:y" }] },
     } as DesignSystem;
     expect(renderPage(page(), bad).css).not.toContain("body");

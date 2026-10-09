@@ -35,5 +35,5 @@ test("Posts per page stores a whole number the schema accepts, 1 to 50 (W-223)",
   await type("5");
   expect(sent.at(-1)?.props).toEqual({ perPage: 5 });
   const root = { id: "root0001", type: "container", props: {}, children: [sent.at(-1)] };
-  expect(validateLayout({ schemaVersion: 12, root }).ok).toBe(true);
+  expect(validateLayout({ schemaVersion: 13, root }).ok).toBe(true);
 });

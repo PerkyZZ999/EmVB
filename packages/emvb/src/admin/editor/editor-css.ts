@@ -6,6 +6,7 @@
  * elevated cards (hairline rings, soft lift shadows, light blur); the canvas stage stays clear.
  */
 import { UI_CSS } from "../ui.ts";
+import { FEATURE_CSS } from "./feature-css.ts";
 
 export const EDITOR_CSS = `${UI_CSS}
 [data-emvb-editor] {
@@ -622,4 +623,5 @@ export const EDITOR_CSS = `${UI_CSS}
     background: var(--color-kumo-elevated);
   }
 }
+${FEATURE_CSS}
 `;

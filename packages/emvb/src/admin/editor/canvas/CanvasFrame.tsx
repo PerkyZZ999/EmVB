@@ -72,7 +72,9 @@ const EDITOR_CANVAS_CSS =
   `:where(${NO_ITEMS}){min-height:48px}` +
   `:is(${NO_ITEMS}){outline:1px dashed #94a3b8;outline-offset:-1px}` +
   `:is(${NO_ITEMS})::after{content:"No items yet: add them in this element's Content settings";display:block;line-height:48px;text-align:center;${HINT}}` +
-  ".emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}[data-emvb-editing]{color:transparent !important}";
+  ".emvb-image-missing{display:inline-block;min-width:48px;min-height:48px;background:var(--color-kumo-tint, #eee)}[data-emvb-editing]{color:transparent !important}" +
+  // W-307: a bound element shows a thin violet underline so live values read as live.
+  "[data-emvb-bound]{text-decoration-line:underline;text-decoration-style:dotted;text-decoration-color:#7c3aed;text-underline-offset:3px}";
 
 /**
  * Tablet and Mobile previews scroll without a visible scrollbar (W-140), as phones and tablets
@@ -277,7 +279,7 @@ export function CanvasFrame({
     ...selection,
     onEditText: (id) => {
       const node = layoutRef.current ? findNode(layoutRef.current, id) : undefined;
-      if (node && isPlainTextNode(node) && plainTextOf(node) !== null) {
+      if (node && isPlainTextNode(node) && plainTextOf(node) !== null && !node.bind?.["text"]) {
         selection.onSelect(id);
         setEditingId(id);
       }

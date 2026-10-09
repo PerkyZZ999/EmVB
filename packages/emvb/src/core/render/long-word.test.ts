@@ -7,7 +7,7 @@ import { renderPage } from "./index.ts";
 // past a phone's screen, so the whole page scrolled sideways.
 describe("long words (W-299)", () => {
   const layout: Layout = {
-    schemaVersion: 12,
+    schemaVersion: 13,
     root: {
       id: "root0001",
       type: "container",

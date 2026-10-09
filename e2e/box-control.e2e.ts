@@ -16,7 +16,7 @@ test("the linked boxes set padding on every side, and unlinked a side, border wi
   const text = `Boxes ${unique()}`;
   const slug = `boxes-${unique()}`;
   const layout = {
-    schemaVersion: 12,
+    schemaVersion: 13,
     root: {
       id: "root0001",
       type: "container",

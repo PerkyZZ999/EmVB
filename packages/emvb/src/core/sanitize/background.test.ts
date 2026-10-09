@@ -189,7 +189,7 @@ describe("background images, gradients and overlays (W-094)", () => {
 
   test("deleting a colour variable clears a gradient stop and an overlay that use it", () => {
     const page: Layout = {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: {
         id: "root0001",
         type: "container",

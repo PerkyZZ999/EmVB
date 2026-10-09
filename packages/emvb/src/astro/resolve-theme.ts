@@ -32,6 +32,7 @@ import {
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
+import { bindingDataFor } from "./request-data.ts";
 import { decodePathSegment, themeContextFrom } from "./theme-context.ts";
 import { entryTimestamp, themePostFromEntry } from "./theme-posts.ts";
 
@@ -390,7 +391,14 @@ export async function resolveThemeParts(
 
   const byId = new Map(parts.map((part) => [part.id, part]));
   const rendered: RenderedPage[] = [];
-  const renderOne = (stored: StoredPart, dynamic?: ThemeDynamicData) => {
+  // W-307: bound fields in a part read site settings and URL parameters too.
+  const boundFor = (stored: StoredPart) => bindingDataFor(readLayout(stored.layout), astro.url);
+  const renderOne = (
+    stored: StoredPart,
+    partDynamic: ThemeDynamicData | undefined,
+    bound: Awaited<ReturnType<typeof bindingDataFor>>,
+  ) => {
+    const dynamic = Object.keys(bound).length > 0 ? { ...partDynamic, ...bound } : partDynamic;
     const page = renderStored(stored.layout, design, stored.id, undefined, dynamic);
     rendered.push(page);
     // W-216: a header or footer part is the page's banner or contentinfo landmark (hosts put it
@@ -438,7 +446,7 @@ export async function resolveThemeParts(
     if (winner === contentWinner && (dynamic?.pagination?.page ?? 1) > 1) {
       pastLastPage = (dynamic?.posts ?? []).length === 0;
     }
-    const { html, css } = renderOne(stored, dynamic);
+    const { html, css } = renderOne(stored, dynamic, await boundFor(stored));
     return { id: stored.id, title: stored.title, partType: stored.partType, html, css };
   };
 
@@ -454,12 +462,21 @@ export async function resolveThemeParts(
       extraParts.map(async (stored) => [stored.id, await templatesFor(stored)] as const),
     ),
   );
+  const extraBound = new Map(
+    await Promise.all(
+      extraParts.map(async (stored) => [stored.id, await boundFor(stored)] as const),
+    ),
+  );
 
   const popups: RenderedPopup[] = [];
   for (const match of popupMatches) {
     const stored = byId.get(match.id);
     if (!stored) continue;
-    const { html, css } = renderOne(stored, extraTemplates.get(stored.id));
+    const { html, css } = renderOne(
+      stored,
+      extraTemplates.get(stored.id),
+      extraBound.get(stored.id) ?? {},
+    );
     popups.push({
       id: stored.id,
       title: stored.title,
@@ -473,7 +490,11 @@ export async function resolveThemeParts(
   for (const match of floatMatches) {
     const stored = byId.get(match.id);
     if (!stored) continue;
-    const { html, css } = renderOne(stored, extraTemplates.get(stored.id));
+    const { html, css } = renderOne(
+      stored,
+      extraTemplates.get(stored.id),
+      extraBound.get(stored.id) ?? {},
+    );
     const layout = readLayout(stored.layout);
     const surface = !layout || !floatHasOwnSurface(layout, design);
     floats.push({

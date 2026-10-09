@@ -52,7 +52,7 @@ describe("a linked box with nothing that names it (W-261)", () => {
   test("the box's settings show the note", async () => {
     const node = box({ href: "/x" });
     const layout: Layout = {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: { id: "root0001", type: "container", props: {}, children: [node] },
     } as Layout;
     await mount(

@@ -18,6 +18,11 @@ export type ThemePostFields = {
   /** ISO date or a display string from the post. */
   publishedAt?: string;
   authorName?: string;
+  /**
+   * The entry's other plain fields (text, numbers, true/false) by field name, for data bindings
+   * (W-307): a Loop over a Team collection binds a heading to `role`.
+   */
+  fields?: Readonly<Record<string, string | number | boolean>>;
 };
 
 /** Data passed into `renderPage` when resolving Single Post / Archive / Loop Item. */
@@ -40,6 +45,10 @@ export type ThemeDynamicData = {
   pagination?: ArchivePagination;
   /** Set inside a Loop's item, where a Pagination would repeat once per post (W-228). */
   inLoopItem?: boolean;
+  /** Site settings bound fields can read (W-307), e.g. `title`, `tagline`, `url`. */
+  site?: Readonly<Record<string, string>>;
+  /** The request's URL parameters, first value per name (W-307). */
+  params?: Readonly<Record<string, string>>;
 };
 
 /** Editor canvas placeholders when no live post is bound. */

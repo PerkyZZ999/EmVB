@@ -3,6 +3,7 @@ import { getPublicPluginApiRouteHandler } from "emdash/plugin-utils";
 import { PAGES_COLLECTION } from "../constants.ts";
 import { formIdsInLayout, loadFormDefinitions } from "./forms-definitions.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
+import { bindingDataFor } from "./request-data.ts";
 import { sectionTemplatesFor } from "./resolve-theme.ts";
 
 type EmDashEntry = NonNullable<Awaited<ReturnType<typeof getEmDashEntry>>["entry"]>;
@@ -49,13 +50,17 @@ export async function resolveEmVBPage(
     ? await loadFormDefinitions(handler, astro.url, formIdsInLayout(layout))
     : undefined;
   const sectionTemplates = layout ? await sectionTemplatesFor(layout) : {};
+  const dynamic = {
+    ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
+    ...(await bindingDataFor(layout, astro.url)),
+  };
   return {
     ...renderStored(
       data["layout"],
       design,
       String(data["id"] ?? slug),
       formDefinitions,
-      Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : undefined,
+      Object.keys(dynamic).length > 0 ? dynamic : undefined,
     ),
     entry,
     title: typeof data["title"] === "string" ? data["title"] : "",

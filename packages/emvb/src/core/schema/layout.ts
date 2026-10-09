@@ -3,11 +3,12 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /**
+ * 13 since W-307: optional `bind` on a node (live data bindings). Every other value is unchanged.
  * 12 since W-160: gradient type, stop locations, and up to 10 stops. v11 gradients
  * (`{ angle, from, to }`) become a linear gradient on read.
  * 11 since W-156 and W-157 (D-045): the layout Section element and an editor-only node label.
  */
-export const LAYOUT_SCHEMA_VERSION = 12;
+export const LAYOUT_SCHEMA_VERSION = 13;
 
 export const NodeId = z
   .string()
@@ -49,6 +50,30 @@ const HtmlAttribute = z.strictObject({
 
 const HtmlAttributes = z.array(HtmlAttribute).max(20);
 
+/** Where a bound field reads its live value (W-307). */
+export const BIND_SOURCES = ["post", "site", "param"] as const;
+export type BindSource = (typeof BIND_SOURCES)[number];
+
+/**
+ * A field bound to live data (W-307): a post field, a site setting or a URL parameter. The
+ * field's own value stays as the fallback when the source has nothing to show.
+ */
+export const Binding = z.strictObject({
+  source: z.enum(BIND_SOURCES),
+  key: z
+    .string()
+    .regex(
+      /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/,
+      "Keys start with a letter: letters, digits, _, . or -, up to 64",
+    ),
+});
+export type Binding = z.infer<typeof Binding>;
+
+/** Prop name → binding. Which props may be bound is checked against BINDABLE_FIELDS on render. */
+const Bindings = z
+  .record(z.string().regex(/^[a-zA-Z]{1,32}$/), Binding)
+  .refine((value) => Object.keys(value).length <= 8, "At most 8 bound fields per element");
+
 /** A box may be the link. A link inside a link is dropped at render time (W-111). */
 const BoxLink = {
   href: z.string().max(2000).optional(),
@@ -68,6 +93,7 @@ const nodeFields = <T extends string, P extends z.ZodType>(type: T, props: P) =>
   htmlId: HtmlId.optional(),
   attributes: HtmlAttributes.optional(),
   label: NodeLabel.optional(),
+  bind: Bindings.optional(),
 });
 
 const leafNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
@@ -499,6 +525,7 @@ const UnknownNodeSchema = z.strictObject({
   htmlId: HtmlId.optional(),
   attributes: HtmlAttributes.optional(),
   label: NodeLabel.optional(),
+  bind: Bindings.optional(),
   get children(): z.ZodType<LayoutNode[] | undefined> {
     return z.array(LayoutNode).optional();
   },
@@ -582,8 +609,13 @@ type HtmlIdOf = z.infer<typeof HtmlId>;
 type HtmlAttributeOf = z.infer<typeof HtmlAttribute>;
 type IdOf = z.infer<typeof NodeId>;
 
+/** Fields every node may carry beyond its props and style (W-307 onward). */
+export type NodeExtras = {
+  bind?: Record<string, Binding>;
+};
+
 /** Manual recursive types so UnknownNode does not poison `z.infer` of the tree. */
-export type UnknownNode = {
+export type UnknownNode = NodeExtras & {
   id: IdOf;
   type: string;
   props: Record<string, unknown>;
@@ -598,7 +630,7 @@ export type UnknownNode = {
   children?: LayoutNode[];
 };
 
-export type ContainerNode = {
+export type ContainerNode = NodeExtras & {
   id: IdOf;
   type: "container";
   props: { tag?: (typeof CONTAINER_TAGS)[number]; href?: string; newTab?: boolean };
@@ -613,7 +645,7 @@ export type ContainerNode = {
   children: LayoutNode[];
 };
 
-export type DivBlockNode = {
+export type DivBlockNode = NodeExtras & {
   id: IdOf;
   type: "div-block";
   props: { href?: string; newTab?: boolean };
@@ -628,7 +660,7 @@ export type DivBlockNode = {
   children: LayoutNode[];
 };
 
-export type LayoutSectionNode = {
+export type LayoutSectionNode = NodeExtras & {
   id: IdOf;
   type: "layout-section";
   props: {
@@ -647,7 +679,7 @@ export type LayoutSectionNode = {
   children: LayoutNode[];
 };
 
-export type GridNode = {
+export type GridNode = NodeExtras & {
   id: IdOf;
   type: "grid";
   props: {
@@ -668,7 +700,7 @@ export type GridNode = {
   children: LayoutNode[];
 };
 
-export type FlexboxNode = {
+export type FlexboxNode = NodeExtras & {
   id: IdOf;
   type: "flexbox";
   props: { href?: string; newTab?: boolean };
@@ -683,7 +715,7 @@ export type FlexboxNode = {
   children: LayoutNode[];
 };
 
-export type SvgNode = {
+export type SvgNode = NodeExtras & {
   id: IdOf;
   type: "svg";
   props: {
@@ -702,7 +734,7 @@ export type SvgNode = {
   label?: string;
 };
 
-export type TabPanelNode = {
+export type TabPanelNode = NodeExtras & {
   id: IdOf;
   type: "tab-panel";
   props: { label: string };
@@ -717,7 +749,7 @@ export type TabPanelNode = {
   children: LayoutNode[];
 };
 
-export type TabsNode = {
+export type TabsNode = NodeExtras & {
   id: IdOf;
   type: "tabs";
   props: { href?: string; newTab?: boolean };
@@ -732,7 +764,7 @@ export type TabsNode = {
   children: LayoutNode[];
 };
 
-export type FormNode = {
+export type FormNode = NodeExtras & {
   id: IdOf;
   type: "form";
   props: { formId: string };
@@ -747,7 +779,7 @@ export type FormNode = {
   children: LayoutNode[];
 };
 
-export type LoopNode = {
+export type LoopNode = NodeExtras & {
   id: IdOf;
   type: "loop";
   props: { itemPartId?: string; perPage?: number };
@@ -762,7 +794,7 @@ export type LoopNode = {
   children: LayoutNode[];
 };
 
-export type SectionNode = {
+export type SectionNode = NodeExtras & {
   id: IdOf;
   type: "section";
   props: { partId?: string };
@@ -777,7 +809,7 @@ export type SectionNode = {
   children: LayoutNode[];
 };
 
-export type AccordionNode = {
+export type AccordionNode = NodeExtras & {
   id: IdOf;
   type: "accordion";
   props: Record<string, never>;
@@ -792,7 +824,7 @@ export type AccordionNode = {
   children: LayoutNode[];
 };
 
-export type MenuNode = {
+export type MenuNode = NodeExtras & {
   id: IdOf;
   type: "menu";
   props: { direction: "row" | "column"; label?: string };
@@ -807,7 +839,7 @@ export type MenuNode = {
   children: LayoutNode[];
 };
 
-export type MenuItemNode = {
+export type MenuItemNode = NodeExtras & {
   id: IdOf;
   type: "menu-item";
   props: { text: string; href?: string; newTab?: boolean; wide?: boolean };
@@ -822,7 +854,7 @@ export type MenuItemNode = {
   children: LayoutNode[];
 };
 
-export type AccordionItemNode = {
+export type AccordionItemNode = NodeExtras & {
   id: IdOf;
   type: "accordion-item";
   props: { summary: string; open?: boolean };

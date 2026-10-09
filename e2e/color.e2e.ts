@@ -29,7 +29,7 @@ test("the colour field takes a validated custom hex and binds a variable from it
   try {
     const text = `Colour ${unique()}`;
     const layout = {
-      schemaVersion: 12,
+      schemaVersion: 13,
       root: {
         id: "root0001",
         type: "container",
