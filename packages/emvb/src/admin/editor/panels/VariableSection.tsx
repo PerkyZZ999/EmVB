@@ -265,9 +265,12 @@ export function VariableSection({
       ...design,
       variables: {
         ...design.variables,
-        [listKey]: items.map((entry) =>
-          entry.id === id ? Object.assign({}, entry, { value: next }) : entry,
-        ),
+        [listKey]: items.map((entry) => {
+          if (entry.id !== id) return entry;
+          // W-316: typing a fixed size ends a token's fluid sizing.
+          const { fluid: _fluid, ...fixed } = entry as typeof entry & { fluid?: unknown };
+          return Object.assign({}, fixed, { value: next });
+        }),
       },
     });
 
@@ -359,7 +362,9 @@ export function VariableSection({
           const inClasses = new Set(
             findVariableUsagesInDesign(design, item.id, kind).map((u) => u.classId),
           ).size;
-          const text = valueText(item.value);
+          // W-316: a fluid token reads "14 → 18 px".
+          const fluid = (item as { fluid?: { min: number; max: number } }).fluid;
+          const text = fluid ? `${fluid.min} → ${fluid.max} px fluid` : valueText(item.value);
           return (
             <li
               key={item.id}

@@ -26,6 +26,7 @@ import { ClassesSection } from "./ClassesSection.tsx";
 import { stopEditorShortcuts } from "./settings/ClassChip.tsx";
 import { StyleRow } from "./settings/StyleRow.tsx";
 import { FIELD } from "../../ui.ts";
+import { TokenScales } from "./TokenScales.tsx";
 import { VariableSection } from "./VariableSection.tsx";
 
 const STYLE_NOTE = "Style changes stay unpublished until you publish styles.";
@@ -244,6 +245,7 @@ export function SiteStylesDrawer({
               setConfirm({ kind: "variable", variableKind: "spacing", id, name })
             }
           />
+          <TokenScales design={design} onSave={save} />
         </div>
       )}
       {tab === "classes" && (

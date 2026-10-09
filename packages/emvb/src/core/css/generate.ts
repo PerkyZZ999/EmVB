@@ -1,3 +1,5 @@
+import { DEFAULT_FLUID_RANGE, fluidClamp } from "../design/tokens.ts";
+import type { FluidRange, LengthVariable } from "../schema/design.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import { DEFAULT_STYLE_TAGS } from "../schema/design.ts";
 import {
@@ -87,6 +89,12 @@ const fontStack = (value: string) => (isSafeFontStack(value) ? value : undefined
 const lengthCss = (length: { value: number; unit: string }) =>
   safe(`${length.value}${length.unit}`);
 
+/** A size token: its fixed length, or a fluid `clamp()` when it has one (W-316). */
+const sizeCss = (variable: LengthVariable, range: FluidRange | undefined) =>
+  variable.fluid
+    ? fluidClamp(variable.fluid.min, variable.fluid.max, range ?? DEFAULT_FLUID_RANGE)
+    : lengthCss(variable.value);
+
 /** One custom property per variable whose id and value are both safe to emit. */
 function declare<T extends { id: string }>(
   variables: readonly T[] | undefined,
@@ -120,8 +128,8 @@ export function generateCss({
   const variables = [
     ...declare(colors, colorVariableName, (color) => safe(color.value)),
     ...declare(fonts, fontVariableName, (font) => fontStack(font.value)),
-    ...declare(fontSizes, fontSizeVariableName, (size) => lengthCss(size.value)),
-    ...declare(spacings, spacingVariableName, (space) => lengthCss(space.value)),
+    ...declare(fontSizes, fontSizeVariableName, (size) => sizeCss(size, design.fluidRange)),
+    ...declare(spacings, spacingVariableName, (space) => sizeCss(space, design.fluidRange)),
   ];
   const animated: string[] = [];
   const entrances: string[] = [];

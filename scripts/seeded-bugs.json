@@ -3185,7 +3185,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "(size) => lengthCss(size.value)",
+          "search": "(size) => sizeCss(size, design.fluidRange)",
           "replace": "(size) => `${size.value.value}${size.value.unit}`"
         }
       ],
@@ -13060,7 +13060,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "    ...declare(spacings, spacingVariableName, (space) => lengthCss(space.value)),\n",
+          "search": "    ...declare(spacings, spacingVariableName, (space) => sizeCss(space, design.fluidRange)),\n",
           "replace": ""
         }
       ],
@@ -26233,6 +26233,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/timeline.test.tsx"],
       "expect": "\\(fail\\).*W-315"
+    },
+    {
+      "id": "W-316/fluid-not-emitted",
+      "requirement": "W-316",
+      "description": "Fluid tokens are emitted as their fixed value.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "  variable.fluid\n    ? fluidClamp(",
+          "replace": "  false\n    ? fluidClamp("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/tokens.test.ts"],
+      "expect": "\\(fail\\).*W-316"
+    },
+    {
+      "id": "W-316/clamp-bounds-swapped",
+      "requirement": "W-316",
+      "description": "A shrinking size gives clamp() its bounds in the wrong order.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/tokens.ts",
+          "search": "  const lo = Math.min(min, max);\n  const hi = Math.max(min, max);",
+          "replace": "  const lo = min;\n  const hi = max;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/tokens.test.ts"],
+      "expect": "\\(fail\\).*W-316"
+    },
+    {
+      "id": "W-316/duplicates-on-reapply",
+      "requirement": "W-316",
+      "description": "Applying a scale again adds duplicate tokens.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/tokens.ts",
+          "search": "  const added = tokens.filter((t) => !have.has(t.id))",
+          "replace": "  const added = tokens.filter((t) => t.id)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/tokens.test.ts"],
+      "expect": "\\(fail\\).*W-316"
+    },
+    {
+      "id": "W-316/range-unchecked",
+      "requirement": "W-316",
+      "description": "A backwards fluid range is accepted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "  .refine((range) => range.minWidth < range.maxWidth, \"The small screen must be narrower\");",
+          "replace": ";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/design/tokens.test.ts"],
+      "expect": "\\(fail\\).*W-316"
     }
   ]
 }

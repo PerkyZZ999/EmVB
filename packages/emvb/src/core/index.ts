@@ -444,3 +444,12 @@ export {
   type VisitorInfo,
 } from "./audience/rules.ts";
 export { changedIds, diffSections, restoreSection, type SectionChange } from "./history/diff.ts";
+export {
+  applyTokens,
+  DEFAULT_FLUID_RANGE,
+  fluidClamp,
+  SCALE_RATIOS,
+  spaceScale,
+  typeScale,
+  type ScaleInput,
+} from "./design/tokens.ts";

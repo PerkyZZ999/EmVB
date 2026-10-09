@@ -34,6 +34,15 @@ export const FontVariable = z.strictObject({
   value: z.string().min(1).max(200),
 });
 
+/**
+ * A fluid size (W-316): `min` px on small screens growing to `max` px on large ones, emitted as
+ * `clamp()` between the site's fluid range. `value` stays as the fixed fallback the editor shows.
+ */
+const FluidSize = z.strictObject({
+  min: z.number().finite().min(0).max(1000),
+  max: z.number().finite().min(0).max(1000),
+});
+
 export const LengthVariable = z.strictObject({
   id: VariableId,
   name: z.string().min(1).max(60),
@@ -41,7 +50,17 @@ export const LengthVariable = z.strictObject({
     value: z.number().finite().min(0).max(10_000),
     unit: z.enum(["px", "rem", "em", "%"]),
   }),
+  fluid: FluidSize.optional(),
 });
+
+/** Screen widths fluid sizes grow between (W-316). Unset = 360 to 1280 px. */
+const FluidRange = z
+  .strictObject({
+    minWidth: z.number().int().min(240).max(1200),
+    maxWidth: z.number().int().min(480).max(3840),
+  })
+  .refine((range) => range.minWidth < range.maxWidth, "The small screen must be narrower");
+export type FluidRange = z.infer<typeof FluidRange>;
 
 /** Shared style class (R-021 / W-030). CSS selector is always `.emvb-k-<id>`. */
 const StyleClass = z.strictObject({
@@ -63,6 +82,7 @@ export const DesignSystem = z.strictObject({
     spacings: z.array(LengthVariable).max(100).optional(),
   }),
   classes: z.array(StyleClass).max(100).optional(),
+  fluidRange: FluidRange.optional(),
   /**
    * Site text direction (W-230). Unset is left to right. Rendered as `dir` on every EmVB root
    * and returned to hosts for `<html dir>`. Layout uses logical properties, so styles flip.

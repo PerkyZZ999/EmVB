@@ -64,4 +64,12 @@ export const FEATURE_CSS = `
 .emvb-timeline-changes > li[data-kind="added"] .emvb-timeline-kind { color: #15803d; }
 .emvb-timeline-changes > li[data-kind="removed"] .emvb-timeline-kind { color: #b91c1c; }
 .emvb-timeline-changes > li[data-kind="changed"] .emvb-timeline-kind { color: #b45309; }
+.emvb-tokens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+.emvb-tokens-grid > label { display: grid; gap: 4px; min-width: 0; }
+.emvb-tokens-fluid { display: flex !important; align-items: center; gap: 4px; font-size: 12px; }
+.emvb-tokens-preview { margin: 8px 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 12px; }
+.emvb-tokens-preview > li { display: grid; grid-template-columns: 48px 1fr auto; gap: 8px; align-items: center; }
+.emvb-tokens-sample { display: inline-block; height: 1em; line-height: 1; }
+.emvb-tokens-preview .emvb-tokens-sample:empty { height: 8px; border-radius: 2px; background: var(--color-kumo-brand); }
+.emvb-tokens-preview code { font-size: 11px; color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
 `;
