@@ -1,5 +1,5 @@
 import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@cloudflare/kumo";
-import { GaugeIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { ClockCounterClockwiseIcon, GaugeIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   findNode,
@@ -44,6 +44,7 @@ import { useSectionTemplates } from "./section-templates.ts";
 import { useCollectionPreviews } from "./collection-previews.ts";
 import { PerfMeterDialog } from "./PerfMeter.tsx";
 import { CommandPalette } from "./CommandPalette.tsx";
+import { TimelineDialog } from "./Timeline.tsx";
 import { paletteItems } from "./palette-items.ts";
 import { restoreOnUndo, type Deletion } from "./restore-deleted.ts";
 import { useEditorCommands } from "./useEditorCommands.ts";
@@ -156,6 +157,7 @@ function EditorApp({
   const [shortcutsOpen, setShortcutsOpen] = React.useState(false);
   const [perfOpen, setPerfOpen] = React.useState(false);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
+  const [timelineOpen, setTimelineOpen] = React.useState(false);
   const [announcement, setAnnouncement] = React.useState("");
   const [leaveOpen, setLeaveOpen] = React.useState(false);
   const [leaving, setLeaving] = React.useState(false);
@@ -349,16 +351,28 @@ function EditorApp({
               canRevert={canRevert}
               onRevert={() => setRevertOpen(true)}
               tools={
-                <Button
-                  variant="ghost"
-                  shape="square"
-                  className="emvb-icon-btn"
-                  aria-label="Page weight"
-                  title="Page weight"
-                  data-emvb-perf-open=""
-                  icon={<GaugeIcon aria-hidden="true" />}
-                  onClick={() => setPerfOpen(true)}
-                />
+                <>
+                  <Button
+                    variant="ghost"
+                    shape="square"
+                    className="emvb-icon-btn"
+                    aria-label="Page weight"
+                    title="Page weight"
+                    data-emvb-perf-open=""
+                    icon={<GaugeIcon aria-hidden="true" />}
+                    onClick={() => setPerfOpen(true)}
+                  />
+                  <Button
+                    variant="ghost"
+                    shape="square"
+                    className="emvb-icon-btn"
+                    aria-label="Version timeline"
+                    title="Version timeline"
+                    data-emvb-timeline-open=""
+                    icon={<ClockCounterClockwiseIcon aria-hidden="true" />}
+                    onClick={() => setTimelineOpen(true)}
+                  />
+                </>
               }
             />
             <div className="emvb-frame">
@@ -558,6 +572,12 @@ function EditorApp({
                       run: () => setSiteStylesOpen(true),
                     },
                     {
+                      id: "timeline",
+                      label: "Version timeline",
+                      keywords: "history revisions restore diff",
+                      run: () => setTimelineOpen(true),
+                    },
+                    {
                       id: "weight",
                       label: "Show page weight",
                       keywords: "performance budget size speed",
@@ -587,6 +607,24 @@ function EditorApp({
                 })
               : []
           }
+        />
+        <TimelineDialog
+          open={timelineOpen}
+          onOpenChange={setTimelineOpen}
+          fetcher={fetcher}
+          collection={collection}
+          entryId={state.id}
+          current={state.page.layout}
+          design={state.design}
+          onApply={(layout, note) => {
+            dispatch({
+              type: "apply-arranged",
+              layout,
+              selected: latest.current.selectedId ?? layout.root.id,
+            });
+            setAnnouncement(note);
+            toasts.add({ title: note, description: "Undo takes it back. Save to keep it." });
+          }}
         />
         <PerfMeterDialog
           open={perfOpen}

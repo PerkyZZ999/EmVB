@@ -26177,6 +26177,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/palette.test.tsx"],
       "expect": "\\(fail\\).*W-314"
+    },
+    {
+      "id": "W-315/edits-missed",
+      "requirement": "W-315",
+      "description": "An edited section counts as unchanged.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/history/diff.ts",
+          "search": "    else if (own(node) !== own(other)) edits += 1;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/history/diff.test.ts"],
+      "expect": "\\(fail\\).*W-315"
+    },
+    {
+      "id": "W-315/removed-hidden",
+      "requirement": "W-315",
+      "description": "Removed sections are not listed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/history/diff.ts",
+          "search": "  flush(Number.POSITIVE_INFINITY);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/history/diff.test.ts"],
+      "expect": "\\(fail\\).*W-315"
+    },
+    {
+      "id": "W-315/clashing-ids",
+      "requirement": "W-315",
+      "description": "A restored section keeps ids now used elsewhere.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/history/diff.ts",
+          "search": "  const incoming = clashes ? withFreshIds(current, section) : section;",
+          "replace": "  const incoming = section;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/history/diff.test.ts"],
+      "expect": "\\(fail\\).*W-315"
+    },
+    {
+      "id": "W-315/oldest-first",
+      "requirement": "W-315",
+      "description": "Versions are listed oldest first.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": ".toSorted((a, b) => (a.at < b.at ? 1 : -1));",
+          "replace": ".toSorted((a, b) => (a.at < b.at ? -1 : 1));"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/timeline.test.tsx"],
+      "expect": "\\(fail\\).*W-315"
     }
   ]
 }

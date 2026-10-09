@@ -443,3 +443,4 @@ export {
   layoutUsesAudience,
   type VisitorInfo,
 } from "./audience/rules.ts";
+export { changedIds, diffSections, restoreSection, type SectionChange } from "./history/diff.ts";
