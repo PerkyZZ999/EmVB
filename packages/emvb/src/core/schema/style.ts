@@ -2,6 +2,7 @@ import { z } from "zod";
 import { isSafeFontStack } from "../sanitize/css.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { POPUP_DEVICES } from "../theme/popup-rules.ts";
+import { MOTION_EFFECTS, MOTION_LIMITS } from "./motion.ts";
 
 /** Colour refs omit `from` (legacy). Length/font refs set `from` (W-028). */
 export const VariableRef = z.strictObject({
@@ -288,6 +289,45 @@ export const StyleProps = z.strictObject({
     ])
     .optional(),
   /**
+   * Scroll motion (W-319): effects tied to the element's trip through the screen (or the page's
+   * scroll), with CSS scroll-driven animations. Browsers without them, and visitors who prefer
+   * reduced motion, see the element still. `{ type: "none" }` stops motion a wider device sets.
+   */
+  scrollMotion: z
+    .union([
+      z.strictObject({
+        effects: z
+          .array(
+            z.strictObject({
+              type: z.enum(MOTION_EFFECTS),
+              from: z.number().min(-1000).max(1000),
+              to: z.number().min(-1000).max(1000),
+            }),
+          )
+          .min(1)
+          .max(MOTION_EFFECTS.length)
+          .superRefine((effects, ctx) => {
+            const seen = new Set<string>();
+            for (const effect of effects) {
+              const [min, max] = MOTION_LIMITS[effect.type];
+              if ([effect.from, effect.to].some((n) => n < min || n > max)) {
+                ctx.addIssue({
+                  code: "custom",
+                  message: `${effect.type} goes from ${min} to ${max}`,
+                });
+              }
+              if (seen.has(effect.type)) {
+                ctx.addIssue({ code: "custom", message: `${effect.type} is set twice` });
+              }
+              seen.add(effect.type);
+            }
+          }),
+        range: z.enum(["enter", "cross", "exit", "page"]),
+      }),
+      z.strictObject({ type: z.literal("none") }),
+    ])
+    .optional(),
+  /**
    * Plays once (W-101, W-107). `delay` waits before it starts. `view` starts as the element
    * scrolls into view, using CSS scroll-driven animations, and falls back to playing on load.
    * Not a state style.
@@ -306,10 +346,15 @@ export type StyleProps = z.infer<typeof StyleProps>;
 
 /**
  * `states` on a node or class (D-032, W-089): hover, focus (`:focus-visible`) and active, each with
- * the same keys and limits as `style` except `transition`, `entrance` and `iconAnimation`. Unknown
- * states are refused.
+ * the same keys and limits as `style` except `transition`, `entrance`, `iconAnimation` and
+ * `scrollMotion`. Unknown states are refused.
  */
-const StateStyle = StyleProps.omit({ transition: true, entrance: true, iconAnimation: true });
+const StateStyle = StyleProps.omit({
+  transition: true,
+  entrance: true,
+  iconAnimation: true,
+  scrollMotion: true,
+});
 
 export const StyleStates = z.strictObject({
   hover: StateStyle.optional(),

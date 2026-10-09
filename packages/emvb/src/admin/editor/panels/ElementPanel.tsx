@@ -175,7 +175,12 @@ const sectionHasStates = (type: string, states: StyleStates | undefined, section
 const JUMPY = new Set<StyleSectionId>(["layout", "size", "position"]);
 
 /** Set on Normal only (W-089, W-101, W-237); a state's Style tab leaves them out. */
-const NORMAL_ONLY_KEYS = new Set<StyleKey>(["transition", "entrance", "iconAnimation"]);
+const NORMAL_ONLY_KEYS = new Set<StyleKey>([
+  "transition",
+  "entrance",
+  "iconAnimation",
+  "scrollMotion",
+]);
 
 const JUMP_HELP: Record<Exclude<StyleStateChoice, "normal">, string> = {
   hover: "Changing size or position on hover can make the page jump.",

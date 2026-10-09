@@ -1,6 +1,7 @@
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
 import type { StyleProps } from "../schema/style.ts";
 import { sanitizeMediaUrl } from "./media-url.ts";
+import { motionDeclarations, withMotion } from "./motion.ts";
 
 const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const VAR_ID = /^[a-z0-9-]{1,40}$/;
@@ -645,6 +646,8 @@ const PROPERTY_MAP: {
   cursor: { css: "cursor", toValue: keyword(CURSOR) },
   transition: { css: "transition", toValue: cssTransition },
   entrance: { css: "animation", toValue: cssEntrance },
+  // W-319: written by `motionDeclarations` in `styleDeclarations`; this entry only names it.
+  scrollMotion: { css: "animation", toValue: () => undefined },
   iconRotate: { css: "--emvb-icon-rotate", toValue: cssIconRotate },
   iconFlip: { css: "--emvb-icon-flip", toValue: cssIconFlip },
   iconScale: { css: "scale", toValue: cssIconScale },
@@ -677,8 +680,15 @@ export function styleDeclarations(style: unknown): {
   const rejected: string[] = [];
   if (typeof style !== "object" || style === null) return { declarations, rejected };
   const record = style as Record<string, unknown>;
+  let motion: Declaration[] = [];
   for (const [key, raw] of shorthandsFirst(record)) {
     if (BACKGROUND_KEYS.has(key)) continue;
+    if (key === "scrollMotion") {
+      const found = motionDeclarations(raw);
+      if (found && found.every((d) => isSafeCssValue(d.value))) motion = found;
+      else rejected.push(key);
+      continue;
+    }
     const entry = Object.hasOwn(PROPERTY_MAP, key)
       ? PROPERTY_MAP[key as keyof StyleProps]
       : undefined;
@@ -704,15 +714,20 @@ export function styleDeclarations(style: unknown): {
   const background = composeBackground(record);
   declarations.push(...background.declarations);
   rejected.push(...background.rejected);
-  return { declarations, rejected };
+  return { declarations: withMotion(declarations, motion), rejected };
 }
 
 /** Normal only (W-089, W-237): a state's `transition` and `iconAnimation` are dropped and reported. */
-const NORMAL_ONLY = ["transition", "iconAnimation"] as const;
+const NORMAL_ONLY = ["transition", "iconAnimation", "scrollMotion"] as const;
 const withoutTransition = (style: unknown): unknown => {
   if (typeof style !== "object" || style === null) return style;
   if (!NORMAL_ONLY.some((key) => key in style)) return style;
-  const { transition: _drop, iconAnimation: _loop, ...rest } = style as Record<string, unknown>;
+  const {
+    transition: _drop,
+    iconAnimation: _loop,
+    scrollMotion: _scroll,
+    ...rest
+  } = style as Record<string, unknown>;
   return rest;
 };
 

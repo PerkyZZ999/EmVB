@@ -70,7 +70,11 @@ function classKeys(
     state === "normal"
       ? withFit
       : withFit.filter(
-          (key) => key !== "transition" && key !== "entrance" && key !== "iconAnimation",
+          (key) =>
+            key !== "transition" &&
+            key !== "entrance" &&
+            key !== "iconAnimation" &&
+            key !== "scrollMotion",
         )
   ) as StyleKey[];
 }

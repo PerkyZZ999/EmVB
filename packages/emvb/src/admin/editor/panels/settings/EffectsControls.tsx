@@ -174,7 +174,7 @@ const APPLIES_TO: ReadonlyArray<{ value: Transition["property"]; label: string }
   { value: "filter", label: "Filters" },
 ];
 
-function TransitionSelect<T extends string>({
+export function TransitionSelect<T extends string>({
   label,
   value,
   options,

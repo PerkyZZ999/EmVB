@@ -1,4 +1,5 @@
 import { Input, Select } from "@cloudflare/kumo";
+import { MotionControl } from "./MotionControl.tsx";
 import { isSafeFontStack, type DesignSystem, type StyleProps } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
@@ -497,6 +498,16 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "scrollMotion") {
+    return (
+      <MotionControl
+        value={style?.scrollMotion}
+        onChange={(scrollMotion) => onPatch({ scrollMotion })}
+        reset={reset}
+      />
+    );
+  }
+
   if (styleKey === "transition") {
     return (
       <TransitionControl
@@ -547,6 +558,7 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "boxShadow",
   "filter",
   "entrance",
+  "scrollMotion",
   "transition",
   "iconRotate",
   "iconFlip",

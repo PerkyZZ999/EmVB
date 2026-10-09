@@ -469,3 +469,4 @@ export {
   type StyleTrace,
   type TraceDevice,
 } from "./css/trace.ts";
+export { MOTION_EFFECTS, MOTION_LIMITS, type MotionEffect } from "./schema/motion.ts";

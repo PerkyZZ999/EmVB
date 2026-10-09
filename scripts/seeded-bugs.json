@@ -8816,7 +8816,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "const StateStyle = StyleProps.omit({ transition: true, entrance: true, iconAnimation: true });",
+          "search": "const StateStyle = StyleProps.omit({\n  transition: true,\n  entrance: true,\n  iconAnimation: true,\n  scrollMotion: true,\n});",
           "replace": "const StateStyle = StyleProps;"
         }
       ],
@@ -8976,8 +8976,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "  effects: [\"opacity\", \"boxShadow\", \"filter\", \"cursor\", \"entrance\", \"transition\"],",
-          "replace": "  effects: [\"opacity\", \"boxShadow\", \"filter\", \"cursor\", \"entrance\"],"
+          "search": "  effects: [\"opacity\", \"boxShadow\", \"filter\", \"cursor\", \"entrance\", \"scrollMotion\", \"transition\"],",
+          "replace": "  effects: [\"opacity\", \"boxShadow\", \"filter\", \"cursor\", \"entrance\", \"scrollMotion\"],"
         }
       ],
       "command": [
@@ -23028,8 +23028,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "const NORMAL_ONLY_KEYS = new Set<StyleKey>([\"transition\", \"entrance\", \"iconAnimation\"]);",
-          "replace": "const NORMAL_ONLY_KEYS = new Set<StyleKey>([\"transition\", \"entrance\"]);"
+          "search": "const NORMAL_ONLY_KEYS = new Set<StyleKey>([\n  \"transition\",\n  \"entrance\",\n  \"iconAnimation\",\n  \"scrollMotion\",\n]);",
+          "replace": "const NORMAL_ONLY_KEYS = new Set<StyleKey>([\"transition\", \"entrance\", \"scrollMotion\"]);"
         }
       ],
       "command": [
@@ -26410,6 +26410,112 @@
         "./packages/emvb/src/admin/editor/panels/settings/style-sources.test.tsx"
       ],
       "expect": "\\(fail\\).*W-318"
+    },
+    {
+      "id": "W-319/reduced-motion-plays",
+      "requirement": "W-319",
+      "description": "Scroll motion keyframes are sent to visitors who prefer reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/motion.ts",
+          "search": "(prefers-reduced-motion: no-preference)",
+          "replace": "(min-width: 0)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
+      "expect": "\\(fail\\).*W-319"
+    },
+    {
+      "id": "W-319/page-uses-view",
+      "requirement": "W-319",
+      "description": "Page scroll motion follows the element instead of the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/motion.ts",
+          "search": "range === \"page\" ? \"scroll(root)\" : \"view()\"",
+          "replace": "range === \"page\" ? \"view()\" : \"view()\""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
+      "expect": "\\(fail\\).*W-319"
+    },
+    {
+      "id": "W-319/entrance-clobbered",
+      "requirement": "W-319",
+      "description": "Scroll motion replaces an entrance on the same element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/motion.ts",
+          "search": "  if (!entrance) return [...declarations, ...motion];",
+          "replace": "  if (entrance || !entrance) return [...declarations, ...motion];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
+      "expect": "\\(fail\\).*W-319"
+    },
+    {
+      "id": "W-319/state-motion",
+      "requirement": "W-319",
+      "description": "Scroll motion in a hover state is emitted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"scrollMotion\"] as const;",
+          "replace": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\"] as const;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
+      "expect": "\\(fail\\).*W-319"
+    },
+    {
+      "id": "W-319/duplicate-effects",
+      "requirement": "W-319",
+      "description": "The schema accepts one effect twice.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "              if (seen.has(effect.type)) {",
+          "replace": "              if (seen.has(effect.type) && false) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
+      "expect": "\\(fail\\).*W-319"
+    },
+    {
+      "id": "W-319/turn-off-removes",
+      "requirement": "W-319",
+      "description": "Turn off here removes the motion instead of stopping inherited motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MotionControl.tsx",
+          "search": "onClick={() => onChange({ type: \"none\" })}",
+          "replace": "onClick={() => onChange(undefined)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/motion-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-319"
+    },
+    {
+      "id": "W-319/last-effect-kept",
+      "requirement": "W-319",
+      "description": "Removing the last effect leaves an empty motion the schema refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MotionControl.tsx",
+          "search": "onChange(effects.length > 0 ? { ...playing, effects } : undefined);",
+          "replace": "onChange({ ...playing, effects });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/motion-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-319"
     }
   ]
 }

@@ -207,7 +207,7 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "borderBottomRightRadius",
     "borderBottomLeftRadius",
   ],
-  effects: ["opacity", "boxShadow", "filter", "cursor", "entrance", "transition"],
+  effects: ["opacity", "boxShadow", "filter", "cursor", "entrance", "scrollMotion", "transition"],
   icon: ["iconRotate", "iconFlip", "iconScale", "iconStrokeWidth", "iconShadow", "iconAnimation"],
   advanced: [],
 };
@@ -381,6 +381,7 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   filter: "Filters",
   cursor: "Cursor",
   entrance: "Entrance",
+  scrollMotion: "Scroll motion",
   iconRotate: "Rotate",
   iconFlip: "Flip",
   iconScale: "Scale",
