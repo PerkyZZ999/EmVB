@@ -2,6 +2,20 @@
   "$comment": "Seeded bugs (N-001). Each must make its command fail with output matching `expect`. Run: bun run seeded-bugs [--only <id text>]",
   "seeds": [
     {
+      "id": "demo-node/dev-on-bun",
+      "requirement": "R-051",
+      "description": "the Node demo dev server is switched back to Bun despite the startup watcher crash",
+      "edits": [
+        {
+          "file": "demos/node/package.json",
+          "search": "\"dev\": \"astro dev",
+          "replace": "\"dev\": \"bun --bun astro dev"
+        }
+      ],
+      "command": ["bun", "run", "check:runtime"],
+      "expect": "demos/node#dev is listed but now runs on Bun"
+    },
+    {
       "id": "W-001/lint-console",
       "requirement": "N-007",
       "description": "console.log in plugin code",

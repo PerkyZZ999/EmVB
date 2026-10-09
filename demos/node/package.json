@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "bun --bun astro dev --host 127.0.0.1 --port 4411",
+    "dev": "astro dev --host 127.0.0.1 --port 4411",
     "build": "bun --bun astro build",
     "start": "HOST=127.0.0.1 PORT=4421 bun ./dist/server/entry.mjs"
   },

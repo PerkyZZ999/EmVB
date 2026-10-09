@@ -29,6 +29,7 @@ Keep commits small, one change each, in the form `feat(scope): …`, `fix(scope)
 
 ## Troubleshooting
 
+- **The Node demo exits with `null is not an object (evaluating 'server.address.port')` or `transport was disconnected`.** Use `bun run demo:node`, which runs Astro on Node. Forcing Bun with `bun --bun astro dev` can trigger a restart during Astro's first update check on macOS. Bun still handles installs, tests and the Node demo's build and production server.
 - **The first admin load after a dev-server start shows "Loading EmDash..." or a hydration error.** Reload; `e2e/auth.setup.ts` retries until two clean loads.
 - **Don't run `astro build` for a demo while its dev server is running.** It can leave the dev admin unable to hydrate; restart the dev server.
 - **Port already in use** (4411, 4412, 4421, 4422): a demo is still running. Stop it, or run Playwright without `CI=1` to reuse it.
