@@ -6,7 +6,7 @@ A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emda
 
 **Website:** <https://emvb.dev>.
 
-**Status:** 0.2.1 is on npm as [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb). The MVP is complete.
+**Status:** 0.3.0 is on npm as [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb). The MVP is complete.
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 

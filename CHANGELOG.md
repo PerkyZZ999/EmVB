@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-09
+
 A large feature release: live data, personalization on the server, a command palette, version history, design tokens, an accessibility co-pilot and scroll motion (W-307–W-321).
 
 ### Breaking
@@ -231,7 +233,8 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/PerkyZZ999/EmVB/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/PerkyZZ999/EmVB/releases/tag/v0.1.0
