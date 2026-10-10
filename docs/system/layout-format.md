@@ -1,6 +1,6 @@
-# Layout format (schema v8)
+# Layout format (schema 13)
 
-How EmVB stores a page and its site-wide design, as implemented through S4 (variables W-028+). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them.
+How EmVB stores a page and its site-wide design, at schema 13 (the W-307 feature batch). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them.
 
 ## Where it lives
 
@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 
 ```json
 {
-  "schemaVersion": 11,
+  "schemaVersion": 13,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, as implemented through S4 (vari
 }
 ```
 
-- `schemaVersion` is the literal `11` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045; v1–v10 documents are upgraded on read by steps that change nothing). `root` is always a container.
+- `schemaVersion` is the literal `13` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045, W-160, W-307; older documents are upgraded on read by steps that change nothing, except v11 → v12, which rewrites a gradient's `from` and `to` into `stops`). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -93,8 +93,10 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `position` | `static`, `relative`, `absolute`, `fixed`, `sticky` | `position` |
 | `top` / `right` / `bottom` / `left` | offset | matching inset properties |
 | `zIndex` | whole number −9999 to 9999 | `z-index` |
-| `fontSize` / `lineHeight` / `letterSpacing` | length | matching type properties |
-| `fontWeight` | `400`–`700`, `normal`, `bold` | `font-weight` |
+| `fontSize` | length | `font-size` |
+| `lineHeight` | length, or a unitless number 0–100 | `line-height` |
+| `letterSpacing` | length whose value may be negative (−10000 to 10000) | `letter-spacing` |
+| `fontWeight` | `100`–`900` in steps of 100, `normal`, `bold` | `font-weight` |
 | `textAlign` | `left`, `center`, `right`, `justify` | `text-align` |
 | `textTransform` | `none`, `uppercase`, `lowercase`, `capitalize` | `text-transform` |
 | `textDecoration` | `none`, `underline`, `overline`, `line-through` | `text-decoration` (W-113; a button sets `none` in its base CSS) |
@@ -103,7 +105,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `backgroundSize` | `auto`, `cover`, `contain` | `background-size` (the image layer) |
 | `backgroundPosition` | `center`, an edge (`top`, `bottom`, `left`, `right`) or a corner (`top left` and the other three) | `background-position` |
 | `backgroundRepeat` | `no-repeat`, `repeat`, `repeat-x`, `repeat-y` | `background-repeat` |
-| `gradient` | `{ angle: 0–360, from, to }`; stops are colours | `linear-gradient`, behind the image |
+| `gradient` | `{ type, angle?, position?, stops }`: `type` `linear`, `radial` or `conic`; `angle` whole degrees 0–360 (the linear direction, default 180, or the conic start, default 0); `position` (the radial centre, default `center`) takes the `backgroundPosition` values; `stops` are 2–10 `{ color, at }`, `color` a colour and `at` a whole % 0–100 | `linear-gradient`, `radial-gradient` (a circle) or `conic-gradient`, stops in `at` order, behind the image |
 | `overlay` | `{ color, opacity: 0–1 }` | a colour layer above the image. Hex becomes 8-digit hex; a colour variable becomes `color-mix` |
 | `borderWidth` / `borderRadius` | length | matching border properties: every side or corner |
 | `borderTopWidth`, `borderRightWidth`, `borderBottomWidth`, `borderLeftWidth` (W-138) | length | `border-top-width`, `border-inline-end-width`, `border-bottom-width`, `border-inline-start-width`, after `border-width`, so a side beats it |
@@ -157,7 +159,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 11,
+  "schemaVersion": 13,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],
@@ -195,6 +197,7 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 
 - Add a migration `LAYOUT_MIGRATIONS[n]` (pure, version n to n + 1) and bump `LAYOUT_SCHEMA_VERSION` in the same change.
 - Add fixtures and tests for the old and new shapes, and update this file.
+- `test/docs/layout-format.test.ts` checks this file's title, the "literal `N`" sentence and the JSON examples against the code, so a schema bump must update them.
 
 ## S8 additive elements (W-072–W-074)
 
