@@ -27058,6 +27058,26 @@
         "an explicit slug is looked up as-is instead of the route parameter"
       ],
       "expect": "\\(fail\\).*an explicit slug is looked up as-is instead of the route parameter"
+    },
+    {
+      "id": "docs/layout-format-example-stale",
+      "requirement": "R-010",
+      "description": "the page example in layout-format.md is left at an old schema version",
+      "edits": [
+        {
+          "file": "docs/system/layout-format.md",
+          "search": "\"schemaVersion\": 13,\n  \"root\": {",
+          "replace": "\"schemaVersion\": 12,\n  \"root\": {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/docs/layout-format.test.ts",
+        "-t",
+        "its examples and stated schema version match the code"
+      ],
+      "expect": "\\(fail\\).*its examples and stated schema version match the code"
     }
   ]
 }
