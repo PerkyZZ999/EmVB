@@ -91,6 +91,14 @@ describe("resolveEmVBPage (W-091, R-030, R-052)", () => {
     expect(lookups).toEqual(["emvb_pages/about", "emvb_pages/about"]);
   });
 
+  test("an explicit slug is looked up as-is instead of the route parameter", async () => {
+    await resolveEmVBPage(astro({}), { slug: "home" });
+    await resolveEmVBPage(astro({ slug: "about" }), { slug: "home" });
+    await resolveEmVBPage(astro({}), { slug: "a%20b" });
+    expect(await resolveEmVBPage(astro({ slug: "about" }), { slug: "" })).toBeNull();
+    expect(lookups).toEqual(["emvb_pages/home", "emvb_pages/home", "emvb_pages/a%20b"]);
+  });
+
   test("a missing collection or entry is not an EmVB page", async () => {
     lookup = async () => {
       throw new Error("no such collection");

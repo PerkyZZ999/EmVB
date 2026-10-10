@@ -27038,6 +27038,26 @@
       ],
       "command": ["bun", "test", "./test/site/changelog.test.ts"],
       "expect": "\\(fail\\).*W-324"
+    },
+    {
+      "id": "astro/explicit-slug-ignored",
+      "requirement": "R-052",
+      "description": "the explicit slug option is ignored and the route parameter is read instead",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "options.slug ?? decodeSlug(",
+          "replace": "decodeSlug("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/resolve.test.ts",
+        "-t",
+        "an explicit slug is looked up as-is instead of the route parameter"
+      ],
+      "expect": "\\(fail\\).*an explicit slug is looked up as-is instead of the route parameter"
     }
   ]
 }

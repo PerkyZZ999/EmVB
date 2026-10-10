@@ -66,6 +66,23 @@ if (!emvb && !(await getEmDashEntry("pages", decodeSlug(Astro.params.slug)))) {
 )}
 ```
 
+A fixed route has no slug parameter, so pass the page’s slug instead. To serve the EmVB page `home` at `/`, in `src/pages/index.astro`:
+
+```astro
+---
+import { EmVBPage, resolveEmVBPage } from "@perkyzz/emvb/astro";
+import { EmVBFormsRuntime } from "@perkyzz/emvb/astro/forms"; // only with @emdash-cms/plugin-forms
+// …site layout…
+
+const emvb = await resolveEmVBPage(Astro, { slug: "home" });
+if (!emvb) return Astro.rewrite("/404");
+---
+
+<EmVBPage page={emvb}>{emvb.needsFormsRuntime && <EmVBFormsRuntime />}</EmVBPage>
+```
+
+Until a page with the slug `home` is published (step 4), `/` returns 404; if the site has its own home content, fall through to it instead, as the `[slug]` route does. The `[slug]` route still serves the same page at `/home`, so redirect that path or set the page’s canonical URL to `/`.
+
 Blank-canvas EmVB pages use `standalone` on `EmVBPage` (see the demos).
 
 `@perkyzz/emvb/astro/forms` imports the forms plugin's client script, so import `EmVBFormsRuntime` only when `@emdash-cms/plugin-forms` is installed. Without it the build fails with `"initForms" is not exported`; drop that import and the `EmVBFormsRuntime` element.
