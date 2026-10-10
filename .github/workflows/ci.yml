@@ -20,5 +20,8 @@ jobs:
       - run: bun run typecheck
       - run: bun run lint
       - run: bun run fmt:check
+      - run: bun run fallow
+      - run: bun run check:runtime
+      - run: bun run check:seeds
       - run: bun run test
       - run: bun run test:astro

@@ -14,7 +14,7 @@ bun run demo:node    # http://127.0.0.1:4411
 ## Before you open a pull request
 
 ```bash
-bun run check                                   # lint, format, types, dead code, unit and Astro tests
+bun run check                                   # lint, format, types, dead code, runtime list, seed verification, unit and Astro tests
 bun run e2e e2e/<area>.e2e.ts --project=node    # the e2e specs for what you touched
 ```
 
