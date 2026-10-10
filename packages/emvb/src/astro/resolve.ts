@@ -27,12 +27,18 @@ type AstroLike = VisitorAstro & {
 /**
  * Looks up the published EmVB page for this request's slug (or its draft under a preview token),
  * so a host route can try EmVB first and fall through to its own content (R-030, R-052).
+ * A fixed route such as `/` passes the page's slug explicitly: `{ slug: "home" }`.
  */
 export async function resolveEmVBPage(
   astro: AstroLike,
-  options: { param?: string } = {},
+  options: {
+    /** The route parameter that holds the URL-encoded slug (default `"slug"`). */
+    param?: string;
+    /** The page's slug, used as-is (not URL-decoded) in place of the route parameter. */
+    slug?: string;
+  } = {},
 ): Promise<ResolvedEmVBPage | null> {
-  const slug = decodeSlug(astro.params[options.param ?? "slug"]);
+  const slug = options.slug ?? decodeSlug(astro.params[options.param ?? "slug"]);
   if (!slug) return null;
   let found: Awaited<ReturnType<typeof getEmDashEntry>>;
   try {
