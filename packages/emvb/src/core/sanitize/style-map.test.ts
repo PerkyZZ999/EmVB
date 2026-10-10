@@ -79,11 +79,11 @@ describe("style property map (W-017, R-012)", () => {
     },
   );
 
-  test.each(["vmin", "ch", "pt", "AUTO", " auto", "auto;x", "calc(1px)"])(
+  test.each(["vmin", "ex", "pt", "AUTO", " auto", "auto;x", "calc(1px)"])(
     "W-088: an unknown unit or keyword %p is refused",
     (bad) => {
       const raw =
-        bad.startsWith("v") || bad === "ch" || bad === "pt" ? { value: 1, unit: bad } : bad;
+        bad.startsWith("v") || bad === "ex" || bad === "pt" ? { value: 1, unit: bad } : bad;
       expect(StyleProps.safeParse({ width: raw }).success).toBe(false);
       expect(styleDeclarations({ width: raw }).rejected).toEqual(["width"]);
     },
@@ -164,8 +164,8 @@ describe("style property map (W-017, R-012)", () => {
     expect(styleDeclarations({ [key]: raw }).rejected).toEqual([key]);
   });
 
-  test("W-088 Position: only offsets may be negative", () => {
-    for (const key of ["marginTop", "width", "gap"]) {
+  test("W-088 Position: only offsets (and margins, W-331) may be negative", () => {
+    for (const key of ["paddingTop", "width", "gap"]) {
       expect(StyleProps.safeParse({ [key]: len(-1) }).success).toBe(false);
       expect(styleDeclarations({ [key]: len(-1) }).rejected).toEqual([key]);
     }

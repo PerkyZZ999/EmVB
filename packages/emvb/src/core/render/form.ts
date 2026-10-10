@@ -7,6 +7,9 @@ import type { VNode } from "./vnode.ts";
 
 export const FORMS_SUBMIT_PATH = "/_emdash/api/plugins/emdash-forms/submit";
 
+/** What a paused form shows on the page (W-326). */
+export const FORM_PAUSED_TEXT = "This form isn't accepting responses right now.";
+
 const honeypot = (inputId: string): VNode => ({
   tag: "div",
   attrs: {
@@ -62,6 +65,20 @@ export function renderForm(
         "data-emvb-form-unbound": "",
       },
       children: ["Bind a form in settings to preview it here."],
+    };
+  }
+  // W-326: a paused form says so, in place of fields that can't be sent (the forms plugin refuses
+  // its submissions), with no form, inputs or Submit button.
+  if (ctx.definitions.get(formId)?.status === "paused") {
+    return {
+      tag: "div",
+      attrs: {
+        ...attrs,
+        class: `${attrs.class} emvb-form-paused`.trim(),
+        role: "status",
+        "data-emvb-form-paused": "",
+      },
+      children: [{ tag: "p", attrs: {}, children: [FORM_PAUSED_TEXT] }],
     };
   }
   // W-203: the forms client puts this label back on the button after each submit, so it must be

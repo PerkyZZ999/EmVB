@@ -16,7 +16,8 @@ export const ColorValue = z.union([
   VariableRef,
 ]);
 
-const LengthUnit = z.enum(["px", "rem", "em", "%", "vw", "vh"]);
+/** `ch` since W-331: the width of a "0", for readable line lengths such as 65ch. */
+const LengthUnit = z.enum(["px", "rem", "em", "%", "vw", "vh", "ch"]);
 
 export const Length = z.strictObject({
   value: z.number().finite().min(0).max(10_000),
@@ -29,7 +30,10 @@ export const LengthValue = z.union([Length, VariableRef]);
 /** Width, height and margins may also be `auto` (W-088). */
 const SizeValue = z.union([Length, VariableRef, z.literal("auto")]);
 
-/** Top, right, bottom and left may be negative, `auto` or a spacing variable (W-088). */
+/**
+ * Top, right, bottom and left may be negative, `auto` or a spacing variable (W-088); so may
+ * margins since W-331, to pull an element over its neighbour.
+ */
 const OffsetValue = z.union([
   z.strictObject({ value: z.number().finite().min(-10_000).max(10_000), unit: LengthUnit }),
   VariableRef,
@@ -105,10 +109,10 @@ export const StyleProps = z.strictObject({
   paddingRight: LengthValue.optional(),
   paddingBottom: LengthValue.optional(),
   paddingLeft: LengthValue.optional(),
-  marginTop: SizeValue.optional(),
-  marginRight: SizeValue.optional(),
-  marginBottom: SizeValue.optional(),
-  marginLeft: SizeValue.optional(),
+  marginTop: OffsetValue.optional(),
+  marginRight: OffsetValue.optional(),
+  marginBottom: OffsetValue.optional(),
+  marginLeft: OffsetValue.optional(),
   position: z.enum(["static", "relative", "absolute", "fixed", "sticky"]).optional(),
   top: OffsetValue.optional(),
   right: OffsetValue.optional(),

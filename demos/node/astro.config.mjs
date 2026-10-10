@@ -23,7 +23,7 @@ export default defineConfig({
         directory: "./uploads",
         baseUrl: "/_emdash/api/media/file",
       }),
-      plugins: [formsPlugin(), emvb()],
+      plugins: [formsPlugin(), emvb({ canvasStyles: ["/site.css"] })],
     }),
   ],
   devToolbar: { enabled: false },

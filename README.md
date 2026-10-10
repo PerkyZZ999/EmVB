@@ -2,21 +2,22 @@
 
 [![Website](https://img.shields.io/badge/website-emvb.dev-1f6feb)](https://emvb.dev) [![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
 
-A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0–1.2. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS, with no EmVB JavaScript on the public site except the optional popups and tabs scripts, which load only on pages that have a popup or Tabs. Forms use the forms plugin's own script. It runs on Node (SQLite) and Cloudflare Workers (D1).
+A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emdash) 1.0–1.2. Pages are built in a full-screen editor inside the EmDash admin and published as plain HTML and CSS. The public site loads no EmVB JavaScript except the optional popups, floats, tabs and menu scripts, and only on pages that use them. Forms use the forms plugin's own script. It runs on Node (SQLite) and Cloudflare Workers (D1).
 
 **Website:** <https://emvb.dev>.
 
-**Status:** 0.3.0 is on npm as [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb). The MVP is complete.
+**Status:** 0.3.0 is on npm as [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb). This repository's main is ahead of that release (schema 14, see the Unreleased section of [CHANGELOG.md](CHANGELOG.md)). The MVP (implementation slices S1–S6) is complete.
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
 ## Features
 
 - **Editor:** drag, drop and nest elements; edit text on the canvas; copy, paste, undo and redo; preview desktop, tablet and mobile.
-- **Elements:** containers (flexbox or CSS Grid), sections, headings, text, lists, links, buttons, images, video, icons (a library of about 14,400 from Lucide, Font Awesome Free, Tabler and Remix; see [the icon library guide](docs/guides/icon-library.md)), dividers, spacers, tabs, accordions, popups, forms, and post fields for theme templates.
-- **Styling:** Hover, Focus and Active states with transitions, per-device styles and hide on device, backgrounds with gradients and overlays, entrance animations, custom attributes.
-- **Site styles:** variables, classes in a clear priority order, tag defaults, changes staged until **Publish styles**, import and export as JSON.
-- **Theme Builder:** headers, footers, Error 404, Search Results, Single Page, Single Post, Archive, Loop Item and popups, with display conditions.
+- **Elements:** containers (flexbox or CSS Grid), sections, headings, text, lists, links, buttons, images, video, icons (a library of about 14,400 from Lucide, Font Awesome Free, Tabler and Remix; see [the icon library guide](docs/guides/icon-library.md)), dividers, spacers, tabs, accordions, menus, popups, floating bars, forms, loops, pagination, and post fields for theme templates.
+- **Styling:** Hover, Focus and Active states with transitions, per-device styles and hide on device, backgrounds (image, video, gradient, overlay), entrance animations and scroll motion, custom attributes.
+- **Site styles:** variables (including fluid type and spacing), classes in a clear priority order, tag defaults, text direction, changes staged until **Publish styles**, import and export as JSON.
+- **Theme Builder:** headers, footers, Error 404, Search Results, Single Page, Single Post, Archive, Loop Item, synced sections, page templates, popups and floating bars, with display conditions.
+- **Live data and personalization:** bind text and images to a post, a site setting or a URL parameter; collection Loops; visitor rules (country, device, new or returning, hours, and segments the host passes); edge A/B tests decided on the server.
 
 More screenshots are in [`site/public/screenshots/`](site/public/screenshots/), and the project site in `site/` shows them all.
 

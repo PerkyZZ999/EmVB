@@ -1,4 +1,5 @@
 import {
+  AUDIENCE_SEGMENT,
   abCookieName,
   collectAbTests,
   deviceFromUserAgent,
@@ -109,11 +110,52 @@ function countryOf(astro: VisitorAstro): string | undefined {
 }
 
 /**
+ * What the host site knows about this visitor (W-329), passed as
+ * `resolveEmVBPage(Astro, { visitor })` or `resolveThemeParts(Astro, ctx, { visitor })`:
+ * segments (`member`, `pro`) that Visitors rules match, and facts that replace what EmVB detects.
+ */
+export type HostVisitor = {
+  segments?: readonly string[];
+  country?: string;
+  device?: VisitorInfo["device"];
+  returning?: boolean;
+};
+
+const MAX_SEGMENTS = 50;
+
+/** The host's visitor facts EmVB can use; bad values are left out (W-329). */
+export function hostVisitorFacts(host: HostVisitor | undefined): Partial<VisitorInfo> {
+  if (!host || typeof host !== "object") return {};
+  const facts: Partial<VisitorInfo> = {};
+  if (Array.isArray(host.segments)) {
+    const segments = [
+      ...new Set(
+        host.segments
+          .filter((s): s is string => typeof s === "string")
+          .map((s) => s.trim().toLowerCase())
+          .filter((s) => AUDIENCE_SEGMENT.test(s)),
+      ),
+    ].slice(0, MAX_SEGMENTS);
+    facts.segments = segments;
+  }
+  const country = typeof host.country === "string" ? host.country.trim().toUpperCase() : "";
+  if (COUNTRY.test(country)) facts.country = country;
+  if (host.device === "mobile" || host.device === "tablet" || host.device === "desktop")
+    facts.device = host.device;
+  if (typeof host.returning === "boolean") facts.returning = host.returning;
+  return facts;
+}
+
+/**
  * What the server knows about this visitor, for visitor-aware elements (W-313): country from
  * the edge, device from the User-Agent, new or returning from a first-party cookie, and the time.
- * Only read when the layout has a visitor rule.
+ * Facts the host passes (W-329) win over detected ones. Only read when the layout has a rule.
  */
-export function visitorFor(layout: Layout | null, astro: VisitorAstro): VisitorInfo | undefined {
+export function visitorFor(
+  layout: Layout | null,
+  astro: VisitorAstro,
+  host?: HostVisitor,
+): VisitorInfo | undefined {
   if (!layout || !layoutUsesAudience(layout)) return undefined;
   const headers = astro.request?.headers;
   const visitor: VisitorInfo = { now: Date.now() };
@@ -138,5 +180,5 @@ export function visitorFor(layout: Layout | null, astro: VisitorAstro): VisitorI
     }
   }
   markPersonalized(astro);
-  return visitor;
+  return { ...visitor, ...hostVisitorFacts(host) };
 }

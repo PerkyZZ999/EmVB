@@ -3,7 +3,7 @@ import type { Layout } from "../../../core/index.ts";
 import { treeKey } from "./LayersPanel.tsx";
 
 const layout = {
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",

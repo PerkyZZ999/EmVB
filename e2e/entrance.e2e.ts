@@ -16,7 +16,7 @@ test("an entrance animation is in the published CSS and reduced motion turns it 
     request,
     text,
     {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

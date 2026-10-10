@@ -29,7 +29,7 @@ import { EmptyCanvas } from "./canvas/EmptyCanvas.tsx";
 import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog, RevertDialog } from "./dialogs.tsx";
 import { discardDraft } from "../content-api.ts";
 import { EditorOverlay } from "./EditorOverlay.tsx";
-import { useEditorHost } from "./host.ts";
+import { useCanvasStyles, useEditorHost } from "./host.ts";
 import { LiveDataProvider, siteOrigin, useLiveData } from "./live-data.tsx";
 import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./panels/ElementPanel.tsx";
@@ -153,6 +153,7 @@ function EditorApp({
   const state = history.present;
   const dirty = isDirty(state);
   const host = useEditorHost();
+  const canvasStyles = useCanvasStyles(fetcher);
   const { exit } = host;
   const saver = useSave(fetcher, state, dispatch, collection);
   const toasts = React.useMemo(() => createKumoToastManager(), []);
@@ -475,6 +476,7 @@ function EditorApp({
                   <CanvasFrame
                     vnode={rendered.vnode}
                     css={rendered.css}
+                    canvasStyles={canvasStyles}
                     layout={state.page.layout}
                     device={device}
                     zoom={zoom}

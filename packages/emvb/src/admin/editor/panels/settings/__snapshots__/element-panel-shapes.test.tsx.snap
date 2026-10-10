@@ -6658,22 +6658,42 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
           span aria-hidden="true"
             svg
         input id="id-13" tabindex="-1" aria-hidden="true" value="newest"
+    div
+      label id="id-14" for="id-15"
+        span
+          "Link pattern"
+      input.emvb-field id="id-15" data-emvb-field="permalink" value="" aria-labelledby="id-14"
+    div
+      label id="id-16" for="id-17"
+        span
+          "Image field"
+      input.emvb-field id="id-17" data-emvb-field="imageField" value="" aria-labelledby="id-16"
+    div
+      label id="id-18" for="id-19"
+        span
+          "Excerpt field"
+      input.emvb-field id="id-19" data-emvb-field="excerptField" value="" aria-labelledby="id-18"
+    div
+      label id="id-20" for="id-21"
+        span
+          "Only entries where"
+      input.emvb-field id="id-21" data-emvb-field="filter" value="" aria-labelledby="id-20"
     div data-emvb-loop-item-bind="manual"
       div
-        label id="id-14" for="id-15"
+        label id="id-22" for="id-23"
           span
             "Loop Item part id"
-        input.emvb-field.emvb-mono id="id-15" value="" aria-labelledby="id-14"
+        input.emvb-field.emvb-mono id="id-23" value="" aria-labelledby="id-22"
       p.emvb-helper
         "No Loop Item theme parts yet. Paste an id, or"
         a href="/_emdash/admin/plugins/emvb/theme"
           "create one in Theme Builder"
         "."
     div
-      label id="id-16" for="id-17"
+      label id="id-24" for="id-25"
         span
           "Posts per page"
-      input.emvb-field.emvb-mono id="id-17" data-emvb-field="perPage" value="" aria-labelledby="id-16"
+      input.emvb-field.emvb-mono id="id-25" data-emvb-field="perPage" value="" aria-labelledby="id-24"
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"

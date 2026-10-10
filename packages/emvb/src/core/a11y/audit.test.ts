@@ -10,7 +10,7 @@ const h = (id: string, level: number, extra: Partial<LayoutNode> = {}) =>
   ({ id, type: "heading", props: { text: "T", level }, ...extra }) as LayoutNode;
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const rules = (layout: Layout) =>

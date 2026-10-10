@@ -3,7 +3,7 @@ import type { Layout } from "../core/index.ts";
 import { abArmsFor, visitorFor } from "./visitor.ts";
 
 const layout = {
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -76,7 +76,7 @@ describe("server-side A/B picks (W-312)", () => {
 
 describe("server-side visitor facts (W-313)", () => {
   const withAudience = {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: "root0001",
       type: "container",
@@ -136,5 +136,51 @@ describe("server-side visitor facts (W-313)", () => {
     const { astro, headers } = astroWith();
     expect(visitorFor(layout, astro)).toBeUndefined();
     expect(headers.get("Cache-Control")).toBeNull();
+  });
+});
+
+describe("the host's visitor facts (W-329)", () => {
+  const ruled = {
+    schemaVersion: 14,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "head0003",
+          type: "heading",
+          props: { text: "Members", level: 2 },
+          audience: { segments: ["member"] },
+        },
+      ],
+    },
+  } as Layout;
+
+  test("segments are cleaned (lowercase, valid names, once each); facts replace detected ones", async () => {
+    const { hostVisitorFacts } = await import("./visitor.ts");
+    expect(
+      hostVisitorFacts({
+        segments: ["Member", "pro", "pro", "no spaces", "<x>", 7 as never],
+        country: "ca",
+        device: "tablet",
+        returning: true,
+      }),
+    ).toEqual({ segments: ["member", "pro"], country: "CA", device: "tablet", returning: true });
+    expect(hostVisitorFacts({ country: "Canada", device: "tv" as never })).toEqual({});
+    expect(hostVisitorFacts(undefined)).toEqual({});
+  });
+
+  test("visitorFor adds them over what EmVB detects, only when the layout has a rule", () => {
+    const { astro } = astroWith();
+    const request = new Request("https://example.com/", {
+      headers: { "cf-ipcountry": "US", "user-agent": "Mozilla/5.0 (iPhone) Mobile" },
+    });
+    const withRequest = { ...astro, request };
+    const visitor = visitorFor(ruled, withRequest, { segments: ["member"], country: "CA" });
+    expect(visitor?.segments).toEqual(["member"]);
+    expect(visitor?.country).toBe("CA");
+    expect(visitor?.device).toBe("mobile");
+    expect(visitorFor(layout, withRequest, { segments: ["member"] })).toBeUndefined();
   });
 });

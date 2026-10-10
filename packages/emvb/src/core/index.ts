@@ -47,6 +47,7 @@ export {
   AB_TEST_NAME,
   Audience,
   AUDIENCE_DEVICES,
+  AUDIENCE_SEGMENT,
   LOOP_DISPLAYS,
   LOOP_ORDERS,
   SectionNode,
@@ -371,6 +372,8 @@ export {
   collectLoopItemPartIds,
   collectSectionPartIds,
   collectCollectionLoops,
+  loopPermalink,
+  parseLoopFilter,
   type CollectionLoop,
   resolvePostForRender,
   resolvePostsForLoop,
@@ -489,3 +492,4 @@ export {
   type SharedPage,
   type ShareRead,
 } from "./share/link.ts";
+export { canvasStyleUrls, MAX_CANVAS_STYLES } from "./canvas-styles.ts";

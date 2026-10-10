@@ -63,7 +63,7 @@ const place = (box: Box) => ({
   height: box.height,
 });
 
-/** Hover and selection outlines plus the floating label. */
+/** Hover and selection outlines plus the floating label (DESIGN.md, canvas overlay). */
 export function SelectionOverlay({
   hover,
   selected,

@@ -58,9 +58,9 @@ async function pickUnit(unit: string) {
 
 describe("length field unit selector (W-088)", () => {
   test("each property offers its own units, and only sizes and margins offer auto", async () => {
-    expect(unitsFor("width")).toEqual(["px", "%", "rem", "em", "vw", "vh", "auto"]);
+    expect(unitsFor("width")).toEqual(["px", "%", "rem", "em", "vw", "vh", "ch", "auto"]);
     expect(unitsFor("marginLeft")).toContain("auto");
-    expect(unitsFor("minWidth")).toEqual(["px", "%", "rem", "em", "vw", "vh"]);
+    expect(unitsFor("minWidth")).toEqual(["px", "%", "rem", "em", "vw", "vh", "ch"]);
     expect(unitsFor("paddingTop")).not.toContain("auto");
     expect(unitsFor("letterSpacing")).toEqual(["px", "rem", "em"]);
     expect(unitsFor("fontSize")).toEqual(["px", "rem", "em", "%", "vw"]);
@@ -192,7 +192,7 @@ describe("length field messages for other units (W-262)", () => {
   test("a number with a unit the field doesn't take lists the units it does", () => {
     expect(parseLengthDraft("100dvh", "height", "px")).toEqual({
       ok: false,
-      message: "Height takes px, %, rem, em, vw or vh.",
+      message: "Height takes px, %, rem, em, vw, vh or ch.",
     });
     expect(parseLengthDraft("12pt", "fontSize", "px")).toEqual({
       ok: false,

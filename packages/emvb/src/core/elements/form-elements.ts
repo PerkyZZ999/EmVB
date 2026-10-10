@@ -50,6 +50,7 @@ const FORM_FIELD_CSS =
 export const form: ElementDefinition<FormNode> = {
   baseCss:
     ".emvb-form{display:flex;flex-direction:column;gap:12px;min-width:0}.emvb-form-unbound{min-height:48px;padding:12px;color:var(--text-color-kumo-subtle,#666);background:var(--color-kumo-tint,#eee)}.ec-form-hp{position:absolute;left:-9999px}" +
+    ":where(.emvb-form-paused){padding:12px 16px;border:1px solid rgba(128,128,128,.5);border:1px solid color-mix(in srgb,currentColor 25%,transparent);border-radius:6px}:where(.emvb-form-paused p){margin:0}" +
     FORM_FIELD_CSS,
   defaults: () => ({ type: "form", props: { formId: "" }, children: [] }),
   descriptor: fieldDescriptor("form", "Form", [

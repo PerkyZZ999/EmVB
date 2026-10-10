@@ -3,13 +3,16 @@ import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /**
+ * 14 since W-329: optional visitor `segments` in an element's audience (the host names them);
+ * W-330 Loop permalink, image, excerpt and filter options; W-331 `ch` lengths and negative
+ * margins. Every other value is unchanged.
  * 13 since W-307: optional `bind` on a node (live data bindings); W-308 collection Loops and the
  * Loop's Empty state element. Every other value is unchanged.
  * 12 since W-160: gradient type, stop locations, and up to 10 stops. v11 gradients
  * (`{ angle, from, to }`) become a linear gradient on read.
  * 11 since W-156 and W-157 (D-045): the layout Section element and an editor-only node label.
  */
-export const LAYOUT_SCHEMA_VERSION = 13;
+export const LAYOUT_SCHEMA_VERSION = 14;
 
 export const NodeId = z
   .string()
@@ -96,6 +99,9 @@ export const Variant = z.strictObject({
 export type Variant = z.infer<typeof Variant>;
 
 export const AUDIENCE_DEVICES = ["mobile", "tablet", "desktop"] as const;
+/** A visitor segment name the host passes and a Visitors rule matches (W-329). */
+export const AUDIENCE_SEGMENT = /^[a-z0-9][a-z0-9_-]{0,39}$/;
+const SEGMENT_HINT = "Segments are lowercase letters, digits, - or _, e.g. member";
 
 /**
  * Who sees an element (W-313): visitors from these countries, on these devices, new or
@@ -123,6 +129,11 @@ export const Audience = z.strictObject({
     .regex(/^[A-Za-z][A-Za-z0-9_+-]*(\/[A-Za-z0-9_+-]+){0,2}$/)
     .max(64)
     .optional(),
+  /**
+   * Visitor segments the host passes (W-329), e.g. `member`, `pro`: the rule matches a visitor
+   * in any of them. Lowercase letters, digits, `-` and `_`.
+   */
+  segments: z.array(z.string().regex(AUDIENCE_SEGMENT, SEGMENT_HINT)).min(1).max(20).optional(),
   hide: z.boolean().optional(),
 });
 export type Audience = z.infer<typeof Audience>;
@@ -486,6 +497,15 @@ export const PostLinkNode = leafNode(
  */
 /** How a Loop lays out its items (W-308): one design, shown as a list, a grid or cards. */
 export const LOOP_DISPLAYS = ["list", "grid", "cards"] as const;
+/** A collection field's slug, e.g. `photo` (W-330). */
+const FIELD_SLUG = /^[a-z][a-z0-9_]{0,63}$/;
+const FIELD_SLUG_HINT = "Use the field's slug, e.g. photo";
+/** A site path with `{slug}` or `{id}`, and no other placeholders (W-330). */
+export const LOOP_PERMALINK =
+  /^(?=.*\{(?:slug|id)\})\/(?!\/)(?:[A-Za-z0-9._~/-]|\{slug\}|\{id\})*$/;
+/** `field=value` pairs separated by `;` (W-330). Values have no `;`, `=` or angle brackets. */
+export const LOOP_FILTER =
+  /^\s*[a-z][a-z0-9_]{0,63}\s*=\s*[^;=<>]{1,100}?(?:\s*;\s*[a-z][a-z0-9_]{0,63}\s*=\s*[^;=<>]{1,100}?)*\s*;?\s*$/;
 /** Which entries a collection Loop shows first (W-308). */
 export const LOOP_ORDERS = ["newest", "oldest", "title"] as const;
 
@@ -509,6 +529,28 @@ export const LoopNode = parentNode(
     display: z.enum(LOOP_DISPLAYS).optional(),
     /** Columns for grid and cards, 1–6 (one column on phones). Unset = 3. */
     columns: z.number().int().min(1).max(6).optional(),
+    /**
+     * Where each entry links (W-330), e.g. `/team/{slug}`; `{slug}` and `{id}` are filled in.
+     * Unset = `/<collection>/{slug}`.
+     */
+    permalink: z
+      .string()
+      .max(200)
+      .regex(LOOP_PERMALINK, "A site path with {slug} or {id}, e.g. /team/{slug}")
+      .optional(),
+    /** The entry field holding the image Post Image shows (W-330). Unset = featured_image. */
+    imageField: z.string().regex(FIELD_SLUG, FIELD_SLUG_HINT).optional(),
+    /** The entry field Post Excerpt shows (W-330). Unset = excerpt. */
+    excerptField: z.string().regex(FIELD_SLUG, FIELD_SLUG_HINT).optional(),
+    /**
+     * Only entries where `field=value` (W-330), pairs separated by `;`, at most 5. A taxonomy name
+     * filters by term; the same field twice matches either value.
+     */
+    filter: z
+      .string()
+      .max(300)
+      .regex(LOOP_FILTER, "Use field=value pairs separated by ;")
+      .optional(),
   }),
 );
 

@@ -19,7 +19,7 @@ const iconNode = (props: Record<string, unknown>): LayoutNode =>
   }) as LayoutNode;
 
 const layoutWith = (node: LayoutNode) => ({
-  schemaVersion: 13 as const,
+  schemaVersion: 14 as const,
   root: { id: "root0001", type: "container" as const, props: {}, children: [node] },
 });
 

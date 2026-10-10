@@ -31,7 +31,7 @@ test("bindings read URL parameters and site settings, and Loops list real entrie
     request,
     `Live ${tag}`,
     {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

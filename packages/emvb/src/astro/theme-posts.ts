@@ -1,4 +1,4 @@
-import type { ThemePostFields } from "../core/index.ts";
+import { loopPermalink, type ThemePostFields } from "../core/index.ts";
 
 type MediaLike = {
   src?: unknown;
@@ -42,7 +42,15 @@ export function entryTimestamp(value: unknown): string | undefined {
  */
 export function themePostFromEntry(
   entry: { id?: string; data?: Record<string, unknown> } | Record<string, unknown>,
-  options: { permalinkPrefix?: string } = {},
+  options: {
+    permalinkPrefix?: string;
+    /** W-330: a Loop's link pattern, e.g. `/team/{slug}`. */
+    permalinkPattern?: string;
+    /** W-330: the field with the entry's image, instead of `featured_image`. */
+    imageField?: string;
+    /** W-330: the field with the entry's excerpt, instead of `excerpt`. */
+    excerptField?: string;
+  } = {},
 ): ThemePostFields | null {
   const data =
     "data" in entry && entry.data && typeof entry.data === "object"
@@ -52,11 +60,14 @@ export function themePostFromEntry(
   const slug = typeof data["slug"] === "string" ? data["slug"] : id;
   if (!slug && !id) return null;
   const title = typeof data["title"] === "string" ? data["title"] : "";
-  const excerpt = typeof data["excerpt"] === "string" ? data["excerpt"] : "";
+  const excerptValue = data[options.excerptField ?? "excerpt"];
+  const excerpt = typeof excerptValue === "string" ? excerptValue : "";
   const content = data["content"] ?? "";
   const prefix = options.permalinkPrefix ?? "/posts";
-  const permalink = `${prefix.replace(/\/$/, "")}/${slug || id}`;
-  const media = mediaFieldsFrom(data["featured_image"]);
+  const permalink = options.permalinkPattern
+    ? loopPermalink(options.permalinkPattern, { slug: slug || id, id: id || slug })
+    : `${prefix.replace(/\/$/, "")}/${slug || id}`;
+  const media = mediaFieldsFrom(data[options.imageField ?? "featured_image"]);
   // W-303: EmDash's own publish date is `data.publishedAt`, a `Date`; a custom field may be text.
   const publishedAt = ["published_at", "publishedAt", "date"]
     .map((key) => entryTimestamp(data[key]))

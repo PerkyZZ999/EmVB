@@ -1,7 +1,7 @@
 {
   "$schema": "https://fallow.tools/schema.json",
   "entry": ["demos/*/src/live.config.ts"],
-  "ignorePatterns": ["spikes/**", "site/**"],
+  "ignorePatterns": ["spikes/**", "site/**", "demos/*/public/**"],
   "ignoreDependencies": [
     "@fortawesome/fontawesome-free",
     "@tabler/icons",

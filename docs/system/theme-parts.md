@@ -88,7 +88,7 @@ Public HTML stays JS-free (R-031) except in two cases: a matching popup loads `e
 |---|---|
 | `post-title` | Escaped title as `h1`–`h6` |
 | `post-excerpt` | Escaped excerpt paragraph (omitted if empty), cut to `maxWords` words with "…" when set |
-| `post-content` | Portable Text / string → safe VNodes (`p`/`h*`), escaped text |
+| `post-content` | Portable Text / string → safe blocks: paragraphs, headings, lists, quotes, links, bold, italic, code, underline, strike-through and line breaks. Images, embeds, custom blocks and raw HTML are left out; text is escaped (W-328) |
 | `post-image` | `<img>` when a media `src`/`url` exists (sanitized) |
 | `post-link` | Permalink `<a>`; blank text uses the title |
 | `loop` | Repeats item template for each archive post; `perPage` (1–50, empty = 20) sets the archive page size (W-221) |
@@ -104,7 +104,7 @@ Public HTML stays JS-free (R-031) except in two cases: a matching popup loads `e
 
 ## Public render
 
-Hosts call `resolveThemeParts(Astro, ctx)` from `emvb/astro`. Return value:
+Hosts call `resolveThemeParts(Astro, ctx, options)` from `emvb/astro`. `options.visitor` is the same object `resolveEmVBPage` takes (segments, and country, device or returning when the site knows better, W-329). Return value:
 
 - `header` / `footer` — chrome (S7a)
 - `content` — body template when Error 404 / Search / Single Page / Single Post / Archive wins

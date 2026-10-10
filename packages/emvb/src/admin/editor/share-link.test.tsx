@@ -7,7 +7,7 @@ import { ShareLinkDialog, siteOnlyMedia } from "./ShareLink.tsx";
 afterEach(cleanup);
 
 const layout = {
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",

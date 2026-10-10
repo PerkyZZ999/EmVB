@@ -8,7 +8,7 @@ afterEach(cleanup);
 
 const layoutWith = (text: string, extra = false): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: "root0001",
       type: "container",

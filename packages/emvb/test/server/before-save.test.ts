@@ -87,7 +87,7 @@ describe("content:beforeSave, called directly (R-006, D-020)", () => {
 describe("elements in the wrong place are refused at save (W-225)", () => {
   test("a menu item outside a Menu is refused with the editor's reason", async () => {
     const layout = {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

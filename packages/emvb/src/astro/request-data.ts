@@ -10,7 +10,7 @@ import {
   type VisitorInfo,
 } from "../core/index.ts";
 import { themePostFromEntry } from "./theme-posts.ts";
-import { abArmsFor, visitorFor, type VisitorAstro } from "./visitor.ts";
+import { abArmsFor, visitorFor, type HostVisitor, type VisitorAstro } from "./visitor.ts";
 
 type RequestData = {
   site?: Record<string, string>;
@@ -35,10 +35,17 @@ async function loopEntries(loop: CollectionLoop): Promise<ThemePostFields[]> {
       status: "published",
       limit: loop.limit,
       orderBy: ORDER_BY[loop.order],
+      // W-330: field and taxonomy filters; EmDash tells taxonomy names from fields itself.
+      ...(loop.where ? { where: loop.where } : {}),
     } as never);
     return (result.entries ?? [])
       .map((entry) =>
-        themePostFromEntry(entry as never, { permalinkPrefix: `/${loop.collection}` }),
+        themePostFromEntry(entry as never, {
+          permalinkPrefix: `/${loop.collection}`,
+          ...(loop.permalink ? { permalinkPattern: loop.permalink } : {}),
+          ...(loop.imageField ? { imageField: loop.imageField } : {}),
+          ...(loop.excerptField ? { excerptField: loop.excerptField } : {}),
+        }),
       )
       .filter((post): post is ThemePostFields => post !== null);
   } catch {
@@ -66,6 +73,7 @@ export async function bindingDataFor(
   url: URL,
   astro?: VisitorAstro,
   templates: readonly Layout[] = [],
+  options: { visitor?: HostVisitor } = {},
 ): Promise<RequestData> {
   if (!page) return {};
   const layout = withTemplates(page, templates);
@@ -74,7 +82,7 @@ export async function bindingDataFor(
   const abArms = astro ? abArmsFor(layout, astro) : undefined;
   if (abArms) data.abArms = abArms;
   // W-313: what the server knows about the visitor, for visitor-aware elements.
-  const visitor = astro ? visitorFor(layout, astro) : undefined;
+  const visitor = astro ? visitorFor(layout, astro, options.visitor) : undefined;
   if (visitor) data.visitor = visitor;
   const loops = collectCollectionLoops(layout);
   if (loops.length > 0) {

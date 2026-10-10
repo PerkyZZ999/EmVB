@@ -8,7 +8,7 @@ import { renderPage } from "./index.ts";
 const design = emptyDesign();
 const page = (props: Record<string, unknown> = {}): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: "root0001",
       type: "container",
@@ -68,7 +68,7 @@ describe("Pagination element (W-222)", () => {
 
   test("inside a Loop's item it renders nothing on the page and a hint in the editor (W-228)", () => {
     const inLoop = {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

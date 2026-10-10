@@ -4,7 +4,7 @@ import { bindingDataFor } from "./request-data.ts";
 
 const page = (children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 
@@ -84,5 +84,25 @@ describe("W-312/W-313 request data covers synced sections", () => {
     expect(data).toEqual({});
     expect(cookies.jar.size).toBe(0);
     expect(response.headers.get("Cache-Control")).toBeNull();
+  });
+});
+
+describe("W-329 the host's visitor facts reach the request data", () => {
+  test("segments from the host are in data.visitor, so Visitors rules can match them", async () => {
+    const { astro } = astroFor("https://site.test/");
+    const members = page([
+      {
+        id: "text0003",
+        type: "text",
+        props: { text: "Members only" },
+        audience: { segments: ["member"] },
+      },
+    ] as never);
+    const data = await bindingDataFor(members, astro.url, astro as never, [], {
+      visitor: { segments: ["member", "pro"] },
+    });
+    expect(data.visitor?.segments).toEqual(["member", "pro"]);
+    const none = await bindingDataFor(members, astro.url, astro as never);
+    expect(none.visitor?.segments).toBeUndefined();
   });
 });

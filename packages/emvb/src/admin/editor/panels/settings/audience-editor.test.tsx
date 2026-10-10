@@ -64,3 +64,26 @@ describe("Visitors editor (W-313)", () => {
     expect(document.querySelector("[data-emvb-variant-editor]")).toBeNull();
   });
 });
+
+describe("Visitors segments (W-329)", () => {
+  test("segment text is cleaned to unique lowercase names", async () => {
+    const { parseSegments } = await import("./AudienceEditor.tsx");
+    expect(parseSegments("Member, pro;vip  member no!pe")).toEqual(["member", "pro", "vip"]);
+  });
+
+  test("typing segments stores them on blur; clearing removes the rule", async () => {
+    let node = { ...heading, audience: {} } as LayoutNode;
+    const onChange = (next: LayoutNode) => {
+      node = next;
+    };
+    await mount(<AudienceEditor node={node} isRoot={false} onChange={onChange} />);
+    const input = q("[data-emvb-audience-segments]") as HTMLInputElement;
+    await act(async () => change(input, "Member, pro"));
+    await act(async () => input.dispatchEvent(new FocusEvent("focusout", { bubbles: true })));
+    expect(node.audience).toEqual({ segments: ["member", "pro"] });
+    await rerender(<AudienceEditor node={node} isRoot={false} onChange={onChange} />);
+    await act(async () => change(input, ""));
+    await act(async () => input.dispatchEvent(new FocusEvent("focusout", { bubbles: true })));
+    expect(node.audience).toEqual({});
+  });
+});

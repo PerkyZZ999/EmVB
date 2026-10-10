@@ -15,7 +15,7 @@ const heading = (id: string, text: string, variant?: LayoutNode["variant"]) =>
   }) as LayoutNode;
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const ab = page(

@@ -1,0 +1,11 @@
+/* The demo site's base styles. The EmVB editor canvas loads this file too, through
+   emvb({ canvasStyles: ["/site.css"] }) in astro.config, so pages look the same there (W-327). */
+:root {
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+}

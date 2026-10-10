@@ -20,7 +20,7 @@ test.afterAll(async () => {
 });
 
 const layoutWith = (text: string, color?: string) => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -38,7 +38,7 @@ const layoutWith = (text: string, color?: string) => ({
 });
 
 const layoutWithSpacing = (text: string, spacingId: string) => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -49,7 +49,7 @@ const layoutWithSpacing = (text: string, spacingId: string) => ({
 });
 
 const layoutWithClass = (textA: string, textB: string, classId: string) => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -239,7 +239,7 @@ test("a published page with an unknown node still renders its other elements wit
   const slug = `unk-${unique()}`;
   const text = `Known ${slug}`;
   const layout = {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: "root0001",
       type: "container",
@@ -280,7 +280,7 @@ test("Size, Position and Effects styles, local and from a class, render on the p
     const slug = `w088-${unique()}`;
     const text = `Sections ${slug}`;
     const layout = {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",
@@ -371,7 +371,7 @@ test("hover, focus and active states from local styles and a class work on the p
   try {
     const slug = `w089-${unique()}`;
     const layout = {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

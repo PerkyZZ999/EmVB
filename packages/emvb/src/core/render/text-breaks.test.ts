@@ -4,7 +4,7 @@ import { renderPage } from "./index.ts";
 
 const page = (text: string): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: "root0001",
       type: "container",

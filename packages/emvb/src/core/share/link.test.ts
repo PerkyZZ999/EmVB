@@ -72,7 +72,7 @@ describe("W-321 shareable playground links", () => {
 
   test("W-321 the page is checked like a saved one", async () => {
     const bad = await packRaw(
-      JSON.stringify({ t: "x", l: { schemaVersion: 13, root: { id: "x", type: "nope" } } }),
+      JSON.stringify({ t: "x", l: { schemaVersion: 14, root: { id: "x", type: "nope" } } }),
     );
     expect(await decodeSharedPage(bad)).toMatchObject({ ok: false, reason: "invalid" });
     const xss = await packRaw(

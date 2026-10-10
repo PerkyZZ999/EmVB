@@ -190,7 +190,7 @@
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
-          "search": "plugins: [formsPlugin(), emvb()],",
+          "search": "plugins: [formsPlugin(), emvb({ canvasStyles: [\"/site.css\"] })],",
           "replace": "plugins: [formsPlugin()],"
         }
       ],
@@ -912,7 +912,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
-          "search": "      const revision = await saveDesign(fetcher, next, latest.current.designRevision);",
+          "search": "      const revision = await saveDesign(fetcher, next, baseRevision());",
           "replace": "      const revision = latest.current.designRevision;"
         }
       ],
@@ -3553,8 +3553,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/forms-api.ts",
-          "search": ".map(({ id, name, slug }) => ({ id, name, slug }))",
-          "replace": ".map((item) => item)"
+          "search": "status === \"paused\" ? { id, name, slug, paused: true } : { id, name, slug },",
+          "replace": "status === \"paused\" ? { id, name, slug, status, paused: true } : { id, name, slug, status },"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/forms-api.test.ts"],
@@ -3877,12 +3877,12 @@
     {
       "id": "W-086/portable-text-h5-heading",
       "requirement": "R-061",
-      "description": "Portable Text h5/h6 blocks render as headings instead of paragraphs",
+      "description": "Post Content turns h5, h6 and block quotes into paragraphs.",
       "edits": [
         {
           "file": "packages/emvb/src/core/theme/dynamic.ts",
-          "search": "new Set([\"h1\", \"h2\", \"h3\", \"h4\"])",
-          "replace": "new Set([\"h1\", \"h2\", \"h3\", \"h4\", \"h5\", \"h6\"])"
+          "search": "const BLOCK_STYLES = new Set([\"normal\", \"h1\", \"h2\", \"h3\", \"h4\", \"h5\", \"h6\", \"blockquote\"]);",
+          "replace": "const BLOCK_STYLES = new Set([\"normal\", \"h1\", \"h2\", \"h3\", \"h4\"]);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/theme/dynamic.test.ts"],
@@ -4098,7 +4098,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
-          "search": "          renderValue={(current: unknown) =>\n            capability.forms.find((form) => form.id === current)?.name ?? placeholder\n          }\n",
+          "search": "          renderValue={(current: unknown) => {\n            const form = capability.forms.find((item) => item.id === current);\n            return form ? formLabel(form) : placeholder;\n          }}\n",
           "replace": ""
         }
       ],
@@ -6266,8 +6266,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "const UNITS = new Set([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\"]);",
-          "replace": "const UNITS = new Set([\"px\", \"rem\", \"em\", \"%\", \"vh\"]);"
+          "search": "const UNITS = new Set([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\", \"ch\"]);",
+          "replace": "const UNITS = new Set([\"px\", \"rem\", \"em\", \"%\", \"vh\", \"ch\"]);"
         }
       ],
       "command": [
@@ -6346,7 +6346,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "  marginLeft: SizeValue.optional(),",
+          "search": "  marginLeft: OffsetValue.optional(),",
           "replace": "  marginLeft: LengthValue.optional(),"
         }
       ],
@@ -7166,8 +7166,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
-          "search": "const NEGATIVE = new Set<StyleKey>([\"top\", \"right\", \"bottom\", \"left\", \"letterSpacing\"]);",
-          "replace": "const NEGATIVE = new Set<StyleKey>([\"letterSpacing\"]);"
+          "search": "const NEGATIVE = new Set<StyleKey>([\n  \"top\",\n  \"right\",\n  \"bottom\",\n  \"left\",\n  \"letterSpacing\",",
+          "replace": "const NEGATIVE = new Set<StyleKey>([\n  \"letterSpacing\","
         }
       ],
       "command": [
@@ -7916,7 +7916,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7936,7 +7936,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7976,7 +7976,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 13;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 14;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -8236,7 +8236,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8256,7 +8256,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8276,7 +8276,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 13;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 14;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8285,9 +8285,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 13"
+        "layout and design are at version 14"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 13"
+      "expect": "\\(fail\\).*layout and design are at version 14"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8296,7 +8296,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 13;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 14;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8305,9 +8305,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 13"
+        "layout and design are at version 14"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 13"
+      "expect": "\\(fail\\).*layout and design are at version 14"
     },
     {
       "id": "D-032/node-states-refused",
@@ -10456,8 +10456,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/theme-posts.ts",
-          "search": "  const permalink = `${prefix.replace(/\\/$/, \"\")}/${slug || id}`;",
-          "replace": "  const permalink = `${prefix}/${slug || id}`;"
+          "search": "    : `${prefix.replace(/\\/$/, \"\")}/${slug || id}`;",
+          "replace": "    : `${prefix}/${slug || id}`;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/theme-posts.test.ts"],
@@ -13329,8 +13329,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "new Set([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\"])",
-          "replace": "new Set([\"px\", \"rem\", \"%\", \"vw\", \"vh\"])"
+          "search": "new Set([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\", \"ch\"])",
+          "replace": "new Set([\"px\", \"rem\", \"%\", \"vw\", \"vh\", \"ch\"])"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/sanitize/css-keywords.test.ts"],
@@ -17004,8 +17004,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/form-elements.ts",
-          "search": "left:-9999px}\" +\n    FORM_FIELD_CSS,",
-          "replace": "left:-9999px}\","
+          "search": ":where(.emvb-form-paused p){margin:0}\" +\n    FORM_FIELD_CSS,",
+          "replace": ":where(.emvb-form-paused p){margin:0}\","
         }
       ],
       "command": [
@@ -17467,7 +17467,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
-          "search": "const revision = await saveDesign(fetcher, next, latest.current.designRevision);",
+          "search": "const revision = await saveDesign(fetcher, next, baseRevision());",
           "replace": "const revision = latest.current.designRevision;"
         }
       ],
@@ -21670,8 +21670,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
-          "search": "\"left\", \"letterSpacing\"]",
-          "replace": "\"left\"]"
+          "search": "  \"left\",\n  \"letterSpacing\",\n",
+          "replace": "  \"left\",\n"
         }
       ],
       "command": [
@@ -25840,8 +25840,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "columns: z.number().int().min(1).max(6).optional(),\n  }),",
-          "replace": "columns: z.number().optional(),\n  }),"
+          "search": "columns: z.number().int().min(1).max(6).optional(),",
+          "replace": "columns: z.number().optional(),"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/collection-loop.test.ts"],
@@ -27040,6 +27040,432 @@
       "expect": "\\(fail\\).*W-324"
     },
     {
+      "id": "W-325/design-saves-overlap",
+      "requirement": "W-325",
+      "description": "Site styles saves run at once, so a quick second edit sends the old revision and is refused (409).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "  const changeDesign = (next: DesignSystem) => queueDesign(() => saveDesignNow(next));",
+          "replace": "  const changeDesign = (next: DesignSystem) => saveDesignNow(next);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/design-queue.test.tsx"],
+      "expect": "\\(fail\\).*W-325"
+    },
+    {
+      "id": "W-325/stale-revision",
+      "requirement": "W-325",
+      "description": "A queued save sends the revision the store had, not the one the last save made.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "await saveDesign(fetcher, next, baseRevision());",
+          "replace": "await saveDesign(fetcher, next, latest.current.designRevision);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/design-queue.test.tsx"],
+      "expect": "\\(fail\\).*W-325"
+    },
+    {
+      "id": "W-326/paused-renders-fields",
+      "requirement": "W-326",
+      "description": "A paused form renders its empty fields and Submit button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/form.ts",
+          "search": "if (ctx.definitions.get(formId)?.status === \"paused\") {",
+          "replace": "if (ctx.definitions.get(formId)?.status === \"stopped\") {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-paused.test.ts"],
+      "expect": "\\(fail\\).*W-326"
+    },
+    {
+      "id": "W-326/paused-dropped",
+      "requirement": "W-326",
+      "description": "A FORM_PAUSED definition answer is dropped like a missing form.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/forms-definitions.ts",
+          "search": "const def = asDefinition(response) ?? asPaused(response, formId);",
+          "replace": "const def = asDefinition(response);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/forms-definitions.test.ts"],
+      "expect": "\\(fail\\).*W-326"
+    },
+    {
+      "id": "W-326/picker-unlabelled",
+      "requirement": "W-326",
+      "description": "The form picker doesn't mark paused forms.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/forms-api.ts",
+          "search": "status === \"paused\" ? { id, name, slug, paused: true } : { id, name, slug },",
+          "replace": "({ id, name, slug }),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-326"
+    },
+    {
+      "id": "W-327/unsafe-url-kept",
+      "requirement": "W-327",
+      "description": "Canvas stylesheet URLs aren't checked, so a scheme-relative URL is loaded.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/canvas-styles.ts",
+          "search": "const sitePath = url.startsWith(\"/\") && !url.startsWith(\"//\");",
+          "replace": "const sitePath = url.startsWith(\"/\");"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/canvas-styles.test.ts"],
+      "expect": "\\(fail\\).*W-327"
+    },
+    {
+      "id": "W-327/links-after-emvb-css",
+      "requirement": "W-327",
+      "description": "Host stylesheets are appended after EmVB's CSS, so they override element styles.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "doc.head.prepend(...links);",
+          "replace": "doc.head.append(...links);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/canvas-styles.test.tsx"],
+      "expect": "\\(fail\\).*W-327"
+    },
+    {
+      "id": "W-327/options-dropped",
+      "requirement": "W-327",
+      "description": "emvb() drops canvasStyles, so the plugin never hears of them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/index.ts",
+          "search": "options: canvasStyles.length > 0 ? { canvasStyles } : {},",
+          "replace": "options: {},"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/canvas-styles.test.ts"],
+      "expect": "\\(fail\\).*W-327"
+    },
+    {
+      "id": "W-327/not-fetched",
+      "requirement": "W-327",
+      "description": "The editor never asks the plugin for the host's canvas stylesheets.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/host.ts",
+          "search": "    if (provided) return;\n",
+          "replace": "    if (provided || fetcher) return;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/canvas/canvas-styles.test.tsx"],
+      "expect": "\\(fail\\).*W-327"
+    },
+    {
+      "id": "W-328/link-unchecked",
+      "requirement": "W-328",
+      "description": "Post Content links keep any href, so javascript: links reach the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/dynamic.ts",
+          "search": "typeof def[\"href\"] === \"string\" ? sanitizeHref(def[\"href\"]) : undefined;",
+          "replace": "typeof def[\"href\"] === \"string\" ? def[\"href\"] : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/post-content-format.test.ts"],
+      "expect": "\\(fail\\).*W-328"
+    },
+    {
+      "id": "W-328/marks-flattened",
+      "requirement": "W-328",
+      "description": "Post Content flattens bold and italic to plain text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/dynamic.ts",
+          "search": "    if (tag) node = { tag, attrs: {}, children: [node] };",
+          "replace": "    if (tag) node = String(node);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/post-content-format.test.ts"],
+      "expect": "\\(fail\\).*W-328"
+    },
+    {
+      "id": "W-328/lists-flat",
+      "requirement": "W-328",
+      "description": "Nested list items aren't nested.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/dynamic.ts",
+          "search": "const level = Math.min(Math.max(rawLevel, 1), MAX_LIST_DEPTH);",
+          "replace": "const level = Math.min(Math.max(rawLevel, 1), 1);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/post-content-format.test.ts"],
+      "expect": "\\(fail\\).*W-328"
+    },
+    {
+      "id": "W-328/custom-blocks",
+      "requirement": "W-328",
+      "description": "Spans of other types (inline HTML) are rendered as text spans.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/dynamic.ts",
+          "search": "if (!isRecord(child) || (child[\"_type\"] !== undefined && child[\"_type\"] !== \"span\")) continue;",
+          "replace": "if (!isRecord(child)) continue;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/post-content-format.test.ts"],
+      "expect": "\\(fail\\).*W-328"
+    },
+    {
+      "id": "W-329/segments-ignored",
+      "requirement": "W-329",
+      "description": "Visitors rules ignore segments, so members-only content shows to everyone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/audience/rules.ts",
+          "search": "    if (!audience.segments.some((segment) => has.has(segment))) return false;",
+          "replace": "    if (!audience.segments.some((segment) => has.has(segment) || true)) return false;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/audience/segments.test.ts"],
+      "expect": "\\(fail\\).*W-329"
+    },
+    {
+      "id": "W-329/host-facts-dropped",
+      "requirement": "W-329",
+      "description": "The host's visitor facts never reach the visitor.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "  return { ...visitor, ...hostVisitorFacts(host) };",
+          "replace": "  return visitor;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor.test.ts"],
+      "expect": "\\(fail\\).*W-329"
+    },
+    {
+      "id": "W-329/resolve-drops-visitor",
+      "requirement": "W-329",
+      "description": "resolveEmVBPage drops its visitor option.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "      options.visitor ? { visitor: options.visitor } : {},\n    )",
+          "replace": "      {},\n    )"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*W-329"
+    },
+    {
+      "id": "W-329/segment-names-unchecked",
+      "requirement": "W-329",
+      "description": "Host segments aren't cleaned, so Member doesn't match a member rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "          .map((s) => s.trim().toLowerCase())",
+          "replace": "          .map((s) => s)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/visitor.test.ts"],
+      "expect": "\\(fail\\).*W-329"
+    },
+    {
+      "id": "W-329/editor-no-segments",
+      "requirement": "W-329",
+      "description": "The Visitors editor drops typed segments.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/AudienceEditor.tsx",
+          "search": "                set({ ...base, segments });",
+          "replace": "                set({ ...base });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/audience-editor.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-329"
+    },
+    {
+      "id": "W-330/filters-not-sent",
+      "requirement": "W-330",
+      "description": "A Loop's filters never reach EmDash, so every entry is listed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/request-data.ts",
+          "search": "      ...(loop.where ? { where: loop.where } : {}),",
+          "replace": "      ...{},"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/loop-options.test.ts"],
+      "expect": "\\(fail\\).*W-330"
+    },
+    {
+      "id": "W-330/pattern-ignored",
+      "requirement": "W-330",
+      "description": "The Loop's link pattern is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "  const permalink = options.permalinkPattern\n",
+          "replace": "  const permalink = false\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/loop-options.test.ts"],
+      "expect": "\\(fail\\).*W-330"
+    },
+    {
+      "id": "W-330/slug-not-encoded",
+      "requirement": "W-330",
+      "description": "A slug is put into the link pattern unencoded.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/dynamic.ts",
+          "search": "    .replaceAll(\"{slug}\", encodeURIComponent(entry.slug))",
+          "replace": "    .replaceAll(\"{slug}\", entry.slug)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/loop-options.test.ts"],
+      "expect": "\\(fail\\).*W-330"
+    },
+    {
+      "id": "W-330/scheme-relative-pattern",
+      "requirement": "W-330",
+      "description": "A //host link pattern is accepted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "\\/(?!\\/)(?:",
+          "replace": "\\/(?:"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/loop-options.test.ts"],
+      "expect": "\\(fail\\).*W-330"
+    },
+    {
+      "id": "W-330/image-field-ignored",
+      "requirement": "W-330",
+      "description": "The image field option is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/theme-posts.ts",
+          "search": "mediaFieldsFrom(data[options.imageField ?? \"featured_image\"])",
+          "replace": "mediaFieldsFrom(data[\"featured_image\"])"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/loop-options.test.ts"],
+      "expect": "\\(fail\\).*W-330"
+    },
+    {
+      "id": "W-330/preview-unfiltered",
+      "requirement": "W-330",
+      "description": "Canvas previews ignore field filters.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/collection-previews.ts",
+          "search": "    if (!(field in data)) return true;",
+          "replace": "    if (field) return true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/collection-preview-filter.test.ts"
+      ],
+      "expect": "\\(fail\\).*W-330"
+    },
+    {
+      "id": "W-331/ch-refused",
+      "requirement": "W-331",
+      "description": "The ch unit is refused by the schema.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "const LengthUnit = z.enum([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\", \"ch\"]);",
+          "replace": "const LengthUnit = z.enum([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\"]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/ch-negative-margin.test.ts"],
+      "expect": "\\(fail\\).*W-331"
+    },
+    {
+      "id": "W-331/ch-not-emitted",
+      "requirement": "W-331",
+      "description": "The CSS mapper drops ch lengths.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const UNITS = new Set([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\", \"ch\"]);",
+          "replace": "const UNITS = new Set([\"px\", \"rem\", \"em\", \"%\", \"vw\", \"vh\"]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/ch-negative-margin.test.ts"],
+      "expect": "\\(fail\\).*W-331"
+    },
+    {
+      "id": "W-331/negative-margin-dropped",
+      "requirement": "W-331",
+      "description": "Negative margins are dropped from the CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  marginTop: { css: \"margin-top\", toValue: cssOffset },",
+          "replace": "  marginTop: { css: \"margin-top\", toValue: cssLengthOrAuto },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/ch-negative-margin.test.ts"],
+      "expect": "\\(fail\\).*W-331"
+    },
+    {
+      "id": "W-331/margin-field-refuses-negative",
+      "requirement": "W-331",
+      "description": "The margin field refuses a negative number.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "  \"letterSpacing\",\n  \"marginTop\",",
+          "replace": "  \"letterSpacing\",\n  \"marginTopX\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/spacing-ch-negative.test.ts"
+      ],
+      "expect": "\\(fail\\).*W-331"
+    },
+    {
+      "id": "W-331/ch-not-typed",
+      "requirement": "W-331",
+      "description": "Typing 40ch in a length field isn't understood.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "(px|rem|em|%|vw|vh|ch)?$/i;",
+          "replace": "(px|rem|em|%|vw|vh)?$/i;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/spacing-ch-negative.test.ts"
+      ],
+      "expect": "\\(fail\\).*W-331"
+    },
+    {
       "id": "astro/explicit-slug-ignored",
       "requirement": "R-052",
       "description": "the explicit slug option is ignored and the route parameter is read instead",
@@ -27066,8 +27492,8 @@
       "edits": [
         {
           "file": "docs/system/layout-format.md",
-          "search": "\"schemaVersion\": 13,\n  \"root\": {",
-          "replace": "\"schemaVersion\": 12,\n  \"root\": {"
+          "search": "\"schemaVersion\": 14,\n  \"root\": {",
+          "replace": "\"schemaVersion\": 13,\n  \"root\": {"
         }
       ],
       "command": [

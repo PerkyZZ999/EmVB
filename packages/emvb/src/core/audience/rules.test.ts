@@ -24,7 +24,7 @@ const heading = (id: string, text: string, audience?: Audience) =>
   }) as LayoutNode;
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 // Wednesday 2026-10-07 14:30 UTC (10:30 in Toronto).

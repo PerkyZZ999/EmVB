@@ -8,7 +8,7 @@ import type { ClipboardActions } from "../useClipboardActions.ts";
 import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
 
 const layout: Layout = {
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",

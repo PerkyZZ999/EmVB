@@ -37,7 +37,7 @@ mock.module("emdash/plugin-utils", () => ({
             return {
               data: {
                 design: {
-                  schemaVersion: 13,
+                  schemaVersion: 14,
                   variables: { colors: [{ id: "brand", name: "Brand", value: "#112233" }] },
                 },
               },
@@ -59,7 +59,7 @@ afterAll(() => {
 
 const heading: LayoutNode = { id: "head0001", type: "heading", props: { text: "Hello", level: 1 } };
 const layout = (...children: LayoutNode[]): Layout => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 const astro = (params: Record<string, string | undefined>) => ({
@@ -163,5 +163,24 @@ describe("resolveEmVBPage (W-091, R-030, R-052)", () => {
     } finally {
       error.mockRestore();
     }
+  });
+});
+
+describe("resolveEmVBPage(Astro, { visitor }) (W-329)", () => {
+  test("a Visitors rule on a segment the host passes shows the element; without it, hides it", async () => {
+    const members: LayoutNode = {
+      id: "head0002",
+      type: "heading",
+      props: { text: "Welcome back, member", level: 2 },
+      audience: { segments: ["member"] },
+    };
+    lookup = async () => page({ title: "About", layout: layout(heading, members) });
+    const member = await resolveEmVBPage(astro({ slug: "about" }), {
+      visitor: { segments: ["member", "pro"] },
+    });
+    expect(member?.html).toContain("Welcome back, member");
+    const guest = await resolveEmVBPage(astro({ slug: "about" }));
+    expect(guest?.html).not.toContain("Welcome back, member");
+    expect(guest?.html).toContain("Hello");
   });
 });

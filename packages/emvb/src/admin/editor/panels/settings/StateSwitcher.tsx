@@ -18,7 +18,7 @@ const isChoice = (value: string): value is StyleStateChoice =>
   (CHOICES as string[]).includes(value);
 
 /**
- * The dot shown where state styles exist. Decorative on the state tabs,
+ * The dot shown where state styles exist (DESIGN.md § State styles). Decorative on the state tabs,
  * so their names stay "Hover", "Focus" and "Active".
  */
 export function StateDot({ decorative = false }: { decorative?: boolean }) {

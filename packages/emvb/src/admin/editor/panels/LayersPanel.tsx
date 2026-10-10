@@ -180,7 +180,7 @@ function focusSelectedRow(tree: Element | null): void {
 
 /** Layers list (IA / W-018): tree with collapse, keyboard navigation, auto-expand to selection. */
 
-/** Props whose text tells same-type elements apart in Layers (the layer-row preview, W-143). */
+/** Props whose text tells same-type elements apart in Layers (DESIGN.md, layer-row preview; W-143). */
 const PREVIEW_PROP: Partial<Record<string, string>> = {
   heading: "text",
   text: "text",

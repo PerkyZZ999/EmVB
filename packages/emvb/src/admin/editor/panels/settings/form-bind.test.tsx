@@ -161,7 +161,7 @@ describe("AddPanel forms group (W-036)", () => {
 
 describe("ElementPanel forms missing (W-036)", () => {
   const formLayout: Layout = {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: "root0001",
       type: "container",
@@ -240,5 +240,26 @@ describe("Forms links outside the EmDash admin (W-289)", () => {
   test("a host without the admin (the playground) shows no Forms links", async () => {
     await noLinks(listing);
     await noLinks(forbidden);
+  });
+});
+
+describe("the form picker marks paused forms (W-326)", () => {
+  test("a paused form's option reads (paused)", async () => {
+    const fetcher: Fetcher = async (path) =>
+      path.includes("/forms/list")
+        ? Response.json({
+            data: {
+              items: [
+                { id: "01A", name: "Contact", slug: "contact", status: "active" },
+                { id: "01B", name: "Survey", slug: "survey", status: "paused" },
+              ],
+            },
+          })
+        : new Response("{}", { status: 404 });
+    await mount(<FormBindControl value="01B" fetcher={fetcher} onChange={() => undefined} />);
+    await flush();
+    const picker = document.querySelector('[data-emvb-form-bind="list"]')?.textContent ?? "";
+    expect(picker).toContain("Survey (paused)");
+    expect(picker).not.toContain("Contact (paused)");
   });
 });

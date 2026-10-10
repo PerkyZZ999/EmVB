@@ -216,6 +216,7 @@ export type CanvasSelection = {
 export function CanvasFrame({
   vnode,
   css,
+  canvasStyles = [],
   layout,
   selection,
   statePreview = null,
@@ -229,6 +230,8 @@ export function CanvasFrame({
 }: {
   vnode: VNode | null;
   css: string;
+  /** The host's stylesheets, loaded before EmVB's CSS (W-327). */
+  canvasStyles?: readonly string[];
   layout: Layout | null;
   selection: CanvasSelection;
   /** The style state chosen in the Style tab, shown on the selected element (W-089). */
@@ -476,6 +479,24 @@ export function CanvasFrame({
     track();
     return () => cancelAnimationFrame(frameId);
   }, [doc, hoverId, selectedId]);
+
+  // W-327: the host's stylesheets go first in the canvas head, whenever they arrive, so EmVB's
+  // CSS (portalled after them) wins where both set a value.
+  const styleKey = canvasStyles.join("\n");
+  React.useEffect(() => {
+    if (!doc) return;
+    const links = styleKey
+      ? styleKey.split("\n").map((href) => {
+          const link = doc.createElement("link");
+          link.rel = "stylesheet";
+          link.href = href;
+          link.setAttribute("data-emvb-canvas-style", "");
+          return link;
+        })
+      : [];
+    doc.head.prepend(...links);
+    return () => links.forEach((link) => link.remove());
+  }, [doc, styleKey]);
 
   return (
     <div className="emvb-stage" ref={stage} data-emvb-zoom={zoom}>

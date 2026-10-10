@@ -46,7 +46,7 @@ const accordion = (children: LayoutNode[]): LayoutNode =>
   ({ id: "acc00001", type: "accordion", props: {}, children }) as LayoutNode;
 
 const layoutWith = (node: LayoutNode): Layout => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: { id: "root0001", type: "container", props: {}, children: [node] },
 });
 

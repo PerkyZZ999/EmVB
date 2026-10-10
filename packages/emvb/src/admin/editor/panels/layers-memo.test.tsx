@@ -21,7 +21,7 @@ function countedLayout(count: number): { layout: Layout; reads: () => number } {
     } as LayoutNode;
   };
   const layout: Layout = {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: "root0001",
       type: "container",

@@ -51,6 +51,8 @@ if (!emvb && !(await getEmDashEntry("pages", decodeSlug(Astro.params.slug)))) {
 
 Without the forms plugin, leave out the `EmVBFormsRuntime` import and element; that subpath imports the forms plugin's client script.
 
+A fixed route has no slug parameter. Pass the page's slug: `await resolveEmVBPage(Astro, { slug: "home" })`. Visitor rules can use the same call's `visitor` option (`{ segments: ["member"] }`, and country, device or returning when the site knows better); `resolveThemeParts` takes it too. The [install guide](https://github.com/PerkyZZ999/EmVB/blob/main/docs/guides/install-in-a-host-site.md) shows both.
+
 Then sign in as an admin, open **Pages VisualBuilder** and click **Set up EmVB** once.
 
 Website: <https://emvb.dev>. The full guide, the demos and the source are on GitHub: <https://github.com/PerkyZZ999/EmVB>.

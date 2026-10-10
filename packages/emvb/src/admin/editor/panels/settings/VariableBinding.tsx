@@ -126,7 +126,7 @@ export function VariableButton({
 }
 
 /**
- * The variable chip that stands in for a bound value: the kind icon, the variable's
+ * The variable chip that stands in for a bound value (DESIGN.md): the kind icon, the variable's
  * name and an × that detaches it, keeping the variable's current value as a literal.
  */
 export function VariableChip({

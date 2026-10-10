@@ -1,6 +1,6 @@
-# Layout format (schema 13)
+# Layout format (schema 14)
 
-How EmVB stores a page and its site-wide design, at schema 13 (the W-307 feature batch). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them.
+How EmVB stores a page and its site-wide design, at schema 14 (visitor segments in W-329; Loop fields in W-330; `ch` lengths and negative margins in W-331). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
 ## Where it lives
 
@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, at schema 13 (the W-307 feature
 
 ```json
 {
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,15 +29,15 @@ How EmVB stores a page and its site-wide design, at schema 13 (the W-307 feature
 }
 ```
 
-- `schemaVersion` is the literal `13` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045, W-160, W-307; older documents are upgraded on read by steps that change nothing, except v11 → v12, which rewrites a gradient's `from` and `to` into `stops`). `root` is always a container.
-- Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)) and `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`; not rendered yet).
+- `schemaVersion` is the literal `14` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045, W-160, W-307, W-329; older documents are upgraded on read by steps that change nothing, except v11 → v12, which rewrites a gradient's `from` and `to` into `stops`). `root` is always a container.
+- Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)), `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`, rendered as `emvb-k-<id>`), `bind` (W-307), `variant` (an A/B arm, W-312) and `audience` (who sees it, W-313, W-329).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
 
 
 | Type | `props` | Children | Renders as |
 | --- | --- | --- | --- |
-| `container` | optional `tag` (`div`, `section`, `header`, `footer`, `main`, `article`, `aside`, `nav`) | `children: Node[]` (required, may be empty) | that tag (default `div`) with `class="emvb-container …"` |
+| `container` | optional `tag` (`div`, `section`, `header`, `footer`, `main`, `article`, `aside`, `nav`), optional `href` and `newTab` (the box is the link; a link inside a link is dropped) | `children: Node[]` (required, may be empty) | that tag (default `div`) with `class="emvb-container …"` |
 | `layout-section` (shown as "Section", W-156) | optional `tag` (as `container`, default `section`), `contentWidth` length, `fullWidth` boolean | `children: Node[]` | that tag with `class="emvb-layout-section …"`, wrapping `<div class="emvb-layout-section-inner">` around the children; the inner box is at most `contentWidth` (default 1140 px, none with `fullWidth`) wide and centred |
 | `heading` | `text` (≤ 2000), `level` (1–6), optional `href` (≤ 2000) and `newTab` (W-141) | none | `<h1>`–`<h6>`; with a safe `href`, the text is wrapped in `<a class="emvb-heading-link">` (colour and decoration inherited) |
 | `spacer` | `height` length | none | `<div aria-hidden="true">` with height in CSS |
@@ -63,7 +63,9 @@ How EmVB stores a page and its site-wide design, at schema 13 (the W-307 feature
 | `post-image` | optional `decorative` | none | Dynamic featured image when URL present |
 | `post-link` | optional `text`, `newTab` | none | Dynamic permalink; blank text → title |
 | `post-date` | optional `format`: `medium` (default), `short`, `long`, `full` or `numeric` (W-177) | none | `<time datetime>` with the published date in UTC; `numeric` is YYYY-MM-DD |
-| `loop` | optional `itemPartId` | `children: Node[]` (inline item template when no part id) | Repeats item template for each archive post |
+| `post-author` | (none) | none | The author's name |
+| `pagination` | optional `prevText`, `nextText`, `showCount` and `countText` (`{page}` and `{total}`; unset text is "Page {page} of {total}") | none | `nav` of Previous, page numbers and Next. Nothing on a single page, with no archive data, or inside a Loop item |
+| `loop` | optional `itemPartId`; `perPage` (1–50, unset = 20) on an archive; a collection Loop also takes `collection`, `limit`, `order`, `display`, `columns`, `permalink`, `imageField`, `excerptField` and `filter` (see [Schema 13](#schema-13-the-w-307-feature-batch) and [Schema 14](#schema-14)) | `children: Node[]` (inline item template when no part id) | Repeats the item template for each post or collection entry |
 | `grid` | `columns` (1–12); optional `columnsTablet` and `columnsMobile` (1–12, W-139) | `children: Node[]` | `display: grid` with that many equal columns; the device counts go in the tablet and mobile media queries, and an unset one follows the next wider device |
 | `section` (shown as "Theme section") | optional `partId` | `children: Node[]` (inline contents when no part id) | When `partId` is set, the published Section theme part's children replace the local ones |
 
@@ -73,7 +75,7 @@ Every node may also carry an optional `label` (1–80 characters, trimmed; an ed
 
 ### Style properties (W-017, extended in W-088)
 
-Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "vh" }` (`vw` and `vh` since W-088). Colours are hex or `{ "var": "<id>" }`. A **size** is a length, a variable reference or `"auto"`. An **offset** is a size whose value may also be negative (−10000 to 10000).
+Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "vh" | "ch" }` (`vw` and `vh` since W-088, `ch` since W-331). Colours are hex or `{ "var": "<id>" }`. A **size** is a length, a variable reference or `"auto"`. An **offset** is a size whose value may also be negative (−10000 to 10000).
 
 | Key | Value | CSS |
 | --- | --- | --- |
@@ -89,10 +91,11 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `aspectRatio` | `"auto"` or `"w/h"` with whole numbers 1–9999, such as `"16/9"` | `aspect-ratio` (`16 / 9`) |
 | `objectFit` | `fill`, `contain`, `cover`, `none`, `scale-down` | `object-fit` (the editor offers it on Image and Video) |
 | `paddingTop` / `Right` / `Bottom` / `Left` | length | `padding-*` |
-| `marginTop` / `Right` / `Bottom` / `Left` | size | `margin-*` |
+| `marginTop` / `Right` / `Bottom` / `Left` | offset (negative since W-331) | `margin-*` |
 | `position` | `static`, `relative`, `absolute`, `fixed`, `sticky` | `position` |
 | `top` / `right` / `bottom` / `left` | offset | matching inset properties |
 | `zIndex` | whole number −9999 to 9999 | `z-index` |
+| `fontFamily` | a font stack (1–200, checked as safe) or a font variable | `font-family` |
 | `fontSize` | length | `font-size` |
 | `lineHeight` | length, or a unitless number 0–100 | `line-height` |
 | `letterSpacing` | length whose value may be negative (−10000 to 10000) | `letter-spacing` |
@@ -102,6 +105,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `textDecoration` | `none`, `underline`, `overline`, `line-through` | `text-decoration` (W-113; a button sets `none` in its base CSS) |
 | `color` / `backgroundColor` / `borderColor` | colour | matching colour properties |
 | `backgroundImage` (W-094) | http(s) URL or a site path, no spaces, quotes or parentheses | `background-image` as `url("…")`. With no size, position or repeat: `cover`, `center`, `no-repeat` |
+| `backgroundVideo` | the same URL rule as `backgroundImage` | a muted, looping `<video>` behind the content |
 | `backgroundSize` | `auto`, `cover`, `contain` | `background-size` (the image layer) |
 | `backgroundPosition` | `center`, an edge (`top`, `bottom`, `left`, `right`) or a corner (`top left` and the other three) | `background-position` |
 | `backgroundRepeat` | `no-repeat`, `repeat`, `repeat-x`, `repeat-y` | `background-repeat` |
@@ -116,7 +120,8 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `filter` | `{ blur?, brightness?, contrast?, saturate?, grayscale?, hueRotate? }`, at least one set: `blur` 0–100 px, `brightness` / `contrast` / `saturate` 0–300 %, `grayscale` 0–100 %, `hueRotate` 0–360° | `filter`, functions always in that order, such as `blur(2px) grayscale(100%)` |
 | `cursor` | `default`, `pointer`, `text`, `move`, `grab`, `not-allowed`, `help`, `crosshair`, `zoom-in` | `cursor` |
 | `transition` (W-089, Normal only) | `{ duration, delay?, easing, property }`: `duration` and `delay` whole ms 0–2000; `easing` `ease`, `ease-in`, `ease-out`, `ease-in-out`, `linear`; `property` `all`, `colors`, `opacity`, `shadow`, `filter`. No other keys | `transition`, one entry per CSS property: `colors` is `color`, `background-color` and `border-color`; `shadow` is `box-shadow`. For example `opacity 200ms ease-out 50ms` |
-| `entrance` (W-101, Normal only) | `{ type, duration }`: `type` is `fade`, `fade-up` or `fade-down`; `duration` whole ms 0–2000 | `animation` named `emvb-<type>`, once, `ease-out`, `both`. Reduced motion sets `animation: none` |
+| `entrance` (W-101, Normal only) | `{ type, duration, delay?, trigger? }`: `type` is `fade`, `fade-up`, `fade-down`, `slide-up`, `slide-down` or `scale`; `duration` and `delay` whole ms 0–2000; `trigger` is `load` (default) or `view` (as it scrolls in; browsers without scroll-driven animations play it on load) | `animation` named `emvb-<type>`, once, `ease-out`, `both`. Reduced motion sets `animation: none` |
+| `scrollMotion` (W-319, Normal only) | `{ effects, range }` or `{ type: "none" }`. Each effect is `{ type, from, to }`: `type` is `fade`, `move-x`, `move-y`, `scale`, `rotate` or `blur` (one of each). `range` is `enter`, `cross`, `exit` or `page`. `none` stops motion a wider device set | CSS scroll-driven animations. Reduced motion, and browsers without them, show the element still |
 | `iconRotate` (W-237, icons) | whole degrees −360 to 360 | `--emvb-icon-rotate`, read by the icon's `svg` as `rotate` |
 | `iconFlip` (W-237, icons) | `none`, `horizontal`, `vertical`, `both` | `--emvb-icon-flip` (`1 1`, `-1 1`, `1 -1`, `-1 -1`), read by the `svg` as `scale` |
 | `iconScale` (W-237) | number 0.1–4 | `scale` on the element (the icon and its background shape) |
@@ -128,7 +133,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ### State styles (W-089)
 
-`node.states` and `design.classes[].states` are `{ "hover"?, "focus"?, "active"? }`. Each state is a style object with the same keys, limits and variable references as `style`, except `transition` and `iconAnimation`, which belong to Normal only. Any other state name is refused. Adding `states` moved the version to 3 (D-032) with a v2 → v3 step that changes nothing.
+`node.states` and `design.classes[].states` are `{ "hover"?, "focus"?, "active"? }`. Each state is a style object with the same keys, limits and variable references as `style`, except `transition`, `entrance`, `iconAnimation` and `scrollMotion`, which belong to Normal only. Any other state name is refused. Adding `states` moved the version to 3 (D-032) with a v2 → v3 step that changes nothing.
 
 ```json
 {
@@ -159,7 +164,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 13,
+  "schemaVersion": 14,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],
@@ -172,6 +177,9 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 - Colour ids are 1–40 of `a-z 0-9 -`, names 1–60 characters, values hex as above. At most 200 colours.
 - The document is at most 256 KiB (`MAX_DESIGN_BYTES`).
+- A font size or spacing variable may set `fluid: { min, max }` (px, 0–1000). It is emitted as `clamp()` between `fluidRange` (unset is 360 to 1280 px; `minWidth` must be less than `maxWidth`). `value` stays the fixed fallback (W-316).
+- `direction` is `ltr`, `rtl` or `auto` (unset is left to right). It is `dir` on every EmVB root, and hosts get it back for `<html dir>` (W-230).
+- `defaults` is a starting style per tag (`h1`–`h6`, `p`, `a`, `button`), emitted under `:where(.emvb-root)` so a class still wins.
 
 ## Limits and validation
 
@@ -201,10 +209,13 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 
 ## S8 additive elements (W-072–W-074)
 
-- **`div-block`**: block container (`display:block`); children like Container.
-- **`flexbox`**: flex container defaulting to row + wrap + gap (Container stays column).
+- **`div-block`**: block container (`display:block`); children like Container. Optional `href` and `newTab`, like Container.
+- **`flexbox`**: flex container defaulting to row + wrap + gap (Container stays column). Optional `href` and `newTab`.
 - **`svg`**: `props.markup` (sanitized allowlist; no scripts/handlers/`use`/`foreignObject`); optional `title`, `decorative`, `size`.
-- **`tabs` / `tab-panel`**: Tabs hold only tab-panels. Public markup is CSS-only (radio + `:has()`); no EmVB public JS (D-EV4-02).
+- **`tabs` / `tab-panel`**: Tabs hold only tab-panels. Public markup is CSS-only (radio + `:has()`); the optional tabs script only takes the hidden radios out of the tab order.
+- **`accordion` / `accordion-item`**: items are `<details>`. An item needs `summary` (1–200) and may start `open`. No script.
+- **`menu` / `menu-item`**: a `nav` (named by `label`, default "Menu") of links. `direction` is `row` or `column`. An item with children is a dropdown; `wide` stretches that panel across the menu. A menu with a dropdown can load the optional menu script so Escape closes it. An empty menu is a plain box, not a `nav`.
+- **`grid`** also takes optional `href` and `newTab`.
 
 
 ## Schema 13: the W-307 feature batch
@@ -232,3 +243,25 @@ A link or image bound to `param` only takes same-site URLs: relative ones, or ab
 page's origin (hosts pass it as `dynamic.origin`). Anything else shows the typed value, unless the
 binding sets `outside: true` ("Allow outside sites" in the editor). Anyone can craft a URL
 parameter, so that option lets them point the page's links and images at any site.
+
+### A/B tests and visitors (W-312, W-313, W-329)
+
+Any node may set `variant`: `{ test, arm, split? }`. `test` is a name of lowercase letters, digits and `-` (up to 32). `arm` is `a` or `b`. `split` (on the B element, 1–99, unset = 50) is the share of visitors who see B. The host picks one arm per visitor and keeps it in a cookie.
+
+`audience` shows or hides the element. Every field that is set must match, and `hide: true` flips that to "everyone except":
+
+- `countries`: two-letter codes, 1–50
+- `devices`: `mobile`, `tablet`, `desktop`
+- `visitor`: `new` or `returning`
+- `hours`: `{ from, to }` (0–23 and 0–24; wraps past midnight when `to` < `from`) and `days` (0 = Sunday), in `timeZone` (an IANA name; unset = UTC)
+- `segments` (W-329): 1–20 names the host passes (`member`, `pro`), lowercase letters, digits, `-` and `_`
+
+A rule the host cannot check does not match. Pages with a variant or an audience are sent `Cache-Control: private, no-store`.
+
+## Schema 14
+
+Schema 14 only adds optional fields, so a v13 document upgrades unchanged.
+
+- **Visitor segments (W-329).** `audience.segments`, above. Hosts pass them as `resolveEmVBPage(Astro, { visitor: { segments } })` and the same option on `resolveThemeParts`. `country`, `device` and `returning` on that object replace what EmVB detects.
+- **Loop fields (W-330).** On a collection Loop, `permalink` is a site path containing `{slug}` or `{id}` (unset is `/<collection>/{slug}`). `imageField` and `excerptField` name the entry fields Post Image and Post Excerpt read (unset is `featured_image` and `excerpt`). `filter` is up to five `field=value` pairs separated by `;`. A taxonomy name filters by term, and the same field twice matches either value.
+- **`ch` and negative margins (W-331).** Lengths may use `ch`. Margins may be negative (−10000 to 10000). Padding stays 0 or more.

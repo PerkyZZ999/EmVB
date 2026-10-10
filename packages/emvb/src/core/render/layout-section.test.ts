@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { emptyDesign, renderPage, validateLayout, type Layout, type LayoutNode } from "../index.ts";
 
 const page = (children: LayoutNode[]): Layout => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 

@@ -5,7 +5,7 @@ import { validateDesign } from "../validate.ts";
 import { renderPage } from "./index.ts";
 
 const layout = {
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: { id: "root0001", type: "container", props: {}, children: [] },
 } as unknown as Layout;
 

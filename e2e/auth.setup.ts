@@ -7,14 +7,14 @@ setup("sign in as the dev admin and warm up the admin", async ({ page }, testInf
   const dashboard = page.getByRole("link", { name: "Dashboard" });
   const welcome = page.getByRole("dialog", { name: /Welcome to EmDash/ });
 
-  // The dev bypass only exists in dev mode.
+  // The dev bypass only exists in dev mode (VALIDATION.md K20).
   await page.goto("/_emdash/api/setup/dev-bypass?redirect=/_emdash/admin");
   await page.waitForURL("**/_emdash/admin**");
   // Every spec starts as an admin, even if an interrupted role test left a lower role behind.
   setDevRole(platform, ROLES.admin);
 
   // The first admin loads after a dev-server start can abort while Vite optimizes dependencies,
-  // and under Bun the plugin registry can fail to hydrate once.
+  // and under Bun the plugin registry can fail to hydrate once (VALIDATION.md S0-1).
   // Load the admin until it renders cleanly twice in a row.
   await expect(async () => {
     for (let i = 0; i < 2; i++) {

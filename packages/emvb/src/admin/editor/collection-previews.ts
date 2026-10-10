@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   collectCollectionLoops,
+  loopPermalink,
   type CollectionLoop,
   type Layout,
   type ThemePostFields,
@@ -12,10 +13,10 @@ type ContentItem = { id: string; slug?: string | null; data?: Record<string, unk
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
 
 /** A content API item as Loop fields; the host's mapping covers images and plain fields. */
-function previewPost(item: ContentItem, collection: string): ThemePostFields {
+function previewPost(item: ContentItem, loop: CollectionLoop): ThemePostFields {
   const data = item.data ?? {};
   const slug = item.slug || text(data["slug"]);
-  const image = data["featured_image"] ?? data["image"];
+  const image = loop.imageField ? data[loop.imageField] : (data["featured_image"] ?? data["image"]);
   const src =
     typeof image === "string"
       ? image
@@ -30,12 +31,32 @@ function previewPost(item: ContentItem, collection: string): ThemePostFields {
     id: item.id,
     slug: slug || item.id,
     title: text(data["title"]) || text(data["name"]),
-    excerpt: text(data["excerpt"]),
+    excerpt: text(data[loop.excerptField ?? "excerpt"]),
     content: "",
-    permalink: `/${collection}/${slug || item.id}`,
+    permalink: loop.permalink
+      ? loopPermalink(loop.permalink, { slug: slug || item.id, id: item.id })
+      : `/${loop.collection}/${slug || item.id}`,
     ...(src ? { featuredImageUrl: src, featuredImageAlt: text(data["title"]) } : {}),
     fields,
   };
+}
+
+/**
+ * W-330: the canvas applies a Loop's `field = value` filters to the entries it read. A field the
+ * entries don't have (a taxonomy, say) can't be checked here, so it doesn't filter the preview;
+ * the published page asks EmDash, which checks taxonomies too.
+ */
+export function matchesPreviewFilter(
+  data: Record<string, unknown>,
+  where: CollectionLoop["where"],
+): boolean {
+  if (!where) return true;
+  return Object.entries(where).every(([field, wanted]) => {
+    if (!(field in data)) return true;
+    const value = data[field];
+    const values = Array.isArray(wanted) ? wanted : [wanted];
+    return values.some((option) => String(value) === option);
+  });
 }
 
 const ORDER: Record<string, string> = {
@@ -71,7 +92,9 @@ export function useCollectionPreviews(
             fetcher,
             `/_emdash/api/content/${loop.collection}?limit=${loop.limit}&${ORDER[loop.order] ?? ORDER["newest"]}`,
           );
-          const items = (body?.items ?? []).map((item) => previewPost(item, loop.collection));
+          const items = (body?.items ?? [])
+            .filter((item) => matchesPreviewFilter(item.data ?? {}, loop.where))
+            .map((item) => previewPost(item, loop));
           return [loop.nodeId, items] as const;
         } catch {
           return undefined;

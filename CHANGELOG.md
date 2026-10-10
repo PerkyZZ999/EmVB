@@ -6,9 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Breaking
+
+- **Layout and design schema 14 (W-329).** Pages and site styles saved now can't be opened by EmVB 0.3.0 or earlier; update the plugin everywhere first. Older pages and styles open and upgrade unchanged.
+
+### Added
+
+- **An EmVB page at a fixed path.** `resolveEmVBPage(Astro, { slug: "home" })` looks up that slug as-is and ignores the route parameter, so a host can serve an EmVB page at `/`. Without `slug`, the route parameter is used as before.
+- **Your site's stylesheets in the editor canvas (W-327).** `emvb({ canvasStyles: ["/styles/site.css", "https://fonts…"] })` makes the canvas load the host's stylesheets and fonts before EmVB's CSS, so pages look in the editor as on the site. Only `https:`/`http:` URLs and site paths are used, at most 10. The demo sites load their `public/site.css` this way.
+- **Visitor segments from your site (W-329).** Hosts pass what they know about the visitor, e.g. `resolveEmVBPage(Astro, { visitor: { segments: ["member", "pro"] } })` (and the same option on `resolveThemeParts`), and a Visitors rule can match those segments (Visitors → Segments). Host-provided country, device and new/returning replace the detected ones.
+- **Loop link pattern, image and excerpt fields, and filters (W-330).** A collection Loop can link each entry where you choose (`/team/{slug}`, `{id}` works too), show a different image or excerpt field (`photo`, `role`), and list only entries where `field=value` (pairs separated by `;`; a taxonomy name filters by term, the same field twice matches either value). The canvas preview applies field filters; taxonomy filters apply on the published page.
+- **`ch` lengths and negative margins (W-331).** Sizes and spacing take `ch` (the width of a "0"), handy for readable text such as a 65ch max width, and margins can be negative (down to -10000) to pull an element over its neighbour. Padding stays 0 or more.
+
+### Changed
+
+- **Post Content keeps the post's formatting (W-328).** Bold, italic, code, underline, strike-through, links (only hrefs that pass the link check), bulleted and numbered lists (nested), headings h1–h6, block quotes and line breaks now show on the page and in the editor. Images, embeds, custom blocks and raw HTML are still left out, and all text is escaped.
+
 ### Fixed
 
 - The emvb.dev changelog page leaves out a release with no entries yet, such as an empty Unreleased (W-324).
+- **Site styles saves no longer conflict with themselves (W-325).** Quick successive edits to variables or classes save one at a time, each on the revision the previous save made, so a second edit is never refused as "changed in another tab". Publish styles waits for pending saves.
+- **Paused forms say so (W-326).** A form paused in the forms plugin shows "This form isn't accepting responses right now." on the page instead of empty fields and a Submit button that can't send, and the form picker marks it "(paused)".
 
 ## [0.3.0] - 2026-10-09
 

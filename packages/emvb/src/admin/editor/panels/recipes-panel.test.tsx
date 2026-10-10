@@ -33,7 +33,7 @@ describe("W-320 recipes in the Add panel and palette", () => {
 
   test("W-320 the palette offers each recipe under Insert", () => {
     const layout: Layout = {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: { id: "root0001", type: "container", props: {}, children: [] },
     };
     const inserted: string[] = [];

@@ -171,7 +171,7 @@ const countSet = (type: string, style: StyleProps | undefined, section: StyleSec
 const sectionHasStates = (type: string, states: StyleStates | undefined, section: StyleSectionId) =>
   STYLE_STATES.some((state) => countSet(type, states?.[state], section) > 0);
 
-/** Sections where a state change moves things around. */
+/** Sections where a state change moves things around (DESIGN.md § State styles). */
 const JUMPY = new Set<StyleSectionId>(["layout", "size", "position"]);
 
 /** Set on Normal only (W-089, W-101, W-237); a state's Style tab leaves them out. */

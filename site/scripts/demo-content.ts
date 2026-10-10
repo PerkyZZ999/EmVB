@@ -65,7 +65,7 @@ const inner = (children: Node[], extra: Partial<Node> = {}) =>
   box(children, { classes: ["inner"], ...extra });
 
 export const design = {
-  schemaVersion: 13,
+  schemaVersion: 14,
   variables: {
     colors: [
       { id: "forest", name: "Forest", value: "#16301f" },
@@ -359,7 +359,7 @@ const faq = (summary: string, body: string, open = false) =>
 export function homeLayout(media: Media, formId: string) {
   const rootId = begin("page");
   return {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: rootId,
       type: "container",
@@ -805,7 +805,7 @@ export function headerLayout() {
       states: { hover: { textDecoration: "underline", color: color("forest") } },
     });
   return {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: rootId,
       type: "container",
@@ -878,7 +878,7 @@ export function footerLayout() {
       { style: { gap: px(10) }, devices: { mobile: { gridColumnSpan: 2 } } },
     );
   return {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: rootId,
       type: "container",
@@ -931,7 +931,7 @@ export function footerLayout() {
 export function popupLayout(media: Media) {
   const rootId = begin("popup");
   return {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: rootId,
       type: "container",
@@ -978,7 +978,7 @@ export function popupLayout(media: Media) {
 export function notFoundLayout() {
   const rootId = begin("nf404");
   return {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: rootId,
       type: "container",
@@ -1010,7 +1010,7 @@ export function notFoundLayout() {
 export function templateLayout() {
   const rootId = begin("tmpl");
   return {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: rootId,
       type: "container",
@@ -1039,7 +1039,7 @@ export function templateLayout() {
 export function simplePageLayout(eyebrow: string, title: string, lead: string) {
   const rootId = begin(`pg${title.length}`);
   return {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: rootId,
       type: "container",

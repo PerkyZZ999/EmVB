@@ -3,7 +3,7 @@ import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
 
 const layoutFor = (first: string, second: string) => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -74,7 +74,7 @@ test("dragging Heading onto the canvas inserts at the pointed index and saves", 
 });
 
 const nestedLayout = (outer: string, inner: string) => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -175,7 +175,7 @@ test("dropping a container into its own child shows the invalid outline and chan
 type Tree = { id: string; type: string; props?: { text?: string }; children?: Tree[] };
 
 const nestingLayout = {
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -308,7 +308,7 @@ test("near a container's bottom edge the drop goes after it, in its parent (W-12
 
 test("a heading dropped on Tabs lands in the open tab panel (W-128)", async ({ page, request }) => {
   const layout = {
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: {
       id: "root0001",
       type: "container",

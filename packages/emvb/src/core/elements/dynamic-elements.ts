@@ -217,6 +217,36 @@ export const loop: ElementDefinition<LoopNode> = {
         ],
       },
       {
+        key: "permalink",
+        kind: "text",
+        label: "Link pattern",
+        optional: true,
+        message:
+          "Where each entry links, e.g. /team/{slug}; {slug} and {id} are filled in. Leave it empty for /collection/{slug}.",
+      },
+      {
+        key: "imageField",
+        kind: "text",
+        label: "Image field",
+        optional: true,
+        message: "The field Post Image shows, e.g. photo. Leave it empty for the featured image.",
+      },
+      {
+        key: "excerptField",
+        kind: "text",
+        label: "Excerpt field",
+        optional: true,
+        message: "The field Post Excerpt shows, e.g. role. Leave it empty for the excerpt.",
+      },
+      {
+        key: "filter",
+        kind: "text",
+        label: "Only entries where",
+        optional: true,
+        message:
+          "field=value pairs separated by ;, e.g. category=news; team=design. A taxonomy works too. The same field twice matches either value.",
+      },
+      {
         key: "itemPartId",
         kind: "text",
         label: "Loop Item",

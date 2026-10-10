@@ -138,11 +138,33 @@ export function useEditorCommands({
       previewWindowFeatures(device),
     );
 
-  const changeDesign = async (next: DesignSystem) => {
+  // W-325: design saves run one at a time, each against the newest revision, like page saves.
+  // Two quick edits used to both send the revision the editor started with, so the second one
+  // was refused with a 409 by the first. `written` remembers the revision a save produced until
+  // the store catches up (the ref updates on the next render).
+  const designQueue = React.useRef<Promise<unknown>>(Promise.resolve());
+  const written = React.useRef<{ from: string | null; to: string } | null>(null);
+  const baseRevision = () => {
+    const current = latest.current.designRevision;
+    const last = written.current;
+    return last && last.from === current ? last.to : current;
+  };
+  const queueDesign = <T>(task: () => Promise<T>): Promise<T> => {
+    const run = designQueue.current.then(task, task);
+    designQueue.current = run.catch(() => undefined);
+    return run;
+  };
+
+  const changeDesign = (next: DesignSystem) => queueDesign(() => saveDesignNow(next));
+
+  const saveDesignNow = async (next: DesignSystem) => {
     try {
-      const revision = await saveDesign(fetcher, next, latest.current.designRevision);
+      const from = latest.current.designRevision;
+      const revision = await saveDesign(fetcher, next, baseRevision());
+      written.current = { from, to: revision };
       dispatch({ type: "set-design", design: next, revision });
     } catch (error) {
+      written.current = null;
       if (error instanceof ApiError && error.status === 409) {
         // W-212: take the styles saved elsewhere (another editor tab, say), so the next change
         // can save, instead of every change failing until a reload that drops page edits.
@@ -169,7 +191,9 @@ export function useEditorCommands({
     }
   };
 
-  const publishStyles = async () => {
+  const publishStyles = () => queueDesign(publishStylesNow);
+
+  const publishStylesNow = async () => {
     try {
       const revision = await publishDesign(fetcher, latest.current.publishedRevision ?? null);
       dispatch({ type: "publish-design", revision });

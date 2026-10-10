@@ -4,7 +4,7 @@ import { PAGES_COLLECTION } from "../constants.ts";
 import { formIdsInLayout, loadFormDefinitions } from "./forms-definitions.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
 import { bindingDataFor } from "./request-data.ts";
-import type { VisitorAstro } from "./visitor.ts";
+import type { HostVisitor, VisitorAstro } from "./visitor.ts";
 import { sectionTemplatesFor } from "./resolve-theme.ts";
 
 type EmDashEntry = NonNullable<Awaited<ReturnType<typeof getEmDashEntry>>["entry"]>;
@@ -36,6 +36,8 @@ export async function resolveEmVBPage(
     param?: string;
     /** The page's slug, used as-is (not URL-decoded) in place of the route parameter. */
     slug?: string;
+    /** What the host knows about the visitor: segments and facts Visitors rules use (W-329). */
+    visitor?: HostVisitor;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   const slug = options.slug ?? decodeSlug(astro.params[options.param ?? "slug"]);
@@ -59,7 +61,13 @@ export async function resolveEmVBPage(
   const sectionTemplates = layout ? await sectionTemplatesFor(layout) : {};
   const dynamic = {
     ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
-    ...(await bindingDataFor(layout, astro.url, astro, Object.values(sectionTemplates))),
+    ...(await bindingDataFor(
+      layout,
+      astro.url,
+      astro,
+      Object.values(sectionTemplates),
+      options.visitor ? { visitor: options.visitor } : {},
+    )),
   };
   return {
     ...renderStored(

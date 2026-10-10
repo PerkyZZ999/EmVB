@@ -3,7 +3,7 @@ import { createPage, ensureEmvbSetup } from "./support/api.ts";
 import { EDITOR, overlay } from "./support/helpers.ts";
 
 const LAYOUT = {
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -46,7 +46,7 @@ async function openEditor(page: Page) {
   await expect(canvas.getByRole("heading", { name: "Canvas heading" })).toBeVisible();
 }
 
-// Canvas width is the viewport minus the editor panel tokens (panel-left 256 + panel-right 288,
+// Canvas width is the viewport minus the DESIGN.md panel tokens (panel-left 256 + panel-right 288,
 // denser chrome since d32ca75).
 for (const [width, height, canvasWidth] of [
   [1280, 720, 736],

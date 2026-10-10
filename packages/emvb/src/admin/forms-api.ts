@@ -1,6 +1,12 @@
 import { ApiError, requestJson, type Fetcher } from "./api.ts";
 
-export type FormListItem = { id: string; name: string; slug: string };
+export type FormListItem = {
+  id: string;
+  name: string;
+  slug: string;
+  /** The forms plugin's "paused" status: the form isn't accepting responses (W-326). */
+  paused?: boolean;
+};
 
 export type FormsCapability =
   | { status: "ready"; forms: FormListItem[]; canList: true }
@@ -36,11 +42,14 @@ async function formsPluginAnswers(fetcher: Fetcher): Promise<boolean> {
 /** Probe forms plugin + list (admin). Editors get manual-id fallback (D-015). */
 export async function loadFormsCapability(fetcher: Fetcher): Promise<FormsCapability> {
   try {
-    const data = await requestJson<{ items: FormListItem[] }>(fetcher, LIST, {
-      method: "POST",
-      body: {},
-    });
-    const forms = (data.items ?? []).map(({ id, name, slug }) => ({ id, name, slug }));
+    const data = await requestJson<{ items: (FormListItem & { status?: unknown })[] }>(
+      fetcher,
+      LIST,
+      { method: "POST", body: {} },
+    );
+    const forms = (data.items ?? []).map(({ id, name, slug, status }) =>
+      status === "paused" ? { id, name, slug, paused: true } : { id, name, slug },
+    );
     return { status: "ready", canList: true, forms };
   } catch (error) {
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {

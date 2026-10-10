@@ -1,4 +1,4 @@
-/** The editor's keyboard shortcuts, shown in the Shortcuts dialog. */
+/** The editor's keyboard shortcuts (DESIGN_BRIEF), shown in the Shortcuts dialog. */
 export const SHORTCUTS: readonly { action: string; keys: string }[] = [
   { action: "Command palette: insert, jump, apply a class, run an action", keys: "Ctrl/Cmd+K" },
   { action: "Move focus between regions", keys: "Tab / Shift+Tab" },

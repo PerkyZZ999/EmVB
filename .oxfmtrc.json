@@ -4,6 +4,7 @@
   "ignorePatterns": [
     "spikes/**",
     "docs/**",
+    "VISION.md",
     "**/dist/**",
     "**/.astro/**",
     "packages/emvb/src/admin/editor/icons/sets/**"

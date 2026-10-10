@@ -1,6 +1,6 @@
-# Install EmVB in a host site
+# Install EmVB in a host site (R-052)
 
-EmVB is a **native** EmDash plugin: add the package, register it in `astro.config`, and add one public route. The EmDash plugin registry installs sandboxed plugins only; native plugins like EmVB are npm packages.
+EmVB is a **native** EmDash plugin: add the package, register it in `astro.config`, and add one public route. The EmDash plugin registry installs sandboxed plugins only; native plugins like EmVB are npm packages (D-010, W-082).
 
 Project website: <https://emvb.dev>. Package: [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb).
 
@@ -40,6 +40,21 @@ export default defineConfig({
   ],
 });
 ```
+
+### Your site's styles in the editor canvas
+
+The editor canvas is a sandboxed frame, so it doesn't see your layout's stylesheets or fonts. Pass them as `canvasStyles` and the canvas loads them before EmVB's own CSS, so pages look in the editor as they do on your site:
+
+```js
+emvb({
+  canvasStyles: ["/styles/site.css", "https://fonts.googleapis.com/css2?family=Inter&display=swap"],
+});
+```
+
+- Use `https:` (or `http:`) URLs or site paths starting with `/`. Anything else (`javascript:`, `data:`, `//host`, relative paths) is ignored. At most 10.
+- EmVB's CSS comes after them, so an element's own styles and your Site styles still win.
+- The canvas runs no scripts, so script-loaded fonts won't apply; use a stylesheet with `@font-face` or a font service's CSS URL.
+- The demo sites load their `public/site.css` this way.
 
 ## 3. Public route
 
@@ -86,6 +101,25 @@ Until a page with the slug `home` is published (step 4), `/` returns 404; if the
 Blank-canvas EmVB pages use `standalone` on `EmVBPage` (see the demos).
 
 `@perkyzz/emvb/astro/forms` imports the forms plugin's client script, so import `EmVBFormsRuntime` only when `@emdash-cms/plugin-forms` is installed. Without it the build fails with `"initForms" is not exported`; drop that import and the `EmVBFormsRuntime` element.
+
+### Tell EmVB what you know about the visitor
+
+An element's **Visitors** rules can show it only to visitors in a segment, such as members or paying customers. EmVB can't know that on its own, so your route passes it:
+
+```astro
+---
+const user = Astro.locals.user; // however your site knows who is signed in
+const visitor = {
+  segments: user ? ["member", ...(user.plan === "pro" ? ["pro"] : [])] : [],
+};
+const emvb = await resolveEmVBPage(Astro, { visitor });
+const theme = await resolveThemeParts(Astro, undefined, { visitor }); // theme parts too
+---
+```
+
+- `segments`: names your editors type in Visitors → Segments (lowercase letters, digits, `-`, `_`). A rule matches a visitor in any of its segments.
+- `country` (two letters), `device` (`mobile`, `tablet`, `desktop`) and `returning` (true or false) replace what EmVB detects from the request, when your site knows better.
+- Pages with Visitors rules are sent with `Cache-Control: private, no-store`, so one visitor's version is never cached for another.
 
 ## 4. First-run setup
 

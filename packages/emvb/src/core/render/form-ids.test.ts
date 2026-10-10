@@ -13,7 +13,7 @@ const form = (id: string, children: LayoutNode[]): LayoutNode => ({
 describe("form control ids (W-187)", () => {
   test("the same form twice on a page keeps every id unique, and each label targets its own control", () => {
     const layout: Layout = {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

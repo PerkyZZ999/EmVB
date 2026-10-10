@@ -134,21 +134,42 @@ exports[`portableTextToVNodes over styles, block types and span shapes matches t
       "children": [
         "One",
       ],
-      "tag": "p",
+      "tag": "h5",
     },
     {
       "attrs": {},
       "children": [
         "Two & <three>",
       ],
-      "tag": "p",
+      "tag": "h5",
     },
     {
       "attrs": {},
       "children": [
         "kept",
       ],
-      "tag": "p",
+      "tag": "h5",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "One",
+      ],
+      "tag": "h6",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "Two & <three>",
+      ],
+      "tag": "h6",
+    },
+    {
+      "attrs": {},
+      "children": [
+        "kept",
+      ],
+      "tag": "h6",
     },
     {
       "attrs": {},
@@ -176,42 +197,21 @@ exports[`portableTextToVNodes over styles, block types and span shapes matches t
       "children": [
         "One",
       ],
-      "tag": "p",
+      "tag": "blockquote",
     },
     {
       "attrs": {},
       "children": [
         "Two & <three>",
       ],
-      "tag": "p",
+      "tag": "blockquote",
     },
     {
       "attrs": {},
       "children": [
         "kept",
       ],
-      "tag": "p",
-    },
-    {
-      "attrs": {},
-      "children": [
-        "One",
-      ],
-      "tag": "p",
-    },
-    {
-      "attrs": {},
-      "children": [
-        "Two & <three>",
-      ],
-      "tag": "p",
-    },
-    {
-      "attrs": {},
-      "children": [
-        "kept",
-      ],
-      "tag": "p",
+      "tag": "blockquote",
     },
     {
       "attrs": {},

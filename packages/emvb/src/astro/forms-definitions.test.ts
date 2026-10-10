@@ -13,7 +13,7 @@ const form = (id: string, formId?: string): LayoutNode =>
   ({ ...defaultElement("form", id), props: formId ? { formId } : {} }) as LayoutNode;
 
 const layout = (...children: LayoutNode[]): Layout => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 
@@ -201,5 +201,21 @@ describe("field limits from the forms plugin (W-297)", () => {
       { minLength: 2, pattern: "[a-z]+" },
     ]);
     expect(fields[1]).not.toHaveProperty("validation");
+  });
+});
+
+describe("a paused form's definition (W-326)", () => {
+  test("FORM_PAUSED (410) is kept as a paused definition, other errors are left out", async () => {
+    const handler: Answer = async (_plugin, _method, _path, request) => {
+      const { id } = (await request.json()) as { id: string };
+      if (id === "paused") {
+        return { success: false, status: 410, error: { code: "FORM_PAUSED", message: "x" } };
+      }
+      return { success: false, error: { code: "NOT_FOUND" } };
+    };
+    const defs = await loadFormDefinitions(asHandler(handler), BASE, ["paused", "missing"]);
+    expect(defs.get("paused")?.status).toBe("paused");
+    expect(defs.get("paused")?.pages).toEqual([]);
+    expect(defs.has("missing")).toBe(false);
   });
 });

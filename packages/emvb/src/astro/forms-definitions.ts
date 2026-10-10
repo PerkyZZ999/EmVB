@@ -95,6 +95,17 @@ function asDefinition(payload: unknown): PublicFormDefinition | null {
   return { ...(def as PublicFormDefinition), pages, settings };
 }
 
+/**
+ * W-326: the forms plugin answers a paused form's definition with `FORM_PAUSED` (410), so the
+ * page can say the form isn't accepting responses instead of rendering empty fields.
+ */
+function asPaused(payload: unknown, formId: string): PublicFormDefinition | null {
+  if (!isRecord(payload) || payload.success !== false) return null;
+  const error = isRecord(payload.error) ? payload.error : {};
+  if (error.code !== "FORM_PAUSED" && payload.status !== 410) return null;
+  return { name: "", slug: formId, status: "paused", pages: [], settings: {} };
+}
+
 /** Loads public form definitions in-process (D-015). Missing forms are omitted. */
 export async function loadFormDefinitions(
   handler: PublicPluginApiRouteHandler | undefined,
@@ -115,7 +126,7 @@ export async function loadFormDefinitions(
           },
         );
         const response = await handler(FORMS_PLUGIN, "POST", "/definition", request);
-        const def = asDefinition(response);
+        const def = asDefinition(response) ?? asPaused(response, formId);
         if (def) map.set(formId, def);
       } catch {
         // Forms plugin missing or form unknown — render without definition options.

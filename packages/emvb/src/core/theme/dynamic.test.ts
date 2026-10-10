@@ -11,7 +11,7 @@ import type { Layout } from "../schema/layout.ts";
 const design = emptyDesign();
 
 const page = (...children: Layout["root"]["children"]): Layout => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 
@@ -119,7 +119,7 @@ describe("loop element", () => {
 
   test("uses loopTemplates when itemPartId is set", () => {
     const itemLayout: Layout = {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "rootitem",
         type: "container",

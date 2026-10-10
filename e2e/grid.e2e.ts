@@ -16,7 +16,7 @@ test("a grid publishes equal columns and a column span", async ({ page, request 
     request,
     text,
     {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",
@@ -65,7 +65,7 @@ test("a grid takes its own column count on tablet and mobile, in the canvas and 
     request,
     text,
     {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

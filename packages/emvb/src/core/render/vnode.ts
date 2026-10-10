@@ -39,6 +39,14 @@ const TAGS = new Set([
   "details",
   "summary",
   "time",
+  // Post Content formatting (W-328)
+  "strong",
+  "em",
+  "code",
+  "u",
+  "s",
+  "br",
+  "blockquote",
   // Lucide icon primitives (W-025 / A-04)
   "svg",
   "path",
@@ -65,7 +73,7 @@ const TAGS = new Set([
   "text",
   "tspan",
 ]);
-const VOID = new Set(["hr", "img", "input"]);
+const VOID = new Set(["hr", "img", "input", "br"]);
 // iframe/video are not void — they need closing tags.
 const ATTR_NAME =
   /^(?:class|id|href|src|alt|width|height|loading|decoding|fetchpriority|dir|role|type|checked|target|rel|aria-[a-z][a-z0-9-]*|title|allow|referrerpolicy|preload|controls|allowfullscreen|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|stroke-dasharray|stroke-opacity|fill-opacity|opacity|transform|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|xlink:href|preserveAspectRatio|gradientUnits|gradientTransform|offset|stop-color|stop-opacity|clipPathUnits|maskUnits|maskContentUnits|patternUnits|patternContentUnits|patternTransform|markerUnits|markerWidth|markerHeight|refX|refY|orient|font-size|font-family|font-weight|text-anchor|dominant-baseline|dx|dy|clip-path|method|action|name|value|placeholder|for|tabindex|autocomplete|open|datetime|muted|loop|playsinline|autoplay|required|novalidate|minlength|maxlength|min|max|pattern|data-[a-z][a-z0-9-]*)$/;

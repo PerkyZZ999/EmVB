@@ -1,14 +1,14 @@
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 
-export type LengthUnit = "px" | "rem" | "em" | "%" | "vw" | "vh";
+export type LengthUnit = "px" | "rem" | "em" | "%" | "vw" | "vh" | "ch";
 /** `x` is a unitless number, for Line height only (W-213). */
 export type UnitChoice = LengthUnit | "auto" | "x";
 export type LengthLiteral = { value: number; unit: LengthUnit };
 
-const BOX: readonly UnitChoice[] = ["px", "%", "rem", "em", "vw", "vh"];
+const BOX: readonly UnitChoice[] = ["px", "%", "rem", "em", "vw", "vh", "ch"];
 const BOX_AUTO: readonly UnitChoice[] = [...BOX, "auto"];
 
-/** Units each length property offers in its unit menu. */
+/** Units each length property offers in its unit menu (DESIGN.md § Inputs). */
 const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   width: BOX_AUTO,
   height: BOX_AUTO,
@@ -38,13 +38,24 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
 
 export const unitsFor = (key: StyleKey): readonly UnitChoice[] => UNITS[key] ?? BOX;
 
-const NEGATIVE = new Set<StyleKey>(["top", "right", "bottom", "left", "letterSpacing"]);
+/** Keys that take a negative number; margins since W-331. */
+const NEGATIVE = new Set<StyleKey>([
+  "top",
+  "right",
+  "bottom",
+  "left",
+  "letterSpacing",
+  "marginTop",
+  "marginRight",
+  "marginBottom",
+  "marginLeft",
+]);
 
 export type ParsedLength =
   | { ok: true; value: LengthLiteral | "auto" | number | undefined }
   | { ok: false; message: string };
 
-const DRAFT = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(px|rem|em|%|vw|vh)?$/i;
+const DRAFT = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(px|rem|em|%|vw|vh|ch)?$/i;
 /** A number with a unit EmVB doesn't take ("100dvh", "12pt"), or a comma decimal ("1,5") (W-262). */
 const OTHER_UNIT = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)\s*[a-z%]+$/i;
 const COMMA_DECIMAL = /^[+-]?\d*,\d+\s*[a-z%]*$/i;

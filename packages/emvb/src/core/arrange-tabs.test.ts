@@ -32,7 +32,7 @@ describe("tabs arrange rules (W-074)", () => {
         defaultElement("tab-panel", `${prefix}${String(i).padStart(4, "0")}`),
       );
     const layout: Layout = {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

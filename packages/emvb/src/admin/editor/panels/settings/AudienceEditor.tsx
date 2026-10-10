@@ -1,5 +1,10 @@
 import * as React from "react";
-import { AUDIENCE_DEVICES, type Audience, type LayoutNode } from "../../../../core/index.ts";
+import {
+  AUDIENCE_DEVICES,
+  AUDIENCE_SEGMENT,
+  type Audience,
+  type LayoutNode,
+} from "../../../../core/index.ts";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const COUNTRY = /^[A-Z]{2}$/;
@@ -15,11 +20,21 @@ export function parseCountries(text: string): string[] {
   return [...new Set(codes)].slice(0, 50);
 }
 
+/** "Member, pro  vip" → ["member", "pro", "vip"]; names that aren't segments are left out (W-329). */
+export function parseSegments(text: string): string[] {
+  const names = text
+    .toLowerCase()
+    .split(/[\s,;]+/)
+    .filter((name) => AUDIENCE_SEGMENT.test(name));
+  return [...new Set(names)].slice(0, 20);
+}
+
 /** Drops empty rules so the stored audience stays valid (W-313). */
 function tidy(audience: Audience): Audience | undefined {
   const next: Audience = { ...audience };
   if (next.countries?.length === 0) delete next.countries;
   if (next.devices?.length === 0) delete next.devices;
+  if (next.segments?.length === 0) delete next.segments;
   if (next.days?.length === 0) delete next.days;
   if (!next.timeZone) delete next.timeZone;
   if (!next.hide) delete next.hide;
@@ -27,7 +42,8 @@ function tidy(audience: Audience): Audience | undefined {
 }
 
 const ruleCount = (a: Audience) =>
-  [a.countries, a.devices, a.visitor, a.hours, a.days].filter((r) => r !== undefined).length;
+  [a.countries, a.devices, a.visitor, a.segments, a.hours, a.days].filter((r) => r !== undefined)
+    .length;
 
 /**
  * Visitors (W-313): show or hide this element by country, device, new or returning visitor,
@@ -43,8 +59,10 @@ export function AudienceEditor({
   onChange: (node: LayoutNode) => void;
 }) {
   const [countryText, setCountryText] = React.useState(node.audience?.countries?.join(", ") ?? "");
+  const [segmentText, setSegmentText] = React.useState(node.audience?.segments?.join(", ") ?? "");
   React.useEffect(() => {
     setCountryText(node.audience?.countries?.join(", ") ?? "");
+    setSegmentText(node.audience?.segments?.join(", ") ?? "");
   }, [node.id]);
   if (isRoot) return null;
   const audience = node.audience;
@@ -132,6 +150,21 @@ export function AudienceEditor({
               <option value="returning">Returning visitor</option>
             </select>
           </label>
+          <label className="emvb-bind-row">
+            <span className="emvb-bind-label">Segments (from your site)</span>
+            <input
+              className="emvb-native-input"
+              value={segmentText}
+              placeholder="member, pro"
+              data-emvb-audience-segments=""
+              onChange={(event) => setSegmentText(event.currentTarget.value)}
+              onBlur={() => {
+                const segments = parseSegments(segmentText);
+                setSegmentText(segments.join(", "));
+                set({ ...base, segments });
+              }}
+            />
+          </label>
           <div className="emvb-bind-row">
             <span className="emvb-bind-label">Hours (24 h, empty = all day)</span>
             <input
@@ -206,7 +239,7 @@ export function AudienceEditor({
           <p className="emvb-helper" data-emvb-audience-help="">
             {ruleCount(base) === 0
               ? "Add a rule: with none, every visitor matches."
-              : "The server checks these on each visit, with no script. A rule it can't check (no country from the host) doesn't match. The canvas shows this element to you either way."}
+              : "The server checks these on each visit, with no script. A rule it can't check (no country from the host, or segments your site doesn't pass) doesn't match. The canvas shows this element to you either way."}
           </p>
         </>
       )}

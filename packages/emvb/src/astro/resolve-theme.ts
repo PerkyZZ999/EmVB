@@ -32,7 +32,7 @@ import {
 } from "../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import { loadDesign, readLayout, renderStored, type RenderedPage } from "./render.ts";
-import type { VisitorAstro } from "./visitor.ts";
+import type { HostVisitor, VisitorAstro } from "./visitor.ts";
 import { bindingDataFor } from "./request-data.ts";
 import { decodePathSegment, themeContextFrom } from "./theme-context.ts";
 import { entryTimestamp, themePostFromEntry } from "./theme-posts.ts";
@@ -333,6 +333,8 @@ async function buildDynamicForContent(
 export async function resolveThemeParts(
   astro: AstroLike,
   ctx?: ThemeRequestContext,
+  /** What the host knows about the visitor: segments and facts Visitors rules use (W-329). */
+  options: { visitor?: HostVisitor } = {},
 ): Promise<ResolvedThemeParts> {
   const context =
     ctx ??
@@ -395,10 +397,16 @@ export async function resolveThemeParts(
   // W-307: bound fields in a part read site settings and URL parameters too.
   // W-312/W-313: synced sections and Loop items the part uses count too.
   const boundFor = (stored: StoredPart, referenced: ThemeDynamicData | undefined) =>
-    bindingDataFor(readLayout(stored.layout), astro.url, astro, [
-      ...Object.values(referenced?.sectionTemplates ?? {}),
-      ...Object.values(referenced?.loopTemplates ?? {}),
-    ]);
+    bindingDataFor(
+      readLayout(stored.layout),
+      astro.url,
+      astro,
+      [
+        ...Object.values(referenced?.sectionTemplates ?? {}),
+        ...Object.values(referenced?.loopTemplates ?? {}),
+      ],
+      options.visitor ? { visitor: options.visitor } : {},
+    );
   const renderOne = (
     stored: StoredPart,
     partDynamic: ThemeDynamicData | undefined,

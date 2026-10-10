@@ -5,7 +5,7 @@ import type { Layout, LayoutNode } from "./schema/layout.ts";
 
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const el = (type: string, id: string, children?: LayoutNode[]) =>

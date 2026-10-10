@@ -21,7 +21,7 @@ const item = (
 });
 
 const page = (child: LayoutNode): Layout => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: { id: "root0001", type: "container", props: {}, children: [child] },
 });
 

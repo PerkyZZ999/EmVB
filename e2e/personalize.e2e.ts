@@ -44,7 +44,7 @@ const personalized = (id: string, name: string) => [
 ];
 
 const layoutOf = (children: unknown[]) => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",
@@ -143,7 +143,7 @@ test("A/B arms and visitor rules inside a synced section work too", async ({
     title: `Synced ${tag}`,
     partType: "section",
     layout: {
-      schemaVersion: 13,
+      schemaVersion: 14,
       root: {
         id: "root0001",
         type: "container",

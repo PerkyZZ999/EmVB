@@ -11,7 +11,7 @@ const icon = (props: Record<string, unknown>): LayoutNode =>
   ({ id: "icon0001", type: "icon", props: { size: 32, ...props } }) as LayoutNode;
 const page = (node: LayoutNode): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: { id: "root0001", type: "container", props: {}, children: [node] },
   }) as unknown as Layout;
 const html = (props: Record<string, unknown>) => renderPage(page(icon(props)), emptyDesign()).html;

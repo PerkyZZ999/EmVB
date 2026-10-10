@@ -8,6 +8,8 @@ export type VisitorInfo = {
   returning?: boolean;
   /** The request time, epoch ms. */
   now?: number;
+  /** Segments the host says this visitor is in (W-329), e.g. member, pro. */
+  segments?: readonly string[];
 };
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -48,6 +50,10 @@ function matches(audience: Audience, visitor: VisitorInfo): boolean {
   if (audience.visitor) {
     if (visitor.returning === undefined) return false;
     if ((audience.visitor === "returning") !== visitor.returning) return false;
+  }
+  if (audience.segments) {
+    const has = new Set(visitor.segments ?? []);
+    if (!audience.segments.some((segment) => has.has(segment))) return false;
   }
   if (audience.hours || audience.days) {
     if (visitor.now === undefined) return false;
@@ -97,6 +103,8 @@ export function audienceSummary(audience: Audience): string {
     );
   if (audience.devices) parts.push(audience.devices.map((d) => DEVICE_LABELS[d]).join("/"));
   if (audience.visitor) parts.push(audience.visitor === "new" ? "new visitors" : "returning");
+  if (audience.segments)
+    parts.push(audience.segments.slice(0, 3).join("/") + (audience.segments.length > 3 ? "…" : ""));
   if (audience.hours) parts.push(`${audience.hours.from}:00–${audience.hours.to}:00`);
   if (audience.days) parts.push(audience.days.map((d) => WEEKDAYS[d]).join(" "));
   const who = parts.join(" · ") || "everyone";

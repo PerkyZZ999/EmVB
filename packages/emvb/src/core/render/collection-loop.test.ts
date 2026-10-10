@@ -18,7 +18,7 @@ const loop = (props: Record<string, unknown>, children: LayoutNode[] = [title, e
   ({ id: "loop0001", type: "loop", props, children }) as LayoutNode;
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 13,
+    schemaVersion: 14,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const entry = (n: number): ThemePostFields => ({

@@ -5,7 +5,7 @@ import { motionDeclarations, withMotion } from "./motion.ts";
 
 const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const VAR_ID = /^[a-z0-9-]{1,40}$/;
-const UNITS = new Set(["px", "rem", "em", "%", "vw", "vh"]);
+const UNITS = new Set(["px", "rem", "em", "%", "vw", "vh", "ch"]);
 const FLEX_DIRECTIONS = new Set(["row", "column", "row-reverse", "column-reverse"]);
 const FLEX_WRAPS = new Set(["nowrap", "wrap", "wrap-reverse"]);
 const JUSTIFY = new Set([
@@ -601,10 +601,10 @@ const PROPERTY_MAP: {
   paddingRight: { css: "padding-inline-end", toValue: cssLength },
   paddingBottom: { css: "padding-bottom", toValue: cssLength },
   paddingLeft: { css: "padding-inline-start", toValue: cssLength },
-  marginTop: { css: "margin-top", toValue: cssLengthOrAuto },
-  marginRight: { css: "margin-inline-end", toValue: cssLengthOrAuto },
-  marginBottom: { css: "margin-bottom", toValue: cssLengthOrAuto },
-  marginLeft: { css: "margin-inline-start", toValue: cssLengthOrAuto },
+  marginTop: { css: "margin-top", toValue: cssOffset },
+  marginRight: { css: "margin-inline-end", toValue: cssOffset },
+  marginBottom: { css: "margin-bottom", toValue: cssOffset },
+  marginLeft: { css: "margin-inline-start", toValue: cssOffset },
   position: { css: "position", toValue: keyword(POSITION) },
   top: { css: "top", toValue: cssOffset },
   right: { css: "inset-inline-end", toValue: cssOffset },

@@ -5,7 +5,7 @@ import { canvas, openEditor, overlay, unique } from "./support/helpers.ts";
 setUpEmvbOnce();
 
 const layoutFor = (text: string) => ({
-  schemaVersion: 13,
+  schemaVersion: 14,
   root: {
     id: "root0001",
     type: "container",

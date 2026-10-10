@@ -8,8 +8,10 @@ import {
 } from "./design-routes.ts";
 import { iconUploadRoute, iconsRoute } from "./icon-routes.ts";
 import { beforeSave } from "./hooks.ts";
+import { canvasStyleUrls } from "../core/canvas-styles.ts";
 
-export function createPlugin() {
+export function createPlugin(options: { canvasStyles?: unknown } = {}) {
+  const canvasStyles = canvasStyleUrls(options.canvasStyles);
   return definePlugin({
     id: PLUGIN_ID,
     version: PLUGIN_VERSION,
@@ -32,6 +34,8 @@ export function createPlugin() {
         public: true,
         handler: async () => ({ ok: true, plugin: PLUGIN_ID, version: PLUGIN_VERSION }),
       },
+      // W-327: what the editor needs from the host's `emvb()` options.
+      "editor/config": { handler: async () => ({ canvasStyles }) },
       design: designRoute,
       "design/draft": designDraftRoute,
       "design/save": designSaveRoute,
