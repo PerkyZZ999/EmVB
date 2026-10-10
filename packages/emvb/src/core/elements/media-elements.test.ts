@@ -76,6 +76,29 @@ describe("SVG element (W-091)", () => {
     const el = render(svgNode({ markup: "<svg><script>x</script></svg>" }));
     expect(el.outerHTML).toBe('<span class="emvb-svg emvb-svg-missing" aria-hidden="true"></span>');
   });
+
+  test("a non-square viewBox keeps its ratio inside the Size box", () => {
+    const box = (viewBox: string) => {
+      const markup = `<svg viewBox="${viewBox}"><path d="M0 0"/></svg>`;
+      const svg = render(svgNode({ markup, size: 48 })).querySelector("svg");
+      return [svg?.getAttribute("width"), svg?.getAttribute("height")];
+    };
+    expect(box("0 0 200 100")).toEqual(["48", "24"]);
+    expect(box(" 0,0, 200\n100 ")).toEqual(["48", "24"]);
+    expect(box("0 0 100 200")).toEqual(["24", "48"]);
+    expect(box("0 0 448 512")).toEqual(["42", "48"]);
+    expect(box("0 0 1 1e308")).toEqual(["1", "48"]);
+    expect(box("0 0 1e308 1e308")).toEqual(["48", "48"]);
+    for (const malformed of [
+      "0 0 0 100",
+      "0 0 0x10 8",
+      "0,,0,200,100",
+      "0 0\xa0200 100",
+      "0 0 200 100 5",
+    ]) {
+      expect(box(malformed)).toEqual(["48", "48"]);
+    }
+  });
 });
 
 describe("icon element (W-091)", () => {
