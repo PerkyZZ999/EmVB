@@ -27010,6 +27010,34 @@
       ],
       "command": ["bun", "test", "./test/site/changelog.test.ts"],
       "expect": "\\(fail\\).*W-323"
+    },
+    {
+      "id": "W-324/empty-release-listed",
+      "requirement": "W-324",
+      "description": "An empty Unreleased shows in the version list.",
+      "edits": [
+        {
+          "file": "site/src/data/changelog.ts",
+          "search": "if (next && next.depth === 3) out.push(heading);",
+          "replace": "out.push(heading);"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/changelog.test.ts"],
+      "expect": "\\(fail\\).*W-324"
+    },
+    {
+      "id": "W-324/empty-heading-shown",
+      "requirement": "W-324",
+      "description": "The empty Unreleased heading shows in the rendered changelog.",
+      "edits": [
+        {
+          "file": "site/src/pages/changelog.astro",
+          "search": "  .log :global(h2:has(+ h2)) {\n    display: none;",
+          "replace": "  .log :global(h2:has(+ h2)) {\n    opacity: 1;"
+        }
+      ],
+      "command": ["bun", "test", "./test/site/changelog.test.ts"],
+      "expect": "\\(fail\\).*W-324"
     }
   ]
 }

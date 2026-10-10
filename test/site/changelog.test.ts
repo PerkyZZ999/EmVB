@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { releaseLabel } from "../../site/src/data/changelog";
+import { releaseLabel, releasesWithEntries } from "../../site/src/data/changelog";
 import { nav } from "../../site/src/data/nav";
 
 // emvb.dev/changelog/ renders the repository's CHANGELOG.md at build time, so it can't drift.
@@ -51,5 +51,27 @@ describe("the home page leads to the changelog (W-323)", () => {
     const hero = read("site/src/components/Hero.astro");
     expect(hero).toMatch(/<a class="release" href="\/changelog\/"/);
     expect(hero).toContain('<a class="whats-new" href="/changelog/">See what\'s new');
+  });
+});
+
+describe("releases with no entries stay off the changelog page (W-324)", () => {
+  test("an empty Unreleased is left out of the version list", () => {
+    const h = (depth: number, text: string) => ({ depth, text });
+    const list = releasesWithEntries([
+      h(1, "Changelog"),
+      h(2, "[Unreleased]"),
+      h(2, "[0.3.0] - 2026-10-09"),
+      h(3, "Added"),
+      h(2, "[0.2.1] - 2026-10-08"),
+      h(3, "Fixed"),
+      h(2, "[0.0.1] - 2026-01-01"),
+    ]);
+    expect(list.map((x) => x.text)).toEqual(["[0.3.0] - 2026-10-09", "[0.2.1] - 2026-10-08"]);
+  });
+
+  test("the page uses it and hides an empty release heading in the rendered file", () => {
+    const page = read("site/src/pages/changelog.astro");
+    expect(page).toContain("releasesWithEntries(getHeadings())");
+    expect(page).toMatch(/:global\(h2:has\(\+ h2\)\) \{\s*display: none;/);
   });
 });

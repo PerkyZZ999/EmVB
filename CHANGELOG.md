@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- The emvb.dev changelog page leaves out a release with no entries yet, such as an empty Unreleased (W-324).
+
 ## [0.3.0] - 2026-10-09
 
 A large feature release: live data, personalization on the server, a command palette, version history, design tokens, an accessibility co-pilot and scroll motion (W-307–W-321).
