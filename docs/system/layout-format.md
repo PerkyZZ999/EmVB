@@ -211,7 +211,7 @@ Issues carry a path such as `root.children[0].props.level`, which the editor use
 
 - **`div-block`**: block container (`display:block`); children like Container. Optional `href` and `newTab`, like Container.
 - **`flexbox`**: flex container defaulting to row + wrap + gap (Container stays column). Optional `href` and `newTab`.
-- **`svg`**: `props.markup` (sanitized allowlist; no scripts/handlers/`use`/`foreignObject`); optional `title`, `decorative`, `size`.
+- **`svg`**: `props.markup` (sanitized allowlist; no scripts/handlers/`use`/`foreignObject`); optional `title`, `decorative`, `size` (with a non-square `viewBox`, `size` is the longer side and the other side follows the viewBox ratio).
 - **`tabs` / `tab-panel`**: Tabs hold only tab-panels. Public markup is CSS-only (radio + `:has()`); the optional tabs script only takes the hidden radios out of the tab order.
 - **`accordion` / `accordion-item`**: items are `<details>`. An item needs `summary` (1–200) and may start `open`. No script.
 - **`menu` / `menu-item`**: a `nav` (named by `label`, default "Menu") of links. `direction` is `row` or `column`. An item with children is a dropdown; `wide` stretches that panel across the menu. A menu with a dropdown can load the optional menu script so Escape closes it. An empty menu is a plain box, not a `nav`.

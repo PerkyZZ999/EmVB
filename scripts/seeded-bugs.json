@@ -27504,6 +27504,26 @@
         "its examples and stated schema version match the code"
       ],
       "expect": "\\(fail\\).*its examples and stated schema version match the code"
+    },
+    {
+      "id": "svg/non-square-viewbox-forced-square",
+      "requirement": "R-011",
+      "description": "an SVG with a non-square viewBox is forced back into a square box",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "return { width: side(across), height: side(down) };",
+          "replace": "return { width: String(size), height: String(size) };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/media-elements.test.ts",
+        "-t",
+        "a non-square viewBox keeps its ratio inside the Size box"
+      ],
+      "expect": "\\(fail\\).*a non-square viewBox keeps its ratio inside the Size box"
     }
   ]
 }
