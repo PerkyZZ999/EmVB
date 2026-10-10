@@ -23,7 +23,7 @@ More screenshots are in [`site/public/screenshots/`](site/public/screenshots/), 
 
 ## Quick start
 
-Needs [Bun](https://bun.sh) and Node. Both demo dev servers and Playwright run on Node. Verified with Bun 1.4.2 and Node 24.21. End-to-end tests use the system Chromium at `/usr/bin/chromium`, or the binary in `EMVB_CHROMIUM`.
+Needs [Bun](https://bun.sh) and Node. Both demo dev servers and Playwright run on Node. Verified with Bun 1.4.3 and Node 24.21. End-to-end tests use the system Chromium at `/usr/bin/chromium`, or the binary in `EMVB_CHROMIUM`.
 
 ```bash
 bun install

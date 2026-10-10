@@ -12,7 +12,7 @@
     "lint": "oxlint --deny-warnings",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
-    "typecheck": "tsc -p packages/emvb && tsc -p .",
+    "typecheck": "bun --check --cwd packages/emvb && bun --check",
     "fallow": "fallow dead-code",
     "check": "bun run lint && bun run fmt:check && bun run typecheck && bun run fallow && bun run check:runtime && bun run check:seeds && bun run test && bun run test:astro",
     "demo:node": "bun run --cwd demos/node dev",

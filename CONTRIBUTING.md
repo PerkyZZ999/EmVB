@@ -4,7 +4,7 @@ Thanks for helping. This page covers setup, the checks to run, code style and co
 
 ## Set up
 
-You need [Bun](https://bun.sh) 1.4.2 or later and Node 24. End-to-end tests use Chromium at `/usr/bin/chromium`, or the binary in `EMVB_CHROMIUM`.
+You need [Bun](https://bun.sh) 1.4.3 or later and Node 24. End-to-end tests use Chromium at `/usr/bin/chromium`, or the binary in `EMVB_CHROMIUM`.
 
 ```bash
 bun install
