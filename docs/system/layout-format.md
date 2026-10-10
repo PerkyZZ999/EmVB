@@ -32,7 +32,7 @@ How EmVB stores a page and its site-wide design, at schema 15 (per-element direc
 - `schemaVersion` is the literal `15` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045, W-160, W-307, W-329, W-341; older documents are upgraded on read by steps that change nothing, except v11 → v12, which rewrites a gradient's `from` and `to` into `stops`). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)), `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`, rendered as `emvb-k-<id>`), `bind` (W-307), `variant` (an A/B arm, W-312) and `audience` (who sees it, W-313, W-329).
 - Objects are strict: unknown keys are rejected, not ignored.
-- **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
+- **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; every shared node field, including `devices` and `hiddenOn`, is allowed and checked as on known nodes; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
 
 
 | Type | `props` | Children | Renders as |

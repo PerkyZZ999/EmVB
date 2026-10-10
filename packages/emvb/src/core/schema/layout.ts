@@ -718,6 +718,8 @@ const UnknownNodeSchema = z.strictObject({
   bind: Bindings.optional(),
   variant: Variant.optional(),
   audience: Audience.optional(),
+  devices: DeviceStyles.optional(),
+  hiddenOn: HiddenOn.optional(),
   get children(): z.ZodType<LayoutNode[] | undefined> {
     return z.array(LayoutNode).optional();
   },

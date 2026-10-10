@@ -28171,6 +28171,26 @@
         "rejected segment"
       ],
       "expect": "\\(fail\\).*rejected segment"
+    },
+    {
+      "id": "schema/unknown-node-device-fields-refused",
+      "requirement": "R-033",
+      "description": "an unknown node refuses a device hide and device styles, so its page can't be saved",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "  audience: Audience.optional(),\n  devices: DeviceStyles.optional(),\n  hiddenOn: HiddenOn.optional(),\n",
+          "replace": "  audience: Audience.optional(),\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/unknown-node.test.ts",
+        "-t",
+        "hidden on a device or given device styles"
+      ],
+      "expect": "\\(fail\\).*hidden on a device or given device styles"
     }
   ]
 }

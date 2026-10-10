@@ -1,7 +1,17 @@
 import { describe, expect, test } from "bun:test";
 import { moveNode, REASONS } from "../arrange.ts";
+import {
+  applyStyle,
+  clipStyle,
+  encodeClip,
+  prepareStyle,
+  readClip,
+  styleClip,
+} from "../clipboard.ts";
+import { toggleHidden } from "../design/devices.ts";
 import { renderPage } from "../render/index.ts";
 import { emptyDesign } from "../schema/design.ts";
+import type { LayoutNode, UnknownNode } from "../schema/layout.ts";
 import { removeNode } from "../tree-ops.ts";
 import { validateLayout } from "../validate.ts";
 import { container, heading } from "../../../test/fixtures/layouts.ts";
@@ -36,6 +46,44 @@ describe("unknown nodes (W-022, R-033)", () => {
     const badId = structuredClone(withUnknown);
     (badId.root.children[1] as { id: string }).id = "!!";
     expect(validateLayout(badId).ok).toBe(false);
+  });
+
+  test("an unknown node can be hidden on a device or given device styles and still saves", () => {
+    const page = (node: UnknownNode) => ({
+      ...withUnknown,
+      root: { ...withUnknown.root, children: [node] },
+    });
+    const hidden: UnknownNode = {
+      id: "car00001",
+      type: "carousel",
+      props: { slides: 3 },
+      devices: { tablet: { color: "#111111" } },
+      hiddenOn: ["mobile"],
+    };
+    const saved = validateLayout(page(hidden));
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) return;
+    expect(saved.layout.root.children).toEqual([hidden]);
+    const reloaded = validateLayout(JSON.parse(JSON.stringify(saved.layout)));
+    expect(reloaded.ok && reloaded.layout).toEqual(saved.layout);
+
+    // What the device bar's hide toggle and Paste style write onto the selected element.
+    const bare: UnknownNode = { id: "car00001", type: "carousel", props: {} };
+    const toggled = { ...bare, hiddenOn: toggleHidden(bare.hiddenOn, "mobile") };
+    expect(validateLayout(page(toggled)).ok).toBe(true);
+    const donor: LayoutNode = {
+      ...heading("head0003"),
+      devices: { mobile: { color: "#222222" } },
+      hiddenOn: ["tablet"],
+    };
+    const read = readClip(encodeClip(styleClip(donor)));
+    if (!read.ok) throw new Error(read.reason);
+    const pasted = applyStyle(bare, prepareStyle(clipStyle(read.clip), emptyDesign()).style);
+    expect(pasted).toMatchObject({
+      devices: { mobile: { color: "#222222" } },
+      hiddenOn: ["tablet"],
+    });
+    expect(validateLayout(page(pasted)).ok).toBe(true);
   });
 
   test("validateLayout still refuses nesting past the depth limit when unknowns are present", () => {
