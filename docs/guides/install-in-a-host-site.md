@@ -65,6 +65,8 @@ Copy the pattern from EmVB’s demos (`demos/node/src/pages/[slug].astro`): try 
 import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
 import { EmVBPage, resolveEmVBPage } from "@perkyzz/emvb/astro";
 import { EmVBFormsRuntime } from "@perkyzz/emvb/astro/forms/client"; // only with @emdash-cms/plugin-forms
+import { EmVBMenuRuntime } from "@perkyzz/emvb/astro/menu";
+import { EmVBTabsRuntime } from "@perkyzz/emvb/astro/tabs";
 // …site layout…
 
 const emvb = await resolveEmVBPage(Astro);
@@ -74,7 +76,11 @@ if (!emvb && !(await getEmDashEntry("pages", decodeSlug(Astro.params.slug)))) {
 ---
 
 {emvb ? (
-  <EmVBPage page={emvb}>{emvb.needsFormsRuntime && <EmVBFormsRuntime />}</EmVBPage>
+  <EmVBPage page={emvb}>
+    {emvb.needsFormsRuntime && <EmVBFormsRuntime />}
+    {emvb.needsTabsRuntime && <EmVBTabsRuntime />}
+    {emvb.needsMenuRuntime && <EmVBMenuRuntime />}
+  </EmVBPage>
 ) : (
   /* site page */
   null
@@ -96,11 +102,13 @@ if (!emvb) return Astro.rewrite("/404");
 <EmVBPage page={emvb}>{emvb.needsFormsRuntime && <EmVBFormsRuntime />}</EmVBPage>
 ```
 
-Until a page with the slug `home` is published (step 4), `/` returns 404; if the site has its own home content, fall through to it instead, as the `[slug]` route does. The `[slug]` route still serves the same page at `/home`, so redirect that path or set the page’s canonical URL to `/`.
+Mount the tabs and menu runtimes here too, as above. Until a page with the slug `home` is published (step 4), `/` returns 404; if the site has its own home content, fall through to it instead, as the `[slug]` route does. The `[slug]` route still serves the same page at `/home`, so redirect that path or set the page’s canonical URL to `/`.
 
 Blank-canvas EmVB pages use `standalone` on `EmVBPage` (see the demos).
 
 `@perkyzz/emvb/astro/forms` does not import the forms plugin, so a site can always import it and the build still succeeds; rendering it does nothing. When `@emdash-cms/plugin-forms` is installed, import `EmVBFormsRuntime` from `@perkyzz/emvb/astro/forms/client` instead. That subpath calls `initForms`.
+
+Public pages are script-free except for these runtimes, and each one is mounted only when the page says it needs it: `needsFormsRuntime` (a Form element), `needsTabsRuntime` (a Tabs element, `@perkyzz/emvb/astro/tabs`) and `needsMenuRuntime` (a Menu element, `@perkyzz/emvb/astro/menu`). Theme parts report their own flags from `resolveThemeParts`, with popups (`@perkyzz/emvb/astro/popups`) and floats (`@perkyzz/emvb/astro/floats`) in addition; mount those in the site layout as `demos/node/src/layouts/Base.astro` does. See [Theme parts § Public render](../system/theme-parts.md#public-render).
 
 ### Tell EmVB what you know about the visitor
 
@@ -117,7 +125,7 @@ const theme = await resolveThemeParts(Astro, undefined, { visitor }); // theme p
 ---
 ```
 
-- `segments`: names your editors type in Visitors → Segments (lowercase letters, digits, `-`, `_`). A rule matches a visitor in any of its segments.
+- `segments`: names your editors type in Visitors → Segments (a lowercase letter or digit, then lowercase letters, digits, `:`, `_` or `-`, up to 64 characters, so `plan:pro` works). A name that doesn't fit is dropped. A rule matches a visitor in any of its segments.
 - `country` (two letters), `device` (`mobile`, `tablet`, `desktop`) and `returning` (true or false) replace what EmVB detects from the request, when your site knows better.
 - Pages with Visitors rules are sent with `Cache-Control: private, no-store`, so one visitor's version is never cached for another.
 
