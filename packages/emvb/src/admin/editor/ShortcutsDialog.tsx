@@ -22,7 +22,10 @@ export function ShortcutsDialog({
             ))}
           </tbody>
         </table>
-        <p>Shortcuts don't fire while a text field has focus, except Ctrl/Cmd+S.</p>
+        <p>
+          Shortcuts don't fire while a text field has focus, except Ctrl/Cmd+S and Ctrl/Cmd+K. In a
+          dialog, only Ctrl/Cmd+S fires.
+        </p>
         <Dialog.Close render={(props) => <Button {...props}>Close</Button>} />
       </Dialog>
     </Dialog.Root>

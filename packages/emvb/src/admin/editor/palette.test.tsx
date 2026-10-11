@@ -121,4 +121,37 @@ describe("Ctrl/Cmd+K (W-314)", () => {
     expect(opened).toBe(1);
     expect(hostSaw).toBe(false);
   });
+
+  test("opens no palette from inside a dialog, but still opens EmVB's from a text field", async () => {
+    let opened = 0;
+    let hostSaw = false;
+    const host = () => {
+      hostSaw = true;
+    };
+    window.addEventListener("keydown", host);
+    await mount(
+      <EditorOverlay label="Editor" onPalette={() => (opened += 1)}>
+        <div role="dialog">
+          <button type="button">Close</button>
+        </div>
+        <input aria-label="Text" />
+      </EditorOverlay>,
+    );
+    const pressModK = (selector: string) => {
+      const target = document.querySelector(selector);
+      if (!target) throw new Error(`no ${selector}`);
+      target.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }),
+      );
+    };
+    pressModK('[role="dialog"] button');
+    const fromDialog = opened;
+    pressModK("input");
+    window.removeEventListener("keydown", host);
+    expect({ fromDialog, fromField: opened - fromDialog, hostSaw }).toEqual({
+      fromDialog: 0,
+      fromField: 1,
+      hostSaw: false,
+    });
+  });
 });

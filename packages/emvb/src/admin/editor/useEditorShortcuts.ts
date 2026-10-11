@@ -24,7 +24,7 @@ const isTextField = (target: EventTarget | null) => {
   );
 };
 
-const inDialog = (target: EventTarget | null) =>
+export const inDialog = (target: EventTarget | null) =>
   !!(target as HTMLElement | null)?.closest?.('[role="dialog"], [role="alertdialog"]');
 
 /**
@@ -99,9 +99,10 @@ export type ShortcutHandlers = {
 
 /**
  * Window-level editor shortcuts (W-020): save, undo and redo (W-095), duplicate, copy and paste
- * (W-093), delete, escape, arrange and traverse. Inside text fields and dialogs only Save works, so
- * typing, native undo, copy and paste keep working there. Element shortcuts also need focus on
- * the canvas, Layers, or nothing (W-132); Save, undo and redo work from the panels too.
+ * (W-093), delete, escape, arrange and traverse. Inside text fields only Save and the palette work,
+ * and inside dialogs only Save, so typing, native undo, copy and paste keep working there. Element
+ * shortcuts also need focus on the canvas, Layers, or nothing (W-132); Save, undo and redo work
+ * from the panels too.
  */
 export function useEditorShortcuts({
   latest,

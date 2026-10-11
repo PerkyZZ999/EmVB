@@ -2,6 +2,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { EDITOR_CSS } from "./editor-css.ts";
 import { isPaletteShortcut } from "./shortcuts.ts";
+import { inDialog } from "./useEditorShortcuts.ts";
 
 /**
  * The full-screen editor layer (D-011, S0-6). It is portaled to `document.body` with
@@ -28,6 +29,8 @@ export function EditorOverlay({
       if (!isPaletteShortcut(event)) return;
       event.preventDefault();
       event.stopImmediatePropagation();
+      // Not over an open dialog: closing the palette would strand focus outside it.
+      if (inDialog(event.target)) return;
       paletteRef.current?.();
     };
     window.addEventListener("keydown", block, true);
