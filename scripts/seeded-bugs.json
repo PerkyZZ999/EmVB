@@ -28211,6 +28211,26 @@
         "host stylesheets"
       ],
       "expect": "\\(fail\\).*host stylesheets"
+    },
+    {
+      "id": "visitor/seen-cookie-read-from-this-request",
+      "requirement": "W-313",
+      "description": "the seen cookie is read back through Astro.cookies, which returns the one set earlier in the request, so the theme parts count a first visit as returning",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "requestCookie(astro, SEEN_COOKIE) === \"1\"",
+          "replace": "astro.cookies.get(SEEN_COOKIE)?.value === \"1\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/visitor.test.ts",
+        "-t",
+        "a first visit stays new for every call in the same request"
+      ],
+      "expect": "\\(fail\\).*a first visit stays new for every call in the same request"
     }
   ]
 }

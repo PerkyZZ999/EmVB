@@ -123,13 +123,35 @@ describe("server-side visitor facts (W-313)", () => {
     expect(jar.get("emvb_seen")?.value).toBe("1");
   });
 
-  test("W-313 a seen visitor is returning; XX is no country; request.cf is read, locals.runtime.cf never", () => {
+  test("a first visit stays new for every call in the same request", () => {
     const { astro, jar } = astroWith();
-    jar.set("emvb_seen", { value: "1" });
+    const ruled = {
+      ...withAudience,
+      root: {
+        ...withAudience.root,
+        children: [
+          {
+            ...withAudience.root.children[0],
+            audience: { visitor: "new" as const },
+          },
+        ],
+      },
+    } as Layout;
+    const firstVisit = { ...astro, request: new Request("https://example.com/") };
+    // The page and then its theme parts, in one request: both see what the browser sent.
+    expect(visitorFor(ruled, firstVisit)?.returning).toBe(false);
+    expect(visitorFor(ruled, firstVisit)?.returning).toBe(false);
+    expect(jar.get("emvb_seen")?.value).toBe("1");
+  });
+
+  test("W-313 a seen visitor is returning; XX is no country; request.cf is read, locals.runtime.cf never", () => {
+    const { astro } = astroWith();
     const request = Object.assign(
       new Request("https://example.com/", { headers: { "cf-ipcountry": "XX" } }),
       { cf: { country: "FR" } },
     );
+    // Set afterwards: happy-dom's Request drops a Cookie header given to it, as browsers do.
+    request.headers.set("cookie", "emvb_seen=1");
     // W-313: Astro 6's Cloudflare adapter throws when locals.runtime.cf is read; never touch it.
     const runtime = {
       get cf(): never {

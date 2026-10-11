@@ -88,6 +88,25 @@ export function abArmsFor(
 const SEEN_COOKIE = "emvb_seen";
 const SEEN_DAYS = 365;
 
+/**
+ * One cookie as the browser sent it, decoded as `Astro.cookies.get` would. Unlike that getter, it
+ * ignores a cookie set earlier in this request, so the page and its theme parts agree on a first
+ * visit.
+ */
+function requestCookie(astro: VisitorAstro, name: string): string | undefined {
+  for (const pair of astro.request?.headers.get("cookie")?.split(";") ?? []) {
+    const at = pair.indexOf("=");
+    if (at < 0 || pair.slice(0, at).trim() !== name) continue;
+    const raw = pair.slice(at + 1).trim();
+    try {
+      return decodeURIComponent(raw);
+    } catch {
+      return raw;
+    }
+  }
+  return undefined;
+}
+
 const COUNTRY = /^[A-Z]{2}$/;
 
 /**
@@ -165,7 +184,7 @@ export function visitorFor(
   const device = deviceFromUserAgent(headers?.get("user-agent"), headers?.get("sec-ch-ua-mobile"));
   if (device) visitor.device = device;
   if (astro.cookies && layoutUsesVisitorRule(layout)) {
-    visitor.returning = astro.cookies.get(SEEN_COOKIE)?.value === "1";
+    visitor.returning = requestCookie(astro, SEEN_COOKIE) === "1";
     if (!visitor.returning) {
       try {
         astro.cookies.set(SEEN_COOKIE, "1", {
