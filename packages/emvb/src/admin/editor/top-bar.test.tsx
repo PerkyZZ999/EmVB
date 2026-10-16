@@ -6,6 +6,19 @@ import type { SaveStatus } from "./useSave.ts";
 
 afterEach(cleanup);
 
+for (const action of ["save", "publish"] as const) {
+  test(`W-726: ${action} reports pending work over an earlier saved status`, async () => {
+    const view = await bar({ busy: action, status: { kind: "saved" } });
+    expect(view.statusText()).toBe(action === "save" ? "Saving…" : "Publishing…");
+    const active = view.host.querySelector(`.emvb-${action}-button`);
+    const other = view.host.querySelector(`.emvb-${action === "save" ? "publish" : "save"}-button`);
+    expect(active?.getAttribute("aria-busy")).toBe("true");
+    expect(other?.getAttribute("aria-busy")).toBe("false");
+    expect(Boolean(active?.querySelector('svg[role="status"]'))).toBe(true);
+    expect(Boolean(other?.querySelector('svg[aria-hidden="true"]'))).toBe(true);
+  });
+}
+
 // W-091: the top bar was only reached through whole-editor tests, which left its status text,
 // Retry, busy states and button wiring unchecked.
 

@@ -6,15 +6,18 @@ import {
   DesktopIcon,
   DeviceMobileIcon,
   DeviceTabletIcon,
+  FloppyDiskIcon,
   KeyboardIcon,
   PaintBrushIcon,
   SignOutIcon,
+  UploadSimpleIcon,
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
 import { statusLabel } from "../entry-status.ts";
 import type { SaveStatus } from "./useSave.ts";
 import type { PopupDevice } from "../../core/index.ts";
+import { useMediaQuery } from "./useMediaQuery.ts";
 
 /** Preview sizes (W-158): the canvas device widths, in a window of that size. */
 const PREVIEW_SIZES = [
@@ -28,14 +31,17 @@ export type TopBarPage = { title: string; status: string };
 function SaveStatusText({
   status,
   dirty,
+  busy,
   onRetry,
 }: {
   status: SaveStatus;
   dirty: boolean;
+  busy: "save" | "publish" | null;
   onRetry: () => void;
 }) {
   let content: React.ReactNode = null;
-  if (status.kind === "saving") content = "Saving…";
+  if (busy === "publish") content = "Publishing…";
+  else if (busy === "save" || status.kind === "saving") content = "Saving…";
   else if (status.kind === "error") {
     content = (
       <>
@@ -94,6 +100,7 @@ export function TopBar({
   /** Extra tools beside Site styles: the page weight and accessibility meters, … (W-310). */
   tools?: React.ReactNode;
 }) {
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   return (
     <header className="emvb-topbar">
       <div className="emvb-topbar-start">
@@ -115,7 +122,11 @@ export function TopBar({
           </>
         )}
       </div>
-      {page ? <SaveStatusText status={status} dirty={dirty} onRetry={onSave} /> : <div />}
+      {page ? (
+        <SaveStatusText status={status} dirty={dirty} busy={busy} onRetry={onSave} />
+      ) : (
+        <div />
+      )}
       <div
         className="emvb-topbar-end"
         style={{
@@ -213,8 +224,10 @@ export function TopBar({
             <Button
               variant="secondary"
               className={`${BUTTON} emvb-save-button`}
-              loading={busy === "save"}
+              icon={<FloppyDiskIcon size={14} aria-hidden="true" />}
+              loading={busy === "save" && !reducedMotion}
               disabled={busy !== null}
+              aria-busy={busy === "save"}
               aria-label={dirty ? "Save draft (unsaved changes)" : "Save draft"}
               onClick={onSave}
             >
@@ -225,8 +238,10 @@ export function TopBar({
               variant="primary"
               className={`${BUTTON} emvb-publish-button`}
               style={SOLID_PRIMARY}
-              loading={busy === "publish"}
+              icon={<UploadSimpleIcon size={14} aria-hidden="true" />}
+              loading={busy === "publish" && !reducedMotion}
               disabled={busy !== null}
+              aria-busy={busy === "publish"}
               aria-label={stylesUnpublished ? "Publish (site styles unpublished)" : undefined}
               title={
                 stylesUnpublished

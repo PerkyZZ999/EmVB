@@ -12307,8 +12307,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/TopBar.tsx",
-          "search": "              loading={busy === \"save\"}\n              disabled={busy !== null}",
-          "replace": "              loading={busy === \"save\"}\n              disabled={false}"
+          "search": "              loading={busy === \"save\" && !reducedMotion}\n              disabled={busy !== null}",
+          "replace": "              loading={busy === \"save\" && !reducedMotion}\n              disabled={false}"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
@@ -12321,8 +12321,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/TopBar.tsx",
-          "search": "              loading={busy === \"publish\"}\n              disabled={busy !== null}",
-          "replace": "              loading={busy === \"publish\"}\n              disabled={false}"
+          "search": "              loading={busy === \"publish\" && !reducedMotion}\n              disabled={busy !== null}",
+          "replace": "              loading={busy === \"publish\" && !reducedMotion}\n              disabled={false}"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
@@ -32988,6 +32988,90 @@
         "W-725"
       ],
       "expect": "toHaveValue"
+    },
+    {
+      "id": "W-726/pending-save",
+      "requirement": "W-726",
+      "description": "Pending action overrides earlier saved feedback: pending-save",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "busy === \"save\" || status.kind === \"saving\"",
+          "replace": "status.kind === \"saving\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/top-bar.test.tsx",
+        "-t",
+        "W-726"
+      ],
+      "expect": "\\(fail\\).*W-726:"
+    },
+    {
+      "id": "W-726/pending-publish",
+      "requirement": "W-726",
+      "description": "Pending action overrides earlier saved feedback: pending-publish",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "if (busy === \"publish\") content = \"Publishing…\";",
+          "replace": "if (busy === \"publish\") content = \"Saved\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/top-bar.test.tsx",
+        "-t",
+        "W-726"
+      ],
+      "expect": "\\(fail\\).*W-726:"
+    },
+    {
+      "id": "W-726/browser-reduced-motion",
+      "requirement": "W-726",
+      "description": "Top-bar pending feedback respects motion and reserves icon width: browser-reduced-motion",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "busy === \"save\" && !reducedMotion",
+          "replace": "busy === \"save\""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/top-bar-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-726"
+      ],
+      "expect": "toHaveCount"
+    },
+    {
+      "id": "W-726/browser-icon-slot",
+      "requirement": "W-726",
+      "description": "Top-bar pending feedback respects motion and reserves icon width: browser-icon-slot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "icon={<UploadSimpleIcon size={14} aria-hidden=\"true\" />}",
+          "replace": "icon={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/top-bar-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-726"
+      ],
+      "expect": "toBe"
     }
   ]
 }

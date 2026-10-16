@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Save and publish feedback (W-726).** The editor announces the action in progress, keeps button widths stable, and uses static icons under reduced motion while retaining busy/disabled feedback. Failures remain actionable and retryable.
+
 - **Search recovery (W-725).** Unmatched searches in Visual pages and Theme Builder offer Clear search, restore results and return keyboard focus to the search field. Theme Builder keeps the selected type filter.
 
 - **Publish styles feedback (W-724).** Publishing shows a stable-width loading button and live footer status, prevents rapid duplicate clicks, and unlocks after success or failure. Reduced motion keeps a static icon with the same pending message; failed requests remain retryable.
