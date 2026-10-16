@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Interrupted image loading (W-719).** Interrupted picture transfers show connection guidance and Try again instead of a low-level body-read error, including when loading an edited copy after its original is missing.
+
 - **Copy-size validation (W-718).** Save copy checks its existing stored custom-size limits before rendering and explains how to choose a supported size or use Full size.
 
 - **Export size bounds (W-717).** Typed image export dimensions keep both sides within the existing pixel limit, preserving the aspect ratio and showing each field's effective maximum.

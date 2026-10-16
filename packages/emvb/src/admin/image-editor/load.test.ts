@@ -83,6 +83,29 @@ describe("loadEditableSource (W-482)", () => {
       reason: "network",
     });
   });
+
+  test.each([
+    ["the current picture", { src: "/a.jpg" }],
+    ["the copy after a missing original", { src: "/a.jpg", edit: { originalSrc: "/gone.jpg" } }],
+  ])("W-719: an interrupted body for %s returns a network error", async (_, props) => {
+    const fetchImpl = (async (url: string) => {
+      if (url === "/gone.jpg") return new Response(null, { status: 404 });
+      return new Response(
+        new ReadableStream({
+          start(controller) {
+            controller.error(new TypeError("Transfer interrupted"));
+          },
+        }),
+        { headers: { "content-type": "image/jpeg" } },
+      );
+    }) as unknown as typeof fetch;
+    const result = await loadEditableSource(props, ORIGIN, fetchImpl);
+    expect(result).toEqual({
+      ok: false,
+      reason: "network",
+      message: "Couldn't load the picture. Check your connection and try again.",
+    });
+  });
 });
 
 describe("a deleted original (W-493)", () => {

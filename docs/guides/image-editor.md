@@ -53,6 +53,8 @@ Save copy accepts a custom longest side from 16 through 10,000 px, as required b
 
 ## Size and loading
 
+If the picture request fails or its transfer is interrupted, the editor asks you to check the connection and offers **Try again**. Retry reopens the same picture without closing the editor.
+
 The editor and its WebGL worker load only after you open them (hover or focus on **Edit image** can start the fetch early). A size check in the repo (`scripts/image-editor-budget.ts`) keeps the photocn chunk under 350 KB gzipped and the worker under 32 KB gzipped. Host sites that ship a Content Security Policy must allow a same-origin module worker for the admin; if the worker cannot start, the editor falls back to a main-thread preview and still saves under the CSP.
 
 ## Attribution

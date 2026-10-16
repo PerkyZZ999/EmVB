@@ -92,7 +92,12 @@ export async function loadEditableSource(
     return copy.ok ? { ...copy, originalMissing: true } : copy;
   }
   if (!response.ok) return { ok: false, reason: "network", message: MESSAGES.network };
-  const blob = await response.blob();
+  let blob: Blob;
+  try {
+    blob = await response.blob();
+  } catch {
+    return { ok: false, reason: "network", message: MESSAGES.network };
+  }
   const type =
     // W-592: MIME types are case-insensitive ("IMAGE/JPEG" is a JPEG).
     (response.headers.get("content-type") ?? blob.type ?? "").split(";")[0]?.trim().toLowerCase() ??

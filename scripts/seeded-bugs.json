@@ -32500,6 +32500,46 @@
         "W-718"
       ],
       "expect": "toContainText"
+    },
+    {
+      "id": "W-719/body-read-rejection",
+      "requirement": "W-482",
+      "description": "Interrupted response bodies return the same actionable network result for a picture and its fallback copy",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/load.ts",
+          "search": "  let blob: Blob;\n  try {\n    blob = await response.blob();\n  } catch {\n    return { ok: false, reason: \"network\", message: MESSAGES.network };\n  }",
+          "replace": "  const blob = await response.blob();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/load.test.ts",
+        "-t",
+        "W-719:"
+      ],
+      "expect": "\\(fail\\).*W-719:"
+    },
+    {
+      "id": "W-719/body-read-retry",
+      "requirement": "W-482",
+      "description": "A body transfer failure keeps Try again available so the image can open after recovery",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/load.ts",
+          "search": "  let blob: Blob;\n  try {\n    blob = await response.blob();\n  } catch {\n    return { ok: false, reason: \"network\", message: MESSAGES.network };\n  }",
+          "replace": "  let blob: Blob;\n  try {\n    blob = await response.blob();\n  } catch {\n    return { ok: false, reason: \"format\", message: MESSAGES.network };\n  }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-719:"
+      ],
+      "expect": "\\(fail\\).*W-719:"
     }
   ]
 }

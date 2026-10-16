@@ -449,6 +449,42 @@ describe("image editor in photocn's layout (W-483)", () => {
     expect(hookOptions).toBeUndefined();
   });
 
+  test("W-719: an interrupted transfer explains recovery and Try again opens the picture", async () => {
+    const seen: string[] = [];
+    globalThis.fetch = (async (url: string) => {
+      seen.push(url);
+      if (seen.length === 1) {
+        return new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.error(new TypeError("Transfer interrupted"));
+            },
+          }),
+          { headers: { "content-type": "image/jpeg" } },
+        );
+      }
+      return new Response("img", { headers: { "content-type": "image/jpeg" } });
+    }) as unknown as typeof fetch;
+
+    await open({ src: "/a.jpg", alt: "A" });
+    expect(q("[data-emvb-image-editor]")?.dataset.emvbImageEditor).toBe("error");
+    expect(q("[data-emvb-image-error]")?.getAttribute("role")).toBe("alert");
+    expect(q("[data-emvb-image-error] p")?.textContent).toBe(
+      "Couldn't load the picture. Check your connection and try again.",
+    );
+    expect(q("[data-emvb-image-error] button")?.textContent).toBe("Try again");
+    expect(hookOptions).toBeUndefined();
+
+    await React.act(async () => {
+      await click("[data-emvb-image-error] button");
+      await [1, 2, 3, 4, 5].reduce((prev) => prev.then(settle), Promise.resolve());
+    });
+    expect(q("[data-emvb-image-editor]")?.dataset.emvbImageEditor).toBe("ready");
+    expect(q("[data-emvb-image-error]")?.textContent ?? null).toBeNull();
+    expect(seen).toEqual(["/a.jpg", "/a.jpg"]);
+    expect(openChanges).toEqual([]);
+  });
+
   test("a picture photocn can't decode shows the error badge", async () => {
     serveImage();
     state.status = "error";
