@@ -8,13 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- **W-708.** Add-panel empty-search feedback has status semantics and clears when results return.
-
-- **W-707.** Classes and variable searches remain available while filtered, even after their lists shrink to three items.
-
-- **W-706.** Timeline falls back to All when agent metadata is unavailable; empty filtered results explain how to recover and have status semantics.
-
-- **W-705.** Palette selection scrolling follows result-list attachment and changes, covering filtering at the same index and reopening.
+- **Palette navigation (W-705).** Filtering and reopening keep the selected command in view.
+- **Timeline filters (W-706).** Saved versions remain visible when agent metadata is unavailable; empty filtered results explain how to return to All.
+- **Site-style search (W-707).** An active search stays available when fewer classes or variables remain, so it can still be cleared.
+- **Search feedback (W-708).** Add-panel searches with no matches expose a status message for assistive technology.
 
 - **Add-panel search (W-704).** Search words match in any order, ignoring case and accents, across element names and groups and section recipe descriptions.
 
