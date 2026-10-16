@@ -15,6 +15,7 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
+import { ImageEditOutput } from "../../core/index.ts";
 import { SOLID_PRIMARY } from "../ui.ts";
 import { withDataUrlFetch } from "./data-url-fetch.ts";
 import { downloadBlob, flattenToJpeg, needsFlatten } from "./flatten.ts";
@@ -42,6 +43,8 @@ export type ExportSettings = {
 export type ExportResult = { blob: Blob; width: number; height: number; type: string };
 
 const MAX_PX = 16384;
+const COPY_SIZE_BOUNDS = ImageEditOutput.shape.maxSide.unwrap();
+const COPY_SIZE_HINT = `For Save copy, use Full size or a custom longest side between ${COPY_SIZE_BOUNDS.minValue} and ${COPY_SIZE_BOUNDS.maxValue} px.`;
 type Pending = "download" | "save" | null;
 
 export function ExportDialog({
@@ -137,6 +140,18 @@ function ExportForm({
 
   const run = async (kind: "download" | "save") => {
     setError(null);
+    const settings: ExportSettings = {
+      format,
+      ...(lossy ? { quality } : {}),
+      ...(width && output ? { maxSide: Math.max(output.width, output.height) } : {}),
+      // Only JPEG copies carry EXIF over; WebP and PNG never have a location.
+      stripGps: format === "jpeg" ? stripGps : true,
+    };
+    if (kind === "save" && !ImageEditOutput.shape.maxSide.safeParse(settings.maxSide).success) {
+      setError(COPY_SIZE_HINT);
+      setFailedSave(false);
+      return;
+    }
     onPendingChange(kind);
     const options = {
       format,
@@ -158,13 +173,6 @@ function ExportForm({
     try {
       const result = mainThread ? await withDataUrlFetch(exportTask) : await exportTask();
       if (kind === "save") {
-        const settings: ExportSettings = {
-          format,
-          ...(lossy ? { quality } : {}),
-          ...(width && output ? { maxSide: Math.max(output.width, output.height) } : {}),
-          // Only JPEG copies carry EXIF over; WebP and PNG never have a location.
-          stripGps: format === "jpeg" ? stripGps : true,
-        };
         await onSave(result, settings);
       }
       setFailedSave(false);

@@ -115,3 +115,28 @@ test("W-717: portrait export dimensions honor both side limits without rendering
   await form.getByRole("button", { name: "Close", exact: true }).click();
   await expect(form).toHaveCount(0);
 });
+
+test("W-718: an unsupported copy size gives a correction hint before upload and recovers at Full size", async ({
+  page,
+  request,
+}) => {
+  await openPhotoEditor(page, request, "Export validation");
+  await page.locator("[data-emvb-image-save]").click();
+  const form = page.locator("[data-emvb-image-export]");
+  let uploads = 0;
+  page.on("request", (sent) => {
+    if (sent.method() === "POST" && new URL(sent.url()).pathname === "/_emdash/api/media")
+      uploads++;
+  });
+  await form.getByRole("spinbutton", { name: "Width in pixels" }).fill("10001");
+  await form.locator("[data-emvb-image-export-save]").click();
+  await expect(form.getByRole("alert")).toContainText("between 16 and 10000 px");
+  await expect(form.getByRole("alert")).toContainText("Full size");
+  await expect(form.getByRole("button", { name: "Close", exact: true })).toBeEnabled();
+  expect(uploads).toBe(0);
+  await form.locator("[data-emvb-image-export-full]").click();
+  await form.locator("[data-emvb-image-export-save]").click();
+  await expect(page.locator("[data-emvb-image-editor]")).toHaveCount(0);
+  await expect(overlay(page).locator("[data-emvb-image-edited]")).toBeVisible();
+  expect(uploads).toBe(1);
+});

@@ -32418,6 +32418,88 @@
         "W-717"
       ],
       "expect": "toHaveValue"
+    },
+    {
+      "id": "W-718/render-before-validation",
+      "requirement": "W-485",
+      "description": "Unsupported custom copy sizes must be refused before rendering while supported saves and downloads continue",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "kind === \"save\" && !ImageEditOutput.shape.maxSide.safeParse(settings.maxSide).success",
+          "replace": "false"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-718: an unsupported"
+      ],
+      "expect": "\\(fail\\).*W-718:"
+    },
+    {
+      "id": "W-718/refuse-supported-size",
+      "requirement": "W-485",
+      "description": "Unsupported custom copy sizes must be refused before rendering while supported saves and downloads continue",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "kind === \"save\" && !ImageEditOutput.shape.maxSide.safeParse(settings.maxSide).success",
+          "replace": "kind === \"save\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-718: custom save size boundary"
+      ],
+      "expect": "\\(fail\\).*W-718:"
+    },
+    {
+      "id": "W-718/restrict-download",
+      "requirement": "W-485",
+      "description": "Unsupported custom copy sizes must be refused before rendering while supported saves and downloads continue",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "kind === \"save\" && !ImageEditOutput.shape.maxSide.safeParse(settings.maxSide).success",
+          "replace": "!ImageEditOutput.shape.maxSide.safeParse(settings.maxSide).success"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-718: Download"
+      ],
+      "expect": "\\(fail\\).*W-718:"
+    },
+    {
+      "id": "W-718/browser-size-hint",
+      "requirement": "W-485",
+      "description": "A refused copy size must explain the supported range and Full size recovery",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "setError(COPY_SIZE_HINT);",
+          "replace": "setError(\"Unsupported size.\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/image-save-recovery.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-718"
+      ],
+      "expect": "toContainText"
     }
   ]
 }

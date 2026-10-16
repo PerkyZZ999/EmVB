@@ -49,6 +49,8 @@ The new file is uploaded as `<original>-edited.<ext>` and applied to the Image e
 
 While Save copy is processing, the export step stays open, including when pressing Escape. If saving fails, it shows the reason and **Retry**; you can also close it once the request finishes. Downloads allow closing the export step while they finish.
 
+Save copy accepts a custom longest side from 16 through 10,000 px, as required by the stored edit format. Other custom sizes show a correction hint before rendering. Choose a supported size or **Full size** to continue. Download keeps its existing size range.
+
 ## Size and loading
 
 The editor and its WebGL worker load only after you open them (hover or focus on **Edit image** can start the fetch early). A size check in the repo (`scripts/image-editor-budget.ts`) keeps the photocn chunk under 350 KB gzipped and the worker under 32 KB gzipped. Host sites that ship a Content Security Policy must allow a same-origin module worker for the admin; if the worker cannot start, the editor falls back to a main-thread preview and still saves under the CSP.

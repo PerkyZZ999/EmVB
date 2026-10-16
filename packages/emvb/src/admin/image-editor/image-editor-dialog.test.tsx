@@ -612,6 +612,61 @@ describe("tone tools in photocn's panels (W-484)", () => {
 describe("save a copy (W-485)", () => {
   const settleAll = () => [1, 2, 3, 4, 5].reduce((prev) => prev.then(settle), Promise.resolve());
 
+  for (const size of [15, 10001]) {
+    test(`W-718: an unsupported custom save size ${size} is rejected before rendering and can recover`, async () => {
+      serveImage();
+      let saved = 0;
+      await open({ src: "/a.jpg", alt: "A" }, async () => {
+        saved++;
+      });
+      await React.act(async () => click("[data-emvb-image-save]"));
+      await React.act(async () => typeInto("[data-emvb-image-export-width]", String(size)));
+      await React.act(async () => click("[data-emvb-image-export-save]"));
+      await settleAll();
+      expect(calls.some(([name]) => name === "exportImage")).toBe(false);
+      expect(saved).toBe(0);
+      expect(q("[data-emvb-image-export-error]")?.textContent).toContain("between 16 and 10000 px");
+      expect(q("[data-emvb-image-export-save]")?.textContent).toBe("Save copy");
+      await React.act(async () => click("[data-emvb-image-export-full]"));
+      await React.act(async () => click("[data-emvb-image-export-save]"));
+      await settleAll();
+      expect(saved).toBe(1);
+      expect(openChanges).toContain(false);
+    });
+  }
+
+  for (const size of [16, 10000]) {
+    test(`W-718: custom save size boundary ${size} remains supported`, async () => {
+      serveImage();
+      const records: unknown[] = [];
+      await open({ src: "/a.jpg", alt: "A" }, async (_file, copy) => {
+        records.push(copy.edit);
+      });
+      await React.act(async () => click("[data-emvb-image-save]"));
+      await React.act(async () => typeInto("[data-emvb-image-export-width]", String(size)));
+      await React.act(async () => click("[data-emvb-image-export-save]"));
+      await settleAll();
+      expect(records).toHaveLength(1);
+      expect(records[0]).toMatchObject({ output: { maxSide: size } });
+      expect(openChanges).toContain(false);
+    });
+  }
+
+  test("W-718: Download retains sizes outside the stored copy's custom-size range", async () => {
+    serveImage();
+    let saved = 0;
+    await open({ src: "/a.jpg", alt: "A" }, async () => {
+      saved++;
+    });
+    await React.act(async () => click("[data-emvb-image-save]"));
+    await React.act(async () => typeInto("[data-emvb-image-export-width]", "10001"));
+    await React.act(async () => click("[data-emvb-image-download]"));
+    await settleAll();
+    expect(calls.find(([name]) => name === "download")?.[1]).toMatchObject({ width: 10001 });
+    expect(saved).toBe(0);
+    expect(q("[data-emvb-image-export-error]")?.textContent ?? null).toBeNull();
+  });
+
   for (const [shape, full, maximum] of [
     ["portrait", { width: 480, height: 640 }, { width: 12288, height: 16384 }],
     ["landscape", { width: 640, height: 480 }, { width: 16384, height: 12288 }],
