@@ -282,6 +282,15 @@ export const UI_CSS = `
     animation: none !important;
   }
   .emvb-list-loading .skeleton-line::after { animation: none !important; }
+  [data-emvb-toasts],
+  [data-emvb-toasts] *,
+  [data-emvb-toasts]::before,
+  [data-emvb-toasts]::after,
+  [data-emvb-toasts] *::before,
+  [data-emvb-toasts] *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 @media (prefers-reduced-transparency: reduce) {
   .emvb-status,

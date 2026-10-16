@@ -33482,6 +33482,48 @@
         "W-731"
       ],
       "expect": "toEqual"
+    },
+    {
+      "id": "W-733/ignore-motion",
+      "requirement": "W-733",
+      "description": "Owned toast motion remains preference-aware: ignore-motion",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  [data-emvb-toasts],\n  [data-emvb-toasts] *,\n  [data-emvb-toasts]::before,\n  [data-emvb-toasts]::after,\n  [data-emvb-toasts] *::before,\n  [data-emvb-toasts] *::after {\n    transition: none !important;\n    animation: none !important;\n  }",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/toast-feedback.e2e.ts", "--project=node"],
+      "expect": "toHaveCSS"
+    },
+    {
+      "id": "W-733/lose-container",
+      "requirement": "W-733",
+      "description": "Owned toast motion remains preference-aware: lose-container",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorToasts.tsx",
+          "search": "container={container} ",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/toast-feedback.e2e.ts", "--project=node"],
+      "expect": "toHaveCSS"
+    },
+    {
+      "id": "W-733/cleanup",
+      "requirement": "W-733",
+      "description": "Closing the editor removes its owned toast portal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/EditorToasts.tsx",
+          "search": "    return () => element.remove();",
+          "replace": "    return () => undefined;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/editor-toasts.test.tsx"],
+      "expect": "toBe"
     }
   ]
 }

@@ -1,4 +1,4 @@
-import { Banner, Button, createKumoToastManager, Empty, Loader, Toasty } from "@cloudflare/kumo";
+import { Banner, Button, createKumoToastManager, Empty, Loader } from "@cloudflare/kumo";
 import {
   ArrowsClockwiseIcon,
   ClockCounterClockwiseIcon,
@@ -33,6 +33,7 @@ import {
   useChromeFlags,
 } from "./editor-chrome.tsx";
 import { EditorOverlay } from "./EditorOverlay.tsx";
+import { EditorToasts } from "./EditorToasts.tsx";
 import { useCanvasStyles, useEditorHost } from "./host.ts";
 import { LiveDataProvider, siteOrigin, useLiveData } from "./live-data.tsx";
 import { newElement } from "./dnd/new-element.ts";
@@ -352,7 +353,7 @@ function EditorApp({
       dirty={dirty && !chrome.leaving}
       onPalette={() => chrome.open("palette")}
     >
-      <Toasty toastManager={toasts}>
+      <EditorToasts toastManager={toasts}>
         {remoteChange && (
           <div className="emvb-remote-change" role="status" data-emvb-remote-change={remoteChange}>
             <span className="emvb-remote-change-icon" aria-hidden="true">
@@ -548,7 +549,7 @@ function EditorApp({
           playgroundUrl={host.playgroundUrl}
           setAnnouncement={setAnnouncement}
         />
-      </Toasty>
+      </EditorToasts>
     </EditorOverlay>
   );
 }
