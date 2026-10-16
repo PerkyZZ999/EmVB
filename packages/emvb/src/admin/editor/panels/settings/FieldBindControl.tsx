@@ -62,6 +62,7 @@ export function FieldBindControl({
   onChange: (field: string, label?: string) => void;
 }) {
   const [fields, setFields] = React.useState<DefinitionField[] | null>(null);
+  const [loading, setLoading] = React.useState(Boolean(formId));
   const [draft, setDraft] = React.useState(value);
 
   React.useEffect(() => {
@@ -75,21 +76,35 @@ export function FieldBindControl({
 
   React.useEffect(() => {
     let cancelled = false;
+    setLoading(Boolean(formId));
     setFields(null);
     if (!formId) return;
     void loadFormFields(fetcher, formId).then((next) => {
-      if (!cancelled) setFields(next);
+      if (!cancelled) {
+        setFields(next);
+        setLoading(false);
+      }
     });
     return () => {
       cancelled = true;
     };
   }, [fetcher, formId]);
 
-  if (fields && fields.length > 0) {
-    const name = draft.trim();
-    const known = fields.some((field) => field.name === name);
-    return (
-      <div data-emvb-field-bind="list">
+  const hasFields = fields !== null && fields.length > 0;
+  const name = draft.trim();
+  const known = fields?.some((field) => field.name === name);
+  let feedback = "";
+  if (!formId)
+    feedback =
+      "Choose a form on the parent Form element to list its fields, or enter a field name manually.";
+  else if (loading) feedback = "Loading form fields… You can enter a field name.";
+  else if (fields === null) feedback = "Could not load form fields. Enter a field name manually.";
+  else if (fields.length === 0)
+    feedback = "This form has no fields yet. Enter a field name manually.";
+
+  return (
+    <div className="emvb-field-group" data-emvb-field-bind={hasFields ? "list" : undefined}>
+      {hasFields && (
         <Select
           label="Field"
           className={FIELD}
@@ -112,10 +127,11 @@ export function FieldBindControl({
             </Select.Option>
           ))}
         </Select>
-        <FieldNameInput value={draft} onChange={changeName} />
-      </div>
-    );
-  }
-
-  return <FieldNameInput value={draft} onChange={changeName} manual />;
+      )}
+      <FieldNameInput value={draft} onChange={changeName} manual={!hasFields} />
+      <p className="emvb-helper" role="status" aria-label="Form fields status" aria-live="polite">
+        {feedback}
+      </p>
+    </div>
+  );
 }

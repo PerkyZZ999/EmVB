@@ -4092,11 +4092,14 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
         "Style"
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
-    div data-filled=""
-      label id="id-2" for="id-3" data-filled=""
-        span
-          "Field name"
-      input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="name" data-filled="" aria-labelledby="id-2"
+    div.emvb-field-group
+      div data-filled=""
+        label id="id-2" for="id-3" data-filled=""
+          span
+            "Field name"
+        input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="name" data-filled="" aria-labelledby="id-2"
+      p.emvb-helper role="status" aria-label="Form fields status" aria-live="polite"
+        "Choose a form on the parent Form element to list its fields, or enter a field name manually."
     div data-filled=""
       label id="id-4" for="id-5" data-filled=""
         span
@@ -4345,11 +4348,14 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
         "Style"
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
-    div data-filled=""
-      label id="id-2" for="id-3" data-filled=""
-        span
-          "Field name"
-      input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="message" data-filled="" aria-labelledby="id-2"
+    div.emvb-field-group
+      div data-filled=""
+        label id="id-2" for="id-3" data-filled=""
+          span
+            "Field name"
+        input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="message" data-filled="" aria-labelledby="id-2"
+      p.emvb-helper role="status" aria-label="Form fields status" aria-live="polite"
+        "Choose a form on the parent Form element to list its fields, or enter a field name manually."
     div data-filled=""
       label id="id-4" for="id-5" data-filled=""
         span
@@ -4598,11 +4604,14 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
         "Style"
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
-    div data-filled=""
-      label id="id-2" for="id-3" data-filled=""
-        span
-          "Field name"
-      input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="choice" data-filled="" aria-labelledby="id-2"
+    div.emvb-field-group
+      div data-filled=""
+        label id="id-2" for="id-3" data-filled=""
+          span
+            "Field name"
+        input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="choice" data-filled="" aria-labelledby="id-2"
+      p.emvb-helper role="status" aria-label="Form fields status" aria-live="polite"
+        "Choose a form on the parent Form element to list its fields, or enter a field name manually."
     div data-filled=""
       label id="id-4" for="id-5" data-filled=""
         span
@@ -4851,11 +4860,14 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
         "Style"
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
-    div data-filled=""
-      label id="id-2" for="id-3" data-filled=""
-        span
-          "Field name"
-      input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="agree" data-filled="" aria-labelledby="id-2"
+    div.emvb-field-group
+      div data-filled=""
+        label id="id-2" for="id-3" data-filled=""
+          span
+            "Field name"
+        input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="agree" data-filled="" aria-labelledby="id-2"
+      p.emvb-helper role="status" aria-label="Form fields status" aria-live="polite"
+        "Choose a form on the parent Form element to list its fields, or enter a field name manually."
     div data-filled=""
       label id="id-4" for="id-5" data-filled=""
         span
@@ -5082,11 +5094,14 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
         "Style"
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
-    div data-filled=""
-      label id="id-2" for="id-3" data-filled=""
-        span
-          "Field name"
-      input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="option" data-filled="" aria-labelledby="id-2"
+    div.emvb-field-group
+      div data-filled=""
+        label id="id-2" for="id-3" data-filled=""
+          span
+            "Field name"
+        input.emvb-field.emvb-mono id="id-3" data-emvb-field-bind="manual" value="option" data-filled="" aria-labelledby="id-2"
+      p.emvb-helper role="status" aria-label="Form fields status" aria-live="polite"
+        "Choose a form on the parent Form element to list its fields, or enter a field name manually."
     div data-filled=""
       label id="id-4" for="id-5" data-filled=""
         span

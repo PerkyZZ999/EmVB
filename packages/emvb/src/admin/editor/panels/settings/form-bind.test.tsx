@@ -50,6 +50,92 @@ describe("FormBindControl (W-036)", () => {
 });
 
 describe("FieldBindControl (W-036)", () => {
+  test("W-735: loading fields announces progress and keeps the input focused when options arrive", async () => {
+    const pending = Promise.withResolvers<Response>();
+    const sent: string[] = [];
+    const fetcher: Fetcher = async () => pending.promise;
+    const host = await mount(
+      <FieldBindControl
+        value="email"
+        formId="01FORM"
+        fetcher={fetcher}
+        onChange={(name) => sent.push(name)}
+      />,
+    );
+    const input = host.querySelector<HTMLInputElement>("input.emvb-mono");
+    if (!input) throw new Error("No field name input");
+    try {
+      expect(host.querySelector('[role="status"]')?.textContent).toBe(
+        "Loading form fields… You can enter a field name.",
+      );
+      expect(input.disabled).toBe(false);
+      await act(async () => {
+        input.focus();
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+          input,
+          "unfinished name",
+        );
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await act(async () =>
+        pending.resolve(
+          Response.json({
+            data: {
+              pages: [
+                { fields: [{ name: "email", type: "email", label: "Email", required: true }] },
+              ],
+            },
+          }),
+        ),
+      );
+      await flush();
+      expect(host.querySelector<HTMLInputElement>("input.emvb-mono") === input).toBe(true);
+      expect(document.activeElement === input).toBe(true);
+      expect(input.value).toBe("unfinished name");
+      expect(input.getAttribute("aria-invalid")).toBe("true");
+      expect(host.querySelector('[data-emvb-field-bind="list"]') !== null).toBe(true);
+      expect(host.querySelector('[role="status"]')?.textContent).toBe("");
+      expect(sent).toEqual([]);
+    } finally {
+      await act(async () => pending.resolve(Response.json({ data: { pages: [] } })));
+    }
+  });
+
+  test.each([
+    ["empty", "01FORM", "This form has no fields yet. Enter a field name manually."],
+    ["unavailable", "01FORM", "Could not load form fields. Enter a field name manually."],
+    [
+      "no parent",
+      undefined,
+      "Choose a form on the parent Form element to list its fields, or enter a field name manually.",
+    ],
+  ])("W-735: %s definitions explain manual entry", async (result, formId, message) => {
+    let requests = 0;
+    const sent: string[] = [];
+    const fetcher: Fetcher = async () => {
+      requests++;
+      return result === "empty"
+        ? Response.json({ data: { pages: [] } })
+        : new Response("{}", { status: 503 });
+    };
+    const host = await mount(
+      <FieldBindControl
+        value="email"
+        formId={formId}
+        fetcher={fetcher}
+        onChange={(name) => sent.push(name)}
+      />,
+    );
+    await flush();
+    expect(host.querySelector('[role="status"]')?.textContent).toBe(message);
+    const input = host.querySelector<HTMLInputElement>("input.emvb-mono");
+    expect(input?.value).toBe("email");
+    expect(input?.disabled).toBe(false);
+    expect(host.querySelector('[data-emvb-field-bind="manual"]') !== null).toBe(true);
+    expect(requests).toBe(formId ? 1 : 0);
+    expect(sent).toEqual([]);
+  });
+
   test("shows field options from definition", async () => {
     const fetcher: Fetcher = async () =>
       new Response(

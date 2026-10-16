@@ -2241,8 +2241,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
-          "search": "  if (fields && fields.length > 0) {",
-          "replace": "  if (false && fields && fields.length > 0) {"
+          "search": "  const hasFields = fields !== null && fields.length > 0;",
+          "replace": "  const hasFields = false;"
         }
       ],
       "command": [
@@ -10101,8 +10101,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
-          "search": "      <div data-emvb-field-bind=\"list\">",
-          "replace": "      <div data-emvb-field-bind=\"list\">\n        <span data-emvb-field-bind=\"manual\" />"
+          "search": "      <FieldNameInput value={draft} onChange={changeName} manual={!hasFields} />",
+          "replace": "      <FieldNameInput value={draft} onChange={changeName} manual />"
         }
       ],
       "command": [
@@ -32568,8 +32568,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
-          "search": "    const name = draft.trim();",
-          "replace": "    const name = value;"
+          "search": "  const name = draft.trim();",
+          "replace": "  const name = value;"
         }
       ],
       "command": [
@@ -32642,8 +32642,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
-          "search": "      if (!cancelled) setFields(next);",
-          "replace": "      setFields(next);"
+          "search": "      if (!cancelled) {\n        setFields(next);\n        setLoading(false);\n      }",
+          "replace": "      {\n        setFields(next);\n        setLoading(false);\n      }"
         }
       ],
       "command": [
@@ -33626,6 +33626,120 @@
         "W-734"
       ],
       "expect": "toBe"
+    },
+    {
+      "id": "W-735/missing-loading",
+      "requirement": "W-735",
+      "description": "Field definition feedback preserves manual entry and focus: missing-loading",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "Loading form fields… You can enter a field name.",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "W-735"
+      ],
+      "expect": "\\(fail\\).*W-735: loading"
+    },
+    {
+      "id": "W-735/empty-as-unavailable",
+      "requirement": "W-735",
+      "description": "Field definition feedback preserves manual entry and focus: empty-as-unavailable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "This form has no fields yet. Enter a field name manually.",
+          "replace": "Could not load form fields. Enter a field name manually."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "W-735"
+      ],
+      "expect": "\\(fail\\).*W-735: empty"
+    },
+    {
+      "id": "W-735/unavailable-as-empty",
+      "requirement": "W-735",
+      "description": "Field definition feedback preserves manual entry and focus: unavailable-as-empty",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "Could not load form fields. Enter a field name manually.",
+          "replace": "This form has no fields yet. Enter a field name manually."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "W-735"
+      ],
+      "expect": "\\(fail\\).*W-735: unavailable"
+    },
+    {
+      "id": "W-735/missing-parent-guidance",
+      "requirement": "W-735",
+      "description": "Field definition feedback preserves manual entry and focus: missing-parent-guidance",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "Choose a form on the parent Form element to list its fields, or enter a field name manually.",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "W-735"
+      ],
+      "expect": "\\(fail\\).*W-735: no parent"
+    },
+    {
+      "id": "W-735/remount-field",
+      "requirement": "W-735",
+      "description": "Field definition feedback preserves manual entry and focus: remount-field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "<div className=\"emvb-field-group\" data-emvb-field-bind={hasFields ? \"list\" : undefined}>",
+          "replace": "<div key={loading ? \"pending\" : \"settled\"} className=\"emvb-field-group\" data-emvb-field-bind={hasFields ? \"list\" : undefined}>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "W-735"
+      ],
+      "expect": "\\(fail\\).*W-735: loading"
+    },
+    {
+      "id": "W-735/missing-live-status",
+      "requirement": "W-735",
+      "description": "Field definition feedback preserves manual entry and focus: missing-live-status",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "role=\"status\" aria-label=\"Form fields status\" aria-live=\"polite\"",
+          "replace": "role=\"presentation\""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/field-feedback.e2e.ts", "--project=node"],
+      "expect": "toHaveText"
     }
   ]
 }
