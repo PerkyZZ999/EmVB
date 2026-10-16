@@ -54,7 +54,7 @@ export type EditorData =
   | { state: "loading" }
   | { state: "ready"; entry: EditorEntry; design: LoadedDesign }
   | { state: "not-found" | "forbidden" }
-  | { state: "error"; message: string };
+  | { state: "error"; message: string; retry: () => void };
 
 const UNREADABLE = "This page's layout can't be read.";
 
@@ -173,6 +173,7 @@ export function useEditorData(
   collection: string = PAGES_COLLECTION,
 ): EditorData {
   const [data, setData] = React.useState<EditorData>({ state: "loading" });
+  const [attempt, setAttempt] = React.useState(0);
   React.useEffect(() => {
     let active = true;
     setData({ state: "loading" });
@@ -187,6 +188,7 @@ export function useEditorData(
           setData({
             state: "error",
             message: error instanceof Error ? error.message : String(error),
+            retry: () => setAttempt((n) => n + 1),
           });
         }
       },
@@ -194,6 +196,6 @@ export function useEditorData(
     return () => {
       active = false;
     };
-  }, [fetcher, entryId, collection]);
+  }, [fetcher, entryId, collection, attempt]);
   return data;
 }

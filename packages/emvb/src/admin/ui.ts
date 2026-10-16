@@ -74,6 +74,7 @@ export const UI_CSS = `
 /* List / setup pages */
 .emvb-pages { display: flex; flex-direction: column; gap: 16px; }
 .emvb-list-loading { min-height: 200px; }
+.emvb-loading-status { margin: 0; padding: 24px 0; text-align: center; }
 .emvb-list-skeleton-rows { display: grid; gap: 14px; }
 .emvb-list-skeleton-row { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); gap: 16px; align-items: center; }
 .emvb-list-skeleton-title { display: grid; gap: 4px; }

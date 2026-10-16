@@ -68,6 +68,15 @@ export function ListLoading({ label }: { label: string }) {
   );
 }
 
+/** A named, motion-free status for short checks that have no list shape to sketch (UX-012). */
+export function LoadingStatus({ label }: { label: string }) {
+  return (
+    <p className="emvb-helper emvb-loading-status" role="status">
+      {label}
+    </p>
+  );
+}
+
 export function ListError({
   title,
   message,

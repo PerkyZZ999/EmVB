@@ -1,7 +1,8 @@
-import { Banner, Empty, Loader } from "@cloudflare/kumo";
-import { LockKeyIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { Empty } from "@cloudflare/kumo";
+import { LockKeyIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 import type { Fetcher } from "../api.ts";
+import { ListError, LoadingStatus } from "../pages/list-kit.tsx";
 import { canUseEmvb, useRole } from "./role.ts";
 
 /** Renders `children` for editors and above, and a "no access" state below (D-020, D-024). */
@@ -13,14 +14,13 @@ export function RequireEditor({
   children: (role: number) => React.ReactNode;
 }) {
   const status = useRole(fetcher);
-  if (status.state === "loading") return <Loader />;
+  if (status.state === "loading") return <LoadingStatus label="Checking your access…" />;
   if (status.state === "error") {
     return (
-      <Banner
-        variant="error"
-        icon={<WarningCircleIcon aria-hidden="true" />}
+      <ListError
         title="Couldn't check your access to EmVB"
-        description={status.message}
+        message={status.message}
+        onRetry={status.retry}
       />
     );
   }

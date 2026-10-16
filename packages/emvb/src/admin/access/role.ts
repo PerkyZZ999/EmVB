@@ -19,12 +19,14 @@ export const canUseEmvb = (role: number) => role >= EDITOR_ROLE;
 type RoleState =
   | { state: "loading" }
   | { state: "ready"; role: number }
-  | { state: "error"; message: string };
+  | { state: "error"; message: string; retry: () => void };
 
 export function useRole(fetcher: Fetcher): RoleState {
   const [status, setStatus] = React.useState<RoleState>({ state: "loading" });
+  const [attempt, setAttempt] = React.useState(0);
   React.useEffect(() => {
     let active = true;
+    setStatus({ state: "loading" });
     readRole(fetcher).then(
       (role) => active && setStatus({ state: "ready", role }),
       (error: unknown) =>
@@ -32,11 +34,12 @@ export function useRole(fetcher: Fetcher): RoleState {
         setStatus({
           state: "error",
           message: error instanceof Error ? error.message : String(error),
+          retry: () => setAttempt((n) => n + 1),
         }),
     );
     return () => {
       active = false;
     };
-  }, [fetcher]);
+  }, [fetcher, attempt]);
   return status;
 }

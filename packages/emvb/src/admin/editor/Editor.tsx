@@ -1,11 +1,10 @@
-import { Banner, Button, createKumoToastManager, Empty, Loader } from "@cloudflare/kumo";
+import { Button, createKumoToastManager, Empty } from "@cloudflare/kumo";
 import {
   ArrowsClockwiseIcon,
   ClockCounterClockwiseIcon,
   GaugeIcon,
   RobotIcon,
   ShareNetworkIcon,
-  WarningCircleIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
 import {
@@ -62,6 +61,7 @@ import { useSave } from "./useSave.ts";
 import { type ShortcutHandlers, useEditorShortcuts } from "./useEditorShortcuts.ts";
 import { useNodeActions } from "./useNodeActions.ts";
 import { type PasteRefusal, useClipboardActions } from "./useClipboardActions.ts";
+import { ListError, LoadingStatus } from "../pages/list-kit.tsx";
 
 /** The full-screen editor for one EmVB page or theme part (R-001, R-002, R-060). */
 
@@ -600,18 +600,13 @@ function LoadBody({ data }: { data: EditorData }) {
   if (data.state === "error") {
     return (
       <div className="emvb-state" data-emvb-editor-state="error">
-        <Banner
-          variant="error"
-          icon={<WarningCircleIcon aria-hidden="true" />}
-          title="Couldn't open this page"
-          description={data.message}
-        />
+        <ListError title="Couldn't open this page" message={data.message} onRetry={data.retry} />
       </div>
     );
   }
   return (
-    <div className="emvb-state">
-      <Loader />
+    <div className="emvb-state" data-emvb-editor-state="loading">
+      <LoadingStatus label="Opening the page…" />
     </div>
   );
 }

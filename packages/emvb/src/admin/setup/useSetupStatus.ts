@@ -58,5 +58,5 @@ export function useSetupStatus(fetcher: Fetcher, role: number) {
     await refresh();
   }, [fetcher, refresh]);
 
-  return { status, running, setup };
+  return { status, running, setup, retry: refresh };
 }

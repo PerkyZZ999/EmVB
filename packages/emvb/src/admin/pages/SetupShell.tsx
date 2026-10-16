@@ -1,9 +1,10 @@
-import { Banner, Button, Empty, Loader } from "@cloudflare/kumo";
-import { LayoutIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { Banner, Button, Empty } from "@cloudflare/kumo";
+import { LayoutIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { Fetcher } from "../api.ts";
 import { useSetupStatus } from "../setup/useSetupStatus.ts";
 import { BUTTON, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
+import { ListError, ListLoading } from "./list-kit.tsx";
 
 /**
  * Shared setup chrome for the plugin's admin pages: loading/error states, the set-up and upgrade
@@ -26,17 +27,24 @@ export function SetupShell({
   keptNote: string;
   children: React.ReactNode;
 }) {
-  const { status, running, setup } = useSetupStatus(fetcher, role);
+  const { status, running, setup, retry } = useSetupStatus(fetcher, role);
 
-  if (status.state === "loading") return <Loader />;
-  if (status.state === "error") {
+  // UX-012: the list's own loading card and a Retry that brings Set up back after a failure.
+  if (status.state === "loading" || status.state === "error") {
     return (
-      <Banner
-        variant="error"
-        icon={<WarningCircleIcon aria-hidden="true" />}
-        title={`Couldn't load ${title}`}
-        description={status.message}
-      />
+      <section data-emvb-page={page} className="emvb-pages">
+        <style data-emvb-ui="">{UI_CSS}</style>
+        <h1 className="emvb-page-title">{title}</h1>
+        {status.state === "loading" ? (
+          <ListLoading label={`Loading ${title}…`} />
+        ) : (
+          <ListError
+            title={`Couldn't load ${title}`}
+            message={status.message}
+            onRetry={() => void retry()}
+          />
+        )}
+      </section>
     );
   }
   const action = (label: string) =>

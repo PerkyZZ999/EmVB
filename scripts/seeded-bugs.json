@@ -9926,13 +9926,13 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/access/RequireEditor.tsx",
-          "search": "  if (status.state === \"error\") {\n    return (\n      <Banner",
-          "replace": "  if (status.state === \"error\") {\n    return (\n      <>\n      {children(0)}\n      <Banner"
+          "search": "  if (status.state === \"error\") {\n    return (\n      <ListError",
+          "replace": "  if (status.state === \"error\") {\n    return (\n      <>\n      {children(0)}\n      <ListError"
         },
         {
           "file": "packages/emvb/src/admin/access/RequireEditor.tsx",
-          "search": "        description={status.message}\n      />",
-          "replace": "        description={status.message}\n      />\n      </>"
+          "search": "        onRetry={status.retry}\n      />",
+          "replace": "        onRetry={status.retry}\n      />\n      </>"
         }
       ],
       "command": [
@@ -10021,8 +10021,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/Editor.tsx",
-          "search": "          title=\"Couldn't open this page\"\n          description={data.message}\n        />",
-          "replace": "          title=\"Couldn't open this page\"\n          description={data.message}\n        />\n        <iframe title=\"canvas\" />"
+          "search": "        <ListError title=\"Couldn't open this page\" message={data.message} onRetry={data.retry} />",
+          "replace": "        <ListError title=\"Couldn't open this page\" message={data.message} onRetry={data.retry} />\n        <iframe title=\"canvas\" />"
         }
       ],
       "command": [
@@ -34711,6 +34711,86 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "UX-011"],
       "expect": "\\(fail\\).*UX-011"
+    },
+    {
+      "id": "UX-012/role-retry-dead",
+      "requirement": "UX-012",
+      "description": "Retry after a failed access check never asks again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/role.ts",
+          "search": "  }, [fetcher, attempt]);",
+          "replace": "  }, [fetcher]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/load-recovery.test.tsx",
+        "-t",
+        "UX-012"
+      ],
+      "expect": "\\(fail\\).*UX-012"
+    },
+    {
+      "id": "UX-012/access-bare-loading",
+      "requirement": "UX-012",
+      "description": "The access check shows no named status",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/access/RequireEditor.tsx",
+          "search": "  if (status.state === \"loading\") return <LoadingStatus label=\"Checking your access…\" />;",
+          "replace": "  if (status.state === \"loading\") return null;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/load-recovery.test.tsx",
+        "-t",
+        "UX-012"
+      ],
+      "expect": "\\(fail\\).*UX-012"
+    },
+    {
+      "id": "UX-012/setup-retry-dead",
+      "requirement": "UX-012",
+      "description": "A failed setup read leaves Retry doing nothing, so Set up never comes back",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/SetupShell.tsx",
+          "search": "onRetry={() => void retry()}",
+          "replace": "onRetry={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/load-recovery.test.tsx",
+        "-t",
+        "UX-012"
+      ],
+      "expect": "\\(fail\\).*UX-012"
+    },
+    {
+      "id": "UX-012/editor-open-retry-dead",
+      "requirement": "UX-012",
+      "description": "Retry after a page failed to open never loads it again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "  }, [fetcher, entryId, collection, attempt]);",
+          "replace": "  }, [fetcher, entryId, collection]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/access/load-recovery.test.tsx",
+        "-t",
+        "UX-012"
+      ],
+      "expect": "\\(fail\\).*UX-012"
     }
   ]
 }
