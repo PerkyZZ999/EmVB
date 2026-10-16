@@ -100,3 +100,83 @@ test("W-729: Keyboard shortcuts marks its portal for reduced motion and retains 
   await expect(popup).toHaveCount(0);
   await expect(open).toBeFocused();
 });
+
+for (const preference of ["no-preference", "reduce"] as const) {
+  test(`W-730: utility dialogs honor ${preference} motion and recover keyboard focus`, async ({
+    page,
+    request,
+  }) => {
+    await page.emulateMedia({ reducedMotion: preference });
+    const id = await createPage(
+      request,
+      "Utility dialog motion",
+      {
+        schemaVersion: 16,
+        root: {
+          id: "root0001",
+          type: "container",
+          props: {},
+          children: [
+            { id: "head0001", type: "heading", props: { text: "Dialog canvas", level: 1 } },
+          ],
+        },
+      },
+      `utility-dialog-${unique()}`,
+    );
+    await openEditor(page, id, "Dialog canvas");
+    await hostProbe(page);
+    const frame = page.locator("iframe[data-emvb-canvas]");
+    const geometry = await frame.evaluate((element) => element.getBoundingClientRect().toJSON());
+    for (const [action, name] of [
+      ["palette", /^Command palette$/],
+      ["Share as a playground link", /^Share as a playground link$/],
+      ["Version timeline", /^Version timeline$/],
+      ["Page weight", /^Page weight$/],
+      ["accessibility", /^Accessibility ·/],
+    ] as const) {
+      const opener = overlay(page).getByRole("button", {
+        name:
+          action === "palette"
+            ? "Keyboard shortcuts"
+            : action === "accessibility"
+              ? /^Accessibility score/
+              : action,
+        exact: true,
+      });
+      if (action === "palette") {
+        await opener.focus();
+        await page.keyboard.press("Control+k");
+      } else await opener.click();
+      const popup = page.getByRole("dialog", { name });
+      await expect(popup).toBeVisible();
+      expect(await motion(popup), action).toEqual({
+        portaled: true,
+        popup: preference === "reduce" ? "0s" : "0.15s",
+        backdrop: preference === "reduce" ? "0s" : "0.15s",
+      });
+      if (preference === "no-preference") {
+        const focused = await popup.evaluate((element) => element.contains(document.activeElement));
+        expect(focused, action).toBe(true);
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await expect
+          .poll(() => motion(popup), { message: action })
+          .toEqual({ portaled: true, popup: "0s", backdrop: "0s" });
+        await page.emulateMedia({ reducedMotion: "no-preference" });
+        await expect
+          .poll(() => motion(popup), { message: action })
+          .toEqual({ portaled: true, popup: "0.15s", backdrop: "0.15s" });
+      }
+      await hostProbe(page);
+      await page.screenshot({
+        animations: "disabled",
+        path: `/tmp/emvb-utility-dialog-${test.info().project.name}-${action.replaceAll(" ", "-")}-${preference}.png`,
+      });
+      await page.keyboard.press("Escape");
+      await expect(popup).toHaveCount(0);
+      await expect(opener).toBeFocused();
+      expect(await frame.evaluate((element) => element.getBoundingClientRect().toJSON())).toEqual(
+        geometry,
+      );
+    }
+  });
+}

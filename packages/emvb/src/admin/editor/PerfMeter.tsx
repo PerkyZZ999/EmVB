@@ -47,7 +47,7 @@ export function PerfMeterDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6 emvb-perf" data-emvb-perf="">
-        <Dialog.Title>Page weight</Dialog.Title>
+        <Dialog.Title data-emvb-dialog="perf">Page weight</Dialog.Title>
         {report && (
           <>
             <ul className="emvb-perf-bars">

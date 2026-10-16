@@ -231,7 +231,7 @@ export function TimelineDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="xl" className="p-6 emvb-timeline" data-emvb-timeline="">
-        <Dialog.Title>Version timeline</Dialog.Title>
+        <Dialog.Title data-emvb-dialog="timeline">Version timeline</Dialog.Title>
         {revisions.kind === "loading" && <p className="emvb-helper">Loading versions…</p>}
         {revisions.kind === "error" && (
           <p className="emvb-helper" role="alert">

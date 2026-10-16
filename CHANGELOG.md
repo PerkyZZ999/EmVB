@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Utility dialog motion (W-730).** Command palette, Share link, Version timeline, Page weight and Accessibility now respect reduced motion for their popup and backdrop while retaining Kumo's normal transitions.
+
 - **Dialog motion and focus (W-729).** EmVB dialog portals and backdrops respect reduced motion, including live preference changes, while unrelated admin portals retain their motion. Closing creation dialogs restores keyboard focus to their opener.
 
 - **Inline color variable feedback (W-728).** Creation shows a live progress message, keeps button/form geometry stable and uses a static indicator under reduced motion. Pending fields and actions are disabled, repeated submissions are guarded, and failed saves retain values for retry.

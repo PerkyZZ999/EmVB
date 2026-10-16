@@ -124,7 +124,7 @@ export function ShareLinkDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6 emvb-share" data-emvb-share="">
-        <Dialog.Title>Share as a playground link</Dialog.Title>
+        <Dialog.Title data-emvb-dialog="share">Share as a playground link</Dialog.Title>
         <Dialog.Description>
           Anyone with the link can open a copy of this page in the EmVB playground and edit it in
           their own browser. The page travels inside the link; nothing is uploaded.

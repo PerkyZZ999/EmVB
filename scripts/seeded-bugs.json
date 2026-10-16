@@ -33390,6 +33390,76 @@
         "W-729: owned"
       ],
       "expect": "toBeFocused"
+    },
+    {
+      "id": "W-730/palette-unmarked",
+      "requirement": "W-730",
+      "description": "The palette dialog honors reduced motion through its owned portal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/CommandPalette.tsx",
+          "search": " data-emvb-dialog=\"palette\"",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/dialog-motion.e2e.ts", "--project=node", "-g", "W-730"],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-730/share-unmarked",
+      "requirement": "W-730",
+      "description": "The share dialog honors reduced motion through its owned portal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ShareLink.tsx",
+          "search": " data-emvb-dialog=\"share\"",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/dialog-motion.e2e.ts", "--project=node", "-g", "W-730"],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-730/timeline-unmarked",
+      "requirement": "W-730",
+      "description": "The timeline dialog honors reduced motion through its owned portal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": " data-emvb-dialog=\"timeline\"",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/dialog-motion.e2e.ts", "--project=node", "-g", "W-730"],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-730/perf-unmarked",
+      "requirement": "W-730",
+      "description": "The perf dialog honors reduced motion through its owned portal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/PerfMeter.tsx",
+          "search": " data-emvb-dialog=\"perf\"",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/dialog-motion.e2e.ts", "--project=node", "-g", "W-730"],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-730/a11y-unmarked",
+      "requirement": "W-730",
+      "description": "The a11y dialog honors reduced motion through its owned portal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/A11yCopilot.tsx",
+          "search": " data-emvb-dialog=\"a11y\"",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/dialog-motion.e2e.ts", "--project=node", "-g", "W-730"],
+      "expect": "toEqual"
     }
   ]
 }

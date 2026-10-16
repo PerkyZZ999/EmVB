@@ -102,7 +102,9 @@ export function CommandPalette({
   return (
     <Dialog.Root open={open} onOpenChange={close}>
       <Dialog size="base" className="emvb-palette" data-emvb-palette="">
-        <Dialog.Title className="sr-only">Command palette</Dialog.Title>
+        <Dialog.Title className="sr-only" data-emvb-dialog="palette">
+          Command palette
+        </Dialog.Title>
         <input
           className="emvb-palette-input"
           role="combobox"

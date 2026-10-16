@@ -62,7 +62,7 @@ export function A11yDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6 emvb-a11y" data-emvb-a11y="">
-        <Dialog.Title>
+        <Dialog.Title data-emvb-dialog="a11y">
           Accessibility · <span data-band={scoreBand(report.score)}>{report.score}</span>/100
         </Dialog.Title>
         {report.issues.length === 0 ? (
