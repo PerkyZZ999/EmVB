@@ -169,6 +169,41 @@ describe("icon library dialog (W-236)", () => {
     expect(statusText()).toBe('No icons match "zzzz qqqq" in Lucide.');
   });
 
+  test("W-737: clearing unmatched icons restores search focus without changing the category or pick", async () => {
+    const view = await open("star");
+    await ready();
+    const clearButton = () =>
+      [...(dialog()?.querySelectorAll<HTMLButtonElement>("button") ?? [])].find(
+        (button) => button.textContent?.trim() === "Clear search",
+      );
+    expect(clearButton() === undefined).toBe(true);
+    await type("zzzz qqqq");
+    await until(() => statusText().startsWith("No icons match"), "the unmatched query");
+    const clear = clearButton();
+    if (!clear) throw new Error("Unmatched icons have no Clear search action");
+    const search = dialog()?.querySelector<HTMLInputElement>('input[type="search"]');
+    await act(async () => {
+      clear.focus();
+      clear.click();
+    });
+    await ready();
+    expect(search?.value).toBe("");
+    expect(search === document.activeElement).toBe(true);
+    expect(statusText()).toMatch(/^[\d,]+ icons$/);
+    expect(
+      dialog()?.querySelector('[data-emvb-icon-category="lucide"]')?.getAttribute("aria-current"),
+    ).toBe("true");
+    expect(
+      dialog()?.querySelector("[data-emvb-icon-picked]")?.getAttribute("data-emvb-icon-picked"),
+    ).toBe("lucide:star");
+    expect(
+      dialog()?.querySelector('[data-emvb-icon-id="lucide:star"]')?.getAttribute("aria-selected"),
+    ).toBe("true");
+    expect(clearButton() === undefined).toBe(true);
+    expect(view.inserted).toEqual([]);
+    expect(view.changes).toEqual([]);
+  });
+
   test("a new search starts at its first result, not where the cursor was in the last list", async () => {
     await open("star");
     const listbox = await ready();

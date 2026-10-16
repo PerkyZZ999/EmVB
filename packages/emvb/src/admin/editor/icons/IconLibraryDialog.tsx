@@ -288,6 +288,7 @@ function IconLibrary({
     renameUpload,
     deleteUpload,
   } = useIconLibrary({ currentId, fetcher });
+  const searchRef = React.useRef<HTMLInputElement>(null);
   return (
     <div className="emvb-icon-library" data-emvb-dialog="icon-library">
       <header className="emvb-icon-library-head">
@@ -355,6 +356,7 @@ function IconLibrary({
             aria-hidden="true"
           />
           <input
+            ref={searchRef}
             id={searchId}
             type="search"
             // The dialog opens straight into the search, like a command palette.
@@ -442,6 +444,19 @@ function IconLibrary({
         ) : filtered.length === 0 ? (
           <div className="emvb-icon-library-empty">
             <p>{status}</p>
+            {query.trim() && (
+              <Button
+                variant="secondary"
+                size="sm"
+                className={BUTTON}
+                onClick={() => {
+                  setQuery("");
+                  searchRef.current?.focus();
+                }}
+              >
+                Clear search
+              </Button>
+            )}
           </div>
         ) : (
           <IconGrid

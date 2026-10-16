@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Icon search recovery (W-737).** Unmatched icon-library searches offer Clear search. It restores results and keyboard focus while keeping the chosen category and icon.
+
 - **Timeline loading accessibility (W-736).** Pending saved-version requests expose a named polite status, including while optional agent metadata is loading.
 
 - **Form field feedback (W-735).** Field binding explains when definitions are loading, unavailable, empty or need a parent form. Manual names stay editable, and arriving options preserve keyboard focus and unfinished input.

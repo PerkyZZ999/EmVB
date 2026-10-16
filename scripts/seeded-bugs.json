@@ -34248,6 +34248,80 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/timeline-feedback.e2e.ts", "--project=node"],
       "expect": "toHaveText"
+    },
+    {
+      "id": "W-737/keep-query",
+      "requirement": "W-737",
+      "description": "Unmatched icon searches have a focused recovery that preserves context: keep-query",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "                  setQuery(\"\");\n                  searchRef.current?.focus();",
+          "replace": "                  setQuery(query);\n                  searchRef.current?.focus();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx",
+        "-t",
+        "W-737"
+      ],
+      "expect": "\\(fail\\).*W-737:"
+    },
+    {
+      "id": "W-737/lose-focus",
+      "requirement": "W-737",
+      "description": "Unmatched icon searches have a focused recovery that preserves context: lose-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "                  searchRef.current?.focus();",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx",
+        "-t",
+        "W-737"
+      ],
+      "expect": "\\(fail\\).*W-737:"
+    },
+    {
+      "id": "W-737/reset-category",
+      "requirement": "W-737",
+      "description": "Unmatched icon searches have a focused recovery that preserves context: reset-category",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "                  setQuery(\"\");\n                  searchRef.current?.focus();",
+          "replace": "                  setQuery(\"\");\n                  setCategoryId(ALL_ICONS);\n                  searchRef.current?.focus();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx",
+        "-t",
+        "W-737"
+      ],
+      "expect": "\\(fail\\).*W-737:"
+    },
+    {
+      "id": "W-737/missing-action",
+      "requirement": "W-737",
+      "description": "Unmatched icon searches have a focused recovery that preserves context: missing-action",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "            {query.trim() && (",
+          "replace": "            {false && query.trim() && ("
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/icon-search-recovery.e2e.ts", "--project=node"],
+      "expect": "toBeFocused"
     }
   ]
 }
