@@ -333,7 +333,7 @@ test("W-742: compact image sheet animates only its entrance and keeps layout and
   await sheet.getByRole("button", { name: "Close panel", exact: true }).click();
   await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "closed");
   expect(await sheet.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
-  await tool.focus();
+  await expect(tool).toBeFocused();
   for (const state of ["open", "closed", "open"]) {
     await page.keyboard.press("Enter");
     await expect(sheet).toHaveAttribute("data-emvb-image-sheet", state);
@@ -351,6 +351,58 @@ test("W-742: compact image sheet animates only its entrance and keeps layout and
   await expect(editor).toHaveAttribute("data-emvb-image-tool-active", "compose");
   await popup.screenshot({
     path: `/tmp/emvb-compact-sheet-${test.info().project.name}-reduce.png`,
+  });
+  await page.keyboard.press("Escape");
+  await expect(popup).toHaveCount(0);
+  await expect(overlay(page).locator("[data-emvb-image-edit]")).toBeFocused();
+  expect(await frame.evaluate((element) => element.getBoundingClientRect().toJSON())).toEqual(
+    frameGeometry,
+  );
+});
+
+test("W-743: compact sheet Close returns keyboard focus to the current outer tool", async ({
+  page,
+  request,
+}) => {
+  await openPhotoEditor(page, request, "Compact sheet focus");
+  const popup = page.getByRole("dialog", { name: "Edit image", exact: true });
+  const frame = overlay(page).locator("iframe[data-emvb-canvas]");
+  const frameGeometry = await frame.evaluate((element) => element.getBoundingClientRect().toJSON());
+  await popup.evaluate((element) => {
+    element.style.width = "390px";
+    element.style.height = "844px";
+  });
+  const editor = page.locator("[data-emvb-image-editor]");
+  await expect(editor).toHaveAttribute("data-layout", "compact");
+  const sheet = editor.locator("[data-emvb-image-sheet]");
+  const outerTool = (tool: string) =>
+    editor.locator(`.emvb-ie-compact > nav [data-emvb-image-tool="${tool}"]`);
+  for (const preference of ["no-preference", "reduce"] as const) {
+    await page.emulateMedia({ reducedMotion: preference });
+    for (const current of ["compose", "metadata"]) {
+      await outerTool("compose").click();
+      await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "open");
+      if (current !== "compose") {
+        await sheet.locator(`[data-emvb-image-tool="${current}"]`).click();
+      }
+      await expect(editor).toHaveAttribute("data-emvb-image-tool-active", current);
+      const close = sheet.getByRole("button", { name: "Close panel", exact: true });
+      await close.focus();
+      await page.keyboard.press("Enter");
+      await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "closed");
+      expect(await sheet.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+      await expect(outerTool(current)).toBeFocused();
+      await expect(outerTool(current)).toHaveAttribute("aria-pressed", "true");
+      await page.keyboard.press("Enter");
+      await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "open");
+      await expect(editor).toHaveAttribute("data-emvb-image-tool-active", current);
+      await page.keyboard.press("Enter");
+      await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "closed");
+      await expect(outerTool(current)).toBeFocused();
+    }
+  }
+  await popup.screenshot({
+    path: `/tmp/emvb-compact-focus-${test.info().project.name}.png`,
   });
   await page.keyboard.press("Escape");
   await expect(popup).toHaveCount(0);

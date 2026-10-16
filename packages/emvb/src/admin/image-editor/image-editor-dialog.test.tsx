@@ -431,6 +431,31 @@ describe("image editor in photocn's layout (W-483)", () => {
     expect(q("[data-emvb-image-sheet]")?.dataset.emvbImageSheet).toBe("closed");
   });
 
+  test("W-743: compact sheet Close returns focus to the current outer tool", async () => {
+    Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
+    serveImage();
+    await open({ src: "/a.jpg", alt: "A" });
+    const outerTool = (tool: string) => `.emvb-ie-compact > nav [data-emvb-image-tool="${tool}"]`;
+    const close = '[data-emvb-image-sheet] [aria-label="Close panel"]';
+    const closeAndCheck = async (tool: string) => {
+      q<HTMLButtonElement>(close)?.focus();
+      expect(document.activeElement === q(close)).toBe(true);
+      await click(close);
+      expect(q("[data-emvb-image-sheet]")?.dataset.emvbImageSheet).toBe("closed");
+      expect(document.activeElement === q(outerTool(tool))).toBe(true);
+      expect(q(outerTool(tool))?.getAttribute("aria-pressed")).toBe("true");
+    };
+    await click(outerTool("compose"));
+    await closeAndCheck("compose");
+    await click(outerTool("compose"));
+    await click('[data-emvb-image-sheet] [data-emvb-image-tool="metadata"]');
+    await closeAndCheck("metadata");
+    expect(calls).toEqual([
+      ["setTool", "compose"],
+      ["setTool", "metadata"],
+    ]);
+  });
+
   test("a picture on another website gets the upload-a-copy message, without photocn", async () => {
     await open({ src: "https://cdn.example.com/a.jpg", alt: "A" });
     expect(q("[data-emvb-image-editor]")?.dataset.emvbImageEditor).toBe("error");

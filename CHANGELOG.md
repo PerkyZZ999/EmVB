@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Compact image panel focus (W-743).** Close panel returns keyboard focus to the current bottom tool, including after switching tools inside the sheet. Enter can immediately reopen its controls.
 - **Compact image sheet motion (W-742).** The controls sheet uses a short transform entrance while photo layout, panel dragging and snap sizes respond immediately. Reduced motion keeps transitions instant.
 - **Media library opening and Close (W-741).** Opening places focus inside the library. Close returns to Choose from library, or the URL field while loading keeps Choose disabled. Completing the request preserves that focus.
 - **Media library retry focus (W-740).** Keyboard Retry keeps focus inside the library while images load and when results arrive. Tab then reaches recovered image cards instead of restarting outside the panel.

@@ -392,6 +392,12 @@ function CompactLayout({ name }: { name: string }) {
     setPanelOpen(true);
     setSnap(SNAP_POINTS[0]);
   };
+  const closePanel = () => {
+    rootRef.current
+      ?.querySelector<HTMLButtonElement>(':scope > nav [aria-pressed="true"]')
+      ?.focus();
+    setPanelOpen(false);
+  };
   // Keep the photo above the sheet: pad the canvas by the sheet's peek height.
   const inset = panelOpen && rootHeight ? Math.max(0, rootHeight * SNAP_POINTS[0] - 28) : undefined;
   const label =
@@ -458,7 +464,7 @@ function CompactLayout({ name }: { name: string }) {
             aria-label="Close panel"
             className="emvb-ie-btn emvb-ie-btn-icon emvb-ie-touch"
             icon={<XIcon aria-hidden="true" />}
-            onClick={() => setPanelOpen(false)}
+            onClick={closePanel}
           />
         </div>
         {/* Focusable so the keyboard can scroll a panel with no controls (Metadata, W-486). */}

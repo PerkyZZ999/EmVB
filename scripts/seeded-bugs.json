@@ -34567,6 +34567,48 @@
         "W-742"
       ],
       "expect": "toEqual"
+    },
+    {
+      "id": "W-743/missing-return-focus",
+      "requirement": "W-743",
+      "description": "Compact sheet Close must restore the current outer tool: missing-return-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "    rootRef.current\n      ?.querySelector<HTMLButtonElement>(':scope > nav [aria-pressed=\"true\"]')\n      ?.focus();",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-743"
+      ],
+      "expect": "\\(fail\\).*W-743"
+    },
+    {
+      "id": "W-743/stale-tool",
+      "requirement": "W-743",
+      "description": "Compact sheet Close must restore the current outer tool: stale-tool",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": ":scope > nav [aria-pressed=\"true\"]",
+          "replace": ":scope > nav [data-emvb-image-tool=\"compose\"]"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/image-save-recovery.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-743"
+      ],
+      "expect": "toBeFocused"
     }
   ]
 }
