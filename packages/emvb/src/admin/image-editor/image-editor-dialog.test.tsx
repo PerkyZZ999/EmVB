@@ -10,6 +10,7 @@ type Calls = [string, ...unknown[]][];
 let calls: Calls = [];
 let hookOptions: Record<string, unknown> | undefined;
 let plan: { ok: boolean; message?: string } = { ok: true };
+let waitForDownload: Promise<void> | undefined;
 const zeroAdjust = () => ({
   lights: {
     brightness: 0,
@@ -100,6 +101,7 @@ function fakeApi() {
     },
     download: async (options: unknown) => {
       calls.push(["download", options]);
+      await waitForDownload;
       return { blob: new Blob([]), type: "image/png", width: 1, height: 1, filename: "x" };
     },
     resetAll: record("resetAll"),
@@ -261,6 +263,7 @@ afterEach(async () => {
   calls = [];
   hookOptions = undefined;
   plan = { ok: true };
+  waitForDownload = undefined;
   Object.assign(state, fresh());
   Object.defineProperty(window, "innerWidth", { value: realWidth, configurable: true });
 });
@@ -684,6 +687,85 @@ describe("save a copy (W-485)", () => {
     await click("[data-emvb-image-export-save]");
     await settleAll();
     expect(tries).toBe(2);
+  });
+
+  test("W-716: Escape cannot dismiss a saving export or hide its failure and Retry", async () => {
+    serveImage();
+    change({ edited: true });
+    const pending = Promise.withResolvers<void>();
+    let tries = 0;
+    await open({ src: "/a.jpg", alt: "A" }, async () => {
+      if (++tries === 1) await pending.promise;
+    });
+    try {
+      await React.act(async () => click("[data-emvb-image-save]"));
+      await React.act(async () => click("[data-emvb-image-export-save]"));
+      await settleAll();
+      expect(tries).toBe(1);
+      expect(q<HTMLButtonElement>("[data-emvb-image-export-save]")?.disabled).toBe(true);
+      await React.act(async () =>
+        document.activeElement?.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        ),
+      );
+      await settleAll();
+      expect(Boolean(q("[data-emvb-image-export]"))).toBe(true);
+      await React.act(async () => pending.reject(new Error("Temporary upload failure")));
+      await settleAll();
+      expect(q("[data-emvb-image-export-error]")?.textContent).toContain(
+        "Temporary upload failure",
+      );
+      expect(q("[data-emvb-image-export-save]")?.textContent).toBe("Retry");
+      await React.act(async () => click("[data-emvb-image-export-save]"));
+      await settleAll();
+      expect(tries).toBe(2);
+      expect(openChanges).toContain(false);
+    } finally {
+      await React.act(async () => pending.resolve());
+    }
+  });
+
+  for (const save of [false, true]) {
+    test(`W-716: Escape can dismiss the export ${save ? "after a failed save" : "before saving"}`, async () => {
+      serveImage();
+      change({ edited: true });
+      await open({ src: "/a.jpg", alt: "A" }, async () => {
+        throw new Error("Try later");
+      });
+      await React.act(async () => click("[data-emvb-image-save]"));
+      if (save) await React.act(async () => click("[data-emvb-image-export-save]"));
+      await settleAll();
+      await React.act(async () =>
+        document.activeElement?.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        ),
+      );
+      await settleAll();
+      expect(Boolean(q("[data-emvb-image-export]"))).toBe(false);
+      expect(openChanges).not.toContain(false);
+    });
+  }
+
+  test("W-716: Escape can dismiss a pending download without closing the image editor", async () => {
+    serveImage();
+    const pending = Promise.withResolvers<void>();
+    waitForDownload = pending.promise;
+    await open({ src: "/a.jpg", alt: "A" }, async () => undefined);
+    try {
+      await React.act(async () => click("[data-emvb-image-save]"));
+      await React.act(async () => click("[data-emvb-image-download]"));
+      expect(calls.filter(([name]) => name === "download")).toHaveLength(1);
+      await React.act(async () =>
+        document.activeElement?.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        ),
+      );
+      await settleAll();
+      expect(Boolean(q("[data-emvb-image-export]"))).toBe(false);
+      expect(openChanges).not.toContain(false);
+    } finally {
+      await React.act(async () => pending.resolve());
+    }
   });
 
   test("re-opening an edited picture loads the original and puts the recipe back", async () => {

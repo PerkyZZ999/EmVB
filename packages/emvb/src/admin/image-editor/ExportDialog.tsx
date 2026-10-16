@@ -42,6 +42,7 @@ export type ExportSettings = {
 export type ExportResult = { blob: Blob; width: number; height: number; type: string };
 
 const MAX_PX = 16384;
+type Pending = "download" | "save" | null;
 
 export function ExportDialog({
   open,
@@ -64,10 +65,14 @@ export function ExportDialog({
   onSave: (result: ExportResult, settings: ExportSettings) => Promise<void>;
   onClosed?: () => void;
 }) {
+  const [pending, setPending] = React.useState<Pending>(null);
   return (
     <Dialog.Root
       open={open}
-      onOpenChange={(next) => onOpenChange(next)}
+      onOpenChange={(next) => {
+        if (!next && pending === "save") return;
+        onOpenChange(next);
+      }}
       onOpenChangeComplete={(next) => {
         if (!next) onClosed?.();
       }}
@@ -80,6 +85,8 @@ export function ExportDialog({
             sourceType={sourceType}
             downloadName={downloadName}
             onSave={onSave}
+            pending={pending}
+            onPendingChange={setPending}
           />
         ) : null}
       </Dialog>
@@ -93,12 +100,16 @@ function ExportForm({
   sourceType,
   downloadName,
   onSave,
+  pending,
+  onPendingChange,
 }: {
   mainThread: boolean;
   sourceHasGps: boolean;
   sourceType: string;
   downloadName: string;
   onSave: (result: ExportResult, settings: ExportSettings) => Promise<void>;
+  pending: Pending;
+  onPendingChange: (pending: Pending) => void;
 }) {
   const editor = useImageEditor();
   const id = React.useId();
@@ -111,7 +122,6 @@ function ExportForm({
     full ? cappedWidth(full, DEFAULT_MAX_SIDE) : null,
   );
   const [stripGps, setStripGps] = React.useState(true);
-  const [pending, setPending] = React.useState<"download" | "save" | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [failedSave, setFailedSave] = React.useState(false);
   const output = full ? outputSize(full, width) : null;
@@ -121,7 +131,7 @@ function ExportForm({
 
   const run = async (kind: "download" | "save") => {
     setError(null);
-    setPending(kind);
+    onPendingChange(kind);
     const options = {
       format,
       quality: lossy ? quality : undefined,
@@ -156,7 +166,7 @@ function ExportForm({
       setError(caught instanceof Error && caught.message ? caught.message : "Export failed.");
       if (kind === "save") setFailedSave(true);
     } finally {
-      setPending(null);
+      onPendingChange(null);
     }
   };
 

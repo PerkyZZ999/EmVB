@@ -47,6 +47,8 @@ Undo, Redo, **Original** (press and hold to compare), and **Reset all edits** wo
 
 The new file is uploaded as `<original>-edited.<ext>` and applied to the Image element. The element's `edit` record points back at the untouched original (and its media id when known) and stores the recipe so re-opening restores the sliders, filter and crop. **Reset to original** in Image settings puts the element back on the first file and leaves the edited copy in the library. An edit of an edit still points at the first original.
 
+While Save copy is processing, the export step stays open, including when pressing Escape. If saving fails, it shows the reason and **Retry**; you can also close it once the request finishes. Downloads allow closing the export step while they finish.
+
 ## Size and loading
 
 The editor and its WebGL worker load only after you open them (hover or focus on **Edit image** can start the fetch early). A size check in the repo (`scripts/image-editor-budget.ts`) keeps the photocn chunk under 350 KB gzipped and the worker under 32 KB gzipped. Host sites that ship a Content Security Policy must allow a same-origin module worker for the admin; if the worker cannot start, the editor falls back to a main-thread preview and still saves under the CSP.

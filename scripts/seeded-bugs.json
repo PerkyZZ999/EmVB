@@ -32262,6 +32262,80 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/media.e2e.ts", "--project=node", "-g", "W-715"],
       "expect": "toHaveValue"
+    },
+    {
+      "id": "W-716/dismiss-saving",
+      "requirement": "W-485",
+      "description": "Export dismissal must stay locked only while saving, retaining errors and Retry",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "        if (!next && pending === \"save\") return;",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-716: Escape cannot dismiss a saving"
+      ],
+      "expect": "\\(fail\\).*W-716:"
+    },
+    {
+      "id": "W-716/locked-idle",
+      "requirement": "W-485",
+      "description": "Export dismissal must stay locked only while saving, retaining errors and Retry",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "        if (!next && pending === \"save\") return;",
+          "replace": "        if (!next) return;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-716: Escape can dismiss the export"
+      ],
+      "expect": "\\(fail\\).*W-716:"
+    },
+    {
+      "id": "W-716/locked-download",
+      "requirement": "W-485",
+      "description": "Export dismissal must stay locked only while saving, retaining errors and Retry",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "        if (!next && pending === \"save\") return;",
+          "replace": "        if (!next && pending !== null) return;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-716: Escape can dismiss a pending download"
+      ],
+      "expect": "\\(fail\\).*W-716:"
+    },
+    {
+      "id": "W-716/browser-dismiss-saving",
+      "requirement": "W-485",
+      "description": "Escape must not dismiss a pending image save or lose its retryable failure",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "        if (!next && pending === \"save\") return;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/image-save-recovery.e2e.ts", "--project=node"],
+      "expect": "toBeVisible"
     }
   ]
 }
