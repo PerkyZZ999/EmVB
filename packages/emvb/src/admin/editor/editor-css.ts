@@ -91,6 +91,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-panel-right [data-emvb-tab],
 .emvb-site-styles-body { animation: emvb-panel-enter 150ms cubic-bezier(0, 0, 0.2, 1); }
 .emvb-field-group, .emvb-new-variable { gap: 8px; }
+.emvb-new-variable-status { min-height: 16px; }
 .emvb-query-style, .emvb-query-add { display: flex; flex-direction: column; gap: 6px; }
 .emvb-query-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; }
 .emvb-query-row > label, .emvb-query-row > .emvb-helper { grid-column: 1 / -1; }

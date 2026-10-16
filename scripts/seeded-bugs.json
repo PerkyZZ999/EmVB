@@ -12698,8 +12698,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "      setError(errorText(failure));\n      setBusy(false);",
-          "replace": "      setBusy(false);"
+          "search": "      setError(errorText(failure));\n    } finally {",
+          "replace": "      setError(null);\n    } finally {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
@@ -33196,6 +33196,110 @@
         "--project=node",
         "-g",
         "W-727"
+      ],
+      "expect": "toBe"
+    },
+    {
+      "id": "W-728/duplicate-create",
+      "requirement": "W-728",
+      "description": "Pending inline color creation is guarded, locked and retryable: duplicate-create",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "    if (pending.current) return;",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-728"
+      ],
+      "expect": "\\(fail\\).*W-728:"
+    },
+    {
+      "id": "W-728/stuck-after-error",
+      "requirement": "W-728",
+      "description": "Pending inline color creation is guarded, locked and retryable: stuck-after-error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "      pending.current = false;\n      setBusy(false);",
+          "replace": "      setBusy(false);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-728"
+      ],
+      "expect": "\\(fail\\).*W-728:"
+    },
+    {
+      "id": "W-728/editable-name",
+      "requirement": "W-728",
+      "description": "Pending inline color creation is guarded, locked and retryable: editable-name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "        label=\"Variable name\"\n        disabled={busy}",
+          "replace": "        label=\"Variable name\"\n        disabled={false}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-728"
+      ],
+      "expect": "\\(fail\\).*W-728:"
+    },
+    {
+      "id": "W-728/browser-reduced-motion",
+      "requirement": "W-728",
+      "description": "Inline variable creation keeps stable, preference-aware feedback: browser-reduced-motion",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "loading={busy && !reducedMotion}",
+          "replace": "loading={busy}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/color-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-728"
+      ],
+      "expect": "toHaveCount"
+    },
+    {
+      "id": "W-728/browser-icon-slot",
+      "requirement": "W-728",
+      "description": "Inline variable creation keeps stable, preference-aware feedback: browser-icon-slot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "icon={<PlusIcon size={14} aria-hidden=\"true\" />}",
+          "replace": "icon={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/color-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-728"
       ],
       "expect": "toBe"
     }

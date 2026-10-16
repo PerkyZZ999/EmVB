@@ -24,6 +24,7 @@ import {
 import { InlineError } from "./inline-error.tsx";
 import { pickerHex, withPreviousAlpha } from "./variable-values.ts";
 import { isCommitEnter } from "../ime.ts";
+import { useMediaQuery } from "../useMediaQuery.ts";
 
 /**
  * W-673: Kumo's Input `variant="error"` is deprecated (and warns), and its `error` prop would print
@@ -439,16 +440,22 @@ function NewVariable({
   const [hex, setHex] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
+  const pending = React.useRef(false);
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const create = async () => {
+    if (pending.current) return;
     if (!name.trim()) return setError("Enter a name for the variable.");
     const typed = hexInput(hex);
     if (!typed) return setError(BAD_HEX);
     setError(null);
+    pending.current = true;
     setBusy(true);
     try {
       await onCreate(name.trim(), typed);
     } catch (failure) {
       setError(errorText(failure));
+    } finally {
+      pending.current = false;
       setBusy(false);
     }
   };
@@ -456,6 +463,7 @@ function NewVariable({
     <div className="emvb-new-variable" data-emvb-form="new-variable">
       <Input
         label="Variable name"
+        disabled={busy}
         className={FIELD}
         value={name}
         autoFocus
@@ -463,6 +471,7 @@ function NewVariable({
       />
       <Input
         label="Value"
+        disabled={busy}
         className={`${FIELD} emvb-mono`}
         placeholder="#1a2b3c"
         value={hex}
@@ -472,11 +481,27 @@ function NewVariable({
         }}
       />
       {error && <InlineError>{error}</InlineError>}
+      <p
+        className="emvb-helper emvb-new-variable-status"
+        role="status"
+        aria-label="Color variable status"
+        aria-live="polite"
+      >
+        {busy ? "Creating color variable…" : ""}
+      </p>
       <div className="emvb-row-actions">
-        <Button variant="secondary" className={BUTTON} onClick={onCancel}>
+        <Button variant="secondary" className={BUTTON} disabled={busy} onClick={onCancel}>
           Cancel
         </Button>
-        <Button variant="secondary" className={BUTTON} loading={busy} onClick={() => void create()}>
+        <Button
+          variant="secondary"
+          className={BUTTON}
+          icon={<PlusIcon size={14} aria-hidden="true" />}
+          loading={busy && !reducedMotion}
+          disabled={busy}
+          aria-busy={busy}
+          onClick={() => void create()}
+        >
           Create variable
         </Button>
       </div>

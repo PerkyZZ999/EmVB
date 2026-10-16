@@ -20,7 +20,11 @@ const DESIGN: DesignSystem = {
   },
 };
 
-async function control(value: StyleProps["color"], fail?: string) {
+async function control(
+  value: StyleProps["color"],
+  fail?: string,
+  save?: (design: DesignSystem) => Promise<void>,
+) {
   const designs: DesignSystem[] = [];
   const values: StyleProps["color"][] = [];
   const host = await mount(
@@ -32,6 +36,7 @@ async function control(value: StyleProps["color"], fail?: string) {
       onDesignChange={async (design) => {
         designs.push(design);
         if (fail) throw new Error(fail);
+        await save?.(design);
       }}
     />,
   );
@@ -142,6 +147,67 @@ describe("editing a bound colour variable (W-091)", () => {
 });
 
 describe("creating a colour variable (W-091)", () => {
+  test("W-728: pending variable creation retains values and unlocks for retry", async () => {
+    const pending = Promise.withResolvers<void>();
+    let saves = 0;
+    const view = await control(undefined, undefined, async () => {
+      if (++saves === 1) await pending.promise;
+    });
+    await view.click("New variable");
+    await view.type("Variable name", "Accent");
+    await view.type("Value", "#abcdef");
+    try {
+      await view.click("Create variable");
+      const form = view.host.querySelector('[data-emvb-form="new-variable"]');
+      const fields = [...(form?.querySelectorAll("input") ?? [])];
+      const buttons = [...(form?.querySelectorAll<HTMLButtonElement>("button") ?? [])];
+      expect(fields.map((field) => field.disabled)).toEqual([true, true]);
+      expect(buttons.map((button) => button.disabled)).toEqual([true, true]);
+      expect(buttons.at(-1)?.getAttribute("aria-busy")).toBe("true");
+      expect(form?.querySelector('[role="status"]')?.textContent).toBe("Creating color variable…");
+      expect(view.values).toEqual([]);
+      await act(async () => pending.reject(new Error("Try saving again.")));
+      await settle();
+      expect(view.alert()).toBe("Try saving again.");
+      expect(fields.map((field) => field.value)).toEqual(["Accent", "#abcdef"]);
+      expect(fields.map((field) => field.disabled)).toEqual([false, false]);
+      expect(buttons.map((button) => button.disabled)).toEqual([false, false]);
+      expect(buttons.at(-1)?.getAttribute("aria-busy")).toBe("false");
+      await view.type("Value", "#123456");
+      await view.click("Create variable");
+      expect(view.designs).toHaveLength(2);
+      expect(view.designs.at(-1)?.variables.colors.at(-1)?.value).toBe("#123456");
+      expect(view.values).toEqual([{ var: "accent" }]);
+      expect(view.has("Variable name")).toBe(false);
+    } finally {
+      await act(async () => pending.resolve());
+    }
+  });
+
+  test("W-728: rapid clicks and Enter create only one pending variable", async () => {
+    const pending = Promise.withResolvers<void>();
+    const view = await control(undefined, undefined, () => pending.promise);
+    await view.click("New variable");
+    await view.type("Variable name", "Accent");
+    await view.type("Value", "#abcdef");
+    try {
+      const form = view.host.querySelector('[data-emvb-form="new-variable"]');
+      const create = [...(form?.querySelectorAll<HTMLButtonElement>("button") ?? [])].find(
+        (button) => button.textContent === "Create variable",
+      );
+      const value = form?.querySelector<HTMLInputElement>('input[placeholder="#1a2b3c"]');
+      await act(async () => {
+        create?.click();
+        create?.click();
+        value?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      });
+      expect(view.designs).toHaveLength(1);
+      expect(view.values).toEqual([]);
+    } finally {
+      await act(async () => pending.resolve());
+    }
+  });
+
   test("a name is required, then a valid hex, before anything is saved", async () => {
     const view = await control(undefined);
     await view.click("New variable");
