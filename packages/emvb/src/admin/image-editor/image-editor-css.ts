@@ -248,7 +248,7 @@ export const IMAGE_EDITOR_CSS = `
 }
 .emvb-ie-compact-head .emvb-ie-toolbar-end { gap: 4px; }
 .emvb-ie .emvb-ie-touch { width: 44px; height: 44px; }
-.emvb-ie-compact-canvas { flex: 1; min-height: 0; padding: 8px; transition: padding 200ms ease; }
+.emvb-ie-compact-canvas { flex: 1; min-height: 0; padding: 8px; }
 .emvb-ie-compact-tools {
   display: flex; flex: none; gap: 4px; overflow-x: auto; scrollbar-width: none;
   padding: 4px 8px max(4px, env(safe-area-inset-bottom)); border-top: 1px solid var(--color-kumo-hairline);
@@ -268,7 +268,7 @@ export const IMAGE_EDITOR_CSS = `
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 40; display: flex; flex-direction: column;
   border-radius: 14px 14px 0 0; border-top: 1px solid var(--color-kumo-line);
   background: var(--color-kumo-elevated); box-shadow: 0 -8px 24px var(--color-kumo-shadow-drop, rgb(0 0 0 / 0.15));
-  transition: height 300ms ease-out, transform 300ms ease-out; transform: translateY(100%); pointer-events: none;
+  transition: transform 200ms ease-out; transform: translateY(100%); pointer-events: none;
 }
 .emvb-ie-sheet[data-open] { transform: none; pointer-events: auto; }
 .emvb-ie-sheet[data-dragging] { transition: none; }

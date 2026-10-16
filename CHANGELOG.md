@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Compact image sheet motion (W-742).** The controls sheet uses a short transform entrance while photo layout, panel dragging and snap sizes respond immediately. Reduced motion keeps transitions instant.
 - **Media library opening and Close (W-741).** Opening places focus inside the library. Close returns to Choose from library, or the URL field while loading keeps Choose disabled. Completing the request preserves that focus.
 - **Media library retry focus (W-740).** Keyboard Retry keeps focus inside the library while images load and when results arrive. Tab then reaches recovered image cards instead of restarting outside the panel.
 - **Steady icon uploads (W-739).** Upload SVG keeps its width while pending. The adjacent feedback wraps within its own column and reserves two lines, preventing normal pending, error and success messages from shifting the toolbar on narrower editor windows.

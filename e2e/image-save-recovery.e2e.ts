@@ -250,3 +250,112 @@ test("W-718: an unsupported copy size gives a correction hint before upload and 
   await expect(overlay(page).locator("[data-emvb-image-edited]")).toBeVisible();
   expect(uploads).toBe(1);
 });
+
+test("W-742: compact image sheet animates only its entrance and keeps layout and drag immediate", async ({
+  page,
+  request,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openPhotoEditor(page, request, "Compact sheet motion");
+  const popup = page.getByRole("dialog", { name: "Edit image", exact: true });
+  const frame = overlay(page).locator("iframe[data-emvb-canvas]");
+  const frameGeometry = await frame.evaluate((element) => element.getBoundingClientRect().toJSON());
+  // The image editor chooses compact layout from its own container, independently of its host.
+  await popup.evaluate((element) => {
+    element.style.width = "390px";
+    element.style.height = "844px";
+  });
+  const editor = page.locator("[data-emvb-image-editor]");
+  await expect(editor).toHaveAttribute("data-layout", "compact");
+  const sheet = editor.locator("[data-emvb-image-sheet]");
+  const photo = editor.locator(".emvb-ie-compact-canvas");
+  const tool = editor.locator('.emvb-ie-compact > nav [data-emvb-image-tool="compose"]');
+  const motion = () =>
+    editor.evaluate((element) => {
+      const sheetStyle = getComputedStyle(element.querySelector(".emvb-ie-sheet") as Element);
+      const photoStyle = getComputedStyle(
+        element.querySelector(".emvb-ie-compact-canvas") as Element,
+      );
+      return {
+        sheetProperty: sheetStyle.transitionProperty,
+        sheetDuration: sheetStyle.transitionDuration,
+        photoDuration: photoStyle.transitionDuration,
+      };
+    });
+  await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "closed");
+  expect(await motion()).toEqual({
+    sheetProperty: "transform",
+    sheetDuration: "0.2s",
+    photoDuration: "0s",
+  });
+  await tool.click();
+  await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "open");
+  await sheet.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
+  const padding = await photo.evaluate((element) => ({
+    current: parseFloat(getComputedStyle(element).paddingBottom),
+    target: parseFloat((element as HTMLElement).style.paddingBottom),
+  }));
+  expect(padding.current).toBeCloseTo(padding.target, 1);
+  const grip = sheet.getByRole("separator", { name: "Resize panel", exact: true });
+  const box = await grip.boundingBox();
+  if (!box) throw new Error("Compact sheet grip has no geometry");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  try {
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 - 250, { steps: 4 });
+    await expect(sheet).toHaveAttribute("data-dragging", "");
+    await expect(sheet).toHaveCSS("transition-duration", "0s");
+    const dragSize = await sheet.evaluate((element) => ({
+      current: element.getBoundingClientRect().height,
+      target:
+        (parseFloat((element as HTMLElement).style.height) / 100) *
+        (element.parentElement?.clientHeight ?? 0),
+    }));
+    expect(dragSize.current).toBeCloseTo(dragSize.target, 1);
+  } finally {
+    await page.mouse.up();
+  }
+  await expect(sheet).not.toHaveAttribute("data-dragging", "");
+  const snapped = await sheet.evaluate((element) => ({
+    percent: (element as HTMLElement).style.height,
+    current: element.getBoundingClientRect().height,
+    target: (element.parentElement?.clientHeight ?? 0) * 0.9,
+    animations: element.getAnimations().length,
+  }));
+  expect(snapped.percent).toBe("90%");
+  expect(snapped.current).toBeCloseTo(snapped.target, 1);
+  expect(snapped.animations).toBe(0);
+  await popup.screenshot({
+    path: `/tmp/emvb-compact-sheet-${test.info().project.name}-normal.png`,
+  });
+  await sheet.getByRole("button", { name: "Close panel", exact: true }).click();
+  await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "closed");
+  expect(await sheet.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+  await tool.focus();
+  for (const state of ["open", "closed", "open"]) {
+    await page.keyboard.press("Enter");
+    await expect(sheet).toHaveAttribute("data-emvb-image-sheet", state);
+  }
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect
+    .poll(motion)
+    .toEqual({ sheetProperty: "none", sheetDuration: "0s", photoDuration: "0s" });
+  await expect(sheet).toHaveCSS("transform", "none");
+  await page.keyboard.press("Enter");
+  await expect(sheet).toHaveAttribute("aria-hidden", "true");
+  await page.keyboard.press("Enter");
+  await expect(sheet).toHaveAttribute("aria-hidden", "false");
+  await expect(tool).toBeFocused();
+  await expect(editor).toHaveAttribute("data-emvb-image-tool-active", "compose");
+  await popup.screenshot({
+    path: `/tmp/emvb-compact-sheet-${test.info().project.name}-reduce.png`,
+  });
+  await page.keyboard.press("Escape");
+  await expect(popup).toHaveCount(0);
+  await expect(overlay(page).locator("[data-emvb-image-edit]")).toBeFocused();
+  expect(await frame.evaluate((element) => element.getBoundingClientRect().toJSON())).toEqual(
+    frameGeometry,
+  );
+});

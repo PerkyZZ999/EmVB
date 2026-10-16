@@ -34523,6 +34523,50 @@
         "W-741"
       ],
       "expect": "toBeFocused"
+    },
+    {
+      "id": "W-742/sheet-layout-motion",
+      "requirement": "W-742",
+      "description": "Compact sheet motion preserves immediate image layout and drag: sheet-layout-motion",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/image-editor-css.ts",
+          "search": "transition: transform 200ms ease-out; transform: translateY(100%); pointer-events: none;",
+          "replace": "transition: height 300ms ease-out, transform 300ms ease-out; transform: translateY(100%); pointer-events: none;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/image-save-recovery.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-742"
+      ],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-742/canvas-layout-motion",
+      "requirement": "W-742",
+      "description": "Compact sheet motion preserves immediate image layout and drag: canvas-layout-motion",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/image-editor-css.ts",
+          "search": ".emvb-ie-compact-canvas { flex: 1; min-height: 0; padding: 8px; }",
+          "replace": ".emvb-ie-compact-canvas { flex: 1; min-height: 0; padding: 8px; transition: padding 200ms ease; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/image-save-recovery.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-742"
+      ],
+      "expect": "toEqual"
     }
   ]
 }
