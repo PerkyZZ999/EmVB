@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Panel feedback (W-722).** Add/Layers, Content/Style and Site styles tab contents fade in over 150 ms. Controls stay interactive and reduced-motion preferences make changes instant.
+
 - **Form-field definition changes (W-721).** The field picker clears old options while loading another form definition, preserving the current name and ignoring late results from the previous form.
 
 - **Form-field name recovery (W-720).** Picking a form field replaces an invalid typed name and clears its error, including when reselecting the stored field. Manual names remain editable and only valid names are saved.

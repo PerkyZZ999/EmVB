@@ -32654,6 +32654,50 @@
         "W-721: a late"
       ],
       "expect": "\\(fail\\).*W-721:"
+    },
+    {
+      "id": "W-722/no-panel-fade",
+      "requirement": "W-722",
+      "description": "Editor panel swaps provide the short functional opacity fade without moving the canvas",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-site-styles-body { animation: emvb-panel-enter 150ms cubic-bezier(0, 0, 0.2, 1); }",
+          "replace": ".emvb-site-styles-body { animation: none; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/interaction-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "no-preference"
+      ],
+      "expect": "toHaveCSS"
+    },
+    {
+      "id": "W-722/ignore-reduced-motion",
+      "requirement": "W-722",
+      "description": "Reduced-motion preferences keep panel changes instant",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  [data-emvb-editor] *, [data-emvb-page] * { transition: none !important; animation: none !important; }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/interaction-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "with reduce motion"
+      ],
+      "expect": "toHaveCSS"
     }
   ]
 }
