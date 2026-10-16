@@ -63,6 +63,8 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
   const [urlDraft, setUrlDraft] = React.useState(src);
   const fileRef = React.useRef<HTMLInputElement>(null);
   const libraryCloseRef = React.useRef<HTMLButtonElement>(null);
+  const libraryOpenerRef = React.useRef<HTMLButtonElement>(null);
+  const urlInputRef = React.useRef<HTMLInputElement>(null);
   // W-486: a library picture opened from its card's Edit… (null when the editor is closed).
   const [editing, setEditing] = React.useState<MediaLibraryItem | null>(null);
   const [editorOpen, setEditorOpen] = React.useState(false);
@@ -97,6 +99,13 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
   React.useEffect(() => {
     if (open) void loadLibrary();
   }, [open, loadLibrary]);
+
+  const closeLibrary = () => {
+    setOpen(false);
+    const opener = libraryOpenerRef.current;
+    const target = opener?.disabled ? urlInputRef.current : opener;
+    target?.focus();
+  };
 
   const edit = ImageEdit.safeParse(props.edit);
   /** W-487: say why a picture can't be edited instead of offering a button that fails. */
@@ -234,6 +243,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
           className={BUTTON}
           onClick={() => setOpen(true)}
           disabled={busy}
+          ref={libraryOpenerRef}
           data-emvb-media-library=""
         >
           Choose from library
@@ -278,6 +288,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
         </p>
       ) : null}
       <Input
+        ref={urlInputRef}
         label="Or paste a URL"
         className={FIELD}
         value={urlDraft}
@@ -303,7 +314,8 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
               className={BUTTON}
               variant="secondary"
               ref={libraryCloseRef}
-              onClick={() => setOpen(false)}
+              autoFocus
+              onClick={closeLibrary}
             >
               Close
             </Button>

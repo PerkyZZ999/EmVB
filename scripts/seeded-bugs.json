@@ -14375,7 +14375,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
-          "search": "              onClick={() => setOpen(false)}\n            >\n              Close",
+          "search": "              onClick={closeLibrary}\n            >\n              Close",
           "replace": "              onClick={() => undefined}\n            >\n              Close"
         }
       ],
@@ -34460,6 +34460,68 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/media-library-feedback.e2e.ts", "--project=node"],
+      "expect": "toBeFocused"
+    },
+    {
+      "id": "W-741/missing-entry-focus",
+      "requirement": "W-741",
+      "description": "Media library entry and explicit Close preserve a usable focus target: missing-entry-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "              autoFocus\n              onClick={closeLibrary}",
+          "replace": "              onClick={closeLibrary}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-741"
+      ],
+      "expect": "\\(fail\\).*W-741:"
+    },
+    {
+      "id": "W-741/missing-return-focus",
+      "requirement": "W-741",
+      "description": "Media library entry and explicit Close preserve a usable focus target: missing-return-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    target?.focus();",
+          "replace": "    void target;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-741"
+      ],
+      "expect": "\\(fail\\).*W-741:"
+    },
+    {
+      "id": "W-741/disabled-opener",
+      "requirement": "W-741",
+      "description": "Media library entry and explicit Close preserve a usable focus target: disabled-opener",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "const target = opener?.disabled ? urlInputRef.current : opener;",
+          "replace": "const target = opener;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/media-library-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-741"
+      ],
       "expect": "toBeFocused"
     }
   ]

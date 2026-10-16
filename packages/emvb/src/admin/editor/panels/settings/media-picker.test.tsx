@@ -142,6 +142,47 @@ describe("media library recovery (W-713)", () => {
     expect(dialog(view.host)?.outerHTML ?? null).toBeNull();
   });
 
+  test("W-741: opening focuses Close and ready dismissal returns to Choose from library", async () => {
+    const view = await picker(image({ src: "/old.png", alt: "Old" }), ok([]));
+    const opener = view.host.querySelector<HTMLButtonElement>("[data-emvb-media-library]");
+    opener?.focus();
+    await view.openLibrary();
+    const close = [...(dialog(view.host)?.querySelectorAll("button") ?? [])].find(
+      (button) => button.textContent === "Close",
+    );
+    if (!close || !opener) throw new Error("Missing media library focus controls");
+    expect(document.activeElement === close).toBe(true);
+    await act(async () => close.click());
+    expect(dialog(view.host)?.outerHTML ?? null).toBeNull();
+    expect(document.activeElement === opener).toBe(true);
+    expect(view.sent).toEqual([]);
+  });
+
+  test("W-741: pending dismissal focuses the URL and completion leaves that focus intact", async () => {
+    const pending = Promise.withResolvers<Response>();
+    const view = await picker(image({ src: "/old.png", alt: "Old" }), () => pending.promise);
+    await view.openLibrary();
+    const opener = view.host.querySelector<HTMLButtonElement>("[data-emvb-media-library]");
+    const url = view.host.querySelector<HTMLInputElement>("[data-emvb-media-url]");
+    const close = [...(dialog(view.host)?.querySelectorAll("button") ?? [])].find(
+      (button) => button.textContent === "Close",
+    );
+    if (!close || !url) throw new Error("Missing pending dismissal controls");
+    expect(opener?.disabled).toBe(true);
+    await act(async () => {
+      close.focus();
+      close.click();
+    });
+    expect(dialog(view.host)?.outerHTML ?? null).toBeNull();
+    expect(document.activeElement === url).toBe(true);
+    await act(async () => pending.resolve(ok([])()));
+    await settle();
+    expect(opener?.disabled).toBe(false);
+    expect(document.activeElement === url).toBe(true);
+    expect(url.value).toBe("/old.png");
+    expect(view.sent).toEqual([]);
+  });
+
   test("W-740: retry keeps focus on Close while loading and after an empty result", async () => {
     const pending = Promise.withResolvers<Response>();
     let attempts = 0;
