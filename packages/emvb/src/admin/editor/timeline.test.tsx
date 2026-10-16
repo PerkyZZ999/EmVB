@@ -21,6 +21,55 @@ const layoutWith = (text: string, extra = false): Layout =>
   }) as Layout;
 
 describe("version timeline dialog (W-315)", () => {
+  test("W-736: named loading feedback lasts through revisions and optional agent metadata", async () => {
+    const revisions = Promise.withResolvers<Response>();
+    const agents = Promise.withResolvers<Response>();
+    const calls: string[] = [];
+    const fetcher = async (path: string) => {
+      calls.push(path);
+      return path.endsWith("/agents/page") ? agents.promise : revisions.promise;
+    };
+    await mount(
+      <TimelineDialog
+        open
+        onOpenChange={() => undefined}
+        fetcher={fetcher}
+        collection="emvb_pages"
+        entryId="01PAGE"
+        current={layoutWith("Now")}
+        design={emptyDesign()}
+        onApply={() => undefined}
+      />,
+    );
+    const loading = () =>
+      document.querySelector('[role="status"][aria-label="Version timeline status"]');
+    try {
+      expect(
+        [...document.querySelectorAll("p.emvb-helper")].map((item) => item.textContent),
+      ).toContain("Loading versions…");
+      expect(loading()?.textContent).toBe("Loading versions…");
+      expect(loading()?.getAttribute("aria-live")).toBe("polite");
+      expect(document.querySelector("[data-emvb-timeline-empty]") === null).toBe(true);
+      await act(async () => revisions.resolve(Response.json({ data: { items: [] } })));
+      await settle();
+      expect(calls.at(-1)).toBe("/_emdash/api/plugins/emvb/agents/page");
+      expect(loading()?.textContent).toBe("Loading versions…");
+      expect(document.querySelector("[data-emvb-timeline-empty]") === null).toBe(true);
+      await act(async () => agents.reject(new Error("Optional metadata unavailable")));
+      await settle();
+      expect(loading() === null).toBe(true);
+      expect(document.querySelector("[data-emvb-timeline-empty]")?.textContent).toBe(
+        "No saved versions yet. Each save adds one.",
+      );
+      expect(document.querySelector('[role="alert"]') === null).toBe(true);
+    } finally {
+      await act(async () => {
+        revisions.resolve(Response.json({ data: { items: [] } }));
+        agents.resolve(Response.json({ data: { versions: [] } }));
+      });
+    }
+  });
+
   test("revision layouts are read from JSON text or objects; bad ones are null", () => {
     expect(revisionLayout({ layout: JSON.stringify(layoutWith("A")) })?.root.id).toBe("root0001");
     expect(revisionLayout({ layout: layoutWith("A") })?.root.id).toBe("root0001");

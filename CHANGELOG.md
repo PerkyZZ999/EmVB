@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Timeline loading accessibility (W-736).** Pending saved-version requests expose a named polite status, including while optional agent metadata is loading.
+
 - **Form field feedback (W-735).** Field binding explains when definitions are loading, unavailable, empty or need a parent form. Manual names stay editable, and arriving options preserve keyboard focus and unfinished input.
 
 - **Bound color save feedback (W-734).** Editing a color variable shows saving and saved messages without shifting the controls. Pending values retain focus and reject duplicate submissions; errors retain the draft for retry and success reminds editors to publish styles.

@@ -33740,6 +33740,40 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/field-feedback.e2e.ts", "--project=node"],
       "expect": "toHaveText"
+    },
+    {
+      "id": "W-736/loading-status-unit",
+      "requirement": "W-736",
+      "description": "Pending version timeline requests expose named polite progress: loading-status-unit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "            role=\"status\"\n            aria-label=\"Version timeline status\"\n            aria-live=\"polite\"",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline.test.tsx",
+        "-t",
+        "W-736"
+      ],
+      "expect": "\\(fail\\).*W-736:"
+    },
+    {
+      "id": "W-736/loading-status-browser",
+      "requirement": "W-736",
+      "description": "Pending version timeline requests expose named polite progress: loading-status-browser",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "            role=\"status\"\n            aria-label=\"Version timeline status\"\n            aria-live=\"polite\"",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/timeline-feedback.e2e.ts", "--project=node"],
+      "expect": "toHaveText"
     }
   ]
 }
