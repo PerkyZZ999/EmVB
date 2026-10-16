@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Timeline Retry (UX-014).** A failed version load offers Retry inside the timeline and keeps keyboard focus in the dialog. Hosts that keep no revisions get no Retry.
+- **Add panel search recovery (UX-013).** A search with no results offers Clear search, which restores the tiles and focus. Escape clears a non-empty search first.
+- **Named loading and Retry for access, setup and opening a page (UX-012).** Spinners are replaced by named status text. Each failure offers Retry; a failed Set up EmVB no longer needs a reload.
+- **AI agents feedback (UX-011).** A named loading card, Retry after a failed load, and "Saving…" / "Saved." when a switch changes.
+- **Section and drawer motion (UX-010).** Style sections fade their rows in as they open and close instantly; the Site styles drawer slides in. Both are instant under reduced motion.
+- **Consistent utility dialogs (UX-007, UX-009).** Shortcuts, Accessibility, Page weight, Timeline and Share use one dialog layout: a 14 px title, spaced 13 px text and a right-aligned compact Close.
+- **Readable selected Layers row on hover (UX-008).** The selected row keeps its primary fill while hovered; its white text had dropped to 1.14:1.
+- **24 px overlay quick actions (UX-006).** Duplicate, Copy and paste and Delete on the selected element meet the WCAG 2.5.8 minimum target.
+- **Kumo selects in the panels (UX-005).** Dynamic data, Visitors, Scales, display conditions and the container-query Property picker use Kumo Select instead of native dropdowns.
+- **Property labels (UX-004).** Labels are 13 px, quieter while unset and semibold once a value is set.
+- **Panel typography and palette hints (UX-001 to UX-003).** Sentence-case group labels, stronger section headers, tagged palette groups with keycap hints, a readable Scales preview and a compact Classes empty state.
+
 - **Compact image panel focus (W-743).** Close panel returns keyboard focus to the current bottom tool, including after switching tools inside the sheet. Enter can immediately reopen its controls.
 - **Compact image sheet motion (W-742).** The controls sheet uses a short transform entrance while photo layout, panel dragging and snap sizes respond immediately. Reduced motion keeps transitions instant.
 - **Media library opening and Close (W-741).** Opening places focus inside the library. Close returns to Choose from library, or the URL field while loading keeps Choose disabled. Completing the request preserves that focus.
