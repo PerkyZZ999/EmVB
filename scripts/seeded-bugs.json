@@ -34322,6 +34322,45 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/icon-search-recovery.e2e.ts", "--project=node"],
       "expect": "toBeFocused"
+    },
+    {
+      "id": "W-738/silent-success",
+      "requirement": "W-738",
+      "description": "Icon upload results expose live success and error feedback: silent-success",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "role={uploadNote ? (uploadNote.error ? \"alert\" : \"status\") : undefined}",
+          "replace": "role={uploadNote?.error ? \"alert\" : undefined}"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "aria-live={uploadNote?.error ? \"assertive\" : \"polite\"}",
+          "replace": "aria-live={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx",
+        "-t",
+        "Upload SVG posts"
+      ],
+      "expect": "\\(fail\\).*Upload SVG posts"
+    },
+    {
+      "id": "W-738/missing-live-region",
+      "requirement": "W-738",
+      "description": "Icon upload results expose live success and error feedback: missing-live-region",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "aria-live={uploadNote?.error ? \"assertive\" : \"polite\"}",
+          "replace": "aria-live={undefined}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/icon-upload-feedback.e2e.ts", "--project=node"],
+      "expect": "toHaveAttribute"
     }
   ]
 }

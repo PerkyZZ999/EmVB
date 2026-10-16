@@ -403,7 +403,8 @@ function IconLibrary({
             <span
               className="emvb-helper"
               data-emvb-icon-upload-note={uploadNote ? (uploadNote.error ? "error" : "ok") : ""}
-              role={uploadNote?.error ? "alert" : undefined}
+              role={uploadNote ? (uploadNote.error ? "alert" : "status") : undefined}
+              aria-live={uploadNote?.error ? "assertive" : "polite"}
             >
               {uploadNote?.text ??
                 "Up to 256 KB. Scripts, event handlers and outside images are removed or refused; the icon is saved with the page."}

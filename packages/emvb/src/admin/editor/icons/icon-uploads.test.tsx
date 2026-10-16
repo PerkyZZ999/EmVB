@@ -153,6 +153,8 @@ describe("My uploads (W-239)", () => {
       dialog()?.querySelector("[data-emvb-icon-picked]")?.getAttribute("data-emvb-icon-picked"),
     ).toBe("upload:bbbb000011112222");
     expect(note()?.getAttribute("data-emvb-icon-upload-note")).toBe("ok");
+    expect(note()?.getAttribute("role")).toBe("status");
+    expect(note()?.getAttribute("aria-live")).toBe("polite");
     expect(note()?.textContent).toBe(
       "Uploaded rocket. Insert adds it to the page. 1 outside image was left out.",
     );

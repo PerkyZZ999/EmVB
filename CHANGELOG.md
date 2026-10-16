@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Icon upload feedback (W-738).** Successful upload and duplicate-selection messages expose polite live status feedback. Failures retain alert semantics, and the message still explains that Insert applies the icon to the page.
+
 - **Icon search recovery (W-737).** Unmatched icon-library searches offer Clear search. It restores results and keyboard focus while keeping the chosen category and icon.
 
 - **Timeline loading accessibility (W-736).** Pending saved-version requests expose a named polite status, including while optional agent metadata is loading.
