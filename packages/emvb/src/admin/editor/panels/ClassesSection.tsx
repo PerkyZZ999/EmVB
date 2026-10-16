@@ -210,7 +210,7 @@ export function ClassesSection({
           This site has 100 classes, the most allowed. Delete one to add another.
         </p>
       ) : null}
-      {classes.length > 3 && (
+      {(classes.length > 3 || filter.length > 0) && (
         <SiteSearch label="Search classes" value={filter} onChange={setFilter} />
       )}
       {classes.length === 0 && !creating && (

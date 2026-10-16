@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **W-707.** Classes and variable searches remain available while filtered, even after their lists shrink to three items.
+
 - **W-706.** Timeline falls back to All when agent metadata is unavailable; empty filtered results explain how to recover and have status semantics.
 
 - **W-705.** Palette selection scrolling follows result-list attachment and changes, covering filtering at the same index and reopening.

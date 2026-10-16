@@ -31704,6 +31704,46 @@
         "W-706: an empty People filter"
       ],
       "expect": "\\(fail\\).*W-706: an empty People filter"
+    },
+    {
+      "id": "W-707/classes-search",
+      "requirement": "W-707",
+      "description": "W-707: classes search stays available",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "(classes.length > 3 || filter.length > 0)",
+          "replace": "classes.length > 3"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-search-retention.test.tsx",
+        "-t",
+        "W-707: classes search stays available"
+      ],
+      "expect": "\\(fail\\).*W-707: classes search stays available"
+    },
+    {
+      "id": "W-707/colors-search",
+      "requirement": "W-707",
+      "description": "W-707: colors search stays available",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "(items.length > 3 || filter.length > 0)",
+          "replace": "items.length > 3"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-search-retention.test.tsx",
+        "-t",
+        "W-707: colors search stays available"
+      ],
+      "expect": "\\(fail\\).*W-707: colors search stays available"
     }
   ]
 }

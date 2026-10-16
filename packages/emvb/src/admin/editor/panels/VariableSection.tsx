@@ -338,7 +338,7 @@ export function VariableSection({
         onNew={() => setCreating(true)}
         newDisabled={variableListFull(design, kind)}
       />
-      {items.length > 3 && (
+      {(items.length > 3 || filter.length > 0) && (
         <SiteSearch
           label={`Search ${title.toLowerCase()}`}
           value={filter}
