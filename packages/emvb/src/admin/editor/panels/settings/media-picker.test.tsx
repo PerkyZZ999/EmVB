@@ -13,7 +13,7 @@ afterEach(cleanup);
 const image = (props: Record<string, unknown>) =>
   ({ id: "img00001", type: "image", props }) as LayoutNode;
 
-async function picker(node: LayoutNode, respond: () => Response) {
+async function picker(node: LayoutNode, respond: () => Response | Promise<Response>) {
   const sent: LayoutNode[] = [];
   const paths: string[] = [];
   const fetcher: Fetcher = async (path) => {
@@ -83,6 +83,80 @@ describe("image source URL (W-091)", () => {
     expect(view.sent.map((n) => n.props)).toEqual([
       { src: "https://example.com/new.jpg", alt: "A" },
     ]);
+  });
+});
+
+describe("media library recovery (W-713)", () => {
+  const unavailable = () =>
+    Response.json({ error: { message: "Library temporarily unavailable." } }, { status: 503 });
+  const dialog = (host: HTMLElement) => host.querySelector('[role="dialog"]');
+  const retry = async (host: HTMLElement) => {
+    const button = [...(dialog(host)?.querySelectorAll("button") ?? [])].find(
+      (item) => item.textContent === "Retry",
+    );
+    if (!button) throw new Error("No library Retry button");
+    await act(async () => button.click());
+    await settle();
+  };
+
+  test("W-713: failed requests show a library alert, not an empty library or URL error", async () => {
+    const view = await picker(image({ src: "/old.png", alt: "Old" }), unavailable);
+    await view.openLibrary();
+    expect(dialog(view.host)?.querySelector('[role="alert"]')?.textContent).toContain(
+      "Library temporarily unavailable.",
+    );
+    expect(dialog(view.host)?.textContent).not.toContain("No images yet.");
+    expect(view.host.querySelector("[data-emvb-media-url]")?.getAttribute("aria-invalid")).not.toBe(
+      "true",
+    );
+    expect(view.sent).toEqual([]);
+  });
+
+  test("W-713: retry shows loading then allows picking the recovered library image", async () => {
+    const pending = Promise.withResolvers<Response>();
+    let attempts = 0;
+    const view = await picker(image({ src: "/old.png", alt: "Old" }), () =>
+      ++attempts === 1 ? unavailable() : pending.promise,
+    );
+    await view.openLibrary();
+    await retry(view.host);
+    expect(attempts).toBe(2);
+    expect(dialog(view.host)?.textContent).toContain("Loading…");
+    expect(dialog(view.host)?.textContent).not.toContain("Library temporarily unavailable.");
+    expect(dialog(view.host)?.textContent).not.toContain("No images yet.");
+    expect(view.sent).toEqual([]);
+    await act(async () =>
+      pending.resolve(
+        ok([
+          { id: "m2", filename: "cat.png", url: "/media/cat.png", status: "ready", alt: "Cat" },
+        ])(),
+      ),
+    );
+    await settle();
+    await act(async () =>
+      view.host.querySelector<HTMLElement>('[data-emvb-media-id="m2"]')?.click(),
+    );
+    expect(view.sent.map((node) => node.props)).toEqual([
+      { src: "/media/cat.png", alt: "Old", mediaId: "m2" },
+    ]);
+    expect(dialog(view.host)?.outerHTML ?? null).toBeNull();
+  });
+
+  test("W-713: another failed retry stays recoverable and a successful empty response says empty", async () => {
+    let attempts = 0;
+    const view = await picker(image({ src: "", alt: "Image" }), () =>
+      ++attempts < 3 ? unavailable() : ok([])(),
+    );
+    await view.openLibrary();
+    await retry(view.host);
+    expect(dialog(view.host)?.querySelector('[role="alert"]')?.textContent).toContain(
+      "Library temporarily unavailable.",
+    );
+    await retry(view.host);
+    expect(attempts).toBe(3);
+    expect(dialog(view.host)?.querySelector('[role="alert"]')?.outerHTML ?? null).toBeNull();
+    expect(dialog(view.host)?.textContent).toContain("No images yet.");
+    expect(view.sent).toEqual([]);
   });
 });
 

@@ -14339,7 +14339,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
-          "search": "{!busy && items.length === 0 && (",
+          "search": "{!busy && !libraryError && items.length === 0 && (",
           "replace": "{false && ("
         }
       ],
@@ -14357,8 +14357,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
-          "search": "      setError(caught instanceof Error ? caught.message : \"Couldn't load the media library.\");",
-          "replace": "      setError(null);"
+          "search": "      setLibraryError(\n        caught instanceof Error ? caught.message : \"Couldn't load the media library.\",\n      );",
+          "replace": "      setLibraryError(null);"
         }
       ],
       "command": [
@@ -32034,6 +32034,80 @@
         "W-712"
       ],
       "expect": "toContainText"
+    },
+    {
+      "id": "W-713/empty-on-failure",
+      "requirement": "R-007",
+      "description": "A failed media-library request must show its own error and remain retryable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "!busy && !libraryError && items.length === 0",
+          "replace": "!busy && items.length === 0"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-713"
+      ],
+      "expect": "\\(fail\\).*W-713:"
+    },
+    {
+      "id": "W-713/misplaced-error",
+      "requirement": "R-007",
+      "description": "A failed media-library request must show its own error and remain retryable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "      setLibraryError(\n        caught instanceof Error ? caught.message : \"Couldn't load the media library.\",\n      );",
+          "replace": "      setError(caught instanceof Error ? caught.message : \"Couldn't load the media library.\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-713"
+      ],
+      "expect": "\\(fail\\).*W-713:"
+    },
+    {
+      "id": "W-713/retry-no-op",
+      "requirement": "R-007",
+      "description": "A failed media-library request must show its own error and remain retryable",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "onClick={() => void loadLibrary()}",
+          "replace": "onClick={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-713"
+      ],
+      "expect": "\\(fail\\).*W-713:"
+    },
+    {
+      "id": "W-713/browser-retry-no-op",
+      "requirement": "R-007",
+      "description": "Keyboard Retry must recover the media library after a temporary request failure",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "onClick={() => void loadLibrary()}",
+          "replace": "onClick={() => undefined}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/media.e2e.ts", "--project=node", "-g", "W-713"],
+      "expect": "toBeVisible"
     }
   ]
 }

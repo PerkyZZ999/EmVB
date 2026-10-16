@@ -39,6 +39,46 @@ async function uploadPixel(page: Page) {
   await expect(overlay(page).locator(".emvb-media-thumb")).toBeVisible({ timeout: 20_000 });
 }
 
+test("W-713: a failed media library load can be retried without changing the image", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(request, "Media retry", imageLayout(), `media-retry-${unique()}`);
+  await openEditor(page, id);
+  await selectImage(page);
+  await uploadPixel(page);
+  const source = await overlay(page).getByLabel("Or paste a URL").inputValue();
+  let attempts = 0;
+  await page.route("**/_emdash/api/media?*", async (route) => {
+    if (route.request().method() === "GET" && ++attempts === 1) {
+      await route.fulfill({
+        status: 503,
+        json: { error: { message: "Library temporarily unavailable." } },
+      });
+    } else await route.continue();
+  });
+  await overlay(page).getByRole("button", { name: "Choose from library", exact: true }).click();
+  const library = overlay(page).getByRole("dialog", { name: "Media library", exact: true });
+  await expect(library.getByRole("alert")).toContainText("Library temporarily unavailable.");
+  await expect(library).not.toContainText("No images yet.");
+  await expect(overlay(page).getByLabel("Or paste a URL")).not.toHaveAttribute(
+    "aria-invalid",
+    "true",
+  );
+  await expect(overlay(page).getByLabel("Or paste a URL")).toHaveValue(source);
+  await library.getByRole("button", { name: "Retry", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(library.locator("[data-emvb-media-id]").first()).toBeVisible();
+  await expect(library.getByRole("alert")).toHaveCount(0);
+  expect(attempts).toBe(2);
+  await expect(overlay(page).getByLabel("Or paste a URL")).toHaveValue(source);
+  const card = library.locator("[data-emvb-media-id]").first();
+  const pickedSource = await card.locator("img").getAttribute("src");
+  await card.click();
+  await expect(library).toHaveCount(0);
+  await expect(overlay(page).getByLabel("Or paste a URL")).toHaveValue(pickedSource ?? "");
+});
+
 test("upload stores media id, URL, alt, and dimensions on both platforms", async ({
   page,
   request,

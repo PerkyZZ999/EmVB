@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Media-library recovery (W-713).** A failed library load shows an error and Retry inside the picker, without claiming the library is empty or marking the image URL invalid.
+
 - **Retained template choices (W-712).** New page keeps an unlisted selected template visible and changeable, and shows template names instead of internal ids.
 
 - **Template creation recovery (W-711).** An unavailable selected page template shows an error and keeps the dialog open; it no longer silently creates a blank page.

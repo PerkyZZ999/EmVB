@@ -1,5 +1,5 @@
-import { Badge, Button, DropdownMenu, Input } from "@cloudflare/kumo";
-import { DotsThreeIcon, MagicWandIcon } from "@phosphor-icons/react";
+import { Badge, Banner, Button, DropdownMenu, Input } from "@cloudflare/kumo";
+import { DotsThreeIcon, MagicWandIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   ImageEdit,
@@ -57,6 +57,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
   const src = typeof props.src === "string" ? props.src : "";
   const [open, setOpen] = React.useState(false);
   const [items, setItems] = React.useState<MediaLibraryItem[]>([]);
+  const [libraryError, setLibraryError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [urlDraft, setUrlDraft] = React.useState(src);
@@ -71,11 +72,13 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
 
   const loadLibrary = React.useCallback(async () => {
     setBusy(true);
-    setError(null);
+    setLibraryError(null);
     try {
       setItems(await listImages(fetcher, { limit: 40 }));
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Couldn't load the media library.");
+      setLibraryError(
+        caught instanceof Error ? caught.message : "Couldn't load the media library.",
+      );
       setItems([]);
     } finally {
       setBusy(false);
@@ -283,8 +286,31 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
               Close
             </Button>
           </div>
-          {busy && <p className="emvb-helper">Loading…</p>}
-          {!busy && items.length === 0 && (
+          {busy && (
+            <p className="emvb-helper" role="status">
+              Loading…
+            </p>
+          )}
+          {!busy && libraryError && (
+            <Banner
+              role="alert"
+              variant="error"
+              icon={<WarningCircleIcon aria-hidden="true" />}
+              title="Couldn't load the media library"
+              description={libraryError}
+              action={
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className={BUTTON}
+                  onClick={() => void loadLibrary()}
+                >
+                  Retry
+                </Button>
+              }
+            />
+          )}
+          {!busy && !libraryError && items.length === 0 && (
             <p className="emvb-helper">No images yet. Upload one to get started.</p>
           )}
           <ul className="emvb-media-grid">
