@@ -32134,8 +32134,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
-          "search": "      if (!resetTarget()) return;",
-          "replace": ""
+          "search": "      if (!imageTarget()) return;\n      setError(\n        `Couldn't reach",
+          "replace": "      setError(\n        `Couldn't reach"
         }
       ],
       "command": [
@@ -32193,6 +32193,74 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/media.e2e.ts", "--project=node", "-g", "W-714"],
+      "expect": "toHaveValue"
+    },
+    {
+      "id": "W-715/stale-application",
+      "requirement": "R-007",
+      "description": "A pending upload must respect the current image and preserve newer fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "      const target = imageTarget();\n      if (target) applyItem(item, target);",
+          "replace": "      applyItem(item);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-upload.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-715:"
+    },
+    {
+      "id": "W-715/late-error",
+      "requirement": "R-007",
+      "description": "A pending upload must respect the current image and preserve newer fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "      if (!imageTarget()) return;\n      setError(caught instanceof Error ? caught.message : \"Upload failed.\");",
+          "replace": "      setError(caught instanceof Error ? caught.message : \"Upload failed.\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-upload.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-715:"
+    },
+    {
+      "id": "W-715/stale-fields",
+      "requirement": "R-007",
+      "description": "A pending upload must respect the current image and preserve newer fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "if (target) applyItem(item, target);",
+          "replace": "if (target) applyItem(item);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-upload.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-715:"
+    },
+    {
+      "id": "W-715/browser-stale-upload",
+      "requirement": "R-007",
+      "description": "A completed upload must leave a newer URL in the canvas and saved draft",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "      const target = imageTarget();\n      if (target) applyItem(item, target);",
+          "replace": "      applyItem(item);"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/media.e2e.ts", "--project=node", "-g", "W-715"],
       "expect": "toHaveValue"
     }
   ]

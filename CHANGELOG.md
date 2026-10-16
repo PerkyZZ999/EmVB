@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Delayed image uploads (W-715).** Upload completion preserves newer image URLs, alt text and styling; results and errors from an older image no longer affect the current selection.
+
 - **Delayed image reset (W-714).** Reset to original preserves newer alt text and styling, and ignores late results or errors after the image changes or its settings close.
 
 - **Media-library recovery (W-713).** A failed library load shows an error and Retry inside the picker, without claiming the library is empty or marking the image URL invalid.

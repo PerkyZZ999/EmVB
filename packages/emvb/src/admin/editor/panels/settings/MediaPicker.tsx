@@ -124,7 +124,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
     setOpen(false);
   };
 
-  const resetTarget = () => {
+  const imageTarget = () => {
     const current = currentNode.current;
     if (!current || current.id !== node.id) return null;
     const latestProps = propsOf(current);
@@ -141,7 +141,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
       // W-492: a failed lookup is an error, not "no original"; a deleted original can't be reset
       // to (its recorded URL is gone too), so the element keeps the edited copy.
       const original = id ? await getMedia(fetcher, id) : null;
-      const target = resetTarget();
+      const target = imageTarget();
       if (!target) return;
       if (id && !original) {
         setError(ORIGINAL_DELETED);
@@ -150,7 +150,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
       const next = propsFromOriginal(propsOf(target), original);
       if (next) onChange(withProps(target, next));
     } catch (caught) {
-      if (!resetTarget()) return;
+      if (!imageTarget()) return;
       setError(
         `Couldn't reach the media library to find the original.${caught instanceof Error && caught.message ? ` ${caught.message}` : ""}`,
       );
@@ -159,8 +159,8 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
     }
   };
 
-  const applyItem = (item: MediaLibraryItem) => {
-    onChange(withProps(node, propsFromMedia(propsOf(node), item)));
+  const applyItem = (item: MediaLibraryItem, target: LayoutNode = node) => {
+    onChange(withProps(target, propsFromMedia(propsOf(target), item)));
     setOpen(false);
     setError(null);
   };
@@ -174,8 +174,10 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
         () => ({}) as { width?: number; height?: number },
       );
       const item = await uploadImage(fetcher, file, dims);
-      applyItem(item);
+      const target = imageTarget();
+      if (target) applyItem(item, target);
     } catch (caught) {
+      if (!imageTarget()) return;
       setError(caught instanceof Error ? caught.message : "Upload failed.");
     } finally {
       setBusy(false);

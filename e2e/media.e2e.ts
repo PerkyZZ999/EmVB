@@ -41,6 +41,59 @@ async function uploadPixel(page: Page) {
   await expect(overlay(page).locator(".emvb-media-thumb")).toBeVisible({ timeout: 20_000 });
 }
 
+test("W-715: a delayed upload keeps a newer image URL in the canvas and saved draft", async ({
+  page,
+  request,
+}) => {
+  const media = await uploadEmvbPixel(request);
+  const id = await createPage(
+    request,
+    "Delayed upload",
+    imageLayout(),
+    `media-upload-late-${unique()}`,
+  );
+  await openEditor(page, id);
+  await selectImage(page);
+  let started = false;
+  const release = Promise.withResolvers<void>();
+  await page.route("**/_emdash/api/media", async (route) => {
+    if (route.request().method() === "POST") {
+      started = true;
+      await release.promise;
+    }
+    await route.continue();
+  });
+  try {
+    await overlay(page).locator("[data-emvb-media-upload]").setInputFiles(PIXEL);
+    await expect.poll(() => started).toBe(true);
+    const source = overlay(page).getByLabel("Or paste a URL");
+    const newUrl = `${media.url}?choice=upload-new`;
+    await source.fill(newUrl);
+    await source.press("Enter");
+    const completed = page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        new URL(response.url()).pathname === "/_emdash/api/media",
+    );
+    release.resolve();
+    const response = await completed;
+    expect(response.status()).toBeLessThan(300);
+    await expect(
+      overlay(page).getByRole("button", { name: "Choose from library", exact: true }),
+    ).toBeEnabled();
+    await expect(source).toHaveValue(newUrl);
+    await expect(canvas(page).locator("img.emvb-image")).toHaveAttribute("src", newUrl);
+    await saveDraft(page);
+    const saved = await storedLayout<{
+      root: { children: Array<{ props: { src: string; mediaId?: string } }> };
+    }>(request, id);
+    expect(saved.root.children[0]?.props.src).toBe(newUrl);
+    expect(saved.root.children[0]?.props.mediaId).toBeUndefined();
+  } finally {
+    release.resolve();
+  }
+});
+
 test("W-714: a delayed reset keeps a newer image URL in the canvas and saved draft", async ({
   page,
   request,
