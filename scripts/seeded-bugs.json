@@ -33072,6 +33072,132 @@
         "W-726"
       ],
       "expect": "toBe"
+    },
+    {
+      "id": "W-727/duplicate-submit",
+      "requirement": "W-727",
+      "description": "Creation pending state stays coherent and retryable: duplicate-submit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "    if (pending.current) return;",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/create-dialogs.test.tsx",
+        "-t",
+        "W-727"
+      ],
+      "expect": "\\(fail\\).*W-727:"
+    },
+    {
+      "id": "W-727/stuck-after-error",
+      "requirement": "W-727",
+      "description": "Creation pending state stays coherent and retryable: stuck-after-error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "      pending.current = false;\n      setBusy(false);",
+          "replace": "      setBusy(false);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/create-dialogs.test.tsx",
+        "-t",
+        "W-727"
+      ],
+      "expect": "\\(fail\\).*W-727:"
+    },
+    {
+      "id": "W-727/editable-fields",
+      "requirement": "W-727",
+      "description": "Creation pending state stays coherent and retryable: editable-fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "<fieldset className=\"emvb-create-fields\" disabled={busy}>",
+          "replace": "<fieldset className=\"emvb-create-fields\" disabled={false}>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/create-dialogs.test.tsx",
+        "-t",
+        "W-727"
+      ],
+      "expect": "\\(fail\\).*W-727:"
+    },
+    {
+      "id": "W-727/browser-reduced-motion",
+      "requirement": "W-727",
+      "description": "Create feedback remains visible, stable and preference aware: browser-reduced-motion",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "loading={busy && !reducedMotion}",
+          "replace": "loading={busy}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/create-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-727"
+      ],
+      "expect": "toHaveCount"
+    },
+    {
+      "id": "W-727/browser-dismissal",
+      "requirement": "W-727",
+      "description": "Create feedback remains visible, stable and preference aware: browser-dismissal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "        if (!next && pending.current) return;",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/create-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-727"
+      ],
+      "expect": "toBeVisible"
+    },
+    {
+      "id": "W-727/browser-icon-slot",
+      "requirement": "W-727",
+      "description": "Create feedback remains visible, stable and preference aware: browser-icon-slot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "icon={<PlusIcon size={14} aria-hidden=\"true\" />}",
+          "replace": "icon={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/create-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-727"
+      ],
+      "expect": "toBe"
     }
   ]
 }

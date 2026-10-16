@@ -76,6 +76,49 @@ const dialogs = [
 
 for (const dialog of dialogs) {
   describe(dialog.name, () => {
+    test("W-727: pending creation is announced once and unlocks after failure", async () => {
+      const pending = Promise.withResolvers<Response>();
+      let creates = 0;
+      const fetcher: Fetcher = async (_path, init) => {
+        if (!init?.body) return Response.json({ data: { items: [] } });
+        creates++;
+        return creates === 1 ? pending.promise : failed(503, "BUSY", "Try again shortly")();
+      };
+      await mount(dialog.render(fetcher));
+      await type("Title", "Pending creation");
+      const form = document.querySelector<HTMLFormElement>("form[data-emvb-dialog]");
+      try {
+        await act(async () => {
+          form?.requestSubmit();
+          form?.requestSubmit();
+        });
+        expect(creates).toBe(1);
+        expect(
+          document.querySelector('[role="status"][aria-label="Creation status"]')?.textContent,
+        ).toBe(`Creating ${dialog.noun}…`);
+        const button = document.querySelector<HTMLButtonElement>('button[type="submit"]');
+        expect(button?.disabled).toBe(true);
+        expect(button?.getAttribute("aria-busy")).toBe("true");
+        expect(document.querySelector<HTMLFieldSetElement>("fieldset")?.disabled).toBe(true);
+        const cancel = [...document.querySelectorAll<HTMLButtonElement>("button")].find(
+          (b) => b.textContent === "Cancel",
+        );
+        expect(cancel?.disabled).toBe(true);
+        await act(async () => pending.resolve(failed(503, "BUSY", "Try again shortly")()));
+        expect(alertText()).toBe(`Couldn't create the ${dialog.noun}. Try again shortly`);
+        expect(button?.disabled).toBe(false);
+        expect(button?.getAttribute("aria-busy")).toBe("false");
+        expect(document.querySelector<HTMLFieldSetElement>("fieldset")?.disabled).toBe(false);
+        expect(cancel?.disabled).toBe(false);
+        expect(input("Title")?.value).toBe("Pending creation");
+        expect(input("Slug")?.value).toBe(`${dialog.slugPrefix}pending-creation`);
+        await submit();
+        expect(creates).toBe(2);
+      } finally {
+        await act(async () => pending.resolve(failed(503, "BUSY", "Try again shortly")()));
+      }
+    });
+
     test("an empty title is refused without a request", async () => {
       const sent: Sent[] = [];
       await mount(dialog.render(fetcherReplying(created("x"), sent)));

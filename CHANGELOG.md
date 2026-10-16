@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Creation feedback (W-727).** New page and New theme part announce progress, keep button/dialog geometry stable, and respect reduced motion. Pending creation locks fields and dismissal, prevents repeated submissions, and restores editing with the entered values after failure.
+
 - **Save and publish feedback (W-726).** The editor announces the action in progress, keeps button widths stable, and uses static icons under reduced motion while retaining busy/disabled feedback. Failures remain actionable and retryable.
 
 - **Search recovery (W-725).** Unmatched searches in Visual pages and Theme Builder offer Clear search, restore results and return keyboard focus to the search field. Theme Builder keeps the selected type filter.
