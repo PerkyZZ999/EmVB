@@ -392,7 +392,10 @@ function VariableValue({
 }) {
   const [draft, setDraft] = React.useState(value);
   const [error, setError] = React.useState<string | null>(null);
+  const [phase, setPhase] = React.useState<"idle" | "saving" | "saved">("idle");
+  const pending = React.useRef(false);
   const commit = async () => {
+    if (pending.current) return;
     const hex = hexInput(draft);
     if (hex === value) return;
     if (!hex) {
@@ -401,10 +404,16 @@ function VariableValue({
     }
     setError(null);
     setDraft(hex);
+    pending.current = true;
+    setPhase("saving");
     try {
       await onCommit(hex);
+      setPhase("saved");
     } catch (failure) {
       setError(errorText(failure));
+      setPhase("idle");
+    } finally {
+      pending.current = false;
     }
   };
   return (
@@ -413,18 +422,35 @@ function VariableValue({
         label={`${name} value`}
         className={`${FIELD} emvb-mono${error ? INVALID : ""}`}
         value={draft}
+        readOnly={phase === "saving"}
+        aria-busy={phase === "saving"}
         aria-invalid={error ? true : undefined}
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={(event) => {
+          setDraft(event.target.value);
+          setPhase("idle");
+        }}
         onBlur={() => void commit()}
         onKeyDown={(event) => {
           if (isCommitEnter(event)) void commit();
         }}
       />
-      {error ? (
-        <InlineError>{error}</InlineError>
-      ) : (
-        <p className="emvb-helper">Style changes stay unpublished until you publish styles.</p>
-      )}
+      <div className="emvb-variable-value-feedback">
+        <p
+          className="emvb-helper"
+          role="status"
+          aria-label="Color variable status"
+          aria-live="polite"
+        >
+          {error
+            ? ""
+            : phase === "saving"
+              ? "Saving color variable…"
+              : phase === "saved"
+                ? "Color variable saved. Publish styles to make it live."
+                : "Style changes stay unpublished until you publish styles."}
+        </p>
+        {error && <InlineError>{error}</InlineError>}
+      </div>
     </>
   );
 }

@@ -12623,8 +12623,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "      await onCommit(hex);\n    } catch (failure) {\n      setError(errorText(failure));",
-          "replace": "      await onCommit(hex);\n    } catch {\n      setError(null);"
+          "search": "      await onCommit(hex);\n      setPhase(\"saved\");\n    } catch (failure) {\n      setError(errorText(failure));",
+          "replace": "      await onCommit(hex);\n      setPhase(\"saved\");\n    } catch {\n      setError(null);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
@@ -33206,8 +33206,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "    if (pending.current) return;",
-          "replace": ""
+          "search": "    if (pending.current) return;\n    if (!name.trim())",
+          "replace": "    if (!name.trim())"
         }
       ],
       "command": [
@@ -33523,6 +33523,108 @@
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/editor-toasts.test.tsx"],
+      "expect": "toBe"
+    },
+    {
+      "id": "W-734/duplicate-commit",
+      "requirement": "W-734",
+      "description": "Bound color edits retain pending feedback, focus and retry: duplicate-commit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "    if (pending.current) return;\n    const hex = hexInput(draft);",
+          "replace": "    const hex = hexInput(draft);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-734"
+      ],
+      "expect": "\\(fail\\).*same-turn Enter and blur"
+    },
+    {
+      "id": "W-734/editable-pending",
+      "requirement": "W-734",
+      "description": "Bound color edits retain pending feedback, focus and retry: editable-pending",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "readOnly={phase === \"saving\"}",
+          "replace": "readOnly={false}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-734"
+      ],
+      "expect": "\\(fail\\).*pending bound value retains focus"
+    },
+    {
+      "id": "W-734/stuck-after-error",
+      "requirement": "W-734",
+      "description": "Bound color edits retain pending feedback, focus and retry: stuck-after-error",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "    } finally {\n      pending.current = false;\n    }\n  };\n  return (",
+          "replace": "    } finally {\n      pending.current = true;\n    }\n  };\n  return ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-734"
+      ],
+      "expect": "\\(fail\\).*pending bound value retains focus"
+    },
+    {
+      "id": "W-734/missing-success",
+      "requirement": "W-734",
+      "description": "Bound color edits retain pending feedback, focus and retry: missing-success",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "Color variable saved. Publish styles to make it live.",
+          "replace": "Style changes saved."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-734"
+      ],
+      "expect": "\\(fail\\).*pending bound value retains focus"
+    },
+    {
+      "id": "W-734/feedback-slot",
+      "requirement": "W-734",
+      "description": "Bound color edits retain pending feedback, focus and retry: feedback-slot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-variable-value-feedback { min-height: 32px; }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/color-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-734"
+      ],
       "expect": "toBe"
     }
   ]

@@ -91,10 +91,78 @@ async function control(
     await act(async () => button.click());
   };
   const picker = () => host.querySelector<HTMLInputElement>('input[type="color"]');
-  return { designs, values, type, blur, enter, click, alert, has, swatches, swatch, picker, host };
+  return {
+    designs,
+    values,
+    field,
+    type,
+    blur,
+    enter,
+    click,
+    alert,
+    has,
+    swatches,
+    swatch,
+    picker,
+    host,
+  };
 }
 
 describe("editing a bound colour variable (W-091)", () => {
+  test("W-734: a pending bound value retains focus and draft, then recovers for retry", async () => {
+    const pending = Promise.withResolvers<void>();
+    let saves = 0;
+    const view = await control({ var: "brand" }, undefined, async () => {
+      if (++saves === 1) await pending.promise;
+    });
+    await view.type("Brand value", "#abcdef");
+    try {
+      await view.enter("Brand value");
+      const input = view.field("Brand value");
+      expect(input?.readOnly).toBe(true);
+      expect(input?.getAttribute("aria-busy")).toBe("true");
+      expect(input === document.activeElement).toBe(true);
+      expect(view.host.querySelector('[role="status"]')?.textContent).toBe(
+        "Saving color variable…",
+      );
+      await act(async () => pending.reject(new Error("Try saving again.")));
+      await settle();
+      expect(view.alert()).toBe("Try saving again.");
+      expect(input?.value).toBe("#abcdef");
+      expect(input?.readOnly).toBe(false);
+      expect(input?.getAttribute("aria-busy")).toBe("false");
+      await view.type("Brand value", "#123456");
+      await view.enter("Brand value");
+      expect(view.designs.map((design) => design.variables.colors[0]?.value)).toEqual([
+        "#abcdef",
+        "#123456",
+      ]);
+      expect(view.alert()).toBeNull();
+      expect(view.host.querySelector('[role="status"]')?.textContent).toBe(
+        "Color variable saved. Publish styles to make it live.",
+      );
+    } finally {
+      await act(async () => pending.resolve());
+    }
+  });
+
+  test("W-734: same-turn Enter and blur submit a bound value only once while pending", async () => {
+    const pending = Promise.withResolvers<void>();
+    const view = await control({ var: "brand" }, undefined, () => pending.promise);
+    await view.type("Brand value", "#abcdef");
+    const input = view.field("Brand value");
+    try {
+      await act(async () => {
+        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        input.blur();
+      });
+      expect(view.designs).toHaveLength(1);
+    } finally {
+      await act(async () => pending.resolve());
+    }
+  });
+
   test("a new hex saves the design with only that variable changed", async () => {
     const view = await control({ var: "brand" });
     await view.type("Brand value", "#112233");

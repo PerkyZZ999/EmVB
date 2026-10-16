@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Bound color save feedback (W-734).** Editing a color variable shows saving and saved messages without shifting the controls. Pending values retain focus and reject duplicate submissions; errors retain the draft for retry and success reminds editors to publish styles.
+
 - **Toast motion preferences (W-733).** Editor notifications respect reduced motion, including live preference changes, while retaining Restore, keyboard dismissal and their existing normal transitions. The scoped toast portal leaves host notifications alone and is removed when the editor closes.
 
 - **Image editor closing motion (W-731).** Closing Edit image keeps reduced motion active after its image body unmounts, preventing the popup and backdrop from briefly resuming their exit transitions.
