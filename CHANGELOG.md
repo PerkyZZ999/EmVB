@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Share-link copy feedback (W-710).** A delayed copy result cannot mark a different link as copied or replace the latest copy result.
+
 - **List-load recovery (W-709).** Visual pages and Theme Builder offer Retry after a failed load, with accessible error feedback.
 
 - **Palette navigation (W-705).** Filtering and reopening keep the selected command in view.

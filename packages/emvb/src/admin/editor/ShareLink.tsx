@@ -82,6 +82,7 @@ export function ShareLinkDialog({
   const [link, setLink] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState<"yes" | "no" | null>(null);
+  const copyAttempt = React.useRef(0);
 
   React.useEffect(() => {
     if (!open || !layout) return;
@@ -99,18 +100,23 @@ export function ShareLinkDialog({
     );
     return () => {
       cancelled = true;
+      copyAttempt.current += 1;
     };
   }, [open, layout, design, title, withStyles, base]);
 
   const copy = () => {
     if (!link) return;
+    const attempt = ++copyAttempt.current;
+    const reportCopy = (result: "yes" | "no") => {
+      if (attempt === copyAttempt.current) setCopied(result);
+    };
     if (!navigator.clipboard?.writeText) {
-      setCopied("no");
+      reportCopy("no");
       return;
     }
     navigator.clipboard.writeText(link).then(
-      () => setCopied("yes"),
-      () => setCopied("no"),
+      () => reportCopy("yes"),
+      () => reportCopy("no"),
     );
   };
 

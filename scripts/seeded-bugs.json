@@ -31858,6 +31858,46 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/list-retry.e2e.ts", "--project=node"],
       "expect": "toBeVisible"
+    },
+    {
+      "id": "W-710/old-link",
+      "requirement": "W-321",
+      "description": "A stale clipboard result changes feedback for a newer share link or copy attempt",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ShareLink.tsx",
+          "search": "copyAttempt.current += 1;",
+          "replace": "copyAttempt.current += 0;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/share-link.test.tsx",
+        "-t",
+        "W-710: copying an old share link"
+      ],
+      "expect": "\\(fail\\).*W-710: copying an old share link"
+    },
+    {
+      "id": "W-710/old-attempt",
+      "requirement": "W-321",
+      "description": "A stale clipboard result changes feedback for a newer share link or copy attempt",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ShareLink.tsx",
+          "search": "const attempt = ++copyAttempt.current;",
+          "replace": "const attempt = copyAttempt.current;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/share-link.test.tsx",
+        "-t",
+        "W-710: a late failed copy"
+      ],
+      "expect": "\\(fail\\).*W-710: a late failed copy"
     }
   ]
 }

@@ -7,10 +7,15 @@ import {
   type DesignSystem,
   type Layout,
 } from "../../core/index.ts";
-import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
+import { cleanup, mount, rerender, settle } from "../../../test/dom/mount.ts";
 import { ShareLinkDialog, siteOnlyMedia } from "./ShareLink.tsx";
 
-afterEach(cleanup);
+const originalClipboard = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+afterEach(async () => {
+  await cleanup();
+  if (originalClipboard) Object.defineProperty(navigator, "clipboard", originalClipboard);
+  else Reflect.deleteProperty(navigator, "clipboard");
+});
 
 const layout = {
   schemaVersion: 16,
@@ -35,8 +40,12 @@ const layout = {
 
 const linkField = () => document.querySelector<HTMLInputElement>("[data-emvb-share-link]");
 
-async function waitForLink() {
-  for (let i = 0; i < 50 && !linkField()?.value.startsWith("http"); i += 1) {
+async function waitForLink(previous?: string) {
+  for (
+    let i = 0;
+    i < 50 && (!linkField()?.value.startsWith("http") || linkField()?.value === previous);
+    i += 1
+  ) {
     // oxlint-disable-next-line no-await-in-loop
     await act(async () => new Promise((r) => setTimeout(r, 5)));
   }
@@ -112,4 +121,64 @@ describe("W-321 Share as a playground link", () => {
     expect(siteOnlyMedia(page)).toBe(2);
     expect(siteOnlyMedia(page, design)).toBe(3);
   });
+});
+
+test("W-710: copying an old share link cannot mark a rebuilt link as copied", async () => {
+  const pending = Promise.withResolvers<void>();
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText: () => pending.promise },
+  });
+  const props = {
+    open: true,
+    onOpenChange: () => undefined,
+    layout,
+    design: emptyDesign(),
+    title: "Before",
+  };
+  await mount(<ShareLinkDialog {...props} />);
+  const before = await waitForLink();
+  expect(before.startsWith("http")).toBe(true);
+  await act(async () =>
+    document.querySelector<HTMLButtonElement>("[data-emvb-share-copy]")?.click(),
+  );
+  await rerender(<ShareLinkDialog {...props} title="After" />);
+  const after = await waitForLink(before);
+  expect(after.startsWith("http") && after !== before).toBe(true);
+  await act(async () => pending.resolve());
+  await settle();
+  expect(document.querySelector('[role="status"]') === null).toBe(true);
+});
+
+test("W-710: a late failed copy cannot replace the latest successful copy feedback", async () => {
+  const first = Promise.withResolvers<void>();
+  const second = Promise.withResolvers<void>();
+  let calls = 0;
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText: () => (++calls === 1 ? first.promise : second.promise) },
+  });
+  await mount(
+    <ShareLinkDialog
+      open
+      onOpenChange={() => undefined}
+      layout={layout}
+      design={emptyDesign()}
+      title="Home"
+    />,
+  );
+  await waitForLink();
+  const copy = document.querySelector<HTMLButtonElement>("[data-emvb-share-copy]");
+  if (!copy) throw new Error("Copy link is missing");
+  await act(async () => {
+    copy.click();
+    copy.click();
+  });
+  expect(calls).toBe(2);
+  await act(async () => second.resolve());
+  await settle();
+  expect(document.querySelector('[role="status"]')?.textContent).toBe("Copied.");
+  await act(async () => first.reject(new Error("Clipboard permission refused")));
+  await settle();
+  expect(document.querySelector('[role="status"]')?.textContent).toBe("Copied.");
 });
