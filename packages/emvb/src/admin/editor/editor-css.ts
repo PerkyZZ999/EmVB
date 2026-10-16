@@ -90,6 +90,12 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-left-panel > [data-emvb-panel],
 .emvb-panel-right [data-emvb-tab],
 .emvb-site-styles-body { animation: emvb-panel-enter 150ms cubic-bezier(0, 0, 0.2, 1); }
+/* UX-010: a section's rows fade in as it opens (closing stays instant); the Site styles drawer slides in. */
+.emvb-section-body { transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1); }
+.emvb-section-body[data-starting-style] { opacity: 0; }
+.emvb-section-body[data-ending-style] { transition: none; }
+@keyframes emvb-drawer-enter { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+.emvb-site-styles { animation: emvb-drawer-enter 200ms cubic-bezier(0, 0, 0.2, 1); }
 .emvb-field-group, .emvb-new-variable { gap: 8px; }
 .emvb-new-variable-status { min-height: 16px; }
 .emvb-variable-value-feedback { min-height: 32px; }

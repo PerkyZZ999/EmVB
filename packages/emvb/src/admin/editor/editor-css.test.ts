@@ -108,3 +108,17 @@ test("hovering the selected Layers row keeps its primary fill, so its white text
     ),
   ).toMatch(/background: var\(--color-kumo-brand\);/);
 });
+
+test("sections fade their rows in as they open and the Site styles drawer slides in (UX-010)", () => {
+  expect(EDITOR_CSS).toMatch(
+    /\n\.emvb-section-body \{ transition: opacity 150ms cubic-bezier\(0, 0, 0\.2, 1\); \}/,
+  );
+  expect(rule(".emvb-section-body[data-starting-style]")).toMatch(/opacity: 0;/);
+  expect(rule(".emvb-section-body[data-ending-style]")).toMatch(/transition: none;/);
+  expect(rule(".emvb-site-styles")).toMatch(
+    /animation: emvb-drawer-enter 200ms cubic-bezier\(0, 0, 0\.2, 1\);/,
+  );
+  expect(EDITOR_CSS).toMatch(
+    /@keyframes emvb-drawer-enter \{ from \{ opacity: 0; transform: translateX\(12px\); \}/,
+  );
+});

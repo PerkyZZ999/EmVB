@@ -34609,6 +34609,66 @@
         "W-743"
       ],
       "expect": "toBeFocused"
+    },
+    {
+      "id": "UX-010/section-pops-open",
+      "requirement": "UX-010",
+      "description": "Opening a style section shows its rows with no fade",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-section-body[data-starting-style] { opacity: 0; }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-010"
+      ],
+      "expect": "\\(fail\\).*UX-010"
+    },
+    {
+      "id": "UX-010/drawer-no-entrance",
+      "requirement": "UX-010",
+      "description": "The Site styles drawer appears with no entrance",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-site-styles { animation: emvb-drawer-enter 200ms cubic-bezier(0, 0, 0.2, 1); }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-010"
+      ],
+      "expect": "\\(fail\\).*UX-010"
+    },
+    {
+      "id": "UX-010/section-fades-on-close",
+      "requirement": "UX-010",
+      "description": "Closing a section fades its rows out before the panel snaps shut",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-section-body[data-ending-style] { transition: none; }",
+          "replace": ".emvb-section-body[data-ending-style] { opacity: 0; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-010"
+      ],
+      "expect": "\\(fail\\).*UX-010"
     }
   ]
 }
