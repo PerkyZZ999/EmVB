@@ -1,7 +1,7 @@
 import { Select } from "@cloudflare/kumo";
 import * as React from "react";
 import { layoutFromPageTemplate, starterLayout } from "../../core/index.ts";
-import type { Fetcher } from "../api.ts";
+import { ApiError, type Fetcher } from "../api.ts";
 import { createPage } from "../content-api.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { listThemeParts, themePartLayout, type ThemePartSummary } from "../theme-api.ts";
@@ -52,7 +52,14 @@ export function NewPageDialog({
         let layout = starterLayout(title);
         if (templateId) {
           const source = await themePartLayout(fetcher, templateId, "page_template");
-          if (source) layout = layoutFromPageTemplate(source);
+          if (!source) {
+            throw new ApiError(
+              409,
+              "TEMPLATE_UNAVAILABLE",
+              "The selected page template couldn't be loaded. Try again or choose Blank page.",
+            );
+          }
+          layout = layoutFromPageTemplate(source);
         }
         return editorUrl(await createPage(fetcher, { title, slug, layout }));
       }}

@@ -31898,6 +31898,60 @@
         "W-710: a late failed copy"
       ],
       "expect": "\\(fail\\).*W-710: a late failed copy"
+    },
+    {
+      "id": "W-711/unavailable-template",
+      "requirement": "W-098",
+      "description": "A selected template silently falls back to a blank page instead of preserving its intent",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "throw new ApiError(\n              409,\n              \"TEMPLATE_UNAVAILABLE\",\n              \"The selected page template couldn't be loaded. Try again or choose Blank page.\",\n            );",
+          "replace": "return editorUrl(await createPage(fetcher, { title, slug, layout }));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/page-template-create.test.tsx",
+        "-t",
+        "W-711: an unavailable"
+      ],
+      "expect": "\\(fail\\).*W-711: an unavailable"
+    },
+    {
+      "id": "W-711/template-retry",
+      "requirement": "W-098",
+      "description": "A selected template silently falls back to a blank page instead of preserving its intent",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "layout = layoutFromPageTemplate(source);",
+          "replace": "layout = starterLayout(title);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/page-template-create.test.tsx",
+        "-t",
+        "W-711: retrying a template failure"
+      ],
+      "expect": "\\(fail\\).*W-711: retrying a template failure"
+    },
+    {
+      "id": "W-711/browser-template-fallback",
+      "requirement": "W-098",
+      "description": "The browser creates a blank page after a selected template fails to load",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "throw new ApiError(\n              409,\n              \"TEMPLATE_UNAVAILABLE\",\n              \"The selected page template couldn't be loaded. Try again or choose Blank page.\",\n            );",
+          "replace": "return editorUrl(await createPage(fetcher, { title, slug, layout }));"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/page-template-create.e2e.ts", "--project=node"],
+      "expect": "toContainText"
     }
   ]
 }
