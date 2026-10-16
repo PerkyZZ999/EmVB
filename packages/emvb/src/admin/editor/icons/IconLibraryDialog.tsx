@@ -388,7 +388,10 @@ function IconLibrary({
               data-emvb-icon-upload-btn=""
               onClick={() => fileRef.current?.click()}
             >
-              {uploading ? "Uploading…" : "Upload SVG"}
+              <span className="emvb-icon-upload-label">
+                <span aria-hidden={uploading}>Upload SVG</span>
+                <span aria-hidden={!uploading}>Uploading…</span>
+              </span>
             </Button>
             <input
               ref={fileRef}
@@ -610,9 +613,13 @@ const ICON_LIBRARY_CSS = `
   font-size: 13px; line-height: 18px;
 }
 .emvb-icon-library-upload {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 12px;
   padding: 10px 16px; border-bottom: 1px solid var(--color-kumo-hairline);
 }
+.emvb-icon-upload-label { display: grid; }
+.emvb-icon-upload-label > span { grid-area: 1 / 1; }
+.emvb-icon-upload-label > span[aria-hidden="true"] { visibility: hidden; }
+.emvb-icon-library-upload [data-emvb-icon-upload-note] { display: flex; align-items: center; min-height: 2lh; }
 .emvb-icon-library-upload [data-emvb-icon-upload-note="error"] { color: var(--text-color-kumo-danger, #b91c1c); }
 .emvb-icon-library-cat[data-uploads] { margin-top: 8px; border-top: 1px solid var(--color-kumo-hairline); padding-top: 8px; }
 .emvb-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

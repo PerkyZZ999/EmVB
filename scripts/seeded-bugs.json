@@ -34361,6 +34361,72 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/icon-upload-feedback.e2e.ts", "--project=node"],
       "expect": "toHaveAttribute"
+    },
+    {
+      "id": "W-739/collapsed-label",
+      "requirement": "W-739",
+      "description": "Inactive label keeps its intrinsic width while hidden",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": ".emvb-icon-upload-label > span[aria-hidden=\"true\"] { visibility: hidden; }",
+          "replace": ".emvb-icon-upload-label > span[aria-hidden=\"true\"] { display: none; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/icon-upload-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "1440px"
+      ],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-739/unreserved-feedback",
+      "requirement": "W-739",
+      "description": "Two lines of feedback space keep narrow upload states steady",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "min-height: 2lh;",
+          "replace": "min-height: 0;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/icon-upload-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "1024px"
+      ],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-739/exposed-label",
+      "requirement": "W-739",
+      "description": "Only the active upload label contributes to the accessible name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "<span aria-hidden={uploading}>Upload SVG</span>",
+          "replace": "<span aria-hidden={false}>Upload SVG</span>"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/icon-upload-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "1440px"
+      ],
+      "expect": "toHaveAccessibleName"
     }
   ]
 }
