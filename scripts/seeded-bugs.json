@@ -32336,6 +32336,88 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/image-save-recovery.e2e.ts", "--project=node"],
       "expect": "toBeVisible"
+    },
+    {
+      "id": "W-717/missing-clamp",
+      "requirement": "W-485",
+      "description": "Typed export dimensions must bound both sides and expose their effective maxima",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "Math.min(maximum.width, w)",
+          "replace": "w"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-717"
+      ],
+      "expect": "\\(fail\\).*W-717:"
+    },
+    {
+      "id": "W-717/wrong-width-max",
+      "requirement": "W-485",
+      "description": "Typed export dimensions must bound both sides and expose their effective maxima",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "max={maximum?.width ?? MAX_PX}",
+          "replace": "max={MAX_PX}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-717"
+      ],
+      "expect": "\\(fail\\).*W-717:"
+    },
+    {
+      "id": "W-717/wrong-height-max",
+      "requirement": "W-485",
+      "description": "Typed export dimensions must bound both sides and expose their effective maxima",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "max={maximum?.height ?? MAX_PX}",
+          "replace": "max={MAX_PX}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-717"
+      ],
+      "expect": "\\(fail\\).*W-717:"
+    },
+    {
+      "id": "W-717/browser-missing-clamp",
+      "requirement": "W-485",
+      "description": "A portrait export width must not push its calculated height past the existing limit",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "Math.min(maximum.width, w)",
+          "replace": "w"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/image-save-recovery.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-717"
+      ],
+      "expect": "toHaveValue"
     }
   ]
 }

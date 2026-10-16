@@ -612,6 +612,35 @@ describe("tone tools in photocn's panels (W-484)", () => {
 describe("save a copy (W-485)", () => {
   const settleAll = () => [1, 2, 3, 4, 5].reduce((prev) => prev.then(settle), Promise.resolve());
 
+  for (const [shape, full, maximum] of [
+    ["portrait", { width: 480, height: 640 }, { width: 12288, height: 16384 }],
+    ["landscape", { width: 640, height: 480 }, { width: 16384, height: 12288 }],
+  ] as const) {
+    for (const side of ["width", "height"] as const) {
+      test(`W-717: ${shape} export ${side} keeps both dimensions within the existing limit`, async () => {
+        serveImage();
+        change({ out: full });
+        await open({ src: "/a.jpg", alt: "A" }, async () => undefined);
+        await React.act(async () => click("[data-emvb-image-save]"));
+        const width = q<HTMLInputElement>("[data-emvb-image-export-width]");
+        const height = q<HTMLInputElement>("[data-emvb-image-export-height]");
+        if (!width || !height) throw new Error("No export dimensions");
+        const field = side === "width" ? width : height;
+        await React.act(async () => {
+          Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+            field,
+            "16384",
+          );
+          field.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        expect({ width: Number(width.value), height: Number(height.value) }).toEqual(maximum);
+        expect(Number(width.max)).toBe(maximum.width);
+        expect(Number(height.max)).toBe(maximum.height);
+        expect(calls.some(([name]) => name === "exportImage" || name === "download")).toBe(false);
+      });
+    }
+  }
+
   test("Save copy opens photocn's export step with WebP 85% and the longest side at 2560", async () => {
     serveImage();
     change({ out: { width: 4000, height: 3000 }, edited: true });

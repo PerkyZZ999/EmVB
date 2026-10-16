@@ -1,15 +1,12 @@
 import { readFileSync } from "node:fs";
-import { expect, test } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createPage, setUpEmvbOnce } from "./support/api.ts";
 import { openEditor, openLayers, overlay, unique } from "./support/helpers.ts";
 
 setUpEmvbOnce();
 test.use({ viewport: { width: 1440, height: 900 } });
 
-test("W-716: Escape keeps an image save open so a failed upload can be retried", async ({
-  page,
-  request,
-}) => {
+async function openPhotoEditor(page: Page, request: APIRequestContext, title: string) {
   const upload = await request.post("/_emdash/api/media", {
     headers: { "X-EmDash-Request": "1" },
     multipart: {
@@ -27,7 +24,7 @@ test("W-716: Escape keeps an image save open so a failed upload can be retried",
     .item;
   const id = await createPage(
     request,
-    "Export recovery",
+    title,
     {
       schemaVersion: 16,
       root: {
@@ -43,7 +40,7 @@ test("W-716: Escape keeps an image save open so a failed upload can be retried",
         ],
       },
     },
-    `export-retry-${unique()}`,
+    `export-${unique()}`,
   );
   await openEditor(page, id);
   await openLayers(page);
@@ -54,6 +51,13 @@ test("W-716: Escape keeps an image save open so a failed upload can be retried",
     "ready",
     { timeout: 30_000 },
   );
+}
+
+test("W-716: Escape keeps an image save open so a failed upload can be retried", async ({
+  page,
+  request,
+}) => {
+  await openPhotoEditor(page, request, "Export recovery");
   await page.locator("[data-emvb-image-save]").click();
   const form = page.locator("[data-emvb-image-export]");
   const release = Promise.withResolvers<void>();
@@ -83,4 +87,31 @@ test("W-716: Escape keeps an image save open so a failed upload can be retried",
   } finally {
     release.resolve();
   }
+});
+
+test("W-717: portrait export dimensions honor both side limits without rendering a large image", async ({
+  page,
+  request,
+}) => {
+  await openPhotoEditor(page, request, "Export dimensions");
+  await page.locator('[data-emvb-image-tool="compose"]').click();
+  await page.locator('[data-emvb-image-rotate="right"]').click();
+  await expect(page.locator("[data-emvb-image-editor-file]")).toContainText("480 × 640 px");
+  await page.locator("[data-emvb-image-save]").click();
+  const form = page.locator("[data-emvb-image-export]");
+  const width = form.getByRole("spinbutton", { name: "Width in pixels" });
+  const height = form.getByRole("spinbutton", { name: "Height in pixels" });
+  await expect(width).toHaveAttribute("max", "12288");
+  await expect(height).toHaveAttribute("max", "16384");
+  await width.fill("16384");
+  await expect(width).toHaveValue("12288");
+  await expect(height).toHaveValue("16384");
+  await form.locator("[data-emvb-image-export-full]").click();
+  await expect(width).toHaveValue("480");
+  await expect(height).toHaveValue("640");
+  await height.fill("16384");
+  await expect(width).toHaveValue("12288");
+  await expect(height).toHaveValue("16384");
+  await form.getByRole("button", { name: "Close", exact: true }).click();
+  await expect(form).toHaveCount(0);
 });

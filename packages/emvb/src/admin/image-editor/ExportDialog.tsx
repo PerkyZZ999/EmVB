@@ -125,6 +125,12 @@ function ExportForm({
   const [error, setError] = React.useState<string | null>(null);
   const [failedSave, setFailedSave] = React.useState(false);
   const output = full ? outputSize(full, width) : null;
+  const maximum = full
+    ? outputSize(
+        full,
+        Math.max(1, Math.floor((MAX_PX * full.width) / Math.max(full.width, full.height))),
+      )
+    : null;
   const canExport = editor.isReady && !editor.disabled;
   const lossy = selected.lossy;
   const jpegGps = format === "jpeg" && sourceHasGps;
@@ -171,14 +177,14 @@ function ExportForm({
   };
 
   const setSide = (raw: string, side: "width" | "height") => {
-    if (!full) return;
+    if (!full || !maximum) return;
     const next = Number(raw);
     if (!(next > 0)) {
       setWidth(null);
       return;
     }
     const w = side === "width" ? Math.round(next) : Math.round((next * full.width) / full.height);
-    setWidth(Math.max(1, Math.min(MAX_PX, w)));
+    setWidth(Math.max(1, Math.min(maximum.width, w)));
   };
 
   return (
@@ -271,7 +277,7 @@ function ExportForm({
                 type="number"
                 inputMode="numeric"
                 min={1}
-                max={MAX_PX}
+                max={maximum?.width ?? MAX_PX}
                 value={output.width}
                 data-emvb-image-export-width=""
                 onChange={(event) => setSide(event.currentTarget.value, "width")}
@@ -283,7 +289,7 @@ function ExportForm({
                 type="number"
                 inputMode="numeric"
                 min={1}
-                max={MAX_PX}
+                max={maximum?.height ?? MAX_PX}
                 value={output.height}
                 data-emvb-image-export-height=""
                 onChange={(event) => setSide(event.currentTarget.value, "height")}

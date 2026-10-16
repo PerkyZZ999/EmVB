@@ -42,7 +42,7 @@ Undo, Redo, **Original** (press and hold to compare), and **Reset all edits** wo
 
 - **Format:** WebP (recommended), JPEG or PNG.
 - **Quality:** 10–100 % (default 85 % for WebP and JPEG).
-- **Size:** typed width and height in px. By default the longest side is capped at 2560 px; **Full size** exports at the crop's full resolution.
+- **Size:** typed width and height in px. By default the longest side is capped at 2560 px; **Full size** exports at the crop's full resolution. Typed sizes keep both sides at or below 16,384 px while preserving the aspect ratio; each field's maximum reflects the other side's limit.
 - **Remove location (GPS):** on by default for a JPEG of a photo that has one. WebP and PNG never carry camera data from the original.
 
 The new file is uploaded as `<original>-edited.<ext>` and applied to the Image element. The element's `edit` record points back at the untouched original (and its media id when known) and stores the recipe so re-opening restores the sliders, filter and crop. **Reset to original** in Image settings puts the element back on the first file and leaves the edited copy in the library. An edit of an edit still points at the first original.

@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Export size bounds (W-717).** Typed image export dimensions keep both sides within the existing pixel limit, preserving the aspect ratio and showing each field's effective maximum.
+
 - **Image export recovery (W-716).** Escape keeps the export step open during Save copy, preserving a failed upload's error and Retry action. Closing remains available before saving, after failure and during downloads.
 
 - **Delayed image uploads (W-715).** Upload completion preserves newer image URLs, alt text and styling; results and errors from an older image no longer affect the current selection.
