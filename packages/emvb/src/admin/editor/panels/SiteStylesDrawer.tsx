@@ -1,6 +1,6 @@
 import { Button, Select, Tabs } from "@cloudflare/kumo";
 import { deletionOf, type Deletion } from "../restore-deleted.ts";
-import { XIcon } from "@phosphor-icons/react";
+import { UploadSimpleIcon, XIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   clearClassRefs,
@@ -31,6 +31,7 @@ import { FIELD } from "../../ui.ts";
 import { TokenScales } from "./TokenScales.tsx";
 import { InlineError } from "./inline-error.tsx";
 import { VariableSection } from "./VariableSection.tsx";
+import { useMediaQuery } from "../useMediaQuery.ts";
 
 const STYLE_NOTE = "Style changes stay unpublished until you publish styles.";
 
@@ -75,6 +76,9 @@ export function SiteStylesDrawer({
 }: Props) {
   const [tab, setTab] = React.useState<"variables" | "classes" | "defaults">("variables");
   const [error, setError] = React.useState<string | null>(null);
+  const [publishing, setPublishing] = React.useState(false);
+  const publishPending = React.useRef(false);
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const [confirm, setConfirm] = React.useState<
     | { kind: "variable"; variableKind: VariableKind; id: string; name: string }
     | { kind: "class"; id: string; name: string }
@@ -99,12 +103,17 @@ export function SiteStylesDrawer({
   };
 
   const publish = async () => {
-    if (!onPublishStyles) return;
+    if (!onPublishStyles || publishPending.current) return;
+    publishPending.current = true;
+    setPublishing(true);
     setError(null);
     try {
       await onPublishStyles();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't publish site styles. Try again.");
+    } finally {
+      publishPending.current = false;
+      setPublishing(false);
     }
   };
 
@@ -169,7 +178,16 @@ export function SiteStylesDrawer({
           </ul>
         )}
         {unpublished && (
-          <Button type="button" variant="primary" size="sm" onClick={() => void publish()}>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            icon={<UploadSimpleIcon size={14} aria-hidden="true" />}
+            loading={publishing && !reducedMotion}
+            disabled={publishing}
+            aria-busy={publishing}
+            onClick={() => void publish()}
+          >
             Publish styles
           </Button>
         )}
@@ -272,7 +290,14 @@ export function SiteStylesDrawer({
           <DefaultsSection design={design} onSave={save} />
         </div>
       )}
-      <p className="emvb-helper emvb-site-styles-footer">{STYLE_NOTE}</p>
+      <p
+        className="emvb-helper emvb-site-styles-footer"
+        role="status"
+        aria-label="Site styles status"
+        aria-live="polite"
+      >
+        {publishing ? "Publishing site styles…" : STYLE_NOTE}
+      </p>
       {pendingImport && (
         <ImportConfirm
           name={pendingImport.name}

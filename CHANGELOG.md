@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Publish styles feedback (W-724).** Publishing shows a stable-width loading button and live footer status, prevents rapid duplicate clicks, and unlocks after success or failure. Reduced motion keeps a static icon with the same pending message; failed requests remain retryable.
+
 - **List loading feedback (W-723).** Visual pages and Theme Builder show named loading cards with three placeholder rows during initial requests and retries. Reduced motion disables shimmer; empty and error states remain distinct.
 
 - **Panel feedback (W-722).** Add/Layers, Content/Style and Site styles tab contents fade in over 150 ms. Controls stay interactive and reduced-motion preferences make changes instant.

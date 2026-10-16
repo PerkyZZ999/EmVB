@@ -32782,6 +32782,110 @@
         "respects reduce motion"
       ],
       "expect": "toBe"
+    },
+    {
+      "id": "W-724/no-loading-state",
+      "requirement": "W-724",
+      "description": "Publishing displays a noninteractive Kumo loading button until the operation finishes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "            loading={publishing && !reducedMotion}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-724: pending"
+      ],
+      "expect": "\\(fail\\).*W-724:"
+    },
+    {
+      "id": "W-724/duplicate-publish",
+      "requirement": "W-724",
+      "description": "Rapid clicks must not queue duplicate site-style publishes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "if (!onPublishStyles || publishPending.current) return;",
+          "replace": "if (!onPublishStyles) return;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-724: rapid"
+      ],
+      "expect": "\\(fail\\).*W-724:"
+    },
+    {
+      "id": "W-724/stuck-after-failure",
+      "requirement": "W-724",
+      "description": "A failed publish clears pending state so the retained error can be retried",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "      publishPending.current = false;\n      setPublishing(false);",
+          "replace": "      publishPending.current = false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-724: failed"
+      ],
+      "expect": "\\(fail\\).*W-724:"
+    },
+    {
+      "id": "W-724/browser-pending-message",
+      "requirement": "W-724",
+      "description": "A pending publish reports its action in the stable live footer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "publishing ? \"Publishing site styles…\" : STYLE_NOTE",
+          "replace": "STYLE_NOTE"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/site-style-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-724"
+      ],
+      "expect": "toHaveText"
+    },
+    {
+      "id": "W-724/browser-reduced-motion",
+      "requirement": "W-724",
+      "description": "Reduced-motion preferences replace the SVG-animated loading spinner with a static icon while keeping pending feedback",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "loading={publishing && !reducedMotion}",
+          "replace": "loading={publishing}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/site-style-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-724"
+      ],
+      "expect": "toHaveCount"
     }
   ]
 }

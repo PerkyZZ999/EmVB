@@ -179,6 +179,97 @@ describe("SiteStylesDrawer (W-032)", () => {
   });
 });
 
+describe("publishing feedback (W-724)", () => {
+  const publishButton = () =>
+    [...document.querySelectorAll<HTMLButtonElement>("button")].find((button) =>
+      button.textContent?.includes("Publish styles"),
+    );
+  const open = (onPublishStyles: () => Promise<void>) =>
+    mount(
+      <SiteStylesDrawer
+        design={emptyDesign()}
+        layout={layout}
+        onDesignChange={async () => undefined}
+        unpublished
+        onPublishStyles={onPublishStyles}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+
+  test("W-724: pending publishing has stable feedback and unlocks after success", async () => {
+    const pending = Promise.withResolvers<void>();
+    try {
+      await open(() => pending.promise);
+      await act(async () => publishButton()?.click());
+      expect(publishButton()?.disabled).toBe(true);
+      expect(publishButton()?.getAttribute("aria-busy")).toBe("true");
+      expect(publishButton()?.querySelector('svg[role="status"]') !== null).toBe(true);
+      expect(document.querySelector('.emvb-site-styles-footer[role="status"]')?.textContent).toBe(
+        "Publishing site styles…",
+      );
+      expect(
+        [...document.querySelectorAll<HTMLButtonElement>("button")]
+          .filter((button) => button.textContent === "Import" || button.textContent === "Export")
+          .every((button) => !button.disabled),
+      ).toBe(true);
+
+      await act(async () => pending.resolve());
+      expect(publishButton()?.disabled).toBe(false);
+      expect(publishButton()?.getAttribute("aria-busy")).not.toBe("true");
+      expect(document.querySelector('.emvb-site-styles-footer[role="status"]')?.textContent).toBe(
+        "Style changes stay unpublished until you publish styles.",
+      );
+    } finally {
+      await act(async () => pending.resolve());
+    }
+  });
+
+  test("W-724: rapid clicks cannot queue duplicate publishes", async () => {
+    const pending = Promise.withResolvers<void>();
+    let calls = 0;
+    try {
+      await open(() => {
+        calls++;
+        return pending.promise;
+      });
+      await act(async () => {
+        publishButton()?.click();
+        publishButton()?.click();
+      });
+      expect(calls).toBe(1);
+    } finally {
+      await act(async () => pending.resolve());
+    }
+  });
+
+  test("W-724: failed publishing retains an actionable error and allows a fresh retry", async () => {
+    const pending = Promise.withResolvers<void>();
+    let calls = 0;
+    try {
+      await open(async () => {
+        if (++calls === 1) await pending.promise;
+      });
+      await act(async () => publishButton()?.click());
+      await act(async () => pending.reject(new Error("Connection lost. Try again.")));
+      expect(document.querySelector('[role="alert"]')?.textContent).toContain(
+        "Connection lost. Try again.",
+      );
+      expect(publishButton()?.disabled).toBe(false);
+      expect(document.querySelector('.emvb-site-styles-footer[role="status"]')?.textContent).toBe(
+        "Style changes stay unpublished until you publish styles.",
+      );
+
+      await act(async () => publishButton()?.click());
+      expect(calls).toBe(2);
+      expect(document.querySelector('[role="alert"]')?.textContent ?? null).toBeNull();
+      expect(publishButton()?.disabled).toBe(false);
+    } finally {
+      await act(async () => pending.resolve());
+    }
+  });
+});
+
 describe("SiteStylesDrawer managers (W-071)", () => {
   test("shows Variables Manager label and CSS tokens", async () => {
     const design: DesignSystem = {

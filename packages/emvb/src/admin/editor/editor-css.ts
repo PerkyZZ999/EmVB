@@ -508,7 +508,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-site-styles-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .emvb-site-styles-subtitle { margin: 0; font-size: 11px; color: var(--text-color-kumo-subtle); }
 .emvb-site-styles-body { display: flex; flex-direction: column; gap: 10px; overflow: auto; min-height: 0; flex: 1 1 auto; }
-.emvb-site-styles-footer { margin-top: auto; }
+.emvb-site-styles-footer { margin-top: auto; min-height: 32px; }
 .emvb-site-section { display: flex; flex-direction: column; gap: 6px; }
 .emvb-site-section-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .emvb-site-count {
