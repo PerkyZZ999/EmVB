@@ -22,6 +22,7 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
   const list = useList(fetcher, listPages);
   const [creating, setCreating] = React.useState(false);
   const [query, setQuery] = React.useState("");
+  const searchRef = React.useRef<HTMLInputElement>(null);
   const shown =
     list.state === "ready"
       ? list.items.filter((page) => matchesSearch(query, page.title, `/${page.slug}`))
@@ -50,10 +51,16 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
         </div>
       )}
       {list.state === "ready" && list.items.length > 0 && (
-        <ListSearch value={query} onChange={setQuery} label="Search pages" />
+        <ListSearch value={query} onChange={setQuery} label="Search pages" inputRef={searchRef} />
       )}
       {list.state === "ready" && list.items.length > 0 && shown.length === 0 && (
-        <NoMatches query={query} />
+        <NoMatches
+          query={query}
+          onClear={() => {
+            setQuery("");
+            searchRef.current?.focus();
+          }}
+        />
       )}
       {list.state === "ready" && shown.length > 0 && (
         <div className="emvb-surface-card" data-emvb-list="pages">

@@ -32886,6 +32886,108 @@
         "W-724"
       ],
       "expect": "toHaveCount"
+    },
+    {
+      "id": "W-725/pages-query",
+      "requirement": "W-725",
+      "description": "Search recovery preserves results, type filter and focus: pages-query",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/PageList.tsx",
+          "search": "            setQuery(\"\");",
+          "replace": "            setQuery(\"zzz\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-search.test.tsx",
+        "-t",
+        "W-725"
+      ],
+      "expect": "\\(fail\\).*W-725:"
+    },
+    {
+      "id": "W-725/pages-focus",
+      "requirement": "W-725",
+      "description": "Search recovery preserves results, type filter and focus: pages-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/PageList.tsx",
+          "search": "            searchRef.current?.focus();",
+          "replace": "            searchRef.current?.blur();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-search.test.tsx",
+        "-t",
+        "W-725"
+      ],
+      "expect": "\\(fail\\).*W-725:"
+    },
+    {
+      "id": "W-725/theme-filter",
+      "requirement": "W-725",
+      "description": "Search recovery preserves results, type filter and focus: theme-filter",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "                setQuery(\"\");",
+          "replace": "                setQuery(\"\");\n                setFilter(\"all\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-search.test.tsx",
+        "-t",
+        "W-725"
+      ],
+      "expect": "\\(fail\\).*W-725:"
+    },
+    {
+      "id": "W-725/theme-focus",
+      "requirement": "W-725",
+      "description": "Search recovery preserves results, type filter and focus: theme-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "                searchRef.current?.focus();",
+          "replace": "                searchRef.current?.blur();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-search.test.tsx",
+        "-t",
+        "W-725"
+      ],
+      "expect": "\\(fail\\).*W-725:"
+    },
+    {
+      "id": "W-725/browser-action",
+      "requirement": "W-725",
+      "description": "Clear search is keyboard operable and restores both lists",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "className={BUTTON} onClick={onClear}",
+          "replace": "className={BUTTON} onClick={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/list-search-recovery.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-725"
+      ],
+      "expect": "toHaveValue"
     }
   ]
 }

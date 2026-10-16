@@ -122,6 +122,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
   const [creating, setCreating] = React.useState(false);
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
+  const searchRef = React.useRef<HTMLInputElement>(null);
 
   const newPart = <NewButton label="New theme part" onClick={() => setCreating(true)} />;
 
@@ -147,7 +148,12 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
       {list.state === "ready" && list.items.length > 0 && (
         <>
           <FilterTabs filter={filter} counts={countByType(list.items)} onChange={setFilter} />
-          <ListSearch value={query} onChange={setQuery} label="Search theme parts" />
+          <ListSearch
+            value={query}
+            onChange={setQuery}
+            label="Search theme parts"
+            inputRef={searchRef}
+          />
         </>
       )}
       {list.state === "loading" && <ListLoading label="Loading theme parts…" />}
@@ -176,7 +182,13 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
               />
             </div>
           ) : shown.length === 0 ? (
-            <NoMatches query={query} />
+            <NoMatches
+              query={query}
+              onClear={() => {
+                setQuery("");
+                searchRef.current?.focus();
+              }}
+            />
           ) : (
             <div className="emvb-surface-card" data-emvb-list="theme-parts">
               <Table data-emvb-list="theme-parts">

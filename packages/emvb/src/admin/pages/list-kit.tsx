@@ -123,14 +123,17 @@ export function ListSearch({
   value,
   onChange,
   label,
+  inputRef,
 }: {
   value: string;
   onChange: (value: string) => void;
   label: string;
+  inputRef: React.Ref<HTMLInputElement>;
 }) {
   return (
     <div className="emvb-list-search">
       <Input
+        ref={inputRef}
         type="search"
         id="emvb-list-search"
         aria-label={label}
@@ -144,10 +147,15 @@ export function ListSearch({
 }
 
 /** Shown when a search finds nothing (W-207). */
-export function NoMatches({ query }: { query: string }) {
+export function NoMatches({ query, onClear }: { query: string; onClear: () => void }) {
   return (
-    <p className="emvb-helper" role="status" data-emvb-no-matches>
-      Nothing matches "{query.trim()}".
-    </p>
+    <div className="emvb-surface-card">
+      <p className="emvb-helper" role="status" data-emvb-no-matches>
+        Nothing matches "{query.trim()}".
+      </p>
+      <Button type="button" variant="secondary" className={BUTTON} onClick={onClear}>
+        Clear search
+      </Button>
+    </div>
   );
 }
