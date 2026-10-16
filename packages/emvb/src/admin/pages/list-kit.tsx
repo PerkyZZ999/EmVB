@@ -13,8 +13,11 @@ type ListState<T> =
 /** Loads a list for `fetcher`, ignoring an answer that arrives after unmount. */
 export function useList<T>(fetcher: Fetcher, load: (fetcher: Fetcher) => Promise<T[]>) {
   const [list, setList] = React.useState<ListState<T>>({ state: "loading" });
+  const [attempt, setAttempt] = React.useState(0);
+  const retry = React.useCallback(() => setAttempt((value) => value + 1), []);
   React.useEffect(() => {
     let active = true;
+    setList({ state: "loading" });
     load(fetcher).then(
       (items) => active && setList({ state: "ready", items }),
       (error: unknown) =>
@@ -27,8 +30,8 @@ export function useList<T>(fetcher: Fetcher, load: (fetcher: Fetcher) => Promise
     return () => {
       active = false;
     };
-  }, [fetcher, load]);
-  return list;
+  }, [fetcher, load, attempt]);
+  return { ...list, retry };
 }
 
 export function NewButton({ label, onClick }: { label: string; onClick: () => void }) {
@@ -45,13 +48,27 @@ export function NewButton({ label, onClick }: { label: string; onClick: () => vo
   );
 }
 
-export function ListError({ title, message }: { title: string; message: string }) {
+export function ListError({
+  title,
+  message,
+  onRetry,
+}: {
+  title: string;
+  message: string;
+  onRetry: () => void;
+}) {
   return (
     <Banner
+      role="alert"
       variant="error"
       icon={<WarningCircleIcon aria-hidden="true" />}
       title={title}
       description={message}
+      action={
+        <Button type="button" variant="secondary" className={BUTTON} onClick={onRetry}>
+          Retry
+        </Button>
+      }
     />
   );
 }

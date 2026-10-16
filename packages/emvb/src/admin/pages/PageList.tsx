@@ -36,7 +36,7 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
       </div>
       {list.state === "loading" && <Loader />}
       {list.state === "error" && (
-        <ListError title="Couldn't load your pages" message={list.message} />
+        <ListError title="Couldn't load your pages" message={list.message} onRetry={list.retry} />
       )}
       {list.state === "ready" && list.items.length === 0 && (
         <div className="emvb-surface-card emvb-empty-shell">

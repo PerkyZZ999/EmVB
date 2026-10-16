@@ -151,7 +151,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
       )}
       {list.state === "loading" && <Loader />}
       {list.state === "error" && (
-        <ListError title="Couldn't load theme parts" message={list.message} />
+        <ListError title="Couldn't load theme parts" message={list.message} onRetry={list.retry} />
       )}
       {list.state === "ready" && list.items.length === 0 && (
         <div className="emvb-surface-card emvb-empty-shell">

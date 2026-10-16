@@ -31764,6 +31764,100 @@
         "W-708: Add announces"
       ],
       "expect": "\\(fail\\).*W-708: Add announces"
+    },
+    {
+      "id": "W-709/pages-retry",
+      "requirement": "R-002",
+      "description": "The failed list has a Retry button that does not reload it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/PageList.tsx",
+          "search": "onRetry={list.retry}",
+          "replace": "onRetry={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-retry.test.tsx",
+        "-t",
+        "W-709: pages can retry"
+      ],
+      "expect": "\\(fail\\).*W-709: pages can retry"
+    },
+    {
+      "id": "W-709/parts-retry",
+      "requirement": "R-002",
+      "description": "The failed list has a Retry button that does not reload it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "onRetry={list.retry}",
+          "replace": "onRetry={() => undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-retry.test.tsx",
+        "-t",
+        "W-709: theme parts can retry"
+      ],
+      "expect": "\\(fail\\).*W-709: theme parts can retry"
+    },
+    {
+      "id": "W-709/late-retry",
+      "requirement": "R-002",
+      "description": "A list retry loses its stale-response guard or accessible error state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "active = false;",
+          "replace": "active = true;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-retry.test.tsx",
+        "-t",
+        "W-709: an older retry"
+      ],
+      "expect": "\\(fail\\).*W-709: an older retry"
+    },
+    {
+      "id": "W-709/alert",
+      "requirement": "R-002",
+      "description": "A list retry loses its stale-response guard or accessible error state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "      role=\"alert\"\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-retry.test.tsx",
+        "-t",
+        "W-709: pages can retry"
+      ],
+      "expect": "\\(fail\\).*W-709: pages can retry"
+    },
+    {
+      "id": "W-709/browser-retry",
+      "requirement": "R-002",
+      "description": "The banner Retry button no longer retries a failed list request",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "onClick={onRetry}",
+          "replace": "onClick={() => undefined}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/list-retry.e2e.ts", "--project=node"],
+      "expect": "toBeVisible"
     }
   ]
 }

@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **List-load recovery (W-709).** Visual pages and Theme Builder offer Retry after a failed load, with accessible error feedback.
+
 - **Palette navigation (W-705).** Filtering and reopening keep the selected command in view.
 - **Timeline filters (W-706).** Saved versions remain visible when agent metadata is unavailable; empty filtered results explain how to return to All.
 - **Site-style search (W-707).** An active search stays available when fewer classes or variables remain, so it can still be cleared.
