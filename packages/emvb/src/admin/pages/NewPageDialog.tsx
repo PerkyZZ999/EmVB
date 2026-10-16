@@ -37,6 +37,8 @@ export function NewPageDialog({
       cancelled = true;
     };
   }, [open, fetcher]);
+  const hasUnlistedTemplate =
+    templateId !== "" && !templates.some((part) => part.id === templateId);
 
   return (
     <CreateDialog
@@ -64,11 +66,17 @@ export function NewPageDialog({
         return editorUrl(await createPage(fetcher, { title, slug, layout }));
       }}
     >
-      {templates.length > 0 ? (
+      {templates.length > 0 || hasUnlistedTemplate ? (
         <Select
           label="Page template"
           className={FIELD}
           value={templateId || NONE}
+          renderValue={(value: unknown) =>
+            !value || value === NONE
+              ? "Blank page"
+              : (templates.find((part) => part.id === value)?.title ??
+                "Previously selected template")
+          }
           onValueChange={(next) => {
             if (!next || next === NONE) {
               setTemplateId("");
@@ -78,6 +86,9 @@ export function NewPageDialog({
           }}
         >
           <Select.Option value={NONE}>Blank page</Select.Option>
+          {hasUnlistedTemplate && (
+            <Select.Option value={templateId}>Previously selected template</Select.Option>
+          )}
           {templates.map((part) => (
             <Select.Option key={part.id} value={part.id}>
               {part.title}

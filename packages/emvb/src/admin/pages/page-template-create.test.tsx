@@ -2,7 +2,7 @@ import { afterEach, expect, spyOn, test } from "bun:test";
 import { act } from "react";
 import type { Layout } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
-import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
+import { cleanup, mount, rerender, settle } from "../../../test/dom/mount.ts";
 import { NewPageDialog } from "./NewPageDialog.tsx";
 
 let restoreNavigation: () => void = () => undefined;
@@ -57,7 +57,18 @@ async function submit() {
   await settle();
 }
 
-async function open(details: () => Promise<Response>) {
+const listedTemplate = {
+  id: "template-one",
+  slug: "template-one",
+  status: "draft",
+  data: { title: "Landing template", part_type: "page_template" },
+};
+
+async function open(
+  details: () => Promise<Response>,
+  catalog: () => Promise<Response> = async () =>
+    Response.json({ data: { items: [listedTemplate] } }),
+) {
   const posted: { data: { title: string; layout: Layout }; slug: string }[] = [];
   const navigation = spyOn(window.location, "assign").mockImplementation(() => undefined);
   restoreNavigation = () => navigation.mockRestore();
@@ -67,24 +78,13 @@ async function open(details: () => Promise<Response>) {
       return Response.json({ data: { item: { id: "new-page" } } }, { status: 201 });
     }
     if (path.endsWith("/template-one")) return details();
-    return Response.json({
-      data: {
-        items: [
-          {
-            id: "template-one",
-            slug: "template-one",
-            status: "draft",
-            data: { title: "Landing template", part_type: "page_template" },
-          },
-        ],
-      },
-    });
+    return catalog();
   };
   await mount(<NewPageDialog open fetcher={fetcher} onOpenChange={() => undefined} />);
   await settle();
   await choose("Landing template");
   await title("New page title");
-  return { posted, navigation };
+  return { posted, navigation, fetcher };
 }
 
 for (const failure of ["missing", "invalid", "offline"] as const) {
@@ -129,3 +129,43 @@ test("W-711: retrying a template failure uses the recovered template and keeps t
   expect(JSON.stringify(posted[0]?.data.layout)).toContain("Template heading");
   expect(posted[0]?.data.layout.root.id === template.root.id).toBe(false);
 });
+
+for (const refresh of ["empty", "offline", "replaced"] as const) {
+  test(`W-712: catalog refresh (${refresh}) keeps the selected template changeable`, async () => {
+    let refreshed = false;
+    const { fetcher, posted } = await open(
+      async () => Response.json({ error: { message: "Gone" } }, { status: 404 }),
+      async () => {
+        if (!refreshed) return Response.json({ data: { items: [listedTemplate] } });
+        if (refresh === "offline") throw new TypeError("Failed to fetch");
+        return Response.json({
+          data: {
+            items:
+              refresh === "empty"
+                ? []
+                : [
+                    {
+                      ...listedTemplate,
+                      id: "template-two",
+                      data: { title: "Another template", part_type: "page_template" },
+                    },
+                  ],
+          },
+        });
+      },
+    );
+    expect(document.querySelector('[role="combobox"]')?.textContent).toContain("Landing template");
+    await rerender(<NewPageDialog open={false} fetcher={fetcher} onOpenChange={() => undefined} />);
+    refreshed = true;
+    await rerender(<NewPageDialog open fetcher={fetcher} onOpenChange={() => undefined} />);
+    await settle();
+    const selector = document.querySelector('[role="combobox"]');
+    expect(selector !== null).toBe(true);
+    expect(selector?.textContent).toContain("Previously selected template");
+    await choose("Previously selected template");
+    await choose("Blank page");
+    await submit();
+    expect(posted.length).toBe(1);
+    expect(JSON.stringify(posted[0]?.data.layout)).toContain("New page title");
+  });
+}

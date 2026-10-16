@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Retained template choices (W-712).** New page keeps an unlisted selected template visible and changeable, and shows template names instead of internal ids.
+
 - **Template creation recovery (W-711).** An unavailable selected page template shows an error and keeps the dialog open; it no longer silently creates a blank page.
 
 - **Share-link copy feedback (W-710).** A delayed copy result cannot mark a different link as copied or replace the latest copy result.

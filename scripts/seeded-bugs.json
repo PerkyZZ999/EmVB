@@ -31952,6 +31952,88 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/page-template-create.e2e.ts", "--project=node"],
       "expect": "toContainText"
+    },
+    {
+      "id": "W-712/hidden-selector",
+      "requirement": "W-098",
+      "description": "An unlisted selected template becomes hidden or unreadable after the catalog changes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "templates.length > 0 || hasUnlistedTemplate",
+          "replace": "templates.length > 0"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/page-template-create.test.tsx",
+        "-t",
+        "W-712:.*(empty|offline)"
+      ],
+      "expect": "\\(fail\\).*W-712:.*(empty|offline)"
+    },
+    {
+      "id": "W-712/raw-label",
+      "requirement": "W-098",
+      "description": "An unlisted selected template becomes hidden or unreadable after the catalog changes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "          renderValue={(value: unknown) =>\n            !value || value === NONE\n              ? \"Blank page\"\n              : (templates.find((part) => part.id === value)?.title ??\n                \"Previously selected template\")\n          }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/page-template-create.test.tsx",
+        "-t",
+        "W-712:.*replaced"
+      ],
+      "expect": "\\(fail\\).*W-712:.*replaced"
+    },
+    {
+      "id": "W-712/missing-option",
+      "requirement": "W-098",
+      "description": "An unlisted selected template becomes hidden or unreadable after the catalog changes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "{hasUnlistedTemplate && (",
+          "replace": "{false && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/page-template-create.test.tsx",
+        "-t",
+        "W-712:.*replaced"
+      ],
+      "expect": "\\(fail\\).*W-712:.*replaced"
+    },
+    {
+      "id": "W-712/browser-hidden-selection",
+      "requirement": "W-098",
+      "description": "The dialog hides its selected template when the refreshed catalog is empty",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewPageDialog.tsx",
+          "search": "templates.length > 0 || hasUnlistedTemplate",
+          "replace": "templates.length > 0"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/page-template-create.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-712"
+      ],
+      "expect": "toContainText"
     }
   ]
 }
