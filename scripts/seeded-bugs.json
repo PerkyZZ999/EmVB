@@ -32698,6 +32698,90 @@
         "with reduce motion"
       ],
       "expect": "toHaveCSS"
+    },
+    {
+      "id": "W-723/loading-label",
+      "requirement": "W-723",
+      "description": "Loading states name the list during initial requests and retries",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "role=\"status\" aria-label={label}",
+          "replace": "role=\"status\" aria-label=\"Loading\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-retry.test.tsx",
+        "-t",
+        "W-723:"
+      ],
+      "expect": "\\(fail\\).*W-723:"
+    },
+    {
+      "id": "W-723/expose-placeholder-content",
+      "requirement": "W-723",
+      "description": "Loading placeholders are hidden from assistive technology",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "className=\"emvb-list-skeleton-rows\" aria-hidden=\"true\"",
+          "replace": "className=\"emvb-list-skeleton-rows\" aria-hidden=\"false\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-retry.test.tsx",
+        "-t",
+        "W-723:"
+      ],
+      "expect": "\\(fail\\).*W-723:"
+    },
+    {
+      "id": "W-723/browser-missing-skeletons",
+      "requirement": "W-723",
+      "description": "Pages and theme-part loading reserve a visible three-row preview",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "{[0, 1, 2].map((row) => (",
+          "replace": "{[].map((row) => ("
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/list-loading.e2e.ts",
+        "--project=node",
+        "-g",
+        "no-preference"
+      ],
+      "expect": "toHaveCount"
+    },
+    {
+      "id": "W-723/browser-reduced-shimmer",
+      "requirement": "W-723",
+      "description": "Reduced motion disables the skeleton pseudo-element shimmer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  .emvb-list-loading .skeleton-line::after { animation: none !important; }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/list-loading.e2e.ts",
+        "--project=node",
+        "-g",
+        "respects reduce motion"
+      ],
+      "expect": "toBe"
     }
   ]
 }

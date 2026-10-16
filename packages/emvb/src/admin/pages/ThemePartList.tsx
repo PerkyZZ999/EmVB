@@ -1,4 +1,4 @@
-import { Empty, Loader, Table } from "@cloudflare/kumo";
+import { Empty, Table } from "@cloudflare/kumo";
 import { SquaresFourIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { ThemePartType } from "../../core/index.ts";
@@ -10,6 +10,7 @@ import { matchesSearch } from "../search.ts";
 import {
   EditedTime,
   ListError,
+  ListLoading,
   ListSearch,
   NewButton,
   NoMatches,
@@ -149,7 +150,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
           <ListSearch value={query} onChange={setQuery} label="Search theme parts" />
         </>
       )}
-      {list.state === "loading" && <Loader />}
+      {list.state === "loading" && <ListLoading label="Loading theme parts…" />}
       {list.state === "error" && (
         <ListError title="Couldn't load theme parts" message={list.message} onRetry={list.retry} />
       )}

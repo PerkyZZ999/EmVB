@@ -1,4 +1,4 @@
-import { Empty, Loader, Table } from "@cloudflare/kumo";
+import { Empty, Table } from "@cloudflare/kumo";
 import { FileIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { Fetcher } from "../api.ts";
@@ -8,6 +8,7 @@ import { matchesSearch } from "../search.ts";
 import {
   EditedTime,
   ListError,
+  ListLoading,
   ListSearch,
   NewButton,
   NoMatches,
@@ -34,7 +35,7 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
         <h1 className="emvb-page-title">Pages VisualBuilder</h1>
         {list.state === "ready" && list.items.length > 0 && newPage}
       </div>
-      {list.state === "loading" && <Loader />}
+      {list.state === "loading" && <ListLoading label="Loading pages…" />}
       {list.state === "error" && (
         <ListError title="Couldn't load your pages" message={list.message} onRetry={list.retry} />
       )}

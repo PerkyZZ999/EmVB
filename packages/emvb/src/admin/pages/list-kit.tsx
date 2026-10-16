@@ -1,4 +1,4 @@
-import { Banner, Button, Input } from "@cloudflare/kumo";
+import { Banner, Button, Input, SkeletonLine } from "@cloudflare/kumo";
 import { PlusIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { Fetcher } from "../api.ts";
@@ -45,6 +45,26 @@ export function NewButton({ label, onClick }: { label: string; onClick: () => vo
     >
       {label}
     </Button>
+  );
+}
+
+export function ListLoading({ label }: { label: string }) {
+  return (
+    <div className="emvb-surface-card emvb-list-loading" role="status" aria-label={label}>
+      <p className="emvb-helper">{label}</p>
+      <div className="emvb-list-skeleton-rows" aria-hidden="true">
+        {[0, 1, 2].map((row) => (
+          <div className="emvb-list-skeleton-row" key={row}>
+            <div className="emvb-list-skeleton-title">
+              <SkeletonLine minWidth={80} maxWidth={80} blockHeight={20} />
+              <SkeletonLine minWidth={55} maxWidth={55} blockHeight={16} />
+            </div>
+            <SkeletonLine minWidth={65} maxWidth={65} />
+            <SkeletonLine minWidth={75} maxWidth={75} />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

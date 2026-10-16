@@ -73,6 +73,11 @@ export const UI_CSS = `
 
 /* List / setup pages */
 .emvb-pages { display: flex; flex-direction: column; gap: 16px; }
+.emvb-list-loading { min-height: 200px; }
+.emvb-list-skeleton-rows { display: grid; gap: 14px; }
+.emvb-list-skeleton-row { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); gap: 16px; align-items: center; }
+.emvb-list-skeleton-title { display: grid; gap: 4px; }
+.emvb-list-loading .skeleton-line { background: var(--color-kumo-tint); }
 .emvb-list-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .emvb-list-search { max-width: 320px; margin: 12px 0; }
 .emvb-page-title { margin: 0; font-size: 24px; line-height: 1.25; font-weight: 600; color: var(--text-color-kumo-default); }
@@ -264,6 +269,7 @@ export const UI_CSS = `
 
 @media (prefers-reduced-motion: reduce) {
   [data-emvb-editor] *, [data-emvb-page] * { transition: none !important; animation: none !important; }
+  .emvb-list-loading .skeleton-line::after { animation: none !important; }
 }
 @media (prefers-reduced-transparency: reduce) {
   .emvb-status,
