@@ -65,6 +65,14 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
   // W-486: a library picture opened from its card's Edit… (null when the editor is closed).
   const [editing, setEditing] = React.useState<MediaLibraryItem | null>(null);
   const [editorOpen, setEditorOpen] = React.useState(false);
+  const currentNode = React.useRef<LayoutNode | null>(node);
+
+  React.useEffect(() => {
+    currentNode.current = node;
+    return () => {
+      currentNode.current = null;
+    };
+  }, [node]);
 
   React.useEffect(() => {
     setUrlDraft(src);
@@ -116,6 +124,13 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
     setOpen(false);
   };
 
+  const resetTarget = () => {
+    const current = currentNode.current;
+    if (!current || current.id !== node.id) return null;
+    const latestProps = propsOf(current);
+    return latestProps.src === props.src && latestProps.edit === props.edit ? current : null;
+  };
+
   /** W-485: back to the untouched original; the edited copy is not deleted. */
   const resetToOriginal = async () => {
     if (!edit.success) return;
@@ -126,13 +141,16 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
       // W-492: a failed lookup is an error, not "no original"; a deleted original can't be reset
       // to (its recorded URL is gone too), so the element keeps the edited copy.
       const original = id ? await getMedia(fetcher, id) : null;
+      const target = resetTarget();
+      if (!target) return;
       if (id && !original) {
         setError(ORIGINAL_DELETED);
         return;
       }
-      const next = propsFromOriginal(props, original);
-      if (next) onChange(withProps(node, next));
+      const next = propsFromOriginal(propsOf(target), original);
+      if (next) onChange(withProps(target, next));
     } catch (caught) {
+      if (!resetTarget()) return;
       setError(
         `Couldn't reach the media library to find the original.${caught instanceof Error && caught.message ? ` ${caught.message}` : ""}`,
       );

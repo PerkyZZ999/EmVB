@@ -1,7 +1,9 @@
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { buildImageEdit } from "../packages/emvb/src/admin/image-editor/save.ts";
 import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
+import { uploadEmvbPixel } from "./support/media.ts";
 
 const PIXEL = path.join(process.cwd(), "e2e/fixtures/emvb-pixel.png");
 
@@ -38,6 +40,76 @@ async function uploadPixel(page: Page) {
   await overlay(page).locator("[data-emvb-media-upload]").setInputFiles(PIXEL);
   await expect(overlay(page).locator(".emvb-media-thumb")).toBeVisible({ timeout: 20_000 });
 }
+
+test("W-714: a delayed reset keeps a newer image URL in the canvas and saved draft", async ({
+  page,
+  request,
+}) => {
+  const media = await uploadEmvbPixel(request);
+  const record = buildImageEdit({
+    imageProps: { src: media.url, mediaId: media.id },
+    recipe: { version: 1, lights: { exposure: 0.2 } },
+    output: { format: "webp", quality: 0.85, maxSide: 2560, stripGps: true },
+  });
+  if (!record.ok) throw new Error(record.message);
+  const layout = imageLayout();
+  const image = layout.root.children[0];
+  if (!image) throw new Error("No image fixture");
+  const editedLayout = {
+    ...layout,
+    root: {
+      ...layout.root,
+      children: [
+        {
+          ...image,
+          props: {
+            ...image.props,
+            src: `${media.url}?copy=1`,
+            mediaId: media.id,
+            edit: record.edit,
+          },
+        },
+      ],
+    },
+  };
+  const id = await createPage(request, "Media reset", editedLayout, `media-reset-${unique()}`);
+  await openEditor(page, id);
+  await selectImage(page);
+  let started = false;
+  const release = Promise.withResolvers<void>();
+  const lookupPath = `/_emdash/api/media/${media.id}`;
+  await page.route(`**${lookupPath}`, async (route) => {
+    started = true;
+    await release.promise;
+    await route.fulfill({ json: { data: { item: media } } });
+  });
+  try {
+    await overlay(page).locator("[data-emvb-image-reset-original]").click();
+    await expect.poll(() => started).toBe(true);
+    const source = overlay(page).getByLabel("Or paste a URL");
+    const newUrl = `${media.url}?choice=new`;
+    await source.fill(newUrl);
+    await source.press("Enter");
+    const completed = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === lookupPath,
+    );
+    release.resolve();
+    await completed;
+    await expect(
+      overlay(page).getByRole("button", { name: "Choose from library", exact: true }),
+    ).toBeEnabled();
+    await expect(source).toHaveValue(newUrl);
+    await expect(canvas(page).locator("img.emvb-image")).toHaveAttribute("src", newUrl);
+    await saveDraft(page);
+    const saved = await storedLayout<{
+      root: { children: Array<{ props: { src: string; edit?: unknown } }> };
+    }>(request, id);
+    expect(saved.root.children[0]?.props.src).toBe(newUrl);
+    expect(saved.root.children[0]?.props.edit).toBeUndefined();
+  } finally {
+    release.resolve();
+  }
+});
 
 test("W-713: a failed media library load can be retried without changing the image", async ({
   page,

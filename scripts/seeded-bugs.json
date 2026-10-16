@@ -32108,6 +32108,92 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/media.e2e.ts", "--project=node", "-g", "W-713"],
       "expect": "toBeVisible"
+    },
+    {
+      "id": "W-714/changed-image",
+      "requirement": "W-485",
+      "description": "A delayed reset must respect the current image and preserve newer fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "return latestProps.src === props.src && latestProps.edit === props.edit ? current : null;",
+          "replace": "return current;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-reset.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-714:"
+    },
+    {
+      "id": "W-714/late-error",
+      "requirement": "W-485",
+      "description": "A delayed reset must respect the current image and preserve newer fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "      if (!resetTarget()) return;",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-reset.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-714:"
+    },
+    {
+      "id": "W-714/unmounted-reset",
+      "requirement": "W-485",
+      "description": "A delayed reset must respect the current image and preserve newer fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "      currentNode.current = null;",
+          "replace": "      currentNode.current = node;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-reset.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-714:"
+    },
+    {
+      "id": "W-714/stale-fields",
+      "requirement": "W-485",
+      "description": "A delayed reset must respect the current image and preserve newer fields",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "      const next = propsFromOriginal(propsOf(target), original);\n      if (next) onChange(withProps(target, next));",
+          "replace": "      const next = propsFromOriginal(props, original);\n      if (next) onChange(withProps(node, next));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-reset.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-714:"
+    },
+    {
+      "id": "W-714/browser-changed-image",
+      "requirement": "W-485",
+      "description": "Reset completion must leave a newer URL in the canvas and saved draft",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "return latestProps.src === props.src && latestProps.edit === props.edit ? current : null;",
+          "replace": "return current;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/media.e2e.ts", "--project=node", "-g", "W-714"],
+      "expect": "toHaveValue"
     }
   ]
 }
