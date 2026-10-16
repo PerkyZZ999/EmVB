@@ -171,3 +171,56 @@ test("after a conflict the page picks up the saved revision, so the next save wo
   expect(sent).toEqual(["r1", "r9"]);
   expect(host.textContent).not.toContain("Couldn't save");
 });
+
+test("UX-011: loading names what is loading, and a failed load offers Retry", async () => {
+  const api = fakeApi(50);
+  let fail = true;
+  let release: () => void = () => undefined;
+  const held = new Promise<void>((resolve) => (release = resolve));
+  const fetcher: Fetcher = async (path, init) => {
+    if (path.endsWith("/agents")) {
+      await held;
+      if (fail)
+        return Response.json({ error: { code: "BOOM", message: "Server down" } }, { status: 500 });
+    }
+    return api.fetcher(path, init);
+  };
+  const host = await mount(<AgentsPage fetcher={fetcher} />);
+  await settle();
+  const loading = host.querySelector('[role="status"].emvb-list-loading');
+  expect(loading?.getAttribute("aria-label") ?? null).toBe("Loading AI agent settings…");
+  await act(async () => release());
+  await settle();
+  await settle();
+  const alert = host.querySelector('[role="alert"]');
+  expect(alert?.textContent ?? "").toContain("Couldn't load the AI agent settings");
+  fail = false;
+  const retry = [...host.querySelectorAll("button")].find((b) => b.textContent === "Retry");
+  await act(async () => retry?.click());
+  await settle();
+  await settle();
+  expect(host.querySelector("[data-emvb-agents=ready]") ? "ready" : "not ready").toBe("ready");
+});
+
+test("UX-011: a settings change says Saving… and then Saved.", async () => {
+  let release: () => void = () => undefined;
+  const api = fakeApi(50);
+  const fetcher: Fetcher = async (path, init) => {
+    if (path.endsWith("/agents/save")) await new Promise<void>((resolve) => (release = resolve));
+    return api.fetcher(path, init);
+  };
+  const host = await mount(<AgentsPage fetcher={fetcher} />);
+  await settle();
+  await settle();
+  const status = () => host.querySelector("[data-emvb-agents-save]");
+  expect(status()?.getAttribute("role") ?? null).toBe("status");
+  expect(status()?.textContent ?? null).toBe("");
+  const master = host.querySelector<HTMLElement>('[role="switch"]');
+  await act(async () => master?.click());
+  await settle();
+  expect(status()?.textContent ?? null).toBe("Saving…");
+  await act(async () => release());
+  await settle();
+  await settle();
+  expect(status()?.textContent ?? null).toBe("Saved.");
+});

@@ -1,4 +1,4 @@
-import { Banner, ClipboardText, Empty, Loader, Switch, Table } from "@cloudflare/kumo";
+import { Banner, ClipboardText, Empty, Switch, Table } from "@cloudflare/kumo";
 import {
   ArrowSquareOutIcon,
   GlobeIcon,
@@ -18,6 +18,7 @@ import { loadAgents, saveAgentSettings, type AgentsState } from "../agents-api.t
 import { useRole } from "../access/role.ts";
 import { editorUrl } from "../editor/exit.ts";
 import type { AgentSettings } from "../../mcp/settings.ts";
+import { ListError, ListLoading } from "./list-kit.tsx";
 import { UI_CSS } from "../ui.ts";
 
 const ADMIN_ROLE = 50;
@@ -72,6 +73,8 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
   const [state, setState] = useState<AgentsState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   // A failed save keeps the page on screen; only a failed load replaces it (W-624).
   const [saveError, setSaveError] = useState<string | null>(null);
   const isAdmin = role.state === "ready" && role.role >= ADMIN_ROLE;
@@ -81,9 +84,17 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
     loadAgents(fetcher)
       .then(setState)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
-  }, [fetcher, isAdmin]);
+  }, [fetcher, isAdmin, attempt]);
 
-  if (role.state === "loading") return <Loader />;
+  // UX-011: loading and a failed load get the list pages' named loading card and Retry.
+  const shell = (body: ReactNode) => (
+    <div className="emvb-pages emvb-agents" data-emvb-agents={error ? "error" : "loading"}>
+      <style data-emvb-ui="">{UI_CSS}</style>
+      <h1 className="emvb-page-title">AI agents</h1>
+      {body}
+    </div>
+  );
+  if (role.state === "loading") return shell(<ListLoading label="Loading AI agent settings…" />);
   if (!isAdmin) {
     return (
       <section data-emvb-access="denied">
@@ -96,24 +107,28 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
     );
   }
   if (error) {
-    return (
-      <Banner
-        variant="error"
-        icon={<WarningCircleIcon aria-hidden="true" />}
+    return shell(
+      <ListError
         title="Couldn't load the AI agent settings"
-        description={error}
-      />
+        message={error}
+        onRetry={() => {
+          setError(null);
+          setAttempt((n) => n + 1);
+        }}
+      />,
     );
   }
-  if (!state) return <Loader />;
+  if (!state) return shell(<ListLoading label="Loading AI agent settings…" />);
 
   const change = async (patch: Partial<AgentSettings>) => {
     const settings = { ...state.settings, ...patch };
     setSaving(true);
+    setSaved(false);
     setSaveError(null);
     try {
       const revision = await saveAgentSettings(fetcher, settings, state.revision);
       setState({ ...state, settings, revision });
+      setSaved(true);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       setSaveError(message);
@@ -145,6 +160,9 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
           {settings.mcpEnabled ? "Agents on" : "Agents off"}
         </span>
       </header>
+      <p className="emvb-helper emvb-agents-save" role="status" data-emvb-agents-save="">
+        {saving ? "Saving…" : saved ? "Saved." : ""}
+      </p>
       {saveError && (
         <Banner
           variant="error"

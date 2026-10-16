@@ -34669,6 +34669,48 @@
         "UX-010"
       ],
       "expect": "\\(fail\\).*UX-010"
+    },
+    {
+      "id": "UX-011/retry-does-nothing",
+      "requirement": "UX-011",
+      "description": "Retry after a failed AI agents load never reloads",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "}, [fetcher, isAdmin, attempt]);",
+          "replace": "}, [fetcher, isAdmin]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "UX-011"],
+      "expect": "\\(fail\\).*UX-011"
+    },
+    {
+      "id": "UX-011/bare-loading",
+      "requirement": "UX-011",
+      "description": "Loading the AI agents settings shows nothing named",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "if (!state) return shell(<ListLoading label=\"Loading AI agent settings…\" />);",
+          "replace": "if (!state) return null;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "UX-011"],
+      "expect": "\\(fail\\).*UX-011"
+    },
+    {
+      "id": "UX-011/silent-save",
+      "requirement": "UX-011",
+      "description": "Changing an AI agents setting gives no Saving or Saved status",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "{saving ? \"Saving…\" : saved ? \"Saved.\" : \"\"}",
+          "replace": "{\"\"}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "UX-011"],
+      "expect": "\\(fail\\).*UX-011"
     }
   ]
 }

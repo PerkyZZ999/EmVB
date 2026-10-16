@@ -104,6 +104,7 @@ export const UI_CSS = `
 /* Live MCP test: the AI agents page reads as cards with clear headings, not bare browser defaults. */
 .emvb-agents { max-width: 960px; }
 .emvb-agents-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.emvb-agents-save { min-height: 16px; margin: 0; }
 .emvb-agents-header p { margin: 4px 0 0; font-size: 14px; line-height: 20px; color: var(--text-color-kumo-subtle); }
 .emvb-agents-status { display: inline-flex; flex: none; align-items: center; gap: 6px; margin-top: 6px; padding: 2px 10px; border: 1px solid var(--color-kumo-line); border-radius: 999px; background: var(--color-kumo-base); color: var(--text-color-kumo-default); font-size: 12px; line-height: 20px; font-weight: 600; }
 .emvb-agents-status > span { width: 8px; height: 8px; border-radius: 999px; background: var(--text-color-kumo-subtle); }
