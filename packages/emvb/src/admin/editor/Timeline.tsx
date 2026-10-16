@@ -218,8 +218,9 @@ export function TimelineDialog({
   }, [open]);
   const all = revisions.kind === "ready" ? revisions.versions : [];
   const hasAgents = all.some((v) => v.agent);
+  const visibleWho = hasAgents ? who : "all";
   const versions = all.filter((v) =>
-    who === "all" ? true : who === "agents" ? Boolean(v.agent) : !v.agent,
+    visibleWho === "all" ? true : visibleWho === "agents" ? Boolean(v.agent) : !v.agent,
   );
   const picked = versions.find((v) => v.id === pickedId) ?? versions[0];
   const changes = React.useMemo(
@@ -238,8 +239,10 @@ export function TimelineDialog({
           </p>
         )}
         {revisions.kind === "ready" && versions.length === 0 && (
-          <p className="emvb-helper" data-emvb-timeline-empty="">
-            No saved versions yet. Each save adds one.
+          <p className="emvb-helper" role="status" data-emvb-timeline-empty="">
+            {all.length === 0
+              ? "No saved versions yet. Each save adds one."
+              : "No saved versions match this filter. Choose All to see every version."}
           </p>
         )}
         {hasAgents && (
@@ -255,7 +258,7 @@ export function TimelineDialog({
                   key={key}
                   type="button"
                   className="emvb-timeline-who-option"
-                  aria-pressed={who === key}
+                  aria-pressed={visibleWho === key}
                   data-emvb-timeline-who={key}
                   onClick={() => {
                     setWho(key);

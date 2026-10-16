@@ -31644,6 +31644,66 @@
         "W-705: reopening"
       ],
       "expect": "\\(fail\\).*W-705: reopening"
+    },
+    {
+      "id": "W-706/metadata-filter",
+      "requirement": "W-706",
+      "description": "W-706: unavailable agent metadata",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "const visibleWho = hasAgents ? who : \"all\";",
+          "replace": "const visibleWho = who;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline-filter.test.tsx",
+        "-t",
+        "W-706: unavailable agent metadata"
+      ],
+      "expect": "\\(fail\\).*W-706: unavailable agent metadata"
+    },
+    {
+      "id": "W-706/filter-empty-message",
+      "requirement": "W-706",
+      "description": "W-706: an empty People filter",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "No saved versions match this filter. Choose All to see every version.",
+          "replace": "No saved versions yet. Each save adds one."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline-filter.test.tsx",
+        "-t",
+        "W-706: an empty People filter"
+      ],
+      "expect": "\\(fail\\).*W-706: an empty People filter"
+    },
+    {
+      "id": "W-706/filter-empty-status",
+      "requirement": "W-706",
+      "description": "W-706: an empty People filter",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "className=\"emvb-helper\" role=\"status\" data-emvb-timeline-empty",
+          "replace": "className=\"emvb-helper\" data-emvb-timeline-empty"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline-filter.test.tsx",
+        "-t",
+        "W-706: an empty People filter"
+      ],
+      "expect": "\\(fail\\).*W-706: an empty People filter"
     }
   ]
 }

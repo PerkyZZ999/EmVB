@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **W-706.** Timeline falls back to All when agent metadata is unavailable; empty filtered results explain how to recover and have status semantics.
+
 - **W-705.** Palette selection scrolling follows result-list attachment and changes, covering filtering at the same index and reopening.
 
 - **Add-panel search (W-704).** Search words match in any order, ignoring case and accents, across element names and groups and section recipe descriptions.
