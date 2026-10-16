@@ -34791,6 +34791,66 @@
         "UX-012"
       ],
       "expect": "\\(fail\\).*UX-012"
+    },
+    {
+      "id": "UX-013/clear-keeps-focus-away",
+      "requirement": "UX-013",
+      "description": "Clear search empties the Add search but leaves focus on the button",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "    searchRef.current?.focus();",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-search-recovery.test.tsx",
+        "-t",
+        "UX-013"
+      ],
+      "expect": "\\(fail\\).*UX-013"
+    },
+    {
+      "id": "UX-013/escape-leaks",
+      "requirement": "UX-013",
+      "description": "Escape in the Add search reaches the editor's shortcuts instead of clearing the search",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "            event.stopPropagation();\n            setQuery(\"\");",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-search-recovery.test.tsx",
+        "-t",
+        "UX-013"
+      ],
+      "expect": "\\(fail\\).*UX-013"
+    },
+    {
+      "id": "UX-013/no-clear-button",
+      "requirement": "UX-013",
+      "description": "An Add search with no results offers no way back but deleting the text",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "          <Button type=\"button\" variant=\"secondary\" className={BUTTON} onClick={clear}>",
+          "replace": "          <Button type=\"button\" variant=\"secondary\" className={BUTTON}>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-search-recovery.test.tsx",
+        "-t",
+        "UX-013"
+      ],
+      "expect": "\\(fail\\).*UX-013"
     }
   ]
 }

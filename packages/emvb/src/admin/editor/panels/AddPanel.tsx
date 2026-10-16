@@ -1,4 +1,4 @@
-import { Input } from "@cloudflare/kumo";
+import { Button, Input } from "@cloudflare/kumo";
 import * as React from "react";
 import { elementIcon } from "../element-chrome.ts";
 import {
@@ -8,7 +8,8 @@ import {
   type ElementType,
 } from "../../../core/index.ts";
 import { NEW_ELEMENT_MIME } from "../dnd/drop-target.ts";
-import { FIELD } from "../../ui.ts";
+import { BUTTON, FIELD } from "../../ui.ts";
+import { isCancelEscape } from "../ime.ts";
 import { matchesSearch } from "../../search.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
 
@@ -34,6 +35,11 @@ export function AddPanel({
   formsAvailable?: boolean;
 }) {
   const [query, setQuery] = React.useState(defaultQuery);
+  const searchRef = React.useRef<HTMLInputElement>(null);
+  const clear = () => {
+    setQuery("");
+    searchRef.current?.focus();
+  };
   const matched = ELEMENT_DESCRIPTORS.filter(
     (d) =>
       d.type !== "tab-panel" &&
@@ -48,14 +54,27 @@ export function AddPanel({
       <Input
         label="Search elements"
         className={FIELD}
+        ref={searchRef}
         value={query}
         onChange={(event) => setQuery(event.target.value)}
+        onKeyDown={(event) => {
+          // UX-013: Escape clears a search first, as Site styles searches do.
+          if (isCancelEscape(event) && query) {
+            event.stopPropagation();
+            setQuery("");
+          }
+        }}
         placeholder="Search elements"
       />
       {matched.length === 0 && recipes.length === 0 ? (
-        <p className="emvb-helper" role="status">
-          No elements match &quot;{query.trim()}&quot;.
-        </p>
+        <div className="emvb-add-nomatch" data-emvb-add-nomatch="">
+          <p className="emvb-helper" role="status">
+            No elements match &quot;{query.trim()}&quot;.
+          </p>
+          <Button type="button" variant="secondary" className={BUTTON} onClick={clear}>
+            Clear search
+          </Button>
+        </div>
       ) : (
         GROUPS.map((group) => {
           const tiles = matched.filter((d) => d.group === group.id);

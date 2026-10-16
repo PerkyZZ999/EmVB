@@ -276,6 +276,7 @@ export const EDITOR_CSS = `${UI_CSS}
 
 .emvb-left-panel { gap: 12px; }
 .emvb-add-group { display: flex; flex-direction: column; gap: 8px; }
+.emvb-add-nomatch { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .emvb-add-group-title { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--text-color-kumo-default); }
 .emvb-layer-caret { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: 0 0 16px; }
 .emvb-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
