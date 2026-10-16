@@ -31744,6 +31744,26 @@
         "W-707: colors search stays available"
       ],
       "expect": "\\(fail\\).*W-707: colors search stays available"
+    },
+    {
+      "id": "W-708/add-empty-status",
+      "requirement": "W-708",
+      "description": "W-708: Add announces",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "className=\"emvb-helper\" role=\"status\"",
+          "replace": "className=\"emvb-helper\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx",
+        "-t",
+        "W-708: Add announces"
+      ],
+      "expect": "\\(fail\\).*W-708: Add announces"
     }
   ]
 }

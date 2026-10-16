@@ -53,7 +53,9 @@ export function AddPanel({
         placeholder="Search elements"
       />
       {matched.length === 0 && recipes.length === 0 ? (
-        <p className="emvb-helper">No elements match &quot;{query.trim()}&quot;.</p>
+        <p className="emvb-helper" role="status">
+          No elements match &quot;{query.trim()}&quot;.
+        </p>
       ) : (
         GROUPS.map((group) => {
           const tiles = matched.filter((d) => d.group === group.id);

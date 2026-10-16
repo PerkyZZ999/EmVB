@@ -86,6 +86,28 @@ describe("Add panel (W-018)", () => {
     expect(tile?.textContent).toContain("Theme section");
   });
 
+  test("W-708: Add announces a search with no results and clears the status on recovery", async () => {
+    await mount(<AddPanel onAdd={() => undefined} />);
+    const input = document.querySelector<HTMLInputElement>("input");
+    if (!input) throw new Error("Add search is missing");
+    const search = async (value: string) =>
+      act(async () => {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+          input,
+          value,
+        );
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    expect(document.querySelector('[role="status"]') === null).toBe(true);
+    await search("zzzzmissing");
+    expect(document.querySelector('[role="status"]')?.textContent).toContain(
+      'No elements match "zzzzmissing".',
+    );
+    await search("");
+    expect(document.querySelector('[role="status"]') === null).toBe(true);
+    expect(document.querySelector('[data-emvb-add-tile="heading"]') !== null).toBe(true);
+  });
+
   test("Add search matches accented words in any order across the name and group (W-704)", async () => {
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="  séction   THEME layout " />);
     expect(document.querySelector('[data-emvb-add-tile="section"]') !== null).toBe(true);
