@@ -7,7 +7,8 @@ import {
   type ConditionsDoc,
 } from "../../../core/index.ts";
 import { conditionRuleLabel } from "../../theme-api.ts";
-import { BUTTON, FIELD } from "../../ui.ts";
+import { BUTTON } from "../../ui.ts";
+import { PanelSelect } from "./settings/PanelSelect.tsx";
 
 type Props = {
   conditions: ConditionsDoc | undefined;
@@ -149,36 +150,33 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
       <ul className="emvb-condition-list">
         {doc.rules.map((rule) => (
           <li key={rule.id} className="emvb-condition-row" data-emvb-condition={rule.id}>
-            <select
+            <PanelSelect
               className="emvb-condition-op"
-              aria-label="Include or exclude"
+              label="Include or exclude"
               value={rule.op}
-              onChange={(event) =>
-                update(rule.id, { op: event.target.value === "exclude" ? "exclude" : "include" })
+              options={[
+                { value: "include", label: "Include" },
+                { value: "exclude", label: "Exclude" },
+              ]}
+              onChange={(value) =>
+                update(rule.id, { op: value === "exclude" ? "exclude" : "include" })
               }
-            >
-              <option value="include">Include</option>
-              <option value="exclude">Exclude</option>
-            </select>
-            <select
-              className={`emvb-condition-where ${FIELD}`}
-              aria-label="Where"
+            />
+            <PanelSelect
+              className="emvb-condition-where"
+              label="Where"
               value={menuValue(rule)}
-              onChange={(event) => {
-                if (event.target.value === CURRENT_RULE) return;
-                const next = ruleFromOption(event.target.value, rule.op, rule.id);
-                update(rule.id, next);
+              options={[
+                ...(menuValue(rule) === CURRENT_RULE
+                  ? [{ value: CURRENT_RULE, label: conditionRuleLabel(rule) }]
+                  : []),
+                ...GROUP_OPTIONS.map((option) => ({ value: option.value, label: option.label })),
+              ]}
+              onChange={(value) => {
+                if (value === CURRENT_RULE) return;
+                update(rule.id, ruleFromOption(value, rule.op, rule.id));
               }}
-            >
-              {menuValue(rule) === CURRENT_RULE && (
-                <option value={CURRENT_RULE}>{conditionRuleLabel(rule)}</option>
-              )}
-              {GROUP_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            />
             <Button
               type="button"
               variant="ghost"

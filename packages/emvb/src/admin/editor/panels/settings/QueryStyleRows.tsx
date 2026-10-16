@@ -4,6 +4,9 @@ import { FIELD } from "../../../ui.ts";
 import { savableNode } from "./DraftTextField.tsx";
 import { formatStyleValue, parseStyleValue, QUERY_STYLE_KEYS } from "./query-style.ts";
 import { isCommitEnter } from "../../ime.ts";
+import { PanelSelect } from "./PanelSelect.tsx";
+
+const CHOOSE = "choose";
 
 type QueryStyle = NonNullable<LayoutNode["query"]>["style"];
 
@@ -134,22 +137,18 @@ export function QueryStyleRows({
         <QueryStyleRow key={key} node={node} styleKey={key} onChange={onChange} />
       ))}
       <div className="emvb-query-add" data-emvb-query-add="">
-        <label className="emvb-field-label" htmlFor={keyId}>
+        <span className="emvb-field-label" id={`${keyId}-label`}>
           Property
-        </label>
-        <select
-          id={keyId}
-          className={FIELD}
-          value={newKey}
-          onChange={(event) => setNewKey(event.target.value)}
-        >
-          <option value="">Choose…</option>
-          {free.map((key) => (
-            <option key={key} value={key}>
-              {key}
-            </option>
-          ))}
-        </select>
+        </span>
+        <PanelSelect
+          labelledBy={`${keyId}-label`}
+          value={newKey || CHOOSE}
+          options={[
+            { value: CHOOSE, label: "Choose…" },
+            ...free.map((key) => ({ value: key, label: key })),
+          ]}
+          onChange={(value) => setNewKey(value === CHOOSE ? "" : value)}
+        />
         <label className="emvb-field-label" htmlFor={valueId}>
           Value
         </label>

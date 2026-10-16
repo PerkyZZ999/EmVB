@@ -7,6 +7,7 @@ import {
   type Layout,
 } from "../../core/index.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
+import { BUTTON } from "../ui.ts";
 
 /** Score bands for the badge colour (W-317). */
 const scoreBand = (score: number) => (score >= 90 ? "good" : score >= 70 ? "fair" : "poor");
@@ -62,63 +63,71 @@ export function A11yDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6 emvb-a11y" data-emvb-a11y="">
-        <Dialog.Title data-emvb-dialog="a11y">
-          Accessibility · <span data-band={scoreBand(report.score)}>{report.score}</span>/100
-        </Dialog.Title>
-        {report.issues.length === 0 ? (
-          <p className="emvb-helper" data-emvb-a11y-clean="">
-            No issues found. Automated checks catch some problems, not all: try the page with a
-            keyboard and a screen reader too.
-          </p>
-        ) : (
-          <ul className="emvb-a11y-issues">
-            {report.issues.map((issue) => (
-              <li key={issue.id} data-emvb-a11y-issue={issue.id} data-severity={issue.severity}>
-                <span className="emvb-a11y-what">
-                  <button
-                    type="button"
-                    className="emvb-link-button"
-                    onClick={() => {
-                      onSelect(issue.nodeId);
-                      onOpenChange(false);
-                    }}
-                  >
-                    {name(issue.nodeId)}
-                  </button>
-                  : {issue.message}
-                </span>
-                {issue.fix && layout && (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    data-emvb-a11y-fix={issue.id}
-                    onClick={() =>
-                      onApply(applyA11yFix(layout, issue), `Fixed: ${issue.fixLabel ?? "issue"}`)
-                    }
-                  >
-                    {issue.fixLabel ?? "Fix"}
-                  </Button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="emvb-a11y-actions">
-          {fixable.length > 1 && layout && (
-            <Button
-              variant="primary"
-              data-emvb-a11y-fix-all=""
-              onClick={() =>
-                onApply(
-                  applyAllA11yFixes(layout, fixable),
-                  `Fixed ${fixable.length} accessibility issues`,
-                )
-              }
-            >
-              Fix all {fixable.length}
-            </Button>
+        <div className="emvb-dialog" data-emvb-dialog="a11y">
+          <Dialog.Title>
+            Accessibility · <span data-band={scoreBand(report.score)}>{report.score}</span>/100
+          </Dialog.Title>
+          {report.issues.length === 0 ? (
+            <p className="emvb-helper" data-emvb-a11y-clean="">
+              No issues found. Automated checks catch some problems, not all: try the page with a
+              keyboard and a screen reader too.
+            </p>
+          ) : (
+            <ul className="emvb-a11y-issues">
+              {report.issues.map((issue) => (
+                <li key={issue.id} data-emvb-a11y-issue={issue.id} data-severity={issue.severity}>
+                  <span className="emvb-a11y-what">
+                    <button
+                      type="button"
+                      className="emvb-link-button"
+                      onClick={() => {
+                        onSelect(issue.nodeId);
+                        onOpenChange(false);
+                      }}
+                    >
+                      {name(issue.nodeId)}
+                    </button>
+                    : {issue.message}
+                  </span>
+                  {issue.fix && layout && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      data-emvb-a11y-fix={issue.id}
+                      onClick={() =>
+                        onApply(applyA11yFix(layout, issue), `Fixed: ${issue.fixLabel ?? "issue"}`)
+                      }
+                    >
+                      {issue.fixLabel ?? "Fix"}
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
           )}
-          <Dialog.Close render={(props) => <Button {...props}>Close</Button>} />
+          <div className="emvb-a11y-actions">
+            {fixable.length > 1 && layout && (
+              <Button
+                variant="primary"
+                data-emvb-a11y-fix-all=""
+                onClick={() =>
+                  onApply(
+                    applyAllA11yFixes(layout, fixable),
+                    `Fixed ${fixable.length} accessibility issues`,
+                  )
+                }
+              >
+                Fix all {fixable.length}
+              </Button>
+            )}
+            <Dialog.Close
+              render={(props) => (
+                <Button {...props} variant="secondary" className={BUTTON}>
+                  Close
+                </Button>
+              )}
+            />
+          </div>
         </div>
       </Dialog>
     </Dialog.Root>

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { pickOption } from "../../../../../test/dom/select.ts";
 import type { LayoutNode } from "../../../../core/index.ts";
 import { LiveDataContext } from "../../live-data.tsx";
 import { BindingsEditor } from "./BindingsEditor.tsx";
@@ -21,12 +22,8 @@ async function editor(node: LayoutNode, params: Record<string, string> = {}) {
   return { host, latest: () => latest };
 }
 
-const change = async (el: HTMLSelectElement, value: string) => {
-  await act(async () => {
-    el.value = value;
-    el.dispatchEvent(new Event("change", { bubbles: true }));
-  });
-};
+const source = (host: HTMLElement, field: string) =>
+  host.querySelector(`[data-emvb-bind-source="${field}"]`);
 
 describe("Dynamic data panel (W-307)", () => {
   test("lists the element's bindable fields and binds one to a site setting", async () => {
@@ -35,9 +32,7 @@ describe("Dynamic data panel (W-307)", () => {
       r.getAttribute("data-emvb-bind-field"),
     );
     expect(rows).toEqual(["text", "href"]);
-    const select = host.querySelector<HTMLSelectElement>("#emvb-bind-keys-head0001-text");
-    if (!select) throw new Error("no select");
-    await change(select, "site");
+    await pickOption(source(host, "text"), "site");
     expect(latest().bind).toEqual({ text: { source: "site", key: "title" } });
   });
 
@@ -52,6 +47,10 @@ describe("Dynamic data panel (W-307)", () => {
     const { host } = await editor(both);
     const labels = [...host.querySelectorAll("label.emvb-bind-label")].map((l) => l.textContent);
     expect(labels).toEqual(["Text source", "Link source"]);
+    const named = [...host.querySelectorAll('[role="combobox"]')].map(
+      (box) => document.getElementById(box.getAttribute("aria-labelledby") ?? "")?.textContent,
+    );
+    expect(named).toEqual(["Text source", "Link source"]);
     const keys = [...host.querySelectorAll("input.emvb-native-input[aria-label]")].map((i) =>
       i.getAttribute("aria-label"),
     );
@@ -105,9 +104,7 @@ describe("Dynamic data panel (W-307)", () => {
   test("Typed value removes the binding; elements without bindable fields show nothing", async () => {
     const bound = { ...heading, bind: { text: { source: "site" as const, key: "title" } } };
     const { host, latest } = await editor(bound);
-    const select = host.querySelector<HTMLSelectElement>("#emvb-bind-keys-head0001-text");
-    if (!select) throw new Error("no select");
-    await change(select, "static");
+    await pickOption(source(host, "text"), "static");
     expect("bind" in latest()).toBe(false);
     const spacer: LayoutNode = {
       id: "spac0001",

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import type { LayoutNode } from "../../../../core/index.ts";
 import { cleanup, mount, rerender } from "../../../../../test/dom/mount.ts";
+import { pickOption } from "../../../../../test/dom/select.ts";
 import { AudienceEditor, parseCountries, readTimeZone } from "./AudienceEditor.tsx";
 import { VariantEditor } from "./VariantEditor.tsx";
 
@@ -16,14 +17,11 @@ const q = (selector: string): Element => {
 };
 
 function change(el: Element, value: string | boolean) {
-  const input = el as HTMLInputElement | HTMLSelectElement;
-  if (typeof value === "boolean") (input as HTMLInputElement).click();
+  const input = el as HTMLInputElement;
+  if (typeof value === "boolean") input.click();
   else {
-    const proto = Object.getPrototypeOf(input) as object;
-    Object.getOwnPropertyDescriptor(proto, "value")?.set?.call(input, value);
-    input.dispatchEvent(
-      new Event(input.tagName === "SELECT" ? "change" : "input", { bubbles: true }),
-    );
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(input, value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
   }
 }
 
@@ -38,13 +36,13 @@ describe("Visitors editor (W-313)", () => {
       node = next;
     };
     await mount(<AudienceEditor node={node} isRoot={false} onChange={onChange} />);
-    await act(async () => change(q("[data-emvb-audience-mode]"), "only"));
+    await pickOption(q("[data-emvb-audience-mode]"), "only");
     expect(node.audience).toEqual({});
     await rerender(<AudienceEditor node={node} isRoot={false} onChange={onChange} />);
     await act(async () => change(q('[data-emvb-audience-device="mobile"]'), true));
     expect(node.audience).toEqual({ devices: ["mobile"] });
     await rerender(<AudienceEditor node={node} isRoot={false} onChange={onChange} />);
-    await act(async () => change(q("[data-emvb-audience-mode]"), "everyone"));
+    await pickOption(q("[data-emvb-audience-mode]"), "everyone");
     expect("audience" in node).toBe(false);
   });
 

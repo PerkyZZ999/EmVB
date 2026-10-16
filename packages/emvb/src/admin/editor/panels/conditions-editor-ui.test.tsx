@@ -8,6 +8,7 @@ import {
 } from "../../../core/index.ts";
 import { cleanup, mount } from "../../../../test/dom/mount.ts";
 import { ConditionsEditor } from "./ConditionsEditor.tsx";
+import { pickOption } from "../../../../test/dom/select.ts";
 
 afterEach(cleanup);
 
@@ -27,16 +28,7 @@ async function editor(conditions: ConditionsDoc | undefined) {
     <ConditionsEditor conditions={conditions} onChange={(doc) => sent.push(doc)} />,
   );
   const rows = () => [...host.querySelectorAll<HTMLElement>(".emvb-condition-row")];
-  const choose = async (select: HTMLSelectElement | null | undefined, value: string) => {
-    if (!select) throw new Error("no select");
-    await act(async () => {
-      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value")?.set?.call(
-        select,
-        value,
-      );
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-  };
+  const choose = (select: Element | null | undefined, value: string) => pickOption(select, value);
   const press = async (name: string, within: ParentNode = host) => {
     const button = [...within.querySelectorAll<HTMLButtonElement>("button")].find(
       (b) => b.textContent?.trim() === name || b.getAttribute("aria-label") === name,
@@ -68,8 +60,8 @@ describe("display conditions editor (W-091)", () => {
     expect(view.host.querySelector('[role="status"]')).toBeNull();
     const row = view.rows()[0];
     expect(view.rows()).toHaveLength(1);
-    expect(row?.querySelector<HTMLSelectElement>(".emvb-condition-op")?.value).toBe("include");
-    expect(row?.querySelector<HTMLSelectElement>(".emvb-condition-where")?.value).toBe(
+    expect(row?.querySelector<HTMLElement>(".emvb-condition-op")?.dataset["value"]).toBe("include");
+    expect(row?.querySelector<HTMLElement>(".emvb-condition-where")?.dataset["value"]).toBe(
       "general:entire_site",
     );
   });
@@ -184,8 +176,8 @@ describe("rules the menu can't build show as themselves (W-694)", () => {
     const host = await mount(
       <ConditionsEditor conditions={doc(rule)} onChange={(d) => sent.push(d)} />,
     );
-    const select = host.querySelector<HTMLSelectElement>(".emvb-condition-where");
-    return { text: select?.selectedOptions[0]?.textContent, sent };
+    const select = host.querySelector('.emvb-condition-where [role="combobox"]');
+    return { text: select?.textContent, sent };
   };
 
   test("the Archive part's default reads All archives, not Entire site", async () => {

@@ -12439,7 +12439,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
-          "search": "update(rule.id, { op: event.target.value === \"exclude\" ? \"exclude\" : \"include\" })",
+          "search": "update(rule.id, { op: value === \"exclude\" ? \"exclude\" : \"include\" })",
           "replace": "update(rule.id, { op: \"include\" })"
         }
       ],
@@ -12457,8 +12457,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
-          "search": "ruleFromOption(event.target.value, rule.op, rule.id)",
-          "replace": "ruleFromOption(event.target.value, \"include\", rule.id)"
+          "search": "ruleFromOption(value, rule.op, rule.id)",
+          "replace": "ruleFromOption(value, \"include\", rule.id)"
         }
       ],
       "command": [
@@ -32656,6 +32656,480 @@
       "expect": "\\(fail\\).*W-721:"
     },
     {
+      "id": "UX-001/uppercase-group-title",
+      "requirement": "UX-001",
+      "description": "Add panel group titles go back to 11 px tracked uppercase, against DESIGN.md typography",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-add-group-title { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; color: var(--text-color-kumo-default); }",
+          "replace": ".emvb-add-group-title { margin: 0; font-size: 11px; line-height: 14px; font-weight: 600; color: var(--text-color-kumo-subtle); text-transform: uppercase; letter-spacing: 0.05em; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-001"
+      ],
+      "expect": "\\(fail\\).*UX-001"
+    },
+    {
+      "id": "UX-001/quiet-section-header",
+      "requirement": "UX-001",
+      "description": "Style section headers fall back to 12 px in the quieter strong colour, weaker than the labels under them",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "color: var(--text-color-kumo-default); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }",
+          "replace": "color: var(--text-color-kumo-strong, var(--text-color-kumo-default)); font: inherit; font-size: 12px; font-weight: 600; letter-spacing: 0.01em; cursor: pointer; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-001"
+      ],
+      "expect": "\\(fail\\).*UX-001"
+    },
+    {
+      "id": "UX-001/uppercase-palette-group",
+      "requirement": "UX-001",
+      "description": "Command palette group headings go back to tracked uppercase",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-palette-group { padding: 8px 10px 2px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-color-kumo-subtle); }",
+          "replace": ".emvb-palette-group { padding: 8px 10px 2px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-color-kumo-subtle); }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "UX-001"
+      ],
+      "expect": "\\(fail\\).*UX-001"
+    },
+    {
+      "id": "UX-001/small-bind-title",
+      "requirement": "UX-001",
+      "description": "Dynamic data, Visitors and A/B test sub-titles shrink back below the section labels",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-bind-title { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; }",
+          "replace": ".emvb-bind-title { margin: 0; font-size: 12px; font-weight: 600; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "UX-001"
+      ],
+      "expect": "\\(fail\\).*UX-001"
+    },
+    {
+      "id": "UX-002/run-on-hint",
+      "requirement": "UX-002",
+      "description": "Palette search results run the group into the detail (\"Insert Recipe\", \"Find text Text\") instead of tagging the group",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/CommandPalette.tsx",
+          "search": "{query.trim() ? <span className=\"emvb-palette-kind\">{item.group}</span> : null}",
+          "replace": "{query.trim() ? item.group : null}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/palette-hint.test.tsx",
+        "-t",
+        "UX-002"
+      ],
+      "expect": "\\(fail\\).*UX-002"
+    },
+    {
+      "id": "UX-002/tag-without-search",
+      "requirement": "UX-002",
+      "description": "Palette rows repeat their group as a tag even under the group's own heading",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/CommandPalette.tsx",
+          "search": "{query.trim() ? <span className=\"emvb-palette-kind\">{item.group}</span> : null}",
+          "replace": "{<span className=\"emvb-palette-kind\">{item.group}</span>}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/palette-hint.test.tsx",
+        "-t",
+        "UX-002"
+      ],
+      "expect": "\\(fail\\).*UX-002"
+    },
+    {
+      "id": "UX-003/wide-spacing-bars",
+      "requirement": "UX-003",
+      "description": "Spacing scale bars grow to 120 px again and squeeze the token names",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TokenScales.tsx",
+          "search": "Math.min(t.value.value, 64)",
+          "replace": "Math.min(t.value.value, 120)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/token-scales.test.tsx",
+        "-t",
+        "UX-003"
+      ],
+      "expect": "\\(fail\\).*UX-003"
+    },
+    {
+      "id": "UX-003/per-row-columns",
+      "requirement": "UX-003",
+      "description": "Scale preview rows size their own columns, so the name column collapses and wraps",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": "grid-template-columns: subgrid;",
+          "replace": "grid-template-columns: 48px 1fr auto;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "UX-003"
+      ],
+      "expect": "\\(fail\\).*UX-003"
+    },
+    {
+      "id": "UX-003/large-empty-title",
+      "requirement": "UX-003",
+      "description": "The Classes empty state keeps Kumo's 24 px title inside the 288 px drawer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-site-empty-card h2 { font-size: 14px; line-height: 18px; }",
+          "replace": ".emvb-site-empty-card h2 { font-size: 24px; line-height: 32px; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-003"
+      ],
+      "expect": "\\(fail\\).*UX-003"
+    },
+    {
+      "id": "UX-003/stretched-link-button",
+      "requirement": "UX-003",
+      "description": "Link buttons in grid sections stretch to full width and centre, like Create variant B did",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "cursor: pointer; justify-self: start; }",
+          "replace": "cursor: pointer; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-003"
+      ],
+      "expect": "\\(fail\\).*UX-003"
+    },
+    {
+      "id": "UX-004/kumo-label-size",
+      "requirement": "UX-004",
+      "description": "Kumo field labels in the element panel go back to Kumo's 14 px medium, larger than the section headers",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-panel-right .font-medium.select-none:not(button) { font-size: 13px;",
+          "replace": ".emvb-panel-right .font-medium.select-none:not(button) { font-size: 14px;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-004"
+      ],
+      "expect": "\\(fail\\).*UX-004"
+    },
+    {
+      "id": "UX-004/set-label-not-bold",
+      "requirement": "UX-004",
+      "description": "A set property's label looks the same as an unset one",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-style-row[data-set=\"true\"] .emvb-choice-label { color: var(--text-color-kumo-default); font-weight: 600; }",
+          "replace": ".emvb-style-row[data-set=\"true\"] .emvb-choice-label { color: var(--text-color-kumo-default); }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-004"
+      ],
+      "expect": "\\(fail\\).*UX-004"
+    },
+    {
+      "id": "UX-005/unlabelled-panel-select",
+      "requirement": "UX-005",
+      "description": "A panel select ignores its row's visible label, so the combobox has no name",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/PanelSelect.tsx",
+          "search": "{...(labelledBy ? { \"aria-labelledby\": labelledBy } : { \"aria-label\": label })}",
+          "replace": "aria-label={label}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/panel-select.test.tsx",
+        "-t",
+        "UX-005"
+      ],
+      "expect": "\\(fail\\).*UX-005"
+    },
+    {
+      "id": "UX-005/native-select-back",
+      "requirement": "UX-005",
+      "description": "A native select comes back into an editor panel next to the Kumo ones",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "            <PanelSelect\n              className=\"emvb-condition-op\"",
+          "replace": "            <select aria-label=\"Op\" />\n            <PanelSelect\n              className=\"emvb-condition-op\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/panel-select.test.tsx",
+        "-t",
+        "UX-005"
+      ],
+      "expect": "\\(fail\\).*UX-005"
+    },
+    {
+      "id": "UX-005/bind-source-unnamed",
+      "requirement": "UX-005",
+      "description": "Dynamic data source selects lose their Text source / Link source names",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BindingsEditor.tsx",
+          "search": "              labelledBy={`${selectId}-label`}",
+          "replace": "              label=\"Source\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/bindings-editor.test.tsx",
+        "-t",
+        "never share a name"
+      ],
+      "expect": "\\(fail\\).*never share a name"
+    },
+    {
+      "id": "UX-005/select-content-width",
+      "requirement": "UX-005",
+      "description": "Panel selects shrink to Kumo's content width and overflow narrow columns (Ratio ran into Fluid)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-panel-select .emvb-field { width: 100%; min-width: 0; }",
+          "replace": ".emvb-panel-select > .emvb-field { width: 100%; }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-005"],
+      "expect": "\\(fail\\).*UX-005"
+    },
+    {
+      "id": "UX-005/lone-select-half-width",
+      "requirement": "UX-005",
+      "description": "A select alone in a bind row stays in the first half of the row",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-bind-row > .emvb-panel-select:last-child { grid-column: 1 / -1; }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "UX-005"
+      ],
+      "expect": "\\(fail\\).*UX-005"
+    },
+    {
+      "id": "UX-006/small-overlay-actions",
+      "requirement": "UX-006",
+      "description": "Overlay quick actions shrink back to 22 px, under WCAG 2.5.8's 24 px target",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "justify-content: center; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; pointer-events: auto; }",
+          "replace": "justify-content: center; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; cursor: pointer; pointer-events: auto; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-006"
+      ],
+      "expect": "\\(fail\\).*UX-006"
+    },
+    {
+      "id": "UX-007/shortcuts-close-left",
+      "requirement": "UX-007",
+      "description": "The shortcuts dialog's Close sits loose at the left again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ShortcutsDialog.tsx",
+          "search": "<div className=\"emvb-dialog-actions\">",
+          "replace": "<div>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialog-actions.test.tsx",
+        "-t",
+        "UX-007"
+      ],
+      "expect": "\\(fail\\).*UX-007"
+    },
+    {
+      "id": "UX-007/shortcuts-note-loud",
+      "requirement": "UX-007",
+      "description": "The shortcuts footnote renders as body text, larger than the table above it",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ShortcutsDialog.tsx",
+          "search": "<p className=\"emvb-helper\">",
+          "replace": "<p>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialog-actions.test.tsx",
+        "-t",
+        "UX-007"
+      ],
+      "expect": "\\(fail\\).*UX-007"
+    },
+    {
+      "id": "UX-007/perf-close-left",
+      "requirement": "UX-007",
+      "description": "The page weight dialog's Close loses its actions row",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/PerfMeter.tsx",
+          "search": "<div className=\"emvb-dialog-actions\">",
+          "replace": "<div>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialog-actions.test.tsx",
+        "-t",
+        "UX-007"
+      ],
+      "expect": "\\(fail\\).*UX-007"
+    },
+    {
+      "id": "UX-008/selected-row-hover-tint",
+      "requirement": "UX-008",
+      "description": "Hovering the selected Layers row paints it tint under white text (about 1.1:1)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-layer-select[aria-current=\"true\"], .emvb-layer-row:hover .emvb-layer-select[aria-current=\"true\"] {",
+          "replace": ".emvb-layer-select[aria-current=\"true\"] {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-008"
+      ],
+      "expect": "\\(fail\\).*UX-008"
+    },
+    {
+      "id": "UX-009/shortcuts-bare-body",
+      "requirement": "UX-009",
+      "description": "The shortcuts dialog drops the shared dialog body, so its title is 16 px regular and nothing is spaced",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ShortcutsDialog.tsx",
+          "search": "<div className=\"emvb-dialog\" data-emvb-dialog=\"shortcuts\">",
+          "replace": "<div data-emvb-dialog=\"shortcuts\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialog-actions.test.tsx",
+        "-t",
+        "UX-009"
+      ],
+      "expect": "\\(fail\\).*UX-009"
+    },
+    {
+      "id": "UX-009/perf-bare-body",
+      "requirement": "UX-009",
+      "description": "The page weight dialog drops the shared dialog body",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/PerfMeter.tsx",
+          "search": "<div className=\"emvb-dialog\" data-emvb-dialog=\"perf\">",
+          "replace": "<div data-emvb-dialog=\"perf\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialog-actions.test.tsx",
+        "-t",
+        "UX-009"
+      ],
+      "expect": "\\(fail\\).*UX-009"
+    },
+    {
       "id": "W-722/no-panel-fade",
       "requirement": "W-722",
       "description": "Editor panel swaps provide the short functional opacity fade without moving the canvas",
@@ -33748,7 +34222,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/Timeline.tsx",
-          "search": "            role=\"status\"\n            aria-label=\"Version timeline status\"\n            aria-live=\"polite\"",
+          "search": "              role=\"status\"\n              aria-label=\"Version timeline status\"\n              aria-live=\"polite\"",
           "replace": ""
         }
       ],
@@ -33768,7 +34242,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/Timeline.tsx",
-          "search": "            role=\"status\"\n            aria-label=\"Version timeline status\"\n            aria-live=\"polite\"",
+          "search": "              role=\"status\"\n              aria-label=\"Version timeline status\"\n              aria-live=\"polite\"",
           "replace": ""
         }
       ],

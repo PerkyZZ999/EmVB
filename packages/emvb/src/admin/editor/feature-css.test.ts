@@ -6,3 +6,41 @@ describe("feature CSS colors (W-380)", () => {
     expect(/#[0-9a-fA-F]{3,8}\b/.test(FEATURE_CSS)).toBe(false);
   });
 });
+
+describe("feature CSS typography (UX-001)", () => {
+  const rule = (selector: string) => {
+    const start = FEATURE_CSS.indexOf(`${selector} {`);
+    return start < 0 ? "" : FEATURE_CSS.slice(start, FEATURE_CSS.indexOf("}", start));
+  };
+
+  test("palette group headings are sentence case without tracking", () => {
+    const css = rule(".emvb-palette-group");
+    expect(css).toMatch(/font-size: 12px;/);
+    expect(/text-transform|letter-spacing/.test(css)).toBe(false);
+  });
+
+  test("panel sub-titles match the 13 px semibold section labels", () => {
+    expect(rule(".emvb-bind-title")).toMatch(/font-size: 13px;/);
+  });
+});
+
+describe("Scales preview layout (UX-003)", () => {
+  const rule = (selector: string) => {
+    const start = FEATURE_CSS.indexOf(`${selector} {`);
+    return start < 0 ? "" : FEATURE_CSS.slice(start, FEATURE_CSS.indexOf("}", start));
+  };
+
+  test("rows share one column grid, so names line up and never collapse", () => {
+    expect(rule(".emvb-tokens-preview")).toMatch(
+      /grid-template-columns: max-content minmax\(0, 1fr\) auto;/,
+    );
+    expect(rule(".emvb-tokens-preview > li")).toMatch(/grid-template-columns: subgrid;/);
+    expect(rule(".emvb-tokens-preview > li > span:nth-child(2)")).toMatch(/white-space: nowrap;/);
+  });
+});
+
+test("UX-005: a select alone in its row, like Visitors' Show to, spans the row", () => {
+  expect(FEATURE_CSS).toMatch(
+    /\.emvb-bind-row > \.emvb-panel-select:last-child \{ grid-column: 1 \/ -1; \}/,
+  );
+});

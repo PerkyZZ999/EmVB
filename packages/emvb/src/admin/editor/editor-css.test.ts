@@ -57,3 +57,54 @@ test("unselected device and state options use the default text colour, for 4.5:1
     ),
   ).toMatch(/color: var\(--text-color-kumo-default\);/);
 });
+
+test("panel group labels and section headers are 13 px sentence case in the default colour (UX-001)", () => {
+  for (const selector of [".emvb-add-group-title", ".emvb-section-header"]) {
+    const css = rule(selector);
+    expect(css).toMatch(/font-size: 13px;/);
+    expect(css).toMatch(/font-weight: 600;/);
+    expect(css).toMatch(/color: var\(--text-color-kumo-default\);/);
+    expect(/text-transform|letter-spacing/.test(css)).toBe(false);
+  }
+});
+
+test("the Classes empty state stays on the editor's 12–16 px scale inside the drawer (UX-003)", () => {
+  expect(rule(".emvb-site-empty-card h2")).toMatch(/font-size: 14px;/);
+  expect(rule(".emvb-site-empty-card > div")).toMatch(/border: 0;/);
+});
+
+test("a link button sits at the start of a grid instead of stretching and centring (UX-003)", () => {
+  expect(rule(".emvb-link-button")).toMatch(/justify-self: start;/);
+});
+
+test("property labels are 13 px, quieter while unset and semibold once set (UX-004)", () => {
+  expect(rule(".emvb-panel-right .font-medium.select-none:not(button)")).toMatch(
+    /font-size: 13px;[^}]*font-weight: 400;/,
+  );
+  for (const selector of [".emvb-box-label", ".emvb-var-field-label"])
+    expect(rule(selector)).toMatch(/font-size: 13px;[^}]*font-weight: 400;/);
+  const unset = EDITOR_CSS.match(/\.emvb-style-row \.font-medium[^{]*\{([^}]*)\}/)?.[1] ?? "";
+  expect(unset).toMatch(/color: var\(--text-color-kumo-strong/);
+  const set =
+    EDITOR_CSS.match(/\.emvb-style-row\[data-set="true"\] \.font-medium[^{]*\{([^}]*)\}/)?.[1] ??
+    "";
+  expect(set).toMatch(/color: var\(--text-color-kumo-default\);/);
+  expect(set).toMatch(/font-weight: 600;/);
+  for (const label of [".emvb-box-label", ".emvb-var-field-label", ".emvb-choice-label"])
+    expect(EDITOR_CSS.includes(`.emvb-style-row[data-set="true"] ${label}`)).toBe(true);
+});
+
+test("the overlay quick actions meet the 24 px minimum target (WCAG 2.5.8, UX-006)", () => {
+  const action = rule(".emvb-overlay-action");
+  expect(action).toMatch(/width: 24px;/);
+  expect(action).toMatch(/height: 24px;/);
+  expect(rule(".emvb-overlay-label")).toMatch(/height: 26px;/);
+});
+
+test("hovering the selected Layers row keeps its primary fill, so its white text stays readable (UX-008)", () => {
+  expect(
+    rule(
+      '.emvb-layer-select[aria-current="true"], .emvb-layer-row:hover .emvb-layer-select[aria-current="true"]',
+    ),
+  ).toMatch(/background: var\(--color-kumo-brand\);/);
+});

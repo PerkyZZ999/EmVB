@@ -156,8 +156,9 @@ export function CommandPalette({
                 >
                   <span className="emvb-palette-label">{item.label}</span>
                   <span className="emvb-palette-hint">
-                    {query.trim() ? item.group : ""}
-                    {item.hint ? ` ${item.hint}` : ""}
+                    {query.trim() ? <span className="emvb-palette-kind">{item.group}</span> : null}
+                    {query.trim() && item.hint ? " " : null}
+                    {item.hint ? <span className="emvb-palette-detail">{item.hint}</span> : null}
                   </span>
                 </li>
               </React.Fragment>

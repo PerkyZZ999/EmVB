@@ -5,6 +5,7 @@ import {
   type Audience,
   type LayoutNode,
 } from "../../../../core/index.ts";
+import { PanelSelect } from "./PanelSelect.tsx";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const COUNTRY = /^[A-Z]{2}$/;
@@ -109,23 +110,25 @@ export function AudienceEditor({
       <h3 className="emvb-bind-title" id={`${id}-title`}>
         Visitors
       </h3>
-      <label className="emvb-bind-row">
-        <span className="emvb-bind-label">Show to</span>
-        <select
-          className="emvb-native-select"
+      <div className="emvb-bind-row">
+        <span className="emvb-bind-label" id={`${id}-show`}>
+          Show to
+        </span>
+        <PanelSelect
+          labelledBy={`${id}-show`}
           value={mode}
-          data-emvb-audience-mode=""
-          onChange={(event) => {
-            const value = event.currentTarget.value as Mode;
+          data={{ "data-emvb-audience-mode": "" }}
+          options={[
+            { value: "everyone", label: "Everyone" },
+            { value: "only", label: "Only visitors who match" },
+            { value: "except", label: "Everyone except visitors who match" },
+          ]}
+          onChange={(value) => {
             if (value === "everyone") set(undefined);
             else set({ ...base, hide: value === "except" });
           }}
-        >
-          <option value="everyone">Everyone</option>
-          <option value="only">Only visitors who match</option>
-          <option value="except">Everyone except visitors who match</option>
-        </select>
-      </label>
+        />
+      </div>
       {audience && (
         <>
           <label className="emvb-bind-row">
@@ -163,23 +166,25 @@ export function AudienceEditor({
               </label>
             ))}
           </fieldset>
-          <label className="emvb-bind-row">
-            <span className="emvb-bind-label">Visit</span>
-            <select
-              className="emvb-native-select"
+          <div className="emvb-bind-row">
+            <span className="emvb-bind-label" id={`${id}-visit`}>
+              Visit
+            </span>
+            <PanelSelect
+              labelledBy={`${id}-visit`}
               value={base.visitor ?? "any"}
-              data-emvb-audience-visitor=""
-              onChange={(event) => {
-                const value = event.currentTarget.value;
+              data={{ "data-emvb-audience-visitor": "" }}
+              options={[
+                { value: "any", label: "New or returning" },
+                { value: "new", label: "First visit" },
+                { value: "returning", label: "Returning visitor" },
+              ]}
+              onChange={(value) => {
                 const { visitor: _v, ...rest } = base;
                 set(value === "new" || value === "returning" ? { ...rest, visitor: value } : rest);
               }}
-            >
-              <option value="any">New or returning</option>
-              <option value="new">First visit</option>
-              <option value="returning">Returning visitor</option>
-            </select>
-          </label>
+            />
+          </div>
           <label className="emvb-bind-row">
             <span className="emvb-bind-label">Segments (from your site)</span>
             <input

@@ -4,18 +4,16 @@ import type { LayoutNode } from "../../../../core/index.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 import { ContainerQueryFields } from "./AdvancedFields.tsx";
 import { formatStyleValue, parseStyleValue } from "./query-style.ts";
+import { pickOption } from "../../../../../test/dom/select.ts";
 
 afterEach(cleanup);
 
 const box = (query?: LayoutNode["query"]) =>
   ({ id: "box00001", type: "container", props: {}, children: [], query }) as LayoutNode;
 
-function type(el: HTMLInputElement | HTMLSelectElement, value: string) {
-  const proto = el instanceof HTMLSelectElement ? HTMLSelectElement : HTMLInputElement;
-  Object.getOwnPropertyDescriptor(proto.prototype, "value")?.set?.call(el, value);
-  el.dispatchEvent(
-    new Event(el instanceof HTMLSelectElement ? "change" : "input", { bubbles: true }),
-  );
+function type(el: HTMLInputElement, value: string) {
+  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(el, value);
+  el.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
 async function panel(query: LayoutNode["query"]) {
@@ -75,11 +73,9 @@ describe("container-query styles are edited field by field (W-398)", () => {
   test("Add style stores a new property", async () => {
     const { host, sent } = await panel({ min: 600, style: {} });
     const add = host.querySelector("[data-emvb-query-add]") as HTMLElement;
+    await pickOption(add, "gap");
     await act(async () => {
-      type(add.querySelector("select") as HTMLSelectElement, "gap");
-    });
-    await act(async () => {
-      type(add.querySelector("input") as HTMLInputElement, "2rem");
+      type(add.querySelector("input[placeholder]") as HTMLInputElement, "2rem");
     });
     await act(async () => {
       [...add.querySelectorAll("button")].find((b) => b.textContent === "Add style")?.click();

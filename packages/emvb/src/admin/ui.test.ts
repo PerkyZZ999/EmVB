@@ -24,3 +24,10 @@ test("links in helper text are underlined in the default text colour, not primar
 test("W-209: list titles and slugs wrap anywhere so the other columns stay visible", () => {
   expect(UI_CSS).toMatch(/\.emvb-row-title, \.emvb-row-slug \{ overflow-wrap: anywhere; \}/);
 });
+
+test("UX-005: a panel select fills its column instead of Kumo's content width", () => {
+  expect(rule(".emvb-panel-select")).toMatch(/min-width: 0;/);
+  const field = rule(".emvb-panel-select .emvb-field");
+  expect(field).toMatch(/width: 100%;/);
+  expect(field).toMatch(/min-width: 0;/);
+});

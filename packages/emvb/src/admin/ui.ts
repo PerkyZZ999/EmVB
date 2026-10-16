@@ -251,22 +251,8 @@ export const UI_CSS = `
   background: var(--emvb-glass-strong, var(--color-kumo-base));
   box-shadow: var(--emvb-elevation-s);
 }
-.emvb-condition-op,
-.emvb-condition-where {
-  height: var(--emvb-control, 28px);
-  border-radius: 6px;
-  border: 1px solid var(--color-kumo-hairline);
-  background: var(--color-kumo-control, var(--color-kumo-base));
-  color: var(--text-color-kumo-default);
-  font: inherit;
-  font-size: 13px;
-  padding: 0 8px;
-}
-.emvb-condition-op:focus-visible,
-.emvb-condition-where:focus-visible {
-  outline: 2px solid var(--color-kumo-brand);
-  outline-offset: 2px;
-}
+.emvb-panel-select { display: block; min-width: 0; }
+.emvb-panel-select .emvb-field { width: 100%; min-width: 0; }
 .emvb-condition-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 
 @media (prefers-reduced-motion: reduce) {

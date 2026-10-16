@@ -15,6 +15,7 @@ import {
 } from "../../../../core/index.ts";
 import { siteOrigin, useLiveData } from "../../live-data.tsx";
 import { isCommitEnter } from "../../ime.ts";
+import { PanelSelect } from "./PanelSelect.tsx";
 
 const KEY = /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/;
 const STATIC = "static";
@@ -73,29 +74,25 @@ export function BindingsEditor({
         return (
           <div className="emvb-bind-row" key={field.key} data-emvb-bind-field={field.key}>
             {/* "Text source", not "Text": the field's own input is already named "Text". */}
-            <label className="emvb-bind-label" htmlFor={selectId}>
+            <label className="emvb-bind-label" id={`${selectId}-label`}>
               {`${field.label} source`}
             </label>
-            <select
-              id={selectId}
-              className="emvb-native-select"
+            <PanelSelect
+              labelledBy={`${selectId}-label`}
               value={source ?? STATIC}
-              onChange={(event) => {
-                const next = event.target.value;
+              data={{ "data-emvb-bind-source": field.key }}
+              options={[
+                { value: STATIC, label: "Typed value" },
+                ...BIND_SOURCES.map((s) => ({ value: s, label: BIND_SOURCE_LABELS[s] })),
+              ]}
+              onChange={(next) => {
                 if (next === STATIC) onChange(withBinding(node, field.key, undefined));
                 else {
                   const src = next as BindSource;
                   onChange(withBinding(node, field.key, { source: src, key: firstKey(src) }));
                 }
               }}
-            >
-              <option value={STATIC}>Typed value</option>
-              {BIND_SOURCES.map((s) => (
-                <option key={s} value={s}>
-                  {BIND_SOURCE_LABELS[s]}
-                </option>
-              ))}
-            </select>
+            />
             {binding ? (
               <BindKeyInput
                 fieldLabel={field.label}

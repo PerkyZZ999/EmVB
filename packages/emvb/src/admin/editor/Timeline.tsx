@@ -16,6 +16,7 @@ import {
 import { ApiError, requestJson, type Fetcher } from "../api.ts";
 import { PLUGIN_ID } from "../../constants.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
+import { BUTTON } from "../ui.ts";
 
 type RevisionItem = {
   id: string;
@@ -231,179 +232,189 @@ export function TimelineDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="xl" className="p-6 emvb-timeline" data-emvb-timeline="">
-        <Dialog.Title data-emvb-dialog="timeline">Version timeline</Dialog.Title>
-        {revisions.kind === "loading" && (
-          <p
-            className="emvb-helper"
-            role="status"
-            aria-label="Version timeline status"
-            aria-live="polite"
-          >
-            Loading versions…
-          </p>
-        )}
-        {revisions.kind === "error" && (
-          <p className="emvb-helper" role="alert">
-            {revisions.message}
-          </p>
-        )}
-        {revisions.kind === "ready" && versions.length === 0 && (
-          <p className="emvb-helper" role="status" data-emvb-timeline-empty="">
-            {all.length === 0
-              ? "No saved versions yet. Each save adds one."
-              : "No saved versions match this filter. Choose All to see every version."}
-          </p>
-        )}
-        {hasAgents && (
-          <div className="emvb-timeline-who" role="group" aria-label="Show versions by">
-            {(Object.keys(WHO_LABELS) as Who[]).map((key) => {
-              const WhoIcon = WHO_ICONS[key];
-              const count =
-                key === "all"
-                  ? all.length
-                  : all.filter((v) => (key === "agents" ? v.agent : !v.agent)).length;
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  className="emvb-timeline-who-option"
-                  aria-pressed={visibleWho === key}
-                  data-emvb-timeline-who={key}
-                  onClick={() => {
-                    setWho(key);
-                    setPickedId(null);
-                    setError(null);
-                  }}
-                >
-                  <WhoIcon aria-hidden="true" size={14} />
-                  {WHO_LABELS[key]}
-                  <span className="emvb-timeline-count" aria-label={`, ${count}`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-        {picked && current && (
-          <div className="emvb-timeline-body">
-            <ol className="emvb-timeline-list" aria-label="Saved versions">
-              {versions.map((v) => (
-                <li key={v.id}>
+        <div className="emvb-dialog" data-emvb-dialog="timeline">
+          <Dialog.Title>Version timeline</Dialog.Title>
+          {revisions.kind === "loading" && (
+            <p
+              className="emvb-helper"
+              role="status"
+              aria-label="Version timeline status"
+              aria-live="polite"
+            >
+              Loading versions…
+            </p>
+          )}
+          {revisions.kind === "error" && (
+            <p className="emvb-helper" role="alert">
+              {revisions.message}
+            </p>
+          )}
+          {revisions.kind === "ready" && versions.length === 0 && (
+            <p className="emvb-helper" role="status" data-emvb-timeline-empty="">
+              {all.length === 0
+                ? "No saved versions yet. Each save adds one."
+                : "No saved versions match this filter. Choose All to see every version."}
+            </p>
+          )}
+          {hasAgents && (
+            <div className="emvb-timeline-who" role="group" aria-label="Show versions by">
+              {(Object.keys(WHO_LABELS) as Who[]).map((key) => {
+                const WhoIcon = WHO_ICONS[key];
+                const count =
+                  key === "all"
+                    ? all.length
+                    : all.filter((v) => (key === "agents" ? v.agent : !v.agent)).length;
+                return (
                   <button
+                    key={key}
                     type="button"
-                    className="emvb-timeline-version"
-                    aria-current={v.id === picked.id ? "true" : undefined}
-                    data-emvb-version={v.id}
+                    className="emvb-timeline-who-option"
+                    aria-pressed={visibleWho === key}
+                    data-emvb-timeline-who={key}
                     onClick={() => {
-                      setPickedId(v.id);
-                      // W-561: a refusal is about the version it came from.
+                      setWho(key);
+                      setPickedId(null);
                       setError(null);
                     }}
                   >
-                    <span className="emvb-timeline-when">
-                      <span>{whenParts(v.at).day}</span>
-                      <span className="emvb-timeline-time">
-                        {whenParts(v.at).time}
-                        {!v.layout && " (no layout)"}
-                      </span>
+                    <WhoIcon aria-hidden="true" size={14} />
+                    {WHO_LABELS[key]}
+                    <span className="emvb-timeline-count" aria-label={`, ${count}`}>
+                      {count}
                     </span>
-                    {v.agent && (
-                      <span
-                        className="emvb-timeline-agent"
-                        data-emvb-agent-version=""
-                        title={v.agent.summary}
-                      >
-                        <RobotIcon aria-hidden="true" size={12} />
-                        Agent
-                      </span>
-                    )}
                   </button>
-                </li>
-              ))}
-            </ol>
-            <div className="emvb-timeline-main">
-              {picked.layout ? (
-                <>
-                  <div className="emvb-timeline-frames">
-                    <figure>
-                      <figcaption>{when(picked.at)}</figcaption>
-                      <Snapshot
-                        layout={picked.layout}
-                        design={design}
-                        ids={{ removed: ids.removed, changed: ids.changed }}
-                        title="Saved version"
-                        canvasStyles={canvasStyles}
-                      />
-                    </figure>
-                    <figure>
-                      <figcaption>Now</figcaption>
-                      <Snapshot
-                        layout={current}
-                        design={design}
-                        ids={{ added: ids.added, changed: ids.changed }}
-                        title="Current page"
-                        canvasStyles={canvasStyles}
-                      />
-                    </figure>
-                  </div>
-                  <ul className="emvb-timeline-changes" data-emvb-timeline-changes="">
-                    {changes.map((change) => (
-                      <li key={`${change.kind}:${change.id}`} data-kind={change.kind}>
-                        <span className="emvb-timeline-kind">{KIND_LABELS[change.kind]}</span>{" "}
-                        {change.label || ELEMENT_NAMES[change.type] || change.type}
-                        {change.kind === "changed" &&
-                          ` · ${change.edits} element${change.edits === 1 ? "" : "s"}`}
-                        {(change.kind === "changed" || change.kind === "removed") && (
-                          <button
-                            type="button"
-                            className="emvb-link-button"
-                            data-emvb-restore-section={change.id}
-                            onClick={() => {
-                              if (!picked.layout) return;
-                              const result = restoreSection(current, picked.layout, change.id);
-                              if (!result.ok) {
-                                setError(result.reason);
-                                return;
-                              }
-                              setError(null);
-                              onApply(result.layout, "Section restored");
-                            }}
-                          >
-                            Restore this section
-                          </button>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                  {error && (
-                    <p className="emvb-helper" role="alert">
-                      {error}
-                    </p>
-                  )}
-                  <p className="emvb-helper">
-                    Restoring changes the page here; undo takes it back, and nothing is saved until
-                    you save.
-                  </p>
-                  <Button
-                    variant="secondary"
-                    data-emvb-restore-version=""
-                    onClick={() => {
-                      if (!picked.layout) return;
-                      onApply(picked.layout, "Version restored");
-                      onOpenChange(false);
-                    }}
-                  >
-                    Restore this whole version
-                  </Button>
-                </>
-              ) : (
-                <p className="emvb-helper">This version has no page layout to compare.</p>
-              )}
+                );
+              })}
             </div>
+          )}
+          {picked && current && (
+            <div className="emvb-timeline-body">
+              <ol className="emvb-timeline-list" aria-label="Saved versions">
+                {versions.map((v) => (
+                  <li key={v.id}>
+                    <button
+                      type="button"
+                      className="emvb-timeline-version"
+                      aria-current={v.id === picked.id ? "true" : undefined}
+                      data-emvb-version={v.id}
+                      onClick={() => {
+                        setPickedId(v.id);
+                        // W-561: a refusal is about the version it came from.
+                        setError(null);
+                      }}
+                    >
+                      <span className="emvb-timeline-when">
+                        <span>{whenParts(v.at).day}</span>
+                        <span className="emvb-timeline-time">
+                          {whenParts(v.at).time}
+                          {!v.layout && " (no layout)"}
+                        </span>
+                      </span>
+                      {v.agent && (
+                        <span
+                          className="emvb-timeline-agent"
+                          data-emvb-agent-version=""
+                          title={v.agent.summary}
+                        >
+                          <RobotIcon aria-hidden="true" size={12} />
+                          Agent
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ol>
+              <div className="emvb-timeline-main">
+                {picked.layout ? (
+                  <>
+                    <div className="emvb-timeline-frames">
+                      <figure>
+                        <figcaption>{when(picked.at)}</figcaption>
+                        <Snapshot
+                          layout={picked.layout}
+                          design={design}
+                          ids={{ removed: ids.removed, changed: ids.changed }}
+                          title="Saved version"
+                          canvasStyles={canvasStyles}
+                        />
+                      </figure>
+                      <figure>
+                        <figcaption>Now</figcaption>
+                        <Snapshot
+                          layout={current}
+                          design={design}
+                          ids={{ added: ids.added, changed: ids.changed }}
+                          title="Current page"
+                          canvasStyles={canvasStyles}
+                        />
+                      </figure>
+                    </div>
+                    <ul className="emvb-timeline-changes" data-emvb-timeline-changes="">
+                      {changes.map((change) => (
+                        <li key={`${change.kind}:${change.id}`} data-kind={change.kind}>
+                          <span className="emvb-timeline-kind">{KIND_LABELS[change.kind]}</span>{" "}
+                          {change.label || ELEMENT_NAMES[change.type] || change.type}
+                          {change.kind === "changed" &&
+                            ` · ${change.edits} element${change.edits === 1 ? "" : "s"}`}
+                          {(change.kind === "changed" || change.kind === "removed") && (
+                            <button
+                              type="button"
+                              className="emvb-link-button"
+                              data-emvb-restore-section={change.id}
+                              onClick={() => {
+                                if (!picked.layout) return;
+                                const result = restoreSection(current, picked.layout, change.id);
+                                if (!result.ok) {
+                                  setError(result.reason);
+                                  return;
+                                }
+                                setError(null);
+                                onApply(result.layout, "Section restored");
+                              }}
+                            >
+                              Restore this section
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    {error && (
+                      <p className="emvb-helper" role="alert">
+                        {error}
+                      </p>
+                    )}
+                    <p className="emvb-helper">
+                      Restoring changes the page here; undo takes it back, and nothing is saved
+                      until you save.
+                    </p>
+                    <Button
+                      variant="secondary"
+                      data-emvb-restore-version=""
+                      onClick={() => {
+                        if (!picked.layout) return;
+                        onApply(picked.layout, "Version restored");
+                        onOpenChange(false);
+                      }}
+                    >
+                      Restore this whole version
+                    </Button>
+                  </>
+                ) : (
+                  <p className="emvb-helper">This version has no page layout to compare.</p>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="emvb-dialog-actions">
+            <Dialog.Close
+              render={(props) => (
+                <Button {...props} variant="secondary" className={BUTTON}>
+                  Close
+                </Button>
+              )}
+            />
           </div>
-        )}
-        <Dialog.Close render={(props) => <Button {...props}>Close</Button>} />
+        </div>
       </Dialog>
     </Dialog.Root>
   );

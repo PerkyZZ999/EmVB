@@ -8,6 +8,7 @@ import {
   type DesignSystem,
 } from "../../../core/index.ts";
 import { fieldNumber } from "./settings/number-input.ts";
+import { PanelSelect } from "./settings/PanelSelect.tsx";
 
 // W-436: the fields are labelled "(px)", so "18px" is 18.
 const num = (text: string): number | undefined => {
@@ -28,6 +29,7 @@ export function TokenScales({
   /** Resolves false when the save failed (the drawer shows why). */
   onSave: (design: DesignSystem) => Promise<boolean | void>;
 }) {
+  const id = React.useId();
   const [kind, setKind] = React.useState<"type" | "space">("type");
   const [base, setBase] = React.useState("18");
   const [minBase, setMinBase] = React.useState("16");
@@ -36,8 +38,7 @@ export function TokenScales({
   const [done, setDone] = React.useState<string | null>(null);
   // W-609, W-626: an "added" message is about the scale as it was; any change clears it.
   const edit =
-    (setter: (value: string) => void) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (setter: (value: string) => void) => (event: React.ChangeEvent<HTMLInputElement>) => {
       setter(event.currentTarget.value);
       setDone(null);
     };
@@ -69,21 +70,24 @@ export function TokenScales({
         screens with CSS clamp(), no breakpoints.
       </p>
       <div className="emvb-tokens-grid">
-        <label>
-          <span className="emvb-bind-label">Scale</span>
-          <select
-            className="emvb-native-select"
+        <div className="emvb-tokens-field">
+          <span className="emvb-bind-label" id={`${id}-kind`}>
+            Scale
+          </span>
+          <PanelSelect
+            labelledBy={`${id}-kind`}
             value={kind}
-            data-emvb-tokens-kind=""
-            onChange={(event) => {
-              setKind(event.currentTarget.value === "space" ? "space" : "type");
+            data={{ "data-emvb-tokens-kind": "" }}
+            options={[
+              { value: "type", label: "Type scale" },
+              { value: "space", label: "Spacing scale" },
+            ]}
+            onChange={(value) => {
+              setKind(value === "space" ? "space" : "type");
               setDone(null);
             }}
-          >
-            <option value="type">Type scale</option>
-            <option value="space">Spacing scale</option>
-          </select>
-        </label>
+          />
+        </div>
         <label>
           <span className="emvb-bind-label">{kind === "type" ? "Body size" : "Base gap"} (px)</span>
           <input
@@ -95,21 +99,21 @@ export function TokenScales({
           />
         </label>
         {kind === "type" && (
-          <label>
-            <span className="emvb-bind-label">Ratio</span>
-            <select
-              className="emvb-native-select"
+          <div className="emvb-tokens-field">
+            <span className="emvb-bind-label" id={`${id}-ratio`}>
+              Ratio
+            </span>
+            <PanelSelect
+              labelledBy={`${id}-ratio`}
               value={ratio}
-              data-emvb-tokens-ratio=""
-              onChange={edit(setRatio)}
-            >
-              {SCALE_RATIOS.map((r) => (
-                <option key={r.value} value={String(r.value)}>
-                  {r.label}
-                </option>
-              ))}
-            </select>
-          </label>
+              data={{ "data-emvb-tokens-ratio": "" }}
+              options={SCALE_RATIOS.map((r) => ({ value: String(r.value), label: r.label }))}
+              onChange={(value) => {
+                setRatio(value);
+                setDone(null);
+              }}
+            />
+          </div>
         )}
         <label className="emvb-tokens-fluid">
           <input
@@ -155,7 +159,7 @@ export function TokenScales({
                 style={
                   kind === "type"
                     ? { fontSize: `${Math.min(t.value.value, 40)}px` }
-                    : { width: `${Math.min(t.value.value, 120)}px` }
+                    : { width: `${Math.min(t.value.value, 64)}px` }
                 }
               >
                 {kind === "type" ? "Aa" : ""}

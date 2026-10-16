@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { emptyDesign, type DesignSystem } from "../../../core/index.ts";
+import { emptyDesign, SCALE_RATIOS, type DesignSystem } from "../../../core/index.ts";
 import { cleanup, mount } from "../../../../test/dom/mount.ts";
+import { pickOption } from "../../../../test/dom/select.ts";
 import { TokenScales } from "./TokenScales.tsx";
 
 afterEach(cleanup);
@@ -74,11 +75,7 @@ describe("Scales in Site styles (W-316)", () => {
         onSave={async () => undefined}
       />,
     );
-    await act(async () => {
-      const kind = document.querySelector("[data-emvb-tokens-kind]") as HTMLSelectElement;
-      kind.value = "space";
-      kind.dispatchEvent(new Event("change", { bubbles: true }));
-    });
+    await pickOption(document.querySelector("[data-emvb-tokens-kind]"), "space");
     await apply();
     expect(status()).toBe("5 added in Spacing. 4 didn't fit: Spacing holds up to 100.");
   });
@@ -103,12 +100,8 @@ describe("Scales in Site styles (W-316)", () => {
 
   test("switching the scale, ratio or Fluid clears the last Added message (W-626)", async () => {
     await mount(<TokenScales design={emptyDesign()} onSave={async () => undefined} />);
-    const pick = async (selector: string, value: string) =>
-      act(async () => {
-        const field = document.querySelector(selector) as HTMLSelectElement;
-        field.value = value;
-        field.dispatchEvent(new Event("change", { bubbles: true }));
-      });
+    const pick = (selector: string, value: string) =>
+      pickOption(document.querySelector(selector), value);
     await apply();
     expect(status()).toBe("8 added in Font sizes.");
     await pick("[data-emvb-tokens-kind]", "space");
@@ -116,8 +109,7 @@ describe("Scales in Site styles (W-316)", () => {
     await pick("[data-emvb-tokens-kind]", "type");
     await apply();
     expect(status()).not.toBeNull();
-    const ratio = document.querySelector("[data-emvb-tokens-ratio]") as HTMLSelectElement;
-    await pick("[data-emvb-tokens-ratio]", ratio.options[0]?.value ?? "");
+    await pick("[data-emvb-tokens-ratio]", String(SCALE_RATIOS[0].value));
     expect(status()).toBeNull();
     await apply();
     expect(status()).not.toBeNull();
@@ -126,4 +118,14 @@ describe("Scales in Site styles (W-316)", () => {
     );
     expect(status()).toBeNull();
   });
+});
+
+test("UX-003: spacing scale bars stop at 64 px so the names beside them stay readable", async () => {
+  await mount(<TokenScales design={emptyDesign()} onSave={async () => undefined} />);
+  await pickOption(document.querySelector("[data-emvb-tokens-kind]"), "space");
+  const widths = [
+    ...document.querySelectorAll<HTMLElement>("[data-emvb-tokens-preview] .emvb-tokens-sample"),
+  ].map((bar) => Number.parseFloat(bar.style.width));
+  expect(widths.length > 0).toBe(true);
+  expect(Math.max(...widths)).toBe(64);
 });

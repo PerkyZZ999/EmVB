@@ -3,7 +3,7 @@
  * from the core chrome in editor-css.ts. Kumo variables only.
  */
 export const FEATURE_CSS = `
-.emvb-native-select, .emvb-native-input {
+.emvb-native-input {
   height: var(--emvb-control, 28px);
   min-width: 0;
   padding: 0 8px;
@@ -13,14 +13,15 @@ export const FEATURE_CSS = `
   color: var(--text-color-kumo-default);
   font: inherit;
 }
-.emvb-native-select:focus-visible, .emvb-native-input:focus-visible {
+.emvb-native-input:focus-visible {
   outline: 2px solid var(--color-kumo-brand);
   outline-offset: 1px;
 }
 .emvb-bind { display: grid; gap: 8px; padding-top: 8px; border-top: 1px solid var(--color-kumo-hairline); }
-.emvb-bind-title { margin: 0; font-size: 12px; font-weight: 600; }
+.emvb-bind-title { margin: 0; font-size: 13px; line-height: 18px; font-weight: 600; }
 .emvb-bind-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; align-items: center; }
 .emvb-bind-row > .emvb-bind-label { grid-column: 1 / -1; font-size: 12px; color: var(--text-color-kumo-subtle); }
+.emvb-bind-row > .emvb-panel-select:last-child { grid-column: 1 / -1; }
 .emvb-bind-live { grid-column: 1 / -1; margin: 0; font-size: 12px; color: var(--text-color-kumo-default); overflow-wrap: anywhere; }
 .emvb-bind-live > b { font-weight: 600; }
 .emvb-bind-outside { grid-column: 1 / -1; display: grid; gap: 4px; }
@@ -46,12 +47,15 @@ export const FEATURE_CSS = `
 .emvb-palette { padding: 0; overflow: hidden; }
 .emvb-palette-input { width: 100%; height: 44px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--color-kumo-line); background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 15px; outline: none; }
 .emvb-palette-list { max-height: min(60vh, 420px); overflow-y: auto; margin: 0; padding: 4px; list-style: none; }
-.emvb-palette-group { padding: 8px 10px 2px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-color-kumo-subtle); }
+.emvb-palette-group { padding: 8px 10px 2px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-color-kumo-subtle); }
 .emvb-palette-item { display: flex; justify-content: space-between; gap: 12px; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; }
 .emvb-palette-item[aria-selected="true"] { background: var(--color-kumo-tint); }
-.emvb-palette-hint { color: var(--text-color-kumo-subtle); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%; }
+.emvb-palette-hint { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 50%; color: var(--text-color-kumo-subtle); font-size: 12px; white-space: nowrap; }
+.emvb-palette-kind { flex: none; padding: 0 6px; border-radius: 4px; line-height: 18px; background: var(--color-kumo-base); box-shadow: inset 0 0 0 1px var(--color-kumo-line); color: var(--text-color-kumo-default); }
+.emvb-palette-detail { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .emvb-palette-empty { padding: 12px; color: var(--text-color-kumo-subtle); font-size: 13px; }
-.emvb-palette-tips { margin: 0; padding: 6px 12px; border-top: 1px solid var(--color-kumo-line); font-size: 11px; color: var(--text-color-kumo-subtle); }
+.emvb-palette-tips { margin: 0; padding: 6px 12px; border-top: 1px solid var(--color-kumo-line); font-size: 12px; line-height: 18px; color: var(--text-color-kumo-subtle); }
+.emvb-palette-tips kbd { display: inline-block; min-width: 18px; padding: 0 4px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--color-kumo-line); font-family: var(--font-mono); font-size: 11px; line-height: 16px; text-align: center; color: var(--text-color-kumo-default); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .emvb-timeline-body { display: grid; grid-template-columns: 220px 1fr; gap: 16px; margin: 12px 0; min-height: 0; }
 .emvb-timeline-list { margin: 0; padding: 0; list-style: none; max-height: 60vh; overflow-y: auto; }
@@ -87,13 +91,14 @@ export const FEATURE_CSS = `
 .emvb-timeline-changes > li[data-kind="removed"] .emvb-timeline-kind { color: var(--text-color-kumo-danger); }
 .emvb-timeline-changes > li[data-kind="changed"] .emvb-timeline-kind { color: var(--text-color-kumo-warning); }
 .emvb-tokens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
-.emvb-tokens-grid > label { display: grid; gap: 4px; min-width: 0; }
+.emvb-tokens-grid > label, .emvb-tokens-field { display: grid; gap: 4px; min-width: 0; }
 .emvb-tokens-fluid { display: flex !important; align-items: center; gap: 4px; font-size: 12px; }
-.emvb-tokens-preview { margin: 8px 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 12px; }
-.emvb-tokens-preview > li { display: grid; grid-template-columns: 48px 1fr auto; gap: 8px; align-items: center; }
+.emvb-tokens-preview { margin: 8px 0; padding: 0; list-style: none; display: grid; grid-template-columns: max-content minmax(0, 1fr) auto; gap: 4px 8px; font-size: 12px; }
+.emvb-tokens-preview > li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; min-height: 24px; }
+.emvb-tokens-preview > li > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .emvb-tokens-sample { display: inline-block; height: 1em; line-height: 1; }
 .emvb-tokens-preview .emvb-tokens-sample:empty { height: 8px; border-radius: 2px; background: var(--color-kumo-brand); }
-.emvb-tokens-preview code { font-size: 11px; color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+.emvb-tokens-preview code { font-size: 11px; color: var(--text-color-kumo-subtle); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
 .emvb-a11y-score { height: 28px; padding: 0 8px; border: 1px solid var(--color-kumo-line); border-radius: 999px; background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; }
 .emvb-a11y-score[data-band="good"] b, .emvb-a11y [data-band="good"] { color: var(--text-color-kumo-success); }
 .emvb-a11y-score[data-band="fair"] b, .emvb-a11y [data-band="fair"] { color: var(--text-color-kumo-warning); }
