@@ -7,7 +7,7 @@ import { ElementPanel } from "../ElementPanel.tsx";
 import { FieldBindControl } from "./FieldBindControl.tsx";
 import { EditorHostContext } from "../../host.ts";
 import { FormBindControl } from "./FormBindControl.tsx";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, rerender } from "../../../../../test/dom/mount.ts";
 
 afterEach(cleanup);
 
@@ -262,4 +262,95 @@ describe("the form picker marks paused forms (W-326)", () => {
     expect(picker).toContain("Survey (paused)");
     expect(picker).not.toContain("Contact (paused)");
   });
+});
+
+describe("field definition changes (W-721)", () => {
+  const definition = (label: string) =>
+    Response.json({
+      data: {
+        pages: [{ fields: [{ name: "email", type: "email", label, required: false }] }],
+      },
+    });
+  const name = () => document.querySelector<HTMLInputElement>("input.emvb-mono")?.value;
+  const hasList = () => document.querySelector('[data-emvb-field-bind="list"]') !== null;
+
+  test.each(["form", "fetcher"])(
+    "W-721: changing the %s hides old options until the new definition arrives",
+    async (source) => {
+      const pending = Promise.withResolvers<Response>();
+      const sent: string[] = [];
+      const onChange = (next: string) => sent.push(next);
+      let requests = 0;
+      const fetcher: Fetcher = async () =>
+        ++requests === 1 ? definition("Old contact") : pending.promise;
+      const nextFetcher: Fetcher = async () => pending.promise;
+      try {
+        await mount(
+          <FieldBindControl value="email" formId="old" fetcher={fetcher} onChange={onChange} />,
+        );
+        await flush();
+        expect(shown()).toEqual(["Old contact"]);
+
+        await rerender(
+          <FieldBindControl
+            value="email"
+            formId={source === "form" ? "new" : "old"}
+            fetcher={source === "fetcher" ? nextFetcher : fetcher}
+            onChange={onChange}
+          />,
+        );
+        expect(hasList()).toBe(false);
+        expect(name()).toBe("email");
+        expect(sent).toEqual([]);
+
+        await act(async () => pending.resolve(definition("New contact")));
+        await flush();
+        expect(shown()).toEqual(["New contact"]);
+        expect(name()).toBe("email");
+        expect(sent).toEqual([]);
+      } finally {
+        await act(async () => pending.resolve(definition("New contact")));
+      }
+    },
+  );
+
+  test.each(["another form", "no form"])(
+    "W-721: a late old definition cannot restore options after moving to %s",
+    async (destination) => {
+      const old = Promise.withResolvers<Response>();
+      const next = Promise.withResolvers<Response>();
+      const fetcher: Fetcher = async (_path, init) => {
+        const body = JSON.parse(String(init?.body)) as { id: string };
+        return body.id === "old" ? old.promise : next.promise;
+      };
+      const onChange = () => undefined;
+      try {
+        await mount(
+          <FieldBindControl value="email" formId="old" fetcher={fetcher} onChange={onChange} />,
+        );
+        await rerender(
+          <FieldBindControl
+            value="email"
+            formId={destination === "another form" ? "new" : undefined}
+            fetcher={fetcher}
+            onChange={onChange}
+          />,
+        );
+        await act(async () => next.resolve(definition("New contact")));
+        await flush();
+        expect(shown()).toEqual(destination === "another form" ? ["New contact"] : []);
+
+        await act(async () => old.resolve(definition("Old contact")));
+        await flush();
+        expect(shown()).toEqual(destination === "another form" ? ["New contact"] : []);
+        expect(hasList()).toBe(destination === "another form");
+        expect(name()).toBe("email");
+      } finally {
+        await act(async () => {
+          next.resolve(definition("New contact"));
+          old.resolve(definition("Old contact"));
+        });
+      }
+    },
+  );
 });

@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Form-field definition changes (W-721).** The field picker clears old options while loading another form definition, preserving the current name and ignoring late results from the previous form.
+
 - **Form-field name recovery (W-720).** Picking a form field replaces an invalid typed name and clears its error, including when reselecting the stored field. Manual names remain editable and only valid names are saved.
 
 - **Interrupted image loading (W-719).** Interrupted picture transfers show connection guidance and Try again instead of a low-level body-read error, including when loading an edited copy after its original is missing.

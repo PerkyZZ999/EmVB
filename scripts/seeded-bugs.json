@@ -32614,6 +32614,46 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/forms.e2e.ts", "--project=node", "-g", "W-720"],
       "expect": "toHaveValue"
+    },
+    {
+      "id": "W-721/retain-old-options",
+      "requirement": "W-036",
+      "description": "Old definition options disappear while a different form or request source loads",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "    setFields(null);\n    if (!formId) return;",
+          "replace": "    if (!formId) {\n      setFields(null);\n      return;\n    }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "W-721: changing"
+      ],
+      "expect": "\\(fail\\).*W-721:"
+    },
+    {
+      "id": "W-721/accept-old-definition",
+      "requirement": "W-036",
+      "description": "Late definitions cannot overwrite a newer form or restore a picker after leaving a form",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "      if (!cancelled) setFields(next);",
+          "replace": "      setFields(next);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "W-721: a late"
+      ],
+      "expect": "\\(fail\\).*W-721:"
     }
   ]
 }

@@ -75,10 +75,8 @@ export function FieldBindControl({
 
   React.useEffect(() => {
     let cancelled = false;
-    if (!formId) {
-      setFields(null);
-      return;
-    }
+    setFields(null);
+    if (!formId) return;
     void loadFormFields(fetcher, formId).then((next) => {
       if (!cancelled) setFields(next);
     });
