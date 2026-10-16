@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **Add-panel search (W-704).** Search words match in any order, ignoring case and accents, across element names and groups and section recipe descriptions.
+
 ## [0.6.5] - 2026-10-15
 
 About 170 fixes from overnight testing since 0.6.0 (W-532 to W-702). No schema change: pages saved by 0.6.5 open in 0.6.0.

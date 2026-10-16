@@ -6,11 +6,11 @@ import { THEME_PARTS_COLLECTION } from "../../constants.ts";
 import type { Fetcher } from "../api.ts";
 import { listThemeParts, partTypeLabel } from "../theme-api.ts";
 import { editorUrl } from "../editor/exit.ts";
+import { matchesSearch } from "../search.ts";
 import {
   EditedTime,
   ListError,
   ListSearch,
-  matchesSearch,
   NewButton,
   NoMatches,
   StatusBadge,

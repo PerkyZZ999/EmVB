@@ -81,21 +81,6 @@ export function EditedTime({ iso }: { iso: string }) {
   );
 }
 
-export const fold = (text: string) =>
-  text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
-
-/**
- * W-207: does an entry match the list search? Every word must appear in one of the fields,
- * ignoring case and accents, so "about us" finds "About Us" and "/about-us".
- */
-export function matchesSearch(query: string, ...fields: string[]): boolean {
-  const haystack = fold(fields.join(" "));
-  return fold(query)
-    .split(/\s+/)
-    .filter(Boolean)
-    .every((word) => haystack.includes(word));
-}
-
 /** The search box above a list (W-207). */
 export function ListSearch({
   value,

@@ -1381,7 +1381,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "      (!q || d.name.toLowerCase().includes(q)),",
+          "search": "      matchesSearch(query, d.name, d.group),",
           "replace": "      true,"
         }
       ],
@@ -2755,8 +2755,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) =>\n      d.type !== \"tab-panel\" &&\n      (formsAvailable || d.group !== \"form\") &&\n      (!q || d.name.toLowerCase().includes(q)),\n  );",
-          "replace": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) =>\n      d.type !== \"tab-panel\" &&\n      d.type !== \"flexbox\" && // seeded: hide flexbox\n      (formsAvailable || d.group !== \"form\") &&\n      (!q || d.name.toLowerCase().includes(q)),\n  );"
+          "search": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) =>\n      d.type !== \"tab-panel\" &&\n      (formsAvailable || d.group !== \"form\") &&\n      matchesSearch(query, d.name, d.group),\n  );",
+          "replace": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) =>\n      d.type !== \"tab-panel\" &&\n      d.type !== \"flexbox\" && // seeded: hide flexbox\n      (formsAvailable || d.group !== \"form\") &&\n      matchesSearch(query, d.name, d.group),\n  );"
         }
       ],
       "command": [
@@ -10001,8 +10001,8 @@
         },
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "      (!q || d.name.toLowerCase().includes(q)),\n  );",
-          "replace": "      (!q || d.name.toLowerCase().includes(q)),\n  );\n  const pinned = ELEMENT_DESCRIPTORS.filter((d) => d.type === \"container\");\n  const matched = found.length > 0 ? [...new Set([...pinned, ...found])] : found;"
+          "search": "      matchesSearch(query, d.name, d.group),\n  );",
+          "replace": "      matchesSearch(query, d.name, d.group),\n  );\n  const pinned = ELEMENT_DESCRIPTORS.filter((d) => d.type === \"container\");\n  const matched = found.length > 0 ? [...new Set([...pinned, ...found])] : found;"
         }
       ],
       "command": [
@@ -21544,7 +21544,7 @@
       "description": "Searching CAFE doesn't find Café.",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "file": "packages/emvb/src/admin/search.ts",
           "search": "export const fold = (text: string) =>\n  text.normalize(\"NFD\").replace(/\\p{M}/gu, \"\").toLocaleLowerCase();",
           "replace": "export const fold = (text: string) => text.toLocaleLowerCase();"
         }
@@ -26745,8 +26745,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "(r) => !q || `${r.name} ${r.description} recipe section`",
-          "replace": "(r) => !q && `${r.name} ${r.description} recipe section`"
+          "search": "matchesSearch(query, r.name, r.description, \"recipe section\")",
+          "replace": "!query.trim() && matchesSearch(query, r.name, r.description, \"recipe section\")"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/recipes-panel.test.tsx"],
@@ -31564,6 +31564,46 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/design-queue.test.tsx"],
       "expect": "\\(fail\\).*W-536"
+    },
+    {
+      "id": "W-704/element-search",
+      "requirement": "W-018",
+      "description": "Add panel returns to literal substring search, hiding matching words in another order or with accents",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "matchesSearch(query, d.name, d.group)",
+          "replace": "d.name.toLowerCase().includes(query.trim().toLowerCase())"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx",
+        "-t",
+        "Add search matches accented words"
+      ],
+      "expect": "\\(fail\\).*Add search matches accented words"
+    },
+    {
+      "id": "W-704/recipe-search",
+      "requirement": "W-018",
+      "description": "Add panel returns to literal substring search, hiding matching words in another order or with accents",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "matchesSearch(query, r.name, r.description, \"recipe section\")",
+          "replace": "`${r.name} ${r.description} recipe section`.toLowerCase().includes(query.trim().toLowerCase())"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx",
+        "-t",
+        "Add search matches recipe words"
+      ],
+      "expect": "\\(fail\\).*Add search matches recipe words"
     }
   ]
 }

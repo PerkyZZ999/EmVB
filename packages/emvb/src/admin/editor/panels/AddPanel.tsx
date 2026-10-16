@@ -9,6 +9,7 @@ import {
 } from "../../../core/index.ts";
 import { NEW_ELEMENT_MIME } from "../dnd/drop-target.ts";
 import { FIELD } from "../../ui.ts";
+import { matchesSearch } from "../../search.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
 
 const GROUPS = [
@@ -33,17 +34,14 @@ export function AddPanel({
   formsAvailable?: boolean;
 }) {
   const [query, setQuery] = React.useState(defaultQuery);
-  const q = query.trim().toLowerCase();
   const matched = ELEMENT_DESCRIPTORS.filter(
     (d) =>
       d.type !== "tab-panel" &&
       (formsAvailable || d.group !== "form") &&
-      (!q || d.name.toLowerCase().includes(q)),
+      matchesSearch(query, d.name, d.group),
   );
   const recipes = onRecipe
-    ? SECTION_RECIPES.filter(
-        (r) => !q || `${r.name} ${r.description} recipe section`.toLowerCase().includes(q),
-      )
+    ? SECTION_RECIPES.filter((r) => matchesSearch(query, r.name, r.description, "recipe section"))
     : [];
   return (
     <div className="emvb-panel-body" data-emvb-panel="add">

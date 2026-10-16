@@ -4,11 +4,11 @@ import * as React from "react";
 import type { Fetcher } from "../api.ts";
 import { listPages } from "../content-api.ts";
 import { editorUrl } from "../editor/exit.ts";
+import { matchesSearch } from "../search.ts";
 import {
   EditedTime,
   ListError,
   ListSearch,
-  matchesSearch,
   NewButton,
   NoMatches,
   StatusBadge,

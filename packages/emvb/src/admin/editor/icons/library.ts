@@ -1,7 +1,7 @@
 import { getBundledIcon, sanitizeSvgMarkup } from "../../../core/index.ts";
 import { serialize } from "../../../core/render/vnode.ts";
 import type { UploadedIconItem } from "../../icon-uploads-api.ts";
-import { fold } from "../../pages/list-kit.tsx";
+import { fold } from "../../search.ts";
 import type { IconEntry, IconSetFile } from "./set-format.ts";
 
 /**

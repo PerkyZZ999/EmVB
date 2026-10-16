@@ -86,6 +86,24 @@ describe("Add panel (W-018)", () => {
     expect(tile?.textContent).toContain("Theme section");
   });
 
+  test("Add search matches accented words in any order across the name and group (W-704)", async () => {
+    await mount(<AddPanel onAdd={() => undefined} defaultQuery="  séction   THEME layout " />);
+    expect(document.querySelector('[data-emvb-add-tile="section"]') !== null).toBe(true);
+    expect(document.querySelectorAll("[data-emvb-add-tile]").length).toBe(1);
+    await mount(<AddPanel onAdd={() => undefined} defaultQuery="form" formsAvailable={false} />);
+    expect(document.querySelector('[aria-label="Form"]') === null).toBe(true);
+    expect(document.querySelector('[data-emvb-add-tile="tab-panel"]') === null).toBe(true);
+  });
+
+  test("Add search matches recipe words in any order (W-704)", async () => {
+    await mount(
+      <AddPanel onAdd={() => undefined} onRecipe={() => undefined} defaultQuery="récipe HERO" />,
+    );
+    expect(document.querySelector('[data-emvb-recipe="hero"]') !== null).toBe(true);
+    expect(document.querySelectorAll("[data-emvb-recipe]").length).toBe(1);
+    expect(document.querySelectorAll("[data-emvb-add-tile]").length).toBe(0);
+  });
+
   test("a new Section from the Add panel (W-156) has padding and validates", () => {
     const node = newElement("layout-section");
     if (!node || node.type !== "layout-section") throw new Error("expected a layout section");

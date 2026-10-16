@@ -2,7 +2,8 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import { cleanup, mount } from "../../../test/dom/mount.ts";
 import type { Fetcher } from "../api.ts";
-import { EditedTime, matchesSearch } from "./list-kit.tsx";
+import { matchesSearch } from "../search.ts";
+import { EditedTime } from "./list-kit.tsx";
 import { PageList } from "./PageList.tsx";
 
 afterEach(cleanup);
