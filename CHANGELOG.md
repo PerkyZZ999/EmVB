@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Image editor closing motion (W-731).** Closing Edit image keeps reduced motion active after its image body unmounts, preventing the popup and backdrop from briefly resuming their exit transitions.
+
 - **Utility dialog motion (W-730).** Command palette, Share link, Version timeline, Page weight and Accessibility now respect reduced motion for their popup and backdrop while retaining Kumo's normal transitions.
 
 - **Dialog motion and focus (W-729).** EmVB dialog portals and backdrops respect reduced motion, including live preference changes, while unrelated admin portals retain their motion. Closing creation dialogs restores keyboard focus to their opener.

@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test, type APIRequestContext, type Locator, type Page } from "@playwright/test";
 import { createPage, setUpEmvbOnce } from "./support/api.ts";
 import { openEditor, openLayers, overlay, unique } from "./support/helpers.ts";
 
@@ -51,6 +51,116 @@ async function openPhotoEditor(page: Page, request: APIRequestContext, title: st
     "ready",
     { timeout: 30_000 },
   );
+}
+
+async function dialogMotion(popup: Locator) {
+  return popup.evaluate((element) => {
+    let backdrop: Element | undefined;
+    for (
+      let portal = element.closest("[data-base-ui-portal]");
+      portal;
+      portal = portal.parentElement?.closest("[data-base-ui-portal]") ?? null
+    ) {
+      backdrop = [...portal.children].find((child) => child.classList.contains("bg-kumo-recessed"));
+      if (backdrop) break;
+    }
+    return {
+      popup: getComputedStyle(element).transitionDuration,
+      backdrop: backdrop ? getComputedStyle(backdrop).transitionDuration : "missing backdrop",
+    };
+  });
+}
+
+async function closeWithoutMotion(page: Page, popup: Locator) {
+  const revived = popup.evaluate(
+    (element) =>
+      new Promise<string[]>((resolve) => {
+        const failures: string[] = [];
+        let backdrop: Element | undefined;
+        for (
+          let portal = element.closest("[data-base-ui-portal]");
+          portal;
+          portal = portal.parentElement?.closest("[data-base-ui-portal]") ?? null
+        ) {
+          backdrop = [...portal.children].find((child) =>
+            child.classList.contains("bg-kumo-recessed"),
+          );
+          if (backdrop) break;
+        }
+        const observer = new MutationObserver(() => {
+          if (!element.isConnected) {
+            observer.disconnect();
+            resolve(failures);
+          } else if (element.hasAttribute("data-ending-style")) {
+            for (const node of [element, backdrop]) {
+              if (!node) continue;
+              const duration = getComputedStyle(node).transitionDuration;
+              if (duration !== "0s") failures.push(duration);
+            }
+          }
+        });
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["data-ending-style"],
+        });
+        element.setAttribute("data-motion-observing", "true");
+      }),
+  );
+  await expect(popup).toHaveAttribute("data-motion-observing", "true");
+  await page.keyboard.press("Escape");
+  expect(await revived).toEqual([]);
+}
+
+for (const preference of ["no-preference", "reduce"] as const) {
+  test(`W-731: image export honors ${preference} motion through repeated opening and closing`, async ({
+    page,
+    request,
+  }) => {
+    await page.emulateMedia({ reducedMotion: preference });
+    await openPhotoEditor(page, request, "Export motion");
+    const editor = page.getByRole("dialog", { name: "Edit image", exact: true });
+    expect(await dialogMotion(editor)).toEqual({
+      popup: preference === "reduce" ? "0s" : "0.15s",
+      backdrop: preference === "reduce" ? "0s" : "0.15s",
+    });
+    const save = page.locator("[data-emvb-image-save]");
+    const canvas = page.locator("iframe[data-emvb-canvas]");
+    const geometry = await canvas.evaluate((element) => element.getBoundingClientRect().toJSON());
+    for (let round = 0; round < 2; round++) {
+      await save.click();
+      const popup = page.getByRole("dialog", { name: "Export image", exact: true });
+      await expect(popup).toBeVisible();
+      expect(await dialogMotion(popup)).toEqual({
+        popup: preference === "reduce" ? "0s" : "0.15s",
+        backdrop: preference === "reduce" ? "0s" : "0.15s",
+      });
+      const width = popup.getByRole("spinbutton", { name: "Width in pixels" });
+      await expect(width).toHaveValue("640");
+      await width.fill("320");
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await expect.poll(() => dialogMotion(popup)).toEqual({ popup: "0s", backdrop: "0s" });
+      await expect(width).toHaveValue("320");
+      await page.screenshot({
+        animations: "disabled",
+        path: `/tmp/emvb-image-export-motion-${test.info().project.name}-${preference}-${round}.png`,
+      });
+      await closeWithoutMotion(page, popup);
+      await expect(save).toBeFocused();
+      await expect(page.locator("[data-emvb-image-editor]")).toHaveAttribute(
+        "data-emvb-image-editor",
+        "ready",
+      );
+      await page.emulateMedia({ reducedMotion: preference });
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await closeWithoutMotion(page, editor);
+    await expect(overlay(page).locator("[data-emvb-image-edit]")).toBeFocused();
+    expect(await canvas.evaluate((element) => element.getBoundingClientRect().toJSON())).toEqual(
+      geometry,
+    );
+  });
 }
 
 test("W-716: Escape keeps an image save open so a failed upload can be retried", async ({

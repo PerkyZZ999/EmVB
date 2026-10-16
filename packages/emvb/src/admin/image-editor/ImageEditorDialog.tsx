@@ -765,7 +765,9 @@ export default function ImageEditorDialog({
     >
       <Dialog className="emvb-image-editor-popup" data-emvb-image-editor-popup="">
         <style>{UI_CSS + IMAGE_EDITOR_CSS}</style>
-        <Dialog.Title className="emvb-ie-sr">Edit image</Dialog.Title>
+        <Dialog.Title className="emvb-ie-sr" data-emvb-dialog="image-editor-shell">
+          Edit image
+        </Dialog.Title>
         <Dialog.Description className="emvb-ie-sr">
           Crop, rotate and adjust a copy of this picture.
         </Dialog.Description>
