@@ -18,7 +18,6 @@ export function CommandPalette({
 }) {
   const [query, setQuery] = React.useState("");
   const [active, setActive] = React.useState(0);
-  const listRef = React.useRef<HTMLUListElement>(null);
   // W-399: opened from a shortcut there is no trigger to return to, so focus fell to <body> on
   // close. Remember what had focus and go back to it when nothing else took focus.
   const wasOpen = React.useRef(false);
@@ -69,11 +68,15 @@ export function CommandPalette({
   }, [open]);
   const shown = React.useMemo(() => filterPalette(items, query), [items, query]);
   const current = Math.min(active, Math.max(0, shown.length - 1));
-  React.useEffect(() => {
-    listRef.current
-      ?.querySelector<HTMLElement>(`[data-index="${current}"]`)
-      ?.scrollIntoView?.({ block: "nearest" });
-  }, [current]);
+  const scrollSelected = React.useCallback(
+    (list: HTMLUListElement | null) => {
+      if (!shown[current]) return;
+      list
+        ?.querySelector<HTMLElement>(`[data-index="${current}"]`)
+        ?.scrollIntoView?.({ block: "nearest" });
+    },
+    [current, shown],
+  );
   const run = (item: PaletteItem | undefined) => {
     if (!item) return;
     onOpenChange(false);
@@ -117,7 +120,12 @@ export function CommandPalette({
           }}
           onKeyDown={onKeyDown}
         />
-        <ul className="emvb-palette-list" id="emvb-palette-list" role="listbox" ref={listRef}>
+        <ul
+          className="emvb-palette-list"
+          id="emvb-palette-list"
+          role="listbox"
+          ref={scrollSelected}
+        >
           {shown.length === 0 && (
             <li className="emvb-palette-empty" role="presentation">
               Nothing matches “{query}”.

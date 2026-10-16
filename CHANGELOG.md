@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **W-705.** Palette selection scrolling follows result-list attachment and changes, covering filtering at the same index and reopening.
+
 - **Add-panel search (W-704).** Search words match in any order, ignoring case and accents, across element names and groups and section recipe descriptions.
 
 ## [0.6.5] - 2026-10-15

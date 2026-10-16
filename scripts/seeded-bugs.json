@@ -31604,6 +31604,46 @@
         "Add search matches recipe words"
       ],
       "expect": "\\(fail\\).*Add search matches recipe words"
+    },
+    {
+      "id": "W-705/filter-scroll",
+      "requirement": "W-314",
+      "description": "The selected palette result is not scrolled into view after filtering or reopening",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/CommandPalette.tsx",
+          "search": "[current, shown],",
+          "replace": "[current],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/palette-scroll.test.tsx",
+        "-t",
+        "W-705: filtering"
+      ],
+      "expect": "\\(fail\\).*W-705: filtering"
+    },
+    {
+      "id": "W-705/reopen-scroll",
+      "requirement": "W-314",
+      "description": "The selected palette result is not scrolled into view after filtering or reopening",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/CommandPalette.tsx",
+          "search": "ref={scrollSelected}",
+          "replace": "ref={undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/palette-scroll.test.tsx",
+        "-t",
+        "W-705: reopening"
+      ],
+      "expect": "\\(fail\\).*W-705: reopening"
     }
   ]
 }
