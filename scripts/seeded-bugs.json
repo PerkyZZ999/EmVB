@@ -34851,6 +34851,66 @@
         "UX-013"
       ],
       "expect": "\\(fail\\).*UX-013"
+    },
+    {
+      "id": "UX-014/retry-dead",
+      "requirement": "UX-014",
+      "description": "Timeline Retry never loads the versions again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "  }, [fetcher, collection, entryId, open, attempt]);",
+          "replace": "  }, [fetcher, collection, entryId, open]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline-retry.test.tsx",
+        "-t",
+        "UX-014"
+      ],
+      "expect": "\\(fail\\).*UX-014"
+    },
+    {
+      "id": "UX-014/retry-drops-focus",
+      "requirement": "UX-014",
+      "description": "Timeline Retry drops keyboard focus to the page when it unmounts",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "                    actionsRef.current?.querySelector(\"button\")?.focus();",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline-retry.test.tsx",
+        "-t",
+        "UX-014"
+      ],
+      "expect": "\\(fail\\).*UX-014"
+    },
+    {
+      "id": "UX-014/retry-on-404",
+      "requirement": "UX-014",
+      "description": "A host without revisions offers a Retry that can never help",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "          setState({ kind: \"error\", message: NO_REVISIONS });",
+          "replace": "          setState({ kind: \"error\", message: NO_REVISIONS, retry: () => undefined });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline-retry.test.tsx",
+        "-t",
+        "UX-014"
+      ],
+      "expect": "\\(fail\\).*UX-014"
     }
   ]
 }

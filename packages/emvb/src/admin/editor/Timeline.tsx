@@ -75,9 +75,10 @@ export const NO_REVISIONS =
 function useRevisions(fetcher: Fetcher, collection: string, entryId: string, open: boolean) {
   const [state, setState] = React.useState<
     | { kind: "loading" }
-    | { kind: "error"; message: string }
+    | { kind: "error"; message: string; retry?: () => void }
     | { kind: "ready"; versions: TimelineVersion[] }
   >({ kind: "loading" });
+  const [attempt, setAttempt] = React.useState(0);
   React.useEffect(() => {
     if (!open) return;
     let cancelled = false;
@@ -104,20 +105,22 @@ function useRevisions(fetcher: Fetcher, collection: string, entryId: string, ope
         setState({ kind: "ready", versions });
       })
       .catch((error: unknown) => {
-        if (!cancelled) {
-          setState({
-            kind: "error",
-            message:
-              error instanceof ApiError && error.status === 404
-                ? NO_REVISIONS
-                : `Couldn't load versions: ${error instanceof Error ? error.message : String(error)}`,
-          });
+        if (cancelled) return;
+        // UX-014: a host without revisions won't change on a retry; a failed request might.
+        if (error instanceof ApiError && error.status === 404) {
+          setState({ kind: "error", message: NO_REVISIONS });
+          return;
         }
+        setState({
+          kind: "error",
+          message: `Couldn't load versions: ${error instanceof Error ? error.message : String(error)}`,
+          retry: () => setAttempt((n) => n + 1),
+        });
       });
     return () => {
       cancelled = true;
     };
-  }, [fetcher, collection, entryId, open]);
+  }, [fetcher, collection, entryId, open, attempt]);
   return state;
 }
 
@@ -210,6 +213,7 @@ export function TimelineDialog({
   canvasStyles?: readonly string[];
 }) {
   const revisions = useRevisions(fetcher, collection, entryId, open);
+  const actionsRef = React.useRef<HTMLDivElement>(null);
   const [pickedId, setPickedId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [who, setWho] = React.useState<Who>("all");
@@ -245,9 +249,25 @@ export function TimelineDialog({
             </p>
           )}
           {revisions.kind === "error" && (
-            <p className="emvb-helper" role="alert">
-              {revisions.message}
-            </p>
+            <div className="emvb-timeline-error" data-emvb-timeline-error="">
+              <p className="emvb-helper" role="alert">
+                {revisions.message}
+              </p>
+              {revisions.retry && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className={BUTTON}
+                  onClick={() => {
+                    // Keep keyboard focus in the dialog while Retry unmounts (as W-740 does).
+                    actionsRef.current?.querySelector("button")?.focus();
+                    revisions.retry?.();
+                  }}
+                >
+                  Retry
+                </Button>
+              )}
+            </div>
           )}
           {revisions.kind === "ready" && versions.length === 0 && (
             <p className="emvb-helper" role="status" data-emvb-timeline-empty="">
@@ -405,7 +425,7 @@ export function TimelineDialog({
               </div>
             </div>
           )}
-          <div className="emvb-dialog-actions">
+          <div className="emvb-dialog-actions" ref={actionsRef}>
             <Dialog.Close
               render={(props) => (
                 <Button {...props} variant="secondary" className={BUTTON}>

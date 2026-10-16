@@ -57,6 +57,7 @@ export const FEATURE_CSS = `
 .emvb-palette-tips { margin: 0; padding: 6px 12px; border-top: 1px solid var(--color-kumo-line); font-size: 12px; line-height: 18px; color: var(--text-color-kumo-subtle); }
 .emvb-palette-tips kbd { display: inline-block; min-width: 18px; padding: 0 4px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--color-kumo-line); font-family: var(--font-mono); font-size: 11px; line-height: 16px; text-align: center; color: var(--text-color-kumo-default); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.emvb-timeline-error { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
 .emvb-timeline-body { display: grid; grid-template-columns: 220px 1fr; gap: 16px; margin: 12px 0; min-height: 0; }
 .emvb-timeline-list { margin: 0; padding: 0; list-style: none; max-height: 60vh; overflow-y: auto; }
 .emvb-timeline-list { display: grid; gap: 2px; padding-inline-end: 4px; }

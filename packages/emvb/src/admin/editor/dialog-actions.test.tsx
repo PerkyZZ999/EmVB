@@ -41,7 +41,9 @@ test("UX-007: the page weight and timeline dialogs close from the same actions r
   for (const file of ["PerfMeter.tsx", "Timeline.tsx"]) {
     const source = readFileSync(join(import.meta.dir, file), "utf8");
     expect(
-      /<div className="emvb-dialog-actions">\s*<Dialog\.Close\s+render=/.test(source) ? file : "",
+      /<div className="emvb-dialog-actions"[^>]*>\s*<Dialog\.Close\s+render=/.test(source)
+        ? file
+        : "",
     ).toBe(file);
   }
 });
