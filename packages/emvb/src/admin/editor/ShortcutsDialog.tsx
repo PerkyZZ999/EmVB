@@ -12,7 +12,7 @@ export function ShortcutsDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6">
         <Dialog.Title>Keyboard shortcuts</Dialog.Title>
-        <table className="emvb-shortcuts">
+        <table className="emvb-shortcuts" data-emvb-dialog="shortcuts">
           <tbody>
             {SHORTCUTS.map(({ action, keys }) => (
               <tr key={action}>

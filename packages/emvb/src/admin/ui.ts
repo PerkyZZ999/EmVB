@@ -271,6 +271,16 @@ export const UI_CSS = `
 
 @media (prefers-reduced-motion: reduce) {
   [data-emvb-editor] *, [data-emvb-page] * { transition: none !important; animation: none !important; }
+  /* Kumo portals sit outside the editor/page roots; a dialog body identifies EmVB ownership. */
+  [data-base-ui-portal]:has([data-emvb-dialog]),
+  [data-base-ui-portal]:has([data-emvb-dialog]) *,
+  [data-base-ui-portal]:has([data-emvb-dialog])::before,
+  [data-base-ui-portal]:has([data-emvb-dialog])::after,
+  [data-base-ui-portal]:has([data-emvb-dialog]) *::before,
+  [data-base-ui-portal]:has([data-emvb-dialog]) *::after {
+    transition: none !important;
+    animation: none !important;
+  }
   .emvb-list-loading .skeleton-line::after { animation: none !important; }
 }
 @media (prefers-reduced-transparency: reduce) {

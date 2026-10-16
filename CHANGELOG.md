@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Dialog motion and focus (W-729).** EmVB dialog portals and backdrops respect reduced motion, including live preference changes, while unrelated admin portals retain their motion. Closing creation dialogs restores keyboard focus to their opener.
+
 - **Inline color variable feedback (W-728).** Creation shows a live progress message, keeps button/form geometry stable and uses a static indicator under reduced motion. Pending fields and actions are disabled, repeated submissions are guarded, and failed saves retain values for retry.
 
 - **Creation feedback (W-727).** New page and New theme part announce progress, keep button/dialog geometry stable, and respect reduced motion. Pending creation locks fields and dismissal, prevents repeated submissions, and restores editing with the entered values after failure.

@@ -33302,6 +33302,94 @@
         "W-728"
       ],
       "expect": "toBe"
+    },
+    {
+      "id": "W-729/ignore-portals",
+      "requirement": "W-729",
+      "description": "Reduced motion respects dialog portal ownership: ignore-portals",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  [data-base-ui-portal]:has([data-emvb-dialog]),\n  [data-base-ui-portal]:has([data-emvb-dialog]) *,\n  [data-base-ui-portal]:has([data-emvb-dialog])::before,\n  [data-base-ui-portal]:has([data-emvb-dialog])::after,\n  [data-base-ui-portal]:has([data-emvb-dialog]) *::before,\n  [data-base-ui-portal]:has([data-emvb-dialog]) *::after {\n    transition: none !important;\n    animation: none !important;\n  }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/dialog-motion.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-729: owned"
+      ],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-729/host-portals",
+      "requirement": "W-729",
+      "description": "Reduced motion respects dialog portal ownership: host-portals",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  [data-base-ui-portal]:has([data-emvb-dialog]),\n  [data-base-ui-portal]:has([data-emvb-dialog]) *,\n  [data-base-ui-portal]:has([data-emvb-dialog])::before,\n  [data-base-ui-portal]:has([data-emvb-dialog])::after,\n  [data-base-ui-portal]:has([data-emvb-dialog]) *::before,\n  [data-base-ui-portal]:has([data-emvb-dialog]) *::after {\n    transition: none !important;\n    animation: none !important;\n  }",
+          "replace": "  [data-base-ui-portal],\n  [data-base-ui-portal] *,\n  [data-base-ui-portal]::before,\n  [data-base-ui-portal]::after,\n  [data-base-ui-portal] *::before,\n  [data-base-ui-portal] *::after {\n    transition: none !important;\n    animation: none !important;\n  }"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/dialog-motion.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-729: owned"
+      ],
+      "expect": "toHaveCSS"
+    },
+    {
+      "id": "W-729/shortcuts-unmarked",
+      "requirement": "W-729",
+      "description": "Reduced motion respects dialog portal ownership: shortcuts-unmarked",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ShortcutsDialog.tsx",
+          "search": " data-emvb-dialog=\"shortcuts\"",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/dialog-motion.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-729: Keyboard"
+      ],
+      "expect": "toEqual"
+    },
+    {
+      "id": "W-729/creation-focus",
+      "requirement": "W-729",
+      "description": "Closing a creation dialog returns keyboard focus to its opener",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "        if (target?.isConnected) target.focus({ preventScroll: true });",
+          "replace": "        if (target?.isConnected) target.blur();"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/dialog-motion.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-729: owned"
+      ],
+      "expect": "toBeFocused"
     }
   ]
 }

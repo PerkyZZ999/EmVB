@@ -58,6 +58,8 @@ export function CreateDialog({
   const [error, setError] = React.useState<FieldError>();
   const [busy, setBusy] = React.useState(false);
   const pending = React.useRef(false);
+  // Native autofocus can run before Kumo records its return-focus target.
+  const opener = React.useRef<HTMLElement | null>(null);
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   // A new prefix (theme part type) re-derives an untouched slug for the title typed so far.
@@ -98,6 +100,12 @@ export function CreateDialog({
         if (!next && pending.current) return;
         onOpenChange(next);
       }}
+      onOpenChangeComplete={(next) => {
+        if (next) return;
+        const target = opener.current;
+        opener.current = null;
+        if (target?.isConnected) target.focus({ preventScroll: true });
+      }}
     >
       <Dialog size="base" className="p-6">
         <style>{UI_CSS}</style>
@@ -116,6 +124,16 @@ export function CreateDialog({
               label="Title"
               className={FIELD}
               autoFocus
+              onFocus={(event) => {
+                const previous = event.relatedTarget;
+                if (
+                  !opener.current &&
+                  previous instanceof HTMLElement &&
+                  !event.currentTarget.closest('[role="dialog"]')?.contains(previous)
+                ) {
+                  opener.current = previous;
+                }
+              }}
               value={title}
               error={error?.field === "title" ? error.message : undefined}
               onChange={(event) => {
