@@ -62,6 +62,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
   const [error, setError] = React.useState<string | null>(null);
   const [urlDraft, setUrlDraft] = React.useState(src);
   const fileRef = React.useRef<HTMLInputElement>(null);
+  const libraryCloseRef = React.useRef<HTMLButtonElement>(null);
   // W-486: a library picture opened from its card's Edit… (null when the editor is closed).
   const [editing, setEditing] = React.useState<MediaLibraryItem | null>(null);
   const [editorOpen, setEditorOpen] = React.useState(false);
@@ -301,6 +302,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
               type="button"
               className={BUTTON}
               variant="secondary"
+              ref={libraryCloseRef}
               onClick={() => setOpen(false)}
             >
               Close
@@ -323,7 +325,10 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
                   type="button"
                   variant="secondary"
                   className={BUTTON}
-                  onClick={() => void loadLibrary()}
+                  onClick={() => {
+                    libraryCloseRef.current?.focus();
+                    void loadLibrary();
+                  }}
                 >
                   Retry
                 </Button>

@@ -32082,7 +32082,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
-          "search": "onClick={() => void loadLibrary()}",
+          "search": "onClick={() => {\n                    libraryCloseRef.current?.focus();\n                    void loadLibrary();\n                  }}",
           "replace": "onClick={() => undefined}"
         }
       ],
@@ -32102,7 +32102,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
-          "search": "onClick={() => void loadLibrary()}",
+          "search": "onClick={() => {\n                    libraryCloseRef.current?.focus();\n                    void loadLibrary();\n                  }}",
           "replace": "onClick={() => undefined}"
         }
       ],
@@ -34427,6 +34427,40 @@
         "1440px"
       ],
       "expect": "toHaveAccessibleName"
+    },
+    {
+      "id": "W-740/missing-focus",
+      "requirement": "W-740",
+      "description": "Media library Retry keeps keyboard focus inside the library during pending and recovered states: missing-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "libraryCloseRef.current?.focus();",
+          "replace": "void libraryCloseRef.current;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-740"
+      ],
+      "expect": "\\(fail\\).*W-740:"
+    },
+    {
+      "id": "W-740/outside-focus",
+      "requirement": "W-740",
+      "description": "Media library Retry keeps keyboard focus inside the library during pending and recovered states: outside-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "libraryCloseRef.current?.focus();",
+          "replace": "fileRef.current?.focus();"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/media-library-feedback.e2e.ts", "--project=node"],
+      "expect": "toBeFocused"
     }
   ]
 }

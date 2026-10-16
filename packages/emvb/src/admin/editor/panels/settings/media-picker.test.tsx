@@ -142,6 +142,35 @@ describe("media library recovery (W-713)", () => {
     expect(dialog(view.host)?.outerHTML ?? null).toBeNull();
   });
 
+  test("W-740: retry keeps focus on Close while loading and after an empty result", async () => {
+    const pending = Promise.withResolvers<Response>();
+    let attempts = 0;
+    const view = await picker(image({ src: "/old.png", alt: "Old" }), () =>
+      ++attempts === 1 ? unavailable() : pending.promise,
+    );
+    await view.openLibrary();
+    const close = [...(dialog(view.host)?.querySelectorAll("button") ?? [])].find(
+      (button) => button.textContent === "Close",
+    );
+    const action = [...(dialog(view.host)?.querySelectorAll("button") ?? [])].find(
+      (button) => button.textContent === "Retry",
+    );
+    if (!close || !action) throw new Error("Missing library recovery controls");
+    await act(async () => {
+      action.focus();
+      action.click();
+    });
+    await settle();
+    expect(attempts).toBe(2);
+    expect(dialog(view.host)?.textContent).toContain("Loading…");
+    expect(document.activeElement === close).toBe(true);
+    await act(async () => pending.resolve(ok([])()));
+    await settle();
+    expect(dialog(view.host)?.textContent).toContain("No images yet.");
+    expect(document.activeElement === close).toBe(true);
+    expect(view.sent).toEqual([]);
+  });
+
   test("W-713: another failed retry stays recoverable and a successful empty response says empty", async () => {
     let attempts = 0;
     const view = await picker(image({ src: "", alt: "Image" }), () =>
