@@ -32540,6 +32540,80 @@
         "W-719:"
       ],
       "expect": "\\(fail\\).*W-719:"
+    },
+    {
+      "id": "W-720/picker-keeps-invalid-draft",
+      "requirement": "W-202",
+      "description": "Choosing a definition field replaces the invalid draft even when the stored name is unchanged",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "            setDraft(next);\n            onChange(next, picked?.label);",
+          "replace": "            onChange(next, picked?.label);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx",
+        "-t",
+        "W-720: picking"
+      ],
+      "expect": "\\(fail\\).*W-720:"
+    },
+    {
+      "id": "W-720/picker-uses-stored-name",
+      "requirement": "W-202",
+      "description": "The definition picker reflects the current name draft so a stale stored choice can be selected again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "    const name = draft.trim();",
+          "replace": "    const name = value;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx",
+        "-t",
+        "W-720: picking"
+      ],
+      "expect": "\\(fail\\).*W-720:"
+    },
+    {
+      "id": "W-720/commit-invalid-draft",
+      "requirement": "W-202",
+      "description": "Invalid manual names remain editable but must not update the stored field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "    if (fieldNameError(next.trim()) === null) onChange(next.trim());",
+          "replace": "    onChange(next.trim());"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx",
+        "-t",
+        "W-720: manual"
+      ],
+      "expect": "\\(fail\\).*W-720:"
+    },
+    {
+      "id": "W-720/browser-stale-draft",
+      "requirement": "W-202",
+      "description": "Choosing a definition field clears the invalid name and saves the intended binding",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "            setDraft(next);\n            onChange(next, picked?.label);",
+          "replace": "            onChange(next, picked?.label);"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/forms.e2e.ts", "--project=node", "-g", "W-720"],
+      "expect": "toHaveValue"
     }
   ]
 }

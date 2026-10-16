@@ -17,7 +17,7 @@ export function fieldNameError(name: string): string | null {
   return null;
 }
 
-/** The Field name box: keeps what you type, stores it only once it's a valid name (W-202). */
+/** The Field name box shares its draft with the definition picker (W-720). */
 function FieldNameInput({
   value,
   onChange,
@@ -27,24 +27,16 @@ function FieldNameInput({
   onChange: (name: string) => void;
   manual?: boolean;
 }) {
-  const [draft, setDraft] = React.useState(value);
-  React.useEffect(() => {
-    setDraft((current) => (fieldNameError(current.trim()) === null ? value : current));
-  }, [value]);
-  const error = fieldNameError(draft.trim());
+  const error = fieldNameError(value.trim());
   return (
     <>
       <Input
         label="Field name"
         className={`${FIELD} emvb-mono`}
-        value={draft}
+        value={value}
         aria-invalid={error ? true : undefined}
         {...(manual ? { "data-emvb-field-bind": "manual" } : {})}
-        onChange={(event) => {
-          const next = event.target.value;
-          setDraft(next);
-          if (fieldNameError(next.trim()) === null) onChange(next.trim());
-        }}
+        onChange={(event) => onChange(event.target.value)}
       />
       {error && (
         <p className="emvb-inline-error" data-emvb-field-name-error>
@@ -70,6 +62,16 @@ export function FieldBindControl({
   onChange: (field: string, label?: string) => void;
 }) {
   const [fields, setFields] = React.useState<DefinitionField[] | null>(null);
+  const [draft, setDraft] = React.useState(value);
+
+  React.useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  const changeName = (next: string) => {
+    setDraft(next);
+    if (fieldNameError(next.trim()) === null) onChange(next.trim());
+  };
 
   React.useEffect(() => {
     let cancelled = false;
@@ -86,16 +88,18 @@ export function FieldBindControl({
   }, [fetcher, formId]);
 
   if (fields && fields.length > 0) {
-    const known = fields.some((field) => field.name === value);
+    const name = draft.trim();
+    const known = fields.some((field) => field.name === name);
     return (
       <div data-emvb-field-bind="list">
         <Select
           label="Field"
           className={FIELD}
-          value={known ? value : MANUAL}
+          value={known ? name : MANUAL}
           onValueChange={(next) => {
             if (!next || next === MANUAL) return;
             const picked = fields.find((each) => each.name === next);
+            setDraft(next);
             onChange(next, picked?.label);
           }}
           renderValue={(current: unknown) => {
@@ -110,10 +114,10 @@ export function FieldBindControl({
             </Select.Option>
           ))}
         </Select>
-        <FieldNameInput value={value} onChange={(name) => onChange(name)} />
+        <FieldNameInput value={draft} onChange={changeName} />
       </div>
     );
   }
 
-  return <FieldNameInput value={value} onChange={(name) => onChange(name)} manual />;
+  return <FieldNameInput value={draft} onChange={changeName} manual />;
 }

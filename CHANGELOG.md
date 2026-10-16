@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Form-field name recovery (W-720).** Picking a form field replaces an invalid typed name and clears its error, including when reselecting the stored field. Manual names remain editable and only valid names are saved.
+
 - **Interrupted image loading (W-719).** Interrupted picture transfers show connection guidance and Try again instead of a low-level body-read error, including when loading an edited copy after its original is missing.
 
 - **Copy-size validation (W-718).** Save copy checks its existing stored custom-size limits before rendering and explains how to choose a supported size or use Full size.

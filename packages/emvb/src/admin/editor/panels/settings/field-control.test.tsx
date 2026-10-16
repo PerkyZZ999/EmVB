@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { act } from "react";
+import { act, useState } from "react";
 import type { FieldDescriptor, LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 import { FieldControl } from "./FieldControl.tsx";
 
 afterEach(cleanup);
@@ -122,5 +122,100 @@ describe("picking a form field copies its label (W-166)", () => {
     });
     await choose("Field", "Email *");
     expect(sent).toStrictEqual([{ field: "email", label: "Email" }]);
+  });
+});
+
+describe("field-name recovery (W-720)", () => {
+  const fields: Fetcher = async () =>
+    Response.json({
+      data: {
+        pages: [
+          {
+            fields: [
+              { name: "email", type: "email", label: "Email", required: true },
+              { name: "note", type: "textarea", label: "Note", required: false },
+            ],
+          },
+        ],
+      },
+    });
+
+  async function boundField(initial: string) {
+    const sent: Record<string, unknown>[] = [];
+    function BoundField() {
+      const [current, setCurrent] = useState<LayoutNode>({
+        id: "input001",
+        type: "text-input",
+        props: { field: initial, label: "Old label" },
+      });
+      return (
+        <FieldControl
+          field={{ key: "field", kind: "text", label: "Field name" }}
+          node={current}
+          fetcher={fields}
+          parentFormId="01FORM"
+          onChange={(next) => {
+            sent.push({ ...next.props });
+            setCurrent(next);
+          }}
+        />
+      );
+    }
+    await mount(<BoundField />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    return sent;
+  }
+
+  const input = () => document.querySelector<HTMLInputElement>("input.emvb-mono");
+  async function typeName(value: string) {
+    const field = input();
+    if (!field) throw new Error("no field-name input");
+    await act(async () => {
+      field.focus();
+      field.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+      await settle();
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(field, value);
+      field.dispatchEvent(new Event("input", { bubbles: true }));
+      field.dispatchEvent(new KeyboardEvent("keyup", { key: "a", bubbles: true }));
+    });
+  }
+
+  test.each(["note", "email"])(
+    "W-720: picking Email replaces an invalid draft when the stored name is %s",
+    async (initial) => {
+      const sent = await boundField(initial);
+      await typeName("bad name");
+      expect(input()?.value).toBe("bad name");
+      expect(input()?.getAttribute("aria-invalid")).toBe("true");
+      expect(sent).toEqual([]);
+      expect(document.querySelector('[role="combobox"]')?.textContent).toContain("Choose a field…");
+
+      await choose("Field", "Email *");
+      expect(input()?.value).toBe("email");
+      expect(input()?.getAttribute("aria-invalid")).not.toBe("true");
+      expect(
+        document.querySelector("[data-emvb-field-name-error]")?.textContent ?? null,
+      ).toBeNull();
+      expect(sent.at(-1)).toEqual({ field: "email", label: "Email" });
+      expect(document.querySelector('[role="combobox"]')?.textContent).toContain("Email *");
+    },
+  );
+
+  test("W-720: manual drafts stay editable and only valid names update the field", async () => {
+    const sent = await boundField("email");
+    await typeName("bad name");
+    await act(async () => input()?.blur());
+    expect(input()?.value).toBe("bad name");
+    expect(sent).toEqual([]);
+
+    const before = input();
+    await typeName("first_name");
+    expect(input()?.value).toBe("first_name");
+    expect(sent).toEqual([{ field: "first_name", label: "Old label" }]);
+    expect(document.activeElement === input() && input() === before).toBe(true);
+    expect(document.querySelector("[data-emvb-field-name-error]")?.textContent ?? null).toBeNull();
   });
 });

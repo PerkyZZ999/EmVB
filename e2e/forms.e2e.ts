@@ -1,16 +1,58 @@
 import { expect, test } from "@playwright/test";
-import { api, createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
+import { api, createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import {
   createContactForm,
   expectSubmission,
   formPageLayout,
   submitAsVisitor,
 } from "./support/forms.ts";
-import { unique } from "./support/helpers.ts";
+import { openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
 
 test.describe.configure({ mode: "serial" });
 
 setUpEmvbOnce();
+
+test("W-720: choosing a form field replaces an invalid typed name and saves the choice", async ({
+  page,
+  request,
+}) => {
+  const slug = `field-recovery-${unique()}`;
+  const form = await createContactForm(request, slug);
+  const layout = formPageLayout(form.id);
+  const formNode = layout.root.children[0];
+  if (!formNode) throw new Error("No form fixture");
+  formNode.children = formNode.children.filter((node) => node.id !== "txt00001");
+  const id = await createPage(request, "Field recovery", layout, slug);
+  await openEditor(page, id);
+  await openLayers(page);
+  await overlay(page).locator('[data-emvb-layer="inp00001"] .emvb-layer-select').click();
+  const name = overlay(page).getByRole("textbox", { name: "Field name", exact: true });
+  const picker = overlay(page).getByRole("combobox", { name: "Field", exact: true });
+  await expect(picker).toContainText("Email *");
+
+  await name.fill("bad name");
+  await expect(name).toHaveAttribute("aria-invalid", "true");
+  await picker.click();
+  await page.getByRole("option", { name: "Note", exact: true }).click();
+  await expect(name).toHaveValue("note");
+  await expect(name).not.toHaveAttribute("aria-invalid", "true");
+  await expect(overlay(page).locator("[data-emvb-field-name-error]")).toHaveCount(0);
+
+  await name.fill("bad name again");
+  await picker.click();
+  await page.getByRole("option", { name: "Note", exact: true }).click();
+  await expect(name).toHaveValue("note");
+  await expect(name).not.toHaveAttribute("aria-invalid", "true");
+  await expect(picker).toContainText("Note");
+  await saveDraft(page);
+  const saved = await storedLayout<{
+    root: { children: Array<{ children: Array<{ props: { field: string; label: string } }> }> };
+  }>(request, id);
+  expect(saved.root.children[0]?.children[0]?.props).toMatchObject({
+    field: "note",
+    label: "Note",
+  });
+});
 
 test("integration POST submit succeeds with EmVB-bound field names", async ({ request }) => {
   const slug = `form-api-${unique()}`;
