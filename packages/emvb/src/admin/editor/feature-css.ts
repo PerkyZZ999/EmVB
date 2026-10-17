@@ -47,6 +47,8 @@ export const FEATURE_CSS = `
 .emvb-aud-checks { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: 0; padding: 0; border: 0; font-size: 12px; }
 .emvb-aud-checks > legend { width: 100%; padding: 0; margin-bottom: 2px; }
 .emvb-palette { padding: 0; overflow: hidden; }
+/* UX-093: anchored near the top, so the box doesn't jump up and down as results filter. */
+.emvb-palette.emvb-palette { top: max(12vh, 32px); translate: -50% 0; }
 .emvb-palette-input { width: 100%; height: 44px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--color-kumo-line); background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 15px; outline: none; }
 .emvb-palette-list { max-height: min(60vh, 420px); overflow-y: auto; margin: 0; padding: 4px; list-style: none; }
 .emvb-palette-group { padding: 8px 10px 2px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-color-kumo-subtle); }

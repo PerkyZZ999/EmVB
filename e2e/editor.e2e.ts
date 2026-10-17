@@ -113,6 +113,22 @@ test("Ctrl+K opens EmVB's palette, never the host's, while the editor is open (W
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
 
+test("UX-093: the command palette stays put while its results filter", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await openEditor(page);
+  await page.keyboard.press("Control+k");
+  const palette = page.getByRole("dialog", { name: "Command palette" });
+  await expect(palette).toBeVisible();
+  await page.waitForTimeout(300);
+  const before = (await palette.boundingBox())?.y ?? -1;
+  await page.keyboard.type("heading");
+  await expect(palette.getByRole("option")).not.toHaveCount(0);
+  await page.waitForTimeout(300);
+  const after = (await palette.boundingBox())?.y ?? -2;
+  expect(Math.round(after)).toBe(Math.round(before));
+  expect(before).toBeLessThan(720 * 0.25);
+});
+
 test("with the Ctrl+K block turned off, the host palette stacks above the editor and takes the click", async ({
   page,
 }) => {

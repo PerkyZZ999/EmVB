@@ -37267,6 +37267,26 @@
         "UX-092"
       ],
       "expect": "\\(fail\\).*UX-092"
+    },
+    {
+      "id": "UX-093/palette-recenters",
+      "requirement": "UX-093",
+      "description": "The palette goes back to vertical centring and jumps as results filter.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-palette.emvb-palette { top: max(12vh, 32px); translate: -50% 0; }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "UX-093"
+      ],
+      "expect": "\\(fail\\).*UX-093"
     }
   ]
 }

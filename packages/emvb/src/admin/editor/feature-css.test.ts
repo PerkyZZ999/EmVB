@@ -44,3 +44,9 @@ test("UX-005: a select alone in its row, like Visitors' Show to, spans the row",
     /\.emvb-bind-row > \.emvb-panel-select:last-child \{ grid-column: 1 \/ -1; \}/,
   );
 });
+
+test("UX-093: the command palette is pinned near the top, so filtering doesn't move it", () => {
+  expect(FEATURE_CSS).toContain(
+    ".emvb-palette.emvb-palette { top: max(12vh, 32px); translate: -50% 0; }",
+  );
+});
