@@ -301,6 +301,22 @@ const DEPENDS_ON: Readonly<Record<string, string>> = {
   iconGap: "iconId",
 };
 
+/** UX-040: number pairs that read as one setting share a row (X beside Y, width beside height). */
+const PAIRED: Readonly<Record<string, string>> = { focalX: "focalY", width: "height" };
+
+function pairFields<F extends { key: string }>(fields: readonly F[]): F[][] {
+  const rows: F[][] = [];
+  for (let i = 0; i < fields.length; i += 1) {
+    const field = fields[i] as F;
+    const next = fields[i + 1];
+    if (next && PAIRED[field.key] === next.key) {
+      rows.push([field, next]);
+      i += 1;
+    } else rows.push([field]);
+  }
+  return rows;
+}
+
 function fieldShown(key: string, node: LayoutNode): boolean {
   const parent = DEPENDS_ON[key];
   if (!parent) return true;
@@ -521,22 +537,31 @@ function KnownElementPanel({
                 : "This element has no content settings."}
             </p>
           ) : (
-            descriptor.fields
-              .filter((field) => fieldShown(field.key, node))
-              .map((field) => (
-                <FieldControl
-                  key={field.key}
-                  field={field}
-                  node={node}
-                  onChange={onChange}
-                  fetcher={fetcher}
-                  parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
-                  duplicateName={
-                    field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
-                  }
-                  device={device}
-                />
-              ))
+            pairFields(descriptor.fields.filter((field) => fieldShown(field.key, node))).map(
+              (row) => {
+                const controls = row.map((field) => (
+                  <FieldControl
+                    key={field.key}
+                    field={field}
+                    node={node}
+                    onChange={onChange}
+                    fetcher={fetcher}
+                    parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
+                    duplicateName={
+                      field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
+                    }
+                    device={device}
+                  />
+                ));
+                return row.length === 2 ? (
+                  <div className="emvb-field-pair" key={row[0]?.key} data-emvb-field-pair="">
+                    {controls}
+                  </div>
+                ) : (
+                  controls
+                );
+              },
+            )
           )}
           <BindingsEditor node={node} onChange={onChange} post={SAMPLE_POST} />
           <AudienceEditor node={node} isRoot={layout?.root.id === node.id} onChange={onChange} />

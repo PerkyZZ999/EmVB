@@ -306,3 +306,27 @@ test("UX-034: grid placement rows show only for a Grid's children, unless alread
   expect(await styleTab(box(), "grid")).toBe(4);
   expect(await styleTab(box({ gridColumnSpan: 2 }), "container")).toBe(1);
 });
+
+test("UX-040: Focal point X and Y, and Width and Height, each share one row", async () => {
+  const image = {
+    id: "imag0009",
+    type: "image",
+    props: { src: "/a.jpg", alt: "A lake" },
+  } as LayoutNode;
+  await mount(
+    <ElementPanel
+      node={image}
+      layout={{ ...layout, root: { ...layout.root, children: [image] } }}
+      design={emptyDesign()}
+      rejection={null}
+      fetcher={stubFetcher}
+      onChange={() => undefined}
+      onDesignChange={async () => undefined}
+      onSelect={() => undefined}
+    />,
+  );
+  const rows = [...document.querySelectorAll("[data-emvb-field-pair]")].map((row) =>
+    [...row.querySelectorAll("label")].map((l) => l.textContent).join(" + "),
+  );
+  expect(rows).toEqual(["Focal point X (%) + Focal point Y (%)", "Width (px) + Height (px)"]);
+});

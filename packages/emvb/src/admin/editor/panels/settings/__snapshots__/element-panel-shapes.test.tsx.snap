@@ -3036,26 +3036,28 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
         span
           "Caption"
       input.emvb-field id="id-15" data-emvb-field="caption" value="" aria-labelledby="id-14"
-    div
-      label id="id-16" for="id-17"
-        span
-          "Focal point X (%)"
-      input.emvb-field.emvb-mono id="id-17" data-emvb-field="focalX" value="" aria-labelledby="id-16"
-    div
-      label id="id-18" for="id-19"
-        span
-          "Focal point Y (%)"
-      input.emvb-field.emvb-mono id="id-19" data-emvb-field="focalY" value="" aria-labelledby="id-18"
-    div
-      label id="id-20" for="id-21"
-        span
-          "Width (px)"
-      input.emvb-field.emvb-mono id="id-21" data-emvb-field="width" value="" aria-labelledby="id-20"
-    div
-      label id="id-22" for="id-23"
-        span
-          "Height (px)"
-      input.emvb-field.emvb-mono id="id-23" data-emvb-field="height" value="" aria-labelledby="id-22"
+    div.emvb-field-pair data-emvb-field-pair=""
+      div
+        label id="id-16" for="id-17"
+          span
+            "Focal point X (%)"
+        input.emvb-field.emvb-mono id="id-17" data-emvb-field="focalX" value="" aria-labelledby="id-16"
+      div
+        label id="id-18" for="id-19"
+          span
+            "Focal point Y (%)"
+        input.emvb-field.emvb-mono id="id-19" data-emvb-field="focalY" value="" aria-labelledby="id-18"
+    div.emvb-field-pair data-emvb-field-pair=""
+      div
+        label id="id-20" for="id-21"
+          span
+            "Width (px)"
+        input.emvb-field.emvb-mono id="id-21" data-emvb-field="width" value="" aria-labelledby="id-20"
+      div
+        label id="id-22" for="id-23"
+          span
+            "Height (px)"
+        input.emvb-field.emvb-mono id="id-23" data-emvb-field="height" value="" aria-labelledby="id-22"
     div.emvb-field-group data-emvb-field="sources"
       label.emvb-field-label for="id-24"
         "Extra sizes (srcset)"

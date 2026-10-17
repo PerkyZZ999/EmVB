@@ -35649,6 +35649,46 @@
         "UX-039"
       ],
       "expect": "\\(fail\\).*UX-039"
+    },
+    {
+      "id": "UX-040/size-unpaired",
+      "requirement": "UX-040",
+      "description": "Width and Height go back to separate rows",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "const PAIRED: Readonly<Record<string, string>> = { focalX: \"focalY\", width: \"height\" };",
+          "replace": "const PAIRED: Readonly<Record<string, string>> = { focalX: \"focalY\" };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-040"
+      ],
+      "expect": "\\(fail\\).*UX-040"
+    },
+    {
+      "id": "UX-040/no-pairs",
+      "requirement": "UX-040",
+      "description": "No fields share a row",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "    if (next && PAIRED[field.key] === next.key) {",
+          "replace": "    if (next && false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-040"
+      ],
+      "expect": "\\(fail\\).*UX-040"
     }
   ]
 }
