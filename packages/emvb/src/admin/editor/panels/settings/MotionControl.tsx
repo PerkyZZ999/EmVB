@@ -242,7 +242,7 @@ export function MotionControl({
             className={BUTTON}
             onClick={() => onChange({ type: "none" })}
           >
-            Turn off here
+            Turn off scroll motion
           </Button>
         )}
       </div>

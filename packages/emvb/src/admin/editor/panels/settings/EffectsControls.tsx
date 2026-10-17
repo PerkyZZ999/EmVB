@@ -257,8 +257,9 @@ export function EntranceControl({
         <span className="emvb-var-field-label">Entrance</span>
         {value ? (
           <>
+            {/* UX-077: the group is already "Entrance"; the select names its own part. */}
             <TransitionSelect
-              label="Entrance"
+              label="Animation"
               value={value.type}
               options={ENTRANCE_TYPES}
               onChange={(type) => onChange({ ...value, type })}

@@ -35,7 +35,9 @@ describe("W-319 scroll motion control", () => {
     const root = await mount(
       <MotionControl value={value} onChange={(next) => (value = next)} reset={null} />,
     );
-    const off = [...root.querySelectorAll("button")].find((b) => b.textContent === "Turn off here");
+    const off = [...root.querySelectorAll("button")].find(
+      (b) => b.textContent === "Turn off scroll motion",
+    );
     await act(async () => off?.click());
     expect(value as Motion).toEqual({ type: "none" });
     await rerender(<MotionControl value={value} onChange={() => {}} reset={null} />);

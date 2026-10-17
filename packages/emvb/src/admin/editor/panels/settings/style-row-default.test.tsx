@@ -34,3 +34,21 @@ test("UX-048: an unset select reads Default, and its first option can still be p
   });
   expect(patches).toEqual([{ fontWeight: 400 }]);
 });
+
+test("UX-077: the Entrance group's select is named Animation, not Entrance again", async () => {
+  const host = await mount(
+    <StyleRow
+      styleKey="entrance"
+      style={{ entrance: { type: "fade", duration: 400 } } as StyleProps}
+      design={emptyDesign()}
+      onPatch={() => undefined}
+      onDesignChange={async () => undefined}
+    />,
+  );
+  const names = [...host.querySelectorAll('[role="combobox"]')].map(
+    (c) =>
+      c.getAttribute("aria-label") ??
+      document.getElementById(c.getAttribute("aria-labelledby") ?? "")?.textContent,
+  );
+  expect(names[0] ?? "no select").toBe("Animation");
+});
