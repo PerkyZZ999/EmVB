@@ -37,6 +37,7 @@ export function PageSettings({
   fetcher?: Fetcher;
 }) {
   // Hooks run before the theme-part branch, so switching `kind` keeps the hook order (W-092).
+  const descriptionId = React.useId();
   const [seoOpen, setSeoOpen] = React.useState(false);
   if (kind === "theme-part") {
     return (
@@ -136,13 +137,25 @@ export function PageSettings({
             onChange={(event) => onChange({ seoTitle: event.target.value })}
           />
           <p className="emvb-helper">Shown in search results and browser tabs.</p>
-          <Input
-            label="Meta description"
-            className={FIELD}
-            maxLength={500}
-            value={page.seoDescription}
-            onChange={(event) => onChange({ seoDescription: event.target.value })}
-          />
+          {/* UX-021: a description runs to about 150 characters, so it gets room and a count. */}
+          <div className="emvb-field-group">
+            <label className="emvb-field-label" htmlFor={descriptionId}>
+              Meta description
+            </label>
+            <textarea
+              id={descriptionId}
+              dir="auto"
+              className={`${FIELD} emvb-textarea`}
+              rows={3}
+              maxLength={500}
+              aria-describedby={`${descriptionId}-count`}
+              value={page.seoDescription}
+              onChange={(event) => onChange({ seoDescription: event.target.value })}
+            />
+            <p className="emvb-helper" id={`${descriptionId}-count`} data-emvb-seo-count="">
+              {page.seoDescription.length} characters. Search results show about 150.
+            </p>
+          </div>
           {/* W-284: EmDash stores these; the public page prints them (W-274). */}
           <Input
             label="Canonical URL"

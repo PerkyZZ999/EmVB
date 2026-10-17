@@ -37,13 +37,14 @@ async function settings(page: PageDraft, kind: "page" | "theme-part" = "page", f
     );
     const id = element?.getAttribute("for");
     const input = id ? document.getElementById(id) : null;
-    return input instanceof HTMLInputElement ? input : null;
+    return input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement ? input : null;
   };
   const type = async (label: string, text: string) => {
     const input = field(label);
     if (!input) throw new Error(`no ${label} field`);
     await act(async () => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(input, text);
+      const proto = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement : HTMLInputElement;
+      Object.getOwnPropertyDescriptor(proto.prototype, "value")?.set?.call(input, text);
       input.dispatchEvent(new Event("input", { bubbles: true }));
     });
   };
@@ -74,6 +75,16 @@ describe("page settings (W-091)", () => {
     await view.type("Meta title", "Search title");
     await view.type("Meta description", "Search text");
     expect(view.sent).toEqual([{ seoTitle: "Search title" }, { seoDescription: "Search text" }]);
+  });
+
+  test("UX-021: the meta description is a multi-line field with a live character count", async () => {
+    const view = await settings({ ...PAGE, seoDescription: "Twelve chars" });
+    await view.openSeo();
+    const field = view.field("Meta description");
+    expect(field instanceof HTMLTextAreaElement).toBe(true);
+    const count = view.host.querySelector("[data-emvb-seo-count]");
+    expect(count?.textContent ?? null).toBe("12 characters. Search results show about 150.");
+    expect(field?.getAttribute("aria-describedby") ?? null).toBe(count?.id ?? "missing");
   });
 
   test("W-284: Canonical URL and Hide from search engines send patches and count as set", async () => {
