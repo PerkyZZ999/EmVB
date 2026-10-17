@@ -36217,6 +36217,26 @@
         "UX-055"
       ],
       "expect": "\\(fail\\).*UX-055"
+    },
+    {
+      "id": "UX-056/dot-on-label",
+      "requirement": "UX-056",
+      "description": "The unsaved dot sits on the end of the label again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-unsaved-dot { position: absolute; top: -3px; right: -3px;",
+          "replace": ".emvb-unsaved-dot { position: absolute; top: 4px; right: 4px;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-056"
+      ],
+      "expect": "\\(fail\\).*UX-056"
     }
   ]
 }

@@ -162,3 +162,9 @@ test("UX-049: the fill type is a one-row segmented choice, not primary buttons",
   // Unpicked labels sit on the recessed track, where the subtle colour is only 4.0:1.
   expect(rule(".emvb-fill-types button")).toContain("color: var(--text-color-kumo-default);");
 });
+
+test("UX-056: the unsaved dot sits on Save draft's corner, ringed, clear of the label", () => {
+  const dot = rule(".emvb-unsaved-dot");
+  expect(dot).toContain("top: -3px; right: -3px;");
+  expect(dot).toContain("box-shadow: 0 0 0 2px var(--color-kumo-base);");
+});

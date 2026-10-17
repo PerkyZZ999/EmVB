@@ -65,7 +65,8 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-link-button { border: 0; padding: 0; background: none; color: var(--text-color-kumo-default); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; justify-self: start; }
 .emvb-save-button, .emvb-publish-button { position: relative; }
 .emvb-styles-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; }
-.emvb-unsaved-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 9999px; background: var(--text-color-kumo-default); }
+/* UX-056: on the corner, ringed in the surface colour, so it no longer sits on the end of "draft". */
+.emvb-unsaved-dot { position: absolute; top: -3px; right: -3px; width: 8px; height: 8px; border-radius: 9999px; background: var(--text-color-kumo-default); box-shadow: 0 0 0 2px var(--color-kumo-base); }
 .emvb-danger-text.emvb-danger-text { color: var(--text-color-kumo-danger); }
 .emvb-frame { display: grid; grid-template-columns: var(--emvb-panel-left) minmax(0, 1fr) var(--emvb-panel-right); min-height: 0; }
 .emvb-panel {
