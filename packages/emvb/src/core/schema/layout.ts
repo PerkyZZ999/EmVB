@@ -107,7 +107,7 @@ export const AUDIENCE_DEVICES = ["mobile", "tablet", "desktop"] as const;
 /** A visitor segment name the host passes and a Visitors rule matches (W-329). */
 /** A host segment name: letters, digits, and `:` `_` `-`, up to 64 characters (`plan:pro`). */
 export const AUDIENCE_SEGMENT = /^[a-z0-9][a-z0-9:_-]{0,63}$/;
-const SEGMENT_HINT = "Segments are lowercase letters, digits, :, - or _, e.g. plan:pro";
+const SEGMENT_HINT = "Segments are lowercase letters, digits, :, - or _, such as plan:pro";
 
 /**
  * Who sees an element (W-313): visitors from these countries, on these devices, new or
@@ -117,7 +117,7 @@ const SEGMENT_HINT = "Segments are lowercase letters, digits, :, - or _, e.g. pl
  */
 export const Audience = z.strictObject({
   countries: z
-    .array(z.string().regex(/^[A-Z]{2}$/, "Two-letter country codes, e.g. CA"))
+    .array(z.string().regex(/^[A-Z]{2}$/, "Two-letter country codes, such as CA"))
     .min(1)
     .max(50)
     .optional(),
@@ -567,7 +567,7 @@ export const PostLinkNode = leafNode(
 export const LOOP_DISPLAYS = ["list", "grid", "cards"] as const;
 /** A collection field's slug, e.g. `photo` (W-330). */
 const FIELD_SLUG = /^[a-z][a-z0-9_]{0,63}$/;
-const FIELD_SLUG_HINT = "Use the field's slug, e.g. photo";
+const FIELD_SLUG_HINT = "Use the field's slug, such as photo";
 /** A site path with `{slug}` or `{id}`, and no other placeholders (W-330). */
 export const LOOP_PERMALINK =
   /^(?=.*\{(?:slug|id)\})\/(?!\/)(?:[A-Za-z0-9._~/-]|\{slug\}|\{id\})*$/;
@@ -593,7 +593,7 @@ export const LoopNode = parentNode(
      */
     collection: z
       .string()
-      .regex(/^[a-z][a-z0-9_]{0,63}$/, "Use the collection's slug, e.g. team")
+      .regex(/^[a-z][a-z0-9_]{0,63}$/, "Use the collection's slug, such as team")
       .optional(),
     /** How many entries a collection Loop shows, 1–50. Unset = 6. */
     limit: z.number().int().min(1).max(50).optional(),
@@ -608,7 +608,7 @@ export const LoopNode = parentNode(
     permalink: z
       .string()
       .max(200)
-      .regex(LOOP_PERMALINK, "A site path with {slug} or {id}, e.g. /team/{slug}")
+      .regex(LOOP_PERMALINK, "A site path with {slug} or {id}, such as /team/{slug}")
       .optional(),
     /** The entry field holding the image Post Image shows (W-330). Unset = featured_image. */
     imageField: z.string().regex(FIELD_SLUG, FIELD_SLUG_HINT).optional(),

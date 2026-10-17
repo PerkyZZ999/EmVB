@@ -288,3 +288,9 @@ test("UX-047: a number field's error-only message stays out of sight until it ap
   );
   expect(host.querySelector("input") ? describedBy(host) : "no input").toBe("none");
 });
+
+test("UX-060: layout validation messages say such as, not e.g.", async () => {
+  const source = await Bun.file(`${import.meta.dir}/../../../../core/schema/layout.ts`).text();
+  const messages = [...source.matchAll(/"[^"\n]*\be\.g\.[^"\n]*"/g)].map((m) => m[0]);
+  expect(source.includes("such as plan:pro") ? messages : ["layout.ts not read"]).toEqual([]);
+});

@@ -28975,7 +28975,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "const SEGMENT_HINT = \"Segments are lowercase letters, digits, :, - or _, e.g. plan:pro\";",
+          "search": "const SEGMENT_HINT = \"Segments are lowercase letters, digits, :, - or _, such as plan:pro\";",
           "replace": "const SEGMENT_HINT = \"Segments are lowercase letters, digits, - or _, e.g. member\";"
         }
       ],
@@ -36357,6 +36357,26 @@
         "UX-059"
       ],
       "expect": "\\(fail\\).*UX-059"
+    },
+    {
+      "id": "UX-060/eg-in-schema",
+      "requirement": "UX-060",
+      "description": "A layout validation message says e.g. again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "\"Two-letter country codes, such as CA\"",
+          "replace": "\"Two-letter country codes, e.g. CA\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-060"
+      ],
+      "expect": "\\(fail\\).*UX-060"
     }
   ]
 }
