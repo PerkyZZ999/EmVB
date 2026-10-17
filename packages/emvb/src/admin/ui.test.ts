@@ -31,3 +31,7 @@ test("UX-005: a panel select fills its column instead of Kumo's content width", 
   expect(field).toMatch(/width: 100%;/);
   expect(field).toMatch(/min-width: 0;/);
 });
+
+test("UX-017: a display-condition row keeps its Where menu inside the panel", () => {
+  expect(rule(".emvb-condition-row")).toMatch(/grid-template-columns: 96px minmax\(0, 1fr\) 28px;/);
+});

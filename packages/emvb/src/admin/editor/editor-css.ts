@@ -422,6 +422,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-textarea { min-height: 72px; height: auto; padding: 8px; resize: vertical; font: inherit; }
 .emvb-field-label { font-size: 12px; font-weight: 500; color: var(--text-color-kumo-subtle); }
 .emvb-panel [data-emvb-panel] .emvb-helper { margin-top: -2px; }
+.emvb-panel [data-emvb-panel="conditions"] > .emvb-section-label + .emvb-helper { margin-top: 4px; }
 
 .emvb-media-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .emvb-media-preview { display: flex; flex-direction: column; gap: 4px; }

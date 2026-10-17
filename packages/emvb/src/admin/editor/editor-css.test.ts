@@ -128,3 +128,9 @@ test('four-box captions wrap instead of clipping "Bottom right" to "Bottom ri…
   expect(caption).toMatch(/text-align: center;/);
   expect(/white-space: nowrap|text-overflow: ellipsis/.test(caption)).toBe(false);
 });
+
+test("the display-conditions note sits 4 px under its heading, not pulled up into it (UX-017)", () => {
+  expect(
+    rule('.emvb-panel [data-emvb-panel="conditions"] > .emvb-section-label + .emvb-helper'),
+  ).toMatch(/margin-top: 4px;/);
+});

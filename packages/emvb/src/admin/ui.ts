@@ -245,7 +245,7 @@ export const UI_CSS = `
 }
 .emvb-condition-row {
   display: grid;
-  grid-template-columns: 96px 1fr 28px;
+  grid-template-columns: 96px minmax(0, 1fr) 28px;
   gap: 6px;
   align-items: center;
   padding: 6px;

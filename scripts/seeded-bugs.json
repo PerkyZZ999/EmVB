@@ -34991,6 +34991,40 @@
         "UX-016"
       ],
       "expect": "\\(fail\\).*UX-016"
+    },
+    {
+      "id": "UX-017/condition-row-overflow",
+      "requirement": "UX-017",
+      "description": "The Where menu sizes its column to its content and pushes the condition card past the panel edge",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  grid-template-columns: 96px minmax(0, 1fr) 28px;",
+          "replace": "  grid-template-columns: 96px 1fr 28px;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-017"],
+      "expect": "\\(fail\\).*UX-017"
+    },
+    {
+      "id": "UX-017/conditions-note-cramped",
+      "requirement": "UX-017",
+      "description": "The display-conditions note is pulled up against its heading",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-panel [data-emvb-panel=\"conditions\"] > .emvb-section-label + .emvb-helper { margin-top: 4px; }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-017"
+      ],
+      "expect": "\\(fail\\).*UX-017"
     }
   ]
 }
