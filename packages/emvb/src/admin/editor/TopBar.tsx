@@ -114,7 +114,10 @@ export function TopBar({
         </Button>
         {page && (
           <>
-            <span className="emvb-topbar-title">{page.title || "Untitled page"}</span>
+            {/* UX-031: a long title ellipsizes; the tooltip keeps the whole name (DESIGN.md). */}
+            <span className="emvb-topbar-title" title={page.title ? page.title : "Untitled page"}>
+              {page.title || "Untitled page"}
+            </span>
             <span className="emvb-status" data-status={page.status}>
               <span className="emvb-status-dot" aria-hidden="true" />
               {statusLabel(page.status)}

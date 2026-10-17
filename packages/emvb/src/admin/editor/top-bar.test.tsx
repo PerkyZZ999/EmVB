@@ -150,3 +150,14 @@ describe("top bar page and actions (W-091)", () => {
     expect(view.statusText()).toBeNull();
   });
 });
+
+test("UX-031: the page title carries its whole name as a tooltip, since a long one ellipsizes", async () => {
+  const long = "Spring collection launch landing page for the north american market";
+  const view = await bar({ page: { title: long, status: "draft" } });
+  const title = view.host.querySelector(".emvb-topbar-title");
+  expect(title?.getAttribute("title") ?? null).toBe(long);
+  const untitled = await bar({ page: { title: "", status: "draft" } });
+  expect(untitled.host.querySelector(".emvb-topbar-title")?.getAttribute("title") ?? null).toBe(
+    "Untitled page",
+  );
+});

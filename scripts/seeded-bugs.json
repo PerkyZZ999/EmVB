@@ -35341,6 +35341,26 @@
         "UX-030"
       ],
       "expect": "\\(fail\\).*UX-030"
+    },
+    {
+      "id": "UX-031/title-no-tooltip",
+      "requirement": "UX-031",
+      "description": "A long page title ellipsizes in the top bar with no way to read it whole",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "<span className=\"emvb-topbar-title\" title={page.title ? page.title : \"Untitled page\"}>",
+          "replace": "<span className=\"emvb-topbar-title\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/top-bar.test.tsx",
+        "-t",
+        "UX-031"
+      ],
+      "expect": "\\(fail\\).*UX-031"
     }
   ]
 }
