@@ -238,3 +238,33 @@ describe("ElementPanel (W-021)", () => {
     expect(document.querySelector('[data-emvb-tab="content"]')?.outerHTML ?? null).toBeNull();
   });
 });
+
+test("UX-028: a button's icon layout settings wait for an icon, unless one is already set", async () => {
+  const button = (props: Record<string, unknown>): LayoutNode =>
+    ({ id: "butn0001", type: "button", props: { text: "Go", ...props } }) as LayoutNode;
+  const page = (node: LayoutNode): Layout => ({
+    ...layout,
+    root: { ...layout.root, children: [node] },
+  });
+  const content = async (node: LayoutNode) => {
+    await mount(
+      <ElementPanel
+        node={node}
+        layout={page(node)}
+        design={emptyDesign()}
+        rejection={null}
+        fetcher={stubFetcher}
+        onChange={() => undefined}
+        onDesignChange={async () => undefined}
+        onSelect={() => undefined}
+      />,
+    );
+    return document.querySelector('[data-emvb-tab="content"]')?.textContent ?? "";
+  };
+  const none = await content(button({}));
+  expect(["Icon position", "Icon size", "Gap (px)"].filter((l) => none.includes(l))).toEqual([]);
+  const withIcon = await content(button({ iconId: "lucide:arrow-right" }));
+  expect(["Icon position", "Icon size", "Gap (px)"].every((l) => withIcon.includes(l))).toBe(true);
+  const stored = await content(button({ iconSize: "lg" }));
+  expect(stored.includes("Icon size")).toBe(true);
+});

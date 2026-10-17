@@ -275,6 +275,23 @@ function Alert({
   );
 }
 
+/**
+ * UX-028: settings that only matter once another is set stay out of the way
+ * until then. A value already stored always shows, so nothing set is ever hidden.
+ */
+const DEPENDS_ON: Readonly<Record<string, string>> = {
+  iconPosition: "iconId",
+  iconSize: "iconId",
+  iconGap: "iconId",
+};
+
+function fieldShown(key: string, node: LayoutNode): boolean {
+  const parent = DEPENDS_ON[key];
+  if (!parent) return true;
+  const props = node.props as Record<string, unknown>;
+  return props[parent] !== undefined || props[key] !== undefined;
+}
+
 /** Right panel with an element selected (IA / W-021): descriptor Content + Style sections. */
 export function ElementPanel(props: Props) {
   const descriptor = ELEMENT_DESCRIPTORS.find((d) => d.type === props.node.type);
@@ -487,20 +504,22 @@ function KnownElementPanel({
                 : "This element has no content settings."}
             </p>
           ) : (
-            descriptor.fields.map((field) => (
-              <FieldControl
-                key={field.key}
-                field={field}
-                node={node}
-                onChange={onChange}
-                fetcher={fetcher}
-                parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
-                duplicateName={
-                  field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
-                }
-                device={device}
-              />
-            ))
+            descriptor.fields
+              .filter((field) => fieldShown(field.key, node))
+              .map((field) => (
+                <FieldControl
+                  key={field.key}
+                  field={field}
+                  node={node}
+                  onChange={onChange}
+                  fetcher={fetcher}
+                  parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
+                  duplicateName={
+                    field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
+                  }
+                  device={device}
+                />
+              ))
           )}
           <BindingsEditor node={node} onChange={onChange} post={SAMPLE_POST} />
           <AudienceEditor node={node} isRoot={layout?.root.id === node.id} onChange={onChange} />
