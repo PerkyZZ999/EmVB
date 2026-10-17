@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act, useState } from "react";
-import type { FieldDescriptor, LayoutNode } from "../../../../core/index.ts";
+import {
+  ELEMENT_DESCRIPTORS,
+  type FieldDescriptor,
+  type LayoutNode,
+} from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 import { FieldControl } from "./FieldControl.tsx";
@@ -237,4 +241,29 @@ test("UX-042: the Image switches say when to turn them on, and the switch is des
     "For images that add nothing to the text. Screen readers skip them.",
   );
   expect(await described("newTab")).toBe("not described");
+});
+
+test("UX-043: every Decorative switch reads the same and says when to use it", async () => {
+  const hints: string[] = [];
+  for (const type of ["image", "post-image", "icon", "svg"]) {
+    const descriptor = ELEMENT_DESCRIPTORS.find((d) => d.type === type);
+    const field = descriptor?.fields.find((f) => f.key === "decorative");
+    if (!field) {
+      hints.push(`${type}: no field`);
+      continue;
+    }
+    const element = { id: `${type.slice(0, 4)}0001`, type, props: {} } as LayoutNode;
+    // oxlint-disable-next-line no-await-in-loop
+    const host = await mount(
+      <FieldControl field={field} node={element} onChange={() => undefined} />,
+    );
+    const id = host.querySelector('[role="switch"]')?.getAttribute("aria-describedby") ?? "";
+    hints.push(`${type}: ${field.label}${id ? "" : " (no hint)"}`);
+  }
+  expect(hints).toEqual([
+    "image: Decorative",
+    "post-image: Decorative",
+    "icon: Decorative",
+    "svg: Decorative",
+  ]);
 });

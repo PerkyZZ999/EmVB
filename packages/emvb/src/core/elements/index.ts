@@ -404,7 +404,7 @@ const image: ElementDefinition<ImageNode> = {
       {
         key: "decorative",
         kind: "boolean",
-        label: "Decorative (empty alt)",
+        label: "Decorative",
         optional: true,
       },
       // The first big image people see (hero, LCP) shouldn't wait for lazy loading (W-226).
@@ -562,7 +562,7 @@ const icon: ElementDefinition<IconNode> = {
       {
         key: "decorative",
         kind: "boolean",
-        label: "Decorative (hide from assistive tech)",
+        label: "Decorative",
         optional: true,
       },
       {
@@ -841,7 +841,7 @@ const svgEl: ElementDefinition<SvgNode> = {
       {
         key: "decorative",
         kind: "boolean",
-        label: "Decorative (hide from assistive tech)",
+        label: "Decorative",
         optional: true,
       },
       {
@@ -1084,7 +1084,7 @@ const accordionItem: ElementDefinition<AccordionItemNode> = {
     defaultTab: "content",
     fields: [
       { key: "summary", kind: "text", label: "Title" },
-      { key: "open", kind: "boolean", label: "Open", optional: true },
+      { key: "open", kind: "boolean", label: "Open by default", optional: true },
     ],
   },
   build: (node, attrs, children) => {

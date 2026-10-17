@@ -35769,6 +35769,46 @@
         "UX-042"
       ],
       "expect": "\\(fail\\).*UX-042"
+    },
+    {
+      "id": "UX-043/icon-label-differs",
+      "requirement": "UX-043",
+      "description": "The Icon's Decorative switch gets its long label back",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "      { key: \"title\", kind: \"text\", label: \"Title\" },\n      {\n        key: \"decorative\",\n        kind: \"boolean\",\n        label: \"Decorative\",",
+          "replace": "      { key: \"title\", kind: \"text\", label: \"Title\" },\n      {\n        key: \"decorative\",\n        kind: \"boolean\",\n        label: \"Decorative (hide from assistive tech)\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx",
+        "-t",
+        "UX-043"
+      ],
+      "expect": "\\(fail\\).*UX-043"
+    },
+    {
+      "id": "UX-043/svg-unexplained",
+      "requirement": "UX-043",
+      "description": "The SVG's Decorative switch has no hint",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "  \"svg.decorative\": \"For graphics that add nothing to the text. Screen readers skip them.\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx",
+        "-t",
+        "UX-043"
+      ],
+      "expect": "\\(fail\\).*UX-043"
     }
   ]
 }

@@ -189,10 +189,14 @@ export function FieldControl({
   return <DraftTextField field={field} node={node} onChange={onChange} />;
 }
 
-/** UX-042: switches whose label alone doesn't say when to turn them on. */
+/** UX-042, UX-043: switches whose label alone doesn't say when to turn them on. */
 const SWITCH_HINTS: Readonly<Record<string, string>> = {
   "image.decorative": "For images that add nothing to the text. Screen readers skip them.",
   "image.priority": "For the first large image on the page. Others load as they scroll into view.",
+  "post-image.decorative": "For images that add nothing to the text. Screen readers skip them.",
+  "icon.decorative": "For icons that repeat nearby text. Screen readers skip them.",
+  "svg.decorative": "For graphics that add nothing to the text. Screen readers skip them.",
+  "menu-item.wide": "The dropdown spans the width of the menu.",
 };
 
 const DEVICE_NAMES = { tablet: "tablet", mobile: "mobile" } as const;
