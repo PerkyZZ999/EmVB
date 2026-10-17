@@ -430,3 +430,48 @@ test("UX-071: Pagination's Count text shows once Show page count is on", async (
 test("UX-071: Pagination's Count text shows with the page count", async () => {
   expect(await pagination({ showCount: true })).toBe("shown");
 });
+
+const newTabSwitch = async (node: LayoutNode) => {
+  await mount(
+    <ElementPanel
+      node={node}
+      layout={{ ...layout, root: { ...layout.root, children: [node] } }}
+      design={emptyDesign()}
+      rejection={null}
+      fetcher={stubFetcher}
+      onChange={() => undefined}
+      onDesignChange={async () => undefined}
+      onSelect={() => undefined}
+    />,
+  );
+  return document.querySelector('[data-emvb-field="newTab"]') ? "shown" : "hidden";
+};
+
+test("UX-072: a Button's new-tab switch waits for a link", async () => {
+  const button = { id: "butn0011", type: "button", props: { text: "Go" } } as LayoutNode;
+  expect(await newTabSwitch(button)).toBe("hidden");
+});
+
+test("UX-072: a Button with a link offers the new-tab switch", async () => {
+  const button = {
+    id: "butn0012",
+    type: "button",
+    props: { text: "Go", href: "/x" },
+  } as LayoutNode;
+  expect(await newTabSwitch(button)).toBe("shown");
+});
+
+test("UX-072: a link bound to live data offers the new-tab switch", async () => {
+  const button = {
+    id: "butn0013",
+    type: "button",
+    props: { text: "Go" },
+    bind: { href: { source: "site", key: "url" } },
+  } as unknown as LayoutNode;
+  expect(await newTabSwitch(button)).toBe("shown");
+});
+
+test("UX-072: Post Link always offers the new-tab switch", async () => {
+  const postLink = { id: "plnk0011", type: "post-link", props: {} } as unknown as LayoutNode;
+  expect(await newTabSwitch(postLink)).toBe("shown");
+});

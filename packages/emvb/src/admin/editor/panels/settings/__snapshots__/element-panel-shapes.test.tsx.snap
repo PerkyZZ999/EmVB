@@ -53,14 +53,6 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
         span
           "Link"
       input.emvb-field id="id-8" data-emvb-field="href" value="" aria-labelledby="id-7"
-    div.emvb-field-group data-emvb-field="newTab"
-      div
-        label id="id-9" for="id-10"
-          span
-            "Open in a new tab"
-        button data-unchecked="" type="button" tabindex="0" id="id-10" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open in a new tab" aria-labelledby="id-9"
-          div
-        input tabindex="-1" aria-hidden="true" type="checkbox"
     section.emvb-bind data-emvb-bindings="" aria-labelledby="emvb-bind-keys-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-bind-keys-bi1nwpcq-title"
         "Dynamic data"
@@ -71,23 +63,23 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
           "Text source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="text"
           div
-            button.emvb-field type="button" tabindex="0" id="id-11" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-text-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-9" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-text-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-12" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-10" tabindex="-1" aria-hidden="true" value="static"
       div.emvb-bind-row data-emvb-bind-field="href"
         label.emvb-bind-label id="emvb-bind-keys-bi1nwpcq-href-label"
           "Link source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="href"
           div
-            button.emvb-field type="button" tabindex="0" id="id-13" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-href-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-11" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-href-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-14" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-12" tabindex="-1" aria-hidden="true" value="static"
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"
@@ -96,12 +88,12 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-15" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-13" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-16" tabindex="-1" aria-hidden="true" value="everyone""
+            input id="id-14" tabindex="-1" aria-hidden="true" value="everyone""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="heading"
@@ -2485,14 +2477,6 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
         span
           "URL"
       input.emvb-field id="id-5" data-emvb-field="href" value="" aria-labelledby="id-4"
-    div.emvb-field-group data-emvb-field="newTab"
-      div
-        label id="id-6" for="id-7"
-          span
-            "Open in a new tab"
-        button data-unchecked="" type="button" tabindex="0" id="id-7" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open in a new tab" aria-labelledby="id-6"
-          div
-        input tabindex="-1" aria-hidden="true" type="checkbox"
     div.emvb-field-group data-emvb-field="iconId" data-emvb-icon-picker=""
       span.emvb-field-label
         "Icon"
@@ -2518,23 +2502,23 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
           "Text source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="text"
           div
-            button.emvb-field type="button" tabindex="0" id="id-8" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-text-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-6" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-text-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-9" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-7" tabindex="-1" aria-hidden="true" value="static"
       div.emvb-bind-row data-emvb-bind-field="href"
         label.emvb-bind-label id="emvb-bind-keys-bi1nwpcq-href-label"
           "Link source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="href"
           div
-            button.emvb-field type="button" tabindex="0" id="id-10" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-href-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-8" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-href-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-11" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-9" tabindex="-1" aria-hidden="true" value="static"
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"
@@ -2543,12 +2527,12 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-12" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-10" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-13" tabindex="-1" aria-hidden="true" value="everyone""
+            input id="id-11" tabindex="-1" aria-hidden="true" value="everyone""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="button"
@@ -3045,47 +3029,39 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
         span
           "Link URL"
       input.emvb-field id="id-13" data-emvb-field="href" value="" aria-labelledby="id-12"
-    div.emvb-field-group data-emvb-field="newTab"
-      div
-        label id="id-14" for="id-15"
-          span
-            "Open link in a new tab"
-        button data-unchecked="" type="button" tabindex="0" id="id-15" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open link in a new tab" aria-labelledby="id-14"
-          div
-        input tabindex="-1" aria-hidden="true" type="checkbox"
     div
-      label id="id-16" for="id-17"
+      label id="id-14" for="id-15"
         span
           "Caption"
-      input.emvb-field id="id-17" data-emvb-field="caption" value="" aria-labelledby="id-16"
+      input.emvb-field id="id-15" data-emvb-field="caption" value="" aria-labelledby="id-14"
     div.emvb-field-pair data-emvb-field-pair=""
+      div
+        label id="id-16" for="id-17"
+          span
+            "Focal point X (%)"
+        input.emvb-field.emvb-mono id="id-17" data-emvb-field="focalX" value="" aria-labelledby="id-16"
       div
         label id="id-18" for="id-19"
           span
-            "Focal point X (%)"
-        input.emvb-field.emvb-mono id="id-19" data-emvb-field="focalX" value="" aria-labelledby="id-18"
+            "Focal point Y (%)"
+        input.emvb-field.emvb-mono id="id-19" data-emvb-field="focalY" value="" aria-labelledby="id-18"
+    div.emvb-field-pair data-emvb-field-pair=""
       div
         label id="id-20" for="id-21"
           span
-            "Focal point Y (%)"
-        input.emvb-field.emvb-mono id="id-21" data-emvb-field="focalY" value="" aria-labelledby="id-20"
-    div.emvb-field-pair data-emvb-field-pair=""
+            "Width (px)"
+        input.emvb-field.emvb-mono id="id-21" data-emvb-field="width" value="" aria-labelledby="id-20"
       div
         label id="id-22" for="id-23"
           span
-            "Width (px)"
-        input.emvb-field.emvb-mono id="id-23" data-emvb-field="width" value="" aria-labelledby="id-22"
-      div
-        label id="id-24" for="id-25"
-          span
             "Height (px)"
-        input.emvb-field.emvb-mono id="id-25" data-emvb-field="height" value="" aria-labelledby="id-24"
+        input.emvb-field.emvb-mono id="id-23" data-emvb-field="height" value="" aria-labelledby="id-22"
     div.emvb-field-group data-emvb-field="sources"
-      label.emvb-field-label for="id-26"
+      label.emvb-field-label for="id-24"
         "Extra sizes (srcset)"
-      textarea.emvb-field.emvb-textarea id="id-26" placeholder="/photo-480.jpg 480
-/photo-1600.jpg 1600" aria-describedby="id-26-help"
-      span.emvb-helper id="id-26-help"
+      textarea.emvb-field.emvb-textarea id="id-24" placeholder="/photo-480.jpg 480
+/photo-1600.jpg 1600" aria-describedby="id-24-help"
+      span.emvb-helper id="id-24-help"
         "One per line: the URL of a smaller or larger copy, a space, then its width in px. Set Width (px) so the main image is listed too."
     section.emvb-bind data-emvb-bindings="" aria-labelledby="emvb-bind-keys-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-bind-keys-bi1nwpcq-title"
@@ -3097,23 +3073,23 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
           "Image source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="src"
           div
-            button.emvb-field type="button" tabindex="0" id="id-27" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-src-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-25" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-src-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-28" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-26" tabindex="-1" aria-hidden="true" value="static"
       div.emvb-bind-row data-emvb-bind-field="alt"
         label.emvb-bind-label id="emvb-bind-keys-bi1nwpcq-alt-label"
           "Alt text source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="alt"
           div
-            button.emvb-field type="button" tabindex="0" id="id-29" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-alt-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-27" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-alt-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-30" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-28" tabindex="-1" aria-hidden="true" value="static"
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"
@@ -3122,12 +3098,12 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-31" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-29" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-32" tabindex="-1" aria-hidden="true" value="everyone""
+            input id="id-30" tabindex="-1" aria-hidden="true" value="everyone""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="image"
@@ -3350,14 +3326,6 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
         span
           "Link"
       input.emvb-field id="id-10" data-emvb-field="href" value="" aria-labelledby="id-9"
-    div.emvb-field-group data-emvb-field="newTab"
-      div
-        label id="id-11" for="id-12"
-          span
-            "Open in a new tab"
-        button data-unchecked="" type="button" tabindex="0" id="id-12" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open in a new tab" aria-labelledby="id-11"
-          div
-        input tabindex="-1" aria-hidden="true" type="checkbox"
     section.emvb-bind data-emvb-bindings="" aria-labelledby="emvb-bind-keys-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-bind-keys-bi1nwpcq-title"
         "Dynamic data"
@@ -3368,23 +3336,23 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
           "Link source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="href"
           div
-            button.emvb-field type="button" tabindex="0" id="id-13" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-href-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-11" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-href-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-14" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-12" tabindex="-1" aria-hidden="true" value="static"
       div.emvb-bind-row data-emvb-bind-field="title"
         label.emvb-bind-label id="emvb-bind-keys-bi1nwpcq-title-label"
           "Title source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="title"
           div
-            button.emvb-field type="button" tabindex="0" id="id-15" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-title-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-13" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-title-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-16" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-14" tabindex="-1" aria-hidden="true" value="static"
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"
@@ -3393,12 +3361,12 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-17" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-15" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-18" tabindex="-1" aria-hidden="true" value="everyone""
+            input id="id-16" tabindex="-1" aria-hidden="true" value="everyone""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="icon"
@@ -9560,14 +9528,6 @@ exports[`element panel markup (W-021, W-086 M16) grid renders the same content a
         span
           "Link"
       input.emvb-field id="id-9" data-emvb-field="href" value="" aria-labelledby="id-8"
-    div.emvb-field-group data-emvb-field="newTab"
-      div
-        label id="id-10" for="id-11"
-          span
-            "Open in a new tab"
-        button data-unchecked="" type="button" tabindex="0" id="id-11" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Open in a new tab" aria-labelledby="id-10"
-          div
-        input tabindex="-1" aria-hidden="true" type="checkbox"
     section.emvb-bind data-emvb-bindings="" aria-labelledby="emvb-bind-keys-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-bind-keys-bi1nwpcq-title"
         "Dynamic data"
@@ -9578,12 +9538,12 @@ exports[`element panel markup (W-021, W-086 M16) grid renders the same content a
           "Link source"
         span.emvb-panel-select data-value="static" data-emvb-bind-source="href"
           div
-            button.emvb-field type="button" tabindex="0" id="id-12" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-href-label" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-10" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-bind-keys-bi1nwpcq-href-label" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Typed value"
               span aria-hidden="true"
                 svg
-            input id="id-13" tabindex="-1" aria-hidden="true" value="static"
+            input id="id-11" tabindex="-1" aria-hidden="true" value="static"
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"
@@ -9592,12 +9552,12 @@ exports[`element panel markup (W-021, W-086 M16) grid renders the same content a
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-14" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-12" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-15" tabindex="-1" aria-hidden="true" value="everyone""
+            input id="id-13" tabindex="-1" aria-hidden="true" value="everyone""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="grid"

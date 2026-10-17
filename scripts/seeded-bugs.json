@@ -36731,6 +36731,66 @@
         "UX-071"
       ],
       "expect": "\\(fail\\).*UX-071"
+    },
+    {
+      "id": "UX-072/new-tab-always",
+      "requirement": "UX-072",
+      "description": "New-tab switches show with no link",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  newTab: \"href\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-072"
+      ],
+      "expect": "\\(fail\\).*UX-072"
+    },
+    {
+      "id": "UX-072/post-link-hidden",
+      "requirement": "UX-072",
+      "description": "Post Link loses its new-tab switch",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  \"post-link.newTab\": () => true,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-072"
+      ],
+      "expect": "\\(fail\\).*UX-072"
+    },
+    {
+      "id": "UX-072/bound-link-ignored",
+      "requirement": "UX-072",
+      "description": "A link bound to live data hides the new-tab switch",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  return (props[parent] !== undefined && props[parent] !== \"\") || bound;\n",
+          "replace": "  return props[parent] !== undefined && props[parent] !== \"\";\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-072"
+      ],
+      "expect": "\\(fail\\).*UX-072"
     }
   ]
 }

@@ -299,6 +299,8 @@ const DEPENDS_ON: Readonly<Record<string, string>> = {
   iconPosition: "iconId",
   iconSize: "iconId",
   iconGap: "iconId",
+  // UX-072: a new tab needs a link, typed or bound to live data (W-276 drops the target without one).
+  newTab: "href",
 };
 
 /** UX-040: number pairs that read as one setting share a row (X beside Y, width beside height). */
@@ -321,6 +323,8 @@ function pairFields<F extends { key: string }>(fields: readonly F[]): F[][] {
 const SHOWN_WHEN: Readonly<Record<string, (props: Record<string, unknown>) => boolean>> = {
   "loop.columns": (props) => props["display"] === "grid" || props["display"] === "cards",
   "pagination.countText": (props) => props["showCount"] === true,
+  // Post Link always links to its post, so its new-tab switch always applies.
+  "post-link.newTab": () => true,
 };
 
 function fieldShown(key: string, node: LayoutNode): boolean {
@@ -331,7 +335,8 @@ function fieldShown(key: string, node: LayoutNode): boolean {
   if (when) return when(props);
   const parent = DEPENDS_ON[key];
   if (!parent) return true;
-  return props[parent] !== undefined;
+  const bound = (node as { bind?: Record<string, unknown> }).bind?.[parent] !== undefined;
+  return (props[parent] !== undefined && props[parent] !== "") || bound;
 }
 
 /** Right panel with an element selected (IA / W-021): descriptor Content + Style sections. */
