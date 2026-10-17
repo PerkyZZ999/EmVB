@@ -35889,6 +35889,46 @@
         "UX-046"
       ],
       "expect": "\\(fail\\).*UX-046"
+    },
+    {
+      "id": "UX-047/default-hidden",
+      "requirement": "UX-047",
+      "description": "Number fields hide what empty means again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "      description={error ? undefined : description}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-047"
+      ],
+      "expect": "\\(fail\\).*UX-047"
+    },
+    {
+      "id": "UX-047/error-copy-as-hint",
+      "requirement": "UX-047",
+      "description": "Every number message shows up front, including error-only ones",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "          field.message && /leave it (empty|blank)/i.test(field.message) ? field.message : undefined\n",
+          "replace": "          field.message\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-047"
+      ],
+      "expect": "\\(fail\\).*UX-047"
     }
   ]
 }

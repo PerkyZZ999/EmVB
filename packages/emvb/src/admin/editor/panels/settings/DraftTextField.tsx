@@ -24,11 +24,13 @@ function CommitInput({
   fieldKey,
   draft,
   error,
+  description,
   setDraft,
   commit,
 }: {
   label: string;
   className: string;
+  description?: string;
   inputMode?: "numeric";
   fieldKey: string;
   draft: string;
@@ -42,6 +44,7 @@ function CommitInput({
       className={className}
       inputMode={inputMode}
       value={draft}
+      description={error ? undefined : description}
       error={error ?? undefined}
       data-emvb-field={fieldKey}
       onChange={(event) => setDraft(event.target.value)}
@@ -207,6 +210,10 @@ export function DraftTextField({
         fieldKey={field.key}
         draft={draft}
         error={error}
+        // UX-047: a message that says what empty means is worth reading before any error.
+        description={
+          field.message && /leave it (empty|blank)/i.test(field.message) ? field.message : undefined
+        }
         setDraft={setDraft}
         commit={commit}
       />

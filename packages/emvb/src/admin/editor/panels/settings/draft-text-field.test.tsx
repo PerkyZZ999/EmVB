@@ -252,3 +252,39 @@ test("UX-045: field explanations say such as, not e.g.", () => {
   );
   expect(eg).toEqual([]);
 });
+
+const describedBy = (host: HTMLElement) => {
+  const id = host.querySelector("input")?.getAttribute("aria-describedby") ?? "";
+  return id ? (document.getElementById(id)?.textContent ?? "missing") : "none";
+};
+const loopNode = { id: "loop0001", type: "loop", props: {} } as unknown as LayoutNode;
+
+test("UX-047: a number field says what empty means", async () => {
+  const field: FieldDescriptor = {
+    key: "limit",
+    kind: "int",
+    label: "Entries to show",
+    optional: true,
+    min: 1,
+    max: 50,
+    message: "1 to 50 entries from the collection. Leave it empty for 6.",
+  };
+  const host = await mount(
+    <DraftTextField field={field} node={loopNode} onChange={() => undefined} />,
+  );
+  expect(describedBy(host)).toBe("1 to 50 entries from the collection. Leave it empty for 6.");
+});
+
+test("UX-047: a number field's error-only message stays out of sight until it applies", async () => {
+  const field: FieldDescriptor = {
+    key: "width",
+    kind: "int",
+    label: "Width (px)",
+    optional: true,
+    message: "Width must be a positive whole number.",
+  };
+  const host = await mount(
+    <DraftTextField field={field} node={loopNode} onChange={() => undefined} />,
+  );
+  expect(host.querySelector("input") ? describedBy(host) : "no input").toBe("none");
+});

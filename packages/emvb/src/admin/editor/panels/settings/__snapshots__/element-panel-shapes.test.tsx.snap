@@ -909,26 +909,28 @@ exports[`element panel markup (W-021, W-086 M16) layout-section renders the same
       label id="id-2" for="id-3"
         span
           "Content width (px)"
-      input.emvb-field.emvb-mono id="id-3" data-emvb-field="contentWidth" value="" aria-labelledby="id-2"
+      input.emvb-field.emvb-mono id="id-3" data-emvb-field="contentWidth" value="" aria-labelledby="id-2" aria-describedby="id-4"
+      p id="id-4"
+        "Content width can't be negative. Leave it empty for 1140 px."
     div.emvb-field-group data-emvb-field="fullWidth"
       div
-        label id="id-4" for="id-5"
+        label id="id-5" for="id-6"
           span
             "Full-width content"
-        button data-unchecked="" type="button" tabindex="0" id="id-5" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Full-width content" aria-labelledby="id-4"
+        button data-unchecked="" type="button" tabindex="0" id="id-6" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Full-width content" aria-labelledby="id-5"
           div
         input tabindex="-1" aria-hidden="true" type="checkbox"
     div data-emvb-field="tag"
       div data-filled=""
-        div id="id-6" data-filled=""
+        div id="id-7" data-filled=""
           span
             "HTML tag"
-        button.emvb-field type="button" tabindex="0" id="id-7" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="HTML tag" data-filled=""
+        button.emvb-field type="button" tabindex="0" id="id-8" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="HTML tag" data-filled=""
           span
             "div"
           span aria-hidden="true"
             svg
-        input id="id-8" tabindex="-1" aria-hidden="true" value="div"
+        input id="id-9" tabindex="-1" aria-hidden="true" value="div"
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"
@@ -937,12 +939,12 @@ exports[`element panel markup (W-021, W-086 M16) layout-section renders the same
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-9" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-10" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-10" tabindex="-1" aria-hidden="true" value="everyone""
+            input id="id-11" tabindex="-1" aria-hidden="true" value="everyone""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="layout-section"
@@ -7532,67 +7534,73 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
       label id="id-8" for="id-9"
         span
           "Columns"
-      input.emvb-field.emvb-mono id="id-9" data-emvb-field="columns" value="" aria-labelledby="id-8"
+      input.emvb-field.emvb-mono id="id-9" data-emvb-field="columns" value="" aria-labelledby="id-8" aria-describedby="id-10"
+      p id="id-10"
+        "1 to 6 columns for Grid and Cards (one on phones). Leave it empty for 3."
     div
-      label id="id-10" for="id-11"
+      label id="id-11" for="id-12"
         span
           "Entries to show"
-      input.emvb-field.emvb-mono id="id-11" data-emvb-field="limit" value="" aria-labelledby="id-10"
+      input.emvb-field.emvb-mono id="id-12" data-emvb-field="limit" value="" aria-labelledby="id-11" aria-describedby="id-13"
+      p id="id-13"
+        "1 to 50 entries from the collection. Leave it empty for 6."
     div data-emvb-field="order"
       div data-filled=""
-        div id="id-12" data-filled=""
+        div id="id-14" data-filled=""
           span
             "Order"
-        button.emvb-field type="button" tabindex="0" id="id-13" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Order" data-filled=""
+        button.emvb-field type="button" tabindex="0" id="id-15" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Order" data-filled=""
           span
             "Newest first"
           span aria-hidden="true"
             svg
-        input id="id-14" tabindex="-1" aria-hidden="true" value="newest"
+        input id="id-16" tabindex="-1" aria-hidden="true" value="newest"
     div
-      label id="id-15" for="id-16"
+      label id="id-17" for="id-18"
         span
           "Link pattern"
-      input.emvb-field id="id-16" data-emvb-field="permalink" value="" aria-labelledby="id-15" aria-describedby="id-17"
-      p id="id-17"
+      input.emvb-field id="id-18" data-emvb-field="permalink" value="" aria-labelledby="id-17" aria-describedby="id-19"
+      p id="id-19"
         "Where each entry links, such as /team/{slug}; {slug} and {id} are filled in. Leave it empty for /collection/{slug}."
     div
-      label id="id-18" for="id-19"
+      label id="id-20" for="id-21"
         span
           "Image field"
-      input.emvb-field id="id-19" data-emvb-field="imageField" value="" aria-labelledby="id-18" aria-describedby="id-20"
-      p id="id-20"
+      input.emvb-field id="id-21" data-emvb-field="imageField" value="" aria-labelledby="id-20" aria-describedby="id-22"
+      p id="id-22"
         "The field Post Image shows, such as photo. Leave it empty for the featured image."
     div
-      label id="id-21" for="id-22"
+      label id="id-23" for="id-24"
         span
           "Excerpt field"
-      input.emvb-field id="id-22" data-emvb-field="excerptField" value="" aria-labelledby="id-21" aria-describedby="id-23"
-      p id="id-23"
+      input.emvb-field id="id-24" data-emvb-field="excerptField" value="" aria-labelledby="id-23" aria-describedby="id-25"
+      p id="id-25"
         "The field Post Excerpt shows, such as role. Leave it empty for the excerpt."
     div
-      label id="id-24" for="id-25"
+      label id="id-26" for="id-27"
         span
           "Only entries where"
-      input.emvb-field id="id-25" data-emvb-field="filter" value="" aria-labelledby="id-24" aria-describedby="id-26"
-      p id="id-26"
+      input.emvb-field id="id-27" data-emvb-field="filter" value="" aria-labelledby="id-26" aria-describedby="id-28"
+      p id="id-28"
         "field=value pairs separated by semicolons, such as category=news; team=design. A taxonomy works too. The same field twice matches either value."
     div data-emvb-loop-item-bind="manual"
       div
-        label id="id-27" for="id-28"
+        label id="id-29" for="id-30"
           span
             "Loop Item part id"
-        input.emvb-field.emvb-mono id="id-28" value="" aria-labelledby="id-27"
+        input.emvb-field.emvb-mono id="id-30" value="" aria-labelledby="id-29"
       p.emvb-helper
         "No Loop Item theme parts yet. Paste an id, or"
         a href="/_emdash/admin/plugins/emvb/theme"
           "create one in Theme Builder"
         "."
     div
-      label id="id-29" for="id-30"
+      label id="id-31" for="id-32"
         span
           "Posts per page"
-      input.emvb-field.emvb-mono id="id-30" data-emvb-field="perPage" value="" aria-labelledby="id-29"
+      input.emvb-field.emvb-mono id="id-32" data-emvb-field="perPage" value="" aria-labelledby="id-31" aria-describedby="id-33"
+      p id="id-33"
+        "1 to 50 posts on each archive page. Leave it empty for 20. Add a Pagination element to link the pages."
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"
@@ -7601,12 +7609,12 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-31" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-34" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-32" tabindex="-1" aria-hidden="true" value="everyone"
+            input id="id-35" tabindex="-1" aria-hidden="true" value="everyone"
     p.emvb-helper data-emvb-loop-note="true"
       "A Loop lists posts only in an Archive template. Here the editor shows sample posts, but the live page shows nothing. Build post lists in Theme Builder › Archive.""
 ,
