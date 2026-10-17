@@ -67,3 +67,13 @@ test("UX-038: a scrolling filter row fades at the edge that hides tabs, followin
     '@property --emvb-fade-end { syntax: "<length>"; inherits: false; initial-value: 0px; }',
   );
 });
+
+test("UX-054: a list row opens its page anywhere it is clicked, and tints on hover", () => {
+  expect(rule(".emvb-surface-card[data-emvb-list] tbody tr")).toContain("position: relative;");
+  expect(rule(".emvb-surface-card[data-emvb-list] .emvb-row-title::after")).toMatch(
+    /content: ""; position: absolute; inset: 0;/,
+  );
+  expect(rule(".emvb-surface-card[data-emvb-list] tbody tr:hover")).toContain(
+    "background: var(--color-kumo-tint);",
+  );
+});

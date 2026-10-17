@@ -36169,6 +36169,34 @@
         "UX-053"
       ],
       "expect": "\\(fail\\).*UX-053"
+    },
+    {
+      "id": "UX-054/title-only",
+      "requirement": "UX-054",
+      "description": "Only the title text opens the page again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-surface-card[data-emvb-list] .emvb-row-title::after { content: \"\"; position: absolute; inset: 0; }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-054"],
+      "expect": "\\(fail\\).*UX-054"
+    },
+    {
+      "id": "UX-054/link-covers-card",
+      "requirement": "UX-054",
+      "description": "Rows aren't positioned, so a title's link would cover the whole card",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-surface-card[data-emvb-list] tbody tr { position: relative; }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-054"],
+      "expect": "\\(fail\\).*UX-054"
     }
   ]
 }

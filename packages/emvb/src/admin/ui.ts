@@ -137,6 +137,12 @@ export const UI_CSS = `
 .emvb-timeline-agent { display: inline-flex; flex: none; align-items: center; gap: 3px; padding: 1px 7px 1px 5px; border: 1px solid var(--color-kumo-line); border-radius: 999px; background: var(--color-kumo-base); color: var(--text-color-kumo-default); font-size: 11px; line-height: 16px; font-weight: 600; }
 .emvb-surface-card[data-emvb-list] { gap: 0; padding: 0; overflow: hidden; overflow-x: auto; }
 .emvb-surface-card[data-emvb-list] table { width: 100%; }
+/* UX-054: the whole row opens the page: the title link stretches over its row,
+   and the row tints on hover, so a click on the status or date isn't lost. */
+.emvb-surface-card[data-emvb-list] tbody tr { position: relative; }
+.emvb-surface-card[data-emvb-list] tbody tr:hover { background: var(--color-kumo-tint); }
+.emvb-surface-card[data-emvb-list] tbody tr:hover .emvb-row-title { text-decoration: underline; text-underline-offset: 2px; }
+.emvb-surface-card[data-emvb-list] .emvb-row-title::after { content: ""; position: absolute; inset: 0; }
 .emvb-surface-card .emvb-empty-shell,
 .emvb-empty-shell {
   display: flex;
