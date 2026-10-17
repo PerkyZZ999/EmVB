@@ -35521,6 +35521,46 @@
         "UX-035"
       ],
       "expect": "\\(fail\\).*UX-035"
+    },
+    {
+      "id": "UX-036/flexbox-like-container",
+      "requirement": "UX-036",
+      "description": "Flexbox shows the Container icon again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/element-chrome.ts",
+          "search": "  flexbox: ColumnsIcon,",
+          "replace": "  flexbox: SquaresFourIcon,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/element-chrome.test.ts",
+        "-t",
+        "UX-036"
+      ],
+      "expect": "\\(fail\\).*UX-036"
+    },
+    {
+      "id": "UX-036/toc-like-list",
+      "requirement": "UX-036",
+      "description": "Table of contents shows the List icon again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/element-chrome.ts",
+          "search": "  toc: ListNumbersIcon,",
+          "replace": "  toc: ListBulletsIcon,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/element-chrome.test.ts",
+        "-t",
+        "UX-036"
+      ],
+      "expect": "\\(fail\\).*UX-036"
     }
   ]
 }
