@@ -152,3 +152,13 @@ test("every EmVB custom property the editor CSS reads is defined, so none falls 
   const defined = new Set([...EDITOR_CSS.matchAll(/(--emvb-[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
   expect([...used].filter((name) => !defined.has(name))).toEqual([]);
 });
+
+test("UX-049: the fill type is a one-row segmented choice, not primary buttons", () => {
+  expect(rule(".emvb-fill-types")).toContain("grid-auto-flow: column;");
+  expect(rule(".emvb-fill-types")).toContain("background: var(--color-kumo-recessed);");
+  const picked = rule('.emvb-fill-types button[aria-checked="true"]');
+  expect(picked).toContain("background: var(--color-kumo-base);");
+  expect(picked.includes("brand")).toBe(false);
+  // Unpicked labels sit on the recessed track, where the subtle colour is only 4.0:1.
+  expect(rule(".emvb-fill-types button")).toContain("color: var(--text-color-kumo-default);");
+});

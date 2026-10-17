@@ -155,9 +155,12 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-custom-color-row { display: flex; align-items: flex-end; gap: 8px; }
 .emvb-custom-color-row > :first-child { flex: 1; min-width: 0; }
 .emvb-color-picker { width: 28px; height: 28px; padding: 2px; border: 0; border-radius: 6px; background: var(--color-kumo-control); box-shadow: inset 0 0 0 1px var(--color-kumo-line); cursor: pointer; }
-.emvb-fill-types { display: flex; flex-wrap: wrap; gap: 4px; }
-.emvb-fill-types button { min-height: 28px; padding: 0 10px; border: 0; border-radius: 6px; background: var(--color-kumo-control); color: var(--text-color-kumo-default); box-shadow: inset 0 0 0 1px var(--color-kumo-line); cursor: pointer; }
-.emvb-fill-types button[aria-checked="true"] { background: var(--color-kumo-brand); color: #fff; box-shadow: none; }
+/* UX-049: the fill type is a segmented choice on one row, like the state switcher; primary stays
+   reserved for Publish, confirms and the selection (DESIGN.md). */
+.emvb-fill-types { display: grid; grid-auto-flow: column; grid-auto-columns: auto; gap: 2px; padding: 2px; border-radius: 8px; background: var(--color-kumo-recessed); }
+.emvb-fill-types button { min-height: 24px; padding: 0 6px; border: 0; border-radius: 6px; background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 13px; line-height: 18px; white-space: nowrap; cursor: pointer; }
+.emvb-fill-types button[aria-checked="true"] { background: var(--color-kumo-base); color: var(--text-color-kumo-default); font-weight: 600; box-shadow: inset 0 0 0 1px var(--color-kumo-line); }
+.emvb-fill-types button:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }
 .emvb-angle { display: flex; flex-direction: column; gap: 4px; }
 .emvb-angle-slider { width: 100%; accent-color: var(--color-kumo-brand); }
 .emvb-gradient-stop { display: flex; flex-direction: column; gap: 8px; padding-top: 8px; box-shadow: inset 0 1px 0 var(--color-kumo-line); }

@@ -35969,6 +35969,66 @@
         "UX-048"
       ],
       "expect": "\\(fail\\).*UX-048"
+    },
+    {
+      "id": "UX-049/fill-wraps",
+      "requirement": "UX-049",
+      "description": "The fill types wrap onto a second row again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-fill-types { display: grid; grid-auto-flow: column;",
+          "replace": ".emvb-fill-types { display: flex; flex-wrap: wrap;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-049"
+      ],
+      "expect": "\\(fail\\).*UX-049"
+    },
+    {
+      "id": "UX-049/primary-fill",
+      "requirement": "UX-049",
+      "description": "The chosen fill type is a primary button again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-fill-types button[aria-checked=\"true\"] { background: var(--color-kumo-base);",
+          "replace": ".emvb-fill-types button[aria-checked=\"true\"] { background: var(--color-kumo-brand);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-049"
+      ],
+      "expect": "\\(fail\\).*UX-049"
+    },
+    {
+      "id": "UX-049/subtle-labels",
+      "requirement": "UX-049",
+      "description": "Unpicked fill labels use the subtle colour, 4.0:1 on the track",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 13px; line-height: 18px; white-space: nowrap;",
+          "replace": "background: transparent; color: var(--text-color-kumo-subtle); font: inherit; font-size: 13px; line-height: 18px; white-space: nowrap;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-049"
+      ],
+      "expect": "\\(fail\\).*UX-049"
     }
   ]
 }
