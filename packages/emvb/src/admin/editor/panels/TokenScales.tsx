@@ -165,7 +165,11 @@ export function TokenScales({
                 {kind === "type" ? "Aa" : ""}
               </span>
               <span>{t.name}</span>
-              <code className="emvb-mono">
+              {/* UX-032: clamp() values ellipsize; the tooltip gives the whole value. */}
+              <code
+                className="emvb-mono"
+                title={t.fluid ? fluidClamp(t.fluid.min, t.fluid.max, range) : `${t.value.value}px`}
+              >
                 {t.fluid ? fluidClamp(t.fluid.min, t.fluid.max, range) : `${t.value.value}px`}
               </code>
             </li>

@@ -129,3 +129,10 @@ test("UX-003: spacing scale bars stop at 64 px so the names beside them stay rea
   expect(widths.length > 0).toBe(true);
   expect(Math.max(...widths)).toBe(64);
 });
+
+test("UX-032: each scale value carries its whole clamp() as a tooltip, since the column ellipsizes", async () => {
+  await mount(<TokenScales design={emptyDesign()} onSave={async () => undefined} />);
+  const codes = [...document.querySelectorAll("[data-emvb-tokens-preview] code")];
+  expect(codes.length > 0).toBe(true);
+  expect(codes.every((code) => code.getAttribute("title") === code.textContent)).toBe(true);
+});
