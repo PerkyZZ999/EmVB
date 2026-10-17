@@ -278,6 +278,7 @@ export function ClassChipInput({
               key={id}
               id={id}
               name={byId.get(id)?.name ?? id}
+              missing={!byId.has(id)}
               active={editing === id}
               hasStates={hasStateStyles(byId.get(id))}
               first={index === 0}

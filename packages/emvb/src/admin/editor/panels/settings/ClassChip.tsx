@@ -24,6 +24,8 @@ type Props = {
   active: boolean;
   /** The class has hover, focus or active styles (W-089). */
   hasStates?: boolean;
+  /** UX-067: the id names no class in Site styles any more, so there is nothing to edit. */
+  missing?: boolean;
   first: boolean;
   last: boolean;
   buttonRef: (el: HTMLButtonElement | null) => void;
@@ -40,7 +42,10 @@ type Props = {
  * duplicates, reorders or removes it, and the × removes it. F2 renames in place.
  */
 export function ClassChip(props: Props) {
-  const { id, name, active } = props;
+  const { id, active, missing } = props;
+  // The visible label reads "Missing (id)"; names read "Remove missing class id".
+  const name = missing ? `missing class ${id}` : props.name;
+  const label = missing ? `Missing (${id})` : props.name;
   const [renaming, setRenaming] = React.useState(false);
   const main = React.useRef<HTMLButtonElement | null>(null);
   /** Enter, Escape and the blur that can follow them must end one rename only once. */
@@ -67,6 +72,7 @@ export function ClassChip(props: Props) {
       className="emvb-chip"
       data-emvb-class-id={id}
       data-active={active}
+      data-missing={missing ? "" : undefined}
       onKeyDown={stopEditorShortcuts}
     >
       {renaming ? (
@@ -93,17 +99,21 @@ export function ClassChip(props: Props) {
           }}
           className="emvb-chip-main"
           aria-pressed={active}
-          title={`${name} · .emvb-k-${id}`}
-          onClick={props.onEdit}
+          title={
+            missing
+              ? "This class isn't in Site styles any more. Remove it from the element."
+              : `${name} · .emvb-k-${id}`
+          }
+          onClick={missing ? undefined : props.onEdit}
           onKeyDown={(event) => {
-            if (event.key === "F2") {
+            if (event.key === "F2" && !missing) {
               event.preventDefault();
               startRename();
             } else props.onKeyDown(event);
           }}
         >
           <TagSimpleIcon size={12} aria-hidden="true" />
-          <span className="emvb-chip-label">{name}</span>
+          <span className="emvb-chip-label">{label}</span>
           {props.hasStates && <StateDot />}
         </button>
       )}
@@ -120,18 +130,19 @@ export function ClassChip(props: Props) {
           </button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content data-emvb-chip-menu={id}>
-          <DropdownMenu.Item icon={PaintBrushIcon} onClick={props.onEdit}>
+          <DropdownMenu.Item icon={PaintBrushIcon} disabled={missing} onClick={props.onEdit}>
             Edit class styles
           </DropdownMenu.Item>
           <DropdownMenu.Item
             icon={PencilSimpleLineIcon}
+            disabled={missing}
             onClick={() => {
               renameAfterMenu.current = true;
             }}
           >
             Rename
           </DropdownMenu.Item>
-          <DropdownMenu.Item icon={CopySimpleIcon} onClick={props.onDuplicate}>
+          <DropdownMenu.Item icon={CopySimpleIcon} disabled={missing} onClick={props.onDuplicate}>
             Duplicate
           </DropdownMenu.Item>
           <DropdownMenu.Item

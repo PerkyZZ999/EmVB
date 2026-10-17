@@ -484,6 +484,8 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-chip:hover { background: var(--color-kumo-recessed); }
 .emvb-chip[data-active="true"] { background: var(--color-kumo-brand); color: #fff; }
+.emvb-chip[data-missing] { background: transparent; box-shadow: inset 0 0 0 1px var(--color-kumo-danger); }
+.emvb-chip[data-missing] .emvb-chip-main { cursor: default; }
 .emvb-chip-main {
   display: inline-flex; align-items: center; gap: 4px; min-width: 0; height: 20px; padding: 0 4px;
   border: 0; border-radius: 4px; background: transparent; color: inherit; font: inherit; cursor: pointer;

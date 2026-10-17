@@ -844,3 +844,30 @@ test("UX-064: the class name form puts Cancel first, then Save as class, like th
     "Save as class",
   ]);
 });
+
+test("UX-067: a class missing from Site styles reads Missing, can't be edited, and can be removed", async () => {
+  const log = { nodes: [] as LayoutNode[], designs: [] as DesignSystem[] };
+  await mount(
+    <PanelHarness
+      initial={
+        {
+          id: "head0001",
+          type: "heading",
+          props: { text: "Hi", level: 1 },
+          classes: ["gone"],
+        } as LayoutNode
+      }
+      log={log}
+    />,
+  );
+  await openStyle();
+  const chip = document.querySelector('[data-emvb-class-id="gone"]');
+  expect(chip?.hasAttribute("data-missing") ?? false).toBe(true);
+  expect(chip?.querySelector(".emvb-chip-label")?.textContent ?? "").toBe("Missing (gone)");
+  await act(async () => chip?.querySelector<HTMLButtonElement>(".emvb-chip-main")?.click());
+  expect(document.querySelector('[data-emvb-class-id="gone"][data-active="true"]')).toBeNull();
+  await act(async () =>
+    chip?.querySelector<HTMLButtonElement>('[aria-label="Remove missing class gone"]')?.click(),
+  );
+  expect(log.nodes.at(-1)?.classes ?? []).toEqual([]);
+});
