@@ -37091,6 +37091,26 @@
         "UX-084"
       ],
       "expect": "\\(fail\\).*UX-084"
+    },
+    {
+      "id": "UX-085/f2-unlisted",
+      "requirement": "UX-085",
+      "description": "The Shortcuts dialog leaves out F2 again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/shortcuts.ts",
+          "search": "  { action: \"Rename (layer or class chip)\", keys: \"F2\" },\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/shortcuts-list.test.ts",
+        "-t",
+        "UX-085"
+      ],
+      "expect": "\\(fail\\).*UX-085"
     }
   ]
 }

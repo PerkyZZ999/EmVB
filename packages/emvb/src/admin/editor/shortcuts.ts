@@ -6,6 +6,8 @@ export const SHORTCUTS: readonly { action: string; keys: string }[] = [
   { action: "Select first child / parent", keys: "Enter / Shift+Enter" },
   { action: "Clear selection", keys: "Esc" },
   { action: "Expand or collapse (Layers)", keys: "← / →" },
+  // UX-085: F2 renames the focused layer or class chip; the list never said so.
+  { action: "Rename (layer or class chip)", keys: "F2" },
   { action: "Move up / down", keys: "Alt+↑ / Alt+↓" },
   { action: "Move out / in", keys: "Alt+← / Alt+→" },
   { action: "Duplicate", keys: "Ctrl/Cmd+D" },
