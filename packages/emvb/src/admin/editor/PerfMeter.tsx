@@ -19,7 +19,14 @@ const KINDS: { kind: PerfKind; label: string }[] = [
   { kind: "images", label: "Images" },
 ];
 
-const kb = (bytes: number) => (bytes < 1000 ? `${bytes} B` : `${(bytes / 1000).toFixed(1)} KB`);
+/** UX-083: "1.4 KB", "100 KB", "1.5 MB": one decimal only where it says something. */
+export const kb = (bytes: number) => {
+  if (bytes < 1000) return `${bytes} B`;
+  const [value, unit] = bytes < 1_000_000 ? [bytes / 1000, "KB"] : [bytes / 1_000_000, "MB"];
+  const shown =
+    value >= 100 || Number.isInteger(value) ? String(Math.round(value)) : value.toFixed(1);
+  return `${shown} ${unit}`;
+};
 
 /**
  * The page's weight against its budget (W-310): one bar per kind, the scripts it loads (zero

@@ -32802,8 +32802,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/feature-css.ts",
-          "search": "grid-template-columns: subgrid;",
-          "replace": "grid-template-columns: 48px 1fr auto;"
+          "search": "grid-template-columns: subgrid; align-items: center; min-height: 24px;",
+          "replace": "grid-template-columns: 48px 1fr auto; align-items: center; min-height: 24px;"
         }
       ],
       "command": [
@@ -37031,6 +37031,26 @@
         "each button calls its own action"
       ],
       "expect": "\\(fail\\).*each button calls its own action"
+    },
+    {
+      "id": "UX-083/always-one-decimal",
+      "requirement": "UX-083",
+      "description": "Sizes always show one decimal again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/PerfMeter.tsx",
+          "search": "    value >= 100 || Number.isInteger(value) ? String(Math.round(value)) : value.toFixed(1);\n",
+          "replace": "    false ? String(Math.round(value)) : value.toFixed(1);\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/perf-meter.test.tsx",
+        "-t",
+        "UX-083"
+      ],
+      "expect": "\\(fail\\).*UX-083"
     }
   ]
 }

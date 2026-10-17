@@ -68,3 +68,15 @@ describe("page weight dialog (W-310, W-311)", () => {
     expect([badge("tabs"), badge("heading"), badge("image")]).toEqual([true, false, false]);
   });
 });
+
+test("UX-083: sizes and budgets drop needless decimals and use MB past 1000 KB", async () => {
+  const { kb } = await import("./PerfMeter.tsx");
+  expect([161, 1100, 1400, 100_000, 1_500_000, 2_000_000].map(kb)).toEqual([
+    "161 B",
+    "1.1 KB",
+    "1.4 KB",
+    "100 KB",
+    "1.5 MB",
+    "2 MB",
+  ]);
+});

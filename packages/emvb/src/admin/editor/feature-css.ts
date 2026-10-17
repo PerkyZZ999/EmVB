@@ -31,7 +31,9 @@ export const FEATURE_CSS = `
 .emvb-element-tile { position: relative; }
 .emvb-element-tile > .emvb-js-badge { position: absolute; top: 4px; right: 4px; }
 .emvb-perf-bars { display: grid; gap: 8px; margin: 12px 0; padding: 0; list-style: none; }
-.emvb-perf-bars > li { display: grid; grid-template-columns: 90px 1fr auto; gap: 8px; align-items: center; font-size: 13px; }
+/* UX-083: rows share one grid, so every bar starts and ends at the same place. */
+.emvb-perf-bars { grid-template-columns: 90px minmax(0, 1fr) max-content; column-gap: 8px; }
+.emvb-perf-bars > li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; font-size: 13px; }
 .emvb-perf-bar { display: block; height: 8px; border-radius: 4px; background: var(--color-kumo-tint); overflow: hidden; }
 .emvb-perf-bar > span { display: block; height: 100%; background: var(--color-kumo-brand); }
 .emvb-perf-bars > li[data-over] .emvb-perf-bar > span { background: var(--color-kumo-danger); }
