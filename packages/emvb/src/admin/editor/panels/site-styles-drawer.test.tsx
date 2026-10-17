@@ -509,3 +509,34 @@ describe("deleting what this page doesn't use (W-251)", () => {
     );
   });
 });
+
+test("UX-024: unpublished changes fold under a count instead of listing every change", async () => {
+  const published = emptyDesign();
+  const design: DesignSystem = {
+    ...published,
+    variables: {
+      ...published.variables,
+      colors: [
+        { id: "brand", name: "Brand", value: "#1d4ed8" },
+        { id: "ink", name: "Ink", value: "#111827" },
+      ],
+    },
+  };
+  await mount(
+    <SiteStylesDrawer
+      design={design}
+      published={published}
+      layout={layout}
+      onDesignChange={async () => undefined}
+      unpublished
+      onPublishStyles={async () => undefined}
+      onLayoutChange={() => undefined}
+      onClose={() => undefined}
+    />,
+  );
+  const diff = document.querySelector("[data-emvb-style-diff]");
+  expect(diff?.tagName ?? null).toBe("DETAILS");
+  expect(diff?.hasAttribute("open") ?? true).toBe(false);
+  expect(diff?.querySelector("summary")?.textContent ?? null).toBe("2 unpublished changes");
+  expect(diff?.querySelectorAll("li").length ?? 0).toBe(2);
+});

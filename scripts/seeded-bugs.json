@@ -35167,6 +35167,26 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-023"],
       "expect": "\\(fail\\).*UX-023"
+    },
+    {
+      "id": "UX-024/diff-list-open",
+      "requirement": "UX-024",
+      "description": "The unpublished change list shows every change open above the tabs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "<details className=\"emvb-style-diff\" data-emvb-style-diff=\"\">",
+          "replace": "<details className=\"emvb-style-diff\" data-emvb-style-diff=\"\" open>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "UX-024"
+      ],
+      "expect": "\\(fail\\).*UX-024"
     }
   ]
 }

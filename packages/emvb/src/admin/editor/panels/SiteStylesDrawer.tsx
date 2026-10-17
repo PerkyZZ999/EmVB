@@ -134,6 +134,7 @@ export function SiteStylesDrawer({
     setPendingImport({ name: file.name, design: result.design, renamed: result.renamed });
   };
 
+  const changes = unpublished && published ? designChanges(published, design) : [];
   return (
     <div
       className="emvb-panel-body emvb-site-styles"
@@ -168,14 +169,22 @@ export function SiteStylesDrawer({
         aria-label="Site styles actions"
         data-emvb-site-styles-actions=""
       >
-        {unpublished && published && (
-          <ul className="emvb-helper" data-emvb-style-diff="">
-            {designChanges(published, design).map((change) => (
-              <li key={`${change.kind}:${change.what}:${change.name}`}>
-                {designChangeLabel(change)}
-              </li>
-            ))}
-          </ul>
+        {/* UX-024: the change list folds under a count, so a long draft can't push the tabs away. */}
+        {changes.length > 0 && (
+          <details className="emvb-style-diff" data-emvb-style-diff="">
+            <summary className="emvb-helper">
+              {changes.length === 1
+                ? "1 unpublished change"
+                : `${changes.length} unpublished changes`}
+            </summary>
+            <ul className="emvb-helper">
+              {changes.map((change) => (
+                <li key={`${change.kind}:${change.what}:${change.name}`}>
+                  {designChangeLabel(change)}
+                </li>
+              ))}
+            </ul>
+          </details>
         )}
         {unpublished && (
           <Button
