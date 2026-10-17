@@ -278,6 +278,9 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
           type="file"
           accept="image/png,image/jpeg,image/gif,image/webp,image/avif"
           className="emvb-sr-only"
+          // UX-050: the Upload button is the control; this input only opens the file dialog.
+          tabIndex={-1}
+          aria-hidden="true"
           data-emvb-media-upload=""
           onChange={(event) => void onUpload(event.target.files?.[0])}
         />

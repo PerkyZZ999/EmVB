@@ -144,6 +144,8 @@ export function BackgroundImageControl({
               type="file"
               accept="image/png,image/jpeg,image/gif,image/webp,image/avif"
               className="emvb-sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
               data-emvb-bg-upload=""
               onChange={(event) => {
                 const file = event.target.files?.[0];

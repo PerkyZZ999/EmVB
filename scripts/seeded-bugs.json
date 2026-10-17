@@ -36029,6 +36029,46 @@
         "UX-049"
       ],
       "expect": "\\(fail\\).*UX-049"
+    },
+    {
+      "id": "UX-050/media-input-tabbable",
+      "requirement": "UX-050",
+      "description": "The Image tab's hidden file input is a Tab stop with no name again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "          tabIndex={-1}\n          aria-hidden=\"true\"\n          data-emvb-media-upload=\"\"",
+          "replace": "          data-emvb-media-upload=\"\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/file-inputs.test.ts",
+        "-t",
+        "UX-050"
+      ],
+      "expect": "\\(fail\\).*UX-050"
+    },
+    {
+      "id": "UX-050/bg-input-exposed",
+      "requirement": "UX-050",
+      "description": "The background upload input is exposed to screen readers",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "              aria-hidden=\"true\"\n              data-emvb-bg-upload=\"\"",
+          "replace": "              data-emvb-bg-upload=\"\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/file-inputs.test.ts",
+        "-t",
+        "UX-050"
+      ],
+      "expect": "\\(fail\\).*UX-050"
     }
   ]
 }

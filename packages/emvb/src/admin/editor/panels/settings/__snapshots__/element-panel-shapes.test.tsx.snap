@@ -2995,7 +2995,7 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
         button.emvb-btn data-kumo-component="Button" type="button" data-emvb-media-upload-btn=""
           span
             "Upload"
-        input.emvb-sr-only data-emvb-media-upload="" type="file"
+        input.emvb-sr-only tabindex="-1" aria-hidden="true" data-emvb-media-upload="" type="file"
       div
         label id="id-2" for="id-3"
           span
