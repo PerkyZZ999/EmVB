@@ -1,5 +1,6 @@
 import * as React from "react";
 import type { createKumoToastManager } from "@cloudflare/kumo";
+import { ArrowSquareOutIcon } from "@phosphor-icons/react";
 import {
   DEVICE_PREVIEW_PX,
   mergeDesign,
@@ -121,7 +122,14 @@ export function useEditorCommands({
             ]
           : []),
         {
-          children: "View page ↗",
+          // UX-082: an icon, not "↗" read aloud as an arrow; the new tab is said in words.
+          children: React.createElement(
+            React.Fragment,
+            null,
+            "View page",
+            React.createElement(ArrowSquareOutIcon, { "aria-hidden": true, size: 14 }),
+            React.createElement("span", { className: "emvb-sr-only" }, " (opens in a new tab)"),
+          ),
           variant: "secondary",
           onClick: () => window.open(path, "_blank", "noopener"),
         },

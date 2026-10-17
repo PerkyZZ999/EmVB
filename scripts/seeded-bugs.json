@@ -36991,6 +36991,26 @@
         "UX-081"
       ],
       "expect": "\\(fail\\).*UX-081"
+    },
+    {
+      "id": "UX-082/arrow-glyph",
+      "requirement": "UX-082",
+      "description": "View page goes back to an arrow glyph",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorCommands.ts",
+          "search": "\"View page\",\n",
+          "replace": "\"View page ↗\",\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "styles already live"
+      ],
+      "expect": "\\(fail\\).*styles already live"
     }
   ]
 }

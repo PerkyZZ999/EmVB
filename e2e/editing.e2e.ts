@@ -75,7 +75,7 @@ test("after save and reload the layout is deep-equal, and a draft save leaves th
   await overlay(page).getByRole("button", { name: "Publish" }).click();
   await expect(page.getByText("Published", { exact: true }).last()).toBeVisible();
   await expect(overlay(page).locator(".emvb-status")).toHaveText("Published");
-  await expect(page.getByRole("button", { name: "View page ↗" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "View page (opens in a new tab)" })).toBeVisible();
 
   await selectHeading(page, "Saved text");
   await overlay(page).getByLabel("Text", { exact: true }).fill("Draft only");

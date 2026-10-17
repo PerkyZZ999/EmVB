@@ -267,6 +267,11 @@ describe("publishing with unpublished site styles (W-126)", () => {
     await settle();
     expect(toastText()).toContain("Published");
     expect(toastText()).not.toContain("Site styles have unpublished changes");
+    // UX-082: the action says it opens a new tab in words, with no arrow glyph to read aloud.
+    const view = [...document.querySelectorAll("button")].find((b) =>
+      b.textContent?.startsWith("View page"),
+    );
+    expect(view?.textContent ?? "missing").toBe("View page (opens in a new tab)");
   });
 });
 
