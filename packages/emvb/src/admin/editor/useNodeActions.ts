@@ -52,11 +52,16 @@ export function useNodeActions({
   const canMove = canDelete;
 
   const finishDelete = (id: string) => {
+    // UX-062: the toast names what went, as the confirm button does ("Delete 3 elements").
+    const layout = latest.current.page.layout;
+    const count = layout ? subtreeSize(layout, id) : 1;
+    const name = ELEMENT_NAMES[(layout && findNode(layout, id)?.type) || "container"] ?? "Element";
+    const title = count > 1 ? `${count} elements deleted` : `${name} deleted`;
     dispatch({ type: "delete-node", id });
     setDeleteAsk(null);
     if (lastToast.current) toasts.close(lastToast.current);
     const toastId: string = toasts.add({
-      title: "Element deleted",
+      title,
       timeout: RESTORE_TIMEOUT_MS,
       actions: [
         {

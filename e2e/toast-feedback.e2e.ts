@@ -43,7 +43,7 @@ for (const preference of ["no-preference", "reduce"] as const) {
       await expect(canvas(page).getByRole("heading", { name: "Restore me" })).toHaveCount(0);
     };
     await remove();
-    const toast = page.getByRole("dialog", { name: "Element deleted", exact: true });
+    const toast = page.getByRole("dialog", { name: "Heading deleted", exact: true });
     await expect(toast).toBeVisible();
     const content = toast.locator(":scope > .isolate");
     await expect(toast).toHaveCSS(

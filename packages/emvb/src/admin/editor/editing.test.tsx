@@ -313,7 +313,8 @@ describe("delete and restore (D-025)", () => {
     await click(layerRow("Heading"));
     await press("Delete");
     expect(layerRow("Heading")?.outerHTML).toBeUndefined();
-    expect(document.body.textContent).toContain("Element deleted");
+    // UX-062: the toast names what was deleted.
+    expect(document.body.textContent).toContain("Heading deleted");
     await click(button("Restore"));
     expect(layerRow("Heading")?.getAttribute("aria-current")).toBe("true");
     expect(editor()?.querySelector('[data-emvb-panel="element"]') !== null).toBe(true);
@@ -612,5 +613,9 @@ describe("keyboard and quick actions (W-020)", () => {
     await settle();
     expect(document.body.textContent).toContain("Delete Container and the 1 element inside it?");
     expect(document.querySelector('[data-emvb-dialog="delete-subtree"]') !== null).toBe(true);
+    // UX-062: confirming names the count in the Restore toast.
+    await click(button("Delete 2 elements"));
+    await settle();
+    expect(document.body.textContent).toContain("2 elements deleted");
   });
 });

@@ -36431,6 +36431,46 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/list-paging.test.ts", "-t", "UX-061"],
       "expect": "\\(fail\\).*UX-061"
+    },
+    {
+      "id": "UX-062/generic-title",
+      "requirement": "UX-062",
+      "description": "The Restore toast says Element deleted again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "    const title = count > 1 ? `${count} elements deleted` : `${name} deleted`;\n",
+          "replace": "    const title = \"Element deleted\";\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "Delete removes the selected element"
+      ],
+      "expect": "\\(fail\\).*Delete removes the selected element"
+    },
+    {
+      "id": "UX-062/subtree-count",
+      "requirement": "UX-062",
+      "description": "Deleting a container names only the container",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "    const title = count > 1 ? `${count} elements deleted` : `${name} deleted`;\n",
+          "replace": "    const title = `${name} deleted`;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "deleting a container with children"
+      ],
+      "expect": "\\(fail\\).*deleting a container with children"
     }
   ]
 }
