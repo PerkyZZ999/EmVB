@@ -35,7 +35,7 @@ describe("editor dialogs (W-091)", () => {
     );
     expect(dialog("conflict")?.textContent).toContain("This page was changed somewhere else");
     await press("Reload page");
-    await press("Overwrite");
+    await press("Overwrite their version");
     expect(calls).toEqual(["reload", "overwrite"]);
   });
 
@@ -71,7 +71,7 @@ describe("editor dialogs (W-091)", () => {
     expect(dialog("delete-subtree")?.textContent).toContain(
       "Delete Container and the 4 elements inside it?",
     );
-    await press("Delete");
+    await press("Delete 5 elements");
     expect(calls).toEqual(["confirm"]);
     await mount(
       <DeleteSubtreeDialog
@@ -85,5 +85,9 @@ describe("editor dialogs (W-091)", () => {
     expect(dialog("delete-subtree")?.textContent).toContain(
       "Delete Tabs and the 1 element inside it?",
     );
+    // UX-015: the confirm button restates the action and how much it removes.
+    expect(
+      [...document.querySelectorAll("button")].some((b) => b.textContent === "Delete 2 elements"),
+    ).toBe(true);
   });
 });

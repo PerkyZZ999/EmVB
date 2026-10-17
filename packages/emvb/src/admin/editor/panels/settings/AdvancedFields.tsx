@@ -169,7 +169,7 @@ export function ContainerQueryFields({
             the current style?
           </p>
           <Button type="button" variant="destructive" className={BUTTON} onClick={copyStyle}>
-            Replace
+            Replace styles
           </Button>
           <Button
             type="button"

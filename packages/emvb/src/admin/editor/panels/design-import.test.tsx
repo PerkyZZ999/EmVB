@@ -94,7 +94,7 @@ describe("design Import (W-214)", () => {
     expect(dialog?.textContent).toContain("This page uses 2 of them");
     expect(saved).toHaveLength(0);
     const replace = [...(dialog?.querySelectorAll("button") ?? [])].find(
-      (b) => b.textContent === "Replace",
+      (b) => b.textContent === "Replace site styles",
     );
     await act(async () => {
       replace?.click();
@@ -130,7 +130,7 @@ describe("design Import (W-214)", () => {
     );
     const dialog = document.querySelector("[data-emvb-import-confirm]");
     const replace = [...(dialog?.querySelectorAll("button") ?? [])].find(
-      (b) => b.textContent === "Replace",
+      (b) => b.textContent === "Replace site styles",
     );
     await act(async () => {
       replace?.click();

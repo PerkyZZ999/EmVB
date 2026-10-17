@@ -30,7 +30,7 @@ export function ConflictDialog({
               style={SOLID_DESTRUCTIVE}
               onClick={onOverwrite}
             >
-              Overwrite
+              Overwrite their version
             </Button>
           </div>
         </div>
@@ -69,7 +69,7 @@ export function RevertDialog({
               style={SOLID_DESTRUCTIVE}
               onClick={onRevert}
             >
-              Revert
+              Revert to published
             </Button>
           </div>
         </div>
@@ -139,7 +139,7 @@ export function DeleteSubtreeDialog({
           <Dialog.Title>
             Delete {label} and the {inside} element{inside === 1 ? "" : "s"} inside it?
           </Dialog.Title>
-          <Dialog.Description>This can be undone with Restore after delete.</Dialog.Description>
+          <Dialog.Description>You can undo this with Restore right after.</Dialog.Description>
           <div className="emvb-dialog-actions">
             <Dialog.Close
               render={(props) => (
@@ -154,7 +154,7 @@ export function DeleteSubtreeDialog({
               style={SOLID_DESTRUCTIVE}
               onClick={onConfirm}
             >
-              Delete
+              Delete {count} elements
             </Button>
           </div>
         </div>

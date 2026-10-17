@@ -34911,6 +34911,66 @@
         "UX-014"
       ],
       "expect": "\\(fail\\).*UX-014"
+    },
+    {
+      "id": "UX-015/bare-overwrite",
+      "requirement": "UX-015",
+      "description": "The conflict dialog's destructive button says only Overwrite",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "              Overwrite their version",
+          "replace": "              Overwrite"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/confirm-copy.test.ts",
+        "-t",
+        "UX-015"
+      ],
+      "expect": "\\(fail\\).*UX-015"
+    },
+    {
+      "id": "UX-015/bare-replace",
+      "requirement": "UX-015",
+      "description": "The container-query confirm says only Replace",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/AdvancedFields.tsx",
+          "search": "            Replace styles",
+          "replace": "            Replace"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/confirm-copy.test.ts",
+        "-t",
+        "UX-015"
+      ],
+      "expect": "\\(fail\\).*UX-015"
+    },
+    {
+      "id": "UX-015/bare-subtree-delete",
+      "requirement": "UX-015",
+      "description": "The delete-subtree confirm says only Delete",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "              Delete {count} elements",
+          "replace": "              Delete"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialogs.test.tsx",
+        "-t",
+        "the delete dialog counts"
+      ],
+      "expect": "\\(fail\\).*the delete dialog counts"
     }
   ]
 }

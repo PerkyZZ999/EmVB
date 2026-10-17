@@ -140,7 +140,7 @@ describe("copying the style asks before replacing query styles (W-402)", () => {
     expect(sent).toEqual([]);
     expect(host.querySelector("[data-emvb-query-confirm]")).toBeNull();
     await click(host, "Use current style at that width");
-    await click(host, "Replace");
+    await click(host, "Replace styles");
     expect(sent.at(-1)?.query).toEqual({ min: 480, style: {} });
   });
 

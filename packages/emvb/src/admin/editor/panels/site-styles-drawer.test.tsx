@@ -451,7 +451,7 @@ describe("deleting a variable from Site styles", () => {
     );
     await act(async () =>
       [...(dialog?.querySelectorAll<HTMLButtonElement>("button") ?? [])]
-        .find((b) => b.textContent === "Delete")
+        .find((b) => b.textContent === "Delete variable")
         ?.click(),
     );
     await settle();

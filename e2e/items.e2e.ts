@@ -87,7 +87,10 @@ test("a new Accordion has three items and its Content tab edits them (W-130)", a
   expect(await summaries(page)).toEqual(["Question 1", "Pricing", "Question 4", "Question 3"]);
 
   await contentPanel(page).getByRole("button", { name: "Delete item 1" }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: /^Delete \d+ elements$/ })
+    .click();
   expect(await titles(page)).toEqual(["Pricing", "Question 4", "Question 3"]);
   await clickRestore(page);
   await expect(canvas(page).locator("summary")).toHaveCount(4);

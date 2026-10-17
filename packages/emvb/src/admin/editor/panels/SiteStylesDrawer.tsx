@@ -416,7 +416,7 @@ function DeleteConfirm({
           style={SOLID_DESTRUCTIVE}
           onClick={onConfirm}
         >
-          Delete
+          {variable ? "Delete variable" : "Delete class"}
         </Button>
       </div>
     </div>
@@ -531,7 +531,7 @@ function ImportConfirm({
           style={SOLID_DESTRUCTIVE}
           onClick={onConfirm}
         >
-          Replace
+          Replace site styles
         </Button>
       </div>
     </div>

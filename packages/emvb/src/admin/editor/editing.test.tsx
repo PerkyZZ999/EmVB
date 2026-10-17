@@ -187,7 +187,7 @@ describe("save draft (R-006)", () => {
     await press("s", { ctrlKey: true });
     expect(document.body.textContent).toContain("This page was changed somewhere else");
     expect(server.data["title"]).toBe("Pricing");
-    await click(button("Overwrite"));
+    await click(button("Overwrite their version"));
     expect(puts(server.calls).at(-1)?.body?.["_rev"]).toBe("rev5");
     expect(server.data["title"]).toBe("Mine");
   });
