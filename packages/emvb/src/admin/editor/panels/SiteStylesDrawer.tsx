@@ -33,6 +33,7 @@ import { TokenScales } from "./TokenScales.tsx";
 import { InlineError } from "./inline-error.tsx";
 import { VariableSection } from "./VariableSection.tsx";
 import { useMediaQuery } from "../useMediaQuery.ts";
+import { useEditedNoun, type EditedNoun } from "../edited-noun.ts";
 
 const STYLE_NOTE = "Style changes stay unpublished until you publish styles.";
 
@@ -384,9 +385,9 @@ const NOT_CHECKED =
   "Other pages and theme parts aren't checked; any that use it lose that styling.";
 
 /** "2 places on this page and 1 class", or null when nothing uses it. */
-function usedIn(pageUses: number, classUses: number): string | null {
+function usedIn(pageUses: number, classUses: number, noun: EditedNoun): string | null {
   const parts = [
-    pageUses > 0 ? `${plural(pageUses, "place", "places")} on this page` : "",
+    pageUses > 0 ? `${plural(pageUses, "place", "places")} on this ${noun}` : "",
     classUses > 0 ? plural(classUses, "class", "classes") : "",
   ].filter(Boolean);
   return parts.length > 0 ? parts.join(" and ") : null;
@@ -418,7 +419,8 @@ function DeleteConfirm({
         findVariableUsagesInDesign(design, confirm.id, confirm.variableKind).map((u) => u.classId),
       ).size
     : 0;
-  const where = usedIn(pageUses, classUses);
+  const noun = useEditedNoun();
+  const where = usedIn(pageUses, classUses, noun);
   return (
     <div className="emvb-site-confirm" data-emvb-site-confirm="" role="alertdialog">
       <p className="emvb-field-label">Delete {confirm.name}?</p>
@@ -426,8 +428,8 @@ function DeleteConfirm({
         {where
           ? `In use in ${where}. Deleting drops those bindings.`
           : variable
-            ? "Not used on this page or by any class."
-            : "Not used on this page."}{" "}
+            ? `Not used on this ${noun} or by any class.`
+            : `Not used on this ${noun}.`}{" "}
         {NOT_CHECKED}
       </p>
       <div className="emvb-dialog-actions">

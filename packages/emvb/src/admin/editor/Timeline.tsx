@@ -17,6 +17,7 @@ import { ApiError, requestJson, type Fetcher } from "../api.ts";
 import { PLUGIN_ID } from "../../constants.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import { BUTTON } from "../ui.ts";
+import { editedNounOf, type EditedNoun } from "./edited-noun.ts";
 
 type RevisionItem = {
   id: string;
@@ -69,8 +70,8 @@ export function revisionLayout(data: Record<string, unknown> | undefined): Layou
 }
 
 /** A host without EmDash revisions for this collection answers 404. */
-export const NO_REVISIONS =
-  "This site doesn't keep saved versions of this page, so there's no timeline to show.";
+export const noRevisions = (noun: EditedNoun) =>
+  `This site doesn't keep saved versions of this ${noun}, so there's no timeline to show.`;
 
 function useRevisions(fetcher: Fetcher, collection: string, entryId: string, open: boolean) {
   const [state, setState] = React.useState<
@@ -108,7 +109,7 @@ function useRevisions(fetcher: Fetcher, collection: string, entryId: string, ope
         if (cancelled) return;
         // UX-014: a host without revisions won't change on a retry; a failed request might.
         if (error instanceof ApiError && error.status === 404) {
-          setState({ kind: "error", message: NO_REVISIONS });
+          setState({ kind: "error", message: noRevisions(editedNounOf(collection)) });
           return;
         }
         setState({

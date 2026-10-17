@@ -11,6 +11,7 @@ import {
 } from "../../core/index.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import { BUTTON } from "../ui.ts";
+import { useEditedNoun } from "./edited-noun.ts";
 
 const KINDS: { kind: PerfKind; label: string }[] = [
   { kind: "html", label: "HTML" },
@@ -48,6 +49,7 @@ export function PerfMeterDialog({
   parts?: ThemeDynamicData;
   onSelect: (id: string) => void;
 }) {
+  const noun = useEditedNoun();
   const report = React.useMemo(
     () => (open && layout ? measurePage(layout, design, parts) : null),
     [open, layout, design, parts],
@@ -86,7 +88,7 @@ export function PerfMeterDialog({
               </ul>
               <p className="emvb-helper" data-emvb-perf-js="">
                 {report.scripts.length === 0
-                  ? "Zero JavaScript: this page is plain HTML and CSS."
+                  ? `Zero JavaScript: this ${noun} is plain HTML and CSS.`
                   : `Scripts: ${report.scripts.map((s) => SCRIPT_LABELS[s.script]).join(", ")}.`}
               </p>
               {report.warnings.length > 0 && (

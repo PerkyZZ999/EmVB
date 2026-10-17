@@ -27,6 +27,7 @@ import {
   type StyleProps,
 } from "../../../core/index.ts";
 import { FIELD } from "../../ui.ts";
+import { useEditedNoun } from "../edited-noun.ts";
 import {
   CreateRow,
   matches,
@@ -146,6 +147,7 @@ export function ClassesSection({
   onSave: (design: DesignSystem) => Promise<boolean | void>;
   onAskDelete: (id: string, name: string) => void;
 }) {
+  const noun = useEditedNoun();
   const classes = design.classes ?? [];
   const [creating, setCreating] = React.useState(false);
   const [name, setName] = React.useState("");
@@ -292,7 +294,7 @@ export function ClassesSection({
                 )}
                 <span
                   className="emvb-site-usage"
-                  title={`Used by ${count} ${count === 1 ? "element" : "elements"} on this page`}
+                  title={`Used by ${count} ${count === 1 ? "element" : "elements"} on this ${noun}`}
                   data-emvb-usage=""
                 >
                   {usageText(count)}

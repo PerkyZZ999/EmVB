@@ -19,6 +19,7 @@ import {
   type PopupDevice,
 } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
+import { EditedNounContext, editedNounOf, useEditedNoun } from "./edited-noun.ts";
 import { indexLayout } from "../../core/tree-ops.ts";
 import type { Fetcher } from "../api.ts";
 import { loadFormsCapability } from "../forms-api.ts";
@@ -84,6 +85,24 @@ export function Editor({
 }) {
   const wideEnough = useMediaQuery(EDITOR_MIN_WIDTH_QUERY);
   const data = useEditorData(fetcher, entryId, collection);
+  return (
+    <EditedNounContext.Provider value={editedNounOf(collection)}>
+      <EditorBody data={data} fetcher={fetcher} wideEnough={wideEnough} collection={collection} />
+    </EditedNounContext.Provider>
+  );
+}
+
+function EditorBody({
+  data,
+  fetcher,
+  wideEnough,
+  collection,
+}: {
+  data: EditorData;
+  fetcher: Fetcher;
+  wideEnough: boolean;
+  collection: string;
+}) {
   if (data.state === "ready") {
     return (
       <LiveDataProvider fetcher={fetcher}>
@@ -132,6 +151,7 @@ function EditorApp({
   const saver = useSave(fetcher, state, dispatch, collection);
   // W-466: tell the person when an agent (or anyone) changed the page while they were idle.
   const remoteChange = useRemoteChange(fetcher, collection, entry.id, state.rev, !dirty);
+  const noun = useEditedNoun();
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const chrome = useChromeFlags();
   const [device, setDevice] = React.useState<PopupDevice>("desktop");
@@ -368,8 +388,8 @@ function EditorApp({
             <span className="emvb-remote-change-text">
               <strong>
                 {remoteChange === "agent"
-                  ? "An AI agent changed this page."
-                  : "This page was changed somewhere else."}
+                  ? `An AI agent changed this ${noun}.`
+                  : `This ${noun} was changed somewhere else.`}
               </strong>{" "}
               <span>Reload to see the latest draft. Its changes are in the version timeline.</span>
             </span>
@@ -603,15 +623,17 @@ function LoadState({ data }: { data: EditorData }) {
 
 function LoadBody({ data }: { data: EditorData }) {
   const { back } = useEditorHost();
+  const noun = useEditedNoun();
+  const Noun = noun === "page" ? "Page" : "Theme part";
   if (data.state === "not-found" || data.state === "forbidden") {
     return (
       <div className="emvb-state" data-emvb-editor-state={data.state}>
         <Empty
-          title={data.state === "not-found" ? "Page not found" : "You can't open this page"}
+          title={data.state === "not-found" ? `${Noun} not found` : `You can't open this ${noun}`}
           description={
             data.state === "not-found"
-              ? `It may have been deleted. Choose another page from ${back.label}.`
-              : "Your role doesn't allow editing this page."
+              ? `It may have been deleted. Choose another ${noun} from ${back.label}.`
+              : `Your role doesn't allow editing this ${noun}.`
           }
           contents={
             <Button variant="secondary" onClick={back.go}>
@@ -625,13 +647,17 @@ function LoadBody({ data }: { data: EditorData }) {
   if (data.state === "error") {
     return (
       <div className="emvb-state" data-emvb-editor-state="error">
-        <ListError title="Couldn't open this page" message={data.message} onRetry={data.retry} />
+        <ListError
+          title={`Couldn't open this ${noun}`}
+          message={data.message}
+          onRetry={data.retry}
+        />
       </div>
     );
   }
   return (
     <div className="emvb-state" data-emvb-editor-state="loading">
-      <LoadingStatus label="Opening the page…" />
+      <LoadingStatus label={`Opening the ${noun}…`} />
     </div>
   );
 }

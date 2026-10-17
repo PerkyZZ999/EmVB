@@ -26,6 +26,7 @@ import {
   type VariableKind,
 } from "../../../core/index.ts";
 import { FIELD } from "../../ui.ts";
+import { useEditedNoun } from "../edited-noun.ts";
 import { InlineError } from "./inline-error.tsx";
 import {
   CreateRow,
@@ -237,6 +238,7 @@ export function VariableSection({
   onSave: (design: DesignSystem) => Promise<boolean | void>;
   onAskDelete: (id: string, name: string) => void;
 }) {
+  const noun = useEditedNoun();
   const listKey = LIST_KEY[kind];
   const items: readonly Item[] = design.variables[listKey] ?? [];
   const [creating, setCreating] = React.useState(false);
@@ -439,7 +441,7 @@ export function VariableSection({
                 )}
                 <span
                   className="emvb-site-usage"
-                  title={`Used ${onPage} ${onPage === 1 ? "time" : "times"} on this page${
+                  title={`Used ${onPage} ${onPage === 1 ? "time" : "times"} on this ${noun}${
                     inClasses ? ` and in ${inClasses} ${inClasses === 1 ? "class" : "classes"}` : ""
                   }`}
                   data-emvb-usage=""

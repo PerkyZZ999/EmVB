@@ -1,4 +1,5 @@
 import { Button, Dialog } from "@cloudflare/kumo";
+import { useEditedNoun } from "./edited-noun.ts";
 import { BUTTON, SOLID_DESTRUCTIVE, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 
 type OpenProps = { open: boolean; onOpenChange: (open: boolean) => void };
@@ -10,14 +11,15 @@ export function ConflictDialog({
   onReload,
   onOverwrite,
 }: OpenProps & { onReload: () => void; onOverwrite: () => void }) {
+  const noun = useEditedNoun();
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6">
         <style>{UI_CSS}</style>
         <div data-emvb-dialog="conflict" className="emvb-dialog">
-          <Dialog.Title>This page was changed somewhere else</Dialog.Title>
+          <Dialog.Title>This {noun} was changed somewhere else</Dialog.Title>
           <Dialog.Description>
-            Someone saved this page after you opened it. Reload to get their version and lose your
+            Someone saved this {noun} after you opened it. Reload to get their version and lose your
             unsaved changes, or overwrite their version with yours.
           </Dialog.Description>
           <div className="emvb-dialog-actions">
@@ -85,13 +87,14 @@ export function LeaveDialog({
   onDiscard,
   onSaveAndLeave,
 }: OpenProps & { onDiscard: () => void; onSaveAndLeave: () => void }) {
+  const noun = useEditedNoun();
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog size="base" className="p-6">
         <style>{UI_CSS}</style>
         <div data-emvb-dialog="leave" className="emvb-dialog">
           <Dialog.Title>Leave without saving?</Dialog.Title>
-          <Dialog.Description>You have unsaved changes on this page.</Dialog.Description>
+          <Dialog.Description>You have unsaved changes on this {noun}.</Dialog.Description>
           <div className="emvb-dialog-actions">
             <Dialog.Close
               render={(props) => (

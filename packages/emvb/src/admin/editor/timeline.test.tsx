@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import { emptyDesign, type Layout } from "../../core/index.ts";
 import { cleanup, mount, rerender, settle } from "../../../test/dom/mount.ts";
-import { NO_REVISIONS, revisionLayout, TimelineDialog } from "./Timeline.tsx";
+import { noRevisions, revisionLayout, TimelineDialog } from "./Timeline.tsx";
 
 afterEach(cleanup);
 
@@ -215,7 +215,7 @@ describe("version timeline dialog (W-315)", () => {
       />,
     );
     await settle();
-    expect(document.querySelector("[role=alert]")?.textContent).toBe(NO_REVISIONS);
+    expect(document.querySelector("[role=alert]")?.textContent).toBe(noRevisions("page"));
   });
 
   test("snapshots load the host stylesheets before EmVB's CSS", async () => {
