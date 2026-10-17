@@ -188,6 +188,7 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
           </li>
         ))}
       </ul>
+      {/* UX-051: sentence case; the plus says "add", so both fit on one row at 264 px. */}
       <div className="emvb-condition-actions">
         <Button
           type="button"
@@ -197,8 +198,9 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
           disabled={full}
           title={full ? fullReason : undefined}
           onClick={() => add("include")}
+          aria-label="Add include rule"
         >
-          Add Include
+          Include
         </Button>
         <Button
           type="button"
@@ -208,8 +210,9 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
           disabled={full}
           title={full ? fullReason : undefined}
           onClick={() => add("exclude")}
+          aria-label="Add exclude rule"
         >
-          Add Exclude
+          Exclude
         </Button>
       </div>
       {full && (

@@ -45,7 +45,7 @@ describe("display conditions editor (W-091)", () => {
     expect(view.host.querySelector('[role="status"]')?.textContent ?? "").toContain(
       "this part will not appear anywhere",
     );
-    await view.press("Add Include");
+    await view.press("Add include rule");
     expect(view.sent).toHaveLength(1);
     const doc = view.sent[0];
     expect(doc?.schemaVersion).toBe(CONDITIONS_SCHEMA_VERSION);
@@ -69,7 +69,7 @@ describe("display conditions editor (W-091)", () => {
   test("Add Exclude appends an exclude after the existing rules", async () => {
     const view = await editor(TWO);
     expect(view.host.querySelector('[role="status"]')).toBeNull();
-    await view.press("Add Exclude");
+    await view.press("Add exclude rule");
     const rules = view.sent[0]?.rules ?? [];
     expect(rules.map((r) => [r.id.startsWith("r-") ? "new" : r.id, r.op])).toEqual([
       ["r1", "include"],
@@ -136,15 +136,15 @@ describe("the condition limit (W-092)", () => {
   });
   const addButtons = (host: HTMLElement) =>
     [...host.querySelectorAll<HTMLButtonElement>("button")].filter((b) =>
-      (b.textContent ?? "").startsWith("Add "),
+      (b.getAttribute("aria-label") ?? "").startsWith("Add "),
     );
 
   test("at 20 rules both Add buttons are disabled, say why, and add nothing", async () => {
     const view = await editor(rules(MAX_CONDITION_RULES));
     // The Kumo tooltip (`title`) only mounts on hover; the helper line says why at all times.
-    expect(addButtons(view.host).map((b) => [b.textContent, b.disabled])).toEqual([
-      ["Add Include", true],
-      ["Add Exclude", true],
+    expect(addButtons(view.host).map((b) => [b.getAttribute("aria-label"), b.disabled])).toEqual([
+      ["Add include rule", true],
+      ["Add exclude rule", true],
     ]);
     expect(view.host.querySelector("[data-emvb-conditions-full]")?.textContent).toBe(
       "20 conditions is the most one part can have. Remove one to add another.",
@@ -159,7 +159,7 @@ describe("the condition limit (W-092)", () => {
     const view = await editor(rules(MAX_CONDITION_RULES - 1));
     expect(addButtons(view.host).map((b) => b.disabled)).toEqual([false, false]);
     expect(view.host.querySelector("[data-emvb-conditions-full]") === null).toBe(true);
-    await view.press("Add Exclude");
+    await view.press("Add exclude rule");
     expect(view.sent.map((doc) => doc.rules.length)).toEqual([MAX_CONDITION_RULES]);
     expect(validateConditions(view.sent[0]).ok).toBe(true);
   });
@@ -208,4 +208,13 @@ describe("rules the menu can't build show as themselves (W-694)", () => {
       (await shown({ group: "archive", name: "taxonomy", args: { taxonomy: "tag" } })).text,
     ).toBe("All tags");
   });
+});
+
+test("UX-051: the add buttons read Include and Exclude, and are named as adding a rule", async () => {
+  const view = await editor(undefined);
+  const adds = [...view.host.querySelectorAll<HTMLButtonElement>(".emvb-condition-actions button")];
+  expect(adds.map((b) => `${b.textContent?.trim()} = ${b.getAttribute("aria-label")}`)).toEqual([
+    "Include = Add include rule",
+    "Exclude = Add exclude rule",
+  ]);
 });

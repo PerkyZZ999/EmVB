@@ -36069,6 +36069,46 @@
         "UX-050"
       ],
       "expect": "\\(fail\\).*UX-050"
+    },
+    {
+      "id": "UX-051/exclude-unnamed",
+      "requirement": "UX-051",
+      "description": "Exclude is named only by its visible word",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "          aria-label=\"Add exclude rule\"\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx",
+        "-t",
+        "UX-051"
+      ],
+      "expect": "\\(fail\\).*UX-051"
+    },
+    {
+      "id": "UX-051/title-case",
+      "requirement": "UX-051",
+      "description": "The include button is Title Case again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "        >\n          Include\n        </Button>",
+          "replace": "        >\n          Add Include\n        </Button>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/conditions-editor-ui.test.tsx",
+        "-t",
+        "UX-051"
+      ],
+      "expect": "\\(fail\\).*UX-051"
     }
   ]
 }

@@ -194,7 +194,7 @@ describe("theme part settings (W-091)", () => {
   test("changing a condition sends it as a conditions patch", async () => {
     const view = await settings({ ...PAGE, partType: "footer" }, "theme-part");
     const add = [...view.host.querySelectorAll("button")].find(
-      (b) => b.textContent?.trim() === "Add Exclude",
+      (b) => b.getAttribute("aria-label") === "Add exclude rule",
     );
     await act(async () => add?.click());
     expect(view.sent.map((patch) => Object.keys(patch))).toEqual([["conditions"]]);
