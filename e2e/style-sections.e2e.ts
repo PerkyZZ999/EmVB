@@ -191,6 +191,7 @@ test("Effects section edits a class: opacity, inset shadow, grayscale and cursor
     await overlay(page).getByRole("button", { name: "Add shadow" }).click();
     await type(page, "Blur", "6");
     await pick(page, "Position", "Inset");
+    await overlay(page).getByRole("button", { name: "Add filters" }).click();
     await type(page, "Grayscale (%)", "100");
     await pick(page, "Cursor", "Pointer");
 

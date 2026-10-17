@@ -466,6 +466,9 @@ describe("Effects section (W-088)", () => {
 
   test("each filter is its own row; clearing the last one unsets Filters", async () => {
     await row("filter");
+    // UX-076: unset Filters start as one button, like Add shadow.
+    expect(document.querySelectorAll("input[data-emvb-number]").length).toBe(0);
+    await act(async () => document.querySelector<HTMLButtonElement>(".emvb-add-filters")?.click());
     expect(
       [...document.querySelectorAll("input[data-emvb-number]")].map((el) =>
         el.getAttribute("data-emvb-number"),

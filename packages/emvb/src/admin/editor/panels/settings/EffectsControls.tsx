@@ -1,6 +1,6 @@
+import * as React from "react";
 import { Button, Select } from "@cloudflare/kumo";
 import { PlusIcon } from "@phosphor-icons/react";
-import type * as React from "react";
 import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
@@ -138,20 +138,43 @@ export function FiltersControl({
     }
     onChange(Object.keys(next).length > 0 ? (next as Filter) : undefined);
   };
+  // UX-076: like shadow, entrance and transition, Filters start as one button.
+  const [open, setOpen] = React.useState(value !== undefined || inherited !== undefined);
+  const rows = React.useRef<HTMLDivElement>(null);
   return (
-    <div className="emvb-filters" data-emvb-style="filter" data-set={value ? "true" : undefined}>
+    <div
+      className="emvb-filters"
+      data-emvb-style="filter"
+      data-set={value ? "true" : undefined}
+      ref={rows}
+    >
       <p className="emvb-sub-label">Filters</p>
-      {FILTER_ROWS.map(([key, label, spec]) => (
-        <NumberRow
-          key={key}
-          rowKey={`filter.${key}`}
-          label={label}
-          value={value?.[key]}
-          spec={spec}
-          inherited={inherited?.[key]}
-          onCommit={(n) => patch(key, n)}
-        />
-      ))}
+      {open || value || inherited ? (
+        FILTER_ROWS.map(([key, label, spec]) => (
+          <NumberRow
+            key={key}
+            rowKey={`filter.${key}`}
+            label={label}
+            value={value?.[key]}
+            spec={spec}
+            inherited={inherited?.[key]}
+            onCommit={(n) => patch(key, n)}
+          />
+        ))
+      ) : (
+        <Button
+          type="button"
+          variant="secondary"
+          className={`${BUTTON} emvb-add-filters`}
+          icon={<PlusIcon aria-hidden="true" />}
+          onClick={() => {
+            setOpen(true);
+            requestAnimationFrame(() => rows.current?.querySelector<HTMLElement>("input")?.focus());
+          }}
+        >
+          Add filters
+        </Button>
+      )}
     </div>
   );
 }

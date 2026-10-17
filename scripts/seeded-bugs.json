@@ -36851,6 +36851,26 @@
         "UX-075"
       ],
       "expect": "\\(fail\\).*UX-075"
+    },
+    {
+      "id": "UX-076/filters-always-open",
+      "requirement": "UX-076",
+      "description": "Six empty filter rows show with no filter set",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "      {open || value || inherited ? (\n",
+          "replace": "      {true ? (\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx",
+        "-t",
+        "each filter is its own row"
+      ],
+      "expect": "\\(fail\\).*each filter is its own row"
     }
   ]
 }
