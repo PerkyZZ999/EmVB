@@ -317,11 +317,20 @@ function pairFields<F extends { key: string }>(fields: readonly F[]): F[][] {
   return rows;
 }
 
+/** UX-071: fields that only apply to some values of another field on the same element. */
+const SHOWN_WHEN: Readonly<Record<string, (props: Record<string, unknown>) => boolean>> = {
+  "loop.columns": (props) => props["display"] === "grid" || props["display"] === "cards",
+};
+
 function fieldShown(key: string, node: LayoutNode): boolean {
+  const props = node.props as Record<string, unknown>;
+  // A stored value always shows, so it can be seen and reset.
+  if (props[key] !== undefined) return true;
+  const when = SHOWN_WHEN[`${node.type}.${key}`];
+  if (when) return when(props);
   const parent = DEPENDS_ON[key];
   if (!parent) return true;
-  const props = node.props as Record<string, unknown>;
-  return props[parent] !== undefined || props[key] !== undefined;
+  return props[parent] !== undefined;
 }
 
 /** Right panel with an element selected (IA / W-021): descriptor Content + Style sections. */

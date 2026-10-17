@@ -35289,8 +35289,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "  return props[parent] !== undefined || props[key] !== undefined;",
-          "replace": "  return props[parent] !== undefined;"
+          "search": "  if (props[key] !== undefined) return true;",
+          "replace": ""
         }
       ],
       "command": [
@@ -36691,6 +36691,26 @@
         "Delete removes the selected element"
       ],
       "expect": "\\(fail\\).*Delete removes the selected element"
+    },
+    {
+      "id": "UX-071/columns-on-list",
+      "requirement": "UX-071",
+      "description": "Loop Columns shows for List again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  \"loop.columns\": (props) => props[\"display\"] === \"grid\" || props[\"display\"] === \"cards\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-071"
+      ],
+      "expect": "\\(fail\\).*UX-071"
     }
   ]
 }

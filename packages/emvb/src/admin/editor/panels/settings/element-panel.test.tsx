@@ -376,3 +376,32 @@ test("UX-065: the breadcrumb's last part is the current element, not a button ba
     "span:Heading",
   ]);
 });
+
+const loopPanel = async (props: Record<string, unknown>) => {
+  const loop = { id: "loop0011", type: "loop", props, children: [] } as unknown as LayoutNode;
+  await mount(
+    <ElementPanel
+      node={loop}
+      layout={{ ...layout, root: { ...layout.root, children: [loop] } }}
+      design={emptyDesign()}
+      rejection={null}
+      fetcher={stubFetcher}
+      onChange={() => undefined}
+      onDesignChange={async () => undefined}
+      onSelect={() => undefined}
+    />,
+  );
+  return document.querySelector('[data-emvb-field="columns"]') ? "shown" : "hidden";
+};
+
+test("UX-071: Loop Columns shows only for Grid or Cards", async () => {
+  expect(await loopPanel({ display: "list" })).toBe("hidden");
+});
+
+test("UX-071: Loop Columns shows for Cards", async () => {
+  expect(await loopPanel({ display: "cards" })).toBe("shown");
+});
+
+test("UX-071: a stored Loop Columns value stays visible on List, so it can be reset", async () => {
+  expect(await loopPanel({ display: "list", columns: 4 })).toBe("shown");
+});
