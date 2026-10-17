@@ -268,3 +268,41 @@ test("UX-028: a button's icon layout settings wait for an icon, unless one is al
   const stored = await content(button({ iconSize: "lg" }));
   expect(stored.includes("Icon size")).toBe(true);
 });
+
+test("UX-034: grid placement rows show only for a Grid's children, unless already set", async () => {
+  const box = (style?: Record<string, unknown>): LayoutNode =>
+    ({
+      id: "card0009",
+      type: "container",
+      props: {},
+      children: [],
+      ...(style ? { style } : {}),
+    }) as LayoutNode;
+  const styleTab = async (node: LayoutNode, parentType: "container" | "grid") => {
+    const parent = { id: "box00009", type: parentType, props: {}, children: [node] } as LayoutNode;
+    const page: Layout = { ...layout, root: { ...layout.root, children: [parent] } };
+    await mount(
+      <ElementPanel
+        node={node}
+        layout={page}
+        design={emptyDesign()}
+        rejection={null}
+        fetcher={stubFetcher}
+        onChange={() => undefined}
+        onDesignChange={async () => undefined}
+        onSelect={() => undefined}
+      />,
+    );
+    const tab = [...document.querySelectorAll('[role="tab"]')].find(
+      (t) => t.textContent === "Style",
+    );
+    await act(async () => (tab as HTMLElement | undefined)?.click());
+    const layoutHeader = document.querySelector<HTMLElement>('[data-emvb-section="layout"]');
+    if (layoutHeader && layoutHeader.getAttribute("aria-expanded") !== "true")
+      await act(async () => layoutHeader.click());
+    return document.querySelectorAll('[data-emvb-style^="grid"]').length;
+  };
+  expect(await styleTab(box(), "container")).toBe(0);
+  expect(await styleTab(box(), "grid")).toBe(4);
+  expect(await styleTab(box({ gridColumnSpan: 2 }), "container")).toBe(1);
+});

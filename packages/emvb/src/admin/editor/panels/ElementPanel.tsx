@@ -88,6 +88,22 @@ const enclosingFormId = (layout: Layout, nodeId: string): string | undefined => 
   return undefined;
 };
 
+const GRID_ITEM_KEYS = new Set<string>([
+  "gridColumnSpan",
+  "gridColumnStart",
+  "gridRowSpan",
+  "gridRowStart",
+]);
+
+/** Whether the node sits directly in a box that lays its children out on a grid. */
+const inGridParent = (layout: Layout | null | undefined, nodeId: string): boolean => {
+  if (!layout) return true;
+  const index = indexLayout(layout);
+  const parentId = index.parentOf.get(nodeId);
+  const parent = parentId ? index.byId.get(parentId) : undefined;
+  return parent?.type === "grid" || parent?.type === "loop";
+};
+
 const sectionKey = (type: string) => `emvb-style-sections:${type}`;
 
 /**
@@ -383,6 +399,7 @@ function KnownElementPanel({
       ? { ...fromBelow, ...ownInherited }
       : ownInherited;
   const position = positionInEffect(node, design, cls);
+  const inGrid = inGridParent(layout, node.id);
   const iconSvg =
     node.type === "icon" && typeof node.props.iconSvg === "string" ? node.props.iconSvg : undefined;
   const strokeAdjustable = React.useMemo(
@@ -628,6 +645,10 @@ function KnownElementPanel({
             const keys = keysFor(node.type, id, style, position).filter(
               (key) =>
                 (styleState === "normal" || !NORMAL_ONLY_KEYS.has(key)) &&
+                // UX-034: spans and starts only place an element inside a Grid (or a Loop's grid).
+                (!GRID_ITEM_KEYS.has(key) ||
+                  inGrid ||
+                  (style as Record<string, unknown> | undefined)?.[key] !== undefined) &&
                 // W-237: Stroke width only for stroke-drawn icons (or once set, so it can be reset).
                 (key !== "iconStrokeWidth" ||
                   strokeAdjustable ||

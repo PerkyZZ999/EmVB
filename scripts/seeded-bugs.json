@@ -35421,6 +35421,66 @@
         "UX-033"
       ],
       "expect": "\\(fail\\).*UX-033"
+    },
+    {
+      "id": "UX-034/spans-everywhere",
+      "requirement": "UX-034",
+      "description": "Grid placement rows show for every element again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "                  inGrid ||\n",
+          "replace": "                  true ||\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-034"
+      ],
+      "expect": "\\(fail\\).*UX-034"
+    },
+    {
+      "id": "UX-034/stored-span-hidden",
+      "requirement": "UX-034",
+      "description": "A stored span outside a Grid is hidden, so it can't be reset",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "                  (style as Record<string, unknown> | undefined)?.[key] !== undefined) &&",
+          "replace": "                  false) &&"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-034"
+      ],
+      "expect": "\\(fail\\).*UX-034"
+    },
+    {
+      "id": "UX-034/grid-parent-ignored",
+      "requirement": "UX-034",
+      "description": "A Grid's children lose their span rows",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  return parent?.type === \"grid\" || parent?.type === \"loop\";",
+          "replace": "  return parent?.type === \"loop\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-034"
+      ],
+      "expect": "\\(fail\\).*UX-034"
     }
   ]
 }
