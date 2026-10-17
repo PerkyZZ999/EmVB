@@ -77,3 +77,13 @@ test("UX-054: a list row opens its page anywhere it is clicked, and tints on hov
     "background: var(--color-kumo-tint);",
   );
 });
+
+test("UX-090: dialog titles sit one step above the 14 px field labels", () => {
+  expect(rule('.emvb-dialog :is(h2, [data-slot="title"])')).toMatch(
+    /font-size: 16px;\s*line-height: 22px;\s*font-weight: 600;/,
+  );
+});
+
+test("UX-088: the agent setup snippets use the light tint surface", () => {
+  expect(rule(".emvb-agents-section pre")).toContain("background: var(--color-kumo-tint);");
+});

@@ -37199,6 +37199,54 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "UX-089"],
       "expect": "\\(fail\\).*UX-089"
+    },
+    {
+      "id": "UX-088/heavy-snippet",
+      "requirement": "UX-088",
+      "description": "Setup snippets go back to the heavy recessed grey.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "border-radius: 6px; background: var(--color-kumo-tint); font-family",
+          "replace": "border-radius: 6px; background: var(--color-kumo-recessed); font-family"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-088"],
+      "expect": "\\(fail\\).*UX-088"
+    },
+    {
+      "id": "UX-090/title-like-labels",
+      "requirement": "UX-090",
+      "description": "Dialog titles shrink back to label size.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  font-size: 16px;\n  line-height: 22px;",
+          "replace": "  font-size: 14px;\n  line-height: 18px;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-090"],
+      "expect": "\\(fail\\).*UX-090"
+    },
+    {
+      "id": "UX-091/bare-create",
+      "requirement": "UX-091",
+      "description": "New theme part's button says only Create.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewThemePartDialog.tsx",
+          "search": "submitLabel=\"Create theme part\"",
+          "replace": "submitLabel=\"Create\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/create-dialogs.test.tsx",
+        "-t",
+        "UX-091"
+      ],
+      "expect": "\\(fail\\).*UX-091"
     }
   ]
 }

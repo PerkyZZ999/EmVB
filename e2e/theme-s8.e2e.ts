@@ -15,7 +15,7 @@ test("Theme Builder creates a Header and opens the theme-part editor", async ({ 
   await page.getByRole("button", { name: "New theme part" }).click();
   await expect(page.locator('[data-emvb-dialog="new-theme-part"]')).toBeVisible();
   await page.getByLabel("Title").fill(title);
-  await page.getByRole("button", { name: "Create", exact: true }).click();
+  await page.getByRole("button", { name: "Create theme part", exact: true }).click();
   await expect(page).toHaveURL(/\/editor\?entry=.*collection=emvb_theme_parts/, {
     timeout: 20_000,
   });

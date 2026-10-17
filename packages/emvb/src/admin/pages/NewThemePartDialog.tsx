@@ -39,8 +39,8 @@ export function NewThemePartDialog({
       noun="theme part"
       emptyTitle="Enter a title."
       slugPrefix={`${partType}-`}
-      slugHint="Internal id only — theme parts are not public URLs."
-      submitLabel="Create"
+      slugHint="Tells theme parts apart. Theme parts have no public address."
+      submitLabel="Create theme part"
       open={open}
       onOpenChange={onOpenChange}
       create={async (title, slug) =>

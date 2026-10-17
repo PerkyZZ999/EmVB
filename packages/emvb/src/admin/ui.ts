@@ -219,10 +219,11 @@ export const UI_CSS = `
 .emvb-dialog .emvb-field { width: 100%; }
 .emvb-create-fields { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .emvb-create-status { min-height: 18px; }
+/* UX-090: 16 px so the title stands above the 14 px field labels under it. */
 .emvb-dialog :is(h2, [data-slot="title"]) {
   margin: 0;
-  font-size: 14px;
-  line-height: 18px;
+  font-size: 16px;
+  line-height: 22px;
   font-weight: 600;
   color: var(--text-color-kumo-default);
 }

@@ -76,6 +76,14 @@ const dialogs = [
 
 for (const dialog of dialogs) {
   describe(dialog.name, () => {
+    test("UX-091: the submit button names what it creates, and the slug hint has no jargon", async () => {
+      await mount(dialog.render(fetcherReplying(created("x"), [])));
+      const createButton = document.querySelector<HTMLButtonElement>('button[type="submit"]');
+      expect(createButton?.textContent?.trim() ?? "no button").toBe(`Create ${dialog.noun}`);
+      const dialogText = document.querySelector("form[data-emvb-dialog]")?.textContent ?? "";
+      expect(dialogText).not.toContain("—");
+      expect(dialogText).not.toContain("Internal id");
+    });
     test("W-727: pending creation is announced once and unlocks after failure", async () => {
       const pending = Promise.withResolvers<Response>();
       let creates = 0;
