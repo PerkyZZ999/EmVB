@@ -5,6 +5,7 @@ import { emptyDesign, type StyleProps } from "../../../../core/index.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 import { switchFillRemembered, type FillMemory } from "./background-mode.ts";
 import { StyleRow } from "./StyleRow.tsx";
+import { GradientControl } from "./BackgroundControls.tsx";
 import type { StyleKey } from "./style-sections.ts";
 
 afterEach(async () => {
@@ -201,4 +202,26 @@ test("UX-033: the Background section's rows name their part instead of repeating
       (l) => l.textContent === "Background color",
     );
   expect(named).toBe(true);
+});
+
+test("UX-081: gradient selects show names, not raw values", async () => {
+  const host = await mount(
+    <GradientControl
+      value={
+        {
+          type: "radial",
+          position: "top left",
+          stops: [
+            { color: "#000000", at: 0 },
+            { color: "#ffffff", at: 100 },
+          ],
+        } as never
+      }
+      design={emptyDesign()}
+      onChange={() => undefined}
+      onDesignChange={async () => undefined}
+    />,
+  );
+  const shown = [...host.querySelectorAll('[role="combobox"]')].map((c) => c.textContent?.trim());
+  expect(shown.slice(0, 2)).toEqual(["Radial", "Top left"]);
 });

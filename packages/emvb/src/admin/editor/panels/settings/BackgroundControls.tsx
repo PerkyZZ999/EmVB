@@ -232,6 +232,9 @@ const RADIAL_AT = [
   "bottom right",
 ] as const;
 
+/** "top left" → "Top left". */
+const sentence = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
+
 /** Linear, radial or conic, with 2–10 stops. Angle is a slider and a number. */
 export function GradientControl({
   value,
@@ -271,6 +274,10 @@ export function GradientControl({
         label="Gradient type"
         className={FIELD}
         value={value.type}
+        // UX-081: triggers show option names ("Linear", "Top left"), not raw values.
+        renderValue={(v: unknown) =>
+          GRADIENT_TYPES.find((option) => option.value === v)?.label ?? String(v)
+        }
         onValueChange={(next) => {
           const type = GRADIENT_TYPES.find((option) => option.value === next)?.value;
           if (type) onChange({ ...value, type });
@@ -287,6 +294,7 @@ export function GradientControl({
           label="Position"
           className={FIELD}
           value={value.position ?? "center"}
+          renderValue={(v: unknown) => sentence(String(v))}
           onValueChange={(next) => {
             const position = RADIAL_AT.find((option) => option === next);
             if (position) onChange({ ...value, position });
@@ -294,7 +302,7 @@ export function GradientControl({
         >
           {RADIAL_AT.map((option) => (
             <Select.Option key={option} value={option}>
-              {option}
+              {sentence(option)}
             </Select.Option>
           ))}
         </Select>

@@ -36971,6 +36971,26 @@
         "UX-080"
       ],
       "expect": "\\(fail\\).*UX-080"
+    },
+    {
+      "id": "UX-081/raw-radial-position",
+      "requirement": "UX-081",
+      "description": "The radial Position shows its raw value again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "          renderValue={(v: unknown) => sentence(String(v))}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "UX-081"
+      ],
+      "expect": "\\(fail\\).*UX-081"
     }
   ]
 }
