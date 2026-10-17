@@ -36711,6 +36711,26 @@
         "UX-071"
       ],
       "expect": "\\(fail\\).*UX-071"
+    },
+    {
+      "id": "UX-071/count-text-always",
+      "requirement": "UX-071",
+      "description": "Count text shows with the page count off",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  \"pagination.countText\": (props) => props[\"showCount\"] === true,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-071"
+      ],
+      "expect": "\\(fail\\).*UX-071"
     }
   ]
 }

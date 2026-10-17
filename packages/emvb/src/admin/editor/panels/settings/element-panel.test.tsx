@@ -405,3 +405,28 @@ test("UX-071: Loop Columns shows for Cards", async () => {
 test("UX-071: a stored Loop Columns value stays visible on List, so it can be reset", async () => {
   expect(await loopPanel({ display: "list", columns: 4 })).toBe("shown");
 });
+
+const pagination = async (props: Record<string, unknown>) => {
+  const node = { id: "pagi0011", type: "pagination", props } as unknown as LayoutNode;
+  await mount(
+    <ElementPanel
+      node={node}
+      layout={{ ...layout, root: { ...layout.root, children: [node] } }}
+      design={emptyDesign()}
+      rejection={null}
+      fetcher={stubFetcher}
+      onChange={() => undefined}
+      onDesignChange={async () => undefined}
+      onSelect={() => undefined}
+    />,
+  );
+  return document.querySelector('[data-emvb-field="countText"]') ? "shown" : "hidden";
+};
+
+test("UX-071: Pagination's Count text shows once Show page count is on", async () => {
+  expect(await pagination({})).toBe("hidden");
+});
+
+test("UX-071: Pagination's Count text shows with the page count", async () => {
+  expect(await pagination({ showCount: true })).toBe("shown");
+});

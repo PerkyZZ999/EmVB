@@ -320,6 +320,7 @@ function pairFields<F extends { key: string }>(fields: readonly F[]): F[][] {
 /** UX-071: fields that only apply to some values of another field on the same element. */
 const SHOWN_WHEN: Readonly<Record<string, (props: Record<string, unknown>) => boolean>> = {
   "loop.columns": (props) => props["display"] === "grid" || props["display"] === "cards",
+  "pagination.countText": (props) => props["showCount"] === true,
 };
 
 function fieldShown(key: string, node: LayoutNode): boolean {
