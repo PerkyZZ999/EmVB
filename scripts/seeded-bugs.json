@@ -34971,6 +34971,26 @@
         "the delete dialog counts"
       ],
       "expect": "\\(fail\\).*the delete dialog counts"
+    },
+    {
+      "id": "UX-016/box-caption-clipped",
+      "requirement": "UX-016",
+      "description": "Radius captions clip to Bottom ri… in the 52 px box cells",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "color: var(--text-color-kumo-subtle); text-align: center; max-width: 100%; }",
+          "replace": "color: var(--text-color-kumo-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-016"
+      ],
+      "expect": "\\(fail\\).*UX-016"
     }
   ]
 }

@@ -392,7 +392,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-box-input:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: -1px; }
 .emvb-box-input[aria-invalid="true"] { box-shadow: inset 0 0 0 1px var(--text-color-kumo-danger); }
 .emvb-box-input[data-bound="true"] { color: var(--color-kumo-brand); }
-.emvb-box-name { font-size: 11px; line-height: 14px; color: var(--text-color-kumo-subtle); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.emvb-box-name { font-size: 11px; line-height: 14px; color: var(--text-color-kumo-subtle); text-align: center; max-width: 100%; }
 .emvb-box-error { margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-danger); }
 .emvb-var-btn:hover, .emvb-var-btn[data-popup-open] { background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
 .emvb-var-btn[data-active="true"] { color: var(--color-kumo-brand); }

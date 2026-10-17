@@ -122,3 +122,9 @@ test("sections fade their rows in as they open and the Site styles drawer slides
     /@keyframes emvb-drawer-enter \{ from \{ opacity: 0; transform: translateX\(12px\); \}/,
   );
 });
+
+test('four-box captions wrap instead of clipping "Bottom right" to "Bottom ri…" (UX-016)', () => {
+  const caption = rule(".emvb-box-name");
+  expect(caption).toMatch(/text-align: center;/);
+  expect(/white-space: nowrap|text-overflow: ellipsis/.test(caption)).toBe(false);
+});
