@@ -444,11 +444,14 @@ export function ClassChipInput({
           {error}
         </p>
       )}
-      <p className="emvb-helper" data-emvb-cascade-caption="">
-        {full
-          ? `${MAX_ELEMENT_CLASSES} classes is the most one element can have.`
-          : "When two classes set the same property, the one lower in Site styles wins. Local styles still win."}
-      </p>
+      {/* UX-025: the cascade rule only matters once two classes can disagree. */}
+      {(full || ids.length >= 2) && (
+        <p className="emvb-helper" data-emvb-cascade-caption="">
+          {full
+            ? `${MAX_ELEMENT_CLASSES} classes is the most one element can have.`
+            : "When two classes set the same property, the one lower in Site styles wins. Local styles still win."}
+        </p>
+      )}
     </div>
   );
 }

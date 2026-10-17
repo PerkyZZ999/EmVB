@@ -807,3 +807,15 @@ describe("save local styles as class (W-134)", () => {
     expect(localNameField()?.value).toBe("Brand");
   });
 });
+
+test("UX-025: the cascade rule shows only once two classes can disagree", async () => {
+  const caption = () => document.querySelector("[data-emvb-cascade-caption]")?.textContent ?? null;
+  await mount(<Harness log={newLog()} />);
+  expect(caption()).toBeNull();
+  await mount(<Harness initial={["accent"]} log={newLog()} />);
+  expect(caption()).toBeNull();
+  await mount(<Harness initial={["accent", "card"]} log={newLog()} />);
+  expect(caption()).toBe(
+    "When two classes set the same property, the one lower in Site styles wins. Local styles still win.",
+  );
+});
