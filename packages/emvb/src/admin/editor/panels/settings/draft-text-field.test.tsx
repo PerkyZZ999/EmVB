@@ -229,3 +229,26 @@ test("UX-041: a list field says one per line and ties the note to its text area"
     "One per line.",
   );
 });
+
+test("UX-045: a text field shows its explanation up front and describes the input with it", async () => {
+  const field: FieldDescriptor = {
+    key: "label",
+    kind: "text",
+    label: "Name",
+    optional: true,
+    message: "Names the menu for assistive technology. Leave it blank to use Menu.",
+  };
+  const node = { id: "menu0001", type: "menu", props: {} } as unknown as LayoutNode;
+  const host = await mount(<DraftTextField field={field} node={node} onChange={() => undefined} />);
+  const id = host.querySelector("input")?.getAttribute("aria-describedby") ?? "";
+  expect(id ? document.getElementById(id)?.textContent : "not described").toBe(
+    "Names the menu for assistive technology. Leave it blank to use Menu.",
+  );
+});
+
+test("UX-045: field explanations say such as, not e.g.", () => {
+  const eg = ELEMENT_DESCRIPTORS.flatMap((d) =>
+    d.fields.filter((f) => f.message?.includes("e.g.")).map((f) => `${d.type}.${f.key}`),
+  );
+  expect(eg).toEqual([]);
+});

@@ -35829,6 +35829,46 @@
         "UX-044"
       ],
       "expect": "\\(fail\\).*UX-044"
+    },
+    {
+      "id": "UX-045/text-hint-hidden",
+      "requirement": "UX-045",
+      "description": "A text field's explanation is hidden again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "      description={field.message}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-045"
+      ],
+      "expect": "\\(fail\\).*UX-045"
+    },
+    {
+      "id": "UX-045/eg-copy",
+      "requirement": "UX-045",
+      "description": "An explanation says e.g. again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/dynamic-elements.ts",
+          "search": "\"The field Post Excerpt shows, such as role. Leave it empty for the excerpt.\"",
+          "replace": "\"The field Post Excerpt shows, e.g. role. Leave it empty for the excerpt.\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-045"
+      ],
+      "expect": "\\(fail\\).*UX-045"
     }
   ]
 }

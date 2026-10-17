@@ -246,6 +246,8 @@ export function DraftTextField({
       // W-272: the field follows its text's direction, so RTL text reads from the right.
       dir="auto"
       value={draft}
+      // UX-045: a text field's message explains it (never an error), so show it up front.
+      description={field.message}
       error={
         tooLong
           ? `Text can be up to ${MAX_TEXT_LENGTH} characters. Shorten it.`
