@@ -168,7 +168,8 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -390,7 +391,8 @@ exports[`element panel markup (W-021, W-086 M16) toc renders the same content an
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -573,7 +575,8 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -754,7 +757,8 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -1013,7 +1017,8 @@ exports[`element panel markup (W-021, W-086 M16) layout-section renders the same
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "4 set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -1215,7 +1220,8 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -1332,7 +1338,8 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -1454,7 +1461,8 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -1599,7 +1607,8 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -1826,7 +1835,8 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -2064,7 +2074,8 @@ exports[`element panel markup (W-021, W-086 M16) label renders the same content 
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -2326,7 +2337,8 @@ exports[`element panel markup (W-021, W-086 M16) link renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -2603,7 +2615,8 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -2846,7 +2859,8 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -3180,7 +3194,8 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -3450,7 +3465,8 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -3667,7 +3683,8 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -3878,7 +3895,8 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -4118,7 +4136,8 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -4370,7 +4389,8 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -4622,7 +4642,8 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -4869,7 +4890,8 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -5099,7 +5121,8 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -5321,7 +5344,8 @@ exports[`element panel markup (W-021, W-086 M16) submit renders the same content
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -5560,7 +5584,8 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -5732,7 +5757,8 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -5899,7 +5925,8 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -6071,7 +6098,8 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -6238,7 +6266,8 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -6465,7 +6494,8 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -6697,7 +6727,8 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -6869,7 +6900,8 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -7036,7 +7068,8 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -7208,7 +7241,8 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -7375,7 +7409,8 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -7683,7 +7718,8 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -7869,7 +7905,8 @@ exports[`element panel markup (W-021, W-086 M16) loop-empty renders the same con
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -8050,7 +8087,8 @@ exports[`element panel markup (W-021, W-086 M16) loop-empty renders the same con
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -8350,7 +8388,8 @@ exports[`element panel markup (W-021, W-086 M16) pagination renders the same con
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -8589,7 +8628,8 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -8775,7 +8815,8 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -8945,7 +8986,8 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -9122,7 +9164,8 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "3 set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -9325,7 +9368,8 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "3 set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -9634,7 +9678,8 @@ exports[`element panel markup (W-021, W-086 M16) grid renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -9888,7 +9933,8 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -10154,7 +10200,8 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -10392,7 +10439,8 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -10665,7 +10713,8 @@ exports[`element panel markup (W-021, W-086 M16) accordion renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -10911,7 +10960,8 @@ exports[`element panel markup (W-021, W-086 M16) accordion-item renders the same
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -11151,7 +11201,8 @@ exports[`element panel markup (W-021, W-086 M16) menu renders the same content a
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -11439,7 +11490,8 @@ exports[`element panel markup (W-021, W-086 M16) menu-item renders the same cont
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "nothing set"
           svg.emvb-sources-caret aria-hidden="true"
@@ -11602,7 +11654,8 @@ exports[`element panel markup (W-021, W-086 M16) closed sections count the prope
           div data-orientation="horizontal" data-activation-direction="none" role="presentation"
     details.emvb-sources data-emvb-style-sources=""
       summary
-        "Where styles come from"
+        span.emvb-sources-label
+          "Where styles come from"
         span.emvb-sources-count
           "4 set"
           svg.emvb-sources-caret aria-hidden="true"

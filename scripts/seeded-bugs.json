@@ -36531,6 +36531,26 @@
         "UX-065"
       ],
       "expect": "\\(fail\\).*UX-065"
+    },
+    {
+      "id": "UX-066/label-wraps",
+      "requirement": "UX-066",
+      "description": "The summary label wraps beside a long count again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-sources-label { white-space: nowrap; }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sources.test.tsx",
+        "-t",
+        "UX-066"
+      ],
+      "expect": "\\(fail\\).*UX-066"
     }
   ]
 }

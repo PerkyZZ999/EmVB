@@ -58,7 +58,7 @@ export function StyleSources({
   return (
     <details className="emvb-sources" data-emvb-style-sources="">
       <summary>
-        Where styles come from
+        <span className="emvb-sources-label">Where styles come from</span>
         <span className="emvb-sources-count">
           {keys.length === 0
             ? "nothing set"

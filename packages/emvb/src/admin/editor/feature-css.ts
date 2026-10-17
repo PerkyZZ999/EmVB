@@ -119,6 +119,10 @@ export const FEATURE_CSS = `
 .emvb-sources > summary { cursor: pointer; display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
 .emvb-sources-count { font-weight: 400; color: var(--text-color-kumo-subtle); display: inline-flex; align-items: center; gap: 8px; }
 .emvb-sources > summary { list-style: none; align-items: center; border-radius: 4px; }
+/* UX-066: the label stays on one line; a long count moves under it, right-aligned. */
+.emvb-sources > summary { flex-wrap: wrap; row-gap: 2px; }
+.emvb-sources-label { white-space: nowrap; }
+.emvb-sources-count { margin-left: auto; white-space: nowrap; }
 .emvb-sources > summary::-webkit-details-marker { display: none; }
 .emvb-sources > summary:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 .emvb-sources-caret { color: var(--text-color-kumo-default); }

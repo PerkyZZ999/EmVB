@@ -81,3 +81,15 @@ test("UX-037: the summary shows a caret that turns when the list opens", async (
   );
   expect(FEATURE_CSS).toContain(".emvb-sources > summary:focus-visible { outline: 2px solid");
 });
+
+test("UX-066: the summary label keeps one line and a long count moves under it", async () => {
+  const root = await mount(
+    <StyleSources node={heading} design={design} device="desktop" state="normal" />,
+  );
+  expect(root.querySelector("summary > .emvb-sources-label")?.textContent ?? "no label").toBe(
+    "Where styles come from",
+  );
+  expect(FEATURE_CSS).toContain(".emvb-sources > summary { flex-wrap: wrap; row-gap: 2px; }");
+  expect(FEATURE_CSS).toContain(".emvb-sources-label { white-space: nowrap; }");
+  expect(FEATURE_CSS).toContain(".emvb-sources-count { margin-left: auto; white-space: nowrap; }");
+});
