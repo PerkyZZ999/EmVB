@@ -61,3 +61,28 @@ describe("accessibility co-pilot UI (W-317)", () => {
     expect(auditPage(applied[1]?.[0] as Layout, emptyDesign()).issues).toEqual([]);
   });
 });
+
+test("UX-022: issues name their severity, and the actions read Close then Fix N issues", async () => {
+  const report = auditPage(layout, emptyDesign());
+  await mount(
+    <A11yDialog
+      open
+      onOpenChange={() => undefined}
+      report={report}
+      layout={layout}
+      onSelect={() => undefined}
+      onApply={() => undefined}
+    />,
+  );
+  const rows = [...document.querySelectorAll("[data-emvb-a11y-issue]")];
+  expect(rows.length > 0).toBe(true);
+  for (const row of rows) {
+    const icon = row.querySelector(".emvb-a11y-severity");
+    const expected = row.getAttribute("data-severity") === "error" ? "Error" : "Warning";
+    expect(icon?.getAttribute("aria-label") ?? null).toBe(expected);
+  }
+  const actions = [
+    ...(document.querySelector(".emvb-a11y-actions")?.querySelectorAll("button") ?? []),
+  ];
+  expect(actions.map((b) => b.textContent)).toEqual(["Close", "Fix 2 issues"]);
+});

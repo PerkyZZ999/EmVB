@@ -108,6 +108,9 @@ export const FEATURE_CSS = `
 .emvb-a11y-issues { margin: 12px 0; padding: 0; list-style: none; display: grid; gap: 8px; max-height: 50vh; overflow-y: auto; }
 .emvb-a11y-issues > li { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; font-size: 13px; padding-left: 8px; border-left: 3px solid var(--color-kumo-warning); }
 .emvb-a11y-issues > li[data-severity="error"] { border-left-color: var(--color-kumo-danger); }
+.emvb-a11y-severity { flex: none; margin-top: 2px; color: var(--text-color-kumo-warning); }
+.emvb-a11y-issues > li[data-severity="error"] .emvb-a11y-severity { color: var(--text-color-kumo-danger); }
+.emvb-a11y-what { flex: 1 1 auto; min-width: 0; }
 .emvb-a11y-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .emvb-sources { margin: 4px 0 8px; font-size: 12px; }
 .emvb-sources > summary { cursor: pointer; display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }

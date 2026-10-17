@@ -1,4 +1,5 @@
 import { Button, Dialog } from "@cloudflare/kumo";
+import { WarningCircleIcon, WarningIcon } from "@phosphor-icons/react";
 import {
   applyA11yFix,
   applyAllA11yFixes,
@@ -7,7 +8,7 @@ import {
   type Layout,
 } from "../../core/index.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
-import { BUTTON } from "../ui.ts";
+import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
 
 /** Score bands for the badge colour (W-317). */
 const scoreBand = (score: number) => (score >= 90 ? "good" : score >= 70 ? "fair" : "poor");
@@ -76,6 +77,22 @@ export function A11yDialog({
             <ul className="emvb-a11y-issues">
               {report.issues.map((issue) => (
                 <li key={issue.id} data-emvb-a11y-issue={issue.id} data-severity={issue.severity}>
+                  {/* UX-022: severity has a shape and a name, not only the bar's colour. */}
+                  {issue.severity === "error" ? (
+                    <WarningCircleIcon
+                      className="emvb-a11y-severity"
+                      size={16}
+                      role="img"
+                      aria-label="Error"
+                    />
+                  ) : (
+                    <WarningIcon
+                      className="emvb-a11y-severity"
+                      size={16}
+                      role="img"
+                      aria-label="Warning"
+                    />
+                  )}
                   <span className="emvb-a11y-what">
                     <button
                       type="button"
@@ -92,7 +109,7 @@ export function A11yDialog({
                   {issue.fix && layout && (
                     <Button
                       variant="secondary"
-                      size="sm"
+                      className={BUTTON}
                       data-emvb-a11y-fix={issue.id}
                       onClick={() =>
                         onApply(applyA11yFix(layout, issue), `Fixed: ${issue.fixLabel ?? "issue"}`)
@@ -106,9 +123,18 @@ export function A11yDialog({
             </ul>
           )}
           <div className="emvb-a11y-actions">
+            <Dialog.Close
+              render={(props) => (
+                <Button {...props} variant="secondary" className={BUTTON}>
+                  Close
+                </Button>
+              )}
+            />
             {fixable.length > 1 && layout && (
               <Button
                 variant="primary"
+                className={BUTTON}
+                style={SOLID_PRIMARY}
                 data-emvb-a11y-fix-all=""
                 onClick={() =>
                   onApply(
@@ -117,16 +143,9 @@ export function A11yDialog({
                   )
                 }
               >
-                Fix all {fixable.length}
+                Fix {fixable.length} issues
               </Button>
             )}
-            <Dialog.Close
-              render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
-                  Close
-                </Button>
-              )}
-            />
           </div>
         </div>
       </Dialog>

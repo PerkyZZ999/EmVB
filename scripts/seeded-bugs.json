@@ -35113,6 +35113,46 @@
         "UX-021"
       ],
       "expect": "\\(fail\\).*UX-021"
+    },
+    {
+      "id": "UX-022/colour-only-severity",
+      "requirement": "UX-022",
+      "description": "Accessibility issues show severity by the bar colour alone",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/A11yCopilot.tsx",
+          "search": "                      aria-label=\"Warning\"",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/a11y-copilot.test.tsx",
+        "-t",
+        "UX-022"
+      ],
+      "expect": "\\(fail\\).*UX-022"
+    },
+    {
+      "id": "UX-022/fix-all-label",
+      "requirement": "UX-022",
+      "description": "The bulk fix reads \"Fix all 2\"",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/A11yCopilot.tsx",
+          "search": "Fix {fixable.length} issues",
+          "replace": "Fix all {fixable.length}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/a11y-copilot.test.tsx",
+        "-t",
+        "UX-022"
+      ],
+      "expect": "\\(fail\\).*UX-022"
     }
   ]
 }
