@@ -36417,6 +36417,20 @@
         "UX-061"
       ],
       "expect": "\\(fail\\).*UX-061"
+    },
+    {
+      "id": "UX-061/list-inert-condition",
+      "requirement": "UX-061",
+      "description": "The list shows a Loop Item's inert condition again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/theme-api.ts",
+          "search": "  loop_item: \"Used by Loops\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/list-paging.test.ts", "-t", "UX-061"],
+      "expect": "\\(fail\\).*UX-061"
     }
   ]
 }

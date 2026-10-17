@@ -39,3 +39,29 @@ describe("lists show every entry, not only the newest 50 (W-204)", () => {
     expect(calls).toBe(20);
   });
 });
+
+test("UX-061: the Theme Builder list says where reusable parts are used, not a condition", async () => {
+  const item = (id: string, partType: string) => ({
+    id,
+    slug: id,
+    status: "draft",
+    data: {
+      title: id,
+      part_type: partType,
+      conditions: {
+        schemaVersion: 1,
+        rules: [{ id: "r1", op: "include", group: "general", name: "entire_site", args: {} }],
+      },
+    },
+  });
+  const fetcher: Fetcher = async () =>
+    Response.json({
+      data: { items: [item("h", "header"), item("l", "loop_item"), item("s", "section")] },
+    });
+  const parts = await listThemeParts(fetcher);
+  expect(parts.map((p) => `${p.partType}: ${p.conditionsSummary}`)).toEqual([
+    "header: Entire site",
+    "loop_item: Used by Loops",
+    "section: Used by Theme sections",
+  ]);
+});

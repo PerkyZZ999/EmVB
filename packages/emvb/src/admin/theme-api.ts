@@ -119,6 +119,12 @@ export function summarizeConditions(raw: unknown): string {
   return parts.join(" · ") || "No conditions";
 }
 
+const ITEM_PART_USE_SHORT: Partial<Record<ThemePartType, string>> = {
+  loop_item: "Used by Loops",
+  section: "Used by Theme sections",
+  page_template: "Offered in New page",
+};
+
 export async function listThemeParts(fetcher: Fetcher): Promise<ThemePartSummary[]> {
   const items = await listAllItems<ContentItem>(fetcher, CONTENT);
   return items.map((item) => ({
@@ -127,7 +133,9 @@ export async function listThemeParts(fetcher: Fetcher): Promise<ThemePartSummary
     partType: partTypeOf(item),
     status: entryStatus(item),
     updatedAt: item.updatedAt ?? "",
-    conditionsSummary: summarizeConditions(item.data?.["conditions"]),
+    // UX-061: reusable parts never match a location, so say where they're used instead.
+    conditionsSummary:
+      ITEM_PART_USE_SHORT[partTypeOf(item)] ?? summarizeConditions(item.data?.["conditions"]),
   }));
 }
 
