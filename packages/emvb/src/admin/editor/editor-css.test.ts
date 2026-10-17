@@ -134,3 +134,9 @@ test("the display-conditions note sits 4 px under its heading, not pulled up int
     rule('.emvb-panel [data-emvb-panel="conditions"] > .emvb-section-label + .emvb-helper'),
   ).toMatch(/margin-top: 4px;/);
 });
+
+test("EmVB's own field labels match the 13 px Kumo labels beside them (UX-020)", () => {
+  expect(rule(".emvb-field-label")).toMatch(
+    /font-size: 13px;[^}]*font-weight: 400;[^}]*color: var\(--text-color-kumo-default\);/,
+  );
+});

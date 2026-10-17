@@ -35073,6 +35073,46 @@
         "UX-019"
       ],
       "expect": "\\(fail\\).*UX-019"
+    },
+    {
+      "id": "UX-020/small-grey-field-label",
+      "requirement": "UX-020",
+      "description": "EmVB's own field labels (Classes, multi-line Text) stay 12 px grey beside 13 px Kumo labels",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-field-label { font-size: 13px; line-height: 20px; font-weight: 400; color: var(--text-color-kumo-default); }",
+          "replace": ".emvb-field-label { font-size: 12px; font-weight: 500; color: var(--text-color-kumo-subtle); }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-020"
+      ],
+      "expect": "\\(fail\\).*UX-020"
+    },
+    {
+      "id": "UX-021/description-no-count",
+      "requirement": "UX-021",
+      "description": "The meta description gives no character count",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "{page.seoDescription.length} characters. Search results show about 150.",
+          "replace": "Search results show about 150 characters."
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx",
+        "-t",
+        "UX-021"
+      ],
+      "expect": "\\(fail\\).*UX-021"
     }
   ]
 }

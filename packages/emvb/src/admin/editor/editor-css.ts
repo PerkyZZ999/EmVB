@@ -420,7 +420,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-var-option-value { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: 11px; color: var(--text-color-kumo-subtle); }
 [data-emvb-var-option][data-selected="true"] .emvb-var-option-name { font-weight: 600; }
 .emvb-textarea { min-height: 72px; height: auto; padding: 8px; resize: vertical; font: inherit; }
-.emvb-field-label { font-size: 12px; font-weight: 500; color: var(--text-color-kumo-subtle); }
+.emvb-field-label { font-size: 13px; line-height: 20px; font-weight: 400; color: var(--text-color-kumo-default); }
 .emvb-panel [data-emvb-panel] .emvb-helper { margin-top: -2px; }
 .emvb-panel [data-emvb-panel="conditions"] > .emvb-section-label + .emvb-helper { margin-top: 4px; }
 
