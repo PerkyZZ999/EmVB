@@ -146,3 +146,9 @@ test("renaming a layer shows the primary focus ring, not the browser's black out
     /outline: none;[^}]*box-shadow: 0 0 0 1px var\(--color-kumo-brand\);/,
   );
 });
+
+test("every EmVB custom property the editor CSS reads is defined, so none falls back to a fixed colour (UX-030)", () => {
+  const used = new Set([...EDITOR_CSS.matchAll(/var\((--emvb-[a-z0-9-]+)/g)].map((m) => m[1]));
+  const defined = new Set([...EDITOR_CSS.matchAll(/(--emvb-[a-z0-9-]+)\s*:/g)].map((m) => m[1]));
+  expect([...used].filter((name) => !defined.has(name))).toEqual([]);
+});

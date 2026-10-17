@@ -35321,6 +35321,26 @@
         "UX-029"
       ],
       "expect": "\\(fail\\).*UX-029"
+    },
+    {
+      "id": "UX-030/undefined-border-var",
+      "requirement": "UX-030",
+      "description": "The container-query rule reads an undefined --emvb-border and falls back to a light grey in dark mode",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-query-style { border-left: 2px solid var(--color-kumo-line); padding-left: 8px; }",
+          "replace": ".emvb-query-style { border-left: 2px solid var(--emvb-border, #d4d4d8); padding-left: 8px; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-030"
+      ],
+      "expect": "\\(fail\\).*UX-030"
     }
   ]
 }
