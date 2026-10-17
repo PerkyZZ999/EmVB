@@ -51,3 +51,29 @@ describe("W-319 scroll motion control", () => {
     expect(presetOf({ ...preset.value, range: "page" })).toBe("custom");
   });
 });
+
+test("UX-078: Add effect is a button whose menu adds the chosen effect", async () => {
+  let value: Motion = { range: "enter", effects: [{ type: "fade", from: 0, to: 100 }] };
+  const root = await mount(
+    <MotionControl value={value} onChange={(next) => (value = next)} reset={null} />,
+  );
+  expect(root.querySelector('[role="combobox"][aria-label="Add effect"]')).toBeNull();
+  const trigger = root.querySelector<HTMLElement>(".emvb-add-effect");
+  await act(async () => {
+    trigger?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+    trigger?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    trigger?.click();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  });
+  const item = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+    (m) => m.textContent?.trim() === "Move up/down",
+  );
+  await act(async () => item?.click());
+  expect(value).toEqual({
+    range: "enter",
+    effects: [
+      { type: "fade", from: 0, to: 100 },
+      { type: "move-y", from: 0, to: 0 },
+    ],
+  });
+});

@@ -1,4 +1,4 @@
-import { Button } from "@cloudflare/kumo";
+import { Button, DropdownMenu } from "@cloudflare/kumo";
 import { PlusIcon, XIcon } from "@phosphor-icons/react";
 import type * as React from "react";
 import {
@@ -200,19 +200,32 @@ export function MotionControl({
               </div>
             ))}
             {unused.length > 0 && (
-              <TransitionSelect
-                label="Add effect"
-                value={"" as MotionEffect | ""}
-                options={[
-                  { value: "" as const, label: "Choose…" },
-                  ...unused.map((t) => ({ value: t, label: EFFECT_LABELS[t].label })),
-                ]}
-                onChange={(type) => {
-                  if (!type) return;
-                  const n = EFFECT_LABELS[type].neutral;
-                  setEffects([...playing.effects, { type, from: n, to: n }]);
-                }}
-              />
+              // UX-078: adding is an action, so it is a button with a menu, not a select.
+              <DropdownMenu>
+                <DropdownMenu.Trigger>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className={`${BUTTON} emvb-add-effect`}
+                    icon={<PlusIcon aria-hidden="true" />}
+                  >
+                    Add effect
+                  </Button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Content data-emvb-add-effect="">
+                  {unused.map((type) => (
+                    <DropdownMenu.Item
+                      key={type}
+                      onClick={() => {
+                        const n = EFFECT_LABELS[type].neutral;
+                        setEffects([...playing.effects, { type, from: n, to: n }]);
+                      }}
+                    >
+                      {EFFECT_LABELS[type].label}
+                    </DropdownMenu.Item>
+                  ))}
+                </DropdownMenu.Content>
+              </DropdownMenu>
             )}
             <p className="emvb-helper">
               Plays as visitors scroll, in browsers that support scroll-driven animations. Visitors

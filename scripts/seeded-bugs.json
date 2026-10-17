@@ -36911,6 +36911,46 @@
         "W-319 Turn off"
       ],
       "expect": "\\(fail\\).*W-319 Turn off"
+    },
+    {
+      "id": "UX-078/add-effect-dead",
+      "requirement": "UX-078",
+      "description": "Choosing an effect from Add effect adds nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MotionControl.tsx",
+          "search": "                        setEffects([...playing.effects, { type, from: n, to: n }]);\n",
+          "replace": "                        void n;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/motion-control.test.tsx",
+        "-t",
+        "UX-078"
+      ],
+      "expect": "\\(fail\\).*UX-078"
+    },
+    {
+      "id": "UX-079/raw-keys",
+      "requirement": "UX-079",
+      "description": "Container-query rows show raw keys again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/QueryStyleRows.tsx",
+          "search": "        {styleName(styleKey)}\n",
+          "replace": "        {styleKey}\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/query-style.test.tsx",
+        "-t",
+        "UX-079"
+      ],
+      "expect": "\\(fail\\).*UX-079"
     }
   ]
 }

@@ -5,6 +5,7 @@ import { savableNode } from "./DraftTextField.tsx";
 import { formatStyleValue, parseStyleValue, QUERY_STYLE_KEYS } from "./query-style.ts";
 import { isCommitEnter } from "../../ime.ts";
 import { PanelSelect } from "./PanelSelect.tsx";
+import { STYLE_LABELS } from "./style-sections.ts";
 
 const CHOOSE = "choose";
 
@@ -19,6 +20,9 @@ function withQueryStyle(node: LayoutNode, style: Record<string, unknown>): Layou
 }
 
 /** One stored property: its value commits on blur or Enter; Remove deletes it. */
+const styleName = (key: string): string =>
+  (STYLE_LABELS as Record<string, string | undefined>)[key] ?? key;
+
 function QueryStyleRow({
   node,
   styleKey,
@@ -58,7 +62,7 @@ function QueryStyleRow({
   return (
     <div className="emvb-query-row" data-emvb-query-key={styleKey}>
       <label className="emvb-field-label" htmlFor={id}>
-        {styleKey}
+        {styleName(styleKey)}
       </label>
       <input
         id={id}
@@ -145,7 +149,10 @@ export function QueryStyleRows({
           value={newKey || CHOOSE}
           options={[
             { value: CHOOSE, label: "Choose…" },
-            ...free.map((key) => ({ value: key, label: key })),
+            // UX-079: the Style tab's names ("Padding top"), not the raw keys.
+            ...free
+              .map((key) => ({ value: key, label: styleName(key) }))
+              .toSorted((a, b) => a.label.localeCompare(b.label)),
           ]}
           onChange={(value) => setNewKey(value === CHOOSE ? "" : value)}
         />

@@ -201,3 +201,14 @@ describe("container-query variables keep their kind (W-696)", () => {
     expect(formatStyleValue({ var: "space-4", from: "spacing" })).toBe("var(--space-4)");
   });
 });
+
+test("UX-079: container-query rows use the Style tab's names, not raw keys", async () => {
+  const { host } = await panel({
+    min: 480,
+    style: { flexDirection: "row", paddingTop: { value: 8, unit: "px" } },
+  });
+  const labels = [...host.querySelectorAll("[data-emvb-query-key] > label")].map(
+    (l) => l.textContent,
+  );
+  expect(labels).toEqual(["Direction", "Padding top"]);
+});
