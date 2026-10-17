@@ -9,7 +9,9 @@ import {
   type WrapType,
   ELEMENT_DESCRIPTORS,
   findNode,
+  LAYOUT_SCHEMA_VERSION,
   moveDown,
+  newNodeId,
   moveUp,
   recipeNode,
   withFreshIds,
@@ -201,11 +203,14 @@ export function useNodeActions({
   };
 
   const addFromPanel = (type: ElementType) => {
-    const layout = latest.current.page.layout;
-    if (!layout) {
-      if (type === "container") dispatch({ type: "add-root-container" });
+    const current = latest.current.page.layout;
+    if (!current && type === "container") {
+      dispatch({ type: "add-root-container" });
       return;
     }
+    // UX-094: an empty page (one made outside EmVB has no layout) gets its container first, so
+    // a click or palette insert lands instead of doing nothing.
+    const layout = current ?? startingLayout();
     const node = newElement(type);
     if (!node) return;
     place(layout, node, ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name ?? type);
@@ -213,8 +218,7 @@ export function useNodeActions({
 
   /** A section recipe built from the site's styles (W-320). */
   const addRecipe = (id: string) => {
-    const layout = latest.current.page.layout;
-    if (!layout) return;
+    const layout = latest.current.page.layout ?? startingLayout();
     const node = recipeNode(id, latest.current.design, layout);
     if (!node) return;
     place(layout, withFreshIds(layout, node), `${node.label ?? "Section"} section`, true);
@@ -235,3 +239,9 @@ export function useNodeActions({
     items,
   };
 }
+
+/** One empty container, the start of a page that has no layout yet (UX-094). */
+const startingLayout = (): Layout => ({
+  schemaVersion: LAYOUT_SCHEMA_VERSION,
+  root: { id: newNodeId(), type: "container", props: {}, children: [] },
+});

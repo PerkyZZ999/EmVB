@@ -191,7 +191,8 @@ export async function saveThemePart(
       body: {
         data: {
           title: draft.title,
-          layout: draft.layout,
+          // UX-094: a part with no layout yet leaves the field alone; the server refuses null.
+          ...(draft.layout ? { layout: draft.layout } : {}),
           part_type: draft.partType,
           conditions: draft.conditions,
           triggers: draft.triggers,

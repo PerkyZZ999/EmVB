@@ -459,6 +459,37 @@ describe("Add panel and Layers (W-018)", () => {
     await openLayers();
     expect(Boolean(layerRow("Container"))).toBe(true);
   });
+
+  test("UX-094: on an empty page, adding a Heading starts the container and lands", async () => {
+    const { fetcher } = fakeServer({ layout: null });
+    await render(fetcher);
+    const headingTile = () =>
+      [...document.querySelectorAll<HTMLElement>(".emvb-element-tile")].find(
+        (t) => t.textContent?.trim() === "Heading",
+      );
+    // The left panel remembers its last tab, so open Add explicitly.
+    if (!headingTile()) {
+      await click(
+        [...document.querySelectorAll('[role="tab"]')].find(
+          (el) => el.textContent?.trim() === "Add",
+        ),
+      );
+    }
+    await click(headingTile());
+    await openLayers();
+    expect(Boolean(layerRow("Container"))).toBe(true);
+    expect(Boolean(layerRow("Heading"))).toBe(true);
+  });
+
+  test("UX-094: a page with no layout saves its title without sending a null layout", async () => {
+    const { server, fetcher } = fakeServer({ layout: null });
+    await render(fetcher);
+    await type(field("Title"), "Untouched");
+    await click(button("Save draft (unsaved changes)"));
+    const data = (puts(server.calls)[0]?.body?.["data"] ?? {}) as Record<string, unknown>;
+    expect(data["title"]).toBe("Untouched");
+    expect("layout" in data).toBe(false);
+  });
 });
 
 describe("keyboard and quick actions (W-020)", () => {

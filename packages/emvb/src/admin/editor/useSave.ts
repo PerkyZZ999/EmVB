@@ -65,7 +65,12 @@ export function saveFailure(
   if (error.status === 400 || error.status === 422) {
     const path = /\broot(?:\.children\[\d+\])*/.exec(error.message)?.[0];
     const id = path && page.layout ? nodeIdAtPath(page.layout, path) : null;
-    return { status: fixAndSave, rejection: error.message, ...(id ? { select: id } : {}) };
+    // UX-095: with no element to highlight, "fix the highlighted setting" pointed at nothing.
+    if (!id) {
+      const message = `Couldn't save. ${error.message}`;
+      return { status: { kind: "error", message, retry: false }, rejection: error.message };
+    }
+    return { status: fixAndSave, rejection: error.message, select: id };
   }
   return { status: { kind: "error", message: `Couldn't save. ${error.message}`, retry: false } };
 }

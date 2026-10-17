@@ -89,8 +89,16 @@ describe("save failures (R-006)", () => {
       rejection: message,
       select: "head0001",
     });
+  });
+
+  test("UX-095: with nothing to highlight, a 400 or 422 says the server's reason instead", () => {
+    const shown = (message: string) => ({
+      kind: "error" as const,
+      message: `Couldn't save. ${message}`,
+      retry: false,
+    });
     expect(saveFailure(new ApiError(400, "BAD", "no path here"), page)).toEqual({
-      status: fix,
+      status: shown("no path here"),
       rejection: "no path here",
     });
     expect(
@@ -98,7 +106,7 @@ describe("save failures (R-006)", () => {
         ...page,
         layout: null,
       }),
-    ).toEqual({ status: fix, rejection: "root.children[0]" });
+    ).toEqual({ status: shown("root.children[0]"), rejection: "root.children[0]" });
   });
 
   test("other client errors show the server's message", () => {

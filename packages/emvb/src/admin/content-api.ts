@@ -113,7 +113,12 @@ export async function savePage(
     {
       method: "PUT",
       body: {
-        data: { title: draft.title, layout: draft.layout, canvas_mode: draft.canvasMode },
+        data: {
+          title: draft.title,
+          // UX-094: a page with no layout yet leaves the field alone; the server refuses null.
+          ...(draft.layout ? { layout: draft.layout } : {}),
+          canvas_mode: draft.canvasMode,
+        },
         slug: draft.slug,
         seo: seoBody(draft),
         ...(rev ? { _rev: rev } : {}),

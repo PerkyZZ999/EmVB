@@ -3143,8 +3143,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "rejection: error.message, ...(id ? { select: id } : {}) };",
-          "replace": "rejection: error.message };"
+          "search": "return { status: fixAndSave, rejection: error.message, select: id };",
+          "replace": "return { status: fixAndSave, rejection: error.message };"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/save-failure.test.ts"],
@@ -37287,6 +37287,80 @@
         "UX-093"
       ],
       "expect": "\\(fail\\).*UX-093"
+    },
+    {
+      "id": "UX-094/null-layout-sent",
+      "requirement": "UX-094",
+      "description": "A page with no layout sends layout: null, which the server refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "...(draft.layout ? { layout: draft.layout } : {}),",
+          "replace": "layout: draft.layout,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "UX-094"
+      ],
+      "expect": "\\(fail\\).*UX-094"
+    },
+    {
+      "id": "UX-094/empty-insert-dropped",
+      "requirement": "UX-094",
+      "description": "Adding an element to an empty page does nothing again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "const layout = current ?? startingLayout();\n    const node = newElement(type);",
+          "replace": "if (!current) return;\n    const layout = current;\n    const node = newElement(type);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "UX-094"
+      ],
+      "expect": "\\(fail\\).*UX-094"
+    },
+    {
+      "id": "UX-095/points-at-nothing",
+      "requirement": "UX-095",
+      "description": "With nothing to highlight, the status still says to fix the highlighted setting.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "    if (!id) {\n",
+          "replace": "    if (!id && Math.random() > 2) {\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/save-failure.test.ts",
+        "-t",
+        "UX-095"
+      ],
+      "expect": "\\(fail\\).*UX-095"
+    },
+    {
+      "id": "UX-094/part-null-layout-sent",
+      "requirement": "UX-094",
+      "description": "A theme part with no layout sends layout: null.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/theme-api.ts",
+          "search": "...(draft.layout ? { layout: draft.layout } : {}),",
+          "replace": "layout: draft.layout,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/theme-api.test.ts", "-t", "UX-094"],
+      "expect": "\\(fail\\).*UX-094"
     }
   ]
 }
