@@ -36511,6 +36511,26 @@
         "UX-064"
       ],
       "expect": "\\(fail\\).*UX-064"
+    },
+    {
+      "id": "UX-065/self-link",
+      "requirement": "UX-065",
+      "description": "The current element's crumb is a button again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "              {index === crumbs.length - 1 ? (",
+          "replace": "              {index === -1 ? ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-065"
+      ],
+      "expect": "\\(fail\\).*UX-065"
     }
   ]
 }

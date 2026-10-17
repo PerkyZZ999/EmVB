@@ -502,13 +502,20 @@ function KnownElementPanel({
           {crumbs.map((crumb, index) => (
             <React.Fragment key={crumb.id ?? "page"}>
               {index > 0 && <span aria-hidden="true"> › </span>}
-              <button
-                type="button"
-                className="emvb-breadcrumb-part"
-                onClick={() => onSelect(crumb.id)}
-              >
-                {crumb.label}
-              </button>
+              {index === crumbs.length - 1 ? (
+                // UX-065: the element being edited is where you are, not a link back to itself.
+                <span className="emvb-breadcrumb-current" aria-current="location">
+                  {crumb.label}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  className="emvb-breadcrumb-part"
+                  onClick={() => onSelect(crumb.id)}
+                >
+                  {crumb.label}
+                </button>
+              )}
             </React.Fragment>
           ))}
         </nav>

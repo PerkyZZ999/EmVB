@@ -328,6 +328,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-breadcrumb-part { border: 0; padding: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: none; border-radius: 2px; }
 .emvb-breadcrumb-part:hover { color: var(--text-color-kumo-default); text-decoration: underline; text-underline-offset: 2px; }
 .emvb-breadcrumb-part:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
+.emvb-breadcrumb-current { color: var(--text-color-kumo-default); }
 .emvb-style-row { display: flex; align-items: flex-start; gap: 4px; }
 .emvb-choice { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .emvb-choice-label { font-size: 13px; line-height: 20px; color: var(--text-color-kumo-default); }
