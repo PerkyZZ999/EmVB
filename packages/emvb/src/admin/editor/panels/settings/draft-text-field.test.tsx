@@ -314,3 +314,18 @@ test("UX-073: the Video URL says which links it takes before any error", async (
     "Use a YouTube or Vimeo link, or a media file path such as /_emdash/api/media/file/….",
   );
 });
+
+test("UX-074: the SVG markup box says what it accepts before anything is pasted", async () => {
+  const field: FieldDescriptor = {
+    key: "markup",
+    kind: "textarea",
+    label: "SVG markup",
+    message: "Paste safe SVG only (no scripts or external links).",
+  };
+  const svg = { id: "svgx0001", type: "svg", props: { markup: "" } } as unknown as LayoutNode;
+  const host = await mount(<DraftTextField field={field} node={svg} onChange={() => undefined} />);
+  const id = host.querySelector("textarea")?.getAttribute("aria-describedby") ?? "";
+  expect(id ? document.getElementById(id)?.textContent : "not described").toBe(
+    "Paste safe SVG only (no scripts or external links).",
+  );
+});

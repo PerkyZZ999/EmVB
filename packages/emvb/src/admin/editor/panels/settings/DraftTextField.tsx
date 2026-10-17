@@ -119,6 +119,8 @@ export function DraftTextField({
       setError(null);
       onChange(next);
     };
+    // UX-041, UX-074: list fields say one per line; other text areas show their own note.
+    const hint = field.kind === "list-items" ? "One per line." : field.message;
     return (
       <div className="emvb-field-group" data-emvb-field={field.key}>
         <label className="emvb-field-label" htmlFor={areaId}>
@@ -132,7 +134,7 @@ export function DraftTextField({
           rows={field.kind === "list-items" ? 4 : 5}
           aria-invalid={error ? true : undefined}
           aria-describedby={
-            [field.kind === "list-items" ? `${areaId}-hint` : "", error ? `${areaId}-error` : ""]
+            [hint ? `${areaId}-hint` : "", error ? `${areaId}-error` : ""]
               .filter(Boolean)
               .join(" ") || undefined
           }
@@ -143,10 +145,9 @@ export function DraftTextField({
             else onChange(withProp(node, field.key, draft));
           }}
         />
-        {/* UX-041: nothing else said each line becomes one item. */}
-        {field.kind === "list-items" && (
+        {hint && (
           <span className="emvb-helper" id={`${areaId}-hint`} data-emvb-field-hint="">
-            One per line.
+            {hint}
           </span>
         )}
         {error && (

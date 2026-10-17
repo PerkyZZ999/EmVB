@@ -35697,8 +35697,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
-          "search": "            One per line.\n",
-          "replace": ""
+          "search": "    const hint = field.kind === \"list-items\" ? \"One per line.\" : field.message;",
+          "replace": "    const hint = field.kind === \"list-items\" ? undefined : field.message;"
         }
       ],
       "command": [
@@ -35717,7 +35717,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
-          "search": "field.kind === \"list-items\" ? `${areaId}-hint` : \"\"",
+          "search": "hint ? `${areaId}-hint` : \"\"",
           "replace": "\"\""
         }
       ],
@@ -36811,6 +36811,26 @@
         "UX-073"
       ],
       "expect": "\\(fail\\).*UX-073"
+    },
+    {
+      "id": "UX-074/svg-note-hidden",
+      "requirement": "UX-074",
+      "description": "The SVG markup box hides what it accepts again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "    const hint = field.kind === \"list-items\" ? \"One per line.\" : field.message;\n",
+          "replace": "    const hint = field.kind === \"list-items\" ? \"One per line.\" : undefined;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-074"
+      ],
+      "expect": "\\(fail\\).*UX-074"
     }
   ]
 }

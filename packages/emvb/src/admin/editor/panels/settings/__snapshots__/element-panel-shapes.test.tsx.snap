@@ -9779,8 +9779,10 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
     div.emvb-field-group data-emvb-field="markup"
       label.emvb-field-label for="id-2"
         "SVG markup"
-      textarea.emvb-field.emvb-textarea id="id-2"
+      textarea.emvb-field.emvb-textarea id="id-2" aria-describedby="id-2-hint"
         "<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>"
+      span.emvb-helper id="id-2-hint" data-emvb-field-hint=""
+        "Paste safe SVG only (no scripts or external links)."
     div data-filled=""
       label id="id-3" for="id-4" data-filled=""
         span
