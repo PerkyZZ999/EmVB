@@ -136,6 +136,15 @@ export function SiteStylesDrawer({
   };
 
   const changes = unpublished && published ? designChanges(published, design) : [];
+  // UX-069, UX-070: Escape and Close give focus back to the button that opened the drawer.
+  const closeAndReturn = () => {
+    onClose();
+    requestAnimationFrame(() =>
+      document
+        .querySelector<HTMLElement>('[data-emvb-editor] button[aria-label="Site styles"]')
+        ?.focus(),
+    );
+  };
   return (
     <div
       className="emvb-panel-body emvb-site-styles"
@@ -144,13 +153,7 @@ export function SiteStylesDrawer({
         stopEditorShortcuts(event);
         if (closesDrawer(event)) {
           event.preventDefault();
-          onClose();
-          // The trigger that opened the drawer gets focus back, as for any closed panel.
-          requestAnimationFrame(() =>
-            document
-              .querySelector<HTMLElement>('[data-emvb-editor] button[aria-label="Site styles"]')
-              ?.focus(),
-          );
+          closeAndReturn();
         }
       }}
     >
@@ -172,7 +175,7 @@ export function SiteStylesDrawer({
           className="emvb-icon-btn"
           aria-label="Close site styles"
           icon={<XIcon aria-hidden="true" />}
-          onClick={onClose}
+          onClick={closeAndReturn}
         />
       </div>
       {/* W-115: the actions get their own wrapping row, so the title is never squeezed. */}

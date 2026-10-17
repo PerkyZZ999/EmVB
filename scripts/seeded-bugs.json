@@ -17096,8 +17096,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
-          "search": "          onClick={onClose}\n        />\n      </div>\n      {/* W-115",
-          "replace": "          onClick={onClose}\n        />\n      {/* W-115"
+          "search": "          onClick={closeAndReturn}\n        />\n      </div>\n      {/* W-115",
+          "replace": "          onClick={closeAndReturn}\n        />\n      {/* W-115"
         },
         {
           "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
@@ -36631,6 +36631,46 @@
         "UX-069"
       ],
       "expect": "\\(fail\\).*UX-069"
+    },
+    {
+      "id": "UX-070/close-drops-focus",
+      "requirement": "UX-070",
+      "description": "Close drops focus to the page again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "          onClick={closeAndReturn}\n",
+          "replace": "          onClick={onClose}\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "UX-070"
+      ],
+      "expect": "\\(fail\\).*UX-070"
+    },
+    {
+      "id": "UX-070/delete-drops-focus",
+      "requirement": "UX-070",
+      "description": "Deleting leaves focus on the page body",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "      if (active && active !== document.body && active.isConnected) return;\n",
+          "replace": "      return;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "Delete removes the selected element"
+      ],
+      "expect": "\\(fail\\).*Delete removes the selected element"
     }
   ]
 }

@@ -315,6 +315,9 @@ describe("delete and restore (D-025)", () => {
     expect(layerRow("Heading")?.outerHTML).toBeUndefined();
     // UX-062: the toast names what was deleted.
     expect(document.body.textContent).toContain("Heading deleted");
+    // UX-070: focus stays in Layers instead of dropping to the page.
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    expect(document.activeElement === document.body ? "body" : "kept").toBe("kept");
     await click(button("Restore"));
     expect(layerRow("Heading")?.getAttribute("aria-current")).toBe("true");
     expect(editor()?.querySelector('[data-emvb-panel="element"]') !== null).toBe(true);

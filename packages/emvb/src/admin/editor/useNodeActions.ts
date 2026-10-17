@@ -58,6 +58,16 @@ export function useNodeActions({
     const name = ELEMENT_NAMES[(layout && findNode(layout, id)?.type) || "container"] ?? "Element";
     const title = count > 1 ? `${count} elements deleted` : `${name} deleted`;
     dispatch({ type: "delete-node", id });
+    // UX-070: the deleted row or canvas element took focus with it; keep the keyboard in Layers.
+    requestAnimationFrame(() => {
+      const active = document.activeElement;
+      if (active && active !== document.body && active.isConnected) return;
+      (
+        document.querySelector<HTMLElement>('.emvb-layer-select[aria-current="true"]') ??
+        document.querySelector<HTMLElement>('[data-emvb-editor] [role="tree"]') ??
+        document.querySelector<HTMLElement>("iframe[data-emvb-canvas]")
+      )?.focus({ preventScroll: true });
+    });
     setDeleteAsk(null);
     if (lastToast.current) toasts.close(lastToast.current);
     const toastId: string = toasts.add({

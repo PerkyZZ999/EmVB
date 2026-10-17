@@ -585,3 +585,27 @@ test("UX-069: Escape closes Site styles from a tab, but not from a text field", 
   await escape(document.querySelector('[data-emvb-site-styles] [role="tab"]'));
   expect(closed).toBe(1);
 });
+
+test("UX-070: Close gives focus back to the Site styles button", async () => {
+  const opener = document.createElement("div");
+  opener.setAttribute("data-emvb-editor", "");
+  opener.innerHTML = '<button type="button" aria-label="Site styles">Site styles</button>';
+  document.body.append(opener);
+  try {
+    await mount(
+      <SiteStylesDrawer
+        design={emptyDesign()}
+        layout={layout}
+        onDesignChange={async () => undefined}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    const close = document.querySelector<HTMLElement>('[aria-label="Close site styles"]');
+    await act(async () => close?.click());
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    expect(document.activeElement?.getAttribute("aria-label") ?? "none").toBe("Site styles");
+  } finally {
+    opener.remove();
+  }
+});
