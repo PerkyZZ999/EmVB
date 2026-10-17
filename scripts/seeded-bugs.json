@@ -35381,6 +35381,46 @@
         "UX-032"
       ],
       "expect": "\\(fail\\).*UX-032"
+    },
+    {
+      "id": "UX-033/fill-label-repeats",
+      "requirement": "UX-033",
+      "description": "The fill type row is labelled Background again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundFill.tsx",
+          "search": "<span className=\"emvb-var-field-label\">Fill</span>",
+          "replace": "<span className=\"emvb-var-field-label\">Background</span>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "UX-033"
+      ],
+      "expect": "\\(fail\\).*UX-033"
+    },
+    {
+      "id": "UX-033/colour-label-repeats",
+      "requirement": "UX-033",
+      "description": "The background colour select is labelled Background again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundFill.tsx",
+          "search": "            label=\"Background color\"",
+          "replace": "            label=\"Background\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "UX-033"
+      ],
+      "expect": "\\(fail\\).*UX-033"
     }
   ]
 }

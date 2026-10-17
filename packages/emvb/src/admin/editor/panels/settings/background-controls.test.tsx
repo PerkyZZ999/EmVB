@@ -187,3 +187,18 @@ describe("background controls (W-094)", () => {
     expect(switchFillRemembered({}, "color", "gradient", {}).gradient?.type).toBe("linear");
   });
 });
+
+test("UX-033: the Background section's rows name their part instead of repeating Background", async () => {
+  const host = await row("backgroundColor");
+  expect(
+    host.querySelector(".emvb-background-fill > .emvb-var-field-label")?.textContent ?? null,
+  ).toBe("Fill");
+  const select = host.querySelector('[role="combobox"]');
+  const label = select?.getAttribute("aria-label") ?? select?.textContent ?? "";
+  const named =
+    label === "Background color" ||
+    [...host.querySelectorAll(".font-medium.select-none")].some(
+      (l) => l.textContent === "Background color",
+    );
+  expect(named).toBe(true);
+});

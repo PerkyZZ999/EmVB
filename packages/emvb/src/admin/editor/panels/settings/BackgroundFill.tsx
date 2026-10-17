@@ -89,7 +89,8 @@ export function BackgroundFill({
       }
     >
       <div className="emvb-field-group emvb-background-fill">
-        <span className="emvb-var-field-label">Background</span>
+        {/* UX-033: the section is already "Background"; these rows name their own part. */}
+        <span className="emvb-var-field-label">Fill</span>
         <div className="emvb-fill-types" role="radiogroup" aria-label="Background type">
           {modes.map((option) => (
             <button
@@ -111,7 +112,7 @@ export function BackgroundFill({
         )}
         {shown === "color" && (
           <ColorControl
-            label="Background"
+            label="Background color"
             value={style?.backgroundColor}
             design={design}
             onChange={(backgroundColor) => onPatch({ backgroundColor })}
