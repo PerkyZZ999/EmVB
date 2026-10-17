@@ -242,3 +242,20 @@ test("UX-046: Hide from search engines is described by its note, which lines up 
   expect(toggle?.getAttribute("aria-describedby") ?? "none").toBe(note?.id ?? "no note");
   expect(note?.classList.contains("emvb-switch-hint") ?? false).toBe(true);
 });
+
+test("UX-061: a Loop Item part says where it is used instead of offering display conditions", async () => {
+  const view = await settings({ ...PAGE, partType: "loop_item" }, "theme-part");
+  expect(view.host.querySelector('[data-emvb-panel="conditions"]')).toBeNull();
+  expect(view.host.querySelector("[data-emvb-item-part-note]")?.textContent ?? "no note").toBe(
+    "Loop elements show this part for each entry they list, so it has no display conditions.",
+  );
+});
+
+test("UX-061: a Float's Place select is described by its note", async () => {
+  const view = await settings({ ...PAGE, partType: "float" }, "theme-part");
+  const place = view.host.querySelector('[role="combobox"][aria-label="Place"]');
+  const note = document.getElementById(place?.getAttribute("aria-describedby") ?? "");
+  expect(note?.textContent ?? "not described").toBe(
+    "A bar stays on that edge and leaves room for the page. A corner sits over the page.",
+  );
+});

@@ -36377,6 +36377,46 @@
         "UX-060"
       ],
       "expect": "\\(fail\\).*UX-060"
+    },
+    {
+      "id": "UX-061/loop-item-conditions",
+      "requirement": "UX-061",
+      "description": "A Loop Item part offers display conditions that change nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "  loop_item:\n    \"Loop elements show this part for each entry they list, so it has no display conditions.\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx",
+        "-t",
+        "UX-061"
+      ],
+      "expect": "\\(fail\\).*UX-061"
+    },
+    {
+      "id": "UX-061/place-note-loose",
+      "requirement": "UX-061",
+      "description": "The Float's Place note isn't tied to the select",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "        description=\"A bar stays on that edge and leaves room for the page. A corner sits over the page.\"\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx",
+        "-t",
+        "UX-061"
+      ],
+      "expect": "\\(fail\\).*UX-061"
     }
   ]
 }

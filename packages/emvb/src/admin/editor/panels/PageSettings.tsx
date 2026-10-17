@@ -5,6 +5,7 @@ import {
   defaultFloatSettings,
   FLOAT_EDGES,
   THEME_PART_TYPE_LABELS,
+  type ThemePartType,
   type FloatEdge,
   type LayoutNode,
 } from "../../../core/index.ts";
@@ -21,6 +22,16 @@ const LAYOUTS = [
   { value: "site-layout", label: "Site layout" },
   { value: "blank", label: "Blank" },
 ];
+
+/** Where each reusable part is used, said in place of display conditions (UX-061). */
+const ITEM_PART_USE: Partial<Record<ThemePartType, string>> = {
+  loop_item:
+    "Loop elements show this part for each entry they list, so it has no display conditions.",
+  section:
+    "Theme section elements show this part wherever you place them, so it has no display conditions.",
+  page_template:
+    "New page offers this layout as a starting point, so it has no display conditions.",
+};
 
 /** Right panel with nothing selected (IA): page settings or theme-part settings. */
 export function PageSettings({
@@ -57,10 +68,17 @@ export function PageSettings({
           disabled
           description="Chosen when the part was created."
         />
-        <ConditionsEditor
-          conditions={page.conditions}
-          onChange={(conditions) => onChange({ conditions })}
-        />
+        {ITEM_PART_USE[page.partType ?? "header"] ? (
+          // UX-061: item parts never match a page location, so conditions would change nothing.
+          <p className="emvb-helper" data-emvb-item-part-note="">
+            {ITEM_PART_USE[page.partType ?? "header"]}
+          </p>
+        ) : (
+          <ConditionsEditor
+            conditions={page.conditions}
+            onChange={(conditions) => onChange({ conditions })}
+          />
+        )}
         {page.partType === "popup" && (
           <TriggersEditor
             triggers={page.triggers}
@@ -235,11 +253,13 @@ function FloatSettingsFields({
   onChange: (settings: NonNullable<PageDraft["float"]>) => void;
 }) {
   return (
-    <div data-emvb-panel="float">
+    // UX-061: the panel's field rhythm, and the note described by the Place select.
+    <div className="emvb-field-group" data-emvb-panel="float">
       <Select
         label="Place"
         className={FIELD}
         value={settings.edge}
+        description="A bar stays on that edge and leaves room for the page. A corner sits over the page."
         onValueChange={(value) => {
           const edge = FLOAT_EDGES.find((item) => item === value);
           if (edge) onChange({ ...settings, edge });
@@ -252,9 +272,6 @@ function FloatSettingsFields({
           </Select.Option>
         ))}
       </Select>
-      <p className="emvb-helper">
-        A bar stays on that edge and leaves room for the page. A corner sits over the page.
-      </p>
       <HintedSwitch
         label="Close button"
         checked={settings.dismiss}
