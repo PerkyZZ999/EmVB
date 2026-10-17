@@ -37111,6 +37111,26 @@
         "UX-085"
       ],
       "expect": "\\(fail\\).*UX-085"
+    },
+    {
+      "id": "UX-086/page-only-hint",
+      "requirement": "UX-086",
+      "description": "The empty canvas hint says this page again in a theme part",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "from Add to start building",
+          "replace": "from Add to start this page"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/empty-root.test.ts",
+        "-t",
+        "UX-086"
+      ],
+      "expect": "\\(fail\\).*UX-086"
     }
   ]
 }

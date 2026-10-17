@@ -40,7 +40,7 @@ const EDITOR_CANVAS_CSS =
   `:is(${DROP_BOXES})::after{content:"Drop elements here";${HINT}}` +
   // UX-019: an empty page fills the canvas, so the whole stage takes a drop and says how to start.
   ":where(.emvb-root:empty){min-height:100vh}" +
-  '.emvb-root:empty::after{content:"Drag an element here from Add to start this page";font-size:18px}' +
+  '.emvb-root:empty::after{content:"Drag an element here from Add to start building";font-size:18px}' +
   `:where(${DROP_BODIES}){min-height:48px}` +
   `:is(${DROP_BODIES}){outline:1px dashed #94a3b8;outline-offset:-1px}` +
   `:is(${DROP_BODIES})::after{content:"Drop elements here";display:block;line-height:48px;text-align:center;${HINT}}` +
