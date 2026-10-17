@@ -186,6 +186,23 @@ export const UI_CSS = `
 .emvb-theme-filter-count { margin-left: 6px; color: var(--text-color-kumo-subtle); font-weight: 400; }
 .emvb-theme-filter:hover { color: var(--text-color-kumo-default); }
 .emvb-theme-filter:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
+/* UX-038: a row that scrolls fades at the edge that has more tabs, so hidden filters aren't
+   mistaken for none. The fade follows the row's own scroll; a row that fits has no timeline. */
+@property --emvb-fade-start { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --emvb-fade-end { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@keyframes emvb-edge-fade {
+  0% { --emvb-fade-start: 0px; --emvb-fade-end: 32px; }
+  8% { --emvb-fade-start: 32px; }
+  92% { --emvb-fade-end: 32px; }
+  100% { --emvb-fade-start: 32px; --emvb-fade-end: 0px; }
+}
+@supports (animation-timeline: scroll()) {
+  .emvb-theme-filters {
+    animation: emvb-edge-fade linear both;
+    animation-timeline: scroll(self inline);
+    mask-image: linear-gradient(to right, transparent, #000 var(--emvb-fade-start), #000 calc(100% - var(--emvb-fade-end)), transparent);
+  }
+}
 
 /* EmVB-owned dialog body (Kumo Dialog keeps host radius/shadow) */
 .emvb-dialog { display: flex; flex-direction: column; gap: 10px; }

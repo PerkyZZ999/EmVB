@@ -53,3 +53,17 @@ test("UX-027: native checkboxes and radios in EmVB use the accent colour", () =>
     rule(':is([data-emvb-editor], [data-emvb-page]) input:is([type="checkbox"], [type="radio"])'),
   ).toMatch(/accent-color: var\(--color-kumo-brand\);/);
 });
+
+test("UX-038: a scrolling filter row fades at the edge that hides tabs, following its own scroll", () => {
+  const at = UI_CSS.indexOf("@supports (animation-timeline: scroll()) {\n  .emvb-theme-filters {");
+  const block = at < 0 ? "" : UI_CSS.slice(at, UI_CSS.indexOf("}\n}", at));
+  expect(block).toContain("animation-timeline: scroll(self inline);");
+  expect(block).toContain("var(--emvb-fade-start)");
+  expect(block).toContain("calc(100% - var(--emvb-fade-end))");
+  const frames = UI_CSS.slice(UI_CSS.indexOf("@keyframes emvb-edge-fade"));
+  expect(frames).toMatch(/0% \{ --emvb-fade-start: 0px; --emvb-fade-end: 32px; \}/);
+  expect(frames).toMatch(/100% \{ --emvb-fade-start: 32px; --emvb-fade-end: 0px; \}/);
+  expect(UI_CSS).toContain(
+    '@property --emvb-fade-end { syntax: "<length>"; inherits: false; initial-value: 0px; }',
+  );
+});

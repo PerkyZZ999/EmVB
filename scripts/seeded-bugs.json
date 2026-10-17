@@ -35601,6 +35601,34 @@
         "UX-037"
       ],
       "expect": "\\(fail\\).*UX-037"
+    },
+    {
+      "id": "UX-038/no-scroll-timeline",
+      "requirement": "UX-038",
+      "description": "The filter fade follows the page instead of the row's own scroll",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "    animation-timeline: scroll(self inline);",
+          "replace": "    animation-timeline: scroll(root block);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-038"],
+      "expect": "\\(fail\\).*UX-038"
+    },
+    {
+      "id": "UX-038/end-never-fades",
+      "requirement": "UX-038",
+      "description": "At the start the row hides tabs on the right with no fade",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "  0% { --emvb-fade-start: 0px; --emvb-fade-end: 32px; }",
+          "replace": "  0% { --emvb-fade-start: 0px; --emvb-fade-end: 0px; }"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-038"],
+      "expect": "\\(fail\\).*UX-038"
     }
   ]
 }
