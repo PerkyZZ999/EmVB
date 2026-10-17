@@ -36571,6 +36571,26 @@
         "UX-067"
       ],
       "expect": "\\(fail\\).*UX-067"
+    },
+    {
+      "id": "UX-068/small-chip-buttons",
+      "requirement": "UX-068",
+      "description": "Chip menu and remove buttons shrink back to 16 x 20 px",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "  width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px;\n",
+          "replace": "  width: 16px; height: 20px; padding: 0; border: 0; border-radius: 4px;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-068"
+      ],
+      "expect": "\\(fail\\).*UX-068"
     }
   ]
 }

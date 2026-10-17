@@ -478,7 +478,8 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-chip-box:focus-within { box-shadow: inset 0 0 0 1px var(--color-kumo-brand); }
 .emvb-chip {
-  display: inline-flex; align-items: center; min-width: 0; max-width: 100%; height: 20px;
+  /* UX-068: 24 px, so the menu and remove buttons meet the 24 px target size (WCAG 2.5.8). */
+  display: inline-flex; align-items: center; min-width: 0; max-width: 100%; height: 24px;
   border-radius: 4px; background: var(--color-kumo-tint); color: var(--text-color-kumo-default);
   font-family: var(--font-sans); font-size: 12px; line-height: 16px;
 }
@@ -487,21 +488,20 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-chip[data-missing] { background: transparent; box-shadow: inset 0 0 0 1px var(--color-kumo-danger); }
 .emvb-chip[data-missing] .emvb-chip-main { cursor: default; }
 .emvb-chip-main {
-  display: inline-flex; align-items: center; gap: 4px; min-width: 0; height: 20px; padding: 0 4px;
+  display: inline-flex; align-items: center; gap: 4px; min-width: 0; height: 24px; padding: 0 4px;
   border: 0; border-radius: 4px; background: transparent; color: inherit; font: inherit; cursor: pointer;
 }
 .emvb-chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 144px; }
 .emvb-chip-icon {
   display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
-  width: 16px; height: 20px; padding: 0; border: 0; border-radius: 4px;
+  width: 24px; height: 24px; padding: 0; border: 0; border-radius: 4px;
   background: transparent; color: inherit; cursor: pointer;
 }
-.emvb-chip-icon:last-child { margin-right: 2px; }
 .emvb-chip-icon:hover { background: color-mix(in oklab, currentColor 14%, transparent); }
 .emvb-chip :focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 1px; }
 .emvb-chip[data-active="true"] :focus-visible { outline-color: #fff; outline-offset: -2px; }
 .emvb-chip-rename {
-  width: 128px; height: 20px; padding: 0 4px; border: 0; border-radius: 4px; outline: 0;
+  width: 128px; height: 24px; padding: 0 4px; border: 0; border-radius: 4px; outline: 0;
   background: var(--color-kumo-base); color: var(--text-color-kumo-default); font: inherit;
   box-shadow: inset 0 0 0 1px var(--color-kumo-brand);
 }
