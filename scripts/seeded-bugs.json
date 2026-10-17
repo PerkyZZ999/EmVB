@@ -36277,6 +36277,46 @@
         "UX-057"
       ],
       "expect": "\\(fail\\).*UX-057"
+    },
+    {
+      "id": "UX-058/raw-tag",
+      "requirement": "UX-058",
+      "description": "The Tag select shows the raw tag p again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "  p: \"Paragraph (p)\",\n",
+          "replace": "  p: \"p\",\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "UX-058"
+      ],
+      "expect": "\\(fail\\).*UX-058"
+    },
+    {
+      "id": "UX-058/note-detached",
+      "requirement": "UX-058",
+      "description": "The tag note isn't tied to the Tag select",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "        description=\"Elements of this tag start here. A class or a local style still wins.\"\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "UX-058"
+      ],
+      "expect": "\\(fail\\).*UX-058"
     }
   ]
 }

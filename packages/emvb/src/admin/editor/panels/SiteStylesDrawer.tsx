@@ -434,6 +434,18 @@ function DeleteConfirm({
 
 const DEFAULT_KEYS = ["color", "fontSize", "fontWeight", "textAlign"] as const;
 
+const TAG_NAMES: Record<DefaultStyleTag, string> = {
+  h1: "Heading 1 (h1)",
+  h2: "Heading 2 (h2)",
+  h3: "Heading 3 (h3)",
+  h4: "Heading 4 (h4)",
+  h5: "Heading 5 (h5)",
+  h6: "Heading 6 (h6)",
+  p: "Paragraph (p)",
+  a: "Link (a)",
+  button: "Button",
+};
+
 function DefaultsSection({
   design,
   onSave,
@@ -456,18 +468,18 @@ function DefaultsSection({
   };
   return (
     <>
-      <p className="emvb-helper">
-        Elements of this tag start here. A class or a local style still wins.
-      </p>
+      {/* UX-058: the note belongs to Tag, so it sits under it; tags read as names. */}
       <Select
         label="Tag"
         className={FIELD}
         value={tag}
+        description="Elements of this tag start here. A class or a local style still wins."
+        renderValue={(value: unknown) => TAG_NAMES[value as DefaultStyleTag] ?? String(value)}
         onValueChange={(value) => setTag(value as DefaultStyleTag)}
       >
         {DEFAULT_STYLE_TAGS.map((item) => (
           <Select.Option key={item} value={item}>
-            {item}
+            {TAG_NAMES[item]}
           </Select.Option>
         ))}
       </Select>
@@ -562,7 +574,7 @@ function DirectionSelect({
   onSave: (next: DesignSystem) => Promise<unknown> | void;
 }) {
   return (
-    <div data-emvb-site-direction="">
+    <div className="emvb-field-group" data-emvb-site-direction="">
       <Select
         label="Text direction"
         className={FIELD}

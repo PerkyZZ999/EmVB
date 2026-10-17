@@ -540,3 +540,25 @@ test("UX-024: unpublished changes fold under a count instead of listing every ch
   expect(diff?.querySelector("summary")?.textContent ?? null).toBe("2 unpublished changes");
   expect(diff?.querySelectorAll("li").length ?? 0).toBe(2);
 });
+
+test("UX-058: Defaults names tags in words and puts the tag note under Tag", async () => {
+  await mount(
+    <SiteStylesDrawer
+      design={emptyDesign()}
+      layout={layout}
+      onDesignChange={async () => undefined}
+      onLayoutChange={() => undefined}
+      onClose={() => undefined}
+    />,
+  );
+  const defaultsTab = [...document.querySelectorAll<HTMLElement>('[role="tab"]')].find(
+    (t) => t.textContent === "Defaults",
+  );
+  await act(async () => defaultsTab?.click());
+  const tag = document.querySelector('[role="combobox"][aria-label="Tag"]');
+  expect(tag?.textContent?.trim() ?? "no Tag select").toBe("Paragraph (p)");
+  const note = document.getElementById(tag?.getAttribute("aria-describedby") ?? "");
+  expect(note?.textContent ?? "not described").toBe(
+    "Elements of this tag start here. A class or a local style still wins.",
+  );
+});
