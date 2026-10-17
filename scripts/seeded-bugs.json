@@ -36317,6 +36317,46 @@
         "UX-058"
       ],
       "expect": "\\(fail\\).*UX-058"
+    },
+    {
+      "id": "UX-059/raw-text-tags",
+      "requirement": "UX-059",
+      "description": "The Text element's HTML tag lists raw tags again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "        options: TEXT_TAGS.map((tag) => ({ value: tag, label: TAG_LABELS[tag] })),\n",
+          "replace": "        options: TEXT_TAGS.map((tag) => ({ value: tag, label: tag })),\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/link-new-tab.test.ts",
+        "-t",
+        "UX-059"
+      ],
+      "expect": "\\(fail\\).*UX-059"
+    },
+    {
+      "id": "UX-059/p-unnamed",
+      "requirement": "UX-059",
+      "description": "p reads as a bare letter",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "  p: \"Paragraph (p)\",\n",
+          "replace": "  p: \"p\",\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/link-new-tab.test.ts",
+        "-t",
+        "UX-059"
+      ],
+      "expect": "\\(fail\\).*UX-059"
     }
   ]
 }

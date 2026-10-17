@@ -53,3 +53,15 @@ test("UX-044: elements that are links name their fields Text and URL", async () 
     "menu-item: Text / URL",
   ]);
 });
+
+test("UX-059: HTML tag choices read as words, with p named Paragraph", async () => {
+  const { ELEMENTS } = await import("./index.ts");
+  const tagLabels = (type: string) => {
+    const { descriptor } = (ELEMENTS as Record<string, unknown>)[type] as {
+      descriptor: { fields: { key: string; options?: { label: string }[] }[] };
+    };
+    return descriptor.fields.find((f) => f.key === "tag")?.options?.map((o) => o.label);
+  };
+  expect(tagLabels("text")).toEqual(["Paragraph (p)", "Div"]);
+  expect(tagLabels("container")?.slice(0, 3)).toEqual(["Div", "Section", "Header"]);
+});

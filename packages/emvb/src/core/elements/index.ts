@@ -53,6 +53,19 @@ export const HEADING_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6"] as const;
 const newTabAttrs = (newTab: boolean | undefined): Record<string, string> =>
   newTab ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
+/** UX-059: tag choices read as words; p, which isn't one, names itself. */
+const TAG_LABELS: Record<(typeof CONTAINER_TAGS)[number] | (typeof TEXT_TAGS)[number], string> = {
+  div: "Div",
+  section: "Section",
+  header: "Header",
+  footer: "Footer",
+  main: "Main",
+  article: "Article",
+  aside: "Aside",
+  nav: "Nav",
+  p: "Paragraph (p)",
+};
+
 const LINK_MESSAGE = "Use a full URL such as https://example.com or a path such as /pricing.";
 
 /** Optional Link and new-tab fields for elements that wrap their content in a link (W-141). */
@@ -131,7 +144,7 @@ const container: ElementDefinition<ContainerNode> = {
         kind: "select",
         label: "HTML tag",
         optional: true,
-        options: CONTAINER_TAGS.map((tag) => ({ value: tag, label: tag })),
+        options: CONTAINER_TAGS.map((tag) => ({ value: tag, label: TAG_LABELS[tag] })),
         message: "Pick a landmark or div.",
       },
       ...BOX_LINK_FIELDS,
@@ -201,7 +214,7 @@ const text: ElementDefinition<TextNode> = {
         kind: "select",
         label: "HTML tag",
         optional: true,
-        options: TEXT_TAGS.map((tag) => ({ value: tag, label: tag })),
+        options: TEXT_TAGS.map((tag) => ({ value: tag, label: TAG_LABELS[tag] })),
       },
     ],
   },
@@ -978,7 +991,7 @@ const layoutSection: ElementDefinition<LayoutSectionNode> = {
         kind: "select",
         label: "HTML tag",
         optional: true,
-        options: CONTAINER_TAGS.map((tag) => ({ value: tag, label: tag })),
+        options: CONTAINER_TAGS.map((tag) => ({ value: tag, label: TAG_LABELS[tag] })),
         message: "Pick a landmark or div. A section is a section by default.",
       },
     ],
