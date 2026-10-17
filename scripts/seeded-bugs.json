@@ -36791,6 +36791,26 @@
         "UX-072"
       ],
       "expect": "\\(fail\\).*UX-072"
+    },
+    {
+      "id": "UX-073/video-hint-hidden",
+      "requirement": "UX-073",
+      "description": "The Video URL hides which links it takes again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "        description={node.type === \"video\" ? field.message : undefined}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-073"
+      ],
+      "expect": "\\(fail\\).*UX-073"
     }
   ]
 }

@@ -294,3 +294,23 @@ test("UX-060: layout validation messages say such as, not e.g.", async () => {
   const messages = [...source.matchAll(/"[^"\n]*\be\.g\.[^"\n]*"/g)].map((m) => m[0]);
   expect(source.includes("such as plan:pro") ? messages : ["layout.ts not read"]).toEqual([]);
 });
+
+test("UX-073: the Video URL says which links it takes before any error", async () => {
+  const field: FieldDescriptor = {
+    key: "url",
+    kind: "href",
+    label: "Video URL",
+    message: "Use a YouTube or Vimeo link, or a media file path such as /_emdash/api/media/file/….",
+  };
+  const video = {
+    id: "vide0001",
+    type: "video",
+    props: { url: "", title: "T" },
+  } as unknown as LayoutNode;
+  const host = await mount(
+    <DraftTextField field={field} node={video} onChange={() => undefined} />,
+  );
+  expect(describedBy(host)).toBe(
+    "Use a YouTube or Vimeo link, or a media file path such as /_emdash/api/media/file/….",
+  );
+});

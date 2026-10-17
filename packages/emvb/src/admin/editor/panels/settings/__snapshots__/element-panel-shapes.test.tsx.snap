@@ -3565,12 +3565,14 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
       label id="id-2" for="id-3"
         span
           "Video URL"
-      input.emvb-field id="id-3" data-emvb-field="url" value="" aria-labelledby="id-2"
+      input.emvb-field id="id-3" data-emvb-field="url" value="" aria-labelledby="id-2" aria-describedby="id-4"
+      p id="id-4"
+        "Use a YouTube or Vimeo link, or a media file path such as /_emdash/api/media/file/…."
     div data-filled=""
-      label id="id-4" for="id-5" data-filled=""
+      label id="id-5" for="id-6" data-filled=""
         span
           "Title"
-      input.emvb-field id="id-5" data-emvb-field="title" value="Video" data-filled="" aria-labelledby="id-4"
+      input.emvb-field id="id-6" data-emvb-field="title" value="Video" data-filled="" aria-labelledby="id-5"
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
         "Visitors"
@@ -3579,12 +3581,12 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-6" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-7" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-7" tabindex="-1" aria-hidden="true" value="everyone""
+            input id="id-8" tabindex="-1" aria-hidden="true" value="everyone""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="video"

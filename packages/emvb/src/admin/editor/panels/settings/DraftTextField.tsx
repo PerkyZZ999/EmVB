@@ -238,6 +238,8 @@ export function DraftTextField({
         fieldKey={field.key}
         draft={draft}
         error={error}
+        // UX-073: which links a video takes is worth knowing before the first try.
+        description={node.type === "video" ? field.message : undefined}
         setDraft={setDraft}
         commit={commit}
       />
