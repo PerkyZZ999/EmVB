@@ -330,3 +330,25 @@ test("UX-040: Focal point X and Y, and Width and Height, each share one row", as
   );
   expect(rows).toEqual(["Focal point X (%) + Focal point Y (%)", "Width (px) + Height (px)"]);
 });
+
+test("UX-063: on Mobile the Style tab says Mobile is being edited and what it overrides", async () => {
+  const head = { id: "head0010", type: "heading", props: { text: "Hi", level: 2 } } as LayoutNode;
+  await mount(
+    <ElementPanel
+      node={head}
+      layout={{ ...layout, root: { ...layout.root, children: [head] } }}
+      design={emptyDesign()}
+      rejection={null}
+      fetcher={stubFetcher}
+      device="mobile"
+      onChange={() => undefined}
+      onDesignChange={async () => undefined}
+      onSelect={() => undefined}
+    />,
+  );
+  const tab = [...document.querySelectorAll('[role="tab"]')].find((t) => t.textContent === "Style");
+  await act(async () => (tab as HTMLElement | undefined)?.click());
+  expect(document.querySelector('[data-emvb-device-note="mobile"]')?.textContent ?? "no note").toBe(
+    "Editing Mobile. These styles override Tablet and Desktop. Hover, Focus and Active are set on Desktop and apply on every device.",
+  );
+});

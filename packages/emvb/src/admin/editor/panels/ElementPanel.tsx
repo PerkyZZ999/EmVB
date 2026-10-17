@@ -641,8 +641,12 @@ function KnownElementPanel({
               onChange={setStyleState}
             />
           ) : (
-            <p className="emvb-helper">
-              These override Desktop. State styles apply on every device.
+            // UX-063: say which device is being edited, as states say "Editing Hover".
+            <p className="emvb-helper" data-emvb-device-note={device}>
+              {device === "mobile"
+                ? "Editing Mobile. These styles override Tablet and Desktop."
+                : "Editing Tablet. These styles override Desktop."}{" "}
+              Hover, Focus and Active are set on Desktop and apply on every device.
             </p>
           )}
           {!cls && <StyleSources node={node} design={design} device={device} state={styleState} />}

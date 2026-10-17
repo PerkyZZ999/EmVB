@@ -36471,6 +36471,26 @@
         "deleting a container with children"
       ],
       "expect": "\\(fail\\).*deleting a container with children"
+    },
+    {
+      "id": "UX-063/device-unnamed",
+      "requirement": "UX-063",
+      "description": "The Mobile Style tab no longer says which device is edited",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "\"Editing Mobile. These styles override Tablet and Desktop.\"",
+          "replace": "\"These override Desktop.\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx",
+        "-t",
+        "UX-063"
+      ],
+      "expect": "\\(fail\\).*UX-063"
     }
   ]
 }
