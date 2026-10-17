@@ -9976,8 +9976,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "                        onMenu(false);\n                        run(node.id);",
-          "replace": "                        run(node.id);"
+          "search": "                          onMenu(false);\n                          run(node.id);",
+          "replace": "                          run(node.id);"
         }
       ],
       "command": [
@@ -35207,6 +35207,46 @@
         "UX-025"
       ],
       "expect": "\\(fail\\).*UX-025"
+    },
+    {
+      "id": "UX-026/delete-not-apart",
+      "requirement": "UX-026",
+      "description": "Delete sits flush with the other layer actions",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "{label === \"Delete\" && (",
+          "replace": "{label === \"Never\" && ("
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx",
+        "-t",
+        "UX-026"
+      ],
+      "expect": "\\(fail\\).*UX-026"
+    },
+    {
+      "id": "UX-026/rename-black-focus",
+      "requirement": "UX-026",
+      "description": "Renaming a layer shows the browser's black focus outline",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-layer-rename:focus { outline: none; box-shadow: 0 0 0 1px var(--color-kumo-brand); }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "UX-026"
+      ],
+      "expect": "\\(fail\\).*UX-026"
     }
   ]
 }

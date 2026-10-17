@@ -1,4 +1,4 @@
-import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { CaretDownIcon, CaretRightIcon, DotsThreeIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
   firstChild,
@@ -532,28 +532,33 @@ const LayerRow = React.memo(function LayerRow({
               }}
               onKeyDown={menuKeys}
             >
-              ···
+              <DotsThreeIcon size={16} weight="bold" aria-hidden="true" />
             </button>
             {menuOpen && (
               <div ref={menuList} className="emvb-layer-menu-list" role="menu" onKeyDown={menuKeys}>
                 {menuItems(node, isRoot, actions, clip, startRename).map(
                   ({ label, run, className, disabled }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      role="menuitem"
-                      className={className}
-                      disabled={disabled}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        const tree = event.currentTarget.closest('[role="tree"]');
-                        onMenu(false);
-                        run(node.id);
-                        window.setTimeout(() => focusSelectedRow(tree), 0);
-                      }}
-                    >
-                      {label}
-                    </button>
+                    <React.Fragment key={label}>
+                      {/* UX-026: Delete sits apart from the other actions, as in Site styles. */}
+                      {label === "Delete" && (
+                        <hr className="emvb-layer-menu-sep" aria-hidden="true" />
+                      )}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className={className}
+                        disabled={disabled}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          const tree = event.currentTarget.closest('[role="tree"]');
+                          onMenu(false);
+                          run(node.id);
+                          window.setTimeout(() => focusSelectedRow(tree), 0);
+                        }}
+                      >
+                        {label}
+                      </button>
+                    </React.Fragment>
                   ),
                 )}
                 {pasteHint(clip) && (

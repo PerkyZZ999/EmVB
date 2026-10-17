@@ -140,3 +140,9 @@ test("EmVB's own field labels match the 13 px Kumo labels beside them (UX-020)",
     /font-size: 13px;[^}]*font-weight: 400;[^}]*color: var\(--text-color-kumo-default\);/,
   );
 });
+
+test("renaming a layer shows the primary focus ring, not the browser's black outline (UX-026)", () => {
+  expect(rule(".emvb-layer-rename:focus")).toMatch(
+    /outline: none;[^}]*box-shadow: 0 0 0 1px var\(--color-kumo-brand\);/,
+  );
+});

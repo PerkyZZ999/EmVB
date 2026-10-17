@@ -132,6 +132,19 @@ describe("Layers panel (W-018)", () => {
     expect(calls).toEqual([]);
   });
 
+  test("UX-026: the row menu sets Delete apart and its button is a Phosphor icon", async () => {
+    await mount("head0001");
+    const menuButton = document.querySelector('[data-emvb-layer="head0001"] .emvb-layer-menu-btn');
+    expect(menuButton?.querySelector("svg") ? "icon" : (menuButton?.textContent ?? null)).toBe(
+      "icon",
+    );
+    await clickEl(menuButton);
+    const del = [...document.querySelectorAll('[role="menuitem"]')].find(
+      (el) => el.textContent === "Delete",
+    );
+    expect(del?.previousElementSibling?.className ?? null).toBe("emvb-layer-menu-sep");
+  });
+
   test("after a row menu action, focus lands on the selected row (W-258)", async () => {
     await mount("head0001");
     await clickEl(document.querySelector('[data-emvb-layer="head0001"] .emvb-layer-menu-btn'));
