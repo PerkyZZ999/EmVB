@@ -47,3 +47,9 @@ test("UX-018: narrow lists keep dates and badges on one line and scroll sideways
 test("UX-023: selects in EmVB dialogs span the dialog like its text fields", () => {
   expect(rule(".emvb-dialog .emvb-field")).toMatch(/width: 100%;/);
 });
+
+test("UX-027: native checkboxes and radios in EmVB use the accent colour", () => {
+  expect(
+    rule(':is([data-emvb-editor], [data-emvb-page]) input:is([type="checkbox"], [type="radio"])'),
+  ).toMatch(/accent-color: var\(--color-kumo-brand\);/);
+});

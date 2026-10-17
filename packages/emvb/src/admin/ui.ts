@@ -231,6 +231,8 @@ export const UI_CSS = `
 .emvb-device-fieldset > .emvb-helper { width: 100%; margin: 0; }
 .emvb-device-option { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; font-size: 13px; cursor: pointer; }
 .emvb-device-option input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-kumo-brand); }
+/* UX-027: every native checkbox and radio EmVB draws takes the accent, not the OS blue. */
+:is([data-emvb-editor], [data-emvb-page]) input:is([type="checkbox"], [type="radio"]) { accent-color: var(--color-kumo-brand); }
 .emvb-device-option input:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 
 /* Conditions editor (theme-part settings) */

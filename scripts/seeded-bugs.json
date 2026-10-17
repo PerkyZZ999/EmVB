@@ -35247,6 +35247,20 @@
         "UX-026"
       ],
       "expect": "\\(fail\\).*UX-026"
+    },
+    {
+      "id": "UX-027/os-blue-checkbox",
+      "requirement": "UX-027",
+      "description": "Hide on desktop and Fluid checkboxes draw in the operating system's blue",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ":is([data-emvb-editor], [data-emvb-page]) input:is([type=\"checkbox\"], [type=\"radio\"]) { accent-color: var(--color-kumo-brand); }",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-027"],
+      "expect": "\\(fail\\).*UX-027"
     }
   ]
 }
