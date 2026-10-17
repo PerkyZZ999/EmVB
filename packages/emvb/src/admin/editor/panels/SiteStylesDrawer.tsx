@@ -26,6 +26,7 @@ import {
 import { BUTTON, SOLID_DESTRUCTIVE } from "../../ui.ts";
 import { ClassesSection } from "./ClassesSection.tsx";
 import { stopEditorShortcuts } from "./settings/ClassChip.tsx";
+import { isCancelEscape } from "../ime.ts";
 import { StyleRow } from "./settings/StyleRow.tsx";
 import { FIELD } from "../../ui.ts";
 import { TokenScales } from "./TokenScales.tsx";
@@ -139,7 +140,19 @@ export function SiteStylesDrawer({
     <div
       className="emvb-panel-body emvb-site-styles"
       data-emvb-site-styles=""
-      onKeyDown={stopEditorShortcuts}
+      onKeyDown={(event) => {
+        stopEditorShortcuts(event);
+        if (closesDrawer(event)) {
+          event.preventDefault();
+          onClose();
+          // The trigger that opened the drawer gets focus back, as for any closed panel.
+          requestAnimationFrame(() =>
+            document
+              .querySelector<HTMLElement>('[data-emvb-editor] button[aria-label="Site styles"]')
+              ?.focus(),
+          );
+        }
+      }}
     >
       <div className="emvb-site-styles-head">
         <div className="emvb-site-styles-titles">
@@ -430,6 +443,18 @@ function DeleteConfirm({
       </div>
     </div>
   );
+}
+
+/**
+ * UX-069: Escape closes the drawer from its buttons, tabs and rows. A text field, an open list or
+ * menu, or a dialog keeps its own Escape, so typing is never thrown away.
+ */
+function closesDrawer(event: React.KeyboardEvent): boolean {
+  if (!isCancelEscape(event) || event.defaultPrevented) return false;
+  const target = event.target as Element | null;
+  if (!target?.closest) return false;
+  if (target.closest('input, textarea, select, [contenteditable="true"]')) return false;
+  return !target.closest('[role="listbox"], [role="menu"], [role="dialog"], [role="alertdialog"]');
 }
 
 const DEFAULT_KEYS = ["color", "fontSize", "fontWeight", "textAlign"] as const;

@@ -562,3 +562,26 @@ test("UX-058: Defaults names tags in words and puts the tag note under Tag", asy
     "Elements of this tag start here. A class or a local style still wins.",
   );
 });
+
+test("UX-069: Escape closes Site styles from a tab, but not from a text field", async () => {
+  let closed = 0;
+  await mount(
+    <SiteStylesDrawer
+      design={emptyDesign()}
+      layout={layout}
+      onDesignChange={async () => undefined}
+      onLayoutChange={() => undefined}
+      onClose={() => {
+        closed += 1;
+      }}
+    />,
+  );
+  const escape = (target: Element | null) =>
+    act(async () => {
+      target?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    });
+  await escape(document.querySelector("[data-emvb-site-styles] input"));
+  expect(closed).toBe(0);
+  await escape(document.querySelector('[data-emvb-site-styles] [role="tab"]'));
+  expect(closed).toBe(1);
+});

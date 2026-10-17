@@ -5391,7 +5391,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
-          "search": "      onKeyDown={stopEditorShortcuts}\n",
+          "search": "        stopEditorShortcuts(event);\n",
           "replace": ""
         }
       ],
@@ -36591,6 +36591,46 @@
         "UX-068"
       ],
       "expect": "\\(fail\\).*UX-068"
+    },
+    {
+      "id": "UX-069/escape-in-field-closes",
+      "requirement": "UX-069",
+      "description": "Escape in a Site styles text field closes the drawer",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "  if (target.closest('input, textarea, select, [contenteditable=\"true\"]')) return false;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "UX-069"
+      ],
+      "expect": "\\(fail\\).*UX-069"
+    },
+    {
+      "id": "UX-069/escape-ignored",
+      "requirement": "UX-069",
+      "description": "Escape never closes Site styles",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "        if (closesDrawer(event)) {\n",
+          "replace": "        if (false && closesDrawer(event)) {\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "UX-069"
+      ],
+      "expect": "\\(fail\\).*UX-069"
     }
   ]
 }
