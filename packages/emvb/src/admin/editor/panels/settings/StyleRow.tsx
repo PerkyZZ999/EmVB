@@ -167,6 +167,9 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
   ],
 };
 
+/** The value of a select row with nothing set; never saved. */
+const UNSET = "__unset";
+
 const isLengthLiteral = (value: unknown): value is { value: number; unit: string } =>
   typeof value === "object" && value !== null && "value" in value && "unit" in value;
 
@@ -321,7 +324,8 @@ export function StyleRow({
     const current =
       styleKey === "fontWeight" && typeof shown === "number"
         ? String(shown)
-        : ((shown as string | undefined) ?? options[0]?.value ?? "");
+        : // UX-048: nothing set reads "Default", like the colour field, not the first option.
+          ((shown as string | undefined) ?? UNSET);
     return (
       <div
         className="emvb-style-row"
@@ -334,6 +338,7 @@ export function StyleRow({
           className={FIELD}
           value={current}
           onValueChange={(next) => {
+            if (next === UNSET) return;
             if (styleKey === "fontWeight") {
               const n = Number(next);
               onPatch({
@@ -346,7 +351,9 @@ export function StyleRow({
             onPatch({ [styleKey]: next });
           }}
           renderValue={(v: unknown) =>
-            options.find((o) => o.value === String(v))?.label ?? String(v)
+            v === UNSET
+              ? "Default"
+              : (options.find((o) => o.value === String(v))?.label ?? String(v))
           }
         >
           {options.map((option) => (

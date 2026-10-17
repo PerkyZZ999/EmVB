@@ -35929,6 +35929,46 @@
         "UX-047"
       ],
       "expect": "\\(fail\\).*UX-047"
+    },
+    {
+      "id": "UX-048/first-option-shown",
+      "requirement": "UX-048",
+      "description": "An unset select shows its first option as if chosen",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "((shown as string | undefined) ?? UNSET);",
+          "replace": "((shown as string | undefined) ?? options[0]?.value ?? \"\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-row-default.test.tsx",
+        "-t",
+        "UX-048"
+      ],
+      "expect": "\\(fail\\).*UX-048"
+    },
+    {
+      "id": "UX-048/blank-unset",
+      "requirement": "UX-048",
+      "description": "An unset select shows nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "            v === UNSET\n              ? \"Default\"\n",
+          "replace": "            v === UNSET\n              ? \"\"\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-row-default.test.tsx",
+        "-t",
+        "UX-048"
+      ],
+      "expect": "\\(fail\\).*UX-048"
     }
   ]
 }
