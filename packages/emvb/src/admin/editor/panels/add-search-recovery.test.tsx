@@ -6,7 +6,7 @@ import { AddPanel } from "./AddPanel.tsx";
 afterEach(cleanup);
 
 const search = () =>
-  document.querySelector<HTMLInputElement>('input[placeholder="Search elements"]');
+  document.querySelector<HTMLInputElement>('input[aria-label="Search elements"]');
 const tiles = () => document.querySelectorAll(".emvb-element-tile").length;
 
 test("UX-013: an Add search with no results offers Clear search, which restores the tiles and focus", async () => {
@@ -36,4 +36,12 @@ test("UX-013: Escape clears a non-empty Add search and stops there", async () =>
   } finally {
     window.removeEventListener("keydown", onWindowKey);
   }
+});
+
+test("UX-053: the Add search is a named search box without a heading that repeats its placeholder", async () => {
+  await mount(<AddPanel onAdd={() => undefined} />);
+  const box = search();
+  expect(box ? `${box.type} / ${box.placeholder}` : "missing").toBe("search / Search elements…");
+  const labels = [...document.querySelectorAll("label")].map((l) => l.textContent?.trim());
+  expect(labels.includes("Search elements")).toBe(false);
 });

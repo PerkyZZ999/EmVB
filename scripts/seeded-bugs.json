@@ -36149,6 +36149,26 @@
         "UX-052"
       ],
       "expect": "\\(fail\\).*UX-052"
+    },
+    {
+      "id": "UX-053/heading-label-back",
+      "requirement": "UX-053",
+      "description": "The Add search gets a visible label that repeats its placeholder",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "        aria-label=\"Search elements\"\n        type=\"search\"\n",
+          "replace": "        label=\"Search elements\"\n        type=\"search\"\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-search-recovery.test.tsx",
+        "-t",
+        "UX-053"
+      ],
+      "expect": "\\(fail\\).*UX-053"
     }
   ]
 }

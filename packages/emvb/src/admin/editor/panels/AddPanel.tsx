@@ -51,8 +51,10 @@ export function AddPanel({
     : [];
   return (
     <div className="emvb-panel-body" data-emvb-panel="add">
+      {/* UX-053: named like the other searches; a visible heading only repeated the placeholder. */}
       <Input
-        label="Search elements"
+        aria-label="Search elements"
+        type="search"
         className={FIELD}
         ref={searchRef}
         value={query}
@@ -64,7 +66,7 @@ export function AddPanel({
             setQuery("");
           }
         }}
-        placeholder="Search elements"
+        placeholder="Search elements…"
       />
       {matched.length === 0 && recipes.length === 0 ? (
         <div className="emvb-add-nomatch" data-emvb-add-nomatch="">
