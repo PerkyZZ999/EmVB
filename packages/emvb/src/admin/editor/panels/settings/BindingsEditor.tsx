@@ -93,7 +93,8 @@ export function BindingsEditor({
                 }
               }}
             />
-            {binding ? (
+            {/* UX-039: unbound, the source select is the row's last child and spans it. */}
+            {binding && (
               <BindKeyInput
                 fieldLabel={field.label}
                 binding={binding}
@@ -101,8 +102,6 @@ export function BindingsEditor({
                 options={suggestions(binding.source, live.site)}
                 onCommit={(key) => onChange(withBinding(node, field.key, { ...binding, key }))}
               />
-            ) : (
-              <span />
             )}
             {binding && (
               <p className="emvb-bind-live" data-emvb-bind-live="">

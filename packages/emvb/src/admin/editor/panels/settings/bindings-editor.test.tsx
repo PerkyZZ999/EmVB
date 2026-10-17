@@ -115,3 +115,12 @@ describe("Dynamic data panel (W-307)", () => {
     expect(empty.host.querySelector("[data-emvb-bindings]")).toBeNull();
   });
 });
+
+test("UX-039: an unbound source select is the last item in its row, so it spans the panel", async () => {
+  const bound = { ...heading, bind: { href: { source: "site" as const, key: "url" } } };
+  const { host } = await editor(bound);
+  const last = (field: string) =>
+    host.querySelector(`[data-emvb-bind-field="${field}"]`)?.lastElementChild?.className ?? "";
+  expect(last("text")).toBe("emvb-panel-select");
+  expect(last("href")).not.toBe("emvb-panel-select");
+});
