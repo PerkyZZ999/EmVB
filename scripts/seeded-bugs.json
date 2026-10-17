@@ -35053,6 +35053,26 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-018"],
       "expect": "\\(fail\\).*UX-018"
+    },
+    {
+      "id": "UX-019/empty-root-strip",
+      "requirement": "UX-019",
+      "description": "An empty page shows only a 48 px drop strip at the top of the canvas",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
+          "search": "  \":where(.emvb-root:empty){min-height:100vh}\" +\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/empty-root.test.ts",
+        "-t",
+        "UX-019"
+      ],
+      "expect": "\\(fail\\).*UX-019"
     }
   ]
 }
