@@ -43,3 +43,7 @@ test("UX-018: narrow lists keep dates and badges on one line and scroll sideways
   );
   expect(rule(".emvb-surface-card[data-emvb-list] td:first-child")).toMatch(/min-width: 180px;/);
 });
+
+test("UX-023: selects in EmVB dialogs span the dialog like its text fields", () => {
+  expect(rule(".emvb-dialog .emvb-field")).toMatch(/width: 100%;/);
+});

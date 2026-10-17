@@ -190,6 +190,8 @@ export const UI_CSS = `
 /* EmVB-owned dialog body (Kumo Dialog keeps host radius/shadow) */
 .emvb-dialog { display: flex; flex-direction: column; gap: 10px; }
 .emvb-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+/* UX-023: selects in EmVB dialogs line up with the full-width fields under them. */
+.emvb-dialog .emvb-field { width: 100%; }
 .emvb-create-fields { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .emvb-create-status { min-height: 18px; }
 .emvb-dialog :is(h2, [data-slot="title"]) {

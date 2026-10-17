@@ -35153,6 +35153,20 @@
         "UX-022"
       ],
       "expect": "\\(fail\\).*UX-022"
+    },
+    {
+      "id": "UX-023/dialog-select-narrow",
+      "requirement": "UX-023",
+      "description": "Page template and Type selects shrink to their text in the create dialogs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-dialog .emvb-field { width: 100%; }",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-023"],
+      "expect": "\\(fail\\).*UX-023"
     }
   ]
 }
