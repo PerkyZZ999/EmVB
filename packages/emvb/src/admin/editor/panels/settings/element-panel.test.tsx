@@ -475,3 +475,36 @@ test("UX-072: Post Link always offers the new-tab switch", async () => {
   const postLink = { id: "plnk0011", type: "post-link", props: {} } as unknown as LayoutNode;
   expect(await newTabSwitch(postLink)).toBe("shown");
 });
+
+const trackFields = async (device: "desktop" | "tablet" | "mobile") => {
+  const grid = {
+    id: "grid0011",
+    type: "grid",
+    props: { columns: 3 },
+    children: [],
+  } as unknown as LayoutNode;
+  await mount(
+    <ElementPanel
+      node={grid}
+      layout={{ ...layout, root: { ...layout.root, children: [grid] } }}
+      design={emptyDesign()}
+      rejection={null}
+      fetcher={stubFetcher}
+      device={device}
+      onChange={() => undefined}
+      onDesignChange={async () => undefined}
+      onSelect={() => undefined}
+    />,
+  );
+  return [...document.querySelectorAll('[data-emvb-field^="columnTracks"]')].map((f) =>
+    f.getAttribute("data-emvb-field"),
+  );
+};
+
+test("UX-075: on Desktop a Grid shows only its desktop tracks", async () => {
+  expect(await trackFields("desktop")).toEqual(["columnTracks"]);
+});
+
+test("UX-075: on Mobile a Grid shows only its mobile tracks", async () => {
+  expect(await trackFields("mobile")).toEqual(["columnTracksMobile"]);
+});

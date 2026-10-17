@@ -320,19 +320,25 @@ function pairFields<F extends { key: string }>(fields: readonly F[]): F[][] {
 }
 
 /** UX-071: fields that only apply to some values of another field on the same element. */
-const SHOWN_WHEN: Readonly<Record<string, (props: Record<string, unknown>) => boolean>> = {
+const SHOWN_WHEN: Readonly<
+  Record<string, (props: Record<string, unknown>, device: PopupDevice) => boolean>
+> = {
   "loop.columns": (props) => props["display"] === "grid" || props["display"] === "cards",
   "pagination.countText": (props) => props["showCount"] === true,
   // Post Link always links to its post, so its new-tab switch always applies.
   "post-link.newTab": () => true,
+  // UX-075: each device's tracks show on that device, as Columns does (W-139).
+  "grid.columnTracks": (_props, device) => device === "desktop",
+  "grid.columnTracksTablet": (_props, device) => device === "tablet",
+  "grid.columnTracksMobile": (_props, device) => device === "mobile",
 };
 
-function fieldShown(key: string, node: LayoutNode): boolean {
+function fieldShown(key: string, node: LayoutNode, device: PopupDevice = "desktop"): boolean {
   const props = node.props as Record<string, unknown>;
   // A stored value always shows, so it can be seen and reset.
   if (props[key] !== undefined) return true;
   const when = SHOWN_WHEN[`${node.type}.${key}`];
-  if (when) return when(props);
+  if (when) return when(props, device);
   const parent = DEPENDS_ON[key];
   if (!parent) return true;
   const bound = (node as { bind?: Record<string, unknown> }).bind?.[parent] !== undefined;
@@ -559,31 +565,31 @@ function KnownElementPanel({
                 : "This element has no content settings."}
             </p>
           ) : (
-            pairFields(descriptor.fields.filter((field) => fieldShown(field.key, node))).map(
-              (row) => {
-                const controls = row.map((field) => (
-                  <FieldControl
-                    key={field.key}
-                    field={field}
-                    node={node}
-                    onChange={onChange}
-                    fetcher={fetcher}
-                    parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
-                    duplicateName={
-                      field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
-                    }
-                    device={device}
-                  />
-                ));
-                return row.length === 2 ? (
-                  <div className="emvb-field-pair" key={row[0]?.key} data-emvb-field-pair="">
-                    {controls}
-                  </div>
-                ) : (
-                  controls
-                );
-              },
-            )
+            pairFields(
+              descriptor.fields.filter((field) => fieldShown(field.key, node, device)),
+            ).map((row) => {
+              const controls = row.map((field) => (
+                <FieldControl
+                  key={field.key}
+                  field={field}
+                  node={node}
+                  onChange={onChange}
+                  fetcher={fetcher}
+                  parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
+                  duplicateName={
+                    field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
+                  }
+                  device={device}
+                />
+              ));
+              return row.length === 2 ? (
+                <div className="emvb-field-pair" key={row[0]?.key} data-emvb-field-pair="">
+                  {controls}
+                </div>
+              ) : (
+                controls
+              );
+            })
           )}
           <BindingsEditor node={node} onChange={onChange} post={SAMPLE_POST} />
           <AudienceEditor node={node} isRoot={layout?.root.id === node.id} onChange={onChange} />

@@ -120,7 +120,7 @@ export function DraftTextField({
       onChange(next);
     };
     // UX-041, UX-074: list fields say one per line; other text areas show their own note.
-    const hint = field.kind === "list-items" ? "One per line." : field.message;
+    const hint = field.message ?? (field.kind === "list-items" ? "One per line." : undefined);
     return (
       <div className="emvb-field-group" data-emvb-field={field.key}>
         <label className="emvb-field-label" htmlFor={areaId}>
