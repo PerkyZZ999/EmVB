@@ -35301,6 +35301,26 @@
         "UX-028"
       ],
       "expect": "\\(fail\\).*UX-028"
+    },
+    {
+      "id": "UX-029/badge-only",
+      "requirement": "UX-029",
+      "description": "Only the hidden JS badge says a tile adds a script",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "typeMayAddScript(tile.type) ? \"Adds a small script to the page\" : undefined",
+          "replace": "undefined"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/add-tile-script.test.tsx",
+        "-t",
+        "UX-029"
+      ],
+      "expect": "\\(fail\\).*UX-029"
     }
   ]
 }

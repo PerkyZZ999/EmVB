@@ -91,6 +91,10 @@ export function AddPanel({
                       type="button"
                       className="emvb-element-tile"
                       data-emvb-add-tile={tile.type}
+                      // UX-029: the JS badge is drawn for sighted users; this says the same aloud.
+                      aria-description={
+                        typeMayAddScript(tile.type) ? "Adds a small script to the page" : undefined
+                      }
                       draggable
                       onDragStart={(event) => {
                         event.dataTransfer.setData(NEW_ELEMENT_MIME, tile.type);
