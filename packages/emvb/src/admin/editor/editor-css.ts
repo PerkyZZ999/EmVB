@@ -62,7 +62,7 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-topbar-actions > * { flex: 0 0 auto !important; width: auto !important; max-width: none !important; }
 .emvb-save-status { display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); white-space: nowrap; }
 .emvb-danger-icon { color: var(--color-kumo-danger); }
-.emvb-link-button { border: 0; padding: 0; background: none; color: var(--text-color-kumo-default); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; justify-self: start; }
+.emvb-link-button { border: 0; padding: 0; background: none; color: var(--text-color-kumo-default); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; justify-self: start; align-self: flex-start; }
 .emvb-save-button, .emvb-publish-button { position: relative; }
 .emvb-styles-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; }
 /* UX-056: on the corner, ringed in the surface colour, so it no longer sits on the end of "draft". */

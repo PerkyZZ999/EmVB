@@ -94,6 +94,9 @@ export const FEATURE_CSS = `
 .emvb-tokens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
 .emvb-tokens-grid > label, .emvb-tokens-field { display: grid; gap: 4px; min-width: 0; }
 .emvb-tokens-fluid { display: flex !important; align-items: center; gap: 4px; font-size: 12px; }
+/* UX-057: Ratio and the small-screen size take the full row, so "Major third" and the label
+   "On small screens (px)" no longer truncate or wrap at the drawer's width. */
+.emvb-tokens-grid > [data-emvb-tokens-row="full"] { grid-column: 1 / -1; }
 .emvb-tokens-preview { margin: 8px 0; padding: 0; list-style: none; display: grid; grid-template-columns: max-content minmax(0, 1fr) auto; gap: 4px 8px; font-size: 12px; }
 .emvb-tokens-preview > li { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; min-height: 24px; }
 .emvb-tokens-preview > li > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

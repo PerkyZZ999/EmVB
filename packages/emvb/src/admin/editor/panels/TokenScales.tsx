@@ -99,7 +99,7 @@ export function TokenScales({
           />
         </label>
         {kind === "type" && (
-          <div className="emvb-tokens-field">
+          <div className="emvb-tokens-field" data-emvb-tokens-row="full">
             <span className="emvb-bind-label" id={`${id}-ratio`}>
               Ratio
             </span>
@@ -128,7 +128,7 @@ export function TokenScales({
           Fluid
         </label>
         {fluid && (
-          <label>
+          <label data-emvb-tokens-row="full">
             <span className="emvb-bind-label">On small screens (px)</span>
             <input
               className="emvb-native-input"

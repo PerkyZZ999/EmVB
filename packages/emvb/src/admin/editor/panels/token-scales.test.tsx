@@ -3,6 +3,8 @@ import { act } from "react";
 import { emptyDesign, SCALE_RATIOS, type DesignSystem } from "../../../core/index.ts";
 import { cleanup, mount } from "../../../../test/dom/mount.ts";
 import { pickOption } from "../../../../test/dom/select.ts";
+import { EDITOR_CSS } from "../editor-css.ts";
+import { FEATURE_CSS } from "../feature-css.ts";
 import { TokenScales } from "./TokenScales.tsx";
 
 afterEach(cleanup);
@@ -135,4 +137,16 @@ test("UX-032: each scale value carries its whole clamp() as a tooltip, since the
   const codes = [...document.querySelectorAll("[data-emvb-tokens-preview] code")];
   expect(codes.length > 0).toBe(true);
   expect(codes.every((code) => code.getAttribute("title") === code.textContent)).toBe(true);
+});
+
+test("UX-057: Ratio and the small-screen size take a full row, and link buttons sit at the start", async () => {
+  await mount(<TokenScales design={emptyDesign()} onSave={async () => true} />);
+  const full = [...document.querySelectorAll('[data-emvb-tokens-row="full"]')].map(
+    (row) => row.querySelector(".emvb-bind-label")?.textContent,
+  );
+  expect(full).toEqual(["Ratio", "On small screens (px)"]);
+  expect(FEATURE_CSS).toContain(
+    '.emvb-tokens-grid > [data-emvb-tokens-row="full"] { grid-column: 1 / -1; }',
+  );
+  expect(EDITOR_CSS).toMatch(/\.emvb-link-button \{[^}]*align-self: flex-start;/);
 });

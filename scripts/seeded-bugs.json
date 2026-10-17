@@ -32842,8 +32842,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/editor-css.ts",
-          "search": "cursor: pointer; justify-self: start; }",
-          "replace": "cursor: pointer; }"
+          "search": "cursor: pointer; justify-self: start; align-self: flex-start; }",
+          "replace": "cursor: pointer; align-self: flex-start; }"
         }
       ],
       "command": [
@@ -36237,6 +36237,46 @@
         "UX-056"
       ],
       "expect": "\\(fail\\).*UX-056"
+    },
+    {
+      "id": "UX-057/ratio-half",
+      "requirement": "UX-057",
+      "description": "Ratio goes back to a half-width cell that truncates",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TokenScales.tsx",
+          "search": "          <div className=\"emvb-tokens-field\" data-emvb-tokens-row=\"full\">\n",
+          "replace": "          <div className=\"emvb-tokens-field\">\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/token-scales.test.tsx",
+        "-t",
+        "UX-057"
+      ],
+      "expect": "\\(fail\\).*UX-057"
+    },
+    {
+      "id": "UX-057/link-centred",
+      "requirement": "UX-057",
+      "description": "Link buttons in flex columns stretch and centre their text again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "justify-self: start; align-self: flex-start; }",
+          "replace": "justify-self: start; }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/token-scales.test.tsx",
+        "-t",
+        "UX-057"
+      ],
+      "expect": "\\(fail\\).*UX-057"
     }
   ]
 }
