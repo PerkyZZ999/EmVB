@@ -440,3 +440,23 @@ describe("field definition changes (W-721)", () => {
     },
   );
 });
+
+const bindWrapClass = async (fetcher: Fetcher, mode: "list" | "manual") => {
+  await mount(<FormBindControl value="" fetcher={fetcher} onChange={() => undefined} />);
+  await flush();
+  return document.querySelector(`[data-emvb-form-bind="${mode}"]`)?.className ?? "missing";
+};
+
+test("UX-035: the form picker, its id field and the Forms link keep the panel's field rhythm", async () => {
+  const listed: Fetcher = async (path) =>
+    path.includes("/forms/list")
+      ? Response.json({ data: { items: [{ id: "01FORM", name: "Contact", slug: "contact" }] } })
+      : new Response("{}", { status: 404 });
+  expect(await bindWrapClass(listed, "list")).toBe("emvb-field-group");
+});
+
+test("UX-035: the manual form id and its note keep the panel's field rhythm", async () => {
+  const forbidden: Fetcher = async () =>
+    new Response(JSON.stringify({ error: { code: "FORBIDDEN", message: "no" } }), { status: 403 });
+  expect(await bindWrapClass(forbidden, "manual")).toBe("emvb-field-group");
+});

@@ -3768,7 +3768,7 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
         "Style"
       div data-orientation="horizontal" data-activation-direction="none" role="presentation"
   div.emvb-panel-body data-emvb-tab="content"
-    div data-emvb-form-bind="manual"
+    div.emvb-field-group data-emvb-form-bind="manual"
       div
         label id="id-2" for="id-3"
           span

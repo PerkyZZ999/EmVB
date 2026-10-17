@@ -52,7 +52,7 @@ export function FormBindControl({
     const known = capability.forms.some((form) => form.id === value);
     const placeholder = !known && value ? "Current id (not in list)" : "Choose a form…";
     return (
-      <div data-emvb-form-bind="list">
+      <div className="emvb-field-group" data-emvb-form-bind="list">
         <Select
           label="Form"
           className={FIELD}
@@ -89,7 +89,7 @@ export function FormBindControl({
   }
 
   return (
-    <div data-emvb-form-bind="manual">
+    <div className="emvb-field-group" data-emvb-form-bind="manual">
       <Input
         label="Form id"
         className={`${FIELD} emvb-mono`}

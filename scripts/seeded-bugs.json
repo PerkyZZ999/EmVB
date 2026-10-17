@@ -10081,8 +10081,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
-          "search": "      <div data-emvb-form-bind=\"list\">",
-          "replace": "      <div data-emvb-form-bind=\"list\">\n        <span data-emvb-form-bind=\"manual\" />"
+          "search": "      <div className=\"emvb-field-group\" data-emvb-form-bind=\"list\">",
+          "replace": "      <div className=\"emvb-field-group\" data-emvb-form-bind=\"list\">\n        <span data-emvb-form-bind=\"manual\" />"
         }
       ],
       "command": [
@@ -35481,6 +35481,46 @@
         "UX-034"
       ],
       "expect": "\\(fail\\).*UX-034"
+    },
+    {
+      "id": "UX-035/list-cramped",
+      "requirement": "UX-035",
+      "description": "The form picker and its id field touch again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
+          "search": "<div className=\"emvb-field-group\" data-emvb-form-bind=\"list\">",
+          "replace": "<div data-emvb-form-bind=\"list\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "UX-035"
+      ],
+      "expect": "\\(fail\\).*UX-035"
+    },
+    {
+      "id": "UX-035/manual-cramped",
+      "requirement": "UX-035",
+      "description": "The manual form id touches its note again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FormBindControl.tsx",
+          "search": "<div className=\"emvb-field-group\" data-emvb-form-bind=\"manual\">",
+          "replace": "<div data-emvb-form-bind=\"manual\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/form-bind.test.tsx",
+        "-t",
+        "UX-035"
+      ],
+      "expect": "\\(fail\\).*UX-035"
     }
   ]
 }
