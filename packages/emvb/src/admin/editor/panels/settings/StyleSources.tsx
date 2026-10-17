@@ -1,3 +1,4 @@
+import { CaretRightIcon } from "@phosphor-icons/react";
 import {
   traceStyle,
   type DesignSystem,
@@ -62,6 +63,8 @@ export function StyleSources({
           {keys.length === 0
             ? "nothing set"
             : `${keys.length} set${fromElsewhere > 0 ? `, ${fromElsewhere} inherited` : ""}`}
+          {/* UX-037: the flex summary drops the native marker, so draw the section caret. */}
+          <CaretRightIcon size={16} aria-hidden="true" className="emvb-sources-caret" />
         </span>
       </summary>
       {keys.length === 0 ? (

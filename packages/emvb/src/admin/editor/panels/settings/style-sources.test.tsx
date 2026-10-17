@@ -5,6 +5,7 @@ import {
   type LayoutNode,
 } from "../../../../core/index.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { FEATURE_CSS } from "../../feature-css.ts";
 import { sourceValue, StyleSources } from "./StyleSources.tsx";
 
 afterEach(cleanup);
@@ -64,4 +65,19 @@ describe("W-318 Where styles come from", () => {
     ).toBe("Brand blue");
     expect(sourceValue({ a: "x".repeat(60) }).endsWith("…")).toBe(true);
   });
+});
+
+test("UX-037: the summary shows a caret that turns when the list opens", async () => {
+  const root = await mount(
+    <StyleSources node={heading} design={design} device="desktop" state="normal" />,
+  );
+  const caret = root.querySelector("summary .emvb-sources-caret");
+  expect(caret?.getAttribute("aria-hidden") ?? "missing").toBe("true");
+  expect(FEATURE_CSS).toContain(
+    ".emvb-sources > summary::-webkit-details-marker { display: none; }",
+  );
+  expect(FEATURE_CSS).toContain(
+    ".emvb-sources[open] .emvb-sources-caret { transform: rotate(90deg); }",
+  );
+  expect(FEATURE_CSS).toContain(".emvb-sources > summary:focus-visible { outline: 2px solid");
 });

@@ -114,7 +114,12 @@ export const FEATURE_CSS = `
 .emvb-a11y-actions { display: flex; gap: 8px; justify-content: flex-end; }
 .emvb-sources { margin: 4px 0 8px; font-size: 12px; }
 .emvb-sources > summary { cursor: pointer; display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
-.emvb-sources-count { font-weight: 400; color: var(--text-color-kumo-subtle); }
+.emvb-sources-count { font-weight: 400; color: var(--text-color-kumo-subtle); display: inline-flex; align-items: center; gap: 8px; }
+.emvb-sources > summary { list-style: none; align-items: center; border-radius: 4px; }
+.emvb-sources > summary::-webkit-details-marker { display: none; }
+.emvb-sources > summary:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
+.emvb-sources-caret { color: var(--text-color-kumo-default); }
+.emvb-sources[open] .emvb-sources-caret { transform: rotate(90deg); }
 .emvb-sources ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .emvb-sources li { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; padding-left: 6px; border-left: 2px solid var(--color-kumo-line); }
 .emvb-sources li[data-kind="class"] { border-left-color: var(--color-kumo-info); }

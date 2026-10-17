@@ -173,6 +173,7 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -394,6 +395,7 @@ exports[`element panel markup (W-021, W-086 M16) toc renders the same content an
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -576,6 +578,7 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -756,6 +759,7 @@ exports[`element panel markup (W-021, W-086 M16) container renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -1012,6 +1016,7 @@ exports[`element panel markup (W-021, W-086 M16) layout-section renders the same
         "Where styles come from"
         span.emvb-sources-count
           "4 set"
+          svg.emvb-sources-caret aria-hidden="true"
       ul
         li data-emvb-source="paddingBottom" data-kind="local"
           span.emvb-sources-prop
@@ -1213,6 +1218,7 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-filled=""
@@ -1329,6 +1335,7 @@ exports[`element panel markup (W-021, W-086 M16) spacer renders the same content
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-filled=""
@@ -1450,6 +1457,7 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -1594,6 +1602,7 @@ exports[`element panel markup (W-021, W-086 M16) divider renders the same conten
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -1821,6 +1830,7 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -2059,6 +2069,7 @@ exports[`element panel markup (W-021, W-086 M16) label renders the same content 
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -2322,6 +2333,7 @@ exports[`element panel markup (W-021, W-086 M16) link renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -2600,6 +2612,7 @@ exports[`element panel markup (W-021, W-086 M16) button renders the same content
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -2840,6 +2853,7 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -3169,6 +3183,7 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -3438,6 +3453,7 @@ exports[`element panel markup (W-021, W-086 M16) icon renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-closed=""
@@ -3654,6 +3670,7 @@ exports[`element panel markup (W-021, W-086 M16) video renders the same content 
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -3864,6 +3881,7 @@ exports[`element panel markup (W-021, W-086 M16) form renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -4103,6 +4121,7 @@ exports[`element panel markup (W-021, W-086 M16) text-input renders the same con
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -4354,6 +4373,7 @@ exports[`element panel markup (W-021, W-086 M16) textarea renders the same conte
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -4605,6 +4625,7 @@ exports[`element panel markup (W-021, W-086 M16) select renders the same content
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -4851,6 +4872,7 @@ exports[`element panel markup (W-021, W-086 M16) checkbox renders the same conte
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -5080,6 +5102,7 @@ exports[`element panel markup (W-021, W-086 M16) radio renders the same content 
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -5301,6 +5324,7 @@ exports[`element panel markup (W-021, W-086 M16) submit renders the same content
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -5539,6 +5563,7 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -5710,6 +5735,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -5876,6 +5902,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -6047,6 +6074,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -6213,6 +6241,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -6437,6 +6466,7 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -6666,6 +6696,7 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -6837,6 +6868,7 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -7003,6 +7035,7 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -7174,6 +7207,7 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -7340,6 +7374,7 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -7631,6 +7666,7 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -7816,6 +7852,7 @@ exports[`element panel markup (W-021, W-086 M16) loop-empty renders the same con
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -7996,6 +8033,7 @@ exports[`element panel markup (W-021, W-086 M16) loop-empty renders the same con
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -8281,6 +8319,7 @@ exports[`element panel markup (W-021, W-086 M16) pagination renders the same con
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -8519,6 +8558,7 @@ exports[`element panel markup (W-021, W-086 M16) section renders the same conten
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -8704,6 +8744,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -8873,6 +8914,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -9049,6 +9091,7 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
         "Where styles come from"
         span.emvb-sources-count
           "3 set"
+          svg.emvb-sources-caret aria-hidden="true"
       ul
         li data-emvb-source="flexDirection" data-kind="local"
           span.emvb-sources-prop
@@ -9251,6 +9294,7 @@ exports[`element panel markup (W-021, W-086 M16) flexbox renders the same conten
         "Where styles come from"
         span.emvb-sources-count
           "3 set"
+          svg.emvb-sources-caret aria-hidden="true"
       ul
         li data-emvb-source="flexDirection" data-kind="local"
           span.emvb-sources-prop
@@ -9554,6 +9598,7 @@ exports[`element panel markup (W-021, W-086 M16) grid renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -9805,6 +9850,7 @@ exports[`element panel markup (W-021, W-086 M16) svg renders the same content an
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -10070,6 +10116,7 @@ exports[`element panel markup (W-021, W-086 M16) tabs renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -10307,6 +10354,7 @@ exports[`element panel markup (W-021, W-086 M16) tab-panel renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -10579,6 +10627,7 @@ exports[`element panel markup (W-021, W-086 M16) accordion renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -10824,6 +10873,7 @@ exports[`element panel markup (W-021, W-086 M16) accordion-item renders the same
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -11061,6 +11111,7 @@ exports[`element panel markup (W-021, W-086 M16) menu renders the same content a
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -11348,6 +11399,7 @@ exports[`element panel markup (W-021, W-086 M16) menu-item renders the same cont
         "Where styles come from"
         span.emvb-sources-count
           "nothing set"
+          svg.emvb-sources-caret aria-hidden="true"
       p.emvb-helper
         "No styles apply yet beyond the element's defaults."
     div data-open=""
@@ -11510,6 +11562,7 @@ exports[`element panel markup (W-021, W-086 M16) closed sections count the prope
         "Where styles come from"
         span.emvb-sources-count
           "4 set"
+          svg.emvb-sources-caret aria-hidden="true"
       ul
         li data-emvb-source="fontSize" data-kind="local"
           span.emvb-sources-prop

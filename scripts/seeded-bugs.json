@@ -35561,6 +35561,46 @@
         "UX-036"
       ],
       "expect": "\\(fail\\).*UX-036"
+    },
+    {
+      "id": "UX-037/no-caret",
+      "requirement": "UX-037",
+      "description": "The style sources summary loses its caret",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleSources.tsx",
+          "search": "          <CaretRightIcon size={16} aria-hidden=\"true\" className=\"emvb-sources-caret\" />\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sources.test.tsx",
+        "-t",
+        "UX-037"
+      ],
+      "expect": "\\(fail\\).*UX-037"
+    },
+    {
+      "id": "UX-037/caret-never-turns",
+      "requirement": "UX-037",
+      "description": "The caret stays pointing right when the list is open",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-sources[open] .emvb-sources-caret { transform: rotate(90deg); }",
+          "replace": ".emvb-sources[open] .emvb-sources-caret { }"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/style-sources.test.tsx",
+        "-t",
+        "UX-037"
+      ],
+      "expect": "\\(fail\\).*UX-037"
     }
   ]
 }
