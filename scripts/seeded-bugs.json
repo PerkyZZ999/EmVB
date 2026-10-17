@@ -35689,6 +35689,46 @@
         "UX-040"
       ],
       "expect": "\\(fail\\).*UX-040"
+    },
+    {
+      "id": "UX-041/no-hint",
+      "requirement": "UX-041",
+      "description": "A list field no longer says one per line",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "            One per line.\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-041"
+      ],
+      "expect": "\\(fail\\).*UX-041"
+    },
+    {
+      "id": "UX-041/hint-not-described",
+      "requirement": "UX-041",
+      "description": "The note isn't tied to the text area for screen readers",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "field.kind === \"list-items\" ? `${areaId}-hint` : \"\"",
+          "replace": "\"\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "UX-041"
+      ],
+      "expect": "\\(fail\\).*UX-041"
     }
   ]
 }

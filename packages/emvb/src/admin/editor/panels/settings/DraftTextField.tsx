@@ -128,7 +128,11 @@ export function DraftTextField({
           className={`${FIELD} emvb-textarea`}
           rows={field.kind === "list-items" ? 4 : 5}
           aria-invalid={error ? true : undefined}
-          aria-describedby={error ? `${areaId}-error` : undefined}
+          aria-describedby={
+            [field.kind === "list-items" ? `${areaId}-hint` : "", error ? `${areaId}-error` : ""]
+              .filter(Boolean)
+              .join(" ") || undefined
+          }
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={() => {
@@ -136,6 +140,12 @@ export function DraftTextField({
             else onChange(withProp(node, field.key, draft));
           }}
         />
+        {/* UX-041: nothing else said each line becomes one item. */}
+        {field.kind === "list-items" && (
+          <span className="emvb-helper" id={`${areaId}-hint`} data-emvb-field-hint="">
+            One per line.
+          </span>
+        )}
         {error && (
           <span className="emvb-helper" id={`${areaId}-error`} data-emvb-field-error="">
             {error}

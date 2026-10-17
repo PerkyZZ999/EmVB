@@ -218,3 +218,14 @@ describe("a required text field emptied or overlong is not stored (W-192)", () =
     expect(sent).toEqual([{ summary: "Q2" }]);
   });
 });
+
+test("UX-041: a list field says one per line and ties the note to its text area", async () => {
+  const field: FieldDescriptor = { key: "items", kind: "list-items", label: "Items" };
+  const node = { id: "list0001", type: "list", props: { items: ["One"] } } as LayoutNode;
+  const host = await mount(<DraftTextField field={field} node={node} onChange={() => undefined} />);
+  const listArea = host.querySelector("textarea");
+  const hintId = listArea?.getAttribute("aria-describedby") ?? "";
+  expect(hintId === "" ? "no description" : document.getElementById(hintId)?.textContent).toBe(
+    "One per line.",
+  );
+});
