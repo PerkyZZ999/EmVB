@@ -144,4 +144,7 @@ export const FEATURE_CSS = `
 .emvb-recipe-desc { font-size: 12px; color: var(--text-color-kumo-subtle); }
 .emvb-motion-effect { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; align-items: end; }
 .emvb-motion-name { grid-column: 1 / -1; font-size: 12px; font-weight: 600; }
+/* UX-092: the fixed theme part type, its label and value on one line */
+.emvb-part-type { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0; }
+.emvb-part-type-value { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--text-color-kumo-default); }
 `;

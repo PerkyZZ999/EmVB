@@ -160,8 +160,8 @@ describe("page settings (W-091)", () => {
 describe("theme part settings (W-091)", () => {
   test("a popup shows its type, sends title changes, and has Triggers", async () => {
     const view = await settings({ ...PAGE, title: "Offer", partType: "popup" }, "theme-part");
-    expect(view.field("Type")?.value).toBe("Popup");
-    expect(view.field("Type")?.disabled).toBe(true);
+    expect(view.host.querySelector(".emvb-part-type-value")?.textContent).toBe("Popup");
+    expect(view.host.querySelectorAll("[data-emvb-part-type] input").length).toBe(0);
     await view.type("Title", "Spring offer");
     expect(view.sent).toEqual([{ title: "Spring offer" }]);
     expect(view.host.querySelector('[data-emvb-panel="triggers"]')).not.toBeNull();
@@ -177,7 +177,7 @@ describe("theme part settings (W-091)", () => {
       },
       "theme-part",
     );
-    expect(view.field("Type")?.value).toBe("Float");
+    expect(view.host.querySelector(".emvb-part-type-value")?.textContent).toBe("Float");
     expect(view.host.querySelector('[data-emvb-panel="float"]') !== null).toBe(true);
     expect(view.host.querySelector('[data-emvb-panel="triggers"]') !== null).toBe(false);
     expect(view.host.textContent?.includes("Top bar")).toBe(true);
@@ -186,7 +186,7 @@ describe("theme part settings (W-091)", () => {
 
   test("a footer has conditions but no Triggers", async () => {
     const view = await settings({ ...PAGE, partType: "footer" }, "theme-part");
-    expect(view.field("Type")?.value).toBe("Footer");
+    expect(view.host.querySelector(".emvb-part-type-value")?.textContent).toBe("Footer");
     expect(view.host.querySelector('[data-emvb-panel="triggers"]')).toBeNull();
     expect(view.host.querySelector('[data-emvb-panel="conditions"]')).not.toBeNull();
   });
@@ -258,4 +258,19 @@ test("UX-061: a Float's Place select is described by its note", async () => {
   expect(note?.textContent ?? "not described").toBe(
     "A bar stays on that edge and leaves room for the page. A corner sits over the page.",
   );
+});
+
+test("UX-092: a theme part's type reads as plain text, not a field that ignores typing", async () => {
+  await mount(
+    <PageSettings
+      page={{ ...PAGE, partType: "footer" }}
+      slugError={null}
+      kind="theme-part"
+      onChange={() => undefined}
+    />,
+  );
+  const type = document.querySelector("[data-emvb-part-type]");
+  expect(type?.querySelector(".emvb-part-type-value")?.textContent ?? "no type").toBe("Footer");
+  expect(type?.querySelectorAll("input").length ?? "no type").toBe(0);
+  expect(type?.textContent ?? "").toContain("Chosen when the part was created.");
 });

@@ -37247,6 +37247,26 @@
         "UX-091"
       ],
       "expect": "\\(fail\\).*UX-091"
+    },
+    {
+      "id": "UX-092/type-as-dead-input",
+      "requirement": "UX-092",
+      "description": "The theme part type goes back to a disabled input.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "            <span className=\"emvb-part-type-value\">\n              {THEME_PART_TYPE_LABELS[page.partType ?? \"header\"]}\n            </span>",
+          "replace": "            <input\n              className=\"emvb-part-type-value\"\n              disabled\n              value={THEME_PART_TYPE_LABELS[page.partType ?? \"header\"]}\n            />"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx",
+        "-t",
+        "UX-092"
+      ],
+      "expect": "\\(fail\\).*UX-092"
     }
   ]
 }

@@ -61,13 +61,16 @@ export function PageSettings({
           value={page.title}
           onChange={(event) => onChange({ title: event.target.value })}
         />
-        <Input
-          label="Type"
-          className={FIELD}
-          value={THEME_PART_TYPE_LABELS[page.partType ?? "header"]}
-          disabled
-          description="Chosen when the part was created."
-        />
+        {/* UX-092: the type is fixed, so it reads as a fact, not a field that won't take input. */}
+        <div className="emvb-field-group" data-emvb-part-type="">
+          <p className="emvb-part-type">
+            <span className="emvb-field-label">Type</span>
+            <span className="emvb-part-type-value">
+              {THEME_PART_TYPE_LABELS[page.partType ?? "header"]}
+            </span>
+          </p>
+          <p className="emvb-helper">Chosen when the part was created.</p>
+        </div>
         {ITEM_PART_USE[page.partType ?? "header"] ? (
           // UX-061: item parts never match a page location, so conditions would change nothing.
           <p className="emvb-helper" data-emvb-item-part-note="">
