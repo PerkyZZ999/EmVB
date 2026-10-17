@@ -35729,6 +35729,46 @@
         "UX-041"
       ],
       "expect": "\\(fail\\).*UX-041"
+    },
+    {
+      "id": "UX-042/switch-not-described",
+      "requirement": "UX-042",
+      "description": "The hint isn't tied to its switch",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "          aria-describedby={hint ? hintId : undefined}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx",
+        "-t",
+        "UX-042"
+      ],
+      "expect": "\\(fail\\).*UX-042"
+    },
+    {
+      "id": "UX-042/priority-unexplained",
+      "requirement": "UX-042",
+      "description": "Load right away has no explanation again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
+          "search": "  \"image.priority\": \"For the first large image on the page. Others load as they scroll into view.\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx",
+        "-t",
+        "UX-042"
+      ],
+      "expect": "\\(fail\\).*UX-042"
     }
   ]
 }

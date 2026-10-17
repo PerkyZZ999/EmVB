@@ -98,6 +98,7 @@ export const EDITOR_CSS = `${UI_CSS}
 @keyframes emvb-drawer-enter { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
 .emvb-site-styles { animation: emvb-drawer-enter 200ms cubic-bezier(0, 0, 0.2, 1); }
 .emvb-field-group, .emvb-new-variable { gap: 8px; }
+.emvb-field-group > .emvb-switch-hint { margin-top: -6px; padding-left: 44px; }
 .emvb-new-variable-status { min-height: 16px; }
 .emvb-variable-value-feedback { min-height: 32px; }
 .emvb-query-style, .emvb-query-add { display: flex; flex-direction: column; gap: 6px; }

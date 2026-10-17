@@ -128,13 +128,21 @@ export function FieldControl({
   }
 
   if (field.kind === "boolean") {
+    const hint = SWITCH_HINTS[`${node.type}.${field.key}`];
+    const hintId = `${node.id}-${field.key}-hint`;
     return (
       <div className="emvb-field-group" data-emvb-field={field.key}>
         <Switch
           label={field.label}
           checked={Boolean(raw)}
+          aria-describedby={hint ? hintId : undefined}
           onCheckedChange={(checked) => onChange(withProp(node, field.key, checked || undefined))}
         />
+        {hint && (
+          <span className="emvb-helper emvb-switch-hint" id={hintId} data-emvb-field-hint="">
+            {hint}
+          </span>
+        )}
       </div>
     );
   }
@@ -180,6 +188,12 @@ export function FieldControl({
 
   return <DraftTextField field={field} node={node} onChange={onChange} />;
 }
+
+/** UX-042: switches whose label alone doesn't say when to turn them on. */
+const SWITCH_HINTS: Readonly<Record<string, string>> = {
+  "image.decorative": "For images that add nothing to the text. Screen readers skip them.",
+  "image.priority": "For the first large image on the page. Others load as they scroll into view.",
+};
 
 const DEVICE_NAMES = { tablet: "tablet", mobile: "mobile" } as const;
 

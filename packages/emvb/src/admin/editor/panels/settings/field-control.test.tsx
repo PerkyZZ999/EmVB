@@ -219,3 +219,22 @@ describe("field-name recovery (W-720)", () => {
     expect(document.querySelector("[data-emvb-field-name-error]")?.textContent ?? null).toBeNull();
   });
 });
+
+test("UX-042: the Image switches say when to turn them on, and the switch is described by it", async () => {
+  const image = { id: "imag0001", type: "image", props: { src: "/a.jpg", alt: "A" } } as LayoutNode;
+  const described = async (key: string) => {
+    const field: FieldDescriptor = { key, kind: "boolean", label: key, optional: true };
+    const host = await mount(
+      <FieldControl field={field} node={image} onChange={() => undefined} />,
+    );
+    const id = host.querySelector('[role="switch"]')?.getAttribute("aria-describedby") ?? "";
+    return id ? (host.querySelector(`[id="${id}"]`)?.textContent ?? "missing") : "not described";
+  };
+  expect(await described("priority")).toBe(
+    "For the first large image on the page. Others load as they scroll into view.",
+  );
+  expect(await described("decorative")).toBe(
+    "For images that add nothing to the text. Screen readers skip them.",
+  );
+  expect(await described("newTab")).toBe("not described");
+});
