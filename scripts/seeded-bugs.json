@@ -36951,6 +36951,26 @@
         "UX-079"
       ],
       "expect": "\\(fail\\).*UX-079"
+    },
+    {
+      "id": "UX-080/raw-direction",
+      "requirement": "UX-080",
+      "description": "Text direction shows the raw value site again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/AdvancedFields.tsx",
+          "search": "      renderValue={(value: unknown) => DIR_NAMES[String(value)] ?? String(value)}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/query-style.test.tsx",
+        "-t",
+        "UX-080"
+      ],
+      "expect": "\\(fail\\).*UX-080"
     }
   ]
 }

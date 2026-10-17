@@ -88,6 +88,9 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-panel-title { margin: 0; font-size: 14px; line-height: 18px; font-weight: 600; }
 .emvb-panel-body, .emvb-field-group, .emvb-new-variable, .emvb-section-body { display: flex; flex-direction: column; gap: 10px; }
 .emvb-field-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: start; }
+/* UX-080: a native checkbox row (Query container) with room between box and label. */
+.emvb-check { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; font-size: 13px; cursor: pointer; }
+.emvb-check > input { width: 16px; height: 16px; margin: 0; }
 @keyframes emvb-panel-enter { from { opacity: 0; } to { opacity: 1; } }
 .emvb-left-panel > [data-emvb-panel],
 .emvb-panel-right [data-emvb-tab],

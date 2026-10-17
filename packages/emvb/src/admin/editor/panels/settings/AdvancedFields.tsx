@@ -49,6 +49,13 @@ export function HtmlIdField({
   );
 }
 
+const DIR_NAMES: Record<string, string> = {
+  site: "Site default",
+  ltr: "Left to right",
+  rtl: "Right to left",
+  auto: "Auto",
+};
+
 /** Text direction for this element only (W-341). Unset follows the site. */
 export function DirectionField({
   node,
@@ -63,6 +70,8 @@ export function DirectionField({
       className={FIELD}
       data-emvb-dir=""
       value={node.dir ?? "site"}
+      // UX-080: the trigger shows the option's name ("Site default"), not its value ("site").
+      renderValue={(value: unknown) => DIR_NAMES[String(value)] ?? String(value)}
       onValueChange={(value) => {
         const dir = value === "ltr" || value === "rtl" || value === "auto" ? value : undefined;
         onChange({ ...node, dir });

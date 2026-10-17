@@ -2,7 +2,8 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import type { LayoutNode } from "../../../../core/index.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
-import { ContainerQueryFields } from "./AdvancedFields.tsx";
+import { ContainerQueryFields, DirectionField } from "./AdvancedFields.tsx";
+import { EDITOR_CSS } from "../../editor-css.ts";
 import { formatStyleValue, parseStyleValue } from "./query-style.ts";
 import { pickOption } from "../../../../../test/dom/select.ts";
 
@@ -211,4 +212,12 @@ test("UX-079: container-query rows use the Style tab's names, not raw keys", asy
     (l) => l.textContent,
   );
   expect(labels).toEqual(["Direction", "Padding top"]);
+});
+
+test("UX-080: Text direction shows Site default, and the Query container box has room", async () => {
+  const host = await mount(<DirectionField node={box()} onChange={() => undefined} />);
+  expect(host.querySelector('[role="combobox"]')?.textContent?.trim() ?? "none").toBe(
+    "Site default",
+  );
+  expect(EDITOR_CSS).toMatch(/\.emvb-check \{[^}]*gap: 8px;/);
 });
