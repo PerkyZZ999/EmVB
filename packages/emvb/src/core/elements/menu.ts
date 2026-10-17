@@ -140,11 +140,12 @@ export const menuItem: ElementDefinition<MenuItemNode> = {
     group: "content",
     defaultTab: "content",
     fields: [
-      { key: "text", kind: "text", label: "Label" },
+      // UX-044: a menu item is a link, so its fields read like the Link and Button elements'.
+      { key: "text", kind: "text", label: "Text" },
       {
         key: "href",
         kind: "href",
-        label: "Link",
+        label: "URL",
         optional: true,
         message: "Use a full URL such as https://example.com or a path such as /pricing.",
       },

@@ -11269,12 +11269,12 @@ exports[`element panel markup (W-021, W-086 M16) menu-item renders the same cont
     div data-filled=""
       label id="id-2" for="id-3" data-filled=""
         span
-          "Label"
+          "Text"
       input.emvb-field id="id-3" data-emvb-field="text" value="Item" data-filled="" aria-labelledby="id-2"
     div data-filled=""
       label id="id-4" for="id-5" data-filled=""
         span
-          "Link"
+          "URL"
       input.emvb-field id="id-5" data-emvb-field="href" value="/" data-filled="" aria-labelledby="id-4"
     div.emvb-field-group data-emvb-field="newTab"
       div

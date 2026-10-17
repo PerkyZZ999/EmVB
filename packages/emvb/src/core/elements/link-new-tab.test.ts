@@ -37,3 +37,19 @@ test("W-684: every element's new-tab switch has the same label", async () => {
   labels.delete("Open link in a new tab");
   expect([...labels]).toEqual(["Open in a new tab"]);
 });
+
+test("UX-044: elements that are links name their fields Text and URL", async () => {
+  const { ELEMENTS } = await import("./index.ts");
+  const names = (type: string) => {
+    const { descriptor } = (ELEMENTS as Record<string, unknown>)[type] as {
+      descriptor: { fields: { key: string; label: string }[] };
+    };
+    const label = (key: string) => descriptor.fields.find((f) => f.key === key)?.label;
+    return `${type}: ${label("text")} / ${label("href")}`;
+  };
+  expect(["link", "button", "menu-item"].map(names)).toEqual([
+    "link: Text / URL",
+    "button: Text / URL",
+    "menu-item: Text / URL",
+  ]);
+});

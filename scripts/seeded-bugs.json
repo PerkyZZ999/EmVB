@@ -35809,6 +35809,26 @@
         "UX-043"
       ],
       "expect": "\\(fail\\).*UX-043"
+    },
+    {
+      "id": "UX-044/menu-item-label-link",
+      "requirement": "UX-044",
+      "description": "The Menu item's fields read Label and Link again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "      { key: \"text\", kind: \"text\", label: \"Text\" },\n      {\n        key: \"href\",\n        kind: \"href\",\n        label: \"URL\",",
+          "replace": "      { key: \"text\", kind: \"text\", label: \"Label\" },\n      {\n        key: \"href\",\n        kind: \"href\",\n        label: \"Link\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/link-new-tab.test.ts",
+        "-t",
+        "UX-044"
+      ],
+      "expect": "\\(fail\\).*UX-044"
     }
   ]
 }
