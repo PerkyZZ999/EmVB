@@ -27,6 +27,22 @@ import type { EditorAction, EditorState } from "./store.ts";
 const RESTORE_TIMEOUT_MS = 6000;
 const NOTICE_TIMEOUT_MS = 4000;
 
+/**
+ * UX-070: when an action removes the focused control (a deleted row, a closing toast), move focus
+ * to the selected layer, the Layers tree, or the canvas, instead of leaving it on the page body.
+ */
+function keepFocusInLayers(force = false) {
+  requestAnimationFrame(() => {
+    const active = document.activeElement;
+    if (!force && active && active !== document.body && active.isConnected) return;
+    (
+      document.querySelector<HTMLElement>('.emvb-layer-select[aria-current="true"]') ??
+      document.querySelector<HTMLElement>('[data-emvb-editor] [role="tree"]') ??
+      document.querySelector<HTMLElement>("iframe[data-emvb-canvas]")
+    )?.focus({ preventScroll: true });
+  });
+}
+
 /** Node actions on the layout tree: delete (with restore toast), duplicate, and add from the panel. */
 export function useNodeActions({
   state,
@@ -59,15 +75,7 @@ export function useNodeActions({
     const title = count > 1 ? `${count} elements deleted` : `${name} deleted`;
     dispatch({ type: "delete-node", id });
     // UX-070: the deleted row or canvas element took focus with it; keep the keyboard in Layers.
-    requestAnimationFrame(() => {
-      const active = document.activeElement;
-      if (active && active !== document.body && active.isConnected) return;
-      (
-        document.querySelector<HTMLElement>('.emvb-layer-select[aria-current="true"]') ??
-        document.querySelector<HTMLElement>('[data-emvb-editor] [role="tree"]') ??
-        document.querySelector<HTMLElement>("iframe[data-emvb-canvas]")
-      )?.focus({ preventScroll: true });
-    });
+    keepFocusInLayers();
     setDeleteAsk(null);
     if (lastToast.current) toasts.close(lastToast.current);
     const toastId: string = toasts.add({
@@ -80,6 +88,8 @@ export function useNodeActions({
           onClick: () => {
             dispatch({ type: "restore" });
             toasts.close(toastId);
+            // The toast is closing with focus in it; the restored element's row takes it.
+            keepFocusInLayers(true);
           },
         },
       ],

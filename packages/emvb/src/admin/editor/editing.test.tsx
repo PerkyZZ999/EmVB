@@ -318,8 +318,13 @@ describe("delete and restore (D-025)", () => {
     // UX-070: focus stays in Layers instead of dropping to the page.
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
     expect(document.activeElement === document.body ? "body" : "kept").toBe("kept");
+    // A real click focuses the toast's button first.
+    button("Restore")?.focus();
     await click(button("Restore"));
     expect(layerRow("Heading")?.getAttribute("aria-current")).toBe("true");
+    // UX-070: focus follows the restored element, not the closing toast.
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+    expect(document.activeElement === layerRow("Heading") ? "on row" : "elsewhere").toBe("on row");
     expect(editor()?.querySelector('[data-emvb-panel="element"]') !== null).toBe(true);
   });
 

@@ -36659,8 +36659,28 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
-          "search": "      if (active && active !== document.body && active.isConnected) return;\n",
-          "replace": "      return;\n"
+          "search": "    if (!force && active && active !== document.body && active.isConnected) return;\n",
+          "replace": "    if (!force) return;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "Delete removes the selected element"
+      ],
+      "expect": "\\(fail\\).*Delete removes the selected element"
+    },
+    {
+      "id": "UX-070/restore-drops-focus",
+      "requirement": "UX-070",
+      "description": "Restore leaves focus in the closing toast",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "            keepFocusInLayers(true);\n",
+          "replace": ""
         }
       ],
       "command": [
