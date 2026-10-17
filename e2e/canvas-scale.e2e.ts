@@ -111,7 +111,9 @@ test("Preview opens a Mobile or Tablet sized window, the main button at the canv
   // The main button previews the device on the canvas.
   await page.getByRole("tab", { name: "Mobile" }).click();
   const fromCanvas = await openFrom(() =>
-    overlay(page).getByRole("button", { name: "Preview", exact: true }).click(),
+    overlay(page)
+      .getByRole("button", { name: "Preview (opens in a new tab)", exact: true })
+      .click(),
   );
   expect(await fromCanvas.evaluate(() => window.innerWidth)).toBe(390);
   await fromCanvas.close();

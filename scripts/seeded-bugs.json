@@ -37011,6 +37011,26 @@
         "styles already live"
       ],
       "expect": "\\(fail\\).*styles already live"
+    },
+    {
+      "id": "UX-082/preview-silent-tab",
+      "requirement": "UX-082",
+      "description": "Preview doesn't say it opens a new tab",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "                <span className=\"emvb-sr-only\"> (opens in a new tab)</span>\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/top-bar.test.tsx",
+        "-t",
+        "each button calls its own action"
+      ],
+      "expect": "\\(fail\\).*each button calls its own action"
     }
   ]
 }

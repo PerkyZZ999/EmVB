@@ -191,6 +191,8 @@ export function TopBar({
                 onClick={() => onPreview()}
               >
                 Preview
+                {/* UX-082: the icon shows a new tab opens; screen readers hear it. */}
+                <span className="emvb-sr-only"> (opens in a new tab)</span>
               </Button>
               <DropdownMenu>
                 <DropdownMenu.Trigger>

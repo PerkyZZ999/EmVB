@@ -414,7 +414,7 @@ describe("Add panel and Layers (W-018)", () => {
     );
     await click(addTab);
     await click(document.querySelector('[data-emvb-add-tile="heading"]'));
-    expect(editor()?.querySelector(".emvb-sr-only")?.textContent).toBe(
+    expect(editor()?.querySelector(".emvb-sr-only[aria-live]")?.textContent).toBe(
       "Heading added inside Container",
     );
     await openLayers();
@@ -436,7 +436,7 @@ describe("Add panel and Layers (W-018)", () => {
     );
     await click(addTab);
     await click(document.querySelector('[data-emvb-add-tile="accordion-item"]'));
-    expect(editor()?.querySelector(".emvb-sr-only")?.textContent).toBe(
+    expect(editor()?.querySelector(".emvb-sr-only[aria-live]")?.textContent).toBe(
       "Accordion items can only go inside an Accordion.",
     );
     // The reason is also visible (the toast), not only in the screen-reader live region (W-170).

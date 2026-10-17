@@ -120,7 +120,7 @@ describe("top bar page and actions (W-091)", () => {
     await view.click("Exit");
     await view.click("Keyboard shortcuts");
     await view.click("Site styles");
-    await view.click("Preview");
+    await view.click("Preview (opens in a new tab)");
     await view.click("Save draft");
     await view.click("Publish");
     expect(view.calls).toEqual(["exit", "shortcuts", "site-styles", "preview", "save", "publish"]);
