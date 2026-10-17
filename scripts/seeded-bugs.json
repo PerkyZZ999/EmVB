@@ -35736,8 +35736,8 @@
       "description": "The hint isn't tied to its switch",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx",
-          "search": "          aria-describedby={hint ? hintId : undefined}\n",
+          "file": "packages/emvb/src/admin/editor/panels/settings/HintedSwitch.tsx",
+          "search": "        aria-describedby={hint ? hintId : undefined}\n",
           "replace": ""
         }
       ],
@@ -35869,6 +35869,26 @@
         "UX-045"
       ],
       "expect": "\\(fail\\).*UX-045"
+    },
+    {
+      "id": "UX-046/noindex-note-detached",
+      "requirement": "UX-046",
+      "description": "The noindex note is a loose paragraph again, not tied to its switch",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/PageSettings.tsx",
+          "search": "            hint=\"Search engines are asked not to list this page or follow its links (noindex, nofollow).\"\n            hintData={{ \"data-emvb-noindex-help\": \"\" }}\n          />",
+          "replace": "          />\n          <p className=\"emvb-helper\" data-emvb-noindex-help=\"\">\n            Search engines are asked not to list this page or follow its links (noindex, nofollow).\n          </p>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/page-settings.test.tsx",
+        "-t",
+        "UX-046"
+      ],
+      "expect": "\\(fail\\).*UX-046"
     }
   ]
 }

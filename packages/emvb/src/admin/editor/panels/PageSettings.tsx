@@ -1,4 +1,4 @@
-import { Button, Collapsible, Input, Select, Switch } from "@cloudflare/kumo";
+import { Button, Collapsible, Input, Select } from "@cloudflare/kumo";
 import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
@@ -13,6 +13,7 @@ import { canonicalProblem, type PageDraft } from "../../content-api.ts";
 import { BUTTON, FIELD } from "../../ui.ts";
 import type { PagePatch } from "../store.ts";
 import { ConditionsEditor } from "./ConditionsEditor.tsx";
+import { HintedSwitch } from "./settings/HintedSwitch.tsx";
 import { MediaPicker } from "./settings/MediaPicker.tsx";
 import { TriggersEditor } from "./TriggersEditor.tsx";
 
@@ -203,14 +204,13 @@ export function PageSettings({
               )}
             </div>
           )}
-          <Switch
+          <HintedSwitch
             label="Hide from search engines"
             checked={page.seoNoIndex === true}
-            onCheckedChange={(checked) => onChange({ seoNoIndex: checked === true })}
+            onCheckedChange={(checked) => onChange({ seoNoIndex: checked })}
+            hint="Search engines are asked not to list this page or follow its links (noindex, nofollow)."
+            hintData={{ "data-emvb-noindex-help": "" }}
           />
-          <p className="emvb-helper" data-emvb-noindex-help="">
-            Search engines are asked not to list this page or follow its links (noindex, nofollow).
-          </p>
         </Collapsible.Panel>
       </Collapsible.Root>
     </div>
@@ -255,14 +255,12 @@ function FloatSettingsFields({
       <p className="emvb-helper">
         A bar stays on that edge and leaves room for the page. A corner sits over the page.
       </p>
-      <Switch
+      <HintedSwitch
         label="Close button"
         checked={settings.dismiss}
-        onCheckedChange={(checked) => onChange({ ...settings, dismiss: checked === true })}
+        onCheckedChange={(checked) => onChange({ ...settings, dismiss: checked })}
+        hint="Closing hides it until the next visit. Nothing is stored in a cookie."
       />
-      <p className="emvb-helper">
-        Closing hides it until the next visit. Nothing is stored in a cookie.
-      </p>
     </div>
   );
 }

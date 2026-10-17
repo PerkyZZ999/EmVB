@@ -1,4 +1,4 @@
-import { Button, Select, Switch } from "@cloudflare/kumo";
+import { Button, Select } from "@cloudflare/kumo";
 import {
   FlipHorizontalIcon,
   FlipVerticalIcon,
@@ -11,6 +11,7 @@ import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { radioGroupKeys } from "./ChoiceGroup.tsx";
 import { NumberField, ResetButton, type NumberSpec } from "./NumberRow.tsx";
+import { HintedSwitch } from "./HintedSwitch.tsx";
 
 /** W-237: the Icon section's own controls (glyph rotation, flip, drop shadow, loop). */
 
@@ -309,14 +310,17 @@ export function IconSingleColorRow({
   onChange: (next: boolean) => void;
 }) {
   return (
-    <div className="emvb-field-group" data-emvb-icon-single-color="">
-      <Switch label="Force single color" checked={checked} onCheckedChange={onChange} />
-      <p className="emvb-helper">
-        {checked
+    <HintedSwitch
+      label="Force single color"
+      checked={checked}
+      onCheckedChange={onChange}
+      data={{ "data-emvb-icon-single-color": "" }}
+      hint={
+        checked
           ? "Every part of this SVG uses the icon color, so details drawn over filled shapes can disappear."
-          : "This SVG keeps its own colors. Turn on to paint it in the icon color."}
-      </p>
-    </div>
+          : "This SVG keeps its own colors. Turn on to paint it in the icon color."
+      }
+    />
   );
 }
 

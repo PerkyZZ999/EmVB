@@ -1,11 +1,12 @@
 import * as React from "react";
-import { Select, Switch } from "@cloudflare/kumo";
+import { Select } from "@cloudflare/kumo";
 import type { FieldDescriptor, LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
 import { DraftTextField } from "./DraftTextField.tsx";
 import { FieldBindControl } from "./FieldBindControl.tsx";
 import { FormBindControl } from "./FormBindControl.tsx";
+import { HintedSwitch } from "./HintedSwitch.tsx";
 import { RequiredFieldsNotice } from "./RequiredFieldsNotice.tsx";
 import { LoopItemBindControl } from "./LoopItemBindControl.tsx";
 import { IconPicker } from "./IconPicker.tsx";
@@ -128,22 +129,15 @@ export function FieldControl({
   }
 
   if (field.kind === "boolean") {
-    const hint = SWITCH_HINTS[`${node.type}.${field.key}`];
-    const hintId = `${node.id}-${field.key}-hint`;
     return (
-      <div className="emvb-field-group" data-emvb-field={field.key}>
-        <Switch
-          label={field.label}
-          checked={Boolean(raw)}
-          aria-describedby={hint ? hintId : undefined}
-          onCheckedChange={(checked) => onChange(withProp(node, field.key, checked || undefined))}
-        />
-        {hint && (
-          <span className="emvb-helper emvb-switch-hint" id={hintId} data-emvb-field-hint="">
-            {hint}
-          </span>
-        )}
-      </div>
+      <HintedSwitch
+        label={field.label}
+        checked={Boolean(raw)}
+        onCheckedChange={(checked) => onChange(withProp(node, field.key, checked || undefined))}
+        hint={SWITCH_HINTS[`${node.type}.${field.key}`]}
+        data={{ "data-emvb-field": field.key }}
+        hintData={{ "data-emvb-field-hint": "" }}
+      />
     );
   }
 

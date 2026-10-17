@@ -233,3 +233,12 @@ describe("switching between page and theme-part settings (W-092)", () => {
     expect(metaTitleShown()).toBe(true);
   });
 });
+
+test("UX-046: Hide from search engines is described by its note, which lines up with the label", async () => {
+  const view = await settings(PAGE);
+  await view.openSeo();
+  const toggle = view.host.querySelector('[role="switch"]');
+  const note = view.host.querySelector("[data-emvb-noindex-help]");
+  expect(toggle?.getAttribute("aria-describedby") ?? "none").toBe(note?.id ?? "no note");
+  expect(note?.classList.contains("emvb-switch-hint") ?? false).toBe(true);
+});
