@@ -4,7 +4,7 @@ import type { Fetcher } from "../api.ts";
 import { slugTakenMessage } from "../editor/useSave.ts";
 import { NewPageDialog } from "./NewPageDialog.tsx";
 import { NewThemePartDialog } from "./NewThemePartDialog.tsx";
-import { cleanup, mount } from "../../../test/dom/mount.ts";
+import { cleanup, mount, rerender } from "../../../test/dom/mount.ts";
 
 afterEach(cleanup);
 
@@ -194,4 +194,24 @@ test("NewThemePartDialog: choosing another type re-derives an untouched slug", a
     await new Promise((resolve) => setTimeout(resolve, 10));
   });
   expect((input("Slug") as HTMLInputElement).value).toBe("footer-main");
+});
+
+test("UX-055: New theme part starts on the type of the filter it was opened from", async () => {
+  const fetcher: Fetcher = async () => new Response("{}", { status: 404 });
+  const dialog = (open: boolean, startOn: "header" | "footer") => (
+    <NewThemePartDialog
+      fetcher={fetcher}
+      open={open}
+      onOpenChange={() => undefined}
+      defaultType={startOn}
+    />
+  );
+  // Opened once from Headers, closed, then opened again from the Footers filter.
+  await mount(dialog(true, "header"));
+  await rerender(dialog(false, "header"));
+  await rerender(dialog(true, "footer"));
+  const shown = [...document.querySelectorAll('[role="combobox"]')].map((c) =>
+    c.textContent?.trim(),
+  );
+  expect(shown).toEqual(["Footer"]);
 });

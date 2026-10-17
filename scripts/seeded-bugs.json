@@ -36197,6 +36197,26 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-054"],
       "expect": "\\(fail\\).*UX-054"
+    },
+    {
+      "id": "UX-055/always-header",
+      "requirement": "UX-055",
+      "description": "Reopening New theme part keeps the last type instead of the filter's",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/NewThemePartDialog.tsx",
+          "search": "    if (open) setPartType(defaultType);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/create-dialogs.test.tsx",
+        "-t",
+        "UX-055"
+      ],
+      "expect": "\\(fail\\).*UX-055"
     }
   ]
 }

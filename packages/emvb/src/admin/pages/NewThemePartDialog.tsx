@@ -18,12 +18,20 @@ export function NewThemePartDialog({
   fetcher,
   open,
   onOpenChange,
+  defaultType = "header",
 }: {
   fetcher: Fetcher;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** UX-055: opened from a type's filter, the dialog starts on that type. */
+  defaultType?: ThemePartType;
 }) {
-  const [partType, setPartType] = React.useState<ThemePartType>("header");
+  const [partType, setPartType] = React.useState<ThemePartType>(defaultType);
+  const [wasOpen, setWasOpen] = React.useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setPartType(defaultType);
+  }
   return (
     <CreateDialog
       name="new-theme-part"

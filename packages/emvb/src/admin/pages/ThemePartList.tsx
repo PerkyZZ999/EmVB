@@ -230,7 +230,12 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
           )}
         </div>
       )}
-      <NewThemePartDialog fetcher={fetcher} open={creating} onOpenChange={setCreating} />
+      <NewThemePartDialog
+        fetcher={fetcher}
+        open={creating}
+        onOpenChange={setCreating}
+        defaultType={filter === "all" ? undefined : filter}
+      />
     </>
   );
 }
