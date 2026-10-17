@@ -1,6 +1,8 @@
 import { Button, createKumoToastManager, Empty } from "@cloudflare/kumo";
 import {
   ArrowsClockwiseIcon,
+  ArrowUUpLeftIcon,
+  ArrowUUpRightIcon,
   ClockCounterClockwiseIcon,
   GaugeIcon,
   RobotIcon,
@@ -394,6 +396,29 @@ function EditorApp({
               onRevert={() => chrome.open("revert")}
               tools={
                 <>
+                  {/* UX-084: undo and redo were keyboard-only; toasts already say "Undo takes it back". */}
+                  <Button
+                    variant="ghost"
+                    shape="square"
+                    className="emvb-icon-btn"
+                    aria-label="Undo"
+                    title="Undo (Ctrl/Cmd+Z)"
+                    data-emvb-undo=""
+                    disabled={history.past.length === 0}
+                    icon={<ArrowUUpLeftIcon aria-hidden="true" />}
+                    onClick={() => dispatch({ type: "undo" })}
+                  />
+                  <Button
+                    variant="ghost"
+                    shape="square"
+                    className="emvb-icon-btn"
+                    aria-label="Redo"
+                    title="Redo (Ctrl/Cmd+Shift+Z)"
+                    data-emvb-redo=""
+                    disabled={history.future.length === 0}
+                    icon={<ArrowUUpRightIcon aria-hidden="true" />}
+                    onClick={() => dispatch({ type: "redo" })}
+                  />
                   <A11yScoreButton report={a11y} onOpen={() => chrome.open("a11y")} />
                   <Button
                     variant="ghost"

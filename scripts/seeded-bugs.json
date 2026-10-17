@@ -37051,6 +37051,46 @@
         "UX-083"
       ],
       "expect": "\\(fail\\).*UX-083"
+    },
+    {
+      "id": "UX-084/undo-always-off",
+      "requirement": "UX-084",
+      "description": "The Undo button never enables",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "                    disabled={history.past.length === 0}\n",
+          "replace": "                    disabled\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "UX-084"
+      ],
+      "expect": "\\(fail\\).*UX-084"
+    },
+    {
+      "id": "UX-084/redo-dead",
+      "requirement": "UX-084",
+      "description": "The Redo button does nothing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "                    onClick={() => dispatch({ type: \"redo\" })}\n",
+          "replace": "                    onClick={() => undefined}\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "UX-084"
+      ],
+      "expect": "\\(fail\\).*UX-084"
     }
   ]
 }

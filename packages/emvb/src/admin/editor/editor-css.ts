@@ -61,6 +61,11 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-topbar-actions { gap: 8px; margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--color-kumo-hairline); flex-shrink: 0; }
 .emvb-topbar-actions > * { flex: 0 0 auto !important; width: auto !important; max-width: none !important; }
 .emvb-save-status { display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); white-space: nowrap; }
+/* UX-084: below 1280 px the page title needs the room; Save draft's dot already shows unsaved
+   changes, so routine status stays for screen readers only. Errors always show. */
+@media (max-width: 1279px) {
+  .emvb-save-status:not([data-emvb-save="error"]) { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+}
 .emvb-danger-icon { color: var(--color-kumo-danger); }
 .emvb-link-button { border: 0; padding: 0; background: none; color: var(--text-color-kumo-default); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; justify-self: start; align-self: flex-start; }
 .emvb-save-button, .emvb-publish-button { position: relative; }

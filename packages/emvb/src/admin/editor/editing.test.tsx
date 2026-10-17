@@ -632,3 +632,21 @@ describe("keyboard and quick actions (W-020)", () => {
     expect(document.body.textContent).toContain("2 elements deleted");
   });
 });
+
+test("UX-084: Undo and Redo buttons follow the history and undo a delete", async () => {
+  const { fetcher } = fakeServer();
+  await render(fetcher);
+  const undo = () => editor()?.querySelector<HTMLButtonElement>("[data-emvb-undo]");
+  const redo = () => editor()?.querySelector<HTMLButtonElement>("[data-emvb-redo]");
+  expect([undo()?.disabled, redo()?.disabled]).toEqual([true, true]);
+  await openLayers();
+  await click(layerRow("Heading"));
+  await press("Delete");
+  expect(layerRow("Heading")?.outerHTML).toBeUndefined();
+  expect(undo()?.disabled).toBe(false);
+  await click(undo());
+  expect(layerRow("Heading") === undefined ? "gone" : "back").toBe("back");
+  expect(redo()?.disabled).toBe(false);
+  await click(redo());
+  expect(layerRow("Heading")?.outerHTML).toBeUndefined();
+});
