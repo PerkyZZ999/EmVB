@@ -36109,6 +36109,46 @@
         "UX-051"
       ],
       "expect": "\\(fail\\).*UX-051"
+    },
+    {
+      "id": "UX-052/flat-indent",
+      "requirement": "UX-052",
+      "description": "Every level indents 12 px again, crushing deep names",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "  8 + 12 * Math.min(depth, 4) + 6 * Math.max(0, depth - 4);",
+          "replace": "  8 + 12 * depth;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx",
+        "-t",
+        "UX-052"
+      ],
+      "expect": "\\(fail\\).*UX-052"
+    },
+    {
+      "id": "UX-052/rows-ignore-indent",
+      "requirement": "UX-052",
+      "description": "Rows go back to a flat 12 px step",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
+          "search": "        style={{ paddingLeft: layerIndent(depth) }}",
+          "replace": "        style={{ paddingLeft: 8 + depth * 12 }}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/layers-panel.test.tsx",
+        "-t",
+        "UX-052"
+      ],
+      "expect": "\\(fail\\).*UX-052"
     }
   ]
 }

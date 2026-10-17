@@ -3,7 +3,7 @@ import * as React from "react";
 import { act } from "react";
 import type { Layout, LayoutNode } from "../../../core/index.ts";
 import { EXISTING_ELEMENT_MIME } from "../dnd/drop-target.ts";
-import { LayersPanel, layerPreview } from "./LayersPanel.tsx";
+import { LayersPanel, layerPreview, layerIndent } from "./LayersPanel.tsx";
 import type { ClipboardActions } from "../useClipboardActions.ts";
 import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
 
@@ -631,4 +631,28 @@ describe("renaming a layer (W-157)", () => {
     expect(field()).toBeNull();
     expect(document.activeElement === select("head0002")).toBe(true);
   });
+});
+
+test("UX-052: Layers indent 12 px for four levels, then 6 px, so deep rows keep their names", () => {
+  expect([0, 1, 4, 5, 10].map(layerIndent)).toEqual([8, 20, 56, 62, 92]);
+});
+
+test("UX-052: a row six levels deep is indented by layerIndent", async () => {
+  let deep: LayoutNode = { id: "head0009", type: "heading", props: { text: "Deep", level: 2 } };
+  for (let i = 5; i >= 1; i -= 1)
+    deep = { id: `deep000${i}`, type: "container", props: {}, children: [deep] } as LayoutNode;
+  await mountTree(
+    <LayersPanel
+      layout={{ ...layout, root: { ...layout.root, children: [deep] } }}
+      selectedId={null}
+      onSelect={() => undefined}
+      onDuplicate={() => undefined}
+      onMoveUp={() => undefined}
+      onMoveDown={() => undefined}
+      onDelete={() => undefined}
+    />,
+  );
+  const row = document.querySelector<HTMLElement>('[data-emvb-layer="head0009"]');
+  expect(row?.style.paddingLeft ?? "no row").toBe(`${layerIndent(6)}px`);
+  expect(layerIndent(6)).toBe(68);
 });

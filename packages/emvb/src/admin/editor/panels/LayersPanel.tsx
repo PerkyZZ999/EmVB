@@ -23,6 +23,13 @@ import { dragStash } from "../dnd/drag-stash.ts";
 import { StateDot } from "./settings/StateSwitcher.tsx";
 import type { ClipboardActions } from "../useClipboardActions.ts";
 
+/**
+ * UX-052: 12 px per level for the first four levels, then 6 px, so a row ten levels deep still
+ * shows its name in the 256 px panel instead of "H…".
+ */
+export const layerIndent = (depth: number): number =>
+  8 + 12 * Math.min(depth, 4) + 6 * Math.max(0, depth - 4);
+
 const rows = (
   node: LayoutNode,
   depth: number,
@@ -434,7 +441,7 @@ const LayerRow = React.memo(function LayerRow({
       <div
         className="emvb-layer-row"
         data-emvb-layer={node.id}
-        style={{ paddingLeft: 8 + depth * 12 }}
+        style={{ paddingLeft: layerIndent(depth) }}
         onClick={() => actions.onSelect(node.id)}
       >
         {hasChildren ? (
