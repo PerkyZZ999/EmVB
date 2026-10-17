@@ -224,3 +224,29 @@ test("UX-011: a settings change says Saving… and then Saved.", async () => {
   await settle();
   expect(status()?.textContent ?? null).toBe("Saved.");
 });
+
+test("UX-089: each setup snippet copies its JSON in one click", async () => {
+  const written: string[] = [];
+  const original = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText: async (text: string) => void written.push(text) },
+  });
+  try {
+    const host = await mount(<AgentsPage fetcher={fakeApi(50).fetcher} />);
+    await settle();
+    await settle();
+    const button = host.querySelector<HTMLButtonElement>('[data-emvb-copy-snippet="local setup"]');
+    expect(button?.getAttribute("aria-label") ?? "no button").toBe("Copy local setup");
+    await act(async () => button?.click());
+    await settle();
+    expect(written).toEqual([
+      host.querySelector("[data-emvb-snippet=stdio]")?.textContent ?? "none",
+    ]);
+    expect(button?.textContent ?? "no button").toBe("Copied");
+    expect(button?.nextElementSibling?.textContent ?? "no status").toBe("Copied");
+  } finally {
+    if (original) Object.defineProperty(navigator, "clipboard", original);
+    else delete (navigator as { clipboard?: unknown }).clipboard;
+  }
+});

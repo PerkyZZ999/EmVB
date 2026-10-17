@@ -1,6 +1,8 @@
-import { Banner, ClipboardText, Empty, Switch, Table } from "@cloudflare/kumo";
+import { Banner, Button, ClipboardText, Empty, Switch, Table } from "@cloudflare/kumo";
 import {
   ArrowSquareOutIcon,
+  CheckIcon,
+  CopyIcon,
   GlobeIcon,
   LockKeyIcon,
   PlugsConnectedIcon,
@@ -231,17 +233,23 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
         </SectionHead>
         <div className="emvb-agents-snippets">
           <div className="emvb-agents-snippet">
-            <h3>
-              <GlobeIcon aria-hidden="true" size={16} />
-              Remote (EmDash MCP, sign in with OAuth)
-            </h3>
+            <div className="emvb-agents-snippet-head">
+              <h3>
+                <GlobeIcon aria-hidden="true" size={16} />
+                Remote (EmDash MCP, sign in with OAuth)
+              </h3>
+              <CopySnippet text={remoteSnippet(state.endpoint)} name="remote setup" />
+            </div>
             <pre data-emvb-snippet="remote">{remoteSnippet(state.endpoint)}</pre>
           </div>
           <div className="emvb-agents-snippet">
-            <h3>
-              <TerminalWindowIcon aria-hidden="true" size={16} />
-              Local (stdio)
-            </h3>
+            <div className="emvb-agents-snippet-head">
+              <h3>
+                <TerminalWindowIcon aria-hidden="true" size={16} />
+                Local (stdio)
+              </h3>
+              <CopySnippet text={stdioSnippet(site)} name="local setup" />
+            </div>
             <pre data-emvb-snippet="stdio">{stdioSnippet(site)}</pre>
           </div>
         </div>
@@ -308,5 +316,51 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
         )}
       </section>
     </div>
+  );
+}
+
+/** UX-089: the setup JSON is meant to be pasted into an agent's config, so it copies in one click. */
+function CopySnippet({ text, name }: { text: string; name: string }) {
+  const [copied, setCopied] = useState<"yes" | "no" | null>(null);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(null), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  const copy = () => {
+    if (!navigator.clipboard?.writeText) {
+      setCopied("no");
+      return;
+    }
+    navigator.clipboard.writeText(text).then(
+      () => setCopied("yes"),
+      () => setCopied("no"),
+    );
+  };
+  return (
+    <>
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        aria-label={`Copy ${name}`}
+        data-emvb-copy-snippet={name}
+        onClick={copy}
+      >
+        {copied === "yes" ? (
+          <CheckIcon aria-hidden="true" size={14} />
+        ) : (
+          <CopyIcon aria-hidden="true" size={14} />
+        )}
+        {copied === "yes" ? "Copied" : "Copy"}
+      </Button>
+      <span className="emvb-sr-only" role="status">
+        {copied === "yes"
+          ? "Copied"
+          : copied === "no"
+            ? "Couldn't copy. Select the text instead."
+            : ""}
+      </span>
+    </>
   );
 }

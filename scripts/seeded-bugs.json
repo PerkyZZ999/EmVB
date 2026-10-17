@@ -37171,6 +37171,34 @@
         "UX-087"
       ],
       "expect": "\\(fail\\).*UX-087"
+    },
+    {
+      "id": "UX-089/copy-wrong-text",
+      "requirement": "UX-089",
+      "description": "The snippet Copy button copies the endpoint instead of the setup JSON.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "<CopySnippet text={stdioSnippet(site)} name=\"local setup\" />",
+          "replace": "<CopySnippet text={state.endpoint} name=\"local setup\" />"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "UX-089"],
+      "expect": "\\(fail\\).*UX-089"
+    },
+    {
+      "id": "UX-089/no-feedback",
+      "requirement": "UX-089",
+      "description": "Copying says nothing; the button keeps reading Copy.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "() => setCopied(\"yes\"),",
+          "replace": "() => undefined,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "UX-089"],
+      "expect": "\\(fail\\).*UX-089"
     }
   ]
 }

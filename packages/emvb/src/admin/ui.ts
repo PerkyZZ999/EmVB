@@ -118,6 +118,8 @@ export const UI_CSS = `
 .emvb-agents-head { display: flex; align-items: flex-start; gap: 12px; }
 .emvb-agents-icon { display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
 .emvb-agents-section h2 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 600; color: var(--text-color-kumo-default); }
+.emvb-agents-snippet-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 28px; }
+.emvb-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .emvb-agents-section h3 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--text-color-kumo-default); }
 .emvb-agents-section p { margin: 0; font-size: 14px; line-height: 20px; color: var(--text-color-kumo-subtle); }
 .emvb-agents-section code { padding: 1px 5px; border-radius: 4px; background: var(--color-kumo-tint); font-family: var(--font-mono); font-size: 12px; }
@@ -126,7 +128,7 @@ export const UI_CSS = `
 .emvb-agents-field { display: grid; gap: 6px; }
 .emvb-agents-snippets { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
 .emvb-agents-snippet { display: grid; align-content: start; gap: 8px; min-width: 0; padding: 12px; border: 1px solid var(--color-kumo-line); border-radius: 8px; }
-.emvb-agents-section pre { margin: 0; padding: 12px; overflow-x: auto; border-radius: 6px; background: var(--color-kumo-recessed, rgba(127,127,127,.08)); font-family: var(--font-mono); font-size: 12px; line-height: 18px; }
+.emvb-agents-section pre { margin: 0; padding: 12px; overflow-x: auto; border-radius: 6px; background: var(--color-kumo-tint); font-family: var(--font-mono); font-size: 12px; line-height: 18px; }
 .emvb-agents-table { overflow-x: auto; margin-inline: -20px; margin-bottom: -20px; border-top: 1px solid var(--color-kumo-line); }
 .emvb-agents-table table { width: 100%; }
 .emvb-agents-when { color: var(--text-color-kumo-subtle); font-variant-numeric: tabular-nums; white-space: nowrap; }
