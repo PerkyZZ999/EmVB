@@ -35,3 +35,11 @@ test("UX-005: a panel select fills its column instead of Kumo's content width", 
 test("UX-017: a display-condition row keeps its Where menu inside the panel", () => {
   expect(rule(".emvb-condition-row")).toMatch(/grid-template-columns: 96px minmax\(0, 1fr\) 28px;/);
 });
+
+test("UX-018: narrow lists keep dates and badges on one line and scroll sideways instead", () => {
+  expect(rule(".emvb-surface-card[data-emvb-list]")).toMatch(/overflow-x: auto;/);
+  expect(rule(".emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child)")).toMatch(
+    /white-space: nowrap;/,
+  );
+  expect(rule(".emvb-surface-card[data-emvb-list] td:first-child")).toMatch(/min-width: 180px;/);
+});

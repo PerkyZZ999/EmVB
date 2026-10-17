@@ -35025,6 +35025,34 @@
         "UX-017"
       ],
       "expect": "\\(fail\\).*UX-017"
+    },
+    {
+      "id": "UX-018/dates-wrap",
+      "requirement": "UX-018",
+      "description": "Narrow lists break dates and badges across lines",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child) { white-space: nowrap; }",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-018"],
+      "expect": "\\(fail\\).*UX-018"
+    },
+    {
+      "id": "UX-018/title-squeezed",
+      "requirement": "UX-018",
+      "description": "Narrow lists squeeze titles until they break mid-word",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": ".emvb-surface-card[data-emvb-list] td:first-child { min-width: 180px; }",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/ui.test.ts", "-t", "UX-018"],
+      "expect": "\\(fail\\).*UX-018"
     }
   ]
 }

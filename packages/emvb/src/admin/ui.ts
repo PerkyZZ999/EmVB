@@ -88,6 +88,10 @@ export const UI_CSS = `
 .emvb-row-slug { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
 /* W-209: a long unbroken title or slug wraps instead of pushing Status and Last edited out of the card. */
 .emvb-row-title, .emvb-row-slug { overflow-wrap: anywhere; }
+/* UX-018: on narrow admin widths the short columns keep one line and the title keeps a readable
+   width; the card scrolls sideways before anything breaks mid-word or mid-date. */
+.emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child) { white-space: nowrap; }
+.emvb-surface-card[data-emvb-list] td:first-child { min-width: 180px; }
 .emvb-tabular { font-variant-numeric: tabular-nums; color: var(--text-color-kumo-subtle); font-size: 13px; }
 
 /* Elevated EmVB-owned card chrome (lists, empty/setup shells) — not host sidebar/header */
@@ -131,7 +135,7 @@ export const UI_CSS = `
 .emvb-agents-link:hover { text-decoration: underline; }
 .emvb-agents-link:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; border-radius: 4px; }
 .emvb-timeline-agent { display: inline-flex; flex: none; align-items: center; gap: 3px; padding: 1px 7px 1px 5px; border: 1px solid var(--color-kumo-line); border-radius: 999px; background: var(--color-kumo-base); color: var(--text-color-kumo-default); font-size: 11px; line-height: 16px; font-weight: 600; }
-.emvb-surface-card[data-emvb-list] { gap: 0; padding: 0; overflow: hidden; }
+.emvb-surface-card[data-emvb-list] { gap: 0; padding: 0; overflow: hidden; overflow-x: auto; }
 .emvb-surface-card[data-emvb-list] table { width: 100%; }
 .emvb-surface-card .emvb-empty-shell,
 .emvb-empty-shell {
