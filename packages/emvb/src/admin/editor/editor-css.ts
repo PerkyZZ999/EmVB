@@ -508,7 +508,6 @@ export const EDITOR_CSS = `${UI_CSS}
 }
 .emvb-save-local { align-self: flex-start; font-size: 13px; }
 .emvb-save-local-row { display: flex; flex-direction: column; gap: 8px; }
-.emvb-save-local-actions { display: flex; gap: 8px; }
 .emvb-chip-text::placeholder { color: var(--text-color-kumo-placeholder, var(--text-color-kumo-subtle)); }
 .emvb-chip-listbox {
   position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0;

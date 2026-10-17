@@ -819,3 +819,28 @@ test("UX-025: the cascade rule shows only once two classes can disagree", async 
     "When two classes set the same property, the one lower in Site styles wins. Local styles still win.",
   );
 });
+
+test("UX-064: the class name form puts Cancel first, then Save as class, like the other forms", async () => {
+  const log = { nodes: [] as LayoutNode[], designs: [] as DesignSystem[] };
+  await mount(
+    <PanelHarness
+      initial={
+        {
+          id: "head0001",
+          type: "heading",
+          props: { text: "Hi", level: 1 },
+          style: { color: "#112233" },
+        } as LayoutNode
+      }
+      log={log}
+    />,
+  );
+  await openStyle();
+  await act(async () => saveLocalButton()?.click());
+  const row = document.querySelector(".emvb-save-local-actions");
+  expect(row?.classList.contains("emvb-dialog-actions") ?? false).toBe(true);
+  expect([...(row?.querySelectorAll("button") ?? [])].map((b) => b.textContent)).toEqual([
+    "Cancel",
+    "Save as class",
+  ]);
+});

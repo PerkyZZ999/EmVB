@@ -418,7 +418,11 @@ export function ClassChipInput({
               } else if (isCancelEscape(event)) closeNaming();
             }}
           />
-          <div className="emvb-save-local-actions">
+          {/* UX-064: Cancel, then the action, right-aligned, like New variable and dialogs. */}
+          <div className="emvb-dialog-actions emvb-save-local-actions">
+            <Button type="button" variant="secondary" className={BUTTON} onClick={closeNaming}>
+              Cancel
+            </Button>
             <Button
               type="button"
               variant="primary"
@@ -427,9 +431,6 @@ export function ClassChipInput({
               onClick={() => void saveLocal()}
             >
               Save as class
-            </Button>
-            <Button type="button" variant="ghost" className={BUTTON} onClick={closeNaming}>
-              Cancel
             </Button>
           </div>
         </div>
