@@ -6,7 +6,7 @@ A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emda
 
 **Website:** <https://emvb.dev>.
 
-**Status:** 0.7.0 is the current npm release (a full pass over the editor's look and about 140 fixes from overnight testing on top of 0.6.5, most of them keeping keyboard focus where it belongs). See the [changelog](CHANGELOG.md). Layout schema 16 (images may carry an `edit` record); design schema 15.
+**Status:** 0.7.0 is the current npm release (a full pass over the editor's look and about 310 fixes from overnight testing since 0.6.0, including the never-published 0.6.5; many of them keep keyboard focus where it belongs). See the [changelog](CHANGELOG.md). Layout schema 16 (images may carry an `edit` record); design schema 15.
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 

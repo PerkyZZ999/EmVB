@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.7.0] - 2026-10-21
 
-About 300 changes from overnight testing and a full pass over the editor's look since 0.6.5 (UX-001 to UX-095, W-704 to W-841). No schema change: pages saved by 0.7.0 open in 0.6.5.
+About 470 changes from overnight testing and a full pass over the editor's look since 0.6.0 (UX-001 to UX-095, W-532 to W-841). This includes the 0.6.5 changes, which were never published to npm. No schema change: pages saved by 0.7.0 open in 0.6.0.
 
 ### Added
 
@@ -18,6 +18,9 @@ About 300 changes from overnight testing and a full pass over the editor's look 
 - **Setup snippet copy buttons (UX-088, UX-089).** The AI agents page has copy buttons on its snippets, a "Copy endpoint URL" button (W-812) and shows a failed copy on screen (W-777, W-778).
 - **Site styles.** Unpublished changes fold under a count (UX-024), Escape closes the drawer and returns focus (UX-069, UX-070), and class chips whose class is gone are marked (UX-067).
 - **Accessibility checks.** The checker flags an SVG with no title that isn't decorative (W-786), a linked box with nothing to name the link (W-798) and an icon that animates without end (W-791). Fix all re-chains heading levels so none still skips (W-773), and issues name their severity (UX-022).
+- **Wording in the site's language.** The Pagination element has a **Posts archive title** (replaces "Posts", W-532) and screen reader names for the navigation, each page number and the arrow-only Previous and Next (W-689). Post Dates are written in the page's language (W-688), and hosts can name popup and float close buttons through `resolveThemeParts` `labels` (W-690).
+- **Select placeholder.** A Select's Placeholder words its empty first choice instead of a fixed "Choose…" (W-686).
+- **Editor hints.** A box's settings say why its Link isn't used when something inside is already a link or control (W-669); the editor says why a synced section past the page's limit isn't shown (W-657); a comma decimal such as "1,5rem" in a size variable or container-query value says to use a dot (W-687, W-695).
 
 ### Changed
 
@@ -113,19 +116,6 @@ About 300 changes from overnight testing and a full pass over the editor's look 
 - **Published pages.** Popups start once and keep their close button at the top (W-757, W-758), corner floats stay on screen (W-759), closing a focused float keeps focus near it and edge bars no longer cover focused elements (W-781, W-782), Escape closes a hover-shown menu dropdown and column flyouts open beside their toggle (W-783, W-784), pasted SVG ids don't collide (W-785), loops are lists (W-789), image figure and caption CSS ships with the image (W-792), contents entries hide with their heading (W-793), numbered lists with three-digit numbers fit (W-796), linked boxes inherit colour (W-797), grid spans fit each device (W-799), long words, labels and tabs wrap instead of widening the page (W-764 to W-766, W-800), background video hides under reduced motion and sits under its overlay (W-801, W-802), large icons shrink on narrow screens (W-803), clicking a public tab focuses it (W-779) and form controls name their error message (W-780) and fields without a label are named (W-753).
 - **Editor.** Timeline pictures have no live links and load the host's stylesheets (W-752, W-811), the command palette keeps a fixed width (W-760, W-810, UX-093), long URLs and quoted values wrap in the panel (W-761, W-763, W-767), keyboard moves announce where the element landed (W-770), page weight sizes and contrast messages read cleanly (W-771, W-772, UX-083), popup delays under a second read in ms (W-776), the canvas frame shows a focus ring (W-809), a bare word in a video URL shows the placeholder (W-795), refused SVG markup says why (W-787), and the canvas passes fetchpriority, srcset, playsinline, autoplay and datetime in React's spelling (W-804).
 - **AI agents (MCP).** `list_versions` gives times as ISO 8601 UTC (W-805), and an update with null props is an invalid layout, not an internal error (W-755). The rate-limit message says 1 second (W-754).
-
-## [0.6.5] - 2026-10-15
-
-About 170 fixes from overnight testing since 0.6.0 (W-532 to W-702). No schema change: pages saved by 0.6.5 open in 0.6.0.
-
-### Added
-
-- **Wording in the site's language.** The Pagination element has a **Posts archive title** (replaces "Posts", W-532) and screen reader names for the navigation, each page number and the arrow-only Previous and Next (W-689). Post Dates are written in the page's language (W-688), and hosts can name popup and float close buttons through `resolveThemeParts` `labels` (W-690).
-- **Select placeholder.** A Select's Placeholder words its empty first choice instead of a fixed "Choose…" (W-686).
-- **Editor hints.** A box's settings say why its Link isn't used when something inside is already a link or control (W-669); the editor says why a synced section past the page's limit isn't shown (W-657); a comma decimal such as "1,5rem" in a size variable or container-query value says to use a dot (W-687, W-695).
-
-### Fixed
-
 - **Forms.** Number fields take decimals (W-578). Hidden fields from the form definition are sent (W-595), and conditional fields such as "Other" carry their condition, stay hidden until shown and no longer block every submission (W-596, W-597). Patterns browsers refuse are repaired instead of dropped (W-538, W-594). Fractional length limits round to whole numbers (W-588). The Form element warns when a minimum is above its maximum, naming both length and value problems at once (W-577, W-589), when a text box is bound to a field with fixed choices (W-579), and compares real audience rules (W-550). Blank labels fall back to a name (W-587), the spam trap no longer scrolls right-to-left pages sideways (W-555), and a field in a broken A/B test isn't flagged as shown to some visitors (W-628).
 - **A/B tests.** Deleting one variant no longer hides the other from some visitors: it shows to everyone and the editor says why (W-625, W-627). Duplicating, pasting or restoring a variant makes an independent copy instead of joining the test (W-629, W-632, W-636). A new test never reuses another test's name, so ending one can't delete the other (W-701).
 - **Typing in Japanese, Chinese or Korean, and other keyboards.** Enter or Escape that ends a composition no longer saves, cancels or closes a field, popup, rename, list or icon search mid-word (W-606, W-676, W-681, W-682). Editor shortcuts work on Cyrillic, Greek, Hebrew and Arabic layouts (W-565), and held Delete, Ctrl+D or Ctrl+V act once (W-622). Public Tabs, the theme part filter and the image editor tools leave Alt, Ctrl and Cmd shortcuts to the browser (W-675, W-680).
@@ -586,8 +576,7 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
 [Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v0.7.0...HEAD
-[0.7.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.6.5...v0.7.0
-[0.6.5]: https://github.com/PerkyZZ999/EmVB/compare/v0.6.0...v0.6.5
+[0.7.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.3.0...v0.4.0
