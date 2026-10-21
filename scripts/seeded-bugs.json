@@ -2715,8 +2715,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": ".emvb-flexbox{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px}",
-          "replace": ".emvb-flexbox{display:flex;flex-direction:column;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px}"
+          "search": ".emvb-flexbox{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px;overflow-wrap:anywhere}",
+          "replace": ".emvb-flexbox{display:flex;flex-direction:column;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px;overflow-wrap:anywhere}"
         }
       ],
       "command": [
@@ -3381,7 +3381,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/form-elements.ts",
-          "search": "return fieldBox(attrs, [labelEl, errorSlot(name)]);",
+          "search": "return fieldBox(attrs, [labelEl, errorSlot(name, controlId(node.id))]);",
           "replace": "return fieldBox(attrs, [labelEl]);"
         }
       ],
@@ -5211,8 +5211,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
-          "search": "    requestAnimationFrame(() => rows.current.get(id)?.focus());\n",
-          "replace": ""
+          "search": "    setRenaming(null);\n    requestAnimationFrame(() => rows.current.get(id)?.focus());\n",
+          "replace": "    setRenaming(null);\n"
         }
       ],
       "command": [
@@ -10895,8 +10895,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "    } catch {\n      setStatus({ kind: \"error\", message: OFFLINE, retry: true });",
-          "replace": "    } catch {"
+          "search": "      } catch {\n        setStatus({ kind: \"error\", message: OFFLINE, retry: true });",
+          "replace": "      } catch {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
@@ -11845,8 +11845,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/loop.ts",
-          "search": "attrs: { class: \"emvb-loop-item\", \"data-emvb-loop-item\": post.id },",
-          "replace": "attrs: { \"data-emvb-loop-item\": post.id },"
+          "search": "attrs: { class: \"emvb-loop-item\", \"data-emvb-loop-item\": post.id, role: \"listitem\" },",
+          "replace": "attrs: { \"data-emvb-loop-item\": post.id, role: \"listitem\" },"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
@@ -12307,8 +12307,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/TopBar.tsx",
-          "search": "              loading={busy === \"save\" && !reducedMotion}\n              disabled={busy !== null}",
-          "replace": "              loading={busy === \"save\" && !reducedMotion}\n              disabled={false}"
+          "search": "              aria-disabled={busy !== null}\n              aria-busy={busy === \"save\"}",
+          "replace": "              aria-disabled={false}\n              aria-busy={busy === \"save\"}"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
@@ -12321,8 +12321,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/TopBar.tsx",
-          "search": "              loading={busy === \"publish\" && !reducedMotion}\n              disabled={busy !== null}",
-          "replace": "              loading={busy === \"publish\" && !reducedMotion}\n              disabled={false}"
+          "search": "              aria-disabled={busy !== null}\n              aria-busy={busy === \"publish\"}",
+          "replace": "              aria-disabled={false}\n              aria-busy={busy === \"publish\"}"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/top-bar.test.tsx"],
@@ -12651,7 +12651,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "if (!name.trim()) return setError(\"Enter a name for the variable.\");",
+          "search": "if (!name.trim()) return refuse(\"name\", \"Enter a name for the variable.\");",
           "replace": ""
         }
       ],
@@ -12665,7 +12665,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "if (!typed) return setError(BAD_HEX);",
+          "search": "if (!typed) return refuse(\"value\", BAD_HEX);",
           "replace": ""
         }
       ],
@@ -12726,8 +12726,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "onClick={onCancel}",
-          "replace": "onClick={() => undefined}"
+          "search": "          onClick={() => {\n            if (!pending.current) onCancel();\n          }}",
+          "replace": "          onClick={() => undefined}"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-control.test.tsx"],
@@ -14407,8 +14407,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/dialogs.tsx",
-          "search": "              onClick={onDiscard}\n",
-          "replace": "              onClick={onSaveAndLeave}\n"
+          "search": "              onClick={unlessSaving(onDiscard)}\n",
+          "replace": "              onClick={unlessSaving(onSaveAndLeave)}\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/dialogs.test.tsx"],
@@ -14421,8 +14421,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/dialogs.tsx",
-          "search": "            <Dialog.Close\n              render={(props) => (\n                <Button {...props} variant=\"secondary\" className={BUTTON}>\n                  Keep editing",
-          "replace": "            <Dialog.Close\n              render={(props) => (\n                <Button {...props} onClick={undefined} variant=\"secondary\" className={BUTTON}>\n                  Keep editing"
+          "search": "                <Button {...props} variant=\"secondary\" className={BUTTON} aria-disabled={saving}>\n                  Keep editing",
+          "replace": "                <Button {...props} onClick={undefined} variant=\"secondary\" className={BUTTON} aria-disabled={saving}>\n                  Keep editing"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/dialogs.test.tsx"],
@@ -16402,8 +16402,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "  baseCss: \".emvb-grid{display:grid;min-width:0}\",",
-          "replace": "  baseCss: \".emvb-grid{display:block;min-width:0}\","
+          "search": "  baseCss: \".emvb-grid{display:grid;min-width:0}\" + BOX_LINK_CSS,",
+          "replace": "  baseCss: \".emvb-grid{display:block;min-width:0}\" + BOX_LINK_CSS,"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/grid.e2e.ts", "--project=node", "-g", "equal columns"],
@@ -16774,8 +16774,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/extras.ts",
-          "search": "attrs: { class: \"emvb-bg-video\", src, muted: \"\", loop: \"\", playsinline: \"\", autoplay: \"\" },",
-          "replace": "attrs: { src, muted: \"\", loop: \"\", playsinline: \"\", autoplay: \"\" },"
+          "search": "          class: \"emvb-bg-video\",\n",
+          "replace": ""
         }
       ],
       "command": [
@@ -17617,7 +17617,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PLUGIN_VERSION = \"0.6.5\";",
+          "search": "export const PLUGIN_VERSION = \"0.7.0\";",
           "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
         }
       ],
@@ -17631,7 +17631,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PLUGIN_VERSION = \"0.6.5\";",
+          "search": "export const PLUGIN_VERSION = \"0.7.0\";",
           "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
         }
       ],
@@ -21545,8 +21545,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/search.ts",
-          "search": "export const fold = (text: string) =>\n  text.normalize(\"NFD\").replace(/\\p{M}/gu, \"\").toLocaleLowerCase();",
-          "replace": "export const fold = (text: string) => text.toLocaleLowerCase();"
+          "search": "  text.normalize(\"NFD\").replace(/\\p{M}/gu, \"\").toLocaleLowerCase().replace(/\u00df/g, \"ss\");",
+          "replace": "  text.toLocaleLowerCase().replace(/\u00df/g, \"ss\");"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/pages/list-search.test.tsx"],
@@ -22700,8 +22700,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/svg-images.ts",
-          "search": "(node.props as { markup?: unknown }).markup;",
-          "replace": "(node.props as { svg?: unknown }).svg;"
+          "search": "(node.props as { markup?: unknown }).markup;\n  return typeof markup === \"string\" ? sanitizeSvgReport(markup).images",
+          "replace": "(node.props as { svg?: unknown }).svg;\n  return typeof markup === \"string\" ? sanitizeSvgReport(markup).images"
         }
       ],
       "command": [
@@ -23818,8 +23818,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/menu/runtime.ts",
-          "search": "    if (target && item.contains(target)) continue;\n",
-          "replace": ""
+          "search": "    if (target && item.contains(target)) continue;\n    details.open = false;\n",
+          "replace": "    details.open = false;\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts"],
@@ -24358,8 +24358,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/menu.ts",
-          "search": "{.emvb-menu-item:hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content{",
-          "replace": "{.emvb-menu-item:hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content,.emvb-menu-item:focus-within>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content{"
+          "search": "{.emvb-menu-item:not([data-emvb-menu-dismissed]):hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content{",
+          "replace": "{.emvb-menu-item:not([data-emvb-menu-dismissed]):hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content,.emvb-menu-item:focus-within>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content{"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/menu-hover.test.ts"],
@@ -24684,8 +24684,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "      .filter((item) => item.trim() !== \"\")\n",
-          "replace": ""
+          "search": "node.props.items.filter((item) => item.trim() !== \"\");",
+          "replace": "node.props.items;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/empty-items.test.ts"],
@@ -25717,8 +25717,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "min-width:0;overflow-wrap:break-word}\",",
-          "replace": "min-width:0}\","
+          "search": "min-width:0;overflow-wrap:break-word}\" +",
+          "replace": "min-width:0}\" +"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/long-word.test.ts"],
@@ -26397,8 +26397,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/Timeline.tsx",
-          "search": ".toSorted((a, b) => (a.at < b.at ? 1 : -1));",
-          "replace": ".toSorted((a, b) => (a.at < b.at ? -1 : 1));"
+          "search": ": a.at < b.at ? 1 : -1));",
+          "replace": ": a.at < b.at ? -1 : 1));"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/timeline.test.tsx"],
@@ -26509,8 +26509,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/a11y/audit.ts",
-          "search": "  return issues.reduce((next, issue) => applyA11yFix(next, issue), layout);",
-          "replace": "  return issues[0] ? applyA11yFix(layout, issues[0]) : layout;"
+          "search": "  const fixed = issues.reduce((next, issue) => applyA11yFix(next, issue), layout);",
+          "replace": "  const fixed = issues[0] ? applyA11yFix(layout, issues[0]) : layout;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts"],
@@ -30441,7 +30441,7 @@
       "edits": [
         {
           "file": "packages/emvb-mcp/src/bridge.ts",
-          "search": "export const BRIDGE_VERSION = \"0.6.5\";",
+          "search": "export const BRIDGE_VERSION = \"0.7.0\";",
           "replace": "export const BRIDGE_VERSION = \"0.4.9\";"
         }
       ],
@@ -31852,8 +31852,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/list-kit.tsx",
-          "search": "onClick={onRetry}",
-          "replace": "onClick={() => undefined}"
+          "search": "            onRetry();",
+          "replace": "            void onRetry;"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/list-retry.e2e.ts", "--project=node"],
@@ -33180,8 +33180,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/list-kit.tsx",
-          "search": "role=\"status\" aria-label={label}",
-          "replace": "role=\"status\" aria-label=\"Loading\""
+          "search": "      role=\"status\"\n      aria-label={label}",
+          "replace": "      role=\"status\"\n      aria-label=\"Loading\""
         }
       ],
       "command": [
@@ -33264,8 +33264,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
-          "search": "            loading={publishing && !reducedMotion}\n",
-          "replace": ""
+          "search": "              publishing && !reducedMotion ? (",
+          "replace": "              false ? ("
         }
       ],
       "command": [
@@ -33346,8 +33346,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
-          "search": "loading={publishing && !reducedMotion}",
-          "replace": "loading={publishing}"
+          "search": "              publishing && !reducedMotion ? (",
+          "replace": "              publishing ? ("
         }
       ],
       "command": [
@@ -33532,8 +33532,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/TopBar.tsx",
-          "search": "icon={<UploadSimpleIcon size={14} aria-hidden=\"true\" />}",
-          "replace": "icon={undefined}"
+          "search": "<UploadSimpleIcon size={14} aria-hidden=\"true\" />",
+          "replace": "undefined"
         }
       ],
       "command": [
@@ -33594,8 +33594,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
-          "search": "<fieldset className=\"emvb-create-fields\" disabled={busy}>",
-          "replace": "<fieldset className=\"emvb-create-fields\" disabled={false}>"
+          "search": "<fieldset className=\"emvb-create-fields\" aria-disabled={busy}>",
+          "replace": "<fieldset className=\"emvb-create-fields\" aria-disabled={false}>"
         }
       ],
       "command": [
@@ -33614,8 +33614,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
-          "search": "loading={busy && !reducedMotion}",
-          "replace": "loading={busy}"
+          "search": "busy && !reducedMotion ?",
+          "replace": "busy ?"
         }
       ],
       "command": [
@@ -33658,8 +33658,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
-          "search": "icon={<PlusIcon size={14} aria-hidden=\"true\" />}",
-          "replace": "icon={undefined}"
+          "search": "<PlusIcon size={14} aria-hidden=\"true\" />",
+          "replace": "undefined"
         }
       ],
       "command": [
@@ -33720,8 +33720,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "        label=\"Variable name\"\n        disabled={busy}",
-          "replace": "        label=\"Variable name\"\n        disabled={false}"
+          "search": "        aria-invalid={invalid === \"name\" || undefined}\n        readOnly={busy}\n        aria-disabled={busy}",
+          "replace": "        aria-invalid={invalid === \"name\" || undefined}"
         }
       ],
       "command": [
@@ -33740,8 +33740,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "loading={busy && !reducedMotion}",
-          "replace": "loading={busy}"
+          "search": "busy && !reducedMotion ?",
+          "replace": "busy ?"
         }
       ],
       "command": [
@@ -33762,8 +33762,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
-          "search": "icon={<PlusIcon size={14} aria-hidden=\"true\" />}",
-          "replace": "icon={undefined}"
+          "search": "<PlusIcon size={14} aria-hidden=\"true\" />",
+          "replace": "undefined"
         }
       ],
       "command": [
@@ -34509,7 +34509,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
-          "search": "const target = opener?.disabled ? urlInputRef.current : opener;",
+          "search": "const target = busyRef.current ? urlInputRef.current : opener;",
           "replace": "const target = opener;"
         }
       ],
@@ -34609,6 +34609,218 @@
         "W-743"
       ],
       "expect": "toBeFocused"
+    },
+    {
+      "id": "W-744/no-keyboard",
+      "requirement": "W-744",
+      "description": "Compact sheet grip keyboard resize and dismiss focus: no-keyboard",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "        onKeyDown={onGripKey}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-744"
+      ],
+      "expect": "\\(fail\\).*W-744"
+    },
+    {
+      "id": "W-744/dismiss-loses-focus",
+      "requirement": "W-744",
+      "description": "Compact sheet grip keyboard resize and dismiss focus: dismiss-loses-focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "onOpenChange={(next) => (next ? setPanelOpen(true) : closePanel())}",
+          "replace": "onOpenChange={setPanelOpen}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-744"
+      ],
+      "expect": "\\(fail\\).*W-744"
+    },
+    {
+      "id": "W-744/down-never-closes",
+      "requirement": "W-744",
+      "description": "Compact sheet grip keyboard resize and dismiss focus: down-never-closes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "snap > peek ? peek : \"close\"",
+          "replace": "peek"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-744"
+      ],
+      "expect": "\\(fail\\).*W-744"
+    },
+    {
+      "id": "W-744/e2e-dismiss-loses-focus",
+      "requirement": "W-744",
+      "description": "Compact sheet drag dismiss must return focus to the current tool (browser)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "onOpenChange={(next) => (next ? setPanelOpen(true) : closePanel())}",
+          "replace": "onOpenChange={setPanelOpen}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/image-save-recovery.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-744"
+      ],
+      "expect": "toBeFocused"
+    },
+    {
+      "id": "W-745/pick-drops-focus",
+      "requirement": "W-745",
+      "description": "Picking a library image must return focus to Choose from library",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "    setError(null);\n    focusOpener();",
+          "replace": "    setError(null);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-745"
+      ],
+      "expect": "\\(fail\\).*W-745"
+    },
+    {
+      "id": "W-745/nested-editor-drops-focus",
+      "requirement": "W-745",
+      "description": "Closing the nested image editor after a saved copy must return focus to Choose from library",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "            if (!libraryRef.current) focusOpener();",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/media-library-feedback.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-745"
+      ],
+      "expect": "toBeFocused"
+    },
+    {
+      "id": "W-747/retry-drops-focus",
+      "requirement": "W-747",
+      "description": "My uploads Try again must keep focus on the search",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "                searchRef.current?.focus();\n                setUploadsFailed(undefined);",
+          "replace": "                setUploadsFailed(undefined);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx",
+        "-t",
+        "W-747"
+      ],
+      "expect": "\\(fail\\).*W-747"
+    },
+    {
+      "id": "W-748/stale-release",
+      "requirement": "W-748",
+      "description": "Drag release must use the last move, not the last render",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "const released = d.latest ?? snap;",
+          "replace": "const released = dragSnap ?? snap;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-748"
+      ],
+      "expect": "\\(fail\\).*W-748"
+    },
+    {
+      "id": "W-749/set-retry-drops-focus",
+      "requirement": "W-749",
+      "description": "Icon-set Try again must keep focus on the search",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "                // W-749: this button unmounts on retry; keep focus in the dialog.\n                searchRef.current?.focus();\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/icons/icon-library.test.tsx",
+        "-t",
+        "W-749"
+      ],
+      "expect": "\\(fail\\).*W-749"
+    },
+    {
+      "id": "W-750/rename-cancel-drops-focus",
+      "requirement": "W-750",
+      "description": "Escape from a chip rename opened by the keyboard menu must return focus to the chip",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChip.tsx",
+          "search": "    requestAnimationFrame(() => main.current?.focus());",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/class-chips.e2e.ts", "--project=node", "-g", "W-750"],
+      "expect": "toBeFocused"
+    },
+    {
+      "id": "W-750/remove-drops-focus",
+      "requirement": "W-750",
+      "description": "Remove from element in the chip menu must keep focus in the chip box",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ClassChipInput.tsx",
+          "search": "    target?.focus();\n    setFocusAt(null);",
+          "replace": "    setFocusAt(null);"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/class-chips.e2e.ts", "--project=node", "-g", "W-750"],
+      "expect": "toBe"
     },
     {
       "id": "UX-010/section-pops-open",
@@ -37039,8 +37251,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/PerfMeter.tsx",
-          "search": "    value >= 100 || Number.isInteger(value) ? String(Math.round(value)) : value.toFixed(1);\n",
-          "replace": "    false ? String(Math.round(value)) : value.toFixed(1);\n"
+          "search": "  return `${value} ${inMb ? \"MB\" : \"KB\"}`;",
+          "replace": "  return `${value.toFixed(1)} ${inMb ? \"MB\" : \"KB\"}`;"
         }
       ],
       "command": [
@@ -37361,6 +37573,1887 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/theme-api.test.ts", "-t", "UX-094"],
       "expect": "\\(fail\\).*UX-094"
+    },
+    {
+      "id": "W-752/live-links",
+      "requirement": "W-752",
+      "description": "Version pictures keep their live links, so Tab and Enter browse away inside the picture.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "<body>${inertLinks(html)}</body>",
+          "replace": "<body>${html}</body>"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline.test.tsx",
+        "-t",
+        "W-752"
+      ],
+      "expect": "\\(fail\\).*W-752"
+    },
+    {
+      "id": "W-753/unnamed-field",
+      "requirement": "W-753",
+      "description": "A field with no label and no placeholder renders with no accessible name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "labelText?.trim() ? control : named(control, name),",
+          "replace": "control,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/form-blank-labels.test.ts",
+        "-t",
+        "W-753"
+      ],
+      "expect": "\\(fail\\).*W-753"
+    },
+    {
+      "id": "W-754/one-seconds",
+      "requirement": "W-754",
+      "description": "The last second of a rate-limit window says \"1 seconds\".",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/rate-limit.ts",
+          "search": "${retryAfterSeconds === 1 ? \"second\" : \"seconds\"}",
+          "replace": "seconds"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-rate-limit.test.ts",
+        "-t",
+        "W-754"
+      ],
+      "expect": "\\(fail\\).*W-754"
+    },
+    {
+      "id": "W-755/null-props-crash",
+      "requirement": "W-755",
+      "description": "props set to null crashes the MCP link, SVG and image checks.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "isRecord(node.props) ? node.props : {};",
+          "replace": "(node.props as Record<string, unknown>);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/mcp-write.test.ts", "-t", "W-755"],
+      "expect": "\\(fail\\).*W-755"
+    },
+    {
+      "id": "W-756/snippet-unfocusable",
+      "requirement": "W-756",
+      "description": "The setup snippets can't be reached by keyboard to scroll them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "const SCROLLABLE = { tabIndex: 0, role: \"group\" } as const;",
+          "replace": "const SCROLLABLE = {} as const;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "W-756"],
+      "expect": "\\(fail\\).*W-756"
+    },
+    {
+      "id": "W-757/double-init",
+      "requirement": "W-757",
+      "description": "Starting the popup runtime twice gives each popup two controllers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "    if (started.has(node)) continue;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts", "-t", "W-757"],
+      "expect": "\\(fail\\).*W-757"
+    },
+    {
+      "id": "W-758/close-scrolls-away",
+      "requirement": "W-758",
+      "description": "The popup close button scrolls away with long content.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-markup.ts",
+          "search": ".emvb-popup__close{position:sticky;top:-1rem;z-index:1;float:right;margin:-1rem -1rem 0 .5rem;",
+          "replace": ".emvb-popup__close{position:absolute;top:.5rem;right:.5rem;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/theme/popup-markup.test.ts",
+        "-t",
+        "W-758"
+      ],
+      "expect": "\\(fail\\).*W-758"
+    },
+    {
+      "id": "W-759/corner-off-screen",
+      "requirement": "W-759",
+      "description": "A long corner float runs off the screen on a phone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": "{max-height:calc(100vh - 3.5rem);max-height:calc(100dvh - 3.5rem);overflow:auto}",
+          "replace": "{}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/float.test.ts", "-t", "W-759"],
+      "expect": "\\(fail\\).*W-759"
+    },
+    {
+      "id": "W-760/palette-widens",
+      "requirement": "W-760",
+      "description": "A long query with no spaces widens the command palette past the screen.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": "font-size: 13px; overflow-wrap: anywhere; contain: inline-size; }",
+          "replace": "font-size: 13px; }"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/editor.e2e.ts", "--project=node", "-g", "W-760"],
+      "expect": "toBe"
+    },
+    {
+      "id": "W-761/media-url-overflow",
+      "requirement": "W-761",
+      "description": "Long media URL runs past the settings panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-media-preview > .emvb-helper { overflow-wrap: anywhere; }",
+          "replace": ".emvb-media-preview > .emvb-helper { }"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/media.e2e.ts", "--project=node", "-g", "W-761"],
+      "expect": "toBe"
+    },
+    {
+      "id": "W-762/alt-repeats-name",
+      "requirement": "W-762",
+      "description": "Library card image repeats the file name as alt",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "alt={item.alt && item.alt !== item.filename ? item.alt : \"\"}",
+          "replace": "alt={item.alt ?? item.filename}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-762"
+      ],
+      "expect": "\\(fail\\).*W-762"
+    },
+    {
+      "id": "W-763/helper-overflow",
+      "requirement": "W-763",
+      "description": "Helper quoting a long value runs off the panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/ui.ts",
+          "search": "color: var(--text-color-kumo-subtle); overflow-wrap: anywhere; }",
+          "replace": "color: var(--text-color-kumo-subtle); }"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/media.e2e.ts", "--project=node", "-g", "W-763"],
+      "expect": "toBe"
+    },
+    {
+      "id": "W-764/button-nowrap",
+      "requirement": "W-764",
+      "description": "Long button label runs off a phone screen",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "gap:0.5em;overflow-wrap:anywhere;text-align:center;margin:0",
+          "replace": "gap:0.5em;margin:0"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/long-word.test.ts",
+        "-t",
+        "W-764"
+      ],
+      "expect": "\\(fail\\).*W-764"
+    },
+    {
+      "id": "W-765/tab-label-nowrap",
+      "requirement": "W-765",
+      "description": "Long tab label widens a phone page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "margin-bottom:-1px;min-width:0;overflow-wrap:anywhere}",
+          "replace": "margin-bottom:-1px}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/long-word.test.ts",
+        "-t",
+        "W-765"
+      ],
+      "expect": "\\(fail\\).*W-765"
+    },
+    {
+      "id": "W-766/submit-nowrap",
+      "requirement": "W-766",
+      "description": "Long submit label widens a phone page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": ".emvb-submit{display:inline-flex;max-width:100%;overflow-wrap:anywhere}",
+          "replace": ".emvb-submit{display:inline-flex}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/form-submit-label.test.ts",
+        "-t",
+        "W-766"
+      ],
+      "expect": "\\(fail\\).*W-766"
+    },
+    {
+      "id": "W-766/check-label-nowrap",
+      "requirement": "W-766",
+      "description": "Long checkbox label widens a phone page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "gap:.5em;overflow-wrap:anywhere}",
+          "replace": "gap:.5em}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/form-submit-label.test.ts",
+        "-t",
+        "W-766"
+      ],
+      "expect": "\\(fail\\).*W-766"
+    },
+    {
+      "id": "W-767/condition-row-overflow",
+      "requirement": "W-767",
+      "description": "Condition remove button pushes the row past the panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ConditionsEditor.tsx",
+          "search": "className=\"emvb-icon-btn\"\n              aria-label=\"Remove condition\"",
+          "replace": "className={BUTTON}\n              aria-label=\"Remove condition\""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/theme-s8.e2e.ts", "--project=node", "-g", "W-767"],
+      "expect": "toBe"
+    },
+    {
+      "id": "W-768/same-second-order",
+      "requirement": "W-768",
+      "description": "Same-second versions in arbitrary order",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "(a.at === b.at ? (a.id < b.id ? 1 : -1) : a.at < b.at ? 1 : -1)",
+          "replace": "(a.at < b.at ? 1 : -1)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline.test.tsx",
+        "-t",
+        "W-768"
+      ],
+      "expect": "\\(fail\\).*W-768"
+    },
+    {
+      "id": "W-769/save-drops-focus",
+      "requirement": "W-769",
+      "description": "Save draft drops keyboard focus to the page body",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "if (button.isConnected && (!active || active === document.body)) button.focus();",
+          "replace": "void active;"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "              aria-busy={busy === \"save\"}",
+          "replace": "              aria-busy={busy === \"save\"}\n              disabled={busy !== null}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/keyboard.e2e.ts", "--project=node", "-g", "W-769"],
+      "expect": "toBeFocused"
+    },
+    {
+      "id": "W-770/move-silent",
+      "requirement": "W-770",
+      "description": "Keyboard moves are not announced",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "if (MOVES.has(run)) announce(movedTo(result.layout, id));",
+          "replace": "if (MOVES.has(run)) void movedTo;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/useNodeActions.test.tsx",
+        "-t",
+        "allowed move"
+      ],
+      "expect": "\\(fail\\).*allowed move"
+    },
+    {
+      "id": "W-771-a",
+      "requirement": "W-771",
+      "description": "kb keeps trailing .0 after rounding",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/PerfMeter.tsx",
+          "search": "Math.round(raw * 10) / 10",
+          "replace": "raw.toFixed(1)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/perf-meter.test.tsx",
+        "-t",
+        "W-771"
+      ],
+      "expect": "\\(fail\\).*W-771"
+    },
+    {
+      "id": "W-772-a",
+      "requirement": "W-772",
+      "description": "contrast message rounds to nearest again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "(Math.floor(ratio * 10) / 10).toFixed(1)",
+          "replace": "ratio.toFixed(1)"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts", "-t", "W-772"],
+      "expect": "\\(fail\\).*W-772"
+    },
+    {
+      "id": "W-773-a",
+      "requirement": "W-773",
+      "description": "Fix all stops re-chaining heading levels",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "  if (order.size === 0) return fixed;",
+          "replace": "  if (order.size >= 0) return fixed;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/audit.test.ts", "-t", "W-773"],
+      "expect": "\\(fail\\).*W-773"
+    },
+    {
+      "id": "W-774-a",
+      "requirement": "W-774",
+      "description": "list search stops folding \u00df",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/search.ts",
+          "search": ".toLocaleLowerCase().replace(/\u00df/g, \"ss\");",
+          "replace": ".toLocaleLowerCase();"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/search.test.ts", "-t", "W-774"],
+      "expect": "\\(fail\\).*W-774"
+    },
+    {
+      "id": "W-775-a",
+      "requirement": "W-775",
+      "description": "Shortcuts list drops Ctrl/Cmd+Y",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/shortcuts.ts",
+          "search": " or Ctrl/Cmd+Y\" },",
+          "replace": "\" },"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/shortcuts-list.test.ts",
+        "-t",
+        "W-775"
+      ],
+      "expect": "\\(fail\\).*W-775"
+    },
+    {
+      "id": "W-776-a",
+      "requirement": "W-776",
+      "description": "short delays read 0 s again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggerSettings.tsx",
+          "search": "  ms > 0 && ms < 1000",
+          "replace": "  ms < 0"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/trigger-settings.test.tsx",
+        "-t",
+        "W-776"
+      ],
+      "expect": "\\(fail\\).*W-776"
+    },
+    {
+      "id": "W-777-a",
+      "requirement": "W-777",
+      "description": "copy failure screen-reader only again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "copied === \"no\" ? \"Couldn't copy\" : \"Copy\"}",
+          "replace": "\"Copy\"}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "W-777"],
+      "expect": "\\(fail\\).*W-777"
+    },
+    {
+      "id": "W-778-a",
+      "requirement": "W-778",
+      "description": "variable copy failure silent again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "      () => show(false),\n    );",
+          "replace": "      () => undefined,\n    );"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "W-778"
+      ],
+      "expect": "\\(fail\\).*W-778"
+    },
+    {
+      "id": "W-779-a",
+      "requirement": "W-779",
+      "description": "tab click leaves focus on the hidden radio",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "    if (index < 0 || event.defaultPrevented) return;",
+          "replace": "    if (index >= 0 || event.defaultPrevented) return;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts", "-t", "W-779"],
+      "expect": "\\(fail\\).*W-779"
+    },
+    {
+      "id": "W-780-a",
+      "requirement": "W-780",
+      "description": "controls stop naming their error slot",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "const describedBy = (controlFor: string) => ({ \"aria-describedby\": errorId(controlFor) });",
+          "replace": "const describedBy = (_controlFor: string) => ({});"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/form-ids.test.ts", "-t", "W-780"],
+      "expect": "\\(fail\\).*W-780"
+    },
+    {
+      "id": "W-781/float-scroll-padding",
+      "requirement": "W-781",
+      "description": "edge bars hide focused content (no scroll-padding)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": ";scroll-padding-top:var(--emvb-float-top);scroll-padding-bottom:var(--emvb-float-bottom)}",
+          "replace": "}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/float.test.ts", "-t", "W-781"],
+      "expect": "\\(fail\\).*W-781"
+    },
+    {
+      "id": "W-782/float-close-focus",
+      "requirement": "W-782",
+      "description": "closing the focused float drops focus to body",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/floats/runtime.ts",
+          "search": "  keepFocusNear(el);\n  el.hidden = true;",
+          "replace": "  el.hidden = true;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/floats/runtime.test.ts", "-t", "W-782"],
+      "expect": "\\(fail\\).*W-782"
+    },
+    {
+      "id": "W-783/menu-esc-runtime",
+      "requirement": "W-783",
+      "description": "Escape doesn't dismiss a hover-shown menu panel",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/menu/runtime.ts",
+          "search": "  for (const item of hovered) item.dataset[DISMISSED] = \"1\";",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/menu/runtime.test.ts", "-t", "W-783"],
+      "expect": "\\(fail\\).*W-783"
+    },
+    {
+      "id": "W-783/menu-esc-css",
+      "requirement": "W-783",
+      "description": "hover rule ignores the Escape dismissal",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": ".emvb-menu-item:not([data-emvb-menu-dismissed]):hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content",
+          "replace": ".emvb-menu-item:hover>.emvb-menu-item__bar>.emvb-menu-item__disclosure::details-content"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/menu-hover.test.ts",
+        "-t",
+        "W-783"
+      ],
+      "expect": "\\(fail\\).*W-783"
+    },
+    {
+      "id": "W-784/column-flyout-anchor",
+      "requirement": "W-784",
+      "description": "column flyout anchored to the stretched item (opens off the page)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "  \".emvb-menu--column .emvb-menu-item__bar{position:relative;width:fit-content;max-width:100%}\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/menu-hover.test.ts",
+        "-t",
+        "W-784"
+      ],
+      "expect": "\\(fail\\).*W-784"
+    },
+    {
+      "id": "W-785/svg-ids-unscoped",
+      "requirement": "W-785",
+      "description": "svg internal ids not scoped per element (gradients collide)",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "scopeSvgIds(tree.children, node.id)",
+          "replace": "tree.children"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/svg-ids.test.ts",
+        "-t",
+        "W-785"
+      ],
+      "expect": "\\(fail\\).*W-785"
+    },
+    {
+      "id": "W-786/svg-no-name",
+      "requirement": "W-786",
+      "description": "an untitled non-decorative SVG isn't flagged",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      node.type === \"svg\" &&",
+          "replace": "      node.type === \"svg-none\" &&"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/svg-name.test.ts", "-t", "W-786"],
+      "expect": "\\(fail\\).*W-786"
+    },
+    {
+      "id": "W-787/svg-refused-silent",
+      "requirement": "W-787",
+      "description": "refused SVG markup gives no note",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/svg-images.ts",
+          "search": "  if (sanitizeSvgReport(markup).tree) return undefined;",
+          "replace": "  return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/svg-images.test.ts",
+        "-t",
+        "W-787"
+      ],
+      "expect": "\\(fail\\).*W-787"
+    },
+    {
+      "id": "W-788/svg-field-not-invalid",
+      "requirement": "W-788",
+      "description": "refused SVG markup field not aria-invalid",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "aria-invalid={error || svgRefused ? true : undefined}",
+          "replace": "aria-invalid={error ? true : undefined}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx",
+        "-t",
+        "W-788"
+      ],
+      "expect": "\\(fail\\).*W-788"
+    },
+    {
+      "id": "W-789/loop-not-list",
+      "requirement": "W-789",
+      "description": "loop entries render as bare divs, not a list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "{ ...attrs, role: \"list\" }",
+          "replace": "attrs"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/tabs-loop.test.ts",
+        "-t",
+        "W-789"
+      ],
+      "expect": "\\(fail\\).*W-789"
+    },
+    {
+      "id": "W-789/loop-editor-invalid-list",
+      "requirement": "W-789",
+      "description": "editor keeps listitem roles beside the Empty state",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/loop.ts",
+          "search": "    for (const item of children) delete item.attrs.role;\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/tabs-loop.test.ts",
+        "-t",
+        "W-789"
+      ],
+      "expect": "\\(fail\\).*W-789"
+    },
+    {
+      "id": "W-790/tabs-schema-accepts-href",
+      "requirement": "W-790",
+      "description": "Tabs schema accepts the stale href/newTab props",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "const TabsNodeSchema = parentNode(\"tabs\", z.strictObject({}));",
+          "replace": "const TabsNodeSchema = parentNode(\"tabs\", z.strictObject({ href: z.string().optional(), newTab: z.boolean().optional() }));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/schema/tabs-type.test.ts",
+        "-t",
+        "W-790"
+      ],
+      "expect": "\\(fail\\).*W-790"
+    },
+    {
+      "id": "W-791/loop-icon-silent",
+      "requirement": "W-791",
+      "description": "an endlessly looping icon isn't flagged",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      return anim?.type === \"spin\" || anim?.type === \"pulse\";",
+          "replace": "      return anim?.type === \"spin-none\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/motion.test.ts", "-t", "W-791"],
+      "expect": "\\(fail\\).*W-791"
+    },
+    {
+      "id": "W-792/figure-css-in-button",
+      "requirement": "W-792",
+      "description": "figure/caption/link CSS only ships with a Button",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    \".emvb-figure{margin:0}.emvb-figcaption{margin-top:0.35em}.emvb-image-link{display:contents}\",",
+          "replace": "    \"\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/image-figure-css.test.ts",
+        "-t",
+        "W-792"
+      ],
+      "expect": "\\(fail\\).*W-792"
+    },
+    {
+      "id": "W-793/toc-entry-not-hidden",
+      "requirement": "W-793",
+      "description": "contents entry stays when its heading is hidden on a device",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      attrs: item.tocClass ? { class: item.tocClass } : {},",
+          "replace": "      attrs: {},"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/toc-hidden-device.test.ts",
+        "-t",
+        "W-793"
+      ],
+      "expect": "\\(fail\\).*W-793"
+    },
+    {
+      "id": "W-795/bare-word-video",
+      "requirement": "W-795",
+      "description": "a bare word becomes a page-relative video player",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/embed-url.ts",
+          "search": "    if (!isVideoFilePath(trimmed)) return undefined;",
+          "replace": "    if (!trimmed) return undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/sanitize/embed-bare-word.test.ts",
+        "-t",
+        "W-795"
+      ],
+      "expect": "\\(fail\\).*W-795"
+    },
+    {
+      "id": "W-796/list-not-wide",
+      "requirement": "W-796",
+      "description": "three-digit list numbers overflow the list",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "    const wide = node.props.ordered === true && items.length >= 100;",
+          "replace": "    const wide = false;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/list-wide.test.ts",
+        "-t",
+        "W-796"
+      ],
+      "expect": "\\(fail\\).*W-796"
+    },
+    {
+      "id": "W-797/box-link-no-class",
+      "requirement": "W-797",
+      "description": "a linked box takes the browser's blue underlined link look",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/extras.ts",
+          "search": "    class: `${vnode.attrs.class ?? \"\"} emvb-box-link`.trim(),",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/box-link-look.test.ts",
+        "-t",
+        "W-797"
+      ],
+      "expect": "\\(fail\\).*W-797"
+    },
+    {
+      "id": "W-798/box-link-name-unchecked",
+      "requirement": "W-798",
+      "description": "a nameless linked box isn't flagged",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    if (boxBecomesLink(node) && !boxHasName(node)) {",
+          "replace": "    if (boxBecomesLink(node) && !boxHasName(node) && node.id === \"\") {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/a11y/box-link-name.test.ts",
+        "-t",
+        "W-798"
+      ],
+      "expect": "\\(fail\\).*W-798"
+    },
+    {
+      "id": "W-799/grid-span-unclamped",
+      "requirement": "W-799",
+      "description": "a grid span or start past a device's columns adds columns",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "  const width = Math.min(across ?? 1, count);",
+          "replace": "  const width = across ?? 1 + count * 0;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/grid-fit.test.ts", "-t", "W-799"],
+      "expect": "\\(fail\\).*W-799"
+    },
+    {
+      "id": "W-800/flex-no-anywhere",
+      "requirement": "W-800",
+      "description": "long words widen a flexbox and the page",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "gap:16px;overflow-wrap:anywhere}\"",
+          "replace": "gap:16px}\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/flexbox-wrap.test.ts",
+        "-t",
+        "W-800"
+      ],
+      "expect": "\\(fail\\).*W-800"
+    },
+    {
+      "id": "W-801/bg-video-ignores-motion",
+      "requirement": "W-801",
+      "description": "a background video keeps playing under reduced motion",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "\"@media (prefers-reduced-motion: reduce){.emvb-bg-video{display:none}}\"",
+          "replace": "\"@media (prefers-reduced-motion: reduce){.emvb-bg-video{}}\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/bg-video-motion.test.ts",
+        "-t",
+        "W-801"
+      ],
+      "expect": "\\(fail\\).*W-801"
+    },
+    {
+      "id": "W-802/overlay-under-video",
+      "requirement": "W-802",
+      "description": "a background video hides its overlay",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "pointer-events:none;background:var(--emvb-bg-overlay)}",
+          "replace": "pointer-events:none}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/render/bg-video-overlay.test.ts",
+        "-t",
+        "W-802"
+      ],
+      "expect": "\\(fail\\).*W-802"
+    },
+    {
+      "id": "W-803/icon-overflows",
+      "requirement": "W-803",
+      "description": "a large icon widens the page on a phone",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ".emvb-icon svg{display:block;max-width:100%;",
+          "replace": ".emvb-icon svg{display:block;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/icon-fit.test.ts",
+        "-t",
+        "W-803"
+      ],
+      "expect": "\\(fail\\).*W-803"
+    },
+    {
+      "id": "W-804/react-attr-spelling",
+      "requirement": "W-804",
+      "description": "the canvas passes lowercase fetchpriority/srcset to React",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/vnode-react.tsx",
+          "search": "  fetchpriority: \"fetchPriority\",\n  srcset: \"srcSet\",",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/vnode-react-attrs.test.tsx",
+        "-t",
+        "W-804"
+      ],
+      "expect": "\\(fail\\).*W-804"
+    },
+    {
+      "id": "W-805/mcp-versions-utc",
+      "requirement": "list_versions times are ISO UTC",
+      "description": "list_versions hands out the raw SQLite time",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/read.ts",
+          "search": "at: utcIso(r.createdAt),",
+          "replace": "at: r.createdAt,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/mcp-read.test.ts",
+        "-t",
+        "list_versions gives each time as ISO 8601 UTC"
+      ],
+      "expect": "\\(fail\\).*list_versions gives each time as ISO 8601 UTC"
+    },
+    {
+      "id": "W-806/styles-dot-on-label",
+      "requirement": "the unpublished-styles dot sits on Publish's corner",
+      "description": "the dot goes back inside the button, over the label",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": "::after { content: \"\"; position: absolute; top: 3px; right: 3px;",
+          "replace": "::after { content: \"\"; position: absolute; top: 4px; right: 4px;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-css.test.ts",
+        "-t",
+        "W-806: the unpublished-styles dot"
+      ],
+      "expect": "\\(fail\\).*W-806: the unpublished-styles dot"
+    },
+    {
+      "id": "W-807/accent-low-contrast",
+      "requirement": "the site accent meets 4.5:1 on every light surface",
+      "description": "the accent goes back to #2563eb (4.15:1 on the sunk bands)",
+      "edits": [
+        {
+          "file": "site/src/styles/tokens.css",
+          "search": "  --accent: #1d4ed8;",
+          "replace": "  --accent: #2563eb;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/site/token-contrast.test.ts",
+        "-t",
+        "light: the accent meets"
+      ],
+      "expect": "\\(fail\\).*light: the accent meets"
+    },
+    {
+      "id": "W-808/pane-not-focusable",
+      "requirement": "scrolling code panes are keyboard reachable",
+      "description": "the layout.json pane loses tabindex",
+      "edits": [
+        {
+          "file": "site/src/components/Pipeline.astro",
+          "search": "<pre tabindex=\"0\" role=\"region\" aria-label=\"layout.json\">",
+          "replace": "<pre role=\"region\" aria-label=\"layout.json\">"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./test/site/scroll-focus.test.ts",
+        "-t",
+        "every code pane in the pipeline"
+      ],
+      "expect": "\\(fail\\).*every code pane in the pipeline"
+    },
+    {
+      "id": "W-809/frame-focus-unwatched",
+      "requirement": "the canvas frame shows a keyboard focus ring",
+      "description": "the frame's window focus is not watched, so no ring",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/canvas/frame-focus-ring.ts",
+          "search": "      win?.addEventListener(\"focus\", onFocus);",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/canvas/frame-focus-ring.test.tsx",
+        "-t",
+        "W-809 the canvas frame shows a keyboard focus ring"
+      ],
+      "expect": "\\(fail\\).*W-809 the canvas frame shows a keyboard focus ring"
+    },
+    {
+      "id": "W-810/palette-width",
+      "requirement": "the command palette keeps a fixed width",
+      "description": "the palette sizes to its rows again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-palette.emvb-palette.emvb-palette { width: min(564px, calc(100vw - 32px)); }",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "W-810: the command palette has a fixed width"
+      ],
+      "expect": "\\(fail\\).*W-810: the command palette has a fixed width"
+    },
+    {
+      "id": "W-811/timeline-opaque-origin",
+      "requirement": "version pictures keep their origin to load host styles",
+      "description": "the version picture gets an empty sandbox again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "      sandbox=\"allow-same-origin\"",
+          "replace": "      sandbox=\"\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline.test.tsx",
+        "-t",
+        "W-811: a version picture keeps its origin"
+      ],
+      "expect": "\\(fail\\).*W-811: a version picture keeps its origin"
+    },
+    {
+      "id": "W-812/endpoint-copy-name",
+      "requirement": "the endpoint copy button names what it copies",
+      "description": "drop the endpoint copy label so Kumo's generic name returns",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": " labels={{ copyAction: \"Copy endpoint URL\" }}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "W-812"],
+      "expect": "\\(fail\\).*W-812"
+    },
+    {
+      "id": "W-813/create-error-focus",
+      "requirement": "a refused or failed create moves focus to the field in error",
+      "description": "drop the focus move so a 409 leaves focus on the page body",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "    (error.field === \"title\" ? titleInput : slugInput).current?.focus();",
+          "replace": "    void titleInput;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/create-dialogs.test.tsx",
+        "-t",
+        "W-813"
+      ],
+      "expect": "\\(fail\\).*W-813"
+    },
+    {
+      "id": "W-814/agents-switch-focus",
+      "requirement": "agent switches keep keyboard focus while saving",
+      "description": "disable the master switch while saving again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "            label=\"Let AI agents edit EmVB pages\"",
+          "replace": "            label=\"Let AI agents edit EmVB pages\"\n            disabled={saving}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "W-814"],
+      "expect": "\\(fail\\).*W-814"
+    },
+    {
+      "id": "W-815/agents-table-keyboard",
+      "requirement": "the agents activity table is reachable by keyboard",
+      "description": "drop the keyboard stop from the activity table",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentsPage.tsx",
+          "search": "<div className=\"emvb-agents-table\" {...SCROLLABLE} aria-label=\"Recent agent activity\">",
+          "replace": "<div className=\"emvb-agents-table\">"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/agents.test.tsx", "-t", "W-815"],
+      "expect": "\\(fail\\).*W-815"
+    },
+    {
+      "id": "W-816/save-repeat-press",
+      "requirement": "Save draft ignores repeat presses while busy",
+      "description": "let Save draft run again while busy",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "                if (busy !== null) return;\n                remember(event);\n                onSave();",
+          "replace": "                remember(event);\n                onSave();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/top-bar.test.tsx",
+        "-t",
+        "W-816"
+      ],
+      "expect": "\\(fail\\).*W-816"
+    },
+    {
+      "id": "W-817/library-escape",
+      "requirement": "Escape closes the media library",
+      "description": "ignore Escape in the media library",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "            event.stopPropagation();\n            closeLibrary();",
+          "replace": "            event.stopPropagation();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-817"
+      ],
+      "expect": "\\(fail\\).*W-817"
+    },
+    {
+      "id": "W-818/new-variable-focus",
+      "requirement": "closing the new-variable form returns focus to New variable",
+      "description": "stop refocusing New variable when the form closes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "    if (!active || active === document.body) newVariableRef.current?.focus();",
+          "replace": "    void active;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-818"
+      ],
+      "expect": "\\(fail\\).*W-818"
+    },
+    {
+      "id": "W-819/upload-busy-press",
+      "requirement": "Upload ignores presses while the picker is busy",
+      "description": "let Upload open the file picker while busy",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "            if (!busyRef.current) fileRef.current?.click();",
+          "replace": "            fileRef.current?.click();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx",
+        "-t",
+        "W-819"
+      ],
+      "expect": "\\(fail\\).*W-819"
+    },
+    {
+      "id": "W-820/new-variable-invalid",
+      "requirement": "a refused new variable focuses and marks the field in error",
+      "description": "stop focusing the refused field",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "    (field === \"name\" ? nameRef : valueRef).current?.focus();",
+          "replace": "    void valueRef;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-820"
+      ],
+      "expect": "\\(fail\\).*W-820"
+    },
+    {
+      "id": "W-821/new-variable-escape",
+      "requirement": "Escape closes the new-variable form",
+      "description": "ignore Escape in the new-variable form",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "        event.stopPropagation();\n        if (!pending.current) onCancel();",
+          "replace": "        event.stopPropagation();\n        void onCancel;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-821"
+      ],
+      "expect": "\\(fail\\).*W-821"
+    },
+    {
+      "id": "W-822/new-variable-cancel-busy",
+      "requirement": "a pending new variable can't be cancelled from its focusable Cancel",
+      "description": "let Cancel close the form mid-create",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ColorControl.tsx",
+          "search": "          onClick={() => {\n            if (!pending.current) onCancel();",
+          "replace": "          onClick={() => {\n            onCancel();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/color-control.test.tsx",
+        "-t",
+        "W-822"
+      ],
+      "expect": "\\(fail\\).*W-822"
+    },
+    {
+      "id": "W-823/bg-library-escape",
+      "requirement": "the background library closes on Escape and returns focus",
+      "description": "ignore Escape in the background library",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "              event.stopPropagation();\n              closeLibrary();",
+          "replace": "              event.stopPropagation();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "W-823"
+      ],
+      "expect": "\\(fail\\).*W-823"
+    },
+    {
+      "id": "W-824/bg-upload-busy-press",
+      "requirement": "background Upload ignores presses while busy",
+      "description": "let background Upload open the file picker while busy",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "                if (!busyRef.current) fileRef.current?.click();",
+          "replace": "                fileRef.current?.click();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx",
+        "-t",
+        "W-824"
+      ],
+      "expect": "\\(fail\\).*W-824"
+    },
+    {
+      "id": "W-825/export-repeat-press",
+      "requirement": "Save copy ignores repeat presses while saving",
+      "description": "drop the export busy guard",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "    if (pending !== null) return;\n    setError(null);",
+          "replace": "    setError(null);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-825"
+      ],
+      "expect": "\\(fail\\).*W-825"
+    },
+    {
+      "id": "W-826/create-busy-disabled",
+      "requirement": "the create button stays focusable while creating",
+      "description": "disable Create while creating again",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "              aria-disabled={busy}\n              aria-busy={busy}",
+          "replace": "              aria-disabled={busy}\n              disabled={busy}\n              aria-busy={busy}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/create-dialogs.test.tsx",
+        "-t",
+        "W-826"
+      ],
+      "expect": "\\(fail\\).*W-826"
+    },
+    {
+      "id": "W-827/icon-upload-busy-press",
+      "requirement": "Upload SVG ignores presses while uploading",
+      "description": "let Upload SVG open the file picker mid-upload",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/icons/IconLibraryDialog.tsx",
+          "search": "                if (!uploading) fileRef.current?.click();",
+          "replace": "                fileRef.current?.click();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/icons/icon-uploads.test.tsx",
+        "-t",
+        "W-827"
+      ],
+      "expect": "\\(fail\\).*W-827"
+    },
+    {
+      "id": "W-828/revert-busy-press",
+      "requirement": "Revert ignores presses while a save or publish is in flight",
+      "description": "let Revert run mid-save",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "                  if (busy !== null) return;\n                  onRevert();",
+          "replace": "                  onRevert();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/top-bar.test.tsx",
+        "-t",
+        "W-828"
+      ],
+      "expect": "\\(fail\\).*W-828"
+    },
+    {
+      "id": "W-829/publish-disabled",
+      "requirement": "Publish styles keeps keyboard focus while publishing",
+      "description": "disable Publish styles while publishing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "            aria-disabled={publishing}",
+          "replace": "            disabled={publishing}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-829: Publish styles stays"
+      ],
+      "expect": "\\(fail\\).*W-829: Publish styles stays"
+    },
+    {
+      "id": "W-829/no-refocus-export",
+      "requirement": "Focus moves to Export after styles publish",
+      "description": "drop the move to Export",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "    exportRef.current?.focus();",
+          "replace": "    void exportRef;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-829: once published"
+      ],
+      "expect": "\\(fail\\).*W-829: once published"
+    },
+    {
+      "id": "W-830/export-close-disabled",
+      "requirement": "Export Close stays focusable while saving",
+      "description": "disable export Close while saving",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ExportDialog.tsx",
+          "search": "          aria-disabled={pending === \"save\"}",
+          "replace": "          disabled={pending === \"save\"}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-830"
+      ],
+      "expect": "\\(fail\\).*W-830"
+    },
+    {
+      "id": "W-830/setup-busy-press",
+      "requirement": "Set up EmVB ignores presses while setup runs",
+      "description": "let Set up run twice",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/SetupShell.tsx",
+          "search": "          if (!running) void setup();",
+          "replace": "          void setup();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/setup-busy.test.tsx",
+        "-t",
+        "W-830"
+      ],
+      "expect": "\\(fail\\).*W-830"
+    },
+    {
+      "id": "W-831/no-focus-fallback",
+      "requirement": "Closing a palette-opened dialog keeps keyboard focus in the editor",
+      "description": "drop the focus fallback",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-chrome.tsx",
+          "search": "    target?.focus({ preventScroll: true });",
+          "replace": "    void target;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-chrome.test.tsx",
+        "-t",
+        "W-831: closing"
+      ],
+      "expect": "\\(fail\\).*W-831: closing"
+    },
+    {
+      "id": "W-831/gives-up-in-closing-dialog",
+      "requirement": "Focus fallback waits for the closing dialog to let go",
+      "description": "stop waiting while focus is still in the closing dialog",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-chrome.tsx",
+          "search": "      if (inDialog && Date.now() - started < 2000) timer = window.setTimeout(settle, 30);",
+          "replace": "      void inDialog;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editor-chrome.test.tsx",
+        "-t",
+        "W-831: closing"
+      ],
+      "expect": "\\(fail\\).*W-831: closing"
+    },
+    {
+      "id": "W-832/restore-drops-focus",
+      "requirement": "Restoring a section keeps keyboard focus on a restore action",
+      "description": "drop the refocus after a section restore",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "    next?.focus();",
+          "replace": "    void next;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/timeline.test.tsx",
+        "-t",
+        "W-832"
+      ],
+      "expect": "\\(fail\\).*W-832"
+    },
+    {
+      "id": "W-833/fix-drops-focus",
+      "requirement": "Applying an accessibility fix keeps keyboard focus on an action",
+      "description": "drop the refocus after a fix",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/A11yCopilot.tsx",
+          "search": "    next?.focus();",
+          "replace": "    void next;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/a11y-copilot.test.tsx",
+        "-t",
+        "W-833"
+      ],
+      "expect": "\\(fail\\).*W-833"
+    },
+    {
+      "id": "W-834/close-mid-save",
+      "requirement": "The leave dialog stays open while Save and leave saves",
+      "description": "let the leave dialog close mid-save",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "        if (!next && saving) return;",
+          "replace": "        void saving;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialogs.test.tsx",
+        "-t",
+        "W-834"
+      ],
+      "expect": "\\(fail\\).*W-834"
+    },
+    {
+      "id": "W-834/repeat-press",
+      "requirement": "Save and leave ignores presses while saving",
+      "description": "let Save and leave run again mid-save",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dialogs.tsx",
+          "search": "    if (!saving) run();",
+          "replace": "    run();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialogs.test.tsx",
+        "-t",
+        "W-834"
+      ],
+      "expect": "\\(fail\\).*W-834"
+    },
+    {
+      "id": "W-835/delete-drops-focus",
+      "requirement": "Confirming a subtree delete keeps keyboard focus in Layers",
+      "description": "drop the refocus after a confirmed delete",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-chrome.tsx",
+          "search": "          focusWhenLost();",
+          "replace": "          void focusWhenLost;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/editing.test.tsx",
+        "-t",
+        "W-835"
+      ],
+      "expect": "\\(fail\\).*W-835"
+    },
+    {
+      "id": "W-836/overwrite-not-in-flight",
+      "requirement": "A save during Overwrite waits for it",
+      "description": "let a save race the overwrite with the stale revision",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "    inFlight.current = run;\n    await run;",
+          "replace": "    await run;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/use-save.test.tsx",
+        "-t",
+        "W-836"
+      ],
+      "expect": "\\(fail\\).*W-836"
+    },
+    {
+      "id": "W-837/retry-drops-focus",
+      "requirement": "List Retry keeps keyboard focus through loading and the result",
+      "description": "drop the Retry focus landing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/list-kit.tsx",
+          "search": "    ref.current?.focus({ preventScroll: true });",
+          "replace": "    void ref;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/pages/list-retry.test.tsx",
+        "-t",
+        "W-837"
+      ],
+      "expect": "\\(fail\\).*W-837"
+    },
+    {
+      "id": "W-838/remove-drops-focus",
+      "requirement": "Removing a Button icon keeps keyboard focus in the field",
+      "description": "drop the refocus after Remove",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
+          "search": "    refocus();\n  };",
+          "replace": "  };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-picker.test.tsx",
+        "-t",
+        "W-838"
+      ],
+      "expect": "\\(fail\\).*W-838"
+    },
+    {
+      "id": "W-839/no-toolbar-focus",
+      "requirement": "Undo, Redo and Reset keep keyboard focus in the toolbar when they disable themselves",
+      "description": "drop the toolbar focus hand-off",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/parts.tsx",
+          "search": "          keepToolbarFocus(from);",
+          "replace": "          void from;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-839"
+      ],
+      "expect": "\\(fail\\).*W-839"
+    },
+    {
+      "id": "W-839/prefers-next",
+      "requirement": "A spent toolbar button hands focus to the previous enabled neighbour first",
+      "description": "prefer the following button on a tie",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/parts.tsx",
+          "search": "Math.abs(index - at) + (index > at ? 0.5 : 0)",
+          "replace": "Math.abs(index - at) - (index > at ? 0.5 : 0)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-839"
+      ],
+      "expect": "\\(fail\\).*W-839"
+    },
+    {
+      "id": "W-840/enter-does-nothing",
+      "requirement": "Enter in a Site styles create field creates the item",
+      "description": "drop the Enter handler",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/site-list.tsx",
+          "search": "        onCreate();\n      }}",
+          "replace": "      }}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "W-840"
+      ],
+      "expect": "\\(fail\\).*W-840"
+    },
+    {
+      "id": "W-840/ime-enter-creates",
+      "requirement": "An IME composition Enter does not create",
+      "description": "ignore composition on Enter",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/site-list.tsx",
+          "search": "!isCommitEnter(event)) return;",
+          "replace": "event.key !== \"Enter\") return;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "W-840"
+      ],
+      "expect": "\\(fail\\).*W-840"
+    },
+    {
+      "id": "W-840/class-create-drops-focus",
+      "requirement": "Creating a class focuses its new row",
+      "description": "drop the new-row focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ClassesSection.tsx",
+          "search": "    setEditing(id);\n    requestAnimationFrame(() => rows.current.get(id)?.focus());",
+          "replace": "    setEditing(id);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "W-840"
+      ],
+      "expect": "\\(fail\\).*W-840"
+    },
+    {
+      "id": "W-840/var-cancel-drops-focus",
+      "requirement": "Cancelling a new variable focuses New",
+      "description": "drop the cancel focus",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "            setCreateError(null);\n            focusNew();",
+          "replace": "            setCreateError(null);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "W-840"
+      ],
+      "expect": "\\(fail\\).*W-840"
+    },
+    {
+      "id": "W-841/delete-drops-focus",
+      "requirement": "Deleting a Site styles row keeps keyboard focus in the list",
+      "description": "drop the post-delete landing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "            requestAnimationFrame(land);",
+          "replace": "            void land;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-841"
+      ],
+      "expect": "\\(fail\\).*W-841"
+    },
+    {
+      "id": "W-841/cancel-drops-focus",
+      "requirement": "Cancelling a Site styles delete returns focus to the row menu",
+      "description": "drop the cancel landing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "              row?.querySelector<HTMLButtonElement>(\".emvb-site-menu-btn\")?.focus(),",
+          "replace": "              void row,"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-841"
+      ],
+      "expect": "\\(fail\\).*W-841"
     }
   ]
 }

@@ -9,7 +9,7 @@ import {
   GAP,
   visibleRows,
 } from "./IconLibraryDialog.tsx";
-import type { LibraryIcon } from "./library.ts";
+import { loadIconSet, type LibraryIcon } from "./library.ts";
 
 afterEach(cleanup);
 
@@ -352,5 +352,35 @@ describe("icon library dialog (W-236)", () => {
     await key(grid() ?? document.body, "Escape");
     expect(changes).toEqual([false, false]);
     expect(inserted).toEqual([]);
+  });
+});
+
+describe("set download failure (W-749)", () => {
+  test("W-749: Try again after a set fails keeps keyboard focus on the search", async () => {
+    let failing = true;
+    const loadSet: typeof loadIconSet = (id) =>
+      failing && id === "lucide" ? Promise.reject(new Error("offline")) : loadIconSet(id);
+    await mount(
+      <IconLibraryDialog
+        open
+        onOpenChange={() => {}}
+        currentId={undefined}
+        loadSet={loadSet}
+        onInsert={() => {}}
+      />,
+    );
+    await until(() => dialog()?.textContent?.includes("icons didn't load") === true, "the failure");
+    failing = false;
+    const retry = [...(dialog()?.querySelectorAll("button") ?? [])].find(
+      (button) => button.textContent === "Try again",
+    );
+    if (!retry) throw new Error("no Try again");
+    await act(async () => {
+      retry.focus();
+      retry.click();
+    });
+    await ready();
+    const search = dialog()?.querySelector('input[type="search"]');
+    expect(search !== null && document.activeElement === search).toBe(true);
   });
 });

@@ -102,7 +102,8 @@ function useRevisions(fetcher: Fetcher, collection: string, entryId: string, ope
             if (agent) version.agent = { tool: agent.tool, summary: agent.summary };
             return version;
           })
-          .toSorted((a, b) => (a.at < b.at ? 1 : -1));
+          // W-768: saves in the same second tie on the time; revision ids are ULIDs, so they settle it.
+          .toSorted((a, b) => (a.at === b.at ? (a.id < b.id ? 1 : -1) : a.at < b.at ? 1 : -1));
         setState({ kind: "ready", versions });
       })
       .catch((error: unknown) => {
@@ -158,6 +159,14 @@ const whenParts = (iso: string) => {
   };
 };
 
+/**
+ * W-752: the picture is not a page to browse. A link in it took keyboard focus and Enter loaded the
+ * site (or the admin, for an in-page anchor) inside the picture. Inside a tag, core escapes `"`
+ * and `>` in attribute values, so the tag and its href are found exactly; text is left alone.
+ */
+const inertLinks = (html: string) =>
+  html.replaceAll(/<a\b[^>]*>/g, (tag) => tag.replace(/ href="[^"]*"/, ""));
+
 /** A small, script-free picture of one version with its changed sections outlined (W-315). */
 function Snapshot({
   layout,
@@ -181,9 +190,19 @@ function Snapshot({
     const links = canvasStyleUrls([...canvasStyles])
       .map((href) => `<link rel="stylesheet" href="${escapeAttr(href)}" data-emvb-canvas-style="">`)
       .join("");
-    return `<!doctype html><html><head>${links}<style>html{zoom:.35}body{margin:0}${css}${outline}</style></head><body>${html}</body></html>`;
+    return `<!doctype html><html><head>${links}<style>html{zoom:.35}body{margin:0}${css}${outline}</style></head><body>${inertLinks(html)}</body></html>`;
   }, [layout, design, ids, canvasStyles]);
-  return <iframe className="emvb-timeline-frame" title={title} sandbox="" srcDoc={doc} />;
+  // W-811: an empty sandbox gave the picture an opaque origin, so the host's own stylesheets were
+  // cross-origin requests the host refused (403), and the picture lost the site's styles. Like the
+  // canvas, it keeps its origin and still runs no scripts.
+  return (
+    <iframe
+      className="emvb-timeline-frame"
+      title={title}
+      sandbox="allow-same-origin"
+      srcDoc={doc}
+    />
+  );
 }
 
 /**
@@ -218,6 +237,23 @@ export function TimelineDialog({
   const [pickedId, setPickedId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [who, setWho] = React.useState<Who>("all");
+  // W-832: a restored section leaves the change list, taking its focused button with it, so
+  // focus fell back to the dialog itself. Move it to the next Restore this section, else to
+  // Restore this whole version.
+  const changesRef = React.useRef<HTMLUListElement>(null);
+  const restoreVersionRef = React.useRef<HTMLButtonElement>(null);
+  const refocusAfterRestore = React.useRef(false);
+  React.useEffect(() => {
+    if (!refocusAfterRestore.current) return;
+    refocusAfterRestore.current = false;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.isConnected && changesRef.current?.contains(active))
+      return;
+    const next =
+      changesRef.current?.querySelector<HTMLElement>("[data-emvb-restore-section]") ??
+      restoreVersionRef.current;
+    next?.focus();
+  });
   // A refusal belongs to the visit it happened in; closing the timeline clears it (W-623).
   React.useEffect(() => {
     if (!open) setError(null);
@@ -370,7 +406,11 @@ export function TimelineDialog({
                         />
                       </figure>
                     </div>
-                    <ul className="emvb-timeline-changes" data-emvb-timeline-changes="">
+                    <ul
+                      ref={changesRef}
+                      className="emvb-timeline-changes"
+                      data-emvb-timeline-changes=""
+                    >
                       {changes.map((change) => (
                         <li key={`${change.kind}:${change.id}`} data-kind={change.kind}>
                           <span className="emvb-timeline-kind">{KIND_LABELS[change.kind]}</span>{" "}
@@ -390,6 +430,7 @@ export function TimelineDialog({
                                   return;
                                 }
                                 setError(null);
+                                refocusAfterRestore.current = true;
                                 onApply(result.layout, "Section restored");
                               }}
                             >
@@ -409,6 +450,7 @@ export function TimelineDialog({
                       until you save.
                     </p>
                     <Button
+                      ref={restoreVersionRef}
                       variant="secondary"
                       data-emvb-restore-version=""
                       onClick={() => {

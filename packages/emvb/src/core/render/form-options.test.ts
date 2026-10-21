@@ -70,7 +70,7 @@ describe("form field options from the bound definition (W-035)", () => {
 
   test("a select lists the definition's options after a blank choice", () => {
     expect(html).toContain(
-      '<select class="ec-form-input" id="emvb-field-sele0001" name="topic"><option value="">Choose…</option><option value="sales">Sales</option><option value="support">Support</option></select>',
+      '<select class="ec-form-input" id="emvb-field-sele0001" name="topic" aria-describedby="emvb-field-sele0001-error"><option value="">Choose…</option><option value="sales">Sales</option><option value="support">Support</option></select>',
     );
   });
 
@@ -81,7 +81,9 @@ describe("form field options from the bound definition (W-035)", () => {
   });
 
   test("fields without options, or not in any definition, keep their placeholders", () => {
-    expect(html).toContain('name="plain"><option value="">Choose…</option></select>');
+    expect(html).toContain(
+      'name="plain" aria-describedby="emvb-field-sele0002-error"><option value="">Choose…</option></select>',
+    );
     expect(html).toContain('name="unbound" value="a"> Option A');
   });
 });
@@ -146,19 +148,19 @@ describe("form fields take the definition's type and limits (W-297)", () => {
     expect(html).toContain('<form class="emvb-form ec-form" method="POST"');
     expect(html).toContain('novalidate=""');
     expect(html).toContain(
-      '<select class="ec-form-input" id="emvb-field-sele0001" name="topic" required="">',
+      '<select class="ec-form-input" id="emvb-field-sele0001" name="topic" aria-describedby="emvb-field-sele0001-error" required="">',
     );
     expect(html).toContain(
-      '<input type="email" class="ec-form-input" id="emvb-field-text0001" name="email" required="" minlength="5" maxlength="80" pattern=".+@example.com">',
+      '<input type="email" class="ec-form-input" id="emvb-field-text0001" name="email" aria-describedby="emvb-field-text0001-error" required="" minlength="5" maxlength="80" pattern=".+@example.com">',
     );
     expect(html).toContain(
-      '<input type="number" class="ec-form-input" id="emvb-field-text0002" name="age" min="18" max="99" step="any">',
+      '<input type="number" class="ec-form-input" id="emvb-field-text0002" name="age" aria-describedby="emvb-field-text0002-error" min="18" max="99" step="any">',
     );
     expect(html).toContain(
-      '<input type="date" class="ec-form-input" id="emvb-field-text0003" name="when">',
+      '<input type="date" class="ec-form-input" id="emvb-field-text0003" name="when" aria-describedby="emvb-field-text0003-error">',
     );
     expect(html).toContain(
-      '<input type="checkbox" id="emvb-field-chek0001" name="agree" value="true" required="">',
+      '<input type="checkbox" id="emvb-field-chek0001" name="agree" value="true" aria-describedby="emvb-field-chek0001-error" required="">',
     );
     expect(html).toContain('class="emvb-form-required" aria-hidden="true"> *</span>');
     // Topic, Email and I agree carry the mark; Age and When don't.
@@ -193,7 +195,7 @@ describe("form fields take the definition's type and limits (W-297)", () => {
       { formDefinitions: new Map([["contact", typed]]) },
     ).html;
     expect(extra).toContain(
-      '<input type="text" class="ec-form-input" id="emvb-field-text0009" name="nick">',
+      '<input type="text" class="ec-form-input" id="emvb-field-text0009" name="nick" aria-label="nick" aria-describedby="emvb-field-text0009-error">',
     );
   });
 
@@ -449,7 +451,7 @@ describe("radio options keep the group's legend (W-524)", () => {
 
   test("the legend comes first, with the required mark, then the options", () => {
     expect(html).toMatch(
-      /<fieldset class="emvb-radio-group"><legend class="emvb-form-label" id="emvb-field-radi0001-label">size<span class="emvb-form-required"[^>]*>[^<]*<\/span><\/legend><label class="emvb-form-radio-label"><input type="radio" name="size" value="s" required=""> Small<\/label><\/fieldset>/,
+      /<fieldset class="emvb-radio-group" aria-describedby="emvb-field-radi0001-error"><legend class="emvb-form-label" id="emvb-field-radi0001-label">size<span class="emvb-form-required"[^>]*>[^<]*<\/span><\/legend><label class="emvb-form-radio-label"><input type="radio" name="size" value="s" required=""> Small<\/label><\/fieldset>/,
     );
   });
 });
@@ -626,8 +628,12 @@ describe("W-686: a Select's empty choice can be worded for the site", () => {
       },
     };
     const { html } = renderPage(page, emptyDesign(), { formDefinitions: definitions });
-    expect(html).toContain('name="topic"><option value="">Choisir…</option><option value="sales">');
-    expect(html).toContain('name="plain"><option value="">Choisir…</option></select>');
+    expect(html).toContain(
+      'name="topic" aria-describedby="emvb-field-sele0001-error"><option value="">Choisir…</option><option value="sales">',
+    );
+    expect(html).toContain(
+      'name="plain" aria-describedby="emvb-field-sele0002-error"><option value="">Choisir…</option></select>',
+    );
     expect(html).not.toContain("Choose…");
   });
 

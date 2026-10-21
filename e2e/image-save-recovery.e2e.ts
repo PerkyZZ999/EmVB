@@ -53,6 +53,66 @@ async function openPhotoEditor(page: Page, request: APIRequestContext, title: st
   );
 }
 
+// W-751: the first image-editor open after a dev-server start compiles its lazy chunks, which can
+// take longer than the 30 s readiness limit the tests assert. Open it once before them, untimed
+// by any test, so every test measures a warm editor.
+test.beforeAll(async ({ browser }, info) => {
+  test.setTimeout(180_000);
+  const { baseURL, storageState } = info.project.use;
+  const context = await browser.newContext({ baseURL, storageState });
+  try {
+    const page = await context.newPage();
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await openEditor(page, await warmPage(context.request));
+    await openLayers(page);
+    await overlay(page).locator(".emvb-layer-select", { hasText: "Image" }).click();
+    await overlay(page).locator("[data-emvb-image-edit]").click();
+    await page
+      .locator('[data-emvb-image-editor="ready"]')
+      .waitFor({ state: "visible", timeout: 150_000 });
+  } finally {
+    await context.close();
+  }
+});
+
+async function warmPage(request: APIRequestContext) {
+  const upload = await request.post("/_emdash/api/media", {
+    headers: { "X-EmDash-Request": "1" },
+    multipart: {
+      file: {
+        name: "warm.jpg",
+        mimeType: "image/jpeg",
+        buffer: readFileSync("e2e/fixtures/photo-gps.jpg"),
+      },
+      width: "640",
+      height: "480",
+    },
+  });
+  expect(upload.status()).toBeLessThan(300);
+  const media = ((await upload.json()) as { data: { item: { id: string; url: string } } }).data
+    .item;
+  return createPage(
+    request,
+    "Image editor warm-up",
+    {
+      schemaVersion: 16,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "image001",
+            type: "image",
+            props: { src: media.url, mediaId: media.id, alt: "Image", width: 640, height: 480 },
+          },
+        ],
+      },
+    },
+    `warm-${unique()}`,
+  );
+}
+
 async function dialogMotion(popup: Locator) {
   return popup.evaluate((element) => {
     let backdrop: Element | undefined;
@@ -410,4 +470,47 @@ test("W-743: compact sheet Close returns keyboard focus to the current outer too
   expect(await frame.evaluate((element) => element.getBoundingClientRect().toJSON())).toEqual(
     frameGeometry,
   );
+});
+
+test("W-744: compact sheet grip resizes by keyboard and a drag dismiss returns focus", async ({
+  page,
+  request,
+}) => {
+  await openPhotoEditor(page, request, "Compact sheet grip");
+  const popup = page.getByRole("dialog", { name: "Edit image", exact: true });
+  await popup.evaluate((element) => {
+    element.style.width = "390px";
+    element.style.height = "844px";
+  });
+  const editor = page.locator("[data-emvb-image-editor]");
+  await expect(editor).toHaveAttribute("data-layout", "compact");
+  const sheet = editor.locator("[data-emvb-image-sheet]");
+  const tool = editor.locator('.emvb-ie-compact > nav [data-emvb-image-tool="compose"]');
+  const grip = sheet.getByRole("separator", { name: "Resize panel", exact: true });
+  await tool.click();
+  await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "open");
+  await grip.focus();
+  await expect(grip).toHaveAttribute("aria-valuetext", "Peek");
+  await page.keyboard.press("ArrowUp");
+  await expect(sheet).toHaveAttribute("style", /height: 90%/);
+  await expect(grip).toHaveAttribute("aria-valuetext", "Expanded");
+  await expect(grip).toBeFocused();
+  await popup.screenshot({ path: `/tmp/emvb-grip-${test.info().project.name}-expanded.png` });
+  await page.keyboard.press("ArrowDown");
+  await expect(sheet).toHaveAttribute("style", /height: 42%/);
+  await page.keyboard.press("ArrowDown");
+  await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "closed");
+  await expect(tool).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "open");
+  const box = await grip.boundingBox();
+  if (!box) throw new Error("Compact sheet grip has no geometry");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 320, { steps: 4 });
+  await page.mouse.up();
+  await expect(sheet).toHaveAttribute("data-emvb-image-sheet", "closed");
+  await expect(tool).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(popup).toHaveCount(0);
 });

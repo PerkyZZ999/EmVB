@@ -298,3 +298,39 @@ test("library picker reapplies a previously uploaded image", async ({ page, requ
   expect(layout.root.children[0]?.props.src).toBe(pickedSrc ?? "");
   expect(layout.root.children[0]?.props.src).toMatch(/^\/_emdash\/api\/media\/file\//);
 });
+
+test("W-761: a long image URL wraps inside the settings panel", async ({ page, request }) => {
+  const src = `https://example.com/${"a".repeat(200)}.png`;
+  const layout = imageLayout();
+  const image = layout.root.children[0];
+  if (image) image.props.src = src;
+  const id = await createPage(request, "Long URL", layout, `media-long-url-${unique()}`);
+  await openEditor(page, id);
+  await selectImage(page);
+  const picker = overlay(page).locator("[data-emvb-media-picker]");
+  await expect(picker.locator(".emvb-media-preview .emvb-mono")).toHaveText(src);
+  const widths = await picker.evaluate((group) => ({
+    group: group.clientWidth,
+    url: group.querySelector(".emvb-media-preview .emvb-mono")?.scrollWidth ?? Infinity,
+  }));
+  expect(widths.url).toBeLessThanOrEqual(widths.group);
+});
+
+test("W-763: a long bad srcset line keeps its error inside the panel", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(request, "Long srcset", imageLayout(), `media-srcset-${unique()}`);
+  await openEditor(page, id);
+  await selectImage(page);
+  const field = overlay(page).getByLabel("Extra sizes (srcset)");
+  await field.fill("Z".repeat(300));
+  await field.press("Tab");
+  const error = overlay(page).locator("[data-emvb-sources-error]");
+  await expect(error).toContainText("write the URL");
+  const widths = await error.evaluate((help) => ({
+    help: help.scrollWidth,
+    group: help.parentElement?.clientWidth ?? 0,
+  }));
+  expect(widths.help).toBeLessThanOrEqual(widths.group);
+});

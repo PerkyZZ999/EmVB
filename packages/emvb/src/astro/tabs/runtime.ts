@@ -107,6 +107,16 @@ function enhance(root: HTMLElement): void {
     activate(root, target(selectedIndex(root), labels.length), true);
   });
 
+  // W-779: a click on a tab focused its invisible radio (the label's default), so the arrows that
+  // followed moved an unseen focus and Tab stopped on the tab again. Select and focus the tab.
+  list.addEventListener("click", (event) => {
+    const label = (event.target as Element | null)?.closest?.<HTMLElement>(".emvb-tab-label");
+    const index = label ? labels.indexOf(label) : -1;
+    if (index < 0 || event.defaultPrevented) return;
+    event.preventDefault();
+    activate(root, index, true);
+  });
+
   // Keep ARIA in sync when the CSS-only radio path is used (click / label).
   root.addEventListener("change", (event) => {
     const target = event.target as HTMLInputElement | null;

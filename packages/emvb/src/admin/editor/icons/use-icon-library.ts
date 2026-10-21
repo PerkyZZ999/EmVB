@@ -36,9 +36,12 @@ function initialCategory(currentId: string | undefined, uploads: boolean): strin
 export function useIconLibrary({
   currentId,
   fetcher,
+  loadSet = loadIconSet,
 }: {
   currentId: string | undefined;
   fetcher?: Fetcher;
+  /** Loads one icon set; replaceable so a failed download can be tested. */
+  loadSet?: typeof loadIconSet;
 }) {
   const [categoryId, setCategoryId] = React.useState(() =>
     initialCategory(currentId, fetcher !== undefined),
@@ -95,7 +98,7 @@ export function useIconLibrary({
     let live = true;
     setFailed(undefined);
     for (const id of (neededKey ? neededKey.split(",") : []) as IconSetId[]) {
-      loadIconSet(id).then(
+      loadSet(id).then(
         (icons) => {
           if (live) setSets((prev) => (prev[id] ? prev : { ...prev, [id]: icons }));
         },
@@ -107,7 +110,7 @@ export function useIconLibrary({
     return () => {
       live = false;
     };
-  }, [neededKey, attempt]);
+  }, [neededKey, attempt, loadSet]);
 
   // All icons waits for the uploads list too, unless it failed (the sets still show, W-295).
   const uploadsSettled = !fetcher || uploads !== undefined || uploadsFailed !== undefined;

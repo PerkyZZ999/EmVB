@@ -229,8 +229,14 @@ describe("creating a colour variable (W-091)", () => {
       const form = view.host.querySelector('[data-emvb-form="new-variable"]');
       const fields = [...(form?.querySelectorAll("input") ?? [])];
       const buttons = [...(form?.querySelectorAll<HTMLButtonElement>("button") ?? [])];
-      expect(fields.map((field) => field.disabled)).toEqual([true, true]);
-      expect(buttons.map((button) => button.disabled)).toEqual([true, true]);
+      // W-822: locked (read-only, aria-disabled) rather than disabled, so focus stays put.
+      expect(
+        fields.map((field) => field.readOnly && field.getAttribute("aria-disabled") === "true"),
+      ).toEqual([true, true]);
+      expect(buttons.map((button) => button.getAttribute("aria-disabled") === "true")).toEqual([
+        true,
+        true,
+      ]);
       expect(buttons.at(-1)?.getAttribute("aria-busy")).toBe("true");
       expect(form?.querySelector('[role="status"]')?.textContent).toBe("Creating color variable…");
       expect(view.values).toEqual([]);
@@ -238,8 +244,13 @@ describe("creating a colour variable (W-091)", () => {
       await settle();
       expect(view.alert()).toBe("Try saving again.");
       expect(fields.map((field) => field.value)).toEqual(["Accent", "#abcdef"]);
-      expect(fields.map((field) => field.disabled)).toEqual([false, false]);
-      expect(buttons.map((button) => button.disabled)).toEqual([false, false]);
+      expect(
+        fields.map((field) => field.readOnly || field.getAttribute("aria-disabled") === "true"),
+      ).toEqual([false, false]);
+      expect(buttons.map((button) => button.getAttribute("aria-disabled") === "true")).toEqual([
+        false,
+        false,
+      ]);
       expect(buttons.at(-1)?.getAttribute("aria-busy")).toBe("false");
       await view.type("Value", "#123456");
       await view.click("Create variable");
@@ -528,4 +539,99 @@ describe("Picking a colour keeps its transparency (W-526)", () => {
     await settle();
     expect(ui.values.at(-1)).toBe("#00ff00");
   });
+});
+
+test("W-818: closing the new-variable form by Cancel or Create puts focus back on New variable", async () => {
+  const view = await control(undefined);
+  const newButton = () =>
+    [...view.host.querySelectorAll<HTMLButtonElement>("button")].find(
+      (b) => b.textContent?.trim() === "New variable",
+    );
+  await view.click("New variable");
+  const cancel = [...view.host.querySelectorAll<HTMLButtonElement>("button")].find(
+    (b) => b.textContent?.trim() === "Cancel",
+  );
+  cancel?.focus();
+  await view.click("Cancel");
+  expect(newButton()).toBeTruthy();
+  expect(document.activeElement === newButton()).toBe(true);
+  await view.click("New variable");
+  await view.type("Variable name", "Accent");
+  await view.type("Value", "#abcdef");
+  await view.click("Create variable");
+  await settle();
+  expect(newButton()).toBeTruthy();
+  expect(document.activeElement === newButton()).toBe(true);
+});
+
+test("W-820: a refused name or value focuses that field and marks it invalid", async () => {
+  const view = await control(undefined);
+  await view.click("New variable");
+  await view.type("Value", "#abcdef");
+  await view.enter("Value");
+  expect(view.alert()).toBe("Enter a name for the variable.");
+  const name = view.field("Variable name");
+  const value = view.field("Value");
+  expect(document.activeElement === name).toBe(true);
+  expect(name.getAttribute("aria-invalid")).toBe("true");
+  expect(value.hasAttribute("aria-invalid")).toBe(false);
+  await view.type("Variable name", "Accent");
+  await view.type("Value", "#12");
+  name.focus();
+  await view.click("Create variable");
+  expect(document.activeElement === view.field("Value")).toBe(true);
+  expect(view.field("Value").getAttribute("aria-invalid")).toBe("true");
+  expect(view.field("Variable name").hasAttribute("aria-invalid")).toBe(false);
+  expect(view.designs).toEqual([]);
+});
+
+test("W-821: Escape closes the new-variable form and returns focus to New variable", async () => {
+  const view = await control(undefined);
+  await view.click("New variable");
+  await view.type("Variable name", "Accent");
+  const outside: string[] = [];
+  const onOutside = (event: KeyboardEvent) => outside.push(event.key);
+  document.addEventListener("keydown", onOutside);
+  await act(async () => {
+    view
+      .field("Variable name")
+      .dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
+      );
+  });
+  await settle();
+  document.removeEventListener("keydown", onOutside);
+  expect(view.has("Variable name")).toBe(false);
+  expect(view.designs).toEqual([]);
+  expect(outside).toEqual([]);
+  const newButton = [...view.host.querySelectorAll<HTMLButtonElement>("button")].find(
+    (b) => b.textContent?.trim() === "New variable",
+  );
+  expect(document.activeElement === newButton).toBe(true);
+});
+
+test("W-822: while creating, the form keeps focus and Cancel or Escape doesn't close it", async () => {
+  const pending = Promise.withResolvers<void>();
+  const view = await control(undefined, undefined, () => pending.promise);
+  await view.click("New variable");
+  await view.type("Variable name", "Accent");
+  await view.type("Value", "#abcdef");
+  try {
+    const form = view.host.querySelector('[data-emvb-form="new-variable"]');
+    const buttons = [...(form?.querySelectorAll<HTMLButtonElement>("button") ?? [])];
+    const create = buttons.find((b) => b.textContent === "Create variable");
+    create?.focus();
+    await act(async () => create?.click());
+    expect(buttons.map((b) => b.disabled)).toEqual([false, false]);
+    expect([...(form?.querySelectorAll("input") ?? [])].map((f) => f.disabled)).toEqual([
+      false,
+      false,
+    ]);
+    expect(document.activeElement === create).toBe(true);
+    await act(async () => buttons.find((b) => b.textContent === "Cancel")?.click());
+    expect(view.has("Variable name")).toBe(true);
+    expect(view.designs).toHaveLength(1);
+  } finally {
+    await act(async () => pending.resolve());
+  }
 });

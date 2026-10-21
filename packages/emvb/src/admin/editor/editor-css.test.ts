@@ -169,6 +169,12 @@ test("UX-056: the unsaved dot sits on Save draft's corner, ringed, clear of the 
   expect(dot).toContain("box-shadow: 0 0 0 2px var(--color-kumo-base);");
 });
 
+test("W-806: the unpublished-styles dot is drawn on Publish's corner, not inside its label", () => {
+  const dot = rule('.emvb-publish-button[data-emvb-styles-pending="true"]::after');
+  expect(dot).toContain("position: absolute; top: 3px; right: 3px;");
+  expect(EDITOR_CSS.includes(".emvb-styles-dot")).toBe(false);
+});
+
 test("UX-068: class chips and their menu and remove buttons meet the 24 px target size", () => {
   expect(EDITOR_CSS).toMatch(/\.emvb-chip \{[^}]*height: 24px;/);
   expect(EDITOR_CSS).toMatch(/\.emvb-chip-icon \{[^}]*width: 24px; height: 24px;/);

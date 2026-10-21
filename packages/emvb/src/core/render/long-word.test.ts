@@ -27,4 +27,36 @@ describe("long words (W-299)", () => {
     expect(html.startsWith('<div class="emvb-root emvb-container">')).toBe(true);
     expect(css).toMatch(/\.emvb-container\{[^}]*overflow-wrap:break-word/);
   });
+
+  // W-764: a button label is a flex item, so break-word alone left it one unbreakable line.
+  test("W-764: a button lets a long label break", () => {
+    const withButton: Layout = {
+      schemaVersion: 16,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [{ id: "btn00001", type: "button", props: { text: "x".repeat(200), href: "/" } }],
+      },
+    };
+    const { css } = renderPage(withButton, emptyDesign());
+    expect(css).toMatch(/\.emvb-button\{[^}]*overflow-wrap:anywhere/);
+  });
+
+  // W-765: a tab label is a flex item in the tab list, so a long word kept the whole label on one line.
+  test("W-765: a tab label lets a long word break", () => {
+    const withTabs: Layout = {
+      schemaVersion: 16,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          { id: "tabs0001", type: "tabs", props: { tabs: ["x".repeat(200)] }, children: [] },
+        ],
+      },
+    };
+    const { css } = renderPage(withTabs, emptyDesign());
+    expect(css).toMatch(/\.emvb-tab-label\{[^}]*min-width:0;overflow-wrap:anywhere/);
+  });
 });

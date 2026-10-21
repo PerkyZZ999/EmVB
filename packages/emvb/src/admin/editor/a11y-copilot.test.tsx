@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import * as React from "react";
 import { act } from "react";
 import { auditPage, emptyDesign, type Layout } from "../../core/index.ts";
 import { cleanup, mount } from "../../../test/dom/mount.ts";
@@ -85,4 +86,31 @@ test("UX-022: issues name their severity, and the actions read Close then Fix N 
     ...(document.querySelector(".emvb-a11y-actions")?.querySelectorAll("button") ?? []),
   ];
   expect(actions.map((b) => b.textContent)).toEqual(["Close", "Fix 2 issues"]);
+});
+
+test("W-833: after a fix, focus moves to the next fix, then to Close once nothing is left", async () => {
+  function Host() {
+    const [current, setCurrent] = React.useState(layout);
+    return (
+      <A11yDialog
+        open
+        onOpenChange={() => undefined}
+        report={auditPage(current, emptyDesign())}
+        layout={current}
+        onSelect={() => undefined}
+        onApply={(next) => setCurrent(next)}
+      />
+    );
+  }
+  await mount(<Host />);
+  const fixes = () => [...document.querySelectorAll<HTMLButtonElement>("[data-emvb-a11y-fix]")];
+  expect(fixes().length).toBe(2);
+  const first = fixes()[0];
+  first?.focus();
+  await act(async () => first?.click());
+  expect(fixes().length).toBe(1);
+  expect(document.activeElement === fixes()[0]).toBe(true);
+  await act(async () => fixes()[0]?.click());
+  expect(fixes().length).toBe(0);
+  expect(document.activeElement?.hasAttribute("data-emvb-a11y-close")).toBe(true);
 });

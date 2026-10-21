@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { act } from "react";
+import { act, useState } from "react";
 import { emptyDesign, type DesignSystem, type Layout } from "../../../core/index.ts";
 import { SiteStylesDrawer } from "./SiteStylesDrawer.tsx";
 import type { Deletion } from "../restore-deleted.ts";
-import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
+import { cleanup, mount, rerender, settle } from "../../../../test/dom/mount.ts";
 
 afterEach(cleanup);
 
@@ -202,7 +202,7 @@ describe("publishing feedback (W-724)", () => {
     try {
       await open(() => pending.promise);
       await act(async () => publishButton()?.click());
-      expect(publishButton()?.disabled).toBe(true);
+      expect(publishButton()?.getAttribute("aria-disabled")).toBe("true");
       expect(publishButton()?.getAttribute("aria-busy")).toBe("true");
       expect(publishButton()?.querySelector('svg[role="status"]') !== null).toBe(true);
       expect(document.querySelector('.emvb-site-styles-footer[role="status"]')?.textContent).toBe(
@@ -216,6 +216,7 @@ describe("publishing feedback (W-724)", () => {
 
       await act(async () => pending.resolve());
       expect(publishButton()?.disabled).toBe(false);
+      expect(publishButton()?.getAttribute("aria-disabled")).not.toBe("true");
       expect(publishButton()?.getAttribute("aria-busy")).not.toBe("true");
       expect(document.querySelector('.emvb-site-styles-footer[role="status"]')?.textContent).toBe(
         "Style changes stay unpublished until you publish styles.",
@@ -608,4 +609,115 @@ test("UX-070: Close gives focus back to the Site styles button", async () => {
   } finally {
     opener.remove();
   }
+});
+
+describe("publishing keeps keyboard focus (W-829)", () => {
+  const publishButton = () =>
+    [...document.querySelectorAll<HTMLButtonElement>("button")].find((button) =>
+      button.textContent?.includes("Publish styles"),
+    );
+  const exportButton = () =>
+    [...document.querySelectorAll<HTMLButtonElement>("button")].find(
+      (button) => button.textContent === "Export",
+    );
+  const drawer = (unpublished: boolean, onPublishStyles: () => Promise<void>) => (
+    <SiteStylesDrawer
+      design={emptyDesign()}
+      layout={layout}
+      onDesignChange={async () => undefined}
+      unpublished={unpublished}
+      onPublishStyles={onPublishStyles}
+      onLayoutChange={() => undefined}
+      onClose={() => undefined}
+    />
+  );
+
+  test("W-829: Publish styles stays focused while publishing and after a failure", async () => {
+    const pending = Promise.withResolvers<void>();
+    try {
+      await mount(drawer(true, () => pending.promise));
+      const button = publishButton();
+      button?.focus();
+      await act(async () => button?.click());
+      expect(button?.disabled).toBe(false);
+      expect(document.activeElement === button).toBe(true);
+      await act(async () => pending.reject(new Error("Connection lost. Try again.")));
+      await settle();
+      expect(document.activeElement === publishButton()).toBe(true);
+    } finally {
+      await act(async () => pending.resolve());
+    }
+  });
+
+  test("W-829: once published, focus moves from Publish styles to Export", async () => {
+    const publish = async () => {
+      await rerender(drawer(false, publish));
+    };
+    await mount(drawer(true, publish));
+    publishButton()?.focus();
+    await act(async () => publishButton()?.click());
+    await settle();
+    expect(publishButton()).toBeUndefined();
+    expect(document.activeElement === exportButton()).toBe(true);
+  });
+});
+
+test("W-841: deleting a class lands focus on the next row, then New; Cancel goes back to the menu", async () => {
+  function Host() {
+    const [design, setDesign] = useState<DesignSystem>({
+      ...emptyDesign(),
+      classes: [
+        { id: "card", name: "Card", style: {} },
+        { id: "tint", name: "Tint", style: {} },
+      ],
+    });
+    return (
+      <SiteStylesDrawer
+        design={design}
+        layout={layout}
+        onDesignChange={async (next) => setDesign(next)}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />
+    );
+  }
+  await mount(<Host />);
+  const frame = () =>
+    act(() => new Promise((resolve) => requestAnimationFrame(() => resolve(null))));
+  const button = (match: (b: HTMLButtonElement) => boolean) =>
+    [...document.querySelectorAll<HTMLButtonElement>("button")].find(match);
+  await act(async () =>
+    [...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((tab) => tab.textContent === "Classes")
+      ?.click(),
+  );
+  const ask = async (name: string) => {
+    await act(async () =>
+      button((b) => b.getAttribute("aria-label") === `Actions for ${name}`)?.click(),
+    );
+    await settle();
+    const item = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+      (el) => el.textContent === "Delete",
+    );
+    await act(async () => item?.click());
+    await settle();
+  };
+  const answer = async (label: string) => {
+    const target = button((b) => b.textContent === label);
+    target?.focus();
+    await act(async () => target?.click());
+    await settle();
+    await frame();
+  };
+  await ask("Card");
+  await answer("Delete class");
+  expect(
+    document.activeElement?.closest("[data-emvb-class-def]")?.getAttribute("data-emvb-class-def"),
+  ).toBe("tint");
+  await ask("Tint");
+  await answer("Cancel");
+  expect(document.activeElement?.getAttribute("aria-label")).toBe("Actions for Tint");
+  await ask("Tint");
+  await answer("Delete class");
+  expect(document.activeElement?.textContent).toBe("New");
 });

@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { s1Page } from "../fixtures/layouts.ts";
+import type { EmvbPorts } from "../../src/mcp/ports.ts";
+import { listVersions } from "../../src/mcp/read.ts";
 import { TOOLS } from "../../src/mcp/tools.ts";
 import { createTestRuntime, ROLES, userWithRole } from "./runtime.ts";
 
@@ -162,6 +164,21 @@ describe("EmVB MCP tools on EmDash's plugin MCP (W-452, W-453, W-454)", () => {
     const id = await newPage();
     const out = data<{ versions: unknown[] }>(await t.mcp("list_versions", { pageId: id }));
     expect(Array.isArray(out.versions)).toBe(true);
+  });
+
+  test("list_versions gives each time as ISO 8601 UTC (W-805)", async () => {
+    const ports = {
+      getPage: async () => ({ id: "p1" }),
+      listRevisions: async () => [
+        { id: "r1", createdAt: "2026-10-21 03:17:01", authorId: null },
+        { id: "r2", createdAt: "2026-10-21T03:17:02.500Z", authorId: "u1" },
+      ],
+    } as unknown as EmvbPorts;
+    const out = await listVersions(ports, { pageId: "p1" });
+    expect(out.versions.map((v) => v.at)).toEqual([
+      "2026-10-21T03:17:01Z",
+      "2026-10-21T03:17:02.500Z",
+    ]);
   });
 
   test("a contributor can't call the tools (editor or above, D-056)", async () => {

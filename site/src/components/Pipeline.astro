@@ -29,7 +29,7 @@ const panes = {
     <div class="code reveal">
       <figure class="pane">
         <figcaption><span class="file">layout.json</span><span class="badge">stored</span></figcaption>
-        <pre><code set:html={panes.json} /></pre>
+        <pre tabindex="0" role="region" aria-label="layout.json"><code set:html={panes.json} /></pre>
       </figure>
       <div class="render" aria-hidden="true">
         <span class="beam"></span>
@@ -38,8 +38,8 @@ const panes = {
       </div>
       <figure class="pane">
         <figcaption><span class="file">page.html + page.css</span><span class="badge badge--live">served</span></figcaption>
-        <pre><code set:html={panes.html} /></pre>
-        <pre class="css"><code set:html={panes.css} /></pre>
+        <pre tabindex="0" role="region" aria-label="page.html"><code set:html={panes.html} /></pre>
+        <pre class="css" tabindex="0" role="region" aria-label="page.css"><code set:html={panes.css} /></pre>
       </figure>
     </div>
     <p class="note">The hero heading of the Northfold demo, as saved and as published (line breaks added).</p>

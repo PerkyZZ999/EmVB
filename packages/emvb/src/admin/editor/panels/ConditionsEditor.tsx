@@ -180,7 +180,9 @@ export function ConditionsEditor({ conditions, onChange }: Props) {
             <Button
               type="button"
               variant="ghost"
-              className={BUTTON}
+              shape="square"
+              // W-767: the 28 px icon button its grid column expects; the text-button size overflowed.
+              className="emvb-icon-btn"
               aria-label="Remove condition"
               icon={<TrashIcon aria-hidden="true" />}
               onClick={() => remove(rule.id)}

@@ -123,6 +123,24 @@ describe("EmVB MCP write tools (W-457, W-458)", () => {
     expect(JSON.stringify((await layoutOf(pageId)).layout)).not.toContain(id);
   });
 
+  test("W-755: props set to null or a list is an invalid layout, not an internal error", async () => {
+    const pageId = await newPage();
+    const { layout } = await layoutOf(pageId);
+    const image = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: layout.root.id,
+      element: { type: "image", props: { src: "/a.jpg", alt: "A" } },
+    });
+    const ids = [layout.root.children?.[0]?.id as string, image.changed[0] as string];
+    for (const nodeId of ids) {
+      for (const props of [null, ["x"]]) {
+        // oxlint-disable-next-line no-await-in-loop -- one write after another
+        const error = await fail("update_element", { pageId, nodeId, set: { props } });
+        expect(error.code).toBe("INVALID_LAYOUT");
+      }
+    }
+  });
+
   test("create_page creates an unpublished page with recipes and refuses a taken slug", async () => {
     const out = await call<{ pageId: string; slug: string }>("create_page", {
       title: "About us",

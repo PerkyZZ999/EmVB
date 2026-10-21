@@ -359,6 +359,33 @@ describe("image editor in photocn's layout (W-483)", () => {
     expect(calls.map((c) => c[0])).toEqual(["undo", "resetAll"]);
   });
 
+  test("W-839: a toolbar button that runs out hands focus to its nearest enabled neighbour", async () => {
+    serveImage();
+    await open({ src: "/a.jpg", alt: "A" });
+    const wait = () => new Promise((resolve) => setTimeout(resolve, 120));
+    const name = () =>
+      document.activeElement?.getAttribute("aria-label") ?? document.activeElement?.textContent;
+    change({ canUndo: true, edited: true });
+    await settle();
+    q<HTMLButtonElement>("[data-emvb-image-undo]")?.focus();
+    await click("[data-emvb-image-undo]");
+    change({ canUndo: false, canRedo: true });
+    await settle();
+    await wait();
+    expect(name()).toBe("Redo");
+    await click("[data-emvb-image-redo]");
+    change({ canUndo: true, canRedo: false });
+    await settle();
+    await wait();
+    expect(name()).toBe("Undo");
+    q<HTMLButtonElement>("[data-emvb-image-reset]")?.focus();
+    await click("[data-emvb-image-reset]");
+    change({ edited: false });
+    await settle();
+    await wait();
+    expect(name()).toBe("Original");
+  });
+
   test("the crop panel drives photocn's geometry", async () => {
     serveImage();
     await open({ src: "/a.jpg", alt: "A", width: 1200, height: 800 });
@@ -454,6 +481,74 @@ describe("image editor in photocn's layout (W-483)", () => {
       ["setTool", "compose"],
       ["setTool", "metadata"],
     ]);
+  });
+
+  test("W-744: the compact sheet grip resizes by keyboard and a dismiss returns focus", async () => {
+    Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
+    serveImage();
+    await open({ src: "/a.jpg", alt: "A" });
+    const sheet = () => q("[data-emvb-image-sheet]");
+    const grip = () => q('[data-emvb-image-sheet] [role="separator"]');
+    const tool = '.emvb-ie-compact > nav [data-emvb-image-tool="compose"]';
+    await click(tool);
+    expect(grip()?.getAttribute("tabindex")).toBe("0");
+    expect(grip()?.getAttribute("aria-valuenow")).toBe("42");
+    expect(grip()?.getAttribute("aria-valuetext")).toBe("Peek");
+    grip()?.focus();
+    await key(grip(), "ArrowUp");
+    expect(sheet()?.style.height).toBe("90%");
+    expect(grip()?.getAttribute("aria-valuetext")).toBe("Expanded");
+    await key(grip(), "Home");
+    expect(sheet()?.style.height).toBe("42%");
+    await key(grip(), "End");
+    expect(sheet()?.style.height).toBe("90%");
+    await key(grip(), "ArrowDown");
+    expect(sheet()?.style.height).toBe("42%");
+    expect(sheet()?.dataset.emvbImageSheet).toBe("open");
+    await key(grip(), "ArrowDown");
+    expect(sheet()?.dataset.emvbImageSheet).toBe("closed");
+    expect(document.activeElement === q(tool)).toBe(true);
+
+    await click(tool);
+    expect(sheet()?.dataset.emvbImageSheet).toBe("open");
+    const g = grip();
+    if (!g) throw new Error("no grip");
+    await React.act(async () => {
+      g.dispatchEvent(new PointerEvent("pointerdown", { pointerId: 1, clientY: 0, bubbles: true }));
+      g.dispatchEvent(
+        new PointerEvent("pointermove", { pointerId: 1, clientY: 2000, bubbles: true }),
+      );
+    });
+    await React.act(async () => {
+      g.dispatchEvent(
+        new PointerEvent("pointerup", { pointerId: 1, clientY: 2000, bubbles: true }),
+      );
+    });
+    await settle();
+    expect(sheet()?.dataset.emvbImageSheet).toBe("closed");
+    expect(document.activeElement === q(tool)).toBe(true);
+  });
+
+  test("W-748: a quick flick released before a re-render still dismisses the sheet", async () => {
+    Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
+    serveImage();
+    await open({ src: "/a.jpg", alt: "A" });
+    const tool = '.emvb-ie-compact > nav [data-emvb-image-tool="compose"]';
+    await click(tool);
+    const g = q('[data-emvb-image-sheet] [role="separator"]');
+    if (!g) throw new Error("no grip");
+    await React.act(async () => {
+      g.dispatchEvent(new PointerEvent("pointerdown", { pointerId: 2, clientY: 0, bubbles: true }));
+      g.dispatchEvent(
+        new PointerEvent("pointermove", { pointerId: 2, clientY: 2000, bubbles: true }),
+      );
+      g.dispatchEvent(
+        new PointerEvent("pointerup", { pointerId: 2, clientY: 2000, bubbles: true }),
+      );
+    });
+    await settle();
+    expect(q("[data-emvb-image-sheet]")?.dataset.emvbImageSheet).toBe("closed");
+    expect(document.activeElement === q(tool)).toBe(true);
   });
 
   test("a picture on another website gets the upload-a-copy message, without photocn", async () => {
@@ -847,7 +942,9 @@ describe("save a copy (W-485)", () => {
       await React.act(async () => click("[data-emvb-image-export-save]"));
       await settleAll();
       expect(tries).toBe(1);
-      expect(q<HTMLButtonElement>("[data-emvb-image-export-save]")?.disabled).toBe(true);
+      expect(
+        q<HTMLButtonElement>("[data-emvb-image-export-save]")?.getAttribute("aria-disabled"),
+      ).toBe("true");
       await React.act(async () =>
         document.activeElement?.dispatchEvent(
           new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
@@ -865,6 +962,58 @@ describe("save a copy (W-485)", () => {
       await settleAll();
       expect(tries).toBe(2);
       expect(openChanges).toContain(false);
+    } finally {
+      await React.act(async () => pending.resolve());
+    }
+  });
+
+  test("W-830: export Close stays focusable while saving and does not close the dialog", async () => {
+    serveImage();
+    change({ edited: true });
+    const pending = Promise.withResolvers<void>();
+    await open({ src: "/a.jpg", alt: "A" }, () => pending.promise);
+    try {
+      await React.act(async () => click("[data-emvb-image-save]"));
+      await React.act(async () => click("[data-emvb-image-export-save]"));
+      await settleAll();
+      const close = q<HTMLButtonElement>(".emvb-ie-export-close");
+      expect(close?.disabled).toBe(false);
+      expect(close?.getAttribute("aria-disabled")).toBe("true");
+      close?.focus();
+      await React.act(async () => close?.click());
+      await settleAll();
+      expect(q("[data-emvb-image-export]") !== null).toBe(true);
+      expect(document.activeElement === close).toBe(true);
+    } finally {
+      await React.act(async () => pending.resolve());
+    }
+  });
+
+  test("W-825: Save copy keeps focus while saving and ignores a repeat press", async () => {
+    serveImage();
+    change({ edited: true });
+    const pending = Promise.withResolvers<void>();
+    let tries = 0;
+    await open({ src: "/a.jpg", alt: "A" }, async () => {
+      if (++tries === 1) await pending.promise;
+    });
+    try {
+      await React.act(async () => click("[data-emvb-image-save]"));
+      const save = q<HTMLButtonElement>("[data-emvb-image-export-save]");
+      const download = q<HTMLButtonElement>("[data-emvb-image-download]");
+      save?.focus();
+      await React.act(async () => click("[data-emvb-image-export-save]"));
+      await settleAll();
+      expect(tries).toBe(1);
+      expect([save?.disabled, download?.disabled]).toEqual([false, false]);
+      expect(document.activeElement === save).toBe(true);
+      await React.act(async () => click("[data-emvb-image-export-save]"));
+      await React.act(async () => click("[data-emvb-image-download]"));
+      await settleAll();
+      expect(tries).toBe(1);
+      await React.act(async () => pending.reject(new Error("Temporary upload failure")));
+      await settleAll();
+      expect(document.activeElement === save).toBe(true);
     } finally {
       await React.act(async () => pending.resolve());
     }

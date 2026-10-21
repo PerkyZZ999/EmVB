@@ -317,9 +317,18 @@ function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTri
   arm?.(() => openOnce(ctrl, config), trigger as never);
 }
 
+/**
+ * W-757: as W-407 for floats, a second call (a host loading the script twice, or calling it again
+ * for new markup) gave a popup a second controller: it opened twice, counted two shows against
+ * "Show at most", and Escape closed it twice, handing focus to the hidden dialog.
+ */
+const started = new WeakSet<HTMLElement>();
+
 export function initPopups(root: ParentNode = document): void {
   const nodes = root.querySelectorAll<HTMLElement>("[data-emvb-popup]");
   for (const node of nodes) {
+    if (started.has(node)) continue;
+    started.add(node);
     const config = readConfig(node);
     if (!config) continue;
     const ctrl = createController(node);

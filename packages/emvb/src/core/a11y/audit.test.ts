@@ -224,3 +224,27 @@ test("W-639: H4 to H6 are not large text, and the site's heading styles count", 
   (h4.props as { level: number }).level = 4;
   expect(onWhite(h4)).toContain("contrast:head0004");
 });
+
+test("W-772: a ratio just under the bar never reads as meeting it", () => {
+  const issue = auditPage(
+    page(h("head0001", 1), {
+      id: "box00001",
+      type: "container",
+      props: {},
+      style: { backgroundColor: "#ffffff" },
+      children: [
+        { id: "text0001", type: "text", props: { text: "Hi" }, style: { color: "#777777" } },
+      ],
+    } as LayoutNode),
+    emptyDesign(),
+  ).issues.find((i) => i.rule === "contrast");
+  // #777 on white is 4.48:1.
+  expect(issue?.message).toBe("Text contrast is 4.4:1; it needs 4.5:1.");
+});
+
+test("W-773: Fix all leaves no skipped heading level behind", () => {
+  const layout = page(h("head0001", 1), h("head0002", 4), h("head0003", 6));
+  const fixed = applyAllA11yFixes(layout, auditPage(layout, emptyDesign()).issues);
+  expect(rules(fixed)).toEqual([]);
+  expect(findNode(fixed, "head0003")?.props).toMatchObject({ level: 3 });
+});

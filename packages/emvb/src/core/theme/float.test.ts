@@ -22,6 +22,15 @@ describe("float settings", () => {
     expect(bad.ok).toBe(false);
   });
 
+  test("W-759: a corner float stays inside the screen and scrolls when it is long", () => {
+    const corner =
+      ".emvb-float:is(.emvb-float--start-top,.emvb-float--end-top,.emvb-float--start-bottom,.emvb-float--end-bottom)";
+    expect(FLOAT_CHROME_CSS).toContain(`${corner}{max-width:calc(100% - 2rem)}`);
+    expect(FLOAT_CHROME_CSS).toContain(
+      `${corner} .emvb-float__body{max-height:calc(100vh - 3.5rem);max-height:calc(100dvh - 3.5rem);overflow:auto}`,
+    );
+  });
+
   test("a hovered or focused float rises above another on the same edge (W-185)", () => {
     expect(FLOAT_CHROME_CSS).toContain(".emvb-float:hover,.emvb-float:focus-within{z-index:9001}");
   });
@@ -116,5 +125,10 @@ describe("float settings", () => {
     } as DesignSystem;
     expect(floatHasOwnSurface(root({ classes: ["band"] }), banded)).toBe(true);
     expect(floatHasOwnSurface(root({ classes: ["band"] }), design)).toBe(false);
+  });
+  test("W-781 keeps keyboard focus clear of edge bars via scroll-padding", () => {
+    const html = FLOAT_CHROME_CSS.match(/(?:^|\})html\{([^}]*)\}/)?.[1] ?? "";
+    expect(html).toContain("scroll-padding-top:var(--emvb-float-top)");
+    expect(html).toContain("scroll-padding-bottom:var(--emvb-float-bottom)");
   });
 });

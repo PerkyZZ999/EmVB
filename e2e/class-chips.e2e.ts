@@ -194,3 +194,56 @@ test("Classes chip menu renames and duplicates", async ({ page, request }) => {
     }
   });
 });
+
+test("W-750: the class chip menu works from the keyboard and keeps focus", async ({
+  page,
+  request,
+}) => {
+  await withClasses(request, ["Keys A", "Keys B"], async ([a = "", b = ""]) => {
+    await openStyle(page, request, [a, b]);
+    const actions = (name: string) =>
+      box(page).getByRole("button", { name: `Actions for ${name}` });
+    const menu = page.getByRole("menu");
+    const choose = async (item: string) => {
+      await expect(menu).toBeVisible();
+      for (let i = 0; i < 8; i += 1) {
+        const focused = await page.evaluate(() => document.activeElement?.textContent?.trim());
+        if (focused === item) break;
+        await page.keyboard.press("ArrowDown");
+      }
+      await expect(page.getByRole("menuitem", { name: item })).toBeFocused();
+      await page.keyboard.press("Enter");
+    };
+
+    await actions(`Keys A ${a}`).focus();
+    await page.keyboard.press("Enter");
+    await expect(menu).toBeVisible();
+    await page.keyboard.press("ArrowDown");
+    expect(await menu.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(menu).toHaveCount(0);
+    await expect(actions(`Keys A ${a}`)).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    await choose("Rename");
+    const rename = overlay(page).locator(".emvb-chip-rename");
+    await expect(rename).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(rename).toHaveCount(0);
+    await expect(chip(page, a)).toBeFocused();
+
+    await actions(`Keys A ${a}`).focus();
+    await page.keyboard.press("Enter");
+    await choose("Move later");
+    await expect.poll(() => chipIds(page)).toEqual([b, a]);
+    await expect(actions(`Keys A ${a}`)).toBeFocused();
+    await page.screenshot({ path: `/tmp/emvb-chip-menu-${test.info().project.name}.png` });
+
+    await page.keyboard.press("Enter");
+    await choose("Remove from element");
+    await expect.poll(() => chipIds(page)).toEqual([b]);
+    const inBox = await box(page).evaluate((element) => element.contains(document.activeElement));
+    expect(inBox).toBe(true);
+    await expect(canvas(page).locator("h1")).toBeVisible();
+  });
+});

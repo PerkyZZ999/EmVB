@@ -477,11 +477,22 @@ export const ListVersionsOutput = z.object({
   ),
 });
 
+/**
+ * W-805: EmDash stores revision times as SQLite UTC text ("2026-10-21 03:17:01") with no zone, so
+ * an agent read them as local time. Hand them out as ISO 8601 UTC instead.
+ */
+const utcIso = (at: string) =>
+  /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$/.test(at) ? `${at.replace(" ", "T")}Z` : at;
+
 export async function listVersions(ports: EmvbPorts, input: z.infer<typeof ListVersionsInput>) {
   const page = await ports.getPage(input.pageId);
   if (!page) throw new McpToolError("NOT_FOUND", `No EmVB page with id ${input.pageId}.`);
   const revisions = await ports.listRevisions(input.pageId, input.limit ?? 20);
   return {
-    versions: revisions.map((r) => ({ revisionId: r.id, at: r.createdAt, authorId: r.authorId })),
+    versions: revisions.map((r) => ({
+      revisionId: r.id,
+      at: utcIso(r.createdAt),
+      authorId: r.authorId,
+    })),
   };
 }

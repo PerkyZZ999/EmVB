@@ -34,9 +34,27 @@ export function useList<T>(fetcher: Fetcher, load: (fetcher: Fetcher) => Promise
   return { ...list, retry };
 }
 
+/**
+ * W-837: Retry swaps the error for a loading card and then the list, so the focused Retry button
+ * vanished and focus fell to the page body. A Retry press leaves a short-lived note; the loading
+ * card, a fresh error's Retry, or the list's New button takes focus when it mounts.
+ */
+let retryPressedAt = 0;
+const RETRY_FOCUS_MS = 15_000;
+function useRetryLanding<T extends HTMLElement>(ref: React.RefObject<T | null>, last: boolean) {
+  React.useEffect(() => {
+    if (Date.now() - retryPressedAt > RETRY_FOCUS_MS) return;
+    if (last) retryPressedAt = 0;
+    ref.current?.focus({ preventScroll: true });
+  }, [ref, last]);
+}
+
 export function NewButton({ label, onClick }: { label: string; onClick: () => void }) {
+  const ref = React.useRef<HTMLButtonElement>(null);
+  useRetryLanding(ref, true);
   return (
     <Button
+      ref={ref}
       variant="primary"
       className={BUTTON}
       style={SOLID_PRIMARY}
@@ -49,8 +67,16 @@ export function NewButton({ label, onClick }: { label: string; onClick: () => vo
 }
 
 export function ListLoading({ label }: { label: string }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  useRetryLanding(ref, false);
   return (
-    <div className="emvb-surface-card emvb-list-loading" role="status" aria-label={label}>
+    <div
+      ref={ref}
+      tabIndex={-1}
+      className="emvb-surface-card emvb-list-loading"
+      role="status"
+      aria-label={label}
+    >
       <p className="emvb-helper">{label}</p>
       <div className="emvb-list-skeleton-rows" aria-hidden="true">
         {[0, 1, 2].map((row) => (
@@ -86,6 +112,8 @@ export function ListError({
   message: string;
   onRetry: () => void;
 }) {
+  const ref = React.useRef<HTMLButtonElement>(null);
+  useRetryLanding(ref, true);
   return (
     <Banner
       role="alert"
@@ -94,7 +122,16 @@ export function ListError({
       title={title}
       description={message}
       action={
-        <Button type="button" variant="secondary" className={BUTTON} onClick={onRetry}>
+        <Button
+          ref={ref}
+          type="button"
+          variant="secondary"
+          className={BUTTON}
+          onClick={() => {
+            retryPressedAt = Date.now();
+            onRetry();
+          }}
+        >
           Retry
         </Button>
       }

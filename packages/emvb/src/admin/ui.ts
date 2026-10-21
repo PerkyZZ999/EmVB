@@ -45,7 +45,8 @@ export const UI_CSS = `
   border-radius: 6px;
 }
 .emvb-mono { font-family: var(--font-mono); }
-.emvb-helper { margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); }
+/* W-763: helpers quote what was typed; a long value with no spaces ran off the panel. */
+.emvb-helper { margin: 0; font-size: 12px; line-height: 16px; color: var(--text-color-kumo-subtle); overflow-wrap: anywhere; }
 .emvb-helper a { color: var(--text-color-kumo-default); text-decoration: underline; text-underline-offset: 2px; }
 .emvb-required-notice { margin-top: 4px; }
 .emvb-required-notice__list { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 12px; line-height: 16px; }
@@ -129,6 +130,7 @@ export const UI_CSS = `
 .emvb-agents-snippets { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
 .emvb-agents-snippet { display: grid; align-content: start; gap: 8px; min-width: 0; padding: 12px; border: 1px solid var(--color-kumo-line); border-radius: 8px; }
 .emvb-agents-section pre { margin: 0; padding: 12px; overflow-x: auto; border-radius: 6px; background: var(--color-kumo-tint); font-family: var(--font-mono); font-size: 12px; line-height: 18px; }
+.emvb-agents-section pre:focus-visible { outline: 2px solid var(--color-kumo-brand); outline-offset: 2px; }
 .emvb-agents-table { overflow-x: auto; margin-inline: -20px; margin-bottom: -20px; border-top: 1px solid var(--color-kumo-line); }
 .emvb-agents-table table { width: 100%; }
 .emvb-agents-when { color: var(--text-color-kumo-subtle); font-variant-numeric: tabular-nums; white-space: nowrap; }

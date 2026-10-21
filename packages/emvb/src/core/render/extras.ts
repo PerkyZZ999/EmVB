@@ -110,6 +110,15 @@ export function boxLinkHeldBack(node: LayoutNode): boolean {
   return childrenOf(node).some(containsInteractive);
 }
 
+/** W-798: the same test applyBoxLink makes, for checks that see only the layout (the audit). */
+export function boxBecomesLink(node: LayoutNode): boolean {
+  if (!BOX.has(node.type)) return false;
+  const { href, tag } = node.props as { href?: unknown; tag?: unknown };
+  if (tag !== undefined && tag !== "div") return false;
+  if (typeof href !== "string" || !href.trim() || !sanitizeHref(href)) return false;
+  return !childrenOf(node).some(containsInteractive);
+}
+
 export function applyBoxLink(node: LayoutNode, vnode: VNode): VNode {
   if (!BOX.has(node.type) || vnode.tag !== "div") return vnode;
   const { href, newTab } = node.props as { href?: string; newTab?: boolean };
@@ -117,7 +126,11 @@ export function applyBoxLink(node: LayoutNode, vnode: VNode): VNode {
   if (childrenOf(node).some(containsInteractive)) return vnode;
   const safe = sanitizeHref(href);
   if (!safe) return vnode;
-  const attrs: Record<string, string> = { ...vnode.attrs, href: safe };
+  const attrs: Record<string, string> = {
+    ...vnode.attrs,
+    class: `${vnode.attrs.class ?? ""} emvb-box-link`.trim(),
+    href: safe,
+  };
   if (newTab) {
     attrs.target = "_blank";
     attrs.rel = "noopener noreferrer";
@@ -140,7 +153,16 @@ export function applyBackgroundVideo(vnode: VNode, src: string | undefined): VNo
     children: [
       {
         tag: "video",
-        attrs: { class: "emvb-bg-video", src, muted: "", loop: "", playsinline: "", autoplay: "" },
+        // W-801: decoration, not content, so screen readers skip it.
+        attrs: {
+          class: "emvb-bg-video",
+          src,
+          muted: "",
+          loop: "",
+          playsinline: "",
+          autoplay: "",
+          "aria-hidden": "true",
+        },
         children: [],
       },
       ...vnode.children,

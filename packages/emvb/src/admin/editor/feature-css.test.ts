@@ -50,3 +50,9 @@ test("UX-093: the command palette is pinned near the top, so filtering doesn't m
     ".emvb-palette.emvb-palette { top: max(12vh, 32px); translate: -50% 0; }",
   );
 });
+
+test("W-810: the command palette has a fixed width, so results don't move it sideways", () => {
+  expect(FEATURE_CSS).toContain(
+    ".emvb-palette.emvb-palette.emvb-palette { width: min(564px, calc(100vw - 32px)); }",
+  );
+});

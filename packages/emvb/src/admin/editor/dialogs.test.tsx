@@ -91,3 +91,32 @@ describe("editor dialogs (W-091)", () => {
     ).toBe(true);
   });
 });
+
+test("W-834: while Save and leave saves, it shows it, keeps focus, and ignores presses and closing", async () => {
+  const pressed: string[] = [];
+  const changes: boolean[] = [];
+  await mount(
+    <LeaveDialog
+      open
+      saving
+      onOpenChange={(open) => changes.push(open)}
+      onDiscard={() => pressed.push("discard")}
+      onSaveAndLeave={() => pressed.push("save-and-leave")}
+    />,
+  );
+  const button = (name: string) =>
+    [...document.querySelectorAll<HTMLButtonElement>("button")].find(
+      (b) => b.textContent?.trim() === name,
+    );
+  const save = button("Saving…");
+  expect(save?.disabled).toBe(false);
+  expect(save?.getAttribute("aria-busy")).toBe("true");
+  expect(save?.getAttribute("aria-disabled")).toBe("true");
+  save?.focus();
+  await act(async () => save?.click());
+  expect(document.activeElement === save).toBe(true);
+  await act(async () => button("Discard changes")?.click());
+  await act(async () => button("Keep editing")?.click());
+  expect(pressed).toEqual([]);
+  expect(changes).toEqual([]);
+});

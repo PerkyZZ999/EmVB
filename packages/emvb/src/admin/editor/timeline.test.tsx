@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
+import * as React from "react";
 import { act } from "react";
 import { emptyDesign, type Layout } from "../../core/index.ts";
 import { cleanup, mount, rerender, settle } from "../../../test/dom/mount.ts";
@@ -138,6 +139,48 @@ describe("version timeline dialog (W-315)", () => {
     expect(JSON.stringify(applied[0]?.[0])).toContain("More");
   });
 
+  test.each([
+    [["01AAA", "01BBB", "01CCC"]],
+    [["01CCC", "01AAA", "01BBB"]],
+    [["01CCC", "01BBB", "01AAA"]],
+  ])("W-768: versions saved in the same second keep newest first (%p)", async (order) => {
+    const fetcher = async (path: string) =>
+      new Response(
+        JSON.stringify(
+          path.includes("revisions")
+            ? {
+                data: {
+                  items: order.map((id) => ({
+                    id,
+                    createdAt: "2026-10-05T10:00:00Z",
+                    data: { layout: layoutWith(id) },
+                  })),
+                  total: 3,
+                },
+              }
+            : { data: { items: [] } },
+        ),
+        { headers: { "content-type": "application/json" } },
+      );
+    await mount(
+      <TimelineDialog
+        open
+        onOpenChange={() => undefined}
+        fetcher={fetcher}
+        collection="emvb_pages"
+        entryId="01PAGE"
+        current={layoutWith("Now", true)}
+        design={emptyDesign()}
+        onApply={() => undefined}
+      />,
+    );
+    await settle();
+    const versions = [...document.querySelectorAll("[data-emvb-version]")].map((el) =>
+      el.getAttribute("data-emvb-version"),
+    );
+    expect(versions).toEqual(["01CCC", "01BBB", "01AAA"]);
+  });
+
   test("W-460 agent versions get a badge and the People/Agents filter", async () => {
     const fetcher = async (path: string) => {
       const data = path.endsWith("/agents/page")
@@ -255,6 +298,80 @@ describe("version timeline dialog (W-315)", () => {
     expect(first >= 0 && second > first && style > second).toBe(true);
     expect(srcdoc.includes("javascript:")).toBe(false);
   });
+
+  test("W-811: a version picture keeps its origin, so it can load the host's stylesheets, and runs no scripts", async () => {
+    const fetcher = async () =>
+      Response.json({
+        data: {
+          items: [
+            { id: "r1", createdAt: "2026-10-05T10:00:00Z", data: { layout: layoutWith("Then") } },
+          ],
+        },
+      });
+    await mount(
+      <TimelineDialog
+        open
+        onOpenChange={() => undefined}
+        fetcher={fetcher}
+        collection="emvb_pages"
+        entryId="01PAGE"
+        current={layoutWith("Now")}
+        design={emptyDesign()}
+        onApply={() => undefined}
+        canvasStyles={["/site.css"]}
+      />,
+    );
+    await settle();
+    const frames = [...document.querySelectorAll("iframe.emvb-timeline-frame")];
+    expect(frames.length > 0).toBe(true);
+    for (const frame of frames) expect(frame.getAttribute("sandbox")).toBe("allow-same-origin");
+  });
+
+  test("W-752: a version picture has no live links to follow", async () => {
+    const linked = {
+      schemaVersion: 16,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          { id: "head0001", type: "heading", props: { text: 'Say href="x"', level: 1 } },
+          { id: "btn00001", type: "button", props: { text: "About", href: "/about" } },
+        ],
+      },
+    } as Layout;
+    const fetcher = async () =>
+      Response.json({
+        data: {
+          items: [{ id: "r1", createdAt: "2026-10-05T10:00:00Z", data: { layout: linked } }],
+        },
+      });
+    await mount(
+      <TimelineDialog
+        open
+        onOpenChange={() => undefined}
+        fetcher={fetcher}
+        collection="emvb_pages"
+        entryId="01PAGE"
+        current={linked}
+        design={emptyDesign()}
+        onApply={() => undefined}
+        canvasStyles={["/site.css"]}
+      />,
+    );
+    await settle();
+    const frames = [...document.querySelectorAll("iframe")].map(
+      (f) => f.getAttribute("srcdoc") ?? "",
+    );
+    expect(frames.length > 0).toBe(true);
+    for (const srcdoc of frames) {
+      const body = srcdoc.slice(srcdoc.indexOf("<body>"));
+      expect(body.includes("About")).toBe(true);
+      expect(/<a [^>]*href=/.test(body)).toBe(false);
+      expect(body.includes('Say href="x"')).toBe(true);
+      expect(srcdoc.includes('<link rel="stylesheet" href="/site.css"')).toBe(true);
+    }
+  });
 });
 
 test("a restore refusal goes away when another version is picked (W-561)", async () => {
@@ -362,4 +479,52 @@ test("a restore refusal is gone after closing and reopening the timeline (W-623)
   await rerender(dialog(true));
   await settle();
   expect(alert()).toBeUndefined();
+});
+
+test("W-832: restoring a section moves focus to the next restore, then to the whole version", async () => {
+  const fetcher = async (path: string) =>
+    Response.json(
+      path.includes("revisions")
+        ? {
+            data: {
+              items: [
+                {
+                  id: "r1",
+                  createdAt: "2026-10-01T10:00:00Z",
+                  data: { layout: layoutWith("First", true) },
+                },
+              ],
+            },
+          }
+        : { data: { versions: [] } },
+    );
+  function Host() {
+    const [current, setCurrent] = React.useState(layoutWith("Now"));
+    return (
+      <TimelineDialog
+        open
+        onOpenChange={() => undefined}
+        fetcher={fetcher}
+        collection="emvb_pages"
+        entryId="01PAGE"
+        current={current}
+        design={emptyDesign()}
+        onApply={(layout) => setCurrent(layout)}
+      />
+    );
+  }
+  await mount(<Host />);
+  await settle();
+  const section = (id: string) =>
+    document.querySelector<HTMLButtonElement>(`[data-emvb-restore-section="${id}"]`);
+  const heading = section("head0001");
+  heading?.focus();
+  await act(async () => heading?.click());
+  await settle();
+  expect(section("head0001")).toBeNull();
+  expect(document.activeElement === section("text0001")).toBe(true);
+  await act(async () => section("text0001")?.click());
+  await settle();
+  expect(section("text0001")).toBeNull();
+  expect(document.activeElement?.hasAttribute("data-emvb-restore-version")).toBe(true);
 });

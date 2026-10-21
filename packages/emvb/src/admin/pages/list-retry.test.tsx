@@ -111,3 +111,35 @@ test("W-709: an older retry cannot replace a newer list load", async () => {
   expect(document.querySelector('[data-emvb-row="newer"]') !== null).toBe(true);
   expect(document.querySelector('[data-emvb-row="older"]') === null).toBe(true);
 });
+
+for (const [name, View, newLabel] of [
+  ["pages", PageList, "New page"],
+  ["theme parts", ThemePartList, "New theme part"],
+] as const) {
+  test(`W-837: ${name} keep keyboard focus through Retry: loading card, the next Retry, then New`, async () => {
+    const second = Promise.withResolvers<Response>();
+    const third = Promise.withResolvers<Response>();
+    let calls = 0;
+    const fetcher: Fetcher = async () => {
+      calls += 1;
+      if (calls === 1) return failed();
+      return calls === 2 ? second.promise : third.promise;
+    };
+    await mount(<View fetcher={fetcher} />);
+    await settle();
+    const retryButton = () =>
+      [...document.querySelectorAll<HTMLButtonElement>("button")].find(
+        (item) => item.textContent === "Retry",
+      );
+    retryButton()?.focus();
+    await retry();
+    expect(document.activeElement?.classList.contains("emvb-list-loading")).toBe(true);
+    await act(async () => second.resolve(failed()));
+    await settle();
+    expect(document.activeElement === retryButton()).toBe(true);
+    await retry();
+    await act(async () => third.resolve(response("recovered")));
+    await settle();
+    expect(document.activeElement?.textContent).toBe(newLabel);
+  });
+}

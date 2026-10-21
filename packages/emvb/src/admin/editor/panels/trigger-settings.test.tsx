@@ -83,6 +83,17 @@ describe("popup trigger settings (W-081)", () => {
     expect(texts[2]).toContain("30 s without scrolling, typing, clicking or moving the pointer.");
   });
 
+  test("W-776: a delay under a second reads in ms, never as 0 s", async () => {
+    const short = await mount(
+      <TriggerSettings trigger={{ type: "delay", ms: 30 }} onChange={() => undefined} />,
+    );
+    expect(short.textContent).toContain("30 ms after the page loads.");
+    const none = await mount(
+      <TriggerSettings trigger={{ type: "delay", ms: 0 }} onChange={() => undefined} />,
+    );
+    expect(none.textContent).toContain("0 s after the page loads.");
+  });
+
   test("idle time is at least 1 000 ms, and an empty field means 1 000", async () => {
     const low = await enter({ type: "inactivity", ms: 30_000 }, "10");
     expect(low.bounds).toEqual(["1000", "120000"]);

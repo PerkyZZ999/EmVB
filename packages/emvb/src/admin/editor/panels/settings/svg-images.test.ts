@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { LayoutNode } from "../../../../core/index.ts";
-import { svgImagesLeftOut, svgImagesNotice } from "./svg-images.ts";
+import { svgImagesLeftOut, svgImagesNotice, svgMarkupRefused } from "./svg-images.ts";
 
 const svg = (markup: unknown) =>
   ({ id: "svg00001", type: "svg", props: { markup } }) as unknown as LayoutNode;
@@ -28,5 +28,18 @@ describe("SVG markup field note (W-231)", () => {
       "Left out 1 external image. An SVG can only show pictures from the media library or embedded PNG, JPEG, WebP or GIF data.",
     );
     expect(svgImagesNotice(3)).toContain("Left out 3 external images.");
+  });
+  test("W-787 refused or empty markup gets a note; safe markup doesn't", () => {
+    expect(svgMarkupRefused(svg('<svg viewBox="0 0 1 1" onload="x()"><rect/></svg>'))).toContain(
+      "can't be shown",
+    );
+    expect(svgMarkupRefused(svg('<svg viewBox="0 0 1 1"><rect wid'))).toContain("can't be shown");
+    expect(svgMarkupRefused(svg("  "))).toBe("Paste SVG markup to show a graphic here.");
+    expect(svgMarkupRefused(svg('<svg viewBox="0 0 1 1"><rect width="1" height="1"/></svg>'))).toBe(
+      undefined,
+    );
+    expect(
+      svgMarkupRefused({ id: "t", type: "text", props: { text: "x" } } as unknown as LayoutNode),
+    ).toBe(undefined);
   });
 });

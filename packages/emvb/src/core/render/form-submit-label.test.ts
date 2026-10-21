@@ -32,3 +32,17 @@ describe("the form's submit label (W-203)", () => {
     );
   });
 });
+
+// W-766: a long Submit label or checkbox/radio option stayed one line and widened a phone page.
+describe("long form labels wrap (W-766)", () => {
+  test("W-766: the submit button and check/radio labels let long words break", () => {
+    const check = {
+      id: "chck0001",
+      type: "checkbox",
+      props: { field: "ok", label: "x".repeat(150) },
+    } as LayoutNode;
+    const { css } = renderPage(page([check, submit("y".repeat(80))]), emptyDesign());
+    expect(css).toMatch(/\.emvb-submit\{[^}]*max-width:100%;overflow-wrap:anywhere/);
+    expect(css).toMatch(/\.emvb-form-checkbox-label,[^{]*\{[^}]*overflow-wrap:anywhere/);
+  });
+});

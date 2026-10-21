@@ -2,6 +2,7 @@ import { createPortal } from "react-dom";
 import { isMultilineText, type Layout, type PopupDevice, type VNode } from "../../../core/index.ts";
 import type { PasteRefusal } from "../useClipboardActions.ts";
 import { CanvasTextEdit } from "./CanvasTextEdit.tsx";
+import { useFrameFocusRing } from "./frame-focus-ring.ts";
 import { type CanvasZoom } from "./canvas-scale.ts";
 import { SelectionOverlay, type Box, type InvalidDrop } from "./SelectionOverlay.tsx";
 import type { StatePreview } from "./state-preview.ts";
@@ -134,6 +135,7 @@ export function CanvasFrame({
     onScale,
     refusal,
   });
+  const focusRing = useFrameFocusRing();
   const { dropLine, dropTarget, invalid } = useCanvasDnD({
     doc: session.doc,
     frame: session.frame,
@@ -188,7 +190,11 @@ export function CanvasFrame({
             data-emvb-canvas=""
             srcDoc={SRCDOC}
             sandbox="allow-same-origin"
-            onLoad={onLoad}
+            data-emvb-canvas-focus={focusRing.ring ? "keyboard" : undefined}
+            onLoad={(event) => {
+              focusRing.watch(event);
+              onLoad();
+            }}
           />
           {editingId && editingText !== null && editingBox && editingEl?.nodeType === 1 && (
             <CanvasTextEdit

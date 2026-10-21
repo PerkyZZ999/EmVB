@@ -44,7 +44,7 @@ const FORM_FIELD_CSS =
   ":where(.emvb-form .ec-form-input:focus-visible){outline:2px solid currentColor;outline-offset:1px;border-color:currentColor}" +
   ':where(.emvb-form .ec-form-input[aria-invalid="true"]){border-color:#b3261e}' +
   ':where(.emvb-form input[type="checkbox"],.emvb-form input[type="radio"]){width:1.1em;height:1.1em;margin:0;accent-color:currentColor}' +
-  ":where(.emvb-form .emvb-form-checkbox-label,.emvb-form .emvb-form-radio-label){display:inline-flex;align-items:center;gap:.5em}" +
+  ":where(.emvb-form .emvb-form-checkbox-label,.emvb-form .emvb-form-radio-label){display:inline-flex;align-items:center;gap:.5em;overflow-wrap:anywhere}" +
   ":where(.emvb-form .emvb-radio-group){display:flex;flex-direction:column;gap:6px;margin:0;padding:0;border:0;min-width:0}" +
   ":where(.emvb-form .emvb-radio-group>legend){float:left;width:100%;margin:0 0 -2px;padding:0}" +
   ":where(.emvb-form .ec-form-error){font-size:.875em;color:#b3261e}";
@@ -66,11 +66,23 @@ export const form: ElementDefinition<FormNode> = {
 };
 
 /** Where the forms runtime writes a field's validation message. */
-const errorSlot = (name: string): VNode => ({
+const errorSlot = (name: string, controlFor: string): VNode => ({
   tag: "span",
-  attrs: { class: "ec-form-error", "data-error-for": name, "aria-live": "polite" },
+  attrs: {
+    class: "ec-form-error",
+    id: errorId(controlFor),
+    "data-error-for": name,
+    "aria-live": "polite",
+  },
   children: [],
 });
+
+/**
+ * W-780: the message was only announced as it appeared; back on the field it wasn't read. Each
+ * control now names its error slot in aria-describedby (an empty slot adds nothing).
+ */
+const errorId = (controlFor: string) => `${controlFor}-error`;
+const describedBy = (controlFor: string) => ({ "aria-describedby": errorId(controlFor) });
 
 const fieldBox = (attrs: Record<string, string>, children: VNode["children"]): VNode => ({
   tag: "div",
@@ -96,9 +108,23 @@ const fieldWrap = (
           } as VNode,
         ]
       : []),
-    control,
-    errorSlot(name),
+    withDescription(labelText?.trim() ? control : named(control, name), controlFor),
+    errorSlot(name, controlFor),
   ]);
+
+const withDescription = (control: VNode, controlFor: string): VNode => ({
+  ...control,
+  attrs: { ...control.attrs, ...describedBy(controlFor) },
+});
+
+/**
+ * W-753: a field with no label (and no placeholder to read out) had no name at all, so a screen
+ * reader said only "edit text" or "group". It falls back to the field name, as a checkbox does.
+ */
+const named = (control: VNode, name: string): VNode =>
+  control.attrs.placeholder?.trim() || !name.trim()
+    ? control
+    : { ...control, attrs: { ...control.attrs, "aria-label": name } };
 
 /** A text input or textarea bound to `field`, with its optional placeholder. */
 const textControl = (
@@ -169,7 +195,13 @@ export const checkbox: ElementDefinition<CheckboxNode> = {
     const name = node.props.field;
     const input: VNode = {
       tag: "input",
-      attrs: { type: "checkbox", id: controlId(node.id), name, value: "true" },
+      attrs: {
+        type: "checkbox",
+        id: controlId(node.id),
+        name,
+        value: "true",
+        ...describedBy(controlId(node.id)),
+      },
       children: [],
     };
     const labelEl: VNode = {
@@ -177,7 +209,7 @@ export const checkbox: ElementDefinition<CheckboxNode> = {
       attrs: { class: "emvb-form-checkbox-label" },
       children: [input, ` ${node.props.label?.trim() || name}`],
     };
-    return fieldBox(attrs, [labelEl, errorSlot(name)]);
+    return fieldBox(attrs, [labelEl, errorSlot(name, controlId(node.id))]);
   },
 };
 
@@ -202,7 +234,11 @@ export const radio: ElementDefinition<RadioNode> = {
       : [];
     const control: VNode = {
       tag: "fieldset",
-      attrs: { class: "emvb-radio-group" },
+      attrs: {
+        class: "emvb-radio-group",
+        ...describedBy(id),
+        ...(legend.length || !name.trim() ? {} : { "aria-label": name }),
+      },
       children: [
         ...legend,
         {
@@ -215,12 +251,12 @@ export const radio: ElementDefinition<RadioNode> = {
         },
       ],
     };
-    return fieldBox(attrs, [control, errorSlot(name)]);
+    return fieldBox(attrs, [control, errorSlot(name, id)]);
   },
 };
 
 export const submit: ElementDefinition<SubmitNode> = {
-  baseCss: ".emvb-submit{display:inline-flex}",
+  baseCss: ".emvb-submit{display:inline-flex;max-width:100%;overflow-wrap:anywhere}",
   defaults: () => ({ type: "submit", props: { label: "Submit" } }),
   descriptor: fieldDescriptor("submit", "Submit", [
     { key: "label", kind: "text", label: "Label", optional: true },

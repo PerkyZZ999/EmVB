@@ -283,20 +283,20 @@ describe("the Publish button shows unpublished site styles (W-153)", () => {
     const { fetcher } = fakeServer({ designUnpublished: true });
     await render(fetcher);
     expect(publishButton()?.getAttribute("aria-label")).toBe("Publish (site styles unpublished)");
-    expect(publishButton()?.querySelector(".emvb-styles-dot")).not.toBeNull();
+    expect(publishButton()?.getAttribute("data-emvb-styles-pending")).toBe("true");
     await click(publishButton());
     await settle();
     await click(button("Publish site styles"));
     await settle();
     expect(publishButton()?.getAttribute("aria-label")).toBeNull();
-    expect(publishButton()?.querySelector(".emvb-styles-dot")).toBeNull();
+    expect(publishButton()?.getAttribute("data-emvb-styles-pending")).toBeNull();
   });
 
   test("with the styles live, Publish has no dot", async () => {
     const { fetcher } = fakeServer();
     await render(fetcher);
     expect(publishButton()?.textContent).toBe("Publish");
-    expect(publishButton()?.querySelector(".emvb-styles-dot")).toBeNull();
+    expect(publishButton()?.getAttribute("data-emvb-styles-pending")).toBeNull();
   });
 });
 
@@ -680,4 +680,36 @@ test("UX-084: Undo and Redo buttons follow the history and undo a delete", async
   expect(redo()?.disabled).toBe(false);
   await click(redo());
   expect(layerRow("Heading")?.outerHTML).toBeUndefined();
+});
+
+test("W-835: confirming a subtree delete puts keyboard focus on the newly selected layer", async () => {
+  const box = (n: number) => ({
+    id: `box0000${n}`,
+    type: "container" as const,
+    props: {},
+    children: [
+      { id: `head000${n}`, type: "heading" as const, props: { text: `In ${n}`, level: 2 } },
+    ],
+  });
+  const layout = {
+    schemaVersion: 1 as const,
+    root: { id: "root0001", type: "container" as const, props: {}, children: [box(1), box(2)] },
+  };
+  const { fetcher } = fakeServer({ layout });
+  await render(fetcher);
+  await openLayers();
+  const row = document.querySelector<HTMLElement>(
+    '[data-emvb-layer="box00001"] .emvb-layer-select',
+  );
+  await click(row);
+  await settle();
+  row?.focus();
+  await press("Delete");
+  await settle();
+  await click(button("Delete 2 elements"));
+  await settle();
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 120)));
+  const selected = document.querySelector('.emvb-layer-select[aria-current="true"]');
+  expect(selected !== null).toBe(true);
+  expect(document.activeElement === selected).toBe(true);
 });

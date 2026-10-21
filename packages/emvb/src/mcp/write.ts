@@ -148,12 +148,22 @@ const refused = (reason: string): never => {
   throw new McpToolError("REFUSED", reason);
 };
 
+/**
+ * W-755: these checks run before the layout is validated, so a write that set `props` to null (or
+ * a list) reached them as is and failed as an internal error instead of an invalid layout.
+ */
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+const propsOf = (node: LayoutNode): Record<string, unknown> =>
+  isRecord(node.props) ? node.props : {};
+
 /** Link props (the element's `href` fields) on each node, keyed by node and prop. */
 function linkValues(root: LayoutNode): Map<string, string> {
   const found = new Map<string, string>();
   const walk = (node: LayoutNode) => {
     const fields = ELEMENT_DESCRIPTORS.find((d) => d.type === node.type)?.fields ?? [];
-    const props = node.props as Record<string, unknown>;
+    const props = propsOf(node);
     for (const field of fields) {
       const value = props[field.key];
       if (field.kind === "href" && typeof value === "string")
@@ -185,7 +195,7 @@ function refuseUnsafeLinks(before: Layout, after: Layout) {
 function svgValues(root: LayoutNode): Map<string, string> {
   const found = new Map<string, string>();
   const walk = (node: LayoutNode) => {
-    const props = node.props as Record<string, unknown>;
+    const props = propsOf(node);
     if (node.type === "svg" && typeof props["markup"] === "string")
       found.set(`${node.id}.markup`, props["markup"]);
     if (typeof props["iconSvg"] === "string") found.set(`${node.id}.iconSvg`, props["iconSvg"]);
@@ -216,7 +226,7 @@ function imageSources(root: LayoutNode): Map<string, string[]> {
   const found = new Map<string, string[]>();
   const walk = (node: LayoutNode) => {
     if (node.type === "image") {
-      const props = node.props as { src?: unknown; sources?: unknown };
+      const props = propsOf(node) as { src?: unknown; sources?: unknown };
       const list = typeof props.src === "string" ? [props.src] : [];
       if (Array.isArray(props.sources)) {
         for (const source of props.sources as { src?: unknown }[]) {
@@ -464,9 +474,6 @@ export const UpdateElementInput = z.strictObject({
     .optional(),
   expectedRev: Rev.optional(),
 });
-
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
 
 /**
  * W-510: a new `src` merged into an image's props kept the old picture's extra sizes (the

@@ -569,18 +569,19 @@ function KnownElementPanel({
               descriptor.fields.filter((field) => fieldShown(field.key, node, device)),
             ).map((row) => {
               const controls = row.map((field) => (
-                <FieldControl
-                  key={field.key}
-                  field={field}
-                  node={node}
-                  onChange={onChange}
-                  fetcher={fetcher}
-                  parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
-                  duplicateName={
-                    field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
-                  }
-                  device={device}
-                />
+                <React.Fragment key={field.key}>
+                  <FieldControl
+                    field={field}
+                    node={node}
+                    onChange={onChange}
+                    fetcher={fetcher}
+                    parentFormId={layout ? enclosingFormId(layout, node.id) : undefined}
+                    duplicateName={
+                      field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
+                    }
+                    device={device}
+                  />
+                </React.Fragment>
               ));
               return row.length === 2 ? (
                 <div className="emvb-field-pair" key={row[0]?.key} data-emvb-field-pair="">

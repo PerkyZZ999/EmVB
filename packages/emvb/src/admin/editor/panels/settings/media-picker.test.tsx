@@ -142,6 +142,25 @@ describe("media library recovery (W-713)", () => {
     expect(dialog(view.host)?.outerHTML ?? null).toBeNull();
   });
 
+  test("W-817: Escape closes the library and returns focus to Choose from library", async () => {
+    const view = await picker(image({ src: "/old.png", alt: "Old" }), ok([]));
+    const opener = view.host.querySelector<HTMLButtonElement>("[data-emvb-media-library]");
+    opener?.focus();
+    await view.openLibrary();
+    const outside: string[] = [];
+    const onOutside = (event: KeyboardEvent) => outside.push(event.key);
+    document.addEventListener("keydown", onOutside);
+    await act(async () => {
+      document.activeElement?.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
+      );
+    });
+    document.removeEventListener("keydown", onOutside);
+    expect(dialog(view.host)?.outerHTML ?? null).toBeNull();
+    expect(document.activeElement === opener).toBe(true);
+    expect(outside).toEqual([]);
+  });
+
   test("W-741: opening focuses Close and ready dismissal returns to Choose from library", async () => {
     const view = await picker(image({ src: "/old.png", alt: "Old" }), ok([]));
     const opener = view.host.querySelector<HTMLButtonElement>("[data-emvb-media-library]");
@@ -158,6 +177,26 @@ describe("media library recovery (W-713)", () => {
     expect(view.sent).toEqual([]);
   });
 
+  test("W-745: picking a library image returns focus to Choose from library", async () => {
+    const view = await picker(
+      image({ src: "/old.png", alt: "Old" }),
+      ok([{ id: "m2", filename: "cat.png", url: "/media/cat.png", status: "ready", alt: "Cat" }]),
+    );
+    await view.openLibrary();
+    const card = view.host.querySelector<HTMLButtonElement>('[data-emvb-media-id="m2"]');
+    const opener = view.host.querySelector<HTMLButtonElement>("[data-emvb-media-library]");
+    if (!card || !opener) throw new Error("Missing library card or opener");
+    await act(async () => {
+      card.focus();
+      card.click();
+    });
+    expect(dialog(view.host)?.outerHTML ?? null).toBeNull();
+    expect(document.activeElement === opener).toBe(true);
+    expect(view.sent.map((node) => (node.props as Record<string, unknown>)["mediaId"])).toEqual([
+      "m2",
+    ]);
+  });
+
   test("W-741: pending dismissal focuses the URL and completion leaves that focus intact", async () => {
     const pending = Promise.withResolvers<Response>();
     const view = await picker(image({ src: "/old.png", alt: "Old" }), () => pending.promise);
@@ -168,7 +207,7 @@ describe("media library recovery (W-713)", () => {
       (button) => button.textContent === "Close",
     );
     if (!close || !url) throw new Error("Missing pending dismissal controls");
-    expect(opener?.disabled).toBe(true);
+    expect(opener?.getAttribute("aria-disabled")).toBe("true");
     await act(async () => {
       close.focus();
       close.click();
@@ -177,7 +216,7 @@ describe("media library recovery (W-713)", () => {
     expect(document.activeElement === url).toBe(true);
     await act(async () => pending.resolve(ok([])()));
     await settle();
-    expect(opener?.disabled).toBe(false);
+    expect(opener?.getAttribute("aria-disabled")).toBe("false");
     expect(document.activeElement === url).toBe(true);
     expect(url.value).toBe("/old.png");
     expect(view.sent).toEqual([]);
@@ -282,6 +321,21 @@ describe("media library (W-091)", () => {
     expect(view.host.querySelector('[data-emvb-media-id="m2"]')?.textContent).toBe("cat.png");
   });
 
+  test("W-762: a library card does not say its file name twice", async () => {
+    const view = await picker(
+      image({ src: "", alt: "Image" }),
+      ok([
+        { id: "m2", filename: "cat.png", url: "/media/cat.png", status: "ready" },
+        { id: "m3", filename: "dog.png", url: "/media/dog.png", alt: "A dog", status: "ready" },
+      ]),
+    );
+    await view.openLibrary();
+    const alt = (id: string) =>
+      view.host.querySelector(`[data-emvb-media-id="${id}"] img`)?.getAttribute("alt");
+    expect(alt("m2")).toBe("");
+    expect(alt("m3")).toBe("A dog");
+  });
+
   test("an empty library says so", async () => {
     const view = await picker(image({ src: "", alt: "Image" }), ok([]));
     await view.openLibrary();
@@ -368,4 +422,29 @@ describe("Reset to original when the original is gone (W-492)", () => {
     expect(view.sent).toEqual([]);
     expect(view.text).toContain("Couldn't reach the media library to find the original.");
   });
+});
+
+test("W-819: while busy, the source buttons stay focusable and ignore presses", async () => {
+  const pending = Promise.withResolvers<Response>();
+  const view = await picker(image({ src: "/old.png", alt: "Old" }), () => pending.promise);
+  await view.openLibrary();
+  const opener = view.host.querySelector<HTMLButtonElement>("[data-emvb-media-library]");
+  const upload = view.host.querySelector<HTMLButtonElement>("[data-emvb-media-upload-btn]");
+  const file = view.host.querySelector<HTMLInputElement>("[data-emvb-media-upload]");
+  if (!opener || !upload || !file) throw new Error("Missing source controls");
+  let picks = 0;
+  file.addEventListener("click", () => picks++);
+  expect([opener.disabled, upload.disabled]).toEqual([false, false]);
+  expect([opener.getAttribute("aria-disabled"), upload.getAttribute("aria-disabled")]).toEqual([
+    "true",
+    "true",
+  ]);
+  upload.focus();
+  await act(async () => upload.click());
+  expect(document.activeElement === upload).toBe(true);
+  expect(picks).toBe(0);
+  await act(async () => pending.resolve(ok([])()));
+  await settle();
+  await act(async () => upload.click());
+  expect(picks).toBe(1);
 });

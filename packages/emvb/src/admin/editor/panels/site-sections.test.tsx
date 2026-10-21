@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { act } from "react";
+import { act, useState } from "react";
 import type { DesignSystem, Layout, VariableKind } from "../../../core/index.ts";
 import { ClassesSection } from "./ClassesSection.tsx";
 import { VariableSection } from "./VariableSection.tsx";
@@ -437,6 +437,25 @@ describe("VariableSection", () => {
     }
   });
 
+  test("W-778: a blocked copy of the CSS variable says so in the row", async () => {
+    const original = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async () => Promise.reject(new Error("denied")) },
+    });
+    try {
+      await mountVars("spacing", "Spacing");
+      await pick("Actions for Brand", "Copy CSS variable");
+      await settle();
+      expect(host.querySelector('[data-emvb-var-id="brand"] [data-emvb-usage]')?.textContent).toBe(
+        "Couldn't copy",
+      );
+    } finally {
+      if (original) Object.defineProperty(navigator, "clipboard", original);
+      else Reflect.deleteProperty(navigator, "clipboard");
+    }
+  });
+
   test("an empty section explains what the kind is for", async () => {
     const none: DesignSystem = {
       schemaVersion: 15,
@@ -484,6 +503,22 @@ describe("ClassesSection", () => {
     await click(byText("Create class"));
     expect({ saved, asked }).toMatchSnapshot("saves");
     expect(html()).toMatchSnapshot("after");
+  });
+
+  test("W-840: Enter in the new class name creates it; an IME Enter only finishes the word", async () => {
+    await mountClasses();
+    await click(byText("New"));
+    const field = inputs("Name").at(-1);
+    await type(field, "Panel");
+    await act(async () => {
+      field?.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", keyCode: 229, bubbles: true }),
+      );
+    });
+    expect(saved).toEqual([]);
+    await press(field, "Enter");
+    expect(saved.length).toBe(1);
+    expect(saved[0]?.classes?.some((cls) => cls.name === "Panel")).toBe(true);
   });
 
   test("W-277: New and Rename refuse a name another class has (any case)", async () => {
@@ -643,4 +678,53 @@ test("W-616: a rename whose save fails reopens the field with the typed name", a
   await settle();
   expect(saved.length).toBe(1);
   expect(renameField()?.value).toBe("Charcoal");
+});
+
+test("W-840: Create lands focus on the new row and Cancel on New, for classes and variables", async () => {
+  const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+  const label = () =>
+    document.activeElement?.getAttribute("aria-label") ?? document.activeElement?.textContent ?? "";
+  for (const which of ["classes", "colors"] as const) {
+    function Host() {
+      const [current, setCurrent] = useState(design);
+      const save = async (next: DesignSystem) => {
+        saved.push(next);
+        setCurrent(next);
+      };
+      return which === "classes" ? (
+        <ClassesSection design={current} layout={layout} onSave={save} onAskDelete={onAskDelete} />
+      ) : (
+        <VariableSection
+          title="Colors"
+          kind="color"
+          design={current}
+          layout={layout}
+          onSave={save}
+          onAskDelete={onAskDelete}
+        />
+      );
+    }
+    // oxlint-disable-next-line no-await-in-loop -- one section after the other
+    await mount(<Host />);
+    // oxlint-disable-next-line no-await-in-loop
+    await click(byText("New"));
+    // oxlint-disable-next-line no-await-in-loop
+    await click(byText("Cancel"));
+    // oxlint-disable-next-line no-await-in-loop
+    await act(frame);
+    expect(document.activeElement?.tagName).toBe("BUTTON");
+    expect(label().trim()).toBe("New");
+    // oxlint-disable-next-line no-await-in-loop
+    await click(byText("New"));
+    // oxlint-disable-next-line no-await-in-loop
+    await type(inputs("Name").at(-1), "Fresh");
+    // oxlint-disable-next-line no-await-in-loop
+    await press(inputs("Name").at(-1), "Enter");
+    // oxlint-disable-next-line no-await-in-loop
+    await act(frame);
+    expect(document.activeElement?.tagName).toBe("BUTTON");
+    expect(label()).toContain("Fresh");
+    // oxlint-disable-next-line no-await-in-loop
+    await cleanup();
+  }
 });

@@ -274,6 +274,33 @@ describe("My uploads (W-239)", () => {
     await act(async () => retry?.click());
     await until(() => shown().length === 1, "the upload tile after retry");
   });
+
+  test("W-747: Try again keeps keyboard focus in the dialog, on the search", async () => {
+    let fail = true;
+    const { fetcher: ok } = stubFetcher({ items: [logo] });
+    const fetcher: Fetcher = async (path, init) =>
+      fail
+        ? Response.json({ error: { code: "X", message: "Offline" } }, { status: 503 })
+        : ok(path, init);
+    await open(fetcher);
+    await goUploads();
+    await until(
+      () => dialog()?.textContent?.includes("Your uploads didn't load") === true,
+      "error",
+    );
+    fail = false;
+    const retry = [...(dialog()?.querySelectorAll("button") ?? [])].find(
+      (button) => button.textContent === "Try again",
+    );
+    if (!retry) throw new Error("no Try again");
+    await act(async () => {
+      retry.focus();
+      retry.click();
+    });
+    await until(() => shown().length === 1, "the upload tile after retry");
+    const search = dialog()?.querySelector('input[type="search"]');
+    expect(search !== null && document.activeElement === search).toBe(true);
+  });
 });
 
 describe("upload ids and tiles (W-239)", () => {
@@ -322,4 +349,37 @@ describe("uploads in All icons (W-295)", () => {
     await goUploads();
     await until(() => dialog()?.textContent?.includes("Your uploads didn't load"), "the failure");
   });
+});
+
+test("W-827: Upload SVG keeps keyboard focus while uploading and ignores a second press", async () => {
+  const release = Promise.withResolvers<Response>();
+  const base = stubFetcher({ items: [logo] });
+  const fetcher: Fetcher = async (path, init) =>
+    path.endsWith("/icons/upload") ? release.promise : base.fetcher(path, init);
+  await open(fetcher);
+  await goUploads();
+  await until(() => shown().length === 1, "the upload tile");
+  const button = await until(
+    () => dialog()?.querySelector<HTMLButtonElement>("[data-emvb-icon-upload-btn]"),
+    "Upload SVG",
+  );
+  const input = dialog()?.querySelector<HTMLInputElement>("[data-emvb-icon-upload-input]");
+  let picks = 0;
+  input?.addEventListener("click", () => picks++);
+  button.focus();
+  await pickFile(
+    new File(['<svg viewBox="0 0 24 24"><path d="M1 1h2"/></svg>'], "rocket.svg", {
+      type: "image/svg+xml",
+    }),
+  );
+  expect(button.disabled).toBe(false);
+  expect(button.getAttribute("aria-disabled")).toBe("true");
+  expect(document.activeElement === button).toBe(true);
+  await act(async () => button.click());
+  expect(picks).toBe(0);
+  await act(async () => release.resolve(Response.json({ data: { item: logo, imagesLeftOut: 0 } })));
+  await settle();
+  expect(document.activeElement === button).toBe(true);
+  await act(async () => button.click());
+  expect(picks).toBe(1);
 });

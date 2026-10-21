@@ -44,6 +44,8 @@ export function validateFloatSettings(raw: unknown): FloatValidation {
 
 /**
  * Chrome for pinned bars and corner floats. Loaded only when a float matches.
+ * W-759: a corner float keeps its 1rem gap on both sides and never grows past the screen; a long
+ * one scrolls inside (on a phone it ran off the top, taking its close button and heading with it).
  * Bars reserve their height through the two custom properties the runtime sets.
  */
 export const FLOAT_CHROME_CSS = `
@@ -58,9 +60,11 @@ export const FLOAT_CHROME_CSS = `
 :where(.emvb-float--surface){background:#fff;color:#0f172a;box-shadow:0 4px 16px -4px rgba(15,23,42,.25);padding:.5rem 1rem}
 :where(.emvb-float--surface:is(.emvb-float--start-top,.emvb-float--end-top,.emvb-float--start-bottom,.emvb-float--end-bottom)){border-radius:.75rem;padding:.75rem 1rem}
 .emvb-float__body{min-width:0;flex:1}
+.emvb-float:is(.emvb-float--start-top,.emvb-float--end-top,.emvb-float--start-bottom,.emvb-float--end-bottom){max-width:calc(100% - 2rem)}
+.emvb-float:is(.emvb-float--start-top,.emvb-float--end-top,.emvb-float--start-bottom,.emvb-float--end-bottom) .emvb-float__body{max-height:calc(100vh - 3.5rem);max-height:calc(100dvh - 3.5rem);overflow:auto}
 .emvb-float__close{flex:none;width:2rem;height:2rem;border:0;border-radius:999px;background:transparent;color:inherit;font-size:1.5rem;line-height:1;cursor:pointer}
 .emvb-float__close:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
-html{--emvb-float-top:0px;--emvb-float-bottom:0px}
+html{--emvb-float-top:0px;--emvb-float-bottom:0px;scroll-padding-top:var(--emvb-float-top);scroll-padding-bottom:var(--emvb-float-bottom)}
 body{padding-top:var(--emvb-float-top);padding-bottom:var(--emvb-float-bottom)}
 `
   .replace(/\n+/g, "")

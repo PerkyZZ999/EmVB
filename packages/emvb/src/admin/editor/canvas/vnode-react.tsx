@@ -13,6 +13,13 @@ const REACT_ATTR: Record<string, string> = {
   minlength: "minLength",
   maxlength: "maxLength",
   novalidate: "noValidate",
+  // W-804: React warned "Invalid DOM property" for these and the canvas logged an error per image
+  // or background video (a priority image's fetchpriority, srcset, a post date's datetime).
+  fetchpriority: "fetchPriority",
+  srcset: "srcSet",
+  playsinline: "playsInline",
+  autoplay: "autoPlay",
+  datetime: "dateTime",
   // The canvas never updates a radio from props, so a tab chosen there stays chosen (QA-5).
   checked: "defaultChecked",
 };

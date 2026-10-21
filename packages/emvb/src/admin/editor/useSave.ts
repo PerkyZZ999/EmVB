@@ -194,14 +194,24 @@ export function useSave(
   }, [start]);
 
   /** Conflict → Overwrite: take the stored revision and save over it. */
+  // W-836: the overwrite counts as the save in flight, so a save asked for meanwhile (Save draft,
+  // Ctrl+S, autosave) waits for it and uses its new revision instead of the stale one, which
+  // reopened the conflict right after a successful overwrite.
   const overwrite = React.useCallback(async () => {
     setConflict(false);
-    try {
-      const stored = await loadEntry(fetcher, latest.current.id, collection);
-      await write(stored.rev);
-    } catch {
-      setStatus({ kind: "error", message: OFFLINE, retry: true });
-    }
+    const run: Promise<string | null> = (async () => {
+      try {
+        const stored = await loadEntry(fetcher, latest.current.id, collection);
+        return await write(stored.rev);
+      } catch {
+        setStatus({ kind: "error", message: OFFLINE, retry: true });
+        return null;
+      }
+    })().finally(() => {
+      if (inFlight.current === run) inFlight.current = null;
+    });
+    inFlight.current = run;
+    await run;
   }, [fetcher, write, collection]);
 
   const publish = React.useCallback(async (): Promise<boolean> => {

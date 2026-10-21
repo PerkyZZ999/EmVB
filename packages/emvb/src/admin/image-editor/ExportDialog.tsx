@@ -139,6 +139,9 @@ function ExportForm({
   const jpegGps = format === "jpeg" && sourceHasGps;
 
   const run = async (kind: "download" | "save") => {
+    // W-825: Download and Save copy stay focusable while working (aria-disabled), so a press
+    // made then is ignored here instead of by a disabled button that drops focus to the body.
+    if (pending !== null) return;
     setError(null);
     const settings: ExportSettings = {
       format,
@@ -206,8 +209,9 @@ function ExportForm({
         <Dialog.Description className="emvb-ie-export-desc">
           Pick a format and size. Rendering always starts from the original.
         </Dialog.Description>
+        {/* W-830: Close stays focusable while saving (onOpenChange already refuses to close). */}
         <Dialog.Close
-          disabled={pending === "save"}
+          aria-disabled={pending === "save"}
           render={(props) => (
             <Button
               {...props}
@@ -339,7 +343,8 @@ function ExportForm({
           variant="outline"
           size="sm"
           className="emvb-ie-btn"
-          disabled={!canExport || pending !== null}
+          disabled={!canExport}
+          aria-disabled={pending !== null}
           icon={
             pending === "download" ? (
               <span className="emvb-ie-spinner emvb-ie-spinner-sm" aria-hidden="true" />
@@ -358,7 +363,8 @@ function ExportForm({
           size="sm"
           className="emvb-ie-btn"
           style={SOLID_PRIMARY}
-          disabled={!canExport || pending !== null}
+          disabled={!canExport}
+          aria-disabled={pending !== null}
           aria-busy={pending === "save" || undefined}
           icon={
             pending === "save" ? (

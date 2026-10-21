@@ -1,5 +1,5 @@
-import { Button, DropdownMenu } from "@cloudflare/kumo";
-import type * as React from "react";
+import { Button, DropdownMenu, Loader } from "@cloudflare/kumo";
+import * as React from "react";
 import {
   ArrowSquareOutIcon,
   CaretDownIcon,
@@ -101,6 +101,20 @@ export function TopBar({
   tools?: React.ReactNode;
 }) {
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  // W-769: a disabled button drops focus to the page body, so the button that was focused when
+  // the work began gets it back once it is done. W-816: Save draft and Publish no longer disable
+  // while busy (aria-disabled, repeat presses ignored), so focus stays on them throughout.
+  const refocus = React.useRef<HTMLElement | null>(null);
+  const remember = (event: React.MouseEvent<HTMLElement>) => {
+    refocus.current = document.activeElement === event.currentTarget ? event.currentTarget : null;
+  };
+  React.useEffect(() => {
+    const button = refocus.current;
+    if (busy !== null || !button) return;
+    refocus.current = null;
+    const active = document.activeElement;
+    if (button.isConnected && (!active || active === document.body)) button.focus();
+  }, [busy]);
   return (
     <header className="emvb-topbar">
       <div className="emvb-topbar-start">
@@ -218,10 +232,16 @@ export function TopBar({
               <Button
                 variant="ghost"
                 className={`${BUTTON} emvb-revert-button`}
-                disabled={busy !== null || !canRevert}
+                // W-828: a save or publish no longer disables Revert (focus fell to the page
+                // body on Ctrl+S); it stays focusable and ignores presses while busy.
+                disabled={!canRevert}
+                aria-disabled={busy !== null}
                 title={canRevert ? "Revert to published" : "No changes since the last publish"}
                 aria-label="Revert to published"
-                onClick={onRevert}
+                onClick={() => {
+                  if (busy !== null) return;
+                  onRevert();
+                }}
               >
                 Revert
               </Button>
@@ -229,12 +249,21 @@ export function TopBar({
             <Button
               variant="secondary"
               className={`${BUTTON} emvb-save-button`}
-              icon={<FloppyDiskIcon size={14} aria-hidden="true" />}
-              loading={busy === "save" && !reducedMotion}
-              disabled={busy !== null}
+              icon={
+                busy === "save" && !reducedMotion ? (
+                  <Loader size={14} />
+                ) : (
+                  <FloppyDiskIcon size={14} aria-hidden="true" />
+                )
+              }
+              aria-disabled={busy !== null}
               aria-busy={busy === "save"}
               aria-label={dirty ? "Save draft (unsaved changes)" : "Save draft"}
-              onClick={onSave}
+              onClick={(event) => {
+                if (busy !== null) return;
+                remember(event);
+                onSave();
+              }}
             >
               Save draft
               {dirty && <span className="emvb-unsaved-dot" aria-hidden="true" />}
@@ -243,9 +272,14 @@ export function TopBar({
               variant="primary"
               className={`${BUTTON} emvb-publish-button`}
               style={SOLID_PRIMARY}
-              icon={<UploadSimpleIcon size={14} aria-hidden="true" />}
-              loading={busy === "publish" && !reducedMotion}
-              disabled={busy !== null}
+              icon={
+                busy === "publish" && !reducedMotion ? (
+                  <Loader size={14} />
+                ) : (
+                  <UploadSimpleIcon size={14} aria-hidden="true" />
+                )
+              }
+              aria-disabled={busy !== null}
               aria-busy={busy === "publish"}
               aria-label={stylesUnpublished ? "Publish (site styles unpublished)" : undefined}
               title={
@@ -254,10 +288,13 @@ export function TopBar({
                   : undefined
               }
               data-emvb-styles-pending={stylesUnpublished ? "true" : undefined}
-              onClick={onPublish}
+              onClick={(event) => {
+                if (busy !== null) return;
+                remember(event);
+                onPublish();
+              }}
             >
               Publish
-              {stylesUnpublished && <span className="emvb-styles-dot" aria-hidden="true" />}
             </Button>
           </div>
         )}

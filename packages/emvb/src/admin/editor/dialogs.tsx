@@ -1,4 +1,5 @@
-import { Button, Dialog } from "@cloudflare/kumo";
+import { Button, Dialog, Loader } from "@cloudflare/kumo";
+import { useMediaQuery } from "./useMediaQuery.ts";
 import { useEditedNoun } from "./edited-noun.ts";
 import { BUTTON, SOLID_DESTRUCTIVE, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 
@@ -86,10 +87,26 @@ export function LeaveDialog({
   onOpenChange,
   onDiscard,
   onSaveAndLeave,
-}: OpenProps & { onDiscard: () => void; onSaveAndLeave: () => void }) {
+  saving = false,
+}: OpenProps & {
+  onDiscard: () => void;
+  onSaveAndLeave: () => void;
+  /** W-834: Save and leave is saving; the dialog shows it and ignores presses and closing. */
+  saving?: boolean;
+}) {
   const noun = useEditedNoun();
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const unlessSaving = (run: () => void) => () => {
+    if (!saving) run();
+  };
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(next) => {
+        if (!next && saving) return;
+        onOpenChange(next);
+      }}
+    >
       <Dialog size="base" className="p-6">
         <style>{UI_CSS}</style>
         <div data-emvb-dialog="leave" className="emvb-dialog">
@@ -98,7 +115,7 @@ export function LeaveDialog({
           <div className="emvb-dialog-actions">
             <Dialog.Close
               render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
+                <Button {...props} variant="secondary" className={BUTTON} aria-disabled={saving}>
                   Keep editing
                 </Button>
               )}
@@ -106,7 +123,8 @@ export function LeaveDialog({
             <Button
               variant="secondary"
               className={`${BUTTON} emvb-danger-text`}
-              onClick={onDiscard}
+              aria-disabled={saving}
+              onClick={unlessSaving(onDiscard)}
             >
               Discard changes
             </Button>
@@ -114,9 +132,12 @@ export function LeaveDialog({
               variant="primary"
               className={BUTTON}
               style={SOLID_PRIMARY}
-              onClick={onSaveAndLeave}
+              icon={saving && !reducedMotion ? <Loader size={14} /> : undefined}
+              aria-disabled={saving}
+              aria-busy={saving}
+              onClick={unlessSaving(onSaveAndLeave)}
             >
-              Save and leave
+              {saving ? "Saving…" : "Save and leave"}
             </Button>
           </div>
         </div>

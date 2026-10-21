@@ -36,7 +36,8 @@ async function bar({
   status = { kind: "idle" },
   busy = null,
   siteStyles = true,
-}: Props = {}) {
+  canRevert,
+}: Props & { canRevert?: boolean } = {}) {
   const calls: string[] = [];
   const log = (name: string) => () => {
     calls.push(name);
@@ -53,6 +54,7 @@ async function bar({
       onPreview={log("preview")}
       onSave={log("save")}
       onPublish={log("publish")}
+      {...(canRevert === undefined ? {} : { canRevert, onRevert: log("revert") })}
     />,
   );
   const button = (name: string) => {
@@ -134,7 +136,10 @@ describe("top bar page and actions (W-091)", () => {
   test("while saving or publishing both Save draft and Publish are disabled", async () => {
     const disabled = async (busy: "save" | "publish" | null) => {
       const view = await bar({ busy });
-      return [view.button("Save draft").disabled, view.button("Publish").disabled];
+      return [
+        view.button("Save draft").getAttribute("aria-disabled") === "true",
+        view.button("Publish").getAttribute("aria-disabled") === "true",
+      ];
     };
     expect(await disabled("save")).toEqual([true, true]);
     expect(await disabled("publish")).toEqual([true, true]);
@@ -160,4 +165,42 @@ test("UX-031: the page title carries its whole name as a tooltip, since a long o
   expect(untitled.host.querySelector(".emvb-topbar-title")?.getAttribute("title") ?? null).toBe(
     "Untitled page",
   );
+});
+
+for (const busy of ["save", "publish"] as const) {
+  test(`W-816: while ${busy} is busy, Save draft and Publish keep focus and ignore repeat presses`, async () => {
+    const view = await bar({ busy });
+    const save = view.button("Save draft");
+    const publish = view.button("Publish");
+    expect([save.disabled, publish.disabled]).toEqual([false, false]);
+    save.focus();
+    await view.click("Save draft");
+    expect(document.activeElement).toBe(save);
+    publish.focus();
+    await view.click("Publish");
+    expect(document.activeElement).toBe(publish);
+    expect(view.calls).toEqual([]);
+  });
+}
+
+test("W-816: when idle, Save draft and Publish still run", async () => {
+  const idle = await bar();
+  await idle.click("Save draft");
+  await idle.click("Publish");
+  expect(idle.calls).toEqual(["save", "publish"]);
+});
+
+test("W-828: a save in flight keeps Revert focusable and ignores the press; idle it reverts", async () => {
+  const page = { title: "Home", status: "published" } as const;
+  const view = await bar({ page, dirty: true, busy: "save", canRevert: true });
+  const revert = view.button("Revert to published");
+  expect(revert.disabled).toBe(false);
+  expect(revert.getAttribute("aria-disabled")).toBe("true");
+  revert.focus();
+  await view.click("Revert to published");
+  expect(document.activeElement).toBe(revert);
+  expect(view.calls).toEqual([]);
+  const idle = await bar({ page, dirty: true, canRevert: true });
+  await idle.click("Revert to published");
+  expect(idle.calls).toEqual(["revert"]);
 });

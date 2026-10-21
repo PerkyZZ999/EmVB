@@ -49,6 +49,9 @@ export const FEATURE_CSS = `
 .emvb-palette { padding: 0; overflow: hidden; }
 /* UX-093: anchored near the top, so the box doesn't jump up and down as results filter. */
 .emvb-palette.emvb-palette { top: max(12vh, 32px); translate: -50% 0; }
+/* W-810: the dialog sized to its rows, so it widened and jumped sideways as results with longer
+   labels appeared. A fixed width (within the viewport) keeps it still while typing. */
+.emvb-palette.emvb-palette.emvb-palette { width: min(564px, calc(100vw - 32px)); }
 .emvb-palette-input { width: 100%; height: 44px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--color-kumo-line); background: transparent; color: var(--text-color-kumo-default); font: inherit; font-size: 15px; outline: none; }
 .emvb-palette-list { max-height: min(60vh, 420px); overflow-y: auto; margin: 0; padding: 4px; list-style: none; }
 .emvb-palette-group { padding: 8px 10px 2px; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-color-kumo-subtle); }
@@ -57,7 +60,8 @@ export const FEATURE_CSS = `
 .emvb-palette-hint { display: inline-flex; align-items: center; gap: 6px; min-width: 0; max-width: 50%; color: var(--text-color-kumo-subtle); font-size: 12px; white-space: nowrap; }
 .emvb-palette-kind { flex: none; padding: 0 6px; border-radius: 4px; line-height: 18px; background: var(--color-kumo-base); box-shadow: inset 0 0 0 1px var(--color-kumo-line); color: var(--text-color-kumo-default); }
 .emvb-palette-detail { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.emvb-palette-empty { padding: 12px; color: var(--text-color-kumo-subtle); font-size: 13px; }
+/* W-760: a long query with no spaces widened the palette past the screen. */
+.emvb-palette-empty { padding: 12px; color: var(--text-color-kumo-subtle); font-size: 13px; overflow-wrap: anywhere; contain: inline-size; }
 .emvb-palette-tips { margin: 0; padding: 6px 12px; border-top: 1px solid var(--color-kumo-line); font-size: 12px; line-height: 18px; color: var(--text-color-kumo-subtle); }
 .emvb-palette-tips kbd { display: inline-block; min-width: 18px; padding: 0 4px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--color-kumo-line); font-family: var(--font-mono); font-size: 11px; line-height: 16px; text-align: center; color: var(--text-color-kumo-default); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

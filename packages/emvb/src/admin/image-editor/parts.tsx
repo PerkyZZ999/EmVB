@@ -50,6 +50,41 @@ type IconButtonProps = {
   className?: string;
 } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onClick" | "disabled" | "className">;
 
+/**
+ * W-839: Undo, Redo and Reset disable themselves when they run out (and an icon button loses its
+ * tooltip wrapper, so it remounts). Focus then fell to the dialog or the page body. Once the
+ * pressed button can no longer hold focus, move it to the nearest enabled button in the toolbar.
+ */
+/** Distance from the pressed button; on a tie the earlier button wins (Redo hands back to Undo). */
+const near = (at: number, index: number) => Math.abs(index - at) + (index > at ? 0.5 : 0);
+
+function keepToolbarFocus(from: HTMLButtonElement) {
+  const bar = from.closest<HTMLElement>('[data-slot="editor-toolbar"], .emvb-ie-compact-head');
+  const dialog = from.closest<HTMLElement>('[role="dialog"]');
+  if (!bar) return;
+  const at = [...bar.querySelectorAll<HTMLButtonElement>("button")].indexOf(from);
+  const started = Date.now();
+  const settle = () => {
+    const active = document.activeElement;
+    const lost =
+      active === document.body ||
+      active === dialog ||
+      active === null ||
+      (active instanceof HTMLButtonElement && active.disabled);
+    if (!lost) {
+      if (active === from && Date.now() - started < 600) window.setTimeout(settle, 30);
+      return;
+    }
+    // Positions, not elements: a button that gained or lost its tooltip is a new element.
+    const all = [...bar.querySelectorAll<HTMLButtonElement>("button")];
+    const open = all
+      .map((button, index) => ({ button, index }))
+      .filter(({ button }) => !button.disabled && button.getAttribute("aria-disabled") !== "true");
+    open.toSorted((a, b) => near(at, a.index) - near(at, b.index))[0]?.button.focus();
+  };
+  window.setTimeout(settle, 0);
+}
+
 /** A ghost or outline button; icon-only ones get a tooltip below (photocn EditorActionButton). */
 export function IconButton({
   label,
@@ -57,8 +92,19 @@ export function IconButton({
   showLabel = false,
   variant = "ghost",
   className,
-  ...props
+  ...rest
 }: IconButtonProps) {
+  const { onClick } = rest;
+  const props = {
+    ...rest,
+    onClick: onClick
+      ? (event: React.MouseEvent<HTMLButtonElement>) => {
+          const from = event.currentTarget;
+          onClick();
+          keepToolbarFocus(from);
+        }
+      : undefined,
+  };
   const classes = `emvb-ie-btn${showLabel ? "" : " emvb-ie-btn-icon"}${className ? ` ${className}` : ""}`;
   const button = showLabel ? (
     <Button type="button" variant={variant} size="sm" className={classes} icon={icon} {...props}>

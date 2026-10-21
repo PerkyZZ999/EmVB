@@ -129,6 +129,21 @@ test("UX-093: the command palette stays put while its results filter", async ({ 
   expect(before).toBeLessThan(720 * 0.25);
 });
 
+test("W-760: a long query with no spaces keeps the palette its width", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await openEditor(page);
+  await page.keyboard.press("Control+k");
+  const palette = page.getByRole("dialog", { name: "Command palette" });
+  await expect(palette).toBeVisible();
+  await page.waitForTimeout(300);
+  const before = (await palette.boundingBox())?.width ?? -1;
+  await page.keyboard.insertText("q".repeat(300));
+  await expect(palette.getByText("Nothing matches")).toBeVisible();
+  const after = (await palette.boundingBox())?.width ?? -2;
+  expect(Math.round(after)).toBe(Math.round(before));
+  expect(await palette.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+});
+
 test("with the Ctrl+K block turned off, the host palette stacks above the editor and takes the click", async ({
   page,
 }) => {

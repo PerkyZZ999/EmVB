@@ -266,7 +266,11 @@ export function generateCss({
     block(".emvb-root", variables),
     defaultsCss,
     backgroundVideo
-      ? ".emvb-has-bg-video{position:relative;overflow:hidden}.emvb-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}.emvb-has-bg-video>:not(.emvb-bg-video){position:relative;z-index:1}"
+      ? ".emvb-has-bg-video{position:relative;overflow:hidden}.emvb-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}.emvb-has-bg-video>:not(.emvb-bg-video){position:relative;z-index:1}" +
+        // W-802: the overlay above the video, under the content; reset so a nested box's own wins.
+        '.emvb-has-bg-video{--emvb-bg-overlay:none}.emvb-has-bg-video::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:var(--emvb-bg-overlay)}' +
+        // W-801: a looping video kept playing for visitors who ask for reduced motion.
+        "@media (prefers-reduced-motion: reduce){.emvb-bg-video{display:none}}"
       : "",
     ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? ""),
     ...classes,

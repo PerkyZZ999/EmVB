@@ -6,8 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-21
+
+About 300 changes from overnight testing and a full pass over the editor's look since 0.6.5 (UX-001 to UX-095, W-704 to W-841). No schema change: pages saved by 0.7.0 open in 0.6.5.
+
+### Added
+
+- **Undo and Redo in the top bar (UX-084).** Buttons next to Save draft; Ctrl/Cmd+Y also redoes and the Shortcuts dialog lists it and F2 rename (UX-085, W-775).
+- **Empty page start (UX-019, UX-086).** An empty page or theme part fills the canvas and says how to start; pages saved without a layout save and accept new elements (UX-094, UX-095).
+- **Meta description count (UX-021).** A roomier field with a live character count.
+- **Setup snippet copy buttons (UX-088, UX-089).** The AI agents page has copy buttons on its snippets, a "Copy endpoint URL" button (W-812) and shows a failed copy on screen (W-777, W-778).
+- **Site styles.** Unpublished changes fold under a count (UX-024), Escape closes the drawer and returns focus (UX-069, UX-070), and class chips whose class is gone are marked (UX-067).
+- **Accessibility checks.** The checker flags an SVG with no title that isn't decorative (W-786), a linked box with nothing to name the link (W-798) and an icon that animates without end (W-791). Fix all re-chains heading levels so none still skips (W-773), and issues name their severity (UX-022).
+
 ### Changed
 
+- **Panel and dialog polish (UX-001 to UX-095).** Sentence-case labels, 13 px field labels, descriptions under text fields, hinted switches, Kumo selects, segmented Background fill types, Filters behind an Add filters button, tooltips for long titles and clamp() values, named HTML tags and gradient values, 16 px dialog titles, destructive confirms that say what they do, 24 px class chip targets and a Layers indent that steps down past four levels. Settings show only when they apply (grid placement for Grid children, Loop Columns for Grid and Cards, the new-tab switch once there is a link, a button's icon layout once it has an icon).
+- **Motion.** Style sections fade in and the Site styles drawer slides in; toasts, the compact image sheet and the image editor respect reduced motion (UX-010, W-731, W-733, W-742).
 - **Timeline Retry (UX-014).** A failed version load offers Retry inside the timeline and keeps keyboard focus in the dialog. Hosts that keep no revisions get no Retry.
 - **Add panel search recovery (UX-013).** A search with no results offers Clear search, which restores the tiles and focus. Escape clears a non-empty search first.
 - **Named loading and Retry for access, setup and opening a page (UX-012).** Spinners are replaced by named status text. Each failure offers Retry; a failed Set up EmVB no longer needs a reload.
@@ -89,6 +104,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Search feedback (W-708).** Add-panel searches with no matches expose a status message for assistive technology.
 
 - **Add-panel search (W-704).** Search words match in any order, ignoring case and accents, across element names and groups and section recipe descriptions.
+
+### Fixed
+
+- **Keyboard focus never falls to the page body.** Busy buttons (Save draft, Publish, Revert, Publish styles, Set up EmVB, create dialogs, agent switches, icon and image uploads, image Save copy, Download and export Close) stay focusable and ignore repeat presses instead of being disabled (W-769, W-814, W-816, W-819, W-822, W-824 to W-830). Focus lands somewhere sensible after closing a dialog with no opener, restoring a timeline section, applying an accessibility fix, deleting a subtree, removing a button icon, using Retry on the Pages and Theme parts lists, running out of image editor Undo, Redo or Reset, and creating, cancelling or deleting in Site styles (W-831 to W-833, W-835, W-837 to W-841). The media library, background media library and New variable form take focus, close on Escape and give it back (W-740, W-741, W-745, W-817, W-818, W-820, W-821, W-823), and refused fields are focused and marked invalid (W-813, W-788).
+- **Saving.** The Leave dialog can't be pressed twice or closed mid-save (W-834), a save asked for during a conflict overwrite waits for it and uses the new revision (W-836), and versions saved in the same second stay newest first (W-768).
+- **Enter in Site styles.** Enter in a new class or variable name creates it (an IME Enter only finishes the word) (W-840).
+- **Published pages.** Popups start once and keep their close button at the top (W-757, W-758), corner floats stay on screen (W-759), closing a focused float keeps focus near it and edge bars no longer cover focused elements (W-781, W-782), Escape closes a hover-shown menu dropdown and column flyouts open beside their toggle (W-783, W-784), pasted SVG ids don't collide (W-785), loops are lists (W-789), image figure and caption CSS ships with the image (W-792), contents entries hide with their heading (W-793), numbered lists with three-digit numbers fit (W-796), linked boxes inherit colour (W-797), grid spans fit each device (W-799), long words, labels and tabs wrap instead of widening the page (W-764 to W-766, W-800), background video hides under reduced motion and sits under its overlay (W-801, W-802), large icons shrink on narrow screens (W-803), clicking a public tab focuses it (W-779) and form controls name their error message (W-780) and fields without a label are named (W-753).
+- **Editor.** Timeline pictures have no live links and load the host's stylesheets (W-752, W-811), the command palette keeps a fixed width (W-760, W-810, UX-093), long URLs and quoted values wrap in the panel (W-761, W-763, W-767), keyboard moves announce where the element landed (W-770), page weight sizes and contrast messages read cleanly (W-771, W-772, UX-083), popup delays under a second read in ms (W-776), the canvas frame shows a focus ring (W-809), a bare word in a video URL shows the placeholder (W-795), refused SVG markup says why (W-787), and the canvas passes fetchpriority, srcset, playsinline, autoplay and datetime in React's spelling (W-804).
+- **AI agents (MCP).** `list_versions` gives times as ISO 8601 UTC (W-805), and an update with null props is an invalid layout, not an internal error (W-755). The rate-limit message says 1 second (W-754).
 
 ## [0.6.5] - 2026-10-15
 
@@ -561,7 +585,8 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v0.6.5...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.6.5...v0.7.0
 [0.6.5]: https://github.com/PerkyZZ999/EmVB/compare/v0.6.0...v0.6.5
 [0.6.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.4.0...v0.5.0

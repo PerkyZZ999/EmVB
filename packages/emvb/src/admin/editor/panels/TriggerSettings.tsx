@@ -75,8 +75,11 @@ function selectorError(selector: string): string | null {
   return null;
 }
 
+// W-776: under a second the time reads in ms; 30 ms read "0 s after the page loads".
 const seconds = (ms: number) =>
-  `${(ms / 1000).toLocaleString("en", { maximumFractionDigits: 1 })} s`;
+  ms > 0 && ms < 1000
+    ? `${ms} ms`
+    : `${(ms / 1000).toLocaleString("en", { maximumFractionDigits: 1 })} s`;
 
 /** The per-type settings row inside a popup trigger (S7b / W-081). */
 export function TriggerSettings({

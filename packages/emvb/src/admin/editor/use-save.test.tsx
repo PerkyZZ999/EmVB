@@ -268,3 +268,25 @@ describe("one save at a time (W-199)", () => {
     expect(hook().status).toEqual({ kind: "saved" });
   });
 });
+
+test("W-836: a save asked for during Overwrite waits for it and uses its new revision", async () => {
+  const revs: unknown[] = [];
+  const gate = Promise.withResolvers<void>();
+  const fetcher: Fetcher = async (_path, init) => {
+    if ((init?.method ?? "GET") === "GET") {
+      await gate.promise;
+      return Response.json({ data: { item: { data: {} }, _rev: "r9" } });
+    }
+    revs.push((JSON.parse(String(init?.body)) as Record<string, unknown>)["_rev"]);
+    return Response.json({ data: { _rev: `r${10 + revs.length - 1}` } });
+  };
+  await start(fetcher, state());
+  await run(async () => {
+    const overwriting = hook().overwrite();
+    const saving = hook().save();
+    gate.resolve();
+    await Promise.all([overwriting, saving]);
+  });
+  expect(revs).toEqual(["r9", "r10"]);
+  expect(live.state?.rev).toBe("r11");
+});

@@ -1,5 +1,6 @@
 import { Button, Dialog } from "@cloudflare/kumo";
 import { WarningCircleIcon, WarningIcon } from "@phosphor-icons/react";
+import * as React from "react";
 import {
   applyA11yFix,
   applyAllA11yFixes,
@@ -55,6 +56,25 @@ export function A11yDialog({
   onApply: (layout: Layout, note: string) => void;
 }) {
   const fixable = report.issues.filter((issue) => issue.fix);
+  // W-833: a fixed issue leaves the list with its focused Fix button, so focus fell back to the
+  // dialog itself. Move it to the next fix, else Fix all, else Close.
+  const refocusAfterFix = React.useRef(false);
+  React.useEffect(() => {
+    if (!refocusAfterFix.current) return;
+    refocusAfterFix.current = false;
+    const body = document.querySelector<HTMLElement>('[data-emvb-dialog="a11y"]');
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active !== body && body?.contains(active)) return;
+    const next =
+      body?.querySelector<HTMLElement>("[data-emvb-a11y-fix]") ??
+      body?.querySelector<HTMLElement>("[data-emvb-a11y-fix-all]") ??
+      body?.querySelector<HTMLElement>("[data-emvb-a11y-close]");
+    next?.focus();
+  });
+  const apply = (next: Layout, note: string) => {
+    refocusAfterFix.current = true;
+    onApply(next, note);
+  };
   const name = (id: string) => {
     const node = layout ? findNode(layout, id) : undefined;
     if (!node) return "Element";
@@ -112,7 +132,7 @@ export function A11yDialog({
                       className={BUTTON}
                       data-emvb-a11y-fix={issue.id}
                       onClick={() =>
-                        onApply(applyA11yFix(layout, issue), `Fixed: ${issue.fixLabel ?? "issue"}`)
+                        apply(applyA11yFix(layout, issue), `Fixed: ${issue.fixLabel ?? "issue"}`)
                       }
                     >
                       {issue.fixLabel ?? "Fix"}
@@ -125,7 +145,7 @@ export function A11yDialog({
           <div className="emvb-a11y-actions">
             <Dialog.Close
               render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
+                <Button {...props} variant="secondary" className={BUTTON} data-emvb-a11y-close="">
                   Close
                 </Button>
               )}
@@ -137,7 +157,7 @@ export function A11yDialog({
                 style={SOLID_PRIMARY}
                 data-emvb-a11y-fix-all=""
                 onClick={() =>
-                  onApply(
+                  apply(
                     applyAllA11yFixes(layout, fixable),
                     `Fixed ${fixable.length} accessibility issues`,
                   )

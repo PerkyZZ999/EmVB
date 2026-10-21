@@ -58,12 +58,12 @@ describe("W-668: a linked box never wraps links, controls or embeds", () => {
   ] as never;
   for (const [name, child] of cases) {
     test(`around a ${name} it stays a box`, () => {
-      expect(inLinkedBox(child)).not.toContain('<a class="emvb-container"');
+      expect(inLinkedBox(child)).not.toContain('<a class="emvb-container emvb-box-link"');
     });
   }
 
   test("plain content still makes the box the link", () => {
     const html = inLinkedBox({ id: "img00002", type: "image", props: { src: "/a.png", alt: "A" } });
-    expect(html).toContain('<a class="emvb-container" href="/card">');
+    expect(html).toContain('<a class="emvb-container emvb-box-link" href="/card">');
   });
 });

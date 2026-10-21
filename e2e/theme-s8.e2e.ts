@@ -87,3 +87,18 @@ test("API-created Popup theme part loads in the editor with Triggers", async ({
   });
   await expect(overlay(page).locator('[data-emvb-panel="triggers"]')).toBeVisible();
 });
+
+test("W-767: display condition rows fit inside the settings panel", async ({ page, request }) => {
+  const title = `Popup rows ${unique()}`;
+  const id = await createThemePart(request, { title, partType: "popup", slug: `rows-${unique()}` });
+  await openEditor(page, id, title, "emvb_theme_parts");
+  await page.keyboard.press("Escape");
+  const settings = overlay(page).locator('[data-emvb-panel="theme-part-settings"]');
+  await settings.getByRole("button", { name: "Exclude" }).click();
+  const rows = settings.locator(".emvb-condition-row");
+  await expect(rows).toHaveCount(2);
+  for (const row of await rows.all()) {
+    const width = await row.evaluate((li) => ({ scroll: li.scrollWidth, client: li.clientWidth }));
+    expect(width.scroll).toBeLessThanOrEqual(width.client);
+  }
+});

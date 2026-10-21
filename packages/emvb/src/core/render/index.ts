@@ -229,13 +229,21 @@ export function renderPage(
     queryMin?: number;
   }[] = [];
   const layoutHasToc = treeHasType(layout.root, "toc");
+  // W-799: each grid child's grid, so a span or start line that doesn't fit a device's columns
+  // can be clamped there.
+  const gridOf = new Map<string, LayoutNode>();
+  someNode(layout.root, (current) => {
+    if (current.type === "grid")
+      for (const child of nodeChildren(current)) gridOf.set(child.id, current);
+    return false;
+  });
   const loneTests = loneAbTests(layout);
   // W-384: a table of contents lists the page's headings that actually render, with their
   // rendered text, so a hidden A/B arm or audience heading is not a dead link.
   const pageHeadings = layoutHasToc
-    ? new Set(headingAnchors(layout.root).map((h) => h.node))
+    ? new Map(headingAnchors(layout.root).map((h) => [h.node, h.hiddenOn]))
     : undefined;
-  const renderedHeadings: { id: string; text: string }[] = [];
+  const renderedHeadings: { id: string; text: string; tocClass?: string }[] = [];
   const emittedIds = new Set<string>();
   const tocNodes: { node: LayoutNode; vnode: VNode }[] = [];
   const knownVariables = new Set(design.variables.colors.map((c) => c.id));
@@ -386,6 +394,26 @@ export function renderPage(
         mobile.declarations.unshift(...mobileColumns);
       }
     }
+    const grid = gridOf.get(node.id);
+    if (grid) {
+      const counts = gridColumnCounts(grid);
+      const tabletPlacement = { ...node.style, ...node.devices?.tablet };
+      const levels = [
+        node.style ?? {},
+        tabletPlacement,
+        { ...tabletPlacement, ...node.devices?.mobile },
+      ];
+      const fitted = levels.map((style, i) =>
+        fitGridColumn(style.gridColumnStart, style.gridColumnSpan, counts[i] ?? 1),
+      );
+      if (fitted.some((f) => f.changed)) {
+        const at = (i: number) => ({ property: "grid-column", value: fitted[i]?.value ?? "auto" });
+        const kept = declarations.filter((d) => d.property !== "grid-column");
+        declarations.splice(0, declarations.length, ...kept, at(0));
+        tablet.declarations.push(at(1));
+        mobile.declarations.push(at(2));
+      }
+    }
     const states = stateDeclarations(node.states);
     for (const key of states.rejected) {
       warnings.push({ nodeId, code: "rejected-style", detail: key });
@@ -517,7 +545,18 @@ export function renderPage(
         node.hiddenOn?.includes(device),
       );
       if (text && !hiddenEverywhere && !renderedHeadings.some((h) => h.id === attrs.id)) {
-        renderedHeadings.push({ id: attrs.id, text });
+        // W-793: a heading hidden on some devices (itself or an ancestor) hides its contents
+        // entry there too, or the entry was a dead link on those devices.
+        const hiddenOn = pageHeadings.get(stored) ?? [];
+        const tocId = `toc-${node.id}`;
+        if (hiddenOn.length > 0) {
+          localRules.push({ id: tocId, declarations: [], states: {}, hiddenOn: [...hiddenOn] });
+        }
+        renderedHeadings.push({
+          id: attrs.id,
+          text,
+          ...(hiddenOn.length > 0 ? { tocClass: `emvb-e-${tocId}` } : {}),
+        });
       }
     }
     if (isParentNode(node)) {
@@ -619,22 +658,74 @@ function treeHasType(node: LayoutNode, type: string): boolean {
  * inside an element hidden on every device, which never show, so a contents link has nothing
  * to jump to (W-409 covered only the heading's own visibility).
  */
-function headingAnchors(root: LayoutNode): { node: LayoutNode }[] {
-  const out: { node: LayoutNode }[] = [];
-  const walk = (node: LayoutNode) => {
+function headingAnchors(root: LayoutNode): { node: LayoutNode; hiddenOn: PopupDevice[] }[] {
+  const out: { node: LayoutNode; hiddenOn: PopupDevice[] }[] = [];
+  const walk = (node: LayoutNode, inherited: PopupDevice[]) => {
     if (node !== root && HIDDEN_DEVICES.every((device) => node.hiddenOn?.includes(device))) return;
-    if (node.type === "heading") out.push({ node });
-    for (const child of nodeChildren(node)) walk(child);
+    const own = node === root ? [] : (node.hiddenOn ?? []);
+    const hiddenOn = HIDDEN_DEVICES.filter((d) => inherited.includes(d) || own.includes(d));
+    if (hiddenOn.length === HIDDEN_DEVICES.length) return;
+    if (node.type === "heading") out.push({ node, hiddenOn });
+    for (const child of nodeChildren(node)) walk(child, hiddenOn);
   };
-  walk(root);
+  walk(root, []);
   return out;
 }
 
 const HIDDEN_DEVICES = ["desktop", "tablet", "mobile"] as const;
 
+/** Columns set by custom tracks or a count, or undefined when neither is set. */
+const columnCount = (tracks: unknown, columns: unknown): number | undefined =>
+  Array.isArray(tracks) && tracks.length > 0
+    ? tracks.length
+    : Number.isInteger(columns) && (columns as number) >= 1
+      ? (columns as number)
+      : undefined;
+
+/** A grid's column count on desktop, tablet and mobile; unset follows the next wider device. */
+function gridColumnCounts(grid: LayoutNode): [number, number, number] {
+  const props = grid.props as Record<string, unknown>;
+  const desktop = columnCount(props["columnTracks"], props["columns"]) ?? 1;
+  const tablet = columnCount(props["columnTracksTablet"], props["columnsTablet"]) ?? desktop;
+  const mobile = columnCount(props["columnTracksMobile"], props["columnsMobile"]) ?? tablet;
+  return [desktop, tablet, mobile];
+}
+
+/**
+ * W-799: a span wider than the grid, or a start line past it, made the browser add columns, so on
+ * a phone grid of 1 column a "span 3" child squeezed its siblings to a few pixels. The span is
+ * capped at the count and a start line that no longer fits is dropped.
+ */
+function fitGridColumn(
+  start: unknown,
+  span: unknown,
+  count: number,
+): { value?: string; changed: boolean } {
+  const across =
+    Number.isInteger(span) && (span as number) >= 1 && (span as number) <= 12
+      ? (span as number)
+      : undefined;
+  const line =
+    Number.isInteger(start) && (start as number) >= 1 && (start as number) <= 13
+      ? (start as number)
+      : undefined;
+  const width = Math.min(across ?? 1, count);
+  const fits = line !== undefined && line + width - 1 <= count ? line : undefined;
+  const changed = width !== (across ?? 1) || fits !== line;
+  const value =
+    fits !== undefined
+      ? across !== undefined
+        ? `${fits} / span ${width}`
+        : String(fits)
+      : across !== undefined
+        ? `span ${width}`
+        : undefined;
+  return { value, changed };
+}
+
 function tocChildren(
   node: LayoutNode,
-  items: { id: string; text: string }[],
+  items: { id: string; text: string; tocClass?: string }[],
   mode: RenderMode,
 ): (VNode | string)[] {
   const title =
@@ -656,9 +747,9 @@ function tocChildren(
   children.push({
     tag: "ol",
     attrs: {},
-    children: items.map((item) => ({
+    children: items.map((item): VNode => ({
       tag: "li",
-      attrs: {},
+      attrs: item.tocClass ? { class: item.tocClass } : {},
       children: [{ tag: "a", attrs: { href: `#${item.id}` }, children: [item.text] }],
     })),
   });

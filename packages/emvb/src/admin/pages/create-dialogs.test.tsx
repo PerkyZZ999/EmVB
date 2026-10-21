@@ -49,6 +49,7 @@ async function submit() {
   });
 }
 
+const settleTicks = () => act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
 const alertText = () => document.querySelector('[role="alert"]')?.textContent ?? null;
 const text = () => document.body.textContent ?? "";
 
@@ -104,20 +105,24 @@ for (const dialog of dialogs) {
         expect(
           document.querySelector('[role="status"][aria-label="Creation status"]')?.textContent,
         ).toBe(`Creating ${dialog.noun}…`);
+        // W-826: locked (aria-disabled, read-only fields) rather than disabled, so focus stays.
+        const locked = () => [
+          button?.getAttribute("aria-disabled"),
+          document.querySelector("fieldset")?.getAttribute("aria-disabled"),
+          cancel?.getAttribute("aria-disabled"),
+          String(input("Title")?.readOnly),
+          String(input("Slug")?.readOnly),
+        ];
         const button = document.querySelector<HTMLButtonElement>('button[type="submit"]');
-        expect(button?.disabled).toBe(true);
-        expect(button?.getAttribute("aria-busy")).toBe("true");
-        expect(document.querySelector<HTMLFieldSetElement>("fieldset")?.disabled).toBe(true);
         const cancel = [...document.querySelectorAll<HTMLButtonElement>("button")].find(
           (b) => b.textContent === "Cancel",
         );
-        expect(cancel?.disabled).toBe(true);
+        expect(locked()).toEqual(["true", "true", "true", "true", "true"]);
+        expect(button?.getAttribute("aria-busy")).toBe("true");
         await act(async () => pending.resolve(failed(503, "BUSY", "Try again shortly")()));
         expect(alertText()).toBe(`Couldn't create the ${dialog.noun}. Try again shortly`);
-        expect(button?.disabled).toBe(false);
+        expect(locked()).toEqual(["false", "false", "false", "false", "false"]);
         expect(button?.getAttribute("aria-busy")).toBe("false");
-        expect(document.querySelector<HTMLFieldSetElement>("fieldset")?.disabled).toBe(false);
-        expect(cancel?.disabled).toBe(false);
         expect(input("Title")?.value).toBe("Pending creation");
         expect(input("Slug")?.value).toBe(`${dialog.slugPrefix}pending-creation`);
         await submit();
@@ -125,6 +130,29 @@ for (const dialog of dialogs) {
       } finally {
         await act(async () => pending.resolve(failed(503, "BUSY", "Try again shortly")()));
       }
+    });
+
+    test("W-826: while creating, focus stays on Create and the failure leaves it there", async () => {
+      const pending = Promise.withResolvers<Response>();
+      let creates = 0;
+      const fetcher: Fetcher = async (_path, init) => {
+        if (!init?.body) return Response.json({ data: { items: [] } });
+        creates++;
+        return pending.promise;
+      };
+      await mount(dialog.render(fetcher));
+      await type("Title", "Keep focus");
+      const button = document.querySelector<HTMLButtonElement>('button[type="submit"]');
+      button?.focus();
+      await act(async () => button?.click());
+      expect(creates).toBe(1);
+      expect(button?.disabled).toBe(false);
+      expect(document.querySelector("fieldset")?.disabled).toBe(false);
+      expect(document.activeElement === button).toBe(true);
+      await act(async () => pending.resolve(failed(503, "BUSY", "Try again shortly")()));
+      await settleTicks();
+      expect(alertText()).toBe(`Couldn't create the ${dialog.noun}. Try again shortly`);
+      expect(document.activeElement === button).toBe(true);
     });
 
     test("an empty title is refused without a request", async () => {
@@ -160,6 +188,20 @@ for (const dialog of dialogs) {
       await submit();
       expect(text()).toContain(slugTakenMessage(`${dialog.slugPrefix}taken`));
       expect(alertText()).toBeNull();
+    });
+
+    test("W-813: a refused or taken slug moves focus to the field in error and marks it invalid", async () => {
+      await mount(dialog.render(fetcherReplying(failed(409, "SLUG_CONFLICT", "taken"), [])));
+      await submit();
+      expect(document.activeElement).toBe(input("Title") ?? null);
+      expect(input("Title")?.getAttribute("aria-invalid")).toBe("true");
+      await type("Title", "Taken");
+      (document.querySelector('button[type="submit"]') as HTMLButtonElement).focus();
+      await submit();
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+      expect(document.activeElement).toBe(input("Slug") ?? null);
+      expect(input("Slug")?.getAttribute("aria-invalid")).toBe("true");
+      expect(input("Title")?.hasAttribute("aria-invalid")).toBe(false);
     });
 
     test("other API errors and network failures show a form-level alert", async () => {

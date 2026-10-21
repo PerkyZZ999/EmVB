@@ -73,4 +73,27 @@ describe("float bars follow their own size (W-407)", () => {
       globalThis.ResizeObserver = original;
     }
   });
+  test("W-782 closing the focused float moves focus to the next control, not <body>", () => {
+    mount(true);
+    document.body.insertAdjacentHTML("afterbegin", `<a href="#a" id="before">Before</a>`);
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<div hidden><a href="#h">Hidden</a></div><a href="#b" id="after">After</a>`,
+    );
+    initFloats();
+    const close = document.querySelector<HTMLButtonElement>("[data-emvb-float-dismiss]");
+    close?.focus();
+    close?.click();
+    expect(document.activeElement?.id).toBe("after");
+  });
+
+  test("W-782 with nothing after the float, focus goes to the control before it", () => {
+    mount(true);
+    document.body.insertAdjacentHTML("afterbegin", `<a href="#a" id="before">Before</a>`);
+    initFloats();
+    const close = document.querySelector<HTMLButtonElement>("[data-emvb-float-dismiss]");
+    close?.focus();
+    close?.click();
+    expect(document.activeElement?.id).toBe("before");
+  });
 });

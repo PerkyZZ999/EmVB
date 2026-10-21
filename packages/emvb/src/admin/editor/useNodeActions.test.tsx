@@ -81,7 +81,8 @@ describe("useNodeActions arrange (R-003)", () => {
     act(() => api.arrange("head0001", moveDown));
     const expected = moveDown(layout, "head0001");
     if (!expected.ok) throw new Error("fixture move refused");
-    expect(announced).toEqual([]);
+    // W-770: the new position is announced.
+    expect(announced).toEqual(["Moved. Heading is 2 of 2 in Container."]);
     expect(actions).toEqual([
       { type: "apply-arranged", layout: expected.layout, selected: expected.selected },
     ]);

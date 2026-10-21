@@ -14,7 +14,7 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { defaultFetcher, type Fetcher } from "../api.ts";
 import { loadAgents, saveAgentSettings, type AgentsState } from "../agents-api.ts";
 import { useRole } from "../access/role.ts";
@@ -70,11 +70,20 @@ function SectionHead({
 }
 
 /** AI agents (`/agents`, W-463): the master switch, publishing, how to connect, recent activity. */
+/**
+ * W-756: on a phone the setup JSON scrolls sideways, and keyboard users could not reach it to
+ * scroll. Focusable, and named so a screen reader says what it is.
+ */
+const SCROLLABLE = { tabIndex: 0, role: "group" } as const;
+
 export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
   const role = useRole(fetcher);
   const [state, setState] = useState<AgentsState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  // W-814: the switches were disabled while saving, which threw keyboard focus to the page body
+  // after every toggle. They stay enabled; a change made mid-save is ignored instead.
+  const savingNow = useRef(false);
   const [saved, setSaved] = useState(false);
   const [attempt, setAttempt] = useState(0);
   // A failed save keeps the page on screen; only a failed load replaces it (W-624).
@@ -123,6 +132,8 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
   if (!state) return shell(<ListLoading label="Loading AI agent settings…" />);
 
   const change = async (patch: Partial<AgentSettings>) => {
+    if (savingNow.current) return;
+    savingNow.current = true;
     const settings = { ...state.settings, ...patch };
     setSaving(true);
     setSaved(false);
@@ -143,6 +154,7 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
         })
         .catch(() => undefined);
     } finally {
+      savingNow.current = false;
       setSaving(false);
     }
   };
@@ -184,7 +196,6 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
           <Switch
             label="Let AI agents edit EmVB pages"
             checked={settings.mcpEnabled}
-            disabled={saving}
             onCheckedChange={(checked: boolean) => void change({ mcpEnabled: checked })}
           />
           <p>
@@ -194,7 +205,8 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
         </div>
         <div className="emvb-agents-field">
           <h3>MCP endpoint</h3>
-          <ClipboardText text={state.endpoint} />
+          {/* W-812: Kumo's default name, "Copy to clipboard", didn't say what it copies. */}
+          <ClipboardText text={state.endpoint} labels={{ copyAction: "Copy endpoint URL" }} />
         </div>
       </section>
       <section
@@ -208,7 +220,7 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
           <Switch
             label="Agents may publish pages"
             checked={settings.publishPages}
-            disabled={saving || !settings.mcpEnabled}
+            disabled={!settings.mcpEnabled}
             onCheckedChange={(checked: boolean) => void change({ publishPages: checked })}
           />
           <p>Off: agents save drafts and a person publishes them.</p>
@@ -217,7 +229,7 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
           <Switch
             label="Agents may publish site styles"
             checked={settings.publishStyles}
-            disabled={saving || !settings.mcpEnabled}
+            disabled={!settings.mcpEnabled}
             onCheckedChange={(checked: boolean) => void change({ publishStyles: checked })}
           />
           <p>Site styles change every page at once, so leave this off unless you need it.</p>
@@ -240,7 +252,9 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
               </h3>
               <CopySnippet text={remoteSnippet(state.endpoint)} name="remote setup" />
             </div>
-            <pre data-emvb-snippet="remote">{remoteSnippet(state.endpoint)}</pre>
+            <pre data-emvb-snippet="remote" {...SCROLLABLE} aria-label="Remote setup">
+              {remoteSnippet(state.endpoint)}
+            </pre>
           </div>
           <div className="emvb-agents-snippet">
             <div className="emvb-agents-snippet-head">
@@ -250,7 +264,9 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
               </h3>
               <CopySnippet text={stdioSnippet(site)} name="local setup" />
             </div>
-            <pre data-emvb-snippet="stdio">{stdioSnippet(site)}</pre>
+            <pre data-emvb-snippet="stdio" {...SCROLLABLE} aria-label="Local setup">
+              {stdioSnippet(site)}
+            </pre>
           </div>
         </div>
       </section>
@@ -270,7 +286,8 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
             />
           </div>
         ) : (
-          <div className="emvb-agents-table">
+          <div className="emvb-agents-table" {...SCROLLABLE} aria-label="Recent agent activity">
+            {/* W-815: on phones the table scrolls sideways; keyboard users couldn't reach it. */}
             <Table>
               <Table.Header>
                 <Table.Row>
@@ -323,7 +340,8 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
 function CopySnippet({ text, name }: { text: string; name: string }) {
   const [copied, setCopied] = useState<"yes" | "no" | null>(null);
   useEffect(() => {
-    if (!copied) return;
+    // W-777: a failed copy stays until the next click; it vanished after 2 s.
+    if (copied !== "yes") return;
     const timer = setTimeout(() => setCopied(null), 2000);
     return () => clearTimeout(timer);
   }, [copied]);
@@ -352,7 +370,8 @@ function CopySnippet({ text, name }: { text: string; name: string }) {
         ) : (
           <CopyIcon aria-hidden="true" size={14} />
         )}
-        {copied === "yes" ? "Copied" : "Copy"}
+        {/* W-777: sighted users saw no sign that the copy failed; only the status said so. */}
+        {copied === "yes" ? "Copied" : copied === "no" ? "Couldn't copy" : "Copy"}
       </Button>
       <span className="emvb-sr-only" role="status">
         {copied === "yes"

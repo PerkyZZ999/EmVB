@@ -2,13 +2,17 @@ import { clipText } from "../limits.ts";
 import { escapeAttr } from "../sanitize/escape.ts";
 import type { TriggersDoc } from "./triggers.ts";
 
-/** Minimal chrome styles for public popups (loaded only when popups match). */
+/**
+ * Minimal chrome styles for public popups (loaded only when popups match). W-758: the close
+ * button sticks to the top of a long popup (it scrolled away with the content on phones) and
+ * floats, so a long heading wraps beside it instead of running under it.
+ */
 export const POPUP_CHROME_CSS = `
 .emvb-popup{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:1.5rem;box-sizing:border-box}
 .emvb-popup[hidden]{display:none!important}
 .emvb-popup__backdrop{position:absolute;inset:0;background:rgba(15,23,42,.55)}
 .emvb-popup__dialog{position:relative;z-index:1;max-width:min(36rem,100%);max-height:min(90vh,100%);overflow:auto;background:#fff;color:#0f172a;border-radius:.75rem;box-shadow:0 25px 50px -12px rgba(0,0,0,.35);padding:1.5rem 1.5rem 1.25rem}
-.emvb-popup__close{position:absolute;top:.5rem;right:.5rem;width:2rem;height:2rem;border:0;border-radius:999px;background:transparent;color:inherit;font-size:1.5rem;line-height:1;cursor:pointer}
+.emvb-popup__close{position:sticky;top:-1rem;z-index:1;float:right;margin:-1rem -1rem 0 .5rem;width:2rem;height:2rem;border:0;border-radius:999px;background:inherit;color:inherit;font-size:1.5rem;line-height:1;cursor:pointer}
 .emvb-popup__close:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
 .emvb-popup__content{min-width:12rem}
 `

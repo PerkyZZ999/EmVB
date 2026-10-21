@@ -273,6 +273,8 @@ export const IMAGE_EDITOR_CSS = `
 .emvb-ie-sheet[data-open] { transform: none; pointer-events: auto; }
 .emvb-ie-sheet[data-dragging] { transition: none; }
 .emvb-ie-sheet-grip { display: flex; align-items: center; justify-content: center; height: 24px; flex: none; cursor: grab; touch-action: none; }
+.emvb-ie-sheet-grip:focus-visible { outline: none; }
+.emvb-ie-sheet-grip:focus-visible > span { outline: 2px solid var(--color-kumo-focus, var(--color-kumo-brand)); outline-offset: 2px; }
 .emvb-ie-sheet-grip > span { width: 48px; height: 6px; border-radius: 9999px; background: var(--color-kumo-line); }
 .emvb-ie-sheet-tools { display: flex; align-items: center; gap: 4px; padding: 0 8px 4px; border-bottom: 1px solid var(--color-kumo-hairline); }
 .emvb-ie-sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom); }

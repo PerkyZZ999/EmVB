@@ -1,7 +1,8 @@
-import { Banner, Button, Empty } from "@cloudflare/kumo";
+import { Banner, Button, Empty, Loader } from "@cloudflare/kumo";
 import { LayoutIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { Fetcher } from "../api.ts";
+import { useMediaQuery } from "../editor/useMediaQuery.ts";
 import { useSetupStatus } from "../setup/useSetupStatus.ts";
 import { BUTTON, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 import { ListError, ListLoading } from "./list-kit.tsx";
@@ -28,6 +29,7 @@ export function SetupShell({
   children: React.ReactNode;
 }) {
   const { status, running, setup, retry } = useSetupStatus(fetcher, role);
+  const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   // UX-012: the list's own loading card and a Retry that brings Set up back after a failure.
   if (status.state === "loading" || status.state === "error") {
@@ -53,8 +55,14 @@ export function SetupShell({
         variant="primary"
         className={BUTTON}
         style={SOLID_PRIMARY}
-        loading={running}
-        onClick={() => void setup()}
+        // W-830: Kumo's `loading` disables the button, which dropped keyboard focus to the page
+        // body while setup ran. It stays focusable (aria-disabled) and ignores presses instead.
+        icon={running && !reducedMotion ? <Loader size={14} /> : undefined}
+        aria-disabled={running}
+        aria-busy={running}
+        onClick={() => {
+          if (!running) void setup();
+        }}
       >
         {label}
       </Button>

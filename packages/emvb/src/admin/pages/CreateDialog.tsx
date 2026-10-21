@@ -1,4 +1,4 @@
-import { Button, Dialog, Input } from "@cloudflare/kumo";
+import { Button, Dialog, Input, Loader } from "@cloudflare/kumo";
 import { PlusIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { pageSlug } from "../../core/index.ts";
@@ -58,6 +58,15 @@ export function CreateDialog({
   const [error, setError] = React.useState<FieldError>();
   const [busy, setBusy] = React.useState(false);
   const pending = React.useRef(false);
+  // W-813: a refused or failed create moved focus nowhere (to the page body after a 409), and
+  // the field in error wasn't marked invalid, so a screen reader user heard nothing.
+  const titleInput = React.useRef<HTMLInputElement>(null);
+  const slugInput = React.useRef<HTMLInputElement>(null);
+  const [errorTurn, setErrorTurn] = React.useState(0);
+  React.useEffect(() => {
+    if (busy || !error || error.field === "form") return;
+    (error.field === "title" ? titleInput : slugInput).current?.focus();
+  }, [error, busy, errorTurn]);
   // Native autofocus can run before Kumo records its return-focus target.
   const opener = React.useRef<HTMLElement | null>(null);
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
@@ -77,6 +86,7 @@ export function CreateDialog({
     if (pending.current) return;
     const cleanTitle = title.trim();
     const cleanSlug = pageSlug(slug);
+    setErrorTurn((turn) => turn + 1);
     if (!cleanTitle) return setError({ field: "title", message: emptyTitle });
     if (!cleanSlug) {
       return setError({ field: "slug", message: "Enter a slug using letters, digits or -." });
@@ -118,10 +128,15 @@ export function CreateDialog({
           }}
         >
           <Dialog.Title>{heading}</Dialog.Title>
-          <fieldset className="emvb-create-fields" disabled={busy}>
+          {/* W-826: locked, not disabled, while creating: a disabled field or button dropped
+              keyboard focus to the page body for the whole request and after a failure. */}
+          <fieldset className="emvb-create-fields" aria-disabled={busy}>
             {children}
             <Input
               label="Title"
+              readOnly={busy}
+              ref={titleInput}
+              aria-invalid={error?.field === "title" || undefined}
               className={FIELD}
               autoFocus
               onFocus={(event) => {
@@ -143,6 +158,9 @@ export function CreateDialog({
             />
             <Input
               label="Slug"
+              readOnly={busy}
+              ref={slugInput}
+              aria-invalid={error?.field === "slug" || undefined}
               className={`${FIELD} emvb-mono`}
               value={slug}
               description={slugHint}
@@ -169,7 +187,7 @@ export function CreateDialog({
           <div className="emvb-dialog-actions">
             <Dialog.Close
               render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON} disabled={busy}>
+                <Button {...props} variant="secondary" className={BUTTON} aria-disabled={busy}>
                   Cancel
                 </Button>
               )}
@@ -179,9 +197,14 @@ export function CreateDialog({
               variant="primary"
               className={BUTTON}
               style={SOLID_PRIMARY}
-              icon={<PlusIcon size={14} aria-hidden="true" />}
-              loading={busy && !reducedMotion}
-              disabled={busy}
+              icon={
+                busy && !reducedMotion ? (
+                  <Loader size={14} />
+                ) : (
+                  <PlusIcon size={14} aria-hidden="true" />
+                )
+              }
+              aria-disabled={busy}
               aria-busy={busy}
             >
               {submitLabel}

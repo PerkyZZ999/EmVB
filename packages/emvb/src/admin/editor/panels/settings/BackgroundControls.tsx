@@ -48,10 +48,24 @@ export function BackgroundImageControl({
   const src = value ?? "";
   const [open, setOpen] = React.useState(false);
   const [items, setItems] = React.useState<MediaLibraryItem[]>([]);
-  const [busy, setBusy] = React.useState(false);
+  const [busy, setBusyState] = React.useState(false);
+  // W-824: Choose from library and Upload stay focusable while busy (aria-disabled, presses
+  // ignored), like W-819, so keyboard focus no longer drops to the page body during an upload.
+  const busyRef = React.useRef(false);
+  const setBusy = React.useCallback((next: boolean) => {
+    busyRef.current = next;
+    setBusyState(next);
+  }, []);
   const [error, setError] = React.useState<string | null>(null);
   const [urlDraft, setUrlDraft] = React.useState(src);
   const fileRef = React.useRef<HTMLInputElement>(null);
+  // W-823: the background Media library didn't take focus, ignored Escape and dropped focus to
+  // the page body when it closed. It now behaves like the image picker's library (W-741/W-817).
+  const libraryOpenerRef = React.useRef<HTMLButtonElement>(null);
+  const closeLibrary = () => {
+    setOpen(false);
+    libraryOpenerRef.current?.focus();
+  };
 
   React.useEffect(() => {
     setUrlDraft(src);
@@ -69,7 +83,7 @@ export function BackgroundImageControl({
     } finally {
       setBusy(false);
     }
-  }, [fetcher]);
+  }, [fetcher, setBusy]);
 
   React.useEffect(() => {
     if (open) void loadLibrary();
@@ -123,8 +137,11 @@ export function BackgroundImageControl({
             <Button
               type="button"
               className={BUTTON}
-              onClick={() => setOpen(true)}
-              disabled={busy}
+              onClick={() => {
+                if (!busyRef.current) setOpen(true);
+              }}
+              aria-disabled={busy}
+              ref={libraryOpenerRef}
               data-emvb-bg-library=""
             >
               Choose from library
@@ -133,8 +150,10 @@ export function BackgroundImageControl({
               type="button"
               className={BUTTON}
               variant="secondary"
-              onClick={() => fileRef.current?.click()}
-              disabled={busy}
+              onClick={() => {
+                if (!busyRef.current) fileRef.current?.click();
+              }}
+              aria-disabled={busy}
               data-emvb-bg-upload-btn=""
             >
               Upload
@@ -177,14 +196,25 @@ export function BackgroundImageControl({
           }}
         />
         {open && (
-          <div className="emvb-media-dialog" role="dialog" aria-label="Media library">
+          <div
+            className="emvb-media-dialog"
+            role="dialog"
+            aria-label="Media library"
+            onKeyDown={(event) => {
+              if (event.key !== "Escape" || event.defaultPrevented) return;
+              event.preventDefault();
+              event.stopPropagation();
+              closeLibrary();
+            }}
+          >
             <div className="emvb-media-dialog-head">
               <h3 className="emvb-panel-title">Media library</h3>
               <Button
                 type="button"
                 className={BUTTON}
                 variant="secondary"
-                onClick={() => setOpen(false)}
+                autoFocus
+                onClick={closeLibrary}
               >
                 Close
               </Button>
@@ -198,7 +228,10 @@ export function BackgroundImageControl({
                     type="button"
                     className="emvb-media-card"
                     data-emvb-bg-media-id={item.id}
-                    onClick={() => applyUrl(item.url)}
+                    onClick={() => {
+                      applyUrl(item.url);
+                      libraryOpenerRef.current?.focus();
+                    }}
                   >
                     <img src={item.url} alt={item.alt ?? item.filename} />
                     <span>{item.filename}</span>

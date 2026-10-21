@@ -1,6 +1,7 @@
 import { clipText } from "../limits.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import { isParentNode, type Layout, type LayoutNode } from "../schema/layout.ts";
+import { boxBecomesLink } from "../render/extras.ts";
 import { updateNode } from "../tree-ops.ts";
 
 /**
@@ -36,7 +37,8 @@ export type A11yIssue = {
     | "image-sizes"
     | "control-name"
     | "empty-heading"
-    | "landmark-name";
+    | "landmark-name"
+    | "motion";
   severity: "error" | "warning";
   message: string;
   /** The one-click fix, when there is a safe one. */
@@ -185,6 +187,24 @@ function largeText(node: LayoutNode, design: DesignSystem): boolean {
  * the single H1, link names, vague link text, text contrast against its background, focusable
  * elements hidden with aria-hidden, and unannounced new tabs. Each issue points at an element; most have a safe fix.
  */
+/**
+ * W-798: whether a linked box has anything inside for its link name: text, a heading, a label, a
+ * non-decorative image's alt, or an icon's or SVG's title. Bound and dynamic content counts, as
+ * its text isn't known here.
+ */
+function boxHasName(node: LayoutNode): boolean {
+  if (node.bind || node.type.startsWith("post-") || node.type === "loop" || node.type === "section")
+    return true;
+  const props = node.props as Record<string, unknown>;
+  const decorative = props["decorative"] === true;
+  const named =
+    node.type === "image" || node.type === "icon" || node.type === "svg"
+      ? !decorative && spoken(node.type === "image" ? props["alt"] : props["title"]) !== ""
+      : ["text", "title", "label", "summary", "caption"].some((key) => spoken(props[key]) !== "");
+  if (named) return true;
+  return isParentNode(node) && node.children.some(boxHasName);
+}
+
 export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
   const issues: A11yIssue[] = [];
   const add = (issue: Omit<A11yIssue, "id">) =>
@@ -270,6 +290,38 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
             : { fix: { kind: "decorative" as const }, fixLabel: "Mark as decorative" }),
         });
       }
+    }
+    // W-786: a non-decorative SVG renders role="img"; with no Title and no <title> in its markup
+    // it reached visitors with no name.
+    if (
+      node.type === "svg" &&
+      props["decorative"] !== true &&
+      !spoken(props["title"]) &&
+      !/<title\b[^>]*>\s*[^<\s]/i.test(String(props["markup"] ?? ""))
+    ) {
+      add({
+        nodeId: node.id,
+        rule: "image-alt",
+        severity: "error",
+        message: "This SVG has no title, so screen readers can't say what it shows.",
+        fix: { kind: "decorative" as const },
+        fixLabel: "Mark as decorative",
+      });
+    }
+    // W-791: a spin or pulse loops forever; reduced-motion visitors are spared, but everyone
+    // else gets motion they can't pause (WCAG 2.2.2) unless it is essential, like a spinner.
+    const looping = [node.style, ...Object.values(node.devices ?? {})].some((st) => {
+      const anim = (st as { iconAnimation?: { type?: unknown } } | undefined)?.iconAnimation;
+      return anim?.type === "spin" || anim?.type === "pulse";
+    });
+    if (looping) {
+      add({
+        nodeId: node.id,
+        rule: "motion",
+        severity: "warning",
+        message:
+          "This icon animates without end and visitors can't pause it. Keep it only if the motion is essential, such as a loading spinner.",
+      });
     }
     // W-403: with extra sizes but no Width, the main image is left out of srcset, so wide screens
     // can only get the listed copies.
@@ -388,6 +440,14 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
       }
       lastLevel = level;
     }
+    if (boxBecomesLink(node) && !boxHasName(node)) {
+      add({
+        nodeId: node.id,
+        rule: "link-name",
+        severity: "error",
+        message: "This box is a link, but nothing inside it has text, so the link has no name.",
+      });
+    }
     if (LINKISH.has(node.type) || (node.type === "icon" && props["href"])) {
       const text = spoken(props["text"] ?? props["title"]);
       const hasHref = typeof props["href"] === "string" && props["href"].trim() !== "";
@@ -433,13 +493,15 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         // W-421: when opacity is what fades the text, a new colour can't fix it; say so instead
         // of offering a fix that leaves the issue in place.
         const fixable = contrastRatio(over(better, nextBg, fade), nextBg) >= needed;
+        // W-772: round down, so 4.48:1 reads "4.4:1", never "4.5:1; it needs 4.5:1".
+        const shown = (Math.floor(ratio * 10) / 10).toFixed(1);
         add({
           nodeId: node.id,
           rule: "contrast",
           severity: "error",
           message: fixable
-            ? `Text contrast is ${ratio.toFixed(1)}:1; it needs ${needed}:1.`
-            : `Text contrast is ${ratio.toFixed(1)}:1; it needs ${needed}:1. Opacity on this element or a parent fades it; raise the opacity.`,
+            ? `Text contrast is ${shown}:1; it needs ${needed}:1.`
+            : `Text contrast is ${shown}:1; it needs ${needed}:1. Opacity on this element or a parent fades it; raise the opacity.`,
           ...(fixable
             ? {
                 fix: { kind: "text-color" as const, color: better },
@@ -518,5 +580,26 @@ export function applyA11yFix(layout: Layout, issue: A11yIssue): Layout {
 
 /** Applies every issue's fix at once (W-317). */
 export function applyAllA11yFixes(layout: Layout, issues: A11yIssue[]): Layout {
-  return issues.reduce((next, issue) => applyA11yFix(next, issue), layout);
+  const fixed = issues.reduce((next, issue) => applyA11yFix(next, issue), layout);
+  // W-773: each heading-order fix was worked out against the page before any fix, so H1, H4,
+  // H6 became H1, H2, H5 and the H5 still skipped. Re-chain the fixed headings in page order.
+  const order = new Set(issues.filter((i) => i.rule === "heading-order").map((i) => i.nodeId));
+  if (order.size === 0) return fixed;
+  const levels = new Map<string, number>();
+  let last = 0;
+  const walk = (node: LayoutNode) => {
+    if (node.type === "heading") {
+      const own = typeof node.props["level"] === "number" ? node.props["level"] : 2;
+      const level = order.has(node.id) ? Math.min(own, Math.max(2, last + 1)) : own;
+      if (level !== own) levels.set(node.id, level);
+      last = level;
+    }
+    if (isParentNode(node)) node.children.forEach(walk);
+  };
+  walk(fixed.root);
+  return [...levels].reduce(
+    (next, [id, level]) =>
+      updateNode(next, id, (node) => ({ ...node, props: { ...node.props, level } }) as LayoutNode),
+    fixed,
+  );
 }

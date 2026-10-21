@@ -128,6 +128,8 @@ export function IconPicker({
   const remove = () => {
     const { iconId: _id, iconSvg: _svg, ...rest } = propsOf(node);
     onChange({ ...node, props: rest } as LayoutNode);
+    // W-838: Remove unmounts itself; keyboard focus moves to Choose instead of the page body.
+    refocus();
   };
 
   return (

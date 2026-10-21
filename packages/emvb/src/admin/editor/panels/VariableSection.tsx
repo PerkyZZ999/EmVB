@@ -255,8 +255,15 @@ export function VariableSection({
   const [renaming, setRenaming] = React.useState<string | null>(null);
   // W-616: what was typed in a rename whose save failed, so the reopened field keeps it.
   const [renameDraft, setRenameDraft] = React.useState<string | null>(null);
-  const [copied, setCopied] = React.useState<string | null>(null);
+  // W-778: a failed copy says so in the row too; it used to do nothing at all.
+  const [copied, setCopied] = React.useState<{ id: string; ok: boolean } | null>(null);
   const rows = React.useRef(new Map<string, HTMLButtonElement>());
+  // W-840: the create row goes away on Create or Cancel; focus lands on the new row or on New.
+  const section = React.useRef<HTMLElement | null>(null);
+  const focusNew = () =>
+    requestAnimationFrame(() =>
+      section.current?.querySelector<HTMLButtonElement>(".emvb-site-section-head button")?.focus(),
+    );
 
   const saveValue = (id: string, next: string | Length) =>
     void onSave({
@@ -301,6 +308,7 @@ export function VariableSection({
     setCreating(false);
     setName("");
     setValue(NEW_VALUE[kind]);
+    requestAnimationFrame(() => rows.current.get(id)?.focus());
   };
 
   const rename = async (id: string, next: string | null) => {
@@ -321,18 +329,21 @@ export function VariableSection({
   };
 
   const copy = (id: string, token: string) => {
-    void navigator.clipboard?.writeText(`var(${token})`).then(
-      () => {
-        setCopied(id);
-        setTimeout(() => setCopied((now) => (now === id ? null : now)), 1500);
-      },
-      () => undefined,
+    const show = (ok: boolean) => {
+      const mark = { id, ok };
+      setCopied(mark);
+      setTimeout(() => setCopied((now) => (now === mark ? null : now)), ok ? 1500 : 4000);
+    };
+    if (!navigator.clipboard?.writeText) return show(false);
+    void navigator.clipboard.writeText(`var(${token})`).then(
+      () => show(true),
+      () => show(false),
     );
   };
 
   const EmptyIcon = EMPTY[kind].icon;
   return (
-    <section className="emvb-site-section" data-emvb-var-kind={kind}>
+    <section ref={section} className="emvb-site-section" data-emvb-var-kind={kind}>
       <SectionHead
         title={title}
         count={items.length}
@@ -447,7 +458,11 @@ export function VariableSection({
                   data-emvb-usage=""
                   aria-live="polite"
                 >
-                  {copied === item.id ? "Copied" : usageText(onPage, inClasses)}
+                  {copied?.id === item.id
+                    ? copied.ok
+                      ? "Copied"
+                      : "Couldn't copy"
+                    : usageText(onPage, inClasses)}
                 </span>
                 <RowMenu
                   label={`Actions for ${item.name}`}
@@ -510,6 +525,7 @@ export function VariableSection({
           onCancel={() => {
             setCreating(false);
             setCreateError(null);
+            focusNew();
           }}
           onCreate={() => void create()}
         >

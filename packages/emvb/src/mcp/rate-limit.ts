@@ -47,10 +47,11 @@ export async function hitRateLimit(
     const stored = await store.getVersioned<Window>(key);
     const current = stored && stored.value?.w === w ? stored.value.n : 0;
     if (current >= limit) {
+      // W-754: "1 second", not "1 seconds", in the last second of a window.
       const retryAfterSeconds = Math.max(1, Math.ceil((w + windowMs - at) / 1000));
       throw new McpToolError(
         "RATE_LIMITED",
-        `Too many ${NOUNS[cls]}: this token may make ${limit} ${per}. Try again in ${retryAfterSeconds} seconds.`,
+        `Too many ${NOUNS[cls]}: this token may make ${limit} ${per}. Try again in ${retryAfterSeconds} ${retryAfterSeconds === 1 ? "second" : "seconds"}.`,
         { retryAfterSeconds, limit, per },
       );
     }

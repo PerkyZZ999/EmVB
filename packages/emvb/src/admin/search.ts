@@ -1,5 +1,6 @@
+// W-774: "ß" folds to "ss" like the command palette, so "strasse" finds "Straße" in lists too.
 export const fold = (text: string) =>
-  text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase();
+  text.normalize("NFD").replace(/\p{M}/gu, "").toLocaleLowerCase().replace(/ß/g, "ss");
 
 /**
  * Every search word must appear in one of the fields,

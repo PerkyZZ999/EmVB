@@ -19,8 +19,9 @@
   --rule: #d9d2c3;
   --rule-strong: #b3aa99;
   /* Brand: primary actions, links, the canvas selection. */
-  --accent: #2563eb;
-  --accent-strong: #1d4ed8;
+  /* W-807: #2563eb was 4.15:1 on the sunk bands; these meet 4.5:1 on every light surface. */
+  --accent: #1d4ed8;
+  --accent-strong: #1e40af;
   --accent-ink: #ffffff;
   --accent-wash: #e4ebfd;
   /* Swatches for the hero's live style demo. */

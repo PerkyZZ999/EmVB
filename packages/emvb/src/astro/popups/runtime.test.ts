@@ -669,3 +669,18 @@ describe("popup keys after focus is lost (W-406)", () => {
     expect(root.hidden).toBe(true);
   });
 });
+
+test("W-757: starting the runtime twice opens a popup once, counts one show, and Escape returns focus", () => {
+  const outside = document.createElement("button");
+  document.body.append(outside);
+  outside.focus();
+  const root = popup("again", doc([{ type: "page_load" }], { showTimes: 2 }));
+  initPopups();
+  expect(root.hidden).toBe(false);
+  expect(localStorage.getItem("emvb-popup-shown:again")).toBe("1");
+  root
+    .querySelector(".emvb-popup__dialog")
+    ?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  expect(root.hidden).toBe(true);
+  expect(document.activeElement === outside).toBe(true);
+});

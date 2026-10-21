@@ -167,7 +167,10 @@ describe("background images, gradients and overlays (W-094)", () => {
       "background-size",
       "background-position",
       "background-repeat",
+      // W-802: the overlay again, for the layer above a background video.
+      "--emvb-bg-overlay",
     ]);
+    expect(declarations[4]?.value).toBe("linear-gradient(#00000066, #00000066)");
     expect(declarations[0]?.value).toBe(
       `linear-gradient(#00000066, #00000066),url("${image}"),linear-gradient(180deg, #ffffff 0%, #000000 100%)`,
     );
@@ -179,6 +182,11 @@ describe("background images, gradients and overlays (W-094)", () => {
       declarations: [
         {
           property: "background-image",
+          value:
+            "linear-gradient(color-mix(in srgb, var(--emvb-c-ink) 50%, transparent), color-mix(in srgb, var(--emvb-c-ink) 50%, transparent))",
+        },
+        {
+          property: "--emvb-bg-overlay",
           value:
             "linear-gradient(color-mix(in srgb, var(--emvb-c-ink) 50%, transparent), color-mix(in srgb, var(--emvb-c-ink) 50%, transparent))",
         },

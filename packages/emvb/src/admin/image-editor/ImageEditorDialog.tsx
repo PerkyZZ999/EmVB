@@ -310,14 +310,33 @@ function PanelSheet({
   label: string;
   children: React.ReactNode;
 }) {
-  const drag = React.useRef<{ pointerId: number; startY: number; startSnap: number } | null>(null);
+  const drag = React.useRef<{
+    pointerId: number;
+    startY: number;
+    startSnap: number;
+    latest: number | null;
+  } | null>(null);
   const [dragSnap, setDragSnap] = React.useState<number | null>(null);
   const height = dragSnap ?? snap;
+  const onGripKey = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const [peek, expanded] = SNAP_POINTS;
+    const key = event.key;
+    let next: number | "close" | null = null;
+    if (key === "ArrowUp" || key === "PageUp") next = expanded;
+    else if (key === "ArrowDown" || key === "PageDown") next = snap > peek ? peek : "close";
+    else if (key === "Home") next = peek;
+    else if (key === "End") next = expanded;
+    if (next === null) return;
+    event.preventDefault();
+    if (next === "close") onOpenChange(false);
+    else onSnapChange(next);
+  };
   const onPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
     const d = drag.current;
     if (!d || d.pointerId !== event.pointerId) return;
     drag.current = null;
-    const released = dragSnap ?? snap;
+    // W-748: a quick flick can release before React re-renders with the last move.
+    const released = d.latest ?? snap;
     setDragSnap(null);
     if (released < SNAP_POINTS[0] * 0.6) {
       onOpenChange(false);
@@ -342,12 +361,26 @@ function PanelSheet({
     >
       <div
         aria-label="Resize panel"
+        aria-orientation="horizontal"
+        aria-valuemax={100}
+        aria-valuemin={0}
+        aria-valuenow={Math.round(height * 100)}
+        aria-valuetext={
+          height === SNAP_POINTS[1] ? "Expanded" : height === SNAP_POINTS[0] ? "Peek" : undefined
+        }
         className="emvb-ie-sheet-grip"
         role="separator"
+        tabIndex={0}
+        onKeyDown={onGripKey}
         onPointerCancel={onPointerUp}
         onPointerDown={(event) => {
           event.currentTarget.setPointerCapture?.(event.pointerId);
-          drag.current = { pointerId: event.pointerId, startY: event.clientY, startSnap: snap };
+          drag.current = {
+            pointerId: event.pointerId,
+            startY: event.clientY,
+            startSnap: snap,
+            latest: null,
+          };
         }}
         onPointerMove={(event) => {
           const d = drag.current;
@@ -355,7 +388,8 @@ function PanelSheet({
           const container = event.currentTarget.closest(".emvb-ie-compact");
           const containerHeight = container?.clientHeight || window.innerHeight;
           const next = d.startSnap - (event.clientY - d.startY) / containerHeight;
-          setDragSnap(Math.min(0.96, Math.max(0.08, next)));
+          d.latest = Math.min(0.96, Math.max(0.08, next));
+          setDragSnap(d.latest);
         }}
         onPointerUp={onPointerUp}
       >
@@ -446,7 +480,7 @@ function CompactLayout({ name }: { name: string }) {
       <PanelSheet
         label={label}
         open={panelOpen}
-        onOpenChange={setPanelOpen}
+        onOpenChange={(next) => (next ? setPanelOpen(true) : closePanel())}
         snap={snap}
         onSnapChange={setSnap}
       >

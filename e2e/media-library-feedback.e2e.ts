@@ -193,3 +193,77 @@ test("W-741: pending library dismissal returns to the URL until Choose is availa
     release.resolve();
   }
 });
+
+test("W-745: picking an image and closing the nested image editor keep keyboard focus", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(request, "Media pick focus", mediaLayout, `media-pick-${unique()}`);
+  await page.route("**/emvb-library-*.png", (route) =>
+    route.fulfill({ path: "e2e/fixtures/emvb-pixel.png", contentType: "image/png" }),
+  );
+  await page.route("**/_emdash/api/media?*", (route) =>
+    route.fulfill({
+      json: {
+        data: {
+          items: [
+            {
+              id: "pick-image",
+              filename: "pick.png",
+              url: "/emvb-library-choice.png",
+              mimeType: "image/png",
+              status: "ready",
+              alt: "Pick image",
+            },
+          ],
+        },
+      },
+    }),
+  );
+  await openEditor(page, id);
+  await openLayers(page);
+  await overlay(page).locator('[data-emvb-layer="img00001"] .emvb-layer-select').click();
+  const opener = overlay(page).getByRole("button", { name: "Choose from library", exact: true });
+  const library = overlay(page).getByRole("dialog", { name: "Media library", exact: true });
+  const card = library.locator('[data-emvb-media-id="pick-image"]');
+  const menu = library.getByRole("button", { name: "More for Pick image", exact: true });
+
+  await opener.focus();
+  await page.keyboard.press("Enter");
+  await expect(card).toBeVisible();
+  await card.focus();
+  await page.keyboard.press("Enter");
+  await expect(library).toHaveCount(0);
+  await expect(opener).toBeFocused();
+  await expect(overlay(page).getByLabel("Or paste a URL")).toHaveValue("/emvb-library-choice.png");
+  await page.screenshot({ path: `/tmp/emvb-media-pick-${test.info().project.name}.png` });
+
+  await page.keyboard.press("Enter");
+  await expect(menu).toBeVisible();
+  await menu.focus();
+  await page.keyboard.press("Enter");
+  const edit = page.getByRole("menuitem", { name: "Edit…" });
+  await expect(edit).toBeVisible();
+  await page.keyboard.press("Enter");
+  const imageEditor = page.getByRole("dialog", { name: "Edit image", exact: true });
+  await expect(imageEditor).toBeVisible({ timeout: 30_000 });
+  await page.keyboard.press("Escape");
+  await expect(imageEditor).toHaveCount(0);
+  await expect(library).toBeVisible();
+  await expect(menu).toBeFocused();
+  await page.keyboard.press("Enter");
+  await page.getByRole("menuitem", { name: "Edit…" }).click();
+  await expect(page.locator("[data-emvb-image-editor]")).toHaveAttribute(
+    "data-emvb-image-editor",
+    "ready",
+    { timeout: 30_000 },
+  );
+  const exposure = page.getByRole("textbox", { name: "Exposure value" });
+  await exposure.fill("0.2");
+  await exposure.press("Enter");
+  await page.locator("[data-emvb-image-save]").click();
+  await page.locator("[data-emvb-image-export-save]").click();
+  await expect(imageEditor).toHaveCount(0, { timeout: 20_000 });
+  await expect(library).toHaveCount(0);
+  await expect(opener).toBeFocused();
+});

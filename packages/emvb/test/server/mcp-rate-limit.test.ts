@@ -39,6 +39,17 @@ const refusal = async (p: Promise<unknown>) => {
 };
 
 describe("MCP rate limits (W-478)", () => {
+  test("W-754: the last second of a window says 1 second", async () => {
+    const store = memoryStore();
+    const now = () => 120_000 + 59_500;
+    for (let i = 0; i < 60; i++) {
+      // oxlint-disable-next-line no-await-in-loop -- one call after another
+      await hitRateLimit(store, "t:a", "write", now);
+    }
+    const error = await refusal(hitRateLimit(store, "t:a", "write", now));
+    expect(error?.message).toContain("Try again in 1 second.");
+  });
+
   test("limits are 300 reads and 60 writes a minute and 10 publishes an hour", () => {
     expect(RATE_LIMITS.read).toMatchObject({ limit: 300, windowMs: 60_000 });
     expect(RATE_LIMITS.write).toMatchObject({ limit: 60, windowMs: 60_000 });

@@ -72,6 +72,30 @@ const CLOSED = {
 
 type ChromeKey = keyof typeof CLOSED;
 
+/**
+ * Focuses the selected layer or the canvas if focus ends up on <body>. A closing dialog keeps
+ * focus until its close animation ends, so wait (up to 2 s) while focus is still in a dialog;
+ * other dialog-like layers (toasts) don't hold it up. Returns a cancel.
+ */
+function focusWhenLost(): () => void {
+  const started = Date.now();
+  let timer: number | undefined;
+  const settle = () => {
+    const now = document.activeElement;
+    if (now && now !== document.body) {
+      const inDialog = now.closest('[role="dialog"], [role="alertdialog"]') !== null;
+      if (inDialog && Date.now() - started < 2000) timer = window.setTimeout(settle, 30);
+      return;
+    }
+    const target =
+      document.querySelector<HTMLElement>('.emvb-layer-select[aria-current="true"]') ??
+      document.querySelector<HTMLElement>("iframe[data-emvb-canvas]");
+    target?.focus({ preventScroll: true });
+  };
+  timer = window.setTimeout(settle, 30);
+  return () => window.clearTimeout(timer);
+}
+
 /** Which editor dialog is open. They all start closed. */
 export function useChromeFlags() {
   const [flags, setFlags] = React.useState(CLOSED);
@@ -80,6 +104,18 @@ export function useChromeFlags() {
   const close = (key: ChromeKey) => setFlags((current) => ({ ...current, [key]: false }));
   const setOpen = (key: ChromeKey) => (next: boolean) =>
     setFlags((current) => ({ ...current, [key]: next }));
+  // W-831: a dialog opened from the command palette has no trigger left to return focus to (the
+  // palette is gone), so closing it dropped focus to <body>. When one closes and nothing took
+  // focus, go to the selected layer, else the canvas, as the palette does after a command.
+  const previous = React.useRef(flags);
+  React.useEffect(() => {
+    const was = previous.current;
+    previous.current = flags;
+    const closed = (Object.keys(flags) as ChromeKey[]).some(
+      (key) => key !== "palette" && was[key] && !flags[key],
+    );
+    return closed ? focusWhenLost() : undefined;
+  }, [flags]);
   return { flags, leaving, setLeaving, open, close, setOpen };
 }
 
@@ -220,6 +256,7 @@ export function EditorDialogs({
   /** Synced sections and Loop Item parts loaded for the canvas (W-671). */
   parts?: ThemeDynamicData;
 }) {
+  const [leaveSaving, setLeaveSaving] = React.useState(false);
   return (
     <>
       <DeleteSubtreeDialog
@@ -227,7 +264,13 @@ export function EditorDialogs({
         onOpenChange={(open) => !open && setDeleteAsk(null)}
         label={deleteAsk?.label ?? "Element"}
         count={deleteAsk?.count ?? 0}
-        onConfirm={() => deleteAsk && finishDelete(deleteAsk.id)}
+        onConfirm={() => {
+          if (!deleteAsk) return;
+          finishDelete(deleteAsk.id);
+          // W-835: the dialog hands focus back to the deleted row, which is gone; go to the
+          // newly selected layer (or the canvas) instead of <body>.
+          focusWhenLost();
+        }}
       />
       <PaletteImageEditor
         open={chrome.flags.imageEditor}
@@ -349,12 +392,16 @@ export function EditorDialogs({
         open={chrome.flags.leave}
         onOpenChange={chrome.setOpen("leave")}
         onDiscard={() => chrome.setLeaving(true)}
-        onSaveAndLeave={() =>
-          void save().then((rev) => {
-            chrome.close("leave");
-            if (rev) chrome.setLeaving(true);
-          })
-        }
+        saving={leaveSaving}
+        onSaveAndLeave={() => {
+          setLeaveSaving(true);
+          void save()
+            .then((rev) => {
+              chrome.close("leave");
+              if (rev) chrome.setLeaving(true);
+            })
+            .finally(() => setLeaveSaving(false));
+        }}
       />
     </>
   );

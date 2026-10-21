@@ -146,6 +146,13 @@ function bareVideoHost(typed: string): boolean {
   return YT_HOSTS.has(host) || VIMEO_HOSTS.has(host);
 }
 
+/** A site path (not `//host`) to a .mp4/.webm/.ogg file, or the media file route. */
+function isVideoFilePath(value: string): boolean {
+  if (value.startsWith("//")) return false;
+  const path = value.split(/[?#]/)[0] ?? "";
+  return /\.(mp4|webm|ogg)$/i.test(path) || path.startsWith("/_emdash/api/media/file/");
+}
+
 export function resolveEmbedUrl(value: string): EmbedTarget | undefined {
   const typed = value.trim();
   const trimmed = bareVideoHost(typed) ? `https://${typed}` : typed;
@@ -153,6 +160,9 @@ export function resolveEmbedUrl(value: string): EmbedTarget | undefined {
 
   const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(trimmed);
   if (!hasScheme) {
+    // W-795: a bare word such as "nonsense" became a page-relative <video> (a black player).
+    // A relative value must name a video file or the media route, as absolute ones must.
+    if (!isVideoFilePath(trimmed)) return undefined;
     const media = sanitizeMediaUrl(trimmed);
     if (!media) return undefined;
     return { kind: "video", src: media };

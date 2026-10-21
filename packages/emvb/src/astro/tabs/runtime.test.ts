@@ -272,6 +272,16 @@ describe("tabs runtime (W-078)", () => {
     expect(document.body.querySelector(".emvb-tab-panel")?.hasAttribute("aria-hidden")).toBe(false);
   });
 
+  test("W-779: clicking a tab selects it and focuses the tab, not its hidden radio", () => {
+    const root = fixture();
+    initTabs(document);
+    const labels = [...root.querySelectorAll<HTMLElement>(".emvb-tab-label")];
+    labels[1]?.click();
+    expect(document.activeElement === labels[1]).toBe(true);
+    expect(labels[1]?.getAttribute("aria-selected")).toBe("true");
+    expect((root.querySelectorAll(".emvb-tab-input")[1] as HTMLInputElement).checked).toBe(true);
+  });
+
   test("after init the hidden radios are out of the Tab order (W-195)", () => {
     const root = fixture();
     initTabs(document);

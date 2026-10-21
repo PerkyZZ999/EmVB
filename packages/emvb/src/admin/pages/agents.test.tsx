@@ -66,6 +66,24 @@ describe("AI agents page (W-463)", () => {
     expect(host.querySelector(".emvb-agents-who .emvb-timeline-agent")?.textContent).toBe("Agent");
   });
 
+  test("W-756: each setup snippet can be reached by keyboard to scroll it, and is named", async () => {
+    const host = await mount(<AgentsPage fetcher={fakeApi(50).fetcher} />);
+    await settle();
+    await settle();
+    for (const [kind, name] of [
+      ["remote", "Remote setup"],
+      ["stdio", "Local setup"],
+    ]) {
+      const pre = host.querySelector<HTMLElement>(`[data-emvb-snippet=${kind}]`);
+      expect(pre?.tabIndex).toBe(0);
+      expect(pre?.getAttribute("role")).toBe("group");
+      expect(pre?.getAttribute("aria-label")).toBe(name);
+    }
+    expect(host.querySelector("[data-emvb-agents=ready] style")?.textContent).toContain(
+      ".emvb-agents-section pre:focus-visible",
+    );
+  });
+
   test("W-477 no activity shows an empty state, not a bare sentence", async () => {
     const host = await mount(<AgentsPage fetcher={fakeApi(50, false).fetcher} />);
     await settle();
@@ -249,4 +267,74 @@ test("UX-089: each setup snippet copies its JSON in one click", async () => {
     if (original) Object.defineProperty(navigator, "clipboard", original);
     else delete (navigator as { clipboard?: unknown }).clipboard;
   }
+});
+
+test("W-777: a failed copy shows on screen and stays until the next click", async () => {
+  const original = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText: async () => Promise.reject(new Error("denied")) },
+  });
+  try {
+    const host = await mount(<AgentsPage fetcher={fakeApi(50).fetcher} />);
+    await settle();
+    await settle();
+    const button = host.querySelector<HTMLButtonElement>('[data-emvb-copy-snippet="local setup"]');
+    await act(async () => button?.click());
+    await settle();
+    expect(button?.textContent ?? "no button").toBe("Couldn't copy");
+    const status = button?.nextElementSibling;
+    expect(status?.textContent ?? "no status").toBe("Couldn't copy. Select the text instead.");
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 2100)));
+    expect(button?.textContent ?? "no button").toBe("Couldn't copy");
+  } finally {
+    if (original) Object.defineProperty(navigator, "clipboard", original);
+    else delete (navigator as { clipboard?: unknown }).clipboard;
+  }
+});
+
+test("W-812: the endpoint copy button says it copies the endpoint URL", async () => {
+  const host = await mount(<AgentsPage fetcher={fakeApi(50).fetcher} />);
+  await settle();
+  await settle();
+  const names = [...host.querySelectorAll("button")].map((b) => b.getAttribute("aria-label"));
+  expect(names).toContain("Copy endpoint URL");
+  expect(names).not.toContain("Copy to clipboard");
+});
+
+test("W-814: a switch stays enabled while saving, so keyboard focus stays on it", async () => {
+  let release: () => void = () => undefined;
+  const api = fakeApi(50);
+  const fetcher: Fetcher = async (path, init) => {
+    if (path.endsWith("/agents/save")) await new Promise<void>((resolve) => (release = resolve));
+    return api.fetcher(path, init);
+  };
+  const host = await mount(<AgentsPage fetcher={fetcher} />);
+  await settle();
+  await settle();
+  const master = host.querySelector<HTMLElement>('[role="switch"]');
+  master?.focus();
+  await act(async () => master?.click());
+  await settle();
+  expect(host.querySelector("[data-emvb-agents-save]")?.textContent ?? null).toBe("Saving…");
+  expect(master?.hasAttribute("disabled")).toBe(false);
+  expect(master?.hasAttribute("data-disabled")).toBe(false);
+  expect(document.activeElement).toBe(master ?? null);
+  // A second change mid-save is ignored, not sent.
+  await act(async () => master?.click());
+  await settle();
+  await act(async () => release());
+  await settle();
+  await settle();
+  expect(api.saved).toHaveLength(1);
+});
+
+test("W-815: the activity table, which scrolls sideways on phones, can be reached by keyboard", async () => {
+  const host = await mount(<AgentsPage fetcher={fakeApi(50).fetcher} />);
+  await settle();
+  await settle();
+  const table = host.querySelector<HTMLElement>(".emvb-agents-table");
+  expect(table?.tabIndex).toBe(0);
+  expect(table?.getAttribute("role") ?? null).toBe("group");
+  expect(table?.getAttribute("aria-label") ?? null).toBe("Recent agent activity");
 });

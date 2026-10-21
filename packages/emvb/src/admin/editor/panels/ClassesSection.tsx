@@ -156,6 +156,12 @@ export function ClassesSection({
   const [filter, setFilter] = React.useState("");
   const [nameError, setNameError] = React.useState<string | null>(null);
   const rows = React.useRef(new Map<string, HTMLButtonElement>());
+  // W-840: the create row goes away on Create or Cancel; focus lands on the new row or on New.
+  const section = React.useRef<HTMLElement | null>(null);
+  const focusNew = () =>
+    requestAnimationFrame(() =>
+      section.current?.querySelector<HTMLButtonElement>(".emvb-site-section-head button")?.focus(),
+    );
 
   const q = filter.trim().toLowerCase();
   const visible = q
@@ -181,6 +187,7 @@ export function ClassesSection({
     setCreating(false);
     setName("");
     setEditing(id);
+    requestAnimationFrame(() => rows.current.get(id)?.focus());
   };
 
   const rename = (id: string, next: string | null) => {
@@ -195,7 +202,7 @@ export function ClassesSection({
   };
 
   return (
-    <section className="emvb-site-section" data-emvb-classes="">
+    <section ref={section} className="emvb-site-section" data-emvb-classes="">
       <p className="emvb-helper emvb-site-cascade" data-emvb-cascade-help="">
         When two classes set the same property, the one lower in this list wins. Local styles on an
         element still win. Editing a class updates every element that uses it. Tablet and mobile
@@ -363,6 +370,7 @@ export function ClassesSection({
           onCancel={() => {
             setCreating(false);
             setNameError(null);
+            focusNew();
           }}
           onCreate={() => void create()}
         >

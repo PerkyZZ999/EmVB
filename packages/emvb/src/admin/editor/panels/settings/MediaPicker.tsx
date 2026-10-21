@@ -58,7 +58,14 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
   const [open, setOpen] = React.useState(false);
   const [items, setItems] = React.useState<MediaLibraryItem[]>([]);
   const [libraryError, setLibraryError] = React.useState<string | null>(null);
-  const [busy, setBusy] = React.useState(false);
+  const [busy, setBusyState] = React.useState(false);
+  // W-819: the source buttons stay focusable while busy (aria-disabled, presses ignored), so
+  // keyboard focus no longer drops to the page body during an upload; the ref answers at once.
+  const busyRef = React.useRef(false);
+  const setBusy = React.useCallback((next: boolean) => {
+    busyRef.current = next;
+    setBusyState(next);
+  }, []);
   const [error, setError] = React.useState<string | null>(null);
   const [urlDraft, setUrlDraft] = React.useState(src);
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -94,18 +101,24 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
     } finally {
       setBusy(false);
     }
-  }, [fetcher]);
+  }, [fetcher, setBusy]);
 
   React.useEffect(() => {
     if (open) void loadLibrary();
   }, [open, loadLibrary]);
 
-  const closeLibrary = () => {
-    setOpen(false);
+  /** Focus Choose from library, or the URL field while the picker is busy (W-741). */
+  const focusOpener = () => {
     const opener = libraryOpenerRef.current;
-    const target = opener?.disabled ? urlInputRef.current : opener;
+    const target = busyRef.current ? urlInputRef.current : opener;
     target?.focus();
   };
+  const closeLibrary = () => {
+    setOpen(false);
+    focusOpener();
+  };
+
+  const libraryRef = React.useRef<HTMLDivElement>(null);
 
   const edit = ImageEdit.safeParse(props.edit);
   /** W-487: say why a picture can't be edited instead of offering a button that fails. */
@@ -173,6 +186,7 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
     onChange(withProps(target, propsFromMedia(propsOf(target), item)));
     setOpen(false);
     setError(null);
+    focusOpener();
   };
 
   const onUpload = async (file: File | undefined) => {
@@ -241,8 +255,10 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
         <Button
           type="button"
           className={BUTTON}
-          onClick={() => setOpen(true)}
-          disabled={busy}
+          onClick={() => {
+            if (!busyRef.current) setOpen(true);
+          }}
+          aria-disabled={busy}
           ref={libraryOpenerRef}
           data-emvb-media-library=""
         >
@@ -252,8 +268,10 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
           type="button"
           className={BUTTON}
           variant="secondary"
-          onClick={() => fileRef.current?.click()}
-          disabled={busy}
+          onClick={() => {
+            if (!busyRef.current) fileRef.current?.click();
+          }}
+          aria-disabled={busy}
           data-emvb-media-upload-btn=""
         >
           Upload
@@ -266,8 +284,10 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
             type="button"
             className={BUTTON}
             variant="ghost"
-            onClick={() => void resetToOriginal()}
-            disabled={busy}
+            onClick={() => {
+              if (!busyRef.current) void resetToOriginal();
+            }}
+            aria-disabled={busy}
             data-emvb-image-reset-original=""
           >
             Reset to original
@@ -306,9 +326,18 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
       {open && (
         <div
           className="emvb-media-dialog"
+          ref={libraryRef}
           role="dialog"
           aria-label="Media library"
           data-emvb-media-dialog=""
+          onKeyDown={(event) => {
+            // W-817: Escape left the library open; it closes it like Close does. The editor's
+            // own Escape (deselect) must not also run.
+            if (event.key !== "Escape" || event.defaultPrevented) return;
+            event.preventDefault();
+            event.stopPropagation();
+            closeLibrary();
+          }}
         >
           <div className="emvb-media-dialog-head">
             <h3 className="emvb-panel-title">Media library</h3>
@@ -362,7 +391,11 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
                   data-emvb-media-id={item.id}
                   onClick={() => applyItem(item)}
                 >
-                  <img src={item.url} alt={item.alt ?? item.filename} />
+                  {/* W-762: the file name is already the label, so no alt repeats it. */}
+                  <img
+                    src={item.url}
+                    alt={item.alt && item.alt !== item.filename ? item.alt : ""}
+                  />
                   <span>{item.filename}</span>
                 </button>
                 {editable && canEdit(item) ? (
@@ -406,7 +439,11 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
           onOpenChange={setEditorOpen}
           imageProps={editingProps}
           onSave={saveLibraryCopy}
-          onClosed={() => setEditing(null)}
+          onClosed={() => {
+            setEditing(null);
+            // W-745: a saved copy closes the library, so the card menu that opened the editor is gone.
+            if (!libraryRef.current) focusOpener();
+          }}
         />
       ) : null}
     </div>

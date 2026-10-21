@@ -23,10 +23,11 @@ const KINDS: { kind: PerfKind; label: string }[] = [
 /** UX-083: "1.4 KB", "100 KB", "1.5 MB": one decimal only where it says something. */
 export const kb = (bytes: number) => {
   if (bytes < 1000) return `${bytes} B`;
-  const [value, unit] = bytes < 1_000_000 ? [bytes / 1000, "KB"] : [bytes / 1_000_000, "MB"];
-  const shown =
-    value >= 100 || Number.isInteger(value) ? String(Math.round(value)) : value.toFixed(1);
-  return `${shown} ${unit}`;
+  // W-771: round before choosing the form, so 1999 B is "2 KB", not "2.0 KB", and 999.6 KB is "1 MB".
+  const inMb = Math.round(bytes / 1000) >= 1000;
+  const raw = inMb ? bytes / 1_000_000 : bytes / 1000;
+  const value = raw >= 100 ? Math.round(raw) : Math.round(raw * 10) / 10;
+  return `${value} ${inMb ? "MB" : "KB"}`;
 };
 
 /**

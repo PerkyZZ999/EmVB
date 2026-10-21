@@ -329,3 +329,35 @@ test("UX-074: the SVG markup box says what it accepts before anything is pasted"
     "Paste safe SVG only (no scripts or external links).",
   );
 });
+
+test("W-788: refused SVG markup marks the field invalid and points to the reason", async () => {
+  const field: FieldDescriptor = {
+    key: "markup",
+    kind: "textarea",
+    label: "SVG markup",
+    message: "Paste safe SVG only (no scripts or external links).",
+  };
+  const svg = (markup: string) =>
+    ({ id: "svgx0002", type: "svg", props: { markup } }) as unknown as LayoutNode;
+  const bad = await mount(
+    <DraftTextField
+      field={field}
+      node={svg('<svg viewBox="0 0 1 1" onload="x()"><rect/></svg>')}
+      onChange={() => undefined}
+    />,
+  );
+  const badArea = bad.querySelector("textarea");
+  expect(badArea?.getAttribute("aria-invalid")).toBe("true");
+  const said = (badArea?.getAttribute("aria-describedby") ?? "")
+    .split(" ")
+    .map((id) => document.getElementById(id)?.textContent ?? "");
+  expect(said.some((t) => t.includes("This SVG can't be shown"))).toBe(true);
+  const good = await mount(
+    <DraftTextField
+      field={field}
+      node={svg('<svg viewBox="0 0 1 1"><rect width="1" height="1"/></svg>')}
+      onChange={() => undefined}
+    />,
+  );
+  expect(good.querySelector("textarea")?.getAttribute("aria-invalid")).toBeNull();
+});

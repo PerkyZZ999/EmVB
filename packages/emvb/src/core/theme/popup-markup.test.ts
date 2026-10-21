@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { defaultTriggers } from "./triggers.ts";
-import { wrapPopupMarkup } from "./popup-markup.ts";
+import { POPUP_CHROME_CSS, wrapPopupMarkup } from "./popup-markup.ts";
 
 describe("wrapPopupMarkup", () => {
   test("embeds escaped config and dialog chrome", () => {
@@ -45,4 +45,12 @@ describe("popup and float chrome in the site's language (W-690)", () => {
 test("a long close name keeps whole characters (W-700)", () => {
   const html = wrapPopupMarkup("p", "", defaultTriggers(), { close: `${"x".repeat(79)}😀` });
   expect(html).toContain(`aria-label="${"x".repeat(79)}"`);
+});
+
+test("W-758: the close button stays at the top of a long popup and doesn't cover the heading", () => {
+  const rule = /\.emvb-popup__close\{([^}]*)\}/.exec(POPUP_CHROME_CSS)?.[1] ?? "";
+  expect(rule).toContain("position:sticky");
+  expect(rule).toContain("top:-1rem");
+  expect(rule).toContain("float:right");
+  expect(rule).not.toContain("position:absolute");
 });

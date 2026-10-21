@@ -33,7 +33,7 @@ const demoSteps = [
       <article class="path reveal">
         <p class="step">A</p>
         <h3>Add it to your EmDash site</h3>
-        <div class="terminal" role="group" aria-label="Install command">
+        <div class="terminal" role="region" tabindex="0" aria-label="Install command">
           {
             install.map((line) => (
               <p>
@@ -54,7 +54,7 @@ const demoSteps = [
       <article class="path reveal">
         <p class="step">B</p>
         <h3>Run the demo locally</h3>
-        <div class="terminal" role="group" aria-label="Demo commands">
+        <div class="terminal" role="region" tabindex="0" aria-label="Demo commands">
           {
             demo.map((line) => (
               <p>
@@ -69,7 +69,9 @@ const demoSteps = [
           {demoSteps.map((step) => <li>{step}</li>)}
         </ol>
         <p class="link">
-          <code>http://127.0.0.1:4411/_emdash/api/setup/dev-bypass?redirect=/_emdash/admin</code>
+          <code tabindex="0" role="region" aria-label="Sign-in link"
+            >http://127.0.0.1:4411/_emdash/api/setup/dev-bypass?redirect=/_emdash/admin</code
+          >
         </p>
       </article>
     </div>

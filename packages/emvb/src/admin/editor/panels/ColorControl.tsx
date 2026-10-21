@@ -1,4 +1,4 @@
-import { Button, Input, Select } from "@cloudflare/kumo";
+import { Button, Input, Loader, Select } from "@cloudflare/kumo";
 import { PlusIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import {
@@ -78,6 +78,17 @@ export function ColorControl({
   const colors = design.variables.colors;
   const bound = value && typeof value === "object" ? colors.find((c) => c.id === value.var) : null;
   const [creating, setCreating] = React.useState(false);
+  // W-818: Cancel and Create unmount the form, which dropped keyboard focus to the page body.
+  // Focus goes back to New variable when the form closes, unless it already moved elsewhere.
+  const newVariableRef = React.useRef<HTMLButtonElement>(null);
+  const wasCreating = React.useRef(false);
+  React.useEffect(() => {
+    const closed = wasCreating.current && !creating;
+    wasCreating.current = creating;
+    if (!closed) return;
+    const active = document.activeElement;
+    if (!active || active === document.body) newVariableRef.current?.focus();
+  }, [creating]);
   const [customOpen, setCustomOpen] = React.useState(false);
   // The hex an out-of-gamut OKLCH entry was clipped to. It lives here because committing a custom
   // colour remounts CustomColor (W-183).
@@ -204,6 +215,7 @@ export function ColorControl({
           variant="ghost"
           className={BUTTON}
           icon={<PlusIcon aria-hidden="true" />}
+          ref={newVariableRef}
           onClick={() => setCreating(true)}
           disabled={variableListFull(design, "color")}
         >
@@ -465,15 +477,25 @@ function NewVariable({
   const [name, setName] = React.useState("");
   const [hex, setHex] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  // W-820: a refused name or value focuses that field and marks it invalid, like W-813.
+  const [invalid, setInvalid] = React.useState<"name" | "value" | null>(null);
+  const nameRef = React.useRef<HTMLInputElement>(null);
+  const valueRef = React.useRef<HTMLInputElement>(null);
   const [busy, setBusy] = React.useState(false);
   const pending = React.useRef(false);
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+  const refuse = (field: "name" | "value", message: string) => {
+    setError(message);
+    setInvalid(field);
+    (field === "name" ? nameRef : valueRef).current?.focus();
+  };
   const create = async () => {
     if (pending.current) return;
-    if (!name.trim()) return setError("Enter a name for the variable.");
+    if (!name.trim()) return refuse("name", "Enter a name for the variable.");
     const typed = hexInput(hex);
-    if (!typed) return setError(BAD_HEX);
+    if (!typed) return refuse("value", BAD_HEX);
     setError(null);
+    setInvalid(null);
     pending.current = true;
     setBusy(true);
     try {
@@ -486,10 +508,24 @@ function NewVariable({
     }
   };
   return (
-    <div className="emvb-new-variable" data-emvb-form="new-variable">
+    <div
+      className="emvb-new-variable"
+      data-emvb-form="new-variable"
+      onKeyDown={(event) => {
+        // W-821: Escape cancels the form like Cancel (W-818 returns focus to New variable).
+        // The editor's own Escape must not also run; a pending create can't be cancelled.
+        if (event.key !== "Escape" || event.defaultPrevented) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (!pending.current) onCancel();
+      }}
+    >
       <Input
         label="Variable name"
-        disabled={busy}
+        ref={nameRef}
+        aria-invalid={invalid === "name" || undefined}
+        readOnly={busy}
+        aria-disabled={busy}
         className={FIELD}
         value={name}
         autoFocus
@@ -497,7 +533,10 @@ function NewVariable({
       />
       <Input
         label="Value"
-        disabled={busy}
+        ref={valueRef}
+        aria-invalid={invalid === "value" || undefined}
+        readOnly={busy}
+        aria-disabled={busy}
         className={`${FIELD} emvb-mono`}
         placeholder="#1a2b3c"
         value={hex}
@@ -516,15 +555,28 @@ function NewVariable({
         {busy ? "Creating color variable…" : ""}
       </p>
       <div className="emvb-row-actions">
-        <Button variant="secondary" className={BUTTON} disabled={busy} onClick={onCancel}>
+        {/* W-822: locked, not disabled, while creating, so keyboard focus stays in the form. */}
+        <Button
+          variant="secondary"
+          className={BUTTON}
+          aria-disabled={busy}
+          onClick={() => {
+            if (!pending.current) onCancel();
+          }}
+        >
           Cancel
         </Button>
         <Button
           variant="secondary"
           className={BUTTON}
-          icon={<PlusIcon size={14} aria-hidden="true" />}
-          loading={busy && !reducedMotion}
-          disabled={busy}
+          icon={
+            busy && !reducedMotion ? (
+              <Loader size={14} />
+            ) : (
+              <PlusIcon size={14} aria-hidden="true" />
+            )
+          }
+          aria-disabled={busy}
           aria-busy={busy}
           onClick={() => void create()}
         >

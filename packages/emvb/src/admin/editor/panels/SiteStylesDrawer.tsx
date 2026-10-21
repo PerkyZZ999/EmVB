@@ -1,4 +1,4 @@
-import { Button, Select, Tabs } from "@cloudflare/kumo";
+import { Button, Loader, Select, Tabs } from "@cloudflare/kumo";
 import { deletionOf, type Deletion } from "../restore-deleted.ts";
 import { UploadSimpleIcon, XIcon } from "@phosphor-icons/react";
 import * as React from "react";
@@ -80,6 +80,16 @@ export function SiteStylesDrawer({
   const [error, setError] = React.useState<string | null>(null);
   const [publishing, setPublishing] = React.useState(false);
   const publishPending = React.useRef(false);
+  // W-829: Publish styles stays focusable while publishing; once it publishes the button goes
+  // away, so focus moves on to Export instead of falling to the page body.
+  const publishRef = React.useRef<HTMLButtonElement>(null);
+  const exportRef = React.useRef<HTMLButtonElement>(null);
+  const refocusAfterPublish = React.useRef(false);
+  React.useEffect(() => {
+    if (unpublished || !refocusAfterPublish.current) return;
+    refocusAfterPublish.current = false;
+    exportRef.current?.focus();
+  }, [unpublished]);
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   const [confirm, setConfirm] = React.useState<
     | { kind: "variable"; variableKind: VariableKind; id: string; name: string }
@@ -107,11 +117,13 @@ export function SiteStylesDrawer({
   const publish = async () => {
     if (!onPublishStyles || publishPending.current) return;
     publishPending.current = true;
+    refocusAfterPublish.current = document.activeElement === publishRef.current;
     setPublishing(true);
     setError(null);
     try {
       await onPublishStyles();
     } catch (err) {
+      refocusAfterPublish.current = false;
       setError(err instanceof Error ? err.message : "Couldn't publish site styles. Try again.");
     } finally {
       publishPending.current = false;
@@ -208,16 +220,28 @@ export function SiteStylesDrawer({
             type="button"
             variant="primary"
             size="sm"
-            icon={<UploadSimpleIcon size={14} aria-hidden="true" />}
-            loading={publishing && !reducedMotion}
-            disabled={publishing}
+            ref={publishRef}
+            icon={
+              publishing && !reducedMotion ? (
+                <Loader size={14} />
+              ) : (
+                <UploadSimpleIcon size={14} aria-hidden="true" />
+              )
+            }
+            aria-disabled={publishing}
             aria-busy={publishing}
             onClick={() => void publish()}
           >
             Publish styles
           </Button>
         )}
-        <Button type="button" variant="secondary" size="sm" onClick={() => exportDesign(design)}>
+        <Button
+          ref={exportRef}
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={() => exportDesign(design)}
+        >
           Export
         </Button>
         <Button
@@ -342,8 +366,15 @@ export function SiteStylesDrawer({
           confirm={confirm}
           design={design}
           layout={layout}
-          onCancel={() => setConfirm(null)}
+          onCancel={() => {
+            const row = confirmRow(confirm);
+            setConfirm(null);
+            requestAnimationFrame(() =>
+              row?.querySelector<HTMLButtonElement>(".emvb-site-menu-btn")?.focus(),
+            );
+          }}
           onConfirm={async () => {
+            const land = landingAfterDelete(confirmRow(confirm));
             if (layout) {
               const deletion = deletionOf(
                 design,
@@ -368,6 +399,7 @@ export function SiteStylesDrawer({
               await save({ ...design, classes });
             }
             setConfirm(null);
+            requestAnimationFrame(land);
           }}
         />
       )}
@@ -391,6 +423,34 @@ function usedIn(pageUses: number, classUses: number, noun: EditedNoun): string |
     classUses > 0 ? plural(classUses, "class", "classes") : "",
   ].filter(Boolean);
   return parts.length > 0 ? parts.join(" and ") : null;
+}
+
+/** The list row the delete confirmation is about. */
+function confirmRow(confirm: { kind: "variable" | "class"; id: string }): HTMLElement | null {
+  const attribute = confirm.kind === "class" ? "data-emvb-class-def" : "data-emvb-var-id";
+  return document.querySelector<HTMLElement>(`[${attribute}="${CSS.escape(confirm.id)}"]`);
+}
+
+/**
+ * W-841: the deleted row and the inline confirmation both go away, and focus fell to the page
+ * body. It lands on the next row, else the previous one, else the list's New button.
+ */
+function landingAfterDelete(row: HTMLElement | null): () => void {
+  const section = row?.closest("section");
+  const neighbour = (row?.nextElementSibling ?? row?.previousElementSibling) as HTMLElement | null;
+  const key =
+    neighbour?.getAttribute("data-emvb-class-def") ?? neighbour?.getAttribute("data-emvb-var-id");
+  const attribute = neighbour?.hasAttribute("data-emvb-class-def")
+    ? "data-emvb-class-def"
+    : "data-emvb-var-id";
+  return () => {
+    const next = key
+      ? section?.querySelector<HTMLElement>(
+          `[${attribute}="${CSS.escape(key)}"] .emvb-site-item-main`,
+        )
+      : null;
+    (next ?? section?.querySelector<HTMLButtonElement>(".emvb-site-section-head button"))?.focus();
+  };
 }
 
 function DeleteConfirm({

@@ -95,9 +95,9 @@ describe("renderLoop (W-091)", () => {
   test("each post is one loop item holding only the item's elements", () => {
     const { html } = renderPage(page(loop({})), design, { dynamic: { posts } });
     expect(html).toBe(
-      '<div class="emvb-root emvb-container"><div class="emvb-loop">' +
-        '<div class="emvb-loop-item" data-emvb-loop-item="a"><h2 class="emvb-post-title">Alpha</h2></div>' +
-        '<div class="emvb-loop-item" data-emvb-loop-item="b"><h2 class="emvb-post-title">Beta</h2></div>' +
+      '<div class="emvb-root emvb-container"><div class="emvb-loop" role="list">' +
+        '<div class="emvb-loop-item" data-emvb-loop-item="a" role="listitem"><h2 class="emvb-post-title">Alpha</h2></div>' +
+        '<div class="emvb-loop-item" data-emvb-loop-item="b" role="listitem"><h2 class="emvb-post-title">Beta</h2></div>' +
         "</div></div>",
     );
   });
@@ -257,5 +257,37 @@ describe("a synced section on the page and in a popup keeps ids unique (W-527)",
 
   test("the page keeps its plain ids", () => {
     expect(parse(onPage).querySelector(".ec-form-input")?.id).toBe("emvb-field-field002");
+  });
+});
+
+describe("W-789 loop entries are a list", () => {
+  const item = { id: "ptitle89", type: "post-title", props: {} } as LayoutNode;
+  const entries: ThemePostFields[] = [
+    { ...SAMPLE_POST, id: "a", title: "Alpha" },
+    { ...SAMPLE_POST, id: "b", title: "Beta" },
+  ];
+  const loopWith = (children: LayoutNode[]) =>
+    ({ id: "loop0089", type: "loop", props: {}, children }) as LayoutNode;
+
+  test("on the page, the loop is a list and each entry a list item", () => {
+    const dom = parse(
+      renderPage(page(loopWith([item])), design, { dynamic: { posts: entries } }).html,
+    );
+    const list = dom.querySelector(".emvb-loop");
+    expect(list?.getAttribute("role")).toBe("list");
+    const items = [...(list?.children ?? [])];
+    expect(items.length).toBe(2);
+    expect(items.every((el) => el.getAttribute("role") === "listitem")).toBe(true);
+  });
+
+  test("in the editor, with the Empty state shown under the items, no list roles", () => {
+    const empty = { id: "lemp0089", type: "loop-empty", props: {}, children: [] } as LayoutNode;
+    const html = renderPage(page(loopWith([item, empty])), design, {
+      mode: "editor",
+      dynamic: { posts: entries },
+    }).html;
+    expect(html).toContain("emvb-loop-item");
+    expect(html).not.toContain('role="list"');
+    expect(html).not.toContain('role="listitem"');
   });
 });

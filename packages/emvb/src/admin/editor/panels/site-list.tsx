@@ -70,7 +70,17 @@ export function CreateRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="emvb-site-create emvb-site-elevated" {...rowProps}>
+    <div
+      className="emvb-site-create emvb-site-elevated"
+      {...rowProps}
+      // W-840: Enter in a text field creates, like the create dialogs; it used to do nothing.
+      onKeyDown={(event) => {
+        const field = event.target as HTMLElement;
+        if (field.tagName !== "INPUT" || !isCommitEnter(event)) return;
+        event.preventDefault();
+        onCreate();
+      }}
+    >
       {children}
       <div className="emvb-dialog-actions">
         <Button type="button" variant="secondary" className={BUTTON} onClick={onCancel}>

@@ -176,4 +176,16 @@ describe("a Button's icon (W-387)", () => {
     await mountPanel(iconNode({ iconId: "star", title: "Star" }));
     expect(document.querySelector("[data-emvb-icon-remove]")).toBeNull();
   });
+
+  test("W-838: Remove hands keyboard focus to Choose, since Remove itself goes away", async () => {
+    const { state } = await mountPanel(
+      buttonNode({ iconId: "lucide:heart", iconSvg: "<svg viewBox='0 0 24 24'></svg>" }),
+    );
+    const remove = document.querySelector<HTMLButtonElement>("[data-emvb-icon-remove]");
+    remove?.focus();
+    await act(async () => remove?.click());
+    expect(state.current.props).toEqual({ text: "Go" });
+    const choose = document.querySelector("[data-emvb-icon-open]");
+    expect(choose !== null && document.activeElement === choose).toBe(true);
+  });
 });

@@ -90,4 +90,16 @@ describe("menu runtime (W-197)", () => {
       ),
     ).toBe(true);
   });
+  test("W-783 Escape over a hover-shown dropdown marks its item dismissed until the pointer leaves", () => {
+    const details = fixture();
+    details.open = false;
+    const item = document.querySelector<HTMLElement>(".emvb-menu-item");
+    const over = (el: Element | null) =>
+      el?.dispatchEvent(new Event("pointerover", { bubbles: true }));
+    over(document.querySelector(".emvb-menu-item__bar span"));
+    esc();
+    expect(item?.hasAttribute("data-emvb-menu-dismissed")).toBe(true);
+    over(document.getElementById("outside"));
+    expect(item?.hasAttribute("data-emvb-menu-dismissed")).toBe(false);
+  });
 });

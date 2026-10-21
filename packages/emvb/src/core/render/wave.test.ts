@@ -201,7 +201,7 @@ describe("link on a container (W-111)", () => {
       },
     ]);
     expect(renderPage(open, design).html).toContain(
-      '<a class="emvb-container" href="https://example.com/a">',
+      '<a class="emvb-container emvb-box-link" href="https://example.com/a">',
     );
     const nested = page([
       {

@@ -1,6 +1,7 @@
 import { Input } from "@cloudflare/kumo";
 import { hrefError } from "./link-rules.ts";
 import { fieldNumber } from "./number-input.ts";
+import { svgMarkupRefused } from "./svg-images.ts";
 import * as React from "react";
 import {
   MAX_TEXT_LENGTH,
@@ -121,6 +122,11 @@ export function DraftTextField({
     };
     // UX-041, UX-074: list fields say one per line; other text areas show their own note.
     const hint = field.message ?? (field.kind === "list-items" ? "One per line." : undefined);
+    // W-787/W-788: refused SVG markup says why under the field; W-788 also marks the field
+    // invalid and points to the note, so screen readers hear it too. The blank-markup prompt
+    // only repeats the hint, so it stays visual.
+    const svgNote = field.key === "markup" ? svgMarkupRefused(node) : undefined;
+    const svgRefused = Boolean(svgNote) && String(raw ?? "").trim() !== "";
     return (
       <div className="emvb-field-group" data-emvb-field={field.key}>
         <label className="emvb-field-label" htmlFor={areaId}>
@@ -132,9 +138,13 @@ export function DraftTextField({
           dir="auto"
           className={`${FIELD} emvb-textarea`}
           rows={field.kind === "list-items" ? 4 : 5}
-          aria-invalid={error ? true : undefined}
+          aria-invalid={error || svgRefused ? true : undefined}
           aria-describedby={
-            [hint ? `${areaId}-hint` : "", error ? `${areaId}-error` : ""]
+            [
+              hint ? `${areaId}-hint` : "",
+              error ? `${areaId}-error` : "",
+              svgRefused ? `${areaId}-svg` : "",
+            ]
               .filter(Boolean)
               .join(" ") || undefined
           }
@@ -154,6 +164,11 @@ export function DraftTextField({
           <span className="emvb-helper" id={`${areaId}-error`} data-emvb-field-error="">
             {error}
           </span>
+        )}
+        {svgNote && (
+          <p className="emvb-inline-error" id={`${areaId}-svg`} data-emvb-svg-refused="">
+            {svgNote}
+          </p>
         )}
       </div>
     );

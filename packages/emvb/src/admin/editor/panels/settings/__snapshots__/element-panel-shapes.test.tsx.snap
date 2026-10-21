@@ -2987,10 +2987,10 @@ exports[`element panel markup (W-021, W-086 M16) image renders the same content 
       p.emvb-helper
         "No image selected yet."
       div.emvb-media-actions
-        button.emvb-btn data-kumo-component="Button" type="button" data-emvb-media-library=""
+        button.emvb-btn data-kumo-component="Button" type="button" aria-disabled="false" data-emvb-media-library=""
           span
             "Choose from library"
-        button.emvb-btn data-kumo-component="Button" type="button" data-emvb-media-upload-btn=""
+        button.emvb-btn data-kumo-component="Button" type="button" aria-disabled="false" data-emvb-media-upload-btn=""
           span
             "Upload"
         input.emvb-sr-only tabindex="-1" aria-hidden="true" data-emvb-media-upload="" type="file"

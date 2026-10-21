@@ -80,3 +80,14 @@ test("UX-083: sizes and budgets drop needless decimals and use MB past 1000 KB",
     "2 MB",
   ]);
 });
+
+test("W-771: sizes that round up never show a trailing .0 or 1000 KB", async () => {
+  const { kb } = await import("./PerfMeter.tsx");
+  expect([1999, 99_960, 999_600, 1_999_999, 1050].map(kb)).toEqual([
+    "2 KB",
+    "100 KB",
+    "1 MB",
+    "2 MB",
+    "1.1 KB",
+  ]);
+});

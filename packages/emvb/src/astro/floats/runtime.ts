@@ -50,8 +50,29 @@ function placeFloats(): void {
   root.style.setProperty("--emvb-float-bottom", `${bottom}px`);
 }
 
+const FOCUSABLE =
+  'a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+
+/**
+ * W-782: hiding the float that holds focus dropped focus to <body>, so the next Tab
+ * restarted at the top of the page. Move it to the nearest control after the float,
+ * else the one before it.
+ */
+function keepFocusNear(el: HTMLElement): void {
+  if (!el.contains(document.activeElement)) return;
+  const candidates = [...document.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
+    (c) => !el.contains(c) && !c.closest("[hidden],[inert]"),
+  );
+  const after = candidates.find(
+    (c) => (el.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+  );
+  const target = after ?? candidates.at(-1);
+  target?.focus();
+}
+
 function hide(el: HTMLElement): void {
   const id = el.getAttribute("data-emvb-float");
+  keepFocusNear(el);
   el.hidden = true;
   if (id) rememberClosed(id);
   placeFloats();

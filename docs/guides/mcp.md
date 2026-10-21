@@ -9,7 +9,7 @@ publishes it, unless an admin allows agent publishing.
 
 - EmDash **1.2 or later** with MCP on: `emdash({ mcp: true, … })`. The rest of EmVB still works on
   EmDash 1.0 and 1.1; only the agent tools need 1.2.
-- `@perkyzz/emvb` 0.5.0 or later on the site (0.6.5 recommended: it adds the `NOT_SET_UP`, image-source and hidden-element checks, and refuses links, SVG markup and duplicate class or variable names the page would drop), with **Set up EmVB** done once. Before that, the page
+- `@perkyzz/emvb` 0.5.0 or later on the site (0.7.0 recommended: `list_versions` gives times as ISO 8601 UTC, and 0.6.5 added the `NOT_SET_UP`, image-source and hidden-element checks and refuses links, SVG markup and duplicate class or variable names the page would drop), with **Set up EmVB** done once. Before that, the page
   tools answer `NOT_SET_UP`.
 - An admin turns agents on in **Pages VisualBuilder → AI agents** (off by default), and approves the
   EmVB tools on EmDash's Plugins screen. EmDash asks again whenever the tool list changes, for

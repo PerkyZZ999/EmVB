@@ -11,8 +11,11 @@ import {
   findNode,
   LAYOUT_SCHEMA_VERSION,
   moveDown,
+  moveIn,
+  moveOut,
   newNodeId,
   moveUp,
+  parentOf,
   recipeNode,
   withFreshIds,
   subtreeSize,
@@ -25,6 +28,21 @@ import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import type { ItemActions } from "./panels/settings/ItemList.tsx";
 import type { EditorAction, EditorState } from "./store.ts";
+
+const MOVES = new Set<unknown>([moveUp, moveDown, moveIn, moveOut]);
+
+/** "Moved. Heading is 2 of 3 in Container." for the screen reader after an Alt+arrow move. */
+function movedTo(layout: Layout, id: string): string {
+  const node = findNode(layout, id);
+  const parentId = parentOf(layout, id);
+  const parent = parentId ? findNode(layout, parentId) : undefined;
+  const siblings: LayoutNode[] =
+    parent && "children" in parent && Array.isArray(parent.children) ? parent.children : [];
+  const index = siblings.findIndex((child) => child.id === id);
+  const name = ELEMENT_NAMES[node?.type ?? "container"] ?? "Element";
+  const where = ELEMENT_NAMES[parent?.type ?? "container"] ?? "its container";
+  return `Moved. ${name} is ${index + 1} of ${siblings.length} in ${where}.`;
+}
 
 const RESTORE_TIMEOUT_MS = 6000;
 const NOTICE_TIMEOUT_MS = 4000;
@@ -126,6 +144,8 @@ export function useNodeActions({
       return;
     }
     dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
+    // W-770: a keyboard move only announced refusals; say where the element landed.
+    if (MOVES.has(run)) announce(movedTo(result.layout, id));
     if (result.note) {
       announce(`Duplicated. ${result.note}`);
       if (lastToast.current) toasts.close(lastToast.current);

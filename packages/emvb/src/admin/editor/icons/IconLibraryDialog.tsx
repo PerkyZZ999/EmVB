@@ -9,7 +9,7 @@ import {
 import * as React from "react";
 import type { Fetcher } from "../../api.ts";
 import { BUTTON, SOLID_PRIMARY, UI_CSS } from "../../ui.ts";
-import { ALL_ICONS, ICON_SETS, UPLOADS, type LibraryIcon } from "./library.ts";
+import { ALL_ICONS, ICON_SETS, UPLOADS, type LibraryIcon, type loadIconSet } from "./library.ts";
 import { fmt, useIconLibrary } from "./use-icon-library.ts";
 import { isCommitEnter } from "../ime.ts";
 
@@ -250,11 +250,13 @@ function IconGrid({
 function IconLibrary({
   currentId,
   fetcher,
+  loadSet,
   onInsert,
 }: {
   currentId: string | undefined;
   /** With a fetcher, My uploads lists and adds uploaded SVGs (W-239). */
   fetcher?: Fetcher;
+  loadSet?: typeof loadIconSet;
   onInsert: (icon: LibraryIcon) => void;
 }) {
   const {
@@ -287,7 +289,7 @@ function IconLibrary({
     uploadId,
     renameUpload,
     deleteUpload,
-  } = useIconLibrary({ currentId, fetcher });
+  } = useIconLibrary({ currentId, fetcher, loadSet });
   const searchRef = React.useRef<HTMLInputElement>(null);
   return (
     <div className="emvb-icon-library" data-emvb-dialog="icon-library">
@@ -384,9 +386,13 @@ function IconLibrary({
               size="sm"
               className={BUTTON}
               icon={<UploadSimpleIcon aria-hidden="true" />}
-              disabled={uploading}
+              // W-827: focusable while uploading (aria-disabled, press ignored); disabling it
+              // dropped keyboard focus out of the modal to the page body.
+              aria-disabled={uploading}
               data-emvb-icon-upload-btn=""
-              onClick={() => fileRef.current?.click()}
+              onClick={() => {
+                if (!uploading) fileRef.current?.click();
+              }}
             >
               <span className="emvb-icon-upload-label">
                 <span aria-hidden={uploading}>Upload SVG</span>
@@ -422,6 +428,8 @@ function IconLibrary({
               size="sm"
               className={BUTTON}
               onClick={() => {
+                // W-747: this button unmounts on retry; keep focus in the dialog.
+                searchRef.current?.focus();
                 setUploadsFailed(undefined);
                 setAttempt((n) => n + 1);
               }}
@@ -436,7 +444,11 @@ function IconLibrary({
               variant="secondary"
               size="sm"
               className={BUTTON}
-              onClick={() => setAttempt((n) => n + 1)}
+              onClick={() => {
+                // W-749: this button unmounts on retry; keep focus in the dialog.
+                searchRef.current?.focus();
+                setAttempt((n) => n + 1);
+              }}
             >
               Try again
             </Button>
@@ -556,6 +568,7 @@ export function IconLibraryDialog({
   onOpenChange,
   currentId,
   fetcher,
+  loadSet,
   onInsert,
   onClosed,
 }: {
@@ -564,6 +577,8 @@ export function IconLibraryDialog({
   currentId: string | undefined;
   /** Enables My uploads (W-239). */
   fetcher?: Fetcher;
+  /** Replaces the icon-set loader (tests: a set that fails to download). */
+  loadSet?: typeof loadIconSet;
   onInsert: (icon: LibraryIcon) => void;
   /** After the close animation, once the focus trap has let go: the place to put focus back. */
   onClosed?: () => void;
@@ -589,6 +604,7 @@ export function IconLibraryDialog({
           <IconLibrary
             currentId={currentId}
             fetcher={fetcher}
+            loadSet={loadSet}
             onInsert={(icon) => {
               onInsert(icon);
               onOpenChange(false);

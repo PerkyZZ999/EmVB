@@ -69,7 +69,9 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-danger-icon { color: var(--color-kumo-danger); }
 .emvb-link-button { border: 0; padding: 0; background: none; color: var(--text-color-kumo-default); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; justify-self: start; align-self: flex-start; }
 .emvb-save-button, .emvb-publish-button { position: relative; }
-.emvb-styles-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; }
+/* W-806: Kumo's primary button wraps its label in a positioned span, so a dot element inside sat on
+   "Publish". The dot is drawn on the button itself, in its top-right corner (the button clips overflow). */
+.emvb-publish-button[data-emvb-styles-pending="true"]::after { content: ""; position: absolute; top: 3px; right: 3px; width: 8px; height: 8px; border-radius: 9999px; background: currentColor; }
 /* UX-056: on the corner, ringed in the surface colour, so it no longer sits on the end of "draft". */
 .emvb-unsaved-dot { position: absolute; top: -3px; right: -3px; width: 8px; height: 8px; border-radius: 9999px; background: var(--text-color-kumo-default); box-shadow: 0 0 0 2px var(--color-kumo-base); }
 .emvb-danger-text.emvb-danger-text { color: var(--text-color-kumo-danger); }
@@ -204,6 +206,8 @@ export const EDITOR_CSS = `${UI_CSS}
 .emvb-stage[data-emvb-zoom="actual"] { overflow-x: auto; }
 .emvb-stage-frame { position: relative; flex: none; height: 100%; overflow: hidden; }
 .emvb-stage-scaler { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+/* W-809: the canvas frame's keyboard focus ring (set from script; see frame-focus-ring.ts). */
+iframe[data-emvb-canvas-focus="keyboard"] { outline: 2px solid var(--color-kumo-brand); outline-offset: -2px; }
 .emvb-zoom { min-width: 64px; font-variant-numeric: tabular-nums; }
 .emvb-preview-split { display: inline-flex; gap: 2px; }
 .emvb-canvas iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
@@ -444,6 +448,8 @@ export const EDITOR_CSS = `${UI_CSS}
 
 .emvb-media-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .emvb-media-preview { display: flex; flex-direction: column; gap: 4px; }
+/* W-761: a long media URL ran past the panel edge. */
+.emvb-media-preview > .emvb-helper { overflow-wrap: anywhere; }
 .emvb-media-edited { align-self: flex-start; }
 .emvb-media-cell { position: relative; }
 .emvb-media-cell .emvb-media-card-menu { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; padding: 0; opacity: 0.92; }

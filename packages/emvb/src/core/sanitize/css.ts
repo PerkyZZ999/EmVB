@@ -728,6 +728,10 @@ export function styleDeclarations(style: unknown): {
   const background = composeBackground(record);
   declarations.push(...background.declarations);
   rejected.push(...background.rejected);
+  // W-802: a background video is drawn above the element's background, overlay included, so
+  // the overlay is also handed to the layer the video box paints above its video.
+  const overlayLayer = cssOverlay(record["overlay"]);
+  if (overlayLayer) declarations.push({ property: "--emvb-bg-overlay", value: overlayLayer });
   const column = gridPlacement(record["gridColumnStart"], record["gridColumnSpan"]);
   const row = gridPlacement(record["gridRowStart"], record["gridRowSpan"]);
   if (column.value) declarations.push({ property: "grid-column", value: column.value });

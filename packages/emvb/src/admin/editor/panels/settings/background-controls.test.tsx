@@ -2,10 +2,11 @@ import { afterEach, describe, expect, test } from "bun:test";
 import * as React from "react";
 import { act } from "react";
 import { emptyDesign, type StyleProps } from "../../../../core/index.ts";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 import { switchFillRemembered, type FillMemory } from "./background-mode.ts";
 import { StyleRow } from "./StyleRow.tsx";
-import { GradientControl } from "./BackgroundControls.tsx";
+import { BackgroundImageControl, GradientControl } from "./BackgroundControls.tsx";
+import type { Fetcher } from "../../../api.ts";
 import type { StyleKey } from "./style-sections.ts";
 
 afterEach(async () => {
@@ -224,4 +225,88 @@ test("UX-081: gradient selects show names, not raw values", async () => {
   );
   const shown = [...host.querySelectorAll('[role="combobox"]')].map((c) => c.textContent?.trim());
   expect(shown.slice(0, 2)).toEqual(["Radial", "Top left"]);
+});
+
+test("W-823: the background library takes focus, closes on Escape and gives focus back", async () => {
+  const fetcher: Fetcher = async () =>
+    Response.json({
+      data: {
+        items: [
+          { id: "m1", filename: "sky.png", url: "/media/sky.png", status: "ready", alt: "Sky" },
+        ],
+      },
+    });
+  const changes: (string | undefined)[] = [];
+  const host = await mount(
+    <BackgroundImageControl
+      value={undefined}
+      fetcher={fetcher}
+      onChange={(next) => changes.push(next)}
+      reset={null}
+    />,
+  );
+  const opener = host.querySelector<HTMLButtonElement>("[data-emvb-bg-library]");
+  const dialog = () => host.querySelector('[role="dialog"]');
+  const open = async () => {
+    opener?.focus();
+    await act(async () => opener?.click());
+    await settle();
+  };
+  await open();
+  const close = [...(dialog()?.querySelectorAll("button") ?? [])].find(
+    (b) => b.textContent === "Close",
+  );
+  expect(document.activeElement === close).toBe(true);
+  const outside: string[] = [];
+  const onOutside = (event: KeyboardEvent) => outside.push(event.key);
+  document.addEventListener("keydown", onOutside);
+  await act(async () => {
+    document.activeElement?.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }),
+    );
+  });
+  document.removeEventListener("keydown", onOutside);
+  expect(dialog()).toBeNull();
+  expect(outside).toEqual([]);
+  expect(document.activeElement === opener).toBe(true);
+  await open();
+  const card = host.querySelector<HTMLButtonElement>('[data-emvb-bg-media-id="m1"]');
+  card?.focus();
+  await act(async () => card?.click());
+  expect(dialog()).toBeNull();
+  expect(changes).toEqual(["/media/sky.png"]);
+  expect(document.activeElement === opener).toBe(true);
+});
+
+test("W-824: while uploading, Choose from library and Upload stay focusable and ignore presses", async () => {
+  const pending = Promise.withResolvers<Response>();
+  const fetcher: Fetcher = async () => pending.promise;
+  const host = await mount(
+    <BackgroundImageControl value={undefined} fetcher={fetcher} onChange={() => {}} reset={null} />,
+  );
+  const library = host.querySelector<HTMLButtonElement>("[data-emvb-bg-library]");
+  const upload = host.querySelector<HTMLButtonElement>("[data-emvb-bg-upload-btn]");
+  const file = host.querySelector<HTMLInputElement>("[data-emvb-bg-upload]");
+  if (!library || !upload || !file) throw new Error("Missing background image controls");
+  let picks = 0;
+  file.addEventListener("click", () => picks++);
+  Object.defineProperty(file, "files", { configurable: true, value: [new File(["x"], "a.png")] });
+  upload.focus();
+  await act(async () => file.dispatchEvent(new Event("change", { bubbles: true })));
+  expect([library.disabled, upload.disabled]).toEqual([false, false]);
+  expect([library.getAttribute("aria-disabled"), upload.getAttribute("aria-disabled")]).toEqual([
+    "true",
+    "true",
+  ]);
+  expect(document.activeElement === upload).toBe(true);
+  await act(async () => upload.click());
+  await act(async () => library.click());
+  expect(picks).toBe(0);
+  expect(host.querySelector('[role="dialog"]')).toBeNull();
+  await act(async () =>
+    pending.resolve(Response.json({ error: { message: "nope" } }, { status: 500 })),
+  );
+  await settle();
+  await act(async () => upload.click());
+  expect(picks).toBe(1);
 });

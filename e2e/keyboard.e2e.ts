@@ -79,3 +79,30 @@ test("element keys on the settings panel's tabs and headers leave the selection 
   await page.keyboard.press("ArrowUp");
   await expect(selected).toHaveAttribute("data-emvb-selected", "head0001");
 });
+
+test("W-769: Save draft keeps keyboard focus through a save", async ({ page, request }) => {
+  const id = await createPage(
+    request,
+    "Save focus",
+    {
+      schemaVersion: 16,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [{ id: "head0001", type: "heading", props: { text: "Before", level: 1 } }],
+      },
+    },
+    `save-focus-${unique()}`,
+  );
+  await openEditor(page, id);
+  await canvas(page).locator('[data-emvb-id="head0001"]').click();
+  const text = overlay(page).getByLabel("Text", { exact: true }).first();
+  await text.fill("After");
+  await text.press("Tab");
+  const save = overlay(page).locator(".emvb-save-button");
+  await save.focus();
+  await page.keyboard.press("Enter");
+  await expect(overlay(page).locator(".emvb-save-status")).toContainText("Saved");
+  await expect(save).toBeFocused();
+});

@@ -918,7 +918,8 @@ export type TabPanelNode = NodeEnvelope & {
 
 export type TabsNode = NodeEnvelope & {
   type: "tabs";
-  props: { href?: string; newTab?: boolean };
+  /** W-790: read from TabsNodeSchema, so the type can't drift from what the schema accepts. */
+  props: z.infer<typeof TabsNodeSchema>["props"];
   children: LayoutNode[];
 };
 

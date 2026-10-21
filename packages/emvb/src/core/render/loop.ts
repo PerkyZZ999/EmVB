@@ -110,10 +110,17 @@ export function renderLoop(
     if (ctx.takeSectionBudget && !ctx.takeSectionBudget(itemSize)) break;
     children.push({
       tag: "div",
-      attrs: { class: "emvb-loop-item", "data-emvb-loop-item": post.id },
+      attrs: { class: "emvb-loop-item", "data-emvb-loop-item": post.id, role: "listitem" },
       children: ctx.children(templateNodes, { ...itemDynamic, post, inLoopItem: true }),
     });
   }
-  if (ctx.mode === "editor") children.push(...empty());
-  return ELEMENTS.loop.build(node as never, attrs, children);
+  // W-789: entries were bare divs, so screen readers didn't hear "list, 4 items" and a repeated
+  // "Read more" had no list item to take its purpose from (WCAG 1.3.1, 2.4.4). The editor adds the
+  // Empty state under the items; a list may hold only its items, so the roles go only then.
+  const extras = ctx.mode === "editor" ? empty() : [];
+  if (extras.length > 0) {
+    for (const item of children) delete item.attrs.role;
+    return ELEMENTS.loop.build(node as never, attrs, [...children, ...extras]);
+  }
+  return ELEMENTS.loop.build(node as never, { ...attrs, role: "list" }, children);
 }

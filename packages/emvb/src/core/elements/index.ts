@@ -26,6 +26,7 @@ import { CONTAINER_TAGS, TEXT_TAGS } from "../schema/layout.ts";
 import type { ElementDescriptor } from "../schema/descriptors.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { sanitizeSvgMarkup } from "../sanitize/svg.ts";
+import { scopeSvgIds } from "./svg-ids.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { getBundledIcon } from "../icons/catalog.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
@@ -128,10 +129,18 @@ const BOX_LINK_FIELDS = [
   { key: "newTab", kind: "boolean" as const, label: "Open in a new tab", optional: true },
 ];
 
+/**
+ * W-797: a linked box is an <a>, so without this its whole content took the browser's blue,
+ * underlined link look. Like a heading link it inherits; :where() lets site and local styles win.
+ * Every box type ships it, as any of them can be the link (W-792: CSS ships with its element).
+ */
+const BOX_LINK_CSS = ":where(a.emvb-box-link){color:inherit;text-decoration:inherit}";
+
 const container: ElementDefinition<ContainerNode> = {
   // W-299: a word longer than the line (a pasted URL) breaks instead of widening the page on a phone.
   baseCss:
-    ".emvb-container{display:flex;flex-direction:column;min-width:0;overflow-wrap:break-word}",
+    ".emvb-container{display:flex;flex-direction:column;min-width:0;overflow-wrap:break-word}" +
+    BOX_LINK_CSS,
   defaults: () => ({ type: "container", props: {}, children: [] }),
   descriptor: {
     type: "container",
@@ -271,7 +280,7 @@ const link: ElementDefinition<LinkNode> = {
 const button: ElementDefinition<ButtonNode> = {
   baseCss:
     // The look sits in :where() so site tag defaults, classes and local styles all win (W-148).
-    ".emvb-button{display:inline-flex;align-items:center;justify-content:center;gap:0.5em;margin:0;font:inherit;text-decoration:none;cursor:pointer}:where(.emvb-button){color:inherit;background:transparent;border:1px solid currentColor;border-radius:6px;padding:0.625em 1.25em;line-height:1.2}.emvb-button-icon{display:inline-flex;flex:none}.emvb-button-icon svg{width:100%;height:100%;display:block}.emvb-button-icon--sm{width:1em;height:1em}.emvb-button-icon--md{width:1.25em;height:1.25em}.emvb-button-icon--lg{width:1.5em;height:1.5em}.emvb-figure{margin:0}.emvb-figcaption{margin-top:0.35em}.emvb-image-link{display:contents}",
+    ".emvb-button{display:inline-flex;align-items:center;justify-content:center;gap:0.5em;overflow-wrap:anywhere;text-align:center;margin:0;font:inherit;text-decoration:none;cursor:pointer}:where(.emvb-button){color:inherit;background:transparent;border:1px solid currentColor;border-radius:6px;padding:0.625em 1.25em;line-height:1.2}.emvb-button-icon{display:inline-flex;flex:none}.emvb-button-icon svg{width:100%;height:100%;display:block}.emvb-button-icon--sm{width:1em;height:1em}.emvb-button-icon--md{width:1.25em;height:1.25em}.emvb-button-icon--lg{width:1.5em;height:1.5em}",
   defaults: () => ({ type: "button", props: { text: "Button" } }),
   descriptor: {
     type: "button",
@@ -369,7 +378,9 @@ function buttonChildren(node: ButtonNode): (VNode | string)[] {
 }
 
 const list: ElementDefinition<ListNode> = {
-  baseCss: ".emvb-list{margin:0;padding-inline-start:1.25em}.emvb-list li{margin:0}",
+  // W-796: "100." is wider than 1.25em, so three-digit numbers sat outside the list's box.
+  baseCss:
+    ".emvb-list{margin:0;padding-inline-start:1.25em}.emvb-list li{margin:0}.emvb-list--wide{padding-inline-start:2.25em}",
   defaults: () => ({ type: "list", props: { items: ["Item"] } }),
   descriptor: {
     type: "list",
@@ -381,21 +392,26 @@ const list: ElementDefinition<ListNode> = {
       { key: "items", kind: "list-items", label: "Items" },
     ],
   },
-  build: (node, attrs) => ({
-    tag: node.props.ordered ? "ol" : "ul",
-    attrs,
+  build: (node, attrs) => {
     // W-275: blank items would be empty bullets on the page; a list of only blanks has none.
-    children: node.props.items
-      .filter((item) => item.trim() !== "")
-      .map((item) => ({ tag: "li", attrs: {}, children: [item] })),
-  }),
+    const items = node.props.items.filter((item) => item.trim() !== "");
+    const wide = node.props.ordered === true && items.length >= 100;
+    return {
+      tag: node.props.ordered ? "ol" : "ul",
+      attrs: wide ? { ...attrs, class: `${attrs.class ?? ""} emvb-list--wide`.trim() } : attrs,
+      children: items.map((item) => ({ tag: "li", attrs: {}, children: [item] })),
+    };
+  },
 };
 
 const image: ElementDefinition<ImageNode> = {
   // W-269: natural size, at most the container's width. A container's default stretch made a
   // 400 px image 1184 px wide (blurry); a Width (px) attribute or a style width still sets it.
   baseCss:
-    ".emvb-image{display:block;max-width:100%;height:auto}:where(img.emvb-image:not([width])){width:fit-content}",
+    ".emvb-image{display:block;max-width:100%;height:auto}:where(img.emvb-image:not([width])){width:fit-content}" +
+    // W-792: these sat in the Button's base CSS, so a page without a Button gave a captioned
+    // image the browser's 40 px figure margins and a linked image a stray inline box.
+    ".emvb-figure{margin:0}.emvb-figcaption{margin-top:0.35em}.emvb-image-link{display:contents}",
   defaults: () => ({
     type: "image",
     props: { src: "", alt: "Image", decorative: false },
@@ -554,7 +570,8 @@ const icon: ElementDefinition<IconNode> = {
   baseCss:
     // W-237: the glyph reads the wrapper's icon custom properties (rotate, flip, shadow, loop,
     // stroke); unset they change nothing. The svg inherits the wrapper's transition for hover.
-    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon-link{display:inline-flex;color:inherit}.emvb-icon svg{display:block;rotate:var(--emvb-icon-rotate,0deg);scale:var(--emvb-icon-flip,1 1);filter:var(--emvb-icon-shadow,none);animation:var(--emvb-icon-animation,none);transition:inherit}" +
+    // W-803: an icon larger than its box (512 px on a phone) shrinks to fit, keeping its shape.
+    ".emvb-icon{display:inline-flex;align-items:center;justify-content:center;line-height:0;color:inherit}.emvb-icon-link{display:inline-flex;max-width:100%;color:inherit}.emvb-icon svg{display:block;max-width:100%;rotate:var(--emvb-icon-rotate,0deg);scale:var(--emvb-icon-flip,1 1);filter:var(--emvb-icon-shadow,none);animation:var(--emvb-icon-animation,none);transition:inherit}" +
     ICON_STROKE_WIDTHS.map(
       (width) =>
         `.emvb-icon-sw${width.replace(".", "_")}{stroke-width:var(--emvb-icon-stroke,${width})}`,
@@ -899,7 +916,7 @@ const svgEl: ElementDefinition<SvgNode> = {
     return {
       tag: "span",
       attrs,
-      children: [{ tag: "svg", attrs: svgAttrs, children: tree.children }],
+      children: [{ tag: "svg", attrs: svgAttrs, children: scopeSvgIds(tree.children, node.id) }],
     };
   },
 };
@@ -923,7 +940,7 @@ const tabPanel: ElementDefinition<TabPanelNode> = {
 
 const tabs: ElementDefinition<TabsNode> = {
   baseCss:
-    ".emvb-tabs{display:flex;flex-direction:column;min-width:0;gap:0}.emvb-tab-input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}.emvb-tab-list{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid currentColor;margin:0;padding:0}.emvb-tab-label{display:inline-block;padding:8px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}.emvb-tab-panels{min-width:0}.emvb-tab-panel{padding-top:12px;min-width:0}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(1):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(1){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(1):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(1)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(2):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(2){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(2):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(2)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(3):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(3){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(3):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(3)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(4):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(4){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(4):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(4)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(5):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(5){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(5):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(5)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(6):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(6){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(6):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(6)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(7):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(7){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(7):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(7)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(8):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(8){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(8):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(8)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(9):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(9){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(9):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(9)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(10):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(10){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(10):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(10)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(11):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(11){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(11):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(11)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(12):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(12){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(12):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(12)){display:none!important}",
+    ".emvb-tabs{display:flex;flex-direction:column;min-width:0;gap:0}.emvb-tab-input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}.emvb-tab-list{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid currentColor;margin:0;padding:0}.emvb-tab-label{display:inline-block;padding:8px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;min-width:0;overflow-wrap:anywhere}.emvb-tab-panels{min-width:0}.emvb-tab-panel{padding-top:12px;min-width:0}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(1):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(1){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(1):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(1)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(2):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(2){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(2):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(2)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(3):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(3){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(3):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(3)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(4):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(4){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(4):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(4)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(5):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(5){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(5):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(5)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(6):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(6){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(6):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(6)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(7):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(7){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(7):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(7)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(8):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(8){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(8):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(8)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(9):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(9){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(9):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(9)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(10):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(10){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(10):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(10)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(11):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(11){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(11):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(11)){display:none!important}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(12):checked) > .emvb-tab-list > .emvb-tab-label:nth-of-type(12){border-bottom-color:currentColor;font-weight:600}.emvb-tabs:has(> .emvb-tab-input:nth-of-type(12):checked) > .emvb-tab-panels > .emvb-tab-panel:not(:nth-of-type(12)){display:none!important}",
   defaults: () => ({
     type: "tabs",
     props: {},
@@ -941,7 +958,7 @@ const tabs: ElementDefinition<TabsNode> = {
 };
 
 const divBlock: ElementDefinition<DivBlockNode> = {
-  baseCss: ".emvb-div-block{display:block;min-width:0}",
+  baseCss: ".emvb-div-block{display:block;min-width:0}" + BOX_LINK_CSS,
   defaults: () => ({ type: "div-block", props: {}, children: [] }),
   descriptor: {
     type: "div-block",
@@ -1009,7 +1026,7 @@ const TRACKS_HINT =
   "Up to 12 tracks, one per line: 1fr, 2fr, 3fr, auto, min-content, max-content, or a length.";
 
 const grid: ElementDefinition<GridNode> = {
-  baseCss: ".emvb-grid{display:grid;min-width:0}",
+  baseCss: ".emvb-grid{display:grid;min-width:0}" + BOX_LINK_CSS,
   defaults: () => ({ type: "grid", props: { columns: 3 }, children: [] }),
   descriptor: {
     type: "grid",
@@ -1056,7 +1073,10 @@ const grid: ElementDefinition<GridNode> = {
 
 const flexbox: ElementDefinition<FlexboxNode> = {
   baseCss:
-    ".emvb-flexbox{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px}",
+    // W-800: a word longer than the line (a pasted URL) widened a row or a centred column and the
+    // page scrolled sideways on a phone; break-word (W-299) doesn't shrink a flex item, anywhere does.
+    ".emvb-flexbox{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;min-width:0;gap:16px;overflow-wrap:anywhere}" +
+    BOX_LINK_CSS,
   defaults: () => ({
     type: "flexbox",
     props: {},
