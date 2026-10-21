@@ -36,18 +36,18 @@
     "icons:build": "bun scripts/build-icon-sets.ts"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.13.0",
+    "@axe-core/playwright": "^4.14.0",
     "@fortawesome/fontawesome-free": "7.3.1",
-    "@happy-dom/global-registrator": "20.14.5",
-    "@playwright/test": "1.63.0",
+    "@happy-dom/global-registrator": "21.0.4",
+    "@playwright/test": "1.64.1",
     "@tabler/icons": "3.49.0",
-    "@types/bun": "1.4.2",
-    "evlog": "2.29.0",
-    "fallow": "3.30.0",
-    "happy-dom": "20.14.5",
-    "lucide-static": "1.52.0",
-    "oxfmt": "0.71.0",
-    "oxlint": "1.86.0",
+    "@types/bun": "1.4.3",
+    "evlog": "2.33.1",
+    "fallow": "3.34.1",
+    "happy-dom": "21.0.4",
+    "lucide-static": "1.61.0",
+    "oxfmt": "0.74.0",
+    "oxlint": "1.89.0",
     "remixicon": "4.8.0",
     "typescript": "7.0.2"
   }

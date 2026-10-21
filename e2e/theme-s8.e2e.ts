@@ -23,12 +23,12 @@ test("Theme Builder creates a Header and opens the theme-part editor", async ({ 
   await expect(canvas(page).getByRole("heading", { name: title })).toBeVisible();
 });
 
-test("S8 Add panel exposes Flexbox, Div Block, SVG, and Tabs", async ({ page, request }) => {
+test("S8 Add panel exposes Flexbox, Div block, SVG, and Tabs", async ({ page, request }) => {
   const id = await createPage(
     request,
     "S8 tiles",
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -50,7 +50,7 @@ test("Site styles Classes Manager tab is reachable", async ({ page, request }) =
     request,
     "Classes manager",
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

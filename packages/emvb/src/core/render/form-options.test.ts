@@ -9,7 +9,7 @@ const field = (type: "select" | "radio", id: string, name: string): LayoutNode =
   ({ id, type, props: { field: name, label: name } }) as LayoutNode;
 
 const layout: Layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",
@@ -119,7 +119,7 @@ describe("form fields take the definition's type and limits (W-297)", () => {
     ],
   };
   const typedLayout: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",
@@ -324,7 +324,7 @@ describe("a field uses the form it sits in", () => {
         children: [select(fieldId)],
       }) as LayoutNode;
     const page: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -366,7 +366,7 @@ describe("a field uses the form it sits in", () => {
 
   test("a form inside a synced section uses that section's definition", () => {
     const sectionForm: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "rootsec1",
         type: "container",
@@ -384,7 +384,7 @@ describe("a field uses the form it sits in", () => {
       },
     };
     const page: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -475,7 +475,7 @@ describe("W-588: length limits the browser can read", () => {
   const page = (validation: Record<string, number>) =>
     renderPage(
       {
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: {
           id: "root0001",
           type: "container",
@@ -509,7 +509,7 @@ describe("W-588: length limits the browser can read", () => {
 
 describe("W-595: hidden fields of the definition", () => {
   const hiddenLayout: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",
@@ -557,7 +557,7 @@ describe("W-595: hidden fields of the definition", () => {
 
 describe("W-596: conditional fields", () => {
   const condLayout: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",

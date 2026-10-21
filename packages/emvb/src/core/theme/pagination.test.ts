@@ -84,7 +84,7 @@ test("a paged archive title takes the site's wording (W-529)", () => {
 test("the archive's Pagination element sets the paged title wording (W-529)", () => {
   const layout = (props: Record<string, unknown>) =>
     ({
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

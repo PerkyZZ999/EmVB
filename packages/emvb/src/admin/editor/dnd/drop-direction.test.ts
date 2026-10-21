@@ -54,7 +54,7 @@ describe("drops follow the layout the canvas shows (W-559)", () => {
 
   test("edge zones use the parent's shown direction when given", () => {
     const layout: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: container("root0001", [
         container("boxa0001", [heading("head0001")]),
         container("boxb0001", [heading("head0002")]),

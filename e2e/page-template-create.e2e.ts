@@ -11,7 +11,7 @@ async function createRecoveryTemplate(request: APIRequestContext) {
     slug: `template-recovery-${unique()}`,
     partType: "page_template",
     layout: {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

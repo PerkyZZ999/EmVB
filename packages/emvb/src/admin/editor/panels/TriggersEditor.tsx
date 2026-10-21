@@ -66,7 +66,7 @@ function ShowTimesField({
       type="number"
       min={1}
       max={100}
-      description="Leave empty for no limit. Counted per visitor's browser, up to 100."
+      description="Leave empty for no limit. Counted per visitor's browser, up to 100. A click trigger always opens."
       value={draft}
       onChange={(event) => setDraft(event.target.value)}
       onBlur={commit}

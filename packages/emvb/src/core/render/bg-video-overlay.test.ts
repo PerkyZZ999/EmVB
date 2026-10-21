@@ -4,7 +4,7 @@ import { emptyDesign, renderPage, type Layout } from "../index.ts";
 describe("W-802 a background video's overlay paints above the video", () => {
   const { css } = renderPage(
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

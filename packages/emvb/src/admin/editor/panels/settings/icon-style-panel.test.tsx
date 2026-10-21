@@ -31,7 +31,7 @@ function Harness({ start, device }: { start: LayoutNode; device?: "mobile" }) {
     <ElementPanel
       node={node}
       layout={{
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }}
       design={emptyDesign()}
@@ -249,6 +249,39 @@ describe("Force single colour and Shape (W-238)", () => {
     expect(row()?.querySelector("button")?.textContent).toContain("None");
     expect(row()?.textContent).toContain("Stopped on this device");
     expect(row()?.querySelector('[data-emvb-field="iconAnimation.duration"]')).toBeNull();
+  });
+
+  test("W-853: Loop forever is off by default and turning it on stores loop: true", async () => {
+    const picks: unknown[] = [];
+    const control = (value: Parameters<typeof IconAnimationControl>[0]["value"]) => (
+      <IconAnimationControl value={value} onChange={(n) => picks.push(n)} />
+    );
+    await mount(control({ type: "spin", duration: 1000 }));
+    const toggle = () =>
+      document.querySelector<HTMLElement>('[data-emvb-icon-loop] [role="switch"]');
+    expect(toggle()?.getAttribute("aria-checked")).toBe("false");
+    expect(document.querySelector("[data-emvb-icon-loop]")?.textContent).toContain(
+      "Stops on its own after about 5 seconds",
+    );
+    await act(async () => toggle()?.click());
+    expect(picks.at(-1)).toEqual({ type: "spin", duration: 1000, loop: true });
+    await cleanup();
+    await mount(control({ type: "spin", duration: 1000, loop: true }));
+    expect(toggle()?.getAttribute("aria-checked")).toBe("true");
+    await act(async () => toggle()?.click());
+    expect(picks.at(-1)).toEqual({ type: "spin", duration: 1000 });
+    // W-882: an inherited Loop forever says so on the narrower device.
+    await cleanup();
+    await mount(
+      <IconAnimationControl
+        value={undefined}
+        inherited={{ type: "spin", duration: 1000, loop: true }}
+        onChange={() => {}}
+      />,
+    );
+    expect(document.querySelector('[data-emvb-style="iconAnimation"]')?.textContent).toContain(
+      "1000 ms, loops forever)",
+    );
   });
 
   test("Force single color shows under Colour for a multi-colour SVG and sets the prop", async () => {

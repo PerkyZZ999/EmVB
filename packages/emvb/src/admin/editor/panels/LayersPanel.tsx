@@ -50,6 +50,8 @@ type LayerActions = {
   clipboard?: ClipboardActions;
   /** Sets or clears a node's editor-only name (W-157); without it rows can't be renamed. */
   onRename?: (id: string, label: string | undefined) => void;
+  /** Opens Save as section (W-876); without it the menu has no such item. */
+  onSaveSection?: (id: string) => void;
 };
 
 type MenuItem = {
@@ -96,6 +98,7 @@ function menuItems(
     runners: {
       rename: actions.onRename ? rename : undefined,
       duplicate: actions.onDuplicate,
+      saveSection: actions.onSaveSection,
       remove: actions.onDelete,
       moveUp: actions.onMoveUp,
       moveDown: actions.onMoveDown,
@@ -209,6 +212,7 @@ export function LayersPanel({
   const live = React.useRef(actions);
   live.current = actions;
   const canRename = !!actions.onRename;
+  const canSaveSection = !!actions.onSaveSection;
   const rowActions = React.useMemo<LayerActions>(
     () => ({
       onSelect: (id) => live.current.onSelect(id),
@@ -217,8 +221,9 @@ export function LayersPanel({
       onMoveDown: (id) => live.current.onMoveDown(id),
       onDelete: (id) => live.current.onDelete(id),
       onRename: canRename ? (id, label) => live.current.onRename?.(id, label) : undefined,
+      onSaveSection: canSaveSection ? (id) => live.current.onSaveSection?.(id) : undefined,
     }),
-    [canRename],
+    [canRename, canSaveSection],
   );
   const onRowMenu = React.useCallback(
     (id: string, open: boolean) => setMenuId(open ? id : null),

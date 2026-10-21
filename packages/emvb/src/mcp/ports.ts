@@ -1,6 +1,14 @@
 import type { AgentSettings } from "./settings.ts";
 import type { RateClass } from "./rate-limit.ts";
-import type { DesignSystem, Layout, RequiredFieldInfo } from "../core/index.ts";
+import type {
+  DesignSystem,
+  Layout,
+  Refusal,
+  RequiredFieldInfo,
+  SavedSection,
+  SavedSectionRecord,
+  SavedSectionSummary,
+} from "../core/index.ts";
 
 /** A page as the tool core sees it: the current draft (or published) data and its revision. */
 export type PageRecord = {
@@ -82,4 +90,17 @@ export interface EmvbPorts {
   formFields?(
     formIds: readonly string[],
   ): Promise<ReadonlyMap<string, readonly RequiredFieldInfo[]>>;
+  /** W-875: saved sections; without it the saved-section tools answer NOT_SET_UP. */
+  savedSections?: SavedSectionsPort;
+}
+
+/** Saved sections in plugin storage `emvb_saved_sections` (W-875, D-060). */
+export interface SavedSectionsPort {
+  list(): Promise<SavedSectionSummary[]>;
+  /** The section read and upgraded; null when there is none; a Refusal when it can't be read. */
+  get(id: string): Promise<SavedSection | Refusal | null>;
+  /** Stores a new section; a Refusal when the list is full. */
+  create(record: SavedSectionRecord): Promise<{ id: string } | Refusal>;
+  rename(id: string, name: string): Promise<SavedSectionSummary | Refusal | null>;
+  remove(id: string): Promise<boolean>;
 }

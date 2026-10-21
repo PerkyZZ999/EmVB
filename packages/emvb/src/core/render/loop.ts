@@ -94,7 +94,7 @@ export function renderLoop(
       attrs: { ...attrs, "data-emvb-loop-empty": "" },
       children: [
         ...ctx.children(emptyNodes, rest),
-        "Choose a Loop Item, or add elements here to design the item.",
+        "Choose a Loop item, or add elements here to design the item.",
       ],
     };
   }

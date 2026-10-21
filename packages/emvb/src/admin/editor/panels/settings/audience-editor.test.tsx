@@ -193,3 +193,35 @@ test("an arm whose partner is gone says every visitor sees it (W-627)", async ()
   );
   expect(document.querySelector("[data-emvb-variant-lone]")).toBeNull();
 });
+
+test("W-865: the Visitors and Scales editors use Kumo fields and checkboxes, not raw inputs", async () => {
+  const { TokenScales } = await import("../TokenScales.tsx");
+  const { emptyDesign } = await import("../../../../core/index.ts");
+  const node = {
+    ...heading,
+    audience: { devices: ["mobile"], hours: { from: 9, to: 17 } },
+  } as LayoutNode;
+  await mount(
+    <>
+      <AudienceEditor node={node} isRoot={false} onChange={() => undefined} />
+      <TokenScales design={emptyDesign()} onSave={async () => undefined} />
+    </>,
+  );
+  expect(
+    document.querySelectorAll(".emvb-native-input, input[type=checkbox]:not([aria-hidden])").length,
+  ).toBe(0);
+  for (const sel of [
+    "[data-emvb-audience-countries]",
+    "[data-emvb-audience-from]",
+    "[data-emvb-audience-zone]",
+    "[data-emvb-tokens-base]",
+  ]) {
+    expect(q(sel).classList.contains("emvb-field") ? sel : `${sel} not a Kumo field`).toBe(sel);
+  }
+  const mobile = q('[data-emvb-audience-device="mobile"]');
+  expect([mobile.getAttribute("role"), mobile.getAttribute("aria-checked")]).toEqual([
+    "checkbox",
+    "true",
+  ]);
+  expect(q("[data-emvb-tokens-fluid]").getAttribute("role")).toBe("checkbox");
+});

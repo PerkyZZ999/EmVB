@@ -158,14 +158,15 @@ function starterPartLayout(title: string, partType: ThemePartType): Layout {
 
 export async function createThemePart(
   fetcher: Fetcher,
-  input: { title: string; slug: string; partType: ThemePartType },
+  input: { title: string; slug: string; partType: ThemePartType; layout?: Layout },
 ): Promise<string> {
   const body = await requestJson<{ item: ContentItem }>(fetcher, CONTENT, {
     method: "POST",
     body: {
       data: {
         title: input.title,
-        layout: starterPartLayout(input.title, input.partType),
+        // W-876: a synced section starts from the element it was made from.
+        layout: input.layout ?? starterPartLayout(input.title, input.partType),
         part_type: input.partType,
         conditions: defaultConditionsFor(input.partType),
         triggers: defaultTriggers(),

@@ -6,7 +6,7 @@ import { auditPage } from "./audit.ts";
 const hiddenRules = (field: Record<string, unknown>) =>
   auditPage(
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

@@ -72,19 +72,8 @@ export function parseRgb(text: string): Rgba | null {
     .map((part) => (part.endsWith("%") ? (Number(part.slice(0, -1)) / 100) * 255 : Number(part)));
   if (nums.some((n) => !Number.isFinite(n) || n < 0 || n > 255)) return null;
   for (let i = 0; i < 3; i += 1) nums[i] = Math.round(nums[i] ?? 0);
-  let a = 1;
-  const alpha = parts[3];
-  if (alpha !== undefined) {
-    if (alpha.endsWith("%")) {
-      const pct = Number(alpha.slice(0, -1));
-      if (!Number.isFinite(pct) || pct < 0 || pct > 100) return null;
-      a = pct / 100;
-    } else {
-      const n = Number(alpha);
-      if (!Number.isFinite(n) || n < 0 || n > 1) return null;
-      a = n;
-    }
-  }
+  const a = parseAlpha(parts[3]);
+  if (a === null) return null;
   return { r: nums[0] ?? 0, g: nums[1] ?? 0, b: nums[2] ?? 0, a };
 }
 
@@ -195,18 +184,17 @@ function readOklch(text: string): Oklch | null {
   if (!Number.isFinite(l) || l < 0 || l > 100) return null;
   if (!Number.isFinite(c) || c < 0 || c > 0.5) return null;
   if (!Number.isFinite(h) || h < 0 || h > 360) return null;
-  let a = 1;
-  const alpha = parts[3];
-  if (alpha !== undefined) {
-    if (alpha.endsWith("%")) {
-      const pct = Number(alpha.slice(0, -1));
-      if (!Number.isFinite(pct) || pct < 0 || pct > 100) return null;
-      a = pct / 100;
-    } else {
-      const n = Number(alpha);
-      if (!Number.isFinite(n) || n < 0 || n > 1) return null;
-      a = n;
-    }
-  }
+  const a = parseAlpha(parts[3]);
+  if (a === null) return null;
   return { l, c, h, a };
+}
+
+/** A CSS alpha (0–1 or 0%–100%); 1 when absent, null when out of range or not a number. */
+function parseAlpha(alpha: string | undefined): number | null {
+  if (alpha === undefined) return 1;
+  const pct = alpha.endsWith("%");
+  const n = Number(pct ? alpha.slice(0, -1) : alpha);
+  const max = pct ? 100 : 1;
+  if (!Number.isFinite(n) || n < 0 || n > max) return null;
+  return pct ? n / 100 : n;
 }

@@ -122,6 +122,27 @@ export type PaginationItem =
   | { kind: "page"; n: number; href: string; current: boolean }
   | { kind: "gap" };
 
+const pageItem =
+  (p: ArchivePagination) =>
+  (n: number): PaginationItem => ({
+    kind: "page",
+    n,
+    href: archivePagePath(p.basePath, n),
+    current: n === p.page,
+  });
+
+/** Previous, then page 1 and a gap (or page 2) before the window that starts at `from`. */
+function leadingItems(p: ArchivePagination, from: number): PaginationItem[] {
+  const page = pageItem(p);
+  const items: PaginationItem[] = [];
+  if (p.page > 1) items.push({ kind: "prev", href: archivePagePath(p.basePath, p.page - 1) });
+  if (from > 1) items.push(page(1));
+  // W-600: "1 … 3" hides just page 2; show it instead of a gap.
+  if (from === 3) items.push(page(2));
+  if (from > 3) items.push({ kind: "gap" });
+  return items;
+}
+
 /**
  * The links a Pagination element shows. Empty when there is only one page. EmDash gives no
  * total count, so the numbers run from 1 to one past the current page (when there is one),
@@ -131,19 +152,9 @@ export function paginationItems(p: ArchivePagination): PaginationItem[] {
   const total = knownTotal(p);
   if (total !== undefined) return totalItems(p, total);
   if (p.page <= 1 && !p.hasMore) return [];
-  const items: PaginationItem[] = [];
-  const page = (n: number): PaginationItem => ({
-    kind: "page",
-    n,
-    href: archivePagePath(p.basePath, n),
-    current: n === p.page,
-  });
-  if (p.page > 1) items.push({ kind: "prev", href: archivePagePath(p.basePath, p.page - 1) });
+  const page = pageItem(p);
   const from = Math.max(1, p.page - 2);
-  if (from > 1) items.push(page(1));
-  // W-600: "1 … 3" hides just page 2; show it instead of a gap.
-  if (from === 3) items.push(page(2));
-  if (from > 3) items.push({ kind: "gap" });
+  const items = leadingItems(p, from);
   for (let n = from; n <= p.page; n++) items.push(page(n));
   if (p.hasMore) {
     items.push(page(p.page + 1));
@@ -155,20 +166,10 @@ export function paginationItems(p: ArchivePagination): PaginationItem[] {
 /** With a known total (W-309): 1, a window around the current page, and the last page. */
 function totalItems(p: ArchivePagination, total: number): PaginationItem[] {
   if (total <= 1) return [];
-  const items: PaginationItem[] = [];
-  const page = (n: number): PaginationItem => ({
-    kind: "page",
-    n,
-    href: archivePagePath(p.basePath, n),
-    current: n === p.page,
-  });
-  if (p.page > 1) items.push({ kind: "prev", href: archivePagePath(p.basePath, p.page - 1) });
+  const page = pageItem(p);
   const from = Math.max(1, p.page - 2);
+  const items = leadingItems(p, from);
   const to = Math.min(total, p.page + 2);
-  if (from > 1) items.push(page(1));
-  // W-600: "1 … 3" hides just page 2; show it instead of a gap.
-  if (from === 3) items.push(page(2));
-  if (from > 3) items.push({ kind: "gap" });
   for (let n = from; n <= to; n++) items.push(page(n));
   if (to === total - 2) items.push(page(total - 1));
   if (to < total - 2) items.push({ kind: "gap" });

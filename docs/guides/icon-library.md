@@ -120,7 +120,7 @@ shows them as Lucide icons, and they switch to the new storage only when you ins
 
 | Set | Version | License |
 | --- | --- | --- |
-| Lucide (`lucide-static`) | 1.52.0 | ISC |
+| Lucide (`lucide-static`) | 1.61.0 | ISC |
 | Font Awesome Free (`@fortawesome/fontawesome-free`) | 7.3.1 | Icons CC BY 4.0 |
 | Tabler Icons (`@tabler/icons`) | 3.49.0 | MIT |
 | Remix Icon (`remixicon`) | 4.8.0 | Apache-2.0 |

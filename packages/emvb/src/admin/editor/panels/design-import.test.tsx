@@ -13,7 +13,7 @@ import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",
@@ -102,6 +102,27 @@ describe("design Import (W-214)", () => {
     await settle();
     expect(saved.map((d) => d.classes?.map((c) => c.id))).toEqual([["hero"]]);
     expect(document.querySelector("[data-emvb-import-confirm]")).toBeNull();
+  });
+
+  test("W-854: the Import confirmation takes focus on Cancel when it opens", async () => {
+    await mount(
+      <SiteStylesDrawer
+        design={current}
+        layout={layout}
+        onDesignChange={async () => undefined}
+        onLayoutChange={() => undefined}
+        onClose={() => undefined}
+      />,
+    );
+    await pick(new File([designToJson(incoming)], "theirs.json", { type: "application/json" }));
+    const dialog = document.querySelector<HTMLElement>("[data-emvb-import-confirm]");
+    const focused = document.activeElement;
+    const title = document.getElementById(dialog?.getAttribute("aria-labelledby") ?? "");
+    expect([
+      focused?.textContent ?? "none",
+      dialog?.contains(focused) === true,
+      title?.textContent ?? "unlabelled",
+    ]).toEqual(["Cancel", true, "Replace site styles with theirs.json?"]);
   });
 
   test("W-283: the confirm lists names the file repeats, and Replace saves them renamed", async () => {

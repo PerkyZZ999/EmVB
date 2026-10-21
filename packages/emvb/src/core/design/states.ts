@@ -1,4 +1,5 @@
 import type { DesignSystem } from "../schema/design.ts";
+import { editClass } from "./classes.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
 import type { StyleProps, StyleStates } from "../schema/style.ts";
 
@@ -33,17 +34,10 @@ export function patchClassState(
   state: StyleStateName,
   patch: Partial<StyleProps>,
 ): DesignSystem {
-  const classes = design.classes ?? [];
-  if (!classes.some((c) => c.id === classId)) return design;
-  return {
-    ...design,
-    classes: classes.map((c) => {
-      if (c.id !== classId) return c;
-      const next = Object.assign({}, c);
-      const states = patchStates(c.states, state, patch);
-      if (states) next.states = states;
-      else delete next.states;
-      return next;
-    }),
-  };
+  return editClass(design, classId, (next) => {
+    const states = patchStates(next.states, state, patch);
+    if (states) next.states = states;
+    else delete next.states;
+    return next;
+  });
 }

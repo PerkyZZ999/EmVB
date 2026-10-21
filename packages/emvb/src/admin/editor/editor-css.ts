@@ -239,7 +239,6 @@ iframe[data-emvb-canvas-focus="keyboard"] { outline: 2px solid var(--color-kumo-
   font-size: 11px;
   line-height: 14px;
   font-weight: 600;
-  letter-spacing: 0.01em;
   white-space: nowrap;
   box-shadow: 0 1px 2px var(--color-kumo-shadow-edge), 0 2px 6px var(--color-kumo-shadow-drop);
   pointer-events: none;
@@ -254,7 +253,9 @@ iframe[data-emvb-canvas-focus="keyboard"] { outline: 2px solid var(--color-kumo-
 .emvb-small-screen { grid-row: 1 / -1; }
 .emvb-shortcuts { width: 100%; border-collapse: collapse; font-size: 13px; }
 .emvb-shortcuts td { padding: 6px 0; border-bottom: 1px solid var(--color-kumo-hairline); }
-.emvb-shortcuts td:last-child { text-align: right; font-family: var(--font-mono); color: var(--text-color-kumo-subtle); }
+.emvb-shortcuts td:last-child { text-align: right; white-space: nowrap; font-size: 11px; color: var(--text-color-kumo-subtle); }
+/* W-864: the same key boxes as the command palette's tips. */
+.emvb-shortcuts kbd { display: inline-block; min-width: 18px; margin: 0 2px; padding: 0 4px; border-radius: 4px; box-shadow: inset 0 0 0 1px var(--color-kumo-line); font-family: var(--font-mono); font-size: 11px; line-height: 16px; text-align: center; color: var(--text-color-kumo-default); }
 
 .emvb-add-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .emvb-element-tile {

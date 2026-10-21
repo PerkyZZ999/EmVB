@@ -14,7 +14,7 @@ test("W-734: bound color saves retain focus, stable feedback and retryable draft
     request,
     text,
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -137,7 +137,7 @@ test("W-728: color variable creation keeps stable feedback and retries without l
     request,
     text,
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

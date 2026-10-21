@@ -2,6 +2,7 @@ import { clipText } from "../limits.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import { isParentNode, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { boxBecomesLink } from "../render/extras.ts";
+import { ICON_ANIMATION_LIMIT_MS, iconAnimationRuns } from "../icons/animation-runs.ts";
 import { updateNode } from "../tree-ops.ts";
 
 /**
@@ -169,6 +170,22 @@ function effectiveStyle(
   return { ...fromClasses, ...(node.style as Record<string, unknown> | undefined) };
 }
 
+/** Each device's style with the node's classes under the node's own (W-882). */
+function deviceStyles(node: LayoutNode, design: DesignSystem): Record<string, unknown>[] {
+  const ids = new Set(node.classes ?? []);
+  const merged: Record<string, Record<string, unknown>> = {};
+  const layers = [
+    ...(design.classes ?? []).filter((c) => ids.has(c.id)).map((c) => c.devices),
+    node.devices,
+  ];
+  for (const devices of layers) {
+    for (const [key, st] of Object.entries(devices ?? {})) {
+      merged[key] = { ...merged[key], ...(st as Record<string, unknown>) };
+    }
+  }
+  return Object.values(merged);
+}
+
 /** Large text (24 px, or 18.66 px bold) needs 3:1; other text 4.5:1. H4 to H6 are not large (W-639). */
 function largeText(node: LayoutNode, design: DesignSystem): boolean {
   const style = effectiveStyle(node, design) as
@@ -308,19 +325,27 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         fixLabel: "Mark as decorative",
       });
     }
-    // W-791: a spin or pulse loops forever; reduced-motion visitors are spared, but everyone
-    // else gets motion they can't pause (WCAG 2.2.2) unless it is essential, like a spinner.
-    const looping = [node.style, ...Object.values(node.devices ?? {})].some((st) => {
-      const anim = (st as { iconAnimation?: { type?: unknown } } | undefined)?.iconAnimation;
-      return anim?.type === "spin" || anim?.type === "pulse";
+    // W-791: motion visitors can't pause breaks WCAG 2.2.2 past 5 seconds, unless it is essential.
+    // W-848: a spin or pulse now stops by itself after about 5 s, so only one whose single run
+    // (a pulse's there and back) is longer than that is still flagged.
+    // W-882: an animation from a class counts too, and the element's own style wins over it.
+    const tooLong = [effectiveStyle(node, design), ...deviceStyles(node, design)].some((st) => {
+      const anim = (
+        st as { iconAnimation?: { type?: unknown; duration?: unknown; loop?: unknown } } | undefined
+      )?.iconAnimation;
+      if (anim?.type !== "spin" && anim?.type !== "pulse") return false;
+      // W-853: Loop forever is motion without end, so it is flagged like before W-848.
+      if (anim.loop === true) return true;
+      const ms = typeof anim.duration === "number" ? anim.duration : 0;
+      return iconAnimationRuns(anim.type, ms) * ms > ICON_ANIMATION_LIMIT_MS;
     });
-    if (looping) {
+    if (tooLong) {
       add({
         nodeId: node.id,
         rule: "motion",
         severity: "warning",
         message:
-          "This icon animates without end and visitors can't pause it. Keep it only if the motion is essential, such as a loading spinner.",
+          "This icon animates for more than 5 seconds and visitors can't pause it. Shorten the duration, or keep it only if the motion is essential.",
       });
     }
     // W-403: with extra sizes but no Width, the main image is left out of srcset, so wide screens

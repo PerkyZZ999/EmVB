@@ -7,7 +7,7 @@ import { layoutScripts, nodeScript, typeMayAddScript } from "./scripts.ts";
 
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const heading = (id: string, text = "Hi") =>
@@ -163,7 +163,7 @@ describe("W-671: parts the canvas loaded are weighed", () => {
   test("an image inside a synced section or Loop Item part counts", () => {
     const wrap = (children: unknown[]) =>
       ({
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: { id: "root0001", type: "container", props: {}, children },
       }) as unknown as Layout;
     const withParts = wrap([
@@ -186,7 +186,7 @@ describe("W-671: parts the canvas loaded are weighed", () => {
   test("W-674: a part id with stray spaces is found, like the renderer does", () => {
     const wrap = (children: unknown[]) =>
       ({
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: { id: "root0001", type: "container", props: {}, children },
       }) as unknown as Layout;
     const withParts = wrap([

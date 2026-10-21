@@ -6,13 +6,13 @@ A visual page builder plugin for [EmDash CMS](https://github.com/emdash-cms/emda
 
 **Website:** <https://emvb.dev>.
 
-**Status:** 0.7.0 is the current npm release (a full pass over the editor's look and about 310 fixes from overnight testing since 0.6.0, including the never-published 0.6.5; many of them keep keyboard focus where it belongs). See the [changelog](CHANGELOG.md). Layout schema 16 (images may carry an `edit` record); design schema 15.
+**Status:** 0.8.0 is the current npm release (saved sections, Loop forever for icon animations, image editor Recipe and Zoom, and fixes from adversarial testing since 0.7.0). See the [changelog](CHANGELOG.md). Layout schema 17 (images may carry an `edit` record; icon animations may `loop`); design schema 16.
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
 ## Features
 
-- **Editor:** drag, drop and nest elements; edit text on the canvas; copy, paste, undo and redo; preview desktop, tablet and mobile.
+- **Editor:** drag, drop and nest elements; edit text on the canvas; copy, paste, undo and redo; preview desktop, tablet and mobile; save any element as a section and reuse it from **My sections**, as a copy or synced (see [the saved sections guide](docs/guides/saved-sections.md)).
 - **Elements:** containers (flexbox or CSS Grid), sections, headings, text, lists, links, buttons (with an optional icon), images (link, caption, focal point, extra sizes for `srcset`, and an in-admin **image editor** for library pictures: crop, adjust, filters, curves, blur, metadata; see [the image editor guide](docs/guides/image-editor.md)), video, icons (a library of about 14,400 from Lucide, Font Awesome Free, Tabler and Remix, shipped in [`@perkyzz/emvb-icons`](packages/emvb-icons/); see [the icon library guide](docs/guides/icon-library.md)), dividers, spacers, tabs, accordions, a table of contents, menus, popups, floating bars, forms, loops, pagination, and post fields for theme templates.
 - **Styling:** Hover, Focus and Active states with transitions, per-device styles and hide on device, container queries, per-element text direction, backgrounds (image, video, gradient, overlay), entrance animations and scroll motion, custom attributes, print styles.
 - **Accessibility check:** a score and a list of issues in the editor (alt text, headings, link and field names, contrast including opacity, new-tab links, landmarks), most with a one-click fix.

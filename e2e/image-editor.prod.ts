@@ -51,7 +51,7 @@ test.afterAll(async () => {
 });
 
 const imagePage = (props: Record<string, unknown>) => ({
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",
@@ -123,7 +123,12 @@ async function axeProblems(page: Page) {
     .map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`);
 }
 
-const canvasShot = (page: Page) => page.locator("[data-emvb-image-canvas]").screenshot();
+// W-861: the Zoom controls sit over the canvas; the comparison is about the picture, so they are
+// masked (their own anti-aliasing can differ by a pixel after a colour-scheme switch).
+const canvasShot = (page: Page) =>
+  page
+    .locator("[data-emvb-image-canvas]")
+    .screenshot({ mask: [page.locator("[data-emvb-image-zoom]")] });
 /** Reset all, so each tool's screenshot shows only its own edit. */
 const resetAll = async (page: Page) => {
   const reset = page.locator("[data-emvb-image-reset]");
@@ -314,6 +319,16 @@ test("tone tools (W-484): adjust, effects, filters, curves and blur change the p
   await page.waitForTimeout(600);
   const original = await canvasShot(page);
   const undo = page.locator("[data-emvb-image-undo]");
+  // W-872: the active tab's underline sits below its icon and label, not through them.
+  const underline = await page.evaluate(() => {
+    const root = document.querySelector('.emvb-ie-tabs[data-variant="underline"]');
+    const label = root?.querySelector('[role="tab"][aria-selected="true"] .emvb-ie-tab-label');
+    const list = root?.querySelector('[role="tablist"]');
+    const line = [...(list?.children ?? [])].find((c) => c.getAttribute("role") !== "tab");
+    if (!label || !line) return null;
+    return line.getBoundingClientRect().top - label.getBoundingClientRect().bottom;
+  });
+  expect(underline ?? -1).toBeGreaterThanOrEqual(0);
   await expect(undo).toBeDisabled();
   expect(await axeProblems(page)).toEqual([]);
 

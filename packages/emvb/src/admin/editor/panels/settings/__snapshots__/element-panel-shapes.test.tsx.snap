@@ -5438,7 +5438,7 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Title"
+      "Post title"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -5449,7 +5449,7 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Title"
+      "Post title"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -5494,7 +5494,7 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Title"
+      "Post title"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -5505,7 +5505,7 @@ exports[`element panel markup (W-021, W-086 M16) post-title renders the same con
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Title"
+      "Post title"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -5667,7 +5667,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Excerpt"
+      "Post excerpt"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -5678,7 +5678,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Excerpt"
+      "Post excerpt"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -5835,7 +5835,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Excerpt"
+      "Post excerpt"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -5846,7 +5846,7 @@ exports[`element panel markup (W-021, W-086 M16) post-excerpt renders the same c
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Excerpt"
+      "Post excerpt"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6008,7 +6008,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Content"
+      "Post content"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6019,7 +6019,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Content"
+      "Post content"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6176,7 +6176,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Content"
+      "Post content"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6187,7 +6187,7 @@ exports[`element panel markup (W-021, W-086 M16) post-content renders the same c
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Content"
+      "Post content"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6349,7 +6349,7 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Image"
+      "Post image"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6360,7 +6360,7 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Image"
+      "Post image"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6404,7 +6404,7 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Image"
+      "Post image"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6415,7 +6415,7 @@ exports[`element panel markup (W-021, W-086 M16) post-image renders the same con
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Image"
+      "Post image"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6577,7 +6577,7 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Link"
+      "Post link"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6588,7 +6588,7 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Link"
+      "Post link"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6637,7 +6637,7 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Link"
+      "Post link"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6648,7 +6648,7 @@ exports[`element panel markup (W-021, W-086 M16) post-link renders the same cont
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Link"
+      "Post link"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6810,7 +6810,7 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Date"
+      "Post date"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6821,7 +6821,7 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Date"
+      "Post date"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -6978,7 +6978,7 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Date"
+      "Post date"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -6989,7 +6989,7 @@ exports[`element panel markup (W-021, W-086 M16) post-date renders the same cont
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Date"
+      "Post date"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -7151,7 +7151,7 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Author"
+      "Post author"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -7162,7 +7162,7 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Author"
+      "Post author"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -7319,7 +7319,7 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Post Author"
+      "Post author"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -7330,7 +7330,7 @@ exports[`element panel markup (W-021, W-086 M16) post-author renders the same co
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Post Author"
+      "Post author"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -7566,14 +7566,14 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
           "Image field"
       input.emvb-field id="id-18" data-emvb-field="imageField" value="" aria-labelledby="id-17" aria-describedby="id-19"
       p id="id-19"
-        "The field Post Image shows, such as photo. Leave it empty for the featured image."
+        "The field Post image shows, such as photo. Leave it empty for the featured image."
     div
       label id="id-20" for="id-21"
         span
           "Excerpt field"
       input.emvb-field id="id-21" data-emvb-field="excerptField" value="" aria-labelledby="id-20" aria-describedby="id-22"
       p id="id-22"
-        "The field Post Excerpt shows, such as role. Leave it empty for the excerpt."
+        "The field Post excerpt shows, such as role. Leave it empty for the excerpt."
     div
       label id="id-23" for="id-24"
         span
@@ -7585,10 +7585,10 @@ exports[`element panel markup (W-021, W-086 M16) loop renders the same content a
       div
         label id="id-26" for="id-27"
           span
-            "Loop Item part id"
+            "Loop item part id"
         input.emvb-field.emvb-mono id="id-27" value="" aria-labelledby="id-26"
       p.emvb-helper
-        "No Loop Item theme parts yet. Paste an id, or"
+        "No Loop item theme parts yet. Paste an id, or"
         a href="/_emdash/admin/plugins/emvb/theme"
           "create one in Theme Builder"
         "."
@@ -8711,7 +8711,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Div Block"
+      "Div block"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -8722,7 +8722,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Div Block"
+      "Div block"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."
@@ -8882,7 +8882,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
   div.emvb-element-header
     svg aria-hidden="true"
     h2.emvb-panel-title
-      "Div Block"
+      "Div block"
   nav.emvb-breadcrumb aria-label="Element path"
     button.emvb-breadcrumb-part type="button"
       "Page"
@@ -8893,7 +8893,7 @@ exports[`element panel markup (W-021, W-086 M16) div-block renders the same cont
     span aria-hidden="true"
       "›"
     span.emvb-breadcrumb-current aria-current="location"
-      "Div Block"
+      "Div block"
   p.emvb-inline-error role="alert"
     svg aria-hidden="true"
     "Can't go there."

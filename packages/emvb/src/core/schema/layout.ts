@@ -17,7 +17,7 @@ import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style
  * (`{ angle, from, to }`) become a linear gradient on read.
  * 11 since W-156 and W-157 (D-045): the layout Section element and an editor-only node label.
  */
-export const LAYOUT_SCHEMA_VERSION = 16;
+export const LAYOUT_SCHEMA_VERSION = 17;
 
 export const NodeId = z
   .string()

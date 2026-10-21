@@ -8,7 +8,7 @@ import { uploadEmvbPixel } from "./support/media.ts";
 const PIXEL = path.join(process.cwd(), "e2e/fixtures/emvb-pixel.png");
 
 const imageLayout = () => ({
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",

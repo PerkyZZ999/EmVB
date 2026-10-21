@@ -85,7 +85,7 @@ test("W-729: Keyboard shortcuts marks its portal for reduced motion and retains 
   const id = await createPage(
     request,
     "Dialog motion",
-    { schemaVersion: 16, root: { id: "root0001", type: "container", props: {}, children: [] } },
+    { schemaVersion: 17, root: { id: "root0001", type: "container", props: {}, children: [] } },
     `dialog-motion-${unique()}`,
   );
   await openEditor(page, id);
@@ -111,7 +111,7 @@ for (const preference of ["no-preference", "reduce"] as const) {
       request,
       "Utility dialog motion",
       {
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: {
           id: "root0001",
           type: "container",

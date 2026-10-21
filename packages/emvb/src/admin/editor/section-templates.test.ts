@@ -4,7 +4,7 @@ import type { Fetcher } from "../api.ts";
 import { loadPartTemplates, loadSectionTemplates } from "./section-templates.ts";
 
 const layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: { id: "root0001", type: "container", props: {}, children: [] },
 } as Layout;
 
@@ -27,7 +27,7 @@ describe("part templates on the canvas (W-658)", () => {
   });
   const withRoot = (children: unknown[]) =>
     ({
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: { id: "root0001", type: "container", props: {}, children },
     }) as unknown as Layout;
 

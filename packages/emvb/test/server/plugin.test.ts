@@ -126,7 +126,7 @@ describe("design routes", () => {
         success: true,
         data: {
           design: {
-            schemaVersion: 15,
+            schemaVersion: 16,
             variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
             classes: [],
           },
@@ -149,7 +149,7 @@ describe("design routes", () => {
     expect(before.body["data"]).toMatchObject({ status: "empty" });
     const draft = await t.route("design/draft", { user: editor });
     expect(draft.body["data"]).toEqual({
-      design: { ...design(), schemaVersion: 15 },
+      design: { ...design(), schemaVersion: 16 },
       published: emptyDesign(),
       revision: draftRevision,
       publishedRevision: null,
@@ -163,7 +163,7 @@ describe("design routes", () => {
     const revision = (published.body["data"] as { revision: string }).revision;
     const read = await t.route("design");
     expect(read.body["data"]).toEqual({
-      design: { ...design(), schemaVersion: 15 },
+      design: { ...design(), schemaVersion: 16 },
       revision,
       status: "ok",
     });
@@ -241,7 +241,7 @@ describe("design routes", () => {
     } as never;
     expect(await designRoute.handler(ctx)).toEqual({
       design: {
-        schemaVersion: 15,
+        schemaVersion: 16,
         variables: { colors: [], fonts: [], fontSizes: [], spacings: [] },
         classes: [],
       },

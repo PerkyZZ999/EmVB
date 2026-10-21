@@ -48,7 +48,7 @@ describe("more video link shapes (W-215)", () => {
 
   test("the hash reaches the page's iframe", () => {
     const layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

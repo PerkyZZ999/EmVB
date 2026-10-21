@@ -8,7 +8,7 @@ import { cleanup, mount, rerender, settle } from "../../../../test/dom/mount.ts"
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",
@@ -290,7 +290,7 @@ describe("SiteStylesDrawer managers (W-071)", () => {
       />,
     );
     expect(document.querySelector("[data-emvb-manager-label]")?.textContent).toContain(
-      "Variables Manager",
+      "Variables manager",
     );
     const row = document.querySelector(
       '[data-emvb-var-id="brand"] .emvb-site-item-main',
@@ -326,7 +326,7 @@ describe("SiteStylesDrawer managers (W-071)", () => {
     ) as HTMLElement | undefined;
     await act(async () => classesTab?.click());
     expect(document.querySelector("[data-emvb-manager-label]")?.textContent).toContain(
-      "Classes Manager",
+      "Classes manager",
     );
     expect(document.querySelector("[data-emvb-cascade-help]")?.textContent).toMatch(
       /lower in this list wins/,
@@ -400,7 +400,7 @@ describe("deleting a variable from Site styles", () => {
       ],
     };
     const page: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -479,7 +479,7 @@ describe("deleting what this page doesn't use (W-251)", () => {
       },
     };
     const page: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: { id: "root0001", type: "container", props: {}, children: [] },
     };
     await mount(
@@ -720,4 +720,38 @@ test("W-841: deleting a class lands focus on the next row, then New; Cancel goes
   await ask("Tint");
   await answer("Delete class");
   expect(document.activeElement?.textContent).toBe("New");
+});
+
+test("W-849: the inline delete confirmation takes focus on Cancel when it opens", async () => {
+  await mount(
+    <SiteStylesDrawer
+      design={{ ...emptyDesign(), classes: [{ id: "card", name: "Card", style: {} }] }}
+      layout={layout}
+      onDesignChange={async () => undefined}
+      onLayoutChange={() => undefined}
+      onClose={() => undefined}
+    />,
+  );
+  await act(async () =>
+    [...document.querySelectorAll<HTMLElement>('[role="tab"]')]
+      .find((tab) => tab.textContent === "Classes")
+      ?.click(),
+  );
+  await act(async () =>
+    document.querySelector<HTMLButtonElement>('[aria-label="Actions for Card"]')?.click(),
+  );
+  await settle();
+  const item = [...document.querySelectorAll<HTMLElement>('[role="menuitem"]')].find(
+    (el) => el.textContent === "Delete",
+  );
+  await act(async () => item?.click());
+  await settle();
+  const dialog = document.querySelector<HTMLElement>("[data-emvb-site-confirm]");
+  const focused = document.activeElement;
+  const title = document.getElementById(dialog?.getAttribute("aria-labelledby") ?? "");
+  expect([
+    focused?.textContent ?? "none",
+    dialog?.contains(focused) === true,
+    title?.textContent ?? "unlabelled",
+  ]).toEqual(["Cancel", true, "Delete Card?"]);
 });

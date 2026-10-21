@@ -29,11 +29,11 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "header", label: "Headers" },
   { value: "footer", label: "Footers" },
   { value: "error_404", label: "Error 404" },
-  { value: "search_results", label: "Search Results" },
-  { value: "single_page", label: "Single Page" },
-  { value: "single_post", label: "Single Post" },
+  { value: "search_results", label: "Search results" },
+  { value: "single_page", label: "Single page" },
+  { value: "single_post", label: "Single post" },
   { value: "archive", label: "Archive" },
-  { value: "loop_item", label: "Loop Item" },
+  { value: "loop_item", label: "Loop item" },
   { value: "section", label: "Sections" },
   { value: "page_template", label: "Page templates" },
   { value: "popup", label: "Popups" },
@@ -80,8 +80,10 @@ function FilterTabs({
     refs.current.get(next)?.focus();
   };
 
+  const rowRef = useEdgeHints<HTMLDivElement>();
   return (
     <div
+      ref={rowRef}
       className="emvb-theme-filters"
       role="tablist"
       aria-label="Filter by type"
@@ -238,4 +240,30 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
       />
     </>
   );
+}
+
+/**
+ * W-863: marks which edges of a scrolling row hide more tabs (data-more-start / data-more-end),
+ * so browsers without scroll-driven animations still get the UX-038 edge fade.
+ */
+export function useEdgeHints<T extends HTMLElement>() {
+  const ref = React.useRef<T>(null);
+  React.useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const update = () => {
+      const max = node.scrollWidth - node.clientWidth;
+      node.toggleAttribute("data-more-start", max > 1 && node.scrollLeft > 1);
+      node.toggleAttribute("data-more-end", max > 1 && node.scrollLeft < max - 1);
+    };
+    update();
+    node.addEventListener("scroll", update, { passive: true });
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(node);
+    return () => {
+      node.removeEventListener("scroll", update);
+      observer?.disconnect();
+    };
+  }, []);
+  return ref;
 }

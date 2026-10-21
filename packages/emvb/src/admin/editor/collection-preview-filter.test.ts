@@ -28,7 +28,7 @@ describe("W-667: collection Loops inside parts on the canvas", () => {
   test("a Loop inside a Loop Item or section part is found next to the page's own", () => {
     const wrap = (children: unknown[]) =>
       ({
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: { id: "root0001", type: "container", props: {}, children },
       }) as unknown as Layout;
     const loop = (id: string, collection: string) => ({

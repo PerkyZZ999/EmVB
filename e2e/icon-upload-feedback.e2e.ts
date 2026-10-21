@@ -15,7 +15,7 @@ for (const width of [1440, 1024]) {
       request,
       "Icon upload feedback",
       {
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: {
           id: "root0001",
           type: "container",

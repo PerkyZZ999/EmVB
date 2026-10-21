@@ -1,6 +1,6 @@
 ---
 name: emvb-page-builder
-description: Build, restyle and review EmVB visual pages on an EmDash site through the EmVB MCP tools (list_pages, get_layout, create_page, add_element, update_element, apply_section_recipe, update_site_styles, get_accessibility_findings). Use when asked to create, change, restyle, review or fix the accessibility of pages on a site built with EmVB or EmDash, including landing pages, menus, portfolios and pages with tabs, accordions, forms or post loops.
+description: Build, restyle and review EmVB visual pages on an EmDash site through the EmVB MCP tools (list_pages, get_layout, create_page, add_element, update_element, apply_section_recipe, insert_saved_section, update_site_styles, get_accessibility_findings). Use when asked to create, change, restyle, review or fix the accessibility of pages on a site built with EmVB or EmDash, including landing pages, menus, portfolios and pages with tabs, accordions, forms or post loops.
 ---
 
 # EmVB page builder
@@ -29,6 +29,10 @@ instructions.
    `recipes` or `apply_section_recipe`), then replace every placeholder with real copy using
    `update_element`. Start with "hero" so its heading is the page's one h1. For anything the
    recipes don't cover, `add_element` takes a whole section with nested `children` in one call.
+   The site's own saved sections come first when one fits: `list_saved_sections`, then
+   `insert_saved_section` (it adds the classes the section uses to the styles draft; a class whose
+   look changed comes in as a numbered copy such as "Card 2", never overwriting the site's).
+   `save_section` saves an element for reuse; `delete_saved_section` only when the person asks.
 6. **Check accessibility** with `get_accessibility_findings` after building and fix every
    error. Contrast findings that share one colour: change that colour variable once.
 7. **Don't publish** unless the person asked and `publish_page` is available. End with
@@ -60,6 +64,8 @@ instructions.
 - `REFUSED` on a link or an SVG: the page would drop it (a `javascript:` link, `onload` or a
   script in SVG markup); the message gives the reason. A class or variable name another one
   already has is refused too. A write that changes nothing saves no new version.
+- `REFUSED` on `insert_saved_section`: the place can't take the section, or the site is at 100
+  classes; nothing was added to the styles draft. Pick another `parentId` or ask the person.
 - `PUBLISH_DISABLED`: leave the draft for review.
 - `FORBIDDEN`: agent access is off on the site, or the token can't use EmVB; tell the person.
 - `NOT_SET_UP`: an admin must click "Set up EmVB" in the EmDash admin first; tell the person.

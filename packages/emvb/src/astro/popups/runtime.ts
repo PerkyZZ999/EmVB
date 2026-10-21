@@ -81,10 +81,11 @@ function isValidSelector(selector: string): boolean {
   }
 }
 
-function canOpen(config: PopupConfig): boolean {
+/** W-846 (D-055): a click is the visitor asking, so "Show at most" neither stops nor counts it. */
+function canOpen(config: PopupConfig, byClick: boolean): boolean {
   const advanced = config.triggers.advanced;
   if (!matchesPopupDevices(advanced, window.innerWidth)) return false;
-  if (!withinShowTimes(advanced, timesShown(config.id))) return false;
+  if (!byClick && !withinShowTimes(advanced, timesShown(config.id))) return false;
   return true;
 }
 
@@ -240,10 +241,10 @@ function bindA11y(ctrl: Controller): void {
 }
 
 /** Opens a closed popup and counts the show; a trigger while it's open does neither (W-092). */
-function openOnce(ctrl: Controller, config: PopupConfig): void {
-  if (ctrl.opened || !canOpen(config)) return;
+function openOnce(ctrl: Controller, config: PopupConfig, byClick: boolean): void {
+  if (ctrl.opened || !canOpen(config, byClick)) return;
   ctrl.open();
-  bumpTimesShown(config.id);
+  if (!byClick) bumpTimesShown(config.id);
 }
 
 const IDLE_EVENTS = ["mousemove", "mousedown", "keydown", "touchstart", "scroll"] as const;
@@ -314,7 +315,8 @@ const ARM: { [T in OpenTrigger["type"]]: Arm<T> } = {
 
 function registerTrigger(ctrl: Controller, config: PopupConfig, trigger: OpenTrigger): void {
   const arm = (ARM as Record<string, Arm<OpenTrigger["type"]> | undefined>)[trigger.type];
-  arm?.(() => openOnce(ctrl, config), trigger as never);
+  const byClick = trigger.type === "click";
+  arm?.(() => openOnce(ctrl, config, byClick), trigger as never);
 }
 
 /**

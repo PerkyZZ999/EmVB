@@ -13,7 +13,7 @@ test("W-724: publishing site styles shows stable pending feedback and recovers f
     request,
     "Style publish feedback",
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: { id: "root0001", type: "container", props: {}, children: [] },
     },
     `style-feedback-${unique()}`,

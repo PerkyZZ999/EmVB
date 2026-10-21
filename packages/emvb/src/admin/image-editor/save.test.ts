@@ -2,6 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { ImageEdit } from "../../core/index.ts";
 import {
+  parseRecipeFile,
+  recipeFileText,
   buildImageEdit,
   cappedWidth,
   editedFileName,
@@ -175,5 +177,23 @@ describe("the edit record (W-485)", () => {
     expect(savedRecipe({ edit: { ...built.edit, v: 2 } })).toBeNull();
     expect(savedRecipe({ edit: { ...built.edit, recipe: { version: 1 } } })).toBeNull();
     expect(savedRecipe({})).toBeNull();
+  });
+});
+
+describe("W-862: recipe files", () => {
+  const recipe = { version: 1 as const, lights: { exposure: 0.2 } };
+  test("a downloaded recipe loads back to the same recipe", () => {
+    expect(parseRecipeFile(recipeFileText(recipe))).toEqual({ ok: true, recipe });
+  });
+  test("a bare photocn recipe loads too", () => {
+    expect(parseRecipeFile(JSON.stringify(recipe))).toEqual({ ok: true, recipe });
+  });
+  test("anything else is refused with a plain message", () => {
+    for (const text of ["not json", "{}", '{"recipe":{"version":2}}', '{"version":1,"evil":1}']) {
+      expect(parseRecipeFile(text)).toEqual({
+        ok: false,
+        error: "This file isn't an image edit recipe.",
+      });
+    }
   });
 });

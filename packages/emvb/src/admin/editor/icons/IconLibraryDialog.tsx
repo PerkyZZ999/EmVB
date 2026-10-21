@@ -12,6 +12,7 @@ import { BUTTON, SOLID_PRIMARY, UI_CSS } from "../../ui.ts";
 import { ALL_ICONS, ICON_SETS, UPLOADS, type LibraryIcon, type loadIconSet } from "./library.ts";
 import { fmt, useIconLibrary } from "./use-icon-library.ts";
 import { isCommitEnter } from "../ime.ts";
+import { DialogCloseButton } from "../DialogCloseButton.tsx";
 
 /** Grid geometry, in px. Tiles stretch to fill the row; this is their narrowest. */
 const TILE_MIN_WIDTH = 96;
@@ -535,13 +536,7 @@ function IconLibrary({
               </Button>
             </>
           )}
-          <Dialog.Close
-            render={(props) => (
-              <Button {...props} variant="secondary" className={BUTTON}>
-                Close
-              </Button>
-            )}
-          />
+          <DialogCloseButton>Close</DialogCloseButton>
           <Button
             variant="primary"
             className={`${BUTTON} ${SOLID_PRIMARY}`}

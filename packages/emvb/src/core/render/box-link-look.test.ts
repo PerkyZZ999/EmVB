@@ -8,7 +8,7 @@ describe("W-797 a linked box keeps its content's look", () => {
   for (const type of ["container", "div-block", "flexbox", "grid"] as const) {
     test(`a linked ${type} is an a.emvb-box-link and its page ships the reset`, () => {
       const layout = {
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: {
           id: "root0001",
           type: "container",
@@ -36,7 +36,7 @@ describe("W-797 a linked box keeps its content's look", () => {
   test("a box that stays a div gets no link class", () => {
     const { html } = renderPage(
       {
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: {
           id: "root0001",
           type: "container",

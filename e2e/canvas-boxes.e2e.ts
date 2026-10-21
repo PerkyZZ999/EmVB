@@ -15,7 +15,7 @@ const box = (id: string, style?: Record<string, unknown>) => ({
 });
 
 const page1 = (children: unknown[]) => ({
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 
@@ -42,7 +42,7 @@ test("an empty box keeps the min-height its user set (W-145)", async ({ page, re
   await expect.poll(() => height(page, "none0001")).toBe(48);
 });
 
-test("a Div Block added from the Add panel is visible and selectable while empty (W-146)", async ({
+test("a Div block added from the Add panel is visible and selectable while empty (W-146)", async ({
   page,
   request,
 }) => {
@@ -79,7 +79,7 @@ test("a Div Block added from the Add panel is visible and selectable while empty
     await overlay(page).getByRole("tab", { name: "Layers" }).click();
     await overlay(page).locator(`[data-emvb-layer="${parent}"] .emvb-layer-select`).click();
     await added.click();
-    await expect(overlay(page).locator(".emvb-overlay-label")).toContainText("Div Block");
+    await expect(overlay(page).locator(".emvb-overlay-label")).toContainText("Div block");
   }
 });
 

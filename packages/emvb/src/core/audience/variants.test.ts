@@ -15,7 +15,7 @@ const heading = (id: string, text: string, variant?: LayoutNode["variant"]) =>
   }) as LayoutNode;
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const ab = page(
@@ -86,7 +86,7 @@ describe("edge A/B variants (W-312)", () => {
 test("a test missing one arm is not run and its remaining arm shows to everyone (W-625)", () => {
   const lonePage = (arm: "a" | "b") =>
     ({
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

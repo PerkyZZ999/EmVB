@@ -1,6 +1,7 @@
-import { Button, Dialog } from "@cloudflare/kumo";
-import { SHORTCUTS } from "./shortcuts.ts";
-import { BUTTON } from "../ui.ts";
+import * as React from "react";
+import { Dialog } from "@cloudflare/kumo";
+import { keyCombos, SHORTCUTS } from "./shortcuts.ts";
+import { DialogCloseButton } from "./DialogCloseButton.tsx";
 
 export function ShortcutsDialog({
   open,
@@ -19,7 +20,20 @@ export function ShortcutsDialog({
               {SHORTCUTS.map(({ action, keys }) => (
                 <tr key={action}>
                   <td>{action}</td>
-                  <td>{keys}</td>
+                  {/* W-864: key boxes, as the command palette's tips; the text still reads "Ctrl/Cmd+K". */}
+                  <td>
+                    {keyCombos(keys).map(({ before, keys: combo }, i) => (
+                      <React.Fragment key={i}>
+                        {before}
+                        {combo.map((key, k) => (
+                          <React.Fragment key={k}>
+                            {k > 0 ? "+" : null}
+                            <kbd>{key}</kbd>
+                          </React.Fragment>
+                        ))}
+                      </React.Fragment>
+                    ))}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -29,13 +43,7 @@ export function ShortcutsDialog({
             a dialog, only Ctrl/Cmd+S fires.
           </p>
           <div className="emvb-dialog-actions">
-            <Dialog.Close
-              render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
-                  Close
-                </Button>
-              )}
-            />
+            <DialogCloseButton>Close</DialogCloseButton>
           </div>
         </div>
       </Dialog>

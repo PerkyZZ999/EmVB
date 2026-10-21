@@ -22,12 +22,14 @@ export const FEATURE_CSS = `
 .emvb-bind-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; align-items: center; }
 .emvb-bind-row > .emvb-bind-label { grid-column: 1 / -1; font-size: 12px; color: var(--text-color-kumo-subtle); }
 .emvb-bind-row > .emvb-panel-select:last-child { grid-column: 1 / -1; }
+/* W-867: a row with one text field (Countries, Segments, Time zone) gives it the full width, as its selects. */
+.emvb-bind-row > .emvb-bind-label + .emvb-field:last-child { grid-column: 1 / -1; }
 .emvb-bind-live { grid-column: 1 / -1; margin: 0; font-size: 12px; color: var(--text-color-kumo-default); overflow-wrap: anywhere; }
 .emvb-bind-live > b { font-weight: 600; }
 .emvb-bind-outside { grid-column: 1 / -1; display: grid; gap: 4px; }
 .emvb-bind-outside > label { display: flex; gap: 6px; align-items: center; font-size: 12px; }
 .emvb-bind-warning { margin: 0; padding: 6px 8px; border-radius: 6px; font-size: 12px; background: var(--color-kumo-warning-tint); color: var(--text-color-kumo-default); }
-.emvb-js-badge { margin-left: auto; padding: 0 4px; border-radius: 4px; font-size: 10px; font-weight: 700; line-height: 16px; background: var(--color-kumo-warning-tint); color: var(--text-color-kumo-default); }
+.emvb-js-badge { margin-left: auto; padding: 0 4px; border-radius: 4px; font-size: 10px; font-weight: 600; line-height: 16px; background: var(--color-kumo-warning-tint); color: var(--text-color-kumo-default); }
 .emvb-element-tile { position: relative; }
 .emvb-element-tile > .emvb-js-badge { position: absolute; top: 4px; right: 4px; }
 .emvb-perf-bars { display: grid; gap: 8px; margin: 12px 0; padding: 0; list-style: none; }
@@ -148,6 +150,14 @@ export const FEATURE_CSS = `
 .emvb-recipe-tile:hover, .emvb-recipe-tile:focus-visible { border-color: var(--color-kumo-brand); }
 .emvb-recipe-name { font-weight: 600; font-size: 13px; }
 .emvb-recipe-desc { font-size: 12px; color: var(--text-color-kumo-subtle); }
+/* W-876: My sections, names only (D-060). */
+.emvb-saved-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.emvb-saved-row { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.emvb-saved-name { flex: 1 1 auto; min-width: 0; text-align: start; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--color-kumo-line); background: var(--color-kumo-base, transparent); cursor: pointer; font: inherit; font-size: 13px; color: inherit; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.emvb-saved-name:hover:not(:disabled), .emvb-saved-name:focus-visible { border-color: var(--color-kumo-brand); }
+.emvb-saved-name:disabled { cursor: not-allowed; color: var(--text-color-kumo-subtle); }
+.emvb-saved-row .emvb-saved-rename { flex: 1 1 auto; }
+.emvb-saved-error { display: grid; gap: 6px; justify-items: start; }
 .emvb-motion-effect { display: grid; grid-template-columns: 1fr 1fr auto; gap: 6px; align-items: end; }
 .emvb-motion-name { grid-column: 1 / -1; font-size: 12px; font-weight: 600; }
 /* UX-092: the fixed theme part type, its label and value on one line */

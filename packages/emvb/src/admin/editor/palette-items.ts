@@ -18,6 +18,9 @@ export type PaletteActions = {
   insert: (type: ElementType) => void;
   /** Adds a section recipe (W-320). */
   insertRecipe?: (id: string) => void;
+  /** My sections (W-876), inserted by id. */
+  savedSections?: readonly { id: string; name: string; damaged?: true }[];
+  insertSaved?: (id: string) => void;
   select: (id: string) => void;
   applyClass: (nodeId: string, classId: string) => void;
   actions: { id: string; label: string; hint?: string; keywords?: string; run: () => void }[];
@@ -91,6 +94,20 @@ export function paletteItems(ctx: PaletteActions): PaletteItem[] {
         hint: "Recipe",
         keywords: `recipe section block template ${recipe.description}`,
         run: () => insertRecipe(recipe.id),
+      });
+    }
+  }
+  const insertSaved = ctx.insertSaved;
+  if (insertSaved) {
+    for (const section of ctx.savedSections ?? []) {
+      if (section.damaged) continue;
+      items.push({
+        id: `saved:${section.id}`,
+        group: "Insert",
+        label: `Insert ${section.name}`,
+        hint: "My sections",
+        keywords: "my sections saved section block template segment",
+        run: () => insertSaved(section.id),
       });
     }
   }

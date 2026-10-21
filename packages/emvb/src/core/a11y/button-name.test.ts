@@ -5,7 +5,7 @@ import { auditPage } from "./audit.ts";
 
 const page = (node: LayoutNode): Layout =>
   ({
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",

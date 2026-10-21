@@ -42,6 +42,8 @@ export type CommandRunners = {
   setDevice?: (device: PopupDevice) => void;
   openShortcuts?: () => void;
   rename?: () => void;
+  /** Opens Save as section for an element (W-876). */
+  saveSection?: (id: string) => void;
   /** Set when the selection is an Image element the image editor can open (W-486). */
   editImage?: () => void;
 };
@@ -115,6 +117,12 @@ const SPECS: readonly Spec[] = [
     surfaces: ["layers", "overlay", "palette"],
     danger: true,
   },
+  {
+    id: "save-section",
+    labels: { layers: "Save as section…", palette: "Save selected element as a section…" },
+    keywords: "my sections saved reuse synced template block segment",
+    surfaces: ["layers", "palette"],
+  },
   { id: "move-up", labels: { layers: "Move up" }, surfaces: ["layers"] },
   { id: "move-down", labels: { layers: "Move down" }, surfaces: ["layers"] },
   {
@@ -131,7 +139,7 @@ const SPECS: readonly Spec[] = [
   },
   {
     id: "wrap-div",
-    labels: { palette: "Wrap in Div Block" },
+    labels: { palette: "Wrap in Div block" },
     keywords: "wrap box",
     surfaces: ["palette"],
   },
@@ -196,6 +204,7 @@ const ORDER: Record<CommandSurface, readonly string[]> = {
     "paste",
     "paste-inside",
     "duplicate",
+    "save-section",
     "copy-style",
     "paste-style",
     "move-up",
@@ -214,6 +223,7 @@ const ORDER: Record<CommandSurface, readonly string[]> = {
     "redo",
     "edit-image",
     "duplicate",
+    "save-section",
     "delete",
     "deselect",
     "site-styles",
@@ -237,6 +247,7 @@ function shown(id: string, input: CommandInput): boolean {
   const clip = !!input.runners.copy;
   if (id === "rename") return !!input.runners.rename;
   if (id === "edit-image") return !!input.runners.editImage;
+  if (id === "save-section") return !!input.runners.saveSection && input.canDuplicate;
   if (id === "paste-inside") return clip && input.isParent;
   if (id === "paste") return clip && (input.surface !== "layers" || !input.isRoot);
   if (CLIP_IDS.has(id)) return clip;
@@ -301,6 +312,9 @@ export function runCommand(runners: CommandRunners, id: string, targetId: string
       return;
     case "duplicate":
       if (targetId) runners.duplicate?.(targetId);
+      return;
+    case "save-section":
+      if (targetId) runners.saveSection?.(targetId);
       return;
     case "delete":
       if (targetId) runners.remove?.(targetId);

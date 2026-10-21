@@ -272,6 +272,7 @@ export {
   canDrop,
   duplicateNode,
   wrapNode,
+  wrapInThemeSection,
   WRAP_TYPES,
   type WrapType,
   createVariantB,
@@ -527,3 +528,22 @@ export {
 } from "./image-edit/schema.ts";
 export { summarizeImageEdit } from "./image-edit/summary.ts";
 export { boxLinkHeldBack } from "./render/extras.ts";
+export {
+  classMergeNotice,
+  insertSavedSection,
+  MAX_SAVED_SECTIONS,
+  mergeSectionClasses,
+  prepareSavedSection,
+  readSavedSection,
+  SAVED_SECTION_NAME_MAX,
+  SAVED_SECTION_REASONS,
+  savedSectionName,
+  savedSectionRecord,
+  snapshotSection,
+  type ClassMerge,
+  type PreparedSection,
+  type SavedSection,
+  type SavedSectionRecord,
+  type SavedSectionSummary,
+  syncedPartLayout,
+} from "./saved-sections.ts";

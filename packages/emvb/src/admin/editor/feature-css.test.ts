@@ -56,3 +56,9 @@ test("W-810: the command palette has a fixed width, so results don't move it sid
     ".emvb-palette.emvb-palette.emvb-palette { width: min(564px, calc(100vw - 32px)); }",
   );
 });
+
+test("W-867: a Visitors row with a single text field spans the full panel width", () => {
+  expect(FEATURE_CSS).toMatch(
+    /\.emvb-bind-row > \.emvb-bind-label \+ \.emvb-field:last-child \{ grid-column: 1 \/ -1; \}/,
+  );
+});

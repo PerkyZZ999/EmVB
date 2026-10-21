@@ -31,6 +31,12 @@ describe("float settings", () => {
     );
   });
 
+  test("W-844: a top or bottom bar is capped at half the screen and scrolls", () => {
+    expect(FLOAT_CHROME_CSS).toContain(
+      ".emvb-float:is(.emvb-float--top,.emvb-float--bottom) .emvb-float__body{max-height:50vh;max-height:50dvh;overflow:auto}",
+    );
+  });
+
   test("a hovered or focused float rises above another on the same edge (W-185)", () => {
     expect(FLOAT_CHROME_CSS).toContain(".emvb-float:hover,.emvb-float:focus-within{z-index:9001}");
   });

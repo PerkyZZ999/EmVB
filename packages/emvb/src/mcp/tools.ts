@@ -3,6 +3,7 @@ import type { EmvbPorts } from "./ports.ts";
 import * as read from "./read.ts";
 import * as write from "./write.ts";
 import * as publish from "./publish.ts";
+import * as sections from "./sections.ts";
 import { McpToolError } from "./errors.ts";
 import { rateClassOf } from "./rate-limit.ts";
 
@@ -122,6 +123,17 @@ const READ_TOOLS: ToolDef[] = [
     destructive: false,
     run: (ports, input) => read.listVersions(ports, input),
   }),
+  tool({
+    name: "list_saved_sections",
+    title: "List saved sections",
+    description:
+      "Lists the site's saved sections (My sections) by id and name, newest first. Insert one with insert_saved_section.",
+    input: sections.ListSavedSectionsInput,
+    output: sections.ListSavedSectionsOutput,
+    readOnly: true,
+    destructive: false,
+    run: (ports) => sections.listSavedSections(ports),
+  }),
 ];
 
 /** Draft-only write tools (W-457, W-458). Nothing here publishes (D-055). */
@@ -212,6 +224,38 @@ const WRITE_TOOLS: ToolDef[] = [
     readOnly: false,
     destructive: false,
     run: (ports, input) => write.restoreVersion(ports, input),
+  }),
+  tool({
+    name: "save_section",
+    title: "Save an element as a section",
+    description:
+      "Saves a copy of an element and its children, with the classes they use, to My sections under a name. Copies only: synced sections are made in the editor.",
+    input: sections.SaveSectionInput,
+    output: sections.SaveSectionOutput,
+    readOnly: false,
+    destructive: false,
+    run: (ports, input) => sections.saveSection(ports, input),
+  }),
+  tool({
+    name: "insert_saved_section",
+    title: "Insert a saved section",
+    description:
+      "Adds a copy of a saved section at parentId/index (default: end of the page). Classes it uses are added to the site styles draft when missing; a class with the same name but a different look is added as a numbered copy, never overwritten.",
+    input: sections.InsertSavedSectionInput,
+    output: sections.InsertSavedSectionOutput,
+    readOnly: false,
+    destructive: false,
+    run: (ports, input) => sections.insertSavedSection(ports, input),
+  }),
+  tool({
+    name: "delete_saved_section",
+    title: "Delete a saved section",
+    description: "Removes a section from My sections. Pages that already hold a copy keep it.",
+    input: sections.DeleteSavedSectionInput,
+    output: sections.DeleteSavedSectionOutput,
+    readOnly: false,
+    destructive: true,
+    run: (ports, input) => sections.deleteSavedSection(ports, input),
   }),
 ];
 

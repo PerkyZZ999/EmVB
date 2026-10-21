@@ -112,6 +112,24 @@ describe("public popup runtime (S7b, W-081)", () => {
     expect(popup("free", doc([{ type: "page_load" }], { showTimes: null })).hidden).toBe(false);
   });
 
+  test("W-846: a click opens a popup past its show limit and isn't counted", () => {
+    localStorage.setItem("emvb-popup-shown:clicked", "1");
+    const trigger = document.createElement("button");
+    trigger.className = "offer";
+    document.body.append(trigger);
+    const root = popup(
+      "clicked",
+      doc([{ type: "page_load" }, { type: "click", selector: ".offer" }], { showTimes: 1 }),
+    );
+    const autoOpened = !root.hidden;
+    trigger.click();
+    expect([autoOpened, root.hidden, localStorage.getItem("emvb-popup-shown:clicked")]).toEqual([
+      false,
+      false,
+      "1",
+    ]);
+  });
+
   test("a click inside the selector opens it; clicks elsewhere, blank and broken selectors don't", () => {
     const button = document.createElement("button");
     button.className = "open-me";

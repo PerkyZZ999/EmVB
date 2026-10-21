@@ -11,7 +11,7 @@ import {
 const field = (id: string, type: string, props: Record<string, unknown>) =>
   ({ id, type, props }) as LayoutNode;
 const layout: Layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",

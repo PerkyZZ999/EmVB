@@ -86,6 +86,9 @@ const MENU_CSS = [
   ".emvb-menu--column .emvb-menu-item__bar{position:relative;width:fit-content;max-width:100%}",
   ".emvb-menu--column .emvb-menu-panel{top:0;inset-inline-start:100%}",
   ".emvb-menu--column .emvb-menu-panel--wide{inset-inline:auto;inset-inline-start:100%;min-width:18rem}",
+  // W-847 (D-056): on a phone there is no room beside the item (the flyout overflowed by about
+  // 40-50 px), so a column flyout opens below its item instead, no wider than the screen.
+  "@media (max-width: 767.98px){.emvb-menu--column .emvb-menu-panel,.emvb-menu--column .emvb-menu-panel--wide{top:100%;inset-inline:auto;inset-inline-start:0;min-width:min(12rem,calc(100vw - 2rem));max-width:calc(100vw - 2rem)}}",
 ].join("");
 
 export const menu: ElementDefinition<MenuNode> = {

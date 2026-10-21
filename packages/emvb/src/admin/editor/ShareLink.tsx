@@ -9,6 +9,7 @@ import {
   type LayoutNode,
 } from "../../core/index.ts";
 import { BUTTON, FIELD } from "../ui.ts";
+import { DialogCloseButton } from "./DialogCloseButton.tsx";
 
 const MEDIA_KEYS = ["src", "poster", "backgroundImage", "backgroundVideo"];
 const siteOnly = (value: unknown) =>
@@ -175,13 +176,7 @@ export function ShareLinkDialog({
                   : "Copy didn't work here: select the link and copy it."}
               </span>
             )}
-            <Dialog.Close
-              render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
-                  Close
-                </Button>
-              )}
-            />
+            <DialogCloseButton>Close</DialogCloseButton>
             <Button
               variant="primary"
               className={BUTTON}

@@ -46,7 +46,7 @@ async function loadPage(
   return { page, layout: result.layout };
 }
 
-export type OutlineNode = { id: string; type: string; label?: string; children?: OutlineNode[] };
+type OutlineNode = { id: string; type: string; label?: string; children?: OutlineNode[] };
 
 /** The tree without props or styles: cheap orientation for an agent (plan § 3 get_layout). */
 function outlineOf(node: LayoutNode): OutlineNode {

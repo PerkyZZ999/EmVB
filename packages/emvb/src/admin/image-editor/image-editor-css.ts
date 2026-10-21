@@ -71,7 +71,6 @@ export const IMAGE_EDITOR_CSS = `
   flex: 1 1 0; min-width: 0; max-width: 40px; height: 32px; display: grid; place-items: center;
   border: 1px solid var(--color-kumo-line); border-radius: 8px; background: var(--color-kumo-base);
   color: var(--text-color-kumo-default); cursor: pointer; padding: 0;
-  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
 }
 .emvb-ie-switch svg { width: 16px; height: 16px; transition: transform 120ms ease; }
 .emvb-ie-switch:hover { background: var(--color-kumo-tint); }
@@ -89,9 +88,9 @@ export const IMAGE_EDITOR_CSS = `
 }
 .emvb-ie-histogram-head {
   display: flex; justify-content: space-between; font-size: 10px; line-height: 14px;
-  text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-color-kumo-subtle);
+  color: var(--text-color-kumo-subtle);
 }
-.emvb-ie-mono { font-family: var(--font-mono, ui-monospace, monospace); text-transform: none; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.emvb-ie-mono { font-family: var(--font-mono, ui-monospace, monospace); font-variant-numeric: tabular-nums; }
 .emvb-ie-histogram canvas { display: block; width: 100%; height: 64px; border-radius: 4px; background: var(--color-kumo-base); }
 
 /* Panels (photocn panel-header.tsx, crop-panel.tsx). */
@@ -189,7 +188,9 @@ export const IMAGE_EDITOR_CSS = `
   border-top-color: var(--text-color-kumo-default); animation: emvb-ie-spin 0.9s linear infinite;
 }
 @keyframes emvb-ie-spin { to { transform: rotate(360deg); } }
-.emvb-ie .emvb-ie-fit { position: absolute; right: 8px; bottom: 8px; }
+.emvb-ie .emvb-ie-compact-note { padding: 4px 12px; }
+.emvb-ie .emvb-ie-recipe-error { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-kumo-danger); }
+.emvb-ie .emvb-ie-zoom { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 4px; padding: 4px; border-radius: 10px; background: var(--color-kumo-base); box-shadow: 0 1px 3px var(--color-kumo-shadow-drop, rgb(0 0 0 / 0.15)); }
 .emvb-ie-error {
   display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 420px; margin: 24px;
   padding: 20px 24px; border-radius: 12px; text-align: center;
@@ -258,10 +259,10 @@ export const IMAGE_EDITOR_CSS = `
   display: flex; flex: none; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   min-width: 56px; min-height: 44px; padding: 0 8px; border: 0; border-radius: 10px; background: none;
   color: var(--text-color-kumo-subtle); font-size: 11px; line-height: 14px; cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
 }
 .emvb-ie-compact-tool svg { width: 20px; height: 20px; }
-.emvb-ie-compact-tool[aria-pressed="true"] { background: var(--color-kumo-brand); color: #fff; }
+.emvb-ie-compact-tool[aria-pressed="true"] { background: var(--color-kumo-brand); color: #fff; box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.2); }
+.emvb-ie-compact-tool[aria-pressed="true"] svg { transform: scale(1.1); }
 .emvb-ie-compact-tool:focus-visible { outline: 2px solid var(--color-kumo-focus, var(--color-kumo-brand)); }
 .emvb-ie-compact-tool:disabled { opacity: 0.5; }
 .emvb-ie-sheet {
@@ -280,7 +281,9 @@ export const IMAGE_EDITOR_CSS = `
 .emvb-ie-sheet-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: env(safe-area-inset-bottom); }
 /* Tone panels (W-484; photocn adjustments-panel, filters-panel, curves-panel, blur-panel). */
 .emvb-ie-tabs-wrap { padding: 12px 16px; }
-.emvb-ie-tabs [role="tablist"] { width: 100%; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
+/* W-872: Kumo's small tab list has a fixed 26px height, but an icon-and-text tab is taller, so the
+   underline (bottom: 0 of the list) cut through the label. The list now grows to its tabs. */
+.emvb-ie-tabs [role="tablist"] { width: 100%; height: auto; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
 .emvb-ie-tabs [role="tab"] { justify-content: center; font-size: 13px; }
 .emvb-ie-tab-label { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
 .emvb-ie-tab-label svg { width: 16px; height: 16px; }
@@ -303,7 +306,7 @@ export const IMAGE_EDITOR_CSS = `
 .emvb-ie .emvb-ie-chip[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--color-kumo-line); }
 .emvb-ie-spin { animation: emvb-ie-spin 0.9s linear infinite; }
 .emvb-ie-subgroup { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; border: 0; min-width: 0; }
-.emvb-ie-caps { padding: 0; margin-bottom: 0; font-size: 12px; line-height: 16px; font-weight: 600; text-transform: uppercase; color: var(--text-color-kumo-subtle); }
+.emvb-ie-caps { padding: 0; margin-bottom: 0; font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-color-kumo-subtle); }
 .emvb-ie-group-curves { gap: 12px; }
 .emvb-ie-curves { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .emvb-ie-curves-box {

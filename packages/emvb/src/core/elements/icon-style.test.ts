@@ -17,7 +17,7 @@ import { defaultElement } from "./index.ts";
 const design = emptyDesign();
 const page = (node: LayoutNode) => {
   const layout: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: { id: "root0001", type: "container", props: {}, children: [node] },
   };
   return renderPage(layout, design);
@@ -54,7 +54,7 @@ describe("icon style keys (W-237)", () => {
     expect(rule).toContain("scale:1.25");
     expect(rule).toContain("--emvb-icon-stroke:1.5");
     expect(rule).toContain("--emvb-icon-shadow:drop-shadow(0px 2px 4px #00000040)");
-    expect(rule).toContain("--emvb-icon-animation:emvb-icon-spin 2000ms linear infinite");
+    expect(rule).toContain("--emvb-icon-animation:emvb-icon-spin 2000ms linear 2");
   });
 
   test("each flip maps to the svg's scale, and none undoes a flip", () => {
@@ -75,9 +75,21 @@ describe("icon style keys (W-237)", () => {
       }),
     );
     expect(css).toContain("--emvb-icon-shadow:drop-shadow(1px 1px 0px)");
-    expect(css).toContain(
+    expect(css).toContain("--emvb-icon-animation:emvb-icon-pulse 800ms ease-in-out 6 alternate");
+  });
+
+  test("W-853: Loop forever keeps a spin or pulse going; a false or stray loop is dropped", () => {
+    const css = (iconAnimation: unknown) => page(icon({ style: { iconAnimation } as never })).css;
+    expect(css({ type: "spin", duration: 1000, loop: true })).toContain(
+      "--emvb-icon-animation:emvb-icon-spin 1000ms linear infinite",
+    );
+    expect(css({ type: "pulse", duration: 800, loop: true })).toContain(
       "--emvb-icon-animation:emvb-icon-pulse 800ms ease-in-out infinite alternate",
     );
+    expect(css({ type: "spin", duration: 1000, loop: false })).not.toContain(
+      "--emvb-icon-animation:",
+    );
+    expect(css({ type: "none", loop: true })).not.toContain("--emvb-icon-animation:");
   });
 
   test("hover and tablet set the same custom properties, so the glyph changes there", () => {

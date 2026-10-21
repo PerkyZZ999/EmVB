@@ -2,7 +2,7 @@
  * Saving an edited picture (W-485): export settings, the output file and the `edit` record.
  * No photocn import here, so this stays testable without WebGL.
  */
-import { ImageEdit, type ImageEditRecipe } from "../../core/index.ts";
+import { IMAGE_EDIT_RECIPE_MAX_BYTES, ImageEdit, ImageEditRecipe } from "../../core/index.ts";
 import type { ImageEditOutput } from "../../core/image-edit/schema.ts";
 import { stripJpegGps } from "./exif.ts";
 
@@ -138,4 +138,34 @@ export function savedRecipe(imageProps: Record<string, unknown>): ImageEditRecip
   if (!parsed.success) return null;
   const { recipe } = parsed.data;
   return Object.keys(recipe).some((k) => k !== "version" && k !== "name") ? recipe : null;
+}
+
+/** W-862 (IE-2): the edit recipe as a JSON file, as photocn's recipe export. */
+export function recipeFileText(recipe: ImageEditRecipe): string {
+  return `${JSON.stringify({ emvbImageRecipe: 1, photocn: PHOTOCN_VERSION, recipe }, null, 2)}\n`;
+}
+
+/** A recipe file larger than this isn't read at all (W-881). */
+export const RECIPE_FILE_MAX_BYTES = IMAGE_EDIT_RECIPE_MAX_BYTES * 4;
+
+export type RecipeFileResult = { ok: true; recipe: ImageEditRecipe } | { ok: false; error: string };
+
+/** Reads a recipe file (ours, or a bare photocn recipe) and checks it like a saved edit. */
+export function parseRecipeFile(text: string): RecipeFileResult {
+  const bad = { ok: false, error: "This file isn't an image edit recipe." } as const;
+  if (text.length > RECIPE_FILE_MAX_BYTES) return bad;
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    return bad;
+  }
+  const inner =
+    raw && typeof raw === "object" && "recipe" in raw ? (raw as { recipe: unknown }).recipe : raw;
+  const parsed = ImageEditRecipe.safeParse(inner);
+  if (!parsed.success) return bad;
+  if (new TextEncoder().encode(JSON.stringify(parsed.data)).length > IMAGE_EDIT_RECIPE_MAX_BYTES) {
+    return { ok: false, error: "This recipe is too large." };
+  }
+  return { ok: true, recipe: parsed.data };
 }

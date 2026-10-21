@@ -74,7 +74,7 @@ MVP vocabulary: `general/entire_site`, `singular/{all,front,not_found,collection
 | `scroll` | Opens when scroll depth ≥ `percent` (0–100) |
 | `click` | Opens when an element matching `selector` is clicked (safe CSS selectors only) |
 
-**Advanced (MVP-thin):** `showTimes` caps opens per browser via `localStorage`; `devices` filters by viewport (`mobile` &lt;768, `tablet` &lt;1025, else `desktop`). Null/omitted = unlimited / all devices.
+**Advanced (MVP-thin):** `showTimes` caps opens per browser via `localStorage`; a click trigger ignores it and isn't counted (D-055); `devices` filters by viewport (`mobile` &lt;768, `tablet` &lt;1025, else `desktop`). Null/omitted = unlimited / all devices.
 
 **Gaps vs Elementor (deferred):** URL/query rules, scheduling, A/B, per-session vs per-user distinctions beyond localStorage. Exit-intent and inactivity shipped in W-081.
 

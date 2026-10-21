@@ -266,14 +266,16 @@ export const StyleProps = z.strictObject({
     })
     .optional(),
   /**
-   * A looping spin or pulse; off for visitors who prefer reduced motion. `{ type: "none" }`
-   * (W-248) stops an animation a device would otherwise inherit from a wider one.
+   * A spin or pulse; off for visitors who prefer reduced motion. It stops after about 5 s
+   * (W-848) unless `loop` is true (W-853, D-059). `{ type: "none" }` (W-248) stops an animation a
+   * device would otherwise inherit from a wider one.
    */
   iconAnimation: z
     .union([
       z.strictObject({
         type: z.enum(["spin", "pulse"]),
         duration: z.number().int().min(200).max(10_000),
+        loop: z.literal(true).optional(),
       }),
       z.strictObject({ type: z.literal("none") }),
     ])

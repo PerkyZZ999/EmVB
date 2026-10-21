@@ -18,6 +18,7 @@ import { PLUGIN_ID } from "../../constants.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import { BUTTON } from "../ui.ts";
 import { editedNounOf, type EditedNoun } from "./edited-noun.ts";
+import { DialogCloseButton } from "./DialogCloseButton.tsx";
 
 type RevisionItem = {
   id: string;
@@ -469,13 +470,7 @@ export function TimelineDialog({
             </div>
           )}
           <div className="emvb-dialog-actions" ref={actionsRef}>
-            <Dialog.Close
-              render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
-                  Close
-                </Button>
-              )}
-            />
+            <DialogCloseButton>Close</DialogCloseButton>
           </div>
         </div>
       </Dialog>

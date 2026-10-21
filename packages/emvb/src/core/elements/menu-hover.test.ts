@@ -43,4 +43,11 @@ describe("W-267 menu dropdowns open on hover", () => {
       /\.emvb-menu--column \.emvb-menu-item__bar\{[^}]*position:relative[^}]*width:fit-content/,
     );
   });
+  test("W-847 on a phone a column menu's flyout opens below its item, inside the screen", () => {
+    const phone = menu.baseCss.match(/@media \(max-width: 767\.98px\)\{(.*?\})\}/)?.[1] ?? "";
+    expect(phone).toContain(".emvb-menu--column .emvb-menu-panel,");
+    expect(phone).toContain(".emvb-menu--column .emvb-menu-panel--wide{");
+    expect(phone).toMatch(/\{top:100%;inset-inline:auto;inset-inline-start:0;/);
+    expect(phone).toContain("max-width:calc(100vw - 2rem)");
+  });
 });

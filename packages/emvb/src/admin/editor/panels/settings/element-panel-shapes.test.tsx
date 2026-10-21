@@ -64,7 +64,7 @@ async function panelFor(
   extra: { rejection?: string; formsAvailable?: boolean; sections?: string[] } = {},
 ) {
   const layout: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: { id: "root0001", type: "container", props: {}, children: [node] },
   };
   localStorage.setItem(

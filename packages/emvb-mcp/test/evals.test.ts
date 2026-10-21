@@ -133,6 +133,10 @@ describe("skill task evals (W-470)", () => {
       expect(tool(name).input.safeParse(input).success).toBe(true);
     ok("create_page", { title: "Spring sale", recipes: ["hero", "features", "cta"] });
     ok("get_layout", { pageId: "p1", format: "outline" });
+    // W-877: saved sections, as the skill's step 5 describes.
+    ok("list_saved_sections", {});
+    ok("insert_saved_section", { pageId: "p1", sectionId: "0123456789abcdef" });
+    ok("save_section", { pageId: "p1", elementId: "n1", name: "Hero" });
     ok("update_element", {
       pageId: "p1",
       nodeId: "n1",

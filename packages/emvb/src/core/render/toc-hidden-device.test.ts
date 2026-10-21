@@ -10,7 +10,7 @@ const heading = (id: string, text: string, hiddenOn?: ("desktop" | "tablet" | "m
 
 describe("W-793 contents entries hide where their heading hides", () => {
   const layout: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",

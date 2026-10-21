@@ -13,7 +13,7 @@ const box = {
   children: [],
 } as unknown as LayoutNode;
 const layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: { id: "root0001", type: "container", props: {}, children: [box] },
 } as Layout;
 

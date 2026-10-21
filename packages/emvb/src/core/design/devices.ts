@@ -1,4 +1,5 @@
 import type { DesignSystem } from "../schema/design.ts";
+import { editClass } from "./classes.ts";
 import type { DeviceStyles, StyleProps } from "../schema/style.ts";
 import { POPUP_DEVICES, type PopupDevice } from "../theme/popup-rules.ts";
 
@@ -28,19 +29,12 @@ export function patchClassDevices(
   device: ResponsiveDevice,
   patch: Partial<StyleProps>,
 ): DesignSystem {
-  const classes = design.classes ?? [];
-  if (!classes.some((c) => c.id === classId)) return design;
-  return {
-    ...design,
-    classes: classes.map((c) => {
-      if (c.id !== classId) return c;
-      const next = Object.assign({}, c);
-      const devices = patchDeviceStyle(c.devices, device, patch);
-      if (devices) next.devices = devices;
-      else delete next.devices;
-      return next;
-    }),
-  };
+  return editClass(design, classId, (next) => {
+    const devices = patchDeviceStyle(next.devices, device, patch);
+    if (devices) next.devices = devices;
+    else delete next.devices;
+    return next;
+  });
 }
 
 /** Add or remove one device. The result stays in desktop, tablet, mobile order, or undefined. */

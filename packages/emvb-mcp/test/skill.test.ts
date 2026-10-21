@@ -34,6 +34,17 @@ describe("emvb-page-builder skill (W-468)", () => {
       expect(names.has(name.slice(1, -1))).toBe(true);
     }
   });
+
+  test("the skill tells agents about saved sections (W-877)", () => {
+    for (const name of [
+      "list_saved_sections",
+      "insert_saved_section",
+      "save_section",
+      "delete_saved_section",
+    ]) {
+      expect(text).toContain(`\`${name}\``);
+    }
+  });
 });
 
 describe("bridge package files (W-471)", () => {

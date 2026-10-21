@@ -175,9 +175,9 @@ export function SiteStylesDrawer({
           <h2 className="emvb-panel-title">Site styles</h2>
           <p className="emvb-helper emvb-site-styles-subtitle" data-emvb-manager-label="">
             {tab === "variables"
-              ? "Variables Manager"
+              ? "Variables manager"
               : tab === "classes"
-                ? "Classes Manager"
+                ? "Classes manager"
                 : "Defaults"}
           </p>
         </div>
@@ -481,10 +481,26 @@ function DeleteConfirm({
     : 0;
   const noun = useEditedNoun();
   const where = usedIn(pageUses, classUses, noun);
+  // W-849: the confirmation opened below the list with focus left on the closed row menu, so a
+  // keyboard or screen reader user didn't reach it. It takes focus on Cancel, the safe answer.
+  const cancelRef = React.useRef<HTMLButtonElement>(null);
+  const titleId = React.useId();
+  const bodyId = React.useId();
+  React.useEffect(() => {
+    cancelRef.current?.focus();
+  }, [confirm.kind, confirm.id]);
   return (
-    <div className="emvb-site-confirm" data-emvb-site-confirm="" role="alertdialog">
-      <p className="emvb-field-label">Delete {confirm.name}?</p>
-      <p className="emvb-helper">
+    <div
+      className="emvb-site-confirm"
+      data-emvb-site-confirm=""
+      role="alertdialog"
+      aria-labelledby={titleId}
+      aria-describedby={bodyId}
+    >
+      <p className="emvb-field-label" id={titleId}>
+        Delete {confirm.name}?
+      </p>
+      <p className="emvb-helper" id={bodyId}>
         {where
           ? `In use in ${where}. Deleting drops those bindings.`
           : variable
@@ -493,7 +509,13 @@ function DeleteConfirm({
         {NOT_CHECKED}
       </p>
       <div className="emvb-dialog-actions">
-        <Button type="button" variant="secondary" className={BUTTON} onClick={onCancel}>
+        <Button
+          ref={cancelRef}
+          type="button"
+          variant="secondary"
+          className={BUTTON}
+          onClick={onCancel}
+        >
           Cancel
         </Button>
         <Button
@@ -608,10 +630,26 @@ function ImportConfirm({
     losses.classes > 0 ? plural(losses.classes, "class", "classes") : "",
     losses.variables > 0 ? plural(losses.variables, "variable", "variables") : "",
   ].filter(Boolean);
+  // W-854: like the delete confirmation (W-849), it takes focus on Cancel, the safe answer, so a
+  // keyboard or screen reader user reaches it after picking the file.
+  const cancelRef = React.useRef<HTMLButtonElement>(null);
+  const titleId = React.useId();
+  const bodyId = React.useId();
+  React.useEffect(() => {
+    cancelRef.current?.focus();
+  }, [name]);
   return (
-    <div className="emvb-site-confirm" data-emvb-import-confirm="" role="alertdialog">
-      <p className="emvb-field-label">Replace site styles with {name}?</p>
-      <p className="emvb-helper">
+    <div
+      className="emvb-site-confirm"
+      data-emvb-import-confirm=""
+      role="alertdialog"
+      aria-labelledby={titleId}
+      aria-describedby={bodyId}
+    >
+      <p className="emvb-field-label" id={titleId}>
+        Replace site styles with {name}?
+      </p>
+      <p className="emvb-helper" id={bodyId}>
         {lost.length > 0
           ? `${lost.join(" and ")} that the file doesn't have will be removed. `
           : "Every class and variable is replaced by the file's. "}
@@ -632,7 +670,13 @@ function ImportConfirm({
         </p>
       )}
       <div className="emvb-dialog-actions">
-        <Button type="button" variant="secondary" className={BUTTON} onClick={onCancel}>
+        <Button
+          ref={cancelRef}
+          type="button"
+          variant="secondary"
+          className={BUTTON}
+          onClick={onCancel}
+        >
           Cancel
         </Button>
         <Button

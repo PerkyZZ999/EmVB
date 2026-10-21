@@ -13,7 +13,7 @@ const form = (id: string, children: LayoutNode[]): LayoutNode => ({
 describe("form control ids (W-187)", () => {
   test("the same form twice on a page keeps every id unique, and each label targets its own control", () => {
     const layout: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -49,7 +49,7 @@ test("W-780: every control names its own error slot, even with the form twice on
     props: { field: "plan", label: "Plan" },
   } as LayoutNode;
   const layout: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",

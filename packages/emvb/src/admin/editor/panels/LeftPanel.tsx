@@ -4,6 +4,7 @@ import type { ElementType, Layout } from "../../../core/index.ts";
 import { AddPanel } from "./AddPanel.tsx";
 import { LayersPanel } from "./LayersPanel.tsx";
 import type { ClipboardActions } from "../useClipboardActions.ts";
+import type { SavedSectionActions } from "../useSavedSections.ts";
 
 const SESSION_KEY = "emvb-left-tab";
 
@@ -14,12 +15,14 @@ export function LeftPanel({
   onSelect,
   onAdd,
   onRecipe,
+  saved,
   onDuplicate,
   onMoveUp,
   onMoveDown,
   onDelete,
   clipboard,
   onRename,
+  onSaveSection,
   formsAvailable = true,
 }: {
   layout: Layout | null;
@@ -28,6 +31,8 @@ export function LeftPanel({
   onAdd: (type: ElementType) => void;
   /** Adds a section recipe (W-320). */
   onRecipe?: (id: string) => void;
+  /** My sections (W-876). */
+  saved?: SavedSectionActions;
   onDuplicate: (id: string) => void;
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
@@ -35,6 +40,8 @@ export function LeftPanel({
   clipboard?: ClipboardActions;
   /** Layers rename (W-157). */
   onRename?: (id: string, label: string | undefined) => void;
+  /** Save as section in the row menu (W-876). */
+  onSaveSection?: (id: string) => void;
   formsAvailable?: boolean;
 }) {
   const [tab, setTab] = React.useState(() => {
@@ -65,7 +72,7 @@ export function LeftPanel({
         onValueChange={changeTab}
       />
       {tab === "add" ? (
-        <AddPanel onAdd={onAdd} onRecipe={onRecipe} formsAvailable={formsAvailable} />
+        <AddPanel onAdd={onAdd} onRecipe={onRecipe} saved={saved} formsAvailable={formsAvailable} />
       ) : (
         <LayersPanel
           layout={layout}
@@ -77,6 +84,7 @@ export function LeftPanel({
           onDelete={onDelete}
           clipboard={clipboard}
           onRename={onRename}
+          onSaveSection={onSaveSection}
         />
       )}
     </div>

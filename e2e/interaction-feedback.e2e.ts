@@ -15,7 +15,7 @@ for (const motion of ["no-preference", "reduce"] as const) {
       request,
       "Panel feedback",
       {
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: {
           id: "root0001",
           type: "container",

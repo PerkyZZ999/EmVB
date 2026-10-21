@@ -7,7 +7,7 @@ import { renderPage } from "./index.ts";
 // past a phone's screen, so the whole page scrolled sideways.
 describe("long words (W-299)", () => {
   const layout: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",
@@ -31,7 +31,7 @@ describe("long words (W-299)", () => {
   // W-764: a button label is a flex item, so break-word alone left it one unbreakable line.
   test("W-764: a button lets a long label break", () => {
     const withButton: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -46,7 +46,7 @@ describe("long words (W-299)", () => {
   // W-765: a tab label is a flex item in the tab list, so a long word kept the whole label on one line.
   test("W-765: a tab label lets a long word break", () => {
     const withTabs: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

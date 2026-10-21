@@ -6,7 +6,7 @@ import { renderPage } from "./index.ts";
 describe("the page root is never hidden (W-567)", () => {
   test("a root stored as hidden on every device still shows the page", () => {
     const layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -24,7 +24,7 @@ describe("the page root is never hidden (W-567)", () => {
 describe("W-571: a class hidden on a device doesn't hide the page root", () => {
   test("the class's display:none rule skips the root", () => {
     const layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

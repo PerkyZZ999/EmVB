@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-21
+
+Saved sections, a Loop forever switch for icon animations, image editor Recipe and Zoom, five behaviour decisions (D-053 to D-057) and dependency updates (W-844 to W-885). Layout schema 17 and design schema 16: the steps change nothing, so 0.8.0 reads every 0.7.0 page, and 0.7.0 shows a page or class that uses Loop forever as "saved by a newer EmVB" instead of invalid.
+
+### Added
+
+- **Saved sections (W-874 to W-877, D-060).** "Save as section…" in a layer's ··· menu or the command palette saves an element and everything inside it under a name. **Copy** adds it to **My sections** in the Add panel (search, rename, delete), and inserting gives an independent copy; **Synced** makes a Section theme part and links the element to it. A saved section brings its classes along: a missing class is recreated, the same class is reused, and one whose look differs is added as "Card 2", so an existing class is never changed. The palette inserts saved sections too. MCP tools `list_saved_sections`, `save_section`, `insert_saved_section` and `delete_saved_section`; the `emvb-page-builder` skill uses them. Old saves are upgraded when read.
+- **Loop forever (W-853, D-059).** Spin and Pulse have a "Loop forever" switch, off by default, for a loading spinner. Reduced motion still turns it off, and the accessibility check flags a looping icon, including one set by a class (W-882).
+- **Image editor Recipe (W-862, W-881, W-884).** Download the current edits as a `.recipe.json` file and load one back (ours or a bare photocn recipe), also from the phone layout's More menu. Bad, oversized or unappliable files say why.
+- **Image editor Zoom (W-861).** Zoom out, Zoom in and Fit to screen at the stage's bottom right, 100% to 800%.
+
+### Changed
+
+- **Bars, print and popups (D-053 to D-055).** A tall top or bottom bar is capped at half the screen and scrolls inside (W-844); printing shows every tab and accordion panel (W-845); a click trigger always opens its popup and isn't counted against its show limit (W-846).
+- **Menus on phones (W-847, D-056).** Column menu flyouts open below their item under 768 px.
+- **Icon animations stop on their own (W-848, D-057).** A spin or pulse runs as many whole times as fit in about 5 seconds unless Loop forever is on.
+- **Editor look.** Sentence-case element names (Div block, Post title, Loop item…) and Theme Builder tabs (W-857, W-866); Kumo inputs and checkboxes in the Visitors and Scales editors (W-865); key boxes in the Shortcuts dialog (W-864); tool tooltips in the image editor (W-860); Theme Builder tab-row edge fades in every browser (W-863).
+- **Dependencies (W-850, W-852, D-058).** EmDash 1.3.1 and the forms plugin 0.2.11, React 19.3.1, happy-dom 21 for tests, Lucide 1.61 (2,171 icons) and `@perkyzz/emvb-icons` 0.2.0. Astro is supported up to 7.3.5 until EmDash moves its zod pin.
+
+### Fixed
+
+- **Saved sections.** An agent insert with a stale rev no longer adds classes before refusing (W-879); Synced on an element a Theme section can't wrap no longer leaves a stray theme part (W-880); focus stays put after rename, after deleting the last search match (W-878) and after closing Save as section (W-883).
+- **Focus.** The inline delete confirmation and the Import confirmation take focus (W-849, W-854).
+- **Image editor.** The active tab underline no longer runs through the tab label (W-872).
+
 ## [0.7.0] - 2026-10-21
 
 About 470 changes from overnight testing and a full pass over the editor's look since 0.6.0 (UX-001 to UX-095, W-532 to W-841). This includes the 0.6.5 changes, which were never published to npm. No schema change: pages saved by 0.7.0 open in 0.6.0.
@@ -575,7 +600,8 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.4.0...v0.5.0

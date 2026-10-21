@@ -45,7 +45,7 @@ const resolveEmVBPage = (
 
 const heading: LayoutNode = { id: "head0001", type: "heading", props: { text: "Hello", level: 1 } };
 const layout = (...children: LayoutNode[]): Layout => ({
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 const astro = (params: Record<string, string | undefined>) => ({

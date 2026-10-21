@@ -16,7 +16,7 @@ Library pictures can be cropped, adjusted, filtered and saved as a new media ite
 npm i @perkyzz/emvb
 ```
 
-Peers, which an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 and `@phosphor-icons/react` ^2.1.10. `@emdash-cms/plugin-forms` ^0.2.9 is optional and enables forms.
+Peers, which an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 and `@phosphor-icons/react` ^2.1.10. `@emdash-cms/plugin-forms` ^0.2.9 is optional and enables forms. EmVB currently supports Astro 7 up to 7.3.5: Astro 7.3.6 and later depend on zod ^4.6.5, while EmDash pins zod to exactly 4.5.4, and the second copy of zod breaks type checking of EmDash plugin routes. Keep your site on `astro` 7.3.5 for now; this will be widened once EmDash moves its zod pin.
 
 Dependencies installed with it: `zod` and [`@perkyzz/emvb-icons`](https://www.npmjs.com/package/@perkyzz/emvb-icons), the icon sets for the editor's Icon library. Only the editor loads them; a placed icon is saved into the page as SVG.
 

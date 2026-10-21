@@ -11,10 +11,12 @@ import {
 import * as React from "react";
 import {
   auditPage,
+  findNode,
   moveDown,
   moveUp,
   renderPage,
   withPlainText,
+  type Layout,
   type LayoutNode,
   type PopupDevice,
 } from "../../core/index.ts";
@@ -63,6 +65,8 @@ import { editableSource } from "../image-editor/load.ts";
 import { useSave } from "./useSave.ts";
 import { type ShortcutHandlers, useEditorShortcuts } from "./useEditorShortcuts.ts";
 import { useNodeActions } from "./useNodeActions.ts";
+import { useSavedSections } from "./useSavedSections.ts";
+import { SaveSectionDialog } from "./SavedSectionDialogs.tsx";
 import { type PasteRefusal, useClipboardActions } from "./useClipboardActions.ts";
 import { ListError, LoadingStatus } from "../pages/list-kit.tsx";
 
@@ -201,6 +205,16 @@ function EditorApp({
     addRecipe,
     items: itemActions,
   } = useNodeActions({ state, latest, dispatch, announce: setAnnouncement, toasts });
+  // W-876: My sections and Save as section (D-060).
+  const saved = useSavedSections({
+    fetcher,
+    latest,
+    dispatch,
+    changeDesign,
+    announce: setAnnouncement,
+    toasts,
+  });
+  const [saveAsk, setSaveAsk] = React.useState<string | null>(null);
   const [refusal, setRefusal] = React.useState<PasteRefusal | null>(null);
   const clipboard = useClipboardActions({
     latest,
@@ -325,6 +339,7 @@ function EditorApp({
     !!selectedNode && !!state.page.layout && selectedNode.id !== state.page.layout.root.id;
   const commandRunners = {
     duplicate,
+    saveSection: setSaveAsk,
     remove,
     wrap,
     save: () => void save(),
@@ -487,6 +502,8 @@ function EditorApp({
                   onMoveDown={(id) => arrange(id, moveDown)}
                   onDelete={remove}
                   clipboard={clipboard}
+                  saved={saved}
+                  onSaveSection={setSaveAsk}
                   onRename={(id, label) =>
                     dispatch({
                       type: "update-node",
@@ -593,6 +610,15 @@ function EditorApp({
           finishDelete={finishDelete}
           playgroundUrl={host.playgroundUrl}
           setAnnouncement={setAnnouncement}
+          saved={saved}
+        />
+        <SaveSectionDialog
+          open={saveAsk !== null}
+          onOpenChange={(open) => !open && setSaveAsk(null)}
+          defaultName={sectionNameFor(state.page.layout, saveAsk)}
+          onSave={(name, mode) =>
+            saveAsk ? saved.save(saveAsk, name, mode) : Promise.resolve(null)
+          }
         />
       </EditorToasts>
     </EditorOverlay>
@@ -660,4 +686,11 @@ function LoadBody({ data }: { data: EditorData }) {
       <LoadingStatus label={`Opening the ${noun}…`} />
     </div>
   );
+}
+
+/** The Save as section name to start from: the layer's own name, else the element's (W-876). */
+function sectionNameFor(layout: Layout | null, id: string | null): string {
+  const node = layout && id ? findNode(layout, id) : undefined;
+  if (!node) return "";
+  return node.label || (ELEMENT_NAMES[node.type] ?? "Section");
 }

@@ -9,7 +9,7 @@ afterEach(cleanup);
 
 const layoutWith = (text: string, extra = false): Layout =>
   ({
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",
@@ -329,7 +329,7 @@ describe("version timeline dialog (W-315)", () => {
 
   test("W-752: a version picture has no live links to follow", async () => {
     const linked = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -383,7 +383,7 @@ test("a restore refusal goes away when another version is picked (W-561)", async
     }));
   const page = (sections: unknown[]) =>
     ({
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: { id: "root0001", type: "container", props: {}, children: sections },
     }) as Layout;
   // The current page is near the cap; the saved version (under it) still had another section.
@@ -437,7 +437,7 @@ test("a restore refusal is gone after closing and reopening the timeline (W-623)
     }));
   const page = (sections: unknown[]) =>
     ({
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: { id: "root0001", type: "container", props: {}, children: sections },
     }) as Layout;
   const big = { id: "biga0001", type: "container", props: {}, children: many("bigx", 1985) };

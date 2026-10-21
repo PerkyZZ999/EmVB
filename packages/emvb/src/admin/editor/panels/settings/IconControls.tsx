@@ -225,7 +225,7 @@ const DEFAULT_DURATION: Record<Looping["type"], number> = { spin: 2000, pulse: 1
 const looping = (a: IconAnimation | undefined): Looping | undefined =>
   a && a.type !== "none" ? a : undefined;
 
-/** A looping spin or pulse (Normal only); visitors who prefer reduced motion see it still. */
+/** A spin or pulse (Normal only) that stops after about 5 s; reduced motion sees it still. */
 const ANIMATION_LABELS: Record<string, string> = { none: "None", spin: "Spin", pulse: "Pulse" };
 
 /**
@@ -264,7 +264,8 @@ export function IconAnimationControl({
             setType(picked);
             if (picked === "spin" || picked === "pulse") {
               const duration = own?.duration ?? from?.duration ?? DEFAULT_DURATION[picked];
-              onChange({ type: picked, duration });
+              const loop = own?.loop ?? from?.loop;
+              onChange(loop ? { type: picked, duration, loop } : { type: picked, duration });
             } else onChange(from ? { type: "none" } : undefined);
           }}
         >
@@ -281,11 +282,26 @@ export function IconAnimationControl({
             onCommit={(n) => onChange({ ...own, duration: n ?? DEFAULT_DURATION[own.type] })}
           />
         )}
-        {own && <p className="emvb-helper">Off for visitors who prefer reduced motion.</p>}
+        {own && (
+          <HintedSwitch
+            label="Loop forever"
+            checked={own.loop === true}
+            onCheckedChange={(loop) => {
+              const { loop: _old, ...rest } = own;
+              onChange(loop ? { ...rest, loop: true } : rest);
+            }}
+            data={{ "data-emvb-icon-loop": "" }}
+            hint={
+              own.loop
+                ? "Keeps going, for a loading spinner. Off for visitors who prefer reduced motion."
+                : "Stops on its own after about 5 seconds. Off for visitors who prefer reduced motion."
+            }
+          />
+        )}
         {!value && from && (
           <p className="emvb-helper">
-            Inherited from a wider device ({ANIMATION_LABELS[from.type]}, {from.duration} ms). Pick
-            None to stop it on this one.
+            Inherited from a wider device ({ANIMATION_LABELS[from.type]}, {from.duration} ms
+            {from.loop ? ", loops forever" : ""}). Pick None to stop it on this one.
           </p>
         )}
         {value?.type === "none" && from && (

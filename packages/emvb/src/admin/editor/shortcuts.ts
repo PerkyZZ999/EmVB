@@ -19,6 +19,20 @@ export const SHORTCUTS: readonly { action: string; keys: string }[] = [
   { action: "Save draft", keys: "Ctrl/Cmd+S" },
 ];
 
+/** One alternative in a shortcut ("Ctrl/Cmd+Shift+Z"), with the separator before it. */
+export type KeyCombo = { before: string; keys: string[] };
+
+/** W-864: "Ctrl/Cmd+Z / Ctrl/Cmd+Y" as combos of single keys, for key boxes. */
+export function keyCombos(keys: string): KeyCombo[] {
+  const parts = keys.split(/( \/ | or )/);
+  const combos: KeyCombo[] = [];
+  for (let i = 0; i < parts.length; i += 2) {
+    const combo = parts[i] ?? "";
+    combos.push({ before: i === 0 ? "" : (parts[i - 1] ?? ""), keys: combo.split(/\+(?=.)/) });
+  }
+  return combos;
+}
+
 /**
  * W-565: the letter of a Ctrl/Cmd shortcut on any keyboard layout. A Russian, Greek, Hebrew or
  * Arabic layout reports its own letter (Ctrl+Z is "я"), so the key's position stands in when the

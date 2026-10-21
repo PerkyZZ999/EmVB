@@ -18,7 +18,7 @@ import { useNodeActions } from "./useNodeActions.ts";
 import { cleanup, mount as mountTree } from "../../../test/dom/mount.ts";
 
 const layout: Layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: container("root0001", [
     heading("head0001", "A"),
     heading("head0002", "B"),
@@ -128,7 +128,7 @@ describe("useNodeActions arrange (R-003)", () => {
 
 describe("useNodeActions add from the panel (W-175)", () => {
   const withTabs: Layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: container("root0001", [
       { ...defaultElement("tabs", "tabs0001"), children: [] } as LayoutNode,
       heading("head0002", "B"),

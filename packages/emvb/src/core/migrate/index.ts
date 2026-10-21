@@ -59,6 +59,7 @@ function walkGradients(value: unknown): unknown {
 
 const gradients: Migration = (doc) => walkGradients(doc) as Record<string, unknown>;
 
+/** 0.8.0 (W-885, D-031, D-059): layout 16 -> 17 and design 15 -> 16 add only the optional `loop`. */
 /** `LAYOUT_MIGRATIONS[n]` upgrades a version-n layout to version n + 1. Migrations must be pure. */
 export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {
   1: unchanged,
@@ -76,6 +77,7 @@ export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {
   13: unchanged,
   14: unchanged,
   15: unchanged,
+  16: unchanged,
 };
 
 /** `DESIGN_MIGRATIONS[n]` upgrades a version-n design document to version n + 1. */
@@ -94,6 +96,7 @@ export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {
   12: unchanged,
   13: unchanged,
   14: unchanged,
+  15: unchanged,
 };
 
 export type UpgradeResult =

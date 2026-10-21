@@ -15,7 +15,7 @@ for (const preference of ["no-preference", "reduce"] as const) {
       request,
       "Toast feedback",
       {
-        schemaVersion: 16,
+        schemaVersion: 17,
         root: {
           id: "root0001",
           type: "container",

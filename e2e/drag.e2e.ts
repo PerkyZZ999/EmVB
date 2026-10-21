@@ -3,7 +3,7 @@ import { createPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
 
 const layoutFor = (first: string, second: string) => ({
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",
@@ -74,7 +74,7 @@ test("dragging Heading onto the canvas inserts at the pointed index and saves", 
 });
 
 const nestedLayout = (outer: string, inner: string) => ({
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",
@@ -175,7 +175,7 @@ test("dropping a container into its own child shows the invalid outline and chan
 type Tree = { id: string; type: string; props?: { text?: string }; children?: Tree[] };
 
 const nestingLayout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",
@@ -253,7 +253,7 @@ test("dragging into an empty nested container nests it there and names the targe
   if (!box) throw new Error("inner div block has no box");
   await dragTileTo(page, "heading", box.x + box.width / 2, box.y + box.height / 2, async () => {
     await expect(overlay(page).locator("[data-emvb-drop-target-label]")).toHaveText(
-      "Inside Div Block",
+      "Inside Div block",
     );
     await expect(overlay(page).locator("[data-emvb-drop-target]")).toBeVisible();
     // W-129: the label sits inside the target's outline, not over the element above.
@@ -311,7 +311,7 @@ test("near a container's bottom edge the drop goes after it, in its parent (W-12
 
 test("a heading dropped on Tabs lands in the open tab panel (W-128)", async ({ page, request }) => {
   const layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",
@@ -362,7 +362,7 @@ test("in a right-to-left row a drop left of the first heading goes after it (W-5
   request,
 }) => {
   const layout = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",

@@ -22,6 +22,17 @@ describe("print, scope, styles merge and page features", () => {
     expect(renderPage(page([]), emptyDesign()).css).toContain("@media print");
   });
 
+  test("W-845: print shows every tab panel and every accordion panel", () => {
+    const css = printCss();
+    const print = css.slice(css.indexOf("@media print{"));
+    expect(print).toContain(
+      ".emvb-tabs:has(> .emvb-tab-input:nth-of-type(n):checked) > .emvb-tab-panels > .emvb-tab-panel:nth-of-type(n){display:block!important}",
+    );
+    expect(print).toContain(
+      ".emvb-accordion-item::details-content{content-visibility:visible;display:block}",
+    );
+  });
+
   test("a scoped render wraps the vnode the editor paints", () => {
     const rendered = renderPage(page([]), emptyDesign(), { scope: "page1", mode: "editor" });
     expect(rendered.vnode.attrs.class).toContain("emvb-scope");

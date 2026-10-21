@@ -33,7 +33,7 @@ describe("Loop and Pagination outside an archive (W-271)", () => {
 
   test("the Loop panel on a page shows the note", async () => {
     const layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: { id: "root0001", type: "container", props: {}, children: [loop] },
     } as Layout;
     await mount(

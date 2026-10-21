@@ -5,7 +5,7 @@ const grad = (color: string) =>
   `<svg viewBox="0 0 10 10"><defs><linearGradient id="g"><stop offset="0" stop-color="${color}"/></linearGradient><clipPath id="c"><rect width="5" height="5"/></clipPath></defs><rect width="10" height="10" fill="url(#g)" clip-path="url(#c)"/><use href="#c"/><rect fill="url(#elsewhere)"/></svg>`;
 
 const page = (): Layout => ({
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",

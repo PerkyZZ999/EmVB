@@ -10,7 +10,7 @@ import { renderPage } from "./index.ts";
 const design = emptyDesign();
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const panel = (id: string, label: string, children: LayoutNode[] = []) =>
@@ -105,7 +105,7 @@ describe("renderLoop (W-091)", () => {
   test("an empty loop in the editor explains how to design the item", () => {
     const editor = renderPage(page(loop({}, [])), design, { mode: "editor" }).html;
     expect(editor).toContain("data-emvb-loop-empty");
-    expect(editor).toContain("Choose a Loop Item, or add elements here to design the item.");
+    expect(editor).toContain("Choose a Loop item, or add elements here to design the item.");
     expect(renderPage(page(loop({}, [])), design).html).not.toContain("emvb-loop");
   });
 

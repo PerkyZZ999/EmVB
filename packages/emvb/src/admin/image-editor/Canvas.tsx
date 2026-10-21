@@ -7,8 +7,13 @@
  * apps/www/src/registry/image-editor), MIT License, Copyright (c) 2026 rbbydotdev. Dropping and
  * opening files are left out: the editor opens the Image element's picture.
  */
-import { Button } from "@cloudflare/kumo";
-import { CircleNotchIcon, CornersOutIcon } from "@phosphor-icons/react";
+import {
+  CircleNotchIcon,
+  CornersOutIcon,
+  MagnifyingGlassMinusIcon,
+  MagnifyingGlassPlusIcon,
+} from "@phosphor-icons/react";
+import { IconButton } from "./parts.tsx";
 import * as React from "react";
 import { BlurFocus } from "./BlurFocus.tsx";
 import { CornerHandlesOverlay, CropFrameOverlay } from "./CropOverlay.tsx";
@@ -23,6 +28,17 @@ import { useImageEditor } from "./engine.ts";
 
 type UserView = { scale: number; x: number; y: number };
 const IDENTITY_VIEW: UserView = { scale: 1, x: 0, y: 0 };
+const MAX_ZOOM = 8;
+/** W-861 (IE-6): one Zoom in or Zoom out press. */
+const ZOOM_STEP = 1.5;
+
+/** Zoom by `factor` keeping the stage point (cx, cy) still; back to 1 is the plain fit. */
+function zoomAt(prev: UserView, factor: number, cx: number, cy: number): UserView {
+  const scale = Math.min(MAX_ZOOM, Math.max(1, prev.scale * factor));
+  if (scale === 1) return IDENTITY_VIEW;
+  const f = scale / prev.scale;
+  return { scale, x: cx - (cx - prev.x) * f, y: cy - (cy - prev.y) * f };
+}
 const SETTLE_MS = 240;
 const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
 
@@ -135,10 +151,7 @@ export function EditorCanvas({ alt, padding = 24 }: { alt: string; padding?: num
     const cy = event.clientY - rect.top;
     setUserView((prev) => {
       if (!zooming) return { ...prev, x: prev.x - event.deltaX, y: prev.y - event.deltaY };
-      const scale = Math.min(8, Math.max(1, prev.scale * Math.exp(-event.deltaY * 0.01)));
-      const f = scale / prev.scale;
-      if (scale === 1) return IDENTITY_VIEW;
-      return { scale, x: cx - (cx - prev.x) * f, y: cy - (cy - prev.y) * f };
+      return zoomAt(prev, Math.exp(-event.deltaY * 0.01), cx, cy);
     });
   };
   React.useEffect(() => {
@@ -242,18 +255,49 @@ export function EditorCanvas({ alt, padding = 24 }: { alt: string; padding?: num
             />
           </div>
         ) : null}
-        {!isCropView && userView !== IDENTITY_VIEW ? (
-          <Button
-            aria-label="Fit to screen"
-            className="emvb-ie-fit"
-            shape="square"
-            size="sm"
-            variant="secondary"
-            icon={<CornersOutIcon aria-hidden="true" />}
-            onClick={() => setUserView(IDENTITY_VIEW)}
+        {!isCropView ? (
+          // W-861 (IE-6): Zoom out, Zoom in and Fit, as photocn's toolbar actions; Ctrl/⌘-scroll
+          // and pinch still zoom too.
+          <div
+            className="emvb-ie-zoom"
+            role="group"
+            aria-label="Zoom"
+            data-emvb-image-zoom={Math.round(userView.scale * 100)}
             onPointerDown={(event) => event.stopPropagation()}
-            type="button"
-          />
+          >
+            <IconButton
+              label="Zoom out"
+              variant="outline"
+              icon={<MagnifyingGlassMinusIcon aria-hidden="true" />}
+              disabled={editor.disabled || userView.scale <= 1}
+              onClick={() =>
+                setUserView((prev) =>
+                  zoomAt(prev, 1 / ZOOM_STEP, (stage?.width ?? 0) / 2, (stage?.height ?? 0) / 2),
+                )
+              }
+              data-emvb-image-zoom-out=""
+            />
+            <IconButton
+              label="Zoom in"
+              variant="outline"
+              icon={<MagnifyingGlassPlusIcon aria-hidden="true" />}
+              disabled={editor.disabled || !editor.isReady || userView.scale >= MAX_ZOOM}
+              onClick={() =>
+                setUserView((prev) =>
+                  zoomAt(prev, ZOOM_STEP, (stage?.width ?? 0) / 2, (stage?.height ?? 0) / 2),
+                )
+              }
+              data-emvb-image-zoom-in=""
+            />
+            {userView !== IDENTITY_VIEW ? (
+              <IconButton
+                label="Fit to screen"
+                variant="outline"
+                icon={<CornersOutIcon aria-hidden="true" />}
+                onClick={() => setUserView(IDENTITY_VIEW)}
+              />
+            ) : null}
+          </div>
         ) : null}
       </div>
     </div>

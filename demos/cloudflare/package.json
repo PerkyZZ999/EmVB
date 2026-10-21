@@ -10,19 +10,19 @@
     "start": "wrangler dev --ip 127.0.0.1 --port 4422"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^14.3.3",
-    "@astrojs/react": "^7.0.0",
-    "@emdash-cms/cloudflare": "1.2.0",
-    "@emdash-cms/plugin-forms": "0.2.9",
+    "@astrojs/cloudflare": "~14.3.4",
+    "@astrojs/react": "^7.1.0",
+    "@emdash-cms/cloudflare": "1.3.1",
+    "@emdash-cms/plugin-forms": "0.2.11",
     "@perkyzz/emvb": "workspace:*",
-    "astro": "^7.3.5",
-    "emdash": "1.2.0",
-    "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "astro": "7.3.5",
+    "emdash": "1.3.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260929.1",
-    "wrangler": "4.143.1"
+    "@cloudflare/workers-types": "^5.20261021.1",
+    "wrangler": "4.151.3"
   },
   "emdash": {
     "label": "EmVB demo (Cloudflare, local only)",

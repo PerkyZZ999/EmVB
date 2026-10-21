@@ -1,3 +1,4 @@
+import { Checkbox, Input } from "@cloudflare/kumo";
 import * as React from "react";
 import {
   applyTokens,
@@ -8,6 +9,7 @@ import {
   type DesignSystem,
 } from "../../../core/index.ts";
 import { fieldNumber } from "./settings/number-input.ts";
+import { FIELD } from "../../ui.ts";
 import { PanelSelect } from "./settings/PanelSelect.tsx";
 
 // W-436: the fields are labelled "(px)", so "18px" is 18.
@@ -90,8 +92,8 @@ export function TokenScales({
         </div>
         <label>
           <span className="emvb-bind-label">{kind === "type" ? "Body size" : "Base gap"} (px)</span>
-          <input
-            className="emvb-native-input"
+          <Input
+            className={FIELD}
             inputMode="decimal"
             value={base}
             data-emvb-tokens-base=""
@@ -115,23 +117,21 @@ export function TokenScales({
             />
           </div>
         )}
-        <label className="emvb-tokens-fluid">
-          <input
-            type="checkbox"
-            checked={fluid}
-            data-emvb-tokens-fluid=""
-            onChange={(event) => {
-              setFluid(event.currentTarget.checked);
-              setDone(null);
-            }}
-          />{" "}
-          Fluid
-        </label>
+        <Checkbox
+          className="emvb-tokens-fluid"
+          label="Fluid"
+          checked={fluid}
+          data-emvb-tokens-fluid=""
+          onCheckedChange={(checked) => {
+            setFluid(checked);
+            setDone(null);
+          }}
+        />
         {fluid && (
           <label data-emvb-tokens-row="full">
             <span className="emvb-bind-label">On small screens (px)</span>
-            <input
-              className="emvb-native-input"
+            <Input
+              className={FIELD}
               inputMode="decimal"
               value={minBase}
               data-emvb-tokens-min=""

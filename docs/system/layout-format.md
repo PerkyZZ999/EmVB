@@ -1,6 +1,6 @@
-# Layout format (schema 16)
+# Layout format (schema 17)
 
-How EmVB stores a page and its site-wide design, at schema 16 (the image editor's `edit` record on images in W-481; per-element direction, image link and caption, button icons, table of contents, container queries, and focal points in W-341 onward; visitor segments in W-329; Loop fields in W-330; `ch` lengths and negative margins in W-331). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
+How EmVB stores a page and its site-wide design, at layout schema 17 and design schema 16 (Loop forever on an icon animation in W-853, D-059; the image editor's `edit` record on images in W-481; per-element direction, image link and caption, button icons, table of contents, container queries, and focal points in W-341 onward; visitor segments in W-329; Loop fields in W-330; `ch` lengths and negative margins in W-331). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
 ## Where it lives
 
@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, at schema 16 (the image editor'
 
 ```json
 {
-  "schemaVersion": 16,
+  "schemaVersion": 17,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, at schema 16 (the image editor'
 }
 ```
 
-- `schemaVersion` is the literal `16` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045, W-160, W-307, W-329, W-341, W-481; older documents are upgraded on read by steps that change nothing, except v11 → v12, which rewrites a gradient's `from` and `to` into `stops`). `root` is always a container.
+- `schemaVersion` is the literal `17` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045, W-160, W-307, W-329, W-341, W-481, W-885; older documents are upgraded on read by steps that change nothing, except v11 → v12, which rewrites a gradient's `from` and `to` into `stops`). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)), `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`, rendered as `emvb-k-<id>`), `bind` (W-307), `variant` (an A/B arm, W-312) and `audience` (who sees it, W-313, W-329).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; every shared node field, including `devices` and `hiddenOn`, is allowed and checked as on known nodes; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -130,7 +130,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `iconScale` (W-237) | number 0.1–4 | `scale` on the element (the icon and its background shape) |
 | `iconStrokeWidth` (W-237, outline icons) | number 0.25–6 | `--emvb-icon-stroke`; applies when the stored SVG's root has a stroke width of 1, 1.5, 2, 2.5 or 3 (render moves it into an `emvb-icon-sw<w>` class) |
 | `iconShadow` (W-237, icons) | `{ x, y, blur, color? }`: px, `x` and `y` −100 to 100, `blur` 0–100 | `--emvb-icon-shadow` as `drop-shadow(Xpx Ypx Bpx [colour])`, read by the `svg` as `filter` (follows the outline) |
-| `iconAnimation` (W-237, Normal only) | `{ type, duration }`: `type` `spin` or `pulse`; `duration` whole ms 200–10000. Or `{ type: "none" }` (W-248), which stops an animation a device inherits from a wider one | `--emvb-icon-animation` (`emvb-icon-spin <ms> linear infinite`, `emvb-icon-pulse <ms> ease-in-out infinite alternate` or `none`); the icon base CSS turns it off under `prefers-reduced-motion: reduce` |
+| `iconAnimation` (W-237, Normal only) | `{ type, duration }`: `type` `spin` or `pulse`; `duration` whole ms 200–10000; optional `loop: true` (W-853, D-059) keeps it running forever. Or `{ type: "none" }` (W-248), which stops an animation a device inherits from a wider one | `--emvb-icon-animation` (`emvb-icon-spin <ms> linear <runs>`, `emvb-icon-pulse <ms> ease-in-out <runs> alternate` or `none`; W-848: `<runs>` is as many whole runs as fit in 5 s, at least one, even for a pulse; with `loop: true` it is `infinite`); the icon base CSS turns it off under `prefers-reduced-motion: reduce` |
 
 **W-088 additions are additive.** Every new key and unit is optional and every earlier value keeps its meaning, so stored pages and classes are valid unchanged. The version moved to 2 (D-031) with a v1 → v2 step that changes nothing, so an older EmVB shows "saved by a newer EmVB" rather than an invalid-layout error. The keys are the same on `node.style` and on `design.classes[].style`. The generator builds each value from typed numbers and keywords only and runs the same `isSafeCssValue` gate as every other property; anything else is dropped with a `rejected-style` warning. A shadow colour bound to a colour variable counts as a use of that variable, and deleting the variable clears it from the page layout and from class styles.
 
@@ -167,7 +167,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 15,
+  "schemaVersion": 16,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],

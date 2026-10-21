@@ -6,7 +6,7 @@ setUpEmvbOnce();
 test.use({ viewport: { width: 1440, height: 900 } });
 
 const mediaLayout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",

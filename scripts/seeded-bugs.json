@@ -3441,7 +3441,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/popups/runtime.ts",
-          "search": "if (!withinShowTimes(advanced, timesShown(config.id))) return false;",
+          "search": "if (!byClick && !withinShowTimes(advanced, timesShown(config.id))) return false;",
           "replace": ""
         }
       ],
@@ -4618,7 +4618,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/classes.ts",
-          "search": "      for (const [key, value] of Object.entries(patch)) if (value === undefined) delete style[key];\n",
+          "search": "    for (const [key, value] of Object.entries(patch)) if (value === undefined) delete style[key];\n",
           "replace": ""
         }
       ],
@@ -7921,7 +7921,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n  16: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7941,7 +7941,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7981,7 +7981,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 16;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 17;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -8241,7 +8241,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n  16: unchanged,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8261,7 +8261,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8281,7 +8281,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 16;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 17;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8290,9 +8290,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout is at version 16 and design at version 15"
+        "layout is at version 17 and design at version 16"
       ],
-      "expect": "\\(fail\\).*layout is at version 16 and design at version 15"
+      "expect": "\\(fail\\).*layout is at version 17 and design at version 16"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8301,7 +8301,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 15;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 16;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8310,9 +8310,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout and design are at version 15"
+        "layout is at version 17 and design at version 16"
       ],
-      "expect": "\\(fail\\).*layout and design are at version 15"
+      "expect": "\\(fail\\).*layout is at version 17 and design at version 16"
     },
     {
       "id": "D-032/node-states-refused",
@@ -9426,7 +9426,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/states.ts",
-          "search": "      else delete next.states;\n",
+          "search": "    else delete next.states;\n",
           "replace": ""
         }
       ],
@@ -12027,8 +12027,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/popups/runtime.ts",
-          "search": "  if (ctrl.opened || !canOpen(config)) return;",
-          "replace": "  if (!canOpen(config)) return;"
+          "search": "  if (ctrl.opened || !canOpen(config, byClick)) return;",
+          "replace": "  if (!canOpen(config, byClick)) return;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
@@ -15006,8 +15006,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/popups/runtime.ts",
-          "search": "  if (ctrl.opened || !canOpen(config)) return;",
-          "replace": "  if (!canOpen(config)) return;\n  if (ctrl.opened) {\n    bumpTimesShown(config.id);\n    return;\n  }"
+          "search": "  if (ctrl.opened || !canOpen(config, byClick)) return;",
+          "replace": "  if (!canOpen(config, byClick)) return;\n  if (ctrl.opened) {\n    bumpTimesShown(config.id);\n    return;\n  }"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts"],
@@ -17617,7 +17617,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PLUGIN_VERSION = \"0.7.0\";",
+          "search": "export const PLUGIN_VERSION = \"0.8.0\";",
           "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
         }
       ],
@@ -17631,7 +17631,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PLUGIN_VERSION = \"0.7.0\";",
+          "search": "export const PLUGIN_VERSION = \"0.8.0\";",
           "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
         }
       ],
@@ -24400,8 +24400,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "    [canRename],",
-          "replace": "    [canRename, actions],"
+          "search": "    [canRename, canSaveSection],",
+          "replace": "    [canRename, canSaveSection, actions],"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/layers-memo.test.tsx"],
@@ -27317,7 +27317,7 @@
           "replace": "options: {},"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/canvas-styles.test.ts"],
+      "command": ["bun", "test", "./packages/emvb/test/server/canvas-styles-options.test.ts"],
       "expect": "\\(fail\\).*W-327"
     },
     {
@@ -27657,7 +27657,7 @@
       "edits": [
         {
           "file": "docs/system/layout-format.md",
-          "search": "\"schemaVersion\": 16,\n  \"root\": {",
+          "search": "\"schemaVersion\": 17,\n  \"root\": {",
           "replace": "\"schemaVersion\": 13,\n  \"root\": {"
         }
       ],
@@ -29023,8 +29023,8 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "\"@perkyzz/emvb-icons\": \"0.1.1\"",
-          "replace": "\"@perkyzz/emvb-icons\": \"0.1.0\""
+          "search": "\"@perkyzz/emvb-icons\": \"0.2.0\"",
+          "replace": "\"@perkyzz/emvb-icons\": \"0.1.1\""
         }
       ],
       "command": [
@@ -30441,7 +30441,7 @@
       "edits": [
         {
           "file": "packages/emvb-mcp/src/bridge.ts",
-          "search": "export const BRIDGE_VERSION = \"0.7.0\";",
+          "search": "export const BRIDGE_VERSION = \"0.8.0\";",
           "replace": "export const BRIDGE_VERSION = \"0.4.9\";"
         }
       ],
@@ -36069,7 +36069,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/dynamic-elements.ts",
-          "search": "\"The field Post Excerpt shows, such as role. Leave it empty for the excerpt.\"",
+          "search": "\"The field Post excerpt shows, such as role. Leave it empty for the excerpt.\"",
           "replace": "\"The field Post Excerpt shows, e.g. role. Leave it empty for the excerpt.\""
         }
       ],
@@ -38308,12 +38308,12 @@
     {
       "id": "W-791/loop-icon-silent",
       "requirement": "W-791",
-      "description": "an endlessly looping icon isn't flagged",
+      "description": "an icon animating past 5 seconds isn't flagged",
       "edits": [
         {
           "file": "packages/emvb/src/core/a11y/audit.ts",
-          "search": "      return anim?.type === \"spin\" || anim?.type === \"pulse\";",
-          "replace": "      return anim?.type === \"spin-none\";"
+          "search": "      return iconAnimationRuns(anim.type, ms) * ms > ICON_ANIMATION_LIMIT_MS;",
+          "replace": "      return false;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/a11y/motion.test.ts", "-t", "W-791"],
@@ -39101,7 +39101,7 @@
       "description": "drop the focus fallback",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/editor-chrome.tsx",
+          "file": "packages/emvb/src/admin/editor/focus-when-lost.ts",
           "search": "    target?.focus({ preventScroll: true });",
           "replace": "    void target;"
         }
@@ -39121,7 +39121,7 @@
       "description": "stop waiting while focus is still in the closing dialog",
       "edits": [
         {
-          "file": "packages/emvb/src/admin/editor/editor-chrome.tsx",
+          "file": "packages/emvb/src/admin/editor/focus-when-lost.ts",
           "search": "      if (inDialog && Date.now() - started < 2000) timer = window.setTimeout(settle, 30);",
           "replace": "      void inDialog;"
         }
@@ -39454,6 +39454,975 @@
         "W-841"
       ],
       "expect": "\\(fail\\).*W-841"
+    },
+    {
+      "id": "W-844/tall-bar-uncapped",
+      "requirement": "W-844",
+      "description": "A tall top or bottom bar grows past half the screen and covers a phone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/float.ts",
+          "search": ".emvb-float:is(.emvb-float--top,.emvb-float--bottom) .emvb-float__body{max-height:50vh;max-height:50dvh;overflow:auto}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/float.test.ts", "-t", "W-844"],
+      "expect": "\\(fail\\).*W-844"
+    },
+    {
+      "id": "W-845/print-hides-tabs",
+      "requirement": "W-845",
+      "description": "Printing a page with Tabs prints only the open tab.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/print.ts",
+          "search": ".emvb-tab-panel:nth-of-type(n){display:block!important}",
+          "replace": ".emvb-tab-panel:nth-of-type(n){}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/features-w332.test.ts", "-t", "W-845"],
+      "expect": "\\(fail\\).*W-845"
+    },
+    {
+      "id": "W-845/print-closed-accordion",
+      "requirement": "W-845",
+      "description": "Printing a page with an Accordion prints only the open items.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/print.ts",
+          "search": ".emvb-accordion-item::details-content{content-visibility:visible;display:block}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/features-w332.test.ts", "-t", "W-845"],
+      "expect": "\\(fail\\).*W-845"
+    },
+    {
+      "id": "W-846/click-capped",
+      "requirement": "W-846",
+      "description": "A click on a popup's trigger does nothing once Show at most is reached.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "if (!byClick && !withinShowTimes(",
+          "replace": "if (!withinShowTimes("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts", "-t", "W-846"],
+      "expect": "\\(fail\\).*W-846"
+    },
+    {
+      "id": "W-846/click-counted",
+      "requirement": "W-846",
+      "description": "A click-opened popup counts against Show at most and uses up the automatic opens.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.ts",
+          "search": "  if (!byClick) bumpTimesShown(config.id);",
+          "replace": "  bumpTimesShown(config.id);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/popups/runtime.test.ts", "-t", "W-846"],
+      "expect": "\\(fail\\).*W-846"
+    },
+    {
+      "id": "W-847/phone-flyout-beside",
+      "requirement": "W-847",
+      "description": "On a phone a column menu's flyout still opens beside its item and runs off the screen.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/menu.ts",
+          "search": "{top:100%;inset-inline:auto;inset-inline-start:0;min-width:min(12rem,calc(100vw - 2rem));max-width:calc(100vw - 2rem)}",
+          "replace": "{}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/elements/menu-hover.test.ts",
+        "-t",
+        "W-847"
+      ],
+      "expect": "\\(fail\\).*W-847"
+    },
+    {
+      "id": "W-848/spin-forever",
+      "requirement": "W-848",
+      "description": "A spinning icon loops forever again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  spin: \"emvb-icon-spin {ms} linear {runs}\",",
+          "replace": "  spin: \"emvb-icon-spin {ms} linear infinite\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
+      "expect": "\\(fail\\).*rotate, flip, scale"
+    },
+    {
+      "id": "W-848/pulse-forever",
+      "requirement": "W-848",
+      "description": "A pulsing icon loops forever again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  pulse: \"emvb-icon-pulse {ms} ease-in-out {runs} alternate\",",
+          "replace": "  pulse: \"emvb-icon-pulse {ms} ease-in-out infinite alternate\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
+      "expect": "\\(fail\\).*pulse alternates"
+    },
+    {
+      "id": "W-848/runs-past-limit",
+      "requirement": "W-848",
+      "description": "A spin repeats one turn more than fits in 5 seconds.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/icons/animation-runs.ts",
+          "search": "  if (type === \"spin\") return Math.max(1, Math.floor(ICON_ANIMATION_LIMIT_MS / durationMs));",
+          "replace": "  if (type === \"spin\") return Math.max(1, Math.ceil(ICON_ANIMATION_LIMIT_MS / durationMs));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/icons/animation-runs.test.ts",
+        "-t",
+        "W-848"
+      ],
+      "expect": "\\(fail\\).*W-848"
+    },
+    {
+      "id": "W-848/pulse-ends-midway",
+      "requirement": "W-848",
+      "description": "A pulse runs an odd number of times and stops while enlarged.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/icons/animation-runs.ts",
+          "search": "  return 2 * Math.max(1, Math.floor(ICON_ANIMATION_LIMIT_MS / (2 * durationMs)));",
+          "replace": "  return Math.max(1, Math.floor(ICON_ANIMATION_LIMIT_MS / durationMs));"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/icons/animation-runs.test.ts",
+        "-t",
+        "W-848"
+      ],
+      "expect": "\\(fail\\).*W-848"
+    },
+    {
+      "id": "W-848/audit-flags-short-loops",
+      "requirement": "W-848",
+      "description": "The accessibility check still flags an icon that stops within 5 seconds.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      return iconAnimationRuns(anim.type, ms) * ms > ICON_ANIMATION_LIMIT_MS;",
+          "replace": "      return iconAnimationRuns(anim.type, ms) * ms > 0;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/motion.test.ts", "-t", "W-848"],
+      "expect": "\\(fail\\).*W-848"
+    },
+    {
+      "id": "W-849/confirm-not-focused",
+      "requirement": "W-849",
+      "description": "The inline delete confirmation opens without taking focus.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "    cancelRef.current?.focus();\n  }, [confirm.kind, confirm.id]);",
+          "replace": "    void cancelRef;\n  }, [confirm.kind, confirm.id]);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-849"
+      ],
+      "expect": "\\(fail\\).*W-849"
+    },
+    {
+      "id": "W-849/confirm-unlabelled",
+      "requirement": "W-849",
+      "description": "The delete confirmation alertdialog has no accessible name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "      data-emvb-site-confirm=\"\"\n      role=\"alertdialog\"\n      aria-labelledby={titleId}\n",
+          "replace": "      data-emvb-site-confirm=\"\"\n      role=\"alertdialog\"\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "W-849"
+      ],
+      "expect": "\\(fail\\).*W-849"
+    },
+    {
+      "id": "W-850/iframe-no-window",
+      "requirement": "W-850",
+      "description": "Component tests run happy-dom 21 with iframe page loading off, so an iframe has no window.",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "  settings: { enableIframePageLoading: true },\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./test/setup/preload.test.ts", "-t", "W-850"],
+      "expect": "\\(fail\\).*W-850"
+    },
+    {
+      "id": "W-853/loop-not-infinite",
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
+      "requirement": "W-853",
+      "description": "Loop forever still stops after the counted runs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  const runs = loop ? \"infinite\" : iconAnimationRuns(",
+          "replace": "  const runs = loop ? \"1\" : iconAnimationRuns("
+        }
+      ]
+    },
+    {
+      "id": "W-853/audit-ignores-loop",
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/motion.test.ts"],
+      "requirement": "W-853",
+      "description": "The accessibility check misses an icon set to Loop forever.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      if (anim.loop === true) return true;",
+          "replace": "      if (anim.loop === true) return false;"
+        }
+      ]
+    },
+    {
+      "id": "W-853/switch-drops-loop",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "requirement": "W-853",
+      "description": "Turning Loop forever on does not store it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx",
+          "search": "onChange(loop ? { ...rest, loop: true } : rest);",
+          "replace": "onChange(rest);"
+        }
+      ]
+    },
+    {
+      "id": "W-853/schema-no-loop",
+      "command": ["bun", "test", "./packages/emvb/src/core/schema/node-shapes.test.ts"],
+      "requirement": "W-853",
+      "description": "The layout schema refuses the loop key.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "        loop: z.literal(true).optional(),\n",
+          "replace": ""
+        }
+      ]
+    },
+    {
+      "id": "W-854/import-confirm-no-focus",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/design-import.test.tsx"],
+      "requirement": "W-854",
+      "description": "The Import confirmation opens without taking focus.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "    cancelRef.current?.focus();\n  }, [name]);",
+          "replace": "  }, [name]);"
+        }
+      ]
+    },
+    {
+      "id": "W-854/import-confirm-unlabelled",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/design-import.test.tsx",
+        "-t",
+        "W-854"
+      ],
+      "requirement": "W-854",
+      "description": "The Import confirmation alertdialog has no accessible name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "      data-emvb-import-confirm=\"\"\n      role=\"alertdialog\"\n      aria-labelledby={titleId}\n",
+          "replace": "      data-emvb-import-confirm=\"\"\n      role=\"alertdialog\"\n"
+        }
+      ]
+    },
+    {
+      "id": "W-857/theme-filter-title-case",
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/lists.test.tsx"],
+      "requirement": "W-857",
+      "description": "A Theme Builder filter tab goes back to Title Case.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "{ value: \"single_page\", label: \"Single page\" }",
+          "replace": "{ value: \"single_page\", label: \"Single Page\" }"
+        }
+      ]
+    },
+    {
+      "id": "W-857/manager-title-case",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-styles-drawer.test.tsx",
+        "-t",
+        "Manager"
+      ],
+      "requirement": "W-857",
+      "description": "The Site styles subtitle goes back to Title Case.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SiteStylesDrawer.tsx",
+          "search": "? \"Classes manager\"",
+          "replace": "? \"Classes Manager\""
+        }
+      ]
+    },
+    {
+      "id": "W-858/badge-bold",
+      "command": ["bun", "test", "./packages/emvb/src/admin/kumo-rules.test.ts"],
+      "requirement": "W-858",
+      "description": "The JS badge goes back to font-weight 700.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": "font-size: 10px; font-weight: 600;",
+          "replace": "font-size: 10px; font-weight: 700;"
+        }
+      ]
+    },
+    {
+      "id": "W-858/histogram-uppercase",
+      "command": ["bun", "test", "./packages/emvb/src/admin/kumo-rules.test.ts"],
+      "requirement": "W-858",
+      "description": "The histogram header goes back to uppercase with wide tracking.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/image-editor-css.ts",
+          "search": "line-height: 14px;\n  color: var(--text-color-kumo-subtle);\n}",
+          "replace": "line-height: 14px;\n  text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-color-kumo-subtle);\n}"
+        }
+      ]
+    },
+    {
+      "id": "W-858/tool-colour-transition",
+      "command": ["bun", "test", "./packages/emvb/src/admin/kumo-rules.test.ts"],
+      "requirement": "W-858",
+      "description": "An image-editor tool button fades its hover colour again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/image-editor-css.ts",
+          "search": "font-size: 11px; line-height: 14px; cursor: pointer;\n",
+          "replace": "font-size: 11px; line-height: 14px; cursor: pointer;\n  transition: background-color 120ms ease, color 120ms ease;\n"
+        }
+      ]
+    },
+    {
+      "id": "W-860/tool-native-title",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-860"
+      ],
+      "requirement": "W-860",
+      "description": "The image-editor tools go back to a browser title instead of a Kumo tooltip.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/parts.tsx",
+          "search": "<Tooltip key={tool.id} content={tool.label} side=\"bottom\" asChild>",
+          "replace": "<React.Fragment key={tool.id}>"
+        },
+        {
+          "file": "packages/emvb/src/admin/image-editor/parts.tsx",
+          "search": "          </button>\n          </Tooltip>",
+          "replace": "          </button>\n          </React.Fragment>"
+        }
+      ]
+    },
+    {
+      "id": "W-861/zoom-buttons-stuck",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-861"
+      ],
+      "requirement": "W-861",
+      "description": "Zoom in and Zoom out stop changing the view.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/Canvas.tsx",
+          "search": "Math.max(1, prev.scale * factor)",
+          "replace": "Math.max(1, prev.scale)"
+        }
+      ]
+    },
+    {
+      "id": "W-862/recipe-unchecked",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/save.test.ts",
+        "-t",
+        "W-862"
+      ],
+      "requirement": "W-862",
+      "description": "A recipe file is loaded without checking it against the recipe schema.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/save.ts",
+          "search": "  const parsed = ImageEditRecipe.safeParse(inner);\n  if (!parsed.success) return bad;",
+          "replace": "  const parsed = { success: true, data: inner as ImageEditRecipe };"
+        }
+      ]
+    },
+    {
+      "id": "W-862/recipe-not-applied",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx",
+        "-t",
+        "W-862"
+      ],
+      "requirement": "W-862",
+      "description": "Loading a recipe file never applies it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "    await editor.recipes.apply(result.recipe as",
+          "replace": "    void (result.recipe as"
+        }
+      ]
+    },
+    {
+      "id": "W-863/no-end-hint",
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/edge-hints.test.tsx"],
+      "requirement": "W-863",
+      "description": "A scrolling tab row never says more tabs hide past its end.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "max > 1 && node.scrollLeft < max - 1",
+          "replace": "false"
+        }
+      ]
+    },
+    {
+      "id": "W-864/plain-shortcut-text",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/dialog-actions.test.tsx",
+        "-t",
+        "W-864"
+      ],
+      "requirement": "W-864",
+      "description": "The shortcuts dialog prints keys as plain text again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ShortcutsDialog.tsx",
+          "search": "<kbd>{key}</kbd>",
+          "replace": "{key}"
+        }
+      ]
+    },
+    {
+      "id": "W-865/raw-country-input",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/audience-editor.test.tsx",
+        "-t",
+        "W-865"
+      ],
+      "requirement": "W-865",
+      "description": "The Visitors countries field falls back to the raw native input style.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/AudienceEditor.tsx",
+          "search": "className={FIELD}\n              value={countryText}",
+          "replace": "className=\"emvb-native-input\"\n              value={countryText}"
+        }
+      ]
+    },
+    {
+      "id": "W-866/title-case-name",
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/element-names.test.ts"],
+      "requirement": "W-866",
+      "description": "An element name goes back to Title Case.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/dynamic-elements.ts",
+          "search": "name: \"Post author\"",
+          "replace": "name: \"Post Author\""
+        }
+      ]
+    },
+    {
+      "id": "W-867/half-width-field",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/feature-css.test.ts",
+        "-t",
+        "W-867"
+      ],
+      "requirement": "W-867",
+      "description": "A single text field in a Visitors row shrinks to half the panel again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/feature-css.ts",
+          "search": ".emvb-bind-row > .emvb-bind-label + .emvb-field:last-child { grid-column: 1 / -1; }",
+          "replace": ""
+        }
+      ]
+    },
+    {
+      "id": "W-872/tab-list-fixed-height",
+      "command": ["bun", "test", "./packages/emvb/src/admin/image-editor/image-editor-css.test.ts"],
+      "requirement": "W-872",
+      "description": "The image editor's tab list keeps Kumo's fixed height, so the underline cuts through the label.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/image-editor-css.ts",
+          "search": ".emvb-ie-tabs [role=\"tablist\"] { width: 100%; height: auto; display: grid;",
+          "replace": ".emvb-ie-tabs [role=\"tablist\"] { width: 100%; display: grid;"
+        }
+      ]
+    },
+    {
+      "id": "W-874/class-clash-overwrites",
+      "command": ["bun", "test", "./packages/emvb/src/core/saved-sections.test.ts"],
+      "requirement": "W-874",
+      "description": "A saved class whose look differs from a same-named site class is treated as the same class, so the section loses its look.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/saved-sections.ts",
+          "search": "(c.id === cls.id || nameKey(c.name) === nameKey(cls.name)) && lookOf(c) === look,",
+          "replace": "c.id === cls.id || nameKey(c.name) === nameKey(cls.name),"
+        }
+      ]
+    },
+    {
+      "id": "W-874/old-save-not-upgraded",
+      "command": ["bun", "test", "./packages/emvb/src/core/saved-sections.test.ts"],
+      "requirement": "W-874",
+      "description": "An old saved section is read without the layout migrations.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/saved-sections.ts",
+          "search": "  const layout = validateLayout(raw[\"layout\"]);",
+          "replace": "  const layout = validateLayout(raw[\"layout\"], {});"
+        }
+      ]
+    },
+    {
+      "id": "W-874/classes-not-remapped",
+      "command": ["bun", "test", "./packages/emvb/src/core/saved-sections.test.ts"],
+      "requirement": "W-874",
+      "description": "Inserted nodes keep the saved class ids instead of the ids the classes got on this site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/saved-sections.ts",
+          "search": "  const remapped = withClassIds(section.node, merge.ids);",
+          "replace": "  const remapped = section.node;"
+        }
+      ]
+    },
+    {
+      "id": "W-874/variants-saved",
+      "command": ["bun", "test", "./packages/emvb/src/core/saved-sections.test.ts"],
+      "requirement": "W-874",
+      "description": "A saved section keeps the A/B test arm of the original.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/saved-sections.ts",
+          "search": "  const node = withoutVariants(structuredClone(found));",
+          "replace": "  const node = structuredClone(found);"
+        }
+      ]
+    },
+    {
+      "id": "W-875/insert-merges-twice",
+      "command": ["bun", "test", "./packages/emvb/test/server/saved-sections.test.ts"],
+      "requirement": "W-875",
+      "description": "insert_saved_section merges the classes again when it writes the page, so the copy points at a class the styles draft doesn't have.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/sections.ts",
+          "search": "prepareSavedSection(section, layout, design, Math.random, merge);",
+          "replace": "prepareSavedSection(section, layout, design, Math.random);"
+        }
+      ]
+    },
+    {
+      "id": "W-875/no-dry-run",
+      "command": ["bun", "test", "./packages/emvb/test/server/saved-sections.test.ts"],
+      "requirement": "W-875",
+      "description": "A refused insert still adds the section's classes to the styles draft.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/sections.ts",
+          "search": "    if (!fits.ok) throw new McpToolError(\"REFUSED\", fits.reason);\n",
+          "replace": ""
+        }
+      ]
+    },
+    {
+      "id": "W-875/save-unchecked",
+      "command": ["bun", "test", "./packages/emvb/test/server/saved-sections.test.ts"],
+      "requirement": "W-875",
+      "description": "The save route stores a record without reading it back through the checks.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/saved-sections.ts",
+          "search": "        if (!read.ok) return read;\n        if ((await all())",
+          "replace": "        if ((await all())"
+        }
+      ]
+    },
+    {
+      "id": "W-875/delete-missing-ok",
+      "command": ["bun", "test", "./packages/emvb/test/server/saved-sections.test.ts"],
+      "requirement": "W-875",
+      "description": "Deleting a section that isn't there reports success.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/sections.ts",
+          "search": "  if (!(await portOf(ports).remove(input.sectionId))) {",
+          "replace": "  if (!(await portOf(ports).remove(input.sectionId)) && input.sectionId === \"\") {"
+        }
+      ]
+    },
+    {
+      "id": "W-876/nomatch-ignores-saved",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/saved-sections.test.tsx"],
+      "requirement": "W-876",
+      "description": "The Add panel says nothing matches when only a saved section does.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "(!saved || matchingSections(saved, query).length === 0) ? (",
+          "replace": "true ? ("
+        }
+      ]
+    },
+    {
+      "id": "W-876/insert-skips-classes",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/saved-sections.test.tsx"],
+      "requirement": "W-876",
+      "description": "Inserting a saved section doesn't bring its classes into Site styles first.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSavedSections.ts",
+          "search": "      if (classes) await changeDesign(result.design);\n",
+          "replace": ""
+        }
+      ]
+    },
+    {
+      "id": "W-876/save-section-on-root",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/saved-sections.test.tsx"],
+      "requirement": "W-876",
+      "description": "Save as section is offered on the page itself.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-commands.ts",
+          "search": "return !!input.runners.saveSection && input.canDuplicate;",
+          "replace": "return !!input.runners.saveSection;"
+        }
+      ]
+    },
+    {
+      "id": "W-876/palette-damaged",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/saved-sections.test.tsx"],
+      "requirement": "W-876",
+      "description": "The palette offers a saved section that can't be read.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/palette-items.ts",
+          "search": "      if (section.damaged) continue;\n",
+          "replace": ""
+        }
+      ]
+    },
+    {
+      "id": "W-876/delete-no-confirm",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/saved-sections.test.tsx"],
+      "requirement": "W-876",
+      "description": "Delete in My sections removes at once without asking.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SavedSectionsGroup.tsx",
+          "search": "onClick={() => setAsking(item.id)}",
+          "replace": "onClick={() => void saved.remove(item.id)}"
+        }
+      ]
+    },
+    {
+      "id": "W-876/synced-no-part",
+      "command": ["bun", "test", "./packages/emvb/src/core/saved-sections.test.ts"],
+      "requirement": "W-876",
+      "description": "The Theme section made for a synced section doesn't point at its part.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "type: \"section\", props: { partId } } as LayoutNode);",
+          "replace": "type: \"section\", props: {} } as LayoutNode);"
+        }
+      ]
+    },
+    {
+      "id": "W-877/skill-no-delete",
+      "command": ["bun", "test", "./packages/emvb-mcp/test/skill.test.ts"],
+      "requirement": "W-877",
+      "description": "The page-builder skill doesn't mention delete_saved_section.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/skill/emvb-page-builder/SKILL.md",
+          "search": "`save_section` saves an element for reuse; `delete_saved_section` only when the person asks.",
+          "replace": "`save_section` saves an element for reuse."
+        }
+      ]
+    },
+    {
+      "id": "W-877/skill-no-insert",
+      "command": ["bun", "test", "./packages/emvb-mcp/test/skill.test.ts"],
+      "requirement": "W-877",
+      "description": "The page-builder skill doesn't tell agents to insert saved sections.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/skill/emvb-page-builder/SKILL.md",
+          "search": "`list_saved_sections`, then\n   `insert_saved_section` (it adds",
+          "replace": "`list_saved_sections`, then\n   inserting one (it adds"
+        },
+        {
+          "file": "packages/emvb-mcp/skill/emvb-page-builder/SKILL.md",
+          "search": "apply_section_recipe, insert_saved_section, update_site_styles",
+          "replace": "apply_section_recipe, update_site_styles"
+        },
+        {
+          "file": "packages/emvb-mcp/skill/emvb-page-builder/SKILL.md",
+          "search": "- `REFUSED` on `insert_saved_section`: the place",
+          "replace": "- `REFUSED` on an insert: the place"
+        }
+      ]
+    },
+    {
+      "id": "W-878/delete-focus-lost",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/saved-sections.test.tsx"],
+      "requirement": "W-878",
+      "description": "Deleting the only saved section a search matches drops focus on the page body.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/SavedSectionsGroup.tsx",
+          "search": "if (!failed && !next && query.trim()) {",
+          "replace": "if (!failed && !next && query.trim() === \"never\") {"
+        }
+      ]
+    },
+    {
+      "id": "W-879/insert-stale-rev-adds-classes",
+      "command": ["bun", "test", "./packages/emvb/test/server/saved-sections.test.ts"],
+      "requirement": "W-879",
+      "description": "insert_saved_section with a stale rev adds the section's classes to the styles draft, then refuses the page write.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/sections.ts",
+          "search": "if (input.expectedRev !== undefined && page.rev !== input.expectedRev) {",
+          "replace": "if (input.expectedRev !== undefined && page.rev !== input.expectedRev && false) {"
+        }
+      ]
+    },
+    {
+      "id": "W-880/synced-orphan-part",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/saved-sections.test.tsx"],
+      "requirement": "W-880",
+      "description": "Make synced section on an element a Theme section can't wrap (a tab panel) makes a theme part anyway, then refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSavedSections.ts",
+          "search": "    if (!fits.ok) return fits.reason;\n",
+          "replace": "\n"
+        }
+      ]
+    },
+    {
+      "id": "W-881/recipe-huge-file-read",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx"
+      ],
+      "requirement": "W-881",
+      "description": "Load recipe reads any file into memory, however large, and calls it not a recipe.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "if (file.size > RECIPE_FILE_MAX_BYTES) {",
+          "replace": "if (file.size < 0) {"
+        }
+      ]
+    },
+    {
+      "id": "W-881/recipe-apply-failure-silent",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx"
+      ],
+      "requirement": "W-881",
+      "description": "A recipe that fails to apply shows nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "setError(\"This recipe couldn't be applied to this picture.\");",
+          "replace": "setError(null);"
+        }
+      ]
+    },
+    {
+      "id": "W-882/motion-ignores-classes",
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/motion.test.ts"],
+      "requirement": "W-882",
+      "description": "The accessibility check misses a Loop forever icon animation that comes from a class.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "const tooLong = [effectiveStyle(node, design), ...deviceStyles(node, design)].some((st) => {",
+          "replace": "const tooLong = [node.style, ...Object.values(node.devices ?? {})].some((st) => {"
+        }
+      ]
+    },
+    {
+      "id": "W-882/motion-class-device-override",
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/motion.test.ts"],
+      "requirement": "W-882",
+      "description": "An element's own device None doesn't win over a class's looping device animation.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "merged[key] = { ...merged[key], ...(st as Record<string, unknown>) };",
+          "replace": "merged[`${key}${Object.keys(merged).length}`] = st as Record<string, unknown>;"
+        }
+      ]
+    },
+    {
+      "id": "W-882/inherited-loop-unsaid",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/icon-style-panel.test.tsx"
+      ],
+      "requirement": "W-882",
+      "description": "A device that inherits Loop forever only says the type and duration.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx",
+          "search": "{from.loop ? \", loops forever\" : \"\"}",
+          "replace": "{\"\"}"
+        }
+      ]
+    },
+    {
+      "id": "W-883/save-section-focus-body",
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/saved-sections.test.tsx"],
+      "requirement": "W-883",
+      "description": "Closing Save as section (opened from a Layers row menu) drops focus on the page body.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/SavedSectionDialogs.tsx",
+          "search": "return was && !open ? focusWhenLost() : undefined;",
+          "replace": "return was && !open && !was ? focusWhenLost() : undefined;"
+        }
+      ]
+    },
+    {
+      "id": "W-884/compact-no-recipe",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx"
+      ],
+      "requirement": "W-884",
+      "description": "The phone (compact) image editor has no way to download or load a recipe.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "              <RecipeItems recipe={recipe} />\n",
+          "replace": "\n"
+        }
+      ]
+    },
+    {
+      "id": "W-884/compact-no-recipe-error",
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx"
+      ],
+      "requirement": "W-884",
+      "description": "A bad recipe file loaded in the compact layout shows no error.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/image-editor/ImageEditorDialog.tsx",
+          "search": "{recipe.errorNote ? <div className=\"emvb-ie-compact-note\">{recipe.errorNote}</div> : null}",
+          "replace": "{null}"
+        }
+      ]
+    },
+    {
+      "id": "W-885/layout-17-step-missing",
+      "command": ["bun", "test", "./packages/emvb/src/core/migrate/migrate.test.ts"],
+      "requirement": "W-885",
+      "description": "Layout schema 17 has no 16 -> 17 step, so every stored 0.7.0 page fails to upgrade.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "  16: unchanged,\n};",
+          "replace": "};"
+        }
+      ]
+    },
+    {
+      "id": "W-885/design-16-step-missing",
+      "command": ["bun", "test", "./packages/emvb/src/core/migrate/migrate.test.ts"],
+      "requirement": "W-885",
+      "description": "Design schema 16 has no 15 -> 16 step.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "  15: unchanged,\n};",
+          "replace": "};"
+        }
+      ]
     }
   ]
 }

@@ -18,7 +18,7 @@ export const postTitle: ElementDefinition<PostTitleNode> = {
   defaults: () => ({ type: "post-title", props: { level: 1 } }),
   descriptor: {
     type: "post-title",
-    name: "Post Title",
+    name: "Post title",
     group: "dynamic",
     defaultTab: "content",
     fields: [
@@ -40,7 +40,7 @@ export const postExcerpt: ElementDefinition<PostExcerptNode> = {
   defaults: () => ({ type: "post-excerpt", props: {} }),
   descriptor: {
     type: "post-excerpt",
-    name: "Post Excerpt",
+    name: "Post excerpt",
     group: "dynamic",
     defaultTab: "style",
     fields: [
@@ -61,7 +61,7 @@ export const postContent: ElementDefinition<PostContentNode> = {
   defaults: () => ({ type: "post-content", props: {} }),
   descriptor: {
     type: "post-content",
-    name: "Post Content",
+    name: "Post content",
     group: "dynamic",
     defaultTab: "style",
     fields: [],
@@ -78,7 +78,7 @@ export const postImage: ElementDefinition<PostImageNode> = {
   defaults: () => ({ type: "post-image", props: { decorative: false } }),
   descriptor: {
     type: "post-image",
-    name: "Post Image",
+    name: "Post image",
     group: "dynamic",
     defaultTab: "content",
     fields: [{ key: "decorative", kind: "boolean", label: "Decorative", optional: true }],
@@ -95,7 +95,7 @@ export const postDate: ElementDefinition<PostDateNode> = {
   defaults: () => ({ type: "post-date", props: {} }),
   descriptor: {
     type: "post-date",
-    name: "Post Date",
+    name: "Post date",
     group: "dynamic",
     defaultTab: "style",
     fields: [
@@ -122,7 +122,7 @@ export const postAuthor: ElementDefinition<PostAuthorNode> = {
   defaults: () => ({ type: "post-author", props: {} }),
   descriptor: {
     type: "post-author",
-    name: "Post Author",
+    name: "Post author",
     group: "dynamic",
     defaultTab: "style",
     fields: [],
@@ -135,7 +135,7 @@ export const postLink: ElementDefinition<PostLinkNode> = {
   defaults: () => ({ type: "post-link", props: {} }),
   descriptor: {
     type: "post-link",
-    name: "Post Link",
+    name: "Post link",
     group: "dynamic",
     defaultTab: "content",
     fields: [
@@ -230,14 +230,14 @@ export const loop: ElementDefinition<LoopNode> = {
         label: "Image field",
         optional: true,
         message:
-          "The field Post Image shows, such as photo. Leave it empty for the featured image.",
+          "The field Post image shows, such as photo. Leave it empty for the featured image.",
       },
       {
         key: "excerptField",
         kind: "text",
         label: "Excerpt field",
         optional: true,
-        message: "The field Post Excerpt shows, such as role. Leave it empty for the excerpt.",
+        message: "The field Post excerpt shows, such as role. Leave it empty for the excerpt.",
       },
       {
         key: "filter",
@@ -250,10 +250,10 @@ export const loop: ElementDefinition<LoopNode> = {
       {
         key: "itemPartId",
         kind: "text",
-        label: "Loop Item",
+        label: "Loop item",
         optional: true,
         message:
-          "Optional published Loop Item theme part. Leave blank to use nested elements as the item template.",
+          "Optional published Loop item theme part. Leave blank to use nested elements as the item template.",
       },
       {
         key: "perPage",

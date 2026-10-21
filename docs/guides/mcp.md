@@ -9,7 +9,7 @@ publishes it, unless an admin allows agent publishing.
 
 - EmDash **1.2 or later** with MCP on: `emdash({ mcp: true, … })`. The rest of EmVB still works on
   EmDash 1.0 and 1.1; only the agent tools need 1.2.
-- `@perkyzz/emvb` 0.5.0 or later on the site (0.7.0 recommended: `list_versions` gives times as ISO 8601 UTC, and it adds the `NOT_SET_UP`, image-source and hidden-element checks and refuses links, SVG markup and duplicate class or variable names the page would drop), with **Set up EmVB** done once. Before that, the page
+- `@perkyzz/emvb` 0.5.0 or later on the site (0.8.0 recommended: it adds the saved-section tools; 0.7.0 gives `list_versions` times as ISO 8601 UTC and adds the `NOT_SET_UP`, image-source and hidden-element checks and refuses links, SVG markup and duplicate class or variable names the page would drop), with **Set up EmVB** done once. Before that, the page
   tools answer `NOT_SET_UP`.
 - An admin turns agents on in **Pages VisualBuilder → AI agents** (off by default), and approves the
   EmVB tools on EmDash's Plugins screen. EmDash asks again whenever the tool list changes, for
@@ -75,7 +75,7 @@ the token, never the token. Calls signed in without a token are counted per user
 
 | Read | Write (draft only) | Publish (only when allowed) |
 | --- | --- | --- |
-| `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `get_accessibility_findings`, `list_versions` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `restore_version`, `update_site_styles` | `publish_page`, `publish_site_styles` |
+| `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `get_accessibility_findings`, `list_versions`, `list_saved_sections` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `restore_version`, `update_site_styles`, `save_section`, `insert_saved_section`, `delete_saved_section` | `publish_page`, `publish_site_styles` |
 
 - Writes take an optional `expectedRev`; a stale one returns `CONFLICT`. Every write returns a new
   `rev`: pass that one to the next write.
@@ -84,6 +84,12 @@ the token, never the token. Calls signed in without a token are counted per user
 - `create_page` uses the slug EmDash derives from the title and refuses a taken one.
 - `update_site_styles` changes the style draft only, and refuses to remove a variable a page or class
   still uses unless `force: true`.
+- Saved sections ([guide](saved-sections.md)): `save_section` stores a copy of an element in
+  **My sections** (agents save copies only; synced sections are made in the editor).
+  `insert_saved_section` first adds the classes the section uses to the style draft (a class with
+  the same name but a different look is added as a numbered copy, never overwritten), then adds the
+  section to the page. `delete_saved_section` is marked destructive; pages keep copies already
+  inserted. All four need an editor token and go through the same write queue as other writes.
 - A page is limited to 512 KB of layout (`TOO_LARGE`), 2,000 elements and 24 levels of nesting.
 - Errors come back as tool errors with a code (`INVALID_INPUT`, `INVALID_LAYOUT`, `NESTING`,
   `NOT_FOUND`, `CONFLICT`, `PUBLISH_DISABLED`, `FORBIDDEN`, `REFUSED`, `TOO_LARGE`, `NOT_SET_UP`,

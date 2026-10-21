@@ -18,7 +18,7 @@ export function LoopItemBindControl({
   fetcher,
   onChange,
   partType = "loop_item",
-  label = "Loop Item",
+  label = "Loop item",
   emptyLabel = "Use nested elements",
   marker = "loop-item",
 }: {

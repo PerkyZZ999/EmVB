@@ -54,6 +54,6 @@ describe("image editor docs match the code (W-488)", () => {
   test("the README features the image editor and links the guide", () => {
     expect(readme).toMatch(/image editor/i);
     expect(readme).toContain("docs/guides/image-editor.md");
-    expect(readme).toContain("Layout schema 16");
+    expect(readme).toContain("Layout schema 17");
   });
 });

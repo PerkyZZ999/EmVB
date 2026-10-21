@@ -9,7 +9,7 @@ import { cleanup, mount, rerender } from "../../../../test/dom/mount.ts";
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: { id: "root0001", type: "container", props: {}, children: [] },
 };
 const vnode: VNode = { tag: "div", attrs: {}, children: ["Page"] };

@@ -35,7 +35,7 @@ describe("Layers tree keys (W-233)", () => {
 
 describe("Layers arrows skip collapsed rows (W-520)", () => {
   const nested = {
-    schemaVersion: 16,
+    schemaVersion: 17,
     root: {
       id: "root0001",
       type: "container",

@@ -14,6 +14,8 @@ import {
   ArrowCounterClockwiseIcon,
   DotsThreeIcon,
   DownloadSimpleIcon,
+  FileArrowUpIcon,
+  ScrollIcon,
   WarningCircleIcon,
   XIcon,
 } from "@phosphor-icons/react";
@@ -45,7 +47,16 @@ import {
   ToolSwitcher,
   UndoButton,
 } from "./parts.tsx";
-import { buildImageEdit, editedFileName, hasGps, outputFile, savedRecipe } from "./save.ts";
+import {
+  buildImageEdit,
+  editedFileName,
+  hasGps,
+  outputFile,
+  parseRecipeFile,
+  RECIPE_FILE_MAX_BYTES,
+  recipeFileText,
+  savedRecipe,
+} from "./save.ts";
 import { displayName, elementAspectOption, sizeLabel, type ImageEditorToolId } from "./tools.ts";
 import type { RenderMode } from "./worker.ts";
 import type { ImageEdit } from "../../core/index.ts";
@@ -113,6 +124,119 @@ function useWidth(ref: React.RefObject<HTMLElement | null>) {
     return () => observer.disconnect();
   }, [ref]);
   return width;
+}
+
+/** W-862 (IE-2): download the current edits as a recipe file, or load one onto this picture. */
+function useRecipeFile(name: string) {
+  const editor = useImageEditor();
+  const fileRef = React.useRef<HTMLInputElement>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const current = editor.recipes.current;
+  const download = () => {
+    if (!current) return;
+    const url = URL.createObjectURL(
+      new Blob([recipeFileText(current as Parameters<typeof recipeFileText>[0])], {
+        type: "application/json",
+      }),
+    );
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name.replace(/\.[^.]+$/, "") || "image"}.recipe.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
+  const load = async (file: File | undefined) => {
+    if (!file) return;
+    // W-881: a huge file picked by mistake isn't read into memory, and a failed apply says so.
+    if (file.size > RECIPE_FILE_MAX_BYTES) {
+      setError("This file is too large to be an image edit recipe.");
+      return;
+    }
+    try {
+      const result = parseRecipeFile(await file.text());
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setError(null);
+      await editor.recipes.apply(result.recipe as Parameters<typeof editor.recipes.apply>[0]);
+    } catch {
+      setError("This recipe couldn't be applied to this picture.");
+    }
+  };
+  const pick = () => fileRef.current?.click();
+  // W-884: the phone layout's More menu offers the same two items, so both layouts render these.
+  const errorNote = error ? (
+    <span className="emvb-ie-recipe-error" role="alert" data-emvb-image-recipe-error="">
+      <WarningCircleIcon aria-hidden="true" />
+      {error}
+    </span>
+  ) : null;
+  const fileInput = (
+    <input
+      ref={fileRef}
+      type="file"
+      accept="application/json,.json"
+      hidden
+      aria-label="Load recipe file"
+      data-emvb-image-recipe-file=""
+      onChange={(event) => {
+        const input = event.currentTarget;
+        void load(input.files?.[0]).finally(() => {
+          input.value = "";
+        });
+      }}
+    />
+  );
+  return { current, download, pick, errorNote, fileInput };
+}
+
+function RecipeMenu({ name }: { name: string }) {
+  const editor = useImageEditor();
+  const recipe = useRecipeFile(name);
+  return (
+    <>
+      {recipe.errorNote}
+      <DropdownMenu>
+        <DropdownMenu.Trigger
+          render={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="emvb-ie-btn"
+              icon={<ScrollIcon aria-hidden="true" />}
+              disabled={editor.disabled || !editor.hasImage}
+              data-emvb-image-recipe=""
+            >
+              Recipe
+            </Button>
+          }
+        />
+        <DropdownMenu.Content align="end">
+          <RecipeItems recipe={recipe} />
+        </DropdownMenu.Content>
+      </DropdownMenu>
+      {recipe.fileInput}
+    </>
+  );
+}
+
+function RecipeItems({ recipe }: { recipe: ReturnType<typeof useRecipeFile> }) {
+  return (
+    <>
+      <DropdownMenu.Item
+        icon={DownloadSimpleIcon}
+        disabled={!recipe.current}
+        onClick={recipe.download}
+      >
+        Download recipe
+      </DropdownMenu.Item>
+      <DropdownMenu.Item icon={FileArrowUpIcon} onClick={recipe.pick}>
+        Load recipe…
+      </DropdownMenu.Item>
+    </>
+  );
 }
 
 function SaveCopyButton() {
@@ -237,6 +361,7 @@ function DesktopLayout({ ready, name }: { ready: Ready; name: string }) {
           </span>
         ) : null}
         <div className="emvb-ie-toolbar-end">
+          <RecipeMenu name={name} />
           <ResetAllButton />
           <CompareButton />
           <CancelButton />
@@ -402,6 +527,7 @@ function PanelSheet({
 
 function CompactLayout({ name }: { name: string }) {
   const editor = useImageEditor();
+  const recipe = useRecipeFile(name);
   const rootRef = React.useRef<HTMLDivElement | null>(null);
   const [rootHeight, setRootHeight] = React.useState<number | null>(null);
   React.useLayoutEffect(() => {
@@ -468,11 +594,14 @@ function CompactLayout({ name }: { name: string }) {
               >
                 Reset all edits
               </DropdownMenu.Item>
+              <RecipeItems recipe={recipe} />
             </DropdownMenu.Content>
           </DropdownMenu>
+          {recipe.fileInput}
           <CancelButton compact />
         </div>
       </header>
+      {recipe.errorNote ? <div className="emvb-ie-compact-note">{recipe.errorNote}</div> : null}
       <div className="emvb-ie-compact-canvas" style={{ paddingBottom: inset }}>
         <EditorCanvas alt={name} padding={12} />
       </div>

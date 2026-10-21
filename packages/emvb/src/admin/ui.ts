@@ -213,6 +213,15 @@ export const UI_CSS = `
     mask-image: linear-gradient(to right, transparent, #000 var(--emvb-fade-start), #000 calc(100% - var(--emvb-fade-end)), transparent);
   }
 }
+/* W-863: without scroll timelines (Firefox, older Safari) the row's data-more-* hints fade it. */
+@supports not (animation-timeline: scroll()) {
+  .emvb-theme-filters[data-more-start] { --emvb-fade-start: 32px; }
+  .emvb-theme-filters[data-more-end] { --emvb-fade-end: 32px; }
+  .emvb-theme-filters[data-more-start],
+  .emvb-theme-filters[data-more-end] {
+    mask-image: linear-gradient(to right, transparent, #000 var(--emvb-fade-start), #000 calc(100% - var(--emvb-fade-end)), transparent);
+  }
+}
 
 /* EmVB-owned dialog body (Kumo Dialog keeps host radius/shadow) */
 .emvb-dialog { display: flex; flex-direction: column; gap: 10px; }

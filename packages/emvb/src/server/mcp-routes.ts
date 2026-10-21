@@ -1,4 +1,5 @@
 import { PluginRouteError, type PluginRoute, type RouteContext } from "emdash";
+import { portOf } from "./saved-sections.ts";
 import { PAGES_COLLECTION, DESIGN_DRAFT_KEY, DESIGN_KEY } from "../constants.ts";
 import { McpToolError } from "../mcp/errors.ts";
 import type { RequiredFieldInfo } from "../core/index.ts";
@@ -135,6 +136,7 @@ function pluginPorts(ctx: RouteContext<unknown>): EmvbPorts {
   };
   return {
     caller: { userId: ctx.user?.id ?? null, role: Number(ctx.user?.role ?? 0) },
+    savedSections: portOf(ctx),
     formFields: (formIds) => loadFormFieldsFromSite(ctx.request.url, formIds),
     async rateLimit(cls) {
       await hitRateLimit(

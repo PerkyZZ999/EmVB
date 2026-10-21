@@ -26,7 +26,7 @@ async function openPhotoEditor(page: Page, request: APIRequestContext, title: st
     request,
     title,
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -56,20 +56,33 @@ async function openPhotoEditor(page: Page, request: APIRequestContext, title: st
 // W-751: the first image-editor open after a dev-server start compiles its lazy chunks, which can
 // take longer than the 30 s readiness limit the tests assert. Open it once before them, untimed
 // by any test, so every test measures a warm editor.
+// W-855: on a cold dev server that first open can also make Vite optimize a new dependency and
+// reload the page, which closes the editor before it is ready (seen in the trace as a second
+// "[vite] connected"). The warm-up opens it again, up to three tries of 150 s each. Only this
+// untimed warm-up changed; the tests' own limits and assertions are the same.
+const WARM_UP_TRIES = 3;
 test.beforeAll(async ({ browser }, info) => {
-  test.setTimeout(180_000);
+  test.setTimeout(WARM_UP_TRIES * 160_000);
   const { baseURL, storageState } = info.project.use;
   const context = await browser.newContext({ baseURL, storageState });
   try {
     const page = await context.newPage();
     await page.setViewportSize({ width: 1440, height: 900 });
-    await openEditor(page, await warmPage(context.request));
-    await openLayers(page);
-    await overlay(page).locator(".emvb-layer-select", { hasText: "Image" }).click();
-    await overlay(page).locator("[data-emvb-image-edit]").click();
-    await page
-      .locator('[data-emvb-image-editor="ready"]')
-      .waitFor({ state: "visible", timeout: 150_000 });
+    const id = await warmPage(context.request);
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await openEditor(page, id);
+        await openLayers(page);
+        await overlay(page).locator(".emvb-layer-select", { hasText: "Image" }).click();
+        await overlay(page).locator("[data-emvb-image-edit]").click();
+        await page
+          .locator('[data-emvb-image-editor="ready"]')
+          .waitFor({ state: "visible", timeout: 150_000 });
+        return;
+      } catch (error) {
+        if (attempt >= WARM_UP_TRIES) throw error;
+      }
+    }
   } finally {
     await context.close();
   }
@@ -95,7 +108,7 @@ async function warmPage(request: APIRequestContext) {
     request,
     "Image editor warm-up",
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

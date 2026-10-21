@@ -16,7 +16,7 @@ test("the settings panel keeps the scroll position of each tab across selections
     request,
     "Panel scroll",
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",
@@ -56,7 +56,7 @@ test("the settings panel keeps the scroll position of each tab across selections
   }
   expect(await scrollTop(page)).toBe(600);
 
-  // The Heading opens on Content, at the top; the next Div Block's Style is back at 600.
+  // The Heading opens on Content, at the top; the next Div block's Style is back at 600.
   await pick(page, "head0001");
   await expect(overlay(page).getByRole("tab", { name: "Content" })).toHaveAttribute(
     "aria-selected",

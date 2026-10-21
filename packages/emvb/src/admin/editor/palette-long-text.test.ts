@@ -6,7 +6,7 @@ import { paletteItems } from "./palette-items.ts";
 const long = `${"Lorem ipsum dolor sit amet. ".repeat(20)}The secret word is zanzibar.`;
 const emoji = `${"a".repeat(76)}😀 and more text after the emoji to pass eighty`;
 const layout: Layout = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   root: {
     id: "root0001",
     type: "container",

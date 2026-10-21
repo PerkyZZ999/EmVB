@@ -207,23 +207,37 @@ export function renameClass(design: DesignSystem, classId: string, name: string)
   };
 }
 
+type DesignClass = NonNullable<DesignSystem["classes"]>[number];
+
+/**
+ * Replace one class with `edit(copy)`; the design comes back unchanged when no class has that id.
+ * The copy is shallow, so `edit` may set or delete keys on it. Pure.
+ */
+export function editClass(
+  design: DesignSystem,
+  classId: string,
+  edit: (copy: DesignClass) => DesignClass,
+): DesignSystem {
+  const classes = design.classes ?? [];
+  if (!classes.some((c) => c.id === classId)) return design;
+  return {
+    ...design,
+    classes: classes.map((c) => (c.id === classId ? edit(Object.assign({}, c)) : c)),
+  };
+}
+
 /** Merge `patch` into a class's style; `undefined` values clear their property. Pure (W-087). */
 export function patchClassStyle(
   design: DesignSystem,
   classId: string,
   patch: Partial<StyleProps>,
 ): DesignSystem {
-  const classes = design.classes ?? [];
-  if (!classes.some((c) => c.id === classId)) return design;
-  return {
-    ...design,
-    classes: classes.map((c) => {
-      if (c.id !== classId) return c;
-      const style: Record<string, unknown> = { ...c.style, ...patch };
-      for (const [key, value] of Object.entries(patch)) if (value === undefined) delete style[key];
-      return Object.assign({}, c, { style: style as StyleProps });
-    }),
-  };
+  return editClass(design, classId, (next) => {
+    const style: Record<string, unknown> = { ...next.style, ...patch };
+    for (const [key, value] of Object.entries(patch)) if (value === undefined) delete style[key];
+    next.style = style as StyleProps;
+    return next;
+  });
 }
 
 /** Swap one applied class id for another in place, keeping the cascade order. Pure (W-087). */

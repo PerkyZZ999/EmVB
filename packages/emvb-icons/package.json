@@ -1,6 +1,6 @@
 {
   "name": "@perkyzz/emvb-icons",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Icon sets for the EmVB editor. Public pages store the chosen SVG and do not load these files.",
   "homepage": "https://emvb.dev",
   "bugs": {

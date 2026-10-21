@@ -15,7 +15,7 @@ npm i @perkyzz/emvb
 # or: bun add @perkyzz/emvb
 ```
 
-EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash's exact pin) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own.
+EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash's exact pin) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own. EmVB currently supports Astro 7 up to 7.3.5: Astro 7.3.6 and later depend on zod ^4.6.5, while EmDash pins zod to exactly 4.5.4, and the second copy of zod breaks type checking of EmDash plugin routes. Keep your site on `astro` 7.3.5 for now; this will be widened once EmDash moves its zod pin.
 
 It also installs two dependencies: `zod` and `@perkyzz/emvb-icons`, the icon sets for the editor's Icon library (pinned to the exact version EmVB was built with). Only the editor loads the icon sets; a placed icon is saved into the page as SVG, so public pages never fetch them.
 

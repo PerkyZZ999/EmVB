@@ -12,6 +12,8 @@ import { BUTTON, FIELD } from "../../ui.ts";
 import { isCancelEscape } from "../ime.ts";
 import { matchesSearch } from "../../search.ts";
 import { dragStash } from "../dnd/drag-stash.ts";
+import type { SavedSectionActions } from "../useSavedSections.ts";
+import { matchingSections, SavedSectionsGroup } from "./SavedSectionsGroup.tsx";
 
 const GROUPS = [
   { id: "layout", label: "Layout" },
@@ -23,12 +25,15 @@ const GROUPS = [
 export function AddPanel({
   onAdd,
   onRecipe,
+  saved,
   defaultQuery = "",
   formsAvailable = true,
 }: {
   onAdd: (type: ElementType) => void;
   /** Adds a section recipe (W-320); without it, recipes are not offered. */
   onRecipe?: (id: string) => void;
+  /** My sections (W-876); without it the group is not shown. */
+  saved?: SavedSectionActions;
   /** Test-only initial search string. */
   defaultQuery?: string;
   /** Hide the Form group when the forms plugin is missing (W-036). */
@@ -68,7 +73,9 @@ export function AddPanel({
         }}
         placeholder="Search elements…"
       />
-      {matched.length === 0 && recipes.length === 0 ? (
+      {matched.length === 0 &&
+      recipes.length === 0 &&
+      (!saved || matchingSections(saved, query).length === 0) ? (
         <div className="emvb-add-nomatch" data-emvb-add-nomatch="">
           <p className="emvb-helper" role="status">
             No elements match &quot;{query.trim()}&quot;.
@@ -146,6 +153,7 @@ export function AddPanel({
           </div>
         </div>
       )}
+      {saved && <SavedSectionsGroup saved={saved} query={query} />}
     </div>
   );
 }

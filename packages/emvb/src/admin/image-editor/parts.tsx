@@ -236,24 +236,25 @@ export function ToolSwitcher() {
       {IMAGE_EDITOR_TOOLS.map((tool, i) => {
         const ToolIcon = TOOL_ICONS[tool.id];
         const active = tool.id === editor.tool;
+        // W-860 (IE-3): a Kumo tooltip names each tool, as photocn's ToggleGroup does.
         return (
-          <button
-            key={tool.id}
-            ref={(el) => {
-              buttons.current[i] = el;
-            }}
-            type="button"
-            className="emvb-ie-switch"
-            aria-label={tool.label}
-            aria-pressed={active}
-            title={tool.label}
-            tabIndex={active || (index < 0 && i === 0) ? 0 : -1}
-            disabled={disabled}
-            data-emvb-image-tool={tool.id}
-            onClick={() => editor.setTool(tool.id)}
-          >
-            <ToolIcon aria-hidden="true" weight={active ? "bold" : "regular"} />
-          </button>
+          <Tooltip key={tool.id} content={tool.label} side="bottom" asChild>
+            <button
+              ref={(el) => {
+                buttons.current[i] = el;
+              }}
+              type="button"
+              className="emvb-ie-switch"
+              aria-label={tool.label}
+              aria-pressed={active}
+              tabIndex={active || (index < 0 && i === 0) ? 0 : -1}
+              disabled={disabled}
+              data-emvb-image-tool={tool.id}
+              onClick={() => editor.setTool(tool.id)}
+            >
+              <ToolIcon aria-hidden="true" weight={active ? "bold" : "regular"} />
+            </button>
+          </Tooltip>
         );
       })}
     </div>

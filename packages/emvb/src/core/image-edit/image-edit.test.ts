@@ -32,7 +32,7 @@ const sampleEdit = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 
-const page = (props: Record<string, unknown>, schemaVersion = 16) => ({
+const page = (props: Record<string, unknown>, schemaVersion = 17) => ({
   schemaVersion,
   root: {
     id: "root0001",
@@ -45,7 +45,7 @@ const page = (props: Record<string, unknown>, schemaVersion = 16) => ({
 describe("image edit record (W-481)", () => {
   test("a full record is valid and survives a layout round trip", () => {
     const layout = page({ mediaId: "01EDITED", width: 1920, height: 1920, edit: sampleEdit() });
-    expect<unknown>(validateLayout(layout)).toEqual({ ok: true, layout, upgradedFrom: 16 });
+    expect<unknown>(validateLayout(layout)).toEqual({ ok: true, layout, upgradedFrom: 17 });
   });
 
   test("originalMediaId and the recipe's optional parts may be left out", () => {
@@ -128,7 +128,7 @@ describe("image edit record (W-481)", () => {
     expect(result.ok).toBe(false);
   });
 
-  test("a v15 page (no edit) upgrades to 16 unchanged", () => {
+  test("a v15 page (no edit) upgrades to the current version unchanged", () => {
     const old = page({ caption: "Hi" }, 15);
     expect(upgradeLayout(old)).toEqual({ ok: true, doc: page({ caption: "Hi" }), from: 15 });
   });
@@ -138,7 +138,7 @@ describe("image edit record (W-481)", () => {
     expect(upgradeLayout(newer, {}, 15)).toEqual({
       ok: false,
       reason: "newer-version",
-      version: 16,
+      version: 17,
     });
   });
 });

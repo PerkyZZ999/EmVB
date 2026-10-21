@@ -13,7 +13,7 @@ test("W-737: unmatched icon searches recover by keyboard with the category and s
     request,
     "Icon search recovery",
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

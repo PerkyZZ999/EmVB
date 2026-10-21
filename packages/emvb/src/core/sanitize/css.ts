@@ -24,6 +24,7 @@ import type { StyleProps } from "../schema/style.ts";
 import { sanitizeMediaUrl } from "./media-url.ts";
 import { motionDeclarations, withMotion } from "./motion.ts";
 import { isRecord } from "../record.ts";
+import { iconAnimationRuns } from "../icons/animation-runs.ts";
 
 const setOf = (values: readonly string[]) => new Set<string>(values);
 const VAR_ID = /^[a-z0-9-]{1,40}$/;
@@ -379,20 +380,27 @@ function cssIconShadow(value: unknown): string | undefined {
 }
 
 const ICON_ANIMATIONS: Readonly<Record<string, string>> = {
-  spin: "emvb-icon-spin {ms} linear infinite",
-  pulse: "emvb-icon-pulse {ms} ease-in-out infinite alternate",
+  spin: "emvb-icon-spin {ms} linear {runs}",
+  pulse: "emvb-icon-pulse {ms} ease-in-out {runs} alternate",
 };
 
-/** W-237: a looping spin or pulse; the Icon's base CSS turns it off for reduced motion. */
+/**
+ * W-237: a spin or pulse; the Icon's base CSS turns it off for reduced motion. W-848: it repeats
+ * only for about 5 seconds (`iconAnimationRuns`), unless it loops forever (W-853).
+ */
 function cssIconAnimation(value: unknown): string | undefined {
   if (!isRecord(value)) return undefined;
-  if (Object.keys(value).some((key) => key !== "type" && key !== "duration")) return undefined;
-  const { type, duration } = value;
+  if (Object.keys(value).some((key) => key !== "type" && key !== "duration" && key !== "loop"))
+    return undefined;
+  const { type, duration, loop } = value;
+  if (loop !== undefined && (loop !== true || type === "none")) return undefined;
   // W-248: stops an animation inherited from a wider device.
   if (type === "none") return duration === undefined ? "none" : undefined;
   if (typeof type !== "string" || !Object.hasOwn(ICON_ANIMATIONS, type)) return undefined;
   if (!Number.isInteger(duration) || !inRangeNumber(duration, 200, 10_000)) return undefined;
-  return ICON_ANIMATIONS[type]?.replace("{ms}", `${duration}ms`);
+  // W-853 (D-059): Loop forever keeps a spinner going, as before W-848.
+  const runs = loop ? "infinite" : iconAnimationRuns(type === "spin" ? "spin" : "pulse", duration);
+  return ICON_ANIMATIONS[type]?.replace("{ms}", `${duration}ms`).replace("{runs}", String(runs));
 }
 
 export type Declaration = { property: string; value: string };

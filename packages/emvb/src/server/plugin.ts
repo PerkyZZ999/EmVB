@@ -6,6 +6,13 @@ import {
   designRoute,
   designSaveRoute,
 } from "./design-routes.ts";
+import {
+  savedSectionDeleteRoute,
+  savedSectionGetRoute,
+  savedSectionRenameRoute,
+  savedSectionSaveRoute,
+  savedSectionsRoute,
+} from "./saved-sections.ts";
 import { iconDeleteRoute, iconRenameRoute, iconUploadRoute, iconsRoute } from "./icon-routes.ts";
 import { beforeSave } from "./hooks.ts";
 import {
@@ -37,6 +44,8 @@ export function createPlugin(options: { canvasStyles?: unknown } = {}) {
       // D-057: agent changes and the site styles history.
       agentlog: { indexes: ["at", "pageId"] },
       designhistory: { indexes: ["at"] },
+      // W-875 (D-060): saved sections, by name, per site.
+      emvb_saved_sections: { indexes: ["updatedAt"] },
     },
     hooks: {
       "content:beforeSave": { handler: beforeSave, errorPolicy: "abort" },
@@ -64,6 +73,11 @@ export function createPlugin(options: { canvasStyles?: unknown } = {}) {
       "design/save": designSaveRoute,
       "design/publish": designPublishRoute,
       icons: iconsRoute,
+      "saved-sections": savedSectionsRoute,
+      "saved-sections/get": savedSectionGetRoute,
+      "saved-sections/save": savedSectionSaveRoute,
+      "saved-sections/rename": savedSectionRenameRoute,
+      "saved-sections/delete": savedSectionDeleteRoute,
       "icons/upload": iconUploadRoute,
       "icons/rename": iconRenameRoute,
       "icons/delete": iconDeleteRoute,

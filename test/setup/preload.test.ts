@@ -11,3 +11,13 @@ test("bunfig's preload provides the DOM at the plugin admin URL before any impor
     true,
   );
 });
+
+test("W-850 an iframe gets its own window, as the editor's canvas frame needs", () => {
+  const frame = document.createElement("iframe");
+  document.body.append(frame);
+  try {
+    expect(typeof frame.contentWindow?.addEventListener).toBe("function");
+  } finally {
+    frame.remove();
+  }
+});

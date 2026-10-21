@@ -1,4 +1,4 @@
-import { Button, Dialog } from "@cloudflare/kumo";
+import { Dialog } from "@cloudflare/kumo";
 import * as React from "react";
 import {
   measurePage,
@@ -10,8 +10,8 @@ import {
   type ThemeDynamicData,
 } from "../../core/index.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
-import { BUTTON } from "../ui.ts";
 import { useEditedNoun } from "./edited-noun.ts";
+import { DialogCloseButton } from "./DialogCloseButton.tsx";
 
 const KINDS: { kind: PerfKind; label: string }[] = [
   { kind: "html", label: "HTML" },
@@ -131,13 +131,7 @@ export function PerfMeterDialog({
             </>
           )}
           <div className="emvb-dialog-actions">
-            <Dialog.Close
-              render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
-                  Close
-                </Button>
-              )}
-            />
+            <DialogCloseButton>Close</DialogCloseButton>
           </div>
         </div>
       </Dialog>

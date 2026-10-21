@@ -35,9 +35,9 @@ import {
   type VariableKind,
 } from "../core/design/variables.ts";
 
-const PageId = z.string().min(1).max(128);
-const NodeIdInput = z.string().min(1).max(64);
-const Rev = z.string().min(1).max(256);
+export const PageId = z.string().min(1).max(128);
+export const NodeIdInput = z.string().min(1).max(64);
+export const Rev = z.string().min(1).max(256);
 
 /** The editor's save checks, run here because plugin writes skip `content:beforeSave` (R1 P0b). */
 function checkLayout(candidate: unknown): Layout {
@@ -87,7 +87,7 @@ export const WriteOutput = z.object({
  * Read → apply → validate → save with `_rev`, one write per page at a time (D-058). Without
  * `expectedRev`, a conflict re-reads and re-applies the operation once; with it, never.
  */
-async function mutatePage(
+export async function mutatePage(
   ports: EmvbPorts,
   tool: string,
   pageId: string,

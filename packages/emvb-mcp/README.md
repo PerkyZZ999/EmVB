@@ -34,7 +34,7 @@ element and site style resources, each page's draft and accessibility findings, 
 `emvb-page-builder` skill with its references (also in `skill/`).
 
 Needs Node 20+ on the agent's computer, and on the site EmDash 1.2+ with `mcp: true`,
-`@perkyzz/emvb` 0.5.0+ (0.7.0 recommended) with **Set up EmVB** done, and agents turned on in **Pages VisualBuilder →
+`@perkyzz/emvb` 0.5.0+ (0.8.0 recommended) with **Set up EmVB** done, and agents turned on in **Pages VisualBuilder →
 AI agents**. Full guide:
 <https://github.com/PerkyZZ999/EmVB/blob/main/docs/guides/mcp.md>.
 

@@ -13,7 +13,7 @@ describe("W-795 a bare word is not a video file", () => {
   });
   test("the page shows the missing-video placeholder, not a player", () => {
     const layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

@@ -4,7 +4,7 @@ import { emptyDesign, renderPage, type Layout } from "../index.ts";
 describe("W-801 a background video respects reduced motion and stays out of screen readers", () => {
   const { html, css } = renderPage(
     {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

@@ -1,3 +1,4 @@
+import { Checkbox, Input } from "@cloudflare/kumo";
 import * as React from "react";
 import {
   AUDIENCE_DEVICES,
@@ -5,6 +6,7 @@ import {
   type Audience,
   type LayoutNode,
 } from "../../../../core/index.ts";
+import { FIELD } from "../../../ui.ts";
 import { PanelSelect } from "./PanelSelect.tsx";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -133,8 +135,8 @@ export function AudienceEditor({
         <>
           <label className="emvb-bind-row">
             <span className="emvb-bind-label">Countries (two-letter codes)</span>
-            <input
-              className="emvb-native-input"
+            <Input
+              className={FIELD}
               value={countryText}
               placeholder="CA, US"
               data-emvb-audience-countries=""
@@ -149,21 +151,18 @@ export function AudienceEditor({
           <fieldset className="emvb-aud-checks">
             <legend className="emvb-bind-label">Devices</legend>
             {AUDIENCE_DEVICES.map((device) => (
-              <label key={device}>
-                <input
-                  type="checkbox"
-                  checked={base.devices?.includes(device) ?? false}
-                  data-emvb-audience-device={device}
-                  onChange={(event) => {
-                    const now = new Set(base.devices ?? []);
-                    if (event.currentTarget.checked) now.add(device);
-                    else now.delete(device);
-                    set({ ...base, devices: AUDIENCE_DEVICES.filter((d) => now.has(d)) });
-                  }}
-                />{" "}
-                {device[0]?.toUpperCase()}
-                {device.slice(1)}
-              </label>
+              <Checkbox
+                key={device}
+                label={`${device[0]?.toUpperCase() ?? ""}${device.slice(1)}`}
+                checked={base.devices?.includes(device) ?? false}
+                data-emvb-audience-device={device}
+                onCheckedChange={(checked) => {
+                  const now = new Set(base.devices ?? []);
+                  if (checked) now.add(device);
+                  else now.delete(device);
+                  set({ ...base, devices: AUDIENCE_DEVICES.filter((d) => now.has(d)) });
+                }}
+              />
             ))}
           </fieldset>
           <div className="emvb-bind-row">
@@ -187,8 +186,8 @@ export function AudienceEditor({
           </div>
           <label className="emvb-bind-row">
             <span className="emvb-bind-label">Segments (from your site)</span>
-            <input
-              className="emvb-native-input"
+            <Input
+              className={FIELD}
               value={segmentText}
               placeholder="member, plan:pro"
               data-emvb-audience-segments=""
@@ -241,8 +240,8 @@ export function AudienceEditor({
           )}
           <div className="emvb-bind-row">
             <span className="emvb-bind-label">Hours (24 h, empty = all day)</span>
-            <input
-              className="emvb-native-input"
+            <Input
+              className={FIELD}
               type="number"
               min={0}
               max={23}
@@ -259,8 +258,8 @@ export function AudienceEditor({
                 set({ ...rest, hours: { from, to } });
               }}
             />
-            <input
-              className="emvb-native-input"
+            <Input
+              className={FIELD}
               type="number"
               min={0}
               max={24}
@@ -280,27 +279,25 @@ export function AudienceEditor({
           <fieldset className="emvb-aud-checks">
             <legend className="emvb-bind-label">Days (none = every day)</legend>
             {DAYS.map((day, index) => (
-              <label key={day}>
-                <input
-                  type="checkbox"
-                  checked={base.days?.includes(index) ?? false}
-                  data-emvb-audience-day={index}
-                  onChange={(event) => {
-                    const now = new Set(base.days ?? []);
-                    if (event.currentTarget.checked) now.add(index);
-                    else now.delete(index);
-                    set({ ...base, days: DAYS.map((_d, i) => i).filter((i) => now.has(i)) });
-                  }}
-                />{" "}
-                {day}
-              </label>
+              <Checkbox
+                key={day}
+                label={day}
+                checked={base.days?.includes(index) ?? false}
+                data-emvb-audience-day={index}
+                onCheckedChange={(checked) => {
+                  const now = new Set(base.days ?? []);
+                  if (checked) now.add(index);
+                  else now.delete(index);
+                  set({ ...base, days: DAYS.map((_d, i) => i).filter((i) => now.has(i)) });
+                }}
+              />
             ))}
           </fieldset>
           {(base.hours || base.days) && (
             <label className="emvb-bind-row">
               <span className="emvb-bind-label">Time zone</span>
-              <input
-                className="emvb-native-input"
+              <Input
+                className={FIELD}
                 value={zoneText}
                 placeholder="UTC"
                 data-emvb-audience-zone=""

@@ -2,6 +2,7 @@ import { Button, Dialog, Loader } from "@cloudflare/kumo";
 import { useMediaQuery } from "./useMediaQuery.ts";
 import { useEditedNoun } from "./edited-noun.ts";
 import { BUTTON, SOLID_DESTRUCTIVE, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
+import { DialogCloseButton } from "./DialogCloseButton.tsx";
 
 type OpenProps = { open: boolean; onOpenChange: (open: boolean) => void };
 
@@ -59,13 +60,7 @@ export function RevertDialog({
             live now. This can't be undone.
           </Dialog.Description>
           <div className="emvb-dialog-actions">
-            <Dialog.Close
-              render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
-                  Cancel
-                </Button>
-              )}
-            />
+            <DialogCloseButton>Cancel</DialogCloseButton>
             <Button
               variant="destructive"
               className={BUTTON}
@@ -165,13 +160,7 @@ export function DeleteSubtreeDialog({
           </Dialog.Title>
           <Dialog.Description>You can undo this with Restore right after.</Dialog.Description>
           <div className="emvb-dialog-actions">
-            <Dialog.Close
-              render={(props) => (
-                <Button {...props} variant="secondary" className={BUTTON}>
-                  Cancel
-                </Button>
-              )}
-            />
+            <DialogCloseButton>Cancel</DialogCloseButton>
             <Button
               variant="destructive"
               className={BUTTON}

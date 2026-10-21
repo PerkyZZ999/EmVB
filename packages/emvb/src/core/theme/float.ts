@@ -47,6 +47,8 @@ export function validateFloatSettings(raw: unknown): FloatValidation {
  * W-759: a corner float keeps its 1rem gap on both sides and never grows past the screen; a long
  * one scrolls inside (on a phone it ran off the top, taking its close button and heading with it).
  * Bars reserve their height through the two custom properties the runtime sets.
+ * W-844 (D-053): a top or bottom bar is capped at half the screen and its body scrolls, so a
+ * tall bar can't cover a phone.
  */
 export const FLOAT_CHROME_CSS = `
 .emvb-float{position:fixed;z-index:9000;box-sizing:border-box;max-width:100%;display:flex;align-items:flex-start;gap:.35rem}.emvb-float:hover,.emvb-float:focus-within{z-index:9001}
@@ -62,6 +64,7 @@ export const FLOAT_CHROME_CSS = `
 .emvb-float__body{min-width:0;flex:1}
 .emvb-float:is(.emvb-float--start-top,.emvb-float--end-top,.emvb-float--start-bottom,.emvb-float--end-bottom){max-width:calc(100% - 2rem)}
 .emvb-float:is(.emvb-float--start-top,.emvb-float--end-top,.emvb-float--start-bottom,.emvb-float--end-bottom) .emvb-float__body{max-height:calc(100vh - 3.5rem);max-height:calc(100dvh - 3.5rem);overflow:auto}
+.emvb-float:is(.emvb-float--top,.emvb-float--bottom) .emvb-float__body{max-height:50vh;max-height:50dvh;overflow:auto}
 .emvb-float__close{flex:none;width:2rem;height:2rem;border:0;border-radius:999px;background:transparent;color:inherit;font-size:1.5rem;line-height:1;cursor:pointer}
 .emvb-float__close:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
 html{--emvb-float-top:0px;--emvb-float-bottom:0px;scroll-padding-top:var(--emvb-float-top);scroll-padding-bottom:var(--emvb-float-bottom)}

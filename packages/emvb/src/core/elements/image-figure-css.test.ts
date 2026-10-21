@@ -4,7 +4,7 @@ import { emptyDesign, renderPage, type Layout } from "../index.ts";
 describe("W-792 image figure CSS ships with the image", () => {
   test("a page with only a captioned, linked image gets the figure, caption and link rules", () => {
     const layout: Layout = {
-      schemaVersion: 16,
+      schemaVersion: 17,
       root: {
         id: "root0001",
         type: "container",

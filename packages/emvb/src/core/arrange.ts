@@ -319,16 +319,31 @@ export function wrapNode(
   type: WrapType,
   random: () => number = Math.random,
 ): Arranged {
+  return wrapWith(layout, id, {
+    id: newNodeId(random),
+    type,
+    props: type === "grid" ? { columns: 2 } : {},
+  } as LayoutNode);
+}
+
+/**
+ * W-876: puts `id` inside a Theme section that embeds the Section theme part `partId`. The element
+ * stays as the Theme section's own content, so the page looks the same until the part is published.
+ */
+export const wrapInThemeSection = (
+  layout: Layout,
+  id: string,
+  partId: string,
+  random: () => number = Math.random,
+): Arranged =>
+  wrapWith(layout, id, { id: newNodeId(random), type: "section", props: { partId } } as LayoutNode);
+
+function wrapWith(layout: Layout, id: string, shell: LayoutNode): Arranged {
   const found = locate(layout, id);
   if (!found) return refuse(REASONS.missing);
   if (!found.parent) return refuse(REASONS.rootFixed);
   if (size(layout.root) + 1 > MAX_NODES) return refuse(REASONS.tooMany);
-  const wrapper: LayoutNode = {
-    id: newNodeId(random),
-    type,
-    props: type === "grid" ? { columns: 2 } : {},
-    children: [found.node],
-  } as LayoutNode;
+  const wrapper = { ...shell, children: [found.node] } as LayoutNode;
   // W-389: the same parent/child rules as a drop, so an accordion item, tab panel or menu item
   // isn't wrapped into a page that can't save, and the extra level stays within the depth cap.
   const inForm = underForm(layout, found.parent.id);

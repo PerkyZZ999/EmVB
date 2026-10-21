@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
 import * as React from "react";
+import { act } from "react";
 import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
 
 /**
@@ -85,6 +86,7 @@ function fakeApi() {
       current: state.edited ? { version: 1, lights: { exposure: 0.2 } } : null,
       apply: async (recipe: unknown) => {
         calls.push(["applyRecipe", recipe]);
+        if ((recipe as { name?: string } | null)?.name === "fails") throw new Error("boom");
       },
     },
     exportImage: async (options: Record<string, unknown>) => {
@@ -347,6 +349,71 @@ describe("image editor in photocn's layout (W-483)", () => {
     expect(q("[data-emvb-image-panel]")?.dataset.emvbImagePanel).toBe("metadata");
   });
 
+  test("W-860: every tool is a Kumo tooltip trigger with its name, not a browser title", async () => {
+    serveImage();
+    await open({ src: "/a.jpg", alt: "A" });
+    const tools = [
+      ...document.querySelectorAll<HTMLButtonElement>(
+        "[data-slot=editor-sidebar] [data-emvb-image-tool]",
+      ),
+    ];
+    expect(tools.length).toBe(8);
+    expect(tools.filter((t) => t.hasAttribute("title"))).toEqual([]);
+    expect(tools.filter((t) => !t.hasAttribute("data-base-ui-tooltip-trigger"))).toEqual([]);
+  });
+
+  test("W-861: Zoom in and Zoom out step the result view; Fit returns to the whole picture", async () => {
+    serveImage();
+    await open({ src: "/a.jpg", alt: "A" });
+    const zoom = () => q("[data-emvb-image-zoom]")?.dataset.emvbImageZoom;
+    const out = () => q<HTMLButtonElement>("[data-emvb-image-zoom-out]");
+    const press = async (el: HTMLElement | null) => {
+      el?.click();
+      await settle();
+    };
+    expect(zoom()).toBe("100");
+    expect(out()?.disabled).toBe(true);
+    await press(q("[data-emvb-image-zoom-in]"));
+    await press(q("[data-emvb-image-zoom-in]"));
+    expect(zoom()).toBe("225");
+    expect(out()?.disabled).toBe(false);
+    await press(out());
+    expect(zoom()).toBe("150");
+    await press(q('[aria-label="Fit to screen"]'));
+    expect(zoom()).toBe("100");
+    expect(q('[aria-label="Fit to screen"]')).toBeNull();
+  });
+
+  test("W-862: loading a recipe file applies it; a bad file says so", async () => {
+    serveImage();
+    await open({ src: "/a.jpg", alt: "A" });
+    const input = q<HTMLInputElement>("[data-emvb-image-recipe-file]") as HTMLInputElement;
+    const pick = async (text: string) => {
+      Object.defineProperty(input, "files", {
+        configurable: true,
+        value: [new File([text], "r.recipe.json", { type: "application/json" })],
+      });
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      await settle();
+      await settle();
+    };
+    await pick("nope");
+    expect(q("[data-emvb-image-recipe-error]")?.textContent).toContain(
+      "isn't an image edit recipe",
+    );
+    expect(calls.filter((c) => c[0] === "applyRecipe")).toEqual([]);
+    const recipe = { version: 1, colors: { saturation: 0.3 } };
+    await pick(JSON.stringify({ emvbImageRecipe: 1, recipe }));
+    expect(calls.filter((c) => c[0] === "applyRecipe")).toEqual([["applyRecipe", recipe]]);
+    expect(q("[data-emvb-image-recipe-error]")).toBeNull();
+    // W-881: a failed apply and a huge file say so instead of failing silently.
+    await pick(JSON.stringify({ recipe: { version: 1, name: "fails" } }));
+    expect(q("[data-emvb-image-recipe-error]")?.textContent).toContain("couldn't be applied");
+    await pick(" ".repeat(70 * 1024));
+    expect(q("[data-emvb-image-recipe-error]")?.textContent).toContain("too large");
+    expect(calls.filter((c) => c[0] === "applyRecipe")).toHaveLength(2);
+  });
+
   test("undo, redo and reset follow the editor's history", async () => {
     serveImage();
     await open({ src: "/a.jpg", alt: "A" });
@@ -383,7 +450,8 @@ describe("image editor in photocn's layout (W-483)", () => {
     change({ edited: false });
     await settle();
     await wait();
-    expect(name()).toBe("Original");
+    // W-862: the Recipe menu now sits just before Reset.
+    expect(name()).toBe("Recipe");
   });
 
   test("the crop panel drives photocn's geometry", async () => {
@@ -456,6 +524,34 @@ describe("image editor in photocn's layout (W-483)", () => {
     // Tapping the active tool again closes the sheet.
     await click('.emvb-ie-compact > nav [data-emvb-image-tool="compose"]');
     expect(q("[data-emvb-image-sheet]")?.dataset.emvbImageSheet).toBe("closed");
+  });
+
+  test("W-884: the compact More menu downloads and loads a recipe like the desktop Recipe menu", async () => {
+    Object.defineProperty(window, "innerWidth", { value: 390, configurable: true });
+    serveImage();
+    const root = await open({ src: "/a.jpg", alt: "A" });
+    expect(root.dataset.layout).toBe("compact");
+    const more = q<HTMLElement>("[data-emvb-image-more]");
+    await act(async () => {
+      more?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+      more?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      more?.click();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+    const items = [...document.querySelectorAll('[role="menuitem"]')].map((i) => i.textContent);
+    expect(items).toContain("Download recipe");
+    expect(items).toContain("Load recipe…");
+    const input = q<HTMLInputElement>("[data-emvb-image-recipe-file]") as HTMLInputElement;
+    Object.defineProperty(input, "files", {
+      configurable: true,
+      value: [new File(["nope"], "r.recipe.json", { type: "application/json" })],
+    });
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await settle();
+    await settle();
+    expect(q("[data-emvb-image-recipe-error]")?.textContent).toContain(
+      "isn't an image edit recipe",
+    );
   });
 
   test("W-743: compact sheet Close returns focus to the current outer tool", async () => {

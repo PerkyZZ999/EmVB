@@ -962,7 +962,7 @@ const divBlock: ElementDefinition<DivBlockNode> = {
   defaults: () => ({ type: "div-block", props: {}, children: [] }),
   descriptor: {
     type: "div-block",
-    name: "Div Block",
+    name: "Div block",
     group: "layout",
     defaultTab: "style",
     fields: BOX_LINK_FIELDS,
