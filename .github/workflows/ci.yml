@@ -25,3 +25,13 @@ jobs:
       - run: bun run check:seeds
       - run: bun run test
       - run: bun run test:astro
+
+  audit:
+    # Separate from the offline checks: needs the advisory database (W-890).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.3
+      - run: bun audit --audit-level=high

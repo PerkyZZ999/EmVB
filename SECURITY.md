@@ -15,3 +15,9 @@ EmVB isn't released yet. Only the `main` branch is supported.
 In scope: script or markup injection through a layout, a design document or a theme part; CSS sanitizer bypasses; URL checks that let `javascript:` or another site's URL through; EmVB routes or saves reachable below the editor role; anything EmVB writes to logs that it shouldn't.
 
 Out of scope: the demo sites' dev-only sign-in (`/_emdash/api/setup/dev-bypass`), which exists only on dev servers, and bugs in EmDash itself, which go to [EmDash](https://github.com/emdash-cms/emdash).
+
+## Monitoring
+
+EmVB is a plugin that runs inside your EmDash site. Health checks and request tracing belong to the host EmDash site and its hosting; EmVB adds no endpoints of its own for them. EmVB's own meter measures page weight only (HTML, CSS, JS and image bytes against its budgets).
+
+Dependency advisories are checked in CI with `bun audit --audit-level=high`, separately from the offline checks.
