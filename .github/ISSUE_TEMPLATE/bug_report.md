@@ -15,7 +15,8 @@ labels: bug
 
 **Environment**
 
-- EmVB commit:
+- EmVB version (or commit, if you run `main`):
+- `@perkyzz/emvb-mcp` version, if an agent is involved:
 - EmDash version:
 - Platform: Node (SQLite) / Cloudflare Workers (D1)
 - Browser:

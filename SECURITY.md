@@ -8,7 +8,7 @@ Expect a reply within a week. A fix goes out on `main`, credited to you if you l
 
 ## Supported versions
 
-EmVB isn't released yet. Only the `main` branch is supported.
+Security fixes go into the latest release of each package on npm (`@perkyzz/emvb`, `@perkyzz/emvb-mcp` and `@perkyzz/emvb-icons`) and into `main`. Older releases don't get backported fixes, so upgrade to the latest release.
 
 ## Scope
 
