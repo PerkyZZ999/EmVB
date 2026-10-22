@@ -40423,6 +40423,46 @@
           "replace": "};"
         }
       ]
+    },
+    {
+      "id": "W-894/retry-refused-token",
+      "requirement": "W-894",
+      "description": "The bridge retries a refused token on connect, delaying the clear token error and hammering the site.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/remote.ts",
+          "search": "if (wait === undefined || !isRetryableConnectError(error)) throw error;",
+          "replace": "if (wait === undefined) throw error;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb-mcp/test/remote.test.ts",
+        "-t",
+        "a refused token is not retried"
+      ],
+      "expect": "\\(fail\\).*a refused token is not retried"
+    },
+    {
+      "id": "W-894/timeout-message",
+      "requirement": "W-894",
+      "description": "A site that doesn't answer in time gets the generic 'Couldn't reach the site' error instead of the timeout message.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/bridge.ts",
+          "search": "if (/timed out|timeout/i.test(message)) {",
+          "replace": "if (false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb-mcp/test/bridge.test.ts",
+        "-t",
+        "doesn't answer in time"
+      ],
+      "expect": "\\(fail\\).*doesn't answer in time"
     }
   ]
 }

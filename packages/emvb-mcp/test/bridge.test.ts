@@ -155,6 +155,27 @@ describe("stdio bridge (W-461, W-462)", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toContain("EMVB_TOKEN");
   });
+
+  test("a site that doesn't answer in time says so (W-894)", async () => {
+    const [clientSide, serverSide] = InMemoryTransport.createLinkedPair();
+    const server = createBridgeServer({
+      remote: {
+        call: async () => {
+          throw new Error("MCP error -32001: Request timed out");
+        },
+        close: async () => undefined,
+      },
+      allowPublish: false,
+    });
+    await server.connect(serverSide);
+    client = new Client({ name: "test", version: "1.0.0" });
+    await client.connect(clientSide);
+    const result = (await client.callTool({ name: "list_pages", arguments: {} })) as ToolResult;
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toBe(
+      "The site didn't answer within 60 s. It may be down or slow; try again.",
+    );
+  });
 });
 
 describe("bridge resources, prompts and the skill (W-467, W-468)", () => {

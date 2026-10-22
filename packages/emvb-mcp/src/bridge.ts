@@ -8,7 +8,7 @@ import {
   visibleTools,
   type ToolDef,
 } from "@perkyzz/emvb/mcp";
-import type { Remote, ToolResult } from "./remote.ts";
+import { CALL_TIMEOUT_MS, type Remote, type ToolResult } from "./remote.ts";
 
 export const BRIDGE_VERSION = "0.8.0";
 
@@ -33,6 +33,11 @@ function explain(error: unknown, tool: string): ToolResult {
   if (/not found|unknown tool/i.test(message)) {
     return failure(
       `The site doesn't offer emvb__${tool}. Check that EmDash's MCP is on (mcp: true, EmDash 1.2+) and that an admin approved the EmVB tools.`,
+    );
+  }
+  if (/timed out|timeout/i.test(message)) {
+    return failure(
+      `The site didn't answer within ${CALL_TIMEOUT_MS / 1000} s. It may be down or slow; try again.`,
     );
   }
   return failure(`Couldn't reach the site: ${message}`);
