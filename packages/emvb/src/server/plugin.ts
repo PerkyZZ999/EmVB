@@ -36,6 +36,8 @@ export function createPlugin(
     version: PLUGIN_VERSION,
     capabilities: [
       "content:read",
+      // W-898: find host fields that use the emvb:canvas widget.
+      "schema:read",
       "content:write",
       "content:publish",
       "content:revisions:read",
@@ -52,7 +54,10 @@ export function createPlugin(
       emvb_saved_sections: { indexes: ["updatedAt"] },
     },
     hooks: {
-      "content:beforeSave": { handler: beforeSave, errorPolicy: "abort" },
+      "content:beforeSave": {
+        handler: (event, ctx) => beforeSave(event, ctx, canvasCollections),
+        errorPolicy: "abort",
+      },
       // D-055: EmDash's own MCP tools can't publish EmVB pages unless the admin allowed it.
       "content:beforePublish": { handler: beforePublish },
     },

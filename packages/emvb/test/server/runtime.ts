@@ -40,13 +40,16 @@ async function createPagesCollection(schema: SchemaRegistry) {
 }
 
 /** A real EmDash runtime on in-memory SQLite with EmVB installed and the pages collection created. */
-export async function createTestRuntime({ setUp = true }: { setUp?: boolean } = {}) {
+export async function createTestRuntime({
+  setUp = true,
+  canvasCollections,
+}: { setUp?: boolean; canvasCollections?: string[] } = {}) {
   const runtime = await EmDashRuntime.create({
     // The runtime caches its database per entrypoint, so each test runtime gets its own.
     config: {
       database: { entrypoint: `emvb-test-${crypto.randomUUID()}`, config: {}, type: "sqlite" },
     },
-    plugins: [createPlugin()],
+    plugins: [createPlugin(canvasCollections ? { canvasCollections } : {})],
     createDialect: () => createDialect({ url: ":memory:" }),
     createStorage: null,
     sandboxEnabled: false,
@@ -127,5 +130,26 @@ export async function createTestRuntime({ setUp = true }: { setUp?: boolean } = 
     settingsRevision = (saved.body["data"] as { revision: string }).revision;
   };
 
-  return { runtime, route, savePage, mcp, agentSettings, dispose: () => runtime.shutdown() };
+  /** W-898: a host `pages` collection whose `canvas` field uses the emvb:canvas widget. */
+  const createHostPages = async () => {
+    await schema.createCollection({ slug: "pages", label: "Pages", supports: ["drafts"] });
+    await schema.createField("pages", { slug: "title", label: "Title", type: "string" });
+    await schema.createField("pages", {
+      slug: "canvas",
+      label: "Design",
+      type: "json",
+      widget: "emvb:canvas",
+    });
+    await schema.createField("pages", { slug: "notes", label: "Notes", type: "json" });
+  };
+
+  return {
+    runtime,
+    route,
+    savePage,
+    createHostPages,
+    mcp,
+    agentSettings,
+    dispose: () => runtime.shutdown(),
+  };
 }

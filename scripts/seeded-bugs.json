@@ -40491,6 +40491,48 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/canvas-styles-options.test.ts"],
       "expect": "\\(fail\\).*W-897"
+    },
+    {
+      "id": "W-898/lower-role-wipe",
+      "requirement": "W-898",
+      "description": "A lower role's change to an emvb:canvas field is compared to nothing, so an author can wipe it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "      if (sameValue(event.content[slug], stored?.data[slug])) continue;",
+          "replace": "      if (stored !== undefined) continue;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/canvas-fields.test.ts"],
+      "expect": "\\(fail\\).*W-898"
+    },
+    {
+      "id": "W-898/host-not-validated",
+      "requirement": "W-898",
+      "description": "Listed host collections skip layout validation.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  if (canvasCollections.includes(event.collection)) return canvasFieldsBeforeSave(event, ctx);",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/canvas-fields.test.ts"],
+      "expect": "\\(fail\\).*W-898"
+    },
+    {
+      "id": "W-898/every-field-validated",
+      "requirement": "W-898",
+      "description": "Every field is treated as an EmVB layout, so a plain JSON field is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "filter((f) => f.widget === CANVAS_WIDGET)",
+          "replace": "filter((f) => f.type === \"json\")"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/canvas-fields.test.ts"],
+      "expect": "\\(fail\\).*W-898"
     }
   ]
 }
