@@ -67,7 +67,7 @@ import { type ShortcutHandlers, useEditorShortcuts } from "./useEditorShortcuts.
 import { useNodeActions } from "./useNodeActions.ts";
 import { useSavedSections } from "./useSavedSections.ts";
 import { SaveSectionDialog } from "./SavedSectionDialogs.tsx";
-import { FieldPreview, previewDocument } from "./FieldPreview.tsx";
+import { FieldPreview, previewDocument, useInlinedStyles } from "./FieldPreview.tsx";
 import { type PasteRefusal, useClipboardActions } from "./useClipboardActions.ts";
 import { ListError, LoadingStatus } from "../pages/list-kit.tsx";
 
@@ -152,6 +152,7 @@ function EditorApp({
   const dirty = isDirty(state);
   const host = useEditorHost();
   const canvasStyles = useCanvasStyles(fetcher);
+  const inlinedStyles = useInlinedStyles(canvasStyles);
   const { exit } = host;
   const saver = useSave(fetcher, state, dispatch, collection);
   // W-466: tell the person when an agent (or anyone) changed the page while they were idle.
@@ -312,6 +313,7 @@ function EditorApp({
       html: result.html,
       css: result.css,
       canvasStyles,
+      inlined: inlinedStyles,
       origin: window.location.origin,
       ...(result.dir === "ltr" || result.dir === "rtl" ? { dir: result.dir } : {}),
     });

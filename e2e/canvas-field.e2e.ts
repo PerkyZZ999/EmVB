@@ -236,6 +236,42 @@ test("W-911: Preview in field mode shows the unsaved layout, sandboxed, without 
   expect(JSON.stringify(await storedCanvas(request, id))).not.toContain(after);
 });
 
+test("W-920: the field Preview frame wears the site's own stylesheet in light and dark", async ({
+  page,
+  request,
+}, info) => {
+  const text = `Styled ${unique()}`;
+  const { id } = await createHostPage(request, { title: "Styled preview", canvas: layout(text) });
+  await page.goto(`/_emdash/admin/content/pages/${id}`);
+  await page
+    .locator('[data-emvb-widget="canvas"]')
+    .getByRole("button", { name: "Edit with EmVB" })
+    .click();
+  await overlay(page).getByRole("button", { name: "Preview", exact: true }).click();
+  const heading = page
+    .frameLocator('[data-emvb-dialog="field-preview"] iframe')
+    .getByRole("heading", { name: text, level: 2 });
+  await expect(heading).toBeVisible();
+  // site.css sets system-ui; the browser default would be a serif.
+  await expect
+    .poll(() => heading.evaluate((el) => getComputedStyle(el).fontFamily))
+    .toContain("system-ui");
+  expect(await heading.evaluate((el) => getComputedStyle(el.ownerDocument.body).marginTop)).toBe(
+    "0px",
+  );
+  // A frame wider than the stage scrolls; centring must not clip its left edge (W-920).
+  const stage = await page.locator(".emvb-field-preview-stage").boundingBox();
+  const frameBox = await page.locator("iframe[data-emvb-field-preview]").boundingBox();
+  expect(frameBox?.x ?? -1).toBeGreaterThanOrEqual(stage?.x ?? 0);
+  for (const scheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.screenshot({
+      path: `${SHOTS}/w920-field-preview-${info.project.name}-${scheme}.png`,
+    });
+  }
+  await page.emulateMedia({ colorScheme: "light" });
+});
+
 test("W-912: Convert to EmVB starts a layout from the saved body and never changes the body", async ({
   page,
   request,

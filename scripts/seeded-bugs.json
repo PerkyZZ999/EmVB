@@ -40842,8 +40842,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
-          "search": "css.replace(/</g, \"\\\\3c \")",
-          "replace": "css"
+          "search": "`<style>${cssText(css)}</style></head>",
+          "replace": "`<style>${css}</style></head>"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/FieldPreview.test.ts"],
@@ -41121,6 +41121,87 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*W-916"
+    },
+    {
+      "id": "W-920/preview-ignores-inlined",
+      "requirement": "W-920",
+      "description": "The preview keeps the blocked <link> even when the site CSS was read.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
+          "search": "      inlined[href] === undefined",
+          "replace": "      inlined[href] === undefined || true"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/FieldPreview.test.ts"],
+      "expect": "\\(fail\\).*W-920"
+    },
+    {
+      "id": "W-920/inlined-css-unescaped",
+      "requirement": "W-920",
+      "description": "Inlined site CSS is not escaped and can end its style element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
+          "search": "        : `<style>${cssText(inlined[href])}</style>`,",
+          "replace": "        : `<style>${inlined[href]}</style>`,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/FieldPreview.test.ts"],
+      "expect": "\\(fail\\).*W-920"
+    },
+    {
+      "id": "W-920/margin-reset-missing",
+      "requirement": "W-920",
+      "description": "The preview body keeps the browser's default margin.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
+          "search": "    `<style>html,body{margin:0}</style>`,",
+          "replace": "    \"\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/FieldPreview.test.ts"],
+      "expect": "\\(fail\\).*W-920"
+    },
+    {
+      "id": "W-920/site-css-never-read",
+      "requirement": "W-920",
+      "description": "The editor never reads the site stylesheet, so the frame falls back to default type.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
+          "search": "    if (url.origin !== window.location.origin) return null;",
+          "replace": "    if (url.origin !== window.location.origin || url) return null;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-920"
+    },
+    {
+      "id": "W-920/stage-clips-wide-frame",
+      "requirement": "W-920",
+      "description": "Flex centring clips the left edge of a frame wider than the stage.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
+          "search": ".emvb-field-preview-stage { display: flex; overflow: auto;",
+          "replace": ".emvb-field-preview-stage { display: flex; justify-content: center; overflow: auto;"
+        },
+        {
+          "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
+          "search": "iframe { flex: none; margin: 0 auto;",
+          "replace": "iframe { flex: none;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-920"
     }
   ]
 }
