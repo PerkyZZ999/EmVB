@@ -40799,6 +40799,23 @@
         "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx"
       ],
       "expect": "\\(fail\\).*W-906"
+    },
+    {
+      "id": "W-907/apply-not-in-form",
+      "requirement": "W-907",
+      "description": "Apply closes the editor but never hands the layout to the entry form, so Save stores the old one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/CanvasField.tsx",
+          "search": "      if (next !== undefined) onChange(next);",
+          "replace": "      if (next !== undefined) void next;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-907"
     }
   ]
 }

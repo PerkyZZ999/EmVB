@@ -2,7 +2,7 @@ import { homedir } from "node:os";
 import { expect, test, type APIRequestContext } from "@playwright/test";
 import { api, parsed, setUpEmvbOnce } from "./support/api.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
-import { overlay, unique } from "./support/helpers.ts";
+import { canvas, overlay, unique } from "./support/helpers.ts";
 
 // W-902: the demos' own `pages` collection carries an emvb:canvas field (W-900, W-901).
 test.describe.configure({ mode: "serial" });
@@ -159,4 +159,37 @@ test("an admin edits the field in EmVB, applies, saves the entry, and the page r
   const response = await page.goto(`/${slug}`);
   expect(response?.status()).toBe(200);
   await expect(page.getByRole("heading", { name: "After", level: 2 })).toBeVisible();
+});
+
+test("W-907: Apply, then the entry's own Save, stores the layout the published page shows", async ({
+  page,
+  request,
+}) => {
+  const before = `Form ${unique()}`;
+  const after = `${before} saved`;
+  const { id, slug } = await createHostPage(request, {
+    title: "Form save",
+    canvas: layout(before),
+  });
+  await page.goto(`/_emdash/admin/content/pages/${id}`);
+  const widget = page.locator('[data-emvb-widget="canvas"]');
+  await widget.getByRole("button", { name: "Edit with EmVB" }).click();
+  const editor = overlay(page);
+  await canvas(page).getByRole("heading", { name: before }).click();
+  await editor.getByLabel("Text", { exact: true }).fill(after);
+  await editor.getByRole("button", { name: "Apply" }).click();
+  await expect(editor).toHaveCount(0);
+  await expect(widget).toContainText(after);
+  // Apply only changes the form; nothing is stored until the entry is saved.
+  expect(JSON.stringify(await storedCanvas(request, id))).toContain(before);
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect
+    .poll(async () => JSON.stringify(await storedCanvas(request, id)), { timeout: 15_000 })
+    .toContain(after);
+  expect((await api(request, "POST", `/_emdash/api/content/pages/${id}/publish`, {})).status).toBe(
+    200,
+  );
+  const response = await page.goto(`/${slug}`);
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole("heading", { name: after, level: 2 })).toBeVisible();
 });
