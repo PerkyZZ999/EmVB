@@ -12,6 +12,11 @@ export default defineConfig({
   image: {
     layout: "constrained",
     responsiveStyles: true,
+    // W-915: EmVB library Images get a srcset through Astro's image service.
+    remotePatterns: [
+      { protocol: "http", hostname: "127.0.0.1" },
+      { protocol: "http", hostname: "localhost" },
+    ],
   },
   integrations: [
     react(),

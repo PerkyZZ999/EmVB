@@ -12,6 +12,9 @@ export type MediaLibraryItem = {
   storageKey: string;
   status: string;
   url: string;
+  /** EmDash 1.4 library focal point, 0–1 (null or absent when unset). */
+  focalX?: number | null;
+  focalY?: number | null;
 };
 
 /** Shared EmDash media endpoint — same path on Node local and Cloudflare R2 (R-007). */
@@ -95,6 +98,29 @@ function fitImageSize(
   next.height = Math.max(1, Math.round(height * scale));
 }
 
+const unitCoordinate = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1;
+
+/**
+ * W-915: EmDash 1.4 stores a focal point per library image (0–1). A newly picked picture takes it
+ * as the element's focal point (0–100 %); one the editor set on this same picture is kept.
+ */
+function libraryFocal(
+  next: Record<string, unknown>,
+  current: Record<string, unknown>,
+  item: MediaLibraryItem,
+): void {
+  const samePicture = current.src === item.url;
+  if (samePicture && current.focalX !== undefined) return;
+  if (unitCoordinate(item.focalX) && unitCoordinate(item.focalY)) {
+    next.focalX = Math.round(item.focalX * 100);
+    next.focalY = Math.round(item.focalY * 100);
+  } else if (!samePicture) {
+    delete next.focalX;
+    delete next.focalY;
+  }
+}
+
 /** Applies a library item onto an image node's props (id, URL, alt, dimensions). */
 export function propsFromMedia(
   current: Record<string, unknown>,
@@ -108,6 +134,7 @@ export function propsFromMedia(
     delete next.edit;
   }
   fitImageSize(next, item.width, item.height);
+  libraryFocal(next, current, item);
   const alt = current.alt;
   if ((!alt || alt === "Image") && item.alt) next.alt = item.alt;
   else if (!alt || alt === "Image") next.alt = item.filename.replace(/\.[^.]+$/, "") || "Image";

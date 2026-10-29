@@ -178,3 +178,26 @@ bun run pack:smoke
 ```
 
 `pack:smoke` checks that the packed package is `@perkyzz/emvb`, isn't private, exports TypeScript source for `.`, `./astro`, `./astro/forms`, `./astro/forms/client`, `./admin` and `./core`, ships no tests, and has no `workspace:` or `catalog:` ranges. The package also exports `./astro/popups`, `./astro/floats`, `./astro/tabs`, `./astro/menu` and `./mcp` (the tool definitions the `@perkyzz/emvb-mcp` bridge uses).
+
+## Responsive images (optional)
+
+EmDash 1.4 doesn't store extra sizes for library images; it builds them at render time through
+Astro's image service. EmVB can do the same for library Images on its pages. Pass Astro's
+`getImage` and authorise your own origin so the service will resize the files:
+
+```astro
+---
+import { getImage } from "astro:assets";
+const emvb = await resolveEmVBPage(Astro, { getImage });
+---
+```
+
+```js
+// astro.config.mjs
+image: { remotePatterns: [{ protocol: "https", hostname: "example.com" }] },
+```
+
+An Image with a width and height, from the library, and without sizes of its own gets up to six
+srcset sizes (up to twice its width). Without `getImage`, or when the service leaves the URL
+unchanged, the plain `<img>` is published as before. A picked library image also takes the focal
+point set on it in EmDash's media library.

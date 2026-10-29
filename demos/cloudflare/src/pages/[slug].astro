@@ -1,4 +1,5 @@
 ---
+import { getImage } from "astro:assets";
 import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
 import { PortableText } from "emdash/ui";
 import { EmVBPage, resolveEmVBPage } from "@perkyzz/emvb/astro";
@@ -17,8 +18,8 @@ if (!slug) {
 // EmVB pages first, then the site's own pages (R-030).
 // A site page whose EmVB canvas field holds a layout renders it in place of its content (W-901).
 const emvb =
-	(await resolveEmVBPage(Astro)) ??
-	(await resolveEmVBPage(Astro, { collection: "pages", field: "canvas" }));
+	(await resolveEmVBPage(Astro, { getImage })) ??
+	(await resolveEmVBPage(Astro, { collection: "pages", field: "canvas", getImage }));
 const found = emvb ? null : await getEmDashEntry("pages", slug);
 const page = found?.entry ?? null;
 const entry = emvb?.entry ?? page;

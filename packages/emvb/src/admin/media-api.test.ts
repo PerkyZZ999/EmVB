@@ -283,3 +283,26 @@ describe("pictures over 10000 px on a side (W-496)", () => {
     });
   });
 });
+
+describe("propsFromMedia focal point (W-915)", () => {
+  test("a picked library image takes its EmDash focal point as percent", () => {
+    const next = propsFromMedia({ alt: "Image" }, item({ focalX: 0.25, focalY: 0.8 }));
+    expect([next.focalX, next.focalY]).toEqual([25, 80]);
+  });
+
+  test("a focal point set on the same picture is kept", () => {
+    const same = { src: "/_emdash/api/media/file/01MEDIA.png", focalX: 10, focalY: 20 };
+    const next = propsFromMedia(same, item({ focalX: 0.5, focalY: 0.5 }));
+    expect([next.focalX, next.focalY]).toEqual([10, 20]);
+  });
+
+  test("a different picture without one drops the old focal point", () => {
+    const next = propsFromMedia({ src: "/old.png", focalX: 10, focalY: 20 }, item());
+    expect(next.focalX).toBeUndefined();
+    expect(next.focalY).toBeUndefined();
+  });
+
+  test("an out-of-range library focal point is ignored", () => {
+    expect(propsFromMedia({}, item({ focalX: 4, focalY: 0.5 })).focalX).toBeUndefined();
+  });
+});

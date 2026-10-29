@@ -40975,6 +40975,65 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*W-914"
+    },
+    {
+      "id": "W-915/library-focal-ignored",
+      "requirement": "W-915",
+      "description": "A picked library image ignores its EmDash focal point.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/media-api.ts",
+          "search": "  libraryFocal(next, current, item);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/media-api.test.ts"],
+      "expect": "\\(fail\\).*W-915"
+    },
+    {
+      "id": "W-915/passthrough-srcset",
+      "requirement": "W-915",
+      "description": "A passthrough image service still writes a no-op srcset.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/responsive-images.ts",
+          "search": "if (result.src && result.src !== absolute) {",
+          "replace": "if (result.src) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/responsive-images.test.ts"],
+      "expect": "\\(fail\\).*W-915"
+    },
+    {
+      "id": "W-915/unsafe-candidates-kept",
+      "requirement": "W-915",
+      "description": "Candidate URLs from the image service aren't sanitised.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/responsive-images.ts",
+          "search": "    const safe = sanitizeMediaUrl(url);",
+          "replace": "    const safe = url;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/responsive-images.test.ts"],
+      "expect": "\\(fail\\).*W-915"
+    },
+    {
+      "id": "W-915/resolve-ignores-getimage",
+      "requirement": "W-915",
+      "description": "resolveEmVBPage ignores the host's getImage, so no srcset is published.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "layout && options.getImage",
+          "replace": "layout && options.getImage && false"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/responsive-images.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-915"
     }
   ]
 }

@@ -6,6 +6,7 @@ import { designFor, formsFor } from "./render-session.ts";
 import { bindingDataFor } from "./request-data.ts";
 import type { HostVisitor, VisitorAstro } from "./visitor.ts";
 import { referencedTemplatesFor } from "./resolve-theme.ts";
+import { withResponsiveSources, type ResponsiveGetImage } from "./responsive-images.ts";
 
 type EmDashEntry = NonNullable<Awaited<ReturnType<ContentPort["getEntry"]>>["entry"]>;
 
@@ -49,6 +50,11 @@ export async function resolveEmVBPage(
     collection?: string;
     /** The emvb:canvas field of `collection` (default `"canvas"`). */
     field?: string;
+    /**
+     * W-915: Astro's `getImage` from `astro:assets`. When passed, library Images get a srcset
+     * from the host's image service (authorise the site origin in `image.remotePatterns`).
+     */
+    getImage?: ResponsiveGetImage;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   return resolveEmVBPageWith(emdashContent, astro, options);
@@ -71,6 +77,11 @@ export async function resolveEmVBPageWith(
     collection?: string;
     /** The emvb:canvas field of `collection` (default `"canvas"`). */
     field?: string;
+    /**
+     * W-915: Astro's `getImage` from `astro:assets`. When passed, library Images get a srcset
+     * from the host's image service (authorise the site origin in `image.remotePatterns`).
+     */
+    getImage?: ResponsiveGetImage;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   const slug = options.slug ?? content.decodeSlug(astro.params[options.param ?? "slug"]);
@@ -122,9 +133,13 @@ export async function resolveEmVBPageWith(
       content,
     )),
   };
+  const responsive =
+    layout && options.getImage
+      ? await withResponsiveSources(layout, options.getImage, astro.url.origin)
+      : stored;
   return {
     ...renderStored(
-      stored,
+      responsive,
       design,
       String(data["id"] ?? slug),
       formDefinitions,
