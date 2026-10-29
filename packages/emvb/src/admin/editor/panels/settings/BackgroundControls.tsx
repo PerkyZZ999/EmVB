@@ -85,10 +85,6 @@ export function BackgroundImageControl({
     }
   }, [fetcher, setBusy]);
 
-  React.useEffect(() => {
-    if (open) void loadLibrary();
-  }, [open, loadLibrary]);
-
   const applyUrl = (next: string) => {
     const safe = sanitizeMediaUrl(next);
     if (!safe || /[()\\\s"'`]/.test(safe)) {
@@ -138,7 +134,10 @@ export function BackgroundImageControl({
               type="button"
               className={BUTTON}
               onClick={() => {
-                if (!busyRef.current) setOpen(true);
+                if (busyRef.current) return;
+                // W-906: load in the same update that opens it, so it never paints "No images yet." first.
+                setOpen(true);
+                void loadLibrary();
               }}
               aria-disabled={busy}
               ref={libraryOpenerRef}

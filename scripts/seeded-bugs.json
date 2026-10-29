@@ -40763,6 +40763,42 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*W-905"
+    },
+    {
+      "id": "W-906/image-library-loads-late",
+      "requirement": "W-906",
+      "description": "The library loads from an effect after it opens, painting the last result first.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/MediaPicker.tsx",
+          "search": "            setOpen(true);\n            void loadLibrary();",
+          "replace": "            setOpen(true);\n            setTimeout(() => void loadLibrary());"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/media-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-906"
+    },
+    {
+      "id": "W-906/background-library-loads-late",
+      "requirement": "W-906",
+      "description": "The library loads from an effect after it opens, painting the last result first.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "                setOpen(true);\n                void loadLibrary();",
+          "replace": "                setOpen(true);\n                setTimeout(() => void loadLibrary());"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-906"
     }
   ]
 }

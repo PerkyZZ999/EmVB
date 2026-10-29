@@ -103,10 +103,6 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
     }
   }, [fetcher, setBusy]);
 
-  React.useEffect(() => {
-    if (open) void loadLibrary();
-  }, [open, loadLibrary]);
-
   /** Focus Choose from library, or the URL field while the picker is busy (W-741). */
   const focusOpener = () => {
     const opener = libraryOpenerRef.current;
@@ -256,7 +252,11 @@ export function MediaPicker({ node, fetcher, onChange, label = "Image", editable
           type="button"
           className={BUTTON}
           onClick={() => {
-            if (!busyRef.current) setOpen(true);
+            if (busyRef.current) return;
+            // W-906: load in the same update that opens it; loading from an effect painted the
+            // last result ("No images yet.") first, and closing then raced the real load.
+            setOpen(true);
+            void loadLibrary();
           }}
           aria-disabled={busy}
           ref={libraryOpenerRef}

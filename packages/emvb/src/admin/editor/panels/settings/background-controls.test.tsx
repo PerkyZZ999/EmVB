@@ -310,3 +310,25 @@ test("W-824: while uploading, Choose from library and Upload stay focusable and 
   await act(async () => upload.click());
   expect(picks).toBe(1);
 });
+
+test("W-906: the background library shows Loading from its first paint", async () => {
+  const pending = Promise.withResolvers<Response>();
+  const host = await mount(
+    <BackgroundImageControl
+      value={undefined}
+      fetcher={async () => pending.promise}
+      onChange={() => {}}
+      reset={null}
+    />,
+  );
+  const seen: string[] = [];
+  const watch = new MutationObserver(() => seen.push(host.textContent ?? ""));
+  watch.observe(host, { childList: true, subtree: true, characterData: true });
+  await act(async () => host.querySelector<HTMLButtonElement>("[data-emvb-bg-library]")?.click());
+  watch.disconnect();
+  expect(seen.some((text) => text.includes("No images yet."))).toBe(false);
+  expect(host.textContent).toContain("Loading…");
+  await act(async () => pending.resolve(Response.json({ data: { items: [] } })));
+  await settle();
+  expect(host.textContent).toContain("No images yet.");
+});

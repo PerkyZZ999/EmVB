@@ -222,6 +222,29 @@ describe("media library recovery (W-713)", () => {
     expect(view.sent).toEqual([]);
   });
 
+  test("W-906: reopening shows Loading at once, never the last result", async () => {
+    let next: Promise<Response> = Promise.resolve(ok([])());
+    const view = await picker(image({ src: "/old.png", alt: "Old" }), () => next);
+    await view.openLibrary();
+    expect(view.text()).toContain("No images yet.");
+    const close = [...(dialog(view.host)?.querySelectorAll("button") ?? [])].find(
+      (button) => button.textContent === "Close",
+    );
+    await act(async () => close?.click());
+    const pending = Promise.withResolvers<Response>();
+    next = pending.promise;
+    const seen: string[] = [];
+    const watch = new MutationObserver(() => seen.push(dialog(view.host)?.textContent ?? ""));
+    watch.observe(view.host, { childList: true, subtree: true, characterData: true });
+    await view.openLibrary();
+    watch.disconnect();
+    expect(seen.some((text) => text.includes("No images yet."))).toBe(false);
+    expect(view.text()).toContain("Loading…");
+    await act(async () => pending.resolve(ok([])()));
+    await settle();
+    expect(view.text()).toContain("No images yet.");
+  });
+
   test("W-740: retry keeps focus on Close while loading and after an empty result", async () => {
     const pending = Promise.withResolvers<Response>();
     let attempts = 0;
