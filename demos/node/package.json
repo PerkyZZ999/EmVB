@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@astrojs/node": "^11.1.9",
-    "@astrojs/react": "^7.1.0",
-    "@emdash-cms/plugin-forms": "0.2.11",
+    "@astrojs/react": "^7.1.2",
+    "@emdash-cms/plugin-forms": "0.2.12",
     "@perkyzz/emvb": "workspace:*",
     "astro": "7.3.5",
     "emdash": "1.3.1",

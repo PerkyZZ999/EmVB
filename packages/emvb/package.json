@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@cloudflare/kumo": "2.6.0",
-    "@emdash-cms/plugin-forms": "0.2.11",
+    "@emdash-cms/plugin-forms": "0.2.12",
     "@phosphor-icons/react": "2.1.10",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

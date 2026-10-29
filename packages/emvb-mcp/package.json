@@ -37,8 +37,8 @@
     "prepack": "bun run build"
   },
   "dependencies": {
-    "@modelcontextprotocol/client": "2.3.1",
-    "@modelcontextprotocol/server": "2.3.1"
+    "@modelcontextprotocol/client": "2.4.0",
+    "@modelcontextprotocol/server": "2.4.0"
   },
   "devDependencies": {
     "@perkyzz/emvb": "0.8.0",
