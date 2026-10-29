@@ -40687,6 +40687,23 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
       "expect": "\\(fail\\).*W-901"
+    },
+    {
+      "id": "W-902/demo-not-listed",
+      "requirement": "W-902",
+      "description": "The Node demo no longer lists `pages` in canvasCollections, so its canvas field goes unchecked.",
+      "edits": [
+        {
+          "file": "demos/node/astro.config.mjs",
+          "search": "emvb({ canvasStyles: [\"/site.css\"], canvasCollections: [\"pages\"] })",
+          "replace": "emvb({ canvasStyles: [\"/site.css\"] })"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*the demo grants schema:read"
     }
   ]
 }
