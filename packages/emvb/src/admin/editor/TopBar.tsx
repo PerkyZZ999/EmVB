@@ -3,6 +3,7 @@ import * as React from "react";
 import {
   ArrowSquareOutIcon,
   CaretDownIcon,
+  CheckIcon,
   DesktopIcon,
   DeviceMobileIcon,
   DeviceTabletIcon,
@@ -79,6 +80,7 @@ export function TopBar({
   canRevert = false,
   onRevert,
   tools,
+  onApply,
 }: {
   page: TopBarPage | null;
   dirty: boolean;
@@ -99,6 +101,8 @@ export function TopBar({
   onRevert?: () => void;
   /** Extra tools beside Site styles: the page weight and accessibility meters, … (W-310). */
   tools?: React.ReactNode;
+  /** Field mode (W-900): one Apply button replaces Preview, Revert, Save draft and Publish. */
+  onApply?: () => void;
 }) {
   const reducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
   // W-769: a disabled button drops focus to the page body, so the button that was focused when
@@ -186,7 +190,22 @@ export function TopBar({
           )}
           {page && tools}
         </div>
-        {page && (
+        {page && onApply && (
+          <Button
+            variant="primary"
+            className={`${BUTTON} emvb-apply-button`}
+            style={SOLID_PRIMARY}
+            icon={<CheckIcon size={14} aria-hidden="true" />}
+            aria-disabled={busy !== null}
+            onClick={() => {
+              if (busy !== null) return;
+              onApply();
+            }}
+          >
+            Apply
+          </Button>
+        )}
+        {page && !onApply && (
           <div
             className="emvb-topbar-actions"
             style={{

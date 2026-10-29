@@ -1,3 +1,4 @@
+import type { Layout } from "../../core/index.ts";
 import * as React from "react";
 import { PLUGIN_ID } from "../../constants.ts";
 import { canvasStyleUrls } from "../../core/canvas-styles.ts";
@@ -25,6 +26,11 @@ export type EditorHost = {
    * for the host's `emvb({ canvasStyles })`.
    */
   canvasStyles?: readonly string[];
+  /**
+   * Field mode (W-900): the editor edits a host entry's emvb:canvas field. Apply hands the layout
+   * back to the entry form instead of saving or publishing anything.
+   */
+  field?: { apply: (layout: Layout | null) => void };
 };
 
 const defaultEditorHost: EditorHost = {

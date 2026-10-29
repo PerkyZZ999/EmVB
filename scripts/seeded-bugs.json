@@ -40561,6 +40561,76 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/canvas-fields.test.ts"],
       "expect": "\\(fail\\).*W-899"
+    },
+    {
+      "id": "W-900/apply-ignored",
+      "requirement": "W-900",
+      "description": "Apply closes the editor without writing the layout back.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/CanvasField.tsx",
+          "search": "field: { apply: (next) => finish(next) },",
+          "replace": "field: { apply: () => close() },"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
+      "expect": "\\(fail\\).*W-900"
+    },
+    {
+      "id": "W-900/save-buttons-shown",
+      "requirement": "W-900",
+      "description": "Field mode still shows Save draft and Publish.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "{page && !onApply && (",
+          "replace": "{page && ("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
+      "expect": "\\(fail\\).*W-900"
+    },
+    {
+      "id": "W-900/role-ignored",
+      "requirement": "W-900",
+      "description": "Authors get the Edit with EmVB button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/CanvasField.tsx",
+          "search": "const canEdit = role.state === \"ready\" && canUseEmvb(role.role);",
+          "replace": "const canEdit = role.state === \"ready\" || canUseEmvb(0);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
+      "expect": "\\(fail\\).*W-900"
+    },
+    {
+      "id": "W-900/unvalidated-stage",
+      "requirement": "W-900",
+      "description": "The field fetcher stages a layout without validating it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/field-fetcher.ts",
+          "search": "        if (!result.ok) {\n",
+          "replace": "        if (result.ok === undefined) {\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
+      "expect": "\\(fail\\).*W-900"
+    },
+    {
+      "id": "W-900/field-leaks-to-server",
+      "requirement": "W-900",
+      "description": "Field-mode entry requests reach the real server.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/field-fetcher.ts",
+          "search": "if (path !== ENTRY_PATH && !path.startsWith(`${ENTRY_PATH}/`)) return base(path, init);",
+          "replace": "if (path) return base(path, init);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
+      "expect": "\\(fail\\).*W-900"
     }
   ]
 }

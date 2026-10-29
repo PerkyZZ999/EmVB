@@ -70,7 +70,10 @@ export function createPlugin(
         { path: "/theme", label: "Theme Builder", icon: "layout" },
         { path: "/agents", label: "AI agents", icon: "layout" },
       ],
-      fieldWidgets: [{ name: "layout", label: "EmVB page (read-only)", fieldTypes: ["json"] }],
+      fieldWidgets: [
+        { name: "layout", label: "EmVB page (read-only)", fieldTypes: ["json"] },
+        { name: "canvas", label: "Edit with EmVB", fieldTypes: ["json"] },
+      ],
     },
     routes: {
       health: {

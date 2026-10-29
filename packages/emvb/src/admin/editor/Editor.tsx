@@ -429,6 +429,7 @@ function EditorApp({
               stylesUnpublished={state.designUnpublished === true}
               canRevert={canRevert}
               onRevert={() => chrome.open("revert")}
+              {...(host.field ? { onApply: () => host.field?.apply(state.page.layout) } : {})}
               tools={
                 <>
                   {/* UX-084: undo and redo were keyboard-only; toasts already say "Undo takes it back". */}

@@ -5,6 +5,7 @@ import { EditorPage } from "./pages/EditorPage.tsx";
 import { PagesPage } from "./pages/PagesPage.tsx";
 import { AgentsPage } from "./pages/AgentsPage.tsx";
 import { ThemeBuilderPage } from "./pages/ThemeBuilderPage.tsx";
+import { CanvasField } from "./widgets/CanvasField.tsx";
 import { LayoutField } from "./widgets/LayoutField.tsx";
 
 if (typeof document !== "undefined") void installSidebarShim(document, defaultFetcher);
@@ -19,4 +20,5 @@ export const pages: PluginAdminExports["pages"] = {
 
 export const fields: PluginAdminExports["fields"] = {
   layout: LayoutField,
+  canvas: CanvasField,
 };
