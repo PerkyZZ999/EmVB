@@ -40834,6 +40834,37 @@
         "./packages/emvb/src/admin/editor/panels/settings/length-row.test.tsx"
       ],
       "expect": "\\(fail\\).*W-910"
+    },
+    {
+      "id": "W-911/preview-css-unescaped",
+      "requirement": "W-911",
+      "description": "The preview document stops CSS-escaping '<', so generated CSS could close its <style>.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
+          "search": "css.replace(/</g, \"\\\\3c \")",
+          "replace": "css"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/FieldPreview.test.ts"],
+      "expect": "\\(fail\\).*W-911"
+    },
+    {
+      "id": "W-911/preview-not-sandboxed",
+      "requirement": "W-911",
+      "description": "The field preview frame allows scripts instead of a full sandbox.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/FieldPreview.tsx",
+          "search": "sandbox=\"\"",
+          "replace": "sandbox=\"allow-scripts\""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-911"
     }
   ]
 }

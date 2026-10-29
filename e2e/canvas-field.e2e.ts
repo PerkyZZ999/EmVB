@@ -193,3 +193,45 @@ test("W-907: Apply, then the entry's own Save, stores the layout the published p
   expect(response?.status()).toBe(200);
   await expect(page.getByRole("heading", { name: after, level: 2 })).toBeVisible();
 });
+
+test("W-911: Preview in field mode shows the unsaved layout, sandboxed, without storing it", async ({
+  page,
+  request,
+}, info) => {
+  const before = `Peek ${unique()}`;
+  const after = `${before} unsaved`;
+  const { id } = await createHostPage(request, { title: "Field preview", canvas: layout(before) });
+  await page.goto(`/_emdash/admin/content/pages/${id}`);
+  await page
+    .locator('[data-emvb-widget="canvas"]')
+    .getByRole("button", { name: "Edit with EmVB" })
+    .click();
+  const editor = overlay(page);
+  await canvas(page).getByRole("heading", { name: before }).click();
+  await editor.getByLabel("Text", { exact: true }).fill(after);
+  await editor.getByRole("button", { name: "Preview", exact: true }).click();
+  const dialog = page.locator('[data-emvb-dialog="field-preview"]');
+  const frame = dialog.locator("iframe[data-emvb-field-preview]");
+  await expect(frame).toHaveAttribute("sandbox", "");
+  await expect(
+    page.frameLocator('[data-emvb-dialog="field-preview"] iframe').getByRole("heading", {
+      name: after,
+      level: 2,
+    }),
+  ).toBeVisible();
+  await dialog.getByRole("tab", { name: "Mobile" }).click();
+  await expect(frame).toHaveAttribute("data-emvb-field-preview", "mobile");
+  expect((await frame.boundingBox())?.width).toBeCloseTo(390, 0);
+  for (const scheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.screenshot({
+      path: `${SHOTS}/w911-field-preview-${info.project.name}-${scheme}.png`,
+    });
+  }
+  await page.emulateMedia({ colorScheme: "light" });
+  await dialog.getByRole("button", { name: "Back to editing" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(editor.getByRole("button", { name: "Apply" })).toBeVisible();
+  expect(JSON.stringify(await storedCanvas(request, id))).toContain(before);
+  expect(JSON.stringify(await storedCanvas(request, id))).not.toContain(after);
+});

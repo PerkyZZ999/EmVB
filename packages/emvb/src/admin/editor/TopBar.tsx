@@ -4,6 +4,7 @@ import {
   ArrowSquareOutIcon,
   CaretDownIcon,
   CheckIcon,
+  EyeIcon,
   DesktopIcon,
   DeviceMobileIcon,
   DeviceTabletIcon,
@@ -190,6 +191,17 @@ export function TopBar({
           )}
           {page && tools}
         </div>
+        {page && onApply && (
+          // W-911: field mode previews in place; there is no saved draft for a new tab.
+          <Button
+            variant="secondary"
+            className={`${BUTTON} emvb-field-preview-button`}
+            icon={<EyeIcon aria-hidden="true" />}
+            onClick={() => onPreview()}
+          >
+            Preview
+          </Button>
+        )}
         {page && onApply && (
           <Button
             variant="primary"

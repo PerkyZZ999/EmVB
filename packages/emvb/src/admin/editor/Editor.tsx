@@ -67,6 +67,7 @@ import { type ShortcutHandlers, useEditorShortcuts } from "./useEditorShortcuts.
 import { useNodeActions } from "./useNodeActions.ts";
 import { useSavedSections } from "./useSavedSections.ts";
 import { SaveSectionDialog } from "./SavedSectionDialogs.tsx";
+import { FieldPreview, previewDocument } from "./FieldPreview.tsx";
 import { type PasteRefusal, useClipboardActions } from "./useClipboardActions.ts";
 import { ListError, LoadingStatus } from "../pages/list-kit.tsx";
 
@@ -290,6 +291,31 @@ function EditorApp({
       collections,
     ],
   );
+  // W-911: field mode previews the unsaved layout with the public renderer, in a sandboxed frame.
+  const [fieldPreview, setFieldPreview] = React.useState(false);
+  const renderFieldPreview = (previewDevice: PopupDevice): string | null => {
+    if (!state.page.layout) return null;
+    const result = renderPage(state.page.layout, state.design, {
+      mode: "public",
+      scope: state.id,
+      dynamic: {
+        ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
+        ...(Object.keys(loopTemplates).length > 0 ? { loopTemplates } : {}),
+        site: live.site,
+        params: live.params,
+        ...(siteOrigin() ? { origin: siteOrigin() } : {}),
+        collections,
+      },
+      previewDevice,
+    });
+    return previewDocument({
+      html: result.html,
+      css: result.css,
+      canvasStyles,
+      origin: window.location.origin,
+      ...(result.dir === "ltr" || result.dir === "rtl" ? { dir: result.dir } : {}),
+    });
+  };
   const layoutIndex = React.useMemo(
     () => (state.page.layout ? indexLayout(state.page.layout) : undefined),
     [state.page.layout],
@@ -423,7 +449,7 @@ function EditorApp({
               onExit={() => (dirty ? chrome.open("leave") : exit())}
               onShortcuts={() => chrome.open("shortcuts")}
               onSiteStyles={() => chrome.open("siteStyles")}
-              onPreview={(size) => preview(size ?? device)}
+              onPreview={(size) => (host.field ? setFieldPreview(true) : preview(size ?? device))}
               onSave={() => void save()}
               onPublish={() => void publish()}
               stylesUnpublished={state.designUnpublished === true}
@@ -613,6 +639,14 @@ function EditorApp({
           setAnnouncement={setAnnouncement}
           saved={saved}
         />
+        {host.field && (
+          <FieldPreview
+            open={fieldPreview}
+            onOpenChange={setFieldPreview}
+            device={device}
+            render={renderFieldPreview}
+          />
+        )}
         <SaveSectionDialog
           open={saveAsk !== null}
           onOpenChange={(open) => !open && setSaveAsk(null)}
