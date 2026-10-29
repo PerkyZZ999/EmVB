@@ -688,7 +688,8 @@ function KnownElementPanel({
               if (cls || styleState !== "normal") return null;
               return section(
                 id,
-                (node.htmlId ? 1 : 0) + (node.attributes?.length ?? 0),
+                // W-914: a per-element direction counts as a set Advanced value too.
+                (node.htmlId ? 1 : 0) + (node.dir ? 1 : 0) + (node.attributes?.length ?? 0),
                 <>
                   <HtmlIdField node={node} layout={layout} onChange={onChange} />
                   <DirectionField node={node} onChange={onChange} />

@@ -3697,7 +3697,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "(node.htmlId ? 1 : 0) + (node.attributes?.length ?? 0),",
+          "search": "(node.htmlId ? 1 : 0) + (node.dir ? 1 : 0) + (node.attributes?.length ?? 0),",
           "replace": "0,"
         }
       ],
@@ -40941,6 +40941,40 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*W-913"
+    },
+    {
+      "id": "W-914/advanced-count-ignores-dir",
+      "requirement": "W-914",
+      "description": "The closed Advanced section doesn't count a per-element text direction.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "(node.htmlId ? 1 : 0) + (node.dir ? 1 : 0) +",
+          "replace": "(node.htmlId ? 1 : 0) +"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/direction.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-914"
+    },
+    {
+      "id": "W-914/render-drops-element-dir",
+      "requirement": "W-914",
+      "description": "The renderer drops a child element's dir; only the root keeps the site direction.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "if (node.dir === \"ltr\" || node.dir === \"rtl\" || node.dir === \"auto\") attrs.dir = node.dir;\n    else if",
+          "replace": "if (isRoot && (node.dir === \"ltr\" || node.dir === \"rtl\" || node.dir === \"auto\")) attrs.dir = node.dir;\n    else if"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/direction.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-914"
     }
   ]
 }
