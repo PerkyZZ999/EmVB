@@ -41238,6 +41238,20 @@
       ],
       "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
       "expect": "\\(fail\\).*W-917"
+    },
+    {
+      "id": "W-921/collections-table-unwrapped",
+      "requirement": "W-921",
+      "description": "The Host collections table isn't in the scrolling, focusable wrapper, so on phones it pushes the whole admin page sideways.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CollectionsPage.tsx",
+          "search": "<div className=\"emvb-agents-table\" {...SCROLLABLE} aria-label=\"Collections\">",
+          "replace": "<div>"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/pages/collections.test.tsx"],
+      "expect": "\\(fail\\).*W-921"
     }
   ]
 }

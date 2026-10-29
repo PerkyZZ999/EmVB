@@ -134,53 +134,56 @@ export function CollectionsPage({ fetcher = defaultFetcher }: { fetcher?: Fetche
         {state.rows.length === 0 ? (
           <p>This site has no collections of its own yet.</p>
         ) : (
-          <Table className="emvb-collections-table">
-            <Table.Header>
-              <Table.Row>
-                <Table.Head>Collection</Table.Head>
-                <Table.Head>Field</Table.Head>
-                <Table.Head>In canvasCollections</Table.Head>
-                <Table.Head>
-                  <span className="sr-only">Action</span>
-                </Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {state.rows.map((row) => (
-                <Table.Row key={row.slug} data-emvb-collection={row.slug}>
-                  <Table.Cell>
-                    {row.label}
-                    <span className="emvb-collections-slug">{row.slug}</span>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <FieldBadge row={row} />
-                  </Table.Cell>
-                  <Table.Cell>{row.listed ? "Yes" : "Not yet"}</Table.Cell>
-                  <Table.Cell>
-                    {row.field === "missing" && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className={BUTTON}
-                        icon={
-                          adding === row.slug ? (
-                            <Loader size={14} />
-                          ) : (
-                            <PlusIcon aria-hidden="true" />
-                          )
-                        }
-                        disabled={adding !== null}
-                        aria-label={`Add canvas field to ${row.label}`}
-                        onClick={() => void add(row.slug)}
-                      >
-                        Add canvas field
-                      </Button>
-                    )}
-                  </Table.Cell>
+          // W-921: on phones the table scrolls inside the card, not the whole admin page.
+          <div className="emvb-agents-table" {...SCROLLABLE} aria-label="Collections">
+            <Table className="emvb-collections-table">
+              <Table.Header>
+                <Table.Row>
+                  <Table.Head>Collection</Table.Head>
+                  <Table.Head>Field</Table.Head>
+                  <Table.Head>In canvasCollections</Table.Head>
+                  <Table.Head>
+                    <span className="sr-only">Action</span>
+                  </Table.Head>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
+              </Table.Header>
+              <Table.Body>
+                {state.rows.map((row) => (
+                  <Table.Row key={row.slug} data-emvb-collection={row.slug}>
+                    <Table.Cell>
+                      {row.label}
+                      <span className="emvb-collections-slug">{row.slug}</span>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <FieldBadge row={row} />
+                    </Table.Cell>
+                    <Table.Cell>{row.listed ? "Yes" : "Not yet"}</Table.Cell>
+                    <Table.Cell>
+                      {row.field === "missing" && (
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className={BUTTON}
+                          icon={
+                            adding === row.slug ? (
+                              <Loader size={14} />
+                            ) : (
+                              <PlusIcon aria-hidden="true" />
+                            )
+                          }
+                          disabled={adding !== null}
+                          aria-label={`Add canvas field to ${row.label}`}
+                          onClick={() => void add(row.slug)}
+                        >
+                          Add canvas field
+                        </Button>
+                      )}
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table>
+          </div>
         )}
       </section>
       <section className="emvb-surface-card emvb-agents-section" aria-labelledby="emvb-hc-config">
