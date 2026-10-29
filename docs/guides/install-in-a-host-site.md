@@ -201,3 +201,16 @@ An Image with a width and height, from the library, and without sizes of its own
 srcset sizes (up to twice its width). Without `getImage`, or when the service leaves the URL
 unchanged, the plain `<img>` is published as before. A picked library image also takes the focal
 point set on it in EmDash's media library.
+
+## Archive page counts (optional)
+
+EmDash doesn't report how many posts an archive has, so the Pagination element's "Page N of M"
+shows "Page N" and its Last link is left out. To count, opt in where you resolve theme parts:
+
+```ts
+const theme = await resolveThemeParts(Astro, context, { pageCount: true });
+```
+
+EmVB then counts with a few one-row queries through EmDash's public collection query (about
+2·log2 of the post count, none on the last page). Pass a function instead of `true` to use your
+own count, for example an EmDash count API: `pageCount: async ({ collection, where }) => n`.

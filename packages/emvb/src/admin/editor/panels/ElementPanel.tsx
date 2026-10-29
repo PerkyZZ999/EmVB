@@ -325,6 +325,8 @@ const SHOWN_WHEN: Readonly<
 > = {
   "loop.columns": (props) => props["display"] === "grid" || props["display"] === "cards",
   "pagination.countText": (props) => props["showCount"] === true,
+  "pagination.lastText": (props) => props["showLast"] === true,
+  "pagination.lastLabel": (props) => props["showLast"] === true,
   // Post Link always links to its post, so its new-tab switch always applies.
   "post-link.newTab": () => true,
   // UX-075: each device's tracks show on that device, as Columns does (W-139).

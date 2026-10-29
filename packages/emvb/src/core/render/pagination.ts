@@ -1,6 +1,11 @@
 import type { PaginationNode } from "../schema/layout.ts";
 import type { ThemeDynamicData } from "../theme/dynamic.ts";
-import { pageCountText, paginationItems, type ArchivePagination } from "../theme/pagination.ts";
+import {
+  lastPagePath,
+  pageCountText,
+  paginationItems,
+  type ArchivePagination,
+} from "../theme/pagination.ts";
 import type { VNode } from "./vnode.ts";
 
 /** What the editor canvas shows: page 2 of several, links going nowhere (W-222). */
@@ -101,6 +106,20 @@ export function renderPagination(
         };
     }
   });
+  // W-916: the editor sample has no total, so its Last link goes nowhere like the others.
+  const last = editor ? "#" : lastPagePath(data);
+  if (node.props.showLast && last) {
+    const text = label(node.props.lastText, "Last");
+    children.push({
+      tag: "a",
+      attrs: {
+        class: "emvb-pagination-last",
+        href: last,
+        ...nameIfSymbols(text, label(node.props.lastLabel, "Last page")),
+      },
+      children: [text],
+    });
+  }
   if (node.props.showCount) {
     // W-309: "Page N of M", or "Page N" while the host has no total.
     children.unshift({

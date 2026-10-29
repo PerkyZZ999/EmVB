@@ -70,3 +70,32 @@ describe("Page N of M (W-309)", () => {
     expect(off).not.toContain("emvb-pagination-count");
   });
 });
+
+describe("Last link (W-916)", () => {
+  const render = (props: Record<string, unknown>, pagination: Record<string, unknown>) =>
+    renderPage(page(pager(props)), emptyDesign(), {
+      dynamic: { pagination: { basePath: "/posts", ...pagination } as never },
+    }).html;
+
+  test("with a known total it links to the last page", () => {
+    const html = render({ showLast: true }, { page: 2, hasMore: true, totalPages: 9 });
+    expect(html).toContain('<a class="emvb-pagination-last" href="/posts/page/9">Last</a>');
+  });
+
+  test("no Last link without a total, on the last page, or when it is off", () => {
+    expect(render({ showLast: true }, { page: 2, hasMore: true })).not.toContain("pagination-last");
+    expect(render({ showLast: true }, { page: 9, hasMore: false, totalPages: 9 })).not.toContain(
+      "pagination-last",
+    );
+    expect(render({}, { page: 2, hasMore: true, totalPages: 9 })).not.toContain("pagination-last");
+  });
+
+  test("an arrow-only Last text gets its name", () => {
+    const html = render(
+      { showLast: true, lastText: "»", lastLabel: "Letzte Seite" },
+      { page: 1, hasMore: true, totalPages: 4 },
+    );
+    expect(html).toContain('aria-label="Letzte Seite"');
+    expect(html).toContain(">»</a>");
+  });
+});

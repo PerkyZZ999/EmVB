@@ -41,6 +41,7 @@ import type { HostVisitor, VisitorAstro } from "./visitor.ts";
 import { bindingDataFor } from "./request-data.ts";
 import { decodePathSegment, themeContextFrom } from "./theme-context.ts";
 import { entryTimestamp, themePostFromEntry } from "./theme-posts.ts";
+import { probeCounter, totalPagesFor, type PostCounter } from "./page-count.ts";
 
 /** The landmark element for a part's wrapper (W-216); other parts get a plain div. */
 const WRAPPER_TAGS: Partial<Record<string, "header" | "footer">> = {
@@ -318,6 +319,7 @@ async function loadArchivePosts(
   perPage: number,
   content: ContentPort,
   postsTitle = "Posts",
+  counter?: PostCounter,
 ): Promise<{
   posts: ThemePostFields[];
   archiveTitle?: string;
@@ -354,7 +356,21 @@ async function loadArchivePosts(
       : ctx.collection === "posts"
         ? postsTitle
         : undefined;
-    return { posts, archiveTitle, pagination: { page, hasMore, basePath: ctx.path } };
+    const pagination: ArchivePagination = { page, hasMore, basePath: ctx.path };
+    if (counter && (hasMore || result.entries.length > 0)) {
+      // W-916: the last page needs no count; later pages are counted past the ones seen.
+      const seen = (page - 1) * perPage + result.entries.length;
+      const count = hasMore
+        ? await counter({
+            collection: "posts",
+            ...(filter.where ? { where: filter.where } : {}),
+            atLeast: seen + 1,
+          })
+        : seen;
+      const totalPages = totalPagesFor(count, perPage, page);
+      if (totalPages !== undefined) pagination.totalPages = totalPages;
+    }
+    return { posts, archiveTitle, pagination };
   } catch {
     return { posts: [] };
   }
@@ -367,6 +383,7 @@ async function buildDynamicForContent(
   parts: StoredPart[],
   content: ContentPort,
   request?: object,
+  counter?: PostCounter,
 ): Promise<ThemeDynamicData | undefined> {
   const { sectionTemplates, loopTemplates } = await templatesFrom(layout, parts, request);
   const referenced: ThemeDynamicData = {
@@ -385,6 +402,7 @@ async function buildDynamicForContent(
       content,
       // W-532: the Pagination element's "Posts archive title" words it in the site's language.
       paginationArchiveTitle(layout),
+      counter,
     );
     return { ...referenced, posts, archiveTitle, ...(pagination ? { pagination } : {}) };
   }
@@ -407,6 +425,11 @@ export async function resolveThemeParts(
     lang?: string;
     /** Popup and float screen reader names in the site's language (W-690). */
     labels?: ChromeLabels;
+    /**
+     * W-916: count archive pages for "Page N of M" and the Last link. Off by default; `true`
+     * uses EmVB's own one-row probe queries, or pass a counter (e.g. an EmDash count API).
+     */
+    pageCount?: boolean | PostCounter;
   } = {},
 ): Promise<ResolvedThemeParts> {
   return resolveThemePartsWith(emdashContent, astro, ctx, options);
@@ -423,8 +446,19 @@ export async function resolveThemePartsWith(
     lang?: string;
     /** Popup and float screen reader names in the site's language (W-690). */
     labels?: ChromeLabels;
+    /**
+     * W-916: count archive pages for "Page N of M" and the Last link. Off by default; `true`
+     * uses EmVB's own one-row probe queries, or pass a counter (e.g. an EmDash count API).
+     */
+    pageCount?: boolean | PostCounter;
   } = {},
 ): Promise<ResolvedThemeParts> {
+  const counter =
+    typeof options.pageCount === "function"
+      ? options.pageCount
+      : options.pageCount === true
+        ? probeCounter(port)
+        : undefined;
   const context =
     ctx ??
     themeContextFrom(astro.url, {
@@ -564,7 +598,15 @@ export async function resolveThemePartsWith(
       layout && winner === contentWinner
         ? {
             ...referenced,
-            ...(await buildDynamicForContent(stored.partType, context, layout, parts, port, astro)),
+            ...(await buildDynamicForContent(
+              stored.partType,
+              context,
+              layout,
+              parts,
+              port,
+              astro,
+              counter,
+            )),
           }
         : referenced;
     // A page past the last one has no posts; the host answers 404 (W-221).

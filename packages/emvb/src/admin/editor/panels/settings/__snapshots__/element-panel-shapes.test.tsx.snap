@@ -8220,47 +8220,55 @@ exports[`element panel markup (W-021, W-086 M16) pagination renders the same con
         button data-unchecked="" type="button" tabindex="0" id="id-7" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Show page count" aria-labelledby="id-6"
           div
         input tabindex="-1" aria-hidden="true" type="checkbox"
+    div.emvb-field-group data-emvb-field="showLast"
+      div
+        label id="id-8" for="id-9"
+          span
+            "Show Last link"
+        button data-unchecked="" type="button" tabindex="0" id="id-9" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Show Last link" aria-labelledby="id-8"
+          div
+        input tabindex="-1" aria-hidden="true" type="checkbox"
     div
-      label id="id-8" for="id-9"
+      label id="id-10" for="id-11"
         span
           "Page title text"
-      input.emvb-field id="id-9" data-emvb-field="titleText" value="" aria-labelledby="id-8" aria-describedby="id-10"
-      p id="id-10"
+      input.emvb-field id="id-11" data-emvb-field="titleText" value="" aria-labelledby="id-10" aria-describedby="id-12"
+      p id="id-12"
         "The browser title of page 2 onward. {title} and {page} are filled in; unset is "{title} – page {page}"."
     div
-      label id="id-11" for="id-12"
+      label id="id-13" for="id-14"
         span
           "Posts archive title"
-      input.emvb-field id="id-12" data-emvb-field="archiveTitle" value="" aria-labelledby="id-11" aria-describedby="id-13"
-      p id="id-13"
+      input.emvb-field id="id-14" data-emvb-field="archiveTitle" value="" aria-labelledby="id-13" aria-describedby="id-15"
+      p id="id-15"
         "Replaces "Posts" as the posts archive's title, in the site's language. Category and tag archives use the term's name."
     div
-      label id="id-14" for="id-15"
+      label id="id-16" for="id-17"
         span
           "Screen reader name"
-      input.emvb-field id="id-15" data-emvb-field="navLabel" value="" aria-labelledby="id-14" aria-describedby="id-16"
-      p id="id-16"
+      input.emvb-field id="id-17" data-emvb-field="navLabel" value="" aria-labelledby="id-16" aria-describedby="id-18"
+      p id="id-18"
         "What screen readers call the links, in the site's language. Unset is "Pagination"."
     div
-      label id="id-17" for="id-18"
+      label id="id-19" for="id-20"
         span
           "Page number name"
-      input.emvb-field id="id-18" data-emvb-field="pageLabel" value="" aria-labelledby="id-17" aria-describedby="id-19"
-      p id="id-19"
+      input.emvb-field id="id-20" data-emvb-field="pageLabel" value="" aria-labelledby="id-19" aria-describedby="id-21"
+      p id="id-21"
         "What screen readers call each number. {page} is filled in; unset is "Page {page}"."
     div
-      label id="id-20" for="id-21"
+      label id="id-22" for="id-23"
         span
           "Previous name"
-      input.emvb-field id="id-21" data-emvb-field="prevLabel" value="" aria-labelledby="id-20" aria-describedby="id-22"
-      p id="id-22"
+      input.emvb-field id="id-23" data-emvb-field="prevLabel" value="" aria-labelledby="id-22" aria-describedby="id-24"
+      p id="id-24"
         "Read out when Previous text is only an arrow. Unset is "Previous page"."
     div
-      label id="id-23" for="id-24"
+      label id="id-25" for="id-26"
         span
           "Next name"
-      input.emvb-field id="id-24" data-emvb-field="nextLabel" value="" aria-labelledby="id-23" aria-describedby="id-25"
-      p id="id-25"
+      input.emvb-field id="id-26" data-emvb-field="nextLabel" value="" aria-labelledby="id-25" aria-describedby="id-27"
+      p id="id-27"
         "Read out when Next text is only an arrow. Unset is "Next page"."
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
@@ -8270,12 +8278,12 @@ exports[`element panel markup (W-021, W-086 M16) pagination renders the same con
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-26" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-28" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-27" tabindex="-1" aria-hidden="true" value="everyone"
+            input id="id-29" tabindex="-1" aria-hidden="true" value="everyone"
     p.emvb-helper data-emvb-loop-note="true"
       "Pagination shows only in an Archive template with more than one page. Here the live page shows nothing.""
 ,

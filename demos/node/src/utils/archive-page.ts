@@ -17,7 +17,7 @@ export async function resolveArchivePage(
 ): Promise<Response | { theme: ResolvedThemeParts; page: number; title: string }> {
   const context = themeContextFrom(Astro.url);
   if (context.kind !== "archive" || context.page === undefined) return notFound(Astro);
-  const theme = await resolveThemeParts(Astro, context);
+  const theme = await resolveThemeParts(Astro, context, { pageCount: true });
   const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
   if (theme.canonicalPath && theme.canonicalPath !== path) {
     return Astro.redirect(theme.canonicalPath, 301);

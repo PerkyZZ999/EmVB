@@ -2,6 +2,7 @@ export { default as EmVBPage } from "./EmVBPage.astro";
 export { resolveEmVBPage, type ResolvedEmVBPage } from "./resolve.ts";
 export type { HostVisitor } from "./visitor.ts";
 export type { ResponsiveGetImage } from "./responsive-images.ts";
+export type { PostCounter } from "./page-count.ts";
 export {
   resolveThemeParts,
   type RenderedThemePart,

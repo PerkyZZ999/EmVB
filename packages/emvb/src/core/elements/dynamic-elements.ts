@@ -309,8 +309,16 @@ export const pagination: ElementDefinition<PaginationNode> = {
         label: "Count text",
         optional: true,
         message:
-          '{page} and {total} are filled in. EmDash 1.2 doesn\'t report a total, so the count shows "Page N" until it does.',
+          '{page} and {total} are filled in. EmDash doesn\'t report a total, so the count shows "Page N" unless the site turns on page counting.',
       },
+      {
+        key: "showLast",
+        kind: "boolean",
+        label: "Show Last link",
+        optional: true,
+        message: "Links to the last page when the site counts pages; otherwise it's left out.",
+      },
+      { key: "lastText", kind: "text", label: "Last text", optional: true },
       {
         key: "titleText",
         kind: "text",
@@ -356,6 +364,13 @@ export const pagination: ElementDefinition<PaginationNode> = {
         label: "Next name",
         optional: true,
         message: 'Read out when Next text is only an arrow. Unset is "Next page".',
+      },
+      {
+        key: "lastLabel",
+        kind: "text",
+        label: "Last name",
+        optional: true,
+        message: 'Read out when Last text is only an arrow. Unset is "Last page".',
       },
     ],
   },

@@ -41034,6 +41034,93 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*W-915"
+    },
+    {
+      "id": "W-916/last-link-guessed",
+      "requirement": "W-916",
+      "description": "Without a total the Last link guesses the next page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/pagination.ts",
+          "search": "  return total !== undefined && p.page < total ? archivePagePath(p.basePath, total) : undefined;",
+          "replace": "  return archivePagePath(p.basePath, total ?? p.page + 1);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/page-count.test.ts"],
+      "expect": "\\(fail\\).*W-916"
+    },
+    {
+      "id": "W-916/last-link-ignored",
+      "requirement": "W-916",
+      "description": "Show Last link renders nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/pagination.ts",
+          "search": "if (node.props.showLast && last) {",
+          "replace": "if (node.props.showLast && last && editor) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/page-count.test.ts"],
+      "expect": "\\(fail\\).*W-916"
+    },
+    {
+      "id": "W-916/count-on-by-default",
+      "requirement": "W-916",
+      "description": "Page counting runs without the host opting in.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "      : options.pageCount === true",
+          "replace": "      : options.pageCount !== false"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*W-916"
+    },
+    {
+      "id": "W-916/probe-off-by-one",
+      "requirement": "W-916",
+      "description": "The probe counts one entry too few.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/page-count.ts",
+          "search": "      return lo + 1;",
+          "replace": "      return lo;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/page-count.test.ts"],
+      "expect": "\\(fail\\).*W-916"
+    },
+    {
+      "id": "W-916/probe-drops-filter",
+      "requirement": "W-916",
+      "description": "The probe counts every post, not the archive's category.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/page-count.ts",
+          "search": "        ...(where ? { where } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/page-count.test.ts"],
+      "expect": "\\(fail\\).*W-916"
+    },
+    {
+      "id": "W-916/show-last-field-missing",
+      "requirement": "W-916",
+      "description": "The Pagination panel has no Show Last link switch.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/dynamic-elements.ts",
+          "search": "        label: \"Show Last link\",",
+          "replace": "        label: \"Show final link\","
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/pagination-last.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-916"
     }
   ]
 }

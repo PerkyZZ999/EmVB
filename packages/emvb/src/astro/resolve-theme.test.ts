@@ -567,6 +567,31 @@ describe("archive pagination (W-221)", () => {
     expect(count(page3.content?.html)).toBe(1);
   });
 
+  test("W-916: page counting is off by default and fills Page N of M and Last when on", async () => {
+    postEntries = posts(7);
+    themeEntries = [
+      part("ARCHIVE1", "archive", [
+        { id: "loop0001", type: "loop", props: { perPage: 3 }, children: [] },
+        { id: "pagi0001", type: "pagination", props: { showCount: true, showLast: true } },
+      ] as LayoutNode[]),
+    ];
+    const url = (path: string) => themeContextFrom(new URL(`http://site.test${path}`));
+    const off = await resolveThemeParts(astro("/posts"), url("/posts"));
+    expect(off.content?.html).toContain(">Page 1</span>");
+    expect(off.content?.html).not.toContain("emvb-pagination-last");
+    const on = await resolveThemeParts(astro("/posts"), url("/posts"), { pageCount: true });
+    expect(on.content?.html).toContain(">Page 1 of 3</span>");
+    expect(on.content?.html).toContain('href="/posts/page/3">Last</a>');
+    const last = await resolveThemeParts(astro("/posts/page/3"), url("/posts/page/3"), {
+      pageCount: true,
+    });
+    expect(last.content?.html).toContain(">Page 3 of 3</span>");
+    const custom = await resolveThemeParts(astro("/posts"), url("/posts"), {
+      pageCount: async () => 30,
+    });
+    expect(custom.content?.html).toContain(">Page 1 of 10</span>");
+  });
+
   test('the Pagination element\'s Posts archive title replaces "Posts" (W-532)', async () => {
     postEntries = posts(7);
     themeEntries = [

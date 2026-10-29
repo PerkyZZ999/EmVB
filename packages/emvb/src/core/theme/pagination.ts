@@ -178,6 +178,15 @@ function totalItems(p: ArchivePagination, total: number): PaginationItem[] {
   return items;
 }
 
+/**
+ * W-916: the last page's path when the total is known and this isn't it. Without a total there
+ * is no Last link: a guessed one could point past the end.
+ */
+export function lastPagePath(p: ArchivePagination): string | undefined {
+  const total = knownTotal(p);
+  return total !== undefined && p.page < total ? archivePagePath(p.basePath, total) : undefined;
+}
+
 /** A text prop of the first Pagination element in an archive layout, if set (W-529, W-532). */
 function paginationText(layout: Layout, key: "titleText" | "archiveTitle"): string | undefined {
   let found: string | undefined;
