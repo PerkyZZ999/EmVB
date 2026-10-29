@@ -1,20 +1,62 @@
-import { Button, Text } from "@cloudflare/kumo";
-import { PencilSimpleIcon } from "@phosphor-icons/react";
+import { Badge, Button, LayerCard, Text } from "@cloudflare/kumo";
+import { LockSimpleIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { summarizeLayout, type Layout } from "../../core/index.ts";
+import { summarizeLayout, type Layout, type LayoutNode } from "../../core/index.ts";
+import { clipText } from "../../core/limits.ts";
 import { canUseEmvb, useRole } from "../access/role.ts";
 import { defaultFetcher, type Fetcher } from "../api.ts";
 import { Editor } from "../editor/Editor.tsx";
+import { ELEMENT_NAMES, elementIcon } from "../editor/element-chrome.ts";
 import { EditorHostContext, type EditorHost } from "../editor/host.ts";
-import { BUTTON } from "../ui.ts";
+import { layerPreview } from "../editor/panels/LayersPanel.tsx";
+import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
 import { createFieldFetcher, FIELD_ENTRY_ID, readFieldLayout } from "./field-fetcher.ts";
 import type { FieldWidgetProps } from "./LayoutField.tsx";
 
 function describe(layout: Layout | null): string {
   const summary = summarizeLayout(layout);
-  if (!summary || summary.nodes === 0) return "No layout yet.";
+  if (!summary || summary.nodes === 0) return "No layout yet";
   return `${summary.nodes} ${summary.nodes === 1 ? "element" : "elements"}`;
 }
+
+const OUTLINE_ROWS = 5;
+
+/** W-904: the page's top-level elements, as the Layers panel names them. Text only. */
+function Outline({ layout }: { layout: Layout }) {
+  const children = layout.root.children ?? [];
+  if (children.length === 0) return null;
+  const more = children.length - OUTLINE_ROWS;
+  return (
+    <ol className="emvb-canvas-outline" aria-label="Top-level elements">
+      {children.slice(0, OUTLINE_ROWS).map((node: LayoutNode) => {
+        const Icon = elementIcon(node.type);
+        const preview = layerPreview(node);
+        return (
+          <li key={node.id}>
+            <Icon size={14} aria-hidden="true" />
+            <span className="emvb-canvas-outline-name">
+              {ELEMENT_NAMES[node.type] ?? "Element"}
+            </span>
+            {preview && <span className="emvb-canvas-outline-text">{clipText(preview, 60)}</span>}
+          </li>
+        );
+      })}
+      {more > 0 && <li className="emvb-canvas-outline-more">+{more} more</li>}
+    </ol>
+  );
+}
+
+const CARD_CSS = `
+[data-emvb-widget="canvas"] .emvb-canvas-head { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+[data-emvb-widget="canvas"] .emvb-canvas-body { display: grid; gap: 12px; padding: 12px; }
+.emvb-canvas-outline { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13px; line-height: 18px; }
+.emvb-canvas-outline > li { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 4px 8px; border-radius: 6px; background: var(--color-kumo-tint); color: var(--text-color-kumo-default); }
+.emvb-canvas-outline > li > svg { flex: none; color: var(--color-kumo-brand); }
+.emvb-canvas-outline-name { flex: none; font-weight: 500; }
+.emvb-canvas-outline-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color-kumo-subtle); }
+.emvb-canvas-outline > li.emvb-canvas-outline-more { background: none; color: var(--text-color-kumo-subtle); }
+.emvb-canvas-readonly { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; color: var(--text-color-kumo-subtle); }
+`;
 
 /**
  * `emvb:canvas` (W-900): a JSON field on any collection listed in `canvasCollections`, edited in
@@ -56,23 +98,45 @@ export function CanvasField({
       data-emvb-widget="canvas"
       className="flex flex-col gap-2"
     >
-      <Text variant="secondary">{label}</Text>
-      <Text>{unreadable ? "This layout can't be read." : describe(layout)}</Text>
-      {role.state === "ready" && !canEdit && (
-        <Text variant="secondary">Only editors and administrators can change this layout.</Text>
-      )}
-      {canEdit && (
-        <div>
-          <Button
-            variant="secondary"
-            className={BUTTON}
-            icon={<PencilSimpleIcon aria-hidden="true" />}
-            onClick={() => setSession(createFieldFetcher(fetcher, { title: label, layout }))}
-          >
-            Edit with EmVB
-          </Button>
-        </div>
-      )}
+      <style>{CARD_CSS}</style>
+      <LayerCard>
+        <LayerCard.Secondary className="emvb-canvas-head">
+          <span>{label}</span>
+          <Badge variant={layout && !unreadable ? "blue" : "neutral"}>
+            {unreadable ? "Unreadable" : describe(layout)}
+          </Badge>
+        </LayerCard.Secondary>
+        <LayerCard.Primary className="emvb-canvas-body">
+          {unreadable ? (
+            <Text>This layout can't be read.</Text>
+          ) : layout && (layout.root.children ?? []).length > 0 ? (
+            <Outline layout={layout} />
+          ) : (
+            <Text variant="secondary">
+              No layout yet. The entry's own content is shown instead.
+            </Text>
+          )}
+          {role.state === "ready" && !canEdit && (
+            <p className="emvb-canvas-readonly">
+              <LockSimpleIcon size={14} aria-hidden="true" />
+              Only editors and administrators can change this layout.
+            </p>
+          )}
+          {canEdit && (
+            <div>
+              <Button
+                variant="primary"
+                className={BUTTON}
+                style={SOLID_PRIMARY}
+                icon={<PencilSimpleIcon aria-hidden="true" />}
+                onClick={() => setSession(createFieldFetcher(fetcher, { title: label, layout }))}
+              >
+                Edit with EmVB
+              </Button>
+            </div>
+          )}
+        </LayerCard.Primary>
+      </LayerCard>
       {/* The editor portals itself over the whole admin (EditorOverlay). */}
       {session && host && (
         <EditorHostContext.Provider value={host}>

@@ -1,3 +1,4 @@
+import { homedir } from "node:os";
 import { expect, test, type APIRequestContext } from "@playwright/test";
 import { api, parsed, setUpEmvbOnce } from "./support/api.ts";
 import { ROLES, setDevRole } from "./support/roles.ts";
@@ -7,7 +8,8 @@ import { overlay, unique } from "./support/helpers.ts";
 test.describe.configure({ mode: "serial" });
 setUpEmvbOnce();
 
-const SHOTS = "/tmp/emvb-ui";
+// Screenshots for review (W-904); outside the repo, copied to the box by hand.
+const SHOTS = `${homedir()}/agent-tools/emvb-ui`;
 const layout = (text: string) => ({
   schemaVersion: 17,
   root: {
@@ -100,6 +102,14 @@ test("an author can't change a host layout and sees it read-only (D-061)", async
   const widget = page.locator('[data-emvb-widget="canvas"]');
   await expect(widget).toContainText("Only editors and administrators can change this layout.");
   await expect(widget.getByRole("button", { name: "Edit with EmVB" })).toHaveCount(0);
+  for (const scheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await widget.scrollIntoViewIfNeeded();
+    await widget.screenshot({
+      path: `${SHOTS}/canvas-card-author-${info.project.name}-${scheme}.png`,
+    });
+  }
+  await page.emulateMedia({ colorScheme: "light" });
   setDevRole(changed, ROLES.admin);
   changed = null;
   expect(await storedCanvas(request, id)).toEqual(layout("Kept"));
@@ -121,6 +131,7 @@ test("an admin edits the field in EmVB, applies, saves the entry, and the page r
     await page.emulateMedia({ colorScheme: scheme });
     await widget.scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${SHOTS}/canvas-widget-${project}-${scheme}.png` });
+    await widget.screenshot({ path: `${SHOTS}/canvas-card-${project}-${scheme}.png` });
   }
   await page.emulateMedia({ colorScheme: "light" });
   await widget.getByRole("button", { name: "Edit with EmVB" }).click();

@@ -40704,6 +40704,48 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*the demo grants schema:read"
+    },
+    {
+      "id": "W-904/outline-uncapped",
+      "requirement": "W-904",
+      "description": "The card lists every top-level element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/CanvasField.tsx",
+          "search": "children.slice(0, OUTLINE_ROWS).map(",
+          "replace": "children.map("
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
+      "expect": "\\(fail\\).*W-904"
+    },
+    {
+      "id": "W-904/more-hidden",
+      "requirement": "W-904",
+      "description": "The card hides how many elements it left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/CanvasField.tsx",
+          "search": "{more > 0 && <li",
+          "replace": "{more > 99 && <li"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
+      "expect": "\\(fail\\).*W-904"
+    },
+    {
+      "id": "W-904/empty-unexplained",
+      "requirement": "W-904",
+      "description": "An empty field gives no hint that the entry's own content shows.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/CanvasField.tsx",
+          "search": "No layout yet. The entry's own content is shown instead.",
+          "replace": "No layout yet."
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
+      "expect": "\\(fail\\).*W-904"
     }
   ]
 }

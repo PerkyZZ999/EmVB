@@ -84,6 +84,40 @@ describe("emvb:canvas field widget (W-900)", () => {
   });
 });
 
+describe("field card (W-904)", () => {
+  const headings = (n: number, text = "Title") => ({
+    schemaVersion: 17,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: Array.from({ length: n }, (_, i) => ({
+        id: `head000${i}`,
+        type: "heading",
+        props: { text: i === 0 ? text : `Title ${i}`, level: 2 },
+      })),
+    },
+  });
+
+  test("outlines the first five top-level elements as text and counts the rest", async () => {
+    const { host } = await render(headings(7, '<img src=x onerror="alert(1)">Hello'));
+    const rows = [...host.querySelectorAll(".emvb-canvas-outline > li")].map(
+      (li) => li.textContent,
+    );
+    expect(rows).toHaveLength(6);
+    expect(rows[0]).toBe('Heading<img src=x onerror="alert(1)">Hello');
+    expect(rows[5]).toBe("+2 more");
+    expect(host.querySelector("img")).toBeNull();
+    expect(host.textContent).toContain("8 elements");
+  });
+
+  test("an empty field says the entry's own content shows instead", async () => {
+    const { host } = await render(null);
+    expect(host.textContent).toContain("No layout yet. The entry's own content is shown instead.");
+    expect(host.querySelector(".emvb-canvas-outline")).toBeNull();
+  });
+});
+
 describe("field-mode fetcher (W-900)", () => {
   test("serves the field as a draft entry and stages only valid layouts", async () => {
     const base = mock<Fetcher>(async () => Response.json({ data: {} }));
