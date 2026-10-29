@@ -1,5 +1,5 @@
-import { Badge, Button, LayerCard, Text } from "@cloudflare/kumo";
-import { LockSimpleIcon, PencilSimpleIcon } from "@phosphor-icons/react";
+import { Badge, Button, LayerCard, Loader, Text } from "@cloudflare/kumo";
+import { LockSimpleIcon, MagicWandIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import { summarizeLayout, type Layout, type LayoutNode } from "../../core/index.ts";
 import { clipText } from "../../core/limits.ts";
@@ -10,6 +10,7 @@ import { ELEMENT_NAMES, elementIcon } from "../editor/element-chrome.ts";
 import { EditorHostContext, type EditorHost } from "../editor/host.ts";
 import { layerPreview } from "../editor/panels/LayersPanel.tsx";
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
+import { convertEntryBody, hostEntryFromLocation } from "./convert-body.ts";
 import { createFieldFetcher, FIELD_ENTRY_ID, readFieldLayout } from "./field-fetcher.ts";
 import type { FieldWidgetProps } from "./LayoutField.tsx";
 
@@ -55,6 +56,9 @@ const CARD_CSS = `
 .emvb-canvas-outline-name { flex: none; font-weight: 500; }
 .emvb-canvas-outline-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-color-kumo-subtle); }
 .emvb-canvas-outline > li.emvb-canvas-outline-more { background: none; color: var(--text-color-kumo-subtle); }
+.emvb-canvas-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.emvb-canvas-convert-note { margin: 0; font-size: 13px; color: var(--text-color-kumo-subtle); }
+.emvb-canvas-convert-note[data-emvb-convert="error"] { color: var(--text-color-kumo-danger); }
 .emvb-canvas-readonly { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; color: var(--text-color-kumo-subtle); }
 `;
 
@@ -76,6 +80,30 @@ export function CanvasField({
   const unreadable = layout === null && value !== null && value !== undefined && value !== "";
   const canEdit = role.state === "ready" && canUseEmvb(role.role);
   const close = React.useCallback(() => setSession(null), []);
+  // W-912: an empty field can start from the entry's saved rich-text body.
+  const entry = React.useMemo(() => hostEntryFromLocation(window.location.pathname), []);
+  const [convert, setConvert] = React.useState<
+    { state: "idle" } | { state: "busy" } | { state: "done" | "error"; message: string }
+  >({ state: "idle" });
+  const startConvert = async () => {
+    if (!entry) return;
+    setConvert({ state: "busy" });
+    try {
+      const result = await convertEntryBody(fetcher, entry);
+      if (!result.ok) {
+        setConvert({ state: "error", message: result.message });
+        return;
+      }
+      const left = result.skipped > 0 ? ` ${result.skipped} left out (not supported).` : "";
+      setConvert({
+        state: "done",
+        message: `Converted ${result.converted} ${result.converted === 1 ? "block" : "blocks"} from the entry's ${result.field} field.${left} Its original content is unchanged. Save the entry to keep the layout.`,
+      });
+      setSession(createFieldFetcher(fetcher, { title: label, layout: result.layout }));
+    } catch {
+      setConvert({ state: "error", message: "The entry's content couldn't be read. Try again." });
+    }
+  };
   const host = React.useMemo<EditorHost | null>(() => {
     if (!session) return null;
     const finish = (next: Layout | null | undefined) => {
@@ -123,7 +151,7 @@ export function CanvasField({
             </p>
           )}
           {canEdit && (
-            <div>
+            <div className="emvb-canvas-actions">
               <Button
                 variant="primary"
                 className={BUTTON}
@@ -133,7 +161,33 @@ export function CanvasField({
               >
                 Edit with EmVB
               </Button>
+              {entry && !unreadable && (!layout || (layout.root.children ?? []).length === 0) && (
+                <Button
+                  variant="secondary"
+                  className={`${BUTTON} emvb-canvas-convert`}
+                  icon={
+                    convert.state === "busy" ? (
+                      <Loader size={14} />
+                    ) : (
+                      <MagicWandIcon aria-hidden="true" />
+                    )
+                  }
+                  disabled={convert.state === "busy"}
+                  onClick={() => void startConvert()}
+                >
+                  Convert to EmVB
+                </Button>
+              )}
             </div>
+          )}
+          {(convert.state === "done" || convert.state === "error") && (
+            <p
+              className="emvb-canvas-convert-note"
+              role={convert.state === "error" ? "alert" : "status"}
+              data-emvb-convert={convert.state}
+            >
+              {convert.message}
+            </p>
           )}
         </LayerCard.Primary>
       </LayerCard>

@@ -548,3 +548,4 @@ export {
   type SavedSectionSummary,
   syncedPartLayout,
 } from "./saved-sections.ts";
+export { portableTextToLayout } from "./portable-text.ts";

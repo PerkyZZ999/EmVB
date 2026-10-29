@@ -235,3 +235,79 @@ test("W-911: Preview in field mode shows the unsaved layout, sandboxed, without 
   expect(JSON.stringify(await storedCanvas(request, id))).toContain(before);
   expect(JSON.stringify(await storedCanvas(request, id))).not.toContain(after);
 });
+
+test("W-912: Convert to EmVB starts a layout from the saved body and never changes the body", async ({
+  page,
+  request,
+}, info) => {
+  const title = `Convert ${unique()}`;
+  const content = [
+    {
+      _type: "block",
+      _key: "a1",
+      style: "h2",
+      markDefs: [],
+      children: [{ _type: "span", _key: "s1", text: "Our story", marks: [] }],
+    },
+    {
+      _type: "block",
+      _key: "a2",
+      style: "normal",
+      markDefs: [],
+      children: [
+        { _type: "span", _key: "s2", text: "<img src=x onerror=alert(1)> plain words", marks: [] },
+      ],
+    },
+    {
+      _type: "block",
+      _key: "a3",
+      style: "normal",
+      listItem: "bullet",
+      level: 1,
+      markDefs: [],
+      children: [{ _type: "span", _key: "s3", text: "Point one", marks: [] }],
+    },
+  ];
+  const { id } = await createHostPage(request, { title, content });
+  const stored = async () =>
+    ((await api(request, "GET", `/_emdash/api/content/pages/${id}`)).json ?? {})["data"] as {
+      item: { data: Record<string, unknown> };
+    };
+  const before = JSON.stringify((await stored()).item.data["content"]);
+  await page.goto(`/_emdash/admin/content/pages/${id}`);
+  const widget = page.locator('[data-emvb-widget="canvas"]');
+  const convert = widget.getByRole("button", { name: "Convert to EmVB" });
+  await expect(convert).toBeVisible();
+  for (const scheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await widget.screenshot({
+      path: `${SHOTS}/w912-convert-card-${info.project.name}-${scheme}.png`,
+    });
+  }
+  await page.emulateMedia({ colorScheme: "light" });
+  await convert.click();
+  const editor = overlay(page);
+  await expect(editor.getByRole("button", { name: "Apply" })).toBeVisible({ timeout: 20_000 });
+  await expect(canvas(page).getByRole("heading", { name: title, level: 1 })).toBeVisible();
+  await expect(canvas(page).getByRole("heading", { name: "Our story", level: 2 })).toBeVisible();
+  await expect(canvas(page).getByText("<img src=x onerror=alert(1)> plain words")).toBeVisible();
+  await expect(canvas(page).locator("img")).toHaveCount(0);
+  await expect(canvas(page).getByRole("listitem")).toHaveText(["Point one"]);
+  await editor.getByRole("button", { name: "Apply" }).click();
+  await expect(widget).toContainText("5 elements");
+  await expect(widget.locator('[data-emvb-convert="done"]')).toContainText("Converted 3 blocks");
+  for (const scheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await widget.screenshot({
+      path: `${SHOTS}/w912-converted-card-${info.project.name}-${scheme}.png`,
+    });
+  }
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect
+    .poll(async () => JSON.stringify((await stored()).item.data["canvas"] ?? null), {
+      timeout: 15_000,
+    })
+    .toContain("Our story");
+  expect(JSON.stringify((await stored()).item.data["content"])).toBe(before);
+});

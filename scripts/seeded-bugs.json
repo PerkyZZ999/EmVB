@@ -40865,6 +40865,37 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*W-911"
+    },
+    {
+      "id": "W-912/image-url-unchecked",
+      "requirement": "W-912",
+      "description": "Convert copies an image URL without the shared URL check, so javascript: and data: sources reach the layout.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/portable-text.ts",
+          "search": "typeof raw === \"string\" ? sanitizeUrl(raw, IMAGE_SCHEMES) : undefined",
+          "replace": "typeof raw === \"string\" ? raw : undefined"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/portable-text.test.ts"],
+      "expect": "\\(fail\\).*W-912"
+    },
+    {
+      "id": "W-912/convert-button-missing",
+      "requirement": "W-912",
+      "description": "The Convert to EmVB button never shows on an empty host field.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/CanvasField.tsx",
+          "search": "{entry && !unreadable &&",
+          "replace": "{false && entry && !unreadable &&"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-912"
     }
   ]
 }
