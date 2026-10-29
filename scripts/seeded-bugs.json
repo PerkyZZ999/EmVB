@@ -41202,6 +41202,34 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*W-920"
+    },
+    {
+      "id": "W-917/changed-filter-ignores-creates",
+      "requirement": "W-917",
+      "description": "--changed-since skips seeds that only create a file.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "[...(s.edits ?? []), ...(s.creates ?? [])].some((edit) => files.has(edit.file))",
+          "replace": "(s.edits ?? []).some((edit) => files.has(edit.file))"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-917"
+    },
+    {
+      "id": "W-917/changed-filter-ignored",
+      "requirement": "W-917",
+      "description": "--changed-since selects every seed.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "      (!files ||",
+          "replace": "      (true ||"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*W-917"
     }
   ]
 }

@@ -4,6 +4,8 @@
  *
  *   bun scripts/seeded-bug.ts [--manifest scripts/seeded-bugs.json] [--root .] [--only <text>]
  *   bun scripts/seeded-bug.ts --verify   (checks every seed still applies, without running any)
+ *   bun scripts/seeded-bug.ts --changed-since <git ref> [--list]
+ *     (only seeds that edit a file changed since the ref; --list prints them without running)
  */
 import { createLogger, initLogger } from "evlog";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
@@ -135,6 +137,25 @@ export async function verifySeeds(root: string, seeds: readonly Seed[]): Promise
   return problems;
 }
 
+/** Seeds matching `only` (a substring of the id) and, when `files` is given, editing one of them. */
+export function selectSeeds(
+  seeds: readonly Seed[],
+  { only, files }: { only?: string; files?: ReadonlySet<string> },
+): Seed[] {
+  return seeds.filter(
+    (s) =>
+      (!only || s.id.includes(only)) &&
+      (!files || [...(s.edits ?? []), ...(s.creates ?? [])].some((edit) => files.has(edit.file))),
+  );
+}
+
+async function changedSince(root: string, ref: string): Promise<Set<string>> {
+  const proc = Bun.spawn(["git", "diff", "--name-only", ref, "--"], { cwd: root, stdout: "pipe" });
+  const out = await new Response(proc.stdout).text();
+  if ((await proc.exited) !== 0) throw new Error(`git diff --name-only ${ref} failed`);
+  return new Set(out.split("\n").filter(Boolean));
+}
+
 function arg(name: string): string | undefined {
   const i = process.argv.indexOf(`--${name}`);
   return i === -1 ? undefined : process.argv[i + 1];
@@ -154,7 +175,14 @@ if (import.meta.main) {
     );
     process.exit(problems.length === 0 ? 0 : 1);
   }
-  const selected = seeds.filter((s) => !only || s.id.includes(only));
+  const since = arg("changed-since");
+  const files = since === undefined ? undefined : await changedSince(root, since);
+  const selected = selectSeeds(seeds, { only, files });
+  if (process.argv.includes("--list")) {
+    for (const seed of selected) process.stdout.write(`${seed.id}\n`);
+    process.stdout.write(`seeded bugs: ${selected.length} selected, none run\n`);
+    process.exit(0);
+  }
   const results: SeedResult[] = [];
   // Seeds mutate the same working tree, so they must run one at a time.
   for (const seed of selected) {

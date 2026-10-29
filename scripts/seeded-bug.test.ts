@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, test } from "bun:test";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runSeed, verifySeeds, type Seed } from "./seeded-bug.ts";
+import { runSeed, selectSeeds, verifySeeds, type Seed } from "./seeded-bug.ts";
 
 let root = "";
 beforeEach(async () => {
@@ -96,4 +96,27 @@ test("verify names each seed that drifted, and why", async () => {
     "regex: expect is not a valid regex: (",
     "twice: duplicate id",
   ]);
+});
+
+test("W-917: --changed-since keeps only seeds that edit or create a changed file", () => {
+  const fake = (id: string, file: string, creates = false): Seed => ({
+    id,
+    requirement: "W-917",
+    description: id,
+    ...(creates
+      ? { creates: [{ file, content: "" }] }
+      : { edits: [{ file, search: "a", replace: "b" }] }),
+    command: ["true"],
+    expect: "x",
+  });
+  const seeds = [
+    fake("W-1/a", "src/a.ts"),
+    fake("W-2/b", "src/b.ts"),
+    fake("W-3/c", "src/c.ts", true),
+  ];
+  const files = new Set(["src/b.ts", "src/c.ts"]);
+  expect(selectSeeds(seeds, { files }).map((s) => s.id)).toEqual(["W-2/b", "W-3/c"]);
+  expect(selectSeeds(seeds, { only: "W-2", files }).map((s) => s.id)).toEqual(["W-2/b"]);
+  expect(selectSeeds(seeds, {}).length).toBe(3);
+  expect(selectSeeds(seeds, { files: new Set() })).toEqual([]);
 });
