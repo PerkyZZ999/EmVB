@@ -190,7 +190,7 @@
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
-          "search": "plugins: [formsPlugin(), emvb({ canvasStyles: [\"/site.css\"] })],",
+          "search": "plugins: [formsPlugin(), emvb({ canvasStyles: [\"/site.css\"], canvasCollections: [\"pages\"] })],",
           "replace": "plugins: [formsPlugin()],"
         }
       ],
@@ -11495,8 +11495,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/resolve.ts",
-          "search": "  try {\n    found = await content.getEntry(PAGES_COLLECTION, slug);\n  } catch {\n    // No emvb_pages collection yet (EmVB not set up): not an EmVB page.\n    return null;\n  }",
-          "replace": "  found = await content.getEntry(PAGES_COLLECTION, slug);"
+          "search": "  try {\n    found = await content.getEntry(options.collection ?? PAGES_COLLECTION, slug);\n  } catch {\n    // No emvb_pages collection yet (EmVB not set up): not an EmVB page.\n    return null;\n  }",
+          "replace": "  found = await content.getEntry(options.collection ?? PAGES_COLLECTION, slug);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
@@ -40631,6 +40631,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/widgets/CanvasField.test.tsx"],
       "expect": "\\(fail\\).*W-900"
+    },
+    {
+      "id": "W-901/host-field-ignored",
+      "requirement": "W-901",
+      "description": "A host entry renders its `layout` instead of its canvas field.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "const stored = hosted ? data[options.field ?? \"canvas\"] : data[\"layout\"];",
+          "replace": "const stored = data[\"layout\"];"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*W-901"
+    },
+    {
+      "id": "W-901/empty-field-rendered",
+      "requirement": "W-901",
+      "description": "An empty canvas field renders an empty EmVB page instead of the host template.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "  if (hosted && (stored === null || stored === undefined || stored === \"\")) return null;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*W-901"
+    },
+    {
+      "id": "W-901/host-blank-mode",
+      "requirement": "W-901",
+      "description": "A host entry's canvas_mode can make it a blank page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "canvasMode: !hosted && data[\"canvas_mode\"]",
+          "replace": "canvasMode: data[\"canvas_mode\"]"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*W-901"
+    },
+    {
+      "id": "W-901/collection-lost",
+      "requirement": "W-901",
+      "description": "The result says emvb_pages for a host entry.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "collection: hosted ? (options.collection as string) : PAGES_COLLECTION,",
+          "replace": "collection: PAGES_COLLECTION,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*W-901"
     }
   ]
 }

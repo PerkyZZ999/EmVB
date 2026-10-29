@@ -12,6 +12,8 @@ type EmDashEntry = NonNullable<Awaited<ReturnType<ContentPort["getEntry"]>>["ent
 export type ResolvedEmVBPage = RenderedPage & {
   /** The EmDash entry, for `getSeoMeta` and the host's layout. */
   entry: EmDashEntry;
+  /** The collection the entry came from: `emvb_pages`, or the host collection (W-901). */
+  collection: string;
   title: string;
   canvasMode: "site-layout" | "blank";
   /** A valid `_preview` token is serving the draft: don't cache the response. */
@@ -40,6 +42,13 @@ export async function resolveEmVBPage(
     visitor?: HostVisitor;
     /** The page's language, e.g. "fr-CA", for Post Dates; defaults to Astro's locale (W-688). */
     lang?: string;
+    /**
+     * W-901: a host collection listed in `canvasCollections`, read instead of EmVB's own pages.
+     * Its entry is an EmVB page only while `field` (an emvb:canvas field) holds a layout.
+     */
+    collection?: string;
+    /** The emvb:canvas field of `collection` (default `"canvas"`). */
+    field?: string;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   return resolveEmVBPageWith(emdashContent, astro, options);
@@ -55,13 +64,20 @@ export async function resolveEmVBPageWith(
     visitor?: HostVisitor;
     /** The page's language, e.g. "fr-CA", for Post Dates; defaults to Astro's locale (W-688). */
     lang?: string;
+    /**
+     * W-901: a host collection listed in `canvasCollections`, read instead of EmVB's own pages.
+     * Its entry is an EmVB page only while `field` (an emvb:canvas field) holds a layout.
+     */
+    collection?: string;
+    /** The emvb:canvas field of `collection` (default `"canvas"`). */
+    field?: string;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   const slug = options.slug ?? content.decodeSlug(astro.params[options.param ?? "slug"]);
   if (!slug) return null;
   let found: Awaited<ReturnType<ContentPort["getEntry"]>>;
   try {
-    found = await content.getEntry(PAGES_COLLECTION, slug);
+    found = await content.getEntry(options.collection ?? PAGES_COLLECTION, slug);
   } catch {
     // No emvb_pages collection yet (EmVB not set up): not an EmVB page.
     return null;
@@ -69,9 +85,13 @@ export async function resolveEmVBPageWith(
   const entry = found.entry;
   if (!entry) return null;
   const data = entry.data as Record<string, unknown>;
+  const hosted = options.collection !== undefined && options.collection !== PAGES_COLLECTION;
+  const stored = hosted ? data[options.field ?? "canvas"] : data["layout"];
+  // An empty canvas field leaves the entry to the host's own template.
+  if (hosted && (stored === null || stored === undefined || stored === "")) return null;
   const handler = content.pluginHandler(astro.locals as never);
   const design = await designFor(astro, handler, astro.url);
-  const layout = readLayout(data["layout"]);
+  const layout = readLayout(stored);
   const referenced = layout
     ? await referencedTemplatesFor(layout, content, astro)
     : { sectionTemplates: {}, loopTemplates: {} };
@@ -104,7 +124,7 @@ export async function resolveEmVBPageWith(
   };
   return {
     ...renderStored(
-      data["layout"],
+      stored,
       design,
       String(data["id"] ?? slug),
       formDefinitions,
@@ -113,8 +133,9 @@ export async function resolveEmVBPageWith(
       options.lang ?? astro.currentLocale,
     ),
     entry,
+    collection: hosted ? (options.collection as string) : PAGES_COLLECTION,
     title: typeof data["title"] === "string" ? data["title"] : "",
-    canvasMode: data["canvas_mode"] === "blank" ? "blank" : "site-layout",
+    canvasMode: !hosted && data["canvas_mode"] === "blank" ? "blank" : "site-layout",
     isPreview: Boolean(found.isPreview),
   };
 }

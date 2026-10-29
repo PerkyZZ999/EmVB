@@ -62,6 +62,12 @@
           "label": "Content",
           "type": "portableText",
           "searchable": true
+        },
+        {
+          "slug": "canvas",
+          "label": "Canvas",
+          "type": "json",
+          "widget": "emvb:canvas"
         }
       ]
     }

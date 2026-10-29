@@ -215,3 +215,28 @@ describe("Loop Item parts on a page (W-666)", () => {
     }
   });
 });
+
+describe("resolveEmVBPage(Astro, { collection, field }) (W-901)", () => {
+  test("a host entry renders its emvb:canvas field, always in the site layout", async () => {
+    lookup = async (collection) =>
+      collection === "pages"
+        ? page({ title: "About", canvas: JSON.stringify(layout(heading)), canvas_mode: "blank" })
+        : { entry: null };
+    const resolved = await resolveEmVBPage(astro({ slug: "about" }), { collection: "pages" });
+    expect(lookups).toEqual(["pages/about"]);
+    expect(resolved?.html).toContain("Hello");
+    expect(resolved?.canvasMode).toBe("site-layout");
+    expect(resolved?.title).toBe("About");
+    expect(resolved?.collection).toBe("pages");
+  });
+
+  test("an empty canvas field, or another field, leaves the entry to the host", async () => {
+    lookup = async () => page({ title: "About", canvas: "", layout: layout(heading) });
+    expect(await resolveEmVBPage(astro({ slug: "about" }), { collection: "pages" })).toBeNull();
+    lookup = async () => page({ title: "About", body: layout(heading) });
+    expect(
+      (await resolveEmVBPage(astro({ slug: "about" }), { collection: "pages", field: "body" }))
+        ?.html,
+    ).toContain("Hello");
+  });
+});

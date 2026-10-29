@@ -18,7 +18,7 @@ export default defineConfig({
     emdash({
       database: d1({ binding: "DB", session: "auto" }),
       storage: r2({ binding: "MEDIA" }),
-      plugins: [formsPlugin(), emvb({ canvasStyles: ["/site.css"] })],
+      plugins: [formsPlugin(), emvb({ canvasStyles: ["/site.css"], canvasCollections: ["pages"] })],
     }),
   ],
   devToolbar: { enabled: false },

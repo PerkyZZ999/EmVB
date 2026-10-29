@@ -58,6 +58,31 @@ emvb({
 - The canvas runs no scripts, so script-loaded fonts won't apply; use a stylesheet with `@font-face` or a font service's CSS URL.
 - The demo sites load their `public/site.css` this way.
 
+### EmVB layouts on your own collections
+
+`canvasCollections` lets entries in your own collections carry an EmVB layout, edited in place from the entry form:
+
+```js
+emvb({ canvasCollections: ["pages"] });
+```
+
+1. In the collection's schema, add a **JSON** field (for example `canvas`) and pick the **Edit with EmVB** widget (`emvb:canvas`).
+2. On the entry form, **Edit with EmVB** opens the full editor. **Apply** writes the layout back into the field; the entry's own Save and Publish store it.
+3. In the public route, ask for the entry's layout and fall back to your own template when the field is empty:
+
+```astro
+const emvb =
+  (await resolveEmVBPage(Astro)) ??
+  (await resolveEmVBPage(Astro, { collection: "pages", field: "canvas" }));
+```
+
+- Slugs must be lowercase letters, digits and `_`; `emvb_pages`, `emvb_theme_parts` and anything else are ignored. At most 20.
+- Saves are checked on the server: an invalid layout is refused, and only editors and administrators can change the field (authors see a read-only summary).
+- An AI agent publishing such an entry follows the **AI agents** publish setting, like an EmVB page.
+- A hosted layout always renders in your site layout (no blank canvas mode), and the editor's Preview isn't available while editing a field.
+- EmVB asks for the `schema:read` capability to find your emvb:canvas fields.
+- The demo sites' `pages` collection has a `canvas` field set up this way.
+
 ## 3. Public route
 
 Copy the pattern from EmVB’s demos (`demos/node/src/pages/[slug].astro`): try `resolveEmVBPage` first, then fall through to the site’s own pages, and rewrite to `/404` when neither matches.

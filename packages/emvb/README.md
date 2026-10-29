@@ -67,7 +67,7 @@ Each runtime is a small script mounted only on pages that need it; the rest of t
 
 Without the forms plugin, import `EmVBFormsRuntime` from `@perkyzz/emvb/astro/forms` (it renders nothing and does not import the plugin) or leave the element out. The `/client` subpath is the one that calls `initForms`.
 
-A fixed route has no slug parameter. Pass the page's slug: `await resolveEmVBPage(Astro, { slug: "home" })`. Visitor rules can use the same call's `visitor` option (`{ segments: ["member"] }`, and country, device or returning when the site knows better); `resolveThemeParts` takes it too. The [install guide](https://github.com/PerkyZZ999/EmVB/blob/main/docs/guides/install-in-a-host-site.md) shows both, and the `canvasStyles` option that loads your site's stylesheets into the editor canvas: `emvb({ canvasStyles: ["/styles/site.css"] })`.
+A fixed route has no slug parameter. Pass the page's slug: `await resolveEmVBPage(Astro, { slug: "home" })`. Visitor rules can use the same call's `visitor` option (`{ segments: ["member"] }`, and country, device or returning when the site knows better); `resolveThemeParts` takes it too. The [install guide](https://github.com/PerkyZZ999/EmVB/blob/main/docs/guides/install-in-a-host-site.md) shows both, and the `canvasStyles` option that loads your site's stylesheets into the editor canvas: `emvb({ canvasStyles: ["/styles/site.css"] })`. It also covers `canvasCollections`, which lets an `emvb:canvas` JSON field on your own collections hold an EmVB layout, edited in place with **Edit with EmVB** and rendered with `resolveEmVBPage(Astro, { collection: "pages", field: "canvas" })`.
 
 Then sign in as an admin, open **Pages VisualBuilder** and click **Set up EmVB** once.
 
