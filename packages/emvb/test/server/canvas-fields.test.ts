@@ -70,3 +70,40 @@ describe("emvb:canvas fields in canvasCollections (W-898)", () => {
     expect((await update(id, { title: "Home", canvas: null }, ROLES.editor)).success).toBe(true);
   });
 });
+
+describe("agent publishing of host entries with an EmVB layout (W-899)", () => {
+  type Publish = (
+    c: string,
+    id: string,
+    o: Record<string, unknown>,
+  ) => Promise<{ success: boolean; error?: { message: string } }>;
+  const publish = (id: string, viaMcp: boolean) =>
+    (t.runtime as unknown as { handleContentPublish: Publish }).handleContentPublish("pages", id, {
+      ...(viaMcp ? { origin: { source: "mcp" } } : {}),
+      actor: { id: "u", role: ROLES.editor, ...(viaMcp ? { source: "mcp" } : {}) },
+    });
+
+  test("an agent can't publish an entry holding a layout unless agents may publish", async () => {
+    await setUp();
+    await t.agentSettings();
+    const id = idOf(await create({ title: "Home", canvas: s1Page() }));
+    const blocked = await publish(id, true);
+    expect(blocked.success).toBe(false);
+    expect(blocked.error?.message ?? "").toContain("Agents may not publish");
+    expect((await publish(id, false)).success).toBe(true);
+    await t.agentSettings({ publishPages: true });
+    expect((await publish(id, true)).success).toBe(true);
+  });
+
+  test("an entry without a layout, or an unlisted collection, isn't held back", async () => {
+    await setUp();
+    await t.agentSettings();
+    const plain = idOf(await create({ title: "Plain" }));
+    expect((await publish(plain, true)).success).toBe(true);
+    await t.dispose();
+    await setUp(false);
+    await t.agentSettings();
+    const other = idOf(await create({ title: "Off", canvas: s1Page() }));
+    expect((await publish(other, true)).success).toBe(true);
+  });
+});

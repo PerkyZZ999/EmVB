@@ -125,7 +125,7 @@ export async function beforeSave(
 const CANVAS_WIDGET = "emvb:canvas";
 
 /** Slugs of the collection's fields that use the `emvb:canvas` widget. */
-async function canvasFieldSlugs(ctx: PluginContext, collection: string): Promise<string[]> {
+export async function canvasFieldSlugs(ctx: PluginContext, collection: string): Promise<string[]> {
   const info = await ctx.schema?.getCollection(collection);
   return (info?.fields ?? []).filter((f) => f.widget === CANVAS_WIDGET).map((f) => f.slug);
 }

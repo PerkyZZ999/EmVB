@@ -59,7 +59,9 @@ export function createPlugin(
         errorPolicy: "abort",
       },
       // D-055: EmDash's own MCP tools can't publish EmVB pages unless the admin allowed it.
-      "content:beforePublish": { handler: beforePublish },
+      "content:beforePublish": {
+        handler: (event, ctx) => beforePublish(event, ctx, canvasCollections),
+      },
     },
     admin: {
       entry: ADMIN_ENTRY,

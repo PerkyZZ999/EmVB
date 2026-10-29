@@ -40533,6 +40533,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/canvas-fields.test.ts"],
       "expect": "\\(fail\\).*W-898"
+    },
+    {
+      "id": "W-899/host-entries-ignored",
+      "requirement": "W-899",
+      "description": "The publish policy ignores listed host collections, so an agent publishes an EmVB layout there.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/agent-settings.ts",
+          "search": "const hostEntry = canvasCollections.includes(event.collection);",
+          "replace": "const hostEntry = false;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/canvas-fields.test.ts"],
+      "expect": "\\(fail\\).*W-899"
+    },
+    {
+      "id": "W-899/every-entry-held",
+      "requirement": "W-899",
+      "description": "Every entry in a listed collection is held back, even one with no layout.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/agent-settings.ts",
+          "search": "if (hostEntry && !(await holdsCanvasLayout(event, ctx))) return undefined;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/canvas-fields.test.ts"],
+      "expect": "\\(fail\\).*W-899"
     }
   ]
 }

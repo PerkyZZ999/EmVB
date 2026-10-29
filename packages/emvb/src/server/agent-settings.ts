@@ -7,6 +7,7 @@ import {
 } from "emdash";
 import { z } from "zod";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../constants.ts";
+import { canvasFieldSlugs } from "./hooks.ts";
 import { AgentSettings, DEFAULT_AGENT_SETTINGS } from "../mcp/settings.ts";
 
 /** Plugin KV key of the agent settings (plan § 4, D-055). */
@@ -145,10 +146,14 @@ const OWNED = new Set([PAGES_COLLECTION, THEME_PARTS_COLLECTION]);
 export async function beforePublish(
   event: ContentPolicyEvent,
   ctx: PluginContext,
+  canvasCollections: readonly string[] = [],
 ): Promise<ContentPolicyDecision> {
-  if (!OWNED.has(event.collection)) return undefined;
+  const hostEntry = canvasCollections.includes(event.collection);
+  if (!OWNED.has(event.collection) && !hostEntry) return undefined;
   const source = event.origin.source === "mcp" || event.actor?.source === "mcp";
   if (!source) return undefined;
+  // W-899: a host entry falls under the EmVB rule only while it holds an EmVB layout.
+  if (hostEntry && !(await holdsCanvasLayout(event, ctx))) return undefined;
   const { settings } = await readAgentSettings(ctx);
   if (settings.mcpEnabled && settings.publishPages) return undefined;
   return {
@@ -156,4 +161,14 @@ export async function beforePublish(
     reason:
       "Agents may not publish EmVB pages on this site. An admin can allow it in Pages VisualBuilder → AI agents.",
   };
+}
+
+async function holdsCanvasLayout(event: ContentPolicyEvent, ctx: PluginContext): Promise<boolean> {
+  const record = event.content;
+  const data =
+    record["data"] && typeof record["data"] === "object"
+      ? (record["data"] as Record<string, unknown>)
+      : record;
+  const slugs = await canvasFieldSlugs(ctx, event.collection);
+  return slugs.some((slug) => data[slug] !== null && data[slug] !== undefined && data[slug] !== "");
 }
