@@ -22,11 +22,15 @@ import {
   pageAgentVersionsRoute,
 } from "./agent-settings.ts";
 import { canvasStyleUrls } from "../core/canvas-styles.ts";
+import { canvasCollectionSlugs } from "../core/canvas-collections.ts";
 import { TOOLS } from "../mcp/tools.ts";
 import { mcpRoutes, mcpToolConfig } from "./mcp-routes.ts";
 
-export function createPlugin(options: { canvasStyles?: unknown } = {}) {
+export function createPlugin(
+  options: { canvasStyles?: unknown; canvasCollections?: unknown } = {},
+) {
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
+  const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
   return definePlugin({
     id: PLUGIN_ID,
     version: PLUGIN_VERSION,
@@ -67,7 +71,7 @@ export function createPlugin(options: { canvasStyles?: unknown } = {}) {
         handler: async () => ({ ok: true, plugin: PLUGIN_ID, version: PLUGIN_VERSION }),
       },
       // W-327: what the editor needs from the host's `emvb()` options.
-      "editor/config": { handler: async () => ({ canvasStyles }) },
+      "editor/config": { handler: async () => ({ canvasStyles, canvasCollections }) },
       design: designRoute,
       "design/draft": designDraftRoute,
       "design/save": designSaveRoute,

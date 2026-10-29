@@ -27313,8 +27313,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/index.ts",
-          "search": "options: canvasStyles.length > 0 ? { canvasStyles } : {},",
-          "replace": "options: {},"
+          "search": "...(canvasStyles.length > 0 ? { canvasStyles } : {}),",
+          "replace": ""
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/canvas-styles-options.test.ts"],
@@ -40463,6 +40463,34 @@
         "doesn't answer in time"
       ],
       "expect": "\\(fail\\).*doesn't answer in time"
+    },
+    {
+      "id": "W-897/own-collection-kept",
+      "requirement": "W-897",
+      "description": "canvasCollections keeps EmVB's own collections, so their hooks run twice.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/canvas-collections.ts",
+          "search": "!SLUG.test(slug) || OWN.has(slug) ||",
+          "replace": "!SLUG.test(slug) ||"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/canvas-collections.test.ts"],
+      "expect": "\\(fail\\).*W-897"
+    },
+    {
+      "id": "W-897/options-dropped",
+      "requirement": "W-897",
+      "description": "emvb() drops canvasCollections, so the plugin never hears of them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/index.ts",
+          "search": "...(canvasCollections.length > 0 ? { canvasCollections } : {}),",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/canvas-styles-options.test.ts"],
+      "expect": "\\(fail\\).*W-897"
     }
   ]
 }
