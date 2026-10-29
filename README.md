@@ -8,11 +8,11 @@ Try it without installing anything in the [playground](https://emvb.dev/playgrou
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
-**Current release:** 0.8.0. It adds saved sections, Loop forever for icon animations, and Recipe and Zoom in the image editor. Layout schema 17, design schema 16. See the [changelog](CHANGELOG.md) for every release.
+**Current release:** 0.9.0. It lets your own collections hold an EmVB layout (Edit with EmVB in the entry form, Preview, Convert to EmVB, Host collections setup), and adds per-element text direction, responsive library images, and Page N of M with a Last link. Layout schema 17, design schema 16, unchanged from 0.8.0. See the [changelog](CHANGELOG.md) for every release.
 
 ## Requirements
 
-- **EmDash 1.4.x.** EmVB is built and tested against EmDash 1.4.0 (0.8.0 was tested on 1.3.1). Its peer range is `emdash` ^1.0.0.
+- **EmDash 1.4.x.** EmVB 0.9.0 is built and tested against EmDash 1.4.0 (0.8.0 was tested on 1.3.1). Its peer range is `emdash` ^1.0.0.
 - **Astro 7, up to 7.3.5.** Astro 7.3.6 and later need a newer zod than EmDash pins, which breaks type checking of plugin routes. Keep `astro` at 7.3.5 until EmDash moves its pin.
 - **React 19**, `@cloudflare/kumo` 2.6.0 and `@phosphor-icons/react` ^2.1.10. An EmDash site already has these.
 - **Optional:** `@emdash-cms/plugin-forms` ^0.2.9 for forms.
@@ -84,6 +84,10 @@ See the [bridge README](packages/emvb-mcp/README.md) and the [MCP guide](docs/gu
 - Site styles: variables (including fluid type and spacing), classes in a clear priority order, and tag defaults. Changes are staged until **Publish styles**, and you can import and export them as JSON.
 - Per element: Hover, Focus and Active states with transitions, per-device styles and hide on device, container queries, text direction, backgrounds (image, video, gradient, overlay), entrance animations and scroll motion, custom attributes and print styles.
 
+**Your own pages**
+
+Give entries in your own collections an EmVB layout: **Edit with EmVB** from the entry form, Preview, Apply, then the entry's own Save. **Convert to EmVB** starts from the existing body, and **Host collections** adds the field. See the [native page editing guide](docs/guides/native-page-editing.md).
+
 **Saved sections**
 
 Save any element as a section and reuse it from **My sections**, as an independent copy or synced everywhere you use it. See the [saved sections guide](docs/guides/saved-sections.md).
@@ -139,6 +143,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 ## Docs
 
 - [Install in a host site](docs/guides/install-in-a-host-site.md)
+- [Edit your own pages](docs/guides/native-page-editing.md)
 - [AI agents (MCP)](docs/guides/mcp.md)
 - [Saved sections](docs/guides/saved-sections.md)
 - [Image editor](docs/guides/image-editor.md)

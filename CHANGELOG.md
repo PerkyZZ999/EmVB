@@ -6,6 +6,33 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-29
+
+EmVB layouts on your own collections, EmDash 1.4.0, and nine smaller additions (W-896 to W-920). Layout schema 17 and design schema 16, unchanged: 0.9.0 reads every 0.8.0 page, and the new props are optional, so 0.8.0 opens pages that don't use them.
+
+### Added
+
+- **Your own pages (W-897 to W-902, D-061).** `emvb({ canvasCollections: [...] })` lets entries in your collections hold an EmVB layout in an `emvb:canvas` JSON field. **Edit with EmVB** on the entry form opens the editor; **Apply** writes the layout back and the entry's own Save and Publish store it. `resolveEmVBPage(Astro, { collection, field })` renders it. Saves are validated on the server, and only editors and administrators can change the field. See the [native page editing guide](docs/guides/native-page-editing.md).
+- **Preview in field mode (W-911).** See the unsaved layout at Desktop, Tablet and Mobile widths in a sandboxed window, in your site's styles (W-920).
+- **Convert to EmVB (W-912).** Start a layout from an entry's rich-text body (headings, paragraphs, lists, images); the body is never changed.
+- **Host collections (W-913).** An admin page that adds the canvas field to a collection and shows the exact `canvasCollections` line for astro.config.
+- **Text direction (W-914).** Left to right or Right to left per element, in Advanced.
+- **Responsive library images (W-915).** Pass `getImage` from `astro:assets` to `resolveEmVBPage` and library images get a `srcset`; a newly picked library image takes its EmDash focal point.
+- **Page N of M and a Last link (W-916, D-062).** Pagination's Show Last link, with its own text and screen reader name. Totals come from an opt-in count (`resolveThemeParts(..., { pageCount: true })`), off by default.
+- **Font size in vh (W-910).**
+
+### Changed
+
+- **EmDash 1.4.0 (W-908).** Built and tested on EmDash 1.4.0; the peer range stays `emdash` ^1.0.0, and Astro stays at 7.3.5 (D-058).
+- **Field card (W-904).** The Canvas card shows an element summary and outline, and a read-only state for authors.
+- **Versions.** `@perkyzz/emvb`, `@perkyzz/emvb-mcp` and `@perkyzz/emvb-icons` are all 0.9.0 (the icons are unchanged since 0.2.0).
+
+### Fixed
+
+- **Editor top bar.** The active device tab keeps its contrast in the dark theme (W-905) and switching device no longer fades through white.
+- **Media library.** Libraries start loading as they open, fixing a race when one was reopened quickly (W-906).
+- **Preview frame (W-920).** It now uses the site's stylesheets and has no stray margin, and a wide frame scrolls instead of being cut off on the left.
+
 ## [0.8.0] - 2026-10-21
 
 Saved sections, a Loop forever switch for icon animations, image editor Recipe and Zoom, five behaviour decisions (D-053 to D-057) and dependency updates (W-844 to W-885). Layout schema 17 and design schema 16: the steps change nothing, so 0.8.0 reads every 0.7.0 page, and 0.7.0 shows a page or class that uses Loop forever as "saved by a newer EmVB" instead of invalid.
