@@ -20,7 +20,8 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   right: BOX_AUTO,
   bottom: BOX_AUTO,
   left: BOX_AUTO,
-  fontSize: ["px", "rem", "em", "%", "vw"],
+  // vh since W-910, for hero headings sized to the screen height.
+  fontSize: ["px", "rem", "em", "%", "vw", "vh"],
   // em first, so a typed 1.5 means 1.5 times the font size, not 1.5 px (W-125).
   lineHeight: ["em", "px", "rem", "%", "x"],
   letterSpacing: ["px", "rem", "em"],

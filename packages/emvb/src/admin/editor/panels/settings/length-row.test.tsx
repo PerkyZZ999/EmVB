@@ -63,7 +63,7 @@ describe("length field unit selector (W-088)", () => {
     expect(unitsFor("minWidth")).toEqual(["px", "%", "rem", "em", "vw", "vh", "ch"]);
     expect(unitsFor("paddingTop")).not.toContain("auto");
     expect(unitsFor("letterSpacing")).toEqual(["px", "rem", "em"]);
-    expect(unitsFor("fontSize")).toEqual(["px", "rem", "em", "%", "vw"]);
+    expect(unitsFor("fontSize")).toEqual(["px", "rem", "em", "%", "vw", "vh"]);
     await row("letterSpacing");
     expect(unitButton()?.getAttribute("aria-label")).toBe("Letter spacing unit (px)");
     await act(async () => unitButton()?.click());
@@ -196,7 +196,7 @@ describe("length field messages for other units (W-262)", () => {
     });
     expect(parseLengthDraft("12pt", "fontSize", "px")).toEqual({
       ok: false,
-      message: "Font size takes px, rem, em, % or vw.",
+      message: "Font size takes px, rem, em, %, vw or vh.",
     });
   });
   test("a comma decimal asks for a dot", () => {
@@ -232,4 +232,17 @@ test("W-603 a unitless line height can be typed over (the draft isn't reset each
   expect(input()?.value).toBe("1.8");
   await act(async () => field?.blur());
   expect(patches).toEqual([{ lineHeight: 1.8 }]);
+});
+
+describe("unit picker coverage (W-910)", () => {
+  test("Font size takes vh, typed or from the unit menu", () => {
+    expect(parseLengthDraft("8vh", "fontSize", "px")).toEqual({
+      ok: true,
+      value: { value: 8, unit: "vh" },
+    });
+    expect(parseLengthDraft("8", "fontSize", "vh")).toEqual({
+      ok: true,
+      value: { value: 8, unit: "vh" },
+    });
+  });
 });
