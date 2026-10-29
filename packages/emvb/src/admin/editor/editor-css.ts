@@ -199,6 +199,9 @@ export const EDITOR_CSS = `${UI_CSS}
 /* W-244: an unselected segmented option (Desktop | Tablet | Mobile, Normal | Hover | Focus | Active) takes the
    default text colour: Kumo's subtle grey on the segmented track is 4.0:1. The raised white pill marks the selected one. */
 .emvb-device-tabs [role="tab"][aria-selected="false"], .emvb-state-tabs [role="tab"][aria-selected="false"] { color: var(--text-color-kumo-default); }
+/* W-905: Kumo animates every property of the active-tab pill, so a light/dark switch faded it
+   through white under light text; only its movement should animate. */
+.emvb-device-tabs [role="tablist"] > div, .emvb-state-tabs [role="tablist"] > div { transition-property: translate, transform, width, height, top, left, scale, opacity; }
 .emvb-device-label { display: inline-flex; align-items: center; gap: 6px; }
 .emvb-device-hide { display: inline-flex; align-items: center; gap: 6px; color: var(--text-color-kumo-default); font-size: 13px; }
 .emvb-stage { position: relative; display: flex; flex: 1 1 auto; justify-content: safe center; min-height: 0; width: 100%; overflow: hidden; }

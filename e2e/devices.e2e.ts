@@ -1,3 +1,4 @@
+import { homedir } from "node:os";
 import { expect, test } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, saveDraft, unique } from "./support/helpers.ts";
@@ -135,4 +136,27 @@ test("Tablet and Mobile previews scroll without a scrollbar of their own (W-140)
     .toBeGreaterThan(0);
   await page.getByRole("tab", { name: "Desktop" }).click();
   await expect.poll(bar).toBe("auto");
+});
+
+test("the active device tab follows a light/dark switch at once (W-905)", async ({
+  page,
+  request,
+}) => {
+  const text = `Theme ${unique()}`;
+  const id = await createPage(request, text, layoutFor(text), `theme-${unique()}`);
+  await page.emulateMedia({ colorScheme: "light" });
+  await openEditor(page, id, text);
+  const pill = page.locator('.emvb-device-tabs [role="tablist"] > div');
+  const light = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
+  await page.emulateMedia({ colorScheme: "dark" });
+  const first = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
+  await page.waitForTimeout(500);
+  const settled = await pill.evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(settled).not.toBe(light);
+  expect(first).toBe(settled);
+  const tab = page.getByRole("tab", { name: "Desktop" });
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+  await page.locator(".emvb-device-bar").screenshot({
+    path: `${homedir()}/agent-tools/emvb-ui/device-tabs-${test.info().project.name}-dark.png`,
+  });
 });
