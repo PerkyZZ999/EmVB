@@ -66,8 +66,8 @@ emvb({
 emvb({ canvasCollections: ["pages"] });
 ```
 
-1. In the collection's schema, add a **JSON** field (for example `canvas`) and pick the **Edit with EmVB** widget (`emvb:canvas`).
-2. On the entry form, **Edit with EmVB** opens the full editor. **Apply** writes the layout back into the field; the entry's own Save and Publish store it.
+1. In the collection's schema, add a **JSON** field (for example `canvas`) and pick the **Edit with EmVB** widget (`emvb:canvas`). Or open **Host collections** in the admin (administrators): it lists your collections, adds the field with **Add canvas field**, and shows the exact `emvb({ canvasCollections: [...] })` line to paste into astro.config (EmVB can't change that file; restart or redeploy after editing it).
+2. On the entry form, **Edit with EmVB** opens the full editor. **Preview** shows the unsaved layout in a sandboxed window (Desktop, Tablet, Mobile). **Apply** writes the layout back into the field; the entry's own Save and Publish store it. While the field is empty, **Convert to EmVB** starts a layout from the entry's saved rich-text body (headings, paragraphs, lists and images; other blocks are left out) without changing the body.
 3. In the public route, ask for the entry's layout and fall back to your own template when the field is empty:
 
 ```astro
@@ -79,7 +79,7 @@ const emvb =
 - Slugs must be lowercase letters, digits and `_`; `emvb_pages`, `emvb_theme_parts` and anything else are ignored. At most 20.
 - Saves are checked on the server: an invalid layout is refused, and only editors and administrators can change the field (authors see a read-only summary).
 - An AI agent publishing such an entry follows the **AI agents** publish setting, like an EmVB page.
-- A hosted layout always renders in your site layout (no blank canvas mode), and the editor's Preview isn't available while editing a field.
+- A hosted layout always renders in your site layout (no blank canvas mode). Preview in a field renders in the browser, so it shows dynamic data the same way the editor canvas does.
 - EmVB asks for the `schema:read` capability to find your emvb:canvas fields.
 - The demo sites' `pages` collection has a `canvas` field set up this way.
 

@@ -40896,6 +40896,51 @@
         "CI": "1"
       },
       "expect": "\u2718.*\\[node\\].*W-912"
+    },
+    {
+      "id": "W-913/snippet-only-listed",
+      "requirement": "W-913",
+      "description": "The canvasCollections snippet leaves out collections that have the field but aren't listed yet.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/host-collections.ts",
+          "search": "r.field === \"ready\" || r.listed",
+          "replace": "r.listed"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/setup/host-collections.test.ts"],
+      "expect": "\\(fail\\).*W-913"
+    },
+    {
+      "id": "W-913/field-body-wrong-widget",
+      "requirement": "W-913",
+      "description": "Setup adds the canvas field with the read-only layout widget instead of emvb:canvas.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/setup/host-collections.ts",
+          "search": "const CANVAS_WIDGET = `${PLUGIN_ID}:canvas`;",
+          "replace": "const CANVAS_WIDGET = `${PLUGIN_ID}:layout`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/setup/host-collections.test.ts"],
+      "expect": "\\(fail\\).*W-913"
+    },
+    {
+      "id": "W-913/no-add-button",
+      "requirement": "W-913",
+      "description": "The Host collections page never offers Add canvas field.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CollectionsPage.tsx",
+          "search": "{row.field === \"missing\" && (",
+          "replace": "{false && row.field === \"missing\" && ("
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/host-collections.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "\u2718.*\\[node\\].*W-913"
     }
   ]
 }

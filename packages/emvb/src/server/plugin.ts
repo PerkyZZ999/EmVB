@@ -69,6 +69,7 @@ export function createPlugin(
         { path: "/pages", label: "Pages VisualBuilder", icon: "layout" },
         { path: "/theme", label: "Theme Builder", icon: "layout" },
         { path: "/agents", label: "AI agents", icon: "layout" },
+        { path: "/collections", label: "Host collections", icon: "layout" },
       ],
       fieldWidgets: [
         { name: "layout", label: "EmVB page (read-only)", fieldTypes: ["json"] },

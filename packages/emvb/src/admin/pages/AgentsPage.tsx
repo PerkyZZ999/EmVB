@@ -45,7 +45,7 @@ const remoteSnippet = (endpoint: string) =>
   JSON.stringify({ mcpServers: { emvb: { url: endpoint } } }, null, 2);
 
 /** A card's heading row: an icon tile, the title and one line on what the card is for (W-477). */
-function SectionHead({
+export function SectionHead({
   id,
   icon: SectionIcon,
   title,
@@ -74,7 +74,7 @@ function SectionHead({
  * W-756: on a phone the setup JSON scrolls sideways, and keyboard users could not reach it to
  * scroll. Focusable, and named so a screen reader says what it is.
  */
-const SCROLLABLE = { tabIndex: 0, role: "group" } as const;
+export const SCROLLABLE = { tabIndex: 0, role: "group" } as const;
 
 export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) {
   const role = useRole(fetcher);
@@ -337,7 +337,7 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
 }
 
 /** UX-089: the setup JSON is meant to be pasted into an agent's config, so it copies in one click. */
-function CopySnippet({ text, name }: { text: string; name: string }) {
+export function CopySnippet({ text, name }: { text: string; name: string }) {
   const [copied, setCopied] = useState<"yes" | "no" | null>(null);
   useEffect(() => {
     // W-777: a failed copy stays until the next click; it vanished after 2 s.
