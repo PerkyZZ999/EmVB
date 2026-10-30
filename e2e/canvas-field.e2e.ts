@@ -260,9 +260,20 @@ test("W-920: the field Preview frame wears the site's own stylesheet in light an
     "0px",
   );
   // A frame wider than the stage scrolls; centring must not clip its left edge (W-920).
-  const stage = await page.locator(".emvb-field-preview-stage").boundingBox();
-  const frameBox = await page.locator("iframe[data-emvb-field-preview]").boundingBox();
-  expect(frameBox?.x ?? -1).toBeGreaterThanOrEqual(stage?.x ?? 0);
+  // The dialog scales in over 150 ms, so measure only once it has settled and read both
+  // boxes in the same tick; two separate reads can straddle the animation.
+  const { stageX, frameX } = await page.evaluate(async () => {
+    const dialog = document.querySelector('[data-emvb-dialog="field-preview"]');
+    await Promise.all(
+      (dialog?.getAnimations({ subtree: true }) ?? []).map((a) => a.finished.catch(() => null)),
+    );
+    const stage = document.querySelector(".emvb-field-preview-stage")?.getBoundingClientRect();
+    const frame = document
+      .querySelector("iframe[data-emvb-field-preview]")
+      ?.getBoundingClientRect();
+    return { stageX: stage?.x ?? Number.NaN, frameX: frame?.x ?? Number.NaN };
+  });
+  expect(frameX).toBeGreaterThanOrEqual(stageX);
   for (const scheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: scheme });
     await page.screenshot({
