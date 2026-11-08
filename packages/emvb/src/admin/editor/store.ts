@@ -211,7 +211,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "add-node": {
       if (!state.page.layout) return state;
       const place = { parentId: action.parentId, index: action.index };
-      const node = withPageHeadingLevel(action.node, state.page.layout);
+      const node = withPageHeadingLevel(action.node, state.page.layout, state.page.partType);
       return arranged(state, addNode(state.page.layout, node, place));
     }
     case "move-node":

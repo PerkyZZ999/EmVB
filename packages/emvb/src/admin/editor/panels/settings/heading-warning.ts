@@ -11,13 +11,17 @@ const SHARED_PARTS: ReadonlySet<ThemePartType> = new Set([
   "loop_item",
 ]);
 
+/** True for a part that lands on pages with their own H1, so a new Heading stays H2 (W-924). */
+export const isSharedPart = (partType: ThemePartType | undefined): boolean =>
+  partType !== undefined && SHARED_PARTS.has(partType);
+
 /**
  * W-208: true for an H1 (a Heading, or a Post title, at level 1) in a header, footer, popup, float,
  * synced section or loop item. The page it lands on then has two H1s (or one per post), which
  * confuses screen readers and search engines.
  */
 export function sharedPartH1(node: LayoutNode, partType: ThemePartType | undefined): boolean {
-  if (!partType || !SHARED_PARTS.has(partType)) return false;
+  if (!isSharedPart(partType)) return false;
   const level = (node.props as { level?: number } | undefined)?.level;
   if (node.type === "heading") return level === 1;
   if (node.type === "post-title") return (level ?? 1) === 1;

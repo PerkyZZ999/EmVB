@@ -155,3 +155,35 @@ describe("useNodeActions add from the panel (W-175)", () => {
     expect(announced).toEqual(["Heading added inside Container"]);
   });
 });
+
+describe("useNodeActions add a Heading from the panel (W-924)", () => {
+  const noH1: Layout = {
+    schemaVersion: 17,
+    root: container("root0001", []) as Layout["root"],
+  };
+  const addedLevel = (actions: EditorAction[]) => {
+    const applied = actions[0];
+    const added = applied?.type === "apply-arranged" ? applied.layout.root.children[0] : undefined;
+    return (added?.props as { level?: number } | undefined)?.level;
+  };
+
+  test("a clicked Heading on a page without an H1 becomes the H1, like a dropped one", async () => {
+    const { api, actions } = await mount({
+      ...state,
+      page: { ...state.page, layout: noH1 },
+      selectedId: "root0001",
+    });
+    act(() => api.addFromPanel("heading"));
+    expect(addedLevel(actions)).toBe(1);
+  });
+
+  test("a clicked Heading in a header part stays H2", async () => {
+    const { api, actions } = await mount({
+      ...state,
+      page: { ...state.page, layout: noH1, partType: "header" },
+      selectedId: "root0001",
+    });
+    act(() => api.addFromPanel("heading"));
+    expect(addedLevel(actions)).toBe(2);
+  });
+});
