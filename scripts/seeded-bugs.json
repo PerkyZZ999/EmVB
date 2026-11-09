@@ -29307,12 +29307,22 @@
     {
       "id": "W-409/toc-lists-hidden",
       "requirement": "W-409",
-      "description": "Headings hidden everywhere are listed in the contents.",
+      "description": "Headings hidden everywhere are listed in the contents. (the render check and the contents walk's checks are all removed)",
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
           "search": "if (text && !hiddenEverywhere && !renderedHeadings",
           "replace": "if (text && !renderedHeadings"
+        },
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (node !== root && HIDDEN_DEVICES.every((device) => node.hiddenOn?.includes(device))) return;",
+          "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (hiddenOn.length === HIDDEN_DEVICES.length) return;",
+          "replace": ""
         }
       ],
       "command": [
@@ -30767,12 +30777,12 @@
     {
       "id": "W-485/edit-of-edit-new-original",
       "requirement": "W-485",
-      "description": "Editing an edited picture records the edited copy as the original, so re-opening stacks losses.",
+      "description": "Editing an edited picture records the edited copy as the original, so re-opening stacks losses. (the W-582 lenient path removed too)",
       "edits": [
         {
           "file": "packages/emvb/src/admin/image-editor/save.ts",
-          "search": "  const originalSrc = prior.success\n    ? prior.data.originalSrc\n    :",
-          "replace": "  const originalSrc = prior.success && false\n    ? prior.data.originalSrc\n    :"
+          "search": "  const originalSrc = prior.success\n    ? prior.data.originalSrc\n    : rawSrc\n      ? rawSrc\n      : typeof imageProps.src === \"string\"\n        ? imageProps.src\n        : \"\";",
+          "replace": "  const originalSrc = typeof imageProps.src === \"string\" ? imageProps.src : \"\";"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/image-editor/save.test.ts"],
@@ -31185,8 +31195,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/limits.ts",
-          "search": "code >= 0xd800 && code <= 0xdbff ? max - 1 : max",
-          "replace": "max"
+          "search": "    return text.slice(0, end);",
+          "replace": "    return text.slice(0, max);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/plain-text.test.ts"],
@@ -31249,12 +31259,17 @@
     {
       "id": "W-512/toc-lists-heading-in-hidden-box",
       "requirement": "W-512",
-      "description": "The table of contents lists a heading inside a box hidden on every device.",
+      "description": "The table of contents lists a heading inside a box hidden on every device. (both the box's own check and the inherited one are removed)",
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "if (node !== root && HIDDEN_DEVICES.every((device) => node.hiddenOn?.includes(device))) return;",
-          "replace": "if (node === root && HIDDEN_DEVICES.length === 0) return;"
+          "search": "    if (node !== root && HIDDEN_DEVICES.every((device) => node.hiddenOn?.includes(device))) return;",
+          "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    if (hiddenOn.length === HIDDEN_DEVICES.length) return;",
+          "replace": ""
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/toc.test.ts"],

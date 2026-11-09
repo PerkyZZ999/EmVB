@@ -72,6 +72,16 @@ describe("unknown nodes (W-022, R-033)", () => {
     expect(node && "dir" in node && node.dir).toBe("rtl");
     expect(node && "container" in node && node.container).toBe(true);
     expect(node && "query" in node && node.query?.min).toBe(480);
+    // They are checked like any element's, not kept as unknown keys.
+    const bad = (extra: Record<string, unknown>) =>
+      validateLayout({
+        ...withUnknown,
+        root: {
+          ...withUnknown.root,
+          children: [{ id: "car00001", type: "carousel", props: {}, ...extra }],
+        },
+      }).ok;
+    expect(bad({ dir: "sideways" })).toBe(false);
   });
 
   test("an unknown node can be hidden on a device or given device styles and still saves", () => {
@@ -110,6 +120,11 @@ describe("unknown nodes (W-022, R-033)", () => {
       hiddenOn: ["tablet"],
     });
     expect(validateLayout(page(pasted)).ok).toBe(true);
+    // A hide or device style is checked like any element's, not kept as an unknown key.
+    expect(validateLayout(page({ ...bare, hiddenOn: ["sideways"] } as never)).ok).toBe(false);
+    expect(
+      validateLayout(page({ ...bare, devices: { tablet: { color: "red;}" } } } as never)).ok,
+    ).toBe(false);
   });
 
   test("validateLayout still refuses nesting past the depth limit when unknowns are present", () => {
