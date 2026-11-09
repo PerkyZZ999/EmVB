@@ -36,7 +36,8 @@ instructions.
 6. **Propose when someone is editing.** `list_page_outline` says `openInEditor`; then (or when the
    person wants to review first) send changes with `propose_changes`, naming its `baseRevision`
    and `baseDesignRevision`. The person accepts or rejects each change in the editor. A direct
-   write to an open page returns `PAGE_OPEN`. `get_proposal` tells you whether yours still applies;
+   write to an open page returns `PAGE_OPEN`. Check `get_requests` for what people asked from the
+   editor and answer each with `propose_changes` and its `requestId`. `get_proposal` tells you whether yours still applies;
    `withdraw_proposal` before sending a corrected one.
 7. **Check accessibility** with `get_accessibility_findings` after building and fix every
    error. Contrast findings that share one colour: change that colour variable once.

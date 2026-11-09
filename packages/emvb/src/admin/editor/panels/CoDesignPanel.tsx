@@ -11,6 +11,7 @@ import type { Layout } from "../../../core/index.ts";
 import type { PendingProposal } from "../../proposals-api.ts";
 import { describeOp, groupOf, GROUP_LABELS, GROUP_ORDER, type Op } from "../co-design.ts";
 import type { CoDesign } from "../useCoDesign.ts";
+import { AgentRequestBox } from "./AgentRequestBox.tsx";
 
 const when = (iso: string) => {
   const date = new Date(iso);
@@ -27,6 +28,7 @@ export function CoDesignPanel({ co, layout }: { co: CoDesign; layout: Layout | n
   const { items, ready, failed } = co.proposals;
   return (
     <div className="emvb-codesign" data-emvb-codesign="">
+      <AgentRequestBox co={co} />
       <p
         className="emvb-helper emvb-codesign-status"
         aria-live="polite"
@@ -58,7 +60,7 @@ export function CoDesignPanel({ co, layout }: { co: CoDesign; layout: Layout | n
             size="sm"
             icon={<RobotIcon size={24} aria-hidden="true" />}
             title="Nothing to review"
-            description="When an AI agent proposes changes to this page, they show here for you to accept or reject one by one. Nothing changes until you do."
+            description="When your agent answers a request, or proposes changes on its own, they show here for you to accept or reject one by one. Nothing changes until you do."
           />
         </div>
       )}

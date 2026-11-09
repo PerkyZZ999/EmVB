@@ -43,4 +43,7 @@ export const MAX_PROPOSAL_BYTES = MAX_LAYOUT_BYTES;
 export const MAX_PROPOSALS = 100;
 /** W-933: one page can't hold the whole store; an agent withdraws or waits for review. */
 export const MAX_PENDING_PER_PAGE = 10;
+/** W-931: a request to an agent is a short brief, and a page holds a few at a time. */
+export const MAX_REQUEST_PROMPT = 2000;
+export const MAX_OPEN_REQUESTS_PER_PAGE = 5;
 export const MAX_PROPOSAL_DEPTH = MAX_DEPTH * 2 + 16;

@@ -108,6 +108,36 @@ export interface EmvbPorts {
    * refused with PAGE_OPEN and the agent proposes instead. Without this port nothing is refused.
    */
   pageOpen?(id: string): Promise<boolean>;
+  /** W-931: the editor's requests for agents (prompt relay); without it get_requests is NOT_SET_UP. */
+  requests?: RequestsPort;
+}
+
+/** W-931: a person's request for their agent, written in the editor's Agent tab. */
+export type AgentRequest = {
+  id: string;
+  target: Proposal["target"];
+  prompt: string;
+  createdAt: string;
+  status: "open" | "answered";
+  proposalId?: string;
+};
+
+export interface RequestsPort {
+  /** Every request for the page, newest first (the editor's list). */
+  list(target: Proposal["target"]): Promise<AgentRequest[]>;
+  /** Open, unexpired requests, oldest first (what an agent should answer). */
+  open(target?: Proposal["target"]): Promise<AgentRequest[]>;
+  create(
+    target: Proposal["target"],
+    prompt: string,
+    userId: string | null,
+  ): Promise<{ ok: true; request: AgentRequest } | { ok: false; reason: string }>;
+  cancel(id: string): Promise<boolean>;
+  /** Marks an open request for `target` answered by a proposal; false when it isn't one. */
+  answer(id: string, target: Proposal["target"], proposalId: string): Promise<boolean>;
+  /** An agent checked for requests now (the editor's "connected" status). */
+  seen(): Promise<void>;
+  lastSeen(): Promise<string | null>;
 }
 
 /** Saved sections in plugin storage `emvb_saved_sections` (W-875, D-060). */

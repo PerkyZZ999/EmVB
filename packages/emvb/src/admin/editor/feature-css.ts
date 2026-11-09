@@ -176,5 +176,8 @@ export const FEATURE_CSS = `
 .emvb-codesign-op-text { min-width: 0; overflow-wrap: anywhere; }
 .emvb-codesign-op-actions { display: inline-flex; flex: none; gap: 2px; }
 .emvb-codesign-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.emvb-codesign-ask { display: grid; gap: 8px; padding-block-end: 12px; border-block-end: 1px solid var(--color-kumo-line); }
+.emvb-codesign-ask-form { display: grid; gap: 6px; }
+.emvb-codesign-ask-form .emvb-helper { margin: 0; }
 .emvb-codesign-preview { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 12px 0; padding: 8px 8px 8px 12px; border: 1px solid var(--color-kumo-line); border-radius: 10px; background: var(--color-kumo-tint); font-size: 13px; line-height: 18px; }
 `;

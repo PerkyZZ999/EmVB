@@ -123,3 +123,45 @@ test("a person reviews an agent proposal change by change in the editor", async 
     timeout: 15_000,
   });
 });
+
+test("W-931: a request typed in the editor reaches the agent, whose answer comes back for review", async ({
+  page,
+  request,
+}) => {
+  const pageId = await createPage(request, "Relay", layout, `relay-${unique()}`);
+  await openEditor(page, pageId, "Co-design start");
+  const ui = overlay(page);
+  await ui.getByRole("tab", { name: /^Agent/ }).click();
+  const box = ui.locator("[data-emvb-agent-ask]");
+  await box.getByLabel("Ask your agent").fill("Make the headline friendlier");
+  await box.getByRole("button", { name: "Send to agent" }).click();
+  await expect(box.locator('[data-emvb-agent-request="open"]')).toContainText(
+    "Make the headline friendlier",
+  );
+
+  // The agent, on its own machine: read the request, answer it with a proposal.
+  const asked = ok<{ requests: { requestId: string; pageId: string; prompt: string }[] }>(
+    await call("get_requests", { pageId }),
+  );
+  expect(asked.requests).toEqual([
+    expect.objectContaining({ pageId, prompt: "Make the headline friendlier" }),
+  ]);
+  const outline = ok<Outline>(await call("list_page_outline", { pageId }));
+  ok(
+    await call("propose_changes", {
+      pageId,
+      baseRevision: outline.baseRevision,
+      baseDesignRevision: outline.baseDesignRevision,
+      requestId: asked.requests[0]?.requestId,
+      ops: [{ kind: "update", id: "head0001", set: { props: { text: "Hello, friend" } } }],
+    }),
+  );
+
+  await expect(box.locator('[data-emvb-agent-request="answered"]')).toBeVisible({
+    timeout: 15_000,
+  });
+  await expect(box.locator('[data-emvb-agent-connection="connected"]')).toBeVisible();
+  const card = ui.locator("[data-emvb-proposal]");
+  await card.getByRole("button", { name: "Accept all (1)" }).click();
+  await expect(canvas(page).getByRole("heading", { name: "Hello, friend" })).toBeVisible();
+});

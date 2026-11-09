@@ -75,7 +75,7 @@ the token, never the token. Calls signed in without a token are counted per user
 
 | Read | Write (draft only) | Publish (only when allowed) | Proposals (reviewed in the editor) |
 | --- | --- | --- | --- |
-| `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `get_accessibility_findings`, `list_versions`, `list_saved_sections` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `restore_version`, `update_site_styles`, `save_section`, `insert_saved_section`, `delete_saved_section` | `publish_page`, `publish_site_styles` | `list_page_outline`, `propose_changes`, `get_proposal`, `withdraw_proposal` |
+| `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `get_accessibility_findings`, `list_versions`, `list_saved_sections` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `restore_version`, `update_site_styles`, `save_section`, `insert_saved_section`, `delete_saved_section` | `publish_page`, `publish_site_styles` | `list_page_outline`, `propose_changes`, `get_proposal`, `withdraw_proposal`, `get_requests` |
 
 - Writes take an optional `expectedRev`; a stale one returns `CONFLICT`. Every write returns a new
   `rev`: pass that one to the next write.
@@ -98,6 +98,13 @@ the token, never the token. Calls signed in without a token are counted per user
   checked against the current page first: a refused one names its index (`Change 2: …`), a stale
   revision returns `CONFLICT`. `get_proposal` says whether a stored proposal still applies;
   `withdraw_proposal` removes one. A site keeps at most 100 proposals and a page at most 10 waiting for review (`REFUSED` past that).
+- **Requests from the editor (prompt relay):** in the editor's **Agent** tab a person types what
+  they want and clicks **Send to agent**. Their own agent reads open requests with `get_requests`
+  (oldest first, optionally for one page) and answers with `propose_changes` plus the
+  `requestId`; the request then shows **Answered** and the proposal waits for review. No model runs
+  on the site and no key is stored: the agent runs wherever the person runs it (D-063). Requests
+  are at most 2,000 characters, five can wait per page, and they stop being offered after a day.
+  The tab says when an agent last checked for requests.
 - **A page open in the editor is not written directly.** While someone has it open, the write tools
   that change that page (`add_element`, `update_element`, `restore_version`, …) refuse with
   `PAGE_OPEN`; send the change with `propose_changes` instead. The editor renews this every 30
@@ -136,7 +143,8 @@ Agent publishing is **off** by default. In **AI agents**, an admin can separatel
 - **Version timeline**: an **Agent** badge on versions an agent saved, and an All / People / Agents
   filter with counts.
 - **Editor**: if an agent changes the page while you are idle, a notice offers **Reload**.
-- **Agent tab** (1.0): proposals for the open page, each change with **Accept** and **Reject**,
+- **Agent tab** (1.0): **Ask your agent** box with your requests and when an agent last checked,
+  then proposals for the open page, each change with **Accept** and **Reject**,
   **Preview** to see them on the canvas first, and **Via agent** on the version you save afterwards.
 
 ## Security notes

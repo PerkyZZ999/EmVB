@@ -1,7 +1,13 @@
 import * as React from "react";
 import type { DesignSystem } from "../../core/schema/design.ts";
-import type { Fetcher } from "../api.ts";
-import { recordAccepted, withdrawProposal, type PendingProposal } from "../proposals-api.ts";
+import {
+  cancelRequest,
+  createRequest,
+  recordAccepted,
+  withdrawProposal,
+  type PendingProposal,
+} from "../proposals-api.ts";
+import { ApiError, type Fetcher } from "../api.ts";
 import { acceptOps, ghostCss, ghostOf, type EditorBase, type Ghost } from "./co-design.ts";
 import type { EditorAction, EditorState } from "./store.ts";
 import { useProposals, type ProposalsState } from "./useProposals.ts";
@@ -24,6 +30,9 @@ export type CoDesign = {
   clearError: () => void;
   /** Changes accepted since the last save. */
   unsaved: number;
+  /** W-931: sends a request to the person's agent; resolves to an error message, or null. */
+  ask: (prompt: string) => Promise<string | null>;
+  cancel: (requestId: string) => Promise<void>;
 };
 
 /** The editor state as a proposal base, with the style revision the server compares against. */
@@ -136,7 +145,23 @@ export function useCoDesign({
     return g ? { ...g, css: ghostCss(g) } : null;
   }, [previewed, state, pending]);
 
+  const ask = async (prompt: string) => {
+    try {
+      await createRequest(fetcher, collection, state.id, prompt);
+      proposals.refresh();
+      return null;
+    } catch (e) {
+      return e instanceof ApiError ? e.message : "Couldn't send the request. Try again.";
+    }
+  };
+  const cancel = async (requestId: string) => {
+    await cancelRequest(fetcher, requestId).catch(() => undefined);
+    proposals.refresh();
+  };
+
   return {
+    ask,
+    cancel,
     proposals,
     decisions,
     pending,

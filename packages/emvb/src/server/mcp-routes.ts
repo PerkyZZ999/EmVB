@@ -1,6 +1,7 @@
 import { PluginRouteError, type PluginRoute, type RouteContext } from "emdash";
 import { portOf } from "./saved-sections.ts";
 import { proposalPortOf } from "./proposals.ts";
+import { requestsPortOf } from "./requests.ts";
 import { isOpenInEditor } from "./presence.ts";
 import { PAGES_COLLECTION, DESIGN_DRAFT_KEY, DESIGN_KEY } from "../constants.ts";
 import { McpToolError } from "../mcp/errors.ts";
@@ -140,6 +141,7 @@ function pluginPorts(ctx: RouteContext<unknown>): EmvbPorts {
     caller: { userId: ctx.user?.id ?? null, role: Number(ctx.user?.role ?? 0) },
     savedSections: portOf(ctx),
     proposals: proposalPortOf(ctx),
+    requests: requestsPortOf(ctx),
     pageOpen: (id) =>
       isOpenInEditor(ctx.kv as unknown as Parameters<typeof isOpenInEditor>[0], {
         collection: PAGES_COLLECTION,

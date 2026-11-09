@@ -63,6 +63,7 @@ describe("EmVB MCP tools on EmDash's plugin MCP (W-452, W-453, W-454)", () => {
       list_versions: { pageId: id },
       list_saved_sections: {},
       list_page_outline: { pageId: id },
+      get_requests: {},
     };
     const outline = data<{ baseRevision: string; baseDesignRevision: string | null }>(
       await t.mcp("list_page_outline", { pageId: id }),

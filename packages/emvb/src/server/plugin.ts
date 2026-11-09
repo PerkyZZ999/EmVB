@@ -6,6 +6,7 @@ import {
   proposalWithdrawRoute,
 } from "./proposals.ts";
 import { presenceRoute } from "./presence.ts";
+import { requestCancelRoute, requestCreateRoute, requestsRoute } from "./requests.ts";
 import { definePlugin } from "emdash";
 import { ADMIN_ENTRY, PLUGIN_ID, PLUGIN_VERSION } from "../constants.ts";
 import {
@@ -67,6 +68,8 @@ export function createPlugin(
       // W-875 (D-060): saved sections, by name, per site.
       emvb_saved_sections: { indexes: ["updatedAt"] },
       emvb_proposals: { indexes: ["createdAt"] },
+      // W-931: prompt relay requests for bring-your-own agents.
+      emvb_requests: { indexes: ["createdAt"] },
     },
     hooks: {
       "content:beforeSave": {
@@ -116,6 +119,9 @@ export function createPlugin(
       "proposals/withdraw": proposalWithdrawRoute,
       "proposals/accepted": proposalAcceptedRoute,
       presence: presenceRoute,
+      requests: requestsRoute,
+      "requests/create": requestCreateRoute,
+      "requests/cancel": requestCancelRoute,
       "saved-sections/get": savedSectionGetRoute,
       "saved-sections/save": savedSectionSaveRoute,
       "saved-sections/rename": savedSectionRenameRoute,

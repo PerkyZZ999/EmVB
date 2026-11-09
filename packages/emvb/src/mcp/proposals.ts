@@ -4,7 +4,7 @@ import { PAGES_COLLECTION } from "../constants.ts";
 import { MAX_PROPOSAL_OPS } from "../core/limits.ts";
 import { ProposalOperation, type Proposal, type ProposalRefusal } from "../core/proposals.ts";
 import { McpToolError } from "./errors.ts";
-import type { EmvbPorts, ProposalsPort } from "./ports.ts";
+import type { EmvbPorts, ProposalsPort, RequestsPort } from "./ports.ts";
 import { loadPage, outlineOf, stats } from "./read.ts";
 import { PageId } from "./write.ts";
 
@@ -16,6 +16,15 @@ import { PageId } from "./write.ts";
 
 const ProposalId = z.string().regex(/^[0-9a-f]{16}$/, "Proposal ids are 16 hex characters");
 const Revision = z.string().min(1).max(256);
+
+const RequestId = z.string().regex(/^[0-9a-f]{16}$/, "Request ids are 16 hex characters");
+
+const requestsOf = (ports: EmvbPorts): RequestsPort => {
+  if (!ports.requests) {
+    throw new McpToolError("NOT_SET_UP", "Requests aren't available on this site.");
+  }
+  return ports.requests;
+};
 
 const portOf = (ports: EmvbPorts): ProposalsPort => {
   if (!ports.proposals) {
@@ -109,15 +118,26 @@ export const ProposeChangesInput = z.strictObject({
   baseRevision: Revision,
   baseDesignRevision: Revision.nullable(),
   ops: boundedArray(ProposalOperation, MAX_PROPOSAL_OPS, 1),
+  /** W-931: the request (from get_requests) this answers; it is then shown as answered. */
+  requestId: RequestId.optional(),
 });
 export const ProposeChangesOutput = z.object({
   proposalId: z.string(),
   pageId: z.string(),
+  answered: z.boolean().optional(),
   createdAt: z.string(),
   changes: z.number(),
 });
 
 export async function proposeChanges(ports: EmvbPorts, input: z.infer<typeof ProposeChangesInput>) {
+  if (input.requestId) {
+    const open = await requestsOf(ports).open(targetOf(input.pageId));
+    if (!open.some((r) => r.id === input.requestId))
+      throw new McpToolError(
+        "NOT_FOUND",
+        `No open request ${input.requestId} for this page. Call get_requests, or propose without requestId.`,
+      );
+  }
   const created = await portOf(ports).create({
     version: 1,
     target: targetOf(input.pageId),
@@ -136,11 +156,46 @@ export async function proposeChanges(ports: EmvbPorts, input: z.infer<typeof Pro
     changes,
     summary: `Proposed ${changes} ${changes === 1 ? "change" : "changes"} for review`,
   });
+  const answered = input.requestId
+    ? await requestsOf(ports).answer(input.requestId, targetOf(input.pageId), created.id)
+    : undefined;
   return {
     proposalId: created.id,
     pageId: input.pageId,
     createdAt: created.record.createdAt,
     changes,
+    ...(answered === undefined ? {} : { answered }),
+  };
+}
+
+// ---------------------------------------------------------------- get_requests
+
+export const GetRequestsInput = z.strictObject({ pageId: PageId.optional() });
+export const GetRequestsOutput = z.object({
+  requests: z.array(
+    z.object({
+      requestId: z.string(),
+      pageId: z.string(),
+      prompt: z.string(),
+      createdAt: z.string(),
+    }),
+  ),
+});
+
+/** W-931: what people asked their agent in the editor, oldest first. Records that an agent looked. */
+export async function getRequests(ports: EmvbPorts, input: z.infer<typeof GetRequestsInput>) {
+  const port = requestsOf(ports);
+  await port.seen();
+  const open = await port.open(input.pageId ? targetOf(input.pageId) : undefined);
+  return {
+    requests: open
+      .filter((r) => r.target.collection === PAGES_COLLECTION)
+      .map((r) => ({
+        requestId: r.id,
+        pageId: r.target.id,
+        prompt: r.prompt,
+        createdAt: r.createdAt,
+      })),
   };
 }
 

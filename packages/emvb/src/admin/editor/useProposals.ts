@@ -1,5 +1,10 @@
 import * as React from "react";
-import { listProposals, type PendingProposal } from "../proposals-api.ts";
+import {
+  listProposals,
+  listRequests,
+  type AgentRequest,
+  type PendingProposal,
+} from "../proposals-api.ts";
 import type { Fetcher } from "../api.ts";
 
 /** How often the open editor asks for new proposals (D-063: EmDash's MCP has no push). */
@@ -11,6 +16,10 @@ export type ProposalsState = {
   ready: boolean;
   failed: boolean;
   refresh: () => void;
+  /** W-931: the page's requests for agents, newest first. */
+  requests: AgentRequest[];
+  /** When an agent last checked for requests (any page), or null if none has yet. */
+  agentSeenAt: string | null;
 };
 
 /**
@@ -27,12 +36,22 @@ export function useProposals(
   const [ready, setReady] = React.useState(false);
   const [failed, setFailed] = React.useState(false);
   const [tick, setTick] = React.useState(0);
+  const [requests, setRequests] = React.useState<AgentRequest[]>([]);
+  const [agentSeenAt, setAgentSeenAt] = React.useState<string | null>(null);
   const refresh = React.useCallback(() => setTick((t) => t + 1), []);
   React.useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
     const load = () => {
       if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      listRequests(fetcher, collection, id).then(
+        (next) => {
+          if (cancelled) return;
+          setRequests((prev) => (sameRequests(prev, next.items) ? prev : next.items));
+          setAgentSeenAt(next.agentSeenAt);
+        },
+        () => undefined,
+      );
       listProposals(fetcher, collection, id).then(
         (next) => {
           if (cancelled) return;
@@ -52,8 +71,11 @@ export function useProposals(
       clearInterval(timer);
     };
   }, [fetcher, collection, id, tick, enabled]);
-  return { items, ready, failed, refresh };
+  return { items, ready, failed, refresh, requests, agentSeenAt };
 }
 
 const sameList = (a: PendingProposal[], b: PendingProposal[]) =>
   a.length === b.length && a.every((p, i) => p.id === b[i]?.id);
+
+const sameRequests = (a: AgentRequest[], b: AgentRequest[]) =>
+  a.length === b.length && a.every((r, i) => r.id === b[i]?.id && r.status === b[i]?.status);

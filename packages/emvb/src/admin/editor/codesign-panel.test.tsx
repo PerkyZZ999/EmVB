@@ -11,7 +11,11 @@ import { CoDesignPanel } from "./panels/CoDesignPanel.tsx";
 import { emptyHistory, historyReducer, type EditorHistory } from "./store.ts";
 import { useCoDesign } from "./useCoDesign.ts";
 
-afterEach(unmount);
+afterEach(async () => {
+  await unmount();
+  requests = [];
+  seenAt = null;
+});
 
 const layout = (): Layout =>
   ({
@@ -40,12 +44,40 @@ const proposal: Proposal = {
 };
 
 type Call = { path: string; body: unknown };
+let requests: { id: string; prompt: string; createdAt: string; status: string }[] = [];
+let seenAt: string | null = null;
 function api(calls: Call[]): Fetcher {
   let withdrawn = false;
   return async (path, init) => {
     const body = init?.body ? JSON.parse(String(init.body)) : undefined;
     calls.push({ path, body });
     if (path.endsWith("/proposals/withdraw")) withdrawn = true;
+    if (path.endsWith("/requests/create")) {
+      const prompt = (body as { prompt: string }).prompt;
+      if (prompt.includes("too much"))
+        return Response.json(
+          {
+            error: {
+              code: "INVALID_REQUEST",
+              message: "This page already has 5 requests waiting.",
+            },
+          },
+          { status: 422 },
+        );
+      requests.unshift({
+        id: "1111222233334444",
+        prompt: prompt.trim(),
+        createdAt: "",
+        status: "open",
+      });
+      return Response.json({ data: { request: requests[0] } });
+    }
+    if (path.endsWith("/requests/cancel")) {
+      requests.splice(0, requests.length);
+      return Response.json({ data: {} });
+    }
+    if (path.endsWith("/requests"))
+      return Response.json({ data: { items: [...requests], agentSeenAt: seenAt } });
     if (path.endsWith("/proposals"))
       return Response.json({
         data: {
@@ -168,5 +200,55 @@ describe("co-design panel (W-930)", () => {
     await act(async () => q('[data-emvb-proposal-op="0"] [data-emvb-op-accept]')?.click());
     expect(q("[data-emvb-codesign-error]")?.textContent).toContain("earlier version of the page");
     expect(headingText()).toBe("Before");
+  });
+
+  test("W-931: no agent yet says so; a request is sent, waits, and can be cancelled", async () => {
+    const calls: Call[] = [];
+    await mount(<Harness fetcher={api(calls)} />);
+    await settle();
+    expect(q('[data-emvb-agent-connection="idle"]')?.textContent).toContain(
+      "No agent has checked for requests yet",
+    );
+    const area = q("#emvb-agent-prompt") as HTMLTextAreaElement;
+    const send = q("[data-emvb-agent-send]") as HTMLButtonElement;
+    expect(send.disabled).toBe(true);
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+      setter?.call(area, "  Tighten the hero copy ");
+      area.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => send.click());
+    await settle();
+    expect(calls.find((c) => c.path.endsWith("/requests/create"))?.body).toEqual({
+      target: { collection: "emvb_pages", id: "page1" },
+      prompt: "  Tighten the hero copy ",
+    });
+    expect(area.value).toBe("");
+    expect(q('[data-emvb-agent-request="open"]')?.textContent).toContain("Tighten the hero copy");
+    await act(async () => q("[data-emvb-agent-cancel]")?.click());
+    await settle();
+    expect(calls.some((c) => c.path.endsWith("/requests/cancel"))).toBe(true);
+    expect(q("[data-emvb-agent-request]")).toBeNull();
+  });
+
+  test("W-931: a refused request keeps the text and says why; a recent agent shows as connected", async () => {
+    seenAt = new Date().toISOString();
+    await mount(<Harness fetcher={api([])} />);
+    await settle();
+    expect(q('[data-emvb-agent-connection="connected"]')?.textContent).toContain(
+      "An agent is connected",
+    );
+    const area = q("#emvb-agent-prompt") as HTMLTextAreaElement;
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+      setter?.call(area, "too much");
+      area.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => q("[data-emvb-agent-send]")?.click());
+    await settle();
+    expect(q('#emvb-agent-prompt-status[role="alert"]')?.textContent).toBe(
+      "This page already has 5 requests waiting.",
+    );
+    expect(area.value).toBe("too much");
   });
 });

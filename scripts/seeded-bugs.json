@@ -42398,6 +42398,104 @@
         "svg markup"
       ],
       "expect": "\\(fail\\).*svg markup"
+    },
+    {
+      "id": "W-931/answer-not-marked",
+      "requirement": "W-931",
+      "description": "A request the agent answered stays waiting, and agents answer it again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": "    ? await requestsOf(ports).answer(input.requestId, targetOf(input.pageId), created.id)\n",
+          "replace": "    ? false\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*reaches the agent, who answers it"
+    },
+    {
+      "id": "W-931/foreign-request-answered",
+      "requirement": "W-931",
+      "description": "A proposal for one page claims to answer another page's request.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": "    if (!open.some((r) => r.id === input.requestId))\n",
+          "replace": "    if (open.length < 0)\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*a requestId that isn't open for this page"
+    },
+    {
+      "id": "W-931/request-cap-off",
+      "requirement": "W-931",
+      "description": "A page can collect any number of waiting requests.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "if (open.length >= MAX_OPEN_REQUESTS_PER_PAGE)",
+          "replace": "if (open.length >= 50)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*a page holds five open ones"
+    },
+    {
+      "id": "W-931/stale-requests-offered",
+      "requirement": "W-931",
+      "description": "Day-old requests are still offered to agents.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "  const live = (s: Stored) => now() - Date.parse(s.createdAt) < REQUEST_TTL_MS;",
+          "replace": "  const live = (_s: Stored) => true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*older than a day"
+    },
+    {
+      "id": "W-931/agent-never-seen",
+      "requirement": "W-931",
+      "description": "The editor never learns that an agent checked for requests.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": "  await port.seen();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*reaches the agent, who answers it"
+    },
+    {
+      "id": "W-931/always-connected",
+      "requirement": "W-931",
+      "description": "The panel says an agent is connected when none has ever checked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AgentRequestBox.tsx",
+          "search": "const connected = agentSeenAt !== null && now - Date.parse(agentSeenAt) < CONNECTED_MS;",
+          "replace": "const connected = true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/codesign-panel.test.tsx"],
+      "expect": "\\(fail\\).*no agent yet says so"
+    },
+    {
+      "id": "W-931/refused-prompt-lost",
+      "requirement": "W-931",
+      "description": "A refused request clears what the person typed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AgentRequestBox.tsx",
+          "search": "    if (!failed) setPrompt(\"\");",
+          "replace": "    setPrompt(\"\");"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/codesign-panel.test.tsx"],
+      "expect": "\\(fail\\).*a refused request keeps the text"
     }
   ]
 }
