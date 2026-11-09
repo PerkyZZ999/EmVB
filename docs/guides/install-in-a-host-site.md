@@ -4,7 +4,7 @@ EmVB is a **native** EmDash plugin: add the package, register it in `astro.confi
 
 Project website: <https://emvb.dev>. Package: [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb).
 
-EmVB 0.9.0 is verified on EmDash 1.4.0 (a fresh `create-emdash` 1.4.0 site with Astro 7.3.5, following this guide); earlier releases were verified on 1.0.1 and 1.2.0. The package ships TypeScript source (no `bun build` step for the plugin).
+EmVB 1.0 is verified on EmDash 1.4.0 (a fresh `create-emdash` 1.4.0 site, node and Cloudflare templates as created, with Astro 7.4.7, following this guide; 0.9.0 was verified the same way with Astro 7.3.5); earlier releases were verified on 1.0.1 and 1.2.0. The package ships TypeScript source (no `bun build` step for the plugin).
 
 ## 1. Install the package
 
@@ -15,7 +15,7 @@ npm i @perkyzz/emvb
 # or: bun add @perkyzz/emvb
 ```
 
-EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash's exact pin) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own. EmVB currently supports Astro 7 up to 7.3.5: Astro 7.3.6 and later depend on zod ^4.6.5, while EmDash pins zod to exactly 4.5.4, and the second copy of zod breaks type checking of EmDash plugin routes. Keep your site on `astro` 7.3.5 for now; this will be widened once EmDash moves its zod pin.
+EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash's exact pin) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own. Keep the Astro version your EmDash site came with; you don't need to change it. A stock EmDash 1.4.0 site installs Astro 7.4.7, and EmVB builds, passes `astro check` and runs there. Your site ends up with two copies of zod (EmDash and EmVB use 4.5.4, Astro uses a newer one); that is expected and harmless.
 
 It also installs two dependencies: `zod` and `@perkyzz/emvb-icons`, the icon sets for the editor's Icon library (pinned to the exact version EmVB was built with). Only the editor loads the icon sets; a placed icon is saved into the page as SVG, so public pages never fetch them.
 

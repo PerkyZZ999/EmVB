@@ -28,6 +28,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **No Astro pin for host sites (D-058 amended).** EmVB works on the Astro version a stock EmDash 1.4 site installs (verified on 7.4.7, node and Cloudflare). The advice to hold `astro` at 7.3.5 is gone from the READMEs and guides.
+
 - **Clearer names, upgraded automatically (W-925).** The Theme section element is now type `part-ref` (was `section`). An element's editor name is `editorLabel` (was `label`). A Loop's item part is `props.partId` (was `itemPartId`). Pages, the editor, the MCP tools and saved sections still accept the old names and upgrade them.
 - **Motion in one place (W-925).** `transition`, `entrance`, `scrollMotion` and `iconAnimation` now live under `style.motion` as `transition`, `entrance`, `scroll` and `icon`. The HTML and CSS are byte-identical to 0.9.0's.
 

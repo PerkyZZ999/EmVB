@@ -8330,9 +8330,9 @@
         "test",
         "./packages/emvb/src/core/schema/states.test.ts",
         "-t",
-        "a node keeps hover, focus and active styles"
+        "an unknown state is refused with its path"
       ],
-      "expect": "\\(fail\\).*a node keeps hover, focus and active styles"
+      "expect": "\\(fail\\).*an unknown state is refused with its path"
     },
     {
       "id": "D-032/class-states-refused",

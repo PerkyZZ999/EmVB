@@ -21,7 +21,8 @@ package version; read the steps below once.
    # or: bun add @perkyzz/emvb@1
    ```
 
-   Keep `astro` on 7.3.5, as for 0.9 (see the install guide). Agents' computers pick up
+   Keep the Astro version your site has; 1.0 needs no Astro change. If you held `astro` at
+   7.3.5 for 0.9, you can drop that pin. Agents' computers pick up
    `@perkyzz/emvb-mcp@1` on their next `npx -y` start.
 
 2. Build and deploy as usual. Nothing in `astro.config.mjs` has to change.

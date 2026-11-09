@@ -13,7 +13,7 @@ Try it without installing anything in the [playground](https://emvb.dev/playgrou
 ## Requirements
 
 - **EmDash 1.4.x.** EmVB 0.9.0 is built and tested against EmDash 1.4.0 (0.8.0 was tested on 1.3.1). Its peer range is `emdash` ^1.0.0.
-- **Astro 7, up to 7.3.5.** Astro 7.3.6 and later need a newer zod than EmDash pins, which breaks type checking of plugin routes. Keep `astro` at 7.3.5 until EmDash moves its pin.
+- **Astro 7, as your EmDash site has it.** No Astro change needed: verified on a stock `create-emdash` 1.4.0 site, which installs Astro 7.4.7.
 - **React 19**, `@cloudflare/kumo` 2.6.0 and `@phosphor-icons/react` ^2.1.10. An EmDash site already has these.
 - **Optional:** `@emdash-cms/plugin-forms` ^0.2.9 for forms.
 - **AI agents need EmDash 1.2 or later** with `mcp: true`. The local bridge needs Node 20 or later on the agent's computer.
