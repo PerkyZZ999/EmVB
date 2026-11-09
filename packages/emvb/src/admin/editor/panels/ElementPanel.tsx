@@ -66,6 +66,7 @@ import {
   HtmlIdField,
 } from "./settings/AdvancedFields.tsx";
 import { ClassChipInput } from "./settings/ClassChipInput.tsx";
+import { useExtensionElement } from "../extensions-context.tsx";
 import { StateDot, StateSwitcher, type StyleStateChoice } from "./settings/StateSwitcher.tsx";
 import {
   DEFAULT_UI,
@@ -350,7 +351,19 @@ function fieldShown(key: string, node: LayoutNode, device: PopupDevice = "deskto
 
 /** Right panel with an element selected (IA / W-021): descriptor Content + Style sections. */
 export function ElementPanel(props: Props) {
-  const descriptor = ELEMENT_DESCRIPTORS.find((d) => d.type === props.node.type);
+  const builtIn = ELEMENT_DESCRIPTORS.find((d) => d.type === props.node.type);
+  const extension = useExtensionElement(props.node.type);
+  const descriptor: ElementDescriptor | undefined = builtIn
+    ? builtIn
+    : extension
+      ? {
+          type: extension.type,
+          name: extension.label,
+          group: extension.group,
+          defaultTab: "content",
+          fields: [...extension.fields],
+        }
+      : undefined;
   if (!descriptor) {
     return (
       <div
@@ -358,9 +371,21 @@ export function ElementPanel(props: Props) {
         data-emvb-panel="element"
         data-emvb-element={props.node.type}
       >
-        <h2 className="emvb-panel-title">Unknown element</h2>
+        <h2 className="emvb-panel-title">
+          {props.node.type.startsWith("ext:") ? "Missing extension" : "Unknown element"}
+        </h2>
         <p className="emvb-helper">
-          Unknown element &quot;{props.node.type}&quot;. It can be moved or deleted, but not edited.
+          {props.node.type.startsWith("ext:") ? (
+            <>
+              This block needs the extension for &quot;{props.node.type}&quot;. It can be moved or
+              deleted; install the extension to edit it.
+            </>
+          ) : (
+            <>
+              Unknown element &quot;{props.node.type}&quot;. It can be moved or deleted, but not
+              edited.
+            </>
+          )}
         </p>
         {props.rejection && <Alert>{props.rejection}</Alert>}
       </div>

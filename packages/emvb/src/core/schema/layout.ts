@@ -753,7 +753,8 @@ const UnknownNodeSchema = z.strictObject({
   type: z
     .string()
     .min(1)
-    .max(64)
+    // W-927: extension types are ext:<pkg>/<name>; 128 fits the longest allowed id.
+    .max(128)
     .refine((value) => !knownTypeSet.has(value), "Unknown element type"),
   props: z.record(z.string(), z.unknown()),
   ...sharedNodeFields,
@@ -1097,7 +1098,12 @@ export const isLoopNode = (node: LayoutNode): node is LoopNode => node.type === 
  * `part-ref` in schema 18 (W-925) but keeps its public class `emvb-section`, so site CSS and
  * the rendered output are unchanged.
  */
-export const cssTypeName = (type: string): string => (type === "part-ref" ? "section" : type);
+export const cssTypeName = (type: string): string => {
+  if (type === "part-ref") return "section";
+  // W-927: every extension element shares the emvb-ext class (type holds : and /).
+  if (type.startsWith("ext:")) return "ext";
+  return type;
+};
 
 export const isSectionNode = (node: LayoutNode): node is SectionNode => node.type === "part-ref";
 

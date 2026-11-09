@@ -3,6 +3,7 @@ import react from "@astrojs/react";
 import { defineConfig } from "astro/config";
 import { formsPlugin } from "@emdash-cms/plugin-forms";
 import { emvb } from "@perkyzz/emvb";
+import hello from "emvb-ext-hello";
 import emdash, { local } from "emdash/astro";
 import { sqlite } from "emdash/db";
 
@@ -28,7 +29,14 @@ export default defineConfig({
         directory: "./uploads",
         baseUrl: "/_emdash/api/media/file",
       }),
-      plugins: [formsPlugin(), emvb({ canvasStyles: ["/site.css"], canvasCollections: ["pages"] })],
+      plugins: [
+        formsPlugin(),
+        emvb({
+          canvasStyles: ["/site.css"],
+          canvasCollections: ["pages"],
+          extensions: [hello],
+        }),
+      ],
     }),
   ],
   devToolbar: { enabled: false },

@@ -225,7 +225,7 @@ export function EditorDialogs({
   selectedNode: LayoutNode | null;
   formsAvailable: boolean;
   paletteActions: readonly EditorCommand[];
-  addFromPanel: (type: ElementType) => void;
+  addFromPanel: (type: ElementType | string) => void;
   addRecipe: (id: string) => void;
   deleteAsk: { id: string; label: string; count: number } | null;
   setDeleteAsk: (ask: { id: string; label: string; count: number } | null) => void;

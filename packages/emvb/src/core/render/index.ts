@@ -45,6 +45,11 @@ import { renderPagination } from "./pagination.ts";
 import { renderSection } from "./section.ts";
 import { renderTabs } from "./tabs.ts";
 import { serialize, type VNode } from "./vnode.ts";
+import {
+  isExtensionType,
+  renderExtensionNode,
+  EXTENSION_PLACEHOLDER_CSS,
+} from "../extensions/index.ts";
 import { classStylesInListOrder, resolveCascade } from "../design/cascade.ts";
 import { applyBindings, hasBindings, type BindingData } from "../data/bindings.ts";
 import {
@@ -496,6 +501,15 @@ export function renderPage(
     const nodeId = id ?? "(invalid id)";
     const type: string = node.type;
     if (!Object.hasOwn(ELEMENTS, type)) {
+      // W-927: extension elements render via the Extensions API, or a placeholder when missing.
+      if (isExtensionType(type)) {
+        usedTypes.add("ext");
+        return renderExtensionNode(node, mode === "editor" ? "editor" : "public", (nodes) =>
+          nodes
+            .map((child) => visit(child, false, dynamic))
+            .filter((child): child is VNode => child !== undefined),
+        );
+      }
       warnings.push({ nodeId, code: "unknown-type", detail: type });
       if (mode === "public") return undefined;
       return {
@@ -629,6 +643,8 @@ export function renderPage(
     }
   }
   const baseCss = new Map(Object.entries(ELEMENTS).map(([type, def]) => [type, def.baseCss]));
+  // W-927: placeholder + wrapper styles ship with every page that may hold an extension node.
+  baseCss.set("ext", EXTENSION_PLACEHOLDER_CSS);
   const css = generateCss({
     design,
     usedTypes,

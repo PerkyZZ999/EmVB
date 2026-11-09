@@ -44,6 +44,9 @@ import { newElement } from "./dnd/new-element.ts";
 import { editorCommands } from "./editor-commands.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import { LeftPanel } from "./panels/LeftPanel.tsx";
+import { useExtensionManifests } from "./useExtensions.ts";
+import { adminExtensionDefaults } from "./extension-manifests.ts";
+import { ExtensionsProvider } from "./extensions-context.tsx";
 import { SettingsPanel } from "./panels/SettingsPanel.tsx";
 import { SmallScreenNotice } from "./SmallScreenNotice.tsx";
 import { emptyHistory, historyReducer, isDirty } from "./store.ts";
@@ -152,6 +155,7 @@ function EditorApp({
   const dirty = isDirty(state);
   const host = useEditorHost();
   const canvasStyles = useCanvasStyles(fetcher);
+  const extensionManifests = useExtensionManifests(fetcher);
   const inlinedStyles = useInlinedStyles(canvasStyles);
   const { exit } = host;
   const saver = useSave(fetcher, state, dispatch, collection);
@@ -413,252 +417,264 @@ function EditorApp({
   })[0];
 
   return (
-    <EditorOverlay
-      label={`EmVB editor: ${state.page.title || "Untitled page"}`}
-      dirty={dirty && !chrome.leaving}
-      onPalette={() => chrome.open("palette")}
-    >
-      <EditorToasts toastManager={toasts}>
-        {remoteChange && (
-          <div className="emvb-remote-change" role="status" data-emvb-remote-change={remoteChange}>
-            <span className="emvb-remote-change-icon" aria-hidden="true">
-              {remoteChange === "agent" ? (
-                <RobotIcon size={16} />
-              ) : (
-                <ArrowsClockwiseIcon size={16} />
-              )}
-            </span>
-            <span className="emvb-remote-change-text">
-              <strong>
-                {remoteChange === "agent"
-                  ? `An AI agent changed this ${noun}.`
-                  : `This ${noun} was changed somewhere else.`}
-              </strong>{" "}
-              <span>Reload to see the latest draft. Its changes are in the version timeline.</span>
-            </span>
-            <Button size="sm" variant="primary" onClick={() => window.location.reload()}>
-              Reload
-            </Button>
-          </div>
-        )}
-        {wideEnough ? (
-          <>
-            <TopBar
-              page={{ title: state.page.title, status: state.status }}
-              dirty={dirty}
-              status={saver.status}
-              busy={busy}
-              onExit={() => (dirty ? chrome.open("leave") : exit())}
-              onShortcuts={() => chrome.open("shortcuts")}
-              onSiteStyles={() => chrome.open("siteStyles")}
-              onPreview={(size) => (host.field ? setFieldPreview(true) : preview(size ?? device))}
-              onSave={() => void save()}
-              onPublish={() => void publish()}
-              stylesUnpublished={state.designUnpublished === true}
-              canRevert={canRevert}
-              onRevert={() => chrome.open("revert")}
-              {...(host.field ? { onApply: () => host.field?.apply(state.page.layout) } : {})}
-              tools={
-                <>
-                  {/* UX-084: undo and redo were keyboard-only; toasts already say "Undo takes it back". */}
-                  <Button
-                    variant="ghost"
-                    shape="square"
-                    className="emvb-icon-btn"
-                    aria-label="Undo"
-                    title="Undo (Ctrl/Cmd+Z)"
-                    data-emvb-undo=""
-                    disabled={history.past.length === 0}
-                    icon={<ArrowUUpLeftIcon aria-hidden="true" />}
-                    onClick={() => dispatch({ type: "undo" })}
-                  />
-                  <Button
-                    variant="ghost"
-                    shape="square"
-                    className="emvb-icon-btn"
-                    aria-label="Redo"
-                    title="Redo (Ctrl/Cmd+Shift+Z)"
-                    data-emvb-redo=""
-                    disabled={history.future.length === 0}
-                    icon={<ArrowUUpRightIcon aria-hidden="true" />}
-                    onClick={() => dispatch({ type: "redo" })}
-                  />
-                  <A11yScoreButton report={a11y} onOpen={() => chrome.open("a11y")} />
-                  <Button
-                    variant="ghost"
-                    shape="square"
-                    className="emvb-icon-btn"
-                    aria-label="Page weight"
-                    title="Page weight"
-                    data-emvb-perf-open=""
-                    icon={<GaugeIcon aria-hidden="true" />}
-                    onClick={() => chrome.open("perf")}
-                  />
-                  <Button
-                    variant="ghost"
-                    shape="square"
-                    className="emvb-icon-btn"
-                    aria-label="Version timeline"
-                    title="Version timeline"
-                    data-emvb-timeline-open=""
-                    icon={<ClockCounterClockwiseIcon aria-hidden="true" />}
-                    onClick={() => chrome.open("timeline")}
-                  />
-                  <Button
-                    variant="ghost"
-                    shape="square"
-                    className="emvb-icon-btn"
-                    aria-label="Share as a playground link"
-                    title="Share as a playground link"
-                    data-emvb-share-open=""
-                    icon={<ShareNetworkIcon aria-hidden="true" />}
-                    onClick={() => chrome.open("share")}
-                  />
-                </>
-              }
-            />
-            <div className="emvb-frame">
-              <aside className="emvb-panel emvb-panel-left" aria-label="Add and Layers">
-                <LeftPanel
-                  layout={state.page.layout}
-                  selectedId={state.selectedId}
-                  onSelect={(id) => dispatch({ type: "select", id })}
-                  onAdd={addFromPanel}
-                  onRecipe={addRecipe}
-                  formsAvailable={formsAvailable}
-                  onDuplicate={duplicate}
-                  onMoveUp={(id) => arrange(id, moveUp)}
-                  onMoveDown={(id) => arrange(id, moveDown)}
-                  onDelete={remove}
-                  clipboard={clipboard}
-                  saved={saved}
-                  onSaveSection={setSaveAsk}
-                  onRename={(id, label) =>
-                    dispatch({
-                      type: "update-node",
-                      id,
-                      update: (node) => withLabel(node, label),
-                    })
-                  }
-                />
-                <div className="emvb-sr-only" aria-live="polite">
-                  {announcement}
-                </div>
-              </aside>
-              <main className="emvb-canvas">
-                <DeviceBar
-                  device={device}
-                  hidden={!!selectedNode?.hiddenOn?.includes(device)}
-                  canHide={!!hideOnDevice && !hideOnDevice.disabled}
-                  hideLabel={hideOnDevice?.label ?? `Hide on ${device}`}
-                  onDevice={setDevice}
-                  zoom={zoom}
-                  scale={scale}
-                  onZoom={setZoom}
-                  onToggleHidden={() => hideOnDevice?.run()}
-                />
-                {rendered ? (
-                  <CanvasFrame
-                    vnode={rendered.vnode}
-                    css={rendered.css}
-                    canvasStyles={canvasStyles}
+    <ExtensionsProvider extensions={extensionManifests}>
+      <EditorOverlay
+        label={`EmVB editor: ${state.page.title || "Untitled page"}`}
+        dirty={dirty && !chrome.leaving}
+        onPalette={() => chrome.open("palette")}
+      >
+        <EditorToasts toastManager={toasts}>
+          {remoteChange && (
+            <div
+              className="emvb-remote-change"
+              role="status"
+              data-emvb-remote-change={remoteChange}
+            >
+              <span className="emvb-remote-change-icon" aria-hidden="true">
+                {remoteChange === "agent" ? (
+                  <RobotIcon size={16} />
+                ) : (
+                  <ArrowsClockwiseIcon size={16} />
+                )}
+              </span>
+              <span className="emvb-remote-change-text">
+                <strong>
+                  {remoteChange === "agent"
+                    ? `An AI agent changed this ${noun}.`
+                    : `This ${noun} was changed somewhere else.`}
+                </strong>{" "}
+                <span>
+                  Reload to see the latest draft. Its changes are in the version timeline.
+                </span>
+              </span>
+              <Button size="sm" variant="primary" onClick={() => window.location.reload()}>
+                Reload
+              </Button>
+            </div>
+          )}
+          {wideEnough ? (
+            <>
+              <TopBar
+                page={{ title: state.page.title, status: state.status }}
+                dirty={dirty}
+                status={saver.status}
+                busy={busy}
+                onExit={() => (dirty ? chrome.open("leave") : exit())}
+                onShortcuts={() => chrome.open("shortcuts")}
+                onSiteStyles={() => chrome.open("siteStyles")}
+                onPreview={(size) => (host.field ? setFieldPreview(true) : preview(size ?? device))}
+                onSave={() => void save()}
+                onPublish={() => void publish()}
+                stylesUnpublished={state.designUnpublished === true}
+                canRevert={canRevert}
+                onRevert={() => chrome.open("revert")}
+                {...(host.field ? { onApply: () => host.field?.apply(state.page.layout) } : {})}
+                tools={
+                  <>
+                    {/* UX-084: undo and redo were keyboard-only; toasts already say "Undo takes it back". */}
+                    <Button
+                      variant="ghost"
+                      shape="square"
+                      className="emvb-icon-btn"
+                      aria-label="Undo"
+                      title="Undo (Ctrl/Cmd+Z)"
+                      data-emvb-undo=""
+                      disabled={history.past.length === 0}
+                      icon={<ArrowUUpLeftIcon aria-hidden="true" />}
+                      onClick={() => dispatch({ type: "undo" })}
+                    />
+                    <Button
+                      variant="ghost"
+                      shape="square"
+                      className="emvb-icon-btn"
+                      aria-label="Redo"
+                      title="Redo (Ctrl/Cmd+Shift+Z)"
+                      data-emvb-redo=""
+                      disabled={history.future.length === 0}
+                      icon={<ArrowUUpRightIcon aria-hidden="true" />}
+                      onClick={() => dispatch({ type: "redo" })}
+                    />
+                    <A11yScoreButton report={a11y} onOpen={() => chrome.open("a11y")} />
+                    <Button
+                      variant="ghost"
+                      shape="square"
+                      className="emvb-icon-btn"
+                      aria-label="Page weight"
+                      title="Page weight"
+                      data-emvb-perf-open=""
+                      icon={<GaugeIcon aria-hidden="true" />}
+                      onClick={() => chrome.open("perf")}
+                    />
+                    <Button
+                      variant="ghost"
+                      shape="square"
+                      className="emvb-icon-btn"
+                      aria-label="Version timeline"
+                      title="Version timeline"
+                      data-emvb-timeline-open=""
+                      icon={<ClockCounterClockwiseIcon aria-hidden="true" />}
+                      onClick={() => chrome.open("timeline")}
+                    />
+                    <Button
+                      variant="ghost"
+                      shape="square"
+                      className="emvb-icon-btn"
+                      aria-label="Share as a playground link"
+                      title="Share as a playground link"
+                      data-emvb-share-open=""
+                      icon={<ShareNetworkIcon aria-hidden="true" />}
+                      onClick={() => chrome.open("share")}
+                    />
+                  </>
+                }
+              />
+              <div className="emvb-frame">
+                <aside className="emvb-panel emvb-panel-left" aria-label="Add and Layers">
+                  <LeftPanel
                     layout={state.page.layout}
-                    device={device}
-                    zoom={zoom}
-                    onScale={setScale}
-                    selection={selection}
-                    statePreview={statePreview}
-                    refusal={refusalShown ? refusal : null}
-                    onDropNew={(elementType, parentId, index) => {
-                      const node = newElement(elementType);
-                      if (!node) return;
-                      dispatch({ type: "add-node", node, parentId, index });
-                    }}
-                    onMove={(id, parentId, index) =>
-                      dispatch({ type: "move-node", id, parentId, index })
-                    }
-                    onCommitText={(id, text) =>
+                    selectedId={state.selectedId}
+                    onSelect={(id) => dispatch({ type: "select", id })}
+                    onAdd={addFromPanel}
+                    onRecipe={addRecipe}
+                    formsAvailable={formsAvailable}
+                    onDuplicate={duplicate}
+                    onMoveUp={(id) => arrange(id, moveUp)}
+                    onMoveDown={(id) => arrange(id, moveDown)}
+                    onDelete={remove}
+                    clipboard={clipboard}
+                    saved={saved}
+                    onSaveSection={setSaveAsk}
+                    onRename={(id, label) =>
                       dispatch({
                         type: "update-node",
                         id,
-                        update: (node) => withPlainText(node, text),
+                        update: (node) => withLabel(node, label),
                       })
                     }
                   />
-                ) : (
-                  <EmptyCanvas latest={latest} dispatch={dispatch} />
-                )}
-              </main>
-              <SettingsPanel
-                state={state}
-                latest={latest}
-                dispatch={dispatch}
-                selectedNode={selectedNode}
-                siteStylesOpen={chrome.flags.siteStyles}
-                onCloseSiteStyles={() => chrome.close("siteStyles")}
-                onDesignChange={changeDesign}
-                onPublishStyles={publishStyles}
-                onDesignItemDeleted={(deletion) => {
-                  deletions.current = [...deletions.current.slice(-19), deletion];
-                }}
-                fetcher={fetcher}
-                formsAvailable={formsAvailable}
-                rejection={saver.rejection}
-                slugError={saver.slugError}
-                onSlugEdit={saver.clearSlugError}
-                kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
-                onStyleState={onStyleState}
-                device={device}
-                items={itemActions}
-              />
-            </div>
-          </>
-        ) : (
-          <SmallScreenNotice />
-        )}
-        <EditorDialogs
-          parts={partDynamic}
-          chrome={chrome}
-          fetcher={fetcher}
-          collection={collection}
-          state={state}
-          latest={latest}
-          dispatch={dispatch}
-          saver={saver}
-          toasts={toasts}
-          save={save}
-          a11y={a11y}
-          canvasStyles={canvasStyles}
-          selectedNode={selectedNode ?? null}
-          formsAvailable={formsAvailable}
-          paletteActions={paletteActions}
-          addFromPanel={addFromPanel}
-          addRecipe={addRecipe}
-          deleteAsk={deleteAsk}
-          setDeleteAsk={setDeleteAsk}
-          finishDelete={finishDelete}
-          playgroundUrl={host.playgroundUrl}
-          setAnnouncement={setAnnouncement}
-          saved={saved}
-        />
-        {host.field && (
-          <FieldPreview
-            open={fieldPreview}
-            onOpenChange={setFieldPreview}
-            device={device}
-            render={renderFieldPreview}
+                  <div className="emvb-sr-only" aria-live="polite">
+                    {announcement}
+                  </div>
+                </aside>
+                <main className="emvb-canvas">
+                  <DeviceBar
+                    device={device}
+                    hidden={!!selectedNode?.hiddenOn?.includes(device)}
+                    canHide={!!hideOnDevice && !hideOnDevice.disabled}
+                    hideLabel={hideOnDevice?.label ?? `Hide on ${device}`}
+                    onDevice={setDevice}
+                    zoom={zoom}
+                    scale={scale}
+                    onZoom={setZoom}
+                    onToggleHidden={() => hideOnDevice?.run()}
+                  />
+                  {rendered ? (
+                    <CanvasFrame
+                      vnode={rendered.vnode}
+                      css={rendered.css}
+                      canvasStyles={canvasStyles}
+                      layout={state.page.layout}
+                      device={device}
+                      zoom={zoom}
+                      onScale={setScale}
+                      selection={selection}
+                      statePreview={statePreview}
+                      refusal={refusalShown ? refusal : null}
+                      onDropNew={(elementType, parentId, index) => {
+                        const node = newElement(
+                          elementType,
+                          undefined,
+                          adminExtensionDefaults(elementType),
+                        );
+                        if (!node) return;
+                        dispatch({ type: "add-node", node, parentId, index });
+                      }}
+                      onMove={(id, parentId, index) =>
+                        dispatch({ type: "move-node", id, parentId, index })
+                      }
+                      onCommitText={(id, text) =>
+                        dispatch({
+                          type: "update-node",
+                          id,
+                          update: (node) => withPlainText(node, text),
+                        })
+                      }
+                    />
+                  ) : (
+                    <EmptyCanvas latest={latest} dispatch={dispatch} />
+                  )}
+                </main>
+                <SettingsPanel
+                  state={state}
+                  latest={latest}
+                  dispatch={dispatch}
+                  selectedNode={selectedNode}
+                  siteStylesOpen={chrome.flags.siteStyles}
+                  onCloseSiteStyles={() => chrome.close("siteStyles")}
+                  onDesignChange={changeDesign}
+                  onPublishStyles={publishStyles}
+                  onDesignItemDeleted={(deletion) => {
+                    deletions.current = [...deletions.current.slice(-19), deletion];
+                  }}
+                  fetcher={fetcher}
+                  formsAvailable={formsAvailable}
+                  rejection={saver.rejection}
+                  slugError={saver.slugError}
+                  onSlugEdit={saver.clearSlugError}
+                  kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
+                  onStyleState={onStyleState}
+                  device={device}
+                  items={itemActions}
+                />
+              </div>
+            </>
+          ) : (
+            <SmallScreenNotice />
+          )}
+          <EditorDialogs
+            parts={partDynamic}
+            chrome={chrome}
+            fetcher={fetcher}
+            collection={collection}
+            state={state}
+            latest={latest}
+            dispatch={dispatch}
+            saver={saver}
+            toasts={toasts}
+            save={save}
+            a11y={a11y}
+            canvasStyles={canvasStyles}
+            selectedNode={selectedNode ?? null}
+            formsAvailable={formsAvailable}
+            paletteActions={paletteActions}
+            addFromPanel={addFromPanel}
+            addRecipe={addRecipe}
+            deleteAsk={deleteAsk}
+            setDeleteAsk={setDeleteAsk}
+            finishDelete={finishDelete}
+            playgroundUrl={host.playgroundUrl}
+            setAnnouncement={setAnnouncement}
+            saved={saved}
           />
-        )}
-        <SaveSectionDialog
-          open={saveAsk !== null}
-          onOpenChange={(open) => !open && setSaveAsk(null)}
-          defaultName={sectionNameFor(state.page.layout, saveAsk)}
-          onSave={(name, mode) =>
-            saveAsk ? saved.save(saveAsk, name, mode) : Promise.resolve(null)
-          }
-        />
-      </EditorToasts>
-    </EditorOverlay>
+          {host.field && (
+            <FieldPreview
+              open={fieldPreview}
+              onOpenChange={setFieldPreview}
+              device={device}
+              render={renderFieldPreview}
+            />
+          )}
+          <SaveSectionDialog
+            open={saveAsk !== null}
+            onOpenChange={(open) => !open && setSaveAsk(null)}
+            defaultName={sectionNameFor(state.page.layout, saveAsk)}
+            onSave={(name, mode) =>
+              saveAsk ? saved.save(saveAsk, name, mode) : Promise.resolve(null)
+            }
+          />
+        </EditorToasts>
+      </EditorOverlay>
+    </ExtensionsProvider>
   );
 }
 

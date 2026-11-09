@@ -13,6 +13,7 @@ The contract version is `CONTRACT_VERSION = "1.0"` (exported from `packages/emvb
   `emvb://schema/design` serve the same schemas.
 - The source of truth is the Zod schemas in `packages/emvb/src/core/schema/`, plus `core/limits.ts`,
   `core/contract.ts` and `core/migrate/`.
+- Extensions API v1 (custom elements, panels, sources): [EXTENSIONS.md](EXTENSIONS.md) (W-927, D-066).
 
 ## The promise (D-065)
 

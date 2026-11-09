@@ -3,6 +3,7 @@ import * as React from "react";
 import type { ElementType, Layout } from "../../../core/index.ts";
 import { AddPanel } from "./AddPanel.tsx";
 import { LayersPanel } from "./LayersPanel.tsx";
+import { ExtensionPanels } from "../extensions/ExtensionPanels.tsx";
 import type { ClipboardActions } from "../useClipboardActions.ts";
 import type { SavedSectionActions } from "../useSavedSections.ts";
 
@@ -28,7 +29,7 @@ export function LeftPanel({
   layout: Layout | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
-  onAdd: (type: ElementType) => void;
+  onAdd: (type: ElementType | string) => void;
   /** Adds a section recipe (W-320). */
   onRecipe?: (id: string) => void;
   /** My sections (W-876). */
@@ -72,7 +73,15 @@ export function LeftPanel({
         onValueChange={changeTab}
       />
       {tab === "add" ? (
-        <AddPanel onAdd={onAdd} onRecipe={onRecipe} saved={saved} formsAvailable={formsAvailable} />
+        <>
+          <AddPanel
+            onAdd={onAdd}
+            onRecipe={onRecipe}
+            saved={saved}
+            formsAvailable={formsAvailable}
+          />
+          <ExtensionPanels />
+        </>
       ) : (
         <LayersPanel
           layout={layout}

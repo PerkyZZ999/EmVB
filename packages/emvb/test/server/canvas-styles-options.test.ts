@@ -22,9 +22,14 @@ describe("the editor/config route (W-327)", () => {
     expect(await route.handler({} as never)).toEqual({
       canvasStyles: ["/a.css"],
       canvasCollections: [],
+      extensions: [],
     });
     const none = createPlugin().routes["editor/config"] as typeof route;
-    expect(await none.handler({} as never)).toEqual({ canvasStyles: [], canvasCollections: [] });
+    expect(await none.handler({} as never)).toEqual({
+      canvasStyles: [],
+      canvasCollections: [],
+      extensions: [],
+    });
   });
 });
 
@@ -39,6 +44,7 @@ describe("canvasCollections option (W-897)", () => {
     expect(await route.handler({} as never)).toEqual({
       canvasStyles: [],
       canvasCollections: ["pages"],
+      extensions: [],
     });
   });
 });

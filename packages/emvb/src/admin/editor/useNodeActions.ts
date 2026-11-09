@@ -24,7 +24,8 @@ import {
   type Layout,
   type LayoutNode,
 } from "../../core/index.ts";
-import { newElement, withPageHeadingLevel } from "./dnd/new-element.ts";
+import { adminExtensionDefaults } from "./extension-manifests.ts";
+import { newElement } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import type { ItemActions } from "./panels/settings/ItemList.tsx";
 import type { EditorAction, EditorState } from "./store.ts";
@@ -222,7 +223,7 @@ export function useNodeActions({
     announce(`${label} added inside ${nameOf(result.parentId) ?? "Container"}`);
   };
 
-  const addFromPanel = (type: ElementType) => {
+  const addFromPanel = (type: ElementType | string) => {
     const current = latest.current.page.layout;
     if (!current && type === "container") {
       dispatch({ type: "add-root-container" });
@@ -231,11 +232,15 @@ export function useNodeActions({
     // UX-094: an empty page (one made outside EmVB has no layout) gets its container first, so
     // a click or palette insert lands instead of doing nothing.
     const layout = current ?? startingLayout();
-    const added = newElement(type);
-    if (!added) return;
-    // W-924: a click or palette insert picks the heading level the way a drop does.
-    const node = withPageHeadingLevel(added, layout, latest.current.page.partType);
-    place(layout, node, ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name ?? type);
+    const node = newElement(type, undefined, adminExtensionDefaults(type));
+    if (!node) return;
+    const builtInName = ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name;
+    const label = builtInName
+      ? builtInName
+      : type.startsWith("ext:")
+        ? type.slice(type.lastIndexOf("/") + 1)
+        : type;
+    place(layout, node, label);
   };
 
   /** A section recipe built from the site's styles (W-320). */

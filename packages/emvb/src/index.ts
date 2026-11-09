@@ -2,6 +2,11 @@ import type { PluginDescriptor } from "emdash";
 import { ADMIN_ENTRY, PACKAGE_NAME, PLUGIN_ID, PLUGIN_VERSION } from "./constants.ts";
 import { canvasCollectionSlugs } from "./core/canvas-collections.ts";
 import { canvasStyleUrls } from "./core/canvas-styles.ts";
+import {
+  rememberExtensions,
+  type EmVBExtension,
+  type ExtensionManifest,
+} from "./core/extensions/index.ts";
 import { createPlugin } from "./server/plugin.ts";
 
 /** Options a host site passes to `emvb()` in astro.config. */
@@ -17,12 +22,19 @@ export type EmVBOptions = {
    * field (W-897). EmVB validates and guards that field on save and publish for these only.
    */
   canvasCollections?: string[];
+  /**
+   * Build-time Extensions API v1 packages (W-927, D-066). Only the site owner adds these.
+   * Live render/resolve functions are kept in-process; a serializable manifest is what
+   * EmDash passes into `createPlugin`.
+   */
+  extensions?: EmVBExtension[];
 };
 
 /** Descriptor that host sites add to `emdash({ plugins: [...] })` in astro.config. */
 export function emvb(options: EmVBOptions = {}): PluginDescriptor {
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
+  const extensions = rememberExtensions(options.extensions);
   return {
     id: PLUGIN_ID,
     version: PLUGIN_VERSION,
@@ -32,9 +44,21 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
     options: {
       ...(canvasStyles.length > 0 ? { canvasStyles } : {}),
       ...(canvasCollections.length > 0 ? { canvasCollections } : {}),
+      ...(extensions.length > 0 ? { extensions } : {}),
     },
   };
 }
 
 export { createPlugin };
 export default createPlugin;
+
+export type { EmVBExtension, ExtensionManifest };
+export {
+  defineExtension,
+  EXTENSION_API_VERSION,
+  type ExtensionElement,
+  type ExtensionPanel,
+  type ExtensionSource,
+  type ExtensionPropSchema,
+  type ExtensionField,
+} from "./core/extensions/index.ts";

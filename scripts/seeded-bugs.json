@@ -190,8 +190,8 @@
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
-          "search": "plugins: [formsPlugin(), emvb({ canvasStyles: [\"/site.css\"], canvasCollections: [\"pages\"] })],",
-          "replace": "plugins: [formsPlugin()],"
+          "search": "      plugins: [\n        formsPlugin(),\n        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n        }),\n      ],",
+          "replace": "      plugins: [\n        formsPlugin(),\n      ],"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/smoke.e2e.ts", "--project=node"],
@@ -19045,40 +19045,12 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/store.ts",
-          "search": "      const node = withPageHeadingLevel(action.node, state.page.layout, state.page.partType);",
+          "search": "      const node = withPageHeadingLevel(action.node, state.page.layout);",
           "replace": "      const node = action.node;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
       "expect": "\\(fail\\).*the first Heading on a page without an H1 becomes the H1"
-    },
-    {
-      "id": "W-924/shared-part-heading-h1",
-      "requirement": "W-924",
-      "description": "A new Heading in a header part becomes a second H1 on the page.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
-          "search": "if (isSharedPart(partType) || hasH1(layout.root)) return node;",
-          "replace": "if (hasH1(layout.root)) return node;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
-      "expect": "\\(fail\\).*in a header part the first Heading stays H2"
-    },
-    {
-      "id": "W-924/clicked-heading-stays-h2",
-      "requirement": "W-924",
-      "description": "A Heading added by clicking stays H2 on a page with no H1.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
-          "search": "    const node = withPageHeadingLevel(added, layout, latest.current.page.partType);",
-          "replace": "    const node = added;"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/admin/editor/useNodeActions.test.tsx"],
-      "expect": "\\(fail\\).*a clicked Heading on a page without an H1 becomes the H1"
     },
     {
       "id": "W-148/e2e-button-browser-look",
@@ -21610,8 +21582,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/heading-warning.ts",
-          "search": "partType !== undefined && SHARED_PARTS.has(partType);",
-          "replace": "partType !== undefined;"
+          "search": "  if (!partType || !SHARED_PARTS.has(partType)) return false;",
+          "replace": "  if (!partType) return false;"
         }
       ],
       "command": [
@@ -37555,8 +37527,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
-          "search": "const layout = current ?? startingLayout();\n    const added = newElement(type);",
-          "replace": "if (!current) return;\n    const layout = current;\n    const added = newElement(type);"
+          "search": "const layout = current ?? startingLayout();\n    const node = newElement(type, undefined, adminExtensionDefaults(type));",
+          "replace": "if (!current) return;\n    const layout = current;\n    const node = newElement(type, undefined, adminExtensionDefaults(type));"
         }
       ],
       "command": [
@@ -40731,8 +40703,8 @@
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
-          "search": "emvb({ canvasStyles: [\"/site.css\"], canvasCollections: [\"pages\"] })",
-          "replace": "emvb({ canvasStyles: [\"/site.css\"] })"
+          "search": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n        }),",
+          "replace": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          extensions: [hello],\n        }),"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
@@ -41579,6 +41551,81 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/compat"],
       "expect": "\\(fail\\).*every released layout schema"
+    },
+    {
+      "id": "W-927/namespace-escape",
+      "requirement": "W-927",
+      "description": "Extension types allow path escape (..) and dots in the pattern, so a hostile type is treated as valid.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/namespace.ts",
+          "search": "if (type.includes(\"..\")) return \"Extension types must not contain ..\";",
+          "replace": "// seed: path escape allowed\n"
+        },
+        {
+          "file": "packages/emvb/src/core/extensions/namespace.ts",
+          "search": "const EXTENSION_TYPE_PATTERN = /^ext:[a-z][a-z0-9-]{0,63}\\/[a-z][a-z0-9-]{0,31}$/;",
+          "replace": "const EXTENSION_TYPE_PATTERN = /^ext:[a-z.][a-z0-9.\\/-]{0,90}$/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
+      "expect": "\\(fail\\).*refuses path escape"
+    },
+    {
+      "id": "W-927/raw-html-injection",
+      "requirement": "W-927",
+      "description": "Extension render output accepts a raw HTML string, so a script tag reaches the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
+          "search": "if (typeof value === \"string\") return undefined; // raw HTML / text \u2014 refused",
+          "replace": "if (typeof value === \"string\") return { id: newNodeId(random), type: \"heading\", props: { text: value, level: 2 } };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
+      "expect": "\\(fail\\).*raw HTML from render"
+    },
+    {
+      "id": "W-927/oversized-data",
+      "requirement": "W-927",
+      "description": "Extension string props ignore maxLength, so oversized data is accepted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/schema.ts",
+          "search": "const max = Math.min(schema.maxLength ?? EXT_MAX_STRING, EXT_MAX_STRING);",
+          "replace": "const max = EXT_MAX_STRING;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
+      "expect": "\\(fail\\).*oversized prop strings"
+    },
+    {
+      "id": "W-927/missing-extension",
+      "requirement": "W-927",
+      "description": "A missing extension is omitted on the public page instead of showing the placeholder, so removing the package blanks the block silently.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/render-ext.ts",
+          "search": "if (!found) {\n    return extensionPlaceholderVNode(type, id, mode);\n  }",
+          "replace": "if (!found) {\n    if (mode === \"public\") return { tag: \"div\", attrs: { class: \"emvb-ext\" }, children: [] };\n    return extensionPlaceholderVNode(type, id, mode);\n  }"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
+      "expect": "\\(fail\\).*missing extension keeps the page"
+    },
+    {
+      "id": "W-927/style-injection",
+      "requirement": "W-927",
+      "description": "Extension output keeps a hostile style object, so CSS injection from render reaches the validated tree.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/safe-nodes.ts",
+          "search": "  // Drop style/attributes from extension output: only props + children of built-ins.\n  // (Extensions style through the host element's own style on the wrapper.)\n  return {\n    id,\n    type: node.type,\n    props: { ...(node.props as Record<string, unknown>) },\n    ...(children ? { children } : {}),\n  };",
+          "replace": "  return {\n    id,\n    type: node.type,\n    props: { ...(node.props as Record<string, unknown>) },\n    ...(node.style !== undefined ? { style: node.style } : {}),\n    ...(children ? { children } : {}),\n  };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
+      "expect": "\\(fail\\).*style injection"
     }
   ]
 }

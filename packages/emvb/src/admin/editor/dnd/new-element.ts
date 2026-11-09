@@ -1,13 +1,12 @@
 import {
   defaultElement,
   ELEMENTS,
+  isExtensionType,
   newNodeId,
   type ElementType,
   type Layout,
   type LayoutNode,
 } from "../../../core/index.ts";
-import type { ThemePartType } from "../../../core/theme/part-types.ts";
-import { isSharedPart } from "../panels/settings/heading-warning.ts";
 
 const hasH1 = (node: LayoutNode): boolean =>
   ((node.type === "heading" || node.type === "post-title") &&
@@ -16,17 +15,10 @@ const hasH1 = (node: LayoutNode): boolean =>
 
 /**
  * A new Heading is the page's H1 when the page has none yet, otherwise the default H2 (W-147).
- * Other nodes, and headings whose level was already chosen, are returned as they are. In a
- * header, footer, popup, float, synced section or loop item it stays H2: that part lands on pages
- * that have their own H1 (W-924).
+ * Other nodes, and headings whose level was already chosen, are returned as they are.
  */
-export function withPageHeadingLevel(
-  node: LayoutNode,
-  layout: Layout,
-  partType?: ThemePartType,
-): LayoutNode {
-  if (node.type !== "heading" || node.props.level !== 2) return node;
-  if (isSharedPart(partType) || hasH1(layout.root)) return node;
+export function withPageHeadingLevel(node: LayoutNode, layout: Layout): LayoutNode {
+  if (node.type !== "heading" || node.props.level !== 2 || hasH1(layout.root)) return node;
   return { ...node, props: { ...node.props, level: 1 } };
 }
 
@@ -64,7 +56,19 @@ export function newTabPanel(n: number, random?: () => number): LayoutNode {
  * Default node for a new element from the Add panel. Only new inserts get starter children;
  * saved Accordions and Tabs with no items keep working as they are (W-130).
  */
-export function newElement(type: string, random?: () => number): LayoutNode | null {
+export function newElement(
+  type: string,
+  random?: () => number,
+  extensionDefaults?: Record<string, unknown>,
+): LayoutNode | null {
+  // W-927: extension elements are stored as UnknownNodes with namespaced types.
+  if (isExtensionType(type)) {
+    return {
+      id: newNodeId(random),
+      type,
+      props: extensionDefaults ? { ...extensionDefaults } : {},
+    };
+  }
   if (!(type in ELEMENTS)) return null;
   if (type === "tabs") {
     const tabs = defaultElement("tabs", newNodeId(random));

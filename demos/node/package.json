@@ -16,6 +16,7 @@
     "@perkyzz/emvb": "workspace:*",
     "astro": "7.3.5",
     "emdash": "1.4.0",
+    "emvb-ext-hello": "workspace:*",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },
