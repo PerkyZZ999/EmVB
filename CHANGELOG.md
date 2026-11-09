@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-09
+
 EmVB 1.0: the stored page format is frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md)), AI agents co-design pages through reviewable proposals, sites can add their own elements and panels (Extensions API), pages can have one version per language, any element can loop, pages and templates import from Elementor (3 and 4), and the editor gains inline text formatting, fluid sizes, transforms, flex item sizing, list markers and numbered steps, gradient overlays and more style settings. Upgrading from 0.9: see the [upgrade guide](docs/guides/upgrade-1.0.md); 0.9 pages upgrade on read, and EmVB's AI tools need approving again on EmDash's Plugins screen.
 
 ### Added
@@ -680,7 +682,9 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.9.0...v1.0.0
+[0.9.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.5.0...v0.6.0

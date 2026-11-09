@@ -8,11 +8,11 @@ Try it without installing anything in the [playground](https://emvb.dev/playgrou
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
-**Current release:** 0.9.0. It lets your own collections hold an EmVB layout (Edit with EmVB in the entry form, Preview, Convert to EmVB, Host collections setup), and adds per-element text direction, responsive library images, and Page N of M with a Last link. Layout schema 17, design schema 16, unchanged from 0.8.0. See the [changelog](CHANGELOG.md) for every release. The next release moves to the schema contract 1.0 (layout schema 18, design schema 17): see [docs/SCHEMA.md](docs/SCHEMA.md) and the [Extensions API](docs/EXTENSIONS.md).
+**Current release:** 1.0.0. The page format is frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17), AI agents co-design pages through reviewable proposals, sites add their own elements and panels ([Extensions API](docs/EXTENSIONS.md)), pages can have a version per language, and pages and templates import from Elementor 3 and 4. The editor adds inline text formatting, fluid sizes, a Laptop device, transforms, flex item sizing, list markers and numbered steps, gradient overlays and more style settings. Upgrading from 0.9: see the [upgrade guide](docs/guides/upgrade-1.0.md). See the [changelog](CHANGELOG.md) for every release.
 
 ## Requirements
 
-- **EmDash 1.4.x.** EmVB 0.9.0 is built and tested against EmDash 1.4.0 (0.8.0 was tested on 1.3.1). Its peer range is `emdash` ^1.0.0.
+- **EmDash 1.4.x.** EmVB 1.0.0 is built and tested against EmDash 1.4.0 (0.8.0 was tested on 1.3.1). Its peer range is `emdash` ^1.0.0.
 - **Astro 7, as your EmDash site has it.** No Astro change needed: verified on a stock `create-emdash` 1.4.0 site, which installs Astro 7.4.7 (7.4.8 since 2026-11-09, also verified).
 - **React 19**, `@cloudflare/kumo` 2.6.0 and `@phosphor-icons/react` ^2.1.10. An EmDash site already has these.
 - **Optional:** `@emdash-cms/plugin-forms` ^0.2.9 for forms.
