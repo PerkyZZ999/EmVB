@@ -110,6 +110,7 @@ describe("Elementor import: containers (W-945)", () => {
       textAlign: "center",
     });
     expect(heading?.devices).toEqual({
+      tablet: { fontSize: { value: 44, unit: "px" } },
       mobile: { fontSize: { value: 34, unit: "px" }, textAlign: "left" },
     });
     expect(result.fonts).toContain("Poppins");

@@ -80,6 +80,11 @@
               "unit": "px",
               "size": -1,
               "sizes": []
+            },
+            "typography_font_size_tablet": {
+              "unit": "px",
+              "size": 44,
+              "sizes": []
             }
           },
           "elements": []

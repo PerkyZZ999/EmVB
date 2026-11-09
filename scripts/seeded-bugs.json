@@ -42932,6 +42932,244 @@
         "packages/emvb/src/admin/editor/panels/settings/loop-control.test.tsx"
       ],
       "expect": "\\(fail\\).*Add loop starts at Float"
+    },
+    {
+      "id": "W-945/script-text-kept",
+      "requirement": "W-945",
+      "description": "Script contents in Elementor HTML are kept as page text and not reported.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/html.ts",
+          "search": "    if (!closing && RAW_TEXT.has(name)) {",
+          "replace": "    if (!closing && RAW_TEXT.has(name) && name !== \"script\") {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*the report names what was approximated or left out"
+    },
+    {
+      "id": "W-945/unsafe-href-kept",
+      "requirement": "W-945",
+      "description": "An Elementor link's address is used without EmVB's href sanitizer.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  const safe = sanitizeHref(l.url);",
+          "replace": "  const safe = l.url;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*renders as inert text wherever it lands"
+    },
+    {
+      "id": "W-945/oversize-not-refused",
+      "requirement": "W-945",
+      "description": "A pasted file over 8 MB is parsed instead of refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "    if (value.length > MAX_IMPORT_CHARS)",
+          "replace": "    if (value.length > MAX_IMPORT_CHARS * 2)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a file over 8 MB is refused before parsing"
+    },
+    {
+      "id": "W-945/size-caps-removed",
+      "requirement": "W-945",
+      "description": "Huge exports aren't cut at the element and node budgets.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "    if (ctx.elements > MAX_IMPORT_ELEMENTS || ctx.overBudget) {",
+          "replace": "    if (ctx.elements > MAX_IMPORT_ELEMENTS * 100) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a page with too many elements keeps the first ones"
+    },
+    {
+      "id": "W-945/depth-unbounded",
+      "requirement": "W-945",
+      "description": "Elementor nesting deeper than EmVB allows isn't cut or reported.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "const MAX_WALK_DEPTH = 16;",
+          "replace": "const MAX_WALK_DEPTH = 100_000;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*very deep nesting is cut"
+    },
+    {
+      "id": "W-945/unknown-widget-dropped",
+      "requirement": "W-945",
+      "description": "A third-party widget's text, images and buttons are thrown away.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "    const nodes = map ? map(s, ctx, name, env, raw) : genericWidget(type, unwrapAll(s), ctx, name);",
+          "replace": "    const nodes = map ? map(s, ctx, name, env, raw) : [];"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*an unknown third-party widget keeps its text"
+    },
+    {
+      "id": "W-945/boxed-not-centred",
+      "requirement": "W-945",
+      "description": "A boxed container's inner box isn't centred.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "              maxWidth: boxedWidth,\n              marginLeft: \"auto\",\n              marginRight: \"auto\",\n",
+          "replace": "              maxWidth: boxedWidth,\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a boxed container is a full-width box"
+    },
+    {
+      "id": "W-945/columns-dont-stack",
+      "requirement": "W-945",
+      "description": "Section columns stay side by side on phones.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "          str(s[\"reverse_order_mobile\"]) === \"reverse-mobile\" ? \"column-reverse\" : \"column\",",
+          "replace": "          str(s[\"reverse_order_mobile\"]) === \"reverse-mobile\" ? \"column-reverse\" : \"row\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a section is a band with a row of percentage columns"
+    },
+    {
+      "id": "W-945/tablet-values-dropped",
+      "requirement": "W-945",
+      "description": "Tablet values (`_tablet` keys) are never imported.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/style.ts",
+          "search": "  if (!isEmptyStyle(tablet)) devices.tablet = tablet;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a heading keeps its level, typography and per-device overrides"
+    },
+    {
+      "id": "W-945/mobile-values-dropped",
+      "requirement": "W-945",
+      "description": "Mobile values (`_mobile` keys) are never imported.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/style.ts",
+          "search": "  if (!isEmptyStyle(mobile)) devices.mobile = mobile;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a heading keeps its level, typography and per-device overrides"
+    },
+    {
+      "id": "W-945/defaults-ignored",
+      "requirement": "W-945",
+      "description": "Unstyled widgets never get Elementor's default colours and fonts.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "    this.useDefaults = options.defaults ?? true;",
+          "replace": "    this.useDefaults = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a site kit gives exact global colours and fonts"
+    },
+    {
+      "id": "W-945/kit-ignored",
+      "requirement": "W-945",
+      "description": "A site kit's global colours and fonts are ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "    this.kitGiven = this.readKit(options.kit);",
+          "replace": "    this.kitGiven = this.readKit(undefined);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a site kit gives exact global colours and fonts"
+    },
+    {
+      "id": "W-945/icons-unresolved",
+      "requirement": "W-945",
+      "description": "Elementor icons never get their SVG from EmVB's icon sets.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "      const svg = ctx.icon?.(id);",
+          "replace": "      const svg = ctx.icon ? undefined : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*a button keeps its link, icon, colours, hover and entrance"
+    },
+    {
+      "id": "W-945/br-collapsed",
+      "requirement": "W-945",
+      "description": "A <br> in Elementor text becomes a space instead of a line break.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/html.ts",
+          "search": "      else buffer += \"\\n\";",
+          "replace": "      else buffer += \" \";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*text editor line breaks stay line breaks"
+    },
+    {
+      "id": "W-945/typed-title-replaced",
+      "requirement": "W-945",
+      "description": "The export's title replaces a title the person already typed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/CreateDialog.tsx",
+          "search": "    if (current && current !== previous) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*a title the person typed is kept"
+    },
+    {
+      "id": "W-945/invalid-import-created",
+      "requirement": "W-945",
+      "description": "Creating goes ahead when the pasted text isn't an export.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "    if (!imported?.ok) {",
+          "replace": "    if (!imported) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*input that isn't an export says why and creates nothing"
+    },
+    {
+      "id": "W-945/part-type-ignored",
+      "requirement": "W-945",
+      "description": "A header template is imported as a reusable section instead of a header.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "    if (suggestedPart) setPartType(suggestedPart);",
+          "replace": "    void suggestedPart;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*a header template becomes a header theme part"
     }
   ]
 }
