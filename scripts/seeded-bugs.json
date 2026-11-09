@@ -17786,12 +17786,12 @@
     {
       "id": "W-127/device-switcher-fixed-width",
       "requirement": "W-127",
-      "description": "the device switcher keeps its fixed 240px width, leaving an empty gap right of Mobile",
+      "description": "the device switcher keeps a fixed width wider than its four options (W-956), leaving an empty gap right of Mobile",
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/editor-css.ts",
           "search": ".emvb-device-tabs { width: max-content; }",
-          "replace": ".emvb-device-tabs { width: 240px; }"
+          "replace": ".emvb-device-tabs { width: 420px; }"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/devices.e2e.ts", "--project=node", "-g", "W-127"],
@@ -18115,12 +18115,17 @@
     {
       "id": "W-130/e2e-hidden-tab-panel-shown",
       "requirement": "W-130",
-      "description": "The empty-panel placeholder sets display, so hidden empty tab panels show on the canvas.",
+      "description": "The empty-panel placeholder forces display, so hidden empty tab panels show on the canvas (the seed also drops the !important the Tabs CSS added later, which on its own keeps hidden panels hidden).",
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/canvas/CanvasFrame.tsx",
           "search": "`:is(${DROP_BODIES}){outline:1px dashed #94a3b8;outline-offset:-1px}` +",
-          "replace": "`:is(${DROP_BODIES}){outline:1px dashed #94a3b8;outline-offset:-1px;display:flex}` +"
+          "replace": "`:is(${DROP_BODIES}){outline:1px dashed #94a3b8;outline-offset:-1px;display:flex!important}` +"
+        },
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ":not(:nth-of-type(1)){display:none!important}",
+          "replace": ":not(:nth-of-type(1)){display:none}"
         }
       ],
       "command": [

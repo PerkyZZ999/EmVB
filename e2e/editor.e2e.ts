@@ -142,6 +142,12 @@ test("W-760: a long query with no spaces keeps the palette its width", async ({ 
   const after = (await palette.boundingBox())?.width ?? -2;
   expect(Math.round(after)).toBe(Math.round(before));
   expect(await palette.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+  // The message wraps the query inside the palette (the list would scroll sideways otherwise).
+  expect(
+    await palette
+      .getByText("Nothing matches")
+      .evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+  ).toBe(true);
 });
 
 test("with the Ctrl+K block turned off, the host palette stacks above the editor and takes the click", async ({
