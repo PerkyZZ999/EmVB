@@ -79,6 +79,22 @@ const BoxShadow = z.strictObject({
 });
 
 /** Filter functions, emitted in a fixed order; at least one is set (W-088). */
+/**
+ * W-953: move, scale and rotate, written as CSS's own `translate`, `scale` and `rotate` so an
+ * entrance (which animates `transform`) never cancels it. In a hover state it is a lift.
+ */
+const Transform = z
+  .strictObject({
+    /** Pixels, right and down. */
+    x: z.number().int().min(-2000).max(2000).optional(),
+    y: z.number().int().min(-2000).max(2000).optional(),
+    /** Percent, 100 = unchanged. */
+    scale: z.number().int().min(10).max(400).optional(),
+    /** Degrees, clockwise. */
+    rotate: z.number().int().min(-360).max(360).optional(),
+  })
+  .refine((t) => Object.values(t).some((v) => v !== undefined), "Set at least one transform");
+
 const Filter = z
   .strictObject({
     blur: num(0, 100).optional(),
@@ -372,6 +388,7 @@ export const StyleProps = z.strictObject({
   opacity: z.number().finite().min(0).max(1).optional(),
   boxShadow: BoxShadow.optional(),
   filter: Filter.optional(),
+  transform: Transform.optional(),
   /** W-957: the same filters applied to what is behind the element (frosted glass). */
   backdropFilter: Filter.optional(),
   cursor: z.enum(CURSORS).optional(),

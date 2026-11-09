@@ -121,6 +121,94 @@ const FILTER_ROWS: ReadonlyArray<[key: keyof Filter, label: string, NumberSpec]>
   ["hueRotate", "Hue rotation", { min: 0, max: 360, example: "90", suffix: "°", placeholder: "0" }],
 ];
 
+type Transform = NonNullable<FlatStyleProps["transform"]>;
+
+/** One full turn, in degrees. */
+const TURN = 360;
+
+const TRANSFORM_ROWS: ReadonlyArray<[key: keyof Transform, label: string, NumberSpec]> = [
+  [
+    "x",
+    "Move X",
+    { min: -2000, max: 2000, integer: true, example: "8", suffix: "px", placeholder: "0" },
+  ],
+  [
+    "y",
+    "Move Y",
+    { min: -2000, max: 2000, integer: true, example: "-4", suffix: "px", placeholder: "0" },
+  ],
+  [
+    "scale",
+    "Scale",
+    { min: 10, max: 400, integer: true, example: "105", suffix: "%", placeholder: "100" },
+  ],
+  [
+    "rotate",
+    "Rotate",
+    { min: -360, max: TURN, integer: true, example: "15", suffix: "°", placeholder: "0" },
+  ],
+];
+
+/**
+ * W-953: move, scale and rotate, one number row each; clearing the last row unsets Transform.
+ * In the Hover state it lifts or nudges the element (with a Transform transition to animate it).
+ */
+export function TransformControl({
+  value,
+  inherited,
+  onChange,
+}: {
+  value: Transform | undefined;
+  inherited?: Transform;
+  onChange: (next: Transform | undefined) => void;
+}) {
+  const patch = (key: keyof Transform, n: number | undefined) => {
+    const next: Record<string, number> = {};
+    for (const [k, v] of Object.entries({ ...value, [key]: n })) {
+      if (typeof v === "number") next[k] = v;
+    }
+    onChange(Object.keys(next).length > 0 ? (next as Transform) : undefined);
+  };
+  const [open, setOpen] = React.useState(value !== undefined || inherited !== undefined);
+  const rows = React.useRef<HTMLDivElement>(null);
+  return (
+    <div
+      className="emvb-filters"
+      data-emvb-style="transform"
+      data-set={value ? "true" : undefined}
+      ref={rows}
+    >
+      <p className="emvb-sub-label">Transform</p>
+      {value || inherited || open ? (
+        TRANSFORM_ROWS.map(([key, label, spec]) => (
+          <NumberRow
+            key={key}
+            rowKey={`transform.${key}`}
+            label={label}
+            value={value?.[key]}
+            spec={spec}
+            inherited={inherited?.[key]}
+            onCommit={(n) => patch(key, n)}
+          />
+        ))
+      ) : (
+        <Button
+          type="button"
+          variant="secondary"
+          className={`${BUTTON} emvb-add-transform`}
+          icon={<PlusIcon aria-hidden="true" />}
+          onClick={() => {
+            setOpen(true);
+            requestAnimationFrame(() => rows.current?.querySelector<HTMLElement>("input")?.focus());
+          }}
+        >
+          Add transform
+        </Button>
+      )}
+    </div>
+  );
+}
+
 /** The filter functions, one number row each; clearing the last one unsets Filters. */
 export function FiltersControl({
   value,
@@ -200,6 +288,8 @@ const APPLIES_TO: ReadonlyArray<{ value: Transition["property"]; label: string }
   { value: "opacity", label: "Opacity" },
   { value: "shadow", label: "Shadow" },
   { value: "filter", label: "Filters" },
+  // W-953: move, scale and rotate (use it with a hover transform for a lift).
+  { value: "transform", label: "Transform" },
 ];
 
 export function TransitionSelect<T extends string>({

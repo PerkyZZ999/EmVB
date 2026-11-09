@@ -296,6 +296,55 @@ describe("Elementor CSS text (W-945)", () => {
     expect(unmapped).toEqual([]);
   });
 
+  test("W-953: an Elementor 4 hover move becomes a hover lift", () => {
+    const move = (y: number) => ({
+      $$type: "transform",
+      value: {
+        "transform-functions": {
+          $$type: "transform-functions",
+          value: [
+            {
+              $$type: "transform-move",
+              value: {
+                x: { $$type: "size", value: { size: 0, unit: "px" } },
+                y: { $$type: "size", value: { size: y, unit: "px" } },
+                z: { $$type: "size", value: { size: 0, unit: "px" } },
+              },
+            },
+            {
+              $$type: "transform-rotate",
+              value: { z: { $$type: "size", value: { size: 0.5, unit: "turn" } } },
+            },
+          ],
+        },
+      },
+    });
+    const imported = importElementor({
+      content: [
+        {
+          id: "card",
+          elType: "e-div-block",
+          settings: { classes: { $$type: "classes", value: ["g-card"] } },
+          elements: [],
+        },
+      ],
+      global_classes: {
+        items: {
+          "g-card": {
+            id: "g-card",
+            variants: [
+              { meta: { breakpoint: "desktop", state: "hover" }, props: { transform: move(-4) } },
+            ],
+          },
+        },
+        order: ["g-card"],
+      },
+    });
+    if (!imported.ok) throw new Error(imported.error);
+    const [card] = (imported.layout.root as Node).children ?? [];
+    expect(card?.states).toEqual({ hover: { transform: { y: -4, rotate: 180 } } });
+  });
+
   test("W-957: an Elementor 4 backdrop blur becomes a backdrop filter", () => {
     const blur = {
       $$type: "backdrop-filter",

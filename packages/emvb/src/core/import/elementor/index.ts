@@ -295,15 +295,20 @@ class Walker {
     ) {
       ctx.note("approximated", name, "Hover animations aren't imported.");
     }
-    if (
-      s["motion_fx_motion_fx_scrolling"] === "yes" ||
-      s["motion_fx_motion_fx_mouse"] === "yes" ||
-      s["_transform_rotateZ_effect"]
-    ) {
+    // W-953: Elementor 3 transforms (`_transform_*_effect`, and `_hover` for the hover state).
+    const transform = v3Transform(s, "");
+    const hoverTransform = v3Transform(s, "_hover");
+    if (transform) target["style"] = { ...(target["style"] as Style | undefined), transform };
+    if (hoverTransform) {
+      const states = { ...(target["states"] as Record<string, Style> | undefined) };
+      states["hover"] = { ...states["hover"], transform: hoverTransform };
+      target["states"] = states;
+    }
+    if (s["motion_fx_motion_fx_scrolling"] === "yes" || s["motion_fx_motion_fx_mouse"] === "yes") {
       ctx.note(
         "approximated",
         name,
-        "Motion effects and transforms weren't imported; add scroll motion in the editor.",
+        "Scrolling and mouse motion effects weren't imported; add scroll motion in the editor.",
       );
     }
     if (s["sticky"] && s["sticky"] !== "")
@@ -578,6 +583,26 @@ const gridProps = (cols: Record<string, number> | undefined): Record<string, unk
   ...(cols?.["t"] ? { columnsTablet: cols["t"] } : {}),
   ...(cols?.["m"] ? { columnsMobile: cols["m"] } : { columnsMobile: 1 }),
 });
+
+/** Elementor 3 transform settings (`_transform_translateX_effect` …) for a state suffix. */
+function v3Transform(s: Settings, state: "" | "_hover"): Record<string, number> | undefined {
+  const sizeOf = (key: string) => {
+    const value = s[`_transform_${key}_effect${state}`];
+    return num(isRecord(value) ? value["size"] : value);
+  };
+  const out: Record<string, number> = {};
+  const x = sizeOf("translateX");
+  const y = sizeOf("translateY");
+  const scale = sizeOf("scale");
+  const rotate = sizeOf("rotateZ");
+  if (x !== undefined && x !== 0) out["x"] = Math.round(Math.min(2000, Math.max(-2000, x)));
+  if (y !== undefined && y !== 0) out["y"] = Math.round(Math.min(2000, Math.max(-2000, y)));
+  if (scale !== undefined && scale !== 1)
+    out["scale"] = Math.round(Math.min(4, Math.max(0.1, scale)) * 100);
+  if (rotate !== undefined && rotate !== 0)
+    out["rotate"] = Math.round(Math.min(360, Math.max(-360, rotate)));
+  return Object.keys(out).length > 0 ? out : undefined;
+}
 
 function verticalOf(style: Style, grid: boolean): string {
   if (grid) return "flex-start";

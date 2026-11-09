@@ -662,6 +662,27 @@ describe("Elementor import: hostile and oversized input (W-945)", () => {
     });
   });
 
+  test("W-953: Elementor 3 transforms and hover transforms carry over", () => {
+    const result = ok(
+      importElementor([
+        {
+          id: "w",
+          elType: "widget",
+          widgetType: "heading",
+          settings: {
+            title: "Lift me",
+            _transform_rotateZ_effect: { unit: "px", size: 5 },
+            _transform_translateY_effect_hover: { unit: "px", size: -6 },
+            _transform_scale_effect_hover: { size: 1.05 },
+          },
+        },
+      ]),
+    );
+    const heading = ofType(result.layout, "heading")[0];
+    expect(heading?.style?.["transform"]).toEqual({ rotate: 5 });
+    expect(heading?.states).toEqual({ hover: { transform: { y: -6, scale: 105 } } });
+  });
+
   test("long text is split, never cut", () => {
     const long = `${"word ".repeat(1000)}end`;
     const result = ok(

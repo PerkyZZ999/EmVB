@@ -43528,6 +43528,94 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
       "expect": "\\(fail\\).*W-949: an Elementor 3 gradient overlay"
+    },
+    {
+      "id": "W-953/transform-not-written",
+      "requirement": "W-953",
+      "description": "A transform writes no CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "      if (found) declarations.push(...found);",
+          "replace": "      if (!found) rejected.push(key);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/transform.test.ts"],
+      "expect": "\\(fail\\).*move, scale and rotate are CSS's own properties"
+    },
+    {
+      "id": "W-953/transform-unchecked",
+      "requirement": "W-953",
+      "description": "Out-of-range or non-integer moves reach the stylesheet.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    if ((x !== undefined && !int(x, -2000, 2000)) || (y !== undefined && !int(y, -2000, 2000)))",
+          "replace": "    if (x === Symbol.for(\"never\"))"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/transform.test.ts"],
+      "expect": "\\(fail\\).*refuses"
+    },
+    {
+      "id": "W-953/transform-transition-missing",
+      "requirement": "W-953",
+      "description": "A Transform transition animates nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  transform: [\"translate\", \"scale\", \"rotate\"],",
+          "replace": "  transform: [],"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/transform.test.ts"],
+      "expect": "\\(fail\\).*a hover transform is a lift"
+    },
+    {
+      "id": "W-953/transform-not-offered",
+      "requirement": "W-953",
+      "description": "Effects has no Transform row.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "    \"transform\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Effects holds opacity"
+    },
+    {
+      "id": "W-953/import-hover-lift-dropped",
+      "requirement": "W-953",
+      "description": "An Elementor 4 hover move is left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "        if (Object.keys(out3).length > 0) style[\"transform\"] = out3;",
+          "replace": "        void out3;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*W-953: an Elementor 4 hover move"
+    },
+    {
+      "id": "W-953/v3-hover-transform-dropped",
+      "requirement": "W-953",
+      "description": "Elementor 3 hover transforms are left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "    const hoverTransform = v3Transform(s, \"_hover\");",
+          "replace": "    const hoverTransform = undefined as Record<string, number> | undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*W-953: Elementor 3 transforms"
     }
   ]
 }

@@ -370,6 +370,7 @@ describe("Effects section (W-088)", () => {
       "boxShadow",
       "filter",
       "backdropFilter",
+      "transform",
       "cursor",
       "entrance",
       "scrollMotion",
@@ -468,6 +469,26 @@ describe("Effects section (W-088)", () => {
     expect(patches).toEqual([{ boxShadow: undefined }]);
   });
 
+  test("W-953: Transform starts as a button, then move, scale and rotate rows", async () => {
+    await row("transform");
+    expect(document.querySelectorAll("input[data-emvb-number]").length).toBe(0);
+    await act(async () =>
+      document.querySelector<HTMLButtonElement>(".emvb-add-transform")?.click(),
+    );
+    expect(
+      [...document.querySelectorAll("input[data-emvb-number]")].map((el) =>
+        el.getAttribute("data-emvb-number"),
+      ),
+    ).toEqual(["transform.x", "transform.y", "transform.scale", "transform.rotate"]);
+    await commitText(numberInput("transform.scale"), "500");
+    expect(document.body.textContent).toContain("Scale can be from 10 to 400.");
+    await commitText(numberInput("transform.y"), "-4");
+    expect(patches).toEqual([{ transform: { y: -4 } }]);
+    await row("transform", { transform: { y: -4 } });
+    await commitText(numberInput("transform.y"), "");
+    expect(patches.at(-1)).toEqual({ transform: undefined });
+  });
+
   test("each filter is its own row; clearing the last one unsets Filters", async () => {
     await row("filter");
     // UX-076: unset Filters start as one button, like Add shadow.
@@ -564,6 +585,7 @@ describe("Transition (W-089)", () => {
       "Opacity",
       "Shadow",
       "Filters",
+      "Transform",
     ]);
     expect(patches).toEqual([{ transition: { ...set, delay: 40, property: "colors" } }]);
   });

@@ -164,7 +164,7 @@ the same keys except `motion`:
 - **Border:** borderWidth, borderTopWidth, borderRightWidth, borderBottomWidth, borderLeftWidth,
   borderStyle, borderColor, borderRadius, borderTopLeftRadius, borderTopRightRadius,
   borderBottomRightRadius, borderBottomLeftRadius.
-- **Effects:** opacity, boxShadow, filter, backdropFilter, cursor.
+- **Effects:** opacity, boxShadow, filter, backdropFilter, transform, cursor.
 - **Icon:** iconRotate, iconFlip, iconScale, iconStrokeWidth, iconShadow.
 - **Motion:** `motion`.
 

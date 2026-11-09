@@ -323,6 +323,7 @@ const TRANSITION_PROPERTIES: Readonly<Record<string, readonly string[]>> = {
   opacity: ["opacity"],
   shadow: ["box-shadow"],
   filter: ["filter"],
+  transform: ["translate", "scale", "rotate"],
 };
 const TRANSITION_KEYS = new Set(["duration", "delay", "easing", "property"]);
 
@@ -686,6 +687,8 @@ const PROPERTY_MAP: {
   boxShadow: { css: "box-shadow", toValue: cssBoxShadow },
   filter: { css: "filter", toValue: cssFilter },
   backdropFilter: { css: "backdrop-filter", toValue: cssFilter },
+  // Written by `transformDeclarations` (three properties); never a declaration of its own.
+  transform: { css: "translate", toValue: () => undefined },
   cursor: { css: "cursor", toValue: keyword(CURSOR) },
   transition: { css: "transition", toValue: cssTransition },
   entrance: { css: "animation", toValue: cssEntrance },
@@ -717,6 +720,36 @@ const shorthandsFirst = (record: Record<string, unknown>): [string, unknown][] =
 };
 
 /** Converts style props into safe declarations; anything that fails validation is dropped and reported. */
+const TRANSFORM_KEYS = new Set(["x", "y", "scale", "rotate"]);
+const int = (v: unknown, min: number, max: number) =>
+  typeof v === "number" && Number.isInteger(v) && v >= min && v <= max;
+
+/** W-953: `{ x?, y?, scale?, rotate? }` → `translate`, `scale`, `rotate` (only those set). */
+function transformDeclarations(value: unknown): Declaration[] | undefined {
+  if (!isRecord(value) || Object.keys(value).some((key) => !TRANSFORM_KEYS.has(key)))
+    return undefined;
+  const { x, y, scale, rotate } = value;
+  if ([x, y, scale, rotate].every((v) => v === undefined)) return undefined;
+  const out: Declaration[] = [];
+  if (x !== undefined || y !== undefined) {
+    if ((x !== undefined && !int(x, -2000, 2000)) || (y !== undefined && !int(y, -2000, 2000)))
+      return undefined;
+    out.push({
+      property: "translate",
+      value: `${(x as number | undefined) ?? 0}px ${(y as number | undefined) ?? 0}px`,
+    });
+  }
+  if (scale !== undefined) {
+    if (!int(scale, 10, 400)) return undefined;
+    out.push({ property: "scale", value: String((scale as number) / 100) });
+  }
+  if (rotate !== undefined) {
+    if (!int(rotate, -360, 360)) return undefined;
+    out.push({ property: "rotate", value: `${rotate as number}deg` });
+  }
+  return out;
+}
+
 export function styleDeclarations(style: unknown): {
   declarations: Declaration[];
   rejected: string[];
@@ -740,6 +773,12 @@ export function styleDeclarations(style: unknown): {
     if (key === "loopMotion") {
       const found = loopDeclarations(raw);
       if (found && found.every((d) => isSafeCssValue(d.value))) loop = found;
+      else rejected.push(key);
+      continue;
+    }
+    if (key === "transform") {
+      const found = transformDeclarations(raw);
+      if (found) declarations.push(...found);
       else rejected.push(key);
       continue;
     }

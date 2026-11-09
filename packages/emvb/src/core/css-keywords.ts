@@ -73,7 +73,15 @@ export const FONT_WEIGHTS = [
 
 export const TRANSITION_EASINGS = ["ease", "ease-in", "ease-out", "ease-in-out", "linear"] as const;
 
-export const TRANSITION_PROPERTIES = ["all", "colors", "opacity", "shadow", "filter"] as const;
+export const TRANSITION_PROPERTIES = [
+  "all",
+  "colors",
+  "opacity",
+  "shadow",
+  "filter",
+  // W-953: the move, scale and rotate of a transform (a hover lift).
+  "transform",
+] as const;
 
 export const BACKGROUND_SIZES = ["auto", "cover", "contain"] as const;
 

@@ -562,6 +562,46 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
         else out.unsupported.push(`grid-column: ${span ?? "?"}`);
         break;
       }
+      case "transform": {
+        // W-953: move, scale and rotate; skew and 3D parts are left out.
+        const fns = un(isRecord(un(v)) ? (un(v) as Settings)["transform-functions"] : undefined);
+        const out3: Record<string, number> = {};
+        for (const fn of Array.isArray(fns) ? fns : []) {
+          const kind = typeOf(fn);
+          const body = un(fn);
+          if (!isRecord(body)) continue;
+          if (kind === "transform-move") {
+            for (const axis of ["x", "y"] as const) {
+              const sz = size(body[axis], { negative: true });
+              if (sz.len && sz.len !== "auto" && sz.len.unit === "px" && sz.len.value !== 0) {
+                out3[axis] = Math.round(Math.min(2000, Math.max(-2000, sz.len.value)));
+              }
+            }
+          } else if (kind === "transform-scale") {
+            const x = Number(un(body["x"]));
+            if (Number.isFinite(x) && x !== 1)
+              out3["scale"] = Math.round(Math.min(4, Math.max(0.1, x)) * 100);
+          } else if (kind === "transform-rotate") {
+            const z = un(body["z"]);
+            const amount = isRecord(z) ? Number(z["size"]) : Number.NaN;
+            const unit = isRecord(z) ? str(z["unit"]) : undefined;
+            const perUnit: Record<string, number> = {
+              deg: 1,
+              turn: 360,
+              rad: 180 / Math.PI,
+              grad: 0.9,
+            };
+            const deg =
+              Number.isFinite(amount) && unit && perUnit[unit]
+                ? amount * (perUnit[unit] ?? 1)
+                : undefined;
+            if (deg !== undefined && deg !== 0)
+              out3["rotate"] = Math.round(Math.min(360, Math.max(-360, deg)));
+          } else out.unsupported.push(kind ?? "transform");
+        }
+        if (Object.keys(out3).length > 0) style["transform"] = out3;
+        break;
+      }
       case "font-style":
       case "white-space":
       case "overflow-wrap":

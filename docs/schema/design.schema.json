@@ -2818,6 +2818,32 @@
           },
           "additionalProperties": false
         },
+        "transform": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer",
+              "minimum": -2000,
+              "maximum": 2000
+            },
+            "y": {
+              "type": "integer",
+              "minimum": -2000,
+              "maximum": 2000
+            },
+            "scale": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 400
+            },
+            "rotate": {
+              "type": "integer",
+              "minimum": -360,
+              "maximum": 360
+            }
+          },
+          "additionalProperties": false
+        },
         "backdropFilter": {
           "type": "object",
           "properties": {
@@ -3092,7 +3118,8 @@
                     "colors",
                     "opacity",
                     "shadow",
-                    "filter"
+                    "filter",
+                    "transform"
                   ]
                 }
               },
@@ -5728,6 +5755,32 @@
             "hueRotate": {
               "type": "number",
               "minimum": 0,
+              "maximum": 360
+            }
+          },
+          "additionalProperties": false
+        },
+        "transform": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "integer",
+              "minimum": -2000,
+              "maximum": 2000
+            },
+            "y": {
+              "type": "integer",
+              "minimum": -2000,
+              "maximum": 2000
+            },
+            "scale": {
+              "type": "integer",
+              "minimum": 10,
+              "maximum": 400
+            },
+            "rotate": {
+              "type": "integer",
+              "minimum": -360,
               "maximum": 360
             }
           },

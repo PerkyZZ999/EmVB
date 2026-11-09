@@ -13,6 +13,7 @@ import {
   EntranceControl,
   FiltersControl,
   ShadowControl,
+  TransformControl,
   TransitionControl,
 } from "./EffectsControls.tsx";
 import {
@@ -596,6 +597,16 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "transform") {
+    return (
+      <TransformControl
+        value={style?.transform}
+        inherited={inherited?.transform}
+        onChange={(transform) => onPatch({ transform })}
+      />
+    );
+  }
+
   if (styleKey === "backdropFilter") {
     return (
       <FiltersControl
@@ -640,6 +651,7 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "boxShadow",
   "filter",
   "backdropFilter",
+  "transform",
   "entrance",
   "scrollMotion",
   "loopMotion",
