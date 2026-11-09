@@ -8,7 +8,7 @@ const PAGES = "/_emdash/admin/plugins/emvb/pages";
 const MAX_LAYOUT_BYTES = 512 * 1024;
 
 const layoutFor = (text: string) => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",
