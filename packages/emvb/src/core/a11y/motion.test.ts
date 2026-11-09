@@ -77,3 +77,25 @@ test("W-882 a Loop forever from a class is flagged; the element's own None wins"
     .map((i) => i.nodeId);
   expect(flagged).toEqual(["icon0009", "icon0011"]);
 });
+
+test("W-938 an element's loop is flagged when it loops forever or one run passes 5 s", () => {
+  const text = (id: string, motionValue?: object, devices?: object): LayoutNode =>
+    ({
+      id,
+      type: "text",
+      props: { text: "Hi" },
+      ...(motionValue ? { style: { motion: motionValue } } : {}),
+      ...(devices ? { devices } : {}),
+    }) as LayoutNode;
+  const effects = [{ type: "move-y", from: 0, to: -8 }];
+  const layout = page(
+    text("text0001", { loop: { effects, duration: 1600, loop: true } }),
+    text("text0002", { loop: { effects, duration: 1600 } }),
+    text("text0003", { loop: { effects, duration: 6000 } }),
+    text("text0004", undefined, {
+      mobile: { motion: { loop: { effects, duration: 900, loop: true } } },
+    }),
+    text("text0005", { loop: { type: "none" } }),
+  );
+  expect(motion(layout)).toEqual(["text0001", "text0003", "text0004"]);
+});

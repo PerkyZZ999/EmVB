@@ -11,6 +11,8 @@ const MOTION_PARTS = {
   scroll: "scrollMotion",
   transition: "transition",
   icon: "iconAnimation",
+  // W-938: added in 1.0; the flat key exists only inside EmVB (style rows, CSS).
+  loop: "loopMotion",
 } as const;
 export type MotionPart = keyof typeof MOTION_PARTS;
 export type FlatMotionKey = (typeof MOTION_PARTS)[MotionPart];
@@ -20,6 +22,7 @@ const PART_OF: Readonly<Record<string, MotionPart>> = {
   scrollMotion: "scroll",
   transition: "transition",
   iconAnimation: "icon",
+  loopMotion: "loop",
 };
 
 export const FLAT_MOTION_KEYS: readonly FlatMotionKey[] = Object.values(MOTION_PARTS);

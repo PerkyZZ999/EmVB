@@ -120,35 +120,56 @@ const IconAnimation = z.union([
  * scroll), with CSS scroll-driven animations. Browsers without them, and visitors who prefer
  * reduced motion, see the element still. `{ type: "none" }` stops motion a wider device sets.
  */
+/** From/to values per effect, each effect once, within MOTION_LIMITS (W-319; loops W-938). */
+const MotionEffects = z
+  .array(
+    z.strictObject({
+      type: z.enum(MOTION_EFFECTS),
+      from: z.number().min(-1000).max(1000),
+      to: z.number().min(-1000).max(1000),
+    }),
+  )
+  .min(1)
+  .max(MOTION_EFFECTS.length)
+  .superRefine((effects, ctx) => {
+    const seen = new Set<string>();
+    for (const effect of effects) {
+      const [min, max] = MOTION_LIMITS[effect.type];
+      if ([effect.from, effect.to].some((n) => n < min || n > max)) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${effect.type} goes from ${min} to ${max}`,
+        });
+      }
+      if (seen.has(effect.type)) {
+        ctx.addIssue({ code: "custom", message: `${effect.type} is set twice` });
+      }
+      seen.add(effect.type);
+    }
+  });
+
 const ScrollMotion = z.union([
   z.strictObject({
-    effects: z
-      .array(
-        z.strictObject({
-          type: z.enum(MOTION_EFFECTS),
-          from: z.number().min(-1000).max(1000),
-          to: z.number().min(-1000).max(1000),
-        }),
-      )
-      .min(1)
-      .max(MOTION_EFFECTS.length)
-      .superRefine((effects, ctx) => {
-        const seen = new Set<string>();
-        for (const effect of effects) {
-          const [min, max] = MOTION_LIMITS[effect.type];
-          if ([effect.from, effect.to].some((n) => n < min || n > max)) {
-            ctx.addIssue({
-              code: "custom",
-              message: `${effect.type} goes from ${min} to ${max}`,
-            });
-          }
-          if (seen.has(effect.type)) {
-            ctx.addIssue({ code: "custom", message: `${effect.type} is set twice` });
-          }
-          seen.add(effect.type);
-        }
-      }),
+    effects: MotionEffects,
     range: z.enum(["enter", "cross", "exit", "page"]),
+  }),
+  z.strictObject({ type: z.literal("none") }),
+]);
+
+/**
+ * A looping animation (W-938): the effects play from their `from` to their `to` values over
+ * `duration`, and back when `alternate` (the default). Like an Icon's spin (D-057, D-059) it stops
+ * after about 5 seconds unless `loop` is true, and it is off for visitors who prefer reduced
+ * motion. Presets in the editor (float, pulse, wiggle…) are just effect sets. `{ type: "none" }`
+ * stops a loop a wider device sets.
+ */
+const LoopMotion = z.union([
+  z.strictObject({
+    effects: MotionEffects,
+    duration: z.number().int().min(200).max(20_000),
+    easing: z.enum(TRANSITION_EASINGS).optional(),
+    alternate: z.boolean().optional(),
+    loop: z.literal(true).optional(),
   }),
   z.strictObject({ type: z.literal("none") }),
 ]);
@@ -176,6 +197,7 @@ export const Motion = z.strictObject({
   scroll: ScrollMotion.optional(),
   transition: Transition.optional(),
   icon: IconAnimation.optional(),
+  loop: LoopMotion.optional(),
 });
 
 export type Motion = z.infer<typeof Motion>;
@@ -364,6 +386,7 @@ const FlatStyleShape = StyleProps.omit({ motion: true }).extend({
   iconAnimation: IconAnimation.optional(),
   scrollMotion: ScrollMotion.optional(),
   entrance: Entrance.optional(),
+  loopMotion: LoopMotion.optional(),
 });
 const flatShape: Record<string, z.ZodType> = {};
 for (const [key, schema] of Object.entries(StyleProps.omit({ motion: true }).shape)) {
@@ -373,6 +396,8 @@ for (const [key, schema] of Object.entries(StyleProps.omit({ motion: true }).sha
     flatShape["iconAnimation"] = IconAnimation.optional();
     flatShape["scrollMotion"] = ScrollMotion.optional();
     flatShape["entrance"] = Entrance.optional();
+    // W-938: added in 1.0, so after every 0.x key (0.x pages keep their CSS order).
+    flatShape["loopMotion"] = LoopMotion.optional();
   }
 }
 export const FlatStyleProps = z.strictObject(flatShape) as unknown as typeof FlatStyleShape;

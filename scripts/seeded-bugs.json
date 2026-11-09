@@ -8981,8 +8981,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "  effects: [\"opacity\", \"boxShadow\", \"filter\", \"cursor\", \"entrance\", \"scrollMotion\", \"transition\"],",
-          "replace": "  effects: [\"opacity\", \"boxShadow\", \"filter\", \"cursor\", \"entrance\", \"scrollMotion\"],"
+          "search": "    \"loopMotion\",\n    \"transition\",\n  ],",
+          "replace": "    \"loopMotion\",\n  ],"
         }
       ],
       "command": [
@@ -26611,8 +26611,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/motion.ts",
-          "search": "(prefers-reduced-motion: no-preference)",
-          "replace": "(min-width: 0)"
+          "search": "export const MOTION_KEYFRAMES = `@media (prefers-reduced-motion: no-preference){",
+          "replace": "export const MOTION_KEYFRAMES = `@media (min-width: 0){"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
@@ -26653,8 +26653,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"scrollMotion\"] as const;",
-          "replace": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\"] as const;"
+          "search": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"scrollMotion\", \"loopMotion\"] as const;",
+          "replace": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"loopMotion\"] as const;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
@@ -26667,8 +26667,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "          if (seen.has(effect.type)) {",
-          "replace": "          if (seen.has(effect.type) && false) {"
+          "search": "      if (seen.has(effect.type)) {",
+          "replace": "      if (seen.has(effect.type) && false) {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
@@ -39768,8 +39768,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "    loop: z.literal(true).optional(),\n",
-          "replace": ""
+          "search": "    duration: z.number().int().min(200).max(10_000),\n    loop: z.literal(true).optional(),\n",
+          "replace": "    duration: z.number().int().min(200).max(10_000),\n"
         }
       ]
     },
@@ -42816,6 +42816,122 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/render/language-switcher.test.ts"],
       "expect": "\\(fail\\).*an unsafe link from the host is dropped"
+    },
+    {
+      "id": "W-938/loops-never-stop",
+      "requirement": "W-938",
+      "description": "A loop that isn't set to Loop forever keeps moving forever.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/motion.ts",
+          "search": "const runs = loop ? \"infinite\" : String(Math.max(1, Math.floor(LOOP_STOP_MS / ms)));",
+          "replace": "const runs = \"infinite\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/loop-motion.test.ts"],
+      "expect": "\\(fail\\).*back and forth for about 5 seconds"
+    },
+    {
+      "id": "W-938/reduced-motion-loops",
+      "requirement": "W-938",
+      "description": "Loops keep playing for visitors who ask for reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/motion.ts",
+          "search": "export const LOOP_KEYFRAMES = `@media (prefers-reduced-motion: no-preference){${Object.entries(",
+          "replace": "export const LOOP_KEYFRAMES = `@media all{${Object.entries("
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/loop-motion.test.ts"],
+      "expect": "\\(fail\\).*only for visitors who don't ask for reduced motion"
+    },
+    {
+      "id": "W-938/duration-unbounded",
+      "requirement": "W-938",
+      "description": "A loop of any duration is accepted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/motion.ts",
+          "search": "if (!Number.isInteger(duration) || (duration as number) < 200 || (duration as number) > 20_000)",
+          "replace": "if (typeof duration !== \"number\")"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/loop-motion.test.ts"],
+      "expect": "\\(fail\\).*bounded: durations"
+    },
+    {
+      "id": "W-938/easing-unchecked",
+      "requirement": "W-938",
+      "description": "Any text is accepted as a loop's easing, reaching the page's CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/motion.ts",
+          "search": "if (easing !== undefined && (typeof easing !== \"string\" || !LOOP_EASINGS.has(easing)))",
+          "replace": "if (easing !== undefined && typeof easing !== \"string\")"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/loop-motion.test.ts"],
+      "expect": "\\(fail\\).*bounded: durations"
+    },
+    {
+      "id": "W-938/hover-loops",
+      "requirement": "W-938",
+      "description": "A hover state can loop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"scrollMotion\", \"loopMotion\"] as const;",
+          "replace": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"scrollMotion\"] as const;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/loop-motion.test.ts"],
+      "expect": "\\(fail\\).*a hover state can't loop"
+    },
+    {
+      "id": "W-938/keyframes-missing",
+      "requirement": "W-938",
+      "description": "A page with a loop never gets its keyframes, so nothing moves.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    entrances.length > 0 && loops ? LOOP_KEYFRAMES : \"\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/loop-motion.test.ts"],
+      "expect": "\\(fail\\).*the page sends the loop keyframes"
+    },
+    {
+      "id": "W-938/endless-loop-unflagged",
+      "requirement": "W-938",
+      "description": "The accessibility check doesn't flag a loop that never stops.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "        if (loop.loop === true) return true;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/motion.test.ts"],
+      "expect": "\\(fail\\).*an element's loop is flagged"
+    },
+    {
+      "id": "W-939/forever-not-saved",
+      "requirement": "W-939",
+      "description": "Turning on Loop forever in the panel doesn't store it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LoopControl.tsx",
+          "search": "                onChange(loop ? { ...rest, loop: true } : rest);",
+          "replace": "                onChange(rest);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/loop-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Add loop starts at Float"
     }
   ]
 }

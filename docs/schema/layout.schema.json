@@ -2641,6 +2641,92 @@
                   "additionalProperties": false
                 }
               ]
+            },
+            "loop": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "effects": {
+                      "minItems": 1,
+                      "maxItems": 6,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "enum": [
+                              "fade",
+                              "move-x",
+                              "move-y",
+                              "scale",
+                              "rotate",
+                              "blur"
+                            ]
+                          },
+                          "from": {
+                            "type": "number",
+                            "minimum": -1000,
+                            "maximum": 1000
+                          },
+                          "to": {
+                            "type": "number",
+                            "minimum": -1000,
+                            "maximum": 1000
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "from",
+                          "to"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "duration": {
+                      "type": "integer",
+                      "minimum": 200,
+                      "maximum": 20000
+                    },
+                    "easing": {
+                      "type": "string",
+                      "enum": [
+                        "ease",
+                        "ease-in",
+                        "ease-out",
+                        "ease-in-out",
+                        "linear"
+                      ]
+                    },
+                    "alternate": {
+                      "type": "boolean"
+                    },
+                    "loop": {
+                      "type": "boolean",
+                      "const": true
+                    }
+                  },
+                  "required": [
+                    "effects",
+                    "duration"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "none"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             }
           },
           "additionalProperties": false

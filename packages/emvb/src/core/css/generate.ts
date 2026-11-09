@@ -19,7 +19,7 @@ import {
 } from "../sanitize/css.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
 import { DEVICE_MEDIA, type PopupDevice } from "../theme/popup-rules.ts";
-import { MOTION_KEYFRAMES } from "../sanitize/motion.ts";
+import { LOOP_KEYFRAMES, MOTION_KEYFRAMES } from "../sanitize/motion.ts";
 
 export type CssInput = {
   design: DesignSystem;
@@ -124,6 +124,10 @@ function declare<T extends { id: string }>(
 const usesMotion = (declarations: readonly Declaration[]) =>
   declarations.some((d) => d.property === "animation" && /\bemvb-m[otsrb]\b/.test(d.value));
 
+/** W-938: declarations that play a loop. */
+const usesLoop = (declarations: readonly Declaration[]) =>
+  declarations.some((d) => d.property === "animation" && /\bemvb-l[otsrb]\b/.test(d.value));
+
 /**
  * Cascade order (R-021 / W-030 / W-089): variables on `.emvb-root`, base CSS, shared
  * `.emvb-k-<id>` class rules, then local `.emvb-e-<id>` (local wins). Each selector's `:hover`,
@@ -151,6 +155,8 @@ export function generateCss({
   const entrances: string[] = [];
   /** W-319: any scroll motion on the page, so its keyframes are sent. */
   let motion = false;
+  /** W-938: any loop on the page, so its keyframes are sent. */
+  let loops = false;
   const rules = (selector: string, declarations: Declaration[], states: StateDeclarations) => [
     block(selector, declarations),
     ...STYLE_STATES.map((state) =>
@@ -166,6 +172,7 @@ export function generateCss({
     if (declarations.some((d) => d.property === "transition")) animated.push(selector);
     if (declarations.some((d) => d.property === "animation")) entrances.push(selector);
     if (usesMotion(declarations)) motion = true;
+    if (usesLoop(declarations)) loops = true;
     return declarations;
   };
   const classes = (design.classes ?? []).flatMap((cls) => {
@@ -238,6 +245,7 @@ export function generateCss({
   };
   for (const rule of responsive) {
     if (usesMotion(rule.tablet) || usesMotion(rule.mobile)) motion = true;
+    if (usesLoop(rule.tablet) || usesLoop(rule.mobile)) loops = true;
     if (
       !entrances.includes(rule.selector) &&
       [...rule.tablet, ...rule.mobile].some((d) => d.property === "animation")
@@ -252,6 +260,7 @@ export function generateCss({
     const query = rule.query ?? [];
     const selector = `.emvb-e-${rule.id}`;
     if (usesMotion(query)) motion = true;
+    if (usesLoop(query)) loops = true;
     if (!entrances.includes(selector) && query.some((d) => d.property === "animation")) {
       entrances.push(selector);
     }
@@ -264,6 +273,7 @@ export function generateCss({
       ? "@keyframes emvb-fade{from{opacity:0}to{opacity:1}}@keyframes emvb-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes emvb-fade-down{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}@keyframes emvb-slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}@keyframes emvb-slide-down{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}@keyframes emvb-scale{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:none}}"
       : "",
     entrances.length > 0 && motion ? MOTION_KEYFRAMES : "",
+    entrances.length > 0 && loops ? LOOP_KEYFRAMES : "",
     block(".emvb-root", variables),
     defaultsCss,
     backgroundVideo

@@ -78,6 +78,12 @@ accepted on input (validation and the MCP tools) and are upgraded when the docum
 allowed in `style`, `devices.*`, `query.style` and a class's style, but not in `states`. The renderer
 flattens it back in the 0.x key order, so the CSS is byte-identical.
 
+Added in 1.0 (W-938, additive): `motion.loop` is `{ effects, duration, easing?, alternate?, loop? }`
+or `{ type: "none" }`. `effects` are the scroll-motion effects (`fade`, `move-x`, `move-y`,
+`scale`, `rotate`, `blur`, each once, same limits); `duration` 200–20000 ms; `easing` one of the
+transition easings; `alternate` (default true) plays back and forth; it stops after about 5 s
+unless `loop: true`. Normal-only, off for reduced motion. It has no 0.x key.
+
 The design moves to 17 only for the motion folding in class styles, their devices, and tag defaults.
 
 On input, a v18 document with a 0.x flat motion key (such as `style.entrance`) keeps the key as an

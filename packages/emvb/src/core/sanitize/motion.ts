@@ -127,3 +127,119 @@ export function withMotion(declarations: Declaration[], motion: Declaration[]): 
     ...vars,
   ];
 }
+
+/** W-938: time-based loop keyframes, one per CSS property, read from `--emvb-l*` values. */
+const LOOP_KEYFRAMES_BY_NAME: Record<string, string> = {
+  lo: "opacity",
+  lt: "translate",
+  ls: "scale",
+  lr: "rotate",
+  lb: "filter",
+};
+
+/**
+ * The loop keyframes (W-938). Only for visitors who haven't asked for reduced motion; anywhere
+ * else `emvb-l*` names nothing and the element stays still.
+ */
+export const LOOP_KEYFRAMES = `@media (prefers-reduced-motion: no-preference){${Object.entries(
+  LOOP_KEYFRAMES_BY_NAME,
+)
+  .map(
+    ([name, prop]) =>
+      `@keyframes emvb-${name}{from{${prop}:var(--emvb-${name}0)}to{${prop}:var(--emvb-${name}1)}}`,
+  )
+  .join("")}}`;
+
+const LOOP_EASINGS = new Set(["ease", "ease-in", "ease-out", "ease-in-out", "linear"]);
+/** About 5 seconds of motion unless it loops forever (as an Icon's spin, D-057/D-059). */
+const LOOP_STOP_MS = 5000;
+
+/**
+ * Declarations for a `loopMotion` value (W-938): `animation` (one per animated property, a time
+ * timeline), and the `--emvb-l*` values. Undefined for a bad value; `{ type: "none" }` is
+ * `animation: none`. Bounded: 200 ms to 20 s, the effects' own limits, at most 5 s unless `loop`.
+ */
+export function loopDeclarations(value: unknown): Declaration[] | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const record = value as Record<string, unknown>;
+  if (record["type"] === "none" && Object.keys(record).length === 1) {
+    return [{ property: "animation", value: "none" }];
+  }
+  const allowed = new Set(["effects", "duration", "easing", "alternate", "loop"]);
+  if (Object.keys(record).some((key) => !allowed.has(key))) return undefined;
+  const { effects, duration, easing, alternate, loop } = record;
+  if (!Number.isInteger(duration) || (duration as number) < 200 || (duration as number) > 20_000)
+    return undefined;
+  if (easing !== undefined && (typeof easing !== "string" || !LOOP_EASINGS.has(easing)))
+    return undefined;
+  if (alternate !== undefined && typeof alternate !== "boolean") return undefined;
+  if (loop !== undefined && loop !== true) return undefined;
+  if (!Array.isArray(effects) || effects.length === 0 || effects.length > MOTION_EFFECTS.length) {
+    return undefined;
+  }
+  if (!effects.every(isEffect)) return undefined;
+  const by = new Map(effects.map((e) => [e.type, e]));
+  if (by.size !== effects.length) return undefined;
+  const frames: [string, string, string][] = [];
+  const fade = by.get("fade");
+  if (fade) frames.push(["lo", num(fade.from / 100), num(fade.to / 100)]);
+  const x = by.get("move-x");
+  const y = by.get("move-y");
+  if (x || y) {
+    frames.push([
+      "lt",
+      `${num(x?.from ?? 0)}px ${num(y?.from ?? 0)}px`,
+      `${num(x?.to ?? 0)}px ${num(y?.to ?? 0)}px`,
+    ]);
+  }
+  const scale = by.get("scale");
+  if (scale) frames.push(["ls", num(scale.from / 100), num(scale.to / 100)]);
+  const rotate = by.get("rotate");
+  if (rotate) frames.push(["lr", `${num(rotate.from)}deg`, `${num(rotate.to)}deg`]);
+  const blur = by.get("blur");
+  if (blur) frames.push(["lb", `blur(${num(blur.from)}px)`, `blur(${num(blur.to)}px)`]);
+  const ms = duration as number;
+  const runs = loop ? "infinite" : String(Math.max(1, Math.floor(LOOP_STOP_MS / ms)));
+  const direction = alternate === false ? "normal" : "alternate";
+  const timing = `${ms}ms ${(easing as string | undefined) ?? "ease-in-out"} ${runs} ${direction}`;
+  return [
+    { property: "animation", value: frames.map(([n]) => `emvb-${n} ${timing}`).join(", ") },
+    { property: "animation-timeline", value: frames.map(() => "auto").join(", ") },
+    { property: "animation-range", value: frames.map(() => "normal").join(", ") },
+    ...frames.flatMap(([n, from, to]) => [
+      { property: `--emvb-${n}0`, value: from },
+      { property: `--emvb-${n}1`, value: to },
+    ]),
+  ];
+}
+
+/**
+ * W-938: adds a loop to declarations that may already animate (an entrance, scroll motion). The
+ * lists are joined, the loop last, with timelines and ranges kept per animation; a loop `none`
+ * leaves the others alone.
+ */
+export function withLoop(declarations: Declaration[], loop: Declaration[]): Declaration[] {
+  const [animation, timeline, range, ...vars] = loop;
+  if (!animation) return declarations;
+  const current = declarations.find((d) => d.property === "animation");
+  if (!current) return [...declarations, ...loop];
+  if (animation.value === "none" || !timeline || !range) return declarations;
+  const count = current.value.split(",").length;
+  const currentTimeline = declarations.find((d) => d.property === "animation-timeline");
+  const currentRange = declarations.find((d) => d.property === "animation-range");
+  const rest = declarations.filter(
+    (d) => d !== current && d !== currentTimeline && d !== currentRange,
+  );
+  const fill = (found: Declaration | undefined, value: string) =>
+    found?.value ?? Array.from({ length: count }, () => value).join(", ");
+  return [
+    ...rest,
+    { property: "animation", value: `${current.value}, ${animation.value}` },
+    {
+      property: "animation-timeline",
+      value: `${fill(currentTimeline, "auto")}, ${timeline.value}`,
+    },
+    { property: "animation-range", value: `${fill(currentRange, "normal")}, ${range.value}` },
+    ...vars,
+  ];
+}

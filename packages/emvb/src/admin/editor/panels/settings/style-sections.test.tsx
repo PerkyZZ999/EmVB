@@ -370,6 +370,7 @@ describe("Effects section (W-088)", () => {
       "cursor",
       "entrance",
       "scrollMotion",
+      "loopMotion",
       "transition",
     ]);
     expect(STYLE_UI.spacer?.sections).not.toContain("effects");

@@ -360,6 +360,26 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
           "This icon animates for more than 5 seconds and visitors can't pause it. Shorten the duration, or keep it only if the motion is essential.",
       });
     }
+    // W-938: an element's loop is held to the same rule: it stops after about 5 s unless it loops
+    // forever, so only Loop forever or a single run longer than 5 s is flagged.
+    const loopsTooLong = [effectiveStyle(node, design), ...deviceStyles(node, design)].some(
+      (st) => {
+        const loop = (st as { loopMotion?: { duration?: unknown; loop?: unknown } } | undefined)
+          ?.loopMotion;
+        if (!loop || !("duration" in loop)) return false;
+        if (loop.loop === true) return true;
+        return typeof loop.duration === "number" && loop.duration > ICON_ANIMATION_LIMIT_MS;
+      },
+    );
+    if (loopsTooLong) {
+      add({
+        nodeId: node.id,
+        rule: "motion",
+        severity: "warning",
+        message:
+          "This element's loop keeps moving for more than 5 seconds and visitors can't pause it. Turn off Loop forever, or keep it only if the motion is essential.",
+      });
+    }
     // W-403: with extra sizes but no Width, the main image is left out of srcset, so wide screens
     // can only get the listed copies.
     if (node.type === "image" && Array.isArray(props["sources"]) && props["sources"].length > 0) {

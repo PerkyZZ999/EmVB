@@ -22,7 +22,7 @@ import {
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
 import type { FlatStyleProps } from "../schema/style.ts";
 import { sanitizeMediaUrl } from "./media-url.ts";
-import { motionDeclarations, withMotion } from "./motion.ts";
+import { loopDeclarations, motionDeclarations, withLoop, withMotion } from "./motion.ts";
 import { isRecord } from "../record.ts";
 import { iconAnimationRuns } from "../icons/animation-runs.ts";
 
@@ -665,6 +665,8 @@ const PROPERTY_MAP: {
   entrance: { css: "animation", toValue: cssEntrance },
   // W-319: written by `motionDeclarations` in `styleDeclarations`; this entry only names it.
   scrollMotion: { css: "animation", toValue: () => undefined },
+  // W-938: written by `loopDeclarations` in `styleDeclarations`; this entry only names it.
+  loopMotion: { css: "animation", toValue: () => undefined },
   iconRotate: { css: "--emvb-icon-rotate", toValue: cssIconRotate },
   iconFlip: { css: "--emvb-icon-flip", toValue: cssIconFlip },
   iconScale: { css: "scale", toValue: cssIconScale },
@@ -698,6 +700,7 @@ export function styleDeclarations(style: unknown): {
   if (typeof style !== "object" || style === null) return { declarations, rejected };
   const record = style as Record<string, unknown>;
   let motion: Declaration[] = [];
+  let loop: Declaration[] = [];
   for (const [key, raw] of shorthandsFirst(record)) {
     if (BACKGROUND_KEYS.has(key)) continue;
     if (
@@ -706,6 +709,12 @@ export function styleDeclarations(style: unknown): {
       key === "gridColumnStart" ||
       key === "gridRowStart"
     ) {
+      continue;
+    }
+    if (key === "loopMotion") {
+      const found = loopDeclarations(raw);
+      if (found && found.every((d) => isSafeCssValue(d.value))) loop = found;
+      else rejected.push(key);
       continue;
     }
     if (key === "scrollMotion") {
@@ -751,11 +760,11 @@ export function styleDeclarations(style: unknown): {
   if (column.badSpan) rejected.push("gridColumnSpan");
   if (row.badStart) rejected.push("gridRowStart");
   if (row.badSpan) rejected.push("gridRowSpan");
-  return { declarations: withMotion(declarations, motion), rejected };
+  return { declarations: withLoop(withMotion(declarations, motion), loop), rejected };
 }
 
 /** Normal only (W-089, W-237): a state's `transition` and `iconAnimation` are dropped and reported. */
-const NORMAL_ONLY = ["transition", "iconAnimation", "scrollMotion"] as const;
+const NORMAL_ONLY = ["transition", "iconAnimation", "scrollMotion", "loopMotion"] as const;
 const withoutTransition = (style: unknown): unknown => {
   if (typeof style !== "object" || style === null) return style;
   if (!NORMAL_ONLY.some((key) => key in style)) return style;
@@ -763,6 +772,7 @@ const withoutTransition = (style: unknown): unknown => {
     transition: _drop,
     iconAnimation: _loop,
     scrollMotion: _scroll,
+    loopMotion: _loopMotion,
     ...rest
   } = style as Record<string, unknown>;
   return rest;
@@ -813,7 +823,7 @@ const BACKGROUND_LAYER_KEYS = [
  * gradient) are filled in from `inherited` here. Otherwise they vanish on that device.
  */
 /** Both write `animation` (W-319), so one set alone would drop the other it inherits. */
-const ANIMATION_KEYS = ["entrance", "scrollMotion"] as const;
+const ANIMATION_KEYS = ["entrance", "scrollMotion", "loopMotion"] as const;
 
 /**
  * A style that sets an entrance or scroll motion keeps the other one it inherits from a wider

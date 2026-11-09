@@ -1,5 +1,6 @@
 import { Input, Select } from "@cloudflare/kumo";
 import { MotionControl } from "./MotionControl.tsx";
+import { LoopControl } from "./LoopControl.tsx";
 import { isSafeFontStack, type DesignSystem, type FlatStyleProps } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
@@ -525,6 +526,16 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "loopMotion") {
+    return (
+      <LoopControl
+        value={style?.loopMotion}
+        onChange={(loopMotion) => onPatch({ loopMotion })}
+        reset={reset}
+      />
+    );
+  }
+
   if (styleKey === "transition") {
     return (
       <TransitionControl
@@ -578,6 +589,7 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "filter",
   "entrance",
   "scrollMotion",
+  "loopMotion",
   "transition",
   "iconRotate",
   "iconFlip",

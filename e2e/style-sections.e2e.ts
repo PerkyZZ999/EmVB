@@ -249,3 +249,32 @@ test("Typography, Spacing, Background and Border open by default; a closed one s
   await expect(section("border")).toHaveAttribute("aria-expanded", "false");
   await expect(section("typography")).toHaveAttribute("aria-expanded", "true");
 });
+
+/** The animations an element is playing (W-938). */
+const animationName = (where: Page | ReturnType<typeof canvas>) =>
+  where
+    .locator(".emvb-heading")
+    .first()
+    .evaluate((el) => getComputedStyle(el).animationName);
+
+test("W-938/W-939: a loop added in Effects plays on the canvas and the page, and reduced motion stops it", async ({
+  page,
+  request,
+}) => {
+  const { id, slug, text } = await openPage(page, request);
+  await canvas(page).getByRole("heading", { name: text }).click();
+  await showStyle(page);
+  await openSection(page, "effects");
+  await overlay(page).getByRole("button", { name: "Add loop" }).click();
+  await pick(page, "Motion", "Pulse");
+  await expect.poll(() => animationName(canvas(page))).toContain("emvb-ls");
+  await saveDraft(page);
+  await publishPage(request, id);
+
+  await page.goto(`/${slug}`);
+  await expect(page.getByRole("heading", { name: text })).toBeVisible();
+  await expect.poll(() => animationName(page)).toContain("emvb-ls");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect.poll(() => animationName(page)).toBe("none");
+});
