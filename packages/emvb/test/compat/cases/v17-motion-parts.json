@@ -1,0 +1,233 @@
+{
+  "design": {
+    "schemaVersion": 16,
+    "variables": {
+      "colors": [{ "id": "brand", "name": "Brand", "value": "#1a56db" }],
+      "spacings": [{ "id": "md", "name": "Medium", "value": { "value": 16, "unit": "px" } }]
+    },
+    "classes": [
+      {
+        "id": "rise",
+        "name": "Rise",
+        "style": {
+          "entrance": { "type": "fade-up", "duration": 500, "delay": 100, "trigger": "view" },
+          "transition": { "duration": 200, "easing": "ease-out", "property": "colors" },
+          "color": { "var": "brand" }
+        },
+        "states": { "hover": { "color": "#111111" } },
+        "devices": {
+          "mobile": { "entrance": { "type": "fade", "duration": 300 } },
+          "tablet": { "scrollMotion": { "type": "none" } }
+        }
+      },
+      {
+        "id": "drift",
+        "name": "Drift",
+        "style": {
+          "scrollMotion": {
+            "effects": [
+              { "type": "move-y", "from": 40, "to": -40 },
+              { "type": "fade", "from": 20, "to": 100 }
+            ],
+            "range": "cross"
+          }
+        }
+      },
+      {
+        "id": "spinner",
+        "name": "Spinner",
+        "style": { "iconAnimation": { "type": "spin", "duration": 1200, "loop": true } }
+      }
+    ],
+    "defaults": {
+      "h2": { "entrance": { "type": "slide-up", "duration": 400, "trigger": "view" } },
+      "a": { "transition": { "duration": 150, "easing": "linear", "property": "all" } }
+    }
+  },
+  "layout": {
+    "schemaVersion": 17,
+    "root": {
+      "id": "root0001",
+      "type": "container",
+      "props": {},
+      "label": "Page root",
+      "style": { "gap": { "var": "md", "from": "spacing" } },
+      "children": [
+        {
+          "id": "hero0001",
+          "type": "layout-section",
+          "label": "Hero band",
+          "props": { "tag": "section" },
+          "style": {
+            "entrance": { "type": "fade", "duration": 600 },
+            "scrollMotion": {
+              "effects": [{ "type": "scale", "from": 90, "to": 100 }],
+              "range": "enter"
+            },
+            "transition": {
+              "duration": 300,
+              "delay": 50,
+              "easing": "ease-in-out",
+              "property": "shadow"
+            }
+          },
+          "states": { "hover": { "opacity": 0.9 } },
+          "devices": {
+            "tablet": { "entrance": { "type": "scale", "duration": 200, "trigger": "load" } },
+            "mobile": { "scrollMotion": { "type": "none" } }
+          },
+          "children": [
+            {
+              "id": "head0001",
+              "type": "heading",
+              "label": "Title",
+              "classes": ["rise", "drift"],
+              "props": { "text": "Motion everywhere", "level": 2 }
+            },
+            {
+              "id": "icon0001",
+              "type": "icon",
+              "label": "Spinner icon",
+              "classes": ["spinner"],
+              "props": {
+                "iconId": "star",
+                "iconSvg": "<svg viewBox=\"0 0 24 24\"><path d=\"M12 2l3 7h7l-6 4 2 7-6-4-6 4 2-7-6-4h7z\"/></svg>",
+                "decorative": true
+              },
+              "style": { "iconAnimation": { "type": "pulse", "duration": 900 }, "iconRotate": 15 },
+              "devices": {
+                "mobile": { "iconAnimation": { "type": "none" } },
+                "tablet": { "iconAnimation": { "type": "spin", "duration": 2000 } }
+              }
+            },
+            {
+              "id": "card0001",
+              "type": "div-block",
+              "container": true,
+              "props": {},
+              "children": [
+                {
+                  "id": "text0001",
+                  "type": "text",
+                  "props": { "text": "Query motion" },
+                  "query": {
+                    "min": 400,
+                    "style": {
+                      "entrance": { "type": "fade-down", "duration": 250 },
+                      "transition": { "duration": 100, "easing": "ease", "property": "opacity" }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "secr0001",
+              "type": "section",
+              "label": "Shared CTA",
+              "props": { "partId": "part-cta" },
+              "children": []
+            },
+            {
+              "id": "secr0002",
+              "type": "section",
+              "props": {},
+              "children": [
+                { "id": "text0002", "type": "text", "props": { "text": "Inline section" } }
+              ]
+            },
+            {
+              "id": "loop0001",
+              "type": "loop",
+              "label": "Posts",
+              "props": { "itemPartId": "part-item", "display": "grid", "columns": 2 },
+              "children": []
+            },
+            {
+              "id": "loop0002",
+              "type": "loop",
+              "props": {},
+              "children": [
+                {
+                  "id": "ptit0001",
+                  "type": "post-title",
+                  "label": "Item title",
+                  "props": { "level": 3 },
+                  "style": { "entrance": { "type": "fade", "duration": 200 } }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "dynamic": {
+    "posts": [
+      {
+        "id": "p1",
+        "slug": "one",
+        "title": "First post",
+        "excerpt": "One",
+        "content": "Body one",
+        "permalink": "/posts/one"
+      },
+      {
+        "id": "p2",
+        "slug": "two",
+        "title": "Second post",
+        "excerpt": "Two",
+        "content": "Body two",
+        "permalink": "/posts/two"
+      }
+    ],
+    "sectionTemplates": {
+      "part-cta": {
+        "schemaVersion": 17,
+        "root": {
+          "id": "ctar0001",
+          "type": "container",
+          "label": "CTA root",
+          "props": {},
+          "children": [
+            {
+              "id": "ctab0001",
+              "type": "button",
+              "label": "CTA button",
+              "props": { "text": "Start", "href": "/start" },
+              "style": {
+                "transition": { "duration": 120, "easing": "ease-out", "property": "colors" },
+                "entrance": { "type": "slide-down", "duration": 300 }
+              },
+              "states": { "hover": { "backgroundColor": "#000000" } }
+            }
+          ]
+        }
+      }
+    },
+    "loopTemplates": {
+      "part-item": {
+        "schemaVersion": 16,
+        "root": {
+          "id": "itmr0001",
+          "type": "container",
+          "props": {},
+          "label": "Item root",
+          "style": {
+            "scrollMotion": { "effects": [{ "type": "blur", "from": 8, "to": 0 }], "range": "page" }
+          },
+          "children": [
+            { "id": "itmt0001", "type": "post-title", "props": {} },
+            {
+              "id": "itml0001",
+              "type": "post-link",
+              "props": { "text": "Read" },
+              "style": {
+                "transition": { "duration": 80, "easing": "linear", "property": "colors" }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

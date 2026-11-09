@@ -1,0 +1,930 @@
+{
+  "design": {
+    "schemaVersion": 15,
+    "variables": {
+      "colors": [
+        {
+          "id": "forest",
+          "name": "Forest",
+          "value": "#16301f"
+        },
+        {
+          "id": "pine",
+          "name": "Pine",
+          "value": "#24533a"
+        },
+        {
+          "id": "moss",
+          "name": "Moss",
+          "value": "#7d9a6a"
+        },
+        {
+          "id": "ember",
+          "name": "Ember",
+          "value": "#c95a24"
+        },
+        {
+          "id": "ember-dark",
+          "name": "Ember dark",
+          "value": "#a5461a"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "value": "#f1eadc"
+        },
+        {
+          "id": "paper",
+          "name": "Paper",
+          "value": "#fbf8f2"
+        },
+        {
+          "id": "ink",
+          "name": "Ink",
+          "value": "#18201b"
+        },
+        {
+          "id": "stone",
+          "name": "Stone",
+          "value": "#56605a"
+        },
+        {
+          "id": "line",
+          "name": "Line",
+          "value": "#e3dccd"
+        },
+        {
+          "id": "white",
+          "name": "White",
+          "value": "#ffffff"
+        }
+      ],
+      "fonts": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": "Fraunces, \"Iowan Old Style\", Georgia, serif"
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": "\"DM Sans\", Inter, system-ui, sans-serif"
+        }
+      ],
+      "fontSizes": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": {
+            "value": 76,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "h2",
+          "name": "Heading 2",
+          "value": {
+            "value": 46,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "h3",
+          "name": "Heading 3",
+          "value": {
+            "value": 23,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "lead",
+          "name": "Lead",
+          "value": {
+            "value": 20,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": {
+            "value": 17,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "small",
+          "name": "Small",
+          "value": {
+            "value": 14,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "micro",
+          "name": "Micro",
+          "value": {
+            "value": 12,
+            "unit": "px"
+          }
+        }
+      ],
+      "spacings": [
+        {
+          "id": "xs",
+          "name": "XS",
+          "value": {
+            "value": 8,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "sm",
+          "name": "Small",
+          "value": {
+            "value": 16,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "md",
+          "name": "Medium",
+          "value": {
+            "value": 24,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "lg",
+          "name": "Large",
+          "value": {
+            "value": 40,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "xl",
+          "name": "XL",
+          "value": {
+            "value": 64,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "xxl",
+          "name": "Section",
+          "value": {
+            "value": 120,
+            "unit": "px"
+          }
+        }
+      ]
+    },
+    "classes": [
+      {
+        "id": "section",
+        "name": "Section",
+        "style": {
+          "alignItems": "center",
+          "paddingTop": {
+            "var": "xxl",
+            "from": "spacing"
+          },
+          "paddingBottom": {
+            "var": "xxl",
+            "from": "spacing"
+          },
+          "paddingLeft": {
+            "var": "md",
+            "from": "spacing"
+          },
+          "paddingRight": {
+            "var": "md",
+            "from": "spacing"
+          }
+        },
+        "devices": {
+          "mobile": {
+            "paddingTop": {
+              "var": "xl",
+              "from": "spacing"
+            },
+            "paddingBottom": {
+              "var": "xl",
+              "from": "spacing"
+            }
+          }
+        }
+      },
+      {
+        "id": "inner",
+        "name": "Inner",
+        "style": {
+          "width": {
+            "value": 100,
+            "unit": "%"
+          },
+          "maxWidth": {
+            "value": 1180,
+            "unit": "px"
+          },
+          "gap": {
+            "var": "lg",
+            "from": "spacing"
+          }
+        }
+      },
+      {
+        "id": "eyebrow",
+        "name": "Eyebrow",
+        "style": {
+          "fontFamily": {
+            "var": "body",
+            "from": "font"
+          },
+          "fontSize": {
+            "var": "micro",
+            "from": "fontSize"
+          },
+          "fontWeight": 700,
+          "letterSpacing": {
+            "value": 2,
+            "unit": "px"
+          },
+          "textTransform": "uppercase",
+          "color": {
+            "var": "ember"
+          }
+        }
+      },
+      {
+        "id": "btn",
+        "name": "Button",
+        "style": {
+          "paddingTop": {
+            "value": 15,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 15,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 26,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 26,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "ember"
+          },
+          "backgroundColor": {
+            "var": "ember"
+          },
+          "color": {
+            "var": "white"
+          },
+          "fontFamily": {
+            "var": "body",
+            "from": "font"
+          },
+          "fontSize": {
+            "value": 16,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "transition": {
+            "duration": 200,
+            "easing": "ease-out",
+            "property": "all"
+          }
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "ember-dark"
+            },
+            "borderColor": {
+              "var": "ember-dark"
+            }
+          },
+          "focus": {
+            "boxShadow": {
+              "x": 0,
+              "y": 0,
+              "blur": 0,
+              "spread": 4,
+              "color": "#f2c4a6"
+            }
+          },
+          "active": {
+            "opacity": 0.9
+          }
+        }
+      },
+      {
+        "id": "btn-ghost",
+        "name": "Button ghost",
+        "style": {
+          "backgroundColor": "#ffffff14",
+          "borderColor": "#ffffff80"
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": "#ffffff2e",
+            "borderColor": {
+              "var": "white"
+            }
+          }
+        }
+      },
+      {
+        "id": "card",
+        "name": "Card",
+        "style": {
+          "backgroundColor": {
+            "var": "white"
+          },
+          "borderRadius": {
+            "value": 20,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "line"
+          },
+          "overflow": "hidden",
+          "boxShadow": {
+            "x": 0,
+            "y": 1,
+            "blur": 2,
+            "spread": 0,
+            "color": "#18201b0f"
+          },
+          "transition": {
+            "duration": 250,
+            "easing": "ease-out",
+            "property": "all"
+          }
+        },
+        "states": {
+          "hover": {
+            "borderColor": {
+              "var": "moss"
+            },
+            "boxShadow": {
+              "x": 0,
+              "y": 22,
+              "blur": 44,
+              "spread": -18,
+              "color": "#16301f59"
+            }
+          }
+        }
+      },
+      {
+        "id": "chip",
+        "name": "Chip",
+        "style": {
+          "paddingTop": {
+            "value": 5,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 5,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 11,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 11,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "backgroundColor": {
+            "var": "sand"
+          },
+          "color": {
+            "var": "pine"
+          },
+          "fontSize": {
+            "var": "micro",
+            "from": "fontSize"
+          },
+          "fontWeight": 600
+        }
+      },
+      {
+        "id": "lead",
+        "name": "Lead",
+        "style": {
+          "fontSize": {
+            "var": "lead",
+            "from": "fontSize"
+          },
+          "lineHeight": {
+            "value": 1.55,
+            "unit": "em"
+          },
+          "maxWidth": {
+            "value": 640,
+            "unit": "px"
+          }
+        }
+      }
+    ],
+    "defaults": {
+      "h1": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "display",
+          "from": "fontSize"
+        },
+        "fontWeight": 500,
+        "lineHeight": {
+          "value": 1.02,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h2": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "h2",
+          "from": "fontSize"
+        },
+        "fontWeight": 500,
+        "lineHeight": {
+          "value": 1.08,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h3": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "h3",
+          "from": "fontSize"
+        },
+        "fontWeight": 600,
+        "lineHeight": {
+          "value": 1.25,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "p": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "body",
+          "from": "fontSize"
+        },
+        "lineHeight": {
+          "value": 1.65,
+          "unit": "em"
+        },
+        "color": {
+          "var": "stone"
+        }
+      },
+      "a": {
+        "color": {
+          "var": "pine"
+        },
+        "fontWeight": 600
+      }
+    }
+  },
+  "layout": {
+    "schemaVersion": 15,
+    "root": {
+      "id": "foot-root",
+      "type": "container",
+      "props": {
+        "tag": "footer"
+      },
+      "style": {
+        "alignItems": "center",
+        "paddingTop": {
+          "var": "xl",
+          "from": "spacing"
+        },
+        "paddingBottom": {
+          "var": "lg",
+          "from": "spacing"
+        },
+        "paddingLeft": {
+          "var": "md",
+          "from": "spacing"
+        },
+        "paddingRight": {
+          "var": "md",
+          "from": "spacing"
+        },
+        "backgroundColor": {
+          "var": "forest"
+        },
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "gap": {
+          "var": "lg",
+          "from": "spacing"
+        }
+      },
+      "children": [
+        {
+          "id": "foot-grid00l",
+          "type": "grid",
+          "props": {
+            "columns": 4
+          },
+          "classes": ["inner"],
+          "style": {
+            "gap": {
+              "var": "lg",
+              "from": "spacing"
+            }
+          },
+          "children": [
+            {
+              "id": "foot-contai003",
+              "type": "container",
+              "props": {},
+              "style": {
+                "gap": {
+                  "value": 12,
+                  "unit": "px"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "gridColumnSpan": 4
+                }
+              },
+              "children": [
+                {
+                  "id": "foot-label001",
+                  "type": "label",
+                  "props": {
+                    "text": "Northfold"
+                  },
+                  "style": {
+                    "fontFamily": {
+                      "var": "display",
+                      "from": "font"
+                    },
+                    "fontSize": {
+                      "value": 28,
+                      "unit": "px"
+                    },
+                    "fontWeight": 600,
+                    "color": {
+                      "var": "white"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text002",
+                  "type": "text",
+                  "props": {
+                    "text": "Small-group hiking trips in Norway, the Alps, Utah and California."
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    },
+                    "maxWidth": {
+                      "value": 280,
+                      "unit": "px"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "foot-contai009",
+              "type": "container",
+              "props": {},
+              "style": {
+                "gap": {
+                  "value": 10,
+                  "unit": "px"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "gridColumnSpan": 2
+                }
+              },
+              "children": [
+                {
+                  "id": "foot-label004",
+                  "type": "label",
+                  "props": {
+                    "text": "Trips"
+                  },
+                  "classes": ["eyebrow"],
+                  "style": {
+                    "color": "#f3c7a4"
+                  }
+                },
+                {
+                  "id": "foot-text005",
+                  "type": "text",
+                  "props": {
+                    "text": "Norway"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text006",
+                  "type": "text",
+                  "props": {
+                    "text": "The Alps"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text007",
+                  "type": "text",
+                  "props": {
+                    "text": "Utah"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text008",
+                  "type": "text",
+                  "props": {
+                    "text": "California"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "foot-contai00f",
+              "type": "container",
+              "props": {},
+              "style": {
+                "gap": {
+                  "value": 10,
+                  "unit": "px"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "gridColumnSpan": 2
+                }
+              },
+              "children": [
+                {
+                  "id": "foot-label00a",
+                  "type": "label",
+                  "props": {
+                    "text": "Company"
+                  },
+                  "classes": ["eyebrow"],
+                  "style": {
+                    "color": "#f3c7a4"
+                  }
+                },
+                {
+                  "id": "foot-text00b",
+                  "type": "text",
+                  "props": {
+                    "text": "Our guides"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text00c",
+                  "type": "text",
+                  "props": {
+                    "text": "Trail fund"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text00d",
+                  "type": "text",
+                  "props": {
+                    "text": "Journal"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text00e",
+                  "type": "text",
+                  "props": {
+                    "text": "Careers"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "id": "foot-contai00k",
+              "type": "container",
+              "props": {},
+              "style": {
+                "gap": {
+                  "value": 10,
+                  "unit": "px"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "gridColumnSpan": 2
+                }
+              },
+              "children": [
+                {
+                  "id": "foot-label00g",
+                  "type": "label",
+                  "props": {
+                    "text": "Contact"
+                  },
+                  "classes": ["eyebrow"],
+                  "style": {
+                    "color": "#f3c7a4"
+                  }
+                },
+                {
+                  "id": "foot-text00h",
+                  "type": "text",
+                  "props": {
+                    "text": "hello@northfold.example"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text00i",
+                  "type": "text",
+                  "props": {
+                    "text": "Mon–Fri, 9–17 CET"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                },
+                {
+                  "id": "foot-text00j",
+                  "type": "text",
+                  "props": {
+                    "text": "Tromsø, Norway"
+                  },
+                  "style": {
+                    "color": "#ffffffb3",
+                    "fontSize": {
+                      "value": 15,
+                      "unit": "px"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "foot-divide00m",
+          "type": "divider",
+          "props": {},
+          "style": {
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "maxWidth": {
+              "value": 1180,
+              "unit": "px"
+            },
+            "color": "#ffffff26"
+          }
+        },
+        {
+          "id": "foot-text00n",
+          "type": "text",
+          "props": {
+            "text": "© 2026 Northfold Expeditions. A demo site built with EmVB."
+          },
+          "style": {
+            "color": "#ffffff80",
+            "fontSize": {
+              "value": 13,
+              "unit": "px"
+            },
+            "width": {
+              "value": 100,
+              "unit": "%"
+            },
+            "maxWidth": {
+              "value": 1180,
+              "unit": "px"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

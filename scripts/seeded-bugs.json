@@ -41280,6 +41280,34 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/pages/collections.test.tsx"],
       "expect": "\\(fail\\).*W-921"
+    },
+    {
+      "id": "W-925/compat-migration-dropped",
+      "requirement": "W-925",
+      "description": "The v11 gradient migration is dropped, so a stored 0.x page with an old two-stop gradient no longer upgrades and renders as it did.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "const gradients: Migration = (doc) => walkGradients(doc) as Record<string, unknown>;",
+          "replace": "const gradients: Migration = (doc) => doc;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\).*v10-gradient-entrance"
+    },
+    {
+      "id": "W-925/compat-render-drift",
+      "requirement": "W-925",
+      "description": "The renderer's entrance easing changes, so stored 0.x pages no longer render byte for byte as they did.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "return `emvb-${type} ${duration}ms ease-out${wait} both`;",
+          "replace": "return `emvb-${type} ${duration}ms ease-in${wait} both`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\).*v17-motion-parts"
     }
   ]
 }

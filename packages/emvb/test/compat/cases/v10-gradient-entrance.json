@@ -1,0 +1,43 @@
+{
+  "design": {
+    "schemaVersion": 10,
+    "variables": { "colors": [{ "id": "ink", "name": "Ink", "value": "#222222" }] },
+    "classes": [
+      {
+        "id": "glow",
+        "name": "Glow",
+        "style": {
+          "gradient": { "angle": 45, "from": "#ffffff", "to": { "var": "ink" } },
+          "entrance": { "type": "fade-up", "duration": 400 }
+        }
+      }
+    ]
+  },
+  "layout": {
+    "schemaVersion": 10,
+    "root": {
+      "id": "root0001",
+      "type": "container",
+      "props": {},
+      "style": {
+        "gradient": { "from": "#000000", "to": "#ffffff" },
+        "transition": { "duration": 200, "easing": "ease", "property": "all" }
+      },
+      "children": [
+        {
+          "id": "head0001",
+          "type": "heading",
+          "classes": ["glow"],
+          "props": { "text": "Old page", "level": 1 },
+          "style": { "entrance": { "type": "fade", "duration": 300, "trigger": "view" } }
+        },
+        {
+          "id": "secr0001",
+          "type": "section",
+          "props": {},
+          "children": [{ "id": "text0001", "type": "text", "props": { "text": "Old section" } }]
+        }
+      ]
+    }
+  }
+}

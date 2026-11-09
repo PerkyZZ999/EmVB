@@ -1,0 +1,2631 @@
+{
+  "design": {
+    "schemaVersion": 15,
+    "variables": {
+      "colors": [
+        {
+          "id": "forest",
+          "name": "Forest",
+          "value": "#16301f"
+        },
+        {
+          "id": "pine",
+          "name": "Pine",
+          "value": "#24533a"
+        },
+        {
+          "id": "moss",
+          "name": "Moss",
+          "value": "#7d9a6a"
+        },
+        {
+          "id": "ember",
+          "name": "Ember",
+          "value": "#c95a24"
+        },
+        {
+          "id": "ember-dark",
+          "name": "Ember dark",
+          "value": "#a5461a"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "value": "#f1eadc"
+        },
+        {
+          "id": "paper",
+          "name": "Paper",
+          "value": "#fbf8f2"
+        },
+        {
+          "id": "ink",
+          "name": "Ink",
+          "value": "#18201b"
+        },
+        {
+          "id": "stone",
+          "name": "Stone",
+          "value": "#56605a"
+        },
+        {
+          "id": "line",
+          "name": "Line",
+          "value": "#e3dccd"
+        },
+        {
+          "id": "white",
+          "name": "White",
+          "value": "#ffffff"
+        }
+      ],
+      "fonts": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": "Fraunces, \"Iowan Old Style\", Georgia, serif"
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": "\"DM Sans\", Inter, system-ui, sans-serif"
+        }
+      ],
+      "fontSizes": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": {
+            "value": 76,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "h2",
+          "name": "Heading 2",
+          "value": {
+            "value": 46,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "h3",
+          "name": "Heading 3",
+          "value": {
+            "value": 23,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "lead",
+          "name": "Lead",
+          "value": {
+            "value": 20,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": {
+            "value": 17,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "small",
+          "name": "Small",
+          "value": {
+            "value": 14,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "micro",
+          "name": "Micro",
+          "value": {
+            "value": 12,
+            "unit": "px"
+          }
+        }
+      ],
+      "spacings": [
+        {
+          "id": "xs",
+          "name": "XS",
+          "value": {
+            "value": 8,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "sm",
+          "name": "Small",
+          "value": {
+            "value": 16,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "md",
+          "name": "Medium",
+          "value": {
+            "value": 24,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "lg",
+          "name": "Large",
+          "value": {
+            "value": 40,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "xl",
+          "name": "XL",
+          "value": {
+            "value": 64,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "xxl",
+          "name": "Section",
+          "value": {
+            "value": 120,
+            "unit": "px"
+          }
+        }
+      ]
+    },
+    "classes": [
+      {
+        "id": "section",
+        "name": "Section",
+        "style": {
+          "alignItems": "center",
+          "paddingTop": {
+            "var": "xxl",
+            "from": "spacing"
+          },
+          "paddingBottom": {
+            "var": "xxl",
+            "from": "spacing"
+          },
+          "paddingLeft": {
+            "var": "md",
+            "from": "spacing"
+          },
+          "paddingRight": {
+            "var": "md",
+            "from": "spacing"
+          }
+        },
+        "devices": {
+          "mobile": {
+            "paddingTop": {
+              "var": "xl",
+              "from": "spacing"
+            },
+            "paddingBottom": {
+              "var": "xl",
+              "from": "spacing"
+            }
+          }
+        }
+      },
+      {
+        "id": "inner",
+        "name": "Inner",
+        "style": {
+          "width": {
+            "value": 100,
+            "unit": "%"
+          },
+          "maxWidth": {
+            "value": 1180,
+            "unit": "px"
+          },
+          "gap": {
+            "var": "lg",
+            "from": "spacing"
+          }
+        }
+      },
+      {
+        "id": "eyebrow",
+        "name": "Eyebrow",
+        "style": {
+          "fontFamily": {
+            "var": "body",
+            "from": "font"
+          },
+          "fontSize": {
+            "var": "micro",
+            "from": "fontSize"
+          },
+          "fontWeight": 700,
+          "letterSpacing": {
+            "value": 2,
+            "unit": "px"
+          },
+          "textTransform": "uppercase",
+          "color": {
+            "var": "ember"
+          }
+        }
+      },
+      {
+        "id": "btn",
+        "name": "Button",
+        "style": {
+          "paddingTop": {
+            "value": 15,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 15,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 26,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 26,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "ember"
+          },
+          "backgroundColor": {
+            "var": "ember"
+          },
+          "color": {
+            "var": "white"
+          },
+          "fontFamily": {
+            "var": "body",
+            "from": "font"
+          },
+          "fontSize": {
+            "value": 16,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "transition": {
+            "duration": 200,
+            "easing": "ease-out",
+            "property": "all"
+          }
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "ember-dark"
+            },
+            "borderColor": {
+              "var": "ember-dark"
+            }
+          },
+          "focus": {
+            "boxShadow": {
+              "x": 0,
+              "y": 0,
+              "blur": 0,
+              "spread": 4,
+              "color": "#f2c4a6"
+            }
+          },
+          "active": {
+            "opacity": 0.9
+          }
+        }
+      },
+      {
+        "id": "btn-ghost",
+        "name": "Button ghost",
+        "style": {
+          "backgroundColor": "#ffffff14",
+          "borderColor": "#ffffff80"
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": "#ffffff2e",
+            "borderColor": {
+              "var": "white"
+            }
+          }
+        }
+      },
+      {
+        "id": "card",
+        "name": "Card",
+        "style": {
+          "backgroundColor": {
+            "var": "white"
+          },
+          "borderRadius": {
+            "value": 20,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "line"
+          },
+          "overflow": "hidden",
+          "boxShadow": {
+            "x": 0,
+            "y": 1,
+            "blur": 2,
+            "spread": 0,
+            "color": "#18201b0f"
+          },
+          "transition": {
+            "duration": 250,
+            "easing": "ease-out",
+            "property": "all"
+          }
+        },
+        "states": {
+          "hover": {
+            "borderColor": {
+              "var": "moss"
+            },
+            "boxShadow": {
+              "x": 0,
+              "y": 22,
+              "blur": 44,
+              "spread": -18,
+              "color": "#16301f59"
+            }
+          }
+        }
+      },
+      {
+        "id": "chip",
+        "name": "Chip",
+        "style": {
+          "paddingTop": {
+            "value": 5,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 5,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 11,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 11,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "backgroundColor": {
+            "var": "sand"
+          },
+          "color": {
+            "var": "pine"
+          },
+          "fontSize": {
+            "var": "micro",
+            "from": "fontSize"
+          },
+          "fontWeight": 600
+        }
+      },
+      {
+        "id": "lead",
+        "name": "Lead",
+        "style": {
+          "fontSize": {
+            "var": "lead",
+            "from": "fontSize"
+          },
+          "lineHeight": {
+            "value": 1.55,
+            "unit": "em"
+          },
+          "maxWidth": {
+            "value": 640,
+            "unit": "px"
+          }
+        }
+      }
+    ],
+    "defaults": {
+      "h1": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "display",
+          "from": "fontSize"
+        },
+        "fontWeight": 500,
+        "lineHeight": {
+          "value": 1.02,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h2": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "h2",
+          "from": "fontSize"
+        },
+        "fontWeight": 500,
+        "lineHeight": {
+          "value": 1.08,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h3": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "h3",
+          "from": "fontSize"
+        },
+        "fontWeight": 600,
+        "lineHeight": {
+          "value": 1.25,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "p": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "body",
+          "from": "fontSize"
+        },
+        "lineHeight": {
+          "value": 1.65,
+          "unit": "em"
+        },
+        "color": {
+          "var": "stone"
+        }
+      },
+      "a": {
+        "color": {
+          "var": "pine"
+        },
+        "fontWeight": 600
+      }
+    }
+  },
+  "layout": {
+    "schemaVersion": 15,
+    "root": {
+      "id": "page-root",
+      "type": "container",
+      "props": {},
+      "style": {
+        "backgroundColor": {
+          "var": "paper"
+        },
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "gap": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "page-contai008",
+          "type": "container",
+          "props": {
+            "tag": "section"
+          },
+          "classes": ["section"],
+          "style": {
+            "paddingTop": {
+              "value": 136,
+              "unit": "px"
+            },
+            "paddingBottom": {
+              "value": 112,
+              "unit": "px"
+            },
+            "backgroundImage": "/media/hero.jpg",
+            "backgroundPosition": "center",
+            "gradient": {
+              "type": "linear",
+              "angle": 180,
+              "stops": [
+                {
+                  "color": "#0d1d1300",
+                  "at": 0
+                },
+                {
+                  "color": "#0d1d13",
+                  "at": 100
+                }
+              ]
+            },
+            "overlay": {
+              "color": {
+                "var": "forest"
+              },
+              "opacity": 0.38
+            },
+            "entrance": {
+              "type": "fade",
+              "duration": 600
+            }
+          },
+          "devices": {
+            "mobile": {
+              "paddingTop": {
+                "value": 88,
+                "unit": "px"
+              },
+              "paddingBottom": {
+                "value": 72,
+                "unit": "px"
+              }
+            }
+          },
+          "children": [
+            {
+              "id": "page-contai007",
+              "type": "container",
+              "props": {},
+              "classes": ["inner"],
+              "style": {
+                "gap": {
+                  "var": "md",
+                  "from": "spacing"
+                }
+              },
+              "children": [
+                {
+                  "id": "page-label001",
+                  "type": "label",
+                  "props": {
+                    "text": "Small-group hiking · since 2014"
+                  },
+                  "classes": ["eyebrow"],
+                  "style": {
+                    "color": "#f3c7a4"
+                  }
+                },
+                {
+                  "id": "page-headin002",
+                  "type": "heading",
+                  "props": {
+                    "text": "Walk the wild edges of the North.",
+                    "level": 1
+                  },
+                  "style": {
+                    "color": {
+                      "var": "white"
+                    },
+                    "maxWidth": {
+                      "value": 860,
+                      "unit": "px"
+                    }
+                  },
+                  "devices": {
+                    "mobile": {
+                      "fontSize": {
+                        "value": 46,
+                        "unit": "px"
+                      }
+                    }
+                  }
+                },
+                {
+                  "id": "page-text003",
+                  "type": "text",
+                  "props": {
+                    "text": "Guided trips through fjords, alpine valleys and desert canyons, in groups of eight or fewer, led by people who grew up on these trails."
+                  },
+                  "classes": ["lead"],
+                  "style": {
+                    "color": "#ffffffd9"
+                  }
+                },
+                {
+                  "id": "page-flexbo006",
+                  "type": "flexbox",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "value": 12,
+                      "unit": "px"
+                    },
+                    "marginTop": {
+                      "var": "xs",
+                      "from": "spacing"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-button004",
+                      "type": "button",
+                      "props": {
+                        "text": "Find your trip",
+                        "href": "#trips"
+                      },
+                      "classes": ["btn"],
+                      "states": {
+                        "hover": {
+                          "backgroundColor": {
+                            "var": "ember-dark"
+                          },
+                          "boxShadow": {
+                            "x": 0,
+                            "y": 12,
+                            "blur": 28,
+                            "spread": -10,
+                            "color": "#c95a24b3"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "id": "page-button005",
+                      "type": "button",
+                      "props": {
+                        "text": "Get the route guide"
+                      },
+                      "classes": ["btn", "btn-ghost"],
+                      "htmlId": "get-guide"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "page-contai00m",
+          "type": "container",
+          "props": {},
+          "style": {
+            "alignItems": "center",
+            "paddingTop": {
+              "var": "xl",
+              "from": "spacing"
+            },
+            "paddingBottom": {
+              "var": "xl",
+              "from": "spacing"
+            },
+            "paddingLeft": {
+              "var": "md",
+              "from": "spacing"
+            },
+            "paddingRight": {
+              "var": "md",
+              "from": "spacing"
+            },
+            "backgroundColor": {
+              "var": "white"
+            },
+            "boxShadow": {
+              "x": 0,
+              "y": -1,
+              "blur": 0,
+              "spread": 0,
+              "color": {
+                "var": "line"
+              }
+            }
+          },
+          "children": [
+            {
+              "id": "page-grid00l",
+              "type": "grid",
+              "props": {
+                "columns": 4
+              },
+              "classes": ["inner"],
+              "style": {
+                "gap": {
+                  "var": "lg",
+                  "from": "spacing"
+                }
+              },
+              "children": [
+                {
+                  "id": "page-contai00b",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "value": 6,
+                      "unit": "px"
+                    }
+                  },
+                  "devices": {
+                    "mobile": {
+                      "gridColumnSpan": 2
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-label009",
+                      "type": "label",
+                      "props": {
+                        "text": "8"
+                      },
+                      "style": {
+                        "fontFamily": {
+                          "var": "display",
+                          "from": "font"
+                        },
+                        "fontSize": {
+                          "value": 44,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "pine"
+                        },
+                        "lineHeight": {
+                          "value": 1,
+                          "unit": "em"
+                        }
+                      }
+                    },
+                    {
+                      "id": "page-text00a",
+                      "type": "text",
+                      "props": {
+                        "text": "hikers at most in every group"
+                      },
+                      "style": {
+                        "fontSize": {
+                          "var": "small",
+                          "from": "fontSize"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "page-contai00e",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "value": 6,
+                      "unit": "px"
+                    }
+                  },
+                  "devices": {
+                    "mobile": {
+                      "gridColumnSpan": 2
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-label00c",
+                      "type": "label",
+                      "props": {
+                        "text": "23"
+                      },
+                      "style": {
+                        "fontFamily": {
+                          "var": "display",
+                          "from": "font"
+                        },
+                        "fontSize": {
+                          "value": 44,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "pine"
+                        },
+                        "lineHeight": {
+                          "value": 1,
+                          "unit": "em"
+                        }
+                      }
+                    },
+                    {
+                      "id": "page-text00d",
+                      "type": "text",
+                      "props": {
+                        "text": "routes across four regions"
+                      },
+                      "style": {
+                        "fontSize": {
+                          "var": "small",
+                          "from": "fontSize"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "page-contai00h",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "value": 6,
+                      "unit": "px"
+                    }
+                  },
+                  "devices": {
+                    "mobile": {
+                      "gridColumnSpan": 2
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-label00f",
+                      "type": "label",
+                      "props": {
+                        "text": "1 : 4"
+                      },
+                      "style": {
+                        "fontFamily": {
+                          "var": "display",
+                          "from": "font"
+                        },
+                        "fontSize": {
+                          "value": 44,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "pine"
+                        },
+                        "lineHeight": {
+                          "value": 1,
+                          "unit": "em"
+                        }
+                      }
+                    },
+                    {
+                      "id": "page-text00g",
+                      "type": "text",
+                      "props": {
+                        "text": "guides to hikers on every trip"
+                      },
+                      "style": {
+                        "fontSize": {
+                          "var": "small",
+                          "from": "fontSize"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "page-contai00k",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "value": 6,
+                      "unit": "px"
+                    }
+                  },
+                  "devices": {
+                    "mobile": {
+                      "gridColumnSpan": 2
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-label00i",
+                      "type": "label",
+                      "props": {
+                        "text": "4.9"
+                      },
+                      "style": {
+                        "fontFamily": {
+                          "var": "display",
+                          "from": "font"
+                        },
+                        "fontSize": {
+                          "value": 44,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "pine"
+                        },
+                        "lineHeight": {
+                          "value": 1,
+                          "unit": "em"
+                        }
+                      }
+                    },
+                    {
+                      "id": "page-text00j",
+                      "type": "text",
+                      "props": {
+                        "text": "average rating from 1,200 walkers"
+                      },
+                      "style": {
+                        "fontSize": {
+                          "var": "small",
+                          "from": "fontSize"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "page-contai01r",
+          "type": "container",
+          "props": {
+            "tag": "section"
+          },
+          "classes": ["section"],
+          "htmlId": "trips",
+          "children": [
+            {
+              "id": "page-contai01q",
+              "type": "container",
+              "props": {},
+              "classes": ["inner"],
+              "children": [
+                {
+                  "id": "page-flexbo00r",
+                  "type": "flexbox",
+                  "props": {},
+                  "style": {
+                    "justifyContent": "space-between",
+                    "alignItems": "flex-end",
+                    "gap": {
+                      "var": "md",
+                      "from": "spacing"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-contai00p",
+                      "type": "container",
+                      "props": {},
+                      "style": {
+                        "gap": {
+                          "var": "sm",
+                          "from": "spacing"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-label00n",
+                          "type": "label",
+                          "props": {
+                            "text": "Autumn and winter 2026"
+                          },
+                          "classes": ["eyebrow"]
+                        },
+                        {
+                          "id": "page-headin00o",
+                          "type": "heading",
+                          "props": {
+                            "text": "Trips for every kind of walker",
+                            "level": 2
+                          },
+                          "style": {
+                            "maxWidth": {
+                              "value": 560,
+                              "unit": "px"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "page-text00q",
+                      "type": "text",
+                      "props": {
+                        "text": "Every route is scouted by our guides, graded honestly and capped at eight people. Meals, huts and transfers are included."
+                      },
+                      "style": {
+                        "maxWidth": {
+                          "value": 400,
+                          "unit": "px"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "page-grid01p",
+                  "type": "grid",
+                  "props": {
+                    "columns": 3
+                  },
+                  "style": {
+                    "gap": {
+                      "var": "md",
+                      "from": "spacing"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-contai012",
+                      "type": "container",
+                      "props": {},
+                      "classes": ["card"],
+                      "devices": {
+                        "mobile": {
+                          "gridColumnSpan": 3
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-image00s",
+                          "type": "image",
+                          "props": {
+                            "src": "/media/fjord.jpg",
+                            "alt": "Granite cliffs dropping into a long blue fjord under a bright sky",
+                            "width": 1600,
+                            "height": 1000
+                          },
+                          "style": {
+                            "width": {
+                              "value": 100,
+                              "unit": "%"
+                            },
+                            "aspectRatio": "4/3",
+                            "objectFit": "cover"
+                          }
+                        },
+                        {
+                          "id": "page-contai011",
+                          "type": "container",
+                          "props": {},
+                          "style": {
+                            "gap": {
+                              "value": 12,
+                              "unit": "px"
+                            },
+                            "paddingTop": {
+                              "var": "md",
+                              "from": "spacing"
+                            },
+                            "paddingBottom": {
+                              "value": 28,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "var": "md",
+                              "from": "spacing"
+                            },
+                            "paddingRight": {
+                              "var": "md",
+                              "from": "spacing"
+                            }
+                          },
+                          "children": [
+                            {
+                              "id": "page-flexbo00v",
+                              "type": "flexbox",
+                              "props": {},
+                              "style": {
+                                "gap": {
+                                  "var": "xs",
+                                  "from": "spacing"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-label00t",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "Norway"
+                                  },
+                                  "classes": ["chip"]
+                                },
+                                {
+                                  "id": "page-label00u",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "7 days · Moderate"
+                                  },
+                                  "classes": ["chip"]
+                                }
+                              ]
+                            },
+                            {
+                              "id": "page-headin00w",
+                              "type": "heading",
+                              "props": {
+                                "text": "Lofoten and the Western Fjords",
+                                "level": 3
+                              }
+                            },
+                            {
+                              "id": "page-text00x",
+                              "type": "text",
+                              "props": {
+                                "text": "Ridge walks above the fjords, nights in red fishing cabins, and the long blue light of late September."
+                              },
+                              "style": {
+                                "fontSize": {
+                                  "value": 15,
+                                  "unit": "px"
+                                }
+                              }
+                            },
+                            {
+                              "id": "page-flexbo010",
+                              "type": "flexbox",
+                              "props": {},
+                              "style": {
+                                "justifyContent": "space-between",
+                                "alignItems": "center",
+                                "marginTop": {
+                                  "var": "xs",
+                                  "from": "spacing"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-label00y",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "From €2,140"
+                                  },
+                                  "style": {
+                                    "fontWeight": 700,
+                                    "color": {
+                                      "var": "ink"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "page-link00z",
+                                  "type": "link",
+                                  "props": {
+                                    "text": "View trip",
+                                    "href": "#enquire"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "page-contai01d",
+                      "type": "container",
+                      "props": {},
+                      "classes": ["card"],
+                      "devices": {
+                        "mobile": {
+                          "gridColumnSpan": 3
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-image013",
+                          "type": "image",
+                          "props": {
+                            "src": "/media/canyon.jpg",
+                            "alt": "Red sandstone cliffs glowing at sunset above a desert valley",
+                            "width": 1600,
+                            "height": 1000
+                          },
+                          "style": {
+                            "width": {
+                              "value": 100,
+                              "unit": "%"
+                            },
+                            "aspectRatio": "4/3",
+                            "objectFit": "cover"
+                          }
+                        },
+                        {
+                          "id": "page-contai01c",
+                          "type": "container",
+                          "props": {},
+                          "style": {
+                            "gap": {
+                              "value": 12,
+                              "unit": "px"
+                            },
+                            "paddingTop": {
+                              "var": "md",
+                              "from": "spacing"
+                            },
+                            "paddingBottom": {
+                              "value": 28,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "var": "md",
+                              "from": "spacing"
+                            },
+                            "paddingRight": {
+                              "var": "md",
+                              "from": "spacing"
+                            }
+                          },
+                          "children": [
+                            {
+                              "id": "page-flexbo016",
+                              "type": "flexbox",
+                              "props": {},
+                              "style": {
+                                "gap": {
+                                  "var": "xs",
+                                  "from": "spacing"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-label014",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "Utah"
+                                  },
+                                  "classes": ["chip"]
+                                },
+                                {
+                                  "id": "page-label015",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "6 days · Challenging"
+                                  },
+                                  "classes": ["chip"]
+                                }
+                              ]
+                            },
+                            {
+                              "id": "page-headin017",
+                              "type": "heading",
+                              "props": {
+                                "text": "Canyon Country",
+                                "level": 3
+                              }
+                            },
+                            {
+                              "id": "page-text018",
+                              "type": "text",
+                              "props": {
+                                "text": "Slot canyons, slickrock benches and a sunrise on the rim, with a support vehicle at camp every night."
+                              },
+                              "style": {
+                                "fontSize": {
+                                  "value": 15,
+                                  "unit": "px"
+                                }
+                              }
+                            },
+                            {
+                              "id": "page-flexbo01b",
+                              "type": "flexbox",
+                              "props": {},
+                              "style": {
+                                "justifyContent": "space-between",
+                                "alignItems": "center",
+                                "marginTop": {
+                                  "var": "xs",
+                                  "from": "spacing"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-label019",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "From €1,890"
+                                  },
+                                  "style": {
+                                    "fontWeight": 700,
+                                    "color": {
+                                      "var": "ink"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "page-link01a",
+                                  "type": "link",
+                                  "props": {
+                                    "text": "View trip",
+                                    "href": "#enquire"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "id": "page-contai01o",
+                      "type": "container",
+                      "props": {},
+                      "classes": ["card"],
+                      "devices": {
+                        "mobile": {
+                          "gridColumnSpan": 3
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-image01e",
+                          "type": "image",
+                          "props": {
+                            "src": "/media/valley.jpg",
+                            "alt": "Tall pines beside a calm river under granite walls",
+                            "width": 1600,
+                            "height": 1000
+                          },
+                          "style": {
+                            "width": {
+                              "value": 100,
+                              "unit": "%"
+                            },
+                            "aspectRatio": "4/3",
+                            "objectFit": "cover"
+                          }
+                        },
+                        {
+                          "id": "page-contai01n",
+                          "type": "container",
+                          "props": {},
+                          "style": {
+                            "gap": {
+                              "value": 12,
+                              "unit": "px"
+                            },
+                            "paddingTop": {
+                              "var": "md",
+                              "from": "spacing"
+                            },
+                            "paddingBottom": {
+                              "value": 28,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "var": "md",
+                              "from": "spacing"
+                            },
+                            "paddingRight": {
+                              "var": "md",
+                              "from": "spacing"
+                            }
+                          },
+                          "children": [
+                            {
+                              "id": "page-flexbo01h",
+                              "type": "flexbox",
+                              "props": {},
+                              "style": {
+                                "gap": {
+                                  "var": "xs",
+                                  "from": "spacing"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-label01f",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "California"
+                                  },
+                                  "classes": ["chip"]
+                                },
+                                {
+                                  "id": "page-label01g",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "5 days · Easy"
+                                  },
+                                  "classes": ["chip"]
+                                }
+                              ]
+                            },
+                            {
+                              "id": "page-headin01i",
+                              "type": "heading",
+                              "props": {
+                                "text": "High Sierra Valleys",
+                                "level": 3
+                              }
+                            },
+                            {
+                              "id": "page-text01j",
+                              "type": "text",
+                              "props": {
+                                "text": "Granite walls, pine meadows and river camps. A gentle first multi-day trip, with light packs."
+                              },
+                              "style": {
+                                "fontSize": {
+                                  "value": 15,
+                                  "unit": "px"
+                                }
+                              }
+                            },
+                            {
+                              "id": "page-flexbo01m",
+                              "type": "flexbox",
+                              "props": {},
+                              "style": {
+                                "justifyContent": "space-between",
+                                "alignItems": "center",
+                                "marginTop": {
+                                  "var": "xs",
+                                  "from": "spacing"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-label01k",
+                                  "type": "label",
+                                  "props": {
+                                    "text": "From €1,460"
+                                  },
+                                  "style": {
+                                    "fontWeight": 700,
+                                    "color": {
+                                      "var": "ink"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "page-link01l",
+                                  "type": "link",
+                                  "props": {
+                                    "text": "View trip",
+                                    "href": "#enquire"
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "page-contai02e",
+          "type": "container",
+          "props": {
+            "tag": "section"
+          },
+          "classes": ["section"],
+          "htmlId": "why",
+          "style": {
+            "backgroundColor": {
+              "var": "sand"
+            }
+          },
+          "children": [
+            {
+              "id": "page-grid02d",
+              "type": "grid",
+              "props": {
+                "columns": 2
+              },
+              "classes": ["inner"],
+              "style": {
+                "gap": {
+                  "var": "xl",
+                  "from": "spacing"
+                },
+                "alignItems": "center"
+              },
+              "children": [
+                {
+                  "id": "page-image01s",
+                  "type": "image",
+                  "props": {
+                    "src": "/media/hiker.jpg",
+                    "alt": "A hiker with a large pack looking out over misty mountain ridges",
+                    "width": 1600,
+                    "height": 1000
+                  },
+                  "style": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    },
+                    "aspectRatio": "4/5",
+                    "objectFit": "cover",
+                    "borderRadius": {
+                      "value": 24,
+                      "unit": "px"
+                    }
+                  },
+                  "devices": {
+                    "mobile": {
+                      "gridColumnSpan": 2,
+                      "aspectRatio": "4/3"
+                    }
+                  }
+                },
+                {
+                  "id": "page-contai02c",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "var": "md",
+                      "from": "spacing"
+                    },
+                    "justifyContent": "center"
+                  },
+                  "devices": {
+                    "mobile": {
+                      "gridColumnSpan": 2
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-label01t",
+                      "type": "label",
+                      "props": {
+                        "text": "Why Northfold"
+                      },
+                      "classes": ["eyebrow"]
+                    },
+                    {
+                      "id": "page-headin01u",
+                      "type": "heading",
+                      "props": {
+                        "text": "Guided by locals, paced for real people",
+                        "level": 2
+                      }
+                    },
+                    {
+                      "id": "page-text01v",
+                      "type": "text",
+                      "props": {
+                        "text": "We plan the hard parts so you can enjoy the walking: permits, huts, luggage transfers, and a guide who knows which ridge to skip when the weather turns."
+                      },
+                      "classes": ["lead"]
+                    },
+                    {
+                      "id": "page-contai02b",
+                      "type": "container",
+                      "props": {},
+                      "style": {
+                        "gap": {
+                          "var": "md",
+                          "from": "spacing"
+                        },
+                        "marginTop": {
+                          "var": "xs",
+                          "from": "spacing"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-flexbo020",
+                          "type": "flexbox",
+                          "props": {},
+                          "style": {
+                            "flexWrap": "nowrap",
+                            "gap": {
+                              "value": 18,
+                              "unit": "px"
+                            },
+                            "alignItems": "flex-start"
+                          },
+                          "children": [
+                            {
+                              "id": "page-icon01w",
+                              "type": "icon",
+                              "props": {
+                                "iconId": "user",
+                                "size": 22,
+                                "decorative": true
+                              },
+                              "style": {
+                                "width": {
+                                  "value": 48,
+                                  "unit": "px"
+                                },
+                                "height": {
+                                  "value": 48,
+                                  "unit": "px"
+                                },
+                                "borderRadius": {
+                                  "value": 14,
+                                  "unit": "px"
+                                },
+                                "backgroundColor": {
+                                  "var": "white"
+                                },
+                                "color": {
+                                  "var": "ember"
+                                },
+                                "fontSize": {
+                                  "value": 22,
+                                  "unit": "px"
+                                }
+                              }
+                            },
+                            {
+                              "id": "page-contai01z",
+                              "type": "container",
+                              "props": {},
+                              "style": {
+                                "gap": {
+                                  "value": 4,
+                                  "unit": "px"
+                                },
+                                "flexDirection": "column",
+                                "width": {
+                                  "value": 80,
+                                  "unit": "%"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-headin01x",
+                                  "type": "heading",
+                                  "props": {
+                                    "text": "Small groups, always",
+                                    "level": 3
+                                  },
+                                  "style": {
+                                    "fontSize": {
+                                      "value": 19,
+                                      "unit": "px"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "page-text01y",
+                                  "type": "text",
+                                  "props": {
+                                    "text": "Eight hikers at most, with two guides on every trip over five days."
+                                  },
+                                  "style": {
+                                    "fontSize": {
+                                      "value": 15,
+                                      "unit": "px"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "page-flexbo025",
+                          "type": "flexbox",
+                          "props": {},
+                          "style": {
+                            "flexWrap": "nowrap",
+                            "gap": {
+                              "value": 18,
+                              "unit": "px"
+                            },
+                            "alignItems": "flex-start"
+                          },
+                          "children": [
+                            {
+                              "id": "page-icon021",
+                              "type": "icon",
+                              "props": {
+                                "iconId": "calendar",
+                                "size": 22,
+                                "decorative": true
+                              },
+                              "style": {
+                                "width": {
+                                  "value": 48,
+                                  "unit": "px"
+                                },
+                                "height": {
+                                  "value": 48,
+                                  "unit": "px"
+                                },
+                                "borderRadius": {
+                                  "value": 14,
+                                  "unit": "px"
+                                },
+                                "backgroundColor": {
+                                  "var": "white"
+                                },
+                                "color": {
+                                  "var": "ember"
+                                },
+                                "fontSize": {
+                                  "value": 22,
+                                  "unit": "px"
+                                }
+                              }
+                            },
+                            {
+                              "id": "page-contai024",
+                              "type": "container",
+                              "props": {},
+                              "style": {
+                                "gap": {
+                                  "value": 4,
+                                  "unit": "px"
+                                },
+                                "flexDirection": "column",
+                                "width": {
+                                  "value": 80,
+                                  "unit": "%"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-headin022",
+                                  "type": "heading",
+                                  "props": {
+                                    "text": "Flexible dates",
+                                    "level": 3
+                                  },
+                                  "style": {
+                                    "fontSize": {
+                                      "value": 19,
+                                      "unit": "px"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "page-text023",
+                                  "type": "text",
+                                  "props": {
+                                    "text": "Move your trip up to 30 days before departure at no charge."
+                                  },
+                                  "style": {
+                                    "fontSize": {
+                                      "value": 15,
+                                      "unit": "px"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "page-flexbo02a",
+                          "type": "flexbox",
+                          "props": {},
+                          "style": {
+                            "flexWrap": "nowrap",
+                            "gap": {
+                              "value": 18,
+                              "unit": "px"
+                            },
+                            "alignItems": "flex-start"
+                          },
+                          "children": [
+                            {
+                              "id": "page-icon026",
+                              "type": "icon",
+                              "props": {
+                                "iconId": "heart",
+                                "size": 22,
+                                "decorative": true
+                              },
+                              "style": {
+                                "width": {
+                                  "value": 48,
+                                  "unit": "px"
+                                },
+                                "height": {
+                                  "value": 48,
+                                  "unit": "px"
+                                },
+                                "borderRadius": {
+                                  "value": 14,
+                                  "unit": "px"
+                                },
+                                "backgroundColor": {
+                                  "var": "white"
+                                },
+                                "color": {
+                                  "var": "ember"
+                                },
+                                "fontSize": {
+                                  "value": 22,
+                                  "unit": "px"
+                                }
+                              }
+                            },
+                            {
+                              "id": "page-contai029",
+                              "type": "container",
+                              "props": {},
+                              "style": {
+                                "gap": {
+                                  "value": 4,
+                                  "unit": "px"
+                                },
+                                "flexDirection": "column",
+                                "width": {
+                                  "value": 80,
+                                  "unit": "%"
+                                }
+                              },
+                              "children": [
+                                {
+                                  "id": "page-headin027",
+                                  "type": "heading",
+                                  "props": {
+                                    "text": "Leave it better",
+                                    "level": 3
+                                  },
+                                  "style": {
+                                    "fontSize": {
+                                      "value": 19,
+                                      "unit": "px"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "page-text028",
+                                  "type": "text",
+                                  "props": {
+                                    "text": "Two percent of every booking funds trail repair in the regions we walk."
+                                  },
+                                  "style": {
+                                    "fontSize": {
+                                      "value": 15,
+                                      "unit": "px"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "page-contai02w",
+          "type": "container",
+          "props": {
+            "tag": "section"
+          },
+          "classes": ["section"],
+          "children": [
+            {
+              "id": "page-contai02v",
+              "type": "container",
+              "props": {},
+              "classes": ["inner"],
+              "children": [
+                {
+                  "id": "page-contai02h",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "var": "sm",
+                      "from": "spacing"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-label02f",
+                      "type": "label",
+                      "props": {
+                        "text": "A day on the trail"
+                      },
+                      "classes": ["eyebrow"]
+                    },
+                    {
+                      "id": "page-headin02g",
+                      "type": "heading",
+                      "props": {
+                        "text": "Unhurried mornings, big views, warm dinners",
+                        "level": 2
+                      },
+                      "style": {
+                        "maxWidth": {
+                          "value": 680,
+                          "unit": "px"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "page-tabs02u",
+                  "type": "tabs",
+                  "props": {},
+                  "style": {
+                    "fontSize": {
+                      "value": 16,
+                      "unit": "px"
+                    },
+                    "color": {
+                      "var": "ink"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-tabpan02l",
+                      "type": "tab-panel",
+                      "props": {
+                        "label": "Morning"
+                      },
+                      "style": {
+                        "paddingTop": {
+                          "var": "lg",
+                          "from": "spacing"
+                        },
+                        "gap": {
+                          "var": "sm",
+                          "from": "spacing"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-headin02i",
+                          "type": "heading",
+                          "props": {
+                            "text": "Coffee at the hut, packs on by nine",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "page-text02j",
+                          "type": "text",
+                          "props": {
+                            "text": "Breakfast is made fresh by the hut team. Your guide walks you through the route and the weather before the first climb."
+                          },
+                          "classes": ["lead"]
+                        },
+                        {
+                          "id": "page-list02k",
+                          "type": "list",
+                          "props": {
+                            "items": [
+                              "Hot breakfast and packed lunch",
+                              "Route and weather briefing",
+                              "Luggage goes ahead by road"
+                            ]
+                          },
+                          "style": {
+                            "color": {
+                              "var": "stone"
+                            },
+                            "lineHeight": {
+                              "value": 1.9,
+                              "unit": "em"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "page-tabpan02p",
+                      "type": "tab-panel",
+                      "props": {
+                        "label": "On the trail"
+                      },
+                      "style": {
+                        "paddingTop": {
+                          "var": "lg",
+                          "from": "spacing"
+                        },
+                        "gap": {
+                          "var": "sm",
+                          "from": "spacing"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-headin02m",
+                          "type": "heading",
+                          "props": {
+                            "text": "Five to seven hours of walking",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "page-text02n",
+                          "type": "text",
+                          "props": {
+                            "text": "We stop often for photos, swims and stories. Expect 12 to 18 kilometres a day, with the hardest climbs in the cool of the morning."
+                          },
+                          "classes": ["lead"]
+                        },
+                        {
+                          "id": "page-list02o",
+                          "type": "list",
+                          "props": {
+                            "items": [
+                              "Two guides, first aid trained",
+                              "Snack stops every 90 minutes",
+                              "Shorter options on most days"
+                            ]
+                          },
+                          "style": {
+                            "color": {
+                              "var": "stone"
+                            },
+                            "lineHeight": {
+                              "value": 1.9,
+                              "unit": "em"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "page-tabpan02t",
+                      "type": "tab-panel",
+                      "props": {
+                        "label": "Evening"
+                      },
+                      "style": {
+                        "paddingTop": {
+                          "var": "lg",
+                          "from": "spacing"
+                        },
+                        "gap": {
+                          "var": "sm",
+                          "from": "spacing"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-headin02q",
+                          "type": "heading",
+                          "props": {
+                            "text": "A shower, a view and a long table",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "page-text02r",
+                          "type": "text",
+                          "props": {
+                            "text": "Nights are in mountain huts, guesthouses and fishing cabins. Dinner is local, seasonal and shared."
+                          },
+                          "classes": ["lead"]
+                        },
+                        {
+                          "id": "page-list02s",
+                          "type": "list",
+                          "props": {
+                            "items": [
+                              "Private rooms on every trip",
+                              "Vegetarian and allergy-friendly menus",
+                              "Tomorrow's plan over dessert"
+                            ]
+                          },
+                          "style": {
+                            "color": {
+                              "var": "stone"
+                            },
+                            "lineHeight": {
+                              "value": 1.9,
+                              "unit": "em"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "page-contai03b",
+          "type": "container",
+          "props": {
+            "tag": "section"
+          },
+          "classes": ["section"],
+          "htmlId": "enquire",
+          "style": {
+            "gradient": {
+              "type": "linear",
+              "angle": 135,
+              "stops": [
+                {
+                  "color": {
+                    "var": "forest"
+                  },
+                  "at": 0
+                },
+                {
+                  "color": {
+                    "var": "pine"
+                  },
+                  "at": 100
+                }
+              ]
+            }
+          },
+          "children": [
+            {
+              "id": "page-grid03a",
+              "type": "grid",
+              "props": {
+                "columns": 2
+              },
+              "classes": ["inner"],
+              "style": {
+                "gap": {
+                  "var": "xl",
+                  "from": "spacing"
+                },
+                "alignItems": "center"
+              },
+              "children": [
+                {
+                  "id": "page-contai031",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "var": "md",
+                      "from": "spacing"
+                    }
+                  },
+                  "devices": {
+                    "mobile": {
+                      "gridColumnSpan": 2
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-label02x",
+                      "type": "label",
+                      "props": {
+                        "text": "Plan your trip"
+                      },
+                      "classes": ["eyebrow"],
+                      "style": {
+                        "color": "#f3c7a4"
+                      }
+                    },
+                    {
+                      "id": "page-headin02y",
+                      "type": "heading",
+                      "props": {
+                        "text": "Tell us where you want to walk",
+                        "level": 2
+                      },
+                      "style": {
+                        "color": {
+                          "var": "white"
+                        }
+                      }
+                    },
+                    {
+                      "id": "page-text02z",
+                      "type": "text",
+                      "props": {
+                        "text": "A guide reads every message and replies within two working days with dates, a packing list and an honest view of the route."
+                      },
+                      "classes": ["lead"],
+                      "style": {
+                        "color": "#ffffffcc"
+                      }
+                    },
+                    {
+                      "id": "page-list030",
+                      "type": "list",
+                      "props": {
+                        "items": [
+                          "No deposit until your dates are confirmed",
+                          "Free date changes up to 30 days out",
+                          "Gear rental at every trailhead"
+                        ]
+                      },
+                      "style": {
+                        "color": "#ffffffd9",
+                        "lineHeight": {
+                          "value": 2,
+                          "unit": "em"
+                        },
+                        "fontSize": {
+                          "value": 16,
+                          "unit": "px"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "page-contai039",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "backgroundColor": {
+                      "var": "white"
+                    },
+                    "borderRadius": {
+                      "value": 24,
+                      "unit": "px"
+                    },
+                    "paddingTop": {
+                      "var": "lg",
+                      "from": "spacing"
+                    },
+                    "paddingBottom": {
+                      "var": "lg",
+                      "from": "spacing"
+                    },
+                    "paddingLeft": {
+                      "var": "lg",
+                      "from": "spacing"
+                    },
+                    "paddingRight": {
+                      "var": "lg",
+                      "from": "spacing"
+                    },
+                    "boxShadow": {
+                      "x": 0,
+                      "y": 30,
+                      "blur": 60,
+                      "spread": -20,
+                      "color": "#00000059"
+                    }
+                  },
+                  "devices": {
+                    "mobile": {
+                      "gridColumnSpan": 2,
+                      "paddingLeft": {
+                        "var": "md",
+                        "from": "spacing"
+                      },
+                      "paddingRight": {
+                        "var": "md",
+                        "from": "spacing"
+                      }
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-form038",
+                      "type": "form",
+                      "props": {
+                        "formId": "form-1"
+                      },
+                      "style": {
+                        "gap": {
+                          "value": 16,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "ink"
+                        },
+                        "fontSize": {
+                          "value": 15,
+                          "unit": "px"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-textin032",
+                          "type": "text-input",
+                          "props": {
+                            "field": "name",
+                            "label": "Your name",
+                            "placeholder": "Alex Morgan"
+                          }
+                        },
+                        {
+                          "id": "page-textin033",
+                          "type": "text-input",
+                          "props": {
+                            "field": "email",
+                            "label": "Email",
+                            "placeholder": "alex@example.com"
+                          }
+                        },
+                        {
+                          "id": "page-select034",
+                          "type": "select",
+                          "props": {
+                            "field": "trip",
+                            "label": "Which trip?"
+                          }
+                        },
+                        {
+                          "id": "page-textar035",
+                          "type": "textarea",
+                          "props": {
+                            "field": "message",
+                            "label": "Anything we should know?",
+                            "placeholder": "Dates, fitness, dietary needs…"
+                          }
+                        },
+                        {
+                          "id": "page-checkb036",
+                          "type": "checkbox",
+                          "props": {
+                            "field": "guide",
+                            "label": "Send me the 2026 route guide"
+                          }
+                        },
+                        {
+                          "id": "page-submit037",
+                          "type": "submit",
+                          "props": {
+                            "label": "Send enquiry"
+                          },
+                          "classes": ["btn"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "page-contai03p",
+          "type": "container",
+          "props": {
+            "tag": "section"
+          },
+          "classes": ["section"],
+          "htmlId": "faq",
+          "children": [
+            {
+              "id": "page-contai03o",
+              "type": "container",
+              "props": {},
+              "style": {
+                "width": {
+                  "value": 100,
+                  "unit": "%"
+                },
+                "maxWidth": {
+                  "value": 820,
+                  "unit": "px"
+                },
+                "gap": {
+                  "var": "lg",
+                  "from": "spacing"
+                },
+                "alignItems": "center"
+              },
+              "children": [
+                {
+                  "id": "page-contai03e",
+                  "type": "container",
+                  "props": {},
+                  "style": {
+                    "gap": {
+                      "var": "sm",
+                      "from": "spacing"
+                    },
+                    "alignItems": "center"
+                  },
+                  "children": [
+                    {
+                      "id": "page-label03c",
+                      "type": "label",
+                      "props": {
+                        "text": "Questions"
+                      },
+                      "classes": ["eyebrow"]
+                    },
+                    {
+                      "id": "page-headin03d",
+                      "type": "heading",
+                      "props": {
+                        "text": "Before you lace up",
+                        "level": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "page-accord03n",
+                  "type": "accordion",
+                  "props": {},
+                  "style": {
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "page-accord03g",
+                      "type": "accordion-item",
+                      "props": {
+                        "summary": "How fit do I need to be?",
+                        "open": true
+                      },
+                      "style": {
+                        "borderColor": {
+                          "var": "line"
+                        },
+                        "fontSize": {
+                          "value": 19,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "ink"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-text03f",
+                          "type": "text",
+                          "props": {
+                            "text": "If you can walk five hours with breaks and a light daypack, our Easy and Moderate trips will suit you. Challenging trips add longer climbs and rougher ground. We grade every route honestly."
+                          },
+                          "style": {
+                            "maxWidth": {
+                              "value": 760,
+                              "unit": "px"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "page-accord03i",
+                      "type": "accordion-item",
+                      "props": {
+                        "summary": "What is included in the price?"
+                      },
+                      "style": {
+                        "borderColor": {
+                          "var": "line"
+                        },
+                        "fontSize": {
+                          "value": 19,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "ink"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-text03h",
+                          "type": "text",
+                          "props": {
+                            "text": "Guides, all nights' accommodation, breakfasts and dinners, packed lunches, luggage transfers and park permits. Flights and travel insurance are not included."
+                          },
+                          "style": {
+                            "maxWidth": {
+                              "value": 760,
+                              "unit": "px"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "page-accord03k",
+                      "type": "accordion-item",
+                      "props": {
+                        "summary": "Can I come on my own?"
+                      },
+                      "style": {
+                        "borderColor": {
+                          "var": "line"
+                        },
+                        "fontSize": {
+                          "value": 19,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "ink"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-text03j",
+                          "type": "text",
+                          "props": {
+                            "text": "Yes. About half of our walkers travel solo. Private rooms are standard, so there is no single supplement."
+                          },
+                          "style": {
+                            "maxWidth": {
+                              "value": 760,
+                              "unit": "px"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "page-accord03m",
+                      "type": "accordion-item",
+                      "props": {
+                        "summary": "What happens if the weather turns?"
+                      },
+                      "style": {
+                        "borderColor": {
+                          "var": "line"
+                        },
+                        "fontSize": {
+                          "value": 19,
+                          "unit": "px"
+                        },
+                        "color": {
+                          "var": "ink"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "page-text03l",
+                          "type": "text",
+                          "props": {
+                            "text": "Your guide always has a lower-level alternative planned. Safety comes first, and the views from the valley are often just as good."
+                          },
+                          "style": {
+                            "maxWidth": {
+                              "value": 760,
+                              "unit": "px"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

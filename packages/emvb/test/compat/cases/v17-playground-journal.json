@@ -1,0 +1,509 @@
+{
+  "design": {
+    "schemaVersion": 16,
+    "variables": {
+      "colors": [
+        {
+          "id": "ink",
+          "name": "Ink",
+          "value": "#14161a"
+        },
+        {
+          "id": "paper",
+          "name": "Paper",
+          "value": "#faf8f3"
+        },
+        {
+          "id": "brand",
+          "name": "Brand",
+          "value": "#2f5bea"
+        },
+        {
+          "id": "brand-dark",
+          "name": "Brand dark",
+          "value": "#2347c4"
+        },
+        {
+          "id": "brand-soft",
+          "name": "Brand soft",
+          "value": "#e8eefd"
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "value": "#f2994a"
+        },
+        {
+          "id": "muted",
+          "name": "Muted text",
+          "value": "#545b66"
+        },
+        {
+          "id": "line",
+          "name": "Line",
+          "value": "#e4dfd3"
+        }
+      ],
+      "fonts": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": "Georgia, \"Times New Roman\", serif"
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+        }
+      ],
+      "fontSizes": [
+        {
+          "id": "lede",
+          "name": "Lede",
+          "value": {
+            "value": 1.25,
+            "unit": "rem"
+          }
+        },
+        {
+          "id": "small",
+          "name": "Small",
+          "value": {
+            "value": 0.875,
+            "unit": "rem"
+          }
+        }
+      ],
+      "spacings": [
+        {
+          "id": "section",
+          "name": "Section padding",
+          "value": {
+            "value": 96,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "gutter",
+          "name": "Gutter",
+          "value": {
+            "value": 24,
+            "unit": "px"
+          }
+        }
+      ]
+    },
+    "classes": [
+      {
+        "id": "card",
+        "name": "Card",
+        "style": {
+          "flexDirection": "column",
+          "gap": {
+            "value": 12,
+            "unit": "px"
+          },
+          "paddingTop": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 28,
+            "unit": "px"
+          },
+          "backgroundColor": "#ffffff",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "line"
+          },
+          "borderRadius": {
+            "value": 18,
+            "unit": "px"
+          },
+          "transition": {
+            "duration": 200,
+            "easing": "ease-out",
+            "property": "all"
+          }
+        },
+        "states": {
+          "hover": {
+            "borderColor": {
+              "var": "brand"
+            },
+            "boxShadow": {
+              "x": 0,
+              "y": 12,
+              "blur": 32,
+              "spread": -12,
+              "color": "#2f5bea55"
+            }
+          }
+        }
+      },
+      {
+        "id": "eyebrow",
+        "name": "Eyebrow",
+        "style": {
+          "color": {
+            "var": "brand"
+          },
+          "fontSize": {
+            "var": "small",
+            "from": "fontSize"
+          },
+          "fontWeight": 600,
+          "letterSpacing": {
+            "value": 0.08,
+            "unit": "em"
+          },
+          "textTransform": "uppercase"
+        }
+      },
+      {
+        "id": "button-primary",
+        "name": "Button primary",
+        "style": {
+          "backgroundColor": {
+            "var": "brand"
+          },
+          "color": "#ffffff",
+          "paddingTop": {
+            "value": 14,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 22,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 14,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 22,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "textDecoration": "none",
+          "transition": {
+            "duration": 150,
+            "easing": "ease-out",
+            "property": "colors"
+          }
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "brand-dark"
+            }
+          }
+        }
+      },
+      {
+        "id": "button-ghost",
+        "name": "Button ghost",
+        "style": {
+          "backgroundColor": "#00000000",
+          "color": {
+            "var": "ink"
+          },
+          "paddingTop": {
+            "value": 13,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 21,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 13,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 21,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "ink"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "textDecoration": "none"
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "ink"
+            },
+            "color": {
+              "var": "paper"
+            }
+          }
+        }
+      }
+    ],
+    "defaults": {
+      "h1": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 3.5,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.08,
+        "letterSpacing": {
+          "value": -0.02,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h2": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 2.4,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.15,
+        "letterSpacing": {
+          "value": -0.01,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h3": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 1.2,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "color": {
+          "var": "ink"
+        }
+      },
+      "p": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "lineHeight": 1.6,
+        "color": {
+          "var": "muted"
+        }
+      },
+      "a": {
+        "color": {
+          "var": "brand"
+        }
+      }
+    }
+  },
+  "layout": {
+    "schemaVersion": 17,
+    "root": {
+      "id": "pg-j-root",
+      "type": "container",
+      "props": {
+        "tag": "main"
+      },
+      "style": {
+        "flexDirection": "column",
+        "gap": {
+          "value": 32,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 72,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 72,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 24,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 24,
+          "unit": "px"
+        },
+        "backgroundColor": {
+          "var": "paper"
+        },
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        }
+      },
+      "children": [
+        {
+          "id": "pg-j-eyebrow",
+          "type": "label",
+          "props": {
+            "text": "The Fieldnote journal"
+          },
+          "classes": ["eyebrow"]
+        },
+        {
+          "id": "pg-j-title",
+          "type": "heading",
+          "props": {
+            "text": "Notes on writing things down",
+            "level": 1
+          }
+        },
+        {
+          "id": "pg-j-lede",
+          "type": "text",
+          "props": {
+            "text": "This Loop repeats its item for each post. The playground fills it with a few made-up posts; on a real site they come from EmDash."
+          }
+        },
+        {
+          "id": "pg-j-loop",
+          "type": "loop",
+          "props": {
+            "perPage": 6
+          },
+          "style": {
+            "flexDirection": "column",
+            "gap": {
+              "value": 20,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "pg-j-card",
+              "type": "flexbox",
+              "props": {},
+              "classes": ["card"],
+              "children": [
+                {
+                  "id": "pg-j-date",
+                  "type": "post-date",
+                  "props": {
+                    "format": "long"
+                  },
+                  "style": {
+                    "fontSize": {
+                      "var": "small",
+                      "from": "fontSize"
+                    },
+                    "color": {
+                      "var": "muted"
+                    }
+                  }
+                },
+                {
+                  "id": "pg-j-post-title",
+                  "type": "post-title",
+                  "props": {
+                    "level": 2
+                  },
+                  "style": {
+                    "fontSize": {
+                      "value": 1.5,
+                      "unit": "rem"
+                    }
+                  }
+                },
+                {
+                  "id": "pg-j-excerpt",
+                  "type": "post-excerpt",
+                  "props": {
+                    "maxWords": 30
+                  }
+                },
+                {
+                  "id": "pg-j-link",
+                  "type": "post-link",
+                  "props": {
+                    "text": "Read the post →"
+                  },
+                  "style": {
+                    "fontWeight": 600
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "dynamic": {
+    "posts": [
+      {
+        "id": "post-1",
+        "slug": "decision-logs",
+        "title": "Why every team needs a decision log",
+        "excerpt": "Most arguments at work are about decisions nobody wrote down. A decision log is a single page that ends them: what was decided, by whom, and why.",
+        "content": "A decision log is a single page that ends re-arguing.",
+        "permalink": "#decision-logs",
+        "publishedAt": "2026-09-29",
+        "authorName": "Maya Okafor"
+      },
+      {
+        "id": "post-2",
+        "slug": "meeting-notes",
+        "title": "Meeting notes people actually open",
+        "excerpt": "Put the outcome first, the to-dos second and the discussion last. Readers who stop after one line still leave with what matters.",
+        "content": "Outcome first, to-dos second, discussion last.",
+        "permalink": "#meeting-notes",
+        "publishedAt": "2026-09-15",
+        "authorName": "Jonas Berg"
+      },
+      {
+        "id": "post-3",
+        "slug": "quiet-tools",
+        "title": "The case for quiet tools",
+        "excerpt": "Badges and streaks are great for engagement and terrible for focus. We built Fieldnote to be the tool you forget is there until you need it.",
+        "content": "Quiet tools respect attention.",
+        "permalink": "#quiet-tools",
+        "publishedAt": "2026-08-30",
+        "authorName": "Maya Okafor"
+      }
+    ]
+  }
+}
