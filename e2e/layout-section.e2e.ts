@@ -62,7 +62,7 @@ test("a layout Section is added, takes a dropped element in its inner box, and k
   await canvas(page)
     .locator(".emvb-layout-section")
     .click({ position: { x: 4, y: 4 } });
-  await expect(overlay(page).locator(".emvb-panel-title")).toHaveText("Section");
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Section");
   const width = overlay(page).getByLabel("Content width (px)");
   await width.fill("600");
   await width.blur();

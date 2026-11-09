@@ -47,7 +47,7 @@ test("the Desktop canvas lays the page out at 1280 px and scales it to fit, with
   const box = await second.boundingBox();
   if (!box) throw new Error("no box");
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
-  await expect(overlay(page).locator(".emvb-panel-title")).toHaveText("Text");
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Text");
   const outline = await overlay(page).locator('[data-emvb-selected="text0001"]').boundingBox();
   if (!outline) throw new Error("no outline");
   near(outline.x, box.x);

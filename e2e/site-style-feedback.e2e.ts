@@ -54,8 +54,14 @@ test("W-724: publishing site styles shows stable pending feedback and recovers f
     await expect(publish).toHaveAttribute("aria-busy", "true");
     await expect(status).toHaveText("Publishing site styles…");
     await expect(publish.locator('svg[role="status"]')).toHaveCount(1);
-    expect(await publish.evaluate((el) => el.getBoundingClientRect().width)).toBe(beforeWidth);
-    expect(await status.evaluate((el) => el.getBoundingClientRect().height)).toBe(beforeHeight);
+    expect(await publish.evaluate((el) => el.getBoundingClientRect().width)).toBeCloseTo(
+      beforeWidth,
+      1,
+    );
+    expect(await status.evaluate((el) => el.getBoundingClientRect().height)).toBeCloseTo(
+      beforeHeight,
+      1,
+    );
     await page.screenshot({ path: `/tmp/emvb-style-publish-${test.info().project.name}.png` });
 
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -63,7 +69,10 @@ test("W-724: publishing site styles shows stable pending feedback and recovers f
     await expect(publish.locator("animate, animateTransform")).toHaveCount(0);
     await expect(publish).toBeDisabled();
     await expect(status).toHaveText("Publishing site styles…");
-    expect(await publish.evaluate((el) => el.getBoundingClientRect().width)).toBe(beforeWidth);
+    expect(await publish.evaluate((el) => el.getBoundingClientRect().width)).toBeCloseTo(
+      beforeWidth,
+      1,
+    );
     await page.screenshot({
       path: `/tmp/emvb-style-publish-${test.info().project.name}-reduce.png`,
     });

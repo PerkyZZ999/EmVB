@@ -11,7 +11,7 @@ setUpEmvbOnce();
 // Screenshots for review (W-904); outside the repo, copied to the box by hand.
 const SHOTS = `${homedir()}/agent-tools/emvb-ui`;
 const layout = (text: string) => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",
