@@ -408,6 +408,18 @@ export function GradientControl({
   );
 }
 
+/** A gradient overlay starts as a scrim: dark behind the text on the left, clear on the right. */
+const NEW_GRADIENT_OVERLAY: Overlay = {
+  gradient: {
+    type: "linear",
+    angle: 90,
+    stops: [
+      { color: "#000000cc", at: 0 },
+      { color: "#00000000", at: 100 },
+    ],
+  },
+};
+
 export function OverlayControl({
   value,
   design,
@@ -421,9 +433,19 @@ export function OverlayControl({
   onDesignChange: (design: DesignSystem) => Promise<void>;
   reset: React.ReactNode;
 }) {
-  const patch = (part: Partial<Overlay>) => {
-    if (!value) return;
-    onChange({ ...value, ...part });
+  const kind = value && "gradient" in value ? "gradient" : "color";
+  // W-949: switching kind keeps the opacity and swaps the paint.
+  const choose = (next: "color" | "gradient") => {
+    if (!value || next === kind) return;
+    const opacity = value.opacity;
+    if (next === "gradient") {
+      onChange({
+        ...NEW_GRADIENT_OVERLAY,
+        ...(opacity !== undefined && opacity !== 1 ? { opacity } : {}),
+      });
+    } else {
+      onChange({ ...NEW_OVERLAY, ...(opacity !== undefined ? { opacity } : {}) });
+    }
   };
   return (
     <div className="emvb-style-row" data-emvb-style="overlay" data-set={value ? "true" : undefined}>
@@ -431,19 +453,48 @@ export function OverlayControl({
         <span className="emvb-var-field-label">Overlay</span>
         {value ? (
           <>
-            <ColorControl
-              label="Overlay color"
-              value={value.color}
-              design={design}
-              onChange={(color) => color && patch({ color })}
-              onDesignChange={onDesignChange}
-            />
+            <div className="emvb-fill-types" role="radiogroup" aria-label="Overlay type">
+              {(["color", "gradient"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="radio"
+                  aria-checked={kind === option}
+                  data-emvb-overlay-type={option}
+                  onClick={() => choose(option)}
+                >
+                  {option === "color" ? "Color" : "Gradient"}
+                </button>
+              ))}
+            </div>
+            {"color" in value ? (
+              <ColorControl
+                label="Overlay color"
+                value={value.color}
+                design={design}
+                onChange={(color) => color && onChange({ ...value, color })}
+                onDesignChange={onDesignChange}
+              />
+            ) : (
+              <GradientControl
+                value={value.gradient}
+                design={design}
+                onChange={(gradient) => onChange({ ...value, gradient })}
+                onDesignChange={onDesignChange}
+              />
+            )}
             <NumberField
               fieldKey="overlay.opacity"
               label="Overlay opacity"
-              value={value.opacity}
+              value={value.opacity ?? ("gradient" in value ? 1 : undefined)}
               spec={OVERLAY_OPACITY}
-              onCommit={(n) => patch({ opacity: n ?? 0 })}
+              onCommit={(n) => {
+                if ("color" in value) onChange({ ...value, opacity: n ?? 0 });
+                else {
+                  const { opacity: _old, ...rest } = value;
+                  onChange(n === undefined || n === 1 ? rest : { ...rest, opacity: n });
+                }
+              }}
             />
           </>
         ) : (

@@ -205,6 +205,34 @@ export const Motion = z.strictObject({
 
 export type Motion = z.infer<typeof Motion>;
 
+/** A gradient: up to 10 stops (W-160). Also the paint of a gradient overlay (W-949). */
+const Gradient = z.strictObject({
+  type: z.enum(["linear", "radial", "conic"]),
+  angle: z.number().int().min(0).max(360).optional(),
+  position: z.enum(BACKGROUND_POSITIONS).optional(),
+  stops: z
+    .array(
+      z.strictObject({
+        color: ColorValue,
+        at: z.number().int().min(0).max(100),
+      }),
+    )
+    .min(2)
+    .max(10),
+});
+
+/** A colour or gradient laid over a background (W-094, W-949). */
+const Overlay = z.union([
+  z.strictObject({
+    color: ColorValue,
+    opacity: z.number().finite().min(0).max(1),
+  }),
+  z.strictObject({
+    gradient: Gradient,
+    opacity: z.number().finite().min(0).max(1).optional(),
+  }),
+]);
+
 /**
  * Style properties for layout and text elements (W-017 / R-012). Unknown keys are refused here;
  * `validateLayout` and `validateDesign` keep a newer 1.x key aside and puts it back untouched (D-065, W-925).
@@ -321,29 +349,12 @@ export const StyleProps = z.strictObject({
    * Background gradient (W-160). Up to 10 stops. `angle` is the linear direction and the conic
    * start; `position` is the radial centre. A stop colour variable is a colour use.
    */
-  gradient: z
-    .strictObject({
-      type: z.enum(["linear", "radial", "conic"]),
-      angle: z.number().int().min(0).max(360).optional(),
-      position: z.enum(BACKGROUND_POSITIONS).optional(),
-      stops: z
-        .array(
-          z.strictObject({
-            color: ColorValue,
-            at: z.number().int().min(0).max(100),
-          }),
-        )
-        .min(2)
-        .max(10),
-    })
-    .optional(),
-  /** A colour laid over the image and gradient. `opacity` is 0–1 (W-094). */
-  overlay: z
-    .strictObject({
-      color: ColorValue,
-      opacity: z.number().finite().min(0).max(1),
-    })
-    .optional(),
+  gradient: Gradient.optional(),
+  /**
+   * Laid over the image and gradient (W-094): a colour, or since W-949 a gradient (a scrim that
+   * fades from dark behind the text to clear). `opacity` 0–1 fades the whole overlay.
+   */
+  overlay: Overlay.optional(),
   borderWidth: LengthValue.optional(),
   /** Per-side widths (W-138, D-044), after `borderWidth`, so a side beats the all-sides value. */
   borderTopWidth: LengthValue.optional(),

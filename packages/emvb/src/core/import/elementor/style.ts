@@ -135,6 +135,29 @@ const sameLength = (values: readonly { value: number; unit: string }[]) =>
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+/** Elementor's two-colour gradient settings under prefix `k` (`background_`, `background_overlay_`). */
+function gradientOf(s: Settings, k: string, ctx: ImportContext): Style | undefined {
+  const a = colorAt(s, `${k}color`, ctx);
+  const b = colorAt(s, `${k}color_b`, ctx);
+  if (!a || !b) return undefined;
+  const sizeOf = (key: string, fallback: number) =>
+    num(isRecord(s[key]) ? (s[key] as Settings)["size"] : undefined) ?? fallback;
+  const stopA = clamp(Math.round(sizeOf(`${k}color_stop`, 0)), 0, 100);
+  const stopB = clamp(Math.round(sizeOf(`${k}color_b_stop`, 100)), 0, 100);
+  const radial = str(s[`${k}gradient_type`]) === "radial";
+  const angle = sizeOf(`${k}gradient_angle`, 180);
+  return {
+    type: radial ? "radial" : "linear",
+    ...(radial
+      ? { position: backgroundPosition(s[`${k}gradient_position`]) ?? "center" }
+      : { angle: clamp(Math.round(((angle % 360) + 360) % 360), 0, 360) }),
+    stops: [
+      { color: a, at: stopA },
+      { color: b, at: Math.max(stopA, stopB) },
+    ],
+  };
+}
+
 /** `background_*` (or `_background_*`): classic colour and image, gradient, overlay. */
 function background(s: Settings, k: string, d: Device, ctx: ImportContext, el: string): Style {
   const style: Style = {};
@@ -169,47 +192,8 @@ function background(s: Settings, k: string, d: Device, ctx: ImportContext, el: s
       }
     }
   } else if (kind === "gradient" && d === "") {
-    const a = colorAt(s, `${k}color`, ctx);
-    const b = colorAt(s, `${k}color_b`, ctx);
-    if (a && b) {
-      const stopA = clamp(
-        Math.round(
-          num(
-            isRecord(s[`${k}color_stop`]) ? (s[`${k}color_stop`] as Settings)["size"] : undefined,
-          ) ?? 0,
-        ),
-        0,
-        100,
-      );
-      const stopB = clamp(
-        Math.round(
-          num(
-            isRecord(s[`${k}color_b_stop`])
-              ? (s[`${k}color_b_stop`] as Settings)["size"]
-              : undefined,
-          ) ?? 100,
-        ),
-        0,
-        100,
-      );
-      const radial = str(s[`${k}gradient_type`]) === "radial";
-      const angle =
-        num(
-          isRecord(s[`${k}gradient_angle`])
-            ? (s[`${k}gradient_angle`] as Settings)["size"]
-            : undefined,
-        ) ?? 180;
-      style["gradient"] = {
-        type: radial ? "radial" : "linear",
-        ...(radial
-          ? { position: backgroundPosition(s[`${k}gradient_position`]) ?? "center" }
-          : { angle: clamp(Math.round(((angle % 360) + 360) % 360), 0, 360) }),
-        stops: [
-          { color: a, at: stopA },
-          { color: b, at: Math.max(stopA, stopB) },
-        ],
-      };
-    }
+    const gradient = gradientOf(s, k, ctx);
+    if (gradient) style["gradient"] = gradient;
   } else if (kind === "video" && d === "") {
     const link = str(s[`${k}video_link`])?.trim();
     if (link && /^https?:\/\/[^\s()"'`\\]+\.(?:mp4|webm|ogg)(?:\?[^\s()"'`\\]*)?$/i.test(link)) {
@@ -239,7 +223,16 @@ function background(s: Settings, k: string, d: Device, ctx: ImportContext, el: s
       const amount = num(isRecord(opacity) ? opacity["size"] : opacity);
       if (overlay) style["overlay"] = { color: overlay, opacity: clamp(amount ?? 0.5, 0, 1) };
     } else if (overlayKind === "gradient") {
-      ctx.note("approximated", el, "A gradient overlay was left out.");
+      // W-949: EmVB overlays can be gradients.
+      const gradient = gradientOf(s, ok, ctx);
+      const opacity = s[`${ok}opacity`];
+      const amount = num(isRecord(opacity) ? opacity["size"] : opacity);
+      if (gradient) {
+        style["overlay"] = {
+          gradient,
+          ...(amount !== undefined && amount < 1 ? { opacity: clamp(amount, 0, 1) } : {}),
+        };
+      }
     }
   }
   return style;

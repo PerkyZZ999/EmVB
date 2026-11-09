@@ -227,3 +227,93 @@ describe("background images, gradients and overlays (W-094)", () => {
     expect(emptyDesign().schemaVersion).toBe(DESIGN_SCHEMA_VERSION);
   });
 });
+
+describe("gradient overlays (W-949)", () => {
+  const scrim = {
+    type: "linear" as const,
+    angle: 90,
+    stops: [
+      { color: "#06295b", at: 0 },
+      { color: "#06295b00", at: 80 },
+    ],
+  };
+
+  test("a gradient overlay is drawn above the image, a scrim", () => {
+    const { declarations, rejected } = styleDeclarations({
+      backgroundImage: image,
+      overlay: { gradient: scrim },
+    });
+    expect(rejected).toEqual([]);
+    expect(declarations[0]?.value).toBe(
+      `linear-gradient(90deg, #06295b 0%, #06295b00 80%),url("${image}")`,
+    );
+    expect(declarations.find((d) => d.property === "--emvb-bg-overlay")?.value).toBe(
+      "linear-gradient(90deg, #06295b 0%, #06295b00 80%)",
+    );
+  });
+
+  test("its opacity fades every stop, hex and variable", () => {
+    const { declarations } = styleDeclarations({
+      overlay: {
+        gradient: {
+          ...scrim,
+          stops: [
+            { color: "#000000", at: 0 },
+            { color: { var: "ink" }, at: 100 },
+          ],
+        },
+        opacity: 0.5,
+      },
+    });
+    expect(declarations[0]?.value).toBe(
+      "linear-gradient(90deg, #00000080 0%, color-mix(in srgb, var(--emvb-c-ink) 50%, transparent) 100%)",
+    );
+  });
+
+  test.each([
+    [{ gradient: scrim, color: "#000000" }],
+    [{ gradient: { ...scrim, stops: [{ color: "#000000", at: 0 }] } }],
+    [{ gradient: scrim, opacity: 2 }],
+    [
+      {
+        gradient: {
+          ...scrim,
+          stops: [
+            { color: "red;}body{x", at: 0 },
+            { color: "#000000", at: 1 },
+          ],
+        },
+      },
+    ],
+  ])("a malformed gradient overlay is refused %#", (overlay) => {
+    expect(StyleProps.safeParse({ overlay }).success).toBe(false);
+    expect(styleDeclarations({ overlay }).rejected).toEqual(["overlay"]);
+  });
+
+  test("deleting a colour variable used by a stop clears the gradient overlay", () => {
+    const page: Layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        style: {
+          overlay: {
+            gradient: {
+              ...scrim,
+              stops: [
+                { color: { var: "brand" }, at: 0 },
+                { color: "#ffffff", at: 100 },
+              ],
+            },
+          },
+        },
+        children: [],
+      },
+    };
+    expect(findVariableUsages(page, "brand", "color").map((u) => u.prop)).toEqual([
+      "overlay.gradient.stops.0",
+    ]);
+    expect(clearVariableRefs(page, "brand", "color").root.style).toBeUndefined();
+  });
+});

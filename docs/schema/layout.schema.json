@@ -1689,49 +1689,154 @@
           "additionalProperties": false
         },
         "overlay": {
-          "type": "object",
-          "properties": {
-            "color": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "color": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "var": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9-]{1,40}$"
+                        },
+                        "from": {
+                          "type": "string",
+                          "enum": [
+                            "color",
+                            "font",
+                            "fontSize",
+                            "spacing"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "var"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
                 },
-                {
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "color",
+                "opacity"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "gradient": {
                   "type": "object",
                   "properties": {
-                    "var": {
-                      "type": "string",
-                      "pattern": "^[a-z0-9-]{1,40}$"
-                    },
-                    "from": {
+                    "type": {
                       "type": "string",
                       "enum": [
-                        "color",
-                        "font",
-                        "fontSize",
-                        "spacing"
+                        "linear",
+                        "radial",
+                        "conic"
                       ]
+                    },
+                    "angle": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 360
+                    },
+                    "position": {
+                      "type": "string",
+                      "enum": [
+                        "center",
+                        "top",
+                        "bottom",
+                        "left",
+                        "right",
+                        "top left",
+                        "top right",
+                        "bottom left",
+                        "bottom right"
+                      ]
+                    },
+                    "stops": {
+                      "minItems": 2,
+                      "maxItems": 10,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "color": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "var": {
+                                    "type": "string",
+                                    "pattern": "^[a-z0-9-]{1,40}$"
+                                  },
+                                  "from": {
+                                    "type": "string",
+                                    "enum": [
+                                      "color",
+                                      "font",
+                                      "fontSize",
+                                      "spacing"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "var"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          },
+                          "at": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "color",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      }
                     }
                   },
                   "required": [
-                    "var"
+                    "type",
+                    "stops"
                   ],
                   "additionalProperties": false
+                },
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
-              ]
-            },
-            "opacity": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
+              },
+              "required": [
+                "gradient"
+              ],
+              "additionalProperties": false
             }
-          },
-          "required": [
-            "color",
-            "opacity"
-          ],
-          "additionalProperties": false
+          ]
         },
         "borderWidth": {
           "anyOf": [
@@ -4499,49 +4604,154 @@
           "additionalProperties": false
         },
         "overlay": {
-          "type": "object",
-          "properties": {
-            "color": {
-              "anyOf": [
-                {
-                  "type": "string",
-                  "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "color": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "var": {
+                          "type": "string",
+                          "pattern": "^[a-z0-9-]{1,40}$"
+                        },
+                        "from": {
+                          "type": "string",
+                          "enum": [
+                            "color",
+                            "font",
+                            "fontSize",
+                            "spacing"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "var"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
                 },
-                {
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "color",
+                "opacity"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "gradient": {
                   "type": "object",
                   "properties": {
-                    "var": {
-                      "type": "string",
-                      "pattern": "^[a-z0-9-]{1,40}$"
-                    },
-                    "from": {
+                    "type": {
                       "type": "string",
                       "enum": [
-                        "color",
-                        "font",
-                        "fontSize",
-                        "spacing"
+                        "linear",
+                        "radial",
+                        "conic"
                       ]
+                    },
+                    "angle": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 360
+                    },
+                    "position": {
+                      "type": "string",
+                      "enum": [
+                        "center",
+                        "top",
+                        "bottom",
+                        "left",
+                        "right",
+                        "top left",
+                        "top right",
+                        "bottom left",
+                        "bottom right"
+                      ]
+                    },
+                    "stops": {
+                      "minItems": 2,
+                      "maxItems": 10,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "color": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "var": {
+                                    "type": "string",
+                                    "pattern": "^[a-z0-9-]{1,40}$"
+                                  },
+                                  "from": {
+                                    "type": "string",
+                                    "enum": [
+                                      "color",
+                                      "font",
+                                      "fontSize",
+                                      "spacing"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "var"
+                                ],
+                                "additionalProperties": false
+                              }
+                            ]
+                          },
+                          "at": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 100
+                          }
+                        },
+                        "required": [
+                          "color",
+                          "at"
+                        ],
+                        "additionalProperties": false
+                      }
                     }
                   },
                   "required": [
-                    "var"
+                    "type",
+                    "stops"
                   ],
                   "additionalProperties": false
+                },
+                "opacity": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
-              ]
-            },
-            "opacity": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
+              },
+              "required": [
+                "gradient"
+              ],
+              "additionalProperties": false
             }
-          },
-          "required": [
-            "color",
-            "opacity"
-          ],
-          "additionalProperties": false
+          ]
         },
         "borderWidth": {
           "anyOf": [

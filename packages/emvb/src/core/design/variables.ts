@@ -50,7 +50,13 @@ export function forEachStyleRef(
   style.gradient?.stops.forEach((stop, index) => {
     visit(stop.color, `gradient.stops.${index}`);
   });
-  if (style.overlay) visit(style.overlay.color, "overlay.color");
+  const overlay = style.overlay;
+  if (overlay && "color" in overlay) visit(overlay.color, "overlay.color");
+  if (overlay && "gradient" in overlay) {
+    overlay.gradient.stops.forEach((stop, index) => {
+      visit(stop.color, `overlay.gradient.stops.${index}`);
+    });
+  }
 }
 
 function collectStyleUsages(
@@ -150,7 +156,14 @@ function stripRefsFromStyle(
     delete next["gradient"];
     changed = true;
   }
-  if (style.overlay && matches(style.overlay.color, id, kind)) {
+  // W-949: a gradient overlay goes with any of its stops, as a gradient does.
+  const overlay = style.overlay;
+  if (
+    overlay &&
+    ("color" in overlay
+      ? matches(overlay.color, id, kind)
+      : overlay.gradient.stops.some((stop) => matches(stop.color, id, kind)))
+  ) {
     delete next["overlay"];
     changed = true;
   }

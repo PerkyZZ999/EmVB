@@ -43228,20 +43228,6 @@
       "expect": "\\(fail\\).*fluid sizes take their large value, phones their small one; laptop folds"
     },
     {
-      "id": "W-945/scrim-under-image",
-      "requirement": "W-945",
-      "description": "A gradient over an image is kept as a gradient EmVB draws under the image.",
-      "edits": [
-        {
-          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
-          "search": "stops.length >= 2 && imageAt > index",
-          "replace": "stops.length >= 2 && imageAt > 1000"
-        }
-      ],
-      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
-      "expect": "\\(fail\\).*a gradient drawn over an image becomes an even overlay"
-    },
-    {
       "id": "W-945/capped-width-gutters-lost",
       "requirement": "W-945",
       "description": "A capped wrapper loses its side gutters on narrow screens.",
@@ -43454,6 +43440,94 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
       "expect": "\\(fail\\).*W-957: an Elementor 4 backdrop blur"
+    },
+    {
+      "id": "W-949/gradient-overlay-not-drawn",
+      "requirement": "W-949",
+      "description": "A gradient overlay writes no CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    return cssGradient(value[\"gradient\"], (color) => overlayPaint(color, opacity));",
+          "replace": "    return opacity === -1 ? cssGradient(value[\"gradient\"]) : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/background.test.ts"],
+      "expect": "\\(fail\\).*a gradient overlay is drawn above the image"
+    },
+    {
+      "id": "W-949/gradient-overlay-opacity-ignored",
+      "requirement": "W-949",
+      "description": "A gradient overlay's opacity doesn't fade its stops.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "    return cssGradient(value[\"gradient\"], (color) => overlayPaint(color, opacity));",
+          "replace": "    return cssGradient(value[\"gradient\"]);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/background.test.ts"],
+      "expect": "\\(fail\\).*its opacity fades every stop"
+    },
+    {
+      "id": "W-949/gradient-overlay-variable-kept",
+      "requirement": "W-949",
+      "description": "Deleting a colour variable leaves a gradient overlay pointing at it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/variables.ts",
+          "search": "      : overlay.gradient.stops.some((stop) => matches(stop.color, id, kind)))",
+          "replace": "      : false)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/background.test.ts"],
+      "expect": "\\(fail\\).*deleting a colour variable used by a stop clears the gradient overlay"
+    },
+    {
+      "id": "W-949/overlay-switch-loses-opacity",
+      "requirement": "W-949",
+      "description": "Switching an overlay to a gradient drops its opacity.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/BackgroundControls.tsx",
+          "search": "        ...(opacity !== undefined && opacity !== 1 ? { opacity } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/background-controls.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-949: an overlay switches to a gradient scrim"
+    },
+    {
+      "id": "W-949/scrim-imported-under-image",
+      "requirement": "W-949",
+      "description": "An imported scrim is drawn under the image instead of over it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "                if (imageAt > index) style[\"overlay\"] = { gradient };",
+          "replace": "                if (imageAt > 1000) style[\"overlay\"] = { gradient };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*a gradient drawn over an image becomes a gradient overlay"
+    },
+    {
+      "id": "W-949/v3-gradient-overlay-dropped",
+      "requirement": "W-949",
+      "description": "An Elementor 3 gradient overlay is left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/style.ts",
+          "search": "      const gradient = gradientOf(s, ok, ctx);",
+          "replace": "      const gradient = undefined as Style | undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*W-949: an Elementor 3 gradient overlay"
     }
   ]
 }

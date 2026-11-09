@@ -628,6 +628,40 @@ describe("Elementor import: hostile and oversized input (W-945)", () => {
     expect(notes(result)).toContain("nested deeper than EmVB allows");
   });
 
+  test("W-949: an Elementor 3 gradient overlay becomes a gradient overlay", () => {
+    const result = ok(
+      importElementor([
+        {
+          id: "c",
+          elType: "container",
+          settings: {
+            content_width: "full",
+            background_background: "classic",
+            background_image: { url: "https://cdn.example/hero.jpg" },
+            background_overlay_background: "gradient",
+            background_overlay_color: "#000000",
+            background_overlay_color_b: "rgba(0,0,0,0)",
+            background_overlay_gradient_angle: { unit: "deg", size: 90 },
+            background_overlay_opacity: { size: 0.8 },
+          },
+          elements: [],
+        },
+      ]),
+    );
+    const [box] = (result.layout.root.children ?? []) as Node[];
+    expect(box?.style?.["overlay"]).toEqual({
+      gradient: {
+        type: "linear",
+        angle: 90,
+        stops: [
+          { color: "#000000", at: 0 },
+          { color: "#00000000", at: 100 },
+        ],
+      },
+      opacity: 0.8,
+    });
+  });
+
   test("long text is split, never cut", () => {
     const long = `${"word ".repeat(1000)}end`;
     const result = ok(

@@ -51,10 +51,20 @@ describe("Elementor 4 atomic import (W-945)", () => {
     expect(hero?.devices).toEqual({ mobile: { minHeight: { value: 360, unit: "px" } } });
   });
 
-  test("a gradient drawn over an image becomes an even overlay, and says so", () => {
-    expect(byLabel("Hero")?.style?.["overlay"]).toEqual({ color: "#102030", opacity: 0.5 });
+  test("a gradient drawn over an image becomes a gradient overlay (W-949)", () => {
+    expect(byLabel("Hero")?.style?.["overlay"]).toEqual({
+      gradient: {
+        type: "linear",
+        angle: 90,
+        stops: [
+          { color: "#102030", at: 0 },
+          { color: "#10203080", at: 50 },
+          { color: "#10203000", at: 100 },
+        ],
+      },
+    });
     expect(byLabel("Hero")?.style).not.toHaveProperty("gradient");
-    expect(notes()).toContain("gradient over an image (shown as an even overlay)");
+    expect(notes()).not.toContain("gradient over an image");
   });
 
   test("fluid sizes take their large value, phones their small one; laptop folds into tablet", () => {

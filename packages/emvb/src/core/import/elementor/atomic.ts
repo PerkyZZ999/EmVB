@@ -134,28 +134,6 @@ function colorOf(v: unknown, snap: AtomicSnapshots): string | undefined {
   return color(un(v));
 }
 
-/** The alpha of a 7- or 9-character hex colour. */
-const alpha = (hex: string) => (hex.length === 9 ? Number.parseInt(hex.slice(7), 16) / 255 : 1);
-
-/** A gradient's first colour at its average opacity across 0–100 % (a scrim stand-in). */
-function averageOverlay(
-  stops: { color: string; at: number }[],
-): { color: string; opacity: number } | undefined {
-  const first = stops[0];
-  if (!first) return undefined;
-  let area = 0;
-  let previous = { at: 0, a: alpha(first.color) };
-  for (const stop of [
-    ...stops,
-    { color: stops[stops.length - 1]?.color ?? first.color, at: 100 },
-  ]) {
-    const a = alpha(stop.color);
-    area += ((previous.a + a) / 2) * Math.max(0, stop.at - previous.at);
-    previous = { at: stop.at, a };
-  }
-  return { color: first.color.slice(0, 7), opacity: Math.round((area / 100) * 100) / 100 };
-}
-
 /** Top-level tokens of a track list (commas and spaces inside parentheses stay put). */
 function topLevel(text: string, separator: RegExp): string[] {
   const out: string[] = [];
@@ -251,8 +229,6 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
         if (c) style["backgroundColor"] = c;
         const overlays = un(bg["background-overlay"]);
         if (Array.isArray(overlays) && overlays.length > 0) {
-          // CSS draws the first layer on top. EmVB draws its gradient under the image, so a
-          // gradient listed before an image (a scrim) becomes an even overlay instead.
           const kinds = overlays.map((layer) => typeOf(layer));
           const imageAt = kinds.indexOf("background-image-overlay");
           for (const [index, layer] of overlays.entries()) {
@@ -292,16 +268,10 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
                   color: stop.color,
                   at: Math.min(100, Math.max(0, Math.round(stop.at))),
                 }));
-              if (stops.length >= 2 && imageAt > index) {
-                const scrim = averageOverlay(stops);
-                if (scrim) {
-                  style["overlay"] = scrim;
-                  out.unsupported.push("gradient over an image (shown as an even overlay)");
-                }
-              } else if (stops.length >= 2) {
+              if (stops.length >= 2) {
                 const radial = str(un(body["type"])) === "radial";
                 const angle = Number(un(body["angle"]));
-                style["gradient"] = {
+                const gradient = {
                   type: radial ? "radial" : "linear",
                   ...(radial
                     ? {}
@@ -312,6 +282,10 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
                       }),
                   stops,
                 };
+                // CSS draws the first layer on top: a gradient before the image is a scrim,
+                // EmVB's gradient overlay (W-949); after it, the gradient under the image.
+                if (imageAt > index) style["overlay"] = { gradient };
+                else style["gradient"] = gradient;
               } else out.unsupported.push("background gradient");
             } else {
               out.unsupported.push("background layer");

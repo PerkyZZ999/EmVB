@@ -446,7 +446,11 @@ function cssAngle(value: unknown, fallback: number): number | undefined {
   return angle as number;
 }
 
-function cssGradient(value: unknown): string | undefined {
+function cssGradient(
+  value: unknown,
+  /** W-949: a gradient overlay fades every stop by its opacity. */
+  paint: (color: string) => string | undefined = (color) => color,
+): string | undefined {
   if (!isRecord(value)) return undefined;
   if (
     Object.keys(value).some(
@@ -461,7 +465,8 @@ function cssGradient(value: unknown): string | undefined {
   for (const stop of stops) {
     if (!isRecord(stop) || Object.keys(stop).some((key) => key !== "color" && key !== "at"))
       return undefined;
-    const color = cssColor(stop["color"]);
+    const base = cssColor(stop["color"]);
+    const color = base ? paint(base) : undefined;
     const at = stop["at"];
     if (!color || !Number.isInteger(at) || (at as number) < 0 || (at as number) > 100)
       return undefined;
@@ -508,6 +513,14 @@ function overlayPaint(color: string, opacity: number): string | undefined {
 
 function cssOverlay(value: unknown): string | undefined {
   if (!isRecord(value)) return undefined;
+  if ("gradient" in value) {
+    // W-949: a gradient overlay; `opacity` (default 1) fades each stop.
+    if (Object.keys(value).some((key) => key !== "gradient" && key !== "opacity")) return undefined;
+    const opacity = value["opacity"] === undefined ? 1 : value["opacity"];
+    if (typeof opacity !== "number" || !Number.isFinite(opacity) || opacity < 0 || opacity > 1)
+      return undefined;
+    return cssGradient(value["gradient"], (color) => overlayPaint(color, opacity));
+  }
   if (Object.keys(value).some((key) => key !== "color" && key !== "opacity")) return undefined;
   const color = cssColor(value["color"]);
   const opacity = value["opacity"];

@@ -74,6 +74,57 @@ describe("background controls (W-094)", () => {
     expect(patches.at(-1)).toEqual({ overlay: { color: "#000000", opacity: 0.4 } });
   });
 
+  test("W-949: an overlay switches to a gradient scrim and back, keeping its opacity", async () => {
+    patches.length = 0;
+    const image = { backgroundImage: "https://cdn.example/a.png" };
+    const host = await row("backgroundColor", {
+      ...image,
+      overlay: { color: "#000000", opacity: 0.6 },
+    });
+    expect(
+      host.querySelector('[data-emvb-overlay-type="color"]')?.getAttribute("aria-checked"),
+    ).toBe("true");
+    await act(async () =>
+      host.querySelector<HTMLElement>('[data-emvb-overlay-type="gradient"]')?.click(),
+    );
+    expect(patches.at(-1)).toEqual({
+      overlay: {
+        gradient: {
+          type: "linear",
+          angle: 90,
+          stops: [
+            { color: "#000000cc", at: 0 },
+            { color: "#00000000", at: 100 },
+          ],
+        },
+        opacity: 0.6,
+      },
+    });
+    await cleanup();
+    patches.length = 0;
+    const gradientHost = await row("backgroundColor", {
+      ...image,
+      overlay: {
+        gradient: {
+          type: "linear",
+          angle: 90,
+          stops: [
+            { color: "#000000", at: 0 },
+            { color: "#ffffff", at: 100 },
+          ],
+        },
+      },
+    });
+    // The gradient overlay is edited with the gradient rows.
+    expect(
+      gradientHost.querySelector('[data-emvb-style="overlay"] [data-emvb-gradient]'),
+    ).not.toBeNull();
+    await act(async () =>
+      gradientHost.querySelector<HTMLElement>('[data-emvb-overlay-type="color"]')?.click(),
+    );
+    expect(patches.at(-1)).toEqual({ overlay: { color: "#000000", opacity: 0.4 } });
+  });
+
   test("an Image fill with no image yet says the element has no background (W-174)", async () => {
     patches.length = 0;
     const host = await row("backgroundColor", { backgroundColor: "#ff0000" });
