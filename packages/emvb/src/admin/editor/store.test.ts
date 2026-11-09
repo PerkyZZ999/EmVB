@@ -187,7 +187,7 @@ describe("a new Heading's level (W-147)", () => {
     expect(levelOf(state, "headNEW2")).toBe(2);
   });
 
-  test("in a header part the first Heading stays H2, since the page has its own H1 (W-924)", () => {
+  test("in a header part the first Heading stays H2, since the page has its own H1 (W-946)", () => {
     const page = withoutH1();
     let state: EditorState = { ...page, page: { ...page.page, partType: "header" } };
     state = add(state, fresh("headNEW4"));

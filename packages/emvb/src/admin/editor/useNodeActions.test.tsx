@@ -156,9 +156,9 @@ describe("useNodeActions add from the panel (W-175)", () => {
   });
 });
 
-describe("useNodeActions add a Heading from the panel (W-924)", () => {
+describe("useNodeActions add a Heading from the panel (W-946)", () => {
   const noH1: Layout = {
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: container("root0001", []) as Layout["root"],
   };
   const addedLevel = (actions: EditorAction[]) => {

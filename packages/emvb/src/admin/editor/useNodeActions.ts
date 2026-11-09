@@ -25,7 +25,7 @@ import {
   type LayoutNode,
 } from "../../core/index.ts";
 import { adminExtensionDefaults } from "./extension-manifests.ts";
-import { newElement } from "./dnd/new-element.ts";
+import { newElement, withPageHeadingLevel } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import type { ItemActions } from "./panels/settings/ItemList.tsx";
 import type { EditorAction, EditorState } from "./store.ts";
@@ -232,8 +232,10 @@ export function useNodeActions({
     // UX-094: an empty page (one made outside EmVB has no layout) gets its container first, so
     // a click or palette insert lands instead of doing nothing.
     const layout = current ?? startingLayout();
-    const node = newElement(type, undefined, adminExtensionDefaults(type));
-    if (!node) return;
+    const added = newElement(type, undefined, adminExtensionDefaults(type));
+    if (!added) return;
+    // W-946: a click or palette insert picks the heading level the way a drop does.
+    const node = withPageHeadingLevel(added, layout, latest.current.page.partType);
     const builtInName = ELEMENT_DESCRIPTORS.find((d) => d.type === type)?.name;
     const label = builtInName
       ? builtInName

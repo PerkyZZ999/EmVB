@@ -143,7 +143,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 | Seeded bugs (prove the tests catch real defects) | `bun run seeded-bugs`                                        |
 | Project site (source in `site/`)                 | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |
 
-[CONTRIBUTING.md](CONTRIBUTING.md) covers pull requests and common problems.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers setup, pull requests and troubleshooting.
 
 ## Docs
 

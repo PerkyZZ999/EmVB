@@ -11,7 +11,7 @@ const SHARED_PARTS: ReadonlySet<ThemePartType> = new Set([
   "loop_item",
 ]);
 
-/** True for a part that lands on pages with their own H1, so a new Heading stays H2 (W-924). */
+/** True for a part that lands on pages with their own H1, so a new Heading stays H2 (W-946). */
 export const isSharedPart = (partType: ThemePartType | undefined): boolean =>
   partType !== undefined && SHARED_PARTS.has(partType);
 

@@ -7,6 +7,8 @@ import {
   type Layout,
   type LayoutNode,
 } from "../../../core/index.ts";
+import type { ThemePartType } from "../../../core/theme/part-types.ts";
+import { isSharedPart } from "../panels/settings/heading-warning.ts";
 
 const hasH1 = (node: LayoutNode): boolean =>
   ((node.type === "heading" || node.type === "post-title") &&
@@ -15,10 +17,17 @@ const hasH1 = (node: LayoutNode): boolean =>
 
 /**
  * A new Heading is the page's H1 when the page has none yet, otherwise the default H2 (W-147).
- * Other nodes, and headings whose level was already chosen, are returned as they are.
+ * Other nodes, and headings whose level was already chosen, are returned as they are. In a
+ * header, footer, popup, float, synced section or loop item it stays H2: that part lands on pages
+ * that have their own H1 (W-946).
  */
-export function withPageHeadingLevel(node: LayoutNode, layout: Layout): LayoutNode {
-  if (node.type !== "heading" || node.props.level !== 2 || hasH1(layout.root)) return node;
+export function withPageHeadingLevel(
+  node: LayoutNode,
+  layout: Layout,
+  partType?: ThemePartType,
+): LayoutNode {
+  if (node.type !== "heading" || node.props.level !== 2) return node;
+  if (isSharedPart(partType) || hasH1(layout.root)) return node;
   return { ...node, props: { ...node.props, level: 1 } };
 }
 
