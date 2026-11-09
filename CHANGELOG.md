@@ -22,6 +22,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Clearer names, upgraded automatically (W-925).** The Theme section element is now type `part-ref` (was `section`). An element's editor name is `editorLabel` (was `label`). A Loop's item part is `props.partId` (was `itemPartId`). Pages, the editor, the MCP tools and saved sections still accept the old names and upgrade them.
 - **Motion in one place (W-925).** `transition`, `entrance`, `scrollMotion` and `iconAnimation` now live under `style.motion` as `transition`, `entrance`, `scroll` and `icon`. The HTML and CSS are byte-identical to 0.9.0's.
 
+### Security
+
+- **Oversized lists in agent and editor requests are refused before they're read item by item (D-070).** With the zod version EmDash 1.4 ships, a large list of bad items in a request could take hundreds of megabytes to refuse. Lists in EmVB's request inputs now check their length first. Nothing changes for EmDash hosts.
+
+### Fixed
+
+- **Heading level (W-946).** A Heading added by clicking it in the Add panel or the command palette now becomes the page's H1 when the page has none, as a dragged one already did. In a header, footer, popup, float, synced section or loop item a new Heading stays H2, so the part no longer adds a second H1 to the pages it lands on.
+
 ### Breaking
 
 - **Layout schema 18 and design schema 17 (W-925).** Every older page and design upgrades on read. A page or design saved by this version can't be opened by 0.9.0 or earlier.

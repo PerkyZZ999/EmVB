@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { boundedArray } from "../core/bounded-array.ts";
 import {
   byteLength,
   defaultElement,
@@ -278,7 +279,7 @@ const ElementSpec: z.ZodType<ElementSpecT> = z.lazy(() =>
   z.looseObject({
     type: z.string().min(1).max(64),
     props: z.record(z.string(), z.unknown()).optional(),
-    children: z.array(ElementSpec).max(200).optional(),
+    children: boundedArray(ElementSpec, 200).optional(),
   }),
 );
 type ElementSpecT = { type: string; props?: Record<string, unknown>; children?: ElementSpecT[] };
@@ -665,18 +666,18 @@ export async function restoreVersion(ports: EmvbPorts, input: z.infer<typeof Res
 
 const VARIABLE_KINDS = ["colors", "fonts", "fontSizes", "spacings"] as const;
 type Item = { id: string } & Record<string, unknown>;
-const Items = z.array(z.looseObject({ id: z.string().min(1).max(64) })).max(100);
+const Items = boundedArray(z.looseObject({ id: z.string().min(1).max(64) }), 100);
 
 export const UpdateSiteStylesInput = z.strictObject({
   variables: z
     .strictObject(Object.fromEntries(VARIABLE_KINDS.map((k) => [k, Items.optional()])))
     .optional(),
-  removeVariables: z
-    .array(z.strictObject({ kind: z.enum(VARIABLE_KINDS), id: z.string().min(1).max(64) }))
-    .max(100)
-    .optional(),
+  removeVariables: boundedArray(
+    z.strictObject({ kind: z.enum(VARIABLE_KINDS), id: z.string().min(1).max(64) }),
+    100,
+  ).optional(),
   classes: Items.optional(),
-  removeClasses: z.array(z.string().min(1).max(64)).max(100).optional(),
+  removeClasses: boundedArray(z.string().min(1).max(64), 100).optional(),
   defaults: z.record(z.string(), z.unknown()).optional(),
   direction: z.enum(["ltr", "rtl", "auto"]).optional(),
   /** Remove variables or classes even when pages or classes still use them (references fall back). */

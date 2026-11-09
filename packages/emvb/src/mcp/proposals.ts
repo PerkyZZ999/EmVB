@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { boundedArray } from "../core/bounded-array.ts";
 import { PAGES_COLLECTION } from "../constants.ts";
 import { MAX_PROPOSAL_OPS } from "../core/limits.ts";
 import { ProposalOperation, type Proposal, type ProposalRefusal } from "../core/proposals.ts";
@@ -107,7 +108,7 @@ export const ProposeChangesInput = z.strictObject({
   pageId: PageId,
   baseRevision: Revision,
   baseDesignRevision: Revision.nullable(),
-  ops: z.array(ProposalOperation).min(1).max(MAX_PROPOSAL_OPS),
+  ops: boundedArray(ProposalOperation, MAX_PROPOSAL_OPS, 1),
 });
 export const ProposeChangesOutput = z.object({
   proposalId: z.string(),

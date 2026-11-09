@@ -34,4 +34,8 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.3
-      - run: bun audit --audit-level=high
+      # D-070 (2026-11-08): GHSA-mrhx-c7xc-m3w5 (zod <4.6.6) is ignored while EmDash 1.4 pins
+      # zod 4.5.4 (D-058). EmVB's request arrays check their length before their items
+      # (core/bounded-array.ts); layouts and designs are size-checked before zod. Revisit when
+      # EmDash moves zod.
+      - run: bun audit --audit-level=high --ignore=GHSA-mrhx-c7xc-m3w5

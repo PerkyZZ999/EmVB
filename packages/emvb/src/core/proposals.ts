@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { boundedArray } from "./bounded-array.ts";
 import { addNode, moveNode, type Refusal } from "./arrange.ts";
 import { cleanClassName, nameKey } from "./design/classes.ts";
 import { isExtensionType, liveElement, validateExtensionProps } from "./extensions/index.ts";
@@ -44,7 +45,7 @@ const ProposalSchema = z.strictObject({
   baseRevision: Revision,
   /** Effective style stamp: draft when present, otherwise published; null for an empty site. */
   baseDesignRevision: Revision.nullable(),
-  ops: z.array(ProposalOperation).min(1).max(MAX_PROPOSAL_OPS),
+  ops: boundedArray(ProposalOperation, MAX_PROPOSAL_OPS, 1),
 });
 export type Proposal = z.infer<typeof ProposalSchema>;
 export type ProposalBase = {
