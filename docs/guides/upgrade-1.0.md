@@ -57,6 +57,8 @@ package version; read the steps below once.
   Needs Astro `i18n` and a route per language; see the install guide's Languages section.
 - [Motion](motion.md): loops in Effects.
 - [Extensions](extensions.md): custom elements, panels and sources from code.
+- [Import from Elementor](elementor-import.md): bring Elementor 3 and 4 pages and templates over
+  as drafts, with a report of what was kept, changed or left out.
 
 ## If something goes wrong
 
