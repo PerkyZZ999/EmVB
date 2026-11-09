@@ -44667,6 +44667,20 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
       "expect": "\\(fail\\).*hidden on desktop stays hidden on laptops"
+    },
+    {
+      "id": "W-956/e2e-laptop-not-published",
+      "requirement": "W-956",
+      "description": "The public page never applies laptop styles.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    at(DEVICE_MEDIA.laptop, \"laptop\"),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/devices.e2e.ts", "--project=node", "-g", "W-956"],
+      "expect": "✘.*\\[node\\].*W-956: a published page uses its laptop styles"
     }
   ]
 }
