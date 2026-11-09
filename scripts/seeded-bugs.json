@@ -42566,6 +42566,62 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/agent-setup.test.tsx"],
       "expect": "\\(fail\\).*the card marks each step"
+    },
+    {
+      "id": "W-934/request-run-twice",
+      "requirement": "W-934",
+      "description": "The watcher runs the agent again for a request it already handed over.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/watch.ts",
+          "search": "    deps.handled.add(request.requestId);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
+      "expect": "\\(fail\\).*an agent that doesn't answer is logged and not retried"
+    },
+    {
+      "id": "W-934/unanswered-looks-answered",
+      "requirement": "W-934",
+      "description": "A request the agent didn't answer is logged as answered.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/watch.ts",
+          "search": "      still.some((r) => r.requestId === request.requestId)\n",
+          "replace": "      false\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
+      "expect": "\\(fail\\).*an agent that doesn't answer is logged"
+    },
+    {
+      "id": "W-934/request-unquoted",
+      "requirement": "W-934",
+      "description": "The person's request is pasted into the brief unmarked, so it reads like the watcher's own instructions.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/watch.ts",
+          "search": "    \"<request>\",\n    request.prompt,\n    \"</request>\",\n",
+          "replace": "    request.prompt,\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
+      "expect": "\\(fail\\).*the request text goes to stdin inside a quoted brief"
+    },
+    {
+      "id": "W-934/interval-unbounded",
+      "requirement": "W-934",
+      "description": "A one-second polling interval is accepted and hammers the site.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/watch.ts",
+          "search": "if (!Number.isFinite(n) || n < min || n > max)",
+          "replace": "if (!Number.isFinite(n))"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
+      "expect": "\\(fail\\).*options: --agent is required"
     }
   ]
 }

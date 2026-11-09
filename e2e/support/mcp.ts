@@ -36,6 +36,8 @@ export function useAgentClient() {
   let remote: Remote | undefined;
   let tokenId: string | undefined;
   let restore: Settings | undefined;
+  /** W-934: what an outside process (the watch CLI) needs to connect as this agent. */
+  const connection = { token: "", site: "" };
   test.beforeAll(async ({ request, baseURL }) => {
     expect(
       (await api(request, "PUT", "/_emdash/api/admin/plugins/emvb/mcp", { enabled: true })).status,
@@ -51,6 +53,8 @@ export function useAgentClient() {
     expect(created.status).toBe(201);
     const data = created.json?.["data"] as { token: string; info: { id: string } };
     tokenId = data.info.id;
+    connection.token = data.token;
+    connection.site = new URL(baseURL ?? "").origin;
     remote = httpRemote(new URL("/_emdash/api/mcp", baseURL), data.token, "e2e");
   });
   test.afterAll(async ({ request }) => {
@@ -62,5 +66,5 @@ export function useAgentClient() {
     if (!remote) throw new Error("no MCP client");
     return remote.call(`emvb__${name}`, args);
   };
-  return { call, ok };
+  return { call, ok, connection };
 }

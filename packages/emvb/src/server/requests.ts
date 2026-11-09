@@ -64,6 +64,15 @@ const toRequest = (id: string, s: Stored): AgentRequest => ({
   ...(s.proposalId ? { proposalId: s.proposalId } : {}),
 });
 
+/** Two requests in the same millisecond kept no order; times only move forward in one process. */
+let lastCreatedMs = 0;
+const nextCreatedAt = (nowMs: number) => {
+  // A tie (or a slightly earlier clock) moves one millisecond on; a clock far behind is kept.
+  lastCreatedMs =
+    nowMs > lastCreatedMs || lastCreatedMs - nowMs >= 1000 ? nowMs : lastCreatedMs + 1;
+  return new Date(lastCreatedMs).toISOString();
+};
+
 const sameTarget = (a: Target, b: Target) => a.collection === b.collection && a.id === b.id;
 
 /** Same per-isolate write queue pattern as proposals; `now` is injectable for tests. */
@@ -89,7 +98,7 @@ export function requestsPort(store: Store, kv: Kv, now: () => number = Date.now)
         .filter((r) => r.stored.status === "open" && live(r.stored))
         .filter((r) => !target || sameTarget(r.stored.target, target))
         .map((r) => toRequest(r.id, r.stored))
-        .toReversed();
+        .toSorted((a, b) => a.createdAt.localeCompare(b.createdAt));
     },
     create: (target, prompt, userId) =>
       queued("requests", async () => {
@@ -113,7 +122,7 @@ export function requestsPort(store: Store, kv: Kv, now: () => number = Date.now)
         const stored: Stored = {
           target,
           prompt: text,
-          createdAt: new Date(now()).toISOString(),
+          createdAt: nextCreatedAt(now()),
           userId,
           status: "open",
         };

@@ -98,6 +98,9 @@ the token, never the token. Calls signed in without a token are counted per user
   checked against the current page first: a refused one names its index (`Change 2: …`), a stale
   revision returns `CONFLICT`. `get_proposal` says whether a stored proposal still applies;
   `withdraw_proposal` removes one. A site keeps at most 100 proposals and a page at most 10 waiting for review (`REFUSED` past that).
+- **`emvb-mcp watch`** (1.0) is the reference way to answer them: it polls `get_requests` and runs
+  your agent command (for example `--agent "claude -p"`) once per request, with the request on
+  stdin and never in the command line. See the bridge's README.
 - **Requests from the editor (prompt relay):** in the editor's **Agent** tab a person types what
   they want and clicks **Send to agent**. Their own agent reads open requests with `get_requests`
   (oldest first, optionally for one page) and answers with `propose_changes` plus the

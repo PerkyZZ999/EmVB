@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
@@ -24,7 +25,7 @@ const layout = {
 
 test.describe.configure({ mode: "serial" });
 setUpEmvbOnce();
-const { call, ok } = useAgentClient();
+const { call, ok, connection } = useAgentClient();
 
 test("a person reviews an agent proposal change by change in the editor", async ({
   page,
@@ -164,4 +165,40 @@ test("W-931: a request typed in the editor reaches the agent, whose answer comes
   const card = ui.locator("[data-emvb-proposal]");
   await card.getByRole("button", { name: "Accept all (1)" }).click();
   await expect(canvas(page).getByRole("heading", { name: "Hello, friend" })).toBeVisible();
+});
+
+test("W-934: emvb-mcp watch hands an editor request to the local agent, whose answer comes back", async ({
+  page,
+  request,
+}) => {
+  const pageId = await createPage(request, "Watch", layout, `watch-${unique()}`);
+  await openEditor(page, pageId, "Co-design start");
+  const ui = overlay(page);
+  await ui.getByRole("tab", { name: /^Agent/ }).click();
+  const box = ui.locator("[data-emvb-agent-ask]");
+  await box.getByLabel("Ask your agent").fill("Say hello");
+  await box.getByRole("button", { name: "Send to agent" }).click();
+  await expect(box.locator('[data-emvb-agent-request="open"]')).toBeVisible();
+
+  const watched = spawnSync(
+    "bun",
+    [
+      "packages/emvb-mcp/src/cli.ts",
+      "watch",
+      "--once",
+      "--site",
+      connection.site,
+      "--agent",
+      "bun e2e/support/scripted-agent.ts",
+    ],
+    { env: { ...process.env, EMVB_TOKEN: connection.token }, encoding: "utf8", timeout: 60_000 },
+  );
+  expect(watched.status, watched.stderr).toBe(0);
+  expect(watched.stderr).toContain(": answered");
+
+  await expect(box.locator('[data-emvb-agent-request="answered"]')).toBeVisible({
+    timeout: 15_000,
+  });
+  await ui.locator("[data-emvb-proposal]").getByRole("button", { name: "Accept all (1)" }).click();
+  await expect(canvas(page).getByRole("heading", { name: "Done: Say hello" })).toBeVisible();
 });

@@ -28,10 +28,26 @@ The token: EmDash → **API tokens**, scope `mcp:tools:emvb`, for a user who is 
 above**. Never give an agent an admin token. Each token may make 300 reads and 60 changes a minute
 and 10 publishes an hour; over that, tools return `RATE_LIMITED` with how long to wait.
 
-Besides the 16 tools (18 with `--allow-publish`), the bridge serves the layout and style schemas,
+Besides the 25 tools (27 with `--allow-publish`), the bridge serves the layout and style schemas,
 element and site style resources, each page's draft and accessibility findings, four prompts
 (`build_landing_page`, `fix_accessibility`, `restyle_site`, `review_page`) and the
 `emvb-page-builder` skill with its references (also in `skill/`).
+
+## Answer requests from the editor: `emvb-mcp watch`
+
+People can ask their agent from the EmVB editor's **Agent** tab. `watch` checks the site for those
+requests and runs your own agent command once per request:
+
+```sh
+EMVB_TOKEN=… npx -y @perkyzz/emvb-mcp watch --site https://your.site --agent "claude -p"
+```
+
+The request is on the command's stdin, inside a short brief that says how to answer
+(`list_page_outline`, then `propose_changes` with the request's id); `EMVB_SITE`, `EMVB_PAGE_ID`
+and `EMVB_REQUEST_ID` are set. The request text never goes into the command line. The agent needs
+the EmVB tools itself (this bridge in its MCP config). Requests run one at a time, each once;
+an unanswered one is logged, not retried. Options: `--interval <s>` (15, 5–3600), `--timeout <s>`
+per run (600), `--once`.
 
 Needs Node 20+ on the agent's computer, and on the site EmDash 1.2+ with `mcp: true`,
 `@perkyzz/emvb` 0.5.0+ (0.8.0 recommended) with **Set up EmVB** done, and agents turned on in **Pages VisualBuilder →
