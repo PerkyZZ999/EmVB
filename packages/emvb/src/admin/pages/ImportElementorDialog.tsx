@@ -88,6 +88,37 @@ function ImportReport({
   );
 }
 
+/** An SVG file read for the import (W-951); the importer applies the icon cap and sanitizer. */
+const MAX_SVG_FILE = 65_536;
+/** Files fetched in one go; an export with more names them in the report. */
+const MAX_SVG_FETCHES = 100;
+
+/** A URL's file name, decoded and lower-cased, to match a chosen file to the export's address. */
+export function svgFileName(url: string): string {
+  const last = url.split(/[?#]/)[0]?.split("/").pop() ?? "";
+  try {
+    return decodeURIComponent(last).toLowerCase();
+  } catch {
+    return last.toLowerCase();
+  }
+}
+
+/** Fetches an SVG file without cookies; undefined when the site refuses (CORS) or it's too big. */
+async function fetchSvg(url: string): Promise<string | undefined> {
+  try {
+    const response = await fetch(url, {
+      credentials: "omit",
+      redirect: "follow",
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!response.ok) return undefined;
+    const text = await response.text();
+    return text.length <= MAX_SVG_FILE && /<svg[\s>]/i.test(text) ? text : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Reads a chosen file as text, refusing one larger than the importer reads. */
 async function readJsonFile(file: File): Promise<string> {
   if (file.size > MAX_IMPORT_CHARS)
@@ -119,6 +150,11 @@ export function ImportElementorDialog({
   const [defaults, setDefaults] = React.useState(true);
   const [icons, setIcons] = React.useState<IconMap>();
   const [partType, setPartType] = React.useState<ThemePartType>("section");
+  // W-951: SVG markup by the address the export uses, fetched or chosen.
+  const [svgs, setSvgs] = React.useState<ReadonlyMap<string, string>>(new Map());
+  const [svgStatus, setSvgStatus] = React.useState<string>();
+  const [fetching, setFetching] = React.useState(false);
+  const svgRef = React.useRef<HTMLInputElement>(null);
   const iconsLoad = React.useRef<Promise<IconMap> | undefined>(undefined);
   const fileRef = React.useRef<HTMLInputElement>(null);
   const kitRef = React.useRef<HTMLInputElement>(null);
@@ -135,6 +171,8 @@ export function ImportElementorDialog({
       setKitError(undefined);
       setDefaults(true);
       setPartType("section");
+      setSvgs(new Map());
+      setSvgStatus(undefined);
     }
   }
 
@@ -151,14 +189,55 @@ export function ImportElementorDialog({
   }, [open]);
 
   const options = React.useCallback(
-    (map: IconMap | undefined) => ({ kit, defaults, icon: (id: string) => map?.get(id) }),
-    [kit, defaults],
+    (map: IconMap | undefined) => ({
+      kit,
+      defaults,
+      icon: (id: string) => map?.get(id),
+      svg: (url: string) => svgs.get(url),
+    }),
+    [kit, defaults, svgs],
   );
   const result = React.useMemo(
     () => (json.trim() ? importElementor(json, options(icons)) : undefined),
     [json, icons, options],
   );
   const suggestedPart = result?.ok ? result.partType : undefined;
+  const missingSvgs = result?.ok ? result.svgFiles : [];
+
+  const fetchSvgs = async () => {
+    setFetching(true);
+    const urls = missingSvgs.slice(0, MAX_SVG_FETCHES);
+    const found = await Promise.all(urls.map(async (url) => [url, await fetchSvg(url)] as const));
+    const got = found.filter((entry): entry is readonly [string, string] => entry[1] !== undefined);
+    setSvgs((current) => new Map([...current, ...got]));
+    const failed = urls.length - got.length;
+    setSvgStatus(
+      failed === 0
+        ? `Fetched ${got.length} SVG ${got.length === 1 ? "file" : "files"}.`
+        : `Fetched ${got.length} of ${urls.length}. Your old site didn't allow the rest to be read from here: download them from its media library and add them with Add SVG files.`,
+    );
+    setFetching(false);
+  };
+
+  const addSvgs = async (files: readonly File[]) => {
+    const wanted = new Map(missingSvgs.map((url) => [svgFileName(url), url]));
+    const usable = (file: File) => file.size <= MAX_SVG_FILE && wanted.has(file.name.toLowerCase());
+    const unused = files.filter((file) => !usable(file)).map((file) => file.name);
+    const added = await Promise.all(
+      files
+        .filter(usable)
+        .map(
+          async (file) => [wanted.get(file.name.toLowerCase()) ?? "", await file.text()] as const,
+        ),
+    );
+    setSvgs((current) => new Map([...current, ...added]));
+    setSvgStatus(
+      `Added ${added.length} SVG ${added.length === 1 ? "file" : "files"}.` +
+        (unused.length > 0
+          ? ` Not used (not in this export, or over 64 KB): ${unused.join(", ")}.`
+          : ""),
+    );
+  };
   React.useEffect(() => {
     if (suggestedPart) setPartType(suggestedPart);
   }, [suggestedPart]);
@@ -323,6 +402,45 @@ export function ImportElementorDialog({
           <p className="emvb-inline-error" role="alert">
             {kitError}
           </p>
+        )}
+        {(missingSvgs.length > 0 || svgStatus) && (
+          <div className="emvb-import-row" data-emvb-import-svgs="">
+            <Button
+              type="button"
+              variant="secondary"
+              className={BUTTON}
+              disabled={fetching || missingSvgs.length === 0}
+              onClick={() => void fetchSvgs()}
+            >
+              {fetching ? "Fetching…" : "Fetch SVG files"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className={BUTTON}
+              disabled={missingSvgs.length === 0}
+              onClick={() => svgRef.current?.click()}
+            >
+              Add SVG files
+            </Button>
+            <span className="emvb-helper" role="status">
+              {svgStatus ??
+                `${missingSvgs.length} SVG ${missingSvgs.length === 1 ? "file" : "files"} can become icons you can recolour. Fetch them from your old site, or add the .svg files.`}
+            </span>
+            <input
+              ref={svgRef}
+              type="file"
+              accept="image/svg+xml,.svg"
+              multiple
+              hidden
+              data-emvb-elementor-svgs=""
+              onChange={(event) => {
+                const files = [...(event.target.files ?? [])];
+                event.target.value = "";
+                if (files.length > 0) void addSvgs(files);
+              }}
+            />
+          </div>
         )}
         <Checkbox
           label="Give unstyled widgets Elementor's default colours and fonts"

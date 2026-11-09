@@ -24,6 +24,18 @@ Export Kit → Export**, then take `site-settings.json` from the zip).
 3. Read the report. The title comes from the template; change it if you like, and check the slug.
 4. **Import** creates a draft and opens it in the editor. Nothing is published until you publish.
 
+### SVG files
+
+SVG icons and the Elementor 4 SVG element point to files on your old site. When the export gives
+their address, the dialog shows **Fetch SVG files** and **Add SVG files**. With the file, the SVG
+becomes an Icon that keeps its own drawing, and parts drawn in `currentColor` take the colour you
+set in EmVB. Fetching works when your old site lets other sites read its files. If it doesn't,
+download the files from the WordPress media library and add them: they are matched by file name. An
+SVG without its file stays an image.
+
+Elementor 4 exports often name an SVG only by its WordPress media number. Those become empty Icon
+elements at the right size; pick each file in the editor (**Icon → My uploads**).
+
 **Give unstyled widgets Elementor's default colours and fonts** is on by default: widgets you never
 styled in Elementor look the way Elementor showed them (its kit colours, Roboto). Turn it off if
 your site had Elementor's default colours and fonts disabled, so those widgets take your EmVB site
@@ -68,7 +80,7 @@ each element, so the import never changes your site's own design system.
 - A class's own custom CSS is applied where EmVB has the property (borders on one side, gaps,
   weights, overflow and so on).
 - Forms keep their fields, labels and the layout around them.
-- A gradient drawn over a background image is shown as an even overlay in the gradient's colour.
+- A gradient drawn over a background image keeps its gradient as an overlay.
 - Transforms, flex grow and shrink, and links to WordPress pages are listed in the report.
 
 ## What is approximated
@@ -94,8 +106,8 @@ These keep their content in the closest EmVB form, and the report says so:
 WordPress-only things: shortcodes, WordPress widgets and sidebars, menus (the Menu element is
 created empty: add its links), the site logo and title, post lists and loops (rebuild them with
 EmVB's Loop element), comments, search and login forms, countdowns, share buttons, Lottie,
-hotspots, motion effects, sticky positioning, Elementor CSS classes, and uploaded SVG icons (pick
-them again in the editor). Scripts and styles in HTML are always removed.
+hotspots, motion effects, sticky positioning and Elementor CSS classes. Scripts and styles in HTML
+are always removed.
 
 ## After importing
 

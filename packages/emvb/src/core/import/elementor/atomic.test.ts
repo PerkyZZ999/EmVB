@@ -478,3 +478,123 @@ describe("Elementor CSS text (W-945)", () => {
     expect(JSON.stringify(style)).not.toMatch(/javascript|script|url\(/);
   });
 });
+
+describe("SVG files become recolourable icons (W-951)", () => {
+  const PHONE =
+    '<?xml version="1.0"?>\n<!-- icon --><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="none" stroke="currentColor"/></svg>';
+  const svgElement = (value: Record<string, unknown>, link?: string) => ({
+    content: [
+      {
+        id: "svg1",
+        elType: "e-svg",
+        settings: {
+          classes: { $$type: "classes", value: ["e-svg1"] },
+          svg: { $$type: "svg-src", value },
+          ...(link
+            ? {
+                link: {
+                  $$type: "link",
+                  value: { destination: { $$type: "url", value: link } },
+                },
+              }
+            : {}),
+        },
+        styles: {
+          "e-svg1": {
+            id: "e-svg1",
+            variants: [
+              {
+                meta: { breakpoint: "desktop", state: null },
+                props: {
+                  width: { $$type: "size", value: { size: 48, unit: "px" } },
+                  height: { $$type: "size", value: { size: 48, unit: "px" } },
+                },
+              },
+            ],
+          },
+        },
+        elements: [],
+      },
+    ],
+  });
+  const withId = (extra: Record<string, unknown> = {}, link?: string) =>
+    svgElement(
+      {
+        id: { $$type: "image-attachment-id", value: 35 },
+        url: { $$type: "url", value: "https://old.example/wp-content/uploads/icone-telephone.svg" },
+        ...extra,
+      },
+      link,
+    );
+  const first = (imported: ReturnType<typeof importElementor>) => {
+    if (!imported.ok) throw new Error(imported.error);
+    return ((imported.layout.root as Node).children ?? [])[0];
+  };
+
+  test("with the file's markup an SVG is an inline icon at its size that CSS colour reaches", () => {
+    const seen: string[] = [];
+    const imported = importElementor(withId(), {
+      svg: (url) => {
+        seen.push(url);
+        return PHONE;
+      },
+    });
+    const icon = first(imported);
+    expect(seen).toEqual(["https://old.example/wp-content/uploads/icone-telephone.svg"]);
+    expect(icon?.type).toBe("icon");
+    expect(props(icon)).toMatchObject({
+      iconId: "file:icone-telephone",
+      decorative: true,
+      size: 48,
+    });
+    expect(String(props(icon)["iconSvg"])).toStartWith("<svg");
+    if (!imported.ok) throw new Error(imported.error);
+    expect(imported.svgFiles).toEqual([]);
+    expect(validateLayout(imported.layout).ok).toBe(true);
+    const { html } = renderPage(imported.layout, emptyDesign());
+    expect(html).toContain('stroke="currentColor"');
+    expect(html).not.toContain("<img");
+  });
+
+  test("a linked SVG icon is named and keeps its link", () => {
+    const icon = first(importElementor(withId({}, "tel:+15555550100"), { svg: () => PHONE }));
+    expect(props(icon)).toMatchObject({ href: "tel:+15555550100", title: "Icone telephone" });
+    expect(props(icon)).not.toHaveProperty("decorative");
+  });
+
+  test("without markup the file stays an image and is listed for the dialog to fetch", () => {
+    const imported = importElementor(withId());
+    expect(first(imported)?.type).toBe("image");
+    if (!imported.ok) throw new Error(imported.error);
+    expect(imported.svgFiles).toEqual([
+      "https://old.example/wp-content/uploads/icone-telephone.svg",
+    ]);
+    expect(imported.notes.map((n) => n.message).join("\n")).toContain(
+      "add the .svg files in the import dialog",
+    );
+  });
+
+  test("an SVG named only by its WordPress media id becomes an empty icon at its size", () => {
+    const s = svgElement({ id: { $$type: "image-attachment-id", value: 35 } });
+    const imported = importElementor(s);
+    const icon = first(imported);
+    expect(icon?.type).toBe("icon");
+    expect(props(icon)).toEqual({ iconId: "wp-media:35", decorative: true, size: 48 });
+    if (!imported.ok) throw new Error(imported.error);
+    expect(imported.notes.map((n) => n.message).join("\n")).toContain("Icon → My uploads");
+    expect(validateLayout(imported.layout).ok).toBe(true);
+  });
+
+  test.each([
+    ['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'],
+    ['<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"></svg>'],
+    ["not an svg"],
+    [`<svg xmlns="http://www.w3.org/2000/svg"><path d="${"M0 0".repeat(9000)}"/></svg>`],
+  ])("markup the sanitizer refuses, or too large, stays an image: %#", (markup) => {
+    const imported = importElementor(withId(), { svg: () => markup });
+    expect(first(imported)?.type).toBe("image");
+    if (!imported.ok) throw new Error(imported.error);
+    expect(JSON.stringify(imported.layout)).not.toMatch(/alert|onload/);
+    expect(imported.notes.map((n) => n.message).join("\n")).toContain("stays an image");
+  });
+});

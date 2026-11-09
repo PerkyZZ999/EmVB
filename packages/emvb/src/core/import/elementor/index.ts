@@ -57,6 +57,11 @@ export type ElementorImport =
       notes: ImportNote[];
       /** Font families the page uses; the site must load them. */
       fonts: string[];
+      /**
+       * W-951: SVG files the export points to whose markup wasn't given; with it (`svg` option)
+       * they import as recolourable icons, without it as images.
+       */
+      svgFiles: string[];
     }
   | { ok: false; error: string };
 
@@ -833,6 +838,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
         mapped: ctx.mapped,
         notes: ctx.report(),
         fonts: [...ctx.fonts].toSorted(),
+        svgFiles: [...ctx.svgFiles],
       };
     }
     const issue = checked.ok ? misplaced : checked.issues[0];

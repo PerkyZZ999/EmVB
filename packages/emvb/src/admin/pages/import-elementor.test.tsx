@@ -3,7 +3,7 @@ import { act } from "react";
 import type { Layout } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
 import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
-import { ImportElementorDialog } from "./ImportElementorDialog.tsx";
+import { ImportElementorDialog, svgFileName } from "./ImportElementorDialog.tsx";
 
 let restoreNavigation: () => void = () => undefined;
 afterEach(async () => {
@@ -151,4 +151,93 @@ test("W-945: a header template becomes a header theme part", async () => {
   expect(navigation.mock.calls[0]?.[0]).toBe(
     "/_emdash/admin/plugins/emvb/editor?entry=made-1&collection=emvb_theme_parts",
   );
+});
+
+const ICON_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" stroke="currentColor"/></svg>';
+const svgUrl = (name: string) => `https://old.example/wp-content/uploads/${name}`;
+const svgPage = JSON.stringify({
+  title: "Contact",
+  content: ["icone-telephone.svg", "Ic%C3%B4ne%20courriel.svg"].map((name, i) => ({
+    id: `s${i}`,
+    elType: "e-svg",
+    settings: {
+      svg: {
+        $$type: "svg-src",
+        value: { id: { $$type: "image-attachment-id", value: 30 + i }, url: svgUrl(name) },
+      },
+    },
+    elements: [],
+  })),
+});
+const svgRow = () => document.querySelector("[data-emvb-import-svgs]")?.textContent ?? "";
+const button = (name: string) => {
+  const found = [...document.querySelectorAll("button")].find((b) => b.textContent === name);
+  if (!found) throw new Error(`${name} button is missing`);
+  return found;
+};
+
+test("W-951: SVG files added in the dialog are matched by name and import as icons", async () => {
+  const { posted } = await open("page");
+  await paste(svgPage);
+  expect(svgRow()).toContain("2 SVG files can become icons you can recolour.");
+  const input = document.querySelector<HTMLInputElement>("[data-emvb-elementor-svgs]");
+  if (!input) throw new Error("SVG file input is missing");
+  const files = [
+    new File([ICON_SVG], "ICONE-TELEPHONE.svg", { type: "image/svg+xml" }),
+    new File([ICON_SVG], "Icône courriel.svg", { type: "image/svg+xml" }),
+    new File([ICON_SVG], "unrelated.svg", { type: "image/svg+xml" }),
+  ];
+  Object.defineProperty(input, "files", { value: files, configurable: true });
+  await act(async () => {
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await settle();
+  expect(svgRow()).toContain(
+    "Added 2 SVG files. Not used (not in this export, or over 64 KB): unrelated.svg.",
+  );
+  await submit();
+  const layout = JSON.stringify(posted[0]?.data.layout);
+  expect(layout).toContain('"iconId":"file:icone-telephone"');
+  expect(layout).toContain("currentColor");
+  expect(layout).not.toContain('"type":"image"');
+});
+
+test("W-951: Fetch SVG files reads what the old site allows and says what it didn't", async () => {
+  const fetched: { url: string; credentials: RequestCredentials | undefined }[] = [];
+  const fetchSpy = spyOn(globalThis, "fetch").mockImplementation((async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => {
+    const url = String(input);
+    fetched.push({ url, credentials: init?.credentials });
+    if (url.endsWith("icone-telephone.svg")) return new Response(ICON_SVG);
+    throw new TypeError("Failed to fetch");
+  }) as typeof fetch);
+  try {
+    const { posted } = await open("page");
+    await paste(svgPage);
+    await act(async () => button("Fetch SVG files").click());
+    await settle();
+    expect(fetched.map((f) => f.url)).toEqual([
+      svgUrl("icone-telephone.svg"),
+      svgUrl("Ic%C3%B4ne%20courriel.svg"),
+    ]);
+    expect(fetched.every((f) => f.credentials === "omit")).toBe(true);
+    expect(svgRow()).toContain("Fetched 1 of 2. Your old site didn't allow the rest");
+    await submit();
+    const layout = JSON.stringify(posted[0]?.data.layout);
+    expect(layout).toContain('"iconId":"file:icone-telephone"');
+    // The one that couldn't be read stays an image.
+    expect(layout).toContain('"type":"image"');
+  } finally {
+    fetchSpy.mockRestore();
+  }
+});
+
+test("W-951: export addresses match chosen files by their decoded, case-free name", () => {
+  expect(svgFileName("https://x.test/a/Ic%C3%B4ne%20Courriel.svg?v=2#x")).toBe(
+    "icône courriel.svg",
+  );
+  expect(svgFileName("https://x.test/a/%E0%A4%A.svg")).toBe("%e0%a4%a.svg");
 });

@@ -23,7 +23,7 @@ import {
 import { FIELD_NAME_PATTERN } from "../../schema/layout.ts";
 import { sanitizeHref } from "../../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
-import type { ImportContext } from "./context.ts";
+import { type ImportContext, svgFileId } from "./context.ts";
 import { declarations, decodeRawCss, finishBorders } from "./css.ts";
 import { cleanText, decodeEntities, embedVideoUrl, splitLong } from "./html.ts";
 import type { Style } from "./style.ts";
@@ -892,6 +892,40 @@ function linkOf(v: unknown, ctx: ImportContext, name: string): { href?: string; 
   return {};
 }
 
+/** An Elementor 4 `svg-src` that names only a WordPress media id (W-951). */
+function mediaId(v: unknown): number | undefined {
+  const source = un(v);
+  const id = isRecord(source) ? un(source["id"]) : undefined;
+  return typeof id === "number" && Number.isInteger(id) && id > 0 ? id : undefined;
+}
+
+/**
+ * An Elementor 4 SVG as an Icon (W-951): sized from its width in px (the svg fills the box), named
+ * by its link when it has one, decorative otherwise. Without markup the icon is an empty slot.
+ */
+function svgIcon(
+  styled: (n: N) => N,
+  ctx: ImportContext,
+  iconId: string,
+  markup: string | undefined,
+  linkProps: { href?: string; newTab?: boolean },
+  title: string,
+): N {
+  const n = styled(
+    node(ctx, "icon", {
+      iconId,
+      ...(markup ? { iconSvg: markup } : {}),
+      ...(linkProps.href ? { ...linkProps, title } : { decorative: true }),
+    }),
+  );
+  const width = (n["style"] as Style | undefined)?.width;
+  if (isRecord(width) && width["unit"] === "px" && typeof width["value"] === "number") {
+    const px = Math.round(width["value"]);
+    if (px > 0 && px <= 512) (n["props"] as Record<string, unknown>)["size"] = px;
+  }
+  return n;
+}
+
 function imageUrl(v: unknown): string | undefined {
   const image = un(v);
   const src = isRecord(image) && "src" in image ? un(image["src"]) : image;
@@ -1112,14 +1146,28 @@ function elementNodes(
     }
     case "e-svg": {
       const url = imageUrl(s["svg"]);
-      if (!url) return [];
+      const linkProps = linkOf(s["link"], ctx, name);
+      // W-951: with the file's markup the SVG is inline, so CSS colour reaches currentColor.
+      const markup = url ? ctx.svgMarkup(url) : undefined;
+      if (url && markup)
+        return [label(svgIcon(styled, ctx, svgFileId(url), markup, linkProps, altFromUrl(url)))];
+      if (!url) {
+        // Elementor exports name an uploaded SVG by its WordPress media id only.
+        const media = mediaId(s["svg"]);
+        if (media === undefined) return [];
+        ctx.note(
+          "skipped",
+          name,
+          "SVG files aren't in Elementor exports, so these are empty Icon elements at their size; pick each file again in the editor (Icon → My uploads).",
+        );
+        return [label(svgIcon(styled, ctx, `wp-media:${media}`, undefined, linkProps, "Icon"))];
+      }
       ctx.externalImage(url);
       ctx.note(
         "approximated",
         name,
-        "SVG icons are shown as images; recolour or replace them from the Icon library if needed.",
+        "SVG files that couldn't be read are shown as images, so colours can't change them; add the .svg files in the import dialog to make them recolourable icons.",
       );
-      const linkProps = linkOf(s["link"], ctx, name);
       return [
         label(
           styled(

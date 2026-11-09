@@ -771,6 +771,41 @@ describe("Elementor import: hostile and oversized input (W-945)", () => {
   });
 });
 
+describe("Elementor 3 uploaded SVG icons (W-951)", () => {
+  const page = JSON.stringify({
+    content: [
+      {
+        id: "i1",
+        elType: "widget",
+        widgetType: "icon",
+        settings: {
+          selected_icon: {
+            library: "svg",
+            value: { id: 12, url: "https://old.example/uploads/truck-logo.svg" },
+          },
+        },
+      },
+      { id: "h1", elType: "widget", widgetType: "heading", settings: { title: "Fleet" } },
+    ],
+  });
+
+  test("with the file's markup the icon keeps its own SVG, recolourable", () => {
+    const result = ok(importElementor(page, { icon, svg: () => SVG }));
+    const [found] = ofType(result.layout, "icon");
+    expect(props(found)).toMatchObject({ iconId: "file:truck-logo", iconSvg: SVG });
+    expect(result.svgFiles).toEqual([]);
+  });
+
+  test("without it the icon is left out, the file listed and the report says how to add it", () => {
+    const result = ok(importElementor(page, { icon }));
+    expect(ofType(result.layout, "icon")).toEqual([]);
+    expect(result.svgFiles).toEqual(["https://old.example/uploads/truck-logo.svg"]);
+    expect(result.notes.map((n) => n.message).join("\n")).toContain(
+      "add the .svg files in the import dialog",
+    );
+  });
+});
+
 describe("Elementor HTML to blocks (W-945)", () => {
   const keep = (url: string) => (/^https?:\/\//.test(url) ? url : undefined);
 

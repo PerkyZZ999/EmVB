@@ -43816,6 +43816,118 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
       "expect": "\\(fail\\).*keeps where it starts counting"
+    },
+    {
+      "id": "W-951/markup-ignored",
+      "requirement": "W-951",
+      "description": "An Elementor 4 SVG with its file's markup still imports as an image.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "      if (url && markup)\n",
+          "replace": "      if (url && markup && url === \"\")\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*with the file's markup an SVG"
+    },
+    {
+      "id": "W-951/unsanitized-markup",
+      "requirement": "W-951",
+      "description": "SVG markup is stored without the sanitizer or size cap.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "    if (markup && markup.length <= ICON_SVG_MAX && isSafeSvgMarkup(markup)) return markup;",
+          "replace": "    if (markup) return markup;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*sanitizer refuses"
+    },
+    {
+      "id": "W-951/media-id-dropped",
+      "requirement": "W-951",
+      "description": "An SVG named only by a WordPress media id vanishes without a slot or note.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "        if (media === undefined) return [];",
+          "replace": "        if (media === undefined || media > 0) return [];"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*WordPress media id"
+    },
+    {
+      "id": "W-951/svg-size-lost",
+      "requirement": "W-951",
+      "description": "An imported SVG icon renders at 24px whatever its width.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "    if (px > 0 && px <= 512) (n[\"props\"]",
+          "replace": "    if (px > 512) (n[\"props\"]"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*with the file's markup an SVG"
+    },
+    {
+      "id": "W-951/svg-files-not-listed",
+      "requirement": "W-951",
+      "description": "Unresolved SVG files aren't listed, so the dialog can't offer them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "      this.svgFiles.add(url);",
+          "replace": "      void url;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*without markup the file stays"
+    },
+    {
+      "id": "W-951/v3-svg-dropped",
+      "requirement": "W-951",
+      "description": "An Elementor 3 uploaded SVG icon with its markup is still left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "      if (url && markup) return { iconId: svgFileId(url)",
+          "replace": "      if (url && markup && url === \"\") return { iconId: svgFileId(url)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*keeps its own SVG"
+    },
+    {
+      "id": "W-951/fetch-with-cookies",
+      "requirement": "W-951",
+      "description": "Fetch SVG files sends the person's cookies to the old site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "      credentials: \"omit\",",
+          "replace": "      credentials: \"include\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*Fetch SVG files reads"
+    },
+    {
+      "id": "W-951/name-match-case",
+      "requirement": "W-951",
+      "description": "Chosen SVG files only match when the case is identical.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "    return decodeURIComponent(last).toLowerCase();",
+          "replace": "    return decodeURIComponent(last);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*(matched by name|decoded, case-free)"
     }
   ]
 }

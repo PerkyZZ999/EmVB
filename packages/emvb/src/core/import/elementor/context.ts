@@ -1,4 +1,6 @@
 /** Shared state of one Elementor import (W-945): ids, globals, icons, limits and the report. */
+import { ICON_SVG_MAX } from "../../schema/layout.ts";
+import { isSafeSvgMarkup } from "../../sanitize/svg.ts";
 import { newNodeId } from "../../tree-ops.ts";
 import { type AtomicSnapshots, emptySnapshots } from "./snapshots.ts";
 import { color, fontStack, fontWeight, isRecord, slider, str, type Settings } from "./values.ts";
@@ -23,6 +25,11 @@ export type ImportOptions = {
   defaults?: boolean;
   /** SVG markup for a library icon id (`fa-solid:star`), from the editor's icon sets. */
   icon?: (id: string) => string | undefined;
+  /**
+   * W-951: the markup of an SVG file the export points to (fetched by the dialog or chosen by the
+   * person), so it becomes a recolourable icon instead of an image.
+   */
+  svg?: (url: string) => string | undefined;
   /** Random source for node ids (tests). */
   random?: () => number;
 };
@@ -55,6 +62,9 @@ export class ImportContext {
   readonly atomic: AtomicSnapshots = emptySnapshots();
   readonly icon: ImportOptions["icon"];
   readonly useDefaults: boolean;
+  /** W-951: SVG files the export points to whose markup wasn't given (the dialog fetches them). */
+  readonly svgFiles = new Set<string>();
+  private readonly svg: ImportOptions["svg"];
   nodes = 0;
   elements = 0;
   mapped = 0;
@@ -67,6 +77,7 @@ export class ImportContext {
   constructor(options: ImportOptions = {}) {
     this.random = options.random ?? Math.random;
     this.icon = options.icon;
+    this.svg = options.svg;
     this.useDefaults = options.defaults ?? true;
     this.kitGiven = this.readKit(options.kit);
   }
@@ -99,6 +110,28 @@ export class ImportContext {
         "Images still load from their original address (your old site). Upload them to the media library before that site goes away.",
       );
     }
+  }
+
+  /**
+   * W-951: an SVG file's markup, ready to store as an icon's `iconSvg`: anything before `<svg`
+   * (an XML declaration, comments) is dropped, and markup the SVG sanitizer refuses or that is over
+   * the icon cap is not used. Files without markup are remembered in `svgFiles`.
+   */
+  svgMarkup(url: string): string | undefined {
+    const raw = this.svg?.(url);
+    if (raw === undefined) {
+      this.svgFiles.add(url);
+      return undefined;
+    }
+    const start = raw.search(/<svg[\s>]/i);
+    const markup = start >= 0 ? raw.slice(start).trim() : "";
+    if (markup && markup.length <= ICON_SVG_MAX && isSafeSvgMarkup(markup)) return markup;
+    this.note(
+      "skipped",
+      "SVG files",
+      "An SVG file is too large or has content EmVB doesn't allow (scripts, styles, links); it stays an image.",
+    );
+    return undefined;
   }
 
   report(): ImportNote[] {
@@ -224,4 +257,11 @@ export function typographyFromGlobal(
   const size = slider(entry.fontSize);
   if (size) style["fontSize"] = size;
   return style;
+}
+
+/** An imported SVG file's icon id: its file name, so the editor shows where it came from. */
+export function svgFileId(url: string): string {
+  const file = url.split(/[?#]/)[0]?.split("/").pop() ?? "";
+  const base = file.replace(/\.svg$/i, "").replace(/[^\w.-]+/g, "-") || "svg";
+  return `file:${base}`.slice(0, 64);
 }

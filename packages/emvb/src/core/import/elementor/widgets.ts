@@ -8,7 +8,7 @@ import { MAX_TABS, MAX_TEXT_LENGTH } from "../../limits.ts";
 import { FIELD_NAME_PATTERN, ICON_SVG_MAX } from "../../schema/layout.ts";
 import { sanitizeHref } from "../../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
-import type { ImportContext } from "./context.ts";
+import { type ImportContext, svgFileId } from "./context.ts";
 import {
   type Block,
   cleanText,
@@ -269,10 +269,17 @@ function iconOf(
   if (isRecord(value)) {
     library = str(value["library"]);
     if (library === "svg") {
+      // W-951: the file's markup (fetched or added in the dialog) makes it a recolourable icon.
+      const file = isRecord(value["value"]) ? str(value["value"]["url"]) : undefined;
+      const url = file ? sanitizeMediaUrl(file) : undefined;
+      const markup = url ? ctx.svgMarkup(url) : undefined;
+      if (url && markup) return { iconId: svgFileId(url), iconSvg: markup, name: altFromUrl(url) };
       ctx.note(
         "skipped",
         el,
-        "Uploaded SVG icons aren't in the export file; pick them again in the editor.",
+        url
+          ? "Uploaded SVG icons that couldn't be read are left out; add the .svg files in the import dialog, or pick them again in the editor."
+          : "Uploaded SVG icons aren't in the export file; pick them again in the editor.",
       );
       return undefined;
     }
