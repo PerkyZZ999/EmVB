@@ -33,9 +33,14 @@ instructions.
    `insert_saved_section` (it adds the classes the section uses to the styles draft; a class whose
    look changed comes in as a numbered copy such as "Card 2", never overwriting the site's).
    `save_section` saves an element for reuse; `delete_saved_section` only when the person asks.
-6. **Check accessibility** with `get_accessibility_findings` after building and fix every
+6. **Propose when someone is editing.** `list_page_outline` says `openInEditor`; then (or when the
+   person wants to review first) send changes with `propose_changes`, naming its `baseRevision`
+   and `baseDesignRevision`. The person accepts or rejects each change in the editor. A direct
+   write to an open page returns `PAGE_OPEN`. `get_proposal` tells you whether yours still applies;
+   `withdraw_proposal` before sending a corrected one.
+7. **Check accessibility** with `get_accessibility_findings` after building and fix every
    error. Contrast findings that share one colour: change that colour variable once.
-7. **Don't publish** unless the person asked and `publish_page` is available. End with
+8. **Don't publish** unless the person asked and `publish_page` is available. End with
    `describe_page` and a short summary so they can review the draft. Fix its warnings too (an
    element hidden on every device, a form's required field with no field on the form).
 
@@ -66,6 +71,10 @@ instructions.
   already has is refused too. A write that changes nothing saves no new version.
 - `REFUSED` on `insert_saved_section`: the place can't take the section, or the site is at 100
   classes; nothing was added to the styles draft. Pick another `parentId` or ask the person.
+- `PAGE_OPEN`: someone has the page open in the editor; send the same change with
+  `propose_changes` instead.
+- `CONFLICT` on `propose_changes`: the page or the site styles changed; call `list_page_outline`
+  again and propose against the new revisions. A refused change starts with its index (`Change 2:`).
 - `PUBLISH_DISABLED`: leave the draft for review.
 - `FORBIDDEN`: agent access is off on the site, or the token can't use EmVB; tell the person.
 - `NOT_SET_UP`: an admin must click "Set up EmVB" in the EmDash admin first; tell the person.

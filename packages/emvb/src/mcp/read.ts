@@ -26,7 +26,7 @@ import { McpToolError } from "./errors.ts";
 import type { EmvbPorts, PageRecord } from "./ports.ts";
 
 /** A stored layout the tools can work on, or a NOT_FOUND / INVALID_LAYOUT error the agent can read. */
-async function loadPage(
+export async function loadPage(
   ports: EmvbPorts,
   pageId: string,
 ): Promise<{
@@ -46,10 +46,10 @@ async function loadPage(
   return { page, layout: result.layout };
 }
 
-type OutlineNode = { id: string; type: string; label?: string; children?: OutlineNode[] };
+export type OutlineNode = { id: string; type: string; label?: string; children?: OutlineNode[] };
 
 /** The tree without props or styles: cheap orientation for an agent (plan § 3 get_layout). */
-function outlineOf(node: LayoutNode): OutlineNode {
+export function outlineOf(node: LayoutNode): OutlineNode {
   const kids = nodeChildren(node);
   const text = summaryText(node);
   return {
@@ -67,7 +67,7 @@ function summaryText(node: LayoutNode): string | undefined {
   return text.length > 60 ? `${clipText(text, 57)}…` : text;
 }
 
-function stats(layout: Layout) {
+export function stats(layout: Layout) {
   let nodes = 0;
   let depth = 0;
   const walk = (node: LayoutNode, d: number) => {

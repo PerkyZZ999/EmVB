@@ -45,6 +45,17 @@ describe("emvb-page-builder skill (W-468)", () => {
       expect(text).toContain(`\`${name}\``);
     }
   });
+
+  test("the skill tells agents to propose while a page is open (W-929)", () => {
+    for (const name of [
+      "list_page_outline",
+      "propose_changes",
+      "get_proposal",
+      "withdraw_proposal",
+    ])
+      expect(text).toContain(`\`${name}\``);
+    expect(text).toContain("`PAGE_OPEN`");
+  });
 });
 
 describe("bridge package files (W-471)", () => {

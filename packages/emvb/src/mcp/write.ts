@@ -107,6 +107,12 @@ export async function mutatePage(
       const page = await ports.getPage(pageId);
       if (!page)
         throw new McpToolError("NOT_FOUND", `No EmVB page with id ${pageId}. Call list_pages.`);
+      if (await ports.pageOpen?.(pageId)) {
+        throw new McpToolError(
+          "PAGE_OPEN",
+          "Someone has this page open in the editor, so it isn't changed directly. Send the change with propose_changes (see list_page_outline) for them to review.",
+        );
+      }
       if (expectedRev !== undefined && page.rev !== expectedRev) {
         throw new McpToolError(
           "CONFLICT",

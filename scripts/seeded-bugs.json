@@ -41990,6 +41990,118 @@
         "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx"
       ],
       "expect": "\\(fail\\).*W-748: a quick flick released before a re-render still dismisses the sheet"
+    },
+    {
+      "id": "W-929/open-page-written-directly",
+      "requirement": "W-929",
+      "description": "An agent's direct write lands on a page someone has open in the editor.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "if (await ports.pageOpen?.(pageId)) {",
+          "replace": "if (false) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-proposals.test.ts"],
+      "expect": "\\(fail\\).*while the page is open in the editor, direct writes are refused"
+    },
+    {
+      "id": "W-929/lease-never-expires",
+      "requirement": "W-929",
+      "description": "A closed tab keeps the page marked open forever.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/presence.ts",
+          "search": "typeof until === \"number\" && until > now && until <= now + PRESENCE_LEASE_MS",
+          "replace": "typeof until === \"number\" && until <= Number.MAX_SAFE_INTEGER"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/server/presence.test.ts"],
+      "expect": "\\(fail\\).*a lease nobody renews runs out"
+    },
+    {
+      "id": "W-929/editor-never-closes",
+      "requirement": "W-929",
+      "description": "Closing the editor leaves the page marked open until the lease runs out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/presence.ts",
+          "search": "      close();\n    };\n  }, [fetcher, collection, id]);",
+          "replace": "    };\n  }, [fetcher, collection, id]);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/presence.test.tsx"],
+      "expect": "\\(fail\\).*open on mount and closed on unmount"
+    },
+    {
+      "id": "W-929/stale-proposal-not-conflict",
+      "requirement": "W-929",
+      "description": "A proposal on an old revision is reported as bad input instead of a conflict with rebase advice.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": "    case \"STALE_BASE\":\n",
+          "replace": "    case \"STALE_BASE_UNUSED\" as string:\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-proposals.test.ts"],
+      "expect": "\\(fail\\).*a proposal on an old revision is refused with CONFLICT"
+    },
+    {
+      "id": "W-929/outline-hides-open",
+      "requirement": "W-929",
+      "description": "list_page_outline never says the page is open, so agents keep trying direct writes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": "openInEditor: (await ports.pageOpen?.(page.id)) ?? false,",
+          "replace": "openInEditor: false,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-proposals.test.ts"],
+      "expect": "\\(fail\\).*while the page is open in the editor"
+    },
+    {
+      "id": "W-929/withdraw-keeps-proposal",
+      "requirement": "W-929",
+      "description": "withdraw_proposal reports success but leaves the proposal waiting.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": "if (!found || !(await proposals.withdraw(input.proposalId))) {",
+          "replace": "if (!found) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-proposals.test.ts"],
+      "expect": "\\(fail\\).*withdraw_proposal removes a proposal once"
+    },
+    {
+      "id": "W-929/propose-skips-op-index",
+      "requirement": "W-929",
+      "description": "A refused change doesn't say which change failed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": ": `Change ${refusal.opIndex}: ${refusal.reason}`,",
+          "replace": ": refusal.reason,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-proposals.test.ts"],
+      "expect": "\\(fail\\).*a change the page can't take is refused with its index"
+    },
+    {
+      "id": "W-929/leaving-keeps-page-open",
+      "requirement": "W-929",
+      "description": "Leaving the admin without closing the editor keeps the page marked open for the whole lease.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/presence.ts",
+          "search": "    window.addEventListener(\"pagehide\", close);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/presence.test.tsx"],
+      "expect": "\\(fail\\).*leaving the page sends the closing beat with keepalive"
     }
   ]
 }

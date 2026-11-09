@@ -98,6 +98,13 @@ export interface EmvbPorts {
   ): Promise<ReadonlyMap<string, readonly RequiredFieldInfo[]>>;
   /** W-875: saved sections; without it the saved-section tools answer NOT_SET_UP. */
   savedSections?: SavedSectionsPort;
+  /** W-929: reviewable agent proposals (D-064); without it the proposal tools answer NOT_SET_UP. */
+  proposals?: ProposalsPort;
+  /**
+   * W-929 (D-064): true while the page is open in the EmVB editor. Direct page writes are then
+   * refused with PAGE_OPEN and the agent proposes instead. Without this port nothing is refused.
+   */
+  pageOpen?(id: string): Promise<boolean>;
 }
 
 /** Saved sections in plugin storage `emvb_saved_sections` (W-875, D-060). */
@@ -121,6 +128,11 @@ export interface ProposalsPort {
   ): Promise<{ ok: true; id: string; record: ProposalRecord } | ProposalRefusal | null>;
   list(target: Proposal["target"]): Promise<{ id: string; record: ProposalRecord }[]>;
   withdraw(id: string): Promise<boolean>;
+  /** W-929: the revisions a new proposal for `target` must name; null when there is no such page. */
+  base(target: Proposal["target"]): Promise<{
+    revision: string;
+    designRevision: string | null;
+  } | null>;
   prepare(
     id: string,
     selected?: readonly number[],

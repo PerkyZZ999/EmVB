@@ -62,12 +62,25 @@ describe("EmVB MCP tools on EmDash's plugin MCP (W-452, W-453, W-454)", () => {
       get_accessibility_findings: { pageId: id },
       list_versions: { pageId: id },
       list_saved_sections: {},
+      list_page_outline: { pageId: id },
     };
-    const results = await Promise.all(
-      TOOLS.filter((tool) => tool.readOnly).map((tool) => t.mcp(tool.name, inputs[tool.name])),
+    const outline = data<{ baseRevision: string; baseDesignRevision: string | null }>(
+      await t.mcp("list_page_outline", { pageId: id }),
     );
+    inputs["get_proposal"] = {
+      proposalId: data<{ proposalId: string }>(
+        await t.mcp("propose_changes", {
+          pageId: id,
+          baseRevision: outline.baseRevision,
+          baseDesignRevision: outline.baseDesignRevision,
+          ops: [{ kind: "update", id: "head0001", set: { props: { text: "Proposed" } } }],
+        }),
+      ).proposalId,
+    };
+    const reads = TOOLS.filter((tool) => tool.readOnly);
+    const results = await Promise.all(reads.map((tool) => t.mcp(tool.name, inputs[tool.name])));
     results.forEach((result, i) => {
-      expect(TOOLS[i]?.output.safeParse(data(result)).success).toBe(true);
+      expect(reads[i]?.output.safeParse(data(result)).success).toBe(true);
     });
   });
 

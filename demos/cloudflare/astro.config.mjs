@@ -21,6 +21,8 @@ export default defineConfig({
   integrations: [
     react(),
     emdash({
+      // W-929: EmDash's MCP endpoint, so e2e can drive the EmVB tools with the bridge's client.
+      mcp: true,
       database: d1({ binding: "DB", session: "auto" }),
       storage: r2({ binding: "MEDIA" }),
       plugins: [formsPlugin(), emvb({ canvasStyles: ["/site.css"], canvasCollections: ["pages"] })],

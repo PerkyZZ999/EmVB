@@ -25,7 +25,7 @@ export const ProposalTarget = z.strictObject({
 const Value = z.record(z.string(), z.unknown());
 const Position = { parentId: NodeId, index: z.number().int().min(0).max(2000) };
 const DesignId = z.string().regex(/^[a-z0-9-]{1,40}$/);
-const Operation = z.discriminatedUnion("kind", [
+export const ProposalOperation = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("insert"), ...Position, node: Value }),
   z.strictObject({ kind: z.literal("move"), id: NodeId, ...Position }),
   z.strictObject({ kind: z.literal("update"), id: NodeId, set: Value }),
@@ -44,7 +44,7 @@ const ProposalSchema = z.strictObject({
   baseRevision: Revision,
   /** Effective style stamp: draft when present, otherwise published; null for an empty site. */
   baseDesignRevision: Revision.nullable(),
-  ops: z.array(Operation).min(1).max(MAX_PROPOSAL_OPS),
+  ops: z.array(ProposalOperation).min(1).max(MAX_PROPOSAL_OPS),
 });
 export type Proposal = z.infer<typeof ProposalSchema>;
 export type ProposalBase = {

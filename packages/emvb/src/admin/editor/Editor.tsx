@@ -60,6 +60,7 @@ import {
 import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { usePartTemplates } from "./section-templates.ts";
 import { useCollectionPreviews, withPartLayouts } from "./collection-previews.ts";
+import { useEditorPresence } from "./presence.ts";
 import { useRemoteChange } from "./remote-change.ts";
 import { A11yScoreButton } from "./A11yCopilot.tsx";
 import { restoreOnUndo, type Deletion } from "./restore-deleted.ts";
@@ -161,6 +162,8 @@ function EditorApp({
   const saver = useSave(fetcher, state, dispatch, collection);
   // W-466: tell the person when an agent (or anyone) changed the page while they were idle.
   const remoteChange = useRemoteChange(fetcher, collection, entry.id, state.rev, !dirty);
+  // W-929: agents propose instead of writing while the page is open here.
+  useEditorPresence(fetcher, collection, entry.id);
   const noun = useEditedNoun();
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const chrome = useChromeFlags();

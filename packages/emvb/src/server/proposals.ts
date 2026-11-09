@@ -101,6 +101,10 @@ export function proposalsPort(
         return { ok: true, id, record };
       }),
     withdraw: (id) => queued("proposals", async () => ID.test(id) && (await store.delete(id))),
+    async base(target) {
+      const found = await readBase(target);
+      return found ? { revision: found.revision, designRevision: found.designRevision } : null;
+    },
     async prepare(id, selected) {
       const read = await get(id);
       if (!read || !read.ok) return read;
@@ -112,7 +116,7 @@ export function proposalsPort(
   };
 }
 
-function proposalPortOf(ctx: RouteContext<unknown>): ProposalsPort {
+export function proposalPortOf(ctx: RouteContext<unknown>): ProposalsPort {
   return proposalsPort(ctx.storage[COLLECTION] as unknown as ProposalStore, async (target) => {
     const found = await ctx.content?.getVersioned?.(target.collection, target.id);
     if (!found) return null;
@@ -153,7 +157,7 @@ function unwrap<T extends { ok: boolean }>(result: T | null): Extract<T, { ok: t
   return result as Extract<T, { ok: true }>;
 }
 
-// Plugin-local editor transport, not MCP tools and not a public API (W-929/W-930 follow).
+// Plugin-local editor transport, not a public API. Agents use the MCP tools (W-929).
 export const proposalsRoute: PluginRoute<z.infer<typeof ProposalTarget>> = {
   permission: "content:edit_any",
   input: ProposalTarget,

@@ -10,7 +10,8 @@ export type McpErrorCode =
   | "TOO_LARGE"
   | "REFUSED"
   | "NOT_SET_UP"
-  | "RATE_LIMITED";
+  | "RATE_LIMITED"
+  | "PAGE_OPEN";
 
 const STATUS: Record<McpErrorCode, number> = {
   INVALID_INPUT: 400,
@@ -24,6 +25,7 @@ const STATUS: Record<McpErrorCode, number> = {
   REFUSED: 422,
   NOT_SET_UP: 409,
   RATE_LIMITED: 429,
+  PAGE_OPEN: 409,
 };
 
 /**
