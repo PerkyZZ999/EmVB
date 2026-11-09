@@ -10,7 +10,9 @@ export type FieldKind =
   | "media"
   | "icon"
   | "list-items"
-  | "image-sources";
+  | "image-sources"
+  /** W-950: formatting (bold, italic, colour, link) on words of the element's Text. */
+  | "marks";
 
 export type FieldOption = { value: string | number | boolean; label: string };
 

@@ -39,10 +39,10 @@ How EmVB stores a page and its site-wide design, at layout schema 18 and design 
 | --- | --- | --- | --- |
 | `container` | optional `tag` (`div`, `section`, `header`, `footer`, `main`, `article`, `aside`, `nav`), optional `href` and `newTab` (the box is the link; a link inside a link is dropped) | `children: Node[]` (required, may be empty) | that tag (default `div`) with `class="emvb-container …"` |
 | `layout-section` (shown as "Section", W-156) | optional `tag` (as `container`, default `section`), `contentWidth` length, `fullWidth` boolean | `children: Node[]` | that tag with `class="emvb-layout-section …"`, wrapping `<div class="emvb-layout-section-inner">` around the children; the inner box is at most `contentWidth` (default 1140 px, none with `fullWidth`) wide and centred |
-| `heading` | `text` (≤ 2000), `level` (1–6), optional `href` (≤ 2000) and `newTab` (W-141) | none | `<h1>`–`<h6>`; with a safe `href`, the text is wrapped in `<a class="emvb-heading-link">` (colour and decoration inherited) |
+| `heading` | `text` (≤ 2000), `level` (1–6), optional `href` (≤ 2000) and `newTab` (W-141), optional `marks` (W-950, see below) | none | `<h1>`–`<h6>`; with a safe `href`, the text is wrapped in `<a class="emvb-heading-link">` (colour and decoration inherited) |
 | `spacer` | `height` length | none | `<div aria-hidden="true">` with height in CSS |
 | `divider` | `{}` | none | `<hr>` |
-| `text` | `text`, optional `tag` (`p` \| `div`) | none | `<p>` or `<div>` |
+| `text` | `text`, optional `tag` (`p` \| `div`), optional `marks` (W-950) | none | `<p>` or `<div>`; formatted words as below |
 | `label` | `text` | none | `<span>` |
 | `link` | `text`, `href`, optional `newTab` | none | `<a href>` (+ `target`/`rel` when `newTab`) |
 | `button` | `text`, optional `href` and `newTab` | none | `<a href>` when `href` is safe, else `<button type="button">` |
@@ -76,6 +76,8 @@ Every node may also carry an optional `editorLabel` (`label` before schema 18; 1
 **Forms (S5):** form fields are only valid inside a `form` (or under one). Pages with a form set `needsFormsRuntime`; the host route loads `EmVBFormsRuntime` so `initForms` handles AJAX submit. Pages without a form stay zero EmVB JS (R-031).
 
 ### Style properties (W-017, extended in W-088)
+
+**Text marks (W-950).** `marks` on a Heading or Text is up to 100 ranges `{ "start", "end", "bold"?: true, "italic"?: true, "color"?: colour, "href"?, "newTab"?: true }` over its `text` (characters `start` to `end`, end not included, 0–2000). They render as `<strong>`, `<em>`, `<span class="emvb-mark-c<n>">` (the colour as `--emvb-mark-<n>` on the element, up to 8 per element; `.emvb-mark-c<n>{color:var(--emvb-mark-<n>)}` is sent only when a page uses one) and `<a class="emvb-mark-link">` (checked like any link; left out inside a linked heading). Ranges past the text are clipped when drawn, so editing the text never invalidates a page; the editor moves them with the words.
 
 Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "vh" | "ch" }` (`vw` and `vh` since W-088, `ch` since W-331). Colours are hex or `{ "var": "<id>" }`. A **size** is a length, a variable reference or `"auto"`. An **offset** is a size whose value may also be negative (−10000 to 10000). A **fluid size** (W-955) is `{ "fluid": { "min": 0–10000, "max": 0–10000 } }` in px: written as `clamp()` growing from `min` on 360 px wide screens to `max` on 1280 px ones (the formula the design's fluid sizes use); `fontSize`, `gap`, the width and height keys, padding and margins (and the offsets) take one.
 

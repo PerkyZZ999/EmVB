@@ -13,6 +13,7 @@ import {
   type LayoutNode,
   type Removed,
   LAYOUT_SCHEMA_VERSION,
+  withShiftedMarks,
 } from "../../core/index.ts";
 import { withPageHeadingLevel } from "./dnd/new-element.ts";
 import type { PageDraft } from "../content-api.ts";
@@ -184,7 +185,10 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       if (!state.page.layout || !findNode(state.page.layout, action.id)) return state;
       return edited(state, {
         ...state.page,
-        layout: updateNode(state.page.layout, action.id, action.update),
+        // W-950: formatted words follow an edit of the text, wherever it was made.
+        layout: updateNode(state.page.layout, action.id, (node) =>
+          withShiftedMarks(node, action.update(node)),
+        ),
       });
     case "delete-node": {
       if (!state.page.layout) return state;

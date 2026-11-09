@@ -12,6 +12,8 @@ export {
   SvgNode,
   TabPanelNode,
   HeadingNode,
+  MAX_TEXT_MARKS,
+  type TextMark,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -618,3 +620,10 @@ export {
   type ProposalRecord,
   type ProposalRefusal,
 } from "./proposals.ts";
+export {
+  hasFormat,
+  type MarkFormat,
+  setFormat,
+  unsetFormat,
+  withShiftedMarks,
+} from "./text-marks.ts";

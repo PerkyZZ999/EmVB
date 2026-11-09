@@ -115,12 +115,12 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `svg` | markup, title, decorative, size |
 | `tabs` | (none) |
 | `tab-panel` | label |
-| `heading` | text, level, href, newTab |
+| `heading` | text, level, href, newTab, marks |
 | `toc` | title |
 | `language-switcher` | label |
 | `spacer` | height |
 | `divider` | (none) |
-| `text` | text, tag |
+| `text` | text, tag, marks |
 | `label` | text |
 | `link` | text, href, newTab |
 | `button` | text, href, newTab, iconId, iconSvg, iconPosition, iconGap, iconSize |

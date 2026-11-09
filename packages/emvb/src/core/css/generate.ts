@@ -1,4 +1,5 @@
 import { cssTypeName } from "../schema/layout.ts";
+import { MARK_CSS } from "../text-marks.ts";
 import { DEFAULT_FLUID_RANGE, fluidClamp } from "../design/tokens.ts";
 import type { FluidRange, LengthVariable } from "../schema/design.ts";
 import type { DesignSystem } from "../schema/design.ts";
@@ -317,6 +318,7 @@ export function generateCss({
     sheet,
     sheet.includes("--emvb-marker-") ? LIST_MARKER_CSS : "",
     listSteps ? LIST_STEPS_CSS : "",
+    sheet.includes("--emvb-mark-") ? MARK_CSS : "",
   ].join("");
 }
 

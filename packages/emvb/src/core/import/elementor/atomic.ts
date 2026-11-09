@@ -20,13 +20,13 @@ import {
   TEXT_DECORATIONS,
   TEXT_TRANSFORMS,
 } from "../../css-keywords.ts";
-import { FIELD_NAME_PATTERN } from "../../schema/layout.ts";
+import { FIELD_NAME_PATTERN, type TextMark } from "../../schema/layout.ts";
 import { sanitizeHref } from "../../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
 import { type ImportContext, type ImportedClass, svgFileId } from "./context.ts";
 import { combineLayers, inlineOver, type Layers, STATE_NAMES } from "./classes.ts";
 import { declarations, decodeRawCss, finishBorders } from "./css.ts";
-import { cleanText, decodeEntities, embedVideoUrl, splitLong } from "./html.ts";
+import { cleanText, decodeEntities, embedVideoUrl, inlineMarks, splitLong } from "./html.ts";
 import type { Style } from "./style.ts";
 import {
   altFromUrl,
@@ -815,6 +815,43 @@ function classLook(id: string, snap: AtomicSnapshots, ctx: ImportContext): Layer
   };
 }
 
+/**
+ * W-950: emphasised and bold words take what the site's CSS gives them inside the element's
+ * classes (the gold, upright word of a hero title).
+ */
+function styleWords(
+  marks: TextMark[],
+  el: Settings,
+  snap: AtomicSnapshots,
+  ctx: ImportContext,
+): TextMark[] {
+  if (marks.length === 0 || ctx.wordRules.size === 0) return marks;
+  const ids = un(settingsOf(el)["classes"]);
+  const names = (Array.isArray(ids) ? ids : []).flatMap((id) =>
+    typeof id === "string" ? [id, snap.classes.get(id)?.label ?? ""] : [],
+  );
+  const ruleFor = (tag: "em" | "strong") =>
+    names.map((name) => ctx.wordRules.get(`${name} ${tag}`)).findLast(Boolean);
+  const em = ruleFor("em");
+  const strong = ruleFor("strong");
+  if (!em && !strong) return marks;
+  return marks.flatMap((mark) => {
+    const next: TextMark = { ...mark };
+    for (const [rule, on] of [
+      [em, mark.italic],
+      [strong, mark.bold],
+    ] as const) {
+      if (!rule || !on) continue;
+      if (rule.color && next.color === undefined) next.color = rule.color;
+      if (rule.italic === false) delete next.italic;
+      if (rule.italic === true) next.italic = true;
+      if (rule.bold === false) delete next.bold;
+      if (rule.bold === true) next.bold = true;
+    }
+    return next.bold || next.italic || next.color || next.href ? [next] : [];
+  });
+}
+
 /** Base styles Elementor gives each atomic element before any class. */
 const BASE: Record<string, Settings> = {
   "e-flexbox": {
@@ -1228,12 +1265,32 @@ function elementNodes(
       const t = text(s["title"]).replace(/\n+/g, " ");
       if (!t) return [];
       const linkProps = linkOf(s["link"], ctx, name);
+      // W-950: bold, italic, coloured and linked words stay formatted (the gold word in a title).
+      const found = styleWords(
+        inlineMarks(str(un(s["title"])) ?? "", (url) => ctx.href(url), t),
+        el,
+        snap,
+        ctx,
+      );
+      const marks = linkProps.href ? found.filter((m) => m.bold || m.italic || m.color) : found;
+      const withMarks = marks.length > 0 ? { marks } : {};
       if (level)
         return splitLong(t).map((part) =>
-          label(styled(node(ctx, "heading", { text: part, level: Number(level), ...linkProps }))),
+          label(
+            styled(
+              node(ctx, "heading", {
+                text: part,
+                level: Number(level),
+                ...linkProps,
+                ...withMarks,
+              }),
+            ),
+          ),
         );
       return splitLong(t).map((part) =>
-        label(styled(node(ctx, "text", { text: part, tag: tag === "div" ? "div" : "p" }))),
+        label(
+          styled(node(ctx, "text", { text: part, tag: tag === "div" ? "div" : "p", ...withMarks })),
+        ),
       );
     }
     case "e-paragraph": {
@@ -1243,8 +1300,22 @@ function elementNodes(
       if (linkProps.href)
         return [label(styled(node(ctx, "link", { text: t.slice(0, 2000), ...linkProps })))];
       const tag = str(un(s["tag"]));
+      const marks = styleWords(
+        inlineMarks(str(un(s["paragraph"])) ?? "", (url) => ctx.href(url), t),
+        el,
+        snap,
+        ctx,
+      );
       return splitLong(t).map((part) =>
-        label(styled(node(ctx, "text", { text: part, ...(tag === "div" ? { tag: "div" } : {}) }))),
+        label(
+          styled(
+            node(ctx, "text", {
+              text: part,
+              ...(tag === "div" ? { tag: "div" } : {}),
+              ...(marks.length > 0 ? { marks } : {}),
+            }),
+          ),
+        ),
       );
     }
     case "e-button": {

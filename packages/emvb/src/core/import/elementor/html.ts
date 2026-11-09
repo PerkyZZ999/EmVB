@@ -5,10 +5,13 @@
  * flattened (and noted); links, images and embeds keep their URLs after sanitizing.
  */
 import { MAX_TEXT_LENGTH } from "../../limits.ts";
+import type { TextMark } from "../../schema/layout.ts";
+import { combine, type Fmt, marksFromChars } from "./inline-marks.ts";
+import { color as cssColorOf } from "./values.ts";
 
 export type Block =
-  | { kind: "heading"; level: number; text: string; href?: string }
-  | { kind: "text"; text: string }
+  | { kind: "heading"; level: number; text: string; href?: string; marks?: TextMark[] }
+  | { kind: "text"; text: string; marks?: TextMark[] }
   | { kind: "link"; text: string; href: string }
   | { kind: "list"; ordered: boolean; start?: number; items: string[] }
   | { kind: "image"; src: string; alt: string }
@@ -162,6 +165,20 @@ const INLINE_FORMAT = new Set([
   "var",
   "time",
 ]);
+/** W-950: the formatting an inline tag gives that EmVB keeps: bold, italic, a colour. */
+function formatOf(name: string, attributes: Record<string, string>): Fmt | undefined {
+  if (name === "strong" || name === "b") return { bold: true };
+  if (name === "em" || name === "i") return { italic: true };
+  if (name === "span" || name === "font") {
+    const declared =
+      /(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(attributes["style"] ?? "")?.[1] ??
+      (name === "font" ? attributes["color"] : undefined);
+    const hex = declared ? cssColorOf(declared.replace(/!important/i, "").trim()) : undefined;
+    return hex && hex.length <= 7 ? { color: hex } : undefined;
+  }
+  return undefined;
+}
+
 const DROP_WITH_NOTE = new Set([
   "form",
   "input",
@@ -211,6 +228,18 @@ export function htmlToBlocks(
   if (input.length > MAX_HTML_LENGTH) dropped.add("text past 200,000 characters");
 
   let buffer = "";
+  // W-950: the formatting of each character of `buffer`, and the inline tags open around it.
+  let fmts: (Fmt | undefined)[] = [];
+  const open: { name: string; f: Fmt }[] = [];
+  const hrefs: (string | undefined)[] = [];
+  const add = (text: string) => {
+    buffer += text;
+    const f = combine(
+      open.map((entry) => entry.f),
+      hrefs.at(-1),
+    );
+    for (let i = 0; i < text.length; i++) fmts.push(f);
+  };
   let heading: number | undefined;
   /** Links seen in the current paragraph, and whether all its text was inside one link. */
   let links: { href: string; text: string }[] = [];
@@ -227,9 +256,21 @@ export function htmlToBlocks(
 
   const flush = () => {
     const text = cleanText(buffer, heading === undefined);
+    const single = splitLong(text).length === 1;
+    const formatted = fmts.some(Boolean);
+    const marks =
+      single && formatted ? marksFromChars(buffer, fmts, heading === undefined, text) : [];
+    if (formatted && marks.length === 0) flattened = true;
     buffer = "";
+    fmts = [];
     const onlyLink = links.length === 1 && !textOutsideLink ? links[0] : undefined;
-    if (links.length > 0 && !onlyLink) flattened = true;
+    if (links.length > 0 && !onlyLink && marks.length === 0) flattened = true;
+    // A heading or link that is one link keeps it on the element, not on its words.
+    const ownMarks = onlyLink
+      ? marks.flatMap(({ href: _href, ...rest }) =>
+          rest.bold || rest.italic || rest.color ? [rest] : [],
+        )
+      : marks;
     links = [];
     textOutsideLink = false;
     if (!text) {
@@ -243,12 +284,14 @@ export function htmlToBlocks(
           level: heading,
           text: part,
           ...(onlyLink ? { href: onlyLink.href } : {}),
+          ...(ownMarks.length > 0 ? { marks: ownMarks } : {}),
         });
       }
     } else if (onlyLink && text.length <= MAX_TEXT_LENGTH) {
       push({ kind: "link", text, href: onlyLink.href });
     } else {
-      for (const part of splitLong(text)) push({ kind: "text", text: part });
+      for (const part of splitLong(text))
+        push({ kind: "text", text: part, ...(marks.length > 0 ? { marks } : {}) });
     }
     heading = undefined;
   };
@@ -271,7 +314,7 @@ export function htmlToBlocks(
       if (text.trim()) item = text;
       return;
     }
-    buffer += text;
+    add(text);
     if (linkDepth > 0) {
       const last = links[links.length - 1];
       if (last) last.text += text;
@@ -343,7 +386,7 @@ export function htmlToBlocks(
     }
     if (name === "br") {
       if (item !== undefined) item += " ";
-      else buffer += "\n";
+      else add("\n");
       continue;
     }
     if (name === "hr") {
@@ -376,6 +419,7 @@ export function htmlToBlocks(
       if (!closing) {
         const href = safeHref(attributes["href"] ?? "");
         linkDepth++;
+        hrefs.push(href);
         if (href && linkDepth === 1) {
           links.push({ href, text: "" });
         } else if (attributes["href"] && !href) {
@@ -383,6 +427,7 @@ export function htmlToBlocks(
         }
       } else if (linkDepth > 0) {
         linkDepth--;
+        hrefs.pop();
       }
       continue;
     }
@@ -394,7 +439,7 @@ export function htmlToBlocks(
       continue;
     }
     if (name === "td" || name === "th") {
-      buffer += " ";
+      add(" ");
       continue;
     }
     if (BLOCK.has(name)) {
@@ -403,7 +448,18 @@ export function htmlToBlocks(
       continue;
     }
     if (INLINE_FORMAT.has(name)) {
-      if (!closing && (name !== "span" || attributes["style"] || attributes["class"]))
+      if (closing) {
+        const at = open.findLastIndex((entry) => entry.name === name);
+        if (at >= 0) open.splice(at, 1);
+        continue;
+      }
+      // W-950: bold, italic and colour are kept (as marks); other formatting is flattened.
+      const f = formatOf(name, attributes);
+      if (f) open.push({ name, f });
+      if (
+        (!f || item !== undefined) &&
+        (name !== "span" || attributes["style"] || attributes["class"])
+      )
         flattened = true;
       continue;
     }
@@ -419,4 +475,26 @@ export function htmlToBlocks(
     push({ kind: "list", ...list });
   }
   return { blocks, flattened, dropped: [...dropped] };
+}
+
+const flat = (text: string) => text.replaceAll("\n", " ");
+
+/**
+ * W-950: the bold, italic, coloured and linked words of a heading's or paragraph's HTML, as marks
+ * over `expected` (the plain text the importer made of it); none when they wouldn't line up.
+ */
+export function inlineMarks(
+  html: string,
+  safeHref: (url: string) => string | undefined,
+  expected: string,
+): TextMark[] {
+  if (!/<[a-z]/i.test(html) || splitLong(expected).length > 1) return [];
+  const { blocks } = htmlToBlocks(html, safeHref, () => undefined);
+  const only = blocks.length === 1 ? blocks[0] : undefined;
+  if ((only?.kind === "text" || only?.kind === "heading") && only.marks) {
+    return flat(only.text) === flat(expected) ? only.marks : [];
+  }
+  if (only?.kind === "link" && flat(only.text) === flat(expected))
+    return [{ start: 0, end: expected.length, href: only.href }];
+  return [];
 }

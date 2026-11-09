@@ -402,3 +402,44 @@ function applyCss(style: Style, prop: string, value: string): boolean {
       return false;
   }
 }
+
+/** W-950: how a class's emphasised or bold words look (`.hero-title em { color: gold }`). */
+export type WordRule = { color?: string; italic?: boolean; bold?: boolean };
+
+/**
+ * W-950: site or page CSS rules for the `em`/`i` or `strong`/`b` words inside an element with a
+ * class (`.elementor .actq-hero-h1 em{font-style:normal;color:#ffba08}`), by class name and
+ * `em` or `strong`. Only colour, font-style and font-weight are read.
+ */
+export function wordRules(css: string): Map<string, WordRule> {
+  const rules = new Map<string, WordRule>();
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, "").slice(0, 200_000);
+  for (const match of clean.matchAll(/([^{}@]+)\{([^{}]*)\}/g)) {
+    const body = match[2] ?? "";
+    const rule: WordRule = {};
+    for (const decl of body.split(";")) {
+      const at = decl.indexOf(":");
+      if (at < 0) continue;
+      const prop = decl.slice(0, at).trim().toLowerCase();
+      const value = decl
+        .slice(at + 1)
+        .replace(/!important/i, "")
+        .trim()
+        .toLowerCase();
+      if (prop === "color") {
+        const hex = color(value);
+        if (hex) rule.color = hex;
+      } else if (prop === "font-style") rule.italic = value === "italic" || value === "oblique";
+      else if (prop === "font-weight")
+        rule.bold = value === "bold" || value === "bolder" || Number(value) >= 600;
+    }
+    if (Object.keys(rule).length === 0) continue;
+    for (const selector of (match[1] ?? "").split(",")) {
+      const found = /\.([A-Za-z_][\w-]*)\s+(em|i|strong|b)\s*$/.exec(selector.trim());
+      if (!found) continue;
+      const key = `${found[1]} ${found[2] === "i" ? "em" : found[2] === "b" ? "strong" : found[2]}`;
+      rules.set(key, { ...rules.get(key), ...rule });
+    }
+  }
+  return rules;
+}

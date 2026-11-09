@@ -864,6 +864,68 @@ describe("images copied to the media library (W-958)", () => {
   });
 });
 
+describe("inline formatting from Elementor (W-950)", () => {
+  test("bold, italic, coloured and linked words in a heading stay formatted", () => {
+    const result = ok(
+      importElementor(
+        JSON.stringify({
+          content: [
+            {
+              id: "h1",
+              elType: "widget",
+              widgetType: "heading",
+              settings: {
+                title:
+                  'Trucks <strong>insured</strong>, <span style="color: rgb(212, 160, 23)">fast</span> &amp; <a href="/quote">online</a>',
+                header_size: "h1",
+              },
+            },
+          ],
+        }),
+        { icon },
+      ),
+    );
+    const [heading] = ofType(result.layout, "heading");
+    expect(props(heading)).toEqual({
+      text: "Trucks insured, fast & online",
+      level: 1,
+      marks: [
+        { start: 7, end: 14, bold: true },
+        { start: 16, end: 20, color: "#d4a017" },
+        { start: 23, end: 29, href: "/quote" },
+      ],
+    });
+    expect(result.notes.map((n) => n.message).join("\n")).not.toContain("became plain text");
+  });
+
+  test("a Text Editor paragraph keeps its formatting; other formatting is still flattened", () => {
+    const { blocks, flattened } = htmlToBlocks(
+      "<p>Call <b><i>now</i></b> or <u>later</u></p>",
+      (u) => u,
+      (u) => u,
+    );
+    expect(blocks).toEqual([
+      {
+        kind: "text",
+        text: "Call now or later",
+        marks: [{ start: 5, end: 8, bold: true, italic: true }],
+      },
+    ]);
+    expect(flattened).toBe(true);
+  });
+
+  test("unsafe links and colours never become marks", () => {
+    const { blocks } = htmlToBlocks(
+      '<p><a href="javascript:alert(1)">bad</a> <span style="color:expression(alert(1))">x</span> <font color="#00ff00">ok</font></p>',
+      (u) => (u.startsWith("javascript") ? undefined : u),
+      (u) => u,
+    );
+    expect(blocks).toEqual([
+      { kind: "text", text: "bad x ok", marks: [{ start: 6, end: 8, color: "#00ff00" }] },
+    ]);
+  });
+});
+
 describe("Elementor HTML to blocks (W-945)", () => {
   const keep = (url: string) => (/^https?:\/\//.test(url) ? url : undefined);
 
@@ -875,7 +937,7 @@ describe("Elementor HTML to blocks (W-945)", () => {
     );
     expect(blocks).toEqual([
       { kind: "heading", level: 2, text: "Title" },
-      { kind: "text", text: "One bold\ntwo" },
+      { kind: "text", text: "One bold\ntwo", marks: [{ start: 4, end: 8, bold: true }] },
       { kind: "list", ordered: false, items: ["A", "B", "B1"] },
       { kind: "divider" },
       { kind: "image", src: "https://x.test/a.png", alt: "A" },

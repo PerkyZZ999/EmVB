@@ -18856,8 +18856,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "      children: [linked ?? node.props.text],",
-          "replace": "      children: [node.props.text],"
+          "search": "      children: linked ? [linked] : words(true),",
+          "replace": "      children: words(true),"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/elements/inner-link.test.ts"],
@@ -18912,8 +18912,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "      children: [linked ?? node.props.text],",
-          "replace": "      children: [node.props.text],"
+          "search": "      children: linked ? [linked] : words(true),",
+          "replace": "      children: words(true),"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/element-links.e2e.ts", "--project=node", "-g", "W-141"],
@@ -43122,8 +43122,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/import/elementor/html.ts",
-          "search": "      else buffer += \"\\n\";",
-          "replace": "      else buffer += \" \";"
+          "search": "      else add(\"\\n\");",
+          "replace": "      else add(\" \");"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
@@ -44332,6 +44332,201 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
       "expect": "\\(fail\\).*class backgrounds use"
+    },
+    {
+      "id": "W-950/marks-not-rendered",
+      "requirement": "W-950",
+      "description": "Text marks are ignored when the page is drawn.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "children: markedChildren(node.props.text, node.props.marks) }",
+          "replace": "children: [node.props.text] }"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/text-marks.test.ts"],
+      "expect": "\\(fail\\).*bold, italic, colour and links wrap"
+    },
+    {
+      "id": "W-950/mark-color-missing",
+      "requirement": "W-950",
+      "description": "A mark's colour never reaches its words.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        declarations.push({ property: `--emvb-mark-${n}`, value: color }),",
+          "replace": "        void [color, n],"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/text-marks.test.ts"],
+      "expect": "\\(fail\\).*bold, italic, colour and links wrap"
+    },
+    {
+      "id": "W-950/mark-css-always",
+      "requirement": "W-950",
+      "description": "The mark colour rules are sent on every page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    sheet.includes(\"--emvb-mark-\") ? MARK_CSS : \"\",",
+          "replace": "    MARK_CSS,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/text-marks.test.ts"],
+      "expect": "\\(fail\\).*renders and styles exactly as before"
+    },
+    {
+      "id": "W-950/mark-link-unchecked",
+      "requirement": "W-950",
+      "description": "A mark's link reaches the page with no link check at all.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/text-marks.ts",
+          "search": "    const linked = links ? on.find((m) => m.href && sanitizeHref(m.href)) : undefined;",
+          "replace": "    const linked = links ? on.find((m) => m.href) : undefined;"
+        },
+        {
+          "file": "packages/emvb/src/core/text-marks.ts",
+          "search": "      ...(linked ? { href: sanitizeHref(linked.href as string) } : {}),",
+          "replace": "      ...(linked ? { href: linked.href } : {}),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/text-marks.test.ts"],
+      "expect": "\\(fail\\).*unsafe links and colours are left out"
+    },
+    {
+      "id": "W-950/heading-inner-links",
+      "requirement": "W-950",
+      "description": "A linked heading nests word links inside its link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": "words(false)",
+          "replace": "words(true)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/text-marks.test.ts"],
+      "expect": "\\(fail\\).*linked heading keeps formatting"
+    },
+    {
+      "id": "W-950/marks-schema-loose",
+      "requirement": "W-950",
+      "description": "Marks accept bold: false and other loose values.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "  bold: z.literal(true).optional(),\n  italic: z.literal(true).optional(),",
+          "replace": "  bold: z.boolean().optional(),\n  italic: z.literal(true).optional(),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/text-marks.test.ts"],
+      "expect": "\\(fail\\).*refuses"
+    },
+    {
+      "id": "W-950/edit-leaves-marks",
+      "requirement": "W-950",
+      "description": "Editing the text leaves the formatting on the old positions.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "          withShiftedMarks(node, action.update(node)),",
+          "replace": "          action.update(node),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
+      "expect": "\\(fail\\).*W-950"
+    },
+    {
+      "id": "W-950/typing-joins-mark",
+      "requirement": "W-950",
+      "description": "Typing just before a formatted word joins the formatting.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/text-marks.ts",
+          "search": "    if (isEnd ? at <= head : at < head) return at;",
+          "replace": "    if (at <= head) return at;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/text-marks.test.ts"],
+      "expect": "\\(fail\\).*typing before a mark"
+    },
+    {
+      "id": "W-950/bold-never-off",
+      "requirement": "W-950",
+      "description": "Bold on already-bold words adds it again instead of taking it off.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/TextMarksControl.tsx",
+          "search": "hasFormat(marks, range.start, range.end, format)",
+          "replace": "hasFormat(marks, range.start, range.start, format)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/text-marks-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Bold on selected words"
+    },
+    {
+      "id": "W-950/ui-link-unchecked",
+      "requirement": "W-950",
+      "description": "A typed word link is stored without the link check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/TextMarksControl.tsx",
+          "search": "    const safe = sanitizeHref(href.trim());",
+          "replace": "    const safe = href.trim();"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/text-marks-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a link goes on the selected words"
+    },
+    {
+      "id": "W-950/import-marks-lost",
+      "requirement": "W-950",
+      "description": "Imported bold, italic, coloured and linked words become plain.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/html.ts",
+          "search": "      single && formatted ? marksFromChars(",
+          "replace": "      single && formatted && !single ? marksFromChars("
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*(stay formatted|keeps its formatting)"
+    },
+    {
+      "id": "W-950/import-color-unchecked",
+      "requirement": "W-950",
+      "description": "An imported colour reaches the mark unchecked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/html.ts",
+          "search": "    return hex && hex.length <= 7 ? { color: hex } : undefined;",
+          "replace": "    return declared ? { color: declared } : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*unsafe links and colours never"
+    },
+    {
+      "id": "W-950/kit-word-rule-ignored",
+      "requirement": "W-950",
+      "description": "The site's CSS for emphasised words in a class is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "      if (rule.color && next.color === undefined) next.color = rule.color;",
+          "replace": "      if (rule.color && next.color === null) next.color = rule.color;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*kit rule for `em`"
     }
   ]
 }

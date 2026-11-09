@@ -9406,6 +9406,77 @@
             },
             "newTab": {
               "type": "boolean"
+            },
+            "marks": {
+              "maxItems": 100,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2000
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2000
+                  },
+                  "bold": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "italic": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "color": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "var": {
+                            "type": "string",
+                            "pattern": "^[a-z0-9-]{1,40}$"
+                          },
+                          "from": {
+                            "type": "string",
+                            "enum": [
+                              "color",
+                              "font",
+                              "fontSize",
+                              "spacing"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "var"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "href": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "newTab": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [
@@ -10733,6 +10804,77 @@
                 "p",
                 "div"
               ]
+            },
+            "marks": {
+              "maxItems": 100,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2000
+                  },
+                  "end": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 2000
+                  },
+                  "bold": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "italic": {
+                    "type": "boolean",
+                    "const": true
+                  },
+                  "color": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "var": {
+                            "type": "string",
+                            "pattern": "^[a-z0-9-]{1,40}$"
+                          },
+                          "from": {
+                            "type": "string",
+                            "enum": [
+                              "color",
+                              "font",
+                              "fontSize",
+                              "spacing"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "var"
+                        ],
+                        "additionalProperties": false
+                      }
+                    ]
+                  },
+                  "href": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000
+                  },
+                  "newTab": {
+                    "type": "boolean",
+                    "const": true
+                  }
+                },
+                "required": [
+                  "start",
+                  "end"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [

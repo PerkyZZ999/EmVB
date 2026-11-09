@@ -13,6 +13,7 @@ import { IconPicker } from "./IconPicker.tsx";
 import { ImageSourcesField } from "./ImageSourcesField.tsx";
 import { MediaPicker } from "./MediaPicker.tsx";
 import { propsOf, withProp } from "./node-props.ts";
+import { TextMarksControl } from "./TextMarksControl.tsx";
 
 /** Content-tab control driven by a FieldDescriptor (W-021 / W-024). */
 export function FieldControl({
@@ -103,6 +104,10 @@ export function FieldControl({
 
   if (field.kind === "icon") {
     return <IconPicker key={field.key} node={node} fetcher={fetcher} onChange={onChange} />;
+  }
+
+  if (field.kind === "marks") {
+    return <TextMarksControl key={field.key} node={node} onChange={onChange} />;
   }
 
   if (field.kind === "image-sources") {
@@ -296,4 +301,5 @@ export const IMPLEMENTED_FIELD_KINDS = [
   "icon",
   "list-items",
   "image-sources",
+  "marks",
 ] as const;

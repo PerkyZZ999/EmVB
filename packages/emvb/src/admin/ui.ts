@@ -240,6 +240,13 @@ export const UI_CSS = `
 .emvb-import-source { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .emvb-import-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
 .emvb-import-label { font-size: 14px; font-weight: 500; color: var(--text-color-kumo-default); }
+.emvb-marks { display: grid; gap: 6px; min-width: 0; }
+.emvb-marks-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.emvb-marks-color { display: inline-flex; align-items: center; gap: 6px; }
+.emvb-marks-color input { inline-size: 32px; block-size: 32px; padding: 0; border: 1px solid var(--color-kumo-line); border-radius: 6px; background: transparent; }
+.emvb-marks-link { display: grid; gap: 6px; }
+.emvb-marks-list { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.emvb-marks-list li { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; overflow-wrap: anywhere; font-size: 13px; }
 .emvb-import-links { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .emvb-import-links > legend { padding: 0; margin-bottom: 4px; }
 .emvb-dialog .emvb-field.emvb-import-json {

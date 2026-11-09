@@ -1,4 +1,6 @@
 import { renderableDesign, renderableDynamic, renderableLayout } from "../contract.ts";
+import { markColors } from "../text-marks.ts";
+import type { TextMark } from "../schema/layout.ts";
 import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_NODES } from "../limits.ts";
 import { loneAbTests, variantShows } from "../audience/variants.ts";
@@ -387,6 +389,12 @@ export function renderPage(
         declarations.push({ property: "object-position", value: position });
         declarations.push({ property: "object-fit", value: "cover" });
       }
+    }
+    if (node.type === "heading" || node.type === "text") {
+      // W-950: each mark colour as a variable its words read.
+      markColors((node.props as { marks?: TextMark[] }).marks).forEach((color, n) =>
+        declarations.push({ property: `--emvb-mark-${n}`, value: color }),
+      );
     }
     if (node.type === "list") {
       // W-952: the marker style; items inherit it. Steps draw their own numbers.

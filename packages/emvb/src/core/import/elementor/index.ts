@@ -11,7 +11,7 @@ import { nestingIssues } from "../../nesting.ts";
 import { validateLayout } from "../../validate.ts";
 import { atomicElement } from "./atomic.ts";
 import { readSnapshots } from "./snapshots.ts";
-import { customCss } from "./css.ts";
+import { customCss, wordRules } from "./css.ts";
 import { ImportContext, type ImportNote, type ImportOptions, type StyleClass } from "./context.ts";
 import {
   boxReader,
@@ -802,6 +802,14 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
   if (source.record) readSnapshots(source.record, ctx.atomic);
   if (isRecord(options.kit)) readSnapshots(options.kit, ctx.atomic);
   ctx.findOldSite(JSON.stringify([source.elements, source.pageSettings ?? {}]));
+  {
+    const kitCustom =
+      isRecord(options.kit) && isRecord(options.kit["settings"])
+        ? str(options.kit["settings"]["custom_css"])
+        : undefined;
+    const pageCustom = source.pageSettings ? str(source.pageSettings["custom_css"]) : undefined;
+    ctx.wordRules = wordRules(`${kitCustom ?? ""}\n${pageCustom ?? ""}`);
+  }
   const walker = new Walker(ctx);
   const children = walker.walk(source.elements, { parentRow: false, depth: 1, walk: walker.walk });
   if (children.length === 0)

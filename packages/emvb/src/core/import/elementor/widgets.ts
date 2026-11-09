@@ -15,6 +15,7 @@ import {
   decodeEntities,
   embedVideoUrl,
   htmlToBlocks,
+  inlineMarks,
   splitLong,
   stripControl,
 } from "./html.ts";
@@ -127,11 +128,14 @@ function blockNodes(blocks: readonly Block[], ctx: ImportContext, el: string): N
             text: block.text,
             level: block.level,
             ...(block.href ? { href: block.href } : {}),
+            ...(block.marks ? { marks: block.marks } : {}),
           }),
         );
         break;
       case "text":
-        out.push(node(ctx, "text", { text: block.text }));
+        out.push(
+          node(ctx, "text", { text: block.text, ...(block.marks ? { marks: block.marks } : {}) }),
+        );
         break;
       case "link":
         out.push(node(ctx, "link", { text: block.text, href: block.href }));
@@ -388,12 +392,23 @@ const heading: Widget = (s, ctx, el) => {
     return [styled(node(ctx, "post-title", level ? { level: Number(level) } : {}), ds)];
   }
   const { text, hadMarkup } = plain(s["title"]);
-  if (hadMarkup) ctx.note("approximated", el, "Formatting inside a heading became plain text.");
   if (!text) return [];
   const linkProps = href(s["link"], ctx);
+  // W-950: bold, italic, coloured and linked words stay formatted.
+  const marks = hadMarkup ? inlineMarks(str(s["title"]) ?? "", (url) => ctx.href(url), text) : [];
+  if (hadMarkup && marks.length === 0)
+    ctx.note("approximated", el, "Formatting inside a heading became plain text.");
   if (level)
     return splitLong(text).map((part) =>
-      styled(node(ctx, "heading", { text: part, level: Number(level), ...linkProps }), ds),
+      styled(
+        node(ctx, "heading", {
+          text: part,
+          level: Number(level),
+          ...linkProps,
+          ...(marks.length > 0 ? { marks } : {}),
+        }),
+        ds,
+      ),
     );
   if (linkProps.href) return [styled(node(ctx, "link", { text: short(text), ...linkProps }), ds)];
   return splitLong(text).map((part) =>

@@ -95,6 +95,8 @@ export class ImportContext {
   /** W-958: Elementor class id → its EmVB class, or undefined when it can't be one. */
   readonly imported = new Map<string, ImportedClass | undefined>();
   readonly useClasses: boolean;
+  /** W-950: site and page CSS for emphasised and bold words inside a class (`wordRules`). */
+  wordRules = new Map<string, { color?: string; italic?: boolean; bold?: boolean }>();
   /** W-958: images on the old site the page uses, so the dialog can copy them. */
   readonly images = new Set<string>();
   /** W-958: WordPress page ids the export links to, so the dialog can ask where each goes. */

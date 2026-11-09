@@ -29,6 +29,7 @@ import type { ElementDescriptor } from "../schema/descriptors.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { sanitizeSvgMarkup } from "../sanitize/svg.ts";
 import { scopeSvgIds } from "./svg-ids.ts";
+import { markedChildren } from "../text-marks.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { getBundledIcon } from "../icons/catalog.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
@@ -104,6 +105,7 @@ const heading: ElementDefinition<HeadingNode> = {
     defaultTab: "content",
     fields: [
       { key: "text", kind: "text", label: "Text" },
+      { key: "marks", kind: "marks", label: "Formatting", optional: true },
       {
         key: "level",
         kind: "select",
@@ -114,13 +116,13 @@ const heading: ElementDefinition<HeadingNode> = {
     ],
   },
   build: (node, attrs) => {
-    const linked = innerLink(node.props.href, node.props.newTab, "emvb-heading-link", [
-      node.props.text,
-    ]);
+    // W-950: a linked heading is one link, so its words keep their formatting but not links.
+    const words = (links: boolean) => markedChildren(node.props.text, node.props.marks, links);
+    const linked = innerLink(node.props.href, node.props.newTab, "emvb-heading-link", words(false));
     return {
       tag: HEADING_TAGS[node.props.level - 1] ?? "h2",
       attrs,
-      children: [linked ?? node.props.text],
+      children: linked ? [linked] : words(true),
     };
   },
 };
@@ -220,6 +222,7 @@ const text: ElementDefinition<TextNode> = {
     defaultTab: "content",
     fields: [
       { key: "text", kind: "textarea", label: "Text" },
+      { key: "marks", kind: "marks", label: "Formatting", optional: true },
       {
         key: "tag",
         kind: "select",
@@ -232,7 +235,7 @@ const text: ElementDefinition<TextNode> = {
   build: (node, attrs) => {
     const tag = node.props.tag ?? "p";
     const safe = (TEXT_TAGS as readonly string[]).includes(tag) ? tag : "p";
-    return { tag: safe, attrs, children: [node.props.text] };
+    return { tag: safe, attrs, children: markedChildren(node.props.text, node.props.marks) };
   },
 };
 

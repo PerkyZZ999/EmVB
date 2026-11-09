@@ -69,7 +69,11 @@ describe("Elementor 4 atomic import (W-945)", () => {
 
   test("W-955: fluid sizes stay fluid from their small to their large value; laptop folds into tablet", () => {
     const title = byLabel("Hero title");
-    expect(props(title)).toEqual({ text: "Fast pages, no code.", level: 1 });
+    expect(props(title)).toEqual({
+      text: "Fast pages, no code.",
+      level: 1,
+      marks: [{ start: 12, end: 20, italic: true }],
+    });
     expect(title?.style).toEqual({
       fontFamily: '"Inter", sans-serif',
       fontSize: { fluid: { min: 32, max: 56 } },
@@ -189,7 +193,7 @@ describe("Elementor 4 atomic import (W-945)", () => {
 
   test("the imported page renders", () => {
     const { html, css } = renderPage(result.layout, emptyDesign());
-    expect(html).toContain("Fast pages, no code.");
+    expect(html).toContain("Fast pages, <em>no code.</em>");
     expect(css).toContain("linear-gradient");
     expect(html).not.toMatch(/<script/i);
   });
@@ -734,5 +738,45 @@ describe("Elementor classes as site classes (W-958)", () => {
       media: (url) => ({ url: `/_emdash/api/media/file/${url.split("/").pop()}`, id: "m1" }),
     });
     expect(JSON.stringify(imported.classes)).not.toMatch(/https?:\/\//);
+  });
+});
+
+describe("emphasised words styled by the site's CSS (W-950)", () => {
+  test("a kit rule for `em` inside a class gives those words its colour and upright style", () => {
+    const imported = importElementor(
+      {
+        content: [
+          {
+            id: "h1",
+            elType: "widget",
+            widgetType: "e-heading",
+            settings: {
+              classes: { $$type: "classes", value: ["g-hero"] },
+              tag: { $$type: "string", value: "h1" },
+              title: { $$type: "escaped-html", value: "Your safety,<br><em>our business.</em>" },
+            },
+            elements: [],
+          },
+        ],
+        global_classes: {
+          items: { "g-hero": { id: "g-hero", label: "acme-hero-h1", variants: [] } },
+          order: ["g-hero"],
+        },
+      },
+      {
+        kit: {
+          settings: {
+            custom_css:
+              "/* gold word */ .elementor .acme-hero-h1 em{font-style:normal;color:#ffba08 !important;} .other em{color:#000}",
+          },
+        },
+      },
+    );
+    if (!imported.ok) throw new Error(imported.error);
+    const [heading] = (imported.layout.root as Node).children ?? [];
+    expect(props(heading)).toMatchObject({
+      text: "Your safety, our business.",
+      marks: [{ start: 13, end: 26, color: "#ffba08" }],
+    });
   });
 });

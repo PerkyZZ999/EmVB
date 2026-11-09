@@ -37,6 +37,25 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
         span
           "Text"
       input.emvb-field id="id-3" data-emvb-field="text" value="Heading" data-filled="" aria-labelledby="id-2"
+    div.emvb-marks data-emvb-field="marks"
+      span.emvb-import-label
+        "Formatting"
+      div.emvb-marks-bar role="toolbar" aria-label="Formatting"
+        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Bold"
+          svg aria-hidden="true"
+        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Italic"
+          svg aria-hidden="true"
+        label.emvb-marks-color
+          span.emvb-helper
+            "Colour"
+          input aria-label="Colour" type="color" value="#000000"
+        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Link"
+          svg aria-hidden="true"
+        button.emvb-btn data-kumo-component="Button" type="button"
+          span
+            "Clear"
+      p.emvb-helper role="status"
+        "Select words in the Text field, then choose a format."
     div data-emvb-field="level"
       div data-filled=""
         div id="id-4" data-filled=""
@@ -1972,6 +1991,25 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
         "Text"
       textarea.emvb-field.emvb-textarea id="id-2"
         "Text"
+    div.emvb-marks data-emvb-field="marks"
+      span.emvb-import-label
+        "Formatting"
+      div.emvb-marks-bar role="toolbar" aria-label="Formatting"
+        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Bold"
+          svg aria-hidden="true"
+        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Italic"
+          svg aria-hidden="true"
+        label.emvb-marks-color
+          span.emvb-helper
+            "Colour"
+          input aria-label="Colour" type="color" value="#000000"
+        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Link"
+          svg aria-hidden="true"
+        button.emvb-btn data-kumo-component="Button" type="button"
+          span
+            "Clear"
+      p.emvb-helper role="status"
+        "Select words in the Text field, then choose a format."
     div data-emvb-field="tag"
       div data-filled=""
         div id="id-3" data-filled=""

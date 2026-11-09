@@ -2,7 +2,7 @@ import { z } from "zod";
 import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { ImageEdit } from "../image-edit/schema.ts";
-import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
+import { ColorValue, DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
 
 /**
  * 16 since W-481 (D-061): an optional editor-only `edit` record on images (image editor).
@@ -214,6 +214,26 @@ const parentNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
     },
   });
 
+/** W-950: at most this many formatted ranges in one Heading or Text. */
+export const MAX_TEXT_MARKS = 100;
+
+/**
+ * W-950: formatting on part of a Heading's or Text's words: characters `start` to `end` (end not
+ * included) are bold, italic, in a colour and/or a link. The text stays plain; ranges past its
+ * end are clipped when the page is drawn, so changing the text never makes a page invalid.
+ */
+export const TextMark = z.strictObject({
+  start: z.number().int().min(0).max(MAX_TEXT_LENGTH),
+  end: z.number().int().min(1).max(MAX_TEXT_LENGTH),
+  bold: z.literal(true).optional(),
+  italic: z.literal(true).optional(),
+  color: ColorValue.optional(),
+  href: z.string().min(1).max(2000).optional(),
+  newTab: z.literal(true).optional(),
+});
+export type TextMark = z.infer<typeof TextMark>;
+const TextMarks = z.array(TextMark).max(MAX_TEXT_MARKS);
+
 export const HeadingNode = leafNode(
   "heading",
   z.strictObject({
@@ -222,6 +242,8 @@ export const HeadingNode = leafNode(
     /** Optional link around the text (W-141), like Elementor's Heading link. */
     href: z.string().max(2000).optional(),
     newTab: z.boolean().optional(),
+    /** W-950: bold, italic, colour and links on part of the text (links only when unlinked). */
+    marks: TextMarks.optional(),
   }),
 );
 
@@ -239,6 +261,8 @@ export const TextNode = leafNode(
   z.strictObject({
     text: z.string().max(MAX_TEXT_LENGTH),
     tag: z.enum(TEXT_TAGS).optional(),
+    /** W-950: bold, italic, colour and links on part of the text. */
+    marks: TextMarks.optional(),
   }),
 );
 

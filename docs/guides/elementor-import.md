@@ -113,8 +113,10 @@ These keep their content in the closest EmVB form, and the report says so:
   carousels (stacked or as a grid), Blockquote, Table of Contents, Code Highlight.
 - **Google Maps** becomes a link to the map; **Star Rating** shows star characters; counters and
   progress bars show their final value.
-- **Text formatting** inside a paragraph (bold, italic, coloured or linked words) becomes plain
-  text. Paragraphs, headings, lists, line breaks, images and video embeds stay separate elements.
+- **Text formatting** inside headings and paragraphs keeps bold, italic, coloured and linked words,
+  including the colour your site's CSS gives emphasised words in a class (the gold word of a hero
+  title). Other formatting (underline, superscript, highlights) becomes plain text. Paragraphs,
+  headings, lists, line breaks, images and video embeds stay separate elements.
 - **Custom CSS** (Pro): rules on `selector` itself are applied where EmVB has the property (colour,
   background colour, font size and weight, alignment, spacing, radius, opacity and a few more).
   Rules for inner parts, and properties EmVB has no setting for, are listed.

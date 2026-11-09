@@ -219,3 +219,25 @@ describe("A drop on its own spot is no edit (W-521)", () => {
     }
   });
 });
+
+test("W-950: formatted words follow an edit of the text, from any control", () => {
+  const start = initial();
+  const layout = structuredClone(start.page.layout);
+  if (!layout) throw new Error("no layout");
+  layout.root.children.push({
+    id: "text0950",
+    type: "text",
+    props: { text: "a gold word", marks: [{ start: 2, end: 6, bold: true }] },
+  } as LayoutNode);
+  let state: EditorState = { ...start, page: { ...start.page, layout } };
+  state = editorReducer(state, {
+    type: "update-node",
+    id: "text0950",
+    update: (node) => ({ ...node, props: { ...node.props, text: "the gold word" } }) as LayoutNode,
+  });
+  const node = state.page.layout ? findNode(state.page.layout, "text0950") : undefined;
+  expect(node?.props).toEqual({
+    text: "the gold word",
+    marks: [{ start: 4, end: 8, bold: true }],
+  });
+});
