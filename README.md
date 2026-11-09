@@ -88,6 +88,10 @@ See the [bridge README](packages/emvb-mcp/README.md) and the [MCP guide](docs/gu
 
 Give entries in your own collections an EmVB layout: **Edit with EmVB** from the entry form, Preview, Apply, then the entry's own Save. **Convert to EmVB** starts from the existing body, and **Host collections** adds the field. See the [native page editing guide](docs/guides/native-page-editing.md).
 
+**Import from Elementor**
+
+Bring pages and templates over from Elementor: choose the exported `.json`, see what will be kept, changed or left out, and get a draft page or theme part. Containers, sections and the core widgets map faithfully; Pro, theme-builder and third-party widgets keep what EmVB can show. See the [Elementor import guide](docs/guides/elementor-import.md).
+
 **Saved sections**
 
 Save any element as a section and reuse it from **My sections**, as an independent copy or synced everywhere you use it. See the [saved sections guide](docs/guides/saved-sections.md).
@@ -147,6 +151,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 - [Edit your own pages](docs/guides/native-page-editing.md)
 - [AI agents (MCP)](docs/guides/mcp.md)
 - [Co-design with an AI agent](docs/guides/co-design.md)
+- [Import from Elementor](docs/guides/elementor-import.md)
 - [Languages](docs/guides/languages.md)
 - [Motion](docs/guides/motion.md)
 - [Extensions](docs/guides/extensions.md)
