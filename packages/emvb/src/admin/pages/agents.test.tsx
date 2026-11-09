@@ -53,7 +53,8 @@ describe("AI agents page (W-463)", () => {
     expect(host.querySelector("[data-emvb-agents=ready] style")?.textContent).toContain(
       ".emvb-agents-section",
     );
-    expect(host.querySelectorAll("section.emvb-surface-card.emvb-agents-section")).toHaveLength(4);
+    // W-932: Setup, Access, Publishing, How to connect, Recent agent activity.
+    expect(host.querySelectorAll("section.emvb-surface-card.emvb-agents-section")).toHaveLength(5);
     expect(host.textContent).toContain("Let AI agents edit EmVB pages");
     expect(host.textContent).toContain("Added heading h1");
     const stdio = host.querySelector("[data-emvb-snippet=stdio]")?.textContent ?? "";
@@ -62,7 +63,7 @@ describe("AI agents page (W-463)", () => {
     expect(host.textContent).not.toContain('EMVB_TOKEN": "ec_');
     // W-477: a status pill, icon headings and an Agent badge on each activity row.
     expect(host.querySelector(".emvb-agents-status")?.textContent).toBe("Agents off");
-    expect(host.querySelectorAll(".emvb-agents-icon[aria-hidden=true] svg")).toHaveLength(4);
+    expect(host.querySelectorAll(".emvb-agents-icon[aria-hidden=true] svg")).toHaveLength(5);
     expect(host.querySelector(".emvb-agents-who .emvb-timeline-agent")?.textContent).toBe("Agent");
   });
 

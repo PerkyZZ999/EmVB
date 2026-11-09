@@ -9,6 +9,8 @@ import { z } from "zod";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../constants.ts";
 import { canvasFieldSlugs } from "./hooks.ts";
 import { AgentSettings, DEFAULT_AGENT_SETTINGS } from "../mcp/settings.ts";
+import { TOOLS } from "../mcp/tools.ts";
+import { servedCurrent, toolListFingerprint } from "./tools-served.ts";
 
 /** Plugin KV key of the agent settings (plan § 4, D-055). */
 const AGENT_SETTINGS_KEY = "agent-settings";
@@ -75,6 +77,8 @@ export const agentsRoute: PluginRoute = {
       settings,
       revision,
       endpoint: new URL("/_emdash/api/mcp", ctx.request.url).toString(),
+      // W-932: EmDash has run one of this version's EmVB tools, so it approved this tool list.
+      toolsServed: await servedCurrent(ctx.kv as never, toolListFingerprint(TOOLS)),
       activity: log.items.map((item) => Object.assign({ id: item.id }, item.data as object)),
     };
   },

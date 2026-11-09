@@ -42496,6 +42496,76 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/codesign-panel.test.tsx"],
       "expect": "\\(fail\\).*a refused request keeps the text"
+    },
+    {
+      "id": "W-932/approval-ignored",
+      "requirement": "W-932",
+      "description": "The setup card says EmVB's tools aren't approved when the admin approved them.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/agents-api.ts",
+          "search": "tools: approved === undefined ? \"unknown\" : approved ? \"approved\" : \"off\"",
+          "replace": "tools: approved === undefined ? \"unknown\" : \"off\""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/agent-setup.test.tsx"],
+      "expect": "\\(fail\\).*approved but unused since this version"
+    },
+    {
+      "id": "W-932/failed-check-looks-fine",
+      "requirement": "W-932",
+      "description": "A server error from EmDash's MCP route is read as the endpoint being on.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/agents-api.ts",
+          "search": "response.status < 500 ? \"on\" : \"unknown\"",
+          "replace": "\"on\""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/agent-setup.test.tsx"],
+      "expect": "\\(fail\\).*a failed check says it couldn't tell"
+    },
+    {
+      "id": "W-932/direct-route-counts",
+      "requirement": "W-932",
+      "description": "Calling EmVB's tool route directly marks the tools as served by EmDash.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/mcp-routes.ts",
+          "search": "            if (viaEmDashMcp(ctx.request))\n",
+          "replace": "            if (ctx.request)\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/tools-served.test.ts"],
+      "expect": "\\(fail\\).*a call through EmDash's MCP endpoint marks"
+    },
+    {
+      "id": "W-932/fingerprint-ignores-description",
+      "requirement": "W-932",
+      "description": "Rewording a tool doesn't change the fingerprint, so a stale approval looks current.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/tools-served.ts",
+          "search": "`${t.name}\\u0000${t.description}\\u0000${t.destructive}`",
+          "replace": "`${t.name}\\u0000${t.destructive}`"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/tools-served.test.ts"],
+      "expect": "\\(fail\\).*any change to a tool's name, description"
+    },
+    {
+      "id": "W-932/step-state-unspoken",
+      "requirement": "W-932",
+      "description": "Screen readers hear each setup step without whether it's done.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/AgentSetup.tsx",
+          "search": "                <span className=\"emvb-sr-only\">: {STATUS[step.state]}</span>\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/agent-setup.test.tsx"],
+      "expect": "\\(fail\\).*the card marks each step"
     }
   ]
 }

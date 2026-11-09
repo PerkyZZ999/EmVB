@@ -102,3 +102,19 @@ test("while the page is open in the editor, a direct write is refused; after lea
     }),
   );
 });
+
+test("W-932: the AI agents page's setup card checks the site's real MCP setup", async ({
+  page,
+}) => {
+  // useAgentClient turned EmDash's tool approval and EmVB's agent access on for this spec.
+  await page.goto("/_emdash/admin/plugins/emvb/agents");
+  const card = page.locator('[data-emvb-agent-setup="ready"]');
+  await expect(card).toBeVisible({ timeout: 20_000 });
+  for (const step of ["endpoint", "tools", "access"])
+    await expect(card.locator(`[data-emvb-setup-step="${step}"]`)).toHaveAttribute(
+      "data-state",
+      "done",
+    );
+  await expect(card.locator('[data-emvb-setup-step="token"]')).toContainText("mcp:tools:emvb");
+  await expect(card).not.toContainText("ec_pat_");
+});

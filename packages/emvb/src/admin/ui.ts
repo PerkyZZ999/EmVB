@@ -123,6 +123,12 @@ export const UI_CSS = `
 .emvb-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .emvb-agents-section h3 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; line-height: 20px; font-weight: 600; color: var(--text-color-kumo-default); }
 .emvb-agents-section p { margin: 0; font-size: 14px; line-height: 20px; color: var(--text-color-kumo-subtle); }
+/* W-932: setup checklist */
+.emvb-agents-steps { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.emvb-agents-steps li { display: flex; align-items: flex-start; gap: 10px; }
+.emvb-agents-step-icon { display: inline-flex; flex: none; margin-block-start: 1px; color: var(--text-color-kumo-subtle); }
+.emvb-agents-steps li[data-state="done"] .emvb-agents-step-icon { color: var(--text-color-kumo-success, var(--color-kumo-brand)); }
+.emvb-agents-steps li[data-state="todo"] .emvb-agents-step-icon { color: var(--text-color-kumo-warning, var(--text-color-kumo-default)); }
 .emvb-agents-section code { padding: 1px 5px; border-radius: 4px; background: var(--color-kumo-tint); font-family: var(--font-mono); font-size: 12px; }
 .emvb-agents-option { display: grid; gap: 4px; padding-top: 16px; border-top: 1px solid var(--color-kumo-line); }
 .emvb-agents-option > p { padding-inline-start: 44px; font-size: 13px; }

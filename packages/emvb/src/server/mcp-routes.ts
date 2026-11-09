@@ -2,6 +2,7 @@ import { PluginRouteError, type PluginRoute, type RouteContext } from "emdash";
 import { portOf } from "./saved-sections.ts";
 import { proposalPortOf } from "./proposals.ts";
 import { requestsPortOf } from "./requests.ts";
+import { noteServed, toolListFingerprint, viaEmDashMcp } from "./tools-served.ts";
 import { isOpenInEditor } from "./presence.ts";
 import { PAGES_COLLECTION, DESIGN_DRAFT_KEY, DESIGN_KEY } from "../constants.ts";
 import { McpToolError } from "../mcp/errors.ts";
@@ -297,6 +298,7 @@ export const isNotSetUp = (error: unknown) =>
 
 /** Routes `mcp/<tool>`: editors and above (D-056), POST JSON, one per tool (R1 D-054). */
 export function mcpRoutes(tools: readonly ToolDef[]): Record<string, PluginRoute> {
+  const fingerprint = toolListFingerprint(tools);
   return Object.fromEntries(
     tools.map((tool) => [
       `mcp/${tool.name}`,
@@ -305,6 +307,9 @@ export function mcpRoutes(tools: readonly ToolDef[]): Record<string, PluginRoute
         input: tool.input,
         handler: async (ctx: RouteContext<unknown>) => {
           try {
+            // W-932: EmDash served this tool, so it approved the current tool list.
+            if (viaEmDashMcp(ctx.request))
+              await noteServed(ctx.kv as never, fingerprint).catch(() => undefined);
             return await runTool(tool, pluginPorts(ctx), ctx.input);
           } catch (error) {
             if (error instanceof McpToolError) {

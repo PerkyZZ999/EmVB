@@ -78,7 +78,7 @@ export function AgentRequestBox({ co, now = Date.now() }: { co: CoDesign; now?: 
         >
           {error ??
             (agentSeenAt === null
-              ? "No agent has checked for requests yet. Connect one with the EmVB MCP tools; it answers with a proposal you review here."
+              ? "No agent has checked for requests yet. An admin sets one up in Pages VisualBuilder → AI agents; it answers with a proposal you review here."
               : connected
                 ? `An agent is connected (checked ${ago(agentSeenAt, now)}).`
                 : `An agent last checked ${ago(agentSeenAt, now)}. It may not see new requests until it checks again.`)}

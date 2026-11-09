@@ -137,6 +137,11 @@ Agent publishing is **off** by default. In **AI agents**, an admin can separatel
 
 ## What people see
 
+- **Setup card** (1.0, top of the AI agents page): checks that EmDash's MCP endpoint is on, that
+  EmVB's tools are approved on EmDash's **Plugins** screen (done once an agent has used this
+  version's tools), that agent access is on, and links to **API tokens**. After an EmVB update
+  that changes the tool list, EmDash hides the tools until an admin approves them again: if your
+  agent doesn't see EmVB's tools after updating, approve them again.
 - **AI agents** page (admins, under **Pages VisualBuilder**): whether agents are on, the master
   switch, the two publish switches, the endpoint, connect snippets and the last 50 agent changes
   with who made them and a link to the page.

@@ -11,7 +11,6 @@ import {
   TerminalWindowIcon,
   UploadSimpleIcon,
   WarningCircleIcon,
-  type Icon,
 } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
@@ -22,6 +21,10 @@ import { editorUrl } from "../editor/exit.ts";
 import type { AgentSettings } from "../../mcp/settings.ts";
 import { ListError, ListLoading } from "./list-kit.tsx";
 import { UI_CSS } from "../ui.ts";
+import { AgentSetupCard } from "./AgentSetup.tsx";
+import { SectionHead } from "./section-head.tsx";
+
+export { SectionHead };
 
 const ADMIN_ROLE = 50;
 
@@ -43,31 +46,6 @@ const stdioSnippet = (site: string) =>
 
 const remoteSnippet = (endpoint: string) =>
   JSON.stringify({ mcpServers: { emvb: { url: endpoint } } }, null, 2);
-
-/** A card's heading row: an icon tile, the title and one line on what the card is for (W-477). */
-export function SectionHead({
-  id,
-  icon: SectionIcon,
-  title,
-  children,
-}: {
-  id: string;
-  icon: Icon;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="emvb-agents-head">
-      <span className="emvb-agents-icon" aria-hidden="true">
-        <SectionIcon size={18} />
-      </span>
-      <div>
-        <h2 id={id}>{title}</h2>
-        <p>{children}</p>
-      </div>
-    </div>
-  );
-}
 
 /** AI agents (`/agents`, W-463): the master switch, publishing, how to connect, recent activity. */
 /**
@@ -185,6 +163,11 @@ export function AgentsPage({ fetcher = defaultFetcher }: { fetcher?: Fetcher }) 
           description={saveError}
         />
       )}
+      <AgentSetupCard
+        fetcher={fetcher}
+        agentsOn={settings.mcpEnabled}
+        toolsServed={state.toolsServed === true}
+      />
       <section
         className="emvb-surface-card emvb-agents-section"
         aria-labelledby="emvb-agents-access"
