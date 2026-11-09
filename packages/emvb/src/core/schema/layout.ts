@@ -732,6 +732,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "menu-item",
   "layout-section",
   "toc",
+  "language-switcher",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -739,6 +740,17 @@ export const TocNode = leafNode(
   "toc",
   z.strictObject({
     title: z.string().max(80).optional(),
+  }),
+);
+
+/**
+ * W-937: links to this page in its other published languages (EmDash translations), each with
+ * hreflang. `label` names the navigation for screen readers. The host fills the links.
+ */
+export const LanguageSwitcherNode = leafNode(
+  "language-switcher",
+  z.strictObject({
+    label: z.string().max(80).optional(),
   }),
 );
 
@@ -774,6 +786,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   TabPanelNode,
   HeadingNode,
   TocNode,
+  LanguageSwitcherNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -813,6 +826,7 @@ export const KNOWN_NODE_SCHEMAS = KnownLayoutNode.options;
 
 export type HeadingNode = z.infer<typeof HeadingNode>;
 export type TocNode = z.infer<typeof TocNode>;
+export type LanguageSwitcherNode = z.infer<typeof LanguageSwitcherNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
 export type TextNode = z.infer<typeof TextNode>;
@@ -1011,6 +1025,7 @@ export type LayoutNode =
   | SectionNode
   | HeadingNode
   | TocNode
+  | LanguageSwitcherNode
   | SpacerNode
   | DividerNode
   | TextNode

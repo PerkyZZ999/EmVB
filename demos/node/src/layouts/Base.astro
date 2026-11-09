@@ -38,6 +38,8 @@ interface Props {
 	dir?: "ltr" | "rtl" | "auto";
 	/** The page's language (W-935): an EmVB fallback page keeps its own; else Astro's locale. */
 	lang?: string;
+	/** The page's published languages (W-937), for a Language switcher in the header or footer. */
+	translations?: { locale: string; href: string; current: boolean }[];
 }
 
 const { title, pageTitle, description, image, content, is404, isFront, isSearch } = Astro.props;
@@ -64,7 +66,12 @@ const themeCtx = is404
 		: isFront
 			? themeContextFront()
 			: themeContextFrom(Astro.url, { content: content ?? null });
-const theme = Astro.props.theme ?? (await resolveThemeParts(Astro, themeCtx, { pageCount: true }));
+const theme =
+	Astro.props.theme ??
+	(await resolveThemeParts(Astro, themeCtx, {
+		pageCount: true,
+		...(Astro.props.translations ? { translations: Astro.props.translations } : {}),
+	}));
 // A/B tests and visitor rules (W-312, W-313) mark the response private: never route-cache it.
 const personalized = /\bprivate\b/.test(Astro.response.headers.get("Cache-Control") ?? "");
 if (Astro.cache?.enabled && !personalized) {

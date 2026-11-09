@@ -61,6 +61,11 @@ export type ThemeDynamicData = {
   collections?: Readonly<Record<string, ThemePostFields[]>>;
   /** Site settings bound fields can read (W-307), e.g. `title`, `tagline`, `url`. */
   site?: Readonly<Record<string, string>>;
+  /**
+   * W-937: this page in each of its published languages, for the Language switcher: `href` is
+   * where that language's version lives, `current` marks the page being shown.
+   */
+  translations?: readonly { locale: string; href: string; current: boolean }[];
   /** The request's URL parameters, first value per name (W-307). */
   params?: Readonly<Record<string, string>>;
   /** The page's own origin, e.g. `https://example.com`: URL-parameter links stay on it (W-307). */

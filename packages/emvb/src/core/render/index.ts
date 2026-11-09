@@ -34,6 +34,7 @@ import {
 } from "../sanitize/css.ts";
 import { STYLE_STATES } from "../schema/state-names.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
+import { sanitizeHref } from "../sanitize/href.ts";
 import { resolvePostForRender, type ThemeDynamicData } from "../theme/dynamic.ts";
 import type { FormDefinitions } from "../forms/definition.ts";
 import type { PopupDevice } from "../theme/popup-rules.ts";
@@ -552,6 +553,12 @@ export function renderPage(
       );
     }
     if (isTabsNode(node)) return finish(node, renderTabs(node, id, attrs, ctx, dynamic));
+    if (node.type === "language-switcher") {
+      const links = languageLinks(dynamic?.translations, mode);
+      // W-937: a page in one language has nothing to switch to; the public page shows nothing.
+      if (!links) return undefined;
+      return finish(node, { ...def.build(node as never, attrs, []), children: [links] });
+    }
     if (node.type === "toc") {
       const built = def.build(node as never, attrs, []);
       const vnode = { ...built, children: [] as (VNode | string)[] };
@@ -776,4 +783,58 @@ function tocChildren(
     })),
   });
   return children;
+}
+
+/** A language's own name for itself ("Français"), or its code when the runtime doesn't know it. */
+function autonym(locale: string): string {
+  try {
+    const name = new Intl.DisplayNames([locale], { type: "language" }).of(locale);
+    return name ? name.charAt(0).toLocaleUpperCase(locale) + name.slice(1) : locale;
+  } catch {
+    return locale;
+  }
+}
+
+/**
+ * W-937: the Language switcher's list. Hosts pass only published translations (a draft is never
+ * linked); each link carries hreflang and lang, and the page being shown is aria-current. The
+ * editor shows a note when the page has no other language yet.
+ */
+function languageLinks(
+  translations: readonly { locale: string; href: string; current: boolean }[] | undefined,
+  mode: RenderMode,
+): VNode | undefined {
+  const list = (translations ?? []).filter(
+    (t) => typeof t.locale === "string" && t.locale && sanitizeHref(t.href) !== undefined,
+  );
+  if (list.length < 2) {
+    if (mode !== "editor") return undefined;
+    return {
+      tag: "p",
+      attrs: {},
+      children: [
+        "Links to this page's other languages show here once it has a published translation.",
+      ],
+    };
+  }
+  return {
+    tag: "ul",
+    attrs: {},
+    children: list.map((t) => ({
+      tag: "li",
+      attrs: {},
+      children: [
+        {
+          tag: "a",
+          attrs: {
+            href: sanitizeHref(t.href) as string,
+            hreflang: t.locale,
+            lang: t.locale,
+            ...(t.current ? { "aria-current": "page" } : {}),
+          },
+          children: [autonym(t.locale)],
+        },
+      ],
+    })),
+  };
 }

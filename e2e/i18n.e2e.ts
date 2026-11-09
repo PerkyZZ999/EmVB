@@ -10,13 +10,16 @@ import { canvas, openEditor, overlay, unique } from "./support/helpers.ts";
 test.describe.configure({ mode: "serial" });
 setUpEmvbOnce();
 
-const layoutSaying = (text: string) => ({
+const layoutSaying = (text: string, switcher = false) => ({
   schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",
     props: {},
-    children: [{ id: "head0001", type: "heading", props: { text, level: 1 } }],
+    children: [
+      { id: "head0001", type: "heading", props: { text, level: 1 } },
+      ...(switcher ? [{ id: "lang0001", type: "language-switcher", props: {} }] : []),
+    ],
   },
 });
 
@@ -26,9 +29,10 @@ async function createIn(
   text: string,
   locale: string,
   translationOf?: string,
+  options: { switcher?: boolean; publish?: boolean } = {},
 ) {
   const created = await api(request, "POST", "/_emdash/api/content/emvb_pages", {
-    data: { title: text, layout: layoutSaying(text) },
+    data: { title: text, layout: layoutSaying(text, options.switcher) },
     slug,
     locale,
     ...(translationOf ? { translationOf } : {}),
@@ -36,7 +40,7 @@ async function createIn(
   expect(created.status, JSON.stringify(created.json)).toBe(201);
   const id = (created.json?.["data"] as { item?: { id?: string } } | undefined)?.item?.id;
   if (!id) throw new Error("no id");
-  await publishPage(request, id);
+  if (options.publish !== false) await publishPage(request, id);
   return id;
 }
 
@@ -94,4 +98,33 @@ test("W-936: Translate this page makes a linked French draft with the layout and
   expect(locales.toSorted()).toEqual(["en", "fr"]);
   await ui.getByRole("tab", { name: /^Agent/ }).click();
   await expect(ui.locator('[data-emvb-agent-request="open"]')).toContainText("into French");
+});
+
+test("W-937: the Language switcher links published translations only, with hreflang", async ({
+  page,
+  request,
+}) => {
+  const slug = `langues-${unique()}`;
+  const en = await createIn(request, slug, "Switch me", "en", undefined, { switcher: true });
+  await createIn(request, slug, "Change-moi", "fr", en, { switcher: true });
+  await page.goto(`/${slug}`);
+  const nav = page.getByRole("navigation", { name: "Languages" });
+  await expect(nav.getByRole("link", { name: "English" })).toHaveAttribute("aria-current", "page");
+  const french = nav.getByRole("link", { name: "Français" });
+  await expect(french).toHaveAttribute("hreflang", "fr");
+  await french.click();
+  await expect(page).toHaveURL(new RegExp(`/fr/${slug}$`));
+  await expect(page.getByRole("heading", { level: 1, name: "Change-moi" })).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Languages" }).getByRole("link", { name: "Français" }),
+  ).toHaveAttribute("aria-current", "page");
+
+  const draftSlug = `brouillon-${unique()}`;
+  const onlyEn = await createIn(request, draftSlug, "Draft sibling", "en", undefined, {
+    switcher: true,
+  });
+  await createIn(request, draftSlug, "Brouillon", "fr", onlyEn, { switcher: true, publish: false });
+  await page.goto(`/${draftSlug}`);
+  await expect(page.getByRole("heading", { level: 1, name: "Draft sibling" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Languages" })).toHaveCount(0);
 });

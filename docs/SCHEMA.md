@@ -111,6 +111,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `tab-panel` | label |
 | `heading` | text, level, href, newTab |
 | `toc` | title |
+| `language-switcher` | label |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag |

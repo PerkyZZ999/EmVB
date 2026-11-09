@@ -30,6 +30,7 @@ const seo = getSeoMeta(emvb.entry, {
 	content={{ collection: emvb.collection, id: emvb.entry.data.id, slug: Astro.params.slug }}
 	dir={emvb.dir}
 	lang={emvb.fallbackLocale ?? emvb.locale}
+	translations={emvb.translations}
 >
 	{
 		emvb.fallbackLocale && (

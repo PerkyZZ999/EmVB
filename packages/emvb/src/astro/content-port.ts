@@ -1,4 +1,12 @@
-import { decodeSlug, getEmDashCollection, getEmDashEntry, getSiteSettings, getTerm } from "emdash";
+import {
+  decodeSlug,
+  getEmDashCollection,
+  getEmDashEntry,
+  getI18nConfig,
+  getSiteSettings,
+  getTerm,
+  getTranslations,
+} from "emdash";
 import { getPublicPluginApiRouteHandler } from "emdash/plugin-utils";
 
 /**
@@ -12,6 +20,9 @@ export type ContentPort = {
   getTerm: typeof getTerm;
   getSiteSettings: typeof getSiteSettings;
   pluginHandler: typeof getPublicPluginApiRouteHandler;
+  /** W-937: an entry's languages, for the Language switcher. Optional for older fakes. */
+  getTranslations?: typeof getTranslations;
+  getI18nConfig?: typeof getI18nConfig;
 };
 
 export const emdashContent: ContentPort = {
@@ -21,4 +32,6 @@ export const emdashContent: ContentPort = {
   getTerm,
   getSiteSettings,
   pluginHandler: getPublicPluginApiRouteHandler,
+  getTranslations,
+  getI18nConfig,
 };

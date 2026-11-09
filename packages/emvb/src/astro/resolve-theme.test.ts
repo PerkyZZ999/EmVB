@@ -648,3 +648,21 @@ describe("archive pagination (W-221)", () => {
     expect(last).not.toContain('rel="next"');
   });
 });
+
+describe("Language switcher in a header (W-937)", () => {
+  test("the page's translations reach the header's switcher", async () => {
+    themeEntries = [
+      part("HEADLANG", "header", [
+        { id: "lang0001", type: "language-switcher", props: {} } as unknown as LayoutNode,
+      ]),
+    ];
+    const translations = [
+      { locale: "en", href: "/about", current: true },
+      { locale: "fr", href: "/fr/a-propos", current: false },
+    ];
+    const withLinks = await resolveThemeParts(astro("/about"), undefined, { translations });
+    expect(withLinks.header?.html).toContain('href="/fr/a-propos" hreflang="fr"');
+    const without = await resolveThemeParts(astro("/about"));
+    expect(without.header?.html).not.toContain("hreflang");
+  });
+});

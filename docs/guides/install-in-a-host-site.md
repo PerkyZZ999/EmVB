@@ -225,6 +225,16 @@ Keep `routing: { prefixDefaultLocale: false }`: prefixing the default locale bre
 The default language stays at `/`, others under their prefix (for example `src/pages/fr/[slug].astro`).
 Header, footer and other theme parts are shared by every language for now.
 
+The **Language switcher** element links the page's other published languages, each in its own
+name with `hreflang`, the shown one marked current; drafts are never linked. `resolveEmVBPage`
+fills it, linking the default language at `/<slug>` and others at `/<locale>/<slug>`; pass
+`translationHref` when your routes differ. For a switcher in a header or footer, pass the page's
+list to the theme parts:
+
+```ts
+const theme = await resolveThemeParts(Astro, ctx, { translations: emvb?.translations });
+```
+
 In the editor, **Page settings → Languages** lists the site's languages. **Translate** makes a
 draft in that language linked to this page, with a copy of its layout, and opens it; with **Ask my
 agent to translate the new page** ticked, it also sends your agent a request (see the AI agents

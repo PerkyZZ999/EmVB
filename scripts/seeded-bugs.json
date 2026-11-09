@@ -42732,6 +42732,90 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/translatable.test.ts"],
       "expect": "\\(fail\\).*texts, alt text and list items"
+    },
+    {
+      "id": "W-937/draft-sibling-linked",
+      "requirement": "W-937",
+      "description": "The switcher links a translation that is still a draft.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "(t.status === \"published\" || t.id === input.entryId)",
+          "replace": "(t.status !== \"trashed\" || t.id === input.entryId)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*published translations only"
+    },
+    {
+      "id": "W-937/current-unmarked",
+      "requirement": "W-937",
+      "description": "The language being shown isn't marked as the current page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "      current: t.id === input.entryId,\n",
+          "replace": "      current: false,\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*published translations only"
+    },
+    {
+      "id": "W-937/no-hreflang",
+      "requirement": "W-937",
+      "description": "Language links lose hreflang, so search engines can't pair the pages.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "            hreflang: t.locale,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/language-switcher.test.ts"],
+      "expect": "\\(fail\\).*links each language in its own name"
+    },
+    {
+      "id": "W-937/lone-language-shown",
+      "requirement": "W-937",
+      "description": "A page in one language shows a switcher with a single link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "  if (list.length < 2) {",
+          "replace": "  if (list.length < 1) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/language-switcher.test.ts"],
+      "expect": "\\(fail\\).*with one language or none"
+    },
+    {
+      "id": "W-937/header-gets-no-links",
+      "requirement": "W-937",
+      "description": "A switcher in the header never gets the page's languages.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    const dynamic = options.translations\n      ? { ...withBound, translations: options.translations }\n      : withBound;",
+          "replace": "    const dynamic = withBound;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*the page's translations reach the header"
+    },
+    {
+      "id": "W-937/host-link-unchecked",
+      "requirement": "W-937",
+      "description": "A javascript: link from the host's translations is rendered.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "(t) => typeof t.locale === \"string\" && t.locale && sanitizeHref(t.href) !== undefined,",
+          "replace": "(t) => typeof t.locale === \"string\" && t.locale,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/language-switcher.test.ts"],
+      "expect": "\\(fail\\).*an unsafe link from the host is dropped"
     }
   ]
 }

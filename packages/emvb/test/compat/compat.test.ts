@@ -46,6 +46,14 @@ const RELEASED_LAYOUT_SCHEMAS: Record<string, number> = {
   "0.9.0": 17,
 };
 
+/**
+ * Element types added in 1.x (D-065: additive only). No 0.x page can hold them, so the 0.x
+ * corpus can't either; each has its own render tests, named here.
+ */
+const ADDED_IN_1X: Record<string, string> = {
+  "language-switcher": "1.0 (W-937): src/core/render/language-switcher.test.ts",
+};
+
 type Style = Record<string, unknown> & { motion?: Record<string, unknown> };
 
 function usedKeys(names: string[]) {
@@ -107,7 +115,9 @@ describe("the compatibility corpus covers the 1.0 contract (W-926)", () => {
         ? ["transition", "entrance", "scroll", "icon"].map((p) => `motion.${p}`)
         : [key],
     );
-    expect(Object.keys(ELEMENTS).filter((type) => !types.has(type))).toEqual([]);
+    expect(
+      Object.keys(ELEMENTS).filter((type) => !types.has(type) && !(type in ADDED_IN_1X)),
+    ).toEqual([]);
     expect(wantStyles.filter((key) => !styles.has(key))).toEqual([]);
   });
 });

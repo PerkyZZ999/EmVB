@@ -280,3 +280,48 @@ describe("per-language pages (W-935, D-068)", () => {
     expect(fr?.fallbackLocale).toBe("en");
   });
 });
+
+describe("Language switcher links (W-937)", () => {
+  type T = { id: string; locale: string; slug: string | null; status: string };
+  const withTranslations = (translations: T[], defaultLocale = "en") =>
+    ({
+      ...content,
+      getTranslations: async () => ({ translationGroup: "g", translations }),
+      getI18nConfig: () => ({ defaultLocale, locales: ["en", "fr", "de"] }),
+    }) as unknown as ContentPort;
+  const switcher: LayoutNode = { id: "lang0001", type: "language-switcher", props: {} };
+
+  test("published translations only, the shown page current, default locale without a prefix", async () => {
+    lookup = async () => page({ layout: layout(switcher) });
+    const resolved = await resolveEmVBPageWith(
+      withTranslations([
+        { id: "p1", locale: "en", slug: "about", status: "published" },
+        { id: "p2", locale: "fr", slug: "a-propos", status: "published" },
+        { id: "p3", locale: "de", slug: "uber", status: "draft" },
+      ]),
+      astro({ slug: "about" }),
+    );
+    expect(resolved?.translations).toEqual([
+      { locale: "en", href: "/about", current: true },
+      { locale: "fr", href: "/fr/a-propos", current: false },
+    ]);
+    expect(resolved?.html).toContain('href="/fr/a-propos"');
+    expect(resolved?.html).not.toContain("/de/uber");
+  });
+
+  test("a host decides where translations live", async () => {
+    lookup = async () => page({ layout: layout(switcher) });
+    const resolved = await resolveEmVBPageWith(
+      withTranslations([
+        { id: "p1", locale: "en", slug: "about", status: "published" },
+        { id: "p2", locale: "fr", slug: "a-propos", status: "published" },
+      ]),
+      astro({ slug: "about" }),
+      { translationHref: (t) => `https://${t.locale}.example.com/${t.slug}` },
+    );
+    expect(resolved?.translations?.map((t) => t.href)).toEqual([
+      "https://en.example.com/about",
+      "https://fr.example.com/a-propos",
+    ]);
+  });
+});

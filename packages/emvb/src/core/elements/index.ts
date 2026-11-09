@@ -13,6 +13,7 @@ import type {
   DividerNode,
   HeadingNode,
   TocNode,
+  LanguageSwitcherNode,
   IconNode,
   ImageNode,
   LabelNode,
@@ -1151,9 +1152,28 @@ const toc: ElementDefinition<TocNode> = {
   }),
 };
 
+const languageSwitcher: ElementDefinition<LanguageSwitcherNode> = {
+  baseCss:
+    ".emvb-language-switcher ul{display:flex;flex-wrap:wrap;gap:0.75em;margin:0;padding:0;list-style:none}.emvb-language-switcher a{color:inherit}.emvb-language-switcher a[aria-current]{font-weight:600;text-decoration:none}",
+  defaults: () => ({ type: "language-switcher", props: {} }),
+  descriptor: {
+    type: "language-switcher",
+    name: "Language switcher",
+    group: "content",
+    defaultTab: "content",
+    fields: [{ key: "label", kind: "text", label: "Label", optional: true }],
+  },
+  build: (node, attrs) => ({
+    tag: "nav",
+    attrs: { ...attrs, "aria-label": node.props.label?.trim() || "Languages" },
+    children: [],
+  }),
+};
+
 export const ELEMENTS = {
   heading,
   toc,
+  "language-switcher": languageSwitcher,
   container,
   "layout-section": layoutSection,
   spacer,

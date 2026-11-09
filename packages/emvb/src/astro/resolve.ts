@@ -1,4 +1,6 @@
 import { PAGES_COLLECTION } from "../constants.ts";
+import { forEachNode } from "../core/tree-ops.ts";
+import type { Layout, LayoutNode } from "../core/schema/layout.ts";
 import { emdashContent, type ContentPort } from "./content-port.ts";
 import { formIdsInLayouts } from "./forms-definitions.ts";
 import { readLayout, renderStored, type RenderedPage } from "./render.ts";
@@ -26,6 +28,11 @@ export type ResolvedEmVBPage = RenderedPage & {
    * its fallback chain instead. Hosts can say so, or link to the requested language's home.
    */
   fallbackLocale?: string;
+  /**
+   * W-937: this page in each published language (the shown one marked current), when the site
+   * has languages. Pass it to `resolveThemeParts` for a Language switcher in the header.
+   */
+  translations?: { locale: string; href: string; current: boolean }[];
 };
 
 type AstroLike = VisitorAstro & {
@@ -67,6 +74,11 @@ export async function resolveEmVBPage(
      * Astro's `currentLocale`; EmDash falls back along its chain when there is none.
      */
     locale?: string;
+    /**
+     * W-937: where a translation of this page lives, for the Language switcher. Defaults to
+     * `/<slug>` for the default locale and `/<locale>/<slug>` for the others.
+     */
+    translationHref?: (translation: { locale: string; slug: string }) => string;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   return resolveEmVBPageWith(emdashContent, astro, options);
@@ -96,6 +108,11 @@ export async function resolveEmVBPageWith(
     getImage?: ResponsiveGetImage;
     /** W-935: which translation to read; defaults to Astro's `currentLocale`. */
     locale?: string;
+    /**
+     * W-937: where a translation of this page lives, for the Language switcher. Defaults to
+     * `/<slug>` for the default locale and `/<locale>/<slug>` for the others.
+     */
+    translationHref?: (translation: { locale: string; slug: string }) => string;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   const slug = options.slug ?? content.decodeSlug(astro.params[options.param ?? "slug"]);
@@ -138,7 +155,18 @@ export async function resolveEmVBPageWith(
         ]),
       )
     : undefined;
+  const translations =
+    content.getI18nConfig?.() ||
+    (layout &&
+      [layout, ...Object.values(sectionTemplates)].some((l) => hasType(l, "language-switcher")))
+      ? await translationLinks(content, {
+          collection: options.collection ?? PAGES_COLLECTION,
+          entryId: String(data["id"] ?? entry.id),
+          ...(options.translationHref ? { hrefOf: options.translationHref } : {}),
+        })
+      : undefined;
   const dynamic = {
+    ...(translations ? { translations } : {}),
     ...(Object.keys(sectionTemplates).length > 0 ? { sectionTemplates } : {}),
     ...(Object.keys(loopTemplates).length > 0 ? { loopTemplates } : {}),
     ...(await bindingDataFor(
@@ -173,5 +201,43 @@ export async function resolveEmVBPageWith(
     isPreview: Boolean(found.isPreview),
     ...(locale ? { locale } : {}),
     ...(found.fallbackLocale ? { fallbackLocale: found.fallbackLocale } : {}),
+    ...(translations ? { translations } : {}),
   };
+}
+
+function hasType(layout: Layout, type: string): boolean {
+  let found = false;
+  forEachNode(layout.root as LayoutNode, (node) => {
+    if (node.type === type) found = true;
+  });
+  return found;
+}
+
+/**
+ * W-937: the page's languages for its Language switcher. Only published translations are
+ * linked (a draft never is); the page being shown is always listed and marked current.
+ */
+async function translationLinks(
+  content: ContentPort,
+  input: {
+    collection: string;
+    entryId: string;
+    hrefOf?: (translation: { locale: string; slug: string }) => string;
+  },
+): Promise<{ locale: string; href: string; current: boolean }[] | undefined> {
+  if (!content.getTranslations) return undefined;
+  const found = await content.getTranslations(input.collection, input.entryId).catch(() => null);
+  if (!found || found.error) return undefined;
+  const defaultLocale = content.getI18nConfig?.()?.defaultLocale;
+  const hrefOf =
+    input.hrefOf ??
+    ((t: { locale: string; slug: string }) =>
+      t.locale === defaultLocale ? `/${t.slug}` : `/${t.locale}/${t.slug}`);
+  return found.translations
+    .filter((t) => t.slug && (t.status === "published" || t.id === input.entryId))
+    .map((t) => ({
+      locale: t.locale,
+      href: hrefOf({ locale: t.locale, slug: t.slug as string }),
+      current: t.id === input.entryId,
+    }));
 }

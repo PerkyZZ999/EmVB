@@ -430,6 +430,11 @@ export async function resolveThemeParts(
      * uses EmVB's own one-row probe queries, or pass a counter (e.g. an EmDash count API).
      */
     pageCount?: boolean | PostCounter;
+    /**
+     * W-937: the page's languages, for a Language switcher in a header or footer. Pass
+     * `resolveEmVBPage(...)?.translations` (or your own list of published translations).
+     */
+    translations?: readonly { locale: string; href: string; current: boolean }[];
   } = {},
 ): Promise<ResolvedThemeParts> {
   return resolveThemePartsWith(emdashContent, astro, ctx, options);
@@ -451,6 +456,11 @@ export async function resolveThemePartsWith(
      * uses EmVB's own one-row probe queries, or pass a counter (e.g. an EmDash count API).
      */
     pageCount?: boolean | PostCounter;
+    /**
+     * W-937: the page's languages, for a Language switcher in a header or footer. Pass
+     * `resolveEmVBPage(...)?.translations` (or your own list of published translations).
+     */
+    translations?: readonly { locale: string; href: string; current: boolean }[];
   } = {},
 ): Promise<ResolvedThemeParts> {
   const counter =
@@ -537,7 +547,10 @@ export async function resolveThemePartsWith(
     partDynamic: ThemeDynamicData | undefined,
     bound: Awaited<ReturnType<typeof bindingDataFor>>,
   ) => {
-    const dynamic = Object.keys(bound).length > 0 ? { ...partDynamic, ...bound } : partDynamic;
+    const withBound = Object.keys(bound).length > 0 ? { ...partDynamic, ...bound } : partDynamic;
+    const dynamic = options.translations
+      ? { ...withBound, translations: options.translations }
+      : withBound;
     const formDefinitions = await formsFor(
       astro,
       handler,
