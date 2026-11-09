@@ -249,7 +249,7 @@ test("W-958: links to WordPress pages go where the person says, and are remember
     if (!init?.method || init.method === "GET") {
       expect(String(path)).toContain("/_emdash/api/content/emvb_pages?");
       return Response.json({
-        data: { items: [{ id: "p1", slug: "nos-produits", data: { title: "Nos produits" } }] },
+        data: { items: [{ id: "p1", slug: "products", data: { title: "Products" } }] },
       });
     }
     posted.push(JSON.parse(String(init.body)) as Posted);
@@ -276,12 +276,12 @@ test("W-958: links to WordPress pages go where the person says, and are remember
   const options = [...document.querySelectorAll("datalist option")].map((o) =>
     o.getAttribute("value"),
   );
-  expect(options).toEqual(["/nos-produits"]);
+  expect(options).toEqual(["/products"]);
   const field43 = field("WordPress page 43");
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
       field43,
-      "/nos-produits",
+      "/products",
     );
     field43.dispatchEvent(new Event("input", { bubbles: true }));
   });
@@ -296,10 +296,10 @@ test("W-958: links to WordPress pages go where the person says, and are remember
   expect(document.body.textContent).toContain("Enter an address such as /contact.");
   await submit();
   const layout = JSON.stringify(posted[0]?.data.layout);
-  expect(layout).toContain('"href":"/nos-produits"');
+  expect(layout).toContain('"href":"/products"');
   expect(layout).not.toContain("javascript");
   expect(JSON.parse(localStorage.getItem("emvb-elementor-page-links") ?? "{}")).toMatchObject({
-    "43": "/nos-produits",
+    "43": "/products",
   });
   localStorage.removeItem("emvb-elementor-page-links");
 });

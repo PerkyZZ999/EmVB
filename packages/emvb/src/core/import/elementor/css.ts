@@ -408,7 +408,7 @@ export type WordRule = { color?: string; italic?: boolean; bold?: boolean };
 
 /**
  * W-950: site or page CSS rules for the `em`/`i` or `strong`/`b` words inside an element with a
- * class (`.elementor .actq-hero-h1 em{font-style:normal;color:#ffba08}`), by class name and
+ * class (`.elementor .hero-title em{font-style:normal;color:#ffba08}`), by class name and
  * `em` or `strong`. Only colour, font-style and font-weight are read.
  */
 export function wordRules(css: string): Map<string, WordRule> {

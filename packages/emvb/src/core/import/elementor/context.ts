@@ -43,7 +43,7 @@ export type ImportOptions = {
   svg?: (url: string) => string | undefined;
   /**
    * W-958: where a link to a WordPress page (by its post id) goes on this site, such as
-   * `/nos-produits`; chosen in the import dialog.
+   * `/products`; chosen in the import dialog.
    */
   pageLink?: (id: number) => string | undefined;
   /** W-958: an old-site image's copy in the media library (its address and media id). */

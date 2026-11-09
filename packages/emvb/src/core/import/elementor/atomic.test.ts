@@ -670,7 +670,7 @@ describe("links to the old site (W-958)", () => {
   };
 
   test("links to pages on the old site become this site's paths", () => {
-    expect(hrefOf("https://old.example/blog/nos-produits/")).toBe("/nos-produits");
+    expect(hrefOf("https://old.example/blog/products/")).toBe("/products");
     expect(hrefOf("https://OLD.example/blog/contact/?ref=x#form")).toBe("/contact?ref=x#form");
     expect(hrefOf("https://old.example/blog/")).toBe("/");
     const spaced = "http://localhost/Mon site/wordpress/wp-content/uploads/a.png";
