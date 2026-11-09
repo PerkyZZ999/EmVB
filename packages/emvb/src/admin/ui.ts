@@ -230,8 +230,10 @@ export const UI_CSS = `
 }
 
 /* EmVB-owned dialog body (Kumo Dialog keeps host radius/shadow) */
-.emvb-dialog { display: flex; flex-direction: column; gap: 10px; }
-.emvb-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+/* A long dialog (Import from Elementor with its report and options) scrolls inside the screen,
+   with its actions kept in view at the bottom. */
+.emvb-dialog { display: flex; flex-direction: column; gap: 10px; max-height: calc(100dvh - 96px); overflow-y: auto; overscroll-behavior: contain; margin: -4px; padding: 4px; }
+.emvb-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; position: sticky; bottom: 0; padding-top: 8px; background: var(--color-kumo-base); }
 /* UX-023: selects in EmVB dialogs line up with the full-width fields under them. */
 .emvb-dialog .emvb-field { width: 100%; }
 .emvb-create-fields { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; padding: 0; border: 0; }

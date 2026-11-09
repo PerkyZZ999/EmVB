@@ -72,7 +72,7 @@ test("W-950: Bold on selected words formats them; again takes it off", async () 
 test("W-950: a link goes on the selected words; an unsafe one is refused", async () => {
   await panel(text({}));
   select(12, 19);
-  await press("Link");
+  await press("Link selected words");
   const input = [...document.querySelectorAll("label")].find(
     (l) => l.textContent === 'Link for "no code"',
   )?.control as HTMLInputElement | null;
@@ -108,5 +108,5 @@ test("W-950: a linked heading offers no word links", async () => {
     props: { text: "Hello", level: 2, href: "/home" },
   } as LayoutNode);
   expect(document.querySelector('[data-emvb-field="marks"]')).not.toBeNull();
-  expect(document.querySelector('[aria-label="Link"]')).toBeNull();
+  expect(document.querySelector('[aria-label="Link selected words"]')).toBeNull();
 });

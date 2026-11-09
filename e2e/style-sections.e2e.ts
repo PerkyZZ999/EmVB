@@ -192,6 +192,8 @@ test("Effects section edits a class: opacity, inset shadow, grayscale and cursor
     await type(page, "Blur", "6");
     await pick(page, "Position", "Inset");
     await overlay(page).getByRole("button", { name: "Add filters" }).click();
+    // Add filters focuses its first field on the next frame; typing before that moved the text there.
+    await expect(overlay(page).locator("input:focus")).toHaveCount(1);
     await type(page, "Grayscale (%)", "100");
     await pick(page, "Cursor", "Pointer");
 

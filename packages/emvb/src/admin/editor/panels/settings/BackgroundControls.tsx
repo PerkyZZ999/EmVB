@@ -460,6 +460,8 @@ export function OverlayControl({
                   type="button"
                   role="radio"
                   aria-checked={kind === option}
+                  // The Fill type above has its own Color and Gradient: these name the overlay.
+                  aria-label={option === "color" ? "Color overlay" : "Gradient overlay"}
                   data-emvb-overlay-type={option}
                   onClick={() => choose(option)}
                 >

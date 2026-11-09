@@ -138,6 +138,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 | All offline checks                               | `bun run check`                                              |
 | Unit tests only                                  | `bun run test`                                               |
 | End to end, both demos (Playwright)              | `bun run e2e`                                                |
+| Whole e2e suite, both demos at once (~17 min)    | `bun run e2e:full`                                           |
 | Public pages on production builds                | `bun run e2e:prod`                                           |
 | Seeded bugs (prove the tests catch real defects) | `bun run seeded-bugs`                                        |
 | Project site (source in `site/`)                 | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |

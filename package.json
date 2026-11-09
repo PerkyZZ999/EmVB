@@ -30,6 +30,7 @@
     "test:astro": "bun run --cwd packages/emvb test:astro",
     "e2e": "playwright test",
     "e2e:prod": "playwright test -c playwright.prod.config.ts",
+    "e2e:full": "bun scripts/e2e-full.ts",
     "seeded-bugs": "bun scripts/seeded-bug.ts",
     "bench:render": "bun scripts/bench-render.ts",
     "bench:css": "bun scripts/css-budget.ts",

@@ -32,7 +32,7 @@ const describe = (mark: TextMark): string =>
   [
     mark.bold ? "Bold" : null,
     mark.italic ? "Italic" : null,
-    typeof mark.color === "string" ? `Colour ${mark.color}` : mark.color ? "Colour" : null,
+    typeof mark.color === "string" ? `Color ${mark.color}` : mark.color ? "Color" : null,
     mark.href ? `Link ${mark.href}${mark.newTab ? " (new tab)" : ""}` : null,
   ]
     .filter(Boolean)
@@ -156,15 +156,20 @@ export function TextMarksControl({
           onClick={() => toggle("italic")}
         />
         <label className="emvb-marks-color">
-          <span className="emvb-helper">Colour</span>
-          <input ref={colorRef} type="color" aria-label="Colour" defaultValue="#000000" />
+          <span className="emvb-helper">Color</span>
+          <input
+            ref={colorRef}
+            type="color"
+            aria-label="Color of selected words"
+            defaultValue="#000000"
+          />
         </label>
         {!linkedHeading && (
           <Button
             type="button"
             variant="secondary"
             className={BUTTON}
-            aria-label="Link"
+            aria-label="Link selected words"
             icon={<LinkSimpleIcon aria-hidden="true" />}
             onMouseDown={keep}
             onClick={() => {

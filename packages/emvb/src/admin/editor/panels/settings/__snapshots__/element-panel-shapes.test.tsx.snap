@@ -47,9 +47,9 @@ exports[`element panel markup (W-021, W-086 M16) heading renders the same conten
           svg aria-hidden="true"
         label.emvb-marks-color
           span.emvb-helper
-            "Colour"
-          input aria-label="Colour" type="color" value="#000000"
-        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Link"
+            "Color"
+          input aria-label="Color of selected words" type="color" value="#000000"
+        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Link selected words"
           svg aria-hidden="true"
         button.emvb-btn data-kumo-component="Button" type="button"
           span
@@ -2001,9 +2001,9 @@ exports[`element panel markup (W-021, W-086 M16) text renders the same content a
           svg aria-hidden="true"
         label.emvb-marks-color
           span.emvb-helper
-            "Colour"
-          input aria-label="Colour" type="color" value="#000000"
-        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Link"
+            "Color"
+          input aria-label="Color of selected words" type="color" value="#000000"
+        button.emvb-btn data-kumo-component="Button" type="button" aria-label="Link selected words"
           svg aria-hidden="true"
         button.emvb-btn data-kumo-component="Button" type="button"
           span

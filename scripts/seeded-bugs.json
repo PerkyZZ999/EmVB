@@ -43217,7 +43217,7 @@
     {
       "id": "W-945/fluid-sizes-dropped",
       "requirement": "W-945",
-      "description": "Fluid max(min()) sizes are dropped instead of using their large value.",
+      "description": "Fluid max(min()) sizes are dropped instead of staying fluid (W-955).",
       "edits": [
         {
           "file": "packages/emvb/src/core/import/elementor/atomic.ts",
@@ -43226,7 +43226,7 @@
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
-      "expect": "\\(fail\\).*fluid sizes take their large value"
+      "expect": "\\(fail\\).*fluid sizes stay fluid"
     },
     {
       "id": "W-945/laptop-dropped",
