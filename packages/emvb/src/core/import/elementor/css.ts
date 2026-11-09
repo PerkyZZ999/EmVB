@@ -222,6 +222,55 @@ function applyCss(style: Style, prop: string, value: string): boolean {
         value;
       return true;
     }
+    case "flex-grow":
+    case "flex-shrink": {
+      const n = num(value);
+      if (n === undefined || n < 0 || n > 100) return false;
+      style[prop === "flex-grow" ? "flexGrow" : "flexShrink"] = n;
+      return true;
+    }
+    case "flex-basis": {
+      if (value === "auto") {
+        style["flexBasis"] = "auto";
+        return true;
+      }
+      const l = cssLength(value);
+      if (!l) return false;
+      style["flexBasis"] = l;
+      return true;
+    }
+    case "flex": {
+      // `1`, `1 1 auto`, `0 0 200px`, `none`, `auto`.
+      const parts =
+        value === "none"
+          ? ["0", "0", "auto"]
+          : value === "auto"
+            ? ["1", "1", "auto"]
+            : value.split(/\s+/);
+      const [grow, shrink, basis] = parts;
+      const g = num(grow);
+      if (g === undefined || g < 0 || g > 100) return false;
+      style["flexGrow"] = g;
+      const sh = shrink === undefined ? undefined : num(shrink);
+      if (sh !== undefined && sh >= 0 && sh <= 100) style["flexShrink"] = sh;
+      if (basis === "auto") style["flexBasis"] = "auto";
+      else if (basis && cssLength(basis)) style["flexBasis"] = cssLength(basis);
+      else if (parts.length === 1) style["flexBasis"] = { value: 0, unit: "%" };
+      return true;
+    }
+    case "align-self": {
+      const mapped = value === "start" ? "flex-start" : value === "end" ? "flex-end" : value;
+      if (!["auto", "stretch", "flex-start", "flex-end", "center", "baseline"].includes(mapped))
+        return false;
+      style["alignSelf"] = mapped;
+      return true;
+    }
+    case "order": {
+      const n = num(value);
+      if (n === undefined || !Number.isInteger(n)) return false;
+      style["order"] = Math.min(99, Math.max(-99, n));
+      return true;
+    }
     case "font-style":
       if (value !== "normal" && value !== "italic" && value !== "oblique") return false;
       style["fontStyle"] = value === "normal" ? "normal" : "italic";

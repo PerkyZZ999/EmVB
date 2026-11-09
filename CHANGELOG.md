@@ -10,6 +10,7 @@ EmVB 1.0: the stored page format is frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA
 
 ### Added
 
+- **Flex item sizing (W-954).** Inside a Flexbox or Container, any element can **Grow** into free space, **Shrink** when space is short and start from a **Basis** size (Size section), and set its own **Align self** and **Order** (Position section). New style keys `flexGrow`, `flexShrink`, `flexBasis`, `alignSelf` and `order` in the 1.0 schema.
 - **Transforms and hover lift (W-953).** Effects has **Transform**: move, scale and rotate an element. In the Hover state it makes cards lift or arrows nudge, and Transition has a **Transform** choice to animate it. It works alongside entrance, scroll and loop motion. New style key `transform` in the 1.0 schema.
 - **Gradient overlays (W-949).** An image or video background's **Overlay** can be a gradient as well as a colour: a scrim that is dark behind the text and clear over the picture. Its opacity fades every stop. `overlay` takes `{ gradient, opacity? }` in the 1.0 schema.
 - **More style settings (W-957).** Typography has **Style** (italic), **Line wrapping** and **Long words**; Size has **Overflow X** and **Overflow Y**, and on images and videos **Object position**; Effects has **Backdrop filters** (blur, brightness and the rest applied to what is behind the element, for frosted glass). New optional style keys `fontStyle`, `whiteSpace`, `overflowWrap`, `overflowX`, `overflowY`, `objectPosition` and `backdropFilter` in the 1.0 schema.

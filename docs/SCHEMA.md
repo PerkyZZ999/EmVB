@@ -151,7 +151,7 @@ These style keys are allowed in `style`, `devices.*`, `query.style` and class st
 the same keys except `motion`:
 
 - **Layout:** flexDirection, flexWrap, justifyContent, alignItems, gap, gridColumnSpan, gridRowSpan,
-  gridColumnStart, gridRowStart.
+  gridColumnStart, gridRowStart, flexGrow, flexShrink, flexBasis, alignSelf, order.
 - **Size:** width, minWidth, maxWidth, height, minHeight, maxHeight, overflow, overflowX,
   overflowY, aspectRatio, objectFit, objectPosition.
 - **Spacing:** paddingTop, paddingRight, paddingBottom, paddingLeft, marginTop, marginRight,

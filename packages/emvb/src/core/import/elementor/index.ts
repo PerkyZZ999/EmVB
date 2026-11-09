@@ -295,6 +295,9 @@ class Walker {
     ) {
       ctx.note("approximated", name, "Hover animations aren't imported.");
     }
+    // W-954: Elementor 3 flex child settings (`_flex_size`, `_flex_align_self`, `_flex_order`).
+    const flexItem = v3FlexItem(s);
+    if (flexItem) target["style"] = { ...(target["style"] as Style | undefined), ...flexItem };
     // W-953: Elementor 3 transforms (`_transform_*_effect`, and `_hover` for the hover state).
     const transform = v3Transform(s, "");
     const hoverTransform = v3Transform(s, "_hover");
@@ -583,6 +586,41 @@ const gridProps = (cols: Record<string, number> | undefined): Record<string, unk
   ...(cols?.["t"] ? { columnsTablet: cols["t"] } : {}),
   ...(cols?.["m"] ? { columnsMobile: cols["m"] } : { columnsMobile: 1 }),
 });
+
+/** Elementor 3 flex child settings → EmVB flex item keys. */
+function v3FlexItem(s: Settings): Style | undefined {
+  const out: Style = {};
+  const sizeMode = str(s["_flex_size"]);
+  if (sizeMode === "grow") out["flexGrow"] = 1;
+  else if (sizeMode === "shrink") out["flexShrink"] = 1;
+  else if (sizeMode === "none") {
+    out["flexGrow"] = 0;
+    out["flexShrink"] = 0;
+  } else if (sizeMode === "custom") {
+    const grow = num(s["_flex_grow"]);
+    const shrink = num(s["_flex_shrink"]);
+    if (grow !== undefined && grow >= 0 && grow <= 100) out["flexGrow"] = grow;
+    if (shrink !== undefined && shrink >= 0 && shrink <= 100) out["flexShrink"] = shrink;
+  }
+  const align = str(s["_flex_align_self"]);
+  const alignMap: Record<string, string> = {
+    "flex-start": "flex-start",
+    start: "flex-start",
+    center: "center",
+    "flex-end": "flex-end",
+    end: "flex-end",
+    stretch: "stretch",
+  };
+  if (align && alignMap[align]) out["alignSelf"] = alignMap[align];
+  const order = str(s["_flex_order"]);
+  if (order === "start") out["order"] = -99;
+  else if (order === "end") out["order"] = 99;
+  else if (order === "custom") {
+    const n = num(s["_flex_order_custom"]);
+    if (n !== undefined && Number.isInteger(n)) out["order"] = Math.min(99, Math.max(-99, n));
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
 
 /** Elementor 3 transform settings (`_transform_translateX_effect` …) for a state suffix. */
 function v3Transform(s: Settings, state: "" | "_hover"): Record<string, number> | undefined {

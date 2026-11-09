@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   ALIGN_ITEMS,
+  ALIGN_SELF,
   BACKGROUND_POSITIONS,
   BACKGROUND_REPEATS,
   BACKGROUND_SIZES,
@@ -267,6 +268,16 @@ export const StyleProps = z.strictObject({
   gridColumnStart: z.number().int().min(1).max(13).optional(),
   /** First row line (1–13). With a span, emits `start / span n`. */
   gridRowStart: z.number().int().min(1).max(13).optional(),
+  /**
+   * W-954: how a child of a Flexbox or Container shares the row or column: how much it grows into
+   * free space, how much it gives up when space is short, its starting size, its own alignment
+   * and its place in the order.
+   */
+  flexGrow: z.number().finite().min(0).max(100).optional(),
+  flexShrink: z.number().finite().min(0).max(100).optional(),
+  flexBasis: SizeValue.optional(),
+  alignSelf: z.enum(ALIGN_SELF).optional(),
+  order: z.number().int().min(-99).max(99).optional(),
   width: SizeValue.optional(),
   minWidth: LengthValue.optional(),
   maxWidth: LengthValue.optional(),

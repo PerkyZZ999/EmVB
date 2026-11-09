@@ -683,6 +683,32 @@ describe("Elementor import: hostile and oversized input (W-945)", () => {
     expect(heading?.states).toEqual({ hover: { transform: { y: -6, scale: 105 } } });
   });
 
+  test("W-954: Elementor 3 flex child settings carry over", () => {
+    const result = ok(
+      importElementor([
+        {
+          id: "w",
+          elType: "widget",
+          widgetType: "heading",
+          settings: {
+            title: "Grow",
+            _flex_size: "custom",
+            _flex_grow: "2",
+            _flex_shrink: "0",
+            _flex_align_self: "center",
+            _flex_order: "end",
+          },
+        },
+      ]),
+    );
+    expect(ofType(result.layout, "heading")[0]?.style).toMatchObject({
+      flexGrow: 2,
+      flexShrink: 0,
+      alignSelf: "center",
+      order: 99,
+    });
+  });
+
   test("long text is split, never cut", () => {
     const long = `${"word ".repeat(1000)}end`;
     const result = ok(

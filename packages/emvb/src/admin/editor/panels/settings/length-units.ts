@@ -12,6 +12,7 @@ const BOX_AUTO: readonly UnitChoice[] = [...BOX, "auto"];
 const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   width: BOX_AUTO,
   height: BOX_AUTO,
+  flexBasis: BOX_AUTO,
   marginTop: BOX_AUTO,
   marginRight: BOX_AUTO,
   marginBottom: BOX_AUTO,

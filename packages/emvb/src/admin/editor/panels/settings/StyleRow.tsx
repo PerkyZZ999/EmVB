@@ -35,6 +35,7 @@ const LENGTH_KEYS = new Set<StyleKey>([
   "height",
   "minHeight",
   "maxHeight",
+  "flexBasis",
   "paddingTop",
   "paddingRight",
   "paddingBottom",
@@ -63,6 +64,9 @@ const LENGTH_KEYS = new Set<StyleKey>([
 ]);
 
 const Z_INDEX: NumberSpec = { min: -9999, max: 9999, integer: true, example: "10" };
+/** W-954: a flex child's share of free space (grow) or of the shortfall (shrink). */
+const FLEX_FACTOR: NumberSpec = { min: 0, max: 100, example: "1" };
+const ORDER: NumberSpec = { min: -99, max: 99, integer: true, example: "-1" };
 const GRID_SPAN: NumberSpec = { min: 1, max: 12, integer: true, example: "2" };
 const GRID_LINE: NumberSpec = { min: 1, max: 13, integer: true, example: "1" };
 const OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: "50", suffix: "%" };
@@ -101,6 +105,14 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "clip", label: "Clip" },
     { value: "scroll", label: "Scroll" },
     { value: "auto", label: "Auto" },
+  ],
+  alignSelf: [
+    { value: "auto", label: "Follow the parent" },
+    { value: "stretch", label: "Stretch" },
+    { value: "flex-start", label: "Start" },
+    { value: "center", label: "Center" },
+    { value: "flex-end", label: "End" },
+    { value: "baseline", label: "Baseline" },
   ],
   overflowX: [
     { value: "visible", label: "Visible" },
@@ -458,6 +470,9 @@ export function StyleRow({
 
   if (
     styleKey === "zIndex" ||
+    styleKey === "flexGrow" ||
+    styleKey === "flexShrink" ||
+    styleKey === "order" ||
     styleKey === "opacity" ||
     styleKey === "gridColumnSpan" ||
     styleKey === "gridRowSpan" ||
@@ -467,11 +482,15 @@ export function StyleRow({
     const spec =
       styleKey === "zIndex"
         ? Z_INDEX
-        : styleKey === "opacity"
-          ? OPACITY
-          : styleKey === "gridColumnStart" || styleKey === "gridRowStart"
-            ? GRID_LINE
-            : GRID_SPAN;
+        : styleKey === "flexGrow" || styleKey === "flexShrink"
+          ? FLEX_FACTOR
+          : styleKey === "order"
+            ? ORDER
+            : styleKey === "opacity"
+              ? OPACITY
+              : styleKey === "gridColumnStart" || styleKey === "gridRowStart"
+                ? GRID_LINE
+                : GRID_SPAN;
     return (
       <NumberRow
         rowKey={styleKey}
@@ -643,6 +662,9 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   ...COLOR_KEYS,
   "fontFamily",
   "zIndex",
+  "flexGrow",
+  "flexShrink",
+  "order",
   "gridColumnSpan",
   "gridColumnStart",
   "gridRowSpan",

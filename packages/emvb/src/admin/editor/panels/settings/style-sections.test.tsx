@@ -100,6 +100,9 @@ describe("Size section (W-088)", () => {
       "overflowX",
       "overflowY",
       "aspectRatio",
+      "flexGrow",
+      "flexShrink",
+      "flexBasis",
     ]);
     expect(keysFor("container", "layout")).toEqual([
       "flexDirection",
@@ -254,7 +257,7 @@ describe("Position section (W-088)", () => {
     await panel(box());
     await styleTab();
     await openSection("position");
-    expect(styleRows("position")).toEqual(["position", "zIndex"]);
+    expect(styleRows("position")).toEqual(["position", "zIndex", "alignSelf", "order"]);
     expect(offsetsHelp()).toBe(
       "Offsets apply once Position is Relative, Absolute, Fixed or Sticky.",
     );
@@ -264,7 +267,16 @@ describe("Position section (W-088)", () => {
     await panel(box({ position: "relative" }));
     await styleTab();
     await openSection("position");
-    expect(styleRows("position")).toEqual(["position", "top", "right", "bottom", "left", "zIndex"]);
+    expect(styleRows("position")).toEqual([
+      "position",
+      "top",
+      "right",
+      "bottom",
+      "left",
+      "zIndex",
+      "alignSelf",
+      "order",
+    ]);
     expect(offsetsHelp()).toBeNull();
   });
 
@@ -290,14 +302,14 @@ describe("Position section (W-088)", () => {
     ) as HTMLButtonElement;
     await act(async () => chip.click());
     await openSection("position");
-    expect(styleRows("position")).toEqual(["position", "zIndex"]);
+    expect(styleRows("position")).toEqual(["position", "zIndex", "alignSelf", "order"]);
   });
 
   test("a set offset stays visible while static", async () => {
     await panel(box({ top: { value: 4, unit: "px" } }));
     await styleTab();
     await openSection("position");
-    expect(styleRows("position")).toEqual(["position", "top", "zIndex"]);
+    expect(styleRows("position")).toEqual(["position", "top", "zIndex", "alignSelf", "order"]);
   });
 
   test("offsets take negative numbers, auto and a spacing variable", async () => {

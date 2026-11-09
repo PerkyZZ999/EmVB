@@ -282,6 +282,71 @@ describe("Elementor CSS text (W-945)", () => {
     expect(unmapped).toEqual(["transform"]);
   });
 
+  test("W-954: flex item settings map from CSS, including the flex shorthand", () => {
+    expect(declarations("flex: 1 1 auto; align-self: start; order: -2").style).toEqual({
+      flexGrow: 1,
+      flexShrink: 1,
+      flexBasis: "auto",
+      alignSelf: "flex-start",
+      order: -2,
+    });
+    expect(declarations("flex: 1").style).toEqual({
+      flexGrow: 1,
+      flexBasis: { value: 0, unit: "%" },
+    });
+    expect(declarations("flex: none").style).toEqual({
+      flexGrow: 0,
+      flexShrink: 0,
+      flexBasis: "auto",
+    });
+  });
+
+  test("W-954: an Elementor 4 flex prop, align-self and order become flex item keys", () => {
+    const imported = importElementor({
+      content: [
+        {
+          id: "x",
+          elType: "e-div-block",
+          settings: { classes: { $$type: "classes", value: ["g-x"] } },
+          elements: [],
+        },
+      ],
+      global_classes: {
+        items: {
+          "g-x": {
+            id: "g-x",
+            variants: [
+              {
+                meta: { breakpoint: "desktop", state: null },
+                props: {
+                  flex: {
+                    $$type: "flex",
+                    value: {
+                      flexGrow: { $$type: "number", value: 1 },
+                      flexShrink: { $$type: "number", value: 0 },
+                    },
+                  },
+                  "align-self": { $$type: "string", value: "flex-start" },
+                  order: { $$type: "number", value: 2 },
+                },
+              },
+            ],
+          },
+        },
+        order: ["g-x"],
+      },
+    });
+    if (!imported.ok) throw new Error(imported.error);
+    const [x] = (imported.layout.root as Node).children ?? [];
+    expect(x?.style).toMatchObject({
+      flexGrow: 1,
+      flexShrink: 0,
+      alignSelf: "flex-start",
+      order: 2,
+    });
+    expect(imported.notes.map((n) => n.message).join("\n")).not.toContain("flex");
+  });
+
   test("W-957: italic, wrapping, long words, object position and one overflow axis map exactly", () => {
     const { style, unmapped } = declarations(
       "font-style: oblique; white-space: nowrap; word-wrap: break-word; object-position: 50% 0%; overflow-y: hidden",

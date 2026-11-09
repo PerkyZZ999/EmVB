@@ -90,6 +90,10 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `gridColumnStart` / `gridRowStart` | whole number 1–13 | `grid-column` / `grid-row` as the line number, or `start / span N` when a span is set too |
 | `width` / `height` | size | `width` / `height` |
 | `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | length | matching size properties (`maxHeight` since W-088) |
+| `flexGrow`, `flexShrink` (W-954) | number 0–100 | `flex-grow`, `flex-shrink`: a Flexbox or Container child's share of free space, and of the shortfall |
+| `flexBasis` (W-954) | length or `auto` | `flex-basis`: the child's starting size along the row or column |
+| `alignSelf` (W-954) | `auto`, `stretch`, `flex-start`, `flex-end`, `center`, `baseline` | `align-self`: the child's own cross-axis alignment (`auto` follows the parent's Align) |
+| `order` (W-954) | whole number −99 to 99 | `order`: the child's place among its siblings (lower first) |
 | `overflow` | `visible`, `hidden`, `clip`, `scroll`, `auto` | `overflow` |
 | `overflowX`, `overflowY` (W-957) | same as `overflow` | `overflow-x`, `overflow-y`, after `overflow` so one axis wins |
 | `aspectRatio` | `"auto"` or `"w/h"` with whole numbers 1–9999, such as `"16/9"` | `aspect-ratio` (`16 / 9`) |

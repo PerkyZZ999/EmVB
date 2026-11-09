@@ -1,5 +1,6 @@
 import {
   ALIGN_ITEMS,
+  ALIGN_SELF,
   BACKGROUND_POSITIONS,
   BACKGROUND_REPEATS,
   BACKGROUND_SIZES,
@@ -41,6 +42,7 @@ const TEXT_DECORATION = setOf(TEXT_DECORATIONS);
 const BORDER_STYLE = setOf(BORDER_STYLES);
 const OVERFLOW = setOf(OVERFLOWS);
 const OBJECT_FIT = setOf(OBJECT_FITS);
+const ALIGN_SELF_SET = setOf(ALIGN_SELF);
 const FONT_STYLE = setOf(FONT_STYLES);
 const WHITE_SPACE = setOf(WHITE_SPACES);
 const OVERFLOW_WRAP = setOf(OVERFLOW_WRAPS);
@@ -172,6 +174,17 @@ function cssOffset(value: unknown): string | undefined {
 
 const cssZIndex = (value: unknown): string | undefined =>
   Number.isInteger(value) && (value as number) >= -9999 && (value as number) <= 9999
+    ? String(value)
+    : undefined;
+
+/** W-954: a grow or shrink factor, 0–100. */
+const cssFlexFactor = (value: unknown): string | undefined =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100
+    ? String(value)
+    : undefined;
+
+const cssOrder = (value: unknown): string | undefined =>
+  Number.isInteger(value) && (value as number) >= -99 && (value as number) <= 99
     ? String(value)
     : undefined;
 
@@ -651,6 +664,11 @@ const PROPERTY_MAP: {
   bottom: { css: "bottom", toValue: cssOffset },
   left: { css: "inset-inline-start", toValue: cssOffset },
   zIndex: { css: "z-index", toValue: cssZIndex },
+  flexGrow: { css: "flex-grow", toValue: cssFlexFactor },
+  flexShrink: { css: "flex-shrink", toValue: cssFlexFactor },
+  flexBasis: { css: "flex-basis", toValue: cssLengthOrAuto },
+  alignSelf: { css: "align-self", toValue: keyword(ALIGN_SELF_SET) },
+  order: { css: "order", toValue: cssOrder },
   fontFamily: { css: "font-family", toValue: cssFontFamily },
   fontSize: { css: "font-size", toValue: cssLength },
   fontWeight: { css: "font-weight", toValue: cssFontWeight },

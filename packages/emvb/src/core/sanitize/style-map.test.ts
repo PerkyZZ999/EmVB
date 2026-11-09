@@ -175,6 +175,36 @@ describe("style property map (W-017, R-012)", () => {
     expect(styleDeclarations({ [key]: raw }).rejected).toEqual([key]);
   });
 
+  test.each([
+    ["flexGrow", 1, "flex-grow", "1"],
+    ["flexShrink", 0, "flex-shrink", "0"],
+    ["flexGrow", 2.5, "flex-grow", "2.5"],
+    ["flexBasis", "auto", "flex-basis", "auto"],
+    ["flexBasis", { value: 240, unit: "px" }, "flex-basis", "240px"],
+    ["alignSelf", "center", "align-self", "center"],
+    ["alignSelf", "auto", "align-self", "auto"],
+    ["order", -1, "order", "-1"],
+  ] as const)("W-954: %s %p maps to %s", (key, raw, css, expected) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(true);
+    expect(styleDeclarations({ [key]: raw })).toEqual({
+      declarations: [{ property: css, value: expected }],
+      rejected: [],
+    });
+  });
+
+  test.each([
+    ["flexGrow", -1],
+    ["flexGrow", 101],
+    ["flexShrink", "1"],
+    ["flexBasis", "content"],
+    ["alignSelf", "start"],
+    ["order", 1.5],
+    ["order", 100],
+  ] as const)("W-954: %s refuses %p", (key, raw) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(false);
+    expect(styleDeclarations({ [key]: raw }).rejected).toEqual([key]);
+  });
+
   test("W-957: one overflow axis beats the both-axes value", () => {
     const { declarations } = styleDeclarations({ overflow: "hidden", overflowX: "auto" });
     const order = declarations.map((d) => d.property);

@@ -64,6 +64,11 @@ const STYLE_KEYS_ADDED_IN_1X: Record<string, string> = {
   overflowWrap: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
   backdropFilter: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
   transform: "1.0 (W-953): src/core/sanitize/transform.test.ts",
+  flexGrow: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
+  flexShrink: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
+  flexBasis: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
+  alignSelf: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
+  order: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
 };
 
 type Style = Record<string, unknown> & { motion?: Record<string, unknown> };

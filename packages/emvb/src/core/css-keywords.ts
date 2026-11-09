@@ -22,6 +22,9 @@ export const JUSTIFY_CONTENT = [
 
 export const ALIGN_ITEMS = ["stretch", "flex-start", "flex-end", "center", "baseline"] as const;
 
+/** W-954: one child's own cross-axis alignment; `auto` follows the parent's Align. */
+export const ALIGN_SELF = ["auto", ...ALIGN_ITEMS] as const;
+
 export const TEXT_ALIGNS = ["left", "center", "right", "justify"] as const;
 
 export const TEXT_TRANSFORMS = ["none", "uppercase", "lowercase", "capitalize"] as const;

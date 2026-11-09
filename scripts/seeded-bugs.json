@@ -6871,8 +6871,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
-          "search": "  \"minHeight\",\n  \"maxHeight\",\n  \"paddingTop\",",
-          "replace": "  \"minHeight\",\n  \"paddingTop\","
+          "search": "  \"minHeight\",\n  \"maxHeight\",\n  \"flexBasis\",",
+          "replace": "  \"minHeight\",\n  \"flexBasis\","
         }
       ],
       "command": [
@@ -7311,8 +7311,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
-          "search": "    styleKey === \"zIndex\" ||\n    styleKey === \"opacity\" ||",
-          "replace": "    styleKey === \"opacity\" ||"
+          "search": "    styleKey === \"zIndex\" ||\n    styleKey === \"flexGrow\" ||",
+          "replace": "    styleKey === \"flexGrow\" ||"
         }
       ],
       "command": [
@@ -43616,6 +43616,94 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
       "expect": "\\(fail\\).*W-953: Elementor 3 transforms"
+    },
+    {
+      "id": "W-954/flex-grow-not-written",
+      "requirement": "W-954",
+      "description": "flexGrow writes no CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  flexGrow: { css: \"flex-grow\", toValue: cssFlexFactor },",
+          "replace": "  flexGrow: { css: \"flex-grow\", toValue: () => undefined },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/style-map.test.ts"],
+      "expect": "\\(fail\\).*W-954: flexGrow"
+    },
+    {
+      "id": "W-954/align-self-unchecked",
+      "requirement": "W-954",
+      "description": "alignSelf reaches the stylesheet without the keyword check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  alignSelf: { css: \"align-self\", toValue: keyword(ALIGN_SELF_SET) },",
+          "replace": "  alignSelf: { css: \"align-self\", toValue: (v: unknown) => String(v) },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/style-map.test.ts"],
+      "expect": "\\(fail\\).*W-954: alignSelf refuses"
+    },
+    {
+      "id": "W-954/order-unchecked",
+      "requirement": "W-954",
+      "description": "A fractional or out-of-range order reaches the stylesheet.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  order: { css: \"order\", toValue: cssOrder },",
+          "replace": "  order: { css: \"order\", toValue: (v: unknown) => String(v) },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/style-map.test.ts"],
+      "expect": "\\(fail\\).*W-954: order refuses"
+    },
+    {
+      "id": "W-954/grow-not-offered",
+      "requirement": "W-954",
+      "description": "Size has no Grow row.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "    \"flexGrow\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Size holds width"
+    },
+    {
+      "id": "W-954/v3-flex-dropped",
+      "requirement": "W-954",
+      "description": "Elementor 3 flex child settings are left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "    const flexItem = v3FlexItem(s);",
+          "replace": "    const flexItem = undefined as Style | undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*W-954: Elementor 3 flex child"
+    },
+    {
+      "id": "W-954/atomic-flex-dropped",
+      "requirement": "W-954",
+      "description": "An Elementor 4 flex prop is left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "      case \"flex\": {\n",
+          "replace": "      case \"flex-disabled\": {\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*W-954: an Elementor 4 flex prop"
     }
   ]
 }

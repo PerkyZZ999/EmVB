@@ -562,6 +562,34 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
         else out.unsupported.push(`grid-column: ${span ?? "?"}`);
         break;
       }
+      case "flex": {
+        // W-954: `{ flexGrow?, flexShrink?, flexBasis? }`.
+        const raw = un(v);
+        if (!isRecord(raw)) break;
+        const grow = Number(un(raw["flexGrow"]));
+        const shrink = Number(un(raw["flexShrink"]));
+        if (raw["flexGrow"] !== undefined && Number.isFinite(grow) && grow >= 0 && grow <= 100)
+          style["flexGrow"] = grow;
+        if (
+          raw["flexShrink"] !== undefined &&
+          Number.isFinite(shrink) &&
+          shrink >= 0 &&
+          shrink <= 100
+        )
+          style["flexShrink"] = shrink;
+        if (raw["flexBasis"] !== undefined) {
+          const basis = size(raw["flexBasis"]);
+          if (basis.len) style["flexBasis"] = basis.len;
+        }
+        break;
+      }
+      case "align-self":
+      case "order": {
+        const { style: mapped } = declarations(`${prop}: ${str(un(v)) ?? String(un(v))}`);
+        if (Object.keys(mapped).length > 0) Object.assign(style, mapped);
+        else out.unsupported.push(prop);
+        break;
+      }
       case "transform": {
         // W-953: move, scale and rotate; skew and 3D parts are left out.
         const fns = un(isRecord(un(v)) ? (un(v) as Settings)["transform-functions"] : undefined);
