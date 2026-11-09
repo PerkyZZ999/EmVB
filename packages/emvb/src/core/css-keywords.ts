@@ -52,6 +52,7 @@ export const LIST_MARKERS = [
   "steps",
   "none",
 ] as const;
+export type ListMarker = (typeof LIST_MARKERS)[number];
 
 /** List markers that count (the list is an `<ol>`). */
 export const NUMBERED_MARKERS: ReadonlySet<string> = new Set([

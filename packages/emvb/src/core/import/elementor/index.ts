@@ -12,6 +12,7 @@ import { validateLayout } from "../../validate.ts";
 import { atomicElement } from "./atomic.ts";
 import { readSnapshots } from "./snapshots.ts";
 import { customCss, wordRules } from "./css.ts";
+import { type CounterItem, counterItems, counterOf } from "./counter-steps.ts";
 import { ImportContext, type ImportNote, type ImportOptions, type StyleClass } from "./context.ts";
 import {
   boxReader,
@@ -181,9 +182,51 @@ class Walker {
   readonly walk = (elements: unknown, env: Env): N[] => {
     const list = Array.isArray(elements) ? elements : [];
     const out: N[] = [];
-    for (const raw of list) out.push(...this.element(raw, env));
+    const labels = (id: string) => this.ctx.atomic.classes.get(id)?.label;
+    for (let i = 0; i < list.length; i++) {
+      // W-961: consecutive paragraphs numbered by a CSS counter become one numbered List.
+      const item = counterOf(list[i], this.ctx.counterItems, labels);
+      if (item) {
+        let end = i;
+        while (
+          end + 1 < list.length &&
+          counterOf(list[end + 1], this.ctx.counterItems, labels)?.counter === item.counter
+        )
+          end++;
+        out.push(...this.counterList(list.slice(i, end + 1), item, env));
+        i = end;
+        continue;
+      }
+      out.push(...this.element(list[i], env));
+    }
     return out;
   };
+
+  /** W-961: the steps as one numbered List with the first step's style, or as they were. */
+  private counterList(run: readonly unknown[], item: CounterItem, env: Env): N[] {
+    const parts = run.flatMap((raw) => this.element(raw, env));
+    const texts = parts.map((part) =>
+      isRecord(part["props"]) ? part["props"]["text"] : undefined,
+    );
+    if (parts.length === 0 || parts.length > 200 || !texts.every((t) => typeof t === "string"))
+      return parts;
+    const first = parts[0] as N;
+    const list = node(this.ctx, "list", {
+      items: texts as string[],
+      ordered: true,
+      ...(item.marker === "decimal" ? {} : { marker: item.marker }),
+    });
+    for (const key of ["style", "devices", "states", "hiddenOn", "classes"] as const) {
+      if (first[key] !== undefined) list[key] = first[key];
+    }
+    list["editorLabel"] = "Numbered steps";
+    this.ctx.note(
+      "approximated",
+      "Numbered steps",
+      "Paragraphs numbered by your site's CSS (a counter) became one numbered List; check its spacing.",
+    );
+    return [list];
+  }
 
   element(raw: unknown, env: Env): N[] {
     const ctx = this.ctx;
@@ -809,6 +852,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
         : undefined;
     const pageCustom = source.pageSettings ? str(source.pageSettings["custom_css"]) : undefined;
     ctx.wordRules = wordRules(`${kitCustom ?? ""}\n${pageCustom ?? ""}`);
+    ctx.counterItems = counterItems(`${kitCustom ?? ""}\n${pageCustom ?? ""}`);
   }
   const walker = new Walker(ctx);
   const children = walker.walk(source.elements, { parentRow: false, depth: 1, walk: walker.walk });

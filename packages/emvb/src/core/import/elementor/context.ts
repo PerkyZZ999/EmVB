@@ -7,6 +7,7 @@ import { emptyDesign, type DesignSystem } from "../../schema/design.ts";
 import { newNodeId, slugify } from "../../tree-ops.ts";
 import { validateDesign } from "../../validate.ts";
 import type { Layers } from "./classes.ts";
+import type { CounterItem } from "./counter-steps.ts";
 import { type AtomicSnapshots, emptySnapshots } from "./snapshots.ts";
 import { color, fontStack, fontWeight, isRecord, slider, str, type Settings } from "./values.ts";
 
@@ -97,6 +98,8 @@ export class ImportContext {
   readonly useClasses: boolean;
   /** W-950: site and page CSS for emphasised and bold words inside a class (`wordRules`). */
   wordRules = new Map<string, { color?: string; italic?: boolean; bold?: boolean }>();
+  /** W-961: classes whose `::before`/`::after` draws a CSS counter (`counterItems`). */
+  counterItems = new Map<string, CounterItem>();
   /** W-958: images on the old site the page uses, so the dialog can copy them. */
   readonly images = new Set<string>();
   /** W-958: WordPress page ids the export links to, so the dialog can ask where each goes. */

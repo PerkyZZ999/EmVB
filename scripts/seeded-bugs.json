@@ -44701,6 +44701,34 @@
       ],
       "command": ["bun", "run", "e2e", "e2e/devices.e2e.ts", "--project=node", "-g", "W-956"],
       "expect": "✘.*\\[node\\].*W-956: a published page uses its laptop styles"
+    },
+    {
+      "id": "W-961/steps-not-detected",
+      "requirement": "W-961",
+      "description": "Paragraphs numbered by a CSS counter stay separate and lose their numbers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/counter-steps.ts",
+          "search": "  if (!isRecord(raw) || items.size === 0) return undefined;",
+          "replace": "  if (!isRecord(raw) || items.size >= 0) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/counter-steps.test.ts"],
+      "expect": "\\(fail\\).*consecutive paragraphs with a counter class"
+    },
+    {
+      "id": "W-961/any-counter-rule",
+      "requirement": "W-961",
+      "description": "A counter in any rule, not only ::before/::after content, makes a list.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/counter-steps.ts",
+          "search": "      const found = /\\.([A-Za-z_][\\w-]*)::?(?:before|after)\\s*$/.exec(selector.trim());",
+          "replace": "      const found = /\\.([A-Za-z_][\\w-]*)(?:::?(?:before|after|marker))?\\s*$/.exec(selector.trim());"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/counter-steps.test.ts"],
+      "expect": "\\(fail\\).*counter rules are read only"
     }
   ]
 }

@@ -102,6 +102,8 @@ copy ("Card 2"). The page looks the same either way.
 - A class's own custom CSS is applied where EmVB has the property (borders on one side, gaps,
   weights, overflow and so on).
 - Forms keep their fields, labels and the layout around them.
+- Steps numbered by your site's CSS (separate paragraphs with a `counter()` in `::before`) become
+  one numbered List.
 - A gradient drawn over a background image keeps its gradient as an overlay.
 - Transforms, flex grow and shrink, and links to WordPress pages are listed in the report.
 
