@@ -1,4 +1,4 @@
-import type { PasteMode, PopupDevice, WrapType } from "../../core/index.ts";
+import type { PasteMode, Device, WrapType } from "../../core/index.ts";
 
 /** Where an editor command is offered. Shortcuts call `runCommand` for the same ids. */
 export type CommandSurface = "palette" | "layers" | "overlay" | "device";
@@ -39,7 +39,7 @@ export type CommandRunners = {
   openTimeline?: () => void;
   openShare?: () => void;
   openWeight?: () => void;
-  setDevice?: (device: PopupDevice) => void;
+  setDevice?: (device: Device) => void;
   openShortcuts?: () => void;
   rename?: () => void;
   /** Opens Save as section for an element (W-876). */
@@ -53,7 +53,7 @@ export type CommandInput = {
   targetId: string | null;
   isRoot: boolean;
   isParent: boolean;
-  device: PopupDevice;
+  device: Device;
   /** Duplicate and wrap. False on the root and when nothing is selected. */
   canDuplicate: boolean;
   /** Delete and the sibling moves. False on the root. */
@@ -185,6 +185,7 @@ const SPECS: readonly Spec[] = [
     surfaces: ["palette"],
   },
   { id: "device-desktop", labels: { palette: "View on desktop" }, surfaces: ["palette"] },
+  { id: "device-laptop", labels: { palette: "View on laptop" }, surfaces: ["palette"] },
   { id: "device-tablet", labels: { palette: "View on tablet" }, surfaces: ["palette"] },
   { id: "device-mobile", labels: { palette: "View on mobile" }, surfaces: ["palette"] },
   {
@@ -232,6 +233,7 @@ const ORDER: Record<CommandSurface, readonly string[]> = {
     "share",
     "weight",
     "device-desktop",
+    "device-laptop",
     "device-tablet",
     "device-mobile",
     "shortcuts",
@@ -369,6 +371,9 @@ export function runCommand(runners: CommandRunners, id: string, targetId: string
       return;
     case "device-desktop":
       runners.setDevice?.("desktop");
+      return;
+    case "device-laptop":
+      runners.setDevice?.("laptop");
       return;
     case "device-tablet":
       runners.setDevice?.("tablet");

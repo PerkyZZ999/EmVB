@@ -36,7 +36,7 @@ import {
   type Arranged,
   inheritedStyle,
   type LayoutNode,
-  type PopupDevice,
+  type Device,
   type ResponsiveDevice,
   classStylesInListOrder,
   iconHasAdjustableStroke,
@@ -220,7 +220,7 @@ type Props = {
   /** The chosen style state, for the canvas preview (W-089). */
   onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
   /** Tablet and mobile edit overrides. Desktop edits `style` (W-096). */
-  device?: PopupDevice;
+  device?: Device;
   /** Add, move and delete for Accordion items and Tabs panels (W-130). */
   items?: ItemActions;
   /** The theme part being edited, if any, for the H1 warning (W-208). */
@@ -323,7 +323,7 @@ function pairFields<F extends { key: string }>(fields: readonly F[]): F[][] {
 
 /** UX-071: fields that only apply to some values of another field on the same element. */
 const SHOWN_WHEN: Readonly<
-  Record<string, (props: Record<string, unknown>, device: PopupDevice) => boolean>
+  Record<string, (props: Record<string, unknown>, device: Device) => boolean>
 > = {
   "loop.columns": (props) => props["display"] === "grid" || props["display"] === "cards",
   "pagination.countText": (props) => props["showCount"] === true,
@@ -337,7 +337,7 @@ const SHOWN_WHEN: Readonly<
   "grid.columnTracksMobile": (_props, device) => device === "mobile",
 };
 
-function fieldShown(key: string, node: LayoutNode, device: PopupDevice = "desktop"): boolean {
+function fieldShown(key: string, node: LayoutNode, device: Device = "desktop"): boolean {
   const props = node.props as Record<string, unknown>;
   // A stored value always shows, so it can be seen and reset.
   if (props[key] !== undefined) return true;
@@ -445,6 +445,7 @@ function KnownElementPanel({
   const responsive: ResponsiveDevice | null = device === "desktop" ? null : device;
   const storedDevices = cls ? cls.devices : node.devices;
   const ownerDevices = storedDevices && {
+    laptop: flattenMotion(storedDevices.laptop),
     tablet: flattenMotion(storedDevices.tablet),
     mobile: flattenMotion(storedDevices.mobile),
   };
@@ -456,6 +457,8 @@ function KnownElementPanel({
   const ownInherited = responsive
     ? {
         ...normal,
+        // W-956: each device inherits the wider ones: Laptop, then Tablet.
+        ...(responsive !== "laptop" ? ownerDevices?.laptop : undefined),
         ...(responsive === "mobile" ? ownerDevices?.tablet : undefined),
       }
     : styleState === "normal"
@@ -612,7 +615,8 @@ function KnownElementPanel({
                     duplicateName={
                       field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
                     }
-                    device={device}
+                    // Field values have no laptop setting: Laptop edits the desktop value.
+                    device={device === "laptop" ? "desktop" : device}
                   />
                 </React.Fragment>
               ));

@@ -70,7 +70,7 @@ pick another type in the dialog if you want.
 - **Style:** backgrounds (colour, image, gradient, overlay), padding, margins, borders, corner
   radius, box shadow, typography (family, size, weight, line height, letter spacing, case,
   decoration), text colour and alignment, entrance animations, visibility per device, and the
-  tablet and mobile values of all of these.
+  laptop, tablet and mobile values of all of these.
 - **Widgets:** Heading, Text Editor, Image, Button (with its icon and hover colours), Spacer,
   Divider, Icon, Icon Box, Image Box, Icon List, Video (YouTube, Vimeo, files), Counter, Progress
   Bar, Testimonial, Star Rating, Alert, Tabs, Accordion, Toggle, Nested Tabs, Nested Accordion,
@@ -90,9 +90,10 @@ styles, and elements point at it and keep only what differs. A class already on 
 changed: an identical one is reused, and a different one with the same name is added as a numbered
 copy ("Card 2"). The page looks the same either way.
 
-- Each class's desktop, tablet and mobile values and its hover and focus states carry over.
-  Laptop and "extra" breakpoints fold into Tablet and Mobile, the way Elementor's desktop-first
-  breakpoints reach the smaller screens.
+- Each class's desktop, laptop, tablet and mobile values and its hover and focus states carry over.
+  "Extra" breakpoints fold into Tablet and Mobile, and Widescreen into Desktop, the way Elementor's
+  desktop-first breakpoints reach the other screens. Grid columns set for laptops follow the desktop
+  columns.
 - Fluid sizes (`max(32px, min(56px, …))` and `clamp()`) in px or rem stay fluid: they grow from
   their small value on phones to their large value on wide screens. Centred wrappers (`min(1180px,
   calc(100% - 48px))`) keep their maximum width and side gutters.

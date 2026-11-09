@@ -150,9 +150,7 @@ test("W-945: an Elementor 4 page keeps its class styles in the editor", async ({
   await page.getByRole("button", { name: "Import from Elementor", exact: true }).click();
   const dialog = page.locator('[data-emvb-dialog="import-elementor"]');
   await dialog.locator("#emvb-elementor-json").fill(JSON.stringify({ ...atomic, title }));
-  await expect(dialog.locator("[data-emvb-import-report]")).toContainText(
-    "Laptop and extra breakpoints were folded into Tablet and Mobile.",
-  );
+  await expect(dialog.locator("[data-emvb-import-report]")).toContainText("Ready to import");
   await dialog.getByRole("button", { name: "Import", exact: true }).click();
   await expect(overlay(page)).toBeVisible({ timeout: 20_000 });
   const heading = canvas(page).getByRole("heading", { name: "Fast pages, no code.", level: 1 });

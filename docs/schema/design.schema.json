@@ -235,12 +235,13 @@
             "$ref": "#/$defs/devices"
           },
           "hiddenOn": {
-            "maxItems": 3,
+            "maxItems": 4,
             "type": "array",
             "items": {
               "type": "string",
               "enum": [
                 "desktop",
+                "laptop",
                 "tablet",
                 "mobile"
               ]
@@ -7429,6 +7430,9 @@
     "devices": {
       "type": "object",
       "properties": {
+        "laptop": {
+          "$ref": "#/$defs/style"
+        },
         "tablet": {
           "$ref": "#/$defs/style"
         },

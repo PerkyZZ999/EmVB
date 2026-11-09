@@ -7,7 +7,7 @@ import {
   type DesignSystem,
   type DeviceStyles,
   type LayoutNode,
-  type PopupDevice,
+  type Device,
   type FlatStyleProps,
   type StyleProps,
   patchNestedStyle,
@@ -19,7 +19,7 @@ import type { StyleStateChoice } from "./settings/StateSwitcher.tsx";
 export type StyleSlot =
   | { owner: "element" | "class"; slot: "style" }
   | { owner: "element" | "class"; slot: "state"; state: StyleStateName }
-  | { owner: "element" | "class"; slot: "device"; device: "tablet" | "mobile" };
+  | { owner: "element" | "class"; slot: "device"; device: "laptop" | "tablet" | "mobile" };
 
 /** Which style object a patch writes: the element's own, a class, a state, or a device. */
 export function styleTarget({
@@ -28,7 +28,7 @@ export function styleTarget({
   state,
 }: {
   classId: string | null;
-  device: PopupDevice;
+  device: Device;
   state: StyleStateChoice;
 }): StyleSlot {
   const owner = classId ? "class" : "element";
@@ -72,7 +72,7 @@ export function applyStylePatch({
   node: LayoutNode;
   design: DesignSystem;
   classId: string | null;
-  device: PopupDevice;
+  device: Device;
   state: StyleStateChoice;
   patch: Partial<FlatStyleProps>;
 }): StyleWrite {

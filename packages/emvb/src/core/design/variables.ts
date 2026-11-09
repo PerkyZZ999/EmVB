@@ -70,7 +70,7 @@ function collectStyleUsages(
   });
 }
 
-const RESPONSIVE = ["tablet", "mobile"] as const;
+const RESPONSIVE = ["laptop", "tablet", "mobile"] as const;
 
 /** Style, state styles and device overrides. A nested usage is `<state|device>.<prop>`. */
 function collectAllUsages(
@@ -207,7 +207,7 @@ function stripRefsFromDevices(
     else delete next[device];
   }
   if (!changed) return devices;
-  return next.tablet || next.mobile ? next : undefined;
+  return next.laptop || next.tablet || next.mobile ? next : undefined;
 }
 
 /** Style, states and device overrides with the refs removed. Same object when nothing changed. */

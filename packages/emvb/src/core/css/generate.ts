@@ -19,7 +19,7 @@ import {
   type StateDeclarations,
 } from "../sanitize/css.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
-import { DEVICE_MEDIA, type PopupDevice } from "../theme/popup-rules.ts";
+import { DEVICE_MEDIA, type Device } from "../theme/popup-rules.ts";
 import { LOOP_KEYFRAMES, MOTION_KEYFRAMES } from "../sanitize/motion.ts";
 
 export type CssInput = {
@@ -30,10 +30,11 @@ export type CssInput = {
     id: string;
     declarations: Declaration[];
     states?: StateDeclarations;
-    /** Tablet and mobile overrides (W-096). Desktop stays in `declarations`. */
+    /** Laptop (W-956), tablet and mobile overrides (W-096). Desktop stays in `declarations`. */
+    laptop?: Declaration[];
     tablet?: Declaration[];
     mobile?: Declaration[];
-    hiddenOn?: readonly PopupDevice[];
+    hiddenOn?: readonly Device[];
     /** W-443: an image with a caption, rendered inside a figure that hides with it. */
     figure?: boolean;
     /** Container-query overrides (W-346). */
@@ -51,7 +52,7 @@ export type CssInput = {
    * device instead of the frame's width, so the Desktop canvas never picks up tablet styles in a
    * narrow window. Without it, the rules sit in their media queries as usual.
    */
-  previewDevice?: PopupDevice;
+  previewDevice?: Device;
 };
 
 /** Focus is keyboard focus (W-089): `:focus-visible`, never `:focus`. */
@@ -200,10 +201,17 @@ export function generateCss({
             {
               selector: `.${className}`,
               // W-210: a device that sets one background layer keeps the layers it inherits.
-              tablet: styleDeclarations(withInheritedLayers(cls.devices?.tablet, cls.style ?? {}))
+              laptop: styleDeclarations(withInheritedLayers(cls.devices?.laptop, cls.style ?? {}))
                 .declarations,
+              tablet: styleDeclarations(
+                withInheritedLayers(cls.devices?.tablet, { ...cls.style, ...cls.devices?.laptop }),
+              ).declarations,
               mobile: styleDeclarations(
-                withInheritedLayers(cls.devices?.mobile, { ...cls.style, ...cls.devices?.tablet }),
+                withInheritedLayers(cls.devices?.mobile, {
+                  ...cls.style,
+                  ...cls.devices?.laptop,
+                  ...cls.devices?.tablet,
+                }),
               ).declarations,
               hiddenOn: cls.hiddenOn,
               // W-571: the page root is never hidden (W-567), not even by a class.
@@ -214,6 +222,7 @@ export function generateCss({
     }),
     ...localRules.map((rule) => ({
       selector: `.emvb-e-${rule.id}`,
+      laptop: rule.laptop ?? [],
       tablet: rule.tablet ?? [],
       mobile: rule.mobile ?? [],
       hiddenOn: rule.hiddenOn,
@@ -221,38 +230,55 @@ export function generateCss({
     })),
   ];
   /** A device block: in its media query, or, for a previewed device, on or off outright. */
-  const forDevices = (devices: readonly PopupDevice[], query: string, body: string) => {
+  const forDevices = (devices: readonly Device[], query: string, body: string) => {
     if (!body) return "";
     if (previewDevice === undefined) return `@media ${query}{${body}}`;
     return devices.includes(previewDevice) ? body : "";
   };
-  const at = (query: string, which: "tablet" | "mobile") =>
+  const at = (query: string, which: "laptop" | "tablet" | "mobile") =>
     forDevices(
-      which === "tablet" ? ["tablet", "mobile"] : ["mobile"],
+      which === "laptop"
+        ? ["laptop", "tablet", "mobile"]
+        : which === "tablet"
+          ? ["tablet", "mobile"]
+          : ["mobile"],
       query,
       responsive.map((rule) => block(rule.selector, rule[which])).join(""),
     );
-  const hide = (device: PopupDevice, query: string) => {
+  /**
+   * W-956: Desktop and Laptop hidden together keep the one `min-width: 1025px` rule every page
+   * saved before Laptop had; hidden on only one of them, each gets its own range.
+   */
+  const hide = (devices: readonly Device[], query: string) => {
+    const hidden = (rule: { hiddenOn?: readonly Device[] | undefined }) => {
+      const on = rule.hiddenOn ?? [];
+      if (devices.includes("desktop") && devices.includes("laptop"))
+        return on.includes("desktop") && on.includes("laptop");
+      if (devices[0] === "desktop") return on.includes("desktop") && !on.includes("laptop");
+      if (devices[0] === "laptop") return on.includes("laptop") && !on.includes("desktop");
+      return on.includes(devices[0] as Device);
+    };
     // W-443: a captioned image hides its figure too, or the caption stayed on its own.
     const selectors = responsive
-      .filter((rule) => rule.hiddenOn?.includes(device))
+      .filter(hidden)
       .flatMap((rule) =>
         "figure" in rule && rule.figure
           ? [rule.selector, `.emvb-figure:has(>${rule.selector},>a>${rule.selector})`]
           : ["hideSelector" in rule && rule.hideSelector ? rule.hideSelector : rule.selector],
       );
     return forDevices(
-      [device],
+      devices,
       query,
       selectors.length > 0 ? `${selectors.join(",")}{display:none}` : "",
     );
   };
   for (const rule of responsive) {
-    if (usesMotion(rule.tablet) || usesMotion(rule.mobile)) motion = true;
-    if (usesLoop(rule.tablet) || usesLoop(rule.mobile)) loops = true;
+    if (usesMotion(rule.laptop) || usesMotion(rule.tablet) || usesMotion(rule.mobile))
+      motion = true;
+    if (usesLoop(rule.laptop) || usesLoop(rule.tablet) || usesLoop(rule.mobile)) loops = true;
     if (
       !entrances.includes(rule.selector) &&
-      [...rule.tablet, ...rule.mobile].some((d) => d.property === "animation")
+      [...rule.laptop, ...rule.tablet, ...rule.mobile].some((d) => d.property === "animation")
     ) {
       entrances.push(rule.selector);
     }
@@ -300,11 +326,14 @@ export function generateCss({
         (rule) =>
           `@container (min-width:${rule.queryMin}px){${block(`.emvb-e-${rule.id}`, rule.query ?? [])}}`,
       ),
+    at(DEVICE_MEDIA.laptop, "laptop"),
     at(DEVICE_MEDIA.tablet, "tablet"),
     at(DEVICE_MEDIA.mobile, "mobile"),
-    hide("desktop", DEVICE_MEDIA.hideDesktop),
-    hide("tablet", DEVICE_MEDIA.hideTablet),
-    hide("mobile", DEVICE_MEDIA.hideMobile),
+    hide(["desktop", "laptop"], DEVICE_MEDIA.hideDesktop),
+    hide(["desktop"], DEVICE_MEDIA.hideDesktopOnly),
+    hide(["laptop"], DEVICE_MEDIA.hideLaptop),
+    hide(["tablet"], DEVICE_MEDIA.hideTablet),
+    hide(["mobile"], DEVICE_MEDIA.hideMobile),
     animated.length > 0
       ? `@media (prefers-reduced-motion: reduce){${animated.join(",")}{transition:none}}`
       : "",

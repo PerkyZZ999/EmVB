@@ -10,6 +10,7 @@ import {
   DeviceTabletIcon,
   FloppyDiskIcon,
   KeyboardIcon,
+  LaptopIcon,
   PaintBrushIcon,
   SignOutIcon,
   UploadSimpleIcon,
@@ -18,12 +19,13 @@ import {
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
 import { statusLabel } from "../entry-status.ts";
 import type { SaveStatus } from "./useSave.ts";
-import type { PopupDevice } from "../../core/index.ts";
+import type { Device } from "../../core/index.ts";
 import { useMediaQuery } from "./useMediaQuery.ts";
 
 /** Preview sizes (W-158): the canvas device widths, in a window of that size. */
 const PREVIEW_SIZES = [
   { device: "desktop", label: "Desktop", icon: DesktopIcon },
+  { device: "laptop", label: "Laptop (1200 px)", icon: LaptopIcon },
   { device: "tablet", label: "Tablet (768 px)", icon: DeviceTabletIcon },
   { device: "mobile", label: "Mobile (390 px)", icon: DeviceMobileIcon },
 ] as const;
@@ -91,7 +93,7 @@ export function TopBar({
   onShortcuts: () => void;
   onSiteStyles?: () => void;
   /** Opens the preview; with no device, at the device shown on the canvas (W-158). */
-  onPreview: (device?: PopupDevice) => void;
+  onPreview: (device?: Device) => void;
   onSave: () => void;
   onPublish: () => void;
   /** Site styles have unpublished changes (W-153): the Publish button carries a dot. */

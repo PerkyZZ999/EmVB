@@ -3,8 +3,8 @@
  *
  * EmVB writes class rules before element rules, at the base and inside each device's media
  * query, and a `:hover`, `:focus` or `:active` rule outranks a plain one. So on a device the
- * winner is the last of: class desktop, element desktop, class tablet, element tablet, class
- * mobile, element mobile; in a state, the element's state beats the class's, which beats both.
+ * winner is the last of: class desktop, element desktop, class laptop, element laptop, class
+ * tablet, element tablet, class mobile, element mobile; in a state, the element's state beats the class's, which beats both.
  */
 import type { Style } from "./style.ts";
 
@@ -12,9 +12,12 @@ export const STATE_NAMES = ["hover", "focus", "active"] as const;
 type StateName = (typeof STATE_NAMES)[number];
 
 /** Desktop style, tablet and mobile overrides, and state styles, as EmVB stores them. */
-export type Layers = { desktop: Style; tablet: Style; mobile: Style } & Record<StateName, Style>;
+export type Layers = { desktop: Style; laptop: Style; tablet: Style; mobile: Style } & Record<
+  StateName,
+  Style
+>;
 
-const DEVICES = ["desktop", "tablet", "mobile"] as const;
+const DEVICES = ["desktop", "laptop", "tablet", "mobile"] as const;
 type Device = (typeof DEVICES)[number];
 
 /** Values compare by content, whatever their key order. */
@@ -39,14 +42,17 @@ function stable(value: unknown): string {
 /** What an element alone shows on a device: its style with the overrides down to it. */
 function elementAt(l: Layers, device: Device): Style {
   if (device === "desktop") return l.desktop;
-  if (device === "tablet") return { ...l.desktop, ...l.tablet };
-  return { ...l.desktop, ...l.tablet, ...l.mobile };
+  if (device === "laptop") return { ...l.desktop, ...l.laptop };
+  if (device === "tablet") return { ...l.desktop, ...l.laptop, ...l.tablet };
+  return { ...l.desktop, ...l.laptop, ...l.tablet, ...l.mobile };
 }
 
 /** What class rules plus element rules show on a device, in EmVB's rule order. */
 function cascadeAt(cls: Layers, own: Layers, device: Device): Style {
   const out: Style = { ...cls.desktop, ...own.desktop };
   if (device === "desktop") return out;
+  Object.assign(out, cls.laptop, own.laptop);
+  if (device === "laptop") return out;
   Object.assign(out, cls.tablet, own.tablet);
   if (device === "tablet") return out;
   return Object.assign(out, cls.mobile, own.mobile);
@@ -57,7 +63,15 @@ function cascadeAt(cls: Layers, own: Layers, device: Device): Style {
  * key differently in a layer: their order on the site (the Site styles order) would decide.
  */
 export function combineLayers(list: readonly Layers[]): Layers | undefined {
-  const out: Layers = { desktop: {}, tablet: {}, mobile: {}, hover: {}, focus: {}, active: {} };
+  const out: Layers = {
+    desktop: {},
+    laptop: {},
+    tablet: {},
+    mobile: {},
+    hover: {},
+    focus: {},
+    active: {},
+  };
   for (const layers of list) {
     for (const name of [...DEVICES, ...STATE_NAMES]) {
       for (const [key, value] of Object.entries(layers[name])) {
@@ -75,7 +89,15 @@ export function combineLayers(list: readonly Layers[]): Layers | undefined {
  * styles can't unset it), or a class state value would need a different undo per device.
  */
 export function inlineOver(want: Layers, cls: Layers): Layers | undefined {
-  const own: Layers = { desktop: {}, tablet: {}, mobile: {}, hover: {}, focus: {}, active: {} };
+  const own: Layers = {
+    desktop: {},
+    laptop: {},
+    tablet: {},
+    mobile: {},
+    hover: {},
+    focus: {},
+    active: {},
+  };
   for (const device of DEVICES) {
     const target = elementAt(want, device);
     const shown = cascadeAt(cls, own, device);

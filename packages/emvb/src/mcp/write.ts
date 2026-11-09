@@ -536,7 +536,7 @@ function currentUnsetPath(path: string): string {
 
 function nestDevices(devices: Record<string, unknown>): Record<string, unknown> {
   const out = { ...devices };
-  for (const device of ["tablet", "mobile"])
+  for (const device of ["laptop", "tablet", "mobile"])
     if (device in out) out[device] = nestMotion(out[device]);
   return out;
 }

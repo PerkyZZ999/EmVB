@@ -67,7 +67,7 @@ describe("Elementor 4 atomic import (W-945)", () => {
     expect(notes()).not.toContain("gradient over an image");
   });
 
-  test("W-955: fluid sizes stay fluid from their small to their large value; laptop folds into tablet", () => {
+  test("W-955: fluid sizes stay fluid from their small to their large value; W-956: laptop values stay on Laptop", () => {
     const title = byLabel("Hero title");
     expect(props(title)).toEqual({
       text: "Fast pages, no code.",
@@ -80,13 +80,14 @@ describe("Elementor 4 atomic import (W-945)", () => {
       fontWeight: 800,
       lineHeight: 1.1,
     });
+    // W-956: the laptop variant stays on Laptop; tablets and phones inherit it.
     expect(title?.devices).toEqual({
-      tablet: { letterSpacing: { value: -1, unit: "px" } },
+      laptop: { letterSpacing: { value: -1, unit: "px" } },
       mobile: { textAlign: "center" },
     });
     const { css } = renderPage(result.layout, emptyDesign());
     expect(css).toContain("font-size:clamp(2rem, 1.413rem + 2.6087vw, 3.5rem)");
-    expect(notes()).toContain("Laptop and extra breakpoints were folded into Tablet and Mobile.");
+    expect(notes()).not.toContain("folded");
   });
 
   test("a capped wrapper width keeps its maximum and its side gutters on narrow screens", () => {
@@ -778,5 +779,33 @@ describe("emphasised words styled by the site's CSS (W-950)", () => {
       text: "Your safety, our business.",
       marks: [{ start: 13, end: 26, color: "#ffba08" }],
     });
+  });
+});
+
+describe("Elementor 4 laptop variants (W-956)", () => {
+  const hiddenOf = (variants: unknown[]) => {
+    const imported = importElementor({
+      content: [
+        {
+          id: "box1",
+          elType: "e-div-block",
+          settings: { classes: { $$type: "classes", value: ["g-box"] } },
+          elements: [],
+        },
+      ],
+      global_classes: { items: { "g-box": { id: "g-box", variants } }, order: ["g-box"] },
+    });
+    if (!imported.ok) throw new Error(imported.error);
+    return ((imported.layout.root as Node).children ?? [])[0]?.hiddenOn;
+  };
+  const display = (breakpoint: string, value: string) => ({
+    meta: { breakpoint, state: null },
+    props: { display: { $$type: "string", value } },
+  });
+
+  test("hidden on desktop stays hidden on laptops unless a laptop variant shows it", () => {
+    expect(hiddenOf([display("desktop", "none")])).toEqual(["desktop", "laptop"]);
+    expect(hiddenOf([display("desktop", "none"), display("laptop", "block")])).toEqual(["desktop"]);
+    expect(hiddenOf([display("laptop", "none")])).toEqual(["laptop"]);
   });
 });

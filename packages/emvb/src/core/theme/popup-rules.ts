@@ -13,11 +13,22 @@ export const POPUP_DEVICES = ["desktop", "tablet", "mobile"] as const;
 export type PopupDevice = (typeof POPUP_DEVICES)[number];
 
 /**
+ * W-956: the devices a page is edited, previewed and hidden on: Laptop sits between Desktop and
+ * Tablet. Popup targeting and visitor rules keep Desktop, Tablet and Mobile (a laptop is desktop).
+ */
+export const DEVICES = ["desktop", "laptop", "tablet", "mobile"] as const;
+export type Device = (typeof DEVICES)[number];
+
+/** Device override layers, widest first; each narrower one wins over the wider ones. */
+export const STYLE_DEVICES = ["laptop", "tablet", "mobile"] as const;
+export type StyleDevice = (typeof STYLE_DEVICES)[number];
+
+/**
  * Widths that agree with `deviceForWidth` (W-096). The canvas lays the page out at 1280 on
  * desktop (at least), 768 on tablet and 390 on mobile, scaled to fit (W-158, D-046); Preview opens
  * the same widths. Public CSS uses the matching max-width queries.
  */
-export const DEVICE_PREVIEW_PX = { desktop: 1280, tablet: 768, mobile: 390 } as const;
+export const DEVICE_PREVIEW_PX = { desktop: 1280, laptop: 1200, tablet: 768, mobile: 390 } as const;
 
 /**
  * Public CSS queries. Bounds match `deviceForWidth`: below 768 mobile, below 1025 tablet.
@@ -26,9 +37,14 @@ export const DEVICE_PREVIEW_PX = { desktop: 1280, tablet: 768, mobile: 390 } as 
  * hidden on both showed. The max bounds sit just under the next device's min (as Bootstrap does).
  */
 export const DEVICE_MEDIA = {
+  /** W-956: laptops are 1025 to 1366 px wide. */
+  laptop: "(max-width: 1366.98px)",
   tablet: "(max-width: 1024.98px)",
   mobile: "(max-width: 767.98px)",
+  /** Hidden on Desktop and Laptop: every page saved before W-956 that hid on Desktop. */
   hideDesktop: "(min-width: 1025px)",
+  hideDesktopOnly: "(min-width: 1367px)",
+  hideLaptop: "(min-width: 1025px) and (max-width: 1366.98px)",
   hideTablet: "(min-width: 768px) and (max-width: 1024.98px)",
   hideMobile: "(max-width: 767.98px)",
 } as const;

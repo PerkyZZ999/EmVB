@@ -171,10 +171,11 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ### Per-device styles (W-096)
 
-`node.devices` and `design.classes[].devices` are `{ "tablet"?, "mobile"? }`. Each is a style object with the same keys as `style`. Only keys that differ from desktop are stored. `node.hiddenOn` and `design.classes[].hiddenOn` are arrays of `"desktop"`, `"tablet"` and `"mobile"` (at most one of each). Desktop itself stays in `style`.
+`node.devices` and `design.classes[].devices` are `{ "laptop"?, "tablet"?, "mobile"? }` (`laptop` since W-956). Each is a style object with the same keys as `style`. Only keys that differ from the wider devices are stored. `node.hiddenOn` and `design.classes[].hiddenOn` are arrays of `"desktop"`, `"laptop"`, `"tablet"` and `"mobile"` (at most one of each). Desktop itself stays in `style`.
 
-- **Queries.** Tablet is `@media (max-width: 1024.98px)`, then mobile `@media (max-width: 767.98px)`. A phone matches both, so mobile wins on a shared key, and a tablet-only key still applies on mobile. The bounds match `deviceForWidth` (under 768 mobile, under 1025 tablet).
-- **Hide.** Each device has its own query, so `display: none` does not leak: desktop `(min-width: 1025px)`, tablet `(min-width: 768px) and (max-width: 1024.98px)`, mobile `(max-width: 767.98px)`. The `.98` keeps fractional widths from zoom or display scaling (1024.5, say) inside one device, so nothing slips between two hide queries (W-506).
+- **Queries.** Laptop is `@media (max-width: 1366.98px)`, then tablet `@media (max-width: 1024.98px)`, then mobile `@media (max-width: 767.98px)`. A narrower screen matches every wider query, so the narrowest device wins on a shared key, and a laptop-only key still applies on tablets and phones. The tablet and mobile bounds match `deviceForWidth` (under 768 mobile, under 1025 tablet), which popup targeting and visitor rules use (a laptop is desktop there).
+- **Hide.** Each device has its own query, so `display: none` does not leak: desktop `(min-width: 1367px)`, laptop `(min-width: 1025px) and (max-width: 1366.98px)`, tablet `(min-width: 768px) and (max-width: 1024.98px)`, mobile `(max-width: 767.98px)`. An element hidden on both Desktop and Laptop gets the one rule `(min-width: 1025px)`. Before W-956, `"desktop"` meant every screen from 1025 px; schema 17 pages are upgraded to `["desktop", "laptop", …]` on read, so they render byte for byte as before.
+- **Grids.** Column counts have no laptop value: laptops use the desktop columns. The `.98` keeps fractional widths from zoom or display scaling (1024.5, say) inside one device, so nothing slips between two hide queries (W-506).
 - **States.** Hover, focus and active stay all-viewport. Device overrides edit Normal only.
 - **Version.** Adding these fields moved the version to 5 (D-036) with a v4 → v5 step that changes nothing.
 

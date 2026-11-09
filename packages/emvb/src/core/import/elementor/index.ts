@@ -662,7 +662,7 @@ function verticalOf(style: Style, grid: boolean): string {
 }
 
 /** Grid gaps and minimum height per device (column counts are props, see gridColumns). */
-const gridReader = (s: Settings, d: "" | "_tablet" | "_mobile"): Style => {
+const gridReader = (s: Settings, d: "" | "_laptop" | "_tablet" | "_mobile"): Style => {
   const style: Style = {};
   const gaps = s[`grid_gaps${d}`];
   const gap = isRecord(gaps)
@@ -676,12 +676,12 @@ const gridReader = (s: Settings, d: "" | "_tablet" | "_mobile"): Style => {
 };
 
 function mergeDevices(
-  a?: { tablet?: Style; mobile?: Style },
-  b?: { tablet?: Style; mobile?: Style },
+  a?: { laptop?: Style; tablet?: Style; mobile?: Style },
+  b?: { laptop?: Style; tablet?: Style; mobile?: Style },
 ) {
   if (!a && !b) return undefined;
-  const out: { tablet?: Style; mobile?: Style } = {};
-  for (const key of ["tablet", "mobile"] as const) {
+  const out: { laptop?: Style; tablet?: Style; mobile?: Style } = {};
+  for (const key of ["laptop", "tablet", "mobile"] as const) {
     const merged = { ...a?.[key], ...b?.[key] };
     if (Object.keys(merged).length > 0) out[key] = merged;
   }

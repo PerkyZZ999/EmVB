@@ -9041,7 +9041,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "  const ownInherited = responsive\n    ? {\n        ...normal,\n        ...(responsive === \"mobile\" ? ownerDevices?.tablet : undefined),\n      }\n    : styleState === \"normal\"\n      ? undefined\n      : normal;",
+          "search": "  const ownInherited = responsive\n    ? {\n        ...normal,\n        // W-956: each device inherits the wider ones: Laptop, then Tablet.\n        ...(responsive !== \"laptop\" ? ownerDevices?.laptop : undefined),\n        ...(responsive === \"mobile\" ? ownerDevices?.tablet : undefined),\n      }\n    : styleState === \"normal\"\n      ? undefined\n      : normal;",
           "replace": "  const ownInherited = undefined;"
         },
         {
@@ -16182,8 +16182,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "    hide(\"desktop\", DEVICE_MEDIA.hideDesktop),",
-          "replace": "    hide(\"desktop\", DEVICE_MEDIA.tablet),"
+          "search": "    hide([\"desktop\", \"laptop\"], DEVICE_MEDIA.hideDesktop),",
+          "replace": "    hide([\"desktop\", \"laptop\"], DEVICE_MEDIA.tablet),"
         }
       ],
       "command": [
@@ -16202,7 +16202,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/devices.ts",
-          "search": "  return next.tablet || next.mobile ? next : undefined;",
+          "search": "  return next.laptop || next.tablet || next.mobile ? next : undefined;",
           "replace": "  return next;"
         }
       ],
@@ -17181,8 +17181,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "which === \"tablet\" ? [\"tablet\", \"mobile\"] : [\"mobile\"],",
-          "replace": "which === \"tablet\" ? [\"tablet\"] : [\"mobile\"],"
+          "search": "          ? [\"tablet\", \"mobile\"]",
+          "replace": "          ? [\"tablet\"]"
         }
       ],
       "command": [
@@ -21660,7 +21660,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "    const tablet = styleDeclarations(withInheritedLayers(tabletStyle, base));",
+          "search": "    const tablet = styleDeclarations(withInheritedLayers(tabletStyle, { ...base, ...laptopStyle }));",
           "replace": "    const tablet = styleDeclarations(tabletStyle);"
         }
       ],
@@ -21674,7 +21674,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "withInheritedLayers(cls.devices?.tablet, cls.style ?? {})",
+          "search": "withInheritedLayers(cls.devices?.tablet, { ...cls.style, ...cls.devices?.laptop })",
           "replace": "withInheritedLayers(cls.devices?.tablet, {})"
         }
       ],
@@ -21688,8 +21688,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/index.ts",
-          "search": "      withInheritedLayers(node.devices?.mobile, { ...base, ...tabletStyle }),",
-          "replace": "      withInheritedLayers(node.devices?.mobile, base),"
+          "search": "      withInheritedLayers(node.devices?.mobile, { ...base, ...laptopStyle, ...tabletStyle }),",
+          "replace": "      withInheritedLayers(node.devices?.mobile, { ...base, ...laptopStyle }),"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/device-layers.test.ts"],
@@ -43216,16 +43216,16 @@
     {
       "id": "W-945/laptop-dropped",
       "requirement": "W-945",
-      "description": "Laptop breakpoint values are lost instead of folding into Tablet.",
+      "description": "Laptop breakpoint values are lost (W-956: they stay on Laptop).",
       "edits": [
         {
           "file": "packages/emvb/src/core/import/elementor/atomic.ts",
-          "search": "  laptop: \"tablet\",\n",
+          "search": "  laptop: \"laptop\",\n",
           "replace": ""
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
-      "expect": "\\(fail\\).*fluid sizes take their large value, phones their small one; laptop folds"
+      "expect": "\\(fail\\).*laptop values stay on Laptop"
     },
     {
       "id": "W-945/capped-width-gutters-lost",
@@ -43304,8 +43304,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/import/elementor/atomic.ts",
-          "search": "  const hidden = ([\"desktop\", \"tablet\", \"mobile\"] as const).filter((d) => s.display[d] === \"none\");",
-          "replace": "  const hidden = ([\"desktop\", \"tablet\", \"mobile\"] as const).filter(() => false);"
+          "search": "    (d) => shown[d] === \"none\",",
+          "replace": "    () => false,"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
@@ -44527,6 +44527,146 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
       "expect": "\\(fail\\).*kit rule for `em`"
+    },
+    {
+      "id": "W-956/laptop-block-missing",
+      "requirement": "W-956",
+      "description": "Laptop styles are never sent.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    at(DEVICE_MEDIA.laptop, \"laptop\"),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/laptop.test.ts"],
+      "expect": "\\(fail\\).*laptop styles sit between"
+    },
+    {
+      "id": "W-956/laptop-after-tablet",
+      "requirement": "W-956",
+      "description": "The laptop block comes after the tablet one, so it beats tablets.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    at(DEVICE_MEDIA.laptop, \"laptop\"),\n    at(DEVICE_MEDIA.tablet, \"tablet\"),",
+          "replace": "    at(DEVICE_MEDIA.tablet, \"tablet\"),\n    at(DEVICE_MEDIA.laptop, \"laptop\"),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/laptop.test.ts"],
+      "expect": "\\(fail\\).*laptop styles sit between"
+    },
+    {
+      "id": "W-956/hide-not-merged",
+      "requirement": "W-956",
+      "description": "Hidden on Desktop and Laptop no longer uses the 1025 px rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    hide([\"desktop\", \"laptop\"], DEVICE_MEDIA.hideDesktop),",
+          "replace": "    hide([\"desktop\", \"laptop\"], DEVICE_MEDIA.hideDesktopOnly),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/laptop.test.ts"],
+      "expect": "\\(fail\\).*one rule from 1025"
+    },
+    {
+      "id": "W-956/migration-missing",
+      "requirement": "W-956",
+      "description": "A 0.9 page hidden on Desktop shows on laptops.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/v18.ts",
+          "search": "root: laptopHidden(upgradeLegacyNode(doc[\"root\"]))",
+          "replace": "root: upgradeLegacyNode(doc[\"root\"])"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/laptop.test.ts"],
+      "expect": "\\(fail\\).*0\\.9 page hidden on Desktop"
+    },
+    {
+      "id": "W-956/preview-laptop-ignored",
+      "requirement": "W-956",
+      "description": "The Laptop canvas doesn't show laptop styles.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "        ? [\"laptop\", \"tablet\", \"mobile\"]",
+          "replace": "        ? [\"tablet\", \"mobile\"]"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/laptop.test.ts"],
+      "expect": "\\(fail\\).*Laptop canvas"
+    },
+    {
+      "id": "W-956/class-laptop-missing",
+      "requirement": "W-956",
+      "description": "A class's laptop styles are dropped.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "withInheritedLayers(cls.devices?.laptop, cls.style ?? {})",
+          "replace": "withInheritedLayers(undefined, {})"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/laptop.test.ts"],
+      "expect": "\\(fail\\).*class's laptop styles"
+    },
+    {
+      "id": "W-956/devicebar-no-laptop",
+      "requirement": "W-956",
+      "description": "The device bar has no Laptop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-rules.ts",
+          "search": "export const DEVICES = [\"desktop\", \"laptop\", \"tablet\", \"mobile\"] as const;",
+          "replace": "export const DEVICES = [\"desktop\", \"tablet\", \"mobile\"] as const;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/laptop-device.test.tsx"],
+      "expect": "\\(fail\\).*device bar offers Laptop"
+    },
+    {
+      "id": "W-956/v3-laptop-ignored",
+      "requirement": "W-956",
+      "description": "Elementor 3 laptop values are ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/style.ts",
+          "search": "  const laptop = changedKeys(desktop, read(\"_laptop\"));",
+          "replace": "  const laptop = changedKeys(desktop, desktop);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*laptop value stays on Laptop"
+    },
+    {
+      "id": "W-956/v3-hide-desktop-narrow",
+      "requirement": "W-956",
+      "description": "Elementor 3 hide on desktop no longer covers laptops.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/style.ts",
+          "search": "  if (laptopActive ? str(s[\"hide_laptop\"]) : str(s[\"hide_desktop\"])) out.push(\"laptop\");",
+          "replace": "  if (laptopActive && str(s[\"hide_laptop\"])) out.push(\"laptop\");"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*hide on desktop covers laptops"
+    },
+    {
+      "id": "W-956/atomic-display-not-inherited",
+      "requirement": "W-956",
+      "description": "An Elementor 4 element hidden on desktop shows on laptops.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "  const shown = { ...s.display, laptop: s.display.laptop ?? s.display.desktop };",
+          "replace": "  const shown = s.display;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*hidden on desktop stays hidden on laptops"
     }
   ]
 }

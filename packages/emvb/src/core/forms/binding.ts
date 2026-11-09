@@ -91,7 +91,7 @@ export type RequiredFieldIssue =
     };
 
 const FIELD_TYPES = new Set(["text-input", "textarea", "select", "checkbox", "radio"]);
-const DEVICE_ORDER = ["desktop", "tablet", "mobile"];
+const DEVICE_ORDER = ["desktop", "laptop", "tablet", "mobile"];
 
 /** Each bound field's controls, with the devices each is hidden on (itself or an ancestor). */
 type Control = { nodeId: string; hidden: Set<string>; who?: string; split?: string };

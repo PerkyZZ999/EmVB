@@ -90,6 +90,7 @@ export function floatHasOwnSurface(layout: Layout, design: DesignSystem): boolea
   return [root, ...classes].some(
     (item) =>
       paintsBackground(item.style) ||
+      paintsBackground(item.devices?.laptop) ||
       paintsBackground(item.devices?.tablet) ||
       paintsBackground(item.devices?.mobile),
   );

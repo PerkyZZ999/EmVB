@@ -3,7 +3,7 @@ import { emptyDesign } from "../schema/design.ts";
 import type { Layout } from "../schema/layout.ts";
 import { auditPage } from "./audit.ts";
 
-const all = ["desktop", "tablet", "mobile"];
+const all = ["desktop", "laptop", "tablet", "mobile"];
 const h = (id: string, level: number, extra: Record<string, unknown> = {}) => ({
   id,
   type: "heading",

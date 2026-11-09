@@ -8,7 +8,7 @@ import {
   type A11yReport,
   type ElementType,
   type LayoutNode,
-  type PopupDevice,
+  type Device,
   type ThemeDynamicData,
 } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
@@ -167,7 +167,7 @@ async function revertToPublished({
 /** Hide or show the selected element on the current device (W-096). */
 export function hideSelectedOnDevice(
   state: EditorState,
-  device: PopupDevice,
+  device: Device,
   dispatch: React.Dispatch<EditorAction>,
 ): void {
   const id = state.selectedId;

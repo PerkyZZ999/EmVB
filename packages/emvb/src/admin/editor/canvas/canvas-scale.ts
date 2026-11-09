@@ -1,4 +1,4 @@
-import { DEVICE_PREVIEW_PX, type PopupDevice } from "../../../core/index.ts";
+import { DEVICE_PREVIEW_PX, type Device } from "../../../core/index.ts";
 
 /** Fit scales the canvas down to the stage; Actual shows it at 100% and scrolls (W-158). */
 export type CanvasZoom = "fit" | "actual";
@@ -9,7 +9,7 @@ export type CanvasZoom = "fit" | "actual";
  * the stage width, never up; Actual keeps 100% and the stage scrolls sideways.
  */
 export function canvasScale(
-  device: PopupDevice,
+  device: Device,
   stageWidth: number,
   zoom: CanvasZoom,
 ): { width: number; scale: number } {

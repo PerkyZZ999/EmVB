@@ -4,7 +4,7 @@ import type { StyleStateName } from "../schema/state-names.ts";
 import { flattenMotion } from "../migrate/v18.ts";
 import type { FlatStyleProps, StyleProps } from "../schema/style.ts";
 
-export type TraceDevice = "desktop" | "tablet" | "mobile";
+export type TraceDevice = "desktop" | "laptop" | "tablet" | "mobile";
 
 /** Where one style value comes from (W-318). */
 export type StyleSource = {
@@ -39,7 +39,7 @@ export function defaultTagFor(node: LayoutNode): DefaultStyleTag | undefined {
   }
 }
 
-const LAYER = { desktop: "Desktop", tablet: "Tablet", mobile: "Mobile" } as const;
+const LAYER = { desktop: "Desktop", laptop: "Laptop", tablet: "Tablet", mobile: "Mobile" } as const;
 const STATE_LABEL: Record<StyleStateName, string> = {
   hover: "Hover",
   focus: "Focus",
@@ -51,7 +51,7 @@ type Owner = {
   label: string;
   classId?: string;
   style?: StyleProps;
-  devices?: { tablet?: StyleProps; mobile?: StyleProps };
+  devices?: { laptop?: StyleProps; tablet?: StyleProps; mobile?: StyleProps };
   states?: Partial<Record<StyleStateName, StyleProps>>;
 };
 
@@ -104,7 +104,10 @@ export function styleLayers(
       ...(owner.classId ? { classId: owner.classId } : {}),
     };
     if (owner.style) layers.push({ source: { ...base, layer: LAYER.desktop }, style: owner.style });
-    if (device !== "desktop" && owner.devices?.tablet) {
+    if (device !== "desktop" && owner.devices?.laptop) {
+      layers.push({ source: { ...base, layer: LAYER.laptop }, style: owner.devices.laptop });
+    }
+    if ((device === "tablet" || device === "mobile") && owner.devices?.tablet) {
       layers.push({ source: { ...base, layer: LAYER.tablet }, style: owner.devices.tablet });
     }
     if (device === "mobile" && owner.devices?.mobile) {

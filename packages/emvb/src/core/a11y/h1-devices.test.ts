@@ -21,7 +21,9 @@ const h1 = (id: string, hiddenOn?: string[]) => ({
 
 describe("H1s are counted per device (W-444)", () => {
   test("a desktop H1 and a mobile H1 that swap are not two", () => {
-    expect(rules([h1("head0001", ["mobile"]), h1("head0002", ["desktop", "tablet"])])).toEqual([]);
+    expect(
+      rules([h1("head0001", ["mobile"]), h1("head0002", ["desktop", "laptop", "tablet"])]),
+    ).toEqual([]);
     const box = {
       id: "boxx0001",
       type: "container",
@@ -29,7 +31,7 @@ describe("H1s are counted per device (W-444)", () => {
       hiddenOn: ["mobile"],
       children: [h1("head0001")],
     };
-    expect(rules([box, h1("head0002", ["desktop", "tablet"])])).toEqual([]);
+    expect(rules([box, h1("head0002", ["desktop", "laptop", "tablet"])])).toEqual([]);
   });
   test("two H1s shown on the same device still warn", () => {
     expect(rules([h1("head0001", ["mobile"]), h1("head0002", ["desktop"])])).toEqual([

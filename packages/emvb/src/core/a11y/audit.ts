@@ -5,6 +5,7 @@ import { isParentNode, type Layout, type LayoutNode } from "../schema/layout.ts"
 import { boxBecomesLink } from "../render/extras.ts";
 import { ICON_ANIMATION_LIMIT_MS, iconAnimationRuns } from "../icons/animation-runs.ts";
 import { updateNode } from "../tree-ops.ts";
+import { DEVICES } from "../theme/popup-rules.ts";
 
 /**
  * W-572: text as a screen reader says it: invisible format characters (zero-width space, word
@@ -240,9 +241,9 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
     issues.push({ ...issue, id: `${issue.rule}:${issue.nodeId}` });
   let lastLevel = 0;
   // W-444: H1s counted per device, so a desktop H1 and a mobile H1 that swap places aren't two.
-  const DEVICES = ["desktop", "tablet", "mobile"] as const;
-  let h1s = [0, 0, 0];
-  let shownOn = [true, true, true];
+  // W-956: Laptop counts as its own device.
+  let h1s = DEVICES.map(() => 0);
+  let shownOn = DEVICES.map(() => true);
   // W-446: aria-hidden on a box hides everything inside it from screen readers, links included.
   let ariaHiddenAbove = false;
   // W-312 variants are alternatives: B is judged as if it stood where A does, so a page whose
@@ -251,13 +252,10 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
   const afterA = new Map<string, [number[], number]>();
   let fade = 1;
   // W-445: per device, like H1s, so a desktop menu and a mobile menu may share a name.
-  const menuNames = [new Set<string>(), new Set<string>(), new Set<string>()];
+  const menuNames = DEVICES.map(() => new Set<string>());
   const walk = (node: LayoutNode, bg: string | undefined, color: string | undefined): void => {
     // W-413: an element hidden on every device (and what's inside it) is never shown or read.
-    if (
-      node !== layout.root &&
-      (["desktop", "tablet", "mobile"] as const).every((d) => node.hiddenOn?.includes(d))
-    ) {
+    if (node !== layout.root && DEVICES.every((d) => node.hiddenOn?.includes(d))) {
       return;
     }
     const variant = node.variant;

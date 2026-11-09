@@ -32,7 +32,7 @@ for (const schema of KNOWN_NODE_SCHEMAS) {
 const STYLE_KEYS = shapeKeys(StyleProps);
 const FLAT_STYLE_KEYS = shapeKeys(FlatStyleProps);
 const STATES = ["hover", "focus", "active"] as const;
-const DEVICES = ["tablet", "mobile"] as const;
+const DEVICES = ["laptop", "tablet", "mobile"] as const;
 
 function formatPath(path: Path): string {
   return path.reduce<string>((out, key) => {

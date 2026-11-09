@@ -203,6 +203,7 @@ function refsInStyle(style: StyleProps | undefined): Ref[] {
 const refsOf = (owner: CopiedStyle): Ref[] => [
   ...refsInStyle(owner.style),
   ...STYLE_STATES.flatMap((state) => refsInStyle(owner.states?.[state])),
+  ...refsInStyle(owner.devices?.laptop),
   ...refsInStyle(owner.devices?.tablet),
   ...refsInStyle(owner.devices?.mobile),
   // W-643: a container-query override (W-346) can use a variable too.

@@ -1,7 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { emptyDesign, renderPage, type Layout } from "../index.ts";
 
-const heading = (id: string, text: string, hiddenOn?: ("desktop" | "tablet" | "mobile")[]) => ({
+const heading = (
+  id: string,
+  text: string,
+  hiddenOn?: ("desktop" | "laptop" | "tablet" | "mobile")[],
+) => ({
   id,
   type: "heading" as const,
   props: { text, level: 2 as const },
@@ -31,7 +35,7 @@ describe("W-793 contents entries hide where their heading hides", () => {
           type: "container",
           props: {},
           hiddenOn: ["mobile"],
-          children: [heading("hd000004", "Never shown", ["desktop", "tablet"])],
+          children: [heading("hd000004", "Never shown", ["desktop", "laptop", "tablet"])],
         },
       ],
     },

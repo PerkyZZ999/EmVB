@@ -1,22 +1,30 @@
 import { Button, Tabs } from "@cloudflare/kumo";
-import { DesktopIcon, DeviceMobileIcon, DeviceTabletIcon, type Icon } from "@phosphor-icons/react";
+import {
+  DesktopIcon,
+  DeviceMobileIcon,
+  DeviceTabletIcon,
+  type Icon,
+  LaptopIcon,
+} from "@phosphor-icons/react";
 import * as React from "react";
-import { POPUP_DEVICES, type PopupDevice } from "../../../core/index.ts";
+import { DEVICES, type Device } from "../../../core/index.ts";
 
-const LABELS: Record<PopupDevice, string> = {
+const LABELS: Record<Device, string> = {
   desktop: "Desktop",
+  laptop: "Laptop",
   tablet: "Tablet",
   mobile: "Mobile",
 };
 
-const ICONS: Record<PopupDevice, Icon> = {
+const ICONS: Record<Device, Icon> = {
   desktop: DesktopIcon,
+  laptop: LaptopIcon,
   tablet: DeviceTabletIcon,
   mobile: DeviceMobileIcon,
 };
 
 /** The device's icon (decorative) and its name, which stays the tab's accessible name (W-127). */
-function DeviceLabel({ device }: { device: PopupDevice }) {
+function DeviceLabel({ device }: { device: Device }) {
   const DeviceIcon = ICONS[device];
   return (
     <span className="emvb-device-label">
@@ -38,13 +46,13 @@ export function DeviceBar({
   scale = 1,
   onZoom,
 }: {
-  device: PopupDevice;
+  device: Device;
   /** Whether the selected element is hidden on `device`. */
   hidden: boolean;
   canHide: boolean;
   /** From the hide-on-device command, so the checkbox wording has one source. */
   hideLabel: string;
-  onDevice: (device: PopupDevice) => void;
+  onDevice: (device: Device) => void;
   onToggleHidden: () => void;
   /** Fit or 100% (W-158), with the current on-screen scale for the readout. */
   zoom?: "fit" | "actual";
@@ -62,13 +70,13 @@ export function DeviceBar({
           variant="segmented"
           size="sm"
           className="emvb-device-tabs"
-          tabs={POPUP_DEVICES.map((item) => ({
+          tabs={DEVICES.map((item) => ({
             value: item,
             label: <DeviceLabel device={item} />,
           }))}
           value={device}
           onValueChange={(next) => {
-            if ((POPUP_DEVICES as readonly string[]).includes(next)) onDevice(next as PopupDevice);
+            if ((DEVICES as readonly string[]).includes(next)) onDevice(next as Device);
           }}
         />
       </div>

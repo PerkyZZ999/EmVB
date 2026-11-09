@@ -25,7 +25,7 @@ import {
 } from "./values.ts";
 
 export type Style = Record<string, unknown>;
-export type Device = "" | "_tablet" | "_mobile";
+export type Device = "" | "_laptop" | "_tablet" | "_mobile";
 
 /** Reads one device's style from a widget's settings. */
 export type Reader = (s: Settings, d: Device, ctx: ImportContext, el: string) => Style;
@@ -36,12 +36,15 @@ export function deviceStyles(
   ctx: ImportContext,
   el: string,
   readers: readonly Reader[],
-): { style?: Style; devices?: { tablet?: Style; mobile?: Style } } {
+): { style?: Style; devices?: { laptop?: Style; tablet?: Style; mobile?: Style } } {
   const read = (d: Device) => Object.assign({}, ...readers.map((r) => r(s, d, ctx, el))) as Style;
   const desktop = read("");
-  const tablet = changedKeys(desktop, read("_tablet"));
-  const mobile = changedKeys({ ...desktop, ...tablet }, read("_mobile"));
-  const devices: { tablet?: Style; mobile?: Style } = {};
+  // W-956: Elementor's laptop values (`key_laptop`), between desktop and tablet.
+  const laptop = changedKeys(desktop, read("_laptop"));
+  const tablet = changedKeys({ ...desktop, ...laptop }, read("_tablet"));
+  const mobile = changedKeys({ ...desktop, ...laptop, ...tablet }, read("_mobile"));
+  const devices: { laptop?: Style; tablet?: Style; mobile?: Style } = {};
+  if (!isEmptyStyle(laptop)) devices.laptop = laptop;
   if (!isEmptyStyle(tablet)) devices.tablet = tablet;
   if (!isEmptyStyle(mobile)) devices.mobile = mobile;
   return {
@@ -390,10 +393,16 @@ export function entrance(s: Settings, ctx: ImportContext, el: string): Style | u
   return { type, duration, trigger: "view", ...(delay ? { delay } : {}) };
 }
 
-/** `hide_desktop` / `hide_tablet` / `hide_mobile` → `hiddenOn`. */
-export function hiddenOn(s: Settings): ("desktop" | "tablet" | "mobile")[] | undefined {
-  const out: ("desktop" | "tablet" | "mobile")[] = [];
+/**
+ * `hide_desktop` / `hide_laptop` / `hide_tablet` / `hide_mobile` → `hiddenOn`. W-956: a site
+ * without Elementor's laptop breakpoint (no `hide_laptop` setting) hides "desktop" from 1025 px,
+ * laptops included.
+ */
+export function hiddenOn(s: Settings): ("desktop" | "laptop" | "tablet" | "mobile")[] | undefined {
+  const out: ("desktop" | "laptop" | "tablet" | "mobile")[] = [];
+  const laptopActive = "hide_laptop" in s;
   if (str(s["hide_desktop"])) out.push("desktop");
+  if (laptopActive ? str(s["hide_laptop"]) : str(s["hide_desktop"])) out.push("laptop");
   if (str(s["hide_tablet"])) out.push("tablet");
   if (str(s["hide_mobile"])) out.push("mobile");
   return out.length > 0 ? out : undefined;

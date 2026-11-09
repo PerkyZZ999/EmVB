@@ -5,7 +5,7 @@ import {
   DEVICE_PREVIEW_PX,
   mergeDesign,
   type DesignSystem,
-  type PopupDevice,
+  type Device,
 } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
@@ -19,13 +19,13 @@ const publicPath = (pattern: string | null | undefined, slug: string) =>
   (pattern || "/{slug}").replace("{slug}", encodeURIComponent(slug));
 
 /** Window heights for the sized Tablet and Mobile previews (W-158); widths are the canvas's. */
-const PREVIEW_HEIGHT = { tablet: 1024, mobile: 844 } as const;
+const PREVIEW_HEIGHT = { laptop: 800, tablet: 1024, mobile: 844 } as const;
 
 /**
  * `window.open` features for a device preview (W-158): Desktop is an ordinary tab; Tablet and
  * Mobile open a window whose page area is the device width, so the page's own media queries apply.
  */
-export function previewWindowFeatures(device: PopupDevice): string | undefined {
+export function previewWindowFeatures(device: Device): string | undefined {
   if (device === "desktop") return undefined;
   return `popup,width=${DEVICE_PREVIEW_PX[device]},height=${PREVIEW_HEIGHT[device]}`;
 }
@@ -137,7 +137,7 @@ export function useEditorCommands({
     });
   };
 
-  const preview = (device: PopupDevice = "desktop") =>
+  const preview = (device: Device = "desktop") =>
     void openInNewTab(
       async () => {
         if (isDirty(latest.current) && !(await save())) return null;

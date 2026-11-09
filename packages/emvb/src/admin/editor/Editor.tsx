@@ -18,7 +18,7 @@ import {
   withPlainText,
   type Layout,
   type LayoutNode,
-  type PopupDevice,
+  type Device,
 } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { EditedNounContext, editedNounOf, useEditedNoun } from "./edited-noun.ts";
@@ -168,7 +168,7 @@ function EditorApp({
   const noun = useEditedNoun();
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const chrome = useChromeFlags();
-  const [device, setDevice] = React.useState<PopupDevice>("desktop");
+  const [device, setDevice] = React.useState<Device>("desktop");
   const [zoom, setZoom] = React.useState<CanvasZoom>("fit");
   const [scale, setScale] = React.useState(1);
   const [statePreview, setStatePreview] = React.useState<StatePreview | null>(null);
@@ -314,7 +314,7 @@ function EditorApp({
   );
   // W-911: field mode previews the unsaved layout with the public renderer, in a sandboxed frame.
   const [fieldPreview, setFieldPreview] = React.useState(false);
-  const renderFieldPreview = (previewDevice: PopupDevice): string | null => {
+  const renderFieldPreview = (previewDevice: Device): string | null => {
     if (!state.page.layout) return null;
     const result = renderPage(state.page.layout, state.design, {
       mode: "public",
@@ -693,7 +693,7 @@ function EditorApp({
             <FieldPreview
               open={fieldPreview}
               onOpenChange={setFieldPreview}
-              device={device}
+              device={device === "laptop" ? "desktop" : device}
               render={renderFieldPreview}
             />
           )}

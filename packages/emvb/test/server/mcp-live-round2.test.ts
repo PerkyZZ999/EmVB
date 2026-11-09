@@ -305,7 +305,7 @@ describe("describe_page warns about hidden content (W-500)", () => {
     await ok("update_element", {
       pageId,
       nodeId: first,
-      set: { hiddenOn: ["mobile", "tablet", "desktop"] },
+      set: { hiddenOn: ["mobile", "tablet", "laptop", "desktop"] },
     });
     await ok("update_element", { pageId, nodeId: second, set: { hiddenOn: ["mobile"] } });
     const d = await ok<{ warnings?: { nodeId: string; message: string }[] }>("describe_page", {
@@ -323,7 +323,7 @@ describe("describe_page warns about hidden content (W-500)", () => {
     await ok("update_element", {
       pageId,
       nodeId: root.id,
-      set: { hiddenOn: ["desktop", "tablet", "mobile"] },
+      set: { hiddenOn: ["desktop", "laptop", "tablet", "mobile"] },
     });
     const d = await ok<{ warnings?: { nodeId: string; message: string }[] }>("describe_page", {
       pageId,

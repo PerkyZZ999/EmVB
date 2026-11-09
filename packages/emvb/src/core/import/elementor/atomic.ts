@@ -721,10 +721,11 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
   return out;
 }
 
-const DEVICE_OF: Record<string, "desktop" | "tablet" | "mobile"> = {
+const DEVICE_OF: Record<string, "desktop" | "laptop" | "tablet" | "mobile"> = {
   desktop: "desktop",
   widescreen: "desktop",
-  laptop: "tablet",
+  // W-956: EmVB has a Laptop device (up to 1366 px), like Elementor's.
+  laptop: "laptop",
   tablet_extra: "tablet",
   tablet: "tablet",
   mobile_extra: "mobile",
@@ -743,9 +744,9 @@ const BREAKPOINT_ORDER = [
 
 type AtomicStyle = {
   style: Style;
-  devices: { tablet?: Style; mobile?: Style };
+  devices: { laptop?: Style; tablet?: Style; mobile?: Style };
   states: { hover?: Style; focus?: Style; active?: Style };
-  display: { desktop?: string; tablet?: string; mobile?: string };
+  display: { desktop?: string; laptop?: string; tablet?: string; mobile?: string };
   columns: { desktop?: number; tablet?: number; mobile?: number };
   tracks: { desktop?: string[]; tablet?: string[]; mobile?: string[] };
   fullRow: boolean;
@@ -778,6 +779,7 @@ function useClasses(n: N, el: Settings, snap: AtomicSnapshots, ctx: ImportContex
   const states = n["states"] as Record<string, Style> | undefined;
   const want: Layers = {
     desktop: (n["style"] as Style | undefined) ?? {},
+    laptop: (n["devices"] as Record<string, Style> | undefined)?.["laptop"] ?? {},
     tablet: (n["devices"] as Record<string, Style> | undefined)?.["tablet"] ?? {},
     mobile: (n["devices"] as Record<string, Style> | undefined)?.["mobile"] ?? {},
     hover: states?.["hover"] ?? {},
@@ -791,6 +793,7 @@ function useClasses(n: N, el: Settings, snap: AtomicSnapshots, ctx: ImportContex
   delete n["states"];
   if (!isEmptyStyle(inline.desktop)) n["style"] = inline.desktop;
   const devices: Record<string, Style> = {};
+  if (!isEmptyStyle(inline.laptop)) devices["laptop"] = inline.laptop;
   if (!isEmptyStyle(inline.tablet)) devices["tablet"] = inline.tablet;
   if (!isEmptyStyle(inline.mobile)) devices["mobile"] = inline.mobile;
   if (Object.keys(devices).length > 0) n["devices"] = devices;
@@ -807,6 +810,7 @@ function classLook(id: string, snap: AtomicSnapshots, ctx: ImportContext): Layer
   const look = atomicStyle("", {}, snap, ctx, id, true, [def]);
   return {
     desktop: look.style,
+    laptop: look.devices.laptop ?? {},
     tablet: look.devices.tablet ?? {},
     mobile: look.devices.mobile ?? {},
     hover: look.states.hover ?? {},
@@ -913,8 +917,9 @@ function atomicStyle(
   /** W-958: only these classes, without Elementor's base styles (a class's own look). */
   only?: readonly ClassDef[],
 ): AtomicStyle {
-  const layers: Record<"desktop" | "tablet" | "mobile", Style> = {
+  const layers: Record<"desktop" | "laptop" | "tablet" | "mobile", Style> = {
     desktop: {},
+    laptop: {},
     tablet: {},
     mobile: {},
   };
@@ -949,7 +954,7 @@ function atomicStyle(
       unsupported.add(`${breakpoint} breakpoint`);
       continue;
     }
-    if (breakpoint !== device && breakpoint !== "widescreen") folded = true;
+    if (breakpoint !== device) folded = true;
     const converted = convert(isRecord(variant.props) ? variant.props : {}, snap, ctx);
     if (variant.custom_css) {
       const raw = isRecord(variant.custom_css) ? variant.custom_css["raw"] : undefined;
@@ -977,7 +982,10 @@ function atomicStyle(
     }
     if (converted.display) display[device] = converted.display;
     if (converted.fullRow) fullRow = true;
-    if (converted.columns) {
+    if (converted.columns && device === "laptop") {
+      // EmVB's grid columns have no laptop value: laptops keep the desktop columns.
+      unsupported.add("grid columns for laptops (laptops use the desktop columns)");
+    } else if (converted.columns && device !== "laptop") {
       columns[device] = converted.columns;
       if (converted.tracks) tracks[device] = converted.tracks;
       else delete tracks[device];
@@ -987,7 +995,7 @@ function atomicStyle(
     ctx.note(
       "approximated",
       "Breakpoints",
-      "Laptop and extra breakpoints were folded into Tablet and Mobile.",
+      "Extra breakpoints were folded into Tablet and Mobile, and Widescreen into Desktop.",
     );
   if (Object.keys(phoneFromFluid).length > 0 && !quiet) {
     ctx.note(
@@ -999,12 +1007,16 @@ function atomicStyle(
   for (const what of quiet ? [] : unsupported) {
     ctx.note("approximated", name, `Left out a style EmVB has no setting for: ${what}.`);
   }
-  for (const layer of [layers.desktop, layers.tablet, layers.mobile]) finishBorders(layer);
+  for (const layer of [layers.desktop, layers.laptop, layers.tablet, layers.mobile])
+    finishBorders(layer);
   const mobile = { ...narrowFromWidth, ...phoneFromFluid, ...layers.mobile };
-  const tablet = changedKeys(layers.desktop, { ...narrowFromWidth, ...layers.tablet });
+  const laptop = changedKeys(layers.desktop, layers.laptop);
+  const wide = { ...layers.desktop, ...laptop };
+  const tablet = changedKeys(wide, { ...narrowFromWidth, ...layers.tablet });
   const devices: AtomicStyle["devices"] = {};
+  if (!isEmptyStyle(laptop)) devices.laptop = laptop;
   if (!isEmptyStyle(tablet)) devices.tablet = tablet;
-  const mobileChanged = changedKeys({ ...layers.desktop, ...layers.tablet }, mobile);
+  const mobileChanged = changedKeys({ ...wide, ...layers.tablet }, mobile);
   if (!isEmptyStyle(mobileChanged)) devices.mobile = mobileChanged;
   const statesOut: AtomicStyle["states"] = {};
   for (const [k, v] of Object.entries(states))
@@ -1110,9 +1122,13 @@ const LABEL_FOR = (el: Settings) => str(un(settingsOf(el)["input-id"]));
 
 function applyStyle(n: N, s: AtomicStyle): N {
   if (!isEmptyStyle(s.style)) n["style"] = { ...(n["style"] as Style | undefined), ...s.style };
-  if (s.devices.tablet || s.devices.mobile) n["devices"] = s.devices;
+  if (s.devices.laptop || s.devices.tablet || s.devices.mobile) n["devices"] = s.devices;
   if (Object.keys(s.states).length > 0) n["states"] = s.states;
-  const hidden = (["desktop", "tablet", "mobile"] as const).filter((d) => s.display[d] === "none");
+  // W-956: a laptop shows what desktop shows unless a laptop variant says otherwise.
+  const shown = { ...s.display, laptop: s.display.laptop ?? s.display.desktop };
+  const hidden = (["desktop", "laptop", "tablet", "mobile"] as const).filter(
+    (d) => shown[d] === "none",
+  );
   if (hidden.length > 0) n["hiddenOn"] = hidden;
   return n;
 }

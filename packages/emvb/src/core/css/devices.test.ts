@@ -43,7 +43,7 @@ describe("per-device styles (W-096)", () => {
     const heading = layout.root.children[0];
     if (!heading) throw new Error("missing heading");
     heading.devices = { tablet: { color: "#111111" }, mobile: { color: "#222222" } };
-    heading.hiddenOn = ["desktop"];
+    heading.hiddenOn = ["desktop", "laptop"];
     layout.root.devices = { mobile: { fontSize: { value: 14, unit: "px" } } };
     layout.root.hiddenOn = ["mobile"];
     const css = renderPage(layout, emptyDesign(), { mode: "public" }).css;
@@ -80,7 +80,7 @@ describe("per-device styles (W-096)", () => {
     const heading = layout.root.children[0];
     if (!heading) throw new Error("missing heading");
     heading.devices = { tablet: { color: "#111111" }, mobile: { color: "#222222" } };
-    heading.hiddenOn = ["desktop"];
+    heading.hiddenOn = ["desktop", "laptop"];
     layout.root.hiddenOn = ["mobile"];
     const h = `.emvb-e-${heading.id}`;
     const css = (previewDevice: "desktop" | "tablet" | "mobile") =>

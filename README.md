@@ -69,7 +69,7 @@ See the [bridge README](packages/emvb-mcp/README.md) and the [MCP guide](docs/gu
 **Editor**
 
 - Drag, drop and nest elements; edit text on the canvas; copy, paste, undo and redo.
-- Preview desktop, tablet and mobile.
+- Preview desktop, laptop, tablet and mobile.
 - A command palette, a version timeline that restores a whole version or one section, and shareable playground links.
 
 **Elements**

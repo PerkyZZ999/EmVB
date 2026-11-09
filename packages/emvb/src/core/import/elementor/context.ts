@@ -270,6 +270,7 @@ export class ImportContext {
     for (let n = 2; taken.has(classId); n++) classId = `${base}-${n}`;
     const cls: StyleClass = { id: classId, name, style: layers.desktop };
     const devices = {
+      ...(Object.keys(layers.laptop).length > 0 ? { laptop: layers.laptop } : {}),
       ...(Object.keys(layers.tablet).length > 0 ? { tablet: layers.tablet } : {}),
       ...(Object.keys(layers.mobile).length > 0 ? { mobile: layers.mobile } : {}),
     };

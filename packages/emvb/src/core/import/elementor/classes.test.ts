@@ -3,6 +3,7 @@ import { combineLayers, inlineOver, type Layers } from "./classes.ts";
 
 const L = (over: Partial<Layers>): Layers => ({
   desktop: {},
+  laptop: {},
   tablet: {},
   mobile: {},
   hover: {},

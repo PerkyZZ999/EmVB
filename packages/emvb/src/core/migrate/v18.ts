@@ -140,7 +140,7 @@ export function patchNestedStyle(
 function foldDevices(devices: unknown): unknown {
   if (!isRecord(devices)) return devices;
   const out: Record<string, unknown> = { ...devices };
-  for (const device of ["tablet", "mobile"]) {
+  for (const device of ["laptop", "tablet", "mobile"]) {
     if (device in out) out[device] = nestMotion(out[device]);
   }
   return out;
@@ -176,9 +176,28 @@ export function upgradeLegacyNode(node: unknown): unknown {
   return out;
 }
 
+/**
+ * W-956: before Laptop, "hidden on Desktop" covered every screen from 1025 px, laptops included;
+ * a stored 0.x element hidden on Desktop is hidden on Laptop too, so it renders as before.
+ */
+function hiddenWithLaptop(hiddenOn: unknown): unknown {
+  if (!Array.isArray(hiddenOn) || !hiddenOn.includes("desktop") || hiddenOn.includes("laptop"))
+    return hiddenOn;
+  const at = hiddenOn.indexOf("desktop");
+  return [...hiddenOn.slice(0, at + 1), "laptop", ...hiddenOn.slice(at + 1)];
+}
+
+function laptopHidden(node: unknown): unknown {
+  if (!isRecord(node)) return node;
+  const out: Record<string, unknown> = { ...node };
+  if ("hiddenOn" in node) out["hiddenOn"] = hiddenWithLaptop(node["hiddenOn"]);
+  if (Array.isArray(node["children"])) out["children"] = node["children"].map(laptopHidden);
+  return out;
+}
+
 /** Layout v17 → v18. */
 export function layoutTo18(doc: Record<string, unknown>): Record<string, unknown> {
-  return "root" in doc ? { ...doc, root: upgradeLegacyNode(doc["root"]) } : doc;
+  return "root" in doc ? { ...doc, root: laptopHidden(upgradeLegacyNode(doc["root"])) } : doc;
 }
 
 /** Design v16 → v17: motion folded in classes (style and devices) and tag defaults. */
@@ -190,6 +209,7 @@ export function designTo17(doc: Record<string, unknown>): Record<string, unknown
       const next: Record<string, unknown> = { ...cls };
       if ("style" in cls) next["style"] = nestMotion(cls["style"]);
       if ("devices" in cls) next["devices"] = foldDevices(cls["devices"]);
+      if ("hiddenOn" in cls) next["hiddenOn"] = hiddenWithLaptop(cls["hiddenOn"]);
       return next;
     });
   }

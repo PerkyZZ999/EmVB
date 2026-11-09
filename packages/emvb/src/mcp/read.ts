@@ -15,6 +15,7 @@ import {
   type ElementType,
   type Layout,
   type LayoutNode,
+  DEVICES,
 } from "../core/index.ts";
 import { parentChildRefusal } from "../core/arrange.ts";
 import { clipText } from "../core/limits.ts";
@@ -312,12 +313,12 @@ function imagesOf(root: LayoutNode) {
   return found;
 }
 
-/** W-500: elements hidden on desktop, tablet and mobile never show; the agent should know. */
+/** W-500: elements hidden on every device (W-956: laptop too) never show; the agent should know. */
 function hiddenEverywhere(root: LayoutNode) {
   const warnings: { nodeId: string; message: string }[] = [];
   const walk = (node: LayoutNode) => {
     const hidden = new Set((node as { hiddenOn?: string[] }).hiddenOn ?? []);
-    if (hidden.has("desktop") && hidden.has("tablet") && hidden.has("mobile")) {
+    if (DEVICES.every((device) => hidden.has(device))) {
       warnings.push({
         nodeId: node.id,
         message:

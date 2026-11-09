@@ -7124,6 +7124,9 @@
     "devices": {
       "type": "object",
       "properties": {
+        "laptop": {
+          "$ref": "#/$defs/style"
+        },
         "tablet": {
           "$ref": "#/$defs/style"
         },
@@ -7180,12 +7183,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -7449,12 +7453,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -7754,12 +7759,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -8023,12 +8029,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -8337,12 +8344,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -8618,12 +8626,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -8872,12 +8881,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -9142,12 +9152,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -9495,12 +9506,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -9754,12 +9766,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -10013,12 +10026,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -10298,12 +10312,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -10552,12 +10567,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -10892,12 +10908,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -11154,12 +11171,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -11424,12 +11442,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -11721,12 +11740,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -12011,12 +12031,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -12909,12 +12930,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -13198,12 +13220,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -13471,12 +13494,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -13733,12 +13757,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -14012,12 +14037,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -14284,12 +14310,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -14556,12 +14583,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -14824,12 +14852,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -15096,12 +15125,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -15356,12 +15386,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -15616,12 +15647,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -15876,12 +15908,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -16130,12 +16163,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -16388,12 +16422,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -16650,12 +16685,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -16915,12 +16951,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -17169,12 +17206,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -17481,12 +17519,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -17742,12 +17781,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -18054,12 +18094,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -18313,12 +18354,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -18574,12 +18616,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -18847,12 +18890,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -19123,12 +19167,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]
@@ -19403,12 +19448,13 @@
           "$ref": "#/$defs/devices"
         },
         "hiddenOn": {
-          "maxItems": 3,
+          "maxItems": 4,
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
               "desktop",
+              "laptop",
               "tablet",
               "mobile"
             ]

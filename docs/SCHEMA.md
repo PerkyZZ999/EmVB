@@ -36,7 +36,7 @@ A document may carry keys this version does not know. They are allowed in exactl
 | --- | --- |
 | a node | `root.children[0].futureKey` |
 | a node's `props` (for a known element type) | `props.futureProp` |
-| a node's style records: `style`, `states.hover/focus/active`, `devices.tablet/mobile`, `query.style` | `style.futureStyle` |
+| a node's style records: `style`, `states.hover/focus/active`, `devices.laptop/tablet/mobile`, `query.style` | `style.futureStyle` |
 | a design class's `style`, `states` and `devices`, and a tag default in `defaults` | `classes[0].style.futureStyle` |
 
 Rules (`core/contract.ts`, limits in `core/limits.ts`):
@@ -193,7 +193,8 @@ are (W-925 audit):
 
 - **Grid per-device keys.** `columns`, `columnsTablet`, `columnsMobile` and `columnTracks*` are
   props, not `devices` style overrides. The grid's column count is content structure, not style.
-  Other per-device values live in `devices.tablet` and `devices.mobile`.
+  Other per-device values live in `devices.laptop`, `devices.tablet` and `devices.mobile`
+  (`laptop` since W-956; `hiddenOn` also takes `"laptop"`).
 - **`iconSize` vs `size`.** A `button`'s icon size is `props.iconSize`, because the button's own size
   is its style. An `icon` or `svg` element's size is `props.size`.
 - **`focalX` / `focalY`.** These are image props, whole percentages 0–100 from the left and top. They

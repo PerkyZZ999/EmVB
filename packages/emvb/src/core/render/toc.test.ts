@@ -69,7 +69,7 @@ describe("headings hidden on every device stay out of the contents (W-409)", () 
         props: {},
         children: [
           { id: "toc00001", type: "toc", props: {} },
-          h("head0001", "Gone", { hiddenOn: ["desktop", "tablet", "mobile"] }),
+          h("head0001", "Gone", { hiddenOn: ["desktop", "laptop", "tablet", "mobile"] }),
           h("head0002", "Phones only", { hiddenOn: ["desktop", "tablet"] }),
         ],
       },
@@ -117,7 +117,7 @@ describe("headings inside a box hidden on every device stay out of the contents 
             id: "box00001",
             type: "container",
             props: {},
-            hiddenOn: ["desktop", "tablet", "mobile"],
+            hiddenOn: ["desktop", "laptop", "tablet", "mobile"],
             children: [h("head0001", "Gone")],
           },
           {

@@ -926,6 +926,50 @@ describe("inline formatting from Elementor (W-950)", () => {
   });
 });
 
+describe("Elementor laptop values (W-956)", () => {
+  const heading = (settings: Record<string, unknown>) =>
+    ok(
+      importElementor(
+        JSON.stringify({
+          content: [
+            {
+              id: "h1",
+              elType: "widget",
+              widgetType: "heading",
+              settings: { title: "Hello", ...settings },
+            },
+          ],
+        }),
+        { icon },
+      ),
+    );
+
+  test("a laptop value stays on Laptop, and tablets inherit it", () => {
+    const result = heading({
+      align: "left",
+      align_laptop: "center",
+      typography_typography: "custom",
+      typography_font_size: { unit: "px", size: 40 },
+      typography_font_size_laptop: { unit: "px", size: 32 },
+    });
+    const [found] = ofType(result.layout, "heading");
+    expect(found?.devices?.["laptop"]).toMatchObject({ fontSize: { value: 32, unit: "px" } });
+    expect(found?.devices?.["tablet"]?.["fontSize"]).toBeUndefined();
+  });
+
+  test("hide on desktop covers laptops unless the site has the laptop breakpoint", () => {
+    const [plain] = ofType(heading({ hide_desktop: "hidden-desktop" }).layout, "heading");
+    expect(plain?.hiddenOn).toEqual(["desktop", "laptop"]);
+    const [split] = ofType(
+      heading({ hide_desktop: "hidden-desktop", hide_laptop: "" }).layout,
+      "heading",
+    );
+    expect(split?.hiddenOn).toEqual(["desktop"]);
+    const [laptopOnly] = ofType(heading({ hide_laptop: "hidden-laptop" }).layout, "heading");
+    expect(laptopOnly?.hiddenOn).toEqual(["laptop"]);
+  });
+});
+
 describe("Elementor HTML to blocks (W-945)", () => {
   const keep = (url: string) => (/^https?:\/\//.test(url) ? url : undefined);
 

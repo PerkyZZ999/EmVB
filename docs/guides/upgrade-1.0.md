@@ -47,6 +47,9 @@ package version; read the steps below once.
 - **Agents propose while you edit.** While someone has a page open in the editor, an agent's
   direct writes to it are refused with `PAGE_OPEN`; it sends a proposal instead, reviewed in the
   editor's **Agent** tab. See [Co-design](co-design.md).
+- **Laptop is a device.** Desktop, Laptop (1025 to 1366 px), Tablet and Mobile. Pages from 0.9
+  that hide something on Desktop keep hiding it on laptops; from now on, Hide on Desktop means
+  wider than 1366 px, and Hide on Laptop is separate.
 - **Unknown keys are kept.** A key EmVB doesn't know is stored untouched and not rendered, so a
   page saved by a later 1.x opens and saves without losing anything.
 

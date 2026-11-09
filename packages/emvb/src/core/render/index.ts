@@ -40,7 +40,7 @@ import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { resolvePostForRender, type ThemeDynamicData } from "../theme/dynamic.ts";
 import type { FormDefinitions } from "../forms/definition.ts";
-import type { PopupDevice } from "../theme/popup-rules.ts";
+import { DEVICES, type Device } from "../theme/popup-rules.ts";
 import type { RenderContext, RenderMode } from "./context.ts";
 import { isDynamicPostNode, renderDynamicPost } from "./dynamic-post.ts";
 import { renderForm, withFieldOptions } from "./form.ts";
@@ -216,7 +216,7 @@ export function renderPage(
     /** Public renders: wrap the markup and scope the CSS to it, so sheets can't override each other (W-112). */
     scope?: string;
     /** Editor canvas: device rules follow this device, not the frame width (W-116). */
-    previewDevice?: PopupDevice;
+    previewDevice?: Device;
     /**
      * Theme parts (header, footer, popup, float) render apart from the page, so a synced section
      * on both gave form fields, honeypots and tab groups the same ids: a label in a popup focused
@@ -239,6 +239,7 @@ export function renderPage(
     id: string;
     declarations: Declaration[];
     states: StateDeclarations;
+    laptop?: Declaration[];
     tablet?: Declaration[];
     mobile?: Declaration[];
     hiddenOn?: LayoutNode["hiddenOn"];
@@ -346,12 +347,15 @@ export function renderPage(
     const { declarations, rejected } = styleDeclarations(own);
     // W-210: a device that sets one background layer keeps the layers it inherits.
     const base = { ...classLayers, ...own };
+    // W-956: Laptop between Desktop and Tablet; each narrower device inherits the wider ones.
+    const laptopStyle = node.devices?.laptop;
+    const laptop = styleDeclarations(withInheritedLayers(laptopStyle, base));
     const tabletStyle = node.devices?.tablet;
-    const tablet = styleDeclarations(withInheritedLayers(tabletStyle, base));
+    const tablet = styleDeclarations(withInheritedLayers(tabletStyle, { ...base, ...laptopStyle }));
     const mobile = styleDeclarations(
-      withInheritedLayers(node.devices?.mobile, { ...base, ...tabletStyle }),
+      withInheritedLayers(node.devices?.mobile, { ...base, ...laptopStyle, ...tabletStyle }),
     );
-    for (const key of [...rejected, ...tablet.rejected, ...mobile.rejected]) {
+    for (const key of [...rejected, ...laptop.rejected, ...tablet.rejected, ...mobile.rejected]) {
       warnings.push({ nodeId, code: "rejected-style", detail: key });
     }
     if (node.type === "spacer") {
@@ -429,10 +433,14 @@ export function renderPage(
     }
     const grid = gridOf.get(node.id);
     if (grid) {
-      const counts = gridColumnCounts(grid);
-      const tabletPlacement = { ...node.style, ...node.devices?.tablet };
+      // A grid's laptop columns are its desktop ones (column counts have no laptop value).
+      const [desktopCount, tabletCount, mobileCount] = gridColumnCounts(grid);
+      const counts = [desktopCount, desktopCount, tabletCount, mobileCount];
+      const laptopPlacement = { ...node.style, ...node.devices?.laptop };
+      const tabletPlacement = { ...laptopPlacement, ...node.devices?.tablet };
       const levels = [
         node.style ?? {},
+        laptopPlacement,
         tabletPlacement,
         { ...tabletPlacement, ...node.devices?.mobile },
       ];
@@ -443,8 +451,15 @@ export function renderPage(
         const at = (i: number) => ({ property: "grid-column", value: fitted[i]?.value ?? "auto" });
         const kept = declarations.filter((d) => d.property !== "grid-column");
         declarations.splice(0, declarations.length, ...kept, at(0));
-        tablet.declarations.push(at(1));
-        mobile.declarations.push(at(2));
+        // On laptop only when it differs from desktop or the laptop style places it itself
+        // (released pages, which have no laptop styles, keep their CSS).
+        const ownLaptop = laptop.declarations.some((d) => d.property === "grid-column");
+        if (ownLaptop || fitted[1]?.value !== fitted[0]?.value) {
+          const others = laptop.declarations.filter((d) => d.property !== "grid-column");
+          laptop.declarations.splice(0, laptop.declarations.length, ...others, at(1));
+        }
+        tablet.declarations.push(at(2));
+        mobile.declarations.push(at(3));
       }
     }
     const states = stateDeclarations(node.states);
@@ -459,6 +474,7 @@ export function renderPage(
     // W-567: the root is the page itself; hiding it on a device blanked the whole page there.
     const hiddenOn = isRoot ? undefined : node.hiddenOn;
     const responsive =
+      laptop.declarations.length > 0 ||
       tablet.declarations.length > 0 ||
       mobile.declarations.length > 0 ||
       (hiddenOn?.length ?? 0) > 0;
@@ -476,6 +492,7 @@ export function renderPage(
         id: ruleId,
         declarations,
         states: states.states,
+        laptop: laptop.declarations,
         tablet: tablet.declarations,
         mobile: mobile.declarations,
         hiddenOn,
@@ -589,9 +606,7 @@ export function renderPage(
     if (node.type === "heading" && pageHeadings?.has(stored) && attrs.id) {
       const text = String((node.props as { text?: unknown }).text ?? "").trim();
       // W-409: a heading hidden on every device has nothing to jump to.
-      const hiddenEverywhere = (["desktop", "tablet", "mobile"] as const).every((device) =>
-        node.hiddenOn?.includes(device),
-      );
+      const hiddenEverywhere = DEVICES.every((device) => node.hiddenOn?.includes(device));
       if (text && !hiddenEverywhere && !renderedHeadings.some((h) => h.id === attrs.id)) {
         // W-793: a heading hidden on some devices (itself or an ancestor) hides its contents
         // entry there too, or the entry was a dead link on those devices.
@@ -709,9 +724,9 @@ function treeHasType(node: LayoutNode, type: string): boolean {
  * inside an element hidden on every device, which never show, so a contents link has nothing
  * to jump to (W-409 covered only the heading's own visibility).
  */
-function headingAnchors(root: LayoutNode): { node: LayoutNode; hiddenOn: PopupDevice[] }[] {
-  const out: { node: LayoutNode; hiddenOn: PopupDevice[] }[] = [];
-  const walk = (node: LayoutNode, inherited: PopupDevice[]) => {
+function headingAnchors(root: LayoutNode): { node: LayoutNode; hiddenOn: Device[] }[] {
+  const out: { node: LayoutNode; hiddenOn: Device[] }[] = [];
+  const walk = (node: LayoutNode, inherited: Device[]) => {
     if (node !== root && HIDDEN_DEVICES.every((device) => node.hiddenOn?.includes(device))) return;
     const own = node === root ? [] : (node.hiddenOn ?? []);
     const hiddenOn = HIDDEN_DEVICES.filter((d) => inherited.includes(d) || own.includes(d));
@@ -723,7 +738,7 @@ function headingAnchors(root: LayoutNode): { node: LayoutNode; hiddenOn: PopupDe
   return out;
 }
 
-const HIDDEN_DEVICES = ["desktop", "tablet", "mobile"] as const;
+const HIDDEN_DEVICES = DEVICES;
 
 /** Columns set by custom tracks or a count, or undefined when neither is set. */
 const columnCount = (tracks: unknown, columns: unknown): number | undefined =>

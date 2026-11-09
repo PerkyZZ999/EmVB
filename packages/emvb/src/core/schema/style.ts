@@ -26,7 +26,7 @@ import {
 } from "../css-keywords.ts";
 import { isSafeFontStack } from "../sanitize/css.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
-import { POPUP_DEVICES } from "../theme/popup-rules.ts";
+import { DEVICES } from "../theme/popup-rules.ts";
 import { MOTION_EFFECTS, MOTION_LIMITS } from "./motion.ts";
 
 /** Colour refs omit `from` (legacy). Length/font refs set `from` (W-028). */
@@ -496,6 +496,8 @@ export type StyleStates = z.infer<typeof StyleStates>;
  * are stored. A phone matches both media queries, so mobile wins over tablet for the same key.
  */
 export const DeviceStyles = z.strictObject({
+  /** W-956: up to 1366 px; Tablet and Mobile win over it. */
+  laptop: StyleProps.optional(),
   tablet: StyleProps.optional(),
   mobile: StyleProps.optional(),
 });
@@ -503,6 +505,6 @@ export const DeviceStyles = z.strictObject({
 export type DeviceStyles = z.infer<typeof DeviceStyles>;
 
 /** Devices on which the element is `display: none`. Empty means shown everywhere. */
-export const HiddenOn = z.array(z.enum(POPUP_DEVICES)).max(3);
+export const HiddenOn = z.array(z.enum(DEVICES)).max(4);
 
 export type HiddenOn = z.infer<typeof HiddenOn>;
