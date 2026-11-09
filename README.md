@@ -143,6 +143,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 ## Docs
 
 - [Install in a host site](docs/guides/install-in-a-host-site.md)
+- [Upgrade from 0.9 to 1.0](docs/guides/upgrade-1.0.md)
 - [Edit your own pages](docs/guides/native-page-editing.md)
 - [AI agents (MCP)](docs/guides/mcp.md)
 - [Co-design with an AI agent](docs/guides/co-design.md)
