@@ -236,6 +236,26 @@ export const UI_CSS = `
 .emvb-dialog .emvb-field { width: 100%; }
 .emvb-create-fields { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .emvb-create-status { min-height: 18px; }
+/* W-945: Import from Elementor. The JSON box keeps its rows; the report scrolls on its own. */
+.emvb-import-source { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.emvb-import-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.emvb-import-label { font-size: 14px; font-weight: 500; color: var(--text-color-kumo-default); }
+.emvb-dialog .emvb-field.emvb-import-json {
+  height: auto; min-height: 84px; padding: 8px; resize: vertical;
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.4;
+}
+.emvb-import-report {
+  max-height: 220px; overflow: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 8px 10px; border-radius: 6px; box-shadow: var(--emvb-elevation-s);
+  font-size: 13px; line-height: 1.35; color: var(--text-color-kumo-default);
+}
+.emvb-import-report:focus-visible { outline: 2px solid var(--color-kumo-brand, currentColor); outline-offset: 2px; }
+.emvb-import-report summary { cursor: pointer; font-weight: 600; }
+.emvb-import-report ul { margin: 4px 0 0; padding-inline-start: 18px; display: flex; flex-direction: column; gap: 2px; }
+.emvb-import-report li { overflow-wrap: anywhere; }
+.emvb-import-summary { font-weight: 600; }
+.emvb-list-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 /* UX-090: 16 px so the title stands above the 14 px field labels under it. */
 .emvb-dialog :is(h2, [data-slot="title"]) {
   margin: 0;

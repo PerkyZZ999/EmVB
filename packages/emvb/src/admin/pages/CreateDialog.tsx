@@ -26,6 +26,7 @@ function createFailure(failure: unknown, noun: string, slug: string): FieldError
 /**
  * The New page / New theme part form (IA): title, a slug that follows `slugPrefix` + title until
  * edited, then `create` returns the editor URL to open. `children` go above the title.
+ * `suggestedTitle` (W-945: an imported template's title) fills the title until the person types one.
  */
 export function CreateDialog({
   name,
@@ -39,6 +40,7 @@ export function CreateDialog({
   open,
   onOpenChange,
   children,
+  suggestedTitle,
 }: {
   name: string;
   heading: string;
@@ -51,6 +53,7 @@ export function CreateDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children?: React.ReactNode;
+  suggestedTitle?: string;
 }) {
   const [title, setTitle] = React.useState("");
   const [slug, setSlug] = React.useState("");
@@ -81,6 +84,18 @@ export function CreateDialog({
       setSlug(pageSlug(`${slugPrefix}${titleRef.current}`));
     }
   }, [slugPrefix]);
+
+  // W-945: a new suggestion replaces the title only while it is empty or the last suggestion.
+  const lastSuggestion = React.useRef<string | undefined>(undefined);
+  React.useEffect(() => {
+    if (!suggestedTitle) return;
+    const current = titleRef.current;
+    const previous = lastSuggestion.current;
+    lastSuggestion.current = suggestedTitle;
+    if (current && current !== previous) return;
+    setTitle(suggestedTitle);
+    if (!slugEditedRef.current) setSlug(pageSlug(`${slugPrefix}${suggestedTitle}`));
+  }, [suggestedTitle, slugPrefix]);
 
   const submit = async () => {
     if (pending.current) return;

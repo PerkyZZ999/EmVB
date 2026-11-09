@@ -1,0 +1,188 @@
+{
+  "version": "0.4",
+  "title": "Pro widgets",
+  "type": "single-post",
+  "content": [
+    {
+      "id": "p1",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "content_width": "full"
+      },
+      "elements": [
+        {
+          "id": "pt",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Fallback title",
+            "header_size": "h1",
+            "__dynamic__": {
+              "title": "[elementor-tag id=\"1a\" name=\"post-title\" settings=\"%7B%7D\"]"
+            }
+          },
+          "elements": []
+        },
+        {
+          "id": "pd",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Site name",
+            "__dynamic__": {
+              "title": "[elementor-tag id=\"2b\" name=\"site-title\" settings=\"%7B%7D\"]"
+            }
+          },
+          "elements": []
+        },
+        {
+          "id": "pc",
+          "elType": "widget",
+          "widgetType": "theme-post-content",
+          "settings": {},
+          "elements": []
+        },
+        {
+          "id": "pf",
+          "elType": "widget",
+          "widgetType": "form",
+          "settings": {
+            "form_name": "Contact",
+            "form_fields": [
+              {
+                "custom_id": "name",
+                "field_type": "text",
+                "field_label": "Name",
+                "placeholder": "Your name",
+                "_id": "a"
+              },
+              {
+                "custom_id": "email",
+                "field_type": "email",
+                "field_label": "Email",
+                "_id": "b"
+              },
+              {
+                "custom_id": "msg",
+                "field_type": "textarea",
+                "field_label": "Message",
+                "_id": "c"
+              },
+              {
+                "custom_id": "terms",
+                "field_type": "acceptance",
+                "acceptance_text": "I agree",
+                "_id": "d"
+              },
+              {
+                "custom_id": "file",
+                "field_type": "upload",
+                "_id": "e"
+              },
+              {
+                "custom_id": "1bad id",
+                "field_type": "text",
+                "field_label": "Weird",
+                "_id": "f"
+              }
+            ],
+            "button_text": "Send it"
+          },
+          "elements": []
+        },
+        {
+          "id": "pcta",
+          "elType": "widget",
+          "widgetType": "call-to-action",
+          "settings": {
+            "title": "Ready?",
+            "description": "Start today.",
+            "button": "Go",
+            "link": {
+              "url": "https://example.com/go"
+            },
+            "bg_image": {
+              "url": "https://old.example/cta.jpg",
+              "id": 7
+            }
+          },
+          "elements": []
+        },
+        {
+          "id": "ppt",
+          "elType": "widget",
+          "widgetType": "price-table",
+          "settings": {
+            "heading": "Pro",
+            "sub_heading": "For teams",
+            "currency_symbol": "euro",
+            "price": "29",
+            "period": "month",
+            "features_list": [
+              {
+                "item_text": "Unlimited pages"
+              },
+              {
+                "item_text": "Support"
+              }
+            ],
+            "button_text": "Buy",
+            "link": {
+              "url": "https://example.com/buy"
+            }
+          },
+          "elements": []
+        },
+        {
+          "id": "pfb",
+          "elType": "widget",
+          "widgetType": "flip-box",
+          "settings": {
+            "title_text_a": "Front",
+            "description_text_a": "Hover me",
+            "title_text_b": "Back",
+            "description_text_b": "Hello",
+            "button_text": "Learn more",
+            "link": {
+              "url": "https://example.com/more"
+            }
+          },
+          "elements": []
+        },
+        {
+          "id": "pah",
+          "elType": "widget",
+          "widgetType": "animated-headline",
+          "settings": {
+            "headline_style": "rotate",
+            "before_text": "We build",
+            "rotating_text": "pages\nsites\nshops",
+            "after_text": "fast",
+            "tag": "h2"
+          },
+          "elements": []
+        },
+        {
+          "id": "pps",
+          "elType": "widget",
+          "widgetType": "posts",
+          "settings": {
+            "posts_per_page": 6
+          },
+          "elements": []
+        },
+        {
+          "id": "pcss",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Styled by CSS",
+            "custom_css": "selector { color: #123456; font-size: 30px !important; transform: rotate(2deg); }"
+          },
+          "elements": []
+        }
+      ]
+    }
+  ]
+}

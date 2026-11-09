@@ -1,0 +1,52 @@
+{
+  "version": "0.4",
+  "title": "Main header",
+  "type": "header",
+  "page_settings": {
+    "custom_css": "selector { background-color: #fafafa; } selector a { color: red; }"
+  },
+  "content": [
+    {
+      "id": "hd1",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "flex_direction": "row",
+        "flex_justify_content": "space-between",
+        "flex_align_items": "center",
+        "html_tag": "header"
+      },
+      "elements": [
+        {
+          "id": "logo",
+          "elType": "widget",
+          "widgetType": "theme-site-logo",
+          "settings": {},
+          "elements": []
+        },
+        {
+          "id": "nav",
+          "elType": "widget",
+          "widgetType": "nav-menu",
+          "settings": {
+            "menu": "main-menu",
+            "layout": "horizontal"
+          },
+          "elements": []
+        },
+        {
+          "id": "cta",
+          "elType": "widget",
+          "widgetType": "button",
+          "settings": {
+            "text": "Contact",
+            "link": {
+              "url": "/contact"
+            }
+          },
+          "elements": []
+        }
+      ]
+    }
+  ]
+}

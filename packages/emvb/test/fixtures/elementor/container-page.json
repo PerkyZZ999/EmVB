@@ -1,0 +1,402 @@
+{
+  "version": "0.4",
+  "title": "Container landing",
+  "type": "page",
+  "page_settings": [],
+  "content": [
+    {
+      "id": "hero01",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "flex_direction": "column",
+        "flex_justify_content": "center",
+        "flex_align_items": "center",
+        "min_height": {
+          "unit": "vh",
+          "size": 80,
+          "sizes": []
+        },
+        "min_height_mobile": {
+          "unit": "vh",
+          "size": 60,
+          "sizes": []
+        },
+        "background_background": "classic",
+        "background_image": {
+          "url": "https://old.example/wp-content/uploads/2025/03/hero.jpg",
+          "id": 12,
+          "source": "library"
+        },
+        "background_position": "center center",
+        "background_size": "cover",
+        "background_overlay_background": "classic",
+        "background_overlay_color": "#000000",
+        "background_overlay_opacity": {
+          "unit": "",
+          "size": 0.5,
+          "sizes": []
+        },
+        "padding": {
+          "unit": "px",
+          "top": "80",
+          "right": "20",
+          "bottom": "80",
+          "left": "20",
+          "isLinked": false
+        },
+        "_element_id": "top"
+      },
+      "elements": [
+        {
+          "id": "h01",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Build pages visually",
+            "header_size": "h1",
+            "align": "center",
+            "align_mobile": "left",
+            "title_color": "#ffffff",
+            "typography_typography": "custom",
+            "typography_font_family": "Poppins",
+            "typography_font_size": {
+              "unit": "px",
+              "size": 56,
+              "sizes": []
+            },
+            "typography_font_size_mobile": {
+              "unit": "px",
+              "size": 34,
+              "sizes": []
+            },
+            "typography_font_weight": "700",
+            "typography_line_height": {
+              "unit": "em",
+              "size": 1.1,
+              "sizes": []
+            },
+            "typography_letter_spacing": {
+              "unit": "px",
+              "size": -1,
+              "sizes": []
+            }
+          },
+          "elements": []
+        },
+        {
+          "id": "t01",
+          "elType": "widget",
+          "widgetType": "text-editor",
+          "settings": {
+            "editor": "<p>Fast, accessible pages.<br>No code needed.</p>",
+            "text_color": "#eeeeee",
+            "align": "center"
+          },
+          "elements": []
+        },
+        {
+          "id": "b01",
+          "elType": "widget",
+          "widgetType": "button",
+          "settings": {
+            "text": "Get started",
+            "link": {
+              "url": "https://example.com/start",
+              "is_external": "",
+              "nofollow": ""
+            },
+            "align": "center",
+            "size": "md",
+            "selected_icon": {
+              "value": "fas fa-arrow-right",
+              "library": "fa-solid"
+            },
+            "icon_align": "right",
+            "button_text_color": "#111111",
+            "background_color": "#ffcc00",
+            "hover_color": "#ffffff",
+            "button_background_hover_color": "#222222",
+            "border_radius": {
+              "unit": "px",
+              "top": "30",
+              "right": "30",
+              "bottom": "30",
+              "left": "30",
+              "isLinked": true
+            },
+            "_animation": "fadeInUp",
+            "animation_duration": "fast"
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "feat01",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "flex_direction": "row",
+        "flex_direction_mobile": "column",
+        "flex_gap": {
+          "column": "30",
+          "row": "30",
+          "unit": "px",
+          "isLinked": true
+        },
+        "content_width": "boxed",
+        "boxed_width": {
+          "unit": "px",
+          "size": 1200,
+          "sizes": []
+        }
+      },
+      "elements": [
+        {
+          "id": "f1",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "content_width": "full"
+          },
+          "elements": [
+            {
+              "id": "ib1",
+              "elType": "widget",
+              "widgetType": "icon-box",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-bolt",
+                  "library": "fa-solid"
+                },
+                "title_text": "Fast",
+                "description_text": "Static HTML, no runtime script.",
+                "title_size": "h3"
+              },
+              "elements": []
+            }
+          ]
+        },
+        {
+          "id": "f2",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "content_width": "full"
+          },
+          "elements": [
+            {
+              "id": "ib2",
+              "elType": "widget",
+              "widgetType": "icon-box",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-universal-access",
+                  "library": "fa-solid"
+                },
+                "title_text": "Accessible",
+                "description_text": "Checks as you build.",
+                "position": "left"
+              },
+              "elements": []
+            }
+          ]
+        },
+        {
+          "id": "f3",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "content_width": "full",
+            "width": {
+              "unit": "%",
+              "size": 40,
+              "sizes": []
+            }
+          },
+          "elements": [
+            {
+              "id": "im1",
+              "elType": "widget",
+              "widgetType": "image-box",
+              "settings": {
+                "image": {
+                  "url": "https://old.example/wp-content/uploads/team.png",
+                  "id": 3,
+                  "alt": "Our team"
+                },
+                "title_text": "People",
+                "description_text": "A small team."
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grid01",
+      "elType": "container",
+      "isInner": false,
+      "settings": {
+        "container_type": "grid",
+        "grid_columns_grid": {
+          "unit": "fr",
+          "size": 4,
+          "sizes": []
+        },
+        "grid_columns_grid_tablet": {
+          "unit": "fr",
+          "size": 2,
+          "sizes": []
+        },
+        "grid_columns_grid_mobile": {
+          "unit": "fr",
+          "size": 1,
+          "sizes": []
+        },
+        "grid_gaps": {
+          "column": "16",
+          "row": "16",
+          "unit": "px",
+          "isLinked": true
+        },
+        "content_width": "full"
+      },
+      "elements": [
+        {
+          "id": "g1",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "One",
+            "header_size": "h4"
+          },
+          "elements": []
+        },
+        {
+          "id": "g2",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Two",
+            "header_size": "h4"
+          },
+          "elements": []
+        },
+        {
+          "id": "g3",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Three",
+            "header_size": "h4"
+          },
+          "elements": []
+        },
+        {
+          "id": "g4",
+          "elType": "widget",
+          "widgetType": "heading",
+          "settings": {
+            "title": "Four",
+            "header_size": "h4"
+          },
+          "elements": []
+        }
+      ]
+    },
+    {
+      "id": "nt01",
+      "elType": "widget",
+      "widgetType": "nested-tabs",
+      "settings": {
+        "tabs": [
+          {
+            "tab_title": "Design",
+            "_id": "a"
+          },
+          {
+            "tab_title": "Publish",
+            "_id": "b"
+          }
+        ]
+      },
+      "elements": [
+        {
+          "id": "nt1",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "content_width": "full"
+          },
+          "elements": [
+            {
+              "id": "ntt1",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Design tab body</p>"
+              },
+              "elements": []
+            }
+          ]
+        },
+        {
+          "id": "nt2",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "content_width": "full"
+          },
+          "elements": [
+            {
+              "id": "ntt2",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Publish tab body</p>"
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "na01",
+      "elType": "widget",
+      "widgetType": "nested-accordion",
+      "settings": {
+        "items": [
+          {
+            "item_title": "Is it free?",
+            "_id": "x"
+          }
+        ]
+      },
+      "elements": [
+        {
+          "id": "na1",
+          "elType": "container",
+          "isInner": true,
+          "settings": {
+            "content_width": "full"
+          },
+          "elements": [
+            {
+              "id": "nat1",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<p>Yes.</p>"
+              },
+              "elements": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

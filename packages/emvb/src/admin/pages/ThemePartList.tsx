@@ -17,6 +17,8 @@ import {
   StatusBadge,
   useList,
 } from "./list-kit.tsx";
+import { ImportButton } from "./ImportButton.tsx";
+import { ImportElementorDialog } from "./ImportElementorDialog.tsx";
 import { NewThemePartDialog } from "./NewThemePartDialog.tsx";
 
 type Filter = "all" | ThemePartType;
@@ -122,11 +124,17 @@ function FilterTabs({
 export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
   const list = useList(fetcher, listThemeParts);
   const [creating, setCreating] = React.useState(false);
+  const [importing, setImporting] = React.useState(false);
   const [filter, setFilter] = React.useState<Filter>("all");
   const [query, setQuery] = React.useState("");
   const searchRef = React.useRef<HTMLInputElement>(null);
 
-  const newPart = <NewButton label="New theme part" onClick={() => setCreating(true)} />;
+  const newPart = (
+    <div className="emvb-list-actions">
+      <ImportButton onClick={() => setImporting(true)} />
+      <NewButton label="New theme part" onClick={() => setCreating(true)} />
+    </div>
+  );
 
   const visible =
     list.state === "ready"
@@ -232,6 +240,12 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
           )}
         </div>
       )}
+      <ImportElementorDialog
+        fetcher={fetcher}
+        open={importing}
+        onOpenChange={setImporting}
+        target="part"
+      />
       <NewThemePartDialog
         fetcher={fetcher}
         open={creating}

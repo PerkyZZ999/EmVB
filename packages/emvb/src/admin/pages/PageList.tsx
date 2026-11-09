@@ -15,12 +15,15 @@ import {
   StatusBadge,
   useList,
 } from "./list-kit.tsx";
+import { ImportElementorDialog } from "./ImportElementorDialog.tsx";
+import { ImportButton } from "./ImportButton.tsx";
 import { NewPageDialog } from "./NewPageDialog.tsx";
 
 /** The Visual pages list (IA): title and slug, status, last edited; New page. */
 export function PageList({ fetcher }: { fetcher: Fetcher }) {
   const list = useList(fetcher, listPages);
   const [creating, setCreating] = React.useState(false);
+  const [importing, setImporting] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const searchRef = React.useRef<HTMLInputElement>(null);
   const shown =
@@ -28,7 +31,12 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
       ? list.items.filter((page) => matchesSearch(query, page.title, `/${page.slug}`))
       : [];
 
-  const newPage = <NewButton label="New page" onClick={() => setCreating(true)} />;
+  const newPage = (
+    <div className="emvb-list-actions">
+      <ImportButton onClick={() => setImporting(true)} />
+      <NewButton label="New page" onClick={() => setCreating(true)} />
+    </div>
+  );
 
   return (
     <>
@@ -94,6 +102,12 @@ export function PageList({ fetcher }: { fetcher: Fetcher }) {
         </div>
       )}
       <NewPageDialog fetcher={fetcher} open={creating} onOpenChange={setCreating} />
+      <ImportElementorDialog
+        fetcher={fetcher}
+        open={importing}
+        onOpenChange={setImporting}
+        target="page"
+      />
     </>
   );
 }

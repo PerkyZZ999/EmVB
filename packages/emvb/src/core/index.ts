@@ -563,6 +563,13 @@ export {
   syncedPartLayout,
 } from "./saved-sections.ts";
 export { portableTextToLayout } from "./portable-text.ts";
+export {
+  type ElementorImport,
+  type ImportNote,
+  type ImportOptions,
+  importElementor,
+  MAX_IMPORT_CHARS,
+} from "./import/elementor/index.ts";
 
 export {
   EXTENSION_API_VERSION,

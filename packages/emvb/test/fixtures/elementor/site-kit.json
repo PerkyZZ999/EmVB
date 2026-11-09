@@ -1,0 +1,63 @@
+{
+  "settings": {
+    "system_colors": [
+      {
+        "_id": "primary",
+        "title": "Primary",
+        "color": "#AA0000"
+      },
+      {
+        "_id": "secondary",
+        "title": "Secondary",
+        "color": "#00AA00"
+      },
+      {
+        "_id": "text",
+        "title": "Text",
+        "color": "#333333"
+      },
+      {
+        "_id": "accent",
+        "title": "Accent",
+        "color": "#0000AA"
+      }
+    ],
+    "custom_colors": [
+      {
+        "_id": "brand2",
+        "title": "Brand 2",
+        "color": "#FF00FF"
+      }
+    ],
+    "system_typography": [
+      {
+        "_id": "primary",
+        "title": "Primary",
+        "typography_typography": "custom",
+        "typography_font_family": "Inter",
+        "typography_font_weight": "800"
+      },
+      {
+        "_id": "text",
+        "title": "Text",
+        "typography_typography": "custom",
+        "typography_font_family": "Lora",
+        "typography_font_weight": "400"
+      },
+      {
+        "_id": "accent",
+        "title": "Accent",
+        "typography_typography": "custom",
+        "typography_font_family": "Inter",
+        "typography_font_weight": "600"
+      },
+      {
+        "_id": "secondary",
+        "title": "Secondary",
+        "typography_typography": "custom",
+        "typography_font_family": "Inter",
+        "typography_font_weight": "500"
+      }
+    ]
+  }
+}

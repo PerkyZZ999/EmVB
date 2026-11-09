@@ -1,0 +1,422 @@
+[
+  {
+    "id": "sec1",
+    "elType": "section",
+    "isInner": false,
+    "settings": {
+      "gap": "wide",
+      "layout": "boxed",
+      "content_width": {
+        "unit": "px",
+        "size": 1000,
+        "sizes": []
+      },
+      "height": "min-height",
+      "custom_height": {
+        "unit": "px",
+        "size": 400,
+        "sizes": []
+      },
+      "column_position": "middle",
+      "background_background": "gradient",
+      "background_color": "#ff0000",
+      "background_color_b": "#0000ff",
+      "background_gradient_angle": {
+        "unit": "deg",
+        "size": 90
+      },
+      "html_tag": "header"
+    },
+    "elements": [
+      {
+        "id": "col1",
+        "elType": "column",
+        "settings": {
+          "_column_size": 33,
+          "_inline_size": 33.333
+        },
+        "elements": [
+          {
+            "id": "s_h",
+            "elType": "widget",
+            "widgetType": "heading",
+            "settings": {
+              "title": "Legacy section",
+              "link": {
+                "url": "/about"
+              },
+              "size": "large"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_t",
+            "elType": "widget",
+            "widgetType": "text-editor",
+            "settings": {
+              "editor": "<h3>Sub heading</h3><p>Plain <em>styled</em> text</p><ol><li>First</li><li>Second</li></ol><hr><img src=\"https://old.example/a.png\" alt=\"A diagram\"><iframe src=\"https://www.youtube.com/embed/dQw4w9WgXcQ\"></iframe>"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_i",
+            "elType": "widget",
+            "widgetType": "image",
+            "settings": {
+              "image": {
+                "url": "https://old.example/wp-content/uploads/photo-300x200.jpg",
+                "id": 9
+              },
+              "width": {
+                "unit": "%",
+                "size": 80,
+                "sizes": []
+              },
+              "align": "left",
+              "caption_source": "custom",
+              "caption": "A photo",
+              "link_to": "custom",
+              "link": {
+                "url": "https://example.com/photo",
+                "is_external": "on"
+              }
+            },
+            "elements": []
+          }
+        ]
+      },
+      {
+        "id": "col2",
+        "elType": "column",
+        "settings": {
+          "_column_size": 66,
+          "_inline_size": 66.666,
+          "padding": {
+            "unit": "px",
+            "top": "5",
+            "right": "5",
+            "bottom": "5",
+            "left": "5",
+            "isLinked": true
+          },
+          "background_background": "classic",
+          "background_color": "rgba(0, 0, 0, 0.5)"
+        },
+        "elements": [
+          {
+            "id": "s_sp",
+            "elType": "widget",
+            "widgetType": "spacer",
+            "settings": {
+              "space": {
+                "unit": "px",
+                "size": 30,
+                "sizes": []
+              },
+              "space_mobile": {
+                "unit": "px",
+                "size": 10,
+                "sizes": []
+              }
+            },
+            "elements": []
+          },
+          {
+            "id": "s_dv",
+            "elType": "widget",
+            "widgetType": "divider",
+            "settings": {
+              "style": "dashed",
+              "weight": {
+                "unit": "px",
+                "size": 2,
+                "sizes": []
+              },
+              "color": "#cccccc",
+              "width": {
+                "unit": "%",
+                "size": 50,
+                "sizes": []
+              },
+              "align": "center"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_ic",
+            "elType": "widget",
+            "widgetType": "icon",
+            "settings": {
+              "selected_icon": {
+                "value": "far fa-star",
+                "library": "fa-regular"
+              },
+              "view": "stacked",
+              "shape": "circle",
+              "primary_color": "#ff6600",
+              "size": {
+                "unit": "px",
+                "size": 40,
+                "sizes": []
+              },
+              "link": {
+                "url": "https://example.com/stars"
+              }
+            },
+            "elements": []
+          },
+          {
+            "id": "s_il",
+            "elType": "widget",
+            "widgetType": "icon-list",
+            "settings": {
+              "view": "inline",
+              "icon_list": [
+                {
+                  "text": "Phone",
+                  "selected_icon": {
+                    "value": "fas fa-phone-alt",
+                    "library": "fa-solid"
+                  },
+                  "link": {
+                    "url": "tel:+1 555 010 0199"
+                  }
+                },
+                {
+                  "text": "Email",
+                  "selected_icon": {
+                    "value": "fas fa-envelope",
+                    "library": "fa-solid"
+                  },
+                  "link": {
+                    "url": "mailto:hi@example.com"
+                  }
+                }
+              ]
+            },
+            "elements": []
+          },
+          {
+            "id": "s_v",
+            "elType": "widget",
+            "widgetType": "video",
+            "settings": {
+              "video_type": "youtube",
+              "youtube_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_c",
+            "elType": "widget",
+            "widgetType": "counter",
+            "settings": {
+              "starting_number": 0,
+              "ending_number": 12500,
+              "suffix": "+",
+              "title": "Pages built"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_p",
+            "elType": "widget",
+            "widgetType": "progress",
+            "settings": {
+              "title": "Done",
+              "percent": {
+                "unit": "%",
+                "size": 70,
+                "sizes": []
+              },
+              "inner_text": "70%"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_te",
+            "elType": "widget",
+            "widgetType": "testimonial",
+            "settings": {
+              "testimonial_content": "It just works.",
+              "testimonial_name": "Ada",
+              "testimonial_job": "Engineer",
+              "testimonial_image": {
+                "url": "https://old.example/ada.jpg",
+                "id": 4,
+                "alt": "Ada"
+              }
+            },
+            "elements": []
+          },
+          {
+            "id": "s_sr",
+            "elType": "widget",
+            "widgetType": "star-rating",
+            "settings": {
+              "rating": {
+                "unit": "",
+                "size": 4,
+                "sizes": []
+              },
+              "title": "Rated"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_al",
+            "elType": "widget",
+            "widgetType": "alert",
+            "settings": {
+              "alert_type": "warning",
+              "alert_title": "Heads up",
+              "alert_description": "Backups run nightly."
+            },
+            "elements": []
+          },
+          {
+            "id": "s_tb",
+            "elType": "widget",
+            "widgetType": "tabs",
+            "settings": {
+              "tabs": [
+                {
+                  "tab_title": "One",
+                  "tab_content": "<p>Tab one</p>"
+                },
+                {
+                  "tab_title": "Two",
+                  "tab_content": "<p>Tab two</p>"
+                }
+              ]
+            },
+            "elements": []
+          },
+          {
+            "id": "s_ac",
+            "elType": "widget",
+            "widgetType": "accordion",
+            "settings": {
+              "tabs": [
+                {
+                  "tab_title": "Q1",
+                  "tab_content": "<p>A1</p>"
+                },
+                {
+                  "tab_title": "Q2",
+                  "tab_content": "<p>A2</p>"
+                }
+              ]
+            },
+            "elements": []
+          },
+          {
+            "id": "s_tg",
+            "elType": "widget",
+            "widgetType": "toggle",
+            "settings": {
+              "tabs": [
+                {
+                  "tab_title": "T1",
+                  "tab_content": "<p>X</p>"
+                }
+              ]
+            },
+            "elements": []
+          },
+          {
+            "id": "s_so",
+            "elType": "widget",
+            "widgetType": "social-icons",
+            "settings": {
+              "social_icon_list": [
+                {
+                  "social_icon": {
+                    "value": "fab fa-facebook",
+                    "library": "fa-brands"
+                  },
+                  "link": {
+                    "url": "https://facebook.com/x"
+                  }
+                },
+                {
+                  "social_icon": {
+                    "value": "fab fa-instagram",
+                    "library": "fa-brands"
+                  },
+                  "link": {
+                    "url": "https://instagram.com/x"
+                  }
+                }
+              ],
+              "shape": "circle"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_ga",
+            "elType": "widget",
+            "widgetType": "image-gallery",
+            "settings": {
+              "wp_gallery": [
+                {
+                  "id": 1,
+                  "url": "https://old.example/g1.jpg"
+                },
+                {
+                  "id": 2,
+                  "url": "https://old.example/g2.jpg"
+                }
+              ],
+              "gallery_columns": "2"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_gm",
+            "elType": "widget",
+            "widgetType": "google_maps",
+            "settings": {
+              "address": "London Eye, London"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_ma",
+            "elType": "widget",
+            "widgetType": "menu-anchor",
+            "settings": {
+              "anchor": "contact"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_ht",
+            "elType": "widget",
+            "widgetType": "html",
+            "settings": {
+              "html": "<div class=\"x\"><p>From HTML</p><script>track()</script></div>"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_sc",
+            "elType": "widget",
+            "widgetType": "shortcode",
+            "settings": {
+              "shortcode": "[contact-form-7 id=\"5\"]"
+            },
+            "elements": []
+          },
+          {
+            "id": "s_wp",
+            "elType": "widget",
+            "widgetType": "wp-widget-calendar",
+            "settings": {},
+            "elements": []
+          }
+        ]
+      }
+    ]
+  }
+]
