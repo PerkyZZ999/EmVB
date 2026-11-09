@@ -1,3 +1,9 @@
+import type {
+  Proposal,
+  ProposalRecord,
+  ProposalRefusal,
+  applyProposal,
+} from "../core/proposals.ts";
 import type { AgentSettings } from "./settings.ts";
 import type { RateClass } from "./rate-limit.ts";
 import type {
@@ -103,4 +109,20 @@ export interface SavedSectionsPort {
   create(record: SavedSectionRecord): Promise<{ id: string } | Refusal>;
   rename(id: string, name: string): Promise<SavedSectionSummary | Refusal | null>;
   remove(id: string): Promise<boolean>;
+}
+
+/** W-928: storage and checked previews only; never writes or publishes content. */
+export interface ProposalsPort {
+  create(
+    proposal: unknown,
+  ): Promise<{ ok: true; id: string; record: ProposalRecord } | ProposalRefusal>;
+  get(
+    id: string,
+  ): Promise<{ ok: true; id: string; record: ProposalRecord } | ProposalRefusal | null>;
+  list(target: Proposal["target"]): Promise<{ id: string; record: ProposalRecord }[]>;
+  withdraw(id: string): Promise<boolean>;
+  prepare(
+    id: string,
+    selected?: readonly number[],
+  ): Promise<ReturnType<typeof applyProposal> | null>;
 }

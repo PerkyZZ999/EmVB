@@ -268,3 +268,60 @@ Schema 14 only adds optional fields, so a v13 document upgrades unchanged.
 - **Visitor segments (W-329).** `audience.segments`, above. Hosts pass them as `resolveEmVBPage(Astro, { visitor: { segments } })` and the same option on `resolveThemeParts`. `country`, `device` and `returning` on that object replace what EmVB detects.
 - **Loop fields (W-330).** On a collection Loop, `permalink` is a site path containing `{slug}` or `{id}` (unset is `/<collection>/{slug}`). `imageField` and `excerptField` name the entry fields Post Image and Post Excerpt read (unset is `featured_image` and `excerpt`). `filter` is up to five `field=value` pairs separated by `;`. A taxonomy name filters by term, and the same field twice matches either value.
 - **`ch` and negative margins (W-331).** Lengths may use `ch`. Margins may be negative (−10000 to 10000). Padding stays 0 or more.
+
+## Internal proposal records (W-928)
+
+Proposals are review data in the plugin-storage collection `emvb_proposals`, not page
+revisions. A row holds `{ proposal, createdAt }`, keyed by a server-generated 16-hex id.
+The version-1 proposal is `{ version: 1, target: { collection, id }, baseRevision,
+baseDesignRevision, ops }`. The plugin adapter currently reads the target entry's
+`layout` field (native visual pages and theme parts); arbitrary host canvas-field
+selection is not part of this transport. `baseRevision` is EmDash's current `_rev`.
+`baseDesignRevision` is the effective draft style revision, or the published style
+revision when no draft exists, or null on an empty site. It is checked only when
+class/variable ops are present, so page-only proposals survive unrelated style edits.
+
+Operations run in list order against frozen schema 18 ids and names:
+
+- `insert`: `{ kind, parentId, index, node }` — a complete stored node/subtree.
+- `move`: `{ kind, id, parentId, index }` — uses editor drop rules; index addresses
+  the destination children **before** removal, as in `moveNode`.
+- `update`: `{ kind, id, set }` — editable node fields only. `props` shallow-merges;
+  other fields replace their whole value, and null clears an optional node field.
+  `id`, `type` and `children` cannot be patched. Use `editorLabel`, `props.partId`
+  and `style.motion`, not their old aliases.
+- `delete`: `{ kind, id }` — never the root.
+- `class`: `{ kind, id, value }` — full class upsert, or null to remove an existing id.
+- `variable`: `{ kind, group, id, value }` — full variable upsert/removal;
+  group is `colors`, `fonts`, `fontSizes` or `spacings`. Payload ids must match the
+  operation id. Names must already be clean and unique in their list; no truncation.
+
+`applyProposal(base, proposal, selectedIndexes?)` returns a new `{ layout, design }`
+only: it cannot save, publish, acquire an edit lock, or change review/undo state.
+Selected indexes refer to the original list; selection order cannot reorder ops.
+Each selected intermediate result passes stored-layout/design validation, nesting
+rules and the existing URL/SVG/CSS/font allowlists. Unknown layout keys still use
+the frozen contract's keep-and-ignore rules. A dependency on an omitted operation,
+a missing id, a bad node, a duplicate id, an invalid index or any other refusal
+aborts the entire preview. Nothing is partially returned or persisted. W-930 must
+feed accepted results through normal undo and draft saves, including the existing
+site-wide guards for shared-style deletion; this store never writes site styles.
+
+Creation checks **all** ops and re-reads the base before storage. `STALE_BASE` reports
+expected/current revisions and asks the caller to read the current document and
+submit a rebased proposal; there is no merge/retry/override. Preparation rechecks the
+live revisions, so keeping or reading an old proposal does not make it applicable.
+Get/list are review reads, not an applicability guarantee; malformed rows are refused
+by get and omitted by list. Per-isolate serialization matches saved sections; there
+is no distributed content transaction (the final draft save still needs its own CAS).
+
+Budgets: 100 ops, 512 KiB JSON, 64 JSON nesting levels, and 100 stored proposals per
+site; resulting layouts/designs retain all existing byte/node/depth limits. Cycles,
+non-JSON values and prototype-manipulation keys are refused before parsing.
+
+Plugin-local editor transport mirrors saved sections: `proposals` (target-filtered
+list), `proposals/get`, `proposals/create`, `proposals/withdraw`. Every route requires
+`content:edit_any` and EmDash's private-request/CSRF guard. These are not public/MCP
+APIs; W-929 adds MCP tools and W-930 adds review UI later. Withdrawal only removes
+review data; it cannot affect a page. No per-op review states or agent publish path
+are implemented here.

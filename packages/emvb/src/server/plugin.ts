@@ -1,3 +1,9 @@
+import {
+  proposalCreateRoute,
+  proposalGetRoute,
+  proposalsRoute,
+  proposalWithdrawRoute,
+} from "./proposals.ts";
 import { definePlugin } from "emdash";
 import { ADMIN_ENTRY, PLUGIN_ID, PLUGIN_VERSION } from "../constants.ts";
 import {
@@ -58,6 +64,7 @@ export function createPlugin(
       designhistory: { indexes: ["at"] },
       // W-875 (D-060): saved sections, by name, per site.
       emvb_saved_sections: { indexes: ["updatedAt"] },
+      emvb_proposals: { indexes: ["createdAt"] },
     },
     hooks: {
       "content:beforeSave": {
@@ -101,6 +108,10 @@ export function createPlugin(
       "design/publish": designPublishRoute,
       icons: iconsRoute,
       "saved-sections": savedSectionsRoute,
+      proposals: proposalsRoute,
+      "proposals/get": proposalGetRoute,
+      "proposals/create": proposalCreateRoute,
+      "proposals/withdraw": proposalWithdrawRoute,
       "saved-sections/get": savedSectionGetRoute,
       "saved-sections/save": savedSectionSaveRoute,
       "saved-sections/rename": savedSectionRenameRoute,

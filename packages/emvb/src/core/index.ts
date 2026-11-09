@@ -601,3 +601,12 @@ export {
   type ExtensionSourceManifest,
   type ExtensionRenderContext,
 } from "./extensions/index.ts";
+export {
+  ProposalTarget,
+  readProposal,
+  applyProposal,
+  type Proposal,
+  type ProposalBase,
+  type ProposalRecord,
+  type ProposalRefusal,
+} from "./proposals.ts";

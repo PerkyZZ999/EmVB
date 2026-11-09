@@ -36,3 +36,9 @@ export function clipText(text: string, max: number): string {
 export const UNKNOWN_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_.:/@-]{0,127}$/;
 export const MAX_UNKNOWN_KEYS = 32;
 export const MAX_UNKNOWN_DEPTH = 16;
+
+/** W-928: proposals are bounded separately from the resulting page and site styles. */
+export const MAX_PROPOSAL_OPS = 100;
+export const MAX_PROPOSAL_BYTES = MAX_LAYOUT_BYTES;
+export const MAX_PROPOSALS = 100;
+export const MAX_PROPOSAL_DEPTH = MAX_DEPTH * 2 + 16;

@@ -41626,6 +41626,351 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/extensions/extensions.test.ts"],
       "expect": "\\(fail\\).*style injection"
+    },
+    {
+      "id": "W-928/move-order",
+      "requirement": "W-928",
+      "description": "Move is acknowledged without moving the node, changing the intended final tree.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "else layout = moved.layout;",
+          "replace": "else layout = layout;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "all ordered ops equal"
+      ],
+      "expect": "\\(fail\\).*all ordered ops equal"
+    },
+    {
+      "id": "W-928/selected-ops-leak",
+      "requirement": "W-928",
+      "description": "Rejected operations run during a selected preview.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "if (selected && !selected.includes(opIndex)) continue;",
+          "replace": "if (false) continue;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "selected ops retain"
+      ],
+      "expect": "\\(fail\\).*selected ops retain"
+    },
+    {
+      "id": "W-928/stale-base",
+      "requirement": "W-928",
+      "description": "A proposal ignores a mismatched page revision.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "if (proposal.baseRevision !== base.revision)",
+          "replace": "if (false)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "stale page and style bases"
+      ],
+      "expect": "\\(fail\\).*stale page and style bases"
+    },
+    {
+      "id": "W-928/skip-op-validation",
+      "requirement": "W-928",
+      "description": "Update payloads bypass stored-layout validation, even if a later delete hides the damage.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "const validLayout = validateLayout(layout);",
+          "replace": "const validLayout = { ok: true as const, layout };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "invalid node props and frozen identity"
+      ],
+      "expect": "\\(fail\\).*invalid node props and frozen identity"
+    },
+    {
+      "id": "W-928/delete-missing",
+      "requirement": "W-928",
+      "description": "Deleting a missing node or the root is silently treated as a valid operation.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "if (!removed.removed) reason =",
+          "replace": "if (false) reason ="
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "missing ids, duplicate ids"
+      ],
+      "expect": "\\(fail\\).*missing ids, duplicate ids"
+    },
+    {
+      "id": "W-928/op-count-cap",
+      "requirement": "W-928",
+      "description": "One too many operations is accepted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": ".max(MAX_PROPOSAL_OPS),",
+          "replace": ".max(MAX_PROPOSAL_OPS + 1),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "proposal count, byte"
+      ],
+      "expect": "\\(fail\\).*proposal count, byte"
+    },
+    {
+      "id": "W-928/payload-byte-cap",
+      "requirement": "W-928",
+      "description": "Serialized proposal size is not checked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "byteLength(raw) > MAX_PROPOSAL_BYTES",
+          "replace": "false"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "proposal count, byte"
+      ],
+      "expect": "\\(fail\\).*proposal count, byte"
+    },
+    {
+      "id": "W-928/json-depth-cap",
+      "requirement": "W-928",
+      "description": "Deep operation JSON bypasses the pre-parse nesting guard.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": " || depth > MAX_PROPOSAL_DEPTH",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "proposal count, byte"
+      ],
+      "expect": "\\(fail\\).*proposal count, byte"
+    },
+    {
+      "id": "W-928/unsafe-link",
+      "requirement": "W-928",
+      "description": "The renderer link allowlist is skipped for new proposal links.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals-safety.ts",
+          "search": "sanitizeHref(value) === undefined",
+          "replace": "false"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "links, media, SVG, CSS"
+      ],
+      "expect": "\\(fail\\).*links, media, SVG, CSS"
+    },
+    {
+      "id": "W-928/design-id-mismatch",
+      "requirement": "W-928",
+      "description": "A class payload changes the id the operation was meant to edit.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "raw.id !== id ||",
+          "replace": "false ||"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "class and variable edits share"
+      ],
+      "expect": "\\(fail\\).*class and variable edits share"
+    },
+    {
+      "id": "W-928/wrapper-id-collision",
+      "requirement": "W-928",
+      "description": "The isolated validation wrapper collides with a legitimate frozen node id.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "id: wrapperId(op.node)",
+          "replace": "id: \"proposal-wrapper\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/proposals.test.ts",
+        "-t",
+        "invalid node props and frozen identity"
+      ],
+      "expect": "\\(fail\\).*invalid node props and frozen identity"
+    },
+    {
+      "id": "W-928/stored-order",
+      "requirement": "W-928",
+      "description": "Persistence reverses operations, so a read no longer equals the submitted proposal.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "await store.put(id, record);",
+          "replace": "await store.put(id, { ...record, proposal: { ...record.proposal, ops: record.proposal.ops.toReversed() } });"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/server/proposals.test.ts",
+        "-t",
+        "round-trip preserves ordered ops"
+      ],
+      "expect": "\\(fail\\).*round-trip preserves ordered ops"
+    },
+    {
+      "id": "W-928/store-skips-validation",
+      "requirement": "W-928",
+      "description": "Creation stores a hand-written invalid operation without either validation pass.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "const applied = applyProposal(base, read.proposal);",
+          "replace": "const applied = { ok: true as const };"
+        },
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "const rechecked = applyProposal(latest, read.proposal);",
+          "replace": "const rechecked = { ok: true as const };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/server/proposals.test.ts",
+        "-t",
+        "invalid ops and stale bases store"
+      ],
+      "expect": "\\(fail\\).*invalid ops and stale bases store"
+    },
+    {
+      "id": "W-928/creation-race",
+      "requirement": "W-928",
+      "description": "The second revision check is ignored before storing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "if (!rechecked.ok) return rechecked;",
+          "replace": "if (false) return rechecked;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/server/proposals.test.ts",
+        "-t",
+        "a base changing during creation"
+      ],
+      "expect": "\\(fail\\).*a base changing during creation"
+    },
+    {
+      "id": "W-928/storage-cap",
+      "requirement": "W-928",
+      "description": "A full site keeps accepting proposal rows.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "if (page.hasMore || page.items.length >= MAX_PROPOSALS)",
+          "replace": "if (false)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/server/proposals.test.ts",
+        "-t",
+        "storage caps, missing targets"
+      ],
+      "expect": "\\(fail\\).*storage caps, missing targets"
+    },
+    {
+      "id": "W-928/collection-wiring",
+      "requirement": "W-928",
+      "description": "The plugin adapter points at an undeclared storage collection.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "const COLLECTION = \"emvb_proposals\";",
+          "replace": "const COLLECTION = \"emvb_missing_proposals\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/server/proposals.test.ts",
+        "-t",
+        "editor transport persists"
+      ],
+      "expect": "\\(fail\\).*editor transport persists"
+    },
+    {
+      "id": "W-928/editor-permission",
+      "requirement": "W-928",
+      "description": "The list transport loses its editor-only permission.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "export const proposalsRoute: PluginRoute<z.infer<typeof ProposalTarget>> = {\n  permission: \"content:edit_any\",",
+          "replace": "export const proposalsRoute: PluginRoute<z.infer<typeof ProposalTarget>> = {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/server/proposals.test.ts",
+        "-t",
+        "routes enforce editor rights"
+      ],
+      "expect": "\\(fail\\).*routes enforce editor rights"
     }
   ]
 }
