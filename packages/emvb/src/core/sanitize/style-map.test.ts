@@ -133,6 +133,55 @@ describe("style property map (W-017, R-012)", () => {
   );
 
   test.each([
+    ["overflowX", "auto", "overflow-x", "auto"],
+    ["overflowY", "hidden", "overflow-y", "hidden"],
+    ["objectPosition", "top left", "object-position", "top left"],
+    ["fontStyle", "italic", "font-style", "italic"],
+    ["whiteSpace", "nowrap", "white-space", "nowrap"],
+    ["whiteSpace", "pre-wrap", "white-space", "pre-wrap"],
+    ["overflowWrap", "anywhere", "overflow-wrap", "anywhere"],
+    ["backdropFilter", { blur: 6 }, "backdrop-filter", "blur(6px)"],
+  ] as const)("W-957: %s %p maps to %s", (key, raw, css, expected) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(true);
+    expect(styleDeclarations({ [key]: raw })).toEqual({
+      declarations: [{ property: css, value: expected }],
+      rejected: [],
+    });
+  });
+
+  test.each(CSS_INJECTION_CORPUS)("W-957: the new keywords reject injection %p", (value) => {
+    for (const key of [
+      "overflowX",
+      "overflowY",
+      "objectPosition",
+      "fontStyle",
+      "whiteSpace",
+      "overflowWrap",
+    ]) {
+      expect(StyleProps.safeParse({ [key]: value }).success).toBe(false);
+      expect(styleDeclarations({ [key]: value }).rejected).toEqual([key]);
+    }
+    expect(StyleProps.safeParse({ backdropFilter: { blur: value } }).success).toBe(false);
+  });
+
+  test.each([
+    ["objectPosition", "50% 50%"],
+    ["fontStyle", "oblique"],
+    ["whiteSpace", "pre"],
+    ["overflowX", "overlay"],
+    ["overflowWrap", "break-all"],
+  ] as const)("W-957: %s refuses CSS EmVB doesn't offer (%p)", (key, raw) => {
+    expect(StyleProps.safeParse({ [key]: raw }).success).toBe(false);
+    expect(styleDeclarations({ [key]: raw }).rejected).toEqual([key]);
+  });
+
+  test("W-957: one overflow axis beats the both-axes value", () => {
+    const { declarations } = styleDeclarations({ overflow: "hidden", overflowX: "auto" });
+    const order = declarations.map((d) => d.property);
+    expect(order.indexOf("overflow")).toBeLessThan(order.indexOf("overflow-x"));
+  });
+
+  test.each([
     ["position", "sticky", "position", "sticky"],
     ["top", { value: -12, unit: "px" }, "top", "-12px"],
     ["right", { value: 10, unit: "%" }, "inset-inline-end", "10%"],

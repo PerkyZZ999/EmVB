@@ -152,19 +152,19 @@ the same keys except `motion`:
 
 - **Layout:** flexDirection, flexWrap, justifyContent, alignItems, gap, gridColumnSpan, gridRowSpan,
   gridColumnStart, gridRowStart.
-- **Size:** width, minWidth, maxWidth, height, minHeight, maxHeight, overflow, aspectRatio,
-  objectFit.
+- **Size:** width, minWidth, maxWidth, height, minHeight, maxHeight, overflow, overflowX,
+  overflowY, aspectRatio, objectFit, objectPosition.
 - **Spacing:** paddingTop, paddingRight, paddingBottom, paddingLeft, marginTop, marginRight,
   marginBottom, marginLeft.
 - **Position:** position, top, right, bottom, left, zIndex.
 - **Type:** fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, textAlign, textTransform,
-  textDecoration, color.
+  textDecoration, fontStyle, whiteSpace, overflowWrap, color.
 - **Background:** backgroundColor, backgroundImage, backgroundSize, backgroundPosition,
   backgroundRepeat, backgroundVideo, gradient, overlay.
 - **Border:** borderWidth, borderTopWidth, borderRightWidth, borderBottomWidth, borderLeftWidth,
   borderStyle, borderColor, borderRadius, borderTopLeftRadius, borderTopRightRadius,
   borderBottomRightRadius, borderBottomLeftRadius.
-- **Effects:** opacity, boxShadow, filter, cursor.
+- **Effects:** opacity, boxShadow, filter, backdropFilter, cursor.
 - **Icon:** iconRotate, iconFlip, iconScale, iconStrokeWidth, iconShadow.
 - **Motion:** `motion`.
 

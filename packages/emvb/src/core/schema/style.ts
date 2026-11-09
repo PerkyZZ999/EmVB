@@ -8,10 +8,12 @@ import {
   CURSORS,
   FLEX_DIRECTIONS,
   FLEX_WRAPS,
+  FONT_STYLES,
   HEX_COLOR,
   JUSTIFY_CONTENT,
   LENGTH_UNITS,
   OBJECT_FITS,
+  OVERFLOW_WRAPS,
   OVERFLOWS,
   POSITIONS,
   TEXT_ALIGNS,
@@ -19,6 +21,7 @@ import {
   TEXT_TRANSFORMS,
   TRANSITION_EASINGS,
   TRANSITION_PROPERTIES,
+  WHITE_SPACES,
 } from "../css-keywords.ts";
 import { isSafeFontStack } from "../sanitize/css.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
@@ -227,10 +230,15 @@ export const StyleProps = z.strictObject({
   minHeight: LengthValue.optional(),
   maxHeight: LengthValue.optional(),
   overflow: z.enum(OVERFLOWS).optional(),
+  /** W-957: one axis only, after `overflow` so it wins (a table that scrolls sideways). */
+  overflowX: z.enum(OVERFLOWS).optional(),
+  overflowY: z.enum(OVERFLOWS).optional(),
   aspectRatio: z
     .union([z.literal("auto"), z.string().regex(ASPECT_RATIO, "Use a ratio such as 16/9")])
     .optional(),
   objectFit: z.enum(OBJECT_FITS).optional(),
+  /** W-957: which part of an image or video stays in view when it is cropped. */
+  objectPosition: z.enum(BACKGROUND_POSITIONS).optional(),
   paddingTop: LengthValue.optional(),
   paddingRight: LengthValue.optional(),
   paddingBottom: LengthValue.optional(),
@@ -280,6 +288,10 @@ export const StyleProps = z.strictObject({
   textTransform: z.enum(TEXT_TRANSFORMS).optional(),
   /** W-113. A button sets `none` in its base CSS, so it is not underlined unless a style says so. */
   textDecoration: z.enum(TEXT_DECORATIONS).optional(),
+  /** W-957. */
+  fontStyle: z.enum(FONT_STYLES).optional(),
+  whiteSpace: z.enum(WHITE_SPACES).optional(),
+  overflowWrap: z.enum(OVERFLOW_WRAPS).optional(),
   color: ColorValue.optional(),
   backgroundColor: ColorValue.optional(),
   /** http(s) or a site path. Spaces, quotes and parentheses are refused so the URL can sit inside `url("")`. */
@@ -349,6 +361,8 @@ export const StyleProps = z.strictObject({
   opacity: z.number().finite().min(0).max(1).optional(),
   boxShadow: BoxShadow.optional(),
   filter: Filter.optional(),
+  /** W-957: the same filters applied to what is behind the element (frosted glass). */
+  backdropFilter: Filter.optional(),
   cursor: z.enum(CURSORS).optional(),
   /**
    * Icon element glyph styling (W-237). Emitted as custom properties on the icon's wrapper, so

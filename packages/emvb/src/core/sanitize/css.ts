@@ -7,16 +7,19 @@ import {
   CURSORS,
   FLEX_DIRECTIONS as FLEX_DIRECTION_VALUES,
   FLEX_WRAPS as FLEX_WRAP_VALUES,
+  FONT_STYLES,
   FONT_WEIGHTS,
   HEX_COLOR,
   JUSTIFY_CONTENT,
   LENGTH_UNITS,
   OBJECT_FITS,
+  OVERFLOW_WRAPS,
   OVERFLOWS,
   POSITIONS,
   TEXT_ALIGNS,
   TEXT_DECORATIONS,
   TEXT_TRANSFORMS,
+  WHITE_SPACES,
   TRANSITION_EASINGS as TRANSITION_EASING_VALUES,
 } from "../css-keywords.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
@@ -38,6 +41,9 @@ const TEXT_DECORATION = setOf(TEXT_DECORATIONS);
 const BORDER_STYLE = setOf(BORDER_STYLES);
 const OVERFLOW = setOf(OVERFLOWS);
 const OBJECT_FIT = setOf(OBJECT_FITS);
+const FONT_STYLE = setOf(FONT_STYLES);
+const WHITE_SPACE = setOf(WHITE_SPACES);
+const OVERFLOW_WRAP = setOf(OVERFLOW_WRAPS);
 const POSITION = setOf(POSITIONS);
 const CURSOR = setOf(CURSORS);
 const ASPECT_RATIO = /^([1-9]\d{0,3})\/([1-9]\d{0,3})$/;
@@ -612,8 +618,11 @@ const PROPERTY_MAP: {
   minHeight: { css: "min-height", toValue: cssLength },
   maxHeight: { css: "max-height", toValue: cssLength },
   overflow: { css: "overflow", toValue: keyword(OVERFLOW) },
+  overflowX: { css: "overflow-x", toValue: keyword(OVERFLOW) },
+  overflowY: { css: "overflow-y", toValue: keyword(OVERFLOW) },
   aspectRatio: { css: "aspect-ratio", toValue: cssAspectRatio },
   objectFit: { css: "object-fit", toValue: keyword(OBJECT_FIT) },
+  objectPosition: { css: "object-position", toValue: keyword(BACKGROUND_POSITION) },
   paddingTop: { css: "padding-top", toValue: cssLength },
   paddingRight: { css: "padding-inline-end", toValue: cssLength },
   paddingBottom: { css: "padding-bottom", toValue: cssLength },
@@ -636,6 +645,9 @@ const PROPERTY_MAP: {
   textAlign: { css: "text-align", toValue: cssTextAlign },
   textTransform: { css: "text-transform", toValue: keyword(TEXT_TRANSFORM) },
   textDecoration: { css: "text-decoration", toValue: keyword(TEXT_DECORATION) },
+  fontStyle: { css: "font-style", toValue: keyword(FONT_STYLE) },
+  whiteSpace: { css: "white-space", toValue: keyword(WHITE_SPACE) },
+  overflowWrap: { css: "overflow-wrap", toValue: keyword(OVERFLOW_WRAP) },
   color: { css: "color", toValue: cssColor },
   backgroundColor: { css: "background-color", toValue: cssColor },
   backgroundImage: { css: "background-image", toValue: cssBackgroundImage },
@@ -660,6 +672,7 @@ const PROPERTY_MAP: {
   opacity: { css: "opacity", toValue: cssOpacity },
   boxShadow: { css: "box-shadow", toValue: cssBoxShadow },
   filter: { css: "filter", toValue: cssFilter },
+  backdropFilter: { css: "backdrop-filter", toValue: cssFilter },
   cursor: { css: "cursor", toValue: keyword(CURSOR) },
   transition: { css: "transition", toValue: cssTransition },
   entrance: { css: "animation", toValue: cssEntrance },

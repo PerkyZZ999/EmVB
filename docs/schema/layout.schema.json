@@ -468,6 +468,26 @@
             "auto"
           ]
         },
+        "overflowX": {
+          "type": "string",
+          "enum": [
+            "visible",
+            "hidden",
+            "clip",
+            "scroll",
+            "auto"
+          ]
+        },
+        "overflowY": {
+          "type": "string",
+          "enum": [
+            "visible",
+            "hidden",
+            "clip",
+            "scroll",
+            "auto"
+          ]
+        },
         "aspectRatio": {
           "anyOf": [
             {
@@ -488,6 +508,20 @@
             "cover",
             "none",
             "scale-down"
+          ]
+        },
+        "objectPosition": {
+          "type": "string",
+          "enum": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top left",
+            "top right",
+            "bottom left",
+            "bottom right"
           ]
         },
         "paddingTop": {
@@ -1440,6 +1474,30 @@
             "underline",
             "overline",
             "line-through"
+          ]
+        },
+        "fontStyle": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "italic"
+          ]
+        },
+        "whiteSpace": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "nowrap",
+            "pre-line",
+            "pre-wrap"
+          ]
+        },
+        "overflowWrap": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "break-word",
+            "anywhere"
           ]
         },
         "color": {
@@ -2350,6 +2408,42 @@
           },
           "additionalProperties": false
         },
+        "backdropFilter": {
+          "type": "object",
+          "properties": {
+            "blur": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "brightness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "contrast": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "saturate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "grayscale": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "hueRotate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            }
+          },
+          "additionalProperties": false
+        },
         "cursor": {
           "type": "string",
           "enum": [
@@ -3184,6 +3278,26 @@
             "auto"
           ]
         },
+        "overflowX": {
+          "type": "string",
+          "enum": [
+            "visible",
+            "hidden",
+            "clip",
+            "scroll",
+            "auto"
+          ]
+        },
+        "overflowY": {
+          "type": "string",
+          "enum": [
+            "visible",
+            "hidden",
+            "clip",
+            "scroll",
+            "auto"
+          ]
+        },
         "aspectRatio": {
           "anyOf": [
             {
@@ -3204,6 +3318,20 @@
             "cover",
             "none",
             "scale-down"
+          ]
+        },
+        "objectPosition": {
+          "type": "string",
+          "enum": [
+            "center",
+            "top",
+            "bottom",
+            "left",
+            "right",
+            "top left",
+            "top right",
+            "bottom left",
+            "bottom right"
           ]
         },
         "paddingTop": {
@@ -4158,6 +4286,30 @@
             "line-through"
           ]
         },
+        "fontStyle": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "italic"
+          ]
+        },
+        "whiteSpace": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "nowrap",
+            "pre-line",
+            "pre-wrap"
+          ]
+        },
+        "overflowWrap": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "break-word",
+            "anywhere"
+          ]
+        },
         "color": {
           "anyOf": [
             {
@@ -5031,6 +5183,42 @@
           "additionalProperties": false
         },
         "filter": {
+          "type": "object",
+          "properties": {
+            "blur": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "brightness": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "contrast": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "saturate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 300
+            },
+            "grayscale": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "hueRotate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 360
+            }
+          },
+          "additionalProperties": false
+        },
+        "backdropFilter": {
           "type": "object",
           "properties": {
             "blur": {

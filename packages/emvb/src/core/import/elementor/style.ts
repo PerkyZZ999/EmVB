@@ -251,7 +251,7 @@ function background(s: Settings, k: string, d: Device, ctx: ImportContext, el: s
  * Elementor) when `ctx.useDefaults`.
  */
 export function typographyReader(p: string, fallback?: string): Reader {
-  return (s, d, ctx: ImportContext, el) => {
+  return (s, d, ctx: ImportContext) => {
     const style: Style = {};
     const ref = globalRef(s, `${p}_typography`);
     if (d === "") {
@@ -287,13 +287,9 @@ export function typographyReader(p: string, fallback?: string): Reader {
       ) {
         style["textDecoration"] = decoration;
       }
-      if (str(s[`${p}_font_style`]) === "italic" || str(s[`${p}_font_style`]) === "oblique") {
-        ctx.note(
-          "approximated",
-          el,
-          "Italic text is shown upright (EmVB has no italic style setting).",
-        );
-      }
+      const fontStyle = str(s[`${p}_font_style`]);
+      if (fontStyle === "italic" || fontStyle === "oblique") style["fontStyle"] = "italic";
+      else if (fontStyle === "normal") style["fontStyle"] = "normal";
     }
     const size = slider(at(s, `${p}_font_size`, d));
     if (size) style["fontSize"] = size;

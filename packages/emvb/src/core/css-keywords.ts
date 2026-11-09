@@ -32,6 +32,15 @@ export const BORDER_STYLES = ["none", "solid", "dashed", "dotted"] as const;
 
 export const OVERFLOWS = ["visible", "hidden", "clip", "scroll", "auto"] as const;
 
+/** W-957: upright or italic text. */
+export const FONT_STYLES = ["normal", "italic"] as const;
+
+/** W-957: how spaces and line breaks wrap. */
+export const WHITE_SPACES = ["normal", "nowrap", "pre-line", "pre-wrap"] as const;
+
+/** W-957: whether long words may break to fit. */
+export const OVERFLOW_WRAPS = ["normal", "break-word", "anywhere"] as const;
+
 export const OBJECT_FITS = ["fill", "contain", "cover", "none", "scale-down"] as const;
 
 export const POSITIONS = ["static", "relative", "absolute", "fixed", "sticky"] as const;

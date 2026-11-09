@@ -170,8 +170,11 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "maxWidth",
     "maxHeight",
     "overflow",
+    "overflowX",
+    "overflowY",
     "aspectRatio",
     "objectFit",
+    "objectPosition",
   ],
   position: ["position", "top", "right", "bottom", "left", "zIndex"],
   typography: [
@@ -183,6 +186,9 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "textAlign",
     "textTransform",
     "textDecoration",
+    "fontStyle",
+    "whiteSpace",
+    "overflowWrap",
     "color",
   ],
   background: [
@@ -213,6 +219,7 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "opacity",
     "boxShadow",
     "filter",
+    "backdropFilter",
     "cursor",
     "entrance",
     "scrollMotion",
@@ -232,6 +239,7 @@ const ICON_MOVED: StyleKey[] = ["color", "transition"];
 /** Keys that only make sense on some element types. */
 const ONLY_FOR: Partial<Record<StyleKey, string[]>> = {
   objectFit: ["image", "video"],
+  objectPosition: ["image", "video"],
   ...Object.fromEntries(
     ["iconRotate", "iconFlip", "iconScale", "iconStrokeWidth", "iconShadow", "iconAnimation"].map(
       (key) => [key, ["icon"]],
@@ -346,6 +354,13 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   overflow: "Overflow",
   aspectRatio: "Aspect ratio",
   objectFit: "Object fit",
+  objectPosition: "Object position",
+  overflowX: "Overflow X",
+  overflowY: "Overflow Y",
+  fontStyle: "Style",
+  whiteSpace: "Line wrapping",
+  overflowWrap: "Long words",
+  backdropFilter: "Backdrop filters",
   paddingTop: "Padding top",
   paddingRight: "Padding right",
   paddingBottom: "Padding bottom",

@@ -265,11 +265,74 @@ describe("Elementor CSS text (W-945)", () => {
       fontWeight: 800,
       lineHeight: 1.2,
       alignItems: "center",
-      overflow: "auto",
+      overflowX: "auto",
       gap: { value: 12, unit: "px" },
       fontFamily: '"Inter", sans-serif',
     });
     expect(unmapped).toEqual(["transform"]);
+  });
+
+  test("W-957: italic, wrapping, long words, object position and one overflow axis map exactly", () => {
+    const { style, unmapped } = declarations(
+      "font-style: oblique; white-space: nowrap; word-wrap: break-word; object-position: 50% 0%; overflow-y: hidden",
+    );
+    expect(style).toEqual({
+      fontStyle: "italic",
+      whiteSpace: "nowrap",
+      overflowWrap: "break-word",
+      objectPosition: "top",
+      overflowY: "hidden",
+    });
+    expect(unmapped).toEqual([]);
+  });
+
+  test("W-957: an Elementor 4 backdrop blur becomes a backdrop filter", () => {
+    const blur = {
+      $$type: "backdrop-filter",
+      value: [
+        {
+          $$type: "css-filter-func",
+          value: {
+            func: { $$type: "string", value: "blur" },
+            args: {
+              $$type: "blur",
+              value: { size: { $$type: "size", value: { size: 9, unit: "px" } } },
+            },
+          },
+        },
+      ],
+    };
+    const imported = importElementor({
+      content: [
+        {
+          id: "glass",
+          elType: "e-div-block",
+          settings: { classes: { $$type: "classes", value: ["g-glass"] } },
+          elements: [],
+        },
+      ],
+      global_classes: {
+        items: {
+          "g-glass": {
+            id: "g-glass",
+            variants: [
+              {
+                meta: { breakpoint: "desktop", state: null },
+                props: {
+                  "backdrop-filter": blur,
+                  "font-style": { $$type: "string", value: "italic" },
+                },
+              },
+            ],
+          },
+        },
+        order: ["g-glass"],
+      },
+    });
+    if (!imported.ok) throw new Error(imported.error);
+    const [glass] = (imported.layout.root as Node).children ?? [];
+    expect(glass?.style).toMatchObject({ backdropFilter: { blur: 9 }, fontStyle: "italic" });
+    expect(imported.notes.map((n) => n.message).join("\n")).not.toContain("backdrop-filter");
   });
 
   test("a side's border draws only that side", () => {

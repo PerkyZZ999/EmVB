@@ -97,6 +97,8 @@ describe("Size section (W-088)", () => {
       "maxWidth",
       "maxHeight",
       "overflow",
+      "overflowX",
+      "overflowY",
       "aspectRatio",
     ]);
     expect(keysFor("container", "layout")).toEqual([
@@ -367,6 +369,7 @@ describe("Effects section (W-088)", () => {
       "opacity",
       "boxShadow",
       "filter",
+      "backdropFilter",
       "cursor",
       "entrance",
       "scrollMotion",

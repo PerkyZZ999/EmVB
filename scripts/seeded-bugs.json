@@ -43366,6 +43366,94 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
       "expect": "\\(fail\\).*a form inside a form"
+    },
+    {
+      "id": "W-957/overflow-axis-dropped",
+      "requirement": "W-957",
+      "description": "overflowX writes no CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  overflowX: { css: \"overflow-x\", toValue: keyword(OVERFLOW) },",
+          "replace": "  overflowX: { css: \"overflow-x\", toValue: () => undefined },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/style-map.test.ts"],
+      "expect": "\\(fail\\).*W-957: overflowX"
+    },
+    {
+      "id": "W-957/object-position-unchecked",
+      "requirement": "W-957",
+      "description": "objectPosition reaches the stylesheet without the keyword check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  objectPosition: { css: \"object-position\", toValue: keyword(BACKGROUND_POSITION) },",
+          "replace": "  objectPosition: { css: \"object-position\", toValue: (v: unknown) => String(v) },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/style-map.test.ts"],
+      "expect": "\\(fail\\).*W-957: objectPosition refuses CSS EmVB doesn't offer"
+    },
+    {
+      "id": "W-957/backdrop-not-written",
+      "requirement": "W-957",
+      "description": "backdropFilter writes no CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  backdropFilter: { css: \"backdrop-filter\", toValue: cssFilter },",
+          "replace": "  backdropFilter: { css: \"backdrop-filter\", toValue: () => undefined },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/style-map.test.ts"],
+      "expect": "\\(fail\\).*W-957: backdropFilter"
+    },
+    {
+      "id": "W-957/italic-not-offered",
+      "requirement": "W-957",
+      "description": "Typography has no Style (italic) row.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "    \"fontStyle\",\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/element-panel-shapes.test.tsx"
+      ],
+      "expect": "\\(fail\\).*element panel markup"
+    },
+    {
+      "id": "W-957/import-italic-dropped",
+      "requirement": "W-957",
+      "description": "Imported italic text stays upright.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/css.ts",
+          "search": "      if (value !== \"normal\" && value !== \"italic\" && value !== \"oblique\") return false;",
+          "replace": "      if (value) return false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*W-957: italic, wrapping"
+    },
+    {
+      "id": "W-957/import-backdrop-dropped",
+      "requirement": "W-957",
+      "description": "An Elementor 4 backdrop blur is left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "        if (px !== undefined && px >= 0 && px <= 100) style[\"backdropFilter\"] = { blur: px };",
+          "replace": "        if (px === -1) style[\"backdropFilter\"] = { blur: px };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*W-957: an Elementor 4 backdrop blur"
     }
   ]
 }

@@ -67,7 +67,9 @@ function classKeys(
 ): StyleKey[] {
   const keys = keysFor("container", section, style, position);
   const withFit =
-    section === "size" && !keys.includes("objectFit") ? [...keys, "objectFit" as const] : keys;
+    section === "size" && !keys.includes("objectFit")
+      ? [...keys, "objectFit" as const, "objectPosition" as const]
+      : keys;
   return (
     state === "normal"
       ? withFit

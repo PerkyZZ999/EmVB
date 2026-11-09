@@ -101,12 +101,52 @@ const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[
     { value: "scroll", label: "Scroll" },
     { value: "auto", label: "Auto" },
   ],
+  overflowX: [
+    { value: "visible", label: "Visible" },
+    { value: "hidden", label: "Hidden" },
+    { value: "clip", label: "Clip" },
+    { value: "scroll", label: "Scroll" },
+    { value: "auto", label: "Auto" },
+  ],
+  overflowY: [
+    { value: "visible", label: "Visible" },
+    { value: "hidden", label: "Hidden" },
+    { value: "clip", label: "Clip" },
+    { value: "scroll", label: "Scroll" },
+    { value: "auto", label: "Auto" },
+  ],
+  objectPosition: [
+    { value: "center", label: "Center" },
+    { value: "top", label: "Top" },
+    { value: "bottom", label: "Bottom" },
+    { value: "left", label: "Left" },
+    { value: "right", label: "Right" },
+    { value: "top left", label: "Top left" },
+    { value: "top right", label: "Top right" },
+    { value: "bottom left", label: "Bottom left" },
+    { value: "bottom right", label: "Bottom right" },
+  ],
   aspectRatio: [
     { value: "auto", label: "Auto" },
     ...["1/1", "4/3", "3/2", "16/9", "21/9", "3/4", "2/3", "9/16"].map((ratio) => ({
       value: ratio,
       label: ratio.replace("/", ":"),
     })),
+  ],
+  fontStyle: [
+    { value: "normal", label: "Normal" },
+    { value: "italic", label: "Italic" },
+  ],
+  whiteSpace: [
+    { value: "normal", label: "Wrap" },
+    { value: "nowrap", label: "Don't wrap" },
+    { value: "pre-line", label: "Keep line breaks" },
+    { value: "pre-wrap", label: "Keep spaces and line breaks" },
+  ],
+  overflowWrap: [
+    { value: "normal", label: "Keep whole" },
+    { value: "break-word", label: "Break if needed" },
+    { value: "anywhere", label: "Break anywhere" },
   ],
   objectFit: [
     { value: "fill", label: "Fill" },
@@ -556,6 +596,18 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "backdropFilter") {
+    return (
+      <FiltersControl
+        styleKey="backdropFilter"
+        label="Backdrop filters"
+        value={style?.backdropFilter}
+        inherited={inherited?.backdropFilter}
+        onChange={(backdropFilter) => onPatch({ backdropFilter })}
+      />
+    );
+  }
+
   if (LENGTH_KEYS.has(styleKey)) {
     return (
       <LengthRow
@@ -587,6 +639,7 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "opacity",
   "boxShadow",
   "filter",
+  "backdropFilter",
   "entrance",
   "scrollMotion",
   "loopMotion",

@@ -54,6 +54,17 @@ const ADDED_IN_1X: Record<string, string> = {
   "language-switcher": "1.0 (W-937): src/core/render/language-switcher.test.ts",
 };
 
+/** Style keys added after 0.9.0, so no released page has them: where each one is tested. */
+const STYLE_KEYS_ADDED_IN_1X: Record<string, string> = {
+  overflowX: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
+  overflowY: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
+  objectPosition: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
+  fontStyle: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
+  whiteSpace: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
+  overflowWrap: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
+  backdropFilter: "1.0 (W-957): src/core/sanitize/style-map.test.ts",
+};
+
 type Style = Record<string, unknown> & { motion?: Record<string, unknown> };
 
 function usedKeys(names: string[]) {
@@ -118,6 +129,8 @@ describe("the compatibility corpus covers the 1.0 contract (W-926)", () => {
     expect(
       Object.keys(ELEMENTS).filter((type) => !types.has(type) && !(type in ADDED_IN_1X)),
     ).toEqual([]);
-    expect(wantStyles.filter((key) => !styles.has(key))).toEqual([]);
+    expect(
+      wantStyles.filter((key) => !styles.has(key) && !(key in STYLE_KEYS_ADDED_IN_1X)),
+    ).toEqual([]);
   });
 });

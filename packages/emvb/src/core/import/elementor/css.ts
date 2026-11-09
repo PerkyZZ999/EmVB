@@ -39,6 +39,32 @@ export function finishBorders(style: Style): void {
   }
 }
 
+/** `center center`, `50% 0%`, `top left` … → EmVB's position keywords. */
+function objectPosition(value: string): string | undefined {
+  const words = value
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((w) => ({ "0%": "left-or-top", "50%": "center", "100%": "right-or-bottom" })[w] ?? w);
+  if (words.length === 0 || words.length > 2) return undefined;
+  const [first = "center", second = "center"] = words;
+  const horizontal =
+    [first, second].find((w) => w === "left" || w === "right") ??
+    (first === "left-or-top" ? "left" : first === "right-or-bottom" ? "right" : "center");
+  const vertical =
+    [first, second].find((w) => w === "top" || w === "bottom") ??
+    (second === "left-or-top" ? "top" : second === "right-or-bottom" ? "bottom" : "center");
+  if (
+    ![first, second].every((w) =>
+      ["left", "right", "top", "bottom", "center", "left-or-top", "right-or-bottom"].includes(w),
+    )
+  )
+    return undefined;
+  if (vertical === "center") return horizontal;
+  if (horizontal === "center") return vertical;
+  return `${vertical} ${horizontal}`;
+}
+
 /** `selector { … }` rules on the element itself (Elementor Pro custom CSS). */
 export function customCss(css: string, ctx: ImportContext, name: string): Style {
   const style: Style = {};
@@ -191,9 +217,30 @@ function applyCss(style: Style, prop: string, value: string): boolean {
     case "overflow":
     case "overflow-x":
     case "overflow-y": {
-      // EmVB has one overflow setting for both axes.
       if (!["visible", "hidden", "clip", "scroll", "auto"].includes(value)) return false;
-      style["overflow"] = value;
+      style[prop === "overflow" ? "overflow" : prop === "overflow-x" ? "overflowX" : "overflowY"] =
+        value;
+      return true;
+    }
+    case "font-style":
+      if (value !== "normal" && value !== "italic" && value !== "oblique") return false;
+      style["fontStyle"] = value === "normal" ? "normal" : "italic";
+      return true;
+    case "white-space": {
+      const mapped = value === "pre" ? "pre-wrap" : value === "break-spaces" ? "pre-wrap" : value;
+      if (!["normal", "nowrap", "pre-line", "pre-wrap"].includes(mapped)) return false;
+      style["whiteSpace"] = mapped;
+      return true;
+    }
+    case "overflow-wrap":
+    case "word-wrap":
+      if (!["normal", "break-word", "anywhere"].includes(value)) return false;
+      style["overflowWrap"] = value;
+      return true;
+    case "object-position": {
+      const position = objectPosition(value);
+      if (!position) return false;
+      style["objectPosition"] = position;
       return true;
     }
     case "font-family": {

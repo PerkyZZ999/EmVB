@@ -91,8 +91,10 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `width` / `height` | size | `width` / `height` |
 | `minWidth` / `maxWidth` / `minHeight` / `maxHeight` | length | matching size properties (`maxHeight` since W-088) |
 | `overflow` | `visible`, `hidden`, `clip`, `scroll`, `auto` | `overflow` |
+| `overflowX`, `overflowY` (W-957) | same as `overflow` | `overflow-x`, `overflow-y`, after `overflow` so one axis wins |
 | `aspectRatio` | `"auto"` or `"w/h"` with whole numbers 1–9999, such as `"16/9"` | `aspect-ratio` (`16 / 9`) |
 | `objectFit` | `fill`, `contain`, `cover`, `none`, `scale-down` | `object-fit` (the editor offers it on Image and Video) |
+| `objectPosition` (W-957) | `center`, `top`, `bottom`, `left`, `right`, `top left`, `top right`, `bottom left`, `bottom right` | `object-position` (Image and Video) |
 | `paddingTop` / `Right` / `Bottom` / `Left` | length | `padding-*` |
 | `marginTop` / `Right` / `Bottom` / `Left` | offset (negative since W-331) | `margin-*` |
 | `position` | `static`, `relative`, `absolute`, `fixed`, `sticky` | `position` |
@@ -106,6 +108,9 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `textAlign` | `left`, `center`, `right`, `justify` | `text-align` |
 | `textTransform` | `none`, `uppercase`, `lowercase`, `capitalize` | `text-transform` |
 | `textDecoration` | `none`, `underline`, `overline`, `line-through` | `text-decoration` (W-113; a button sets `none` in its base CSS) |
+| `fontStyle` (W-957) | `normal`, `italic` | `font-style` |
+| `whiteSpace` (W-957) | `normal`, `nowrap`, `pre-line`, `pre-wrap` | `white-space` (a Text element defaults to `pre-line`) |
+| `overflowWrap` (W-957) | `normal`, `break-word`, `anywhere` | `overflow-wrap` |
 | `color` / `backgroundColor` / `borderColor` | colour | matching colour properties |
 | `backgroundImage` (W-094) | http(s) URL or a site path, no spaces, quotes or parentheses | `background-image` as `url("…")`. With no size, position or repeat: `cover`, `center`, `no-repeat` |
 | `backgroundVideo` | the same URL rule as `backgroundImage` | a muted, looping `<video>` behind the content |
@@ -121,6 +126,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `opacity` | number 0–1 (the editor shows 0–100 %) | `opacity` |
 | `boxShadow` | `{ x, y, blur, spread, color?, inset? }`: px numbers, `x`, `y` and `spread` −1000 to 1000, `blur` 0 to 1000; `color` is a colour; `inset` is a boolean | `box-shadow` as `[inset] Xpx Ypx Bpx Spx [colour]`; no colour means the text colour |
 | `filter` | `{ blur?, brightness?, contrast?, saturate?, grayscale?, hueRotate? }`, at least one set: `blur` 0–100 px, `brightness` / `contrast` / `saturate` 0–300 %, `grayscale` 0–100 %, `hueRotate` 0–360° | `filter`, functions always in that order, such as `blur(2px) grayscale(100%)` |
+| `backdropFilter` (W-957) | the same object as `filter` | `backdrop-filter`, applied to what is behind the element (frosted glass) |
 | `cursor` | `default`, `pointer`, `text`, `move`, `grab`, `not-allowed`, `help`, `crosshair`, `zoom-in` | `cursor` |
 | `motion.transition` (W-089, Normal only) | `{ duration, delay?, easing, property }`: `duration` and `delay` whole ms 0–2000; `easing` `ease`, `ease-in`, `ease-out`, `ease-in-out`, `linear`; `property` `all`, `colors`, `opacity`, `shadow`, `filter`. No other keys | `transition`, one entry per CSS property: `colors` is `color`, `background-color` and `border-color`; `shadow` is `box-shadow`. For example `opacity 200ms ease-out 50ms` |
 | `motion.entrance` (W-101, Normal only) | `{ type, duration, delay?, trigger? }`: `type` is `fade`, `fade-up`, `fade-down`, `slide-up`, `slide-down` or `scale`; `duration` and `delay` whole ms 0–2000; `trigger` is `load` (default) or `view` (as it scrolls in; browsers without scroll-driven animations play it on load) | `animation` named `emvb-<type>`, once, `ease-out`, `both`. Reduced motion sets `animation: none` |

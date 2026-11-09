@@ -126,10 +126,15 @@ export function FiltersControl({
   value,
   inherited,
   onChange,
+  styleKey = "filter",
+  label: heading = "Filters",
 }: {
   value: Filter | undefined;
   inherited?: Filter;
   onChange: (next: Filter | undefined) => void;
+  /** W-957: the same rows edit `backdropFilter` (what's behind the element). */
+  styleKey?: "filter" | "backdropFilter";
+  label?: string;
 }) {
   const patch = (key: keyof Filter, n: number | undefined) => {
     const next: Record<string, number> = {};
@@ -144,16 +149,16 @@ export function FiltersControl({
   return (
     <div
       className="emvb-filters"
-      data-emvb-style="filter"
+      data-emvb-style={styleKey}
       data-set={value ? "true" : undefined}
       ref={rows}
     >
-      <p className="emvb-sub-label">Filters</p>
+      <p className="emvb-sub-label">{heading}</p>
       {open || value || inherited ? (
         FILTER_ROWS.map(([key, label, spec]) => (
           <NumberRow
             key={key}
-            rowKey={`filter.${key}`}
+            rowKey={`${styleKey}.${key}`}
             label={label}
             value={value?.[key]}
             spec={spec}
@@ -172,7 +177,7 @@ export function FiltersControl({
             requestAnimationFrame(() => rows.current?.querySelector<HTMLElement>("input")?.focus());
           }}
         >
-          Add filters
+          {`Add ${heading.toLowerCase()}`}
         </Button>
       )}
     </div>

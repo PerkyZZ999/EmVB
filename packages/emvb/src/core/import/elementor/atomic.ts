@@ -589,8 +589,34 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
         break;
       }
       case "font-style":
-        if (str(un(v)) === "italic") out.unsupported.push("italic");
+      case "white-space":
+      case "overflow-wrap":
+      case "object-position":
+      case "overflow-x":
+      case "overflow-y": {
+        const raw = str(un(v));
+        const { style: mapped } = declarations(`${prop}: ${raw ?? ""}`);
+        if (Object.keys(mapped).length > 0) Object.assign(style, mapped);
+        else out.unsupported.push(`${prop}: ${raw ?? "?"}`);
         break;
+      }
+      case "backdrop-filter": {
+        const list = un(v);
+        const blur = (Array.isArray(list) ? list : [])
+          .map((f) => un(f))
+          .filter(isRecord)
+          .find((f) => str(un(f["func"])) === "blur");
+        // `{ func: "blur", args: { $$type: "blur", value: { size: <size> } } }`
+        const args = blur ? un(blur["args"]) : undefined;
+        const radius = isRecord(args) ? size(args["size"]) : {};
+        const px =
+          radius.len && radius.len !== "auto" && radius.len.unit === "px"
+            ? radius.len.value
+            : undefined;
+        if (px !== undefined && px >= 0 && px <= 100) style["backdropFilter"] = { blur: px };
+        else out.unsupported.push("backdrop-filter");
+        break;
+      }
       default:
         out.unsupported.push(prop);
     }
