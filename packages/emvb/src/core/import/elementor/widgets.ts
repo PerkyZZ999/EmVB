@@ -54,6 +54,10 @@ export type Env = {
   depth: number;
   /** Maps child Elementor elements (nested widgets), as the structure walker does. */
   walk: (elements: unknown, env: Env) => N[];
+  /** Inside an Elementor 4 form: its labels by input id, so fields take their label. */
+  form?: { labels: Map<string, string>; byField?: Map<Record<string, unknown>, string> };
+  /** Inside a grid: its column counts, for children that span every column. */
+  grid?: { desktop: number; tablet?: number; mobile?: number };
 };
 
 type Widget = (s: Settings, ctx: ImportContext, el: string, env: Env, raw: Settings) => N[];

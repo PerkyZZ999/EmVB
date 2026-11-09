@@ -1,0 +1,1017 @@
+{
+  "content": [
+    {
+      "id": "hero",
+      "elType": "e-flexbox",
+      "settings": {
+        "classes": {
+          "$$type": "classes",
+          "value": ["g-hero"]
+        },
+        "tag": {
+          "$$type": "string",
+          "value": "section"
+        }
+      },
+      "elements": [
+        {
+          "id": "wrap",
+          "elType": "e-div-block",
+          "settings": {
+            "classes": {
+              "$$type": "classes",
+              "value": ["g-wrap"]
+            }
+          },
+          "elements": [
+            {
+              "id": "h1",
+              "elType": "widget",
+              "settings": {
+                "classes": {
+                  "$$type": "classes",
+                  "value": ["g-title"]
+                },
+                "title": {
+                  "$$type": "html",
+                  "value": "Fast pages,<br><em>no code.</em>"
+                },
+                "tag": {
+                  "$$type": "string",
+                  "value": "h1"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-heading",
+              "editor_settings": {
+                "title": "Hero title"
+              }
+            },
+            {
+              "id": "p1",
+              "elType": "widget",
+              "settings": {
+                "paragraph": {
+                  "$$type": "html",
+                  "value": "Read the <strong>guide</strong>."
+                },
+                "link": {
+                  "$$type": "link",
+                  "value": {
+                    "destination": {
+                      "$$type": "url",
+                      "value": "https://example.com/guide"
+                    },
+                    "isTargetBlank": {
+                      "$$type": "boolean",
+                      "value": true
+                    }
+                  }
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-paragraph"
+            },
+            {
+              "id": "b1",
+              "elType": "widget",
+              "settings": {
+                "classes": {
+                  "$$type": "classes",
+                  "value": ["g-btn"]
+                },
+                "text": {
+                  "$$type": "html",
+                  "value": "Get a quote <span>→</span>"
+                },
+                "link": {
+                  "$$type": "link",
+                  "value": {
+                    "destination": {
+                      "$$type": "query",
+                      "value": {
+                        "id": {
+                          "$$type": "number",
+                          "value": 43
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-button"
+            },
+            {
+              "id": "p2",
+              "elType": "widget",
+              "settings": {
+                "classes": {
+                  "$$type": "classes",
+                  "value": ["g-mobile-hide"]
+                },
+                "paragraph": {
+                  "$$type": "string",
+                  "value": "Desktop only"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-paragraph"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0",
+          "editor_settings": {
+            "title": "Hero wrapper"
+          }
+        }
+      ],
+      "isInner": false,
+      "version": "0.0",
+      "editor_settings": {
+        "title": "Hero"
+      }
+    },
+    {
+      "id": "grid",
+      "elType": "e-div-block",
+      "settings": {
+        "classes": {
+          "$$type": "classes",
+          "value": ["g-grid"]
+        }
+      },
+      "elements": [
+        {
+          "id": "c1",
+          "elType": "e-div-block",
+          "settings": {},
+          "elements": [
+            {
+              "id": "i1",
+              "elType": "widget",
+              "settings": {
+                "image": {
+                  "$$type": "image",
+                  "value": {
+                    "src": {
+                      "$$type": "image-src",
+                      "value": {
+                        "id": {
+                          "$$type": "image-attachment-id",
+                          "value": 5
+                        },
+                        "url": {
+                          "$$type": "url",
+                          "value": "https://old.example/team-photo.jpg"
+                        }
+                      }
+                    },
+                    "size": {
+                      "$$type": "string",
+                      "value": "full"
+                    }
+                  }
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-image"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        },
+        {
+          "id": "c2",
+          "elType": "e-div-block",
+          "settings": {},
+          "elements": [
+            {
+              "id": "s1",
+              "elType": "widget",
+              "settings": {
+                "svg": {
+                  "$$type": "svg-src",
+                  "value": {
+                    "id": {
+                      "$$type": "image-attachment-id",
+                      "value": 6
+                    },
+                    "url": {
+                      "$$type": "url",
+                      "value": "https://old.example/icon.svg"
+                    }
+                  }
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-svg"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        },
+        {
+          "id": "c3",
+          "elType": "e-div-block",
+          "settings": {},
+          "elements": [
+            {
+              "id": "p3",
+              "elType": "widget",
+              "settings": {
+                "paragraph": {
+                  "$$type": "string",
+                  "value": "Card"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-paragraph"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        },
+        {
+          "id": "c4",
+          "elType": "e-div-block",
+          "settings": {},
+          "elements": [
+            {
+              "id": "p4",
+              "elType": "widget",
+              "settings": {
+                "paragraph": {
+                  "$$type": "string",
+                  "value": "Card"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-paragraph"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        },
+        {
+          "id": "wide",
+          "elType": "e-div-block",
+          "settings": {
+            "classes": {
+              "$$type": "classes",
+              "value": ["g-wide"]
+            }
+          },
+          "elements": [
+            {
+              "id": "p5",
+              "elType": "widget",
+              "settings": {
+                "paragraph": {
+                  "$$type": "string",
+                  "value": "Full row"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-paragraph"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        }
+      ],
+      "isInner": false,
+      "version": "0.0"
+    },
+    {
+      "id": "acc",
+      "elType": "e-accordion",
+      "settings": {
+        "default_state": {
+          "$$type": "string",
+          "value": "first_expanded"
+        }
+      },
+      "elements": [
+        {
+          "id": "ai",
+          "elType": "e-accordion-item",
+          "settings": {},
+          "elements": [
+            {
+              "id": "ah",
+              "elType": "e-accordion-item-header",
+              "settings": {},
+              "elements": [
+                {
+                  "id": "at",
+                  "elType": "e-accordion-item-title",
+                  "settings": {},
+                  "elements": [
+                    {
+                      "id": "atp",
+                      "elType": "widget",
+                      "settings": {
+                        "paragraph": {
+                          "$$type": "string",
+                          "value": "▸ Is it free?"
+                        },
+                        "tag": {
+                          "$$type": "string",
+                          "value": "span"
+                        }
+                      },
+                      "elements": [],
+                      "isInner": false,
+                      "version": "0.0",
+                      "widgetType": "e-paragraph"
+                    }
+                  ],
+                  "isInner": false,
+                  "version": "0.0"
+                }
+              ],
+              "isInner": false,
+              "version": "0.0"
+            },
+            {
+              "id": "ac",
+              "elType": "e-accordion-item-content",
+              "settings": {},
+              "elements": [
+                {
+                  "id": "acp",
+                  "elType": "widget",
+                  "settings": {
+                    "paragraph": {
+                      "$$type": "string",
+                      "value": "Yes."
+                    }
+                  },
+                  "elements": [],
+                  "isInner": false,
+                  "version": "0.0",
+                  "widgetType": "e-paragraph"
+                }
+              ],
+              "isInner": false,
+              "version": "0.0"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        }
+      ],
+      "isInner": false,
+      "version": "0.0"
+    },
+    {
+      "id": "form",
+      "elType": "e-form",
+      "settings": {
+        "form-name": {
+          "$$type": "string",
+          "value": "Quote"
+        }
+      },
+      "elements": [
+        {
+          "id": "ok",
+          "elType": "e-form-success-message",
+          "settings": {},
+          "elements": [
+            {
+              "id": "okp",
+              "elType": "widget",
+              "settings": {
+                "paragraph": {
+                  "$$type": "string",
+                  "value": "Thanks!"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-paragraph"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        },
+        {
+          "id": "r1",
+          "elType": "e-div-block",
+          "settings": {},
+          "elements": [
+            {
+              "id": "l1",
+              "elType": "widget",
+              "settings": {
+                "text": {
+                  "$$type": "escaped-html",
+                  "value": "Name *"
+                },
+                "input-id": {
+                  "$$type": "string",
+                  "value": "name"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-form-label"
+            },
+            {
+              "id": "f1",
+              "elType": "widget",
+              "settings": {
+                "type": {
+                  "$$type": "string",
+                  "value": "text"
+                },
+                "placeholder": {
+                  "$$type": "string",
+                  "value": "Ada"
+                },
+                "_cssid": {
+                  "$$type": "string",
+                  "value": "name"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-form-input"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        },
+        {
+          "id": "r2",
+          "elType": "e-flexbox",
+          "settings": {},
+          "elements": [
+            {
+              "id": "f2",
+              "elType": "widget",
+              "settings": {
+                "name": {
+                  "$$type": "string",
+                  "value": "topics"
+                },
+                "value": {
+                  "$$type": "string",
+                  "value": "topic-a"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-form-checkbox"
+            },
+            {
+              "id": "l2",
+              "elType": "widget",
+              "settings": {
+                "text": {
+                  "$$type": "escaped-html",
+                  "value": "Topic A"
+                }
+              },
+              "elements": [],
+              "isInner": false,
+              "version": "0.0",
+              "widgetType": "e-form-label"
+            }
+          ],
+          "isInner": false,
+          "version": "0.0"
+        },
+        {
+          "id": "f3",
+          "elType": "widget",
+          "settings": {
+            "name": {
+              "$$type": "string",
+              "value": "plan"
+            },
+            "options": {
+              "$$type": "options",
+              "value": []
+            }
+          },
+          "elements": [],
+          "isInner": false,
+          "version": "0.0",
+          "widgetType": "e-form-select"
+        },
+        {
+          "id": "send",
+          "elType": "widget",
+          "settings": {
+            "text": {
+              "$$type": "string",
+              "value": "Send"
+            }
+          },
+          "elements": [],
+          "isInner": false,
+          "version": "0.0",
+          "widgetType": "e-form-submit-button"
+        }
+      ],
+      "isInner": false,
+      "version": "0.0"
+    }
+  ],
+  "page_settings": [],
+  "version": "0.4",
+  "title": "Atomic sample",
+  "type": "wp-page",
+  "global_classes": {
+    "items": {
+      "g-hero": {
+        "id": "g-hero",
+        "label": "acme-hero",
+        "type": "class",
+        "variants": [
+          {
+            "meta": {
+              "breakpoint": "desktop",
+              "state": null
+            },
+            "props": {
+              "display": {
+                "$$type": "string",
+                "value": "flex"
+              },
+              "flex-direction": {
+                "$$type": "string",
+                "value": "column"
+              },
+              "min-height": {
+                "$$type": "size",
+                "value": {
+                  "size": 500,
+                  "unit": "px"
+                }
+              },
+              "background": {
+                "$$type": "background",
+                "value": {
+                  "color": {
+                    "$$type": "color",
+                    "value": "#102030"
+                  },
+                  "background-overlay": {
+                    "$$type": "background-overlay",
+                    "value": [
+                      {
+                        "$$type": "background-gradient-overlay",
+                        "value": {
+                          "type": {
+                            "$$type": "string",
+                            "value": "linear"
+                          },
+                          "angle": {
+                            "$$type": "number",
+                            "value": 90
+                          },
+                          "stops": {
+                            "$$type": "gradient-color-stop",
+                            "value": [
+                              {
+                                "$$type": "color-stop",
+                                "value": {
+                                  "color": {
+                                    "$$type": "color",
+                                    "value": "#102030"
+                                  },
+                                  "offset": {
+                                    "$$type": "number",
+                                    "value": 0
+                                  }
+                                }
+                              },
+                              {
+                                "$$type": "color-stop",
+                                "value": {
+                                  "color": {
+                                    "$$type": "color",
+                                    "value": "rgba(16,32,48,.5)"
+                                  },
+                                  "offset": {
+                                    "$$type": "number",
+                                    "value": 50
+                                  }
+                                }
+                              },
+                              {
+                                "$$type": "color-stop",
+                                "value": {
+                                  "color": {
+                                    "$$type": "color",
+                                    "value": "rgba(16,32,48,0)"
+                                  },
+                                  "offset": {
+                                    "$$type": "number",
+                                    "value": 100
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      {
+                        "$$type": "background-image-overlay",
+                        "value": {
+                          "image": {
+                            "$$type": "image",
+                            "value": {
+                              "src": {
+                                "$$type": "image-src",
+                                "value": {
+                                  "url": {
+                                    "$$type": "url",
+                                    "value": "https://old.example/hero.webp"
+                                  }
+                                }
+                              },
+                              "size": {
+                                "$$type": "string",
+                                "value": "large"
+                              }
+                            }
+                          },
+                          "size": {
+                            "$$type": "string",
+                            "value": "cover"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "color": {
+                "$$type": "global-color-variable",
+                "value": "e-gv-ink"
+              }
+            },
+            "custom_css": null
+          },
+          {
+            "meta": {
+              "breakpoint": "mobile",
+              "state": null
+            },
+            "props": {
+              "min-height": {
+                "$$type": "size",
+                "value": {
+                  "size": 360,
+                  "unit": "px"
+                }
+              }
+            },
+            "custom_css": null
+          }
+        ]
+      },
+      "g-title": {
+        "id": "g-title",
+        "label": "acme-title",
+        "type": "class",
+        "variants": [
+          {
+            "meta": {
+              "breakpoint": "desktop",
+              "state": null
+            },
+            "props": {
+              "font-family": {
+                "$$type": "global-font-variable",
+                "value": "e-gv-font"
+              },
+              "font-size": {
+                "$$type": "size",
+                "value": {
+                  "size": "max(32px, min(56px, (100vw - 395px) * 1000 + 32px))",
+                  "unit": "custom"
+                }
+              },
+              "font-weight": {
+                "$$type": "string",
+                "value": "800"
+              },
+              "line-height": {
+                "$$type": "size",
+                "value": {
+                  "size": "1.1",
+                  "unit": "custom"
+                }
+              }
+            },
+            "custom_css": null
+          },
+          {
+            "meta": {
+              "breakpoint": "laptop",
+              "state": null
+            },
+            "props": {
+              "letter-spacing": {
+                "$$type": "size",
+                "value": {
+                  "size": -1,
+                  "unit": "px"
+                }
+              }
+            },
+            "custom_css": null
+          },
+          {
+            "meta": {
+              "breakpoint": "mobile",
+              "state": null
+            },
+            "props": {
+              "text-align": {
+                "$$type": "string",
+                "value": "center"
+              }
+            },
+            "custom_css": null
+          }
+        ]
+      },
+      "g-wrap": {
+        "id": "g-wrap",
+        "label": "acme-wrap",
+        "type": "class",
+        "variants": [
+          {
+            "meta": {
+              "breakpoint": "desktop",
+              "state": null
+            },
+            "props": {
+              "width": {
+                "$$type": "size",
+                "value": {
+                  "size": "min(1180px, calc(100% - 48px))",
+                  "unit": "custom"
+                }
+              },
+              "margin": {
+                "$$type": "dimensions",
+                "value": {
+                  "inline-start": {
+                    "$$type": "size",
+                    "value": {
+                      "size": "",
+                      "unit": "auto"
+                    }
+                  },
+                  "inline-end": {
+                    "$$type": "size",
+                    "value": {
+                      "size": "",
+                      "unit": "auto"
+                    }
+                  }
+                }
+              }
+            },
+            "custom_css": null
+          }
+        ]
+      },
+      "g-grid": {
+        "id": "g-grid",
+        "label": "acme-grid",
+        "type": "class",
+        "variants": [
+          {
+            "meta": {
+              "breakpoint": "desktop",
+              "state": null
+            },
+            "props": {
+              "display": {
+                "$$type": "string",
+                "value": "grid"
+              },
+              "grid-template-columns": {
+                "$$type": "string",
+                "value": "20% repeat(3, minmax(0, 1fr))"
+              },
+              "gap": {
+                "$$type": "size",
+                "value": {
+                  "size": 16,
+                  "unit": "px"
+                }
+              }
+            },
+            "custom_css": null
+          },
+          {
+            "meta": {
+              "breakpoint": "tablet",
+              "state": null
+            },
+            "props": {
+              "grid-template-columns": {
+                "$$type": "string",
+                "value": "repeat(2, minmax(0, 1fr))"
+              }
+            },
+            "custom_css": null
+          },
+          {
+            "meta": {
+              "breakpoint": "mobile",
+              "state": null
+            },
+            "props": {
+              "grid-template-columns": {
+                "$$type": "string",
+                "value": "1fr"
+              }
+            },
+            "custom_css": null
+          }
+        ]
+      },
+      "g-wide": {
+        "id": "g-wide",
+        "label": "acme-wide",
+        "type": "class",
+        "variants": [
+          {
+            "meta": {
+              "breakpoint": "desktop",
+              "state": null
+            },
+            "props": {
+              "grid-column": {
+                "$$type": "span",
+                "value": "1 / -1"
+              }
+            },
+            "custom_css": null
+          }
+        ]
+      },
+      "g-btn": {
+        "id": "g-btn",
+        "label": "acme-btn",
+        "type": "class",
+        "variants": [
+          {
+            "meta": {
+              "breakpoint": "desktop",
+              "state": null
+            },
+            "props": {
+              "background": {
+                "$$type": "background",
+                "value": {
+                  "color": {
+                    "$$type": "global-color-variable",
+                    "value": "e-gv-accent"
+                  }
+                }
+              },
+              "color": {
+                "$$type": "color",
+                "value": "#111111"
+              },
+              "border-radius": {
+                "$$type": "size",
+                "value": {
+                  "size": 10,
+                  "unit": "px"
+                }
+              },
+              "transition": {
+                "$$type": "transition",
+                "value": [
+                  {
+                    "$$type": "selection-size",
+                    "value": {
+                      "selection": {
+                        "$$type": "key-value",
+                        "value": {
+                          "key": {
+                            "$$type": "string",
+                            "value": "transform"
+                          },
+                          "value": {
+                            "$$type": "string",
+                            "value": "transform"
+                          }
+                        }
+                      },
+                      "size": {
+                        "$$type": "size",
+                        "value": {
+                          "size": 0.2,
+                          "unit": "s"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            "custom_css": {
+              "raw": "Zm9udC13ZWlnaHQ6IDc1MDsgYm9yZGVyLWJvdHRvbTogM3B4IHNvbGlkICNhYTc3MDA7"
+            }
+          },
+          {
+            "meta": {
+              "breakpoint": "desktop",
+              "state": "hover"
+            },
+            "props": {
+              "background": {
+                "$$type": "background",
+                "value": {
+                  "color": {
+                    "$$type": "color",
+                    "value": "#ffd000"
+                  }
+                }
+              }
+            },
+            "custom_css": null
+          }
+        ]
+      },
+      "g-mobile-hide": {
+        "id": "g-mobile-hide",
+        "label": "acme-desktop-only",
+        "type": "class",
+        "variants": [
+          {
+            "meta": {
+              "breakpoint": "mobile",
+              "state": null
+            },
+            "props": {
+              "display": {
+                "$$type": "string",
+                "value": "none"
+              }
+            },
+            "custom_css": null
+          }
+        ]
+      }
+    },
+    "order": ["g-hero", "g-title", "g-wrap", "g-grid", "g-wide", "g-btn", "g-mobile-hide"]
+  },
+  "global_variables": {
+    "data": {
+      "e-gv-ink": {
+        "type": "global-color-variable",
+        "label": "acme-ink",
+        "value": "#f5f5f5"
+      },
+      "e-gv-accent": {
+        "type": "global-color-variable",
+        "label": "acme-accent",
+        "value": "#ffba08"
+      },
+      "e-gv-font": {
+        "type": "global-font-variable",
+        "label": "acme-font",
+        "value": "Inter"
+      }
+    },
+    "watermark": 0,
+    "version": 1
+  }
+}

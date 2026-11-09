@@ -1,5 +1,6 @@
 /** Shared state of one Elementor import (W-945): ids, globals, icons, limits and the report. */
 import { newNodeId } from "../../tree-ops.ts";
+import { type AtomicSnapshots, emptySnapshots } from "./snapshots.ts";
 import { color, fontStack, fontWeight, isRecord, slider, str, type Settings } from "./values.ts";
 
 export type NoteKind = "approximated" | "skipped" | "unmapped";
@@ -50,6 +51,8 @@ export class ImportContext {
   readonly notes = new Map<string, ImportNote>();
   readonly fonts = new Set<string>();
   readonly htmlIds = new Set<string>();
+  /** Elementor 4 global classes and variables, from the export or the kit. */
+  readonly atomic: AtomicSnapshots = emptySnapshots();
   readonly icon: ImportOptions["icon"];
   readonly useDefaults: boolean;
   nodes = 0;

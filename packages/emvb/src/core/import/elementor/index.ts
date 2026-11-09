@@ -6,7 +6,11 @@
  */
 import { LAYOUT_SCHEMA_VERSION, type Layout } from "../../schema/layout.ts";
 import type { ThemePartType } from "../../theme/part-types.ts";
+import { nestingIssues } from "../../nesting.ts";
 import { validateLayout } from "../../validate.ts";
+import { atomicElement } from "./atomic.ts";
+import { readSnapshots } from "./snapshots.ts";
+import { customCss } from "./css.ts";
 import { ImportContext, type ImportNote, type ImportOptions } from "./context.ts";
 import {
   boxReader,
@@ -17,16 +21,7 @@ import {
   type Style,
   widthReader,
 } from "./style.ts";
-import {
-  color,
-  fontWeight,
-  isRecord,
-  num,
-  type Settings,
-  slider,
-  str,
-  textAlign,
-} from "./values.ts";
+import { isRecord, num, type Settings, slider, str } from "./values.ts";
 import {
   box,
   dynamicTag,
@@ -78,7 +73,14 @@ const PART_TYPES: Record<string, ThemePartType> = {
   "loop-item": "loop_item",
 };
 
-type Source = { elements: unknown[]; title?: string; type?: string; pageSettings?: Settings };
+type Source = {
+  elements: unknown[];
+  title?: string;
+  type?: string;
+  pageSettings?: Settings;
+  /** The export's own record: Elementor 4 exports carry `global_classes` and `global_variables`. */
+  record?: Settings;
+};
 
 /** Finds the Elementor elements in what the person pasted or uploaded. */
 function readSource(input: unknown): Source | { error: string } {
@@ -116,6 +118,7 @@ function readSource(input: unknown): Source | { error: string } {
     if (Array.isArray(value["content"])) {
       return {
         elements: value["content"],
+        record: value,
         ...titleOf(value["title"]),
         ...(str(value["type"]) ? { type: str(value["type"]) } : {}),
         ...(isRecord(value["page_settings"]) ? { pageSettings: value["page_settings"] } : {}),
@@ -190,6 +193,15 @@ class Walker {
     const elType = str(raw["elType"]) ?? "";
     let nodes: N[];
     let name: string;
+    const atomicType = elType === "widget" ? (str(raw["widgetType"]) ?? "") : elType;
+    const atomic = atomicType.startsWith("e-")
+      ? atomicElement(raw, ctx, ctx.atomic, env)
+      : undefined;
+    if (atomic) {
+      if (atomic.length === 0) return [];
+      ctx.mapped++;
+      return atomic;
+    }
     if (elType === "widget") {
       const type = str(raw["widgetType"]) ?? "";
       name = label(type);
@@ -200,15 +212,9 @@ class Walker {
     } else if (elType === "column") {
       name = "Column";
       nodes = this.column(raw, s, env, 10);
-    } else if (elType === "container" || elType === "e-flexbox" || elType === "e-div-block") {
+    } else if (elType === "container") {
       name = "Container";
-      if (elType !== "container")
-        ctx.note(
-          "approximated",
-          name,
-          "Elementor 4 elements keep their content; their styles weren't imported.",
-        );
-      nodes = this.container(raw, elType === "container" ? s : {}, env);
+      nodes = this.container(raw, s, env);
     } else if (elType.startsWith("e-")) {
       name = label(elType);
       nodes = this.widget(elType, s, raw, env, name);
@@ -223,9 +229,7 @@ class Walker {
     }
     if (nodes.length === 0) return [];
     ctx.mapped++;
-    const widget =
-      elType === "widget" ||
-      (elType.startsWith("e-") && !["e-flexbox", "e-div-block"].includes(elType));
+    const widget = elType === "widget" || elType.startsWith("e-");
     return this.common(nodes, s, name, widget);
   }
 
@@ -631,150 +635,6 @@ function unwrapAll(s: Settings): Settings {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Custom CSS (Elementor Pro): `selector { ... }` rules on the element itself, best effort
-
-const CSS_LENGTH = /^(-?\d+(?:\.\d+)?)(px|rem|em|%|vw|vh|ch)?$/;
-
-function cssLength(value: string, negative = false) {
-  const m = CSS_LENGTH.exec(value.trim());
-  if (!m) return undefined;
-  const n = Number(m[1]);
-  if (!negative && n < 0) return undefined;
-  if (n !== 0 && !m[2]) return undefined;
-  return { value: n, unit: m[2] ?? "px" };
-}
-
-function customCss(css: string, ctx: ImportContext, name: string): Style {
-  const style: Style = {};
-  const source = css.slice(0, 20_000).replace(/\/\*[\s\S]*?\*\//g, "");
-  const unmapped = new Set<string>();
-  let other = false;
-  for (const rule of source.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const selector = (rule[1] ?? "").trim();
-    if (selector !== "selector" && selector !== "body") {
-      other = true;
-      continue;
-    }
-    for (const declaration of (rule[2] ?? "").split(";")) {
-      const at = declaration.indexOf(":");
-      if (at === -1) continue;
-      const prop = declaration.slice(0, at).trim().toLowerCase();
-      const value = declaration
-        .slice(at + 1)
-        .replace(/!important/i, "")
-        .trim();
-      if (!prop || !value) continue;
-      if (!applyCss(style, prop, value)) unmapped.add(prop);
-    }
-  }
-  if (other)
-    ctx.note(
-      "approximated",
-      name,
-      "Custom CSS rules for inner parts or other selectors weren't imported.",
-    );
-  if (unmapped.size > 0)
-    ctx.note(
-      "approximated",
-      name,
-      `Custom CSS properties left out: ${[...unmapped].slice(0, 8).join(", ")}.`,
-    );
-  return style;
-}
-
-function applyCss(style: Style, prop: string, value: string): boolean {
-  switch (prop) {
-    case "color":
-    case "background-color": {
-      const c = color(value);
-      if (!c) return false;
-      style[prop === "color" ? "color" : "backgroundColor"] = c;
-      return true;
-    }
-    case "background": {
-      const c = color(value);
-      if (!c) return false;
-      style["backgroundColor"] = c;
-      return true;
-    }
-    case "font-size":
-    case "max-width":
-    case "min-height":
-    case "border-radius":
-    case "width": {
-      const l = cssLength(value);
-      if (!l) return false;
-      const keys: Record<string, string> = {
-        "font-size": "fontSize",
-        "max-width": "maxWidth",
-        "min-height": "minHeight",
-        "border-radius": "borderRadius",
-        width: "width",
-      };
-      style[keys[prop] ?? prop] = l;
-      return true;
-    }
-    case "font-weight": {
-      const w = fontWeight(value);
-      if (w === undefined) return false;
-      style["fontWeight"] = w;
-      return true;
-    }
-    case "text-align": {
-      const a = textAlign(value);
-      if (!a) return false;
-      style["textAlign"] = a;
-      return true;
-    }
-    case "text-transform":
-      if (!["none", "uppercase", "lowercase", "capitalize"].includes(value)) return false;
-      style["textTransform"] = value;
-      return true;
-    case "opacity": {
-      const n = num(value);
-      if (n === undefined || n < 0 || n > 1) return false;
-      style["opacity"] = n;
-      return true;
-    }
-    case "letter-spacing": {
-      const l = cssLength(value, true);
-      if (!l) return false;
-      style["letterSpacing"] = l;
-      return true;
-    }
-    case "line-height": {
-      const n = num(value);
-      if (n !== undefined && n >= 0 && n <= 100) {
-        style["lineHeight"] = n;
-        return true;
-      }
-      const l = cssLength(value);
-      if (!l) return false;
-      style["lineHeight"] = l;
-      return true;
-    }
-    case "padding":
-    case "margin": {
-      const parts = value
-        .split(/\s+/)
-        .map((v) => (v === "auto" && prop === "margin" ? "auto" : cssLength(v, prop === "margin")));
-      if (parts.length === 0 || parts.length > 4 || parts.some((p) => p === undefined))
-        return false;
-      const [t, r = t, b = t, l = r] = parts;
-      const base = prop === "padding" ? "padding" : "margin";
-      if (prop === "padding" && [t, r, b, l].includes("auto")) return false;
-      style[`${base}Top`] = t;
-      style[`${base}Right`] = r;
-      style[`${base}Bottom`] = b;
-      style[`${base}Left`] = l;
-      return true;
-    }
-    default:
-      return false;
-  }
-}
-
-// ---------------------------------------------------------------------------------------------
 // Validation: prune what EmVB refuses, never fail the import for one bad value
 
 type Found = { node: N; parent?: N; rest: string[] };
@@ -864,6 +724,8 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
   if ("error" in source) return { ok: false, error: source.error };
   if (source.elements.length === 0) return { ok: false, error: "This export has no elements." };
   const ctx = new ImportContext(options);
+  if (source.record) readSnapshots(source.record, ctx.atomic);
+  if (isRecord(options.kit)) readSnapshots(options.kit, ctx.atomic);
   const walker = new Walker(ctx);
   const children = walker.walk(source.elements, { parentRow: false, depth: 1, walk: walker.walk });
   if (children.length === 0)
@@ -876,8 +738,17 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
   const page = source.pageSettings ?? {};
   const pageStyle = deviceStyles(page, ctx, "Page", [boxReader("")]);
   const pageCss = str(page["custom_css"]);
+  // The kit's custom CSS sets site-wide text defaults on `body` (font, colour): the page root
+  // takes them, below the page's own settings.
+  const kitSettings =
+    isRecord(options.kit) && isRecord(options.kit["settings"])
+      ? options.kit["settings"]
+      : undefined;
+  const kitCss = kitSettings ? str(kitSettings["custom_css"]) : undefined;
+  const kitStyle = kitCss ? customCss(kitCss, ctx, "Site kit") : {};
   const root = box(ctx, children, {
     flexDirection: "column",
+    ...kitStyle,
     ...pageStyle.style,
     ...(pageCss ? customCss(pageCss, ctx, "Page") : {}),
   });
@@ -886,7 +757,9 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
   const tried = new Set<string>();
   for (let attempt = 0; attempt < 500; attempt++) {
     const checked = validateLayout(candidate);
-    if (checked.ok) {
+    // The save hook also refuses misplaced elements (a field outside a form, …): prune those too.
+    const misplaced = checked.ok ? nestingIssues(checked.layout, 1)[0] : undefined;
+    if (checked.ok && !misplaced) {
       const partType = source.type ? PART_TYPES[source.type] : undefined;
       return {
         ok: true,
@@ -899,7 +772,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
         fonts: [...ctx.fonts].toSorted(),
       };
     }
-    const issue = checked.issues[0];
+    const issue = checked.ok ? misplaced : checked.issues[0];
     if (!issue || !prune(root, issue, ctx, tried)) {
       return {
         ok: false,

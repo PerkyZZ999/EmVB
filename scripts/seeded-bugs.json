@@ -43170,6 +43170,202 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
       "expect": "\\(fail\\).*a header template becomes a header theme part"
+    },
+    {
+      "id": "W-945/atomic-classes-ignored",
+      "requirement": "W-945",
+      "description": "Elementor 4 global classes never reach the element's style.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "  return [...globals, ...locals];",
+          "replace": "  return [...locals];"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*global classes and variables become the element's style"
+    },
+    {
+      "id": "W-945/atomic-variables-ignored",
+      "requirement": "W-945",
+      "description": "Elementor 4 colour variables aren't resolved.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "  if (typeOf(v) === \"global-color-variable\") {",
+          "replace": "  if (typeOf(v) === \"global-color-variable\" && Math.random() > 2) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*global classes and variables become the element's style"
+    },
+    {
+      "id": "W-945/fluid-sizes-dropped",
+      "requirement": "W-945",
+      "description": "Fluid max(min()) sizes are dropped instead of using their large value.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "      if (large) return { len: large, ...(small ? { small } : {}), fluid: true };",
+          "replace": "      void large;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*fluid sizes take their large value"
+    },
+    {
+      "id": "W-945/laptop-dropped",
+      "requirement": "W-945",
+      "description": "Laptop breakpoint values are lost instead of folding into Tablet.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "  laptop: \"tablet\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*fluid sizes take their large value, phones their small one; laptop folds"
+    },
+    {
+      "id": "W-945/scrim-under-image",
+      "requirement": "W-945",
+      "description": "A gradient over an image is kept as a gradient EmVB draws under the image.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "stops.length >= 2 && imageAt > index",
+          "replace": "stops.length >= 2 && imageAt > 1000"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*a gradient drawn over an image becomes an even overlay"
+    },
+    {
+      "id": "W-945/capped-width-gutters-lost",
+      "requirement": "W-945",
+      "description": "A capped wrapper loses its side gutters on narrow screens.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "          out.narrow = { width: \"auto\", marginLeft: half, marginRight: half };",
+          "replace": "          void half;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*a capped wrapper width keeps its maximum"
+    },
+    {
+      "id": "W-945/raw-css-ignored",
+      "requirement": "W-945",
+      "description": "Elementor 4 variant custom CSS is never decoded.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "      const css = decodeRawCss(raw);",
+          "replace": "      const css = raw === 1 ? decodeRawCss(raw) : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*a button keeps its colours, hover, transition and decoded custom CSS"
+    },
+    {
+      "id": "W-945/side-border-all-sides",
+      "requirement": "W-945",
+      "description": "A border on one side draws on every side.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/css.ts",
+          "search": "  if (widths.length === 0 && sides.size === 0) return;",
+          "replace": "  return;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*a side's border draws only that side"
+    },
+    {
+      "id": "W-945/grid-tracks-lost",
+      "requirement": "W-945",
+      "description": "Unequal grid columns become equal columns.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "  return equal ? { count: tracks.length } : { count: tracks.length, tracks };",
+          "replace": "  return { count: tracks.length };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*a grid keeps its tracks per device"
+    },
+    {
+      "id": "W-945/full-row-ignored",
+      "requirement": "W-945",
+      "description": "A grid child set to span every column stays in one column.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "        if (span === \"1/-1\" || span === \"span-1\" || span === \"1/span-1\") out.fullRow = true;",
+          "replace": "        if (span === \"never\") out.fullRow = true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*a grid keeps its tracks per device and a full-row child spans them all"
+    },
+    {
+      "id": "W-945/display-none-shown",
+      "requirement": "W-945",
+      "description": "An element hidden on a device with display none shows there.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "  const hidden = ([\"desktop\", \"tablet\", \"mobile\"] as const).filter((d) => s.display[d] === \"none\");",
+          "replace": "  const hidden = ([\"desktop\", \"tablet\", \"mobile\"] as const).filter(() => false);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*display none on a device hides it there"
+    },
+    {
+      "id": "W-945/sibling-label-ignored",
+      "requirement": "W-945",
+      "description": "A form label beside its field (no input id) is not used.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "      pairSiblingLabels(el, byField);",
+          "replace": "      void pairSiblingLabels;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*form fields take their label"
+    },
+    {
+      "id": "W-945/atomic-href-unsanitized",
+      "requirement": "W-945",
+      "description": "Elementor 4 link addresses skip EmVB's href sanitizer.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "    const safe = sanitizeHref(str(un(destination)) ?? \"\");",
+          "replace": "    const safe = str(un(destination)) ?? \"\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*hostile links, text and images stay inert"
+    },
+    {
+      "id": "W-945/nesting-not-checked",
+      "requirement": "W-945",
+      "description": "An import keeps elements the save hook refuses (a form in a form).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "    const misplaced = checked.ok ? nestingIssues(checked.layout, 1)[0] : undefined;",
+          "replace": "    const misplaced = checked.ok ? undefined : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*a form inside a form"
     }
   ]
 }

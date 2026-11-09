@@ -296,7 +296,11 @@ export function ImportElementorDialog({
                   const isKit =
                     typeof settings === "object" &&
                     settings !== null &&
-                    ("system_colors" in settings || "system_typography" in settings);
+                    // Elementor 3 kits carry global colours and fonts; Elementor 4 kits may only
+                    // carry custom CSS and breakpoints (their classes ride in each export).
+                    ["system_colors", "system_typography", "custom_css", "active_breakpoints"].some(
+                      (key) => key in settings,
+                    );
                   if (!isKit)
                     throw new Error("That isn't an Elementor site kit (site-settings.json).");
                   setKit(parsed);
