@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-EmVB 1.0: the stored page format is frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md)), AI agents co-design pages through reviewable proposals, sites can add their own elements and panels (Extensions API), pages can have one version per language, any element can loop, and pages and templates import from Elementor (3 and 4). Upgrading from 0.9: see the [upgrade guide](docs/guides/upgrade-1.0.md); 0.9 pages upgrade on read, and EmVB's AI tools need approving again on EmDash's Plugins screen.
+EmVB 1.0: the stored page format is frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md)), AI agents co-design pages through reviewable proposals, sites can add their own elements and panels (Extensions API), pages can have one version per language, any element can loop, pages and templates import from Elementor (3 and 4), and the editor gains inline text formatting, fluid sizes, transforms, flex item sizing, list markers and numbered steps, gradient overlays and more style settings. Upgrading from 0.9: see the [upgrade guide](docs/guides/upgrade-1.0.md); 0.9 pages upgrade on read, and EmVB's AI tools need approving again on EmDash's Plugins screen.
 
 ### Added
 

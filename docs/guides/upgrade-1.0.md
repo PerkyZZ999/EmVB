@@ -58,7 +58,19 @@ package version; read the steps below once.
 - [Motion](motion.md): loops in Effects.
 - [Extensions](extensions.md): custom elements, panels and sources from code.
 - [Import from Elementor](elementor-import.md): bring Elementor 3 and 4 pages and templates over
-  as drafts, with a report of what was kept, changed or left out.
+  as drafts, with a report of what was kept, changed or left out; copy their images, set page
+  links, and optionally keep Elementor's classes as site classes.
+- New in the editor (all optional; pages that don't use them render as before):
+  - **Formatting** on Heading and Text: bold, italic, colour and links on selected words.
+  - **Fluid sizes:** type a range such as `32–56` in Font size, Gap, a width or height, Padding
+    or Margin.
+  - **Lists:** Marker (bullets, numbers, letters, Roman numerals, numbered steps) and Start at;
+    Marker color and size.
+  - **Effects:** Transform (move, scale, rotate, also in Hover), Backdrop filters, gradient
+    overlays on image and video backgrounds.
+  - **Flexbox children:** Grow, Shrink, Basis, Align self and Order.
+  - **Typography and Size:** Style (italic), Line wrapping, Long words, Overflow X and Y, Object
+    position.
 
 ## If something goes wrong
 
