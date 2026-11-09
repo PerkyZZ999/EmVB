@@ -42186,6 +42186,90 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/bounded-array.test.ts"],
       "expect": "\\(fail\\).*an oversized array of bad items is one issue"
+    },
+    {
+      "id": "W-930/rejected-op-leaks",
+      "requirement": "W-930",
+      "description": "Accepting some changes applies the whole proposal, rejected ones included.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/co-design.ts",
+          "search": "    [...selected].toSorted((a, b) => a - b),\n",
+          "replace": "    undefined,\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/co-design.test.ts"],
+      "expect": "\\(fail\\).*accepting some changes applies only those"
+    },
+    {
+      "id": "W-930/ghost-mutates-layout",
+      "requirement": "W-930",
+      "description": "The ghost preview writes the proposed changes into the editor's real layout.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/co-design.ts",
+          "search": "  return { layout: applied.layout, added, changed, removed };",
+          "replace": "  return { layout: Object.assign(editor.layout, applied.layout), added, changed, removed };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/co-design.test.ts"],
+      "expect": "\\(fail\\).*the ghost shows pending changes"
+    },
+    {
+      "id": "W-930/decided-proposal-kept",
+      "requirement": "W-930",
+      "description": "A proposal whose changes were all decided stays waiting for review.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useCoDesign.ts",
+          "search": "      withdrawProposal(fetcher, p.id).then(proposals.refresh, () => undefined);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/codesign-panel.test.tsx"],
+      "expect": "\\(fail\\).*Reject all leaves the page alone and withdraws"
+    },
+    {
+      "id": "W-930/save-not-via-agent",
+      "requirement": "W-930",
+      "description": "Saving accepted agent changes isn't labelled Via agent.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useCoDesign.ts",
+          "search": "    setUnsaved((n) => n + indexes.length);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/codesign-panel.test.tsx"],
+      "expect": "\\(fail\\).*Accept all applies every change"
+    },
+    {
+      "id": "W-930/stale-proposal-raw-reason",
+      "requirement": "W-930",
+      "description": "A proposal for an older revision shows the raw revision mismatch instead of what to do.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useCoDesign.ts",
+          "search": "setError(result.code === \"STALE_BASE\" ? stalePage : result.reason);",
+          "replace": "setError(result.reason);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/codesign-panel.test.tsx"],
+      "expect": "\\(fail\\).*a proposal for an older revision explains itself"
+    },
+    {
+      "id": "W-930/timeline-no-via-agent",
+      "requirement": "W-930",
+      "description": "The timeline calls a person's save of accepted changes an Agent version.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Timeline.tsx",
+          "search": "{v.agent.tool === \"accept_proposal\" ? \"Via agent\" : \"Agent\"}",
+          "replace": "Agent"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/timeline.test.tsx"],
+      "expect": "\\(fail\\).*labelled Via agent"
     }
   ]
 }

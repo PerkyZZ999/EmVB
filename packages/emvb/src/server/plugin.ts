@@ -2,6 +2,7 @@ import {
   proposalCreateRoute,
   proposalGetRoute,
   proposalsRoute,
+  proposalAcceptedRoute,
   proposalWithdrawRoute,
 } from "./proposals.ts";
 import { presenceRoute } from "./presence.ts";
@@ -113,6 +114,7 @@ export function createPlugin(
       "proposals/get": proposalGetRoute,
       "proposals/create": proposalCreateRoute,
       "proposals/withdraw": proposalWithdrawRoute,
+      "proposals/accepted": proposalAcceptedRoute,
       presence: presenceRoute,
       "saved-sections/get": savedSectionGetRoute,
       "saved-sections/save": savedSectionSaveRoute,

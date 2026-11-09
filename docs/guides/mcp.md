@@ -136,6 +136,8 @@ Agent publishing is **off** by default. In **AI agents**, an admin can separatel
 - **Version timeline**: an **Agent** badge on versions an agent saved, and an All / People / Agents
   filter with counts.
 - **Editor**: if an agent changes the page while you are idle, a notice offers **Reload**.
+- **Agent tab** (1.0): proposals for the open page, each change with **Accept** and **Reject**,
+  **Preview** to see them on the canvas first, and **Via agent** on the version you save afterwards.
 
 ## Security notes
 

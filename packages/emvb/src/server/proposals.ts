@@ -1,7 +1,7 @@
 import { PluginRouteError, type PluginRoute, type RouteContext } from "emdash";
 import { z } from "zod";
 import { DESIGN_DRAFT_KEY, DESIGN_KEY } from "../constants.ts";
-import { MAX_PROPOSALS } from "../core/limits.ts";
+import { MAX_PROPOSAL_OPS, MAX_PROPOSALS } from "../core/limits.ts";
 import {
   applyProposal,
   ProposalTarget,
@@ -14,6 +14,7 @@ import {
 import { isRecord } from "../core/record.ts";
 import type { ProposalsPort } from "../mcp/ports.ts";
 import { queued } from "../mcp/queue.ts";
+import { agentLog, appendAgentLog } from "./agent-settings.ts";
 import { readDesign } from "./design-routes.ts";
 
 const COLLECTION = "emvb_proposals";
@@ -182,5 +183,39 @@ export const proposalWithdrawRoute: PluginRoute<z.infer<typeof IdInput>> = {
     if (!(await proposalPortOf(ctx).withdraw(ctx.input.id)))
       throw new PluginRouteError("NOT_FOUND", "No such proposal.", 404);
     return { id: ctx.input.id };
+  },
+};
+
+const AcceptedInput = z.strictObject({
+  target: ProposalTarget,
+  accepted: z.number().int().min(1).max(MAX_PROPOSAL_OPS),
+});
+
+/**
+ * W-930: after Save draft, the editor notes that the new version holds changes accepted from an
+ * agent proposal. The version itself is a normal save by the person; the log entry only labels it
+ * "Via agent" in the timeline. The newest revision is read here, never taken from the browser.
+ */
+export const proposalAcceptedRoute: PluginRoute<z.infer<typeof AcceptedInput>> = {
+  permission: "content:edit_any",
+  input: AcceptedInput,
+  handler: async (ctx) => {
+    const { target, accepted } = ctx.input;
+    const content = ctx.content as unknown as {
+      listRevisions?(c: string, id: string, o: { limit?: number }): Promise<{ id: string }[]>;
+    };
+    const [latest] = content.listRevisions
+      ? await content.listRevisions(target.collection, target.id, { limit: 1 })
+      : [];
+    if (!latest) throw new PluginRouteError("NOT_FOUND", "No saved version to label.", 404);
+    await appendAgentLog(agentLog(ctx as never), {
+      target: "page",
+      tool: "accept_proposal",
+      pageId: target.id,
+      revisionId: latest.id,
+      summary: `Saved ${accepted} ${accepted === 1 ? "change" : "changes"} accepted from an agent proposal`,
+      userId: ctx.user?.id ?? null,
+    });
+    return { revisionId: latest.id };
   },
 };

@@ -239,6 +239,42 @@ describe("version timeline dialog (W-315)", () => {
     expect(ids()).toEqual(["r1"]);
   });
 
+  test("W-930: a person's save of accepted agent changes is labelled Via agent", async () => {
+    const fetcher = async (path: string) => {
+      const data = path.endsWith("/agents/page")
+        ? {
+            versions: [
+              { revisionId: "r2", tool: "accept_proposal", summary: "Saved 2 changes accepted" },
+              { revisionId: "r1", tool: "add_element", summary: "Added heading" },
+            ],
+          }
+        : {
+            items: [
+              { id: "r1", createdAt: "2026-10-01T10:00:00Z", data: { layout: layoutWith("A") } },
+              { id: "r2", createdAt: "2026-10-05T10:00:00Z", data: { layout: layoutWith("B") } },
+            ],
+          };
+      return Response.json({ data });
+    };
+    await mount(
+      <TimelineDialog
+        open
+        onOpenChange={() => undefined}
+        fetcher={fetcher}
+        collection="emvb_pages"
+        entryId="01PAGE"
+        current={layoutWith("Now", true)}
+        design={emptyDesign()}
+        onApply={() => undefined}
+      />,
+    );
+    await settle();
+    const badge = (id: string) =>
+      document.querySelector(`[data-emvb-version="${id}"] [data-emvb-agent-version]`)?.textContent;
+    expect(badge("r2")).toBe("Via agent");
+    expect(badge("r1")).toBe("Agent");
+  });
+
   test("W-315 a host without revisions says so plainly, not a raw Not found", async () => {
     const fetcher = async () =>
       new Response(JSON.stringify({ error: { code: "NOT_FOUND", message: "Not found" } }), {

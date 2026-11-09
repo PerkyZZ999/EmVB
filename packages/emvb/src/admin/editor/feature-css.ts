@@ -163,4 +163,18 @@ export const FEATURE_CSS = `
 /* UX-092: the fixed theme part type, its label and value on one line */
 .emvb-part-type { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0; }
 .emvb-part-type-value { font-size: 13px; line-height: 20px; font-weight: 600; color: var(--text-color-kumo-default); }
+/* W-930: co-design review (Agent tab) and the canvas ghost-preview notice */
+.emvb-codesign { display: grid; gap: 12px; padding: 12px; }
+.emvb-codesign-status { display: flex; align-items: center; gap: 6px; margin: 0; }
+.emvb-codesign-card { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--color-kumo-line); border-radius: 10px; background: var(--color-kumo-base); }
+.emvb-codesign-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
+.emvb-codesign-group { display: grid; gap: 4px; }
+.emvb-codesign-group-title { margin: 0; font-size: 12px; font-weight: 600; color: var(--text-color-kumo-subtle); }
+.emvb-codesign-ops { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.emvb-codesign-op { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; padding: 2px 4px 2px 8px; border-radius: 6px; font-size: 13px; line-height: 18px; }
+.emvb-codesign-op:hover { background: var(--color-kumo-tint); }
+.emvb-codesign-op-text { min-width: 0; overflow-wrap: anywhere; }
+.emvb-codesign-op-actions { display: inline-flex; flex: none; gap: 2px; }
+.emvb-codesign-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.emvb-codesign-preview { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 8px 12px 0; padding: 8px 8px 8px 12px; border: 1px solid var(--color-kumo-line); border-radius: 10px; background: var(--color-kumo-tint); font-size: 13px; line-height: 18px; }
 `;

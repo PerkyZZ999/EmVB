@@ -63,7 +63,7 @@ export async function appendAgentLog(
   if (ids.length > 0) await store.deleteMany(ids);
 }
 
-const agentLog = (ctx: PluginContext) => ctx.storage["agentlog"] as unknown as LogQuery;
+export const agentLog = (ctx: PluginContext) => ctx.storage["agentlog"] as unknown as LogQuery;
 
 /** Agents tab: the settings, the MCP endpoint and the last 50 agent changes. Admins only. */
 export const agentsRoute: PluginRoute = {

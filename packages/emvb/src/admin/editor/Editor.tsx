@@ -61,6 +61,7 @@ import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { usePartTemplates } from "./section-templates.ts";
 import { useCollectionPreviews, withPartLayouts } from "./collection-previews.ts";
 import { useEditorPresence } from "./presence.ts";
+import { useCoDesign } from "./useCoDesign.ts";
 import { useRemoteChange } from "./remote-change.ts";
 import { A11yScoreButton } from "./A11yCopilot.tsx";
 import { restoreOnUndo, type Deletion } from "./restore-deleted.ts";
@@ -185,6 +186,16 @@ function EditorApp({
     saver,
     toasts,
   });
+  // W-930: agent proposals reviewed change by change; a preview shows them as a ghost.
+  const coDesign = useCoDesign({
+    fetcher,
+    collection,
+    state,
+    dispatch,
+    changeDesign,
+    onError: (title) => toasts.add({ title }),
+    enabled: !host.field && collection === PAGES_COLLECTION,
+  });
   // W-252: undoing a Site styles delete brings the variable or class back with its uses.
   const deletions = React.useRef<Deletion[]>([]);
   const changeDesignRef = React.useRef(changeDesign);
@@ -270,10 +281,12 @@ function EditorApp({
     [state.page.layout, sectionTemplates, loopTemplates],
   );
   const collections = useCollectionPreviews(previewLayout, fetcher);
+  // W-930: while previewing a proposal the canvas shows its ghost, never the editor's layout changed.
+  const canvasLayout = coDesign.ghost?.layout ?? state.page.layout;
   const rendered = React.useMemo(
     () =>
-      state.page.layout
-        ? renderPage(state.page.layout, state.design, {
+      canvasLayout
+        ? renderPage(canvasLayout, state.design, {
             mode: "editor",
             // Same scope class as the public page, so canvas CSS matches published CSS (W-334).
             scope: state.id,
@@ -289,7 +302,7 @@ function EditorApp({
           })
         : null,
     [
-      state.page.layout,
+      canvasLayout,
       state.design,
       sectionTemplates,
       loopTemplates,
@@ -547,6 +560,7 @@ function EditorApp({
                     clipboard={clipboard}
                     saved={saved}
                     onSaveSection={setSaveAsk}
+                    {...(!host.field && collection === PAGES_COLLECTION ? { coDesign } : {})}
                     onRename={(id, label) =>
                       dispatch({
                         type: "update-node",
@@ -571,10 +585,25 @@ function EditorApp({
                     onZoom={setZoom}
                     onToggleHidden={() => hideOnDevice?.run()}
                   />
+                  {coDesign.ghost && (
+                    <div className="emvb-codesign-preview" role="status" data-emvb-ghost-banner="">
+                      <span>
+                        Previewing agent changes: new in blue, changed dashed, removed struck
+                        through. Nothing is applied until you accept.
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => coDesign.setPreviewId(null)}
+                      >
+                        Stop preview
+                      </Button>
+                    </div>
+                  )}
                   {rendered ? (
                     <CanvasFrame
                       vnode={rendered.vnode}
-                      css={rendered.css}
+                      css={coDesign.ghost ? `${rendered.css}\n${coDesign.ghost.css}` : rendered.css}
                       canvasStyles={canvasStyles}
                       layout={state.page.layout}
                       device={device}

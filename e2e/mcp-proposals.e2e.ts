@@ -1,6 +1,6 @@
-import { expect, test, type APIRequestContext } from "@playwright/test";
-import { httpRemote, type Remote, type ToolResult } from "../packages/emvb-mcp/src/remote.ts";
-import { api, createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
+import { expect, test } from "@playwright/test";
+import { createPage, getPage, parsed, setUpEmvbOnce } from "./support/api.ts";
+import { useAgentClient, type Outline } from "./support/mcp.ts";
 import { openEditor, unique } from "./support/helpers.ts";
 
 /**
@@ -8,7 +8,6 @@ import { openEditor, unique } from "./support/helpers.ts";
  * tools on EmDash's own MCP endpoint, and a page open in the editor refuses direct writes (D-064).
  */
 
-const AGENTS = "/_emdash/api/plugins/emvb/agents";
 const layout = {
   schemaVersion: 18,
   root: {
@@ -19,61 +18,9 @@ const layout = {
   },
 };
 
-type Settings = { mcpEnabled: boolean; publishPages: boolean; publishStyles: boolean };
-let remote: Remote | undefined;
-let tokenId: string | undefined;
-let restore: Settings | undefined;
-
 test.describe.configure({ mode: "serial" });
 setUpEmvbOnce();
-
-async function saveSettings(request: APIRequestContext, settings: Settings) {
-  const current = await api(request, "GET", AGENTS);
-  const revision =
-    (current.json?.["data"] as { revision?: string | null } | undefined)?.revision ?? null;
-  const saved = await api(request, "POST", `${AGENTS}/save`, { settings, revision });
-  expect(saved.status).toBe(200);
-}
-
-test.beforeAll(async ({ request, baseURL }) => {
-  // The site's half of agent access: EmDash's tool approval and EmVB's own switch (D-055).
-  expect(
-    (await api(request, "PUT", "/_emdash/api/admin/plugins/emvb/mcp", { enabled: true })).status,
-  ).toBe(200);
-  const before = await api(request, "GET", AGENTS);
-  restore = (before.json?.["data"] as { settings?: Settings } | undefined)?.settings;
-  expect(restore).toBeTruthy();
-  await saveSettings(request, { ...(restore as Settings), mcpEnabled: true });
-  const created = await api(request, "POST", "/_emdash/api/admin/api-tokens", {
-    name: `e2e W-929 ${unique()}`,
-    scopes: ["mcp:tools:emvb"],
-  });
-  expect(created.status).toBe(201);
-  const data = created.json?.["data"] as { token: string; info: { id: string } };
-  tokenId = data.info.id;
-  remote = httpRemote(new URL("/_emdash/api/mcp", baseURL), data.token, "e2e");
-});
-
-test.afterAll(async ({ request }) => {
-  await remote?.close();
-  if (tokenId) await api(request, "DELETE", `/_emdash/api/admin/api-tokens/${tokenId}`);
-  if (restore) await saveSettings(request, restore);
-});
-
-const call = async (name: string, args: Record<string, unknown>) => {
-  if (!remote) throw new Error("no MCP client");
-  return remote.call(`emvb__${name}`, args);
-};
-const ok = <T>(result: ToolResult) => {
-  expect(result.isError ?? false, result.content[0]?.text).toBe(false);
-  return result.structuredContent as T;
-};
-type Outline = {
-  baseRevision: string;
-  baseDesignRevision: string | null;
-  openInEditor: boolean;
-  pendingProposals: { proposalId: string }[];
-};
+const { call, ok } = useAgentClient();
 
 test("an agent proposes changes over MCP; the page is untouched until a person reviews them", async ({
   request,

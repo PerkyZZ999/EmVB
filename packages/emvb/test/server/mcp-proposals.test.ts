@@ -207,4 +207,37 @@ describe("proposal MCP tools (W-929, D-064)", () => {
       ).success,
     ).toBe(true);
   });
+
+  test("the editor's save of accepted changes is labelled in the page's agent versions (W-930)", async () => {
+    const pageId = await newPage();
+    const editor = userWithRole(ROLES.editor);
+    // A page made without saving has no revision to label yet.
+    const none = await t.route("proposals/accepted", {
+      user: editor,
+      body: { target: { collection: "emvb_pages", id: pageId }, accepted: 2 },
+    });
+    expect(none.status).toBe(404);
+    data(
+      (await t.mcp("update_element", {
+        pageId,
+        nodeId: "head0001",
+        set: { props: { text: "Saved by a person" } },
+      })) as Result,
+    );
+    const recorded = await t.route("proposals/accepted", {
+      user: editor,
+      body: { target: { collection: "emvb_pages", id: pageId }, accepted: 2 },
+    });
+    expect(recorded.status).toBe(200);
+    const revisionId = (recorded.body["data"] as { revisionId: string }).revisionId;
+    const versions = await t.route("agents/page", { user: editor, body: { pageId } });
+    expect((versions.body["data"] as { versions: unknown[] }).versions).toContainEqual(
+      expect.objectContaining({ revisionId, tool: "accept_proposal" }),
+    );
+    const contributor = await t.route("proposals/accepted", {
+      user: userWithRole(ROLES.contributor),
+      body: { target: { collection: "emvb_pages", id: pageId }, accepted: 1 },
+    });
+    expect(contributor.status).toBe(403);
+  });
 });

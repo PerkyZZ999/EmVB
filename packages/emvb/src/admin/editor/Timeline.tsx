@@ -375,7 +375,8 @@ export function TimelineDialog({
                           title={v.agent.summary}
                         >
                           <RobotIcon aria-hidden="true" size={12} />
-                          Agent
+                          {/* W-930: a person's save of changes accepted from a proposal. */}
+                          {v.agent.tool === "accept_proposal" ? "Via agent" : "Agent"}
                         </span>
                       )}
                     </button>
