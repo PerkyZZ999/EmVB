@@ -14,3 +14,7 @@ export function adminExtensionDefaults(type: string): Record<string, unknown> | 
   }
   return undefined;
 }
+
+/** W-933: whether the site registered the extension for `type`, as the editor's manifests say. */
+export const adminExtensionInstalled = (type: string): boolean =>
+  cache.some((ext) => ext.elements.some((e) => e.type === type));

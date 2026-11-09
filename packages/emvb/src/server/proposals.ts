@@ -1,7 +1,7 @@
 import { PluginRouteError, type PluginRoute, type RouteContext } from "emdash";
 import { z } from "zod";
 import { DESIGN_DRAFT_KEY, DESIGN_KEY } from "../constants.ts";
-import { MAX_PROPOSAL_OPS, MAX_PROPOSALS } from "../core/limits.ts";
+import { MAX_PENDING_PER_PAGE, MAX_PROPOSAL_OPS, MAX_PROPOSALS } from "../core/limits.ts";
 import {
   applyProposal,
   ProposalTarget,
@@ -81,6 +81,23 @@ export function proposalsPort(
         const applied = applyProposal(base, read.proposal);
         if (!applied.ok) return applied;
         const page = await all();
+        const forPage = page.items.filter((row) => {
+          const target =
+            isRecord(row.data) && isRecord(row.data.proposal)
+              ? row.data.proposal.target
+              : undefined;
+          return (
+            isRecord(target) &&
+            target.collection === read.proposal.target.collection &&
+            target.id === read.proposal.target.id
+          );
+        }).length;
+        if (forPage >= MAX_PENDING_PER_PAGE)
+          return {
+            ok: false,
+            code: "PROPOSALS_FULL",
+            reason: `This page already has ${MAX_PENDING_PER_PAGE} proposals waiting for review. Withdraw one, or wait until the person editing reviews them.`,
+          };
         if (page.hasMore || page.items.length >= MAX_PROPOSALS)
           return {
             ok: false,
@@ -176,12 +193,35 @@ export const proposalCreateRoute: PluginRoute<z.infer<typeof CreateInput>> = {
   input: CreateInput,
   handler: async (ctx) => unwrap(await proposalPortOf(ctx).create(ctx.input.proposal)),
 };
-export const proposalWithdrawRoute: PluginRoute<z.infer<typeof IdInput>> = {
+const WithdrawInput = IdInput.extend({
+  /** W-933: the person's review, when the editor closes a proposal it decided. */
+  decision: z
+    .strictObject({
+      accepted: z.number().int().min(0).max(MAX_PROPOSAL_OPS),
+      rejected: z.number().int().min(0).max(MAX_PROPOSAL_OPS),
+    })
+    .optional(),
+});
+export const proposalWithdrawRoute: PluginRoute<z.infer<typeof WithdrawInput>> = {
   permission: "content:edit_any",
-  input: IdInput,
+  input: WithdrawInput,
   handler: async (ctx) => {
-    if (!(await proposalPortOf(ctx).withdraw(ctx.input.id)))
+    const port = proposalPortOf(ctx);
+    const found = await port.get(ctx.input.id);
+    if (!(await port.withdraw(ctx.input.id)))
       throw new PluginRouteError("NOT_FOUND", "No such proposal.", 404);
+    const decision = ctx.input.decision;
+    if (decision && found?.ok) {
+      await appendAgentLog(agentLog(ctx as never), {
+        target: "page",
+        tool: "review_proposal",
+        pageId: found.record.proposal.target.id,
+        proposalId: ctx.input.id,
+        changes: found.record.proposal.ops.length,
+        summary: `Reviewed a proposal: ${decision.accepted} accepted, ${decision.rejected} rejected`,
+        userId: ctx.user?.id ?? null,
+      });
+    }
     return { id: ctx.input.id };
   },
 };

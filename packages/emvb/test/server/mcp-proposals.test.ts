@@ -240,4 +240,39 @@ describe("proposal MCP tools (W-929, D-064)", () => {
     });
     expect(contributor.status).toBe(403);
   });
+
+  test("W-933 audit: the log says who proposed, which proposal, and who reviewed it", async () => {
+    const pageId = await newPage();
+    const agent = userWithRole(ROLES.editor);
+    const { proposalId } = data<{ proposalId: string }>(
+      await propose(pageId, [rename("A"), rename("B")]),
+    );
+    const reviewer = { ...userWithRole(ROLES.editor), id: "user-reviewer" };
+    const closed = await t.route("proposals/withdraw", {
+      user: reviewer,
+      body: { id: proposalId, decision: { accepted: 1, rejected: 1 } },
+    });
+    expect(closed.status).toBe(200);
+    const log = await t.route("agents", { user: userWithRole(ROLES.admin) });
+    const activity = (log.body["data"] as { activity: Record<string, unknown>[] }).activity;
+    expect(activity).toContainEqual(
+      expect.objectContaining({
+        tool: "propose_changes",
+        pageId,
+        proposalId,
+        changes: 2,
+        userId: agent.id,
+      }),
+    );
+    expect(activity).toContainEqual(
+      expect.objectContaining({
+        tool: "review_proposal",
+        pageId,
+        proposalId,
+        changes: 2,
+        userId: "user-reviewer",
+        summary: "Reviewed a proposal: 1 accepted, 1 rejected",
+      }),
+    );
+  });
 });

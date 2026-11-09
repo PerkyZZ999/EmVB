@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { emptyDesign } from "../core/schema/design.ts";
 import { LAYOUT_SCHEMA_VERSION } from "../core/schema/layout.ts";
 import type { Proposal, ProposalBase, ProposalRecord } from "../core/proposals.ts";
-import { MAX_PROPOSALS } from "../core/limits.ts";
+import { MAX_PENDING_PER_PAGE, MAX_PROPOSALS } from "../core/limits.ts";
 import { proposalsPort } from "./proposals.ts";
 import { createTestRuntime, ROLES, userWithRole } from "../../test/server/runtime.ts";
 
@@ -120,14 +120,37 @@ describe("proposal storage port (W-928)", () => {
     expect(await port.get(made.id)).toMatchObject({ ok: false, code: "INVALID_PROPOSAL" });
     expect(await port.list(proposal().target)).toEqual([]);
     expect(await port.get("bad")).toBeNull();
-    for (let i = rows.size; i < MAX_PROPOSALS; i++)
-      rows.set(String(i).padStart(16, "0"), made.record);
+    // Many pages fill the site-wide store (one page alone stops at MAX_PENDING_PER_PAGE).
+    for (let i = rows.size; i < MAX_PROPOSALS; i++) {
+      const other = structuredClone(made.record);
+      other.proposal.target.id = `other-${i}`;
+      rows.set(String(i).padStart(16, "0"), other);
+    }
     expect(await port.create(proposal())).toMatchObject({ ok: false, code: "PROPOSALS_FULL" });
     expect(rows.size).toBe(MAX_PROPOSALS);
     expect(await memory(async () => null).port.create(proposal())).toMatchObject({
       ok: false,
       code: "NOT_FOUND",
     });
+  });
+});
+
+describe("per-page proposal cap (W-933)", () => {
+  test("one page holds at most MAX_PENDING_PER_PAGE proposals; other pages still take theirs", async () => {
+    const { port } = memory();
+    // One at a time: each create counts the ones before it.
+    /* oxlint-disable no-await-in-loop */
+    for (let i = 0; i < MAX_PENDING_PER_PAGE; i++) {
+      const made = await port.create(proposal());
+      expect(made.ok).toBe(true);
+    }
+    /* oxlint-enable no-await-in-loop */
+    const full = await port.create(proposal());
+    expect(full).toMatchObject({ ok: false, code: "PROPOSALS_FULL" });
+    if (!full.ok) expect(full.reason).toContain("This page already has");
+    const other = proposal();
+    other.target.id = "page-b";
+    expect((await port.create(other)).ok).toBe(true);
   });
 });
 

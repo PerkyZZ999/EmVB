@@ -97,7 +97,7 @@ the token, never the token. Calls signed in without a token are counted per user
   saved or published until they do, and agents never publish through a proposal. Every change is
   checked against the current page first: a refused one names its index (`Change 2: …`), a stale
   revision returns `CONFLICT`. `get_proposal` says whether a stored proposal still applies;
-  `withdraw_proposal` removes one. A site keeps at most 100 proposals.
+  `withdraw_proposal` removes one. A site keeps at most 100 proposals and a page at most 10 waiting for review (`REFUSED` past that).
 - **A page open in the editor is not written directly.** While someone has it open, the write tools
   that change that page (`add_element`, `update_element`, `restore_version`, …) refuse with
   `PAGE_OPEN`; send the change with `propose_changes` instead. The editor renews this every 30

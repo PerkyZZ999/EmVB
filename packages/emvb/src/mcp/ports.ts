@@ -51,6 +51,9 @@ export type AgentLogEntry = {
   pageId?: string;
   rev?: string;
   revisionId?: string;
+  /** W-933 audit: which proposal, and how many changes it carried. */
+  proposalId?: string;
+  changes?: number;
   summary: string;
 };
 

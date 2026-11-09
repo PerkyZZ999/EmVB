@@ -42222,8 +42222,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useCoDesign.ts",
-          "search": "      withdrawProposal(fetcher, p.id).then(proposals.refresh, () => undefined);\n",
-          "replace": ""
+          "search": "      withdrawProposal(fetcher, p.id, {",
+          "replace": "      Promise.resolve({"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/codesign-panel.test.tsx"],
@@ -42270,6 +42270,134 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/timeline.test.tsx"],
       "expect": "\\(fail\\).*labelled Via agent"
+    },
+    {
+      "id": "W-933/missing-extension-proposed",
+      "requirement": "W-933",
+      "description": "An agent can propose an element of an extension the site doesn't have, whose props nothing can check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "if (isExtensionType(item.type) && !installed(item.type)) {",
+          "replace": "if (false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/test/server/proposal-redteam.test.ts",
+        "-t",
+        "unregistered extension"
+      ],
+      "expect": "\\(fail\\).*unregistered extension"
+    },
+    {
+      "id": "W-933/page-cap-off",
+      "requirement": "W-933",
+      "description": "One agent fills the whole proposal store with proposals for a single page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "if (forPage >= MAX_PENDING_PER_PAGE)",
+          "replace": "if (forPage > MAX_PROPOSALS)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/server/proposals.test.ts"],
+      "expect": "\\(fail\\).*one page holds at most MAX_PENDING_PER_PAGE"
+    },
+    {
+      "id": "W-933/audit-no-proposal-id",
+      "requirement": "W-933",
+      "description": "The agent log can't tie a proposal to the agent that sent it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": "    proposalId: created.id,\n    changes,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/test/server/mcp-proposals.test.ts",
+        "-t",
+        "W-933 audit"
+      ],
+      "expect": "\\(fail\\).*W-933 audit"
+    },
+    {
+      "id": "W-933/review-not-logged",
+      "requirement": "W-933",
+      "description": "A person's accept/reject review of a proposal leaves no audit entry.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "if (decision && found?.ok) {",
+          "replace": "if (false) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/test/server/mcp-proposals.test.ts",
+        "-t",
+        "W-933 audit"
+      ],
+      "expect": "\\(fail\\).*W-933 audit"
+    },
+    {
+      "id": "W-933/bidi-in-review",
+      "requirement": "W-933",
+      "description": "Direction-override characters in agent text disguise a change in the review list.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/co-design.ts",
+          "search": "text.replace(BIDI_AND_CONTROLS, \"\")",
+          "replace": "text"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/co-design.test.ts"],
+      "expect": "\\(fail\\).*invisible direction overrides"
+    },
+    {
+      "id": "W-933/proposal-link-unchecked",
+      "requirement": "W-933",
+      "description": "A proposal can add a javascript: link the direct-write tools refuse.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals-safety.ts",
+          "search": "        sanitizeHref(value) === undefined\n",
+          "replace": "        false\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/test/server/proposal-redteam.test.ts",
+        "-t",
+        "heading link"
+      ],
+      "expect": "\\(fail\\).*heading link"
+    },
+    {
+      "id": "W-933/proposal-svg-unchecked",
+      "requirement": "W-933",
+      "description": "A proposal can add SVG markup with scripts or handlers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals-safety.ts",
+          "search": "if (typeof markup === \"string\" && markup.trim() && !isSafeSvgMarkup(markup))",
+          "replace": "if (false)"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/test/server/proposal-redteam.test.ts",
+        "-t",
+        "svg markup"
+      ],
+      "expect": "\\(fail\\).*svg markup"
     }
   ]
 }

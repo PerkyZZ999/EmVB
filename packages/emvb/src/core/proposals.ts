@@ -140,7 +140,10 @@ function wrapperId(raw: Record<string, unknown>): string {
   return id;
 }
 
-function nodeRefusal(node: LayoutNode): string | undefined {
+function nodeRefusal(
+  node: LayoutNode,
+  installed: (type: string) => boolean = (type) => liveElement(type) !== undefined,
+): string | undefined {
   let reason: string | undefined;
   forEachNode(node, (item) => {
     if (reason) return;
@@ -157,6 +160,11 @@ function nodeRefusal(node: LayoutNode): string | undefined {
       reason = "Use frozen schema names: editorLabel and props.partId.";
     }
     const extension = liveElement(item.type);
+    // W-933: a page may keep a placeholder for a missing extension, but an agent can't add or
+    // change one: its props can't be checked without the extension's schema.
+    if (isExtensionType(item.type) && !installed(item.type)) {
+      reason = `The extension for ${item.type} is not installed on this site.`;
+    }
     if (extension && !validateExtensionProps(extension.element.schema, item.props).ok) {
       reason = `Invalid extension props for ${item.type}.`;
     }
@@ -167,6 +175,7 @@ function nodeRefusal(node: LayoutNode): string | undefined {
 function editNode(
   layout: Layout,
   op: Extract<Proposal["ops"][number], { kind: "update" }>,
+  installed?: (type: string) => boolean,
 ): Layout | ProposalRefusal {
   const found = findNode(layout, op.id);
   if (!found) return refuse(`Element ${op.id} is no longer on the page.`);
@@ -184,7 +193,7 @@ function editNode(
     else if (value === null) delete next[key];
     else next[key] = value;
   }
-  const reason = nodeRefusal(next as LayoutNode);
+  const reason = nodeRefusal(next as LayoutNode, installed);
   return reason ? refuse(reason) : updateNode(layout, op.id, () => next as LayoutNode);
 }
 
@@ -230,10 +239,17 @@ function stale(
 }
 
 /** Pure and atomic. Selection uses original op indexes and always runs in proposal order. */
+/**
+ * `extensionInstalled` says whether an `ext:` type is registered; the server's default reads the
+ * live registry, and the browser editor passes the manifests it loaded (W-933).
+ */
+export type ApplyOptions = { extensionInstalled?: (type: string) => boolean };
+
 export function applyProposal(
   base: ProposalBase,
   raw: unknown,
   selected?: readonly number[],
+  options: ApplyOptions = {},
 ): { ok: true; layout: Layout; design: DesignSystem } | ProposalRefusal {
   const read = readProposal(raw);
   if (!read.ok) return read;
@@ -279,7 +295,7 @@ export function applyProposal(
           break;
         }
         const node = isolated.layout.root.children[0] as LayoutNode;
-        reason = nodeRefusal(node);
+        reason = nodeRefusal(node, options.extensionInstalled);
         if (reason) break;
         const added = addNode(layout, node, op);
         if (!added.ok) reason = added.reason;
@@ -293,7 +309,7 @@ export function applyProposal(
         break;
       }
       case "update": {
-        const edited = editNode(layout, op);
+        const edited = editNode(layout, op, options.extensionInstalled);
         if ("ok" in edited) reason = edited.reason;
         else layout = edited;
         break;

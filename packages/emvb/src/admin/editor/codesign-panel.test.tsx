@@ -122,8 +122,10 @@ describe("co-design panel (W-930)", () => {
     await act(async () => q('[data-emvb-proposal-op="1"] [data-emvb-op-reject]')?.click());
     await settle();
     expect(childCount()).toBe(1);
+    // W-933: the person's review is recorded with the withdrawal.
     expect(calls.find((c) => c.path.endsWith("/withdraw"))?.body).toEqual({
       id: "abcdef0123456789",
+      decision: { accepted: 1, rejected: 1 },
     });
     await act(async () => dispatchRef({ type: "undo" }));
     expect(headingText()).toBe("Before");

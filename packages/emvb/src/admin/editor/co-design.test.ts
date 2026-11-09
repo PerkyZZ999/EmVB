@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { emptyDesign } from "../../core/schema/design.ts";
 import { LAYOUT_SCHEMA_VERSION, type Layout } from "../../core/schema/layout.ts";
 import type { Proposal } from "../../core/proposals.ts";
+import { setAdminExtensionManifests } from "./extension-manifests.ts";
 import { acceptOps, describeOp, ghostCss, ghostOf, groupOf, type EditorBase } from "./co-design.ts";
 
 const layout = (): Layout =>
@@ -98,5 +99,43 @@ describe("co-design review (W-930)", () => {
     });
     expect(css).not.toContain('"]{}');
     expect(css).toContain('[data-emvb-id="text0001"]');
+  });
+
+  test("W-933: an extension element is accepted only when the site has that extension", () => {
+    const withExt: Proposal = {
+      ...proposal(),
+      ops: [
+        {
+          kind: "insert",
+          parentId: "root0001",
+          index: 0,
+          node: { id: "ext00001", type: "ext:hello/badge", props: {} },
+        },
+      ],
+    };
+    setAdminExtensionManifests([]);
+    const missing = acceptOps(editor(), withExt, [0]);
+    expect(missing.ok).toBe(false);
+    if (!missing.ok) expect(missing.reason).toContain("not installed");
+    setAdminExtensionManifests([
+      {
+        extensionApi: 1,
+        id: "hello",
+        label: "Hello",
+        elements: [{ type: "ext:hello/badge", name: "badge" }],
+        panels: [],
+        sources: [],
+      } as never,
+    ]);
+    try {
+      expect(acceptOps(editor(), withExt, [0]).ok).toBe(true);
+    } finally {
+      setAdminExtensionManifests([]);
+    }
+  });
+
+  test("W-933: invisible direction overrides in agent text are removed from the review line", () => {
+    const op = { kind: "update", id: "head0001", set: { props: { text: "invoice\u202Efdp.exe" } } };
+    expect(describeOp(op as never, layout())).toBe("Change Heading text to “invoicefdp.exe”");
   });
 });

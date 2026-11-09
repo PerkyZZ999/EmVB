@@ -24,8 +24,15 @@ export async function listProposals(
 }
 
 /** Removes a proposal once every change in it was accepted or rejected (or on Reject all). */
-export async function withdrawProposal(fetcher: Fetcher, id: string): Promise<void> {
-  await requestJson(fetcher, `${BASE}/withdraw`, { method: "POST", body: { id } });
+export async function withdrawProposal(
+  fetcher: Fetcher,
+  id: string,
+  decision?: { accepted: number; rejected: number },
+): Promise<void> {
+  await requestJson(fetcher, `${BASE}/withdraw`, {
+    method: "POST",
+    body: decision ? { id, decision } : { id },
+  });
 }
 
 /** Labels the newest saved version "Via agent" in the timeline. */

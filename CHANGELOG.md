@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
+- **Agent proposals reviewed for safety (W-933).** A red-team corpus (script links in nine spellings, unsafe image and SVG sources, CSS and font-stack break-outs, event-handler attributes, unknown and missing-extension elements, prototype keys, oversized and deeply nested proposals, prompt-injected and markup text) runs every case through `propose_changes` and the matching direct-write tool: both refuse it, and text that is only content renders inert. Fixed on the way: a proposal could add an element of an extension the site doesn't have. A page now holds at most 10 waiting proposals, so one agent can't fill the site's store. The agent log records the proposal id and change count, and the person's review (how many accepted and rejected). Review lines drop invisible direction-override characters that could disguise a change.
 - **Oversized lists in agent and editor requests are refused before they're read item by item (D-070).** With the zod version EmDash 1.4 ships, a large list of bad items in a request could take hundreds of megabytes to refuse. Lists in EmVB's request inputs now check their length first. Nothing changes for EmDash hosts.
 
 ### Fixed

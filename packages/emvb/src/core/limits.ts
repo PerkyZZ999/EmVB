@@ -41,4 +41,6 @@ export const MAX_UNKNOWN_DEPTH = 16;
 export const MAX_PROPOSAL_OPS = 100;
 export const MAX_PROPOSAL_BYTES = MAX_LAYOUT_BYTES;
 export const MAX_PROPOSALS = 100;
+/** W-933: one page can't hold the whole store; an agent withdraws or waits for review. */
+export const MAX_PENDING_PER_PAGE = 10;
 export const MAX_PROPOSAL_DEPTH = MAX_DEPTH * 2 + 16;

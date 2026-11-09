@@ -3,6 +3,9 @@ import type { DesignSystem } from "../../core/schema/design.ts";
 import type { Layout, LayoutNode } from "../../core/schema/layout.ts";
 import { findNode, forEachNode } from "../../core/tree-ops.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
+import { adminExtensionInstalled } from "./extension-manifests.ts";
+
+const OPTIONS = { extensionInstalled: adminExtensionInstalled };
 
 /**
  * W-930 co-design review, as pure functions over the editor's own state. Accepting runs the same
@@ -49,9 +52,15 @@ const textOf = (node: unknown): string | undefined => {
   const props = (node as { props?: Record<string, unknown> } | null)?.props;
   const text = props?.["text"] ?? props?.["label"];
   if (typeof text !== "string" || !text.trim()) return undefined;
-  const plain = text.trim().replace(/\s+/g, " ");
+  // W-933: direction overrides and other invisible controls could make a change read as another.
+  const plain = text.replace(BIDI_AND_CONTROLS, "").trim().replace(/\s+/g, " ");
   return plain.length > 48 ? `${plain.slice(0, 47)}…` : plain;
 };
+
+/** C0 controls (not tab or newline), zero-width and bidi formatting characters. */
+const BIDI_AND_CONTROLS =
+  // oxlint-disable-next-line no-control-regex
+  /[\u0000-\u0008\u000B-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g;
 
 const quoted = (text: string | undefined) => (text ? ` “${text}”` : "");
 
@@ -110,6 +119,7 @@ export function acceptOps(
     baseOf(editor),
     proposal,
     [...selected].toSorted((a, b) => a - b),
+    OPTIONS,
   );
   if (!applied.ok) return applied;
   const designChanged = selected.some((i) => groupOf(proposal.ops[i] as Op) === "styles");
@@ -148,7 +158,7 @@ export function ghostOf(
   const applied =
     shown.length === 0
       ? { ok: true as const, layout: structuredClone(editor.layout) }
-      : applyProposal(baseOf(editor), proposal, shown);
+      : applyProposal(baseOf(editor), proposal, shown, OPTIONS);
   if (!applied.ok) return null;
   const added = new Set([...idsOf(applied.layout)].filter((id) => !before.has(id)));
   const changed = new Set<string>();

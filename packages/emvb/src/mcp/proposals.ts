@@ -132,6 +132,8 @@ export async function proposeChanges(ports: EmvbPorts, input: z.infer<typeof Pro
     tool: "propose_changes",
     pageId: input.pageId,
     rev: input.baseRevision,
+    proposalId: created.id,
+    changes,
     summary: `Proposed ${changes} ${changes === 1 ? "change" : "changes"} for review`,
   });
   return {
@@ -215,6 +217,8 @@ export async function withdrawProposal(
       target: "page",
       tool: "withdraw_proposal",
       pageId: found.record.proposal.target.id,
+      proposalId: input.proposalId,
+      changes: found.record.proposal.ops.length,
       summary: "Withdrew a proposal",
     });
   }

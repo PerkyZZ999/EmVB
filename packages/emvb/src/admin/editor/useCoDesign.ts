@@ -81,7 +81,11 @@ export function useCoDesign({
     setDecisions((all) => ({ ...all, [p.id]: next }));
     if (p.proposal.ops.every((_, i) => next[i] !== undefined)) {
       if (previewId === p.id) setPreviewId(null);
-      withdrawProposal(fetcher, p.id).then(proposals.refresh, () => undefined);
+      const decided = Object.values(next);
+      withdrawProposal(fetcher, p.id, {
+        accepted: decided.filter((d) => d === "accepted").length,
+        rejected: decided.filter((d) => d === "rejected").length,
+      }).then(proposals.refresh, () => undefined);
     }
   };
 
