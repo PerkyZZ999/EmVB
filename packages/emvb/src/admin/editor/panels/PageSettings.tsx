@@ -40,6 +40,7 @@ export function PageSettings({
   onChange,
   kind = "page",
   fetcher,
+  languages,
 }: {
   page: PageDraft;
   slugError: string | null;
@@ -47,6 +48,8 @@ export function PageSettings({
   kind?: "page" | "theme-part";
   /** For the Social image picker (W-287); without it the field isn't offered. */
   fetcher?: Fetcher;
+  /** W-936: the Languages section, when the site has more than one. */
+  languages?: React.ReactNode;
 }) {
   // Hooks run before the theme-part branch, so switching `kind` keeps the hook order (W-092).
   const descriptionId = React.useId();
@@ -234,6 +237,7 @@ export function PageSettings({
           />
         </Collapsible.Panel>
       </Collapsible.Root>
+      {languages}
     </div>
   );
 }

@@ -19,6 +19,13 @@ export type ResolvedEmVBPage = RenderedPage & {
   canvasMode: "site-layout" | "blank";
   /** A valid `_preview` token is serving the draft: don't cache the response. */
   isPreview: boolean;
+  /** W-935 (D-068): the locale asked for (option or Astro's), when the site has one. */
+  locale?: string;
+  /**
+   * W-935: set when that locale has no translation of the page and EmDash served this one from
+   * its fallback chain instead. Hosts can say so, or link to the requested language's home.
+   */
+  fallbackLocale?: string;
 };
 
 type AstroLike = VisitorAstro & {
@@ -55,6 +62,11 @@ export async function resolveEmVBPage(
      * from the host's image service (authorise the site origin in `image.remotePatterns`).
      */
     getImage?: ResponsiveGetImage;
+    /**
+     * W-935: which translation to read (EmDash's row-per-locale model, D-068). Defaults to
+     * Astro's `currentLocale`; EmDash falls back along its chain when there is none.
+     */
+    locale?: string;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   return resolveEmVBPageWith(emdashContent, astro, options);
@@ -82,13 +94,20 @@ export async function resolveEmVBPageWith(
      * from the host's image service (authorise the site origin in `image.remotePatterns`).
      */
     getImage?: ResponsiveGetImage;
+    /** W-935: which translation to read; defaults to Astro's `currentLocale`. */
+    locale?: string;
   } = {},
 ): Promise<ResolvedEmVBPage | null> {
   const slug = options.slug ?? content.decodeSlug(astro.params[options.param ?? "slug"]);
   if (!slug) return null;
+  const locale = options.locale ?? astro.currentLocale;
   let found: Awaited<ReturnType<ContentPort["getEntry"]>>;
   try {
-    found = await content.getEntry(options.collection ?? PAGES_COLLECTION, slug);
+    found = await content.getEntry(
+      options.collection ?? PAGES_COLLECTION,
+      slug,
+      locale ? { locale } : undefined,
+    );
   } catch {
     // No emvb_pages collection yet (EmVB not set up): not an EmVB page.
     return null;
@@ -145,12 +164,14 @@ export async function resolveEmVBPageWith(
       formDefinitions,
       Object.keys(dynamic).length > 0 ? dynamic : undefined,
       false,
-      options.lang ?? astro.currentLocale,
+      options.lang ?? found.fallbackLocale ?? locale,
     ),
     entry,
     collection: hosted ? (options.collection as string) : PAGES_COLLECTION,
     title: typeof data["title"] === "string" ? data["title"] : "",
     canvasMode: !hosted && data["canvas_mode"] === "blank" ? "blank" : "site-layout",
     isPreview: Boolean(found.isPreview),
+    ...(locale ? { locale } : {}),
+    ...(found.fallbackLocale ? { fallbackLocale: found.fallbackLocale } : {}),
   };
 }

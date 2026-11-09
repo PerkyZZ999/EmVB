@@ -654,6 +654,7 @@ function EditorApp({
                   slugError={saver.slugError}
                   onSlugEdit={saver.clearSlugError}
                   kind={collection === THEME_PARTS_COLLECTION ? "theme-part" : "page"}
+                  translatable={!host.field && collection === PAGES_COLLECTION}
                   onStyleState={onStyleState}
                   device={device}
                   items={itemActions}

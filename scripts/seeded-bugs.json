@@ -11495,8 +11495,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/resolve.ts",
-          "search": "  try {\n    found = await content.getEntry(options.collection ?? PAGES_COLLECTION, slug);\n  } catch {\n    // No emvb_pages collection yet (EmVB not set up): not an EmVB page.\n    return null;\n  }",
-          "replace": "  found = await content.getEntry(options.collection ?? PAGES_COLLECTION, slug);"
+          "search": "  try {\n    found = await content.getEntry(\n      options.collection ?? PAGES_COLLECTION,\n      slug,\n      locale ? { locale } : undefined,\n    );\n  } catch {\n    // No emvb_pages collection yet (EmVB not set up): not an EmVB page.\n    return null;\n  }",
+          "replace": "  found = await content.getEntry(\n      options.collection ?? PAGES_COLLECTION,\n      slug,\n      locale ? { locale } : undefined,\n    );"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts"],
@@ -42622,6 +42622,116 @@
       ],
       "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
       "expect": "\\(fail\\).*options: --agent is required"
+    },
+    {
+      "id": "W-935/locale-not-asked",
+      "requirement": "W-935",
+      "description": "Every language shows the same page: the locale never reaches EmDash.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "      locale ? { locale } : undefined,\n",
+          "replace": "      undefined,\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*Astro's locale picks the translation"
+    },
+    {
+      "id": "W-935/fallback-unreported",
+      "requirement": "W-935",
+      "description": "A page served in another language is presented as the requested translation.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "    ...(found.fallbackLocale ? { fallbackLocale: found.fallbackLocale } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*a missing translation served from the fallback chain"
+    },
+    {
+      "id": "W-935/explicit-locale-ignored",
+      "requirement": "W-935",
+      "description": "A host's explicit locale option is ignored in favour of Astro's.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "  const locale = options.locale ?? astro.currentLocale;",
+          "replace": "  const locale = astro.currentLocale ?? options.locale;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*an explicit locale wins over Astro's"
+    },
+    {
+      "id": "W-936/translation-unlinked",
+      "requirement": "W-936",
+      "description": "A translation is created as an unrelated page, not linked to the original.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/languages-api.ts",
+          "search": "        translationOf: input.sourceId,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/languages-section.test.tsx"
+      ],
+      "expect": "\\(fail\\).*Translate creates the linked draft"
+    },
+    {
+      "id": "W-936/agent-asked-anyway",
+      "requirement": "W-936",
+      "description": "Unticking Ask my agent still sends the agent a request.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/LanguagesSection.tsx",
+          "search": "      if (askAgent) {",
+          "replace": "      if (true) {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/languages-section.test.tsx"
+      ],
+      "expect": "\\(fail\\).*without the agent box ticked"
+    },
+    {
+      "id": "W-936/single-language-shows",
+      "requirement": "W-936",
+      "description": "A site with one language shows an empty Languages section.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/languages-api.ts",
+          "search": "  if (locales.length < 2 || !data.i18n?.defaultLocale) return null;",
+          "replace": "  if (!data.i18n?.defaultLocale) return { defaultLocale: \"en\", locales: [\"en\"] };"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/languages-section.test.tsx"
+      ],
+      "expect": "\\(fail\\).*a site with one language shows nothing"
+    },
+    {
+      "id": "W-936/form-binding-translated",
+      "requirement": "W-936",
+      "description": "A form field's binding name is offered for translation, breaking the form.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/translatable.ts",
+          "search": "const NOT_TEXT = new Set([\"formId\", \"field\"]);",
+          "replace": "const NOT_TEXT = new Set<string>([]);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/translatable.test.ts"],
+      "expect": "\\(fail\\).*texts, alt text and list items"
     }
   ]
 }

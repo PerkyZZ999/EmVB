@@ -41,5 +41,12 @@ export default defineConfig({
       ],
     }),
   ],
+  // W-935 (D-068): English at /, French at /fr/. prefixDefaultLocale stays false: EmDash's admin
+  // breaks when the default locale is prefixed.
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "fr"],
+    routing: { prefixDefaultLocale: false },
+  },
   devToolbar: { enabled: false },
 });

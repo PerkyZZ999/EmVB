@@ -202,6 +202,35 @@ srcset sizes (up to twice its width). Without `getImage`, or when the service le
 unchanged, the plain `<img>` is published as before. A picked library image also takes the focal
 point set on it in EmDash's media library.
 
+## Languages (optional)
+
+EmVB follows EmDash's translations: each language of a page is its own entry (D-068), with its own
+layout. With Astro's `i18n` set up, `resolveEmVBPage(Astro)` reads the page in `Astro.currentLocale`
+(or pass `locale`). When that language has no translation, EmDash serves the next one in its
+fallback chain and the result says so in `fallbackLocale`, so the route can show a note and keep
+the page's real language in `<html lang>`:
+
+```astro
+---
+const emvb = await resolveEmVBPage(Astro, { getImage });
+if (!emvb) return Astro.rewrite("/404");
+---
+<Base lang={emvb.fallbackLocale ?? emvb.locale}>
+  {emvb.fallbackLocale && <p>This page isn't translated yet; here is the original.</p>}
+  <EmVBPage page={emvb} />
+</Base>
+```
+
+Keep `routing: { prefixDefaultLocale: false }`: prefixing the default locale breaks EmDash's admin.
+The default language stays at `/`, others under their prefix (for example `src/pages/fr/[slug].astro`).
+Header, footer and other theme parts are shared by every language for now.
+
+In the editor, **Page settings → Languages** lists the site's languages. **Translate** makes a
+draft in that language linked to this page, with a copy of its layout, and opens it; with **Ask my
+agent to translate the new page** ticked, it also sends your agent a request (see the AI agents
+guide) whose proposal you review in the new page's Agent tab. Only words are meant to change:
+texts, buttons, alt text, labels and placeholders. Form field names, links and images stay.
+
 ## Archive page counts (optional)
 
 EmDash doesn't report how many posts an archive has, so the Pagination element's "Page N of M"

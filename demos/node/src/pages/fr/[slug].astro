@@ -1,0 +1,46 @@
+---
+/**
+ * W-935 (D-068): French EmVB pages. EmDash keeps one row per locale; resolveEmVBPage reads the
+ * French translation and falls back to English when there is none, saying so.
+ */
+import { getImage } from "astro:assets";
+import { getSeoMeta, getSiteSettings } from "emdash";
+import { EmVBPage, resolveEmVBPage } from "@perkyzz/emvb/astro";
+import { EmVBFormsRuntime } from "@perkyzz/emvb/astro/forms/client";
+import { EmVBMenuRuntime } from "@perkyzz/emvb/astro/menu";
+import { EmVBTabsRuntime } from "@perkyzz/emvb/astro/tabs";
+import Base from "../../layouts/Base.astro";
+import { resolveStarterSiteIdentity } from "../../utils/site-identity";
+
+const emvb = await resolveEmVBPage(Astro, { getImage });
+if (!emvb) return Astro.rewrite("/404");
+const { siteTitle } = resolveStarterSiteIdentity(await getSiteSettings());
+const seo = getSeoMeta(emvb.entry, {
+	siteTitle,
+	siteUrl: Astro.url.origin,
+	path: Astro.url.pathname.replace(/\/$/, ""),
+});
+---
+
+<Base
+	title={seo.title}
+	pageTitle={seo.ogTitle}
+	description={seo.description}
+	canonical={seo.canonical}
+	content={{ collection: emvb.collection, id: emvb.entry.data.id, slug: Astro.params.slug }}
+	dir={emvb.dir}
+	lang={emvb.fallbackLocale ?? emvb.locale}
+>
+	{
+		emvb.fallbackLocale && (
+			<p class="emvb-demo-fallback" data-emvb-fallback={emvb.fallbackLocale}>
+				Cette page n'est pas encore traduite ; voici la version originale.
+			</p>
+		)
+	}
+	<EmVBPage page={emvb}>
+		{emvb.needsFormsRuntime && <EmVBFormsRuntime />}
+		{emvb.needsTabsRuntime && <EmVBTabsRuntime />}
+		{emvb.needsMenuRuntime && <EmVBMenuRuntime />}
+	</EmVBPage>
+</Base>

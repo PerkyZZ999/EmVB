@@ -4,17 +4,25 @@ import { defaultElement, type Layout, type LayoutNode } from "../core/index.ts";
 import type { ContentPort } from "./content-port.ts";
 import { resolveEmVBPageWith } from "./resolve.ts";
 
-type Found = { entry: { id: string; data: Record<string, unknown> } | null; isPreview?: boolean };
-let lookup: (collection: string, slug: string) => Promise<Found> = async () => ({ entry: null });
+type Found = {
+  entry: { id: string; data: Record<string, unknown> } | null;
+  isPreview?: boolean;
+  fallbackLocale?: string;
+};
+let lookup: (
+  collection: string,
+  slug: string,
+  options?: { locale?: string },
+) => Promise<Found> = async () => ({ entry: null });
 const lookups: string[] = [];
 type Call = { plugin: string; method: string; path: string; body: string };
 const handlerCalls: Call[] = [];
 
 const content = {
   decodeSlug,
-  getEntry: async (collection: string, key: string) => {
-    lookups.push(`${collection}/${key}`);
-    return lookup(collection, key);
+  getEntry: async (collection: string, key: string, options?: { locale?: string }) => {
+    lookups.push(`${collection}/${key}${options?.locale ? `@${options.locale}` : ""}`);
+    return lookup(collection, key, options);
   },
   getCollection: async () => ({ entries: [] }),
   getTerm: async () => null,
@@ -238,5 +246,37 @@ describe("resolveEmVBPage(Astro, { collection, field }) (W-901)", () => {
       (await resolveEmVBPage(astro({ slug: "about" }), { collection: "pages", field: "body" }))
         ?.html,
     ).toContain("Hello");
+  });
+});
+
+describe("per-language pages (W-935, D-068)", () => {
+  const astroIn = (currentLocale?: string) => ({
+    ...astro({ slug: "about" }),
+    ...(currentLocale ? { currentLocale } : {}),
+  });
+
+  test("Astro's locale picks the translation; the page says which", async () => {
+    lookup = async (_c, _k, options) =>
+      page({ layout: layout({ ...heading, props: { text: `Hi ${options?.locale}`, level: 1 } }) });
+    const fr = await resolveEmVBPage(astroIn("fr"));
+    expect(lookups).toEqual(["emvb_pages/about@fr"]);
+    expect(fr?.html).toContain("Hi fr");
+    expect(fr?.locale).toBe("fr");
+    expect(fr?.fallbackLocale).toBeUndefined();
+  });
+
+  test("an explicit locale wins over Astro's; a site without locales asks for none", async () => {
+    lookup = async () => page({ layout: layout(heading) });
+    await resolveEmVBPage(astroIn("fr"), { locale: "de" });
+    const plain = await resolveEmVBPage(astroIn());
+    expect(lookups).toEqual(["emvb_pages/about@de", "emvb_pages/about"]);
+    expect(plain && "locale" in plain).toBe(false);
+  });
+
+  test("a missing translation served from the fallback chain is reported", async () => {
+    lookup = async () => ({ ...page({ layout: layout(heading) }), fallbackLocale: "en" });
+    const fr = await resolveEmVBPage(astroIn("fr"));
+    expect(fr?.locale).toBe("fr");
+    expect(fr?.fallbackLocale).toBe("en");
   });
 });
