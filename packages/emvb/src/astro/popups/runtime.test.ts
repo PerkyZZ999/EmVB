@@ -7,8 +7,22 @@ let timers: Timer[] = [];
 let lastId = 0;
 let timeoutSpy: ReturnType<typeof spyOn>;
 let clearSpy: ReturnType<typeof spyOn>;
+// W-947: tests redefine these; afterEach puts back exactly what was there. Deleting them instead
+// removed happy-dom's own window.innerWidth/innerHeight, which broke later files in the same run.
+const RESTORED = [
+  [window, ["innerWidth", "innerHeight", "scrollY"]],
+  [document.documentElement, ["scrollHeight"]],
+] as const;
+let saved: Array<[object, string, PropertyDescriptor | undefined]> = [];
 
 beforeEach(() => {
+  saved = RESTORED.flatMap(([target, keys]) =>
+    keys.map((key): [object, string, PropertyDescriptor | undefined] => [
+      target,
+      key,
+      Object.getOwnPropertyDescriptor(target, key),
+    ]),
+  );
   timers = [];
   timeoutSpy = spyOn(window, "setTimeout").mockImplementation(((run: () => void, ms?: number) => {
     lastId += 1;
@@ -23,8 +37,10 @@ afterEach(() => {
   clearSpy.mockRestore();
   document.body.innerHTML = "";
   localStorage.clear();
-  for (const key of ["innerWidth", "innerHeight", "scrollY"]) Reflect.deleteProperty(window, key);
-  Reflect.deleteProperty(document.documentElement, "scrollHeight");
+  for (const [target, key, descriptor] of saved) {
+    if (descriptor) Object.defineProperty(target, key, descriptor);
+    else Reflect.deleteProperty(target, key);
+  }
 });
 
 /** Adds a closed popup with `triggers` to the page, starts the runtime, and returns its root. */

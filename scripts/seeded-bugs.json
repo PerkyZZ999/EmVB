@@ -41971,6 +41971,25 @@
         "routes enforce editor rights"
       ],
       "expect": "\\(fail\\).*routes enforce editor rights"
+    },
+    {
+      "id": "W-947/popup-tests-delete-window-size",
+      "requirement": "W-947",
+      "description": "Popup runtime tests delete happy-dom's window size after each test, so the image-editor sheet tests run later in the same process fail.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/popups/runtime.test.ts",
+          "search": "    if (descriptor) Object.defineProperty(target, key, descriptor);\n    else Reflect.deleteProperty(target, key);",
+          "replace": "    Reflect.deleteProperty(target, key);"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/astro/popups/runtime.test.ts",
+        "./packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-748: a quick flick released before a re-render still dismisses the sheet"
     }
   ]
 }
