@@ -1,0 +1,686 @@
+{
+  "source": "Saved in the node demo database (page \"nimbus-muu3ox4j341\", published) by a build writing layout schema 9 (0.1.0). Design from the v15-demo-home case.",
+  "design": {
+    "schemaVersion": 15,
+    "variables": {
+      "colors": [
+        {
+          "id": "forest",
+          "name": "Forest",
+          "value": "#16301f"
+        },
+        {
+          "id": "pine",
+          "name": "Pine",
+          "value": "#24533a"
+        },
+        {
+          "id": "moss",
+          "name": "Moss",
+          "value": "#7d9a6a"
+        },
+        {
+          "id": "ember",
+          "name": "Ember",
+          "value": "#c95a24"
+        },
+        {
+          "id": "ember-dark",
+          "name": "Ember dark",
+          "value": "#a5461a"
+        },
+        {
+          "id": "sand",
+          "name": "Sand",
+          "value": "#f1eadc"
+        },
+        {
+          "id": "paper",
+          "name": "Paper",
+          "value": "#fbf8f2"
+        },
+        {
+          "id": "ink",
+          "name": "Ink",
+          "value": "#18201b"
+        },
+        {
+          "id": "stone",
+          "name": "Stone",
+          "value": "#56605a"
+        },
+        {
+          "id": "line",
+          "name": "Line",
+          "value": "#e3dccd"
+        },
+        {
+          "id": "white",
+          "name": "White",
+          "value": "#ffffff"
+        }
+      ],
+      "fonts": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": "Fraunces, \"Iowan Old Style\", Georgia, serif"
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": "\"DM Sans\", Inter, system-ui, sans-serif"
+        }
+      ],
+      "fontSizes": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": {
+            "value": 76,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "h2",
+          "name": "Heading 2",
+          "value": {
+            "value": 46,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "h3",
+          "name": "Heading 3",
+          "value": {
+            "value": 23,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "lead",
+          "name": "Lead",
+          "value": {
+            "value": 20,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": {
+            "value": 17,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "small",
+          "name": "Small",
+          "value": {
+            "value": 14,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "micro",
+          "name": "Micro",
+          "value": {
+            "value": 12,
+            "unit": "px"
+          }
+        }
+      ],
+      "spacings": [
+        {
+          "id": "xs",
+          "name": "XS",
+          "value": {
+            "value": 8,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "sm",
+          "name": "Small",
+          "value": {
+            "value": 16,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "md",
+          "name": "Medium",
+          "value": {
+            "value": 24,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "lg",
+          "name": "Large",
+          "value": {
+            "value": 40,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "xl",
+          "name": "XL",
+          "value": {
+            "value": 64,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "xxl",
+          "name": "Section",
+          "value": {
+            "value": 120,
+            "unit": "px"
+          }
+        }
+      ]
+    },
+    "classes": [
+      {
+        "id": "section",
+        "name": "Section",
+        "style": {
+          "alignItems": "center",
+          "paddingTop": {
+            "var": "xxl",
+            "from": "spacing"
+          },
+          "paddingBottom": {
+            "var": "xxl",
+            "from": "spacing"
+          },
+          "paddingLeft": {
+            "var": "md",
+            "from": "spacing"
+          },
+          "paddingRight": {
+            "var": "md",
+            "from": "spacing"
+          }
+        },
+        "devices": {
+          "mobile": {
+            "paddingTop": {
+              "var": "xl",
+              "from": "spacing"
+            },
+            "paddingBottom": {
+              "var": "xl",
+              "from": "spacing"
+            }
+          }
+        }
+      },
+      {
+        "id": "inner",
+        "name": "Inner",
+        "style": {
+          "width": {
+            "value": 100,
+            "unit": "%"
+          },
+          "maxWidth": {
+            "value": 1180,
+            "unit": "px"
+          },
+          "gap": {
+            "var": "lg",
+            "from": "spacing"
+          }
+        }
+      },
+      {
+        "id": "eyebrow",
+        "name": "Eyebrow",
+        "style": {
+          "fontFamily": {
+            "var": "body",
+            "from": "font"
+          },
+          "fontSize": {
+            "var": "micro",
+            "from": "fontSize"
+          },
+          "fontWeight": 700,
+          "letterSpacing": {
+            "value": 2,
+            "unit": "px"
+          },
+          "textTransform": "uppercase",
+          "color": {
+            "var": "ember"
+          }
+        }
+      },
+      {
+        "id": "btn",
+        "name": "Button",
+        "style": {
+          "paddingTop": {
+            "value": 15,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 15,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 26,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 26,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "ember"
+          },
+          "backgroundColor": {
+            "var": "ember"
+          },
+          "color": {
+            "var": "white"
+          },
+          "fontFamily": {
+            "var": "body",
+            "from": "font"
+          },
+          "fontSize": {
+            "value": 16,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "transition": {
+            "duration": 200,
+            "easing": "ease-out",
+            "property": "all"
+          }
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "ember-dark"
+            },
+            "borderColor": {
+              "var": "ember-dark"
+            }
+          },
+          "focus": {
+            "boxShadow": {
+              "x": 0,
+              "y": 0,
+              "blur": 0,
+              "spread": 4,
+              "color": "#f2c4a6"
+            }
+          },
+          "active": {
+            "opacity": 0.9
+          }
+        }
+      },
+      {
+        "id": "btn-ghost",
+        "name": "Button ghost",
+        "style": {
+          "backgroundColor": "#ffffff14",
+          "borderColor": "#ffffff80"
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": "#ffffff2e",
+            "borderColor": {
+              "var": "white"
+            }
+          }
+        }
+      },
+      {
+        "id": "card",
+        "name": "Card",
+        "style": {
+          "backgroundColor": {
+            "var": "white"
+          },
+          "borderRadius": {
+            "value": 20,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "line"
+          },
+          "overflow": "hidden",
+          "boxShadow": {
+            "x": 0,
+            "y": 1,
+            "blur": 2,
+            "spread": 0,
+            "color": "#18201b0f"
+          },
+          "transition": {
+            "duration": 250,
+            "easing": "ease-out",
+            "property": "all"
+          }
+        },
+        "states": {
+          "hover": {
+            "borderColor": {
+              "var": "moss"
+            },
+            "boxShadow": {
+              "x": 0,
+              "y": 22,
+              "blur": 44,
+              "spread": -18,
+              "color": "#16301f59"
+            }
+          }
+        }
+      },
+      {
+        "id": "chip",
+        "name": "Chip",
+        "style": {
+          "paddingTop": {
+            "value": 5,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 5,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 11,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 11,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "backgroundColor": {
+            "var": "sand"
+          },
+          "color": {
+            "var": "pine"
+          },
+          "fontSize": {
+            "var": "micro",
+            "from": "fontSize"
+          },
+          "fontWeight": 600
+        }
+      },
+      {
+        "id": "lead",
+        "name": "Lead",
+        "style": {
+          "fontSize": {
+            "var": "lead",
+            "from": "fontSize"
+          },
+          "lineHeight": {
+            "value": 1.55,
+            "unit": "em"
+          },
+          "maxWidth": {
+            "value": 640,
+            "unit": "px"
+          }
+        }
+      }
+    ],
+    "defaults": {
+      "h1": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "display",
+          "from": "fontSize"
+        },
+        "fontWeight": 500,
+        "lineHeight": {
+          "value": 1.02,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h2": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "h2",
+          "from": "fontSize"
+        },
+        "fontWeight": 500,
+        "lineHeight": {
+          "value": 1.08,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h3": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "h3",
+          "from": "fontSize"
+        },
+        "fontWeight": 600,
+        "lineHeight": {
+          "value": 1.25,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "p": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "fontSize": {
+          "var": "body",
+          "from": "fontSize"
+        },
+        "lineHeight": {
+          "value": 1.65,
+          "unit": "em"
+        },
+        "color": {
+          "var": "stone"
+        }
+      },
+      "a": {
+        "color": {
+          "var": "pine"
+        },
+        "fontWeight": 600
+      }
+    }
+  },
+  "layout": {
+    "schemaVersion": 9,
+    "root": {
+      "id": "root0001",
+      "type": "container",
+      "props": {},
+      "children": [
+        {
+          "id": "iw57u6j9",
+          "type": "container",
+          "props": {},
+          "children": [
+            {
+              "id": "hrh3dw3a",
+              "type": "text",
+              "props": {
+                "text": "NEW · Nimbus 3.0 is here"
+              },
+              "style": {
+                "color": {
+                  "var": "nimbus-mist"
+                },
+                "letterSpacing": {
+                  "value": 2,
+                  "unit": "px"
+                },
+                "textTransform": "uppercase",
+                "fontSize": {
+                  "value": 13,
+                  "unit": "px"
+                }
+              }
+            },
+            {
+              "id": "mwkog9wp",
+              "type": "heading",
+              "props": {
+                "text": "Ship analytics your whole team actually reads",
+                "level": 1
+              },
+              "style": {
+                "color": {
+                  "var": "nimbus-white"
+                },
+                "fontSize": {
+                  "value": 56,
+                  "unit": "px"
+                },
+                "lineHeight": {
+                  "value": 1.1,
+                  "unit": "px"
+                },
+                "textAlign": "center",
+                "maxWidth": {
+                  "value": 820,
+                  "unit": "px"
+                }
+              }
+            },
+            {
+              "id": "k9ui4l0c",
+              "type": "text",
+              "props": {
+                "text": "Nimbus turns raw product events into plain-English dashboards, alerts and weekly digests. No SQL, no sampling, no surprises on your bill."
+              },
+              "style": {
+                "color": {
+                  "var": "nimbus-mist"
+                },
+                "fontSize": {
+                  "value": 19,
+                  "unit": "px"
+                },
+                "textAlign": "center",
+                "maxWidth": {
+                  "value": 640,
+                  "unit": "px"
+                }
+              }
+            },
+            {
+              "id": "1jfjlmeq",
+              "type": "container",
+              "props": {},
+              "children": [
+                {
+                  "id": "8giu96lc",
+                  "type": "button",
+                  "props": {
+                    "text": "Start free trial",
+                    "href": "#signup"
+                  }
+                },
+                {
+                  "id": "jpfvfe72",
+                  "type": "button",
+                  "props": {
+                    "text": "Book a demo",
+                    "href": "/contact"
+                  }
+                }
+              ],
+              "style": {
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "justifyContent": "center",
+                "gap": {
+                  "value": 12,
+                  "unit": "px"
+                }
+              }
+            }
+          ],
+          "style": {
+            "alignItems": "center",
+            "gap": {
+              "value": 20,
+              "unit": "px"
+            },
+            "paddingTop": {
+              "value": 112,
+              "unit": "px"
+            },
+            "paddingBottom": {
+              "value": 112,
+              "unit": "px"
+            },
+            "paddingLeft": {
+              "value": 24,
+              "unit": "px"
+            },
+            "paddingRight": {
+              "value": 24,
+              "unit": "px"
+            },
+            "backgroundColor": {
+              "var": "nimbus-navy"
+            }
+          }
+        }
+      ],
+      "style": {
+        "gap": {
+          "value": 0,
+          "unit": "px"
+        }
+      }
+    }
+  }
+}

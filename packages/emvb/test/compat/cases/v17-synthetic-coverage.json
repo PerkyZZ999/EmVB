@@ -1,0 +1,179 @@
+{
+  "source": "Synthetic, written for W-926 in the 0.9.0 format (layout 17, design 16): the element, style keys and node attributes no saved page uses, plus unsafe SVG, link and text values for the sanitizers.",
+  "design": {
+    "schemaVersion": 16,
+    "variables": {
+      "colors": [
+        {
+          "id": "ink",
+          "name": "Ink",
+          "value": "#1f2937"
+        }
+      ]
+    }
+  },
+  "layout": {
+    "schemaVersion": 17,
+    "root": {
+      "id": "root0001",
+      "type": "container",
+      "props": {},
+      "attributes": [
+        {
+          "name": "data-note",
+          "value": "\"quoted\" <b>&amp;"
+        },
+        {
+          "name": "aria-describedby",
+          "value": "help0001"
+        }
+      ],
+      "style": {
+        "minWidth": {
+          "value": 320,
+          "unit": "px"
+        },
+        "marginBottom": {
+          "value": 24,
+          "unit": "px"
+        },
+        "backgroundVideo": "/media/loop.mp4",
+        "backgroundRepeat": "repeat-x",
+        "borderRightWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderLeftWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderTopRightRadius": {
+          "value": 4,
+          "unit": "px"
+        },
+        "borderBottomRightRadius": {
+          "value": 5,
+          "unit": "px"
+        },
+        "borderBottomLeftRadius": {
+          "value": 6,
+          "unit": "px"
+        },
+        "filter": {
+          "blur": 2,
+          "grayscale": 40
+        },
+        "cursor": "pointer"
+      },
+      "children": [
+        {
+          "id": "grid0001",
+          "type": "grid",
+          "props": {
+            "columns": 3
+          },
+          "children": [
+            {
+              "id": "cell0001",
+              "type": "div-block",
+              "props": {},
+              "style": {
+                "gridRowSpan": 2,
+                "gridColumnStart": 2,
+                "gridRowStart": 1,
+                "position": "relative",
+                "bottom": {
+                  "value": -8,
+                  "unit": "px"
+                }
+              },
+              "children": [
+                {
+                  "id": "text0001",
+                  "type": "text",
+                  "props": {
+                    "text": "<script>alert(1)</script> & \"quotes\""
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "icon0001",
+          "type": "icon",
+          "props": {
+            "iconId": "custom-line",
+            "iconSvg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M4 12h16\" stroke=\"currentColor\" fill=\"none\"/></svg>",
+            "decorative": true
+          },
+          "style": {
+            "iconRotate": 45,
+            "iconFlip": "horizontal",
+            "iconScale": 1.5,
+            "iconStrokeWidth": 2.5,
+            "iconShadow": {
+              "x": 1,
+              "y": 2,
+              "blur": 3,
+              "color": {
+                "var": "ink"
+              }
+            }
+          }
+        },
+        {
+          "id": "svgm0001",
+          "type": "svg",
+          "props": {
+            "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><defs><linearGradient id=\"g\"><stop offset=\"0\" stop-color=\"red\"/></linearGradient></defs><circle cx=\"6\" cy=\"6\" r=\"5\" stroke=\"url(#g)\"/><path d=\"M12 6h10\"/></svg>",
+            "title": "Dot",
+            "decorative": false
+          }
+        },
+        {
+          "id": "svgbad01",
+          "type": "svg",
+          "props": {
+            "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 10 10\" onload=\"alert(1)\"><circle cx=\"5\" cy=\"5\" r=\"4\"/></svg>",
+            "title": "Unsafe",
+            "decorative": false
+          }
+        },
+        {
+          "id": "form0001",
+          "type": "form",
+          "props": {
+            "formId": "contact"
+          },
+          "children": [
+            {
+              "id": "radio001",
+              "type": "radio",
+              "props": {
+                "field": "plan",
+                "label": "Plan",
+                "placeholder": "Basic\nPro"
+              }
+            },
+            {
+              "id": "subm0001",
+              "type": "submit",
+              "props": {
+                "label": "Send"
+              }
+            }
+          ]
+        },
+        {
+          "id": "link0001",
+          "type": "link",
+          "props": {
+            "text": "Bad link",
+            "href": "javascript:alert(4)"
+          }
+        }
+      ]
+    }
+  }
+}

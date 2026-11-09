@@ -41490,6 +41490,95 @@
       ],
       "command": ["bun", "test", "./test/docs/schema-doc.test.ts"],
       "expect": "\\(fail\\).*lists every element type"
+    },
+    {
+      "id": "W-926/compat-renderer-output",
+      "requirement": "W-926",
+      "description": "The radio group renders with a different class, so a stored 0.x page's HTML changes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/form-elements.ts",
+          "search": "class: \"emvb-radio-group\",",
+          "replace": "class: \"emvb-radios\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\).*v17-synthetic-coverage"
+    },
+    {
+      "id": "W-926/compat-href-sanitizer",
+      "requirement": "W-926",
+      "description": "The public href allowlist lets javascript: through, so a stored page's unsafe link is no longer neutralised.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/href.ts",
+          "search": "new Set([\"http:\", \"https:\", \"mailto:\", \"tel:\"]);",
+          "replace": "new Set([\"http:\", \"https:\", \"mailto:\", \"tel:\", \"javascript:\"]);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\).*v17-synthetic-coverage"
+    },
+    {
+      "id": "W-926/compat-svg-sanitizer",
+      "requirement": "W-926",
+      "description": "The SVG sanitizer stops refusing event-handler attributes, so a stored unsafe SVG renders instead of the placeholder.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "  if (/\\bon[a-z]+\\s*=/i.test(raw)) return undefined;\n",
+          "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/core/sanitize/svg.ts",
+          "search": "/<script\\b|<\\/script\\b|\\bon[a-z]+\\s*=|javascript:|",
+          "replace": "/<script\\b|<\\/script\\b|javascript:|"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\).*v17-synthetic-coverage"
+    },
+    {
+      "id": "W-926/compat-old-page-rejected",
+      "requirement": "W-926",
+      "description": "The attribute-name rule is tightened to data-* only, so a stored page with an aria-* attribute is rejected on read.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "      /^(?:data|aria)-[a-z][a-z0-9-]{0,40}$/,",
+          "replace": "      /^data-[a-z][a-z0-9-]{0,40}$/,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\).*every case is accepted"
+    },
+    {
+      "id": "W-926/compat-coverage-gap",
+      "requirement": "W-926",
+      "description": "The corpus loses its only iconFlip, so a style key of the 1.0 contract is no longer exercised.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/compat/cases/v17-synthetic-coverage.json",
+          "search": "\"iconFlip\": \"horizontal\",",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\).*every element type and style key"
+    },
+    {
+      "id": "W-926/compat-release-gap",
+      "requirement": "W-926",
+      "description": "The only stored page from 0.3.0 (layout 13) is relabelled, so a released schema has no page in the corpus.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/compat/cases/v13-qa-node-boxes.json",
+          "search": "\"schemaVersion\": 13",
+          "replace": "\"schemaVersion\": 14"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\).*every released layout schema"
     }
   ]
 }

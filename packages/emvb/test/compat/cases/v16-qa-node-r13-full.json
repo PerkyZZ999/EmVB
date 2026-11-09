@@ -1,0 +1,741 @@
+{
+  "source": "Saved in the node demo database (page \"r13-full-mv8nqu9f301\", published) by a build writing layout schema 16 (0.6.0/0.7.0). Design from the v17-playground-landing case.",
+  "design": {
+    "schemaVersion": 16,
+    "variables": {
+      "colors": [
+        {
+          "id": "ink",
+          "name": "Ink",
+          "value": "#14161a"
+        },
+        {
+          "id": "paper",
+          "name": "Paper",
+          "value": "#faf8f3"
+        },
+        {
+          "id": "brand",
+          "name": "Brand",
+          "value": "#2f5bea"
+        },
+        {
+          "id": "brand-dark",
+          "name": "Brand dark",
+          "value": "#2347c4"
+        },
+        {
+          "id": "brand-soft",
+          "name": "Brand soft",
+          "value": "#e8eefd"
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "value": "#f2994a"
+        },
+        {
+          "id": "muted",
+          "name": "Muted text",
+          "value": "#545b66"
+        },
+        {
+          "id": "line",
+          "name": "Line",
+          "value": "#e4dfd3"
+        }
+      ],
+      "fonts": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": "Georgia, \"Times New Roman\", serif"
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+        }
+      ],
+      "fontSizes": [
+        {
+          "id": "lede",
+          "name": "Lede",
+          "value": {
+            "value": 1.25,
+            "unit": "rem"
+          }
+        },
+        {
+          "id": "small",
+          "name": "Small",
+          "value": {
+            "value": 0.875,
+            "unit": "rem"
+          }
+        }
+      ],
+      "spacings": [
+        {
+          "id": "section",
+          "name": "Section padding",
+          "value": {
+            "value": 96,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "gutter",
+          "name": "Gutter",
+          "value": {
+            "value": 24,
+            "unit": "px"
+          }
+        }
+      ]
+    },
+    "classes": [
+      {
+        "id": "card",
+        "name": "Card",
+        "style": {
+          "flexDirection": "column",
+          "gap": {
+            "value": 12,
+            "unit": "px"
+          },
+          "paddingTop": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 28,
+            "unit": "px"
+          },
+          "backgroundColor": "#ffffff",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "line"
+          },
+          "borderRadius": {
+            "value": 18,
+            "unit": "px"
+          },
+          "transition": {
+            "duration": 200,
+            "easing": "ease-out",
+            "property": "all"
+          }
+        },
+        "states": {
+          "hover": {
+            "borderColor": {
+              "var": "brand"
+            },
+            "boxShadow": {
+              "x": 0,
+              "y": 12,
+              "blur": 32,
+              "spread": -12,
+              "color": "#2f5bea55"
+            }
+          }
+        }
+      },
+      {
+        "id": "eyebrow",
+        "name": "Eyebrow",
+        "style": {
+          "color": {
+            "var": "brand"
+          },
+          "fontSize": {
+            "var": "small",
+            "from": "fontSize"
+          },
+          "fontWeight": 600,
+          "letterSpacing": {
+            "value": 0.08,
+            "unit": "em"
+          },
+          "textTransform": "uppercase"
+        }
+      },
+      {
+        "id": "button-primary",
+        "name": "Button primary",
+        "style": {
+          "backgroundColor": {
+            "var": "brand"
+          },
+          "color": "#ffffff",
+          "paddingTop": {
+            "value": 14,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 22,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 14,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 22,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "textDecoration": "none",
+          "transition": {
+            "duration": 150,
+            "easing": "ease-out",
+            "property": "colors"
+          }
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "brand-dark"
+            }
+          }
+        }
+      },
+      {
+        "id": "button-ghost",
+        "name": "Button ghost",
+        "style": {
+          "backgroundColor": "#00000000",
+          "color": {
+            "var": "ink"
+          },
+          "paddingTop": {
+            "value": 13,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 21,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 13,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 21,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "ink"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "textDecoration": "none"
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "ink"
+            },
+            "color": {
+              "var": "paper"
+            }
+          }
+        }
+      }
+    ],
+    "defaults": {
+      "h1": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 3.5,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.08,
+        "letterSpacing": {
+          "value": -0.02,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h2": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 2.4,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.15,
+        "letterSpacing": {
+          "value": -0.01,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h3": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 1.2,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "color": {
+          "var": "ink"
+        }
+      },
+      "p": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "lineHeight": 1.6,
+        "color": {
+          "var": "muted"
+        }
+      },
+      "a": {
+        "color": {
+          "var": "brand"
+        }
+      }
+    }
+  },
+  "layout": {
+    "schemaVersion": 16,
+    "root": {
+      "id": "root0001",
+      "type": "container",
+      "props": {},
+      "style": {
+        "flexDirection": "column",
+        "gap": {
+          "value": 24,
+          "unit": "px"
+        }
+      },
+      "children": [
+        {
+          "id": "head0001",
+          "type": "heading",
+          "props": {
+            "text": "Autumn Garden Co.",
+            "level": 1
+          }
+        },
+        {
+          "id": "cilvsxsc",
+          "type": "container",
+          "props": {},
+          "children": []
+        },
+        {
+          "id": "zo8o3em0",
+          "type": "layout-section",
+          "props": {},
+          "style": {
+            "paddingTop": {
+              "value": 64,
+              "unit": "px"
+            },
+            "paddingRight": {
+              "value": 24,
+              "unit": "px"
+            },
+            "paddingBottom": {
+              "value": 64,
+              "unit": "px"
+            },
+            "paddingLeft": {
+              "value": 24,
+              "unit": "px"
+            }
+          },
+          "children": []
+        },
+        {
+          "id": "q48f6gkq",
+          "type": "spacer",
+          "props": {
+            "height": {
+              "value": 24,
+              "unit": "px"
+            }
+          }
+        },
+        {
+          "id": "7myw1qp4",
+          "type": "divider",
+          "props": {}
+        },
+        {
+          "id": "60rde3bo",
+          "type": "section",
+          "props": {},
+          "children": []
+        },
+        {
+          "id": "an3i0en6",
+          "type": "div-block",
+          "props": {},
+          "children": []
+        },
+        {
+          "id": "8b36egsa",
+          "type": "flexbox",
+          "props": {},
+          "style": {
+            "flexDirection": "row",
+            "flexWrap": "wrap",
+            "gap": {
+              "value": 16,
+              "unit": "px"
+            }
+          },
+          "children": []
+        },
+        {
+          "id": "vlh6qy7n",
+          "type": "grid",
+          "props": {
+            "columns": 3
+          },
+          "children": []
+        },
+        {
+          "id": "qhkibrpe",
+          "type": "tabs",
+          "props": {},
+          "children": [
+            {
+              "id": "0839vbnj",
+              "type": "tab-panel",
+              "props": {
+                "label": "Tab 1"
+              },
+              "children": [
+                {
+                  "id": "kznlxhsz",
+                  "type": "heading",
+                  "props": {
+                    "text": "First tab",
+                    "level": 3
+                  }
+                }
+              ]
+            },
+            {
+              "id": "hntx5d99",
+              "type": "tab-panel",
+              "props": {
+                "label": "Tab 2"
+              },
+              "children": [
+                {
+                  "id": "47ctsp0v",
+                  "type": "heading",
+                  "props": {
+                    "text": "Second tab",
+                    "level": 3
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "vpf2uqxh",
+          "type": "accordion",
+          "props": {},
+          "children": [
+            {
+              "id": "n6lba0dj",
+              "type": "accordion-item",
+              "props": {
+                "summary": "Question 1",
+                "open": true
+              },
+              "children": [
+                {
+                  "id": "z3l1miob",
+                  "type": "text",
+                  "props": {
+                    "text": "Answer to question 1. Replace this text or add elements here."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "izt6d3x7",
+              "type": "accordion-item",
+              "props": {
+                "summary": "Question 2"
+              },
+              "children": [
+                {
+                  "id": "aamdd7a3",
+                  "type": "text",
+                  "props": {
+                    "text": "Answer to question 2. Replace this text or add elements here."
+                  }
+                }
+              ]
+            },
+            {
+              "id": "5a6avv79",
+              "type": "accordion-item",
+              "props": {
+                "summary": "Question 3"
+              },
+              "children": [
+                {
+                  "id": "ik6bj8yv",
+                  "type": "text",
+                  "props": {
+                    "text": "Answer to question 3. Replace this text or add elements here."
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hoiq8f60",
+          "type": "heading",
+          "props": {
+            "text": "Heading",
+            "level": 2
+          }
+        },
+        {
+          "id": "t1efgshw",
+          "type": "toc",
+          "props": {}
+        },
+        {
+          "id": "56xyqbzu",
+          "type": "text",
+          "props": {
+            "text": "Text"
+          }
+        },
+        {
+          "id": "iy5h1hpy",
+          "type": "label",
+          "props": {
+            "text": "Label"
+          }
+        },
+        {
+          "id": "mgf7a4fa",
+          "type": "link",
+          "props": {
+            "text": "Link",
+            "href": "/"
+          }
+        },
+        {
+          "id": "zce4u6l9",
+          "type": "button",
+          "props": {
+            "text": "Button"
+          }
+        },
+        {
+          "id": "4d62o6gx",
+          "type": "list",
+          "props": {
+            "items": ["Item"]
+          }
+        },
+        {
+          "id": "380gucho",
+          "type": "image",
+          "props": {
+            "src": "",
+            "alt": "Image",
+            "decorative": false
+          }
+        },
+        {
+          "id": "mwo44pt9",
+          "type": "icon",
+          "props": {
+            "iconId": "star",
+            "title": "Star",
+            "decorative": false,
+            "size": 24
+          }
+        },
+        {
+          "id": "wngmvfm9",
+          "type": "video",
+          "props": {
+            "url": "",
+            "title": "Video"
+          }
+        },
+        {
+          "id": "ah7a3oih",
+          "type": "svg",
+          "props": {
+            "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M8 12h8\"/></svg>",
+            "title": "SVG",
+            "decorative": false,
+            "size": 48
+          }
+        },
+        {
+          "id": "lqmnb1m5",
+          "type": "menu",
+          "props": {
+            "direction": "row"
+          },
+          "children": [
+            {
+              "id": "td7mle23",
+              "type": "menu-item",
+              "props": {
+                "text": "Home",
+                "href": "/"
+              },
+              "children": []
+            },
+            {
+              "id": "cr4hn821",
+              "type": "menu-item",
+              "props": {
+                "text": "Work",
+                "href": "/work"
+              },
+              "children": [
+                {
+                  "id": "imfokcmu",
+                  "type": "menu-item",
+                  "props": {
+                    "text": "Projects",
+                    "href": "/work/projects"
+                  },
+                  "children": []
+                },
+                {
+                  "id": "z4w0j43z",
+                  "type": "menu-item",
+                  "props": {
+                    "text": "Archive",
+                    "href": "/work/archive"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "85jpeeu1",
+              "type": "menu-item",
+              "props": {
+                "text": "About",
+                "href": "/about"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "ccrty0qt",
+          "type": "post-title",
+          "props": {
+            "level": 1
+          }
+        },
+        {
+          "id": "cdla3suu",
+          "type": "post-excerpt",
+          "props": {}
+        },
+        {
+          "id": "3l1dihve",
+          "type": "post-content",
+          "props": {}
+        },
+        {
+          "id": "2w7iysp5",
+          "type": "post-image",
+          "props": {
+            "decorative": false
+          }
+        },
+        {
+          "id": "8n30vx00",
+          "type": "post-link",
+          "props": {}
+        },
+        {
+          "id": "slmq4jny",
+          "type": "post-date",
+          "props": {}
+        },
+        {
+          "id": "mctn8pfb",
+          "type": "post-author",
+          "props": {}
+        },
+        {
+          "id": "81yj5yvh",
+          "type": "loop",
+          "props": {},
+          "children": []
+        },
+        {
+          "id": "nhyttoer",
+          "type": "pagination",
+          "props": {}
+        },
+        {
+          "id": "tz63shd2",
+          "type": "form",
+          "props": {
+            "formId": ""
+          },
+          "children": []
+        }
+      ]
+    }
+  }
+}
