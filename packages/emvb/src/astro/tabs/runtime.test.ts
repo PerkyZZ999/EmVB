@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, spyOn, test } from "bun:test";
 import { initTabs, selectTabForTest } from "./runtime.ts";
 
 function fixture(): HTMLElement {
@@ -206,8 +206,14 @@ describe("tabs runtime (W-078)", () => {
   // W-091: survivors in the tabs runtime (Stryker 76%).
   test("initialising twice still moves one tab per key press", () => {
     const root = threeTabs("tabs-2");
+    const list = root.querySelector(".emvb-tab-list");
+    if (!list) throw new Error("tab list is missing");
+    const added = spyOn(list, "addEventListener");
     initTabs(document);
     initTabs(document);
+    // W-675's defaultPrevented check hides a second key handler, so count them too.
+    expect(added.mock.calls.filter(([type]) => type === "keydown")).toHaveLength(1);
+    added.mockRestore();
     press(root, "ArrowRight");
     expect(state(root)).toEqual([
       "- false -1 true",

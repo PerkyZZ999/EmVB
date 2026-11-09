@@ -10661,8 +10661,8 @@
           "replace": "  const trimmed = value;"
         }
       ],
-      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/href.test.ts"],
-      "expect": "\\(fail\\).*accepts \" /pricing \""
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/media-url.test.ts"],
+      "expect": "\\(fail\\).*allows +https://cdn\\.example/spaced\\.png"
     },
     {
       "id": "W-091/load-entry-part-type-default",

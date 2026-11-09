@@ -7,6 +7,8 @@ describe("sanitizeMediaUrl (W-024, R-032)", () => {
     ["http://cdn.example/a.png", "http://cdn.example/a.png"],
     ["/uploads/photo.jpg", "/uploads/photo.jpg"],
     ["./local.webp", "./local.webp"],
+    // W-091: pasted addresses often carry spaces around them.
+    ["  https://cdn.example/spaced.png  ", "https://cdn.example/spaced.png"],
   ])("allows %s", (input, out) => {
     expect(sanitizeMediaUrl(input)).toBe(out);
   });
