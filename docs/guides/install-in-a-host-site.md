@@ -4,7 +4,7 @@ EmVB is a **native** EmDash plugin: add the package, register it in `astro.confi
 
 Project website: <https://emvb.dev>. Package: [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb).
 
-EmVB 1.0 is verified on EmDash 1.4.0 (a fresh `create-emdash` 1.4.0 site, node and Cloudflare templates as created, with Astro 7.4.7, following this guide; 0.9.0 was verified the same way with Astro 7.3.5); earlier releases were verified on 1.0.1 and 1.2.0. The package ships TypeScript source (no `bun build` step for the plugin).
+EmVB 1.0 is verified on EmDash 1.4.0 (a fresh `create-emdash` 1.4.0 site, node and Cloudflare templates as created, with Astro 7.4.7, and again on 2026-11-09 with Astro 7.4.8 and the 1.0 extras, following this guide; 0.9.0 was verified the same way with Astro 7.3.5); earlier releases were verified on 1.0.1 and 1.2.0. The package ships TypeScript source (no `bun build` step for the plugin).
 
 ## 1. Install the package
 
