@@ -46,7 +46,7 @@ describe("W-318 style inheritance trace", () => {
     expect(
       defaultTagFor({ id: "b", type: "button", props: { text: "x", href: " " } } as LayoutNode),
     ).toBe("button");
-    expect(defaultTagFor({ id: "s", type: "section", props: {} } as LayoutNode)).toBeUndefined();
+    expect(defaultTagFor({ id: "s", type: "part-ref", props: {} } as LayoutNode)).toBeUndefined();
   });
 
   test("W-318 default < classes in site order < element", () => {
@@ -94,7 +94,7 @@ describe("W-318 style inheritance trace", () => {
   });
 
   test("W-318 a plain element with no design inherits nothing", () => {
-    const bare = { id: "s", type: "section", props: {}, children: [] } as unknown as LayoutNode;
+    const bare = { id: "s", type: "part-ref", props: {}, children: [] } as unknown as LayoutNode;
     expect(traceStyle(bare, { ...design, defaults: undefined })).toEqual({});
     expect(inheritedStyle(bare, design, "desktop", "normal")).toEqual({});
   });

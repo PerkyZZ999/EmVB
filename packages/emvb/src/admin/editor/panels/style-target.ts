@@ -8,7 +8,9 @@ import {
   type DeviceStyles,
   type LayoutNode,
   type PopupDevice,
+  type FlatStyleProps,
   type StyleProps,
+  patchNestedStyle,
   type StyleStateName,
   type StyleStates,
 } from "../../../core/index.ts";
@@ -35,8 +37,8 @@ export function styleTarget({
   return { owner, slot: "state", state };
 }
 
-const withStyle = (node: LayoutNode, patch: Partial<StyleProps>): LayoutNode => {
-  const style: Record<string, unknown> = { ...node.style, ...patch };
+const withStyle = (node: LayoutNode, patch: Partial<FlatStyleProps>): LayoutNode => {
+  const style = patchNestedStyle(node.style, patch);
   for (const key of Object.keys(style)) if (style[key] === undefined) delete style[key];
   return {
     ...node,
@@ -72,7 +74,7 @@ export function applyStylePatch({
   classId: string | null;
   device: PopupDevice;
   state: StyleStateChoice;
-  patch: Partial<StyleProps>;
+  patch: Partial<FlatStyleProps>;
 }): StyleWrite {
   const target = styleTarget({ classId, device, state });
   if (target.slot === "device") {

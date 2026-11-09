@@ -86,12 +86,12 @@ function media(
   const seen = new Set<Layout>();
   /** W-671: a synced section or Loop Item part the canvas loaded is weighed with the page. */
   const part = (n: LayoutNode): Layout | undefined => {
-    const props = n.props as { partId?: unknown; itemPartId?: unknown };
+    const props = n.props as { partId?: unknown };
     const found =
-      n.type === "section" && typeof props.partId === "string"
+      n.type === "part-ref" && typeof props.partId === "string"
         ? dynamic?.sectionTemplates?.[props.partId.trim()]
-        : n.type === "loop" && typeof props.itemPartId === "string"
-          ? dynamic?.loopTemplates?.[props.itemPartId.trim()]
+        : n.type === "loop" && typeof props.partId === "string"
+          ? dynamic?.loopTemplates?.[props.partId.trim()]
           : undefined;
     if (!found || seen.has(found)) return undefined;
     seen.add(found);
@@ -161,7 +161,7 @@ export function measurePage(
     sections.push({
       id: child.id,
       type: child.type,
-      ...(child.label ? { label: child.label } : {}),
+      ...(child.editorLabel ? { label: child.editorLabel } : {}),
       bytes: Math.round(utf8(one.html) * GZIP) + m.bytes,
       images: m.images,
     });

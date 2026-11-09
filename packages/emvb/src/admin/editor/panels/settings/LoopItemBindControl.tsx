@@ -24,7 +24,7 @@ export function LoopItemBindControl({
 }: {
   value: string;
   fetcher: Fetcher;
-  onChange: (itemPartId: string) => void;
+  onChange: (partId: string) => void;
   partType?: ThemePartType;
   label?: string;
   emptyLabel?: string;

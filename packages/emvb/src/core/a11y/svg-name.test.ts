@@ -5,7 +5,7 @@ import { applyA11yFix, auditPage } from "./audit.ts";
 
 const SQUARE = '<svg viewBox="0 0 10 10"><rect width="10" height="10"/></svg>';
 const page = (...children: LayoutNode[]): Layout => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",

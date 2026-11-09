@@ -3,7 +3,11 @@
 A layout is `{ schemaVersion, root }`. `root` is a container whose `children` are the page's
 bands (usually `layout-section`). Each node has `id`, `type`, `props`, optional `style` (with
 `devices.tablet/mobile` overrides and `states.hover/focus`), `classes` (site class ids),
-`label`, and `children` when it is a parent.
+`editorLabel` (an editor-only name), and `children` when it is a parent. Motion lives under
+`style.motion` as `{ entrance, scroll, transition, icon }` (Normal only, never in `states`).
+A Theme section embed is type `part-ref` with `props.partId`; a Loop's item part is
+`props.partId`. Older names (`section`, `label`, `itemPartId`, flat `entrance` and friends) are
+still accepted on input and upgraded (schema 18, contract 1.0).
 
 Style values are literals or variable references:
 

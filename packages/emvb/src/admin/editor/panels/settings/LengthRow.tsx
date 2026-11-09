@@ -1,7 +1,7 @@
 import { DropdownMenu, InputGroup } from "@cloudflare/kumo";
 import { CaretDownIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
+import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import { FIELD } from "../../../ui.ts";
 import {
   parseLengthDraft,
@@ -49,7 +49,7 @@ export function LengthRow({
   placeholder?: string;
   /** Gap: a slider for the common range. The number field still accepts the full length. */
   slider?: boolean;
-  onPatch: (patch: Partial<StyleProps>) => void;
+  onPatch: (patch: Partial<FlatStyleProps>) => void;
   reset: React.ReactNode;
 }) {
   const units = unitsFor(styleKey);

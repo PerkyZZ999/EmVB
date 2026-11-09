@@ -1,6 +1,6 @@
 import { DropdownMenu } from "@cloudflare/kumo";
 import { BracketsCurlyIcon, RulerIcon, TextAaIcon, TextTIcon, XIcon } from "@phosphor-icons/react";
-import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
+import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import type { StyleKey } from "./style-sections.ts";
 
 /** Variable kinds a length or font property can bind to. Colours bind through ColorControl. */
@@ -77,7 +77,7 @@ export function VariableButton({
   kind: BindKind;
   design: DesignSystem;
   current: string | null;
-  onBind: (ref: NonNullable<StyleProps["gap"]>) => void;
+  onBind: (ref: NonNullable<FlatStyleProps["gap"]>) => void;
 }) {
   const list = variablesOf(design, kind);
   return (

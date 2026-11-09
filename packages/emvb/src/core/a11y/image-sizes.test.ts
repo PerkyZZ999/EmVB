@@ -6,7 +6,7 @@ import { auditPage } from "./audit.ts";
 const rulesFor = (props: Record<string, unknown>) =>
   auditPage(
     {
-      schemaVersion: 17,
+      schemaVersion: 18,
       root: {
         id: "root0001",
         type: "container",

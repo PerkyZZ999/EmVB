@@ -45,7 +45,11 @@ describe("state styles (D-032, W-089)", () => {
   test("a state value gets the same limits as style", () => {
     for (const bad of [{ opacity: 2 }, { color: "red;}" }, { zIndex: 1.5 }, { unknownKey: 1 }]) {
       expect(StyleStates.safeParse({ hover: bad }).success).toBe(false);
+    }
+    // W-925 (D-065): a document keeps an unknown key (written by a newer 1.x) instead of refusing it.
+    for (const bad of [{ opacity: 2 }, { color: "red;}" }, { zIndex: 1.5 }]) {
       expect(validateLayout(withStates({ active: bad })).ok).toBe(false);
     }
+    expect(validateLayout(withStates({ active: { unknownKey: 1 } })).ok).toBe(true);
   });
 });

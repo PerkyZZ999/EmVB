@@ -1,6 +1,7 @@
 import type { DesignSystem } from "../schema/design.ts";
 import { editClass } from "./classes.ts";
-import type { DeviceStyles, StyleProps } from "../schema/style.ts";
+import { patchNestedStyle } from "../migrate/v18.ts";
+import type { DeviceStyles, StylePatch, StyleProps } from "../schema/style.ts";
 import { POPUP_DEVICES, type PopupDevice } from "../theme/popup-rules.ts";
 
 export type ResponsiveDevice = "tablet" | "mobile";
@@ -12,10 +13,9 @@ export type ResponsiveDevice = "tablet" | "mobile";
 export function patchDeviceStyle(
   devices: DeviceStyles | undefined,
   device: ResponsiveDevice,
-  patch: Partial<StyleProps>,
+  patch: StylePatch,
 ): DeviceStyles | undefined {
-  const merged: Record<string, unknown> = { ...devices?.[device], ...patch };
-  for (const key of Object.keys(merged)) if (merged[key] === undefined) delete merged[key];
+  const merged = patchNestedStyle(devices?.[device], patch);
   const next: DeviceStyles = { ...devices };
   if (Object.keys(merged).length > 0) next[device] = merged as StyleProps;
   else delete next[device];
@@ -27,7 +27,7 @@ export function patchClassDevices(
   design: DesignSystem,
   classId: string,
   device: ResponsiveDevice,
-  patch: Partial<StyleProps>,
+  patch: StylePatch,
 ): DesignSystem {
   return editClass(design, classId, (next) => {
     const devices = patchDeviceStyle(next.devices, device, patch);

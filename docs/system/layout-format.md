@@ -1,6 +1,6 @@
-# Layout format (schema 17)
+# Layout format (schema 18)
 
-How EmVB stores a page and its site-wide design, at layout schema 17 and design schema 16 (Loop forever on an icon animation in W-853, D-059; the image editor's `edit` record on images in W-481; per-element direction, image link and caption, button icons, table of contents, container queries, and focal points in W-341 onward; visitor segments in W-329; Loop fields in W-330; `ch` lengths and negative margins in W-331). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
+How EmVB stores a page and its site-wide design, at layout schema 18 and design schema 17, schema contract 1.0 (W-925, D-065: renames, motion under `motion`, unknown keys kept; see [docs/SCHEMA.md](../SCHEMA.md)); Loop forever on an icon animation in W-853, D-059; the image editor's `edit` record on images in W-481; per-element direction, image link and caption, button icons, table of contents, container queries, and focal points in W-341 onward; visitor segments in W-329; Loop fields in W-330; `ch` lengths and negative margins in W-331). The source of truth is the code: `packages/emvb/src/core/schema/` (Zod schemas), `core/limits.ts`, `core/validate.ts` and `core/migrate/`. Update this file in the same change as any of them (ARCHITECTURE.md § Documentation).
 
 ## Where it lives
 
@@ -11,7 +11,7 @@ How EmVB stores a page and its site-wide design, at layout schema 17 and design 
 
 ```json
 {
-  "schemaVersion": 17,
+  "schemaVersion": 18,
   "root": {
     "id": "root0001",
     "type": "container",
@@ -29,7 +29,7 @@ How EmVB stores a page and its site-wide design, at layout schema 17 and design 
 }
 ```
 
-- `schemaVersion` is the literal `17` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045, W-160, W-307, W-329, W-341, W-481, W-885; older documents are upgraded on read by steps that change nothing, except v11 → v12, which rewrites a gradient's `from` and `to` into `stops`). `root` is always a container.
+- `schemaVersion` is the literal `18` (D-031, D-032, D-034, D-036, D-038, D-039, D-041, D-042, D-044, W-141, D-045, W-160, W-307, W-329, W-341, W-481, W-885, W-925; older documents are upgraded on read by steps that change nothing, except v11 → v12, which rewrites a gradient's `from` and `to` into `stops`, and v17 → v18 (W-925), which renames `section` to `part-ref`, a node's `label` to `editorLabel` and a Loop's `itemPartId` to `partId`, and moves `transition`, `entrance`, `scrollMotion` and `iconAnimation` under `style.motion`). `root` is always a container.
 - Every node has `id` (4–24 of `A-Z a-z 0-9 _ -`, unique within the page), `type`, `props`, and optional `style`, `states` (W-089, see [State styles](#state-styles-w-089)), `classes` (up to 20 ids of 1–40 of `a-z 0-9 -`, rendered as `emvb-k-<id>`), `bind` (W-307), `variant` (an A/B arm, W-312) and `audience` (who sees it, W-313, W-329).
 - Objects are strict: unknown keys are rejected, not ignored.
 - **Unknown element types** (W-022 / R-033): a node whose `type` is not in the known set is kept on save (`id` rules still apply; `props` is an open record; every shared node field, including `devices` and `hiddenOn`, is allowed and checked as on known nodes; optional `children` are validated recursively). Public pages omit it; the editor shows a selectable placeholder. Damaged known nodes (wrong props) still fail validation with path-specific issues.
@@ -65,13 +65,13 @@ How EmVB stores a page and its site-wide design, at layout schema 17 and design 
 | `post-date` | optional `format`: `medium` (default), `short`, `long`, `full` or `numeric` (W-177) | none | `<time datetime>` with the published date in UTC; `numeric` is YYYY-MM-DD |
 | `post-author` | (none) | none | The author's name |
 | `pagination` | optional `prevText`, `nextText`, `showCount` and `countText` (`{page}` and `{total}`; unset text is "Page {page} of {total}"), `titleText` (the paged archive title, `{title}` and `{page}`, W-529), `archiveTitle` (replaces "Posts" as the posts archive title, ≤ 60, W-532), and screen reader names `navLabel` ("Pagination"), `pageLabel` ("Page {page}"), `prevLabel` and `nextLabel` ("Previous page" / "Next page", used when the text is only an arrow), each ≤ 60 (W-689) | none | `nav` of Previous, page numbers and Next. Nothing on a single page, with no archive data, or inside a Loop item |
-| `loop` | optional `itemPartId`; `perPage` (1–50, unset = 20) on an archive; a collection Loop also takes `collection`, `limit`, `order`, `display`, `columns`, `permalink`, `imageField`, `excerptField` and `filter` (see [Schema 13](#schema-13-the-w-307-feature-batch) and [Schema 14](#schema-14)) | `children: Node[]` (inline item template when no part id) | Repeats the item template for each post or collection entry |
+| `loop` | optional `partId` (the item part; `itemPartId` before schema 18); `perPage` (1–50, unset = 20) on an archive; a collection Loop also takes `collection`, `limit`, `order`, `display`, `columns`, `permalink`, `imageField`, `excerptField` and `filter` (see [Schema 13](#schema-13-the-w-307-feature-batch) and [Schema 14](#schema-14)) | `children: Node[]` (inline item template when no part id) | Repeats the item template for each post or collection entry |
 | `grid` | `columns` (1–12); optional `columnsTablet` and `columnsMobile` (1–12, W-139); optional `columnTracks`, `columnTracksTablet`, `columnTracksMobile` (1–12 tracks: `1fr`, `2fr`, `3fr`, `auto`, `min-content`, `max-content`, or a length) | `children: Node[]` | `display: grid` with that many equal columns, or the custom tracks when that device sets them; the device values go in the tablet and mobile media queries, and an unset one follows the next wider device |
-| `section` (shown as "Theme section") | optional `partId` | `children: Node[]` (inline contents when no part id) | When `partId` is set, the published Section theme part's children replace the local ones |
+| `part-ref` (shown as "Theme section"; `section` before schema 18) | optional `partId` | `children: Node[]` (inline contents when no part id) | When `partId` is set, the published Section theme part's children replace the local ones |
 
 An image's optional `edit` (W-481, D-061) is written by the image editor and never rendered. `src`, `mediaId`, `width` and `height` point at the edited file; `edit` points back at the original: `v` (`1`), `engine` (`"photocn"`), `engineVersion` (such as `"0.1.2"`), `recipe` (photocn's `RecipeV1`, strict: sliders −1 to 1, blur and curve points 0 to 1, at most 32 points per curve channel, straighten ±45°, a filter name of up to 32 letters, digits, spaces, `_` or `-`, a blend image only as a site path or `https:` URL, at most 16 KB as JSON), optional `originalMediaId`, `originalSrc` (up to 2000 characters), `output` (`format` `webp`, `jpeg` or `png`, optional `quality` 0.1 to 1, optional `maxSide` 16 to 10000 px, `stripGps` boolean) and `editedAt` (an ISO 8601 timestamp).
 
-Every node may also carry an optional `label` (1–80 characters, trimmed; an editor-only name shown in Layers and on the canvas, never rendered, W-157), optional `htmlId` (CSS `id`, unique on the page), `classes` (style-class ids from the design system, S4), `devices` and `hiddenOn` (W-096, below).
+Every node may also carry an optional `editorLabel` (`label` before schema 18; 1–80 characters, trimmed; an editor-only name shown in Layers and on the canvas, never rendered, W-157), optional `htmlId` (CSS `id`, unique on the page), `classes` (style-class ids from the design system, S4), `devices` and `hiddenOn` (W-096, below).
 
 **Forms (S5):** form fields are only valid inside a `form` (or under one). Pages with a form set `needsFormsRuntime`; the host route loads `EmVBFormsRuntime` so `initForms` handles AJAX submit. Pages without a form stay zero EmVB JS (R-031).
 
@@ -122,35 +122,35 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `boxShadow` | `{ x, y, blur, spread, color?, inset? }`: px numbers, `x`, `y` and `spread` −1000 to 1000, `blur` 0 to 1000; `color` is a colour; `inset` is a boolean | `box-shadow` as `[inset] Xpx Ypx Bpx Spx [colour]`; no colour means the text colour |
 | `filter` | `{ blur?, brightness?, contrast?, saturate?, grayscale?, hueRotate? }`, at least one set: `blur` 0–100 px, `brightness` / `contrast` / `saturate` 0–300 %, `grayscale` 0–100 %, `hueRotate` 0–360° | `filter`, functions always in that order, such as `blur(2px) grayscale(100%)` |
 | `cursor` | `default`, `pointer`, `text`, `move`, `grab`, `not-allowed`, `help`, `crosshair`, `zoom-in` | `cursor` |
-| `transition` (W-089, Normal only) | `{ duration, delay?, easing, property }`: `duration` and `delay` whole ms 0–2000; `easing` `ease`, `ease-in`, `ease-out`, `ease-in-out`, `linear`; `property` `all`, `colors`, `opacity`, `shadow`, `filter`. No other keys | `transition`, one entry per CSS property: `colors` is `color`, `background-color` and `border-color`; `shadow` is `box-shadow`. For example `opacity 200ms ease-out 50ms` |
-| `entrance` (W-101, Normal only) | `{ type, duration, delay?, trigger? }`: `type` is `fade`, `fade-up`, `fade-down`, `slide-up`, `slide-down` or `scale`; `duration` and `delay` whole ms 0–2000; `trigger` is `load` (default) or `view` (as it scrolls in; browsers without scroll-driven animations play it on load) | `animation` named `emvb-<type>`, once, `ease-out`, `both`. Reduced motion sets `animation: none` |
-| `scrollMotion` (W-319, Normal only) | `{ effects, range }` or `{ type: "none" }`. Each effect is `{ type, from, to }`: `type` is `fade`, `move-x`, `move-y`, `scale`, `rotate` or `blur` (one of each). `range` is `enter`, `cross`, `exit` or `page`. `none` stops motion a wider device set | CSS scroll-driven animations. Reduced motion, and browsers without them, show the element still |
+| `motion.transition` (W-089, Normal only) | `{ duration, delay?, easing, property }`: `duration` and `delay` whole ms 0–2000; `easing` `ease`, `ease-in`, `ease-out`, `ease-in-out`, `linear`; `property` `all`, `colors`, `opacity`, `shadow`, `filter`. No other keys | `transition`, one entry per CSS property: `colors` is `color`, `background-color` and `border-color`; `shadow` is `box-shadow`. For example `opacity 200ms ease-out 50ms` |
+| `motion.entrance` (W-101, Normal only) | `{ type, duration, delay?, trigger? }`: `type` is `fade`, `fade-up`, `fade-down`, `slide-up`, `slide-down` or `scale`; `duration` and `delay` whole ms 0–2000; `trigger` is `load` (default) or `view` (as it scrolls in; browsers without scroll-driven animations play it on load) | `animation` named `emvb-<type>`, once, `ease-out`, `both`. Reduced motion sets `animation: none` |
+| `motion.scroll` (W-319, Normal only; `scrollMotion` before schema 18) | `{ effects, range }` or `{ type: "none" }`. Each effect is `{ type, from, to }`: `type` is `fade`, `move-x`, `move-y`, `scale`, `rotate` or `blur` (one of each). `range` is `enter`, `cross`, `exit` or `page`. `none` stops motion a wider device set | CSS scroll-driven animations. Reduced motion, and browsers without them, show the element still |
 | `iconRotate` (W-237, icons) | whole degrees −360 to 360 | `--emvb-icon-rotate`, read by the icon's `svg` as `rotate` |
 | `iconFlip` (W-237, icons) | `none`, `horizontal`, `vertical`, `both` | `--emvb-icon-flip` (`1 1`, `-1 1`, `1 -1`, `-1 -1`), read by the `svg` as `scale` |
 | `iconScale` (W-237) | number 0.1–4 | `scale` on the element (the icon and its background shape) |
 | `iconStrokeWidth` (W-237, outline icons) | number 0.25–6 | `--emvb-icon-stroke`; applies when the stored SVG's root has a stroke width of 1, 1.5, 2, 2.5 or 3 (render moves it into an `emvb-icon-sw<w>` class) |
 | `iconShadow` (W-237, icons) | `{ x, y, blur, color? }`: px, `x` and `y` −100 to 100, `blur` 0–100 | `--emvb-icon-shadow` as `drop-shadow(Xpx Ypx Bpx [colour])`, read by the `svg` as `filter` (follows the outline) |
-| `iconAnimation` (W-237, Normal only) | `{ type, duration }`: `type` `spin` or `pulse`; `duration` whole ms 200–10000; optional `loop: true` (W-853, D-059) keeps it running forever. Or `{ type: "none" }` (W-248), which stops an animation a device inherits from a wider one | `--emvb-icon-animation` (`emvb-icon-spin <ms> linear <runs>`, `emvb-icon-pulse <ms> ease-in-out <runs> alternate` or `none`; W-848: `<runs>` is as many whole runs as fit in 5 s, at least one, even for a pulse; with `loop: true` it is `infinite`); the icon base CSS turns it off under `prefers-reduced-motion: reduce` |
+| `motion.icon` (W-237, Normal only; `iconAnimation` before schema 18) | `{ type, duration }`: `type` `spin` or `pulse`; `duration` whole ms 200–10000; optional `loop: true` (W-853, D-059) keeps it running forever. Or `{ type: "none" }` (W-248), which stops an animation a device inherits from a wider one | `--emvb-icon-animation` (`emvb-icon-spin <ms> linear <runs>`, `emvb-icon-pulse <ms> ease-in-out <runs> alternate` or `none`; W-848: `<runs>` is as many whole runs as fit in 5 s, at least one, even for a pulse; with `loop: true` it is `infinite`); the icon base CSS turns it off under `prefers-reduced-motion: reduce` |
 
 **W-088 additions are additive.** Every new key and unit is optional and every earlier value keeps its meaning, so stored pages and classes are valid unchanged. The version moved to 2 (D-031) with a v1 → v2 step that changes nothing, so an older EmVB shows "saved by a newer EmVB" rather than an invalid-layout error. The keys are the same on `node.style` and on `design.classes[].style`. The generator builds each value from typed numbers and keywords only and runs the same `isSafeCssValue` gate as every other property; anything else is dropped with a `rejected-style` warning. A shadow colour bound to a colour variable counts as a use of that variable, and deleting the variable clears it from the page layout and from class styles.
 
 ### State styles (W-089)
 
-`node.states` and `design.classes[].states` are `{ "hover"?, "focus"?, "active"? }`. Each state is a style object with the same keys, limits and variable references as `style`, except `transition`, `entrance`, `iconAnimation` and `scrollMotion`, which belong to Normal only. Any other state name is refused. Adding `states` moved the version to 3 (D-032) with a v2 → v3 step that changes nothing.
+`node.states` and `design.classes[].states` are `{ "hover"?, "focus"?, "active"? }`. Each state is a style object with the same keys, limits and variable references as `style`, except `motion` (transition, entrance, scroll and icon motion), which belongs to Normal only. Any other state name is refused. Adding `states` moved the version to 3 (D-032) with a v2 → v3 step that changes nothing.
 
 ```json
 {
   "id": "btn00001",
   "type": "button",
   "props": { "text": "Go" },
-  "style": { "backgroundColor": "#1d4ed8", "transition": { "duration": 200, "easing": "ease-out", "property": "colors" } },
+  "style": { "backgroundColor": "#1d4ed8", "motion": { "transition": { "duration": 200, "easing": "ease-out", "property": "colors" } } },
   "states": { "hover": { "backgroundColor": "#1e3a8a" }, "focus": { "borderColor": "#f59e0b" } }
 }
 ```
 
 - **Selectors.** `hover` is `:hover`, `focus` is `:focus-visible` (keyboard focus, so a mouse click leaves no focus style); a linked Heading or Icon also matches when its inner link has keyboard focus (`:has(> :is(.emvb-heading-link,.emvb-icon-link):focus-visible)`, W-242) and `active` is `:active`.
 - **Cascade.** Each selector's base rule is followed by its `:hover`, `:focus-visible` and `:active` rules, classes first and then the local rule. So a state rule beats every Normal rule (a class's Hover colour shows over a local Normal colour), within one state the local rule beats the class, and Active beats Focus, which beats Hover.
-- **Safety.** State values go through the same mappers and `isSafeCssValue` gate as `style`. A rejected value is dropped with a `rejected-style` warning naming `<state>.<key>` (such as `hover.color`); a `transition` inside a state is dropped and reported the same way, and so is an unknown state name. An unknown variable in a state is reported like one in `style`. An element whose only styles are states still gets `emvb-e-<id>`.
+- **Safety.** State values go through the same mappers and `isSafeCssValue` gate as `style`. A rejected value is dropped with a `rejected-style` warning naming `<state>.<key>` (such as `hover.color`); a `motion` inside a state is refused by validation and dropped by the renderer and reported the same way, and so is an unknown state name. An unknown variable in a state is reported like one in `style`. An element whose only styles are states still gets `emvb-e-<id>`.
 - **Reduced motion.** When any rule has a `transition`, the CSS ends with one `@media (prefers-reduced-motion: reduce){…{transition:none}}` block that lists exactly those selectors. Nothing else changes under reduced motion.
 - **Editor preview.** The canvas CSS repeats every state rule for `[data-emvb-state="hover"|"focus"|"active"]`, and the editor sets that attribute on the selected element while a state is chosen in the Style tab. Public CSS has neither the attribute nor those selectors.
 
@@ -167,7 +167,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 
 ```json
 {
-  "schemaVersion": 16,
+  "schemaVersion": 17,
   "variables": {
     "colors": [{ "id": "brand", "name": "Brand", "value": "#0055ff" }],
     "fonts": [{ "id": "body", "name": "Body", "value": "Noto Sans, sans-serif" }],

@@ -283,7 +283,7 @@ describe("useSavedSections insert (W-876, D-060)", () => {
     classes: [{ id: "card", name: "Card", style: { color } }],
   });
   const page: Layout = {
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: {
       id: "root0001",
       type: "container",
@@ -348,7 +348,7 @@ describe("useSavedSections insert (W-876, D-060)", () => {
 describe("useSavedSections synced (W-880)", () => {
   test("an element the Theme section can't wrap is refused before any theme part is made", async () => {
     const page: Layout = {
-      schemaVersion: 17,
+      schemaVersion: 18,
       root: {
         id: "root0001",
         type: "container",

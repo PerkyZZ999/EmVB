@@ -365,10 +365,10 @@ const LayerRow = React.memo(function LayerRow({
   const preview = layerPreview(node);
   const typeName = ELEMENT_NAMES[node.type] ?? node.type;
   // A label names the row in place of the type (W-157); the type stays in the tooltip.
-  const name = node.label ?? typeName;
+  const name = node.editorLabel ?? typeName;
   // Names and previews truncate, so the tooltip carries them in full (DESIGN.md, W-168).
-  const tooltip = node.label
-    ? `${node.label} (${typeName})`
+  const tooltip = node.editorLabel
+    ? `${node.editorLabel} (${typeName})`
     : preview
       ? `${typeName}: ${preview}`
       : typeName;
@@ -439,7 +439,7 @@ const LayerRow = React.memo(function LayerRow({
     setRenaming(false);
     if (text === null || !actions.onRename) return;
     const next = clipText(text.trim(), 80).trim() || undefined;
-    if (next !== node.label) actions.onRename(node.id, next);
+    if (next !== node.editorLabel) actions.onRename(node.id, next);
   };
   return (
     <li role="treeitem" aria-expanded={hasChildren ? !collapsed : undefined}>
@@ -477,7 +477,11 @@ const LayerRow = React.memo(function LayerRow({
           <span className="emvb-layer-caret" />
         )}
         {renaming ? (
-          <RenameInput initial={node.label ?? ""} placeholder={typeName} onDone={finishRename} />
+          <RenameInput
+            initial={node.editorLabel ?? ""}
+            placeholder={typeName}
+            onDone={finishRename}
+          />
         ) : (
           <button
             ref={selectButton}
@@ -485,7 +489,7 @@ const LayerRow = React.memo(function LayerRow({
             className="emvb-layer-select"
             aria-current={selected ? "true" : undefined}
             title={tooltip}
-            data-emvb-layer-label={node.label ? "" : undefined}
+            data-emvb-layer-label={node.editorLabel ? "" : undefined}
             onDoubleClick={startRename}
             onKeyDown={(event) => {
               if (event.key === "F2") {

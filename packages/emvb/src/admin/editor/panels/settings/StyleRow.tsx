@@ -1,6 +1,6 @@
 import { Input, Select } from "@cloudflare/kumo";
 import { MotionControl } from "./MotionControl.tsx";
-import { isSafeFontStack, type DesignSystem, type StyleProps } from "../../../../core/index.ts";
+import { isSafeFontStack, type DesignSystem, type FlatStyleProps } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
@@ -210,9 +210,9 @@ export function StyleRow({
   onDesignChange,
 }: {
   styleKey: StyleKey;
-  style: StyleProps | undefined;
+  style: FlatStyleProps | undefined;
   /** The Normal styles while a state is edited (W-089): shown as placeholders, never saved. */
-  inherited?: StyleProps;
+  inherited?: FlatStyleProps;
   design: DesignSystem;
   /** Present on an element, so a background image can use the media library. */
   fetcher?: Fetcher;
@@ -220,7 +220,7 @@ export function StyleRow({
   elementType?: string;
   /** Which class and device the background fill memory belongs to (W-184). */
   fillScope?: string;
-  onPatch: (patch: Partial<StyleProps>) => void;
+  onPatch: (patch: Partial<FlatStyleProps>) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
 }) {
   const value = style?.[styleKey];
@@ -287,7 +287,7 @@ export function StyleRow({
       >
         <ColorControl
           label={label}
-          value={value as StyleProps["color"]}
+          value={value as FlatStyleProps["color"]}
           placeholder={placeholder}
           design={design}
           onChange={(color) => onPatch({ [styleKey]: color })}
@@ -343,7 +343,7 @@ export function StyleRow({
               const n = Number(next);
               onPatch({
                 fontWeight: Number.isFinite(n)
-                  ? (n as NonNullable<StyleProps["fontWeight"]>)
+                  ? (n as NonNullable<FlatStyleProps["fontWeight"]>)
                   : undefined,
               });
               return;
@@ -407,7 +407,7 @@ export function StyleRow({
           kind="font"
           design={design}
           current={ref?.var ?? null}
-          onBind={(next) => onPatch({ fontFamily: next as StyleProps["fontFamily"] })}
+          onBind={(next) => onPatch({ fontFamily: next as FlatStyleProps["fontFamily"] })}
         />
         {reset}
       </div>

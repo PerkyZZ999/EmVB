@@ -25,6 +25,12 @@ import { sanitizeMediaUrl } from "../core/sanitize/media-url.ts";
 import { sanitizeHref } from "../core/sanitize/href.ts";
 import { isSafeSvgMarkup } from "../core/sanitize/svg.ts";
 import { clipText, MAX_DEPTH } from "../core/limits.ts";
+import {
+  isFlatMotionKey,
+  nestMotion,
+  patchNestedStyle,
+  upgradeLegacyNode,
+} from "../core/migrate/v18.ts";
 import { McpToolError } from "./errors.ts";
 import type { EmvbPorts } from "./ports.ts";
 import { queued } from "./queue.ts";
@@ -285,7 +291,8 @@ const BoundedElementSpec = z.preprocess((value, ctx) => {
     });
     return z.NEVER;
   }
-  return value;
+  // W-925: 0.x names (`section`, `label`, `itemPartId`, flat motion keys) are still accepted.
+  return upgradeLegacyNode(value);
 }, ElementSpec);
 
 function buildNode(spec: ElementSpecT): LayoutNode {
@@ -454,6 +461,7 @@ const SETTABLE = [
   "hiddenOn",
   "classes",
   "htmlId",
+  "editorLabel",
   "label",
   "bind",
   "audience",
@@ -498,8 +506,36 @@ function dropOldPictureProps(
   }
 }
 
+/** W-925: a `set` in 0.x names (`label`, `props.itemPartId`) in the schema-18 names. */
+function currentSetNames(set: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(set)) {
+    if (key === "label") {
+      if (!("editorLabel" in set)) out["editorLabel"] = value;
+    } else if (key === "props" && isRecord(value) && "itemPartId" in value) {
+      const { itemPartId, ...props } = value;
+      out[key] = "partId" in props ? props : { ...props, partId: itemPartId };
+    } else out[key] = value;
+  }
+  return out;
+}
+
+/** W-925: an `unset` path in 0.x names in the schema-18 names. */
+function currentUnsetPath(path: string): string {
+  if (path === "label") return "editorLabel";
+  if (path === "props.itemPartId") return "props.partId";
+  return path;
+}
+
+function nestDevices(devices: Record<string, unknown>): Record<string, unknown> {
+  const out = { ...devices };
+  for (const device of ["tablet", "mobile"])
+    if (device in out) out[device] = nestMotion(out[device]);
+  return out;
+}
+
 export async function updateElement(ports: EmvbPorts, input: z.infer<typeof UpdateElementInput>) {
-  const set = resolveDesignRefs(input.set ?? {}, (await ports.getDesign()).design);
+  const set = currentSetNames(resolveDesignRefs(input.set ?? {}, (await ports.getDesign()).design));
   return mutatePage(ports, "update_element", input.pageId, input.expectedRev, (layout) => {
     if (!findNode(layout, input.nodeId))
       refused(`No element with id ${input.nodeId} on this page.`);
@@ -507,17 +543,29 @@ export async function updateElement(ports: EmvbPorts, input: z.infer<typeof Upda
       const copy = structuredClone(node) as Record<string, unknown>;
       for (const [key, value] of Object.entries(set)) {
         if (value === undefined) continue;
+        if (key === "style" && isRecord(value)) {
+          // Flat motion keys (0.x) land in `motion` part by part, like the editor's rows.
+          copy[key] = patchNestedStyle(isRecord(copy[key]) ? copy[key] : undefined, value);
+          continue;
+        }
         // Objects merge one level deep, like the editor's panels; anything else replaces.
         copy[key] = isRecord(value) && isRecord(copy[key]) ? { ...copy[key], ...value } : value;
+        if (key === "devices" && isRecord(copy[key])) copy[key] = nestDevices(copy[key]);
+        if (key === "query" && isRecord(copy[key]) && "style" in copy[key]) {
+          copy[key] = { ...copy[key], style: nestMotion(copy[key]["style"]) };
+        }
       }
       if (node.type === "image" && isRecord(set.props)) {
         dropOldPictureProps(node.props as Record<string, unknown>, set.props, copy);
       }
       for (const path of input.unset ?? []) {
-        const [top, sub] = path.split(".") as [string, string | undefined];
+        const [top, sub] = currentUnsetPath(path).split(".") as [string, string | undefined];
         if (top === "id" || top === "type" || top === "children") continue;
         if (sub === undefined) delete copy[top];
-        else if (isRecord(copy[top])) delete copy[top][sub];
+        else if (top === "style" && isFlatMotionKey(sub)) {
+          const style = copy[top];
+          if (isRecord(style)) copy[top] = patchNestedStyle(style, { [sub]: undefined });
+        } else if (isRecord(copy[top])) delete copy[top][sub];
       }
       return copy as LayoutNode;
     });

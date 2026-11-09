@@ -1,6 +1,8 @@
 export * from "./limits.ts";
 export {
   LAYOUT_SCHEMA_VERSION,
+  CONTRACT_VERSION,
+  cssTypeName,
   Layout,
   type LayoutNode,
   type UnknownNode,
@@ -91,6 +93,9 @@ export {
 } from "./elements/plain-text.ts";
 export {
   StyleProps,
+  FlatStyleProps,
+  Motion,
+  type StylePatch,
   StyleStates,
   DeviceStyles,
   HiddenOn,
@@ -100,6 +105,15 @@ export {
   VariableRef,
 } from "./schema/style.ts";
 export { STYLE_STATES, type StyleStateName } from "./schema/state-names.ts";
+export {
+  flattenMotion,
+  nestMotion,
+  patchNestedStyle,
+  upgradeLegacyNode,
+  FLAT_MOTION_KEYS,
+  isFlatMotionKey,
+} from "./migrate/v18.ts";
+export { renderableDesign, renderableLayout, renderableNode, renderableStyle } from "./contract.ts";
 export {
   upgradeLayout,
   isNewerThanSupported,

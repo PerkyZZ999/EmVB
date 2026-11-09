@@ -63,7 +63,7 @@ export function renderLoop(
   dynamic: ThemeDynamicData | undefined,
 ): VNode | undefined {
   const posts = entriesFor(node, dynamic, ctx.mode);
-  const itemPartId = node.props.itemPartId?.trim() ?? "";
+  const itemPartId = node.props.partId?.trim() ?? "";
   const loopStack = dynamic?.loopStack ?? [];
   // W-654: a loop item part holding a Loop that uses the same part (or one that leads back to it)
   // recursed until the stack overflowed and the page failed to render.

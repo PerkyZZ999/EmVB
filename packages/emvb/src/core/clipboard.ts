@@ -377,6 +377,14 @@ function withoutIconKeys(style: object | undefined): object | undefined {
       removed = true;
     }
   }
+  // W-925: the Icon animation is `motion.icon` since schema 18.
+  const motion = next["motion"];
+  if (isRecord(motion) && "icon" in motion) {
+    const { icon: _icon, ...rest } = motion;
+    if (Object.keys(rest).length > 0) next["motion"] = rest;
+    else delete next["motion"];
+    removed = true;
+  }
   if (!removed) return style;
   return Object.keys(next).length > 0 ? next : undefined;
 }

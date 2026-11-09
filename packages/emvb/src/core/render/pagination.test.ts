@@ -8,7 +8,7 @@ import { renderPage } from "./index.ts";
 const design = emptyDesign();
 const page = (props: Record<string, unknown> = {}): Layout =>
   ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: {
       id: "root0001",
       type: "container",

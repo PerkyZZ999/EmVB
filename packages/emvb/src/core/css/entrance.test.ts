@@ -15,7 +15,7 @@ const page = (): Layout => ({
         id: "head0001",
         type: "heading",
         props: { text: "Hello", level: 1 },
-        style: { entrance: { type: "fade-up", duration: 400 } },
+        style: { motion: { entrance: { type: "fade-up", duration: 400 } } },
       },
     ],
   },
@@ -52,7 +52,10 @@ describe("W-670: an entrance set only in a container query", () => {
             type: "container",
             props: {},
             children: [],
-            query: { min: 600, style: { entrance: { type: "fade-up", duration: 400 } } },
+            query: {
+              min: 600,
+              style: { motion: { entrance: { type: "fade-up", duration: 400 } } },
+            },
           },
         ],
       },
@@ -70,7 +73,7 @@ describe("W-670: an entrance in a tag default", () => {
   test("sends its keyframes and turns off for reduced motion", () => {
     const design = {
       ...emptyDesign(),
-      defaults: { h1: { entrance: { type: "fade-up", duration: 400 } } },
+      defaults: { h1: { motion: { entrance: { type: "fade-up", duration: 400 } } } },
     } as ReturnType<typeof emptyDesign>;
     const { css } = renderPage(page(), design);
     expect(css).toContain(":where(.emvb-root) h1{animation:emvb-fade-up");

@@ -44,7 +44,8 @@ import {
   resolveCascade,
   SAMPLE_POST,
   STYLE_STATES,
-  type StyleProps,
+  type FlatStyleProps,
+  flattenMotion,
   type StyleStates,
   boxLinkHeldBack,
 } from "../../../core/index.ts";
@@ -131,7 +132,7 @@ const writeSections = (type: string, open: Set<StyleSectionId>) => {
   }
 };
 
-const countSet = (type: string, style: StyleProps | undefined, section: StyleSectionId) =>
+const countSet = (type: string, style: FlatStyleProps | undefined, section: StyleSectionId) =>
   keysFor(type, section, style).filter((key) => style?.[key] !== undefined).length;
 
 /** Whether any state sets a key of this section (the section header's dot in Normal). */
@@ -159,7 +160,7 @@ const JUMP_HELP: Record<Exclude<StyleStateChoice, "normal">, string> = {
 const positionInEffect = (
   node: LayoutNode,
   design: DesignSystem,
-  cls: { style?: StyleProps } | undefined,
+  cls: { style?: FlatStyleProps } | undefined,
 ) =>
   cls
     ? cls.style?.position
@@ -413,10 +414,15 @@ function KnownElementPanel({
   React.useEffect(() => {
     onStyleState?.(node.id, tab === "style" ? styleState : "normal");
   }, [node.id, styleState, tab, onStyleState]);
-  const normal = cls ? cls.style : node.style;
+  // W-925: the rows read the flat motion keys; applyStylePatch nests them again.
+  const normal = flattenMotion(cls ? cls.style : node.style);
   const states = cls ? cls.states : node.states;
   const responsive: ResponsiveDevice | null = device === "desktop" ? null : device;
-  const ownerDevices = cls ? cls.devices : node.devices;
+  const storedDevices = cls ? cls.devices : node.devices;
+  const ownerDevices = storedDevices && {
+    tablet: flattenMotion(storedDevices.tablet),
+    mobile: flattenMotion(storedDevices.mobile),
+  };
   const style = responsive
     ? ownerDevices?.[responsive]
     : styleState === "normal"
@@ -463,7 +469,7 @@ function KnownElementPanel({
     !singleColorOffered &&
     node.props.singleColor !== true &&
     ownColors;
-  const patchStyle = (patch: Partial<StyleProps>) => {
+  const patchStyle = (patch: Partial<FlatStyleProps>) => {
     const written = applyStylePatch({
       node,
       design,

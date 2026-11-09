@@ -55,7 +55,7 @@ function outlineOf(node: LayoutNode): OutlineNode {
   return {
     id: node.id,
     type: node.type,
-    ...(node.label || text ? { label: node.label ?? text } : {}),
+    ...(node.editorLabel || text ? { label: node.editorLabel ?? text } : {}),
     ...(kids.length > 0 ? { children: kids.map(outlineOf) } : {}),
   };
 }
@@ -323,7 +323,7 @@ function hiddenEverywhere(root: LayoutNode) {
         message:
           node.id === root.id
             ? "The whole page is hidden on every device, so visitors see an empty page. Unset hiddenOn on the root."
-            : `${node.label ?? node.type} ${node.id} is hidden on every device, so it and everything inside it never show. Unset hiddenOn, or remove it.`,
+            : `${node.editorLabel ?? node.type} ${node.id} is hidden on every device, so it and everything inside it never show. Unset hiddenOn, or remove it.`,
       });
       return;
     }
@@ -395,7 +395,7 @@ export async function describePage(ports: EmvbPorts, input: z.infer<typeof Descr
       excerpt: clip(part.text.join(" "), 240),
       media: part.media,
     };
-    if (node.label) section.label = node.label;
+    if (node.editorLabel) section.label = node.editorLabel;
     return section;
   });
   const wordCount = all.text.join(" ").split(/\s+/).filter(Boolean).length;

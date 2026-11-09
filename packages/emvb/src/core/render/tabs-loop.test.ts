@@ -10,7 +10,7 @@ import { renderPage } from "./index.ts";
 const design = emptyDesign();
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const panel = (id: string, label: string, children: LayoutNode[] = []) =>
@@ -115,7 +115,7 @@ describe("renderLoop (W-091)", () => {
   });
 
   test("the item part id is trimmed before it picks the loop-item template", () => {
-    const { html } = renderPage(page(loop({ itemPartId: "  item-1 " })), design, {
+    const { html } = renderPage(page(loop({ partId: "  item-1 " })), design, {
       dynamic: { posts, loopTemplates: { "item-1": itemLayout } },
     });
     expect(parse(html).querySelectorAll("h3.emvb-post-title").length).toBe(2);
@@ -123,11 +123,11 @@ describe("renderLoop (W-091)", () => {
   });
 
   test("an item part id with no templates falls back to the loop's own children", () => {
-    const withPosts = renderPage(page(loop({ itemPartId: "item-1" })), design, {
+    const withPosts = renderPage(page(loop({ partId: "item-1" })), design, {
       dynamic: { posts },
     });
     expect(parse(withPosts.html).querySelectorAll("h2.emvb-post-title").length).toBe(2);
-    const editor = renderPage(page(loop({ itemPartId: "item-1" })), design, { mode: "editor" });
+    const editor = renderPage(page(loop({ partId: "item-1" })), design, { mode: "editor" });
     expect(parse(editor.html).querySelector(".emvb-loop-item h2")?.textContent).toBe(
       SAMPLE_POST.title,
     );
@@ -150,8 +150,8 @@ describe("one element rendered twice keeps its HTML ids unique (W-249)", () => {
   const twice = (part: Layout) =>
     renderPage(
       page(
-        { id: "sec00001", type: "section", props: { partId: "p1" }, children: [] } as LayoutNode,
-        { id: "sec00002", type: "section", props: { partId: "p1" }, children: [] } as LayoutNode,
+        { id: "sec00001", type: "part-ref", props: { partId: "p1" }, children: [] } as LayoutNode,
+        { id: "sec00002", type: "part-ref", props: { partId: "p1" }, children: [] } as LayoutNode,
       ),
       design,
       { dynamic: { sectionTemplates: { p1: part } } },
@@ -229,7 +229,7 @@ describe("a synced section on the page and in a popup keeps ids unique (W-527)",
   );
   const placed = page({
     id: "sec00001",
-    type: "section",
+    type: "part-ref",
     props: { partId: "p1" },
     children: [],
   } as LayoutNode);

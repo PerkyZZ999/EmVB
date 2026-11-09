@@ -16,7 +16,7 @@ describe("forms-client attribute names stay reserved (W-191)", () => {
     }
     expect(isReservedAttribute("data-track")).toBe(false);
     const layout: Layout = {
-      schemaVersion: 17,
+      schemaVersion: 18,
       root: {
         id: "root0001",
         type: "container",

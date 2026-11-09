@@ -1,3 +1,4 @@
+import { cssTypeName } from "../schema/layout.ts";
 import { DEFAULT_FLUID_RANGE, fluidClamp } from "../design/tokens.ts";
 import type { FluidRange, LengthVariable } from "../schema/design.ts";
 import type { DesignSystem } from "../schema/design.ts";
@@ -272,7 +273,11 @@ export function generateCss({
         // W-801: a looping video kept playing for visitors who ask for reduced motion.
         "@media (prefers-reduced-motion: reduce){.emvb-bg-video{display:none}}"
       : "",
-    ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? ""),
+    ...[...usedTypes]
+      .toSorted((a, b) =>
+        cssTypeName(a) < cssTypeName(b) ? -1 : cssTypeName(a) > cssTypeName(b) ? 1 : 0,
+      )
+      .map((type) => baseCss.get(type) ?? ""),
     ...classes,
     ...locals,
     ...localRules

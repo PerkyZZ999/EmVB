@@ -75,8 +75,8 @@ import { ListError, LoadingStatus } from "../pages/list-kit.tsx";
 
 /** Sets or clears a node's editor-only name (W-157). */
 const withLabel = (node: LayoutNode, label: string | undefined): LayoutNode => {
-  const { label: _old, ...rest } = node;
-  return (label ? { ...rest, label } : rest) as LayoutNode;
+  const { editorLabel: _old, ...rest } = node;
+  return (label ? { ...rest, editorLabel: label } : rest) as LayoutNode;
 };
 
 export function Editor({
@@ -351,7 +351,7 @@ function EditorApp({
     selectedId: selectedNode ? state.selectedId : null,
     labelFor: (id) => {
       const node = layoutIndex?.byId.get(id);
-      return node ? (node.label ?? ELEMENT_NAMES[node.type] ?? node.type) : "Element";
+      return node ? (node.editorLabel ?? ELEMENT_NAMES[node.type] ?? node.type) : "Element";
     },
     canDelete,
     canMove,
@@ -729,5 +729,5 @@ function LoadBody({ data }: { data: EditorData }) {
 function sectionNameFor(layout: Layout | null, id: string | null): string {
   const node = layout && id ? findNode(layout, id) : undefined;
   if (!node) return "";
-  return node.label || (ELEMENT_NAMES[node.type] ?? "Section");
+  return node.editorLabel || (ELEMENT_NAMES[node.type] ?? "Section");
 }

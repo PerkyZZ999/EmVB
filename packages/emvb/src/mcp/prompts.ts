@@ -1,14 +1,4 @@
-import { z } from "zod";
-import { DesignSystem } from "../core/schema/design.ts";
-import { Layout } from "../core/schema/layout.ts";
-
-/** JSON Schema (2020-12) of a stored layout, for `emvb://schema/layout` (W-467). */
-export const layoutJsonSchema = () =>
-  z.toJSONSchema(Layout, { io: "input", unrepresentable: "any" });
-
-/** JSON Schema of the design system (site styles), for `emvb://schema/design`. */
-export const designJsonSchema = () =>
-  z.toJSONSchema(DesignSystem, { io: "input", unrepresentable: "any" });
+export { designJsonSchema, layoutJsonSchema } from "../core/json-schema.ts";
 
 export type PromptDef = {
   name: string;

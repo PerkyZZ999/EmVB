@@ -7,13 +7,13 @@ import { PerfMeterDialog } from "./PerfMeter.tsx";
 afterEach(cleanup);
 
 const layout: Layout = {
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",
     props: {},
     children: [
-      { id: "head0001", type: "heading", props: { text: "One", level: 1 }, label: "Hero" },
+      { id: "head0001", type: "heading", props: { text: "One", level: 1 }, editorLabel: "Hero" },
       { id: "form0001", type: "form", props: { formId: "contact" }, children: [] },
     ],
   },

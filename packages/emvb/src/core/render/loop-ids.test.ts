@@ -14,7 +14,7 @@ const entry = (n: number) => ({
 describe("ids inside a Loop (W-649)", () => {
   test("each id appears once on the page, even when the item design repeats", () => {
     const layout = {
-      schemaVersion: 17,
+      schemaVersion: 18,
       root: {
         id: "root0001",
         type: "container",

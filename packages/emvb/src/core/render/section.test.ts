@@ -28,7 +28,7 @@ describe("synced sections", () => {
     const page = layout([
       {
         id: "sec00001",
-        type: "section",
+        type: "part-ref",
         props: { partId: "part-1" },
         children: [heading("local01", "Local only")],
       },
@@ -44,7 +44,7 @@ describe("synced sections", () => {
     const page = layout([
       {
         id: "sec00001",
-        type: "section",
+        type: "part-ref",
         props: { partId: "missing" },
         children: [heading("local01", "Local only")],
       },
@@ -60,12 +60,12 @@ describe("synced sections", () => {
     const page = layout([
       {
         id: "sec00001",
-        type: "section",
+        type: "part-ref",
         props: { partId: "part-1" },
         children: [
           {
             id: "sec00002",
-            type: "section",
+            type: "part-ref",
             props: { partId: "part-2" },
             children: [],
           },
@@ -98,7 +98,7 @@ describe("an id reused by another layout keeps its own styles (W-250)", () => {
   });
   const sectionNode = (id: string, partId: string): LayoutNode => ({
     id,
-    type: "section",
+    type: "part-ref",
     props: { partId },
     children: [],
   });
@@ -145,7 +145,7 @@ describe("an id reused by another layout keeps its own styles (W-250)", () => {
     const loop: LayoutNode = {
       id: "loop0001",
       type: "loop",
-      props: { itemPartId: "item" },
+      props: { partId: "item" },
       children: [],
     };
     const { html, css } = renderPage(
@@ -166,7 +166,7 @@ describe("an id reused by another layout keeps its own styles (W-250)", () => {
 describe("runtimes follow synced section and loop item contents (W-253)", () => {
   const sectionNode: LayoutNode = {
     id: "sec00001",
-    type: "section",
+    type: "part-ref",
     props: { partId: "p1" },
     children: [],
   };
@@ -237,7 +237,7 @@ describe("runtimes follow synced section and loop item contents (W-253)", () => 
     const loop: LayoutNode = {
       id: "loop0001",
       type: "loop",
-      props: { itemPartId: "item" },
+      props: { partId: "item" },
       children: [],
     };
     const result = renderPage(layout([loop]), emptyDesign(), {

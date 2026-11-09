@@ -6,7 +6,7 @@ import { renderPage } from "./index.ts";
 const inLinkedBox = (child: unknown) =>
   renderPage(
     {
-      schemaVersion: 17,
+      schemaVersion: 18,
       root: {
         id: "root0001",
         type: "container",
@@ -51,10 +51,7 @@ describe("W-668: a linked box never wraps links, controls or embeds", () => {
       "video",
       { id: "vid00001", type: "video", props: { url: "https://youtu.be/dQw4w9WgXcQ", title: "V" } },
     ],
-    [
-      "Loop Item part",
-      { id: "loop0001", type: "loop", props: { itemPartId: "card" }, children: [] },
-    ],
+    ["Loop Item part", { id: "loop0001", type: "loop", props: { partId: "card" }, children: [] }],
   ] as never;
   for (const [name, child] of cases) {
     test(`around a ${name} it stays a box`, () => {

@@ -3,13 +3,13 @@ import { emptyDesign } from "../schema/design.ts";
 import { renderPage } from "./index.ts";
 
 const layoutOf = (children: unknown[]) => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: { id: "root0001", type: "container", props: {}, children },
 });
-const loopUsing = (id: string, itemPartId: string) => ({
+const loopUsing = (id: string, partId: string) => ({
   id,
   type: "loop",
-  props: { itemPartId },
+  props: { partId },
   children: [],
 });
 const title = { id: "ptit0001", type: "post-title", props: {} };

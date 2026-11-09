@@ -1,3 +1,4 @@
+import { flattenMotion } from "../migrate/v18.ts";
 import { clipText } from "../limits.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import { isParentNode, type Layout, type LayoutNode } from "../schema/layout.ts";
@@ -161,13 +162,19 @@ function effectiveStyle(
   const tagDefaults =
     level === undefined
       ? undefined
-      : (design.defaults?.[`h${level}` as "h1"] as Record<string, unknown> | undefined);
+      : (flattenMotion(design.defaults?.[`h${level}` as "h1"]) as
+          | Record<string, unknown>
+          | undefined);
   const classIds = new Set(node.classes ?? []);
-  if (classIds.size === 0 && !tagDefaults) return node.style as Record<string, unknown> | undefined;
+  // W-925: read by the flat motion keys (`iconAnimation`), as the renderer does.
+  const own = flattenMotion(node.style) as Record<string, unknown> | undefined;
+  if (classIds.size === 0 && !tagDefaults) return own;
   const fromClasses = (design.classes ?? [])
     .filter((c) => classIds.has(c.id))
-    .reduce<Record<string, unknown>>((acc, c) => Object.assign(acc, c.style), { ...tagDefaults });
-  return { ...fromClasses, ...(node.style as Record<string, unknown> | undefined) };
+    .reduce<Record<string, unknown>>((acc, c) => Object.assign(acc, flattenMotion(c.style)), {
+      ...tagDefaults,
+    });
+  return { ...fromClasses, ...own };
 }
 
 /** Each device's style with the node's classes under the node's own (W-882). */
@@ -180,7 +187,7 @@ function deviceStyles(node: LayoutNode, design: DesignSystem): Record<string, un
   ];
   for (const devices of layers) {
     for (const [key, st] of Object.entries(devices ?? {})) {
-      merged[key] = { ...merged[key], ...(st as Record<string, unknown>) };
+      merged[key] = { ...merged[key], ...(flattenMotion(st) as Record<string, unknown>) };
     }
   }
   return Object.values(merged);
@@ -210,7 +217,12 @@ function largeText(node: LayoutNode, design: DesignSystem): boolean {
  * its text isn't known here.
  */
 function boxHasName(node: LayoutNode): boolean {
-  if (node.bind || node.type.startsWith("post-") || node.type === "loop" || node.type === "section")
+  if (
+    node.bind ||
+    node.type.startsWith("post-") ||
+    node.type === "loop" ||
+    node.type === "part-ref"
+  )
     return true;
   const props = node.props as Record<string, unknown>;
   const decorative = props["decorative"] === true;

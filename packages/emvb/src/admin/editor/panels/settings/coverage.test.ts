@@ -15,7 +15,7 @@ describe("settings coverage (W-021)", () => {
     }
   });
 
-  test("every StyleProps key the panel shows has a StyleRow control", () => {
+  test("every FlatStyleProps key the panel shows has a StyleRow control", () => {
     const implemented = new Set(IMPLEMENTED_STYLE_KEYS);
     for (const key of CONTROLLED_STYLE_KEYS) {
       expect(implemented.has(key)).toBe(true);

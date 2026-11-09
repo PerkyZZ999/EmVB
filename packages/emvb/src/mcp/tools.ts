@@ -51,7 +51,7 @@ const READ_TOOLS: ToolDef[] = [
     name: "get_layout",
     title: "Get a page layout",
     description:
-      "Returns a page's layout (schema 16) and its revision `rev`. Use format \"outline\" first for a cheap tree of ids, types and labels; pass nodeId for one element's subtree.",
+      "Returns a page's layout (schema 18, contract 1.0) and its revision `rev`. Use format \"outline\" first for a cheap tree of ids, types and labels; pass nodeId for one element's subtree.",
     input: read.GetLayoutInput,
     output: read.GetLayoutOutput,
     readOnly: true,
@@ -174,7 +174,7 @@ const WRITE_TOOLS: ToolDef[] = [
     name: "update_element",
     title: "Update an element",
     description:
-      'Changes an element: `set` merges objects (props, style, states, devices, attributes) one level deep and replaces other fields; `unset` removes fields such as "style.color" or "label". Never changes id, type or children.',
+      'Changes an element: `set` merges objects (props, style, states, devices, attributes) one level deep and replaces other fields; `unset` removes fields such as "style.color" or "editorLabel". The 0.x names label, props.itemPartId and the flat style keys entrance, scrollMotion, transition and iconAnimation are still accepted. Never changes id, type or children.',
     input: write.UpdateElementInput,
     output: write.WriteOutput,
     readOnly: false,

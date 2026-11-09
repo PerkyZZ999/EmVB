@@ -1,6 +1,7 @@
 import { clipText, MAX_DESIGN_BYTES } from "../limits.ts";
 import { DesignSystem as DesignSystemSchema, DESIGN_SCHEMA_VERSION } from "../schema/design.ts";
 import type { DesignSystem } from "../schema/design.ts";
+import { restoreExtras, splitDesignExtras } from "../contract.ts";
 import { DESIGN_MIGRATIONS, upgradeLayout } from "../migrate/index.ts";
 import type { Layout } from "../schema/layout.ts";
 import { findClassUsages, nameKey } from "./classes.ts";
@@ -100,8 +101,12 @@ export function designFromJson(text: string): DesignImport {
           : "That file is not an EmVB design document.",
     };
   }
+  const extras = splitDesignExtras(upgraded.doc);
+  if (extras.issues.length > 0)
+    return { ok: false, message: "That file is not an EmVB design document." };
   const result = DesignSystemSchema.safeParse(upgraded.doc);
   if (!result.success) return { ok: false, message: "That file is not an EmVB design document." };
+  restoreExtras(result.data, extras.extras);
   // W-619: every reference points at an id, so two classes (or two variables of one kind) with
   // the same id can't both be kept; the editor never writes such a file.
   const repeated = repeatedId(result.data);

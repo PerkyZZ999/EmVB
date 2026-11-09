@@ -41,7 +41,7 @@ describe("W-318 Where styles come from", () => {
   });
 
   test("W-318 says so when nothing is set", async () => {
-    const bare = { id: "s", type: "section", props: {}, children: [] } as unknown as LayoutNode;
+    const bare = { id: "s", type: "part-ref", props: {}, children: [] } as unknown as LayoutNode;
     const root = await mount(
       <StyleSources node={bare} design={design} device="mobile" state="normal" />,
     );

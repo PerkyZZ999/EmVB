@@ -24,7 +24,8 @@ import {
   classNameTakenMessage,
   type DesignSystem,
   type Layout,
-  type StyleProps,
+  type FlatStyleProps,
+  flattenMotion,
 } from "../../../core/index.ts";
 import { FIELD } from "../../ui.ts";
 import { useEditedNoun } from "../edited-noun.ts";
@@ -60,8 +61,8 @@ const CLASS_SECTIONS: StyleSectionId[] = [
 
 function classKeys(
   section: StyleSectionId,
-  style: StyleProps | undefined,
-  position: StyleProps["position"],
+  style: FlatStyleProps | undefined,
+  position: FlatStyleProps["position"],
   state: StyleStateChoice,
 ): StyleKey[] {
   const keys = keysFor("container", section, style, position);
@@ -91,7 +92,7 @@ function ClassStyleEditor({
 }) {
   const [state, setState] = React.useState<StyleStateChoice>("normal");
   const [section, setSection] = React.useState<StyleSectionId>("layout");
-  const style = state === "normal" ? cls.style : cls.states?.[state];
+  const style = flattenMotion(state === "normal" ? cls.style : cls.states?.[state]);
   const position = style?.position ?? cls.style.position;
   const keys = classKeys(section, style, position, state);
   return (
@@ -181,7 +182,7 @@ export function ClassesSection({
       "class",
       classes.map((c) => c.id),
     );
-    const next = { id, name: trimmed, style: {} as StyleProps };
+    const next = { id, name: trimmed, style: {} as FlatStyleProps };
     // W-610: a failed save keeps the row and what was typed, so it can be retried.
     if ((await onSave({ ...design, classes: [...classes, next] })) === false) return;
     setCreating(false);

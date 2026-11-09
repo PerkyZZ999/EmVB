@@ -87,7 +87,7 @@ describe("content:beforeSave, called directly (R-006, D-020)", () => {
 describe("elements in the wrong place are refused at save (W-225)", () => {
   test("a menu item outside a Menu is refused with the editor's reason", async () => {
     const layout = {
-      schemaVersion: 17,
+      schemaVersion: 18,
       root: {
         id: "root0001",
         type: "container",
@@ -105,7 +105,7 @@ describe("elements in the wrong place are refused at save (W-225)", () => {
 
 describe("image edit records are checked at save (W-481)", () => {
   const withEdit = (edit: Record<string, unknown>) => ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: {
       id: "root0001",
       type: "container",

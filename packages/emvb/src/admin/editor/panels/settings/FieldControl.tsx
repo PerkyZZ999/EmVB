@@ -52,18 +52,18 @@ export function FieldControl({
     );
   }
 
-  if (field.key === "itemPartId" && fetcher) {
+  if (field.key === "partId" && node.type === "loop" && fetcher) {
     return (
       <LoopItemBindControl
         key={field.key}
         value={typeof raw === "string" ? raw : ""}
         fetcher={fetcher}
-        onChange={(itemPartId) => onChange(withProp(node, "itemPartId", itemPartId || undefined))}
+        onChange={(partId) => onChange(withProp(node, "partId", partId || undefined))}
       />
     );
   }
 
-  if (field.key === "partId" && node.type === "section" && fetcher) {
+  if (field.key === "partId" && node.type === "part-ref" && fetcher) {
     return (
       <LoopItemBindControl
         key={field.key}

@@ -336,7 +336,11 @@ export const wrapInThemeSection = (
   partId: string,
   random: () => number = Math.random,
 ): Arranged =>
-  wrapWith(layout, id, { id: newNodeId(random), type: "section", props: { partId } } as LayoutNode);
+  wrapWith(layout, id, {
+    id: newNodeId(random),
+    type: "part-ref",
+    props: { partId },
+  } as LayoutNode);
 
 function wrapWith(layout: Layout, id: string, shell: LayoutNode): Arranged {
   const found = locate(layout, id);

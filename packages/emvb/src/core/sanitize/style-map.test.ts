@@ -1,18 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { StyleProps } from "../schema/style.ts";
+import { FlatStyleProps, StyleProps } from "../schema/style.ts";
 import { CSS_INJECTION_CORPUS } from "../../../test/fixtures/xss.ts";
 import { STYLE_PROPERTY_MAP, cssColor, cssLength, styleDeclarations } from "./css.ts";
 
 const len = (value: number, unit: "px" | "rem" | "em" | "%" = "px") => ({ value, unit });
 
 describe("style property map (W-017, R-012)", () => {
-  test("every StyleProps key has a CSS mapping", () => {
+  test("every flat style key (StyleProps with motion as its 0.x keys) has a CSS mapping", () => {
     const keys = Object.keys(STYLE_PROPERTY_MAP) as (keyof typeof STYLE_PROPERTY_MAP)[];
     expect(keys.length).toBeGreaterThan(20);
     for (const key of keys) {
       expect(STYLE_PROPERTY_MAP[key].css.length).toBeGreaterThan(0);
       // Round-trip: an empty object with only unknown keys is rejected by the schema.
-      expect(StyleProps.safeParse({ [key]: undefined }).success).toBe(true);
+      expect(FlatStyleProps.safeParse({ [key]: undefined }).success).toBe(true);
     }
   });
 

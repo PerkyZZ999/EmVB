@@ -1,4 +1,4 @@
-import type { StyleProps } from "../../../../core/index.ts";
+import type { FlatStyleProps } from "../../../../core/index.ts";
 import { STYLE_UI } from "./style-sections.ts";
 import { NEW_GRADIENT } from "./BackgroundControls.tsx";
 
@@ -11,14 +11,14 @@ const BOXES = new Set([
   "div-block",
   "layout-section",
   "form",
-  "section",
+  "part-ref",
   "tab-panel",
   "accordion",
   "accordion-item",
 ]);
 
 /** Color and gradient everywhere. Image and video on boxes, or when already set. */
-export function fillModes(type: string, style?: StyleProps): FillMode[] {
+export function fillModes(type: string, style?: FlatStyleProps): FillMode[] {
   const modes: FillMode[] = ["color", "gradient"];
   const box = BOXES.has(type) || !(type in STYLE_UI);
   if (box || type === "button" || type === "submit" || style?.backgroundImage !== undefined)
@@ -28,7 +28,7 @@ export function fillModes(type: string, style?: StyleProps): FillMode[] {
 }
 
 /** The fill the page is showing. Video wins, then image, then gradient, then a solid color. */
-export function activeFill(style: StyleProps | undefined): FillMode {
+export function activeFill(style: FlatStyleProps | undefined): FillMode {
   if (style?.backgroundVideo) return "video";
   if (style?.backgroundImage) return "image";
   if (style?.gradient) return "gradient";
@@ -36,7 +36,7 @@ export function activeFill(style: StyleProps | undefined): FillMode {
 }
 
 /** More than one fill is stored, so the page paints a stack the type switcher will collapse. */
-export function fillIsMixed(style: StyleProps | undefined): boolean {
+export function fillIsMixed(style: FlatStyleProps | undefined): boolean {
   return (
     [
       style?.backgroundColor !== undefined,
@@ -59,7 +59,7 @@ const CLEARED = {
 } as const;
 
 /** Choosing a type removes the other fills. Overlay stays with an image or a video. */
-function switchFill(style: StyleProps | undefined, mode: FillMode): Partial<StyleProps> {
+function switchFill(style: FlatStyleProps | undefined, mode: FillMode): Partial<FlatStyleProps> {
   if (mode === "gradient") return { ...CLEARED, gradient: style?.gradient ?? NEW_GRADIENT };
   if (mode === "image") {
     return {
@@ -78,7 +78,10 @@ function switchFill(style: StyleProps | undefined, mode: FillMode): Partial<Styl
 }
 
 /** The fields a fill type owns as stored now, or undefined when that type has nothing set. */
-function heldFill(style: StyleProps | undefined, mode: FillMode): Partial<StyleProps> | undefined {
+function heldFill(
+  style: FlatStyleProps | undefined,
+  mode: FillMode,
+): Partial<FlatStyleProps> | undefined {
   const main = {
     color: style?.backgroundColor,
     gradient: style?.gradient,
@@ -88,22 +91,22 @@ function heldFill(style: StyleProps | undefined, mode: FillMode): Partial<StyleP
   if (main === undefined) return undefined;
   return Object.fromEntries(
     Object.entries(switchFill(style, mode)).filter(([, value]) => value !== undefined),
-  ) as Partial<StyleProps>;
+  ) as Partial<FlatStyleProps>;
 }
 
 /** What each fill type last held while this element was being edited (W-184). */
-export type FillMemory = Partial<Record<FillMode, Partial<StyleProps>>>;
+export type FillMemory = Partial<Record<FillMode, Partial<FlatStyleProps>>>;
 
 /**
  * Like `switchFill`, but the type being left is remembered in `memory`, and an empty type being
  * chosen gets back what it last held, so Gradient → Color → Gradient keeps the gradient (W-184).
  */
 export function switchFillRemembered(
-  style: StyleProps | undefined,
+  style: FlatStyleProps | undefined,
   from: FillMode,
   to: FillMode,
   memory: FillMemory,
-): Partial<StyleProps> {
+): Partial<FlatStyleProps> {
   const held = heldFill(style, from);
   if (held) memory[from] = held;
   const remembered = memory[to];

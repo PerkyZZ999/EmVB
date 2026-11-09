@@ -1,7 +1,8 @@
 import { clipText } from "../limits.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
-import type { StyleProps } from "../schema/style.ts";
+import { patchNestedStyle } from "../migrate/v18.ts";
+import type { StylePatch, StyleProps } from "../schema/style.ts";
 import { localStyleOf, withLocalStyle } from "../local-style.ts";
 import { forEachNode, slugify, updateNode } from "../tree-ops.ts";
 
@@ -230,12 +231,10 @@ export function editClass(
 export function patchClassStyle(
   design: DesignSystem,
   classId: string,
-  patch: Partial<StyleProps>,
+  patch: StylePatch,
 ): DesignSystem {
   return editClass(design, classId, (next) => {
-    const style: Record<string, unknown> = { ...next.style, ...patch };
-    for (const [key, value] of Object.entries(patch)) if (value === undefined) delete style[key];
-    next.style = style as StyleProps;
+    next.style = patchNestedStyle(next.style, patch) as StyleProps;
     return next;
   });
 }

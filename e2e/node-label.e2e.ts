@@ -4,7 +4,7 @@ import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./su
 
 setUpEmvbOnce();
 
-type Stored = { root: { children: { id: string; label?: string }[] } };
+type Stored = { root: { children: { id: string; editorLabel?: string }[] } };
 
 test("a layer is renamed by double-click, F2 and the row menu, the name is saved, and the page never shows it (W-157)", async ({
   page,
@@ -66,7 +66,7 @@ test("a layer is renamed by double-click, F2 and the row menu, the name is saved
 
   await saveDraft(page);
   const stored = await storedLayout<Stored>(request, id);
-  expect(stored.root.children.map((c) => c.label)).toEqual(["Hero title", "Intro copy"]);
+  expect(stored.root.children.map((c) => c.editorLabel)).toEqual(["Hero title", "Intro copy"]);
   await expect(canvas(page).locator(".emvb-heading")).toHaveText("Labels");
 
   await publishPage(request, id);

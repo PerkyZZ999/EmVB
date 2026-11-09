@@ -7,7 +7,7 @@ import { layoutScripts, nodeScript, typeMayAddScript } from "./scripts.ts";
 
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 const heading = (id: string, text = "Hi") =>
@@ -163,12 +163,12 @@ describe("W-671: parts the canvas loaded are weighed", () => {
   test("an image inside a synced section or Loop Item part counts", () => {
     const wrap = (children: unknown[]) =>
       ({
-        schemaVersion: 17,
+        schemaVersion: 18,
         root: { id: "root0001", type: "container", props: {}, children },
       }) as unknown as Layout;
     const withParts = wrap([
-      { id: "sec00001", type: "section", props: { partId: "hero" }, children: [] },
-      { id: "loop0001", type: "loop", props: { itemPartId: "card" }, children: [] },
+      { id: "sec00001", type: "part-ref", props: { partId: "hero" }, children: [] },
+      { id: "loop0001", type: "loop", props: { partId: "card" }, children: [] },
     ]);
     const hero = wrap([
       { id: "img00001", type: "image", props: { src: "/hero.jpg", alt: "Hero" } },
@@ -186,11 +186,11 @@ describe("W-671: parts the canvas loaded are weighed", () => {
   test("W-674: a part id with stray spaces is found, like the renderer does", () => {
     const wrap = (children: unknown[]) =>
       ({
-        schemaVersion: 17,
+        schemaVersion: 18,
         root: { id: "root0001", type: "container", props: {}, children },
       }) as unknown as Layout;
     const withParts = wrap([
-      { id: "sec00001", type: "section", props: { partId: " hero " }, children: [] },
+      { id: "sec00001", type: "part-ref", props: { partId: " hero " }, children: [] },
     ]);
     const hero = wrap([
       { id: "img00001", type: "image", props: { src: "/hero.jpg", alt: "Hero" } },

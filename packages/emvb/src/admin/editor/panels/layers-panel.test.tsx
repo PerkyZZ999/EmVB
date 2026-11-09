@@ -8,7 +8,7 @@ import type { ClipboardActions } from "../useClipboardActions.ts";
 import { cleanup, mount as mountTree } from "../../../../test/dom/mount.ts";
 
 const layout: Layout = {
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",
@@ -516,9 +516,9 @@ describe("renaming a layer (W-157)", () => {
         onRename={(id, label) => {
           renames.push([id, label]);
           const relabel = (node: LayoutNode): LayoutNode => {
-            const { label: _old, ...rest } = node;
+            const { editorLabel: _old, ...rest } = node;
             const next = (
-              node.id === id ? (label ? { ...rest, label } : rest) : node
+              node.id === id ? (label ? { ...rest, editorLabel: label } : rest) : node
             ) as LayoutNode;
             return "children" in next && Array.isArray(next.children)
               ? ({ ...next, children: next.children.map(relabel) } as LayoutNode)
@@ -565,7 +565,7 @@ describe("renaming a layer (W-157)", () => {
       ...layout,
       root: {
         ...layout.root,
-        children: [{ ...(layout.root.children[0] as LayoutNode), label: "Hero" }],
+        children: [{ ...(layout.root.children[0] as LayoutNode), editorLabel: "Hero" }],
       },
     };
     await mountTree(<Live start={labelled} />);

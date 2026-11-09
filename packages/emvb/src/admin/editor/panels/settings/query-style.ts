@@ -1,7 +1,7 @@
-import { StyleProps } from "../../../../core/index.ts";
+import { FlatStyleProps } from "../../../../core/index.ts";
 
 /** Style keys a container-query style may set (W-398). */
-export const QUERY_STYLE_KEYS: readonly string[] = Object.keys(StyleProps.shape).toSorted();
+export const QUERY_STYLE_KEYS: readonly string[] = Object.keys(FlatStyleProps.shape).toSorted();
 
 /** A stored style value as one line of text: `16px`, `auto`, `#112233`, `var(--name)` (W-398). */
 export function formatStyleValue(value: unknown): string {
@@ -77,7 +77,7 @@ function candidates(text: string, key: string): unknown[] {
 /** The value `key` would store for `text`, or why it can't (W-398). */
 export function parseStyleValue(key: string, text: string): { value: unknown } | { error: string } {
   // W-542: an inherited name ("constructor") is not a style property; it used to throw.
-  const shape = StyleProps.shape as Record<
+  const shape = FlatStyleProps.shape as Record<
     string,
     { safeParse: (v: unknown) => { success: boolean } }
   >;

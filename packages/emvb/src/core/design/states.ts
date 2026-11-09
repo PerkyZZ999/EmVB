@@ -1,7 +1,7 @@
 import type { DesignSystem } from "../schema/design.ts";
 import { editClass } from "./classes.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
-import type { StyleProps, StyleStates } from "../schema/style.ts";
+import type { StylePatch, StyleStates } from "../schema/style.ts";
 
 type StateStyle = NonNullable<StyleStates[StyleStateName]>;
 
@@ -12,11 +12,13 @@ type StateStyle = NonNullable<StyleStates[StyleStateName]>;
 export function patchStates(
   states: StyleStates | undefined,
   state: StyleStateName,
-  patch: Partial<StyleProps>,
+  patch: StylePatch,
 ): StyleStates | undefined {
   const merged: Record<string, unknown> = { ...states?.[state], ...patch };
   for (const key of Object.keys(merged)) if (merged[key] === undefined) delete merged[key];
+  // Motion is not a state style; the flat `transition` key is the one the editor sends.
   delete merged["transition"];
+  delete merged["motion"];
   const next: StyleStates = { ...states };
   if (Object.keys(merged).length > 0) next[state] = merged as StateStyle;
   else delete next[state];
@@ -32,7 +34,7 @@ export function patchClassState(
   design: DesignSystem,
   classId: string,
   state: StyleStateName,
-  patch: Partial<StyleProps>,
+  patch: StylePatch,
 ): DesignSystem {
   return editClass(design, classId, (next) => {
     const states = patchStates(next.states, state, patch);

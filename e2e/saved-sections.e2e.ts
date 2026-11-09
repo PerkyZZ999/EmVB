@@ -182,7 +182,7 @@ test("Synced makes a Section theme part and links the element to it (W-876, W-09
     await saveDraft(page);
     const stored = await storedLayout<{ root: Node }>(request, id);
     const shell = stored.root.children?.[0];
-    expect(shell?.type).toBe("section");
+    expect(shell?.type).toBe("part-ref");
     partId = shell?.props?.["partId"] as string | undefined;
     expect(partId).toBeTruthy();
     expect(shell?.children?.[0]?.id).toBe("box00001");

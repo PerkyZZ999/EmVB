@@ -26,7 +26,7 @@ No SEO. No public `urlPattern` (parts are not catch-all pages).
 | `single_page` | Replaces `<main>` on EmDash `pages` singular | `kind=singular`, `collection=pages`, not front; **not** posts or `emvb_pages` |
 | `single_post` | Replaces `<main>` on EmDash `posts` singular | `kind=singular`, `collection=posts` (e.g. `/posts/welcome`) |
 | `archive` | Replaces `<main>` on posts archive / category / tag | `kind=archive` and not search |
-| `loop_item` | Reusable item template for Loop elements | **Never** a page location; referenced by `loop.itemPartId` |
+| `loop_item` | Reusable item template for Loop elements | **Never** a page location; referenced by `loop.partId` (`itemPartId` before layout schema 18) |
 | `section` | Reusable synced block | **Never** a page location; referenced by `section.partId`. Pages render the part's children live |
 | `page_template` | Starting layout for a new page | **Never** a page location. New page copies the layout with fresh ids |
 | `popup` | Overlay dialog at body end | Always competes; conditions decide; **not** a content replace |
@@ -94,7 +94,7 @@ Public HTML stays JS-free (R-031) except in two cases: a matching popup loads `e
 | `loop` | Repeats item template for each archive post; `perPage` (1–50, empty = 20) sets the archive page size (W-221) |
 | `pagination` | `nav aria-label="Pagination"` with plain Previous / page numbers / Next links (`rel` prev/next, `aria-current="page"`). Nothing when there is one page or no archive data; nothing inside a Loop item (W-222, W-228) |
 
-**Loop Item:** set `loop.itemPartId` to a published `loop_item` theme-part id, or nest post-* elements under Loop as an inline template. Editor canvas shows sample placeholders when no live post is bound.
+**Loop Item:** set `loop.partId` (`itemPartId` before layout schema 18) to a published `loop_item` theme-part id, or nest post-* elements under Loop as an inline template. Editor canvas shows sample placeholders when no live post is bound.
 
 **Archive pages (W-221–W-224):** `/posts/page/N`, `/category/<slug>/page/N` and `/tag/<slug>/page/N` are page N of that archive. `themeContextFrom` sets `ctx.page` and keeps `ctx.path` as the archive's own path, so conditions match every page. Posts load by offset with the first Loop's `perPage`. EmDash gives `hasMore` but no total, so the links run to one page past the current one. Page 1 is always the bare URL.
 

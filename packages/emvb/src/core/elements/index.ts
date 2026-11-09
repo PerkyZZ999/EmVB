@@ -1183,7 +1183,7 @@ export const ELEMENTS = {
   loop,
   "loop-empty": loopEmpty,
   pagination,
-  section,
+  "part-ref": section,
   "div-block": divBlock,
   flexbox,
   grid,

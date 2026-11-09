@@ -11,7 +11,7 @@ import type { Layout } from "../schema/layout.ts";
 const design = emptyDesign();
 
 const page = (...children: Layout["root"]["children"]): Layout => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 
@@ -124,9 +124,9 @@ describe("loop element", () => {
     expect(html).toContain("Read");
   });
 
-  test("uses loopTemplates when itemPartId is set", () => {
+  test("uses loopTemplates when partId is set", () => {
     const itemLayout: Layout = {
-      schemaVersion: 17,
+      schemaVersion: 18,
       root: {
         id: "rootitem",
         type: "container",
@@ -137,7 +137,7 @@ describe("loop element", () => {
     const layout = page({
       id: "loop0002",
       type: "loop",
-      props: { itemPartId: "item-1" },
+      props: { partId: "item-1" },
       children: [],
     });
     const { html } = renderPage(layout, design, {
@@ -154,7 +154,7 @@ describe("loop element", () => {
     const layout = page({
       id: "loop0003",
       type: "loop",
-      props: { itemPartId: "  abc  " },
+      props: { partId: "  abc  " },
       children: [defaultElement("heading", "head0001")],
     });
     expect(collectLoopItemPartIds(layout)).toEqual(["abc"]);

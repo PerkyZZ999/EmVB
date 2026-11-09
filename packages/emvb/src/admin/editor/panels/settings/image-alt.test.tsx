@@ -32,7 +32,7 @@ describe("Image alt text notes (W-265)", () => {
   test("the Image panel shows the note", async () => {
     const node = img({ alt: "Image" });
     const layout = {
-      schemaVersion: 17,
+      schemaVersion: 18,
       root: { id: "root0001", type: "container", props: {}, children: [node] },
     } as Layout;
     await mount(

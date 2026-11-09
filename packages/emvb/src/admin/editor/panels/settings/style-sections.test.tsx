@@ -4,7 +4,7 @@ import {
   emptyDesign,
   type DesignSystem,
   type LayoutNode,
-  type StyleProps,
+  type FlatStyleProps,
 } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
@@ -19,12 +19,12 @@ afterEach(async () => {
   sessionStorage.clear();
 });
 
-let patches: Partial<StyleProps>[] = [];
+let patches: Partial<FlatStyleProps>[] = [];
 afterEach(() => {
   patches = [];
 });
 
-const row = (styleKey: StyleKey, style: StyleProps = {}) =>
+const row = (styleKey: StyleKey, style: FlatStyleProps = {}) =>
   mount(
     <StyleRow
       styleKey={styleKey}
@@ -57,7 +57,7 @@ const panel = (node: LayoutNode, design: DesignSystem = emptyDesign()) =>
     <ElementPanel
       node={node}
       layout={{
-        schemaVersion: 17,
+        schemaVersion: 18,
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }}
       design={design}
@@ -233,7 +233,7 @@ const styleRows = (section: string) =>
 
 const offsetsHelp = () => document.querySelector("[data-emvb-offsets-help]")?.textContent ?? null;
 
-const box = (style?: StyleProps, classes?: string[]): LayoutNode => ({
+const box = (style?: FlatStyleProps, classes?: string[]): LayoutNode => ({
   id: "boxx0001",
   type: "container",
   props: {},
@@ -242,7 +242,7 @@ const box = (style?: StyleProps, classes?: string[]): LayoutNode => ({
   ...(classes ? { classes } : {}),
 });
 
-const withClass = (style: StyleProps): DesignSystem => ({
+const withClass = (style: FlatStyleProps): DesignSystem => ({
   ...emptyDesign(),
   classes: [{ id: "pin", name: "Pin", style }],
 });

@@ -4,14 +4,14 @@ import { bindingDataFor } from "./request-data.ts";
 
 const page = (children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 
 /** A page whose only element is a synced section; the section part holds the dynamic bits. */
 const synced: LayoutNode = {
   id: "sect0001",
-  type: "section",
+  type: "part-ref",
   props: { partId: "SECT0001" },
   children: [],
 } as never;

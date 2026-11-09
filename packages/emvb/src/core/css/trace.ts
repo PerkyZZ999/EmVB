@@ -1,7 +1,8 @@
 import type { DefaultStyleTag, DesignSystem } from "../schema/design.ts";
 import type { LayoutNode } from "../schema/layout.ts";
 import type { StyleStateName } from "../schema/state-names.ts";
-import type { StyleProps } from "../schema/style.ts";
+import { flattenMotion } from "../migrate/v18.ts";
+import type { FlatStyleProps, StyleProps } from "../schema/style.ts";
 
 export type TraceDevice = "desktop" | "tablet" | "mobile";
 
@@ -65,7 +66,7 @@ export function styleLayers(
   design: DesignSystem,
   device: TraceDevice = "desktop",
   state: StyleStateName | "normal" = "normal",
-): { source: Omit<StyleSource, "value">; style: StyleProps }[] {
+): { source: Omit<StyleSource, "value">; style: FlatStyleProps }[] {
   const layers: { source: Omit<StyleSource, "value">; style: StyleProps }[] = [];
   const tag = defaultTagFor(node);
   const tagStyle = tag ? design.defaults?.[tag] : undefined;
@@ -125,7 +126,12 @@ export function styleLayers(
       });
     }
   }
-  return layers;
+  // W-925: traced by the flat motion keys the style rows use.
+  const traced: { source: Omit<StyleSource, "value">; style: FlatStyleProps }[] = [];
+  for (const { source, style } of layers) {
+    traced.push({ source, style: flattenMotion(style) as FlatStyleProps });
+  }
+  return traced;
 }
 
 /** Where each set property of a node comes from (W-318), by property name. */
@@ -160,10 +166,10 @@ export function inheritedStyle(
   design: DesignSystem,
   device: TraceDevice,
   state: StyleStateName | "normal",
-): StyleProps {
+): FlatStyleProps {
   const layers = styleLayers(node, design, device, state);
   // Drop the layer being edited: the element's own on this device and state.
   const editing = state !== "normal" ? STATE_LABEL[state] : LAYER[device];
   const below = layers.filter((l) => !(l.source.kind === "local" && l.source.layer === editing));
-  return Object.assign({}, ...below.map((l) => l.style)) as StyleProps;
+  return Object.assign({}, ...below.map((l) => l.style)) as FlatStyleProps;
 }

@@ -38,7 +38,7 @@ describe("transition (W-089)", () => {
       "filter 300ms ease-out 0ms",
     ],
   ])("%j becomes transition: %s", (transition, css) => {
-    expect(StyleProps.safeParse({ transition }).success).toBe(true);
+    expect(StyleProps.safeParse({ motion: { transition } }).success).toBe(true);
     expect(styleDeclarations({ transition })).toEqual({
       declarations: [{ property: "transition", value: css }],
       rejected: [],
@@ -59,7 +59,7 @@ describe("transition (W-089)", () => {
     { easing: "ease", property: "all" },
     "all 200ms ease",
   ])("%j is refused by the schema and dropped by the generator", (transition) => {
-    expect(StyleProps.safeParse({ transition }).success).toBe(false);
+    expect(StyleProps.safeParse({ motion: { transition } }).success).toBe(false);
     expect(styleDeclarations({ transition })).toEqual({
       declarations: [],
       rejected: ["transition"],
@@ -67,9 +67,11 @@ describe("transition (W-089)", () => {
   });
 
   test("transitions are Normal only: refused in a state, and dropped with a warning if forged", () => {
-    expect(StyleStates.safeParse({ hover: { transition: fade } }).success).toBe(false);
+    expect(StyleStates.safeParse({ hover: { motion: { transition: fade } } }).success).toBe(false);
     const result = renderPage(
-      page(button("btn00001", { states: { hover: { opacity: 0.5, transition: fade } } })),
+      page(
+        button("btn00001", { states: { hover: { opacity: 0.5, motion: { transition: fade } } } }),
+      ),
       design(),
     );
     expect(result.css).toContain(".emvb-e-btn00001:hover{opacity:0.5}");
@@ -84,12 +86,19 @@ describe("transition (W-089)", () => {
   test("the transition sits on the base rule, and reduced motion turns off exactly those rules", () => {
     const css = renderPage(
       page(
-        button("btn00001", { style: { transition: fade }, states: { hover: { opacity: 0.5 } } }),
+        button("btn00001", {
+          style: { motion: { transition: fade } },
+          states: { hover: { opacity: 0.5 } },
+        }),
         button("btn00002", { style: { opacity: 0.9 } }),
         button("btn00003", { classes: ["card"] }),
       ),
       design([
-        { id: "card", name: "Card", style: { transition: { ...fade, property: "colors" } } },
+        {
+          id: "card",
+          name: "Card",
+          style: { motion: { transition: { ...fade, property: "colors" } } },
+        },
         { id: "plain", name: "Plain", style: { opacity: 0.8 } },
       ]),
     ).css;

@@ -57,7 +57,7 @@ describe("W-320 adaptive section recipes", () => {
           (i) => i.severity === "error" && i.rule !== "no-h1",
         );
         expect(errors).toEqual([]);
-        expect(node.label).toBe(recipe.name);
+        expect(node.editorLabel).toBe(recipe.name);
       });
     }
   }

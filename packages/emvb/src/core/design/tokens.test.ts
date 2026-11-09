@@ -5,7 +5,7 @@ import type { Layout } from "../schema/layout.ts";
 import { applyTokens, fluidClamp, spaceScale, typeScale } from "./tokens.ts";
 
 const page = {
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: { id: "root0001", type: "container", props: {}, children: [] },
 } as Layout;
 

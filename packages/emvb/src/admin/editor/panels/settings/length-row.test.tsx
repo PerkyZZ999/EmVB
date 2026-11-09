@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import { emptyDesign, type StyleProps } from "../../../../core/index.ts";
+import { emptyDesign, type FlatStyleProps } from "../../../../core/index.ts";
 import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 import { parseLengthDraft, unitsFor } from "./length-units.ts";
 import { StyleRow } from "./StyleRow.tsx";
@@ -8,12 +8,12 @@ import type { StyleKey } from "./style-sections.ts";
 
 afterEach(cleanup);
 
-let patches: Partial<StyleProps>[] = [];
+let patches: Partial<FlatStyleProps>[] = [];
 afterEach(() => {
   patches = [];
 });
 
-const row = (styleKey: StyleKey, style: StyleProps = {}) =>
+const row = (styleKey: StyleKey, style: FlatStyleProps = {}) =>
   mount(
     <StyleRow
       styleKey={styleKey}

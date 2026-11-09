@@ -430,5 +430,5 @@ export function recipeNode(
   if (!recipe) return undefined;
   const topLevel = layout && hasH1(layout.root) ? 2 : 1;
   const node = withIds(recipe.build(siteTokens(design), { topLevel }), random);
-  return { ...node, label: recipe.name } as LayoutNode;
+  return { ...node, editorLabel: recipe.name } as LayoutNode;
 }

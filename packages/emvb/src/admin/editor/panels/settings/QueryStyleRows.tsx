@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { LayoutNode } from "../../../../core/index.ts";
+import { flattenMotion, nestMotion, type LayoutNode } from "../../../../core/index.ts";
 import { FIELD } from "../../../ui.ts";
 import { savableNode } from "./DraftTextField.tsx";
 import { formatStyleValue, parseStyleValue, QUERY_STYLE_KEYS } from "./query-style.ts";
@@ -15,7 +15,10 @@ type QueryStyle = NonNullable<LayoutNode["query"]>["style"];
 function withQueryStyle(node: LayoutNode, style: Record<string, unknown>): LayoutNode | string {
   const query = node.query;
   if (!query) return "Set a container width first.";
-  const next = { ...node, query: { ...query, style: style as QueryStyle } } as LayoutNode;
+  const next = {
+    ...node,
+    query: { ...query, style: nestMotion(style) as QueryStyle },
+  } as LayoutNode;
   return savableNode(next) || !savableNode(node) ? next : "That value can't be saved here.";
 }
 
@@ -32,7 +35,7 @@ function QueryStyleRow({
   styleKey: string;
   onChange: (node: LayoutNode) => void;
 }) {
-  const style = (node.query?.style ?? {}) as Record<string, unknown>;
+  const style = flattenMotion(node.query?.style ?? {}) as Record<string, unknown>;
   const stored = formatStyleValue(style[styleKey]);
   const [draft, setDraft] = React.useState(stored);
   const [error, setError] = React.useState<string | null>(null);
@@ -105,7 +108,7 @@ export function QueryStyleRows({
   node: LayoutNode;
   onChange: (node: LayoutNode) => void;
 }) {
-  const style = (node.query?.style ?? {}) as Record<string, unknown>;
+  const style = flattenMotion(node.query?.style ?? {}) as Record<string, unknown>;
   const keys = Object.keys(style).filter((key) => style[key] !== undefined);
   const free = QUERY_STYLE_KEYS.filter((key) => !keys.includes(key));
   const [newKey, setNewKey] = React.useState("");

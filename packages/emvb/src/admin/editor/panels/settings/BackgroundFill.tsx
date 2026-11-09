@@ -1,6 +1,6 @@
 import { Input, Select } from "@cloudflare/kumo";
 import * as React from "react";
-import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
+import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
@@ -39,14 +39,14 @@ export function BackgroundFill({
   reset,
   memoryScope = "",
 }: {
-  style: StyleProps | undefined;
+  style: FlatStyleProps | undefined;
   elementType?: string;
   design: DesignSystem;
   fetcher?: Fetcher;
   sizeOptions: { value: string; label: string }[];
   positionOptions: { value: string; label: string }[];
   repeatOptions: { value: string; label: string }[];
-  onPatch: (patch: Partial<StyleProps>) => void;
+  onPatch: (patch: Partial<FlatStyleProps>) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
   reset: React.ReactNode;
   /** Keeps remembered fills apart per class, device and state on one element (W-184). */
@@ -140,7 +140,7 @@ export function BackgroundFill({
               value={style?.backgroundSize}
               options={sizeOptions}
               onChange={(backgroundSize) =>
-                onPatch({ backgroundSize: backgroundSize as StyleProps["backgroundSize"] })
+                onPatch({ backgroundSize: backgroundSize as FlatStyleProps["backgroundSize"] })
               }
             />
             <OptionSelect
@@ -149,7 +149,7 @@ export function BackgroundFill({
               options={positionOptions}
               onChange={(backgroundPosition) =>
                 onPatch({
-                  backgroundPosition: backgroundPosition as StyleProps["backgroundPosition"],
+                  backgroundPosition: backgroundPosition as FlatStyleProps["backgroundPosition"],
                 })
               }
             />
@@ -158,7 +158,9 @@ export function BackgroundFill({
               value={style?.backgroundRepeat}
               options={repeatOptions}
               onChange={(backgroundRepeat) =>
-                onPatch({ backgroundRepeat: backgroundRepeat as StyleProps["backgroundRepeat"] })
+                onPatch({
+                  backgroundRepeat: backgroundRepeat as FlatStyleProps["backgroundRepeat"],
+                })
               }
             />
           </>

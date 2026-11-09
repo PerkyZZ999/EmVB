@@ -158,7 +158,9 @@ test("state switcher edits Hover on the element and on a class, previews each st
     const stored = await storedLayout<{ root: Node }>(request, id);
     const [, first, second] = stored.root.children ?? [];
     expect(first?.states).toEqual({ hover: { opacity: 0.4 } });
-    expect(first).toMatchObject({ style: { opacity: 0.9, transition: { duration: 200 } } });
+    expect(first).toMatchObject({
+      style: { opacity: 0.9, motion: { transition: { duration: 200 } } },
+    });
     expect(second?.states).toBeUndefined();
 
     await publishSiteStyles(page);

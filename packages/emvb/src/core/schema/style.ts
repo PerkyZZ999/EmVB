@@ -101,7 +101,89 @@ const Transition = z.strictObject({
   property: z.enum(TRANSITION_PROPERTIES),
 });
 
-/** Style properties for layout and text elements (W-017 / R-012). Unknown keys are rejected. */
+/**
+ * A spin or pulse; off for visitors who prefer reduced motion. It stops after about 5 s
+ * (W-848) unless `loop` is true (W-853, D-059). `{ type: "none" }` (W-248) stops an animation a
+ * device would otherwise inherit from a wider one.
+ */
+const IconAnimation = z.union([
+  z.strictObject({
+    type: z.enum(["spin", "pulse"]),
+    duration: z.number().int().min(200).max(10_000),
+    loop: z.literal(true).optional(),
+  }),
+  z.strictObject({ type: z.literal("none") }),
+]);
+
+/**
+ * Scroll motion (W-319): effects tied to the element's trip through the screen (or the page's
+ * scroll), with CSS scroll-driven animations. Browsers without them, and visitors who prefer
+ * reduced motion, see the element still. `{ type: "none" }` stops motion a wider device sets.
+ */
+const ScrollMotion = z.union([
+  z.strictObject({
+    effects: z
+      .array(
+        z.strictObject({
+          type: z.enum(MOTION_EFFECTS),
+          from: z.number().min(-1000).max(1000),
+          to: z.number().min(-1000).max(1000),
+        }),
+      )
+      .min(1)
+      .max(MOTION_EFFECTS.length)
+      .superRefine((effects, ctx) => {
+        const seen = new Set<string>();
+        for (const effect of effects) {
+          const [min, max] = MOTION_LIMITS[effect.type];
+          if ([effect.from, effect.to].some((n) => n < min || n > max)) {
+            ctx.addIssue({
+              code: "custom",
+              message: `${effect.type} goes from ${min} to ${max}`,
+            });
+          }
+          if (seen.has(effect.type)) {
+            ctx.addIssue({ code: "custom", message: `${effect.type} is set twice` });
+          }
+          seen.add(effect.type);
+        }
+      }),
+    range: z.enum(["enter", "cross", "exit", "page"]),
+  }),
+  z.strictObject({ type: z.literal("none") }),
+]);
+
+/**
+ * Plays once (W-101, W-107). `delay` waits before it starts. `view` starts as the element
+ * scrolls into view, using CSS scroll-driven animations, and falls back to playing on load.
+ * Not a state style.
+ */
+const Entrance = z.strictObject({
+  type: z.enum(["fade", "fade-up", "fade-down", "slide-up", "slide-down", "scale"]),
+  duration: z.number().int().min(0).max(2000),
+  delay: z.number().int().min(0).max(2000).optional(),
+  trigger: z.enum(["load", "view"]).optional(),
+});
+
+/**
+ * Every motion setting of a style, under one key (W-925, layout 18 / design 17): `entrance`,
+ * `scroll` (scroll motion), `transition` and `icon` (an Icon's spin or pulse). Before 1.0 these
+ * were the flat style keys `entrance`, `scrollMotion`, `transition` and `iconAnimation`; stored
+ * documents are moved here on read. Each part keeps its own rules and its own device cascade.
+ */
+export const Motion = z.strictObject({
+  entrance: Entrance.optional(),
+  scroll: ScrollMotion.optional(),
+  transition: Transition.optional(),
+  icon: IconAnimation.optional(),
+});
+
+export type Motion = z.infer<typeof Motion>;
+
+/**
+ * Style properties for layout and text elements (W-017 / R-012). Unknown keys are refused here;
+ * `validateLayout` and `validateDesign` keep a newer 1.x key aside and puts it back untouched (D-065, W-925).
+ */
 export const StyleProps = z.strictObject({
   flexDirection: z.enum(FLEX_DIRECTIONS).optional(),
   flexWrap: z.enum(FLEX_WRAPS).optional(),
@@ -246,7 +328,6 @@ export const StyleProps = z.strictObject({
   boxShadow: BoxShadow.optional(),
   filter: Filter.optional(),
   cursor: z.enum(CURSORS).optional(),
-  transition: Transition.optional(),
   /**
    * Icon element glyph styling (W-237). Emitted as custom properties on the icon's wrapper, so
    * they work in states, devices and classes; the Icon's base CSS applies them to its `<svg>`.
@@ -265,88 +346,47 @@ export const StyleProps = z.strictObject({
       color: ColorValue.optional(),
     })
     .optional(),
-  /**
-   * A spin or pulse; off for visitors who prefer reduced motion. It stops after about 5 s
-   * (W-848) unless `loop` is true (W-853, D-059). `{ type: "none" }` (W-248) stops an animation a
-   * device would otherwise inherit from a wider one.
-   */
-  iconAnimation: z
-    .union([
-      z.strictObject({
-        type: z.enum(["spin", "pulse"]),
-        duration: z.number().int().min(200).max(10_000),
-        loop: z.literal(true).optional(),
-      }),
-      z.strictObject({ type: z.literal("none") }),
-    ])
-    .optional(),
-  /**
-   * Scroll motion (W-319): effects tied to the element's trip through the screen (or the page's
-   * scroll), with CSS scroll-driven animations. Browsers without them, and visitors who prefer
-   * reduced motion, see the element still. `{ type: "none" }` stops motion a wider device sets.
-   */
-  scrollMotion: z
-    .union([
-      z.strictObject({
-        effects: z
-          .array(
-            z.strictObject({
-              type: z.enum(MOTION_EFFECTS),
-              from: z.number().min(-1000).max(1000),
-              to: z.number().min(-1000).max(1000),
-            }),
-          )
-          .min(1)
-          .max(MOTION_EFFECTS.length)
-          .superRefine((effects, ctx) => {
-            const seen = new Set<string>();
-            for (const effect of effects) {
-              const [min, max] = MOTION_LIMITS[effect.type];
-              if ([effect.from, effect.to].some((n) => n < min || n > max)) {
-                ctx.addIssue({
-                  code: "custom",
-                  message: `${effect.type} goes from ${min} to ${max}`,
-                });
-              }
-              if (seen.has(effect.type)) {
-                ctx.addIssue({ code: "custom", message: `${effect.type} is set twice` });
-              }
-              seen.add(effect.type);
-            }
-          }),
-        range: z.enum(["enter", "cross", "exit", "page"]),
-      }),
-      z.strictObject({ type: z.literal("none") }),
-    ])
-    .optional(),
-  /**
-   * Plays once (W-101, W-107). `delay` waits before it starts. `view` starts as the element
-   * scrolls into view, using CSS scroll-driven animations, and falls back to playing on load.
-   * Not a state style.
-   */
-  entrance: z
-    .strictObject({
-      type: z.enum(["fade", "fade-up", "fade-down", "slide-up", "slide-down", "scale"]),
-      duration: z.number().int().min(0).max(2000),
-      delay: z.number().int().min(0).max(2000).optional(),
-      trigger: z.enum(["load", "view"]).optional(),
-    })
-    .optional(),
+  motion: Motion.optional(),
 });
 
 export type StyleProps = z.infer<typeof StyleProps>;
 
 /**
- * `states` on a node or class (D-032, W-089): hover, focus (`:focus-visible`) and active, each with
- * the same keys and limits as `style` except `transition`, `entrance`, `iconAnimation` and
- * `scrollMotion`. Unknown states are refused.
+ * The pre-1.0 flat style shape: `motion`'s parts as the top-level keys `entrance`, `scrollMotion`,
+ * `transition` and `iconAnimation` (W-925). The editor's style rows and the CSS sanitizer work on
+ * this shape; `flattenMotion` and `nestMotion` convert. It is never stored.
+ * Its keys are in the 0.x schema order (`transition` after `cursor`, `iconAnimation` after the
+ * other icon keys, then `scrollMotion` and `entrance`): a parsed style's CSS is written in that
+ * order, so keeping it keeps 0.x pages byte for byte.
  */
-const StateStyle = StyleProps.omit({
-  transition: true,
-  entrance: true,
-  iconAnimation: true,
-  scrollMotion: true,
+const FlatStyleShape = StyleProps.omit({ motion: true }).extend({
+  transition: Transition.optional(),
+  iconAnimation: IconAnimation.optional(),
+  scrollMotion: ScrollMotion.optional(),
+  entrance: Entrance.optional(),
 });
+const flatShape: Record<string, z.ZodType> = {};
+for (const [key, schema] of Object.entries(StyleProps.omit({ motion: true }).shape)) {
+  flatShape[key] = schema;
+  if (key === "cursor") flatShape["transition"] = Transition.optional();
+  if (key === "iconShadow") {
+    flatShape["iconAnimation"] = IconAnimation.optional();
+    flatShape["scrollMotion"] = ScrollMotion.optional();
+    flatShape["entrance"] = Entrance.optional();
+  }
+}
+export const FlatStyleProps = z.strictObject(flatShape) as unknown as typeof FlatStyleShape;
+
+export type FlatStyleProps = z.infer<typeof FlatStyleProps>;
+
+/** A style edit: flat motion keys (`undefined` clears), or a whole `motion` record. */
+export type StylePatch = Partial<FlatStyleProps> & { motion?: Motion | undefined };
+
+/**
+ * `states` on a node or class (D-032, W-089): hover, focus (`:focus-visible`) and active, each with
+ * the same keys and limits as `style` except `motion`. Unknown states are refused.
+ */
+const StateStyle = StyleProps.omit({ motion: true });
 
 export const StyleStates = z.strictObject({
   hover: StateStyle.optional(),

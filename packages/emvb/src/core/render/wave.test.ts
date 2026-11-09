@@ -8,7 +8,7 @@ import { renderPage } from "./index.ts";
 
 const design: DesignSystem = emptyDesign();
 const page = (children: LayoutNode[], root: Partial<LayoutNode> = {}): Layout => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: { ...container("root0001", children), ...root } as Layout["root"],
 });
 
@@ -25,7 +25,7 @@ describe("design transfer (W-103)", () => {
   });
 
   test("a newer design file is refused", () => {
-    const result = designFromJson(JSON.stringify({ ...emptyDesign(), schemaVersion: 17 }));
+    const result = designFromJson(JSON.stringify({ ...emptyDesign(), schemaVersion: 18 }));
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.message).toBe("That design was saved by a newer EmVB.");
   });
@@ -88,7 +88,9 @@ describe("entrance motion (W-107)", () => {
         id: "head0001",
         type: "heading",
         props: { text: "Hi", level: 1 },
-        style: { entrance: { type: "slide-up", duration: 500, delay: 120, trigger: "view" } },
+        style: {
+          motion: { entrance: { type: "slide-up", duration: 500, delay: 120, trigger: "view" } },
+        },
       },
     ]);
     const css = renderPage(layout, design).css;

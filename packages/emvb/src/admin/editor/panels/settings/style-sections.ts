@@ -1,4 +1,4 @@
-import type { StyleProps } from "../../../../core/index.ts";
+import type { FlatStyleProps } from "../../../../core/index.ts";
 
 export type StyleSectionId =
   | "icon"
@@ -12,7 +12,7 @@ export type StyleSectionId =
   | "effects"
   | "advanced";
 
-export type StyleKey = keyof StyleProps;
+export type StyleKey = keyof FlatStyleProps;
 
 /** Elementor v4 order (W-088); every list below follows it. */
 const SECTION_ORDER: StyleSectionId[] = [
@@ -139,7 +139,7 @@ export const SECTION_LABELS: Record<StyleSectionId, string> = {
   advanced: "Advanced",
 };
 
-/** Style property keys shown in each section (subset of StyleProps). */
+/** Style property keys shown in each section (subset of FlatStyleProps). */
 const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
   layout: [
     "flexDirection",
@@ -276,7 +276,7 @@ const TYPE_SECTION_KEYS: Record<string, Partial<Record<StyleSectionId, StyleKey[
 const OFFSETS = new Set<StyleKey>(["top", "right", "bottom", "left"]);
 
 /** Offsets only do anything once the element is positioned (W-088). */
-export const offsetsApply = (position: StyleProps["position"]) =>
+export const offsetsApply = (position: FlatStyleProps["position"]) =>
   position !== undefined && position !== "static";
 
 /**
@@ -287,8 +287,8 @@ export const offsetsApply = (position: StyleProps["position"]) =>
 export function keysFor(
   type: string,
   section: StyleSectionId,
-  style?: StyleProps,
-  position?: StyleProps["position"],
+  style?: FlatStyleProps,
+  position?: FlatStyleProps["position"],
 ): StyleKey[] {
   const offered = new Set(
     (
@@ -307,7 +307,7 @@ export function keysFor(
 /** The type's sections, plus any other section holding a set value, in section order. */
 export function sectionsFor(
   sections: StyleSectionId[],
-  style: StyleProps | undefined,
+  style: FlatStyleProps | undefined,
   type?: string,
 ): StyleSectionId[] {
   const moved = type === "icon" ? ICON_MOVED : [];
@@ -395,5 +395,5 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   transition: "Transition",
 };
 
-/** Every StyleProps key that the settings panel must be able to edit. */
+/** Every FlatStyleProps key that the settings panel must be able to edit. */
 export const CONTROLLED_STYLE_KEYS: StyleKey[] = Object.values(SECTION_KEYS).flat();

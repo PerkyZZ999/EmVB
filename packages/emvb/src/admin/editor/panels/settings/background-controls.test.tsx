@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import * as React from "react";
 import { act } from "react";
-import { emptyDesign, type StyleProps } from "../../../../core/index.ts";
+import { emptyDesign, type FlatStyleProps } from "../../../../core/index.ts";
 import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 import { switchFillRemembered, type FillMemory } from "./background-mode.ts";
 import { StyleRow } from "./StyleRow.tsx";
@@ -13,9 +13,9 @@ afterEach(async () => {
   await cleanup();
 });
 
-const patches: Partial<StyleProps>[] = [];
+const patches: Partial<FlatStyleProps>[] = [];
 
-const row = (styleKey: StyleKey, style: StyleProps = {}) =>
+const row = (styleKey: StyleKey, style: FlatStyleProps = {}) =>
   mount(
     <StyleRow
       styleKey={styleKey}
@@ -124,17 +124,17 @@ describe("background controls (W-094)", () => {
   });
 
   test("switching fill type and back restores what the type last held (W-184)", async () => {
-    const GRADIENT: StyleProps["gradient"] = {
+    const GRADIENT: FlatStyleProps["gradient"] = {
       type: "radial",
       stops: [
         { color: "#ff0000", at: 0 },
         { color: "#0000ff", at: 100 },
       ],
     };
-    let device: (scope: string, style: StyleProps) => void = () => undefined;
-    let current: StyleProps = {};
+    let device: (scope: string, style: FlatStyleProps) => void = () => undefined;
+    let current: FlatStyleProps = {};
     function Live() {
-      const [style, setStyle] = React.useState<StyleProps>({ gradient: GRADIENT });
+      const [style, setStyle] = React.useState<FlatStyleProps>({ gradient: GRADIENT });
       const [scope, setScope] = React.useState("local:desktop");
       device = (next, nextStyle) => {
         setScope(next);
@@ -172,7 +172,7 @@ describe("background controls (W-094)", () => {
 
   test("the fill memory only fills an empty type and keeps image settings together (W-184)", () => {
     const memory: FillMemory = {};
-    const image: StyleProps = {
+    const image: FlatStyleProps = {
       backgroundImage: "https://cdn.example/a.png",
       backgroundSize: "contain",
       overlay: { color: "#000000", opacity: 0.4 },

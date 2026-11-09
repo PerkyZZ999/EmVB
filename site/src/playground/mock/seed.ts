@@ -116,7 +116,7 @@ export const SEED_DESIGN: DesignSystem = {
         borderStyle: "solid",
         borderColor: { var: "line" },
         borderRadius: { value: 18, unit: "px" },
-        transition: { duration: 200, easing: "ease-out", property: "all" },
+        motion: { transition: { duration: 200, easing: "ease-out", property: "all" } },
       },
       states: {
         hover: {
@@ -149,7 +149,7 @@ export const SEED_DESIGN: DesignSystem = {
         borderRadius: { value: 999, unit: "px" },
         fontWeight: 600,
         textDecoration: "none",
-        transition: { duration: 150, easing: "ease-out", property: "colors" },
+        motion: { transition: { duration: 150, easing: "ease-out", property: "colors" } },
       },
       states: { hover: { backgroundColor: { var: "brand-dark" } } },
     },
@@ -332,7 +332,7 @@ export function landingLayout(): Layout {
             "layout-section",
             { tag: "header" },
             {
-              label: "Header",
+              editorLabel: "Header",
               style: { ...pad(18, 24) },
               children: [
                 node(
@@ -865,7 +865,7 @@ export function landingLayout(): Layout {
                   { label: "Sign up", htmlId: "signup" },
                 ),
               ],
-              label: "Main content",
+              editorLabel: "Main content",
             },
           ),
           node(
@@ -873,7 +873,7 @@ export function landingLayout(): Layout {
             "layout-section",
             { tag: "footer" },
             {
-              label: "Footer",
+              editorLabel: "Footer",
               style: { ...pad(28, 24) },
               children: [
                 node(

@@ -1,7 +1,11 @@
 import { Button, Input, Select } from "@cloudflare/kumo";
 import { PlusIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import { sanitizeMediaUrl, type DesignSystem, type StyleProps } from "../../../../core/index.ts";
+import {
+  sanitizeMediaUrl,
+  type DesignSystem,
+  type FlatStyleProps,
+} from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { listImages, uploadImage, type MediaLibraryItem } from "../../../media-api.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
@@ -9,8 +13,8 @@ import { ColorControl } from "../ColorControl.tsx";
 import { NumberField, type NumberSpec } from "./NumberRow.tsx";
 import { isCommitEnter } from "../../ime.ts";
 
-type Gradient = NonNullable<StyleProps["gradient"]>;
-type Overlay = NonNullable<StyleProps["overlay"]>;
+type Gradient = NonNullable<FlatStyleProps["gradient"]>;
+type Overlay = NonNullable<FlatStyleProps["overlay"]>;
 
 const ANGLE: NumberSpec = { min: 0, max: 360, integer: true, example: "180", suffix: "°" };
 const OVERLAY_OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: "40", suffix: "%" };

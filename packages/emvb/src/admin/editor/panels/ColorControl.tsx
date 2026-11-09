@@ -6,10 +6,10 @@ import {
   slugify,
   variableListFull,
   type DesignSystem,
-  type StyleProps,
+  type FlatStyleProps,
 } from "../../../core/index.ts";
 
-type ColorValue = StyleProps["color"];
+type ColorValue = FlatStyleProps["color"];
 import { BUTTON, FIELD } from "../../ui.ts";
 import {
   formatOklch,

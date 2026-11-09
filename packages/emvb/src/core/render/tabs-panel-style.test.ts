@@ -5,7 +5,7 @@ import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { renderPage } from "./index.ts";
 
 const layout = {
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",

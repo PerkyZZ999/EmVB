@@ -243,7 +243,7 @@ export function useNodeActions({
     const layout = latest.current.page.layout ?? startingLayout();
     const node = recipeNode(id, latest.current.design, layout);
     if (!node) return;
-    place(layout, withFreshIds(layout, node), `${node.label ?? "Section"} section`, true);
+    place(layout, withFreshIds(layout, node), `${node.editorLabel ?? "Section"} section`, true);
   };
 
   return {

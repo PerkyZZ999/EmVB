@@ -19,7 +19,7 @@ import { validateDesign, validateLayout } from "./validate.ts";
 const NOW = "2026-10-21T21:00:00.000Z";
 
 const page = (children: LayoutNode[]): Layout => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 
@@ -203,7 +203,7 @@ describe("synced sections (W-876, W-098)", () => {
     const linked = wrapInThemeSection(layout, "box00001", "PART01", counter);
     if (!linked.ok) throw new Error(linked.reason);
     const shell = findNode(linked.layout, linked.selected);
-    expect(shell?.type).toBe("section");
+    expect(shell?.type).toBe("part-ref");
     expect(shell?.props).toEqual({ partId: "PART01" });
     expect(nodeChildren(shell as LayoutNode).map((n) => n.id)).toEqual(["box00001"]);
     expect(validateLayout(linked.layout).ok).toBe(true);

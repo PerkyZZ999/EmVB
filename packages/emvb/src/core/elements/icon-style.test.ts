@@ -17,7 +17,7 @@ import { defaultElement } from "./index.ts";
 const design = emptyDesign();
 const page = (node: LayoutNode) => {
   const layout: Layout = {
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: { id: "root0001", type: "container", props: {}, children: [node] },
   };
   return renderPage(layout, design);
@@ -44,7 +44,7 @@ describe("icon style keys (W-237)", () => {
           iconScale: 1.25,
           iconStrokeWidth: 1.5,
           iconShadow: { x: 0, y: 2, blur: 4, color: "#00000040" },
-          iconAnimation: { type: "spin", duration: 2000 },
+          motion: { icon: { type: "spin", duration: 2000 } },
         },
       }),
     );
@@ -70,7 +70,7 @@ describe("icon style keys (W-237)", () => {
       icon({
         style: {
           iconShadow: { x: 1, y: 1, blur: 0 },
-          iconAnimation: { type: "pulse", duration: 800 },
+          motion: { icon: { type: "pulse", duration: 800 } },
         },
       }),
     );
@@ -79,7 +79,8 @@ describe("icon style keys (W-237)", () => {
   });
 
   test("W-853: Loop forever keeps a spin or pulse going; a false or stray loop is dropped", () => {
-    const css = (iconAnimation: unknown) => page(icon({ style: { iconAnimation } as never })).css;
+    const css = (iconAnimation: unknown) =>
+      page(icon({ style: { motion: { icon: iconAnimation } } as never })).css;
     expect(css({ type: "spin", duration: 1000, loop: true })).toContain(
       "--emvb-icon-animation:emvb-icon-spin 1000ms linear infinite",
     );
@@ -95,7 +96,10 @@ describe("icon style keys (W-237)", () => {
   test("hover and tablet set the same custom properties, so the glyph changes there", () => {
     const { css } = page(
       icon({
-        style: { iconRotate: 0, transition: { property: "all", duration: 300, easing: "ease" } },
+        style: {
+          iconRotate: 0,
+          motion: { transition: { property: "all", duration: 300, easing: "ease" } },
+        },
         states: { hover: { iconRotate: 90, iconScale: 1.2, color: "#ff0000" } },
         devices: { tablet: { iconFlip: "vertical" }, mobile: { iconScale: 0.8 } },
       }),
@@ -115,8 +119,8 @@ describe("icon style keys (W-237)", () => {
       { iconStrokeWidth: 7 },
       { iconShadow: { x: 0, y: 0, blur: -1 } },
       { iconShadow: { x: 0, y: 0, blur: 1, color: "red;}" } },
-      { iconAnimation: { type: "wobble", duration: 1000 } },
-      { iconAnimation: { type: "spin", duration: 50 } },
+      { motion: { icon: { type: "wobble", duration: 1000 } } },
+      { motion: { icon: { type: "spin", duration: 50 } } },
     ]) {
       expect(StyleProps.safeParse(bad).success).toBe(false);
       const { css } = page(icon({ style: bad as never }));
@@ -125,21 +129,23 @@ describe("icon style keys (W-237)", () => {
   });
 
   test("W-248: a device can stop an animation it inherits with { type: none }", () => {
-    const style = { iconAnimation: { type: "spin", duration: 2000 } } as const;
-    expect(StyleProps.safeParse({ iconAnimation: { type: "none" } }).success).toBe(true);
-    expect(StyleProps.safeParse({ iconAnimation: { type: "none", duration: 900 } }).success).toBe(
-      false,
+    const style = { motion: { icon: { type: "spin", duration: 2000 } } } as const;
+    expect(StyleProps.safeParse({ motion: { icon: { type: "none" } } }).success).toBe(true);
+    expect(
+      StyleProps.safeParse({ motion: { icon: { type: "none", duration: 900 } } }).success,
+    ).toBe(false);
+    const { css } = page(
+      icon({ style, devices: { mobile: { motion: { icon: { type: "none" } } } } }),
     );
-    const { css } = page(icon({ style, devices: { mobile: { iconAnimation: { type: "none" } } } }));
     expect(css).toMatch(/\.emvb-e-icon0001\{[^}]*--emvb-icon-animation:emvb-icon-spin 2000ms/);
     expect(css).toMatch(/@media[^{]*\{\.emvb-e-icon0001\{--emvb-icon-animation:none\}/);
-    const odd = page(icon({ style: { iconAnimation: { type: "none", duration: 9 } } as never }));
+    const odd = page(icon({ style: { motion: { icon: { type: "none", duration: 9 } } } as never }));
     expect(odd.css).not.toMatch(/\.emvb-e-icon0001\{/);
   });
 
   test("animation is Normal only: a hover animation is dropped", () => {
     const { css } = page(
-      icon({ states: { hover: { iconAnimation: { type: "spin", duration: 1000 } } as never } }),
+      icon({ states: { hover: { motion: { icon: { type: "spin", duration: 1000 } } } as never } }),
     );
     expect(css).not.toMatch(/:hover\{[^}]*--emvb-icon-animation/);
     expect(css).not.toContain("--emvb-icon-animation:emvb");

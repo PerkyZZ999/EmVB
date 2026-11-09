@@ -8,14 +8,19 @@ import { A11yDialog, A11yScoreButton } from "./A11yCopilot.tsx";
 afterEach(cleanup);
 
 const layout = {
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",
     props: {},
     children: [
       { id: "head0001", type: "heading", props: { text: "A", level: 1 } },
-      { id: "head0002", type: "heading", props: { text: "B", level: 1 }, label: "Second title" },
+      {
+        id: "head0002",
+        type: "heading",
+        props: { text: "B", level: 1 },
+        editorLabel: "Second title",
+      },
       { id: "head0003", type: "heading", props: { text: "C", level: 5 } },
     ],
   },

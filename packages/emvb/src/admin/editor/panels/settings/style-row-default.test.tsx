@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { emptyDesign, type StyleProps } from "../../../../core/index.ts";
+import { emptyDesign, type FlatStyleProps } from "../../../../core/index.ts";
 import { cleanup, mount } from "../../../../../test/dom/mount.ts";
 import { act } from "react";
 import { StyleRow } from "./StyleRow.tsx";
@@ -7,7 +7,7 @@ import { StyleRow } from "./StyleRow.tsx";
 afterEach(cleanup);
 
 test("UX-048: an unset select reads Default, and its first option can still be picked", async () => {
-  const patches: Partial<StyleProps>[] = [];
+  const patches: Partial<FlatStyleProps>[] = [];
   const host = await mount(
     <StyleRow
       styleKey="fontWeight"
@@ -39,7 +39,7 @@ test("UX-077: the Entrance group's select is named Animation, not Entrance again
   const host = await mount(
     <StyleRow
       styleKey="entrance"
-      style={{ entrance: { type: "fade", duration: 400 } } as StyleProps}
+      style={{ entrance: { type: "fade", duration: 400 } } as FlatStyleProps}
       design={emptyDesign()}
       onPatch={() => undefined}
       onDesignChange={async () => undefined}

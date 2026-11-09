@@ -38,16 +38,16 @@ export function renderSection(
   const template =
     partId && dynamic?.sectionTemplates ? dynamic.sectionTemplates[partId] : undefined;
   if (!partId) {
-    return ELEMENTS.section.build(node as never, attrs, ctx.children(node.children, dynamic));
+    return ELEMENTS["part-ref"].build(node as never, attrs, ctx.children(node.children, dynamic));
   }
   if (!template || stack.includes(partId) || stack.length >= MAX_SECTION_DEPTH) {
-    if (ctx.mode !== "editor") return ELEMENTS.section.build(node as never, attrs, []);
+    if (ctx.mode !== "editor") return ELEMENTS["part-ref"].build(node as never, attrs, []);
     return { tag: "div", attrs, children: ["Synced section"] };
   }
   // W-653: past the render's budget a copy renders like a missing part. W-657: the editor
   // says why, instead of the same placeholder a deleted part shows.
   if (ctx.takeSectionBudget && !ctx.takeSectionBudget(partSize(template.root.children))) {
-    if (ctx.mode !== "editor") return ELEMENTS.section.build(node as never, attrs, []);
+    if (ctx.mode !== "editor") return ELEMENTS["part-ref"].build(node as never, attrs, []);
     return {
       tag: "div",
       attrs,
@@ -60,5 +60,5 @@ export function renderSection(
     sectionStack: [...stack, partId],
     idOrigin: `${dynamic?.idOrigin ?? ""}/s:${partId}`,
   };
-  return ELEMENTS.section.build(node as never, attrs, ctx.children(templateNodes, next));
+  return ELEMENTS["part-ref"].build(node as never, attrs, ctx.children(templateNodes, next));
 }

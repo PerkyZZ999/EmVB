@@ -54,7 +54,7 @@ function editsBetween(before: LayoutNode, after: LayoutNode): number {
 const describe = (node: LayoutNode) => ({
   id: node.id,
   type: node.type,
-  ...(node.label ? { label: node.label } : {}),
+  ...(node.editorLabel ? { label: node.editorLabel } : {}),
 });
 
 /**

@@ -86,7 +86,7 @@ describe("emvb:canvas field widget (W-900)", () => {
 
 describe("field card (W-904)", () => {
   const headings = (n: number, text = "Title") => ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: {
       id: "root0001",
       type: "container",

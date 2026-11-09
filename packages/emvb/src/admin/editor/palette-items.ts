@@ -116,7 +116,7 @@ export function paletteItems(ctx: PaletteActions): PaletteItem[] {
     const walk = (node: LayoutNode, depth: number): void => {
       if (count >= MAX_LAYERS) return;
       count += 1;
-      const name = node.label || ELEMENT_NAMES[node.type] || node.type;
+      const name = node.editorLabel || ELEMENT_NAMES[node.type] || node.type;
       const text = textOf(node);
       items.push({
         id: `layer:${node.id}`,
@@ -150,7 +150,7 @@ export function paletteItems(ctx: PaletteActions): PaletteItem[] {
         id: `class:${cls.id}`,
         group: "Apply class",
         label: `Apply .${cls.name}`,
-        hint: `to ${selected.label || ELEMENT_NAMES[selected.type] || selected.type}`,
+        hint: `to ${selected.editorLabel || ELEMENT_NAMES[selected.type] || selected.type}`,
         keywords: cls.id,
         run: () => ctx.applyClass(selected.id, cls.id),
       });

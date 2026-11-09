@@ -15,9 +15,19 @@ import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style
  * Loop's Empty state element. Every other value is unchanged.
  * 12 since W-160: gradient type, stop locations, and up to 10 stops. v11 gradients
  * (`{ angle, from, to }`) become a linear gradient on read.
+ * 18 since W-925 (D-065, contract 1.0): the Section reference node is `part-ref`, a node's
+ * editor name is `editorLabel`, a Loop's template part is `partId`, and the four motion style
+ * keys sit under one `motion` record. Older documents are rewritten on read.
  * 11 since W-156 and W-157 (D-045): the layout Section element and an editor-only node label.
  */
-export const LAYOUT_SCHEMA_VERSION = 17;
+export const LAYOUT_SCHEMA_VERSION = 18;
+
+/**
+ * The frozen document contract (W-925, D-065). Within 1.x a new optional key may appear
+ * without a schemaVersion bump, and readers keep keys they do not know; a rename or a removal
+ * needs 2.0. `schemaVersion` stays a plain number for the migration chain.
+ */
+export const CONTRACT_VERSION = "1.0";
 
 export const NodeId = z
   .string()
@@ -163,7 +173,8 @@ const sharedNodeFields = {
   classes: ClassIds.optional(),
   htmlId: HtmlId.optional(),
   attributes: HtmlAttributes.optional(),
-  label: NodeLabel.optional(),
+  /** The name shown in the editor's Navigator (was `label` before schema 18). Never rendered. */
+  editorLabel: NodeLabel.optional(),
   bind: Bindings.optional(),
   variant: Variant.optional(),
   audience: Audience.optional(),
@@ -560,7 +571,7 @@ export const PostLinkNode = leafNode(
 
 /**
  * Repeats its item template for each post in ThemeDynamicData.posts.
- * When `itemPartId` is set, the host supplies that Loop Item layout in loopTemplates;
+ * When `partId` is set, the host supplies that Loop Item layout in loopTemplates;
  * otherwise children are the inline item template.
  */
 /** How a Loop lays out its items (W-308): one design, shown as a list, a grid or cards. */
@@ -584,7 +595,7 @@ export const LOOP_ORDERS = ["newest", "oldest", "title"] as const;
 export const LoopNode = parentNode(
   "loop",
   z.strictObject({
-    itemPartId: z.string().max(128).optional(),
+    partId: z.string().max(128).optional(),
     /** Posts per archive page, 1–50 (W-221). Unset = 20. */
     perPage: z.number().int().min(1).max(50).optional(),
     /**
@@ -671,7 +682,7 @@ export const PaginationNode = leafNode(
  * `sectionTemplates` and the part's children render in place of `children`.
  */
 export const SectionNode = parentNode(
-  "section",
+  "part-ref",
   z.strictObject({
     partId: z.string().max(128).optional(),
   }),
@@ -708,7 +719,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "loop",
   "loop-empty",
   "pagination",
-  "section",
+  "part-ref",
   "div-block",
   "flexbox",
   "grid",
@@ -855,7 +866,7 @@ type NodeEnvelope = {
   classes?: ClassesOf;
   htmlId?: HtmlIdOf;
   attributes?: HtmlAttributeOf[];
-  label?: string;
+  editorLabel?: string;
 } & NodeExtras;
 
 /** Manual recursive types so UnknownNode does not poison `z.infer` of the tree. */
@@ -937,7 +948,7 @@ export type FormNode = NodeEnvelope & {
 export type LoopNode = NodeEnvelope & {
   type: "loop";
   props: {
-    itemPartId?: string;
+    partId?: string;
     perPage?: number;
     collection?: string;
     limit?: number;
@@ -955,7 +966,7 @@ export type LoopEmptyNode = NodeEnvelope & {
 };
 
 export type SectionNode = NodeEnvelope & {
-  type: "section";
+  type: "part-ref";
   props: { partId?: string };
   children: LayoutNode[];
 };
@@ -1081,7 +1092,14 @@ export const isFormNode = (node: LayoutNode): node is FormNode => node.type === 
 
 export const isLoopNode = (node: LayoutNode): node is LoopNode => node.type === "loop";
 
-export const isSectionNode = (node: LayoutNode): node is SectionNode => node.type === "section";
+/**
+ * The class name an element type renders with (`emvb-<name>`). A Section reference became
+ * `part-ref` in schema 18 (W-925) but keeps its public class `emvb-section`, so site CSS and
+ * the rendered output are unchanged.
+ */
+export const cssTypeName = (type: string): string => (type === "part-ref" ? "section" : type);
+
+export const isSectionNode = (node: LayoutNode): node is SectionNode => node.type === "part-ref";
 
 export const isDivBlockNode = (node: LayoutNode): node is DivBlockNode => node.type === "div-block";
 
@@ -1112,7 +1130,7 @@ export const isLayoutParentNode = (
   node.type === "flexbox" ||
   node.type === "grid" ||
   node.type === "tab-panel" ||
-  node.type === "section" ||
+  node.type === "part-ref" ||
   node.type === "loop-empty" ||
   node.type === "accordion-item" ||
   node.type === "menu-item";
@@ -1144,7 +1162,7 @@ export const isParentNode = (
   node.type === "form" ||
   node.type === "loop" ||
   node.type === "loop-empty" ||
-  node.type === "section" ||
+  node.type === "part-ref" ||
   node.type === "tabs" ||
   node.type === "tab-panel" ||
   node.type === "accordion" ||

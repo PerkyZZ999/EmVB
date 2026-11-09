@@ -76,11 +76,11 @@ const ALWAYS_INTERACTIVE = new Set([
 
 function containsInteractive(node: LayoutNode): boolean {
   if (ALWAYS_INTERACTIVE.has(node.type)) return true;
-  const props = node.props as { partId?: unknown; itemPartId?: unknown };
+  const props = node.props as { partId?: unknown };
   // A synced section or Loop Item part is another layout this check can't see into.
-  if (node.type === "section" && typeof props.partId === "string" && props.partId.trim())
+  if (node.type === "part-ref" && typeof props.partId === "string" && props.partId.trim())
     return true;
-  if (node.type === "loop" && typeof props.itemPartId === "string" && props.itemPartId.trim()) {
+  if (node.type === "loop" && typeof props.partId === "string" && props.partId.trim()) {
     return true;
   }
   if (

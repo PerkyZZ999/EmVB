@@ -24,7 +24,7 @@ afterEach(async () => {
 });
 
 const layout: Layout = {
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",
@@ -82,7 +82,7 @@ describe("Add panel (W-018)", () => {
 
   test("the theme-part embed is named Theme section, and search finds it (W-155)", async () => {
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="theme" />);
-    const tile = document.querySelector('[data-emvb-add-tile="section"]');
+    const tile = document.querySelector('[data-emvb-add-tile="part-ref"]');
     expect(tile?.textContent).toContain("Theme section");
   });
 
@@ -110,7 +110,7 @@ describe("Add panel (W-018)", () => {
 
   test("Add search matches accented words in any order across the name and group (W-704)", async () => {
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="  séction   THEME layout " />);
-    expect(document.querySelector('[data-emvb-add-tile="section"]') !== null).toBe(true);
+    expect(document.querySelector('[data-emvb-add-tile="part-ref"]') !== null).toBe(true);
     expect(document.querySelectorAll("[data-emvb-add-tile]").length).toBe(1);
     await mount(<AddPanel onAdd={() => undefined} defaultQuery="form" formsAvailable={false} />);
     expect(document.querySelector('[aria-label="Form"]') === null).toBe(true);

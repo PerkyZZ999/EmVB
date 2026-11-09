@@ -3,12 +3,13 @@ import { HEX_COLOR } from "../css-keywords.ts";
 import { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./style.ts";
 
 /**
+ * 17 since W-925 (contract 1.0): the motion style keys sit under one `motion` record.
  * 15 since W-341, in step with layouts (optional fields only; the design document itself is unchanged).
  * 14 since W-329, in step with layouts (optional fields only: `ch` lengths, negative margins).
  * 13 since W-307, in step with layouts (the W-307 batch only adds optional fields).
  * 12 since W-160: class gradients use the same stops as layouts. v11 `{ angle, from, to }` upgrades on read.
  */
-export const DESIGN_SCHEMA_VERSION = 16;
+export const DESIGN_SCHEMA_VERSION = 17;
 
 /** Tags a site can give a starting style. Classes and local styles still win. */
 export const DEFAULT_STYLE_TAGS = ["h1", "h2", "h3", "h4", "h5", "h6", "p", "a", "button"] as const;

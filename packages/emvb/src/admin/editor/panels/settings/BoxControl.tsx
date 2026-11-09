@@ -1,7 +1,7 @@
 import { DropdownMenu } from "@cloudflare/kumo";
 import { CaretDownIcon, LinkSimpleBreakIcon, LinkSimpleIcon } from "@phosphor-icons/react";
 import * as React from "react";
-import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
+import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import {
   allSame,
   groupSet,
@@ -23,7 +23,7 @@ import { bindKind, boundRef, VariableButton } from "./VariableBinding.tsx";
 import { isCommitEnter } from "../../ime.ts";
 
 /** Margin's "auto" menu item: auto left and right margins centre a box with a width (W-151). */
-const autoSidesPatch = (group: BoxGroup): Partial<StyleProps> => ({
+const autoSidesPatch = (group: BoxGroup): Partial<FlatStyleProps> => ({
   [group.sides[1]]: "auto",
   [group.sides[3]]: "auto",
 });
@@ -40,11 +40,11 @@ export function BoxControl({
   onPatch,
 }: {
   group: BoxGroup;
-  style: StyleProps | undefined;
+  style: FlatStyleProps | undefined;
   /** The Normal styles while a state is edited, shown as placeholders (W-089). */
-  inherited?: StyleProps;
+  inherited?: FlatStyleProps;
   design: DesignSystem;
-  onPatch: (patch: Partial<StyleProps>) => void;
+  onPatch: (patch: Partial<FlatStyleProps>) => void;
 }) {
   const values = sideValues(group, style);
   const normal = inherited ? sideValues(group, inherited) : [];

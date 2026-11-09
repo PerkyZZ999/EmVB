@@ -314,7 +314,7 @@ describe("resolveThemeParts (R-062)", () => {
   test("a synced section shows inside a float and a popup too (W-200)", async () => {
     const synced = {
       id: "sect0001",
-      type: "section",
+      type: "part-ref",
       props: { partId: "SECT0001" },
       children: [],
     } as unknown as LayoutNode;
@@ -331,7 +331,7 @@ describe("resolveThemeParts (R-062)", () => {
   test("W-312/W-313 A/B tests and visitor rules inside a part's synced section apply", async () => {
     const synced = {
       id: "sect0001",
-      type: "section",
+      type: "part-ref",
       props: { partId: "SECT0001" },
       children: [],
     } as unknown as LayoutNode;
@@ -472,7 +472,7 @@ describe("resolveThemeParts (R-062)", () => {
     ];
     themeEntries = [
       part("ARCHIVE1", "archive", [
-        { id: "loop0001", type: "loop", props: { itemPartId: "LOOPITEM" }, children: [] },
+        { id: "loop0001", type: "loop", props: { partId: "LOOPITEM" }, children: [] },
       ] as LayoutNode[]),
       part("LOOPITEM", "loop_item", [
         { id: "ptitle01", type: "post-title", props: { level: 3 } } as LayoutNode,
@@ -492,10 +492,10 @@ describe("resolveThemeParts (R-062)", () => {
     postEntries = [{ id: "01A", data: { id: "01A", slug: "a", title: "Alpha" } }];
     themeEntries = [
       part("ARCHIVE1", "archive", [
-        { id: "loop0001", type: "loop", props: { itemPartId: "OUTER" }, children: [] },
+        { id: "loop0001", type: "loop", props: { partId: "OUTER" }, children: [] },
       ] as LayoutNode[]),
       part("OUTER", "loop_item", [
-        { id: "loop0002", type: "loop", props: { itemPartId: "INNER" }, children: [] },
+        { id: "loop0002", type: "loop", props: { partId: "INNER" }, children: [] },
       ] as LayoutNode[]),
       part("INNER", "loop_item", [
         { id: "ptitle01", type: "post-title", props: { level: 3 } } as LayoutNode,
@@ -512,11 +512,11 @@ describe("resolveThemeParts (R-062)", () => {
     postEntries = [{ id: "01A", data: { id: "01A", slug: "a", title: "Alpha" } }];
     themeEntries = [
       part("ARCHIVE1", "archive", [
-        { id: "loop0001", type: "loop", props: { itemPartId: "SELF" }, children: [] },
+        { id: "loop0001", type: "loop", props: { partId: "SELF" }, children: [] },
       ] as LayoutNode[]),
       part("SELF", "loop_item", [
         { id: "ptitle01", type: "post-title", props: { level: 3 } } as LayoutNode,
-        { id: "loop0002", type: "loop", props: { itemPartId: "SELF" }, children: [] } as LayoutNode,
+        { id: "loop0002", type: "loop", props: { partId: "SELF" }, children: [] } as LayoutNode,
       ]),
     ];
     const resolved = await resolveThemeParts(

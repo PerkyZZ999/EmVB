@@ -20,7 +20,9 @@ import {
   type DefaultStyleTag,
   type DesignSystem,
   type Layout,
-  type StyleProps,
+  type FlatStyleProps,
+  flattenMotion,
+  patchNestedStyle,
   type VariableKind,
 } from "../../../core/index.ts";
 import { BUTTON, SOLID_DESTRUCTIVE } from "../../ui.ts";
@@ -566,12 +568,10 @@ function DefaultsSection({
   onSave: (design: DesignSystem) => Promise<boolean | void>;
 }) {
   const [tag, setTag] = React.useState<DefaultStyleTag>("p");
-  const style = design.defaults?.[tag];
-  const patch = (partial: Partial<StyleProps>) => {
-    const next: StyleProps = { ...style, ...partial };
-    for (const key of Object.keys(partial) as (keyof StyleProps)[]) {
-      if (partial[key] === undefined) delete next[key];
-    }
+  const stored = design.defaults?.[tag];
+  const style = flattenMotion(stored);
+  const patch = (partial: Partial<FlatStyleProps>) => {
+    const next = patchNestedStyle(stored, partial);
     const defaults = {
       ...design.defaults,
       [tag]: Object.keys(next).length > 0 ? next : undefined,

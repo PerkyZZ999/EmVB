@@ -22,7 +22,7 @@ type Stored = { schemaVersion: number; root: Node };
 
 const STYLE = {
   color: "#aa2200",
-  transition: { duration: 200, easing: "ease-out", property: "colors" },
+  motion: { transition: { duration: 200, easing: "ease-out", property: "colors" } },
 };
 const STATES = { hover: { color: "#0022aa" }, focus: { backgroundColor: "#eeeeee" } };
 

@@ -389,7 +389,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "    ...[...usedTypes].toSorted().map((type) => baseCss.get(type) ?? \"\"),\n",
+          "search": "    ...[...usedTypes]\n      .toSorted((a, b) =>\n        cssTypeName(a) < cssTypeName(b) ? -1 : cssTypeName(a) > cssTypeName(b) ? 1 : 0,\n      )\n      .map((type) => baseCss.get(type) ?? \"\"),\n",
           "replace": "    ...baseCss.values(),\n"
         }
       ],
@@ -2021,8 +2021,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/cascade.ts",
-          "search": "  const out: Record<string, unknown> = {};\n  for (const style of classStylesInAppliedOrder) {\n    if (!style) continue;\n    Object.assign(out, style);\n  }\n  if (local) Object.assign(out, local);\n  return out as StyleProps;\n",
-          "replace": "  const out: Record<string, unknown> = {};\n  if (local) Object.assign(out, local);\n  for (const style of classStylesInAppliedOrder) {\n    if (!style) continue;\n    Object.assign(out, style);\n  }\n  return out as StyleProps;\n"
+          "search": "  const out: Record<string, unknown> = {};\n  for (const style of classStylesInAppliedOrder) {\n    if (!style) continue;\n    Object.assign(out, flattenMotion(style));\n  }\n  if (local) Object.assign(out, flattenMotion(local));\n  return out as FlatStyleProps;\n",
+          "replace": "  const out: Record<string, unknown> = {};\n  if (local) Object.assign(out, flattenMotion(local));\n  for (const style of classStylesInAppliedOrder) {\n    if (!style) continue;\n    Object.assign(out, flattenMotion(style));\n  }\n  return out as FlatStyleProps;\n"
         }
       ],
       "command": [
@@ -4617,9 +4617,9 @@
       "description": "patchClassStyle keeps properties set to undefined",
       "edits": [
         {
-          "file": "packages/emvb/src/core/design/classes.ts",
-          "search": "    for (const [key, value] of Object.entries(patch)) if (value === undefined) delete style[key];\n",
-          "replace": ""
+          "file": "packages/emvb/src/core/migrate/v18.ts",
+          "search": "    if (value === undefined) delete out[key];\n    else out[key] = value;\n",
+          "replace": "    out[key] = value;\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/design/classes.test.ts"],
@@ -4682,8 +4682,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "  const normal = cls ? cls.style : node.style;\n  const states = cls ? cls.states : node.states;",
-          "replace": "  const normal = node.style;\n  const states = node.states;"
+          "search": "  const normal = flattenMotion(cls ? cls.style : node.style);\n  const states = cls ? cls.states : node.states;",
+          "replace": "  const normal = flattenMotion(node.style);\n  const states = node.states;"
         }
       ],
       "command": [
@@ -7921,7 +7921,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n  16: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n  16: unchanged,\n  17: layoutTo18,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7941,7 +7941,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n  16: designTo17,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  2: unchanged,\n};"
         }
       ],
@@ -7981,7 +7981,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 17;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 18;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 1;"
         }
       ],
@@ -8241,7 +8241,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n  16: unchanged,\n};",
+          "search": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n  16: unchanged,\n  17: layoutTo18,\n};",
           "replace": "export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8261,7 +8261,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n};",
+          "search": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n  2: unchanged,\n  3: unchanged,\n  4: unchanged,\n  5: unchanged,\n  6: unchanged,\n  7: unchanged,\n  8: unchanged,\n  9: unchanged,\n  10: unchanged,\n  11: gradients,\n  12: unchanged,\n  13: unchanged,\n  14: unchanged,\n  15: unchanged,\n  16: designTo17,\n};",
           "replace": "export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {\n  1: unchanged,\n};"
         }
       ],
@@ -8281,7 +8281,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "export const LAYOUT_SCHEMA_VERSION = 17;",
+          "search": "export const LAYOUT_SCHEMA_VERSION = 18;",
           "replace": "export const LAYOUT_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8290,9 +8290,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout is at version 17 and design at version 16"
+        "layout is at version 18 and design at version 17"
       ],
-      "expect": "\\(fail\\).*layout is at version 17 and design at version 16"
+      "expect": "\\(fail\\).*layout is at version 18 and design at version 17"
     },
     {
       "id": "D-032/design-version-not-bumped",
@@ -8301,7 +8301,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "export const DESIGN_SCHEMA_VERSION = 16;",
+          "search": "export const DESIGN_SCHEMA_VERSION = 17;",
           "replace": "export const DESIGN_SCHEMA_VERSION = 2;"
         }
       ],
@@ -8310,9 +8310,9 @@
         "test",
         "./packages/emvb/src/core/migrate/migrate.test.ts",
         "-t",
-        "layout is at version 17 and design at version 16"
+        "layout is at version 18 and design at version 17"
       ],
-      "expect": "\\(fail\\).*layout is at version 17 and design at version 16"
+      "expect": "\\(fail\\).*layout is at version 18 and design at version 17"
     },
     {
       "id": "D-032/node-states-refused",
@@ -8821,7 +8821,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "const StateStyle = StyleProps.omit({\n  transition: true,\n  entrance: true,\n  iconAnimation: true,\n  scrollMotion: true,\n});",
+          "search": "const StateStyle = StyleProps.omit({ motion: true });",
           "replace": "const StateStyle = StyleProps;"
         }
       ],
@@ -11859,8 +11859,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/loop.ts",
-          "search": "node.props.itemPartId?.trim() ?? \"\";",
-          "replace": "node.props.itemPartId ?? \"\";"
+          "search": "node.props.partId?.trim() ?? \"\";",
+          "replace": "node.props.partId ?? \"\";"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/tabs-loop.test.ts"],
@@ -19358,12 +19358,12 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "  attributes: HtmlAttributes.optional(),\n  label: NodeLabel.optional(),\n  bind: Bindings.optional(),\n  variant: Variant.optional(),\n  audience: Audience.optional(),\n  /** Text direction for this element only (W-341). Unset follows the site direction. */",
-          "replace": "  attributes: HtmlAttributes.optional(),\n  bind: Bindings.optional(),\n  variant: Variant.optional(),\n  audience: Audience.optional(),\n  /** Text direction for this element only (W-341). Unset follows the site direction. */"
+          "search": "  /** The name shown in the editor's Navigator (was `label` before schema 18). Never rendered. */\n  editorLabel: NodeLabel.optional(),\n",
+          "replace": ""
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/schema/node-label.test.ts"],
-      "expect": "\\(fail\\).*any node, the root and an unknown one included, may carry a label"
+      "expect": "\\(fail\\).*node labels"
     },
     {
       "id": "W-157/rename-not-saved",
@@ -19386,7 +19386,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/LayersPanel.tsx",
-          "search": "  const name = node.label ?? typeName;",
+          "search": "  const name = node.editorLabel ?? typeName;",
           "replace": "  const name = typeName;"
         }
       ],
@@ -26667,8 +26667,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "              if (seen.has(effect.type)) {",
-          "replace": "              if (seen.has(effect.type) && false) {"
+          "search": "          if (seen.has(effect.type)) {",
+          "replace": "          if (seen.has(effect.type) && false) {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
@@ -27685,7 +27685,7 @@
       "edits": [
         {
           "file": "docs/system/layout-format.md",
-          "search": "\"schemaVersion\": 17,\n  \"root\": {",
+          "search": "\"schemaVersion\": 18,\n  \"root\": {",
           "replace": "\"schemaVersion\": 13,\n  \"root\": {"
         }
       ],
@@ -39768,7 +39768,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/style.ts",
-          "search": "        loop: z.literal(true).optional(),\n",
+          "search": "    loop: z.literal(true).optional(),\n",
           "replace": ""
         }
       ]
@@ -40230,8 +40230,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "type: \"section\", props: { partId } } as LayoutNode);",
-          "replace": "type: \"section\", props: {} } as LayoutNode);"
+          "search": "    type: \"part-ref\",\n    props: { partId },\n  } as LayoutNode);",
+          "replace": "    type: \"part-ref\",\n    props: {},\n  } as LayoutNode);"
         }
       ]
     },
@@ -40365,8 +40365,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/a11y/audit.ts",
-          "search": "merged[key] = { ...merged[key], ...(st as Record<string, unknown>) };",
-          "replace": "merged[`${key}${Object.keys(merged).length}`] = st as Record<string, unknown>;"
+          "search": "merged[key] = { ...merged[key], ...(flattenMotion(st) as Record<string, unknown>) };",
+          "replace": "merged[`${key}${Object.keys(merged).length}`] = flattenMotion(st) as Record<string, unknown>;"
         }
       ]
     },
@@ -40442,8 +40442,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "  16: unchanged,\n};",
-          "replace": "};"
+          "search": "  16: unchanged,\n  17: layoutTo18,\n};",
+          "replace": "  17: layoutTo18,\n};"
         }
       ]
     },
@@ -40455,8 +40455,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/migrate/index.ts",
-          "search": "  15: unchanged,\n};",
-          "replace": "};"
+          "search": "  15: unchanged,\n  16: designTo17,\n};",
+          "replace": "  16: designTo17,\n};"
         }
       ]
     },
@@ -41308,6 +41308,188 @@
       ],
       "command": ["bun", "test", "./packages/emvb/test/compat"],
       "expect": "\\(fail\\).*v17-motion-parts"
+    },
+    {
+      "id": "W-925/unknown-key-rendered",
+      "requirement": "W-925",
+      "description": "D-065: the renderer reads a style's unknown keys, so a key a newer 1.x wrote can reach the CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "  return inFlatOrder(known(flattenMotion(withoutStrayMotionKeys(style)), FLAT_STYLE_KEYS), style);",
+          "replace": "  return inFlatOrder(flattenMotion(style), style);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*(never reaches the HTML or CSS|kept but not rendered)"
+    },
+    {
+      "id": "W-925/unknown-key-dropped",
+      "requirement": "W-925",
+      "description": "D-065: unknown keys are checked but not put back, so a save loses what a newer 1.x wrote.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "    if (isRecord(target)) target[key] = value;",
+          "replace": "    void target;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*kept untouched"
+    },
+    {
+      "id": "W-925/unknown-cap-count",
+      "requirement": "W-925",
+      "description": "D-065: one more unknown key than the cap is kept.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "      } else if (count > MAX_UNKNOWN_KEYS) {",
+          "replace": "      } else if (count > MAX_UNKNOWN_KEYS + 1) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*unknown keys are kept in one place"
+    },
+    {
+      "id": "W-925/unknown-cap-depth",
+      "requirement": "W-925",
+      "description": "D-065: an unknown key of any depth is kept.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "      } else if (depthOf(record[key], MAX_UNKNOWN_DEPTH) > MAX_UNKNOWN_DEPTH) {",
+          "replace": "      } else if (depthOf(record[key], MAX_UNKNOWN_DEPTH) > MAX_UNKNOWN_DEPTH + 1) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*an unknown key nests at most"
+    },
+    {
+      "id": "W-925/unknown-bad-name",
+      "requirement": "W-925",
+      "description": "D-065: an unknown key with any name is kept.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "      if (!UNKNOWN_KEY_PATTERN.test(key)) {",
+          "replace": "      if (!UNKNOWN_KEY_PATTERN.test(key) && false) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*a bad key name is refused"
+    },
+    {
+      "id": "W-925/layout-18-step-missing",
+      "requirement": "W-925",
+      "description": "Layout schema 18 has no 17 -> 18 step, so every stored 0.9 page is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "  17: layoutTo18,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*a v17 page gets the 1.0 names"
+    },
+    {
+      "id": "W-925/design-17-step-missing",
+      "requirement": "W-925",
+      "description": "Design schema 17 has no 16 -> 17 step.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "  16: designTo17,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*a v16 design gets class motion"
+    },
+    {
+      "id": "W-925/section-not-renamed",
+      "requirement": "W-925",
+      "description": "The 17 -> 18 step keeps the type section instead of part-ref.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/v18.ts",
+          "search": "    else if (key === \"type\" && value === \"section\") out[key] = \"part-ref\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*a v17 page gets the 1.0 names"
+    },
+    {
+      "id": "W-925/motion-order",
+      "requirement": "W-925",
+      "description": "The motion parts are not put back in their 0.x place, so a 1.0 page's CSS changes order.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "  if (!isRecord(style) || !isRecord(nested) || !(\"motion\" in nested)) return style;",
+          "replace": "  if (!isRecord(style) || !isRecord(nested) || \"motion\" in nested) return style;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/compat"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-925/patch-motion-not-cleared",
+      "requirement": "W-925",
+      "description": "Clearing a flat motion key leaves the motion part stored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/v18.ts",
+          "search": "      if (value === undefined) delete motion[part];\n      else motion[part] = value;",
+          "replace": "      motion[part] = value;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/contract.test.ts"],
+      "expect": "\\(fail\\).*flat motion keys land in style.motion"
+    },
+    {
+      "id": "W-925/mcp-old-label",
+      "requirement": "W-925",
+      "description": "update_element stores a 0.x label as an unknown key instead of editorLabel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/write.ts",
+          "search": "    if (key === \"label\") {",
+          "replace": "    if (key === \"label\" && false) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/mcp-contract.test.ts"],
+      "expect": "\\(fail\\).*update_element sets and unsets by old names"
+    },
+    {
+      "id": "W-925/json-schema-stale",
+      "requirement": "W-925",
+      "description": "The JSON Schema export changes without the files in docs/schema.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/json-schema.ts",
+          "search": "    title: `EmVB layout (schema ${LAYOUT_SCHEMA_VERSION}, contract ${CONTRACT_VERSION})`,",
+          "replace": "    title: `EmVB layout ${LAYOUT_SCHEMA_VERSION}`,"
+        }
+      ],
+      "command": ["bun", "test", "./scripts/export-json-schema.test.ts"],
+      "expect": "\\(fail\\).*docs/schema matches the code"
+    },
+    {
+      "id": "W-925/schema-doc-missing-type",
+      "requirement": "W-925",
+      "description": "docs/SCHEMA.md drops the part-ref element from its element table.",
+      "edits": [
+        {
+          "file": "docs/SCHEMA.md",
+          "search": "| `part-ref` | partId |\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./test/docs/schema-doc.test.ts"],
+      "expect": "\\(fail\\).*lists every element type"
     }
   ]
 }

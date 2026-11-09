@@ -5,7 +5,7 @@ import { nodeChildren } from "../../../../core/tree-ops.ts";
 const TEXT_PROPS = ["text", "label", "summary", "title", "alt"] as const;
 
 /** Elements whose text comes from the post or another layout; assume they name the link. */
-const DYNAMIC = new Set(["section", "loop"]);
+const DYNAMIC = new Set(["part-ref", "loop"]);
 
 const hasName = (node: LayoutNode): boolean => {
   if (DYNAMIC.has(node.type) || node.type.startsWith("post-")) return true;

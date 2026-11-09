@@ -3,7 +3,7 @@ import type { Layout } from "../core/index.ts";
 import { abArmsFor, visitorFor } from "./visitor.ts";
 
 const layout = {
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: {
     id: "root0001",
     type: "container",
@@ -76,7 +76,7 @@ describe("server-side A/B picks (W-312)", () => {
 
 describe("server-side visitor facts (W-313)", () => {
   const withAudience = {
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: {
       id: "root0001",
       type: "container",
@@ -194,7 +194,7 @@ describe("server-side visitor facts (W-313)", () => {
 
 describe("the host's visitor facts (W-329)", () => {
   const ruled = {
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: {
       id: "root0001",
       type: "container",

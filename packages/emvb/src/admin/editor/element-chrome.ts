@@ -53,7 +53,7 @@ export const ELEMENT_ICONS: Record<string, Icon> = {
   container: SquaresFourIcon,
   "div-block": SquareIcon,
   "layout-section": RowsIcon,
-  section: StackIcon,
+  "part-ref": StackIcon,
   flexbox: ColumnsIcon,
   grid: GridFourIcon,
   spacer: ArrowsVerticalIcon,

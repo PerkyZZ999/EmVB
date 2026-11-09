@@ -79,7 +79,7 @@ export function A11yDialog({
     const node = layout ? findNode(layout, id) : undefined;
     if (!node) return "Element";
     if (layout && node.id === layout.root.id) return "Page";
-    return node.label || ELEMENT_NAMES[node.type] || node.type;
+    return node.editorLabel || ELEMENT_NAMES[node.type] || node.type;
   };
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>

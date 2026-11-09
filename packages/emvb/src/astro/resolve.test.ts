@@ -45,7 +45,7 @@ const resolveEmVBPage = (
 
 const heading: LayoutNode = { id: "head0001", type: "heading", props: { text: "Hello", level: 1 } };
 const layout = (...children: LayoutNode[]): Layout => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 const astro = (params: Record<string, string | undefined>) => ({
@@ -201,7 +201,7 @@ describe("Loop Item parts on a page (W-666)", () => {
       const loop = {
         id: "loop0001",
         type: "loop",
-        props: { collection: "team", itemPartId: "LIPART1" },
+        props: { collection: "team", partId: "LIPART1" },
         children: [],
       } as unknown as LayoutNode;
       lookup = async () => page({ title: "Team", layout: layout(loop) });

@@ -5,7 +5,7 @@ import {
   emptyDesign,
   type DesignSystem,
   type LayoutNode,
-  type StyleProps,
+  type FlatStyleProps,
 } from "../../../../core/index.ts";
 import { styleDeclarations } from "../../../../core/sanitize/css.ts";
 import type { Fetcher } from "../../../api.ts";
@@ -46,7 +46,7 @@ function Harness({
     <ElementPanel
       node={node}
       layout={{
-        schemaVersion: 17,
+        schemaVersion: 18,
         root: { id: "root0001", type: "container", props: {}, children: [node] },
       }}
       design={design}
@@ -63,7 +63,7 @@ function Harness({
   );
 }
 
-const box = (style?: StyleProps): LayoutNode => ({
+const box = (style?: FlatStyleProps): LayoutNode => ({
   id: "box00001",
   type: "container",
   props: {},

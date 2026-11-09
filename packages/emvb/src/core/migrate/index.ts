@@ -1,5 +1,6 @@
 import { isRecord } from "../record.ts";
 import { LAYOUT_SCHEMA_VERSION } from "../schema/layout.ts";
+import { designTo17, layoutTo18 } from "./v18.ts";
 
 export type Migration = (doc: Record<string, unknown>) => Record<string, unknown>;
 
@@ -17,7 +18,9 @@ export type Migration = (doc: Record<string, unknown>) => Record<string, unknown
  * optional fields only (audience segments, Loop options, `ch` and negative margins), and
  * v14 → v15 (W-341 onward) adds optional fields only (direction, image link and caption,
  * button icons, table of contents, container queries), and layout v15 → v16 (W-481) adds the
- * optional image `edit` record. Every other value is unchanged.
+ * optional image `edit` record, and layout v17 → v18 / design v16 → v17 (W-925, contract 1.0)
+ * rename `section` to `part-ref`, a node's `label` to `editorLabel` and a Loop's `itemPartId` to
+ * `partId`, and fold the four motion style keys under `motion`. Every other value is unchanged.
  */
 const unchanged: Migration = (doc) => doc;
 
@@ -78,6 +81,7 @@ export const LAYOUT_MIGRATIONS: Readonly<Record<number, Migration>> = {
   14: unchanged,
   15: unchanged,
   16: unchanged,
+  17: layoutTo18,
 };
 
 /** `DESIGN_MIGRATIONS[n]` upgrades a version-n design document to version n + 1. */
@@ -97,6 +101,7 @@ export const DESIGN_MIGRATIONS: Readonly<Record<number, Migration>> = {
   13: unchanged,
   14: unchanged,
   15: unchanged,
+  16: designTo17,
 };
 
 export type UpgradeResult =

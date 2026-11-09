@@ -6,10 +6,16 @@ import { changedIds, diffSections, restoreSection } from "./diff.ts";
 const h = (id: string, text: string) =>
   ({ id, type: "heading", props: { text, level: 2 } }) as LayoutNode;
 const box = (id: string, children: LayoutNode[], label?: string) =>
-  ({ id, type: "container", props: {}, children, ...(label ? { label } : {}) }) as LayoutNode;
+  ({
+    id,
+    type: "container",
+    props: {},
+    children,
+    ...(label ? { editorLabel: label } : {}),
+  }) as LayoutNode;
 const page = (...children: LayoutNode[]): Layout =>
   ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: { id: "root0001", type: "container", props: {}, children },
   }) as Layout;
 

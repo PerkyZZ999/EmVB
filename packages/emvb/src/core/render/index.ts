@@ -1,3 +1,4 @@
+import { renderableDesign, renderableDynamic, renderableLayout } from "../contract.ts";
 import { MAX_NODES } from "../limits.ts";
 import { loneAbTests, variantShows } from "../audience/variants.ts";
 import { audienceShows, audienceSummary } from "../audience/rules.ts";
@@ -17,6 +18,7 @@ import {
   isParentNode,
   isSectionNode,
   isTabsNode,
+  cssTypeName,
   type Layout,
   type LayoutNode,
   type PaginationNode,
@@ -194,8 +196,8 @@ function renameIds(vnode: VNode, base: string, next: string): VNode {
 const MAX_SECTION_ELEMENTS = 20 * MAX_NODES;
 
 export function renderPage(
-  layout: Layout,
-  design: DesignSystem,
+  storedLayout: Layout,
+  storedDesign: DesignSystem,
   opts: {
     mode?: RenderMode;
     formDefinitions?: FormDefinitions;
@@ -215,7 +217,11 @@ export function renderPage(
   } = {},
 ): RenderResult {
   const mode = opts.mode ?? "public";
-  const baseDynamic = opts.dynamic;
+  // W-925: the renderer reads the 0.x flat style shape and known keys only (D-065), so keys a
+  // newer 1.x wrote are never rendered and the output matches 0.x byte for byte.
+  const layout = renderableLayout(storedLayout);
+  const design = renderableDesign(storedDesign);
+  const baseDynamic = renderableDynamic(opts.dynamic);
   const warnings: RenderWarning[] = [];
   const usedTypes = new Set<string>();
   const localRules: {
@@ -291,7 +297,7 @@ export function renderPage(
     nodeId: string,
     ruleId: string | undefined,
   ): Record<string, string> => {
-    const classes = [...(isRoot ? ["emvb-root"] : []), `emvb-${node.type}`];
+    const classes = [...(isRoot ? ["emvb-root"] : []), `emvb-${cssTypeName(node.type)}`];
     for (const classId of node.classes ?? []) {
       const name = styleClassName(classId);
       if (name) classes.push(name);

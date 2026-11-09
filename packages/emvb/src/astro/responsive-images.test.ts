@@ -9,7 +9,7 @@ import {
 const image = (props: Record<string, unknown>) => ({ id: "img00001", type: "image", props });
 const layout = (props: Record<string, unknown>) =>
   ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: { id: "root0001", type: "container", props: {}, children: [image(props)] },
   }) as unknown as Layout;
 const library = { src: "/_emdash/api/media/file/a.jpg", alt: "A", width: 800, height: 600 };

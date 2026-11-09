@@ -6,7 +6,7 @@ import {
   ProhibitIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
-import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
+import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { radioGroupKeys } from "./ChoiceGroup.tsx";
@@ -15,9 +15,9 @@ import { HintedSwitch } from "./HintedSwitch.tsx";
 
 /** W-237: the Icon section's own controls (glyph rotation, flip, drop shadow, loop). */
 
-type Flip = NonNullable<StyleProps["iconFlip"]>;
-type IconShadow = NonNullable<StyleProps["iconShadow"]>;
-type IconAnimation = NonNullable<StyleProps["iconAnimation"]>;
+type Flip = NonNullable<FlatStyleProps["iconFlip"]>;
+type IconShadow = NonNullable<FlatStyleProps["iconShadow"]>;
+type IconAnimation = NonNullable<FlatStyleProps["iconAnimation"]>;
 
 const ICON_ROTATE: NumberSpec = {
   min: -360,
@@ -345,7 +345,7 @@ type IconShape = "none" | "circle" | "rounded" | "square";
 const SHAPE_PADDING = { value: 12, unit: "px" } as const;
 /** A light neutral, so the default icon colour (the text colour) reads on it. */
 const SHAPE_BACKGROUND = "#f1f5f9";
-const SHAPE_RADIUS: Record<Exclude<IconShape, "none">, StyleProps["borderRadius"]> = {
+const SHAPE_RADIUS: Record<Exclude<IconShape, "none">, FlatStyleProps["borderRadius"]> = {
   circle: { value: 50, unit: "%" },
   rounded: { value: 12, unit: "px" },
   square: { value: 0, unit: "px" },
@@ -359,7 +359,7 @@ const CORNERS = [
 ] as const;
 
 /** The shape the styles in effect make: a background or border, and the corner radius. */
-function iconShapeOf(style: StyleProps | undefined): IconShape {
+function iconShapeOf(style: FlatStyleProps | undefined): IconShape {
   if (!style || (style.backgroundColor === undefined && style.borderWidth === undefined))
     return "none";
   const radius = style.borderRadius;
@@ -376,8 +376,11 @@ function iconShapeOf(style: StyleProps | undefined): IconShape {
  * keeps a background or border already set, and adds 12 px padding only where none is set.
  * None clears the background, radius and padding it would have added.
  */
-function iconShapePatch(shape: IconShape, style: StyleProps | undefined): Partial<StyleProps> {
-  const patch: Partial<StyleProps> = {};
+function iconShapePatch(
+  shape: IconShape,
+  style: FlatStyleProps | undefined,
+): Partial<FlatStyleProps> {
+  const patch: Partial<FlatStyleProps> = {};
   for (const corner of CORNERS) if (style?.[corner] !== undefined) patch[corner] = undefined;
   if (shape === "none") {
     patch.backgroundColor = undefined;
@@ -406,9 +409,9 @@ export function IconShapeRow({
   inherited,
   onPatch,
 }: {
-  style: StyleProps | undefined;
-  inherited?: StyleProps;
-  onPatch: (patch: Partial<StyleProps>) => void;
+  style: FlatStyleProps | undefined;
+  inherited?: FlatStyleProps;
+  onPatch: (patch: Partial<FlatStyleProps>) => void;
 }) {
   const effective = { ...inherited, ...style };
   const current = iconShapeOf(effective);

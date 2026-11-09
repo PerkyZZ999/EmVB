@@ -21,7 +21,7 @@ import { findNode, nodeChildren } from "./tree-ops.ts";
 import { validateLayout } from "./validate.ts";
 
 const page = (children: LayoutNode[]): Layout => ({
-  schemaVersion: 17,
+  schemaVersion: 18,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 
@@ -40,7 +40,10 @@ const heading = (id = "head0001"): LayoutNode => ({
   id,
   type: "heading",
   props: { text: "Hello", level: 2 },
-  style: { color: "#ff0000", transition: { duration: 200, easing: "ease", property: "colors" } },
+  style: {
+    color: "#ff0000",
+    motion: { transition: { duration: 200, easing: "ease", property: "colors" } },
+  },
   states: { hover: { color: "#00ff00" } },
   classes: ["card"],
 });
@@ -60,7 +63,7 @@ describe("clipboard envelope (W-093)", () => {
   test("an element round-trips through the envelope, and the copy doesn't share objects", () => {
     const node = heading();
     const clip = elementClip(node);
-    expect(clip).toMatchObject({ format: "emvb-clipboard", version: 1, schemaVersion: 17 });
+    expect(clip).toMatchObject({ format: "emvb-clipboard", version: 1, schemaVersion: 18 });
     (node.props as { text: string }).text = "Changed after copy";
     const back = readOk(encodeClip(clip));
     expect(back.kind).toBe("element");
@@ -82,7 +85,7 @@ describe("clipboard envelope (W-093)", () => {
       style: {
         style: {
           color: "#ff0000",
-          transition: { duration: 200, easing: "ease", property: "colors" },
+          motion: { transition: { duration: 200, easing: "ease", property: "colors" } },
         },
         states: { hover: { color: "#00ff00" } },
       },
@@ -94,7 +97,7 @@ describe("clipboard envelope (W-093)", () => {
     expect(clipStyle(clip)).toEqual({
       style: {
         color: "#ff0000",
-        transition: { duration: 200, easing: "ease", property: "colors" },
+        motion: { transition: { duration: 200, easing: "ease", property: "colors" } },
       },
       states: { hover: { color: "#00ff00" } },
     });
@@ -128,7 +131,7 @@ describe("clipboard envelope (W-093)", () => {
       ok: false,
       reason: CLIP_REASONS.newer,
     });
-    expect(readClip(JSON.stringify({ ...clip, schemaVersion: 18 }))).toEqual({
+    expect(readClip(JSON.stringify({ ...clip, schemaVersion: 19 }))).toEqual({
       ok: false,
       reason: CLIP_REASONS.newer,
     });
@@ -148,7 +151,9 @@ describe("clipboard envelope (W-093)", () => {
     expect(readClip(JSON.stringify(badState)).ok).toBe(false);
     const transitionInState = {
       ...styleClip(heading()),
-      states: { hover: { transition: { duration: 1, easing: "ease", property: "all" } } },
+      states: {
+        hover: { motion: { transition: { duration: 1, easing: "ease", property: "all" } } },
+      },
     };
     expect(readClip(JSON.stringify(transitionInState)).ok).toBe(false);
   });
@@ -455,7 +460,7 @@ describe("pasting an Icon's style elsewhere (W-292)", () => {
   const iconStyle = {
     style: { color: "#ff0000", iconRotate: 45, iconShadow: { x: 0, y: 2, blur: 4 } },
     states: { hover: { iconScale: 1.2 }, focus: { color: "#00ff00", iconFlip: "both" as const } },
-    devices: { mobile: { iconAnimation: { type: "spin" as const, duration: 1000 } } },
+    devices: { mobile: { motion: { icon: { type: "spin" as const, duration: 1000 } } } },
   };
 
   test("a Heading gets the colour but not the Icon glyph keys", () => {

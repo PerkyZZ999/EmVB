@@ -4,7 +4,7 @@ import { auditPage } from "./audit.ts";
 
 const page = (box: Record<string, unknown>): Layout =>
   ({
-    schemaVersion: 17,
+    schemaVersion: 18,
     root: {
       id: "root0001",
       type: "container",

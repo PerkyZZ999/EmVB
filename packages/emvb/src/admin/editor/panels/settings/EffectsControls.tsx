@@ -1,15 +1,15 @@
 import * as React from "react";
 import { Button, Select } from "@cloudflare/kumo";
 import { PlusIcon } from "@phosphor-icons/react";
-import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
+import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { NumberField, NumberRow, type NumberSpec } from "./NumberRow.tsx";
 
-type Shadow = NonNullable<StyleProps["boxShadow"]>;
-type Filter = NonNullable<StyleProps["filter"]>;
-type Transition = NonNullable<StyleProps["transition"]>;
-type Entrance = NonNullable<StyleProps["entrance"]>;
+type Shadow = NonNullable<FlatStyleProps["boxShadow"]>;
+type Filter = NonNullable<FlatStyleProps["filter"]>;
+type Transition = NonNullable<FlatStyleProps["transition"]>;
+type Entrance = NonNullable<FlatStyleProps["entrance"]>;
 
 /** DESIGN.md: Add shadow starts at 0 4 12 0, 18 % black. */
 const NEW_SHADOW: Shadow = { x: 0, y: 4, blur: 12, spread: 0, color: "#0000002e" };

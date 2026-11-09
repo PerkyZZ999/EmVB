@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import type { StyleProps } from "../../../../core/index.ts";
+import type { FlatStyleProps } from "../../../../core/index.ts";
 import { cleanup, mount, rerender } from "../../../../../test/dom/mount.ts";
 import { MOTION_PRESETS, MotionControl, presetOf } from "./MotionControl.tsx";
 
 afterEach(cleanup);
-type Motion = StyleProps["scrollMotion"];
+type Motion = FlatStyleProps["scrollMotion"];
 
 describe("W-319 scroll motion control", () => {
   test("W-319 Add scroll motion starts at Rise in, then effects can be removed", async () => {

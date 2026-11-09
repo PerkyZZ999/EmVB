@@ -5,13 +5,13 @@ import {
   MOTION_EFFECTS,
   MOTION_LIMITS,
   type MotionEffect,
-  type StyleProps,
+  type FlatStyleProps,
 } from "../../../../core/index.ts";
 import { BUTTON } from "../../../ui.ts";
 import { TransitionSelect } from "./EffectsControls.tsx";
 import { NumberField, type NumberSpec } from "./NumberRow.tsx";
 
-type Motion = NonNullable<StyleProps["scrollMotion"]>;
+type Motion = NonNullable<FlatStyleProps["scrollMotion"]>;
 type Playing = Extract<Motion, { effects: unknown }>;
 type Effect = Playing["effects"][number];
 

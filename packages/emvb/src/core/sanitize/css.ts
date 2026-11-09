@@ -20,7 +20,7 @@ import {
   TRANSITION_EASINGS as TRANSITION_EASING_VALUES,
 } from "../css-keywords.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
-import type { StyleProps } from "../schema/style.ts";
+import type { FlatStyleProps } from "../schema/style.ts";
 import { sanitizeMediaUrl } from "./media-url.ts";
 import { motionDeclarations, withMotion } from "./motion.ts";
 import { isRecord } from "../record.ts";
@@ -590,7 +590,10 @@ function composeBackground(style: Record<string, unknown>): {
 }
 
 const PROPERTY_MAP: {
-  [K in keyof Required<StyleProps>]: { css: string; toValue: (v: unknown) => string | undefined };
+  [K in keyof Required<FlatStyleProps>]: {
+    css: string;
+    toValue: (v: unknown) => string | undefined;
+  };
 } = {
   flexDirection: { css: "flex-direction", toValue: cssFlexDirection },
   flexWrap: { css: "flex-wrap", toValue: keyword(FLEX_WRAPS) },
@@ -712,7 +715,7 @@ export function styleDeclarations(style: unknown): {
       continue;
     }
     const entry = Object.hasOwn(PROPERTY_MAP, key)
-      ? PROPERTY_MAP[key as keyof StyleProps]
+      ? PROPERTY_MAP[key as keyof FlatStyleProps]
       : undefined;
     const value = entry?.toValue(raw);
     const safe =

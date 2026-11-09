@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import * as React from "react";
 import { act } from "react";
-import type { DesignSystem, StyleProps } from "../../../core/index.ts";
+import type { DesignSystem, FlatStyleProps } from "../../../core/index.ts";
 import { cleanup, mount, settle } from "../../../../test/dom/mount.ts";
 import { ColorControl } from "./ColorControl.tsx";
 
@@ -11,7 +11,7 @@ afterEach(cleanup);
 // bound value, validation, failures and id collisions weren't checked.
 
 const DESIGN: DesignSystem = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   variables: {
     colors: [
       { id: "brand", name: "Brand", value: "#0055ff" },
@@ -21,12 +21,12 @@ const DESIGN: DesignSystem = {
 };
 
 async function control(
-  value: StyleProps["color"],
+  value: FlatStyleProps["color"],
   fail?: string,
   save?: (design: DesignSystem) => Promise<void>,
 ) {
   const designs: DesignSystem[] = [];
-  const values: StyleProps["color"][] = [];
+  const values: FlatStyleProps["color"][] = [];
   const host = await mount(
     <ColorControl
       label="Text color"
@@ -169,7 +169,7 @@ describe("editing a bound colour variable (W-091)", () => {
     await view.blur("Brand value");
     expect(view.designs).toEqual([
       {
-        schemaVersion: 16,
+        schemaVersion: 17,
         variables: {
           colors: [
             { id: "brand", name: "Brand", value: "#112233" },
@@ -448,7 +448,7 @@ describe("colour field: label, swatches and Custom color (W-136)", () => {
 
   test("the clipped hint stays when the saved colour comes back and remounts the field (W-183)", async () => {
     function Live() {
-      const [value, setValue] = React.useState<StyleProps["color"]>("#c2410c");
+      const [value, setValue] = React.useState<FlatStyleProps["color"]>("#c2410c");
       return (
         <ColorControl
           label="Text color"

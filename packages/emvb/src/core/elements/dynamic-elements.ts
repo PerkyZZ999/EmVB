@@ -248,7 +248,7 @@ export const loop: ElementDefinition<LoopNode> = {
           "field=value pairs separated by semicolons, such as category=news; team=design. A taxonomy works too. The same field twice matches either value.",
       },
       {
-        key: "itemPartId",
+        key: "partId",
         kind: "text",
         label: "Loop item",
         optional: true,
@@ -380,9 +380,9 @@ export const pagination: ElementDefinition<PaginationNode> = {
 
 export const section: ElementDefinition<SectionNode> = {
   baseCss: ".emvb-section{display:flex;flex-direction:column;min-width:0}",
-  defaults: () => ({ type: "section", props: {}, children: [] }),
+  defaults: () => ({ type: "part-ref", props: {}, children: [] }),
   descriptor: {
-    type: "section",
+    type: "part-ref",
     // "Theme section": it embeds a Section theme part; the layout Section is its own element (W-155).
     name: "Theme section",
     group: "layout",

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
-import type { DesignSystem, StyleProps } from "../../../../core/index.ts";
+import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 import { StyleRow } from "./StyleRow.tsx";
 import type { StyleKey } from "./style-sections.ts";
@@ -10,7 +10,7 @@ afterEach(cleanup);
 
 const px = (value: number, unit: "px" | "rem" = "px") => ({ value, unit });
 const design: DesignSystem = {
-  schemaVersion: 16,
+  schemaVersion: 17,
   variables: {
     colors: [],
     fonts: [
@@ -25,12 +25,12 @@ const design: DesignSystem = {
   },
 };
 
-let patches: Partial<StyleProps>[] = [];
+let patches: Partial<FlatStyleProps>[] = [];
 afterEach(() => {
   patches = [];
 });
 
-const row = (styleKey: StyleKey, style: StyleProps = {}) =>
+const row = (styleKey: StyleKey, style: FlatStyleProps = {}) =>
   mount(
     <StyleRow
       styleKey={styleKey}

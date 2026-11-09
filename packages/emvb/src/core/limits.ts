@@ -28,3 +28,11 @@ export function clipText(text: string, max: number): string {
   const code = text.charCodeAt(max - 1);
   return text.slice(0, code >= 0xd800 && code <= 0xdbff ? max - 1 : max);
 }
+
+/**
+ * D-065 (W-925): a key this version does not know is kept untouched, on a node, its props and
+ * its style records only, and never rendered. These bound what such a key may hold.
+ */
+export const UNKNOWN_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_.:/@-]{0,127}$/;
+export const MAX_UNKNOWN_KEYS = 32;
+export const MAX_UNKNOWN_DEPTH = 16;
