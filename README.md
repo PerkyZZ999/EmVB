@@ -8,7 +8,7 @@ Try it without installing anything in the [playground](https://emvb.dev/playgrou
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
-**Current release:** 0.9.0. It lets your own collections hold an EmVB layout (Edit with EmVB in the entry form, Preview, Convert to EmVB, Host collections setup), and adds per-element text direction, responsive library images, and Page N of M with a Last link. Layout schema 17, design schema 16, unchanged from 0.8.0. See the [changelog](CHANGELOG.md) for every release.
+**Current release:** 0.9.0. It lets your own collections hold an EmVB layout (Edit with EmVB in the entry form, Preview, Convert to EmVB, Host collections setup), and adds per-element text direction, responsive library images, and Page N of M with a Last link. Layout schema 17, design schema 16, unchanged from 0.8.0. See the [changelog](CHANGELOG.md) for every release. The next release moves to the schema contract 1.0 (layout schema 18, design schema 17): see [docs/SCHEMA.md](docs/SCHEMA.md).
 
 ## Requirements
 
@@ -138,7 +138,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 | Seeded bugs (prove the tests catch real defects) | `bun run seeded-bugs`                                        |
 | Project site (source in `site/`)                 | `bun run site` (http://127.0.0.1:4455), `bun run site:build` |
 
-[CONTRIBUTING.md](CONTRIBUTING.md) covers setup, pull requests and troubleshooting.
+[CONTRIBUTING.md](CONTRIBUTING.md) covers pull requests and common problems.
 
 ## Docs
 
@@ -149,6 +149,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 - [Image editor](docs/guides/image-editor.md)
 - [Icon library](docs/guides/icon-library.md)
 - [Layout format](docs/system/layout-format.md): how pages and the design system are stored.
+- [Schema contract](docs/SCHEMA.md): the stored formats kept stable through 1.x, with JSON Schema exports in docs/schema/.
 - [Theme parts](docs/system/theme-parts.md): theme parts, conditions, triggers and dynamic data.
 
 ## Links
