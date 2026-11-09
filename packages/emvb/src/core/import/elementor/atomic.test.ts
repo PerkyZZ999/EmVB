@@ -691,3 +691,48 @@ describe("links to the old site (W-958)", () => {
     );
   });
 });
+
+describe("Elementor classes as site classes (W-958)", () => {
+  const withClasses = (options: Parameters<typeof importElementor>[1] = {}) => {
+    const imported = importElementor(JSON.stringify(atomicPage), { classes: true, ...options });
+    if (!imported.ok) throw new Error(imported.error);
+    return imported;
+  };
+
+  test("off by default: styles are copied in and no class is proposed", () => {
+    expect(result.classes).toEqual([]);
+    expect(nodes(result.layout).some((n) => n.classes)).toBe(false);
+  });
+
+  test("on: elements point at their classes and keep inline only what differs", () => {
+    const imported = withClasses();
+    const title = nodes(imported.layout).find((n) => n.editorLabel === "Hero title");
+    expect(title?.classes).toEqual(["acme-title"]);
+    expect(title?.style).toBeUndefined();
+    const cls = imported.classes.find((c) => c.id === "acme-title");
+    expect(cls?.style).toMatchObject({
+      fontSize: { fluid: { min: 32, max: 56 } },
+      fontWeight: 800,
+    });
+    // A class with nothing EmVB can hold is not proposed or attached.
+    expect(imported.classes.map((c) => c.id)).not.toContain("acme-desktop-only");
+    expect(imported.notes.map((n) => n.message).join("\n")).toContain(
+      "Existing classes are never changed",
+    );
+  });
+
+  test("the page renders the same declarations for each element, from the class or inline", () => {
+    const imported = withClasses();
+    const design = { ...emptyDesign(), classes: imported.classes };
+    const { css } = renderPage(imported.layout, design);
+    expect(css).toContain(".emvb-k-acme-title{");
+    expect(validateLayout(imported.layout).ok).toBe(true);
+  });
+
+  test("class backgrounds use the media library copies too", () => {
+    const imported = withClasses({
+      media: (url) => ({ url: `/_emdash/api/media/file/${url.split("/").pop()}`, id: "m1" }),
+    });
+    expect(JSON.stringify(imported.classes)).not.toMatch(/https?:\/\//);
+  });
+});

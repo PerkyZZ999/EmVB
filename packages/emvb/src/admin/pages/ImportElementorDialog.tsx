@@ -5,6 +5,8 @@ import {
   type ElementorImport,
   type ImportNote,
   importElementor,
+  mergeSectionClasses,
+  remapClassIds,
   MAX_IMPORT_CHARS,
   THEME_PART_TYPE_LABELS,
   THEME_PART_TYPES,
@@ -17,6 +19,8 @@ import { uploadImage } from "../media-api.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { loadIconSet } from "../editor/icons/library.ts";
 import { createThemePart } from "../theme-api.ts";
+import { saveDesign } from "../design-api.ts";
+import { loadDesign } from "../editor/useEditorData.ts";
 import { BUTTON, FIELD } from "../ui.ts";
 import { CreateDialog } from "./CreateDialog.tsx";
 import {
@@ -193,6 +197,8 @@ export function ImportElementorDialog({
   const [kitName, setKitName] = React.useState<string>();
   const [kitError, setKitError] = React.useState<string>();
   const [defaults, setDefaults] = React.useState(true);
+  // W-958: Elementor classes become site classes only when asked (off by default).
+  const [useClasses, setUseClasses] = React.useState(false);
   const [icons, setIcons] = React.useState<IconMap>();
   const [partType, setPartType] = React.useState<ThemePartType>("section");
   // W-951: SVG markup by the address the export uses, fetched or chosen.
@@ -223,6 +229,7 @@ export function ImportElementorDialog({
       setKitName(undefined);
       setKitError(undefined);
       setDefaults(true);
+      setUseClasses(false);
       setPartType("section");
       setSvgs(new Map());
       setSvgStatus(undefined);
@@ -248,12 +255,13 @@ export function ImportElementorDialog({
     (map: IconMap | undefined) => ({
       kit,
       defaults,
+      classes: useClasses,
       icon: (id: string) => map?.get(id),
       svg: (url: string) => svgs.get(url),
       pageLink: (id: number) => pageLinks[id],
       media: (url: string) => copies.get(url),
     }),
-    [kit, defaults, svgs, pageLinks, copies],
+    [kit, defaults, useClasses, svgs, pageLinks, copies],
   );
   const result = React.useMemo(
     () => (json.trim() ? importElementor(json, options(icons)) : undefined),
@@ -379,11 +387,23 @@ export function ImportElementorDialog({
       );
     }
     writePageLinks(pageLinks);
+    let layout = imported.layout;
+    if (imported.classes.length > 0) {
+      // W-958 (D-060): never changes a class already on the site; identical ones are reused, a
+      // different one with the same name is added as a numbered copy. Classes are saved first,
+      // so the page never points at a class that failed to save.
+      const loaded = await loadDesign(fetcher);
+      const merge = mergeSectionClasses(loaded.design, imported.classes);
+      if ("ok" in merge) throw new ApiError(400, "IMPORT_CLASSES", merge.reason);
+      if (merge.added.length > 0 || merge.renamed.length > 0)
+        await saveDesign(fetcher, merge.design, loaded.revision);
+      layout = remapClassIds(layout, merge.ids);
+    }
     if (target === "part") {
-      const id = await createThemePart(fetcher, { title, slug, partType, layout: imported.layout });
+      const id = await createThemePart(fetcher, { title, slug, partType, layout });
       return editorUrl(id, THEME_PARTS_COLLECTION);
     }
-    return editorUrl(await createPage(fetcher, { title, slug, layout: imported.layout }));
+    return editorUrl(await createPage(fetcher, { title, slug, layout }));
   };
 
   return (
@@ -617,6 +637,11 @@ export function ImportElementorDialog({
           label="Give unstyled widgets Elementor's default colours and fonts"
           checked={defaults}
           onCheckedChange={(checked: boolean) => setDefaults(checked)}
+        />
+        <Checkbox
+          label="Add Elementor's classes to my site's classes"
+          checked={useClasses}
+          onCheckedChange={(checked: boolean) => setUseClasses(checked)}
         />
         {target === "part" && (
           <Select

@@ -3,9 +3,17 @@ import { ICON_SVG_MAX } from "../../schema/layout.ts";
 import { sanitizeHref } from "../../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
 import { isSafeSvgMarkup } from "../../sanitize/svg.ts";
-import { newNodeId } from "../../tree-ops.ts";
+import { emptyDesign, type DesignSystem } from "../../schema/design.ts";
+import { newNodeId, slugify } from "../../tree-ops.ts";
+import { validateDesign } from "../../validate.ts";
+import type { Layers } from "./classes.ts";
 import { type AtomicSnapshots, emptySnapshots } from "./snapshots.ts";
 import { color, fontStack, fontWeight, isRecord, slider, str, type Settings } from "./values.ts";
+
+export type StyleClass = NonNullable<DesignSystem["classes"]>[number];
+
+/** W-958: an Elementor global class as the EmVB class the import adds. */
+export type ImportedClass = { id: string; layers: Layers; cls: StyleClass };
 
 export type NoteKind = "approximated" | "skipped" | "unmapped";
 
@@ -39,6 +47,11 @@ export type ImportOptions = {
   pageLink?: (id: number) => string | undefined;
   /** W-958: an old-site image's copy in the media library (its address and media id). */
   media?: (url: string) => { url: string; id?: string } | undefined;
+  /**
+   * W-958: point elements at their Elementor global classes as EmVB classes (returned in
+   * `classes` for the dialog to add to the site), instead of copying the classes' styles in.
+   */
+  classes?: boolean;
   /** Random source for node ids (tests). */
   random?: () => number;
 };
@@ -79,6 +92,9 @@ export class ImportContext {
   private readonly svg: ImportOptions["svg"];
   private readonly pageLinkOf: ImportOptions["pageLink"];
   private readonly mediaOf: ImportOptions["media"];
+  /** W-958: Elementor class id → its EmVB class, or undefined when it can't be one. */
+  readonly imported = new Map<string, ImportedClass | undefined>();
+  readonly useClasses: boolean;
   /** W-958: images on the old site the page uses, so the dialog can copy them. */
   readonly images = new Set<string>();
   /** W-958: WordPress page ids the export links to, so the dialog can ask where each goes. */
@@ -100,6 +116,7 @@ export class ImportContext {
     this.svg = options.svg;
     this.pageLinkOf = options.pageLink;
     this.mediaOf = options.media;
+    this.useClasses = options.classes === true;
     this.useDefaults = options.defaults ?? true;
     this.kitGiven = this.readKit(options.kit);
   }
@@ -234,6 +251,43 @@ export class ImportContext {
       return `${rest}${url.search}${url.hash}`;
     }
     return undefined;
+  }
+
+  /**
+   * W-958: the EmVB class for an Elementor global class, made once per import: named by its
+   * label, with an id from it, and only when it is a valid class (else elements stay inline).
+   */
+  importedClass(id: string, look: () => Layers, label?: string): ImportedClass | undefined {
+    if (this.imported.has(id)) return this.imported.get(id);
+    if (this.imported.size >= 100) return undefined;
+    const layers = look();
+    const name = (label ?? "").trim().slice(0, 60) || id.slice(0, 60);
+    const taken = new Set([...this.imported.values()].map((c) => c?.id));
+    const base = slugify(name).slice(0, 34).replace(/-+$/, "") || "elementor";
+    let classId = base;
+    for (let n = 2; taken.has(classId); n++) classId = `${base}-${n}`;
+    const cls: StyleClass = { id: classId, name, style: layers.desktop };
+    const devices = {
+      ...(Object.keys(layers.tablet).length > 0 ? { tablet: layers.tablet } : {}),
+      ...(Object.keys(layers.mobile).length > 0 ? { mobile: layers.mobile } : {}),
+    };
+    if (Object.keys(devices).length > 0) cls.devices = devices;
+    const states = {
+      ...(Object.keys(layers.hover).length > 0 ? { hover: layers.hover } : {}),
+      ...(Object.keys(layers.focus).length > 0 ? { focus: layers.focus } : {}),
+      ...(Object.keys(layers.active).length > 0 ? { active: layers.active } : {}),
+    };
+    if (Object.keys(states).length > 0) cls.states = states as StyleClass["states"];
+    const valid = validateDesign({ ...emptyDesign(), classes: [cls] }).ok;
+    const made = valid ? { id: classId, layers, cls } : undefined;
+    this.imported.set(id, made);
+    if (made)
+      this.note(
+        "approximated",
+        "Classes",
+        "Elementor classes are added to your site's classes when you import. Existing classes are never changed: an identical one is reused, a different one with the same name is added as a numbered copy.",
+      );
+    return made;
   }
 
   report(): ImportNote[] {

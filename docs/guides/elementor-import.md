@@ -81,10 +81,14 @@ pick another type in the dialog if you want.
 
 ## Elementor 4 (atomic) pages
 
-Pages built with Elementor 4's new elements (Flexbox, Div Block, Heading, Paragraph, Button,
-Image, SVG, Divider, YouTube, Accordion, Tabs and the Form fields) import with their styles. An
-Elementor 4 export carries the global classes and variables the page uses; EmVB applies them to
-each element, so the import never changes your site's own design system.
+Pages built with Elementor 4's new elements (Flexbox, Div Block, Heading, Paragraph, Button, Image,
+SVG, Divider, YouTube, Accordion, Tabs and the Form fields) import with their styles. An Elementor 4
+export carries the global classes and variables the page uses. By default EmVB copies their styles
+into each element, so the import never changes your site's classes. Turn on **Add Elementor's
+classes to my site's classes** to keep them as classes instead: each one becomes a class in Site
+styles, and elements point at it and keep only what differs. A class already on your site is never
+changed: an identical one is reused, and a different one with the same name is added as a numbered
+copy ("Card 2"). The page looks the same either way.
 
 - Each class's desktop, tablet and mobile values and its hover and focus states carry over.
   Laptop and "extra" breakpoints fold into Tablet and Mobile, the way Elementor's desktop-first

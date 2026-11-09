@@ -242,6 +242,12 @@ function withClassIds(node: LayoutNode, ids: ReadonlyMap<string, string>): Layou
   return next;
 }
 
+/** W-958: a whole layout with its class refs moved to the ids a merge gave them. */
+export const remapClassIds = (layout: Layout, ids: ReadonlyMap<string, string>): Layout => ({
+  ...layout,
+  root: withClassIds(layout.root, ids) as Layout["root"],
+});
+
 export type PreparedSection = {
   node: LayoutNode;
   design: DesignSystem;

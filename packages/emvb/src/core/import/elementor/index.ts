@@ -4,14 +4,15 @@
  * icon sets in. The result is always a layout EmVB accepts: anything that fails validation is
  * pruned (and reported) instead of failing the import.
  */
-import { LAYOUT_SCHEMA_VERSION, type Layout } from "../../schema/layout.ts";
+import { LAYOUT_SCHEMA_VERSION, type Layout, type LayoutNode } from "../../schema/layout.ts";
+import { nodeChildren } from "../../tree-ops.ts";
 import type { ThemePartType } from "../../theme/part-types.ts";
 import { nestingIssues } from "../../nesting.ts";
 import { validateLayout } from "../../validate.ts";
 import { atomicElement } from "./atomic.ts";
 import { readSnapshots } from "./snapshots.ts";
 import { customCss } from "./css.ts";
-import { ImportContext, type ImportNote, type ImportOptions } from "./context.ts";
+import { ImportContext, type ImportNote, type ImportOptions, type StyleClass } from "./context.ts";
 import {
   boxReader,
   deviceStyles,
@@ -66,6 +67,8 @@ export type ElementorImport =
       pageLinks: number[];
       /** W-958: images on the old site the page uses (`media` gives their library copies). */
       images: string[];
+      /** W-958: with `classes`, the EmVB classes the page's elements point at, to add to the site. */
+      classes: StyleClass[];
     }
   | { ok: false; error: string };
 
@@ -847,6 +850,9 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
         svgFiles: [...ctx.svgFiles],
         pageLinks: [...ctx.pageLinks].toSorted((a, b) => a - b),
         images: [...ctx.images],
+        classes: usedClasses(checked.layout, ctx).map((cls) =>
+          options.media ? (useCopies(structuredClone(cls), ctx) as StyleClass) : cls,
+        ),
       };
     }
     const issue = checked.ok ? misplaced : checked.issues[0];
@@ -865,7 +871,8 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
  * also get the library id), backgrounds and any other stored address equal to it.
  */
 function useCopies(value: unknown, ctx: ImportContext): unknown {
-  if (typeof value === "string") return ctx.copied(value)?.url ?? value;
+  if (typeof value === "string")
+    return /^https?:\/\//i.test(value) ? (ctx.copied(value)?.url ?? value) : value;
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; i++) value[i] = useCopies(value[i], ctx);
     return value;
@@ -876,4 +883,15 @@ function useCopies(value: unknown, ctx: ImportContext): unknown {
   for (const [key, inner] of Object.entries(value)) value[key] = useCopies(inner, ctx);
   if (props && copy?.id) props["mediaId"] = copy.id;
   return value;
+}
+
+/** W-958: the imported classes still used once the page is valid (pruning can drop elements). */
+function usedClasses(layout: Layout, ctx: ImportContext): StyleClass[] {
+  const used = new Set<string>();
+  const visit = (item: LayoutNode) => {
+    for (const id of item.classes ?? []) used.add(id);
+    nodeChildren(item).forEach(visit);
+  };
+  visit(layout.root);
+  return [...ctx.imported.values()].flatMap((c) => (c && used.has(c.id) ? [c.cls] : []));
 }

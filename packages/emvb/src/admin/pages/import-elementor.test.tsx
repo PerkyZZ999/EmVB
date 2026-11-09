@@ -1,6 +1,6 @@
 import { afterEach, expect, spyOn, test } from "bun:test";
 import { act } from "react";
-import type { Layout } from "../../core/index.ts";
+import { emptyDesign, type Layout } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
 import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
 import { ImportElementorDialog, fileNameOf } from "./ImportElementorDialog.tsx";
@@ -402,4 +402,55 @@ test("W-958: Copy images puts old-site images in the media library and the page 
   } finally {
     fetchSpy.mockRestore();
   }
+});
+
+test("W-958: with Add Elementor's classes on, classes join the site without changing one", async () => {
+  const atomic = (await import("../../../test/fixtures/elementor/atomic-page.json")).default;
+  const posted: Posted[] = [];
+  const savedDesigns: {
+    design: { classes: { id: string; name: string; style: unknown }[] };
+    revision: string | null;
+  }[] = [];
+  const navigation = spyOn(window.location, "assign").mockImplementation(() => undefined);
+  restoreNavigation = () => navigation.mockRestore();
+  const mine = { id: "acme-title", name: "acme-title", style: { color: "#000000" } };
+  const fetcher: Fetcher = async (path, init) => {
+    const url = String(path);
+    if (url.endsWith("/design/draft"))
+      return Response.json({
+        data: { design: { ...emptyDesign(), classes: [mine] }, revision: "r1" },
+      });
+    if (url.endsWith("/design/save")) {
+      savedDesigns.push(JSON.parse(String(init?.body)) as (typeof savedDesigns)[number]);
+      return Response.json({ data: { revision: "r2" } });
+    }
+    posted.push(JSON.parse(String(init?.body)) as Posted);
+    return Response.json({ data: { item: { id: "made-1" } } }, { status: 201 });
+  };
+  await mount(
+    <ImportElementorDialog fetcher={fetcher} open onOpenChange={() => undefined} target="page" />,
+  );
+  await settle();
+  await paste(JSON.stringify({ ...atomic, title: "Classes" }));
+  const box = [...document.querySelectorAll("label")].find((l) =>
+    l.textContent?.includes("Add Elementor's classes to my site's classes"),
+  );
+  const toggle = box?.querySelector<HTMLElement>("button, input");
+  if (!toggle) throw new Error("classes checkbox is missing");
+  expect(toggle.getAttribute("aria-checked") ?? String((toggle as HTMLInputElement).checked)).toBe(
+    "false",
+  );
+  await act(async () => toggle.click());
+  await settle();
+  await submit();
+  expect(savedDesigns).toHaveLength(1);
+  expect(savedDesigns[0]?.revision).toBe("r1");
+  const classes = savedDesigns[0]?.design.classes ?? [];
+  // The site's own class is untouched; the import's look is added as a numbered copy.
+  expect(classes[0]).toEqual(mine);
+  const copy = classes.find((c) => c.name === "acme-title 2");
+  expect(copy).toBeDefined();
+  const layout = JSON.stringify(posted[0]?.data.layout);
+  expect(layout).toContain(`"classes":["${copy?.id}"]`);
+  expect(layout).not.toContain('"classes":["acme-title"]');
 });

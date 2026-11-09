@@ -23,7 +23,8 @@ import {
 import { FIELD_NAME_PATTERN } from "../../schema/layout.ts";
 import { sanitizeHref } from "../../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
-import { type ImportContext, svgFileId } from "./context.ts";
+import { type ImportContext, type ImportedClass, svgFileId } from "./context.ts";
+import { combineLayers, inlineOver, type Layers, STATE_NAMES } from "./classes.ts";
 import { declarations, decodeRawCss, finishBorders } from "./css.ts";
 import { cleanText, decodeEntities, embedVideoUrl, splitLong } from "./html.ts";
 import type { Style } from "./style.ts";
@@ -750,6 +751,70 @@ type AtomicStyle = {
   fullRow: boolean;
 };
 
+/**
+ * W-958: with "Add Elementor's classes" on, an element points at its Elementor global classes as
+ * EmVB classes and keeps inline only what makes it look exactly as before (see `inlineOver`).
+ * When the classes can't give that look (a class sets something the element doesn't have, two
+ * classes disagree, or a class isn't valid), the element keeps its full inline style.
+ */
+function useClasses(n: N, el: Settings, snap: AtomicSnapshots, ctx: ImportContext): N {
+  if (!ctx.useClasses) return n;
+  const ids = un(settingsOf(el)["classes"]);
+  const globals = (Array.isArray(ids) ? ids : []).filter(
+    (id): id is string => typeof id === "string" && snap.classes.has(id),
+  );
+  if (globals.length === 0) return n;
+  const made = globals.map((id) =>
+    ctx.importedClass(id, () => classLook(id, snap, ctx), snap.classes.get(id)?.label),
+  );
+  if (made.some((l) => l === undefined)) return n;
+  // A class whose look is only visibility or grid placement carries nothing as an EmVB class.
+  const layers = made.filter((c) =>
+    Object.values((c as ImportedClass).layers).some((layer) => !isEmptyStyle(layer)),
+  );
+  if (layers.length === 0) return n;
+  const combined = combineLayers(layers.map((l) => (l as ImportedClass).layers));
+  if (!combined) return n;
+  const states = n["states"] as Record<string, Style> | undefined;
+  const want: Layers = {
+    desktop: (n["style"] as Style | undefined) ?? {},
+    tablet: (n["devices"] as Record<string, Style> | undefined)?.["tablet"] ?? {},
+    mobile: (n["devices"] as Record<string, Style> | undefined)?.["mobile"] ?? {},
+    hover: states?.["hover"] ?? {},
+    focus: states?.["focus"] ?? {},
+    active: states?.["active"] ?? {},
+  };
+  const inline = inlineOver(want, combined);
+  if (!inline) return n;
+  delete n["style"];
+  delete n["devices"];
+  delete n["states"];
+  if (!isEmptyStyle(inline.desktop)) n["style"] = inline.desktop;
+  const devices: Record<string, Style> = {};
+  if (!isEmptyStyle(inline.tablet)) devices["tablet"] = inline.tablet;
+  if (!isEmptyStyle(inline.mobile)) devices["mobile"] = inline.mobile;
+  if (Object.keys(devices).length > 0) n["devices"] = devices;
+  const stateStyles: Record<string, Style> = {};
+  for (const s of STATE_NAMES) if (!isEmptyStyle(inline[s])) stateStyles[s] = inline[s];
+  if (Object.keys(stateStyles).length > 0) n["states"] = stateStyles;
+  n["classes"] = layers.map((l) => (l as ImportedClass).id);
+  return n;
+}
+
+/** One Elementor global class's own look, as EmVB layers. */
+function classLook(id: string, snap: AtomicSnapshots, ctx: ImportContext): Layers {
+  const def = snap.classes.get(id) as ClassDef;
+  const look = atomicStyle("", {}, snap, ctx, id, true, [def]);
+  return {
+    desktop: look.style,
+    tablet: look.devices.tablet ?? {},
+    mobile: look.devices.mobile ?? {},
+    hover: look.states.hover ?? {},
+    focus: look.states.focus ?? {},
+    active: look.states.active ?? {},
+  };
+}
+
 /** Base styles Elementor gives each atomic element before any class. */
 const BASE: Record<string, Settings> = {
   "e-flexbox": {
@@ -808,6 +873,8 @@ function atomicStyle(
   name: string,
   /** Read again for one value: don't repeat the notes. */
   quiet = false,
+  /** W-958: only these classes, without Elementor's base styles (a class's own look). */
+  only?: readonly ClassDef[],
 ): AtomicStyle {
   const layers: Record<"desktop" | "tablet" | "mobile", Style> = {
     desktop: {},
@@ -823,9 +890,9 @@ function atomicStyle(
   let fullRow = false;
   const unsupported = new Set<string>();
   const variants: ClassVariant[] = [];
-  if (BASE[type])
+  if (BASE[type] && !only)
     variants.push({ meta: { breakpoint: "desktop", state: null }, props: BASE[type] });
-  for (const def of classesOf(el, snap)) {
+  for (const def of only ?? classesOf(el, snap)) {
     const own = Array.isArray(def.variants) ? def.variants : [];
     // Within a class, wider breakpoints first so narrower ones override them.
     variants.push(
@@ -1060,7 +1127,8 @@ function elementNodes(
   const type = str(el["widgetType"]) ?? str(el["elType"]) ?? "";
   const s = settingsOf(el);
   const name = labelOf(type);
-  const styled = (n: N) => applyStyle(n, atomicStyle(type, el, snap, ctx, name));
+  const styled = (n: N) =>
+    useClasses(applyStyle(n, atomicStyle(type, el, snap, ctx, name)), el, snap, ctx);
   const kids = (next: Partial<Env> = {}) => {
     const { grid: _grid, ...rest } = env;
     return walk(el["elements"], { ...rest, depth: env.depth + 1, ...next });
@@ -1152,7 +1220,7 @@ function elementNodes(
           n["devices"] = devices;
         }
       }
-      return [label(n)];
+      return [label(useClasses(n, el, snap, ctx))];
     }
     case "e-heading": {
       const tag = str(un(s["tag"])) ?? "h2";

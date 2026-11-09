@@ -44206,6 +44206,132 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
       "expect": "\\(fail\\).*Copy images puts"
+    },
+    {
+      "id": "W-958/classes-on-by-default",
+      "requirement": "W-958",
+      "description": "Elementor classes join the site without being asked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "    this.useClasses = options.classes === true;",
+          "replace": "    this.useClasses = options.classes !== false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*off by default"
+    },
+    {
+      "id": "W-958/class-override-lost",
+      "requirement": "W-958",
+      "description": "A class's tablet value wins over the element's own look.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/classes.ts",
+          "search": "      own[device][key] = target[key];",
+          "replace": "      void key;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/classes.test.ts"],
+      "expect": "\\(fail\\).*tablet value beats"
+    },
+    {
+      "id": "W-958/class-adds-style",
+      "requirement": "W-958",
+      "description": "A class that adds a style the element didn't have is used anyway.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/classes.ts",
+          "search": "      if (target[key] === undefined) return undefined;",
+          "replace": "      if (target[key] === undefined) continue;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/classes.test.ts"],
+      "expect": "\\(fail\\).*can't be used"
+    },
+    {
+      "id": "W-958/class-state-kept",
+      "requirement": "W-958",
+      "description": "A class's hover value isn't undone on the element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/classes.ts",
+          "search": "      own[state][key] = first;",
+          "replace": "      void first;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/classes.test.ts"],
+      "expect": "\\(fail\\).*states:"
+    },
+    {
+      "id": "W-958/classes-conflict",
+      "requirement": "W-958",
+      "description": "Two classes that disagree are both used.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/classes.ts",
+          "search": "        if (key in out[name] && !same(out[name][key], value)) return undefined;",
+          "replace": "        if (key === \"\\u0000\") return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/classes.test.ts"],
+      "expect": "\\(fail\\).*several classes"
+    },
+    {
+      "id": "W-958/empty-class-attached",
+      "requirement": "W-958",
+      "description": "A class with nothing EmVB can hold is proposed and attached.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "    Object.values((c as ImportedClass).layers).some((layer) => !isEmptyStyle(layer)),",
+          "replace": "    c !== null,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*on: elements point"
+    },
+    {
+      "id": "W-958/class-ids-not-remapped",
+      "requirement": "W-958",
+      "description": "Imported elements keep the export's class id after a clash.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "      layout = remapClassIds(layout, merge.ids);",
+          "replace": "      void remapClassIds;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*classes join the site"
+    },
+    {
+      "id": "W-958/classes-not-saved",
+      "requirement": "W-958",
+      "description": "The imported classes are never saved to the site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "      if (merge.added.length > 0 || merge.renamed.length > 0)",
+          "replace": "      if (merge.added.length < 0)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*classes join the site"
+    },
+    {
+      "id": "W-958/copies-any-string",
+      "requirement": "W-958",
+      "description": "Every stored string is offered to the media lookup.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "    return /^https?:\\/\\//i.test(value) ? (ctx.copied(value)?.url ?? value) : value;",
+          "replace": "    return ctx.copied(value)?.url ?? value;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*class backgrounds use"
     }
   ]
 }

@@ -548,6 +548,7 @@ export {
   insertSavedSection,
   MAX_SAVED_SECTIONS,
   mergeSectionClasses,
+  remapClassIds,
   prepareSavedSection,
   readSavedSection,
   SAVED_SECTION_NAME_MAX,
