@@ -1,5 +1,7 @@
 /** Shared state of one Elementor import (W-945): ids, globals, icons, limits and the report. */
 import { ICON_SVG_MAX } from "../../schema/layout.ts";
+import { sanitizeHref } from "../../sanitize/href.ts";
+import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
 import { isSafeSvgMarkup } from "../../sanitize/svg.ts";
 import { newNodeId } from "../../tree-ops.ts";
 import { type AtomicSnapshots, emptySnapshots } from "./snapshots.ts";
@@ -30,6 +32,13 @@ export type ImportOptions = {
    * person), so it becomes a recolourable icon instead of an image.
    */
   svg?: (url: string) => string | undefined;
+  /**
+   * W-958: where a link to a WordPress page (by its post id) goes on this site, such as
+   * `/nos-produits`; chosen in the import dialog.
+   */
+  pageLink?: (id: number) => string | undefined;
+  /** W-958: an old-site image's copy in the media library (its address and media id). */
+  media?: (url: string) => { url: string; id?: string } | undefined;
   /** Random source for node ids (tests). */
   random?: () => number;
 };
@@ -49,6 +58,9 @@ const DEFAULT_TYPOGRAPHY: Record<string, GlobalTypography> = {
   accent: { fontFamily: "Roboto", fontWeight: "500" },
 };
 
+/** Old-site images listed for copying; an export with more lists the first ones. */
+const MAX_IMAGES = 300;
+
 /** Notes kept per import; the rest are counted into one line. */
 const MAX_NOTES = 300;
 /** Leaves room under MAX_NODES (2000) for wrappers added after the budget check. */
@@ -65,6 +77,14 @@ export class ImportContext {
   /** W-951: SVG files the export points to whose markup wasn't given (the dialog fetches them). */
   readonly svgFiles = new Set<string>();
   private readonly svg: ImportOptions["svg"];
+  private readonly pageLinkOf: ImportOptions["pageLink"];
+  private readonly mediaOf: ImportOptions["media"];
+  /** W-958: images on the old site the page uses, so the dialog can copy them. */
+  readonly images = new Set<string>();
+  /** W-958: WordPress page ids the export links to, so the dialog can ask where each goes. */
+  readonly pageLinks = new Set<number>();
+  /** W-958: where the old WordPress site lives (the address before `/wp-content/`). */
+  private oldSites: URL[] = [];
   nodes = 0;
   elements = 0;
   mapped = 0;
@@ -78,6 +98,8 @@ export class ImportContext {
     this.random = options.random ?? Math.random;
     this.icon = options.icon;
     this.svg = options.svg;
+    this.pageLinkOf = options.pageLink;
+    this.mediaOf = options.media;
     this.useDefaults = options.defaults ?? true;
     this.kitGiven = this.readKit(options.kit);
   }
@@ -101,15 +123,26 @@ export class ImportContext {
     this.notes.set(key, { kind, element, message, count: 1 });
   }
 
-  /** Notes once that imported images still load from the old site. */
+  /**
+   * Remembers an image on the old site (W-958: the dialog copies them into the media library) and
+   * notes once that the ones not copied still load from there.
+   */
   externalImage(url: string): void {
-    if (/^https?:\/\//i.test(url)) {
-      this.note(
-        "approximated",
-        "Images",
-        "Images still load from their original address (your old site). Upload them to the media library before that site goes away.",
-      );
-    }
+    if (!/^https?:\/\//i.test(url)) return;
+    if (this.images.size < MAX_IMAGES) this.images.add(url);
+    if (this.copied(url)) return;
+    this.note(
+      "approximated",
+      "Images",
+      "Images still load from their original address (your old site). Copy them to the media library in the import dialog, or upload them before that site goes away.",
+    );
+  }
+
+  /** W-958: the media library copy of an old-site image, when the dialog made one. */
+  copied(url: string): { url: string; id?: string } | undefined {
+    const found = this.mediaOf?.(url);
+    const safe = found ? sanitizeMediaUrl(found.url) : undefined;
+    return found && safe ? { ...found, url: safe } : undefined;
   }
 
   /**
@@ -131,6 +164,75 @@ export class ImportContext {
       "SVG files",
       "An SVG file is too large or has content EmVB doesn't allow (scripts, styles, links); it stays an image.",
     );
+    return undefined;
+  }
+
+  /**
+   * W-958: finds the old site's address from the uploads the export points to
+   * (`https://old.example/blog/wp-content/…` → `https://old.example/blog`).
+   */
+  findOldSite(text: string): void {
+    const found = new Map<string, URL>();
+    for (const match of text.matchAll(
+      /https?:\/\/[^"'<>\s/\\]+(?:\/[^"'<>/\\]*)*?(?=\/wp-content\/)/gi,
+    )) {
+      try {
+        const url = new URL(match[0]);
+        found.set(url.href.toLowerCase(), url);
+      } catch {
+        // Not an address: ignore it.
+      }
+      if (found.size >= 5) break;
+    }
+    this.oldSites = [...found.values()];
+  }
+
+  /**
+   * An export's link, made safe. W-958: a link to a page on the old site becomes the same path on
+   * this one (`https://old.example/blog/contact/` → `/contact`), so it works once those pages are
+   * imported with the same slugs; files, admin pages and `?p=` links keep their address.
+   */
+  href(raw: string): string | undefined {
+    const local = this.localPath(raw.trim());
+    if (local === undefined) return sanitizeHref(raw);
+    const safe = sanitizeHref(local);
+    if (safe)
+      this.note(
+        "approximated",
+        "Links",
+        "Links to pages on your old site now point to the same address on this site; import or create those pages with the same slugs.",
+      );
+    return safe;
+  }
+
+  /** W-958: a WordPress page link's address here, made safe; every id is remembered. */
+  pageLink(id: number): string | undefined {
+    if (this.pageLinks.size < 100) this.pageLinks.add(id);
+    const chosen = this.pageLinkOf?.(id)?.trim();
+    return chosen ? sanitizeHref(chosen) : undefined;
+  }
+
+  private localPath(raw: string): string | undefined {
+    if (this.oldSites.length === 0 || !/^https?:\/\//i.test(raw)) return undefined;
+    let url: URL;
+    try {
+      url = new URL(raw);
+    } catch {
+      return undefined;
+    }
+    for (const site of this.oldSites) {
+      if (url.origin.toLowerCase() !== site.origin.toLowerCase()) continue;
+      const base = site.pathname.replace(/\/+$/, "").toLowerCase();
+      const path = url.pathname;
+      const lower = path.toLowerCase();
+      if (lower !== base && !lower.startsWith(`${base}/`)) continue;
+      let rest = path.slice(base.length) || "/";
+      if (/^\/(?:wp-content|wp-admin|wp-json|wp-includes)(?:\/|$)|\.php$/i.test(rest))
+        return undefined;
+      if (/[?&](?:p|page_id|post_type)=/i.test(url.search)) return undefined;
+      if (rest.length > 1) rest = rest.replace(/\/+$/, "") || "/";
+      return `${rest}${url.search}${url.hash}`;
+    }
     return undefined;
   }
 

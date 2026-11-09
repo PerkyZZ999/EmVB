@@ -3,7 +3,7 @@ import { act } from "react";
 import type { Layout } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
 import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
-import { ImportElementorDialog, svgFileName } from "./ImportElementorDialog.tsx";
+import { ImportElementorDialog, fileNameOf } from "./ImportElementorDialog.tsx";
 
 let restoreNavigation: () => void = () => undefined;
 afterEach(async () => {
@@ -236,8 +236,170 @@ test("W-951: Fetch SVG files reads what the old site allows and says what it did
 });
 
 test("W-951: export addresses match chosen files by their decoded, case-free name", () => {
-  expect(svgFileName("https://x.test/a/Ic%C3%B4ne%20Courriel.svg?v=2#x")).toBe(
-    "icône courriel.svg",
+  expect(fileNameOf("https://x.test/a/Ic%C3%B4ne%20Courriel.svg?v=2#x")).toBe("icône courriel.svg");
+  expect(fileNameOf("https://x.test/a/%E0%A4%A.svg")).toBe("%e0%a4%a.svg");
+});
+
+test("W-958: links to WordPress pages go where the person says, and are remembered", async () => {
+  localStorage.removeItem("emvb-elementor-page-links");
+  const posted: Posted[] = [];
+  const navigation = spyOn(window.location, "assign").mockImplementation(() => undefined);
+  restoreNavigation = () => navigation.mockRestore();
+  const fetcher: Fetcher = async (path, init) => {
+    if (!init?.method || init.method === "GET") {
+      expect(String(path)).toContain("/_emdash/api/content/emvb_pages?");
+      return Response.json({
+        data: { items: [{ id: "p1", slug: "nos-produits", data: { title: "Nos produits" } }] },
+      });
+    }
+    posted.push(JSON.parse(String(init.body)) as Posted);
+    return Response.json({ data: { item: { id: "made-1" } } }, { status: 201 });
+  };
+  await mount(
+    <ImportElementorDialog fetcher={fetcher} open onOpenChange={() => undefined} target="page" />,
   );
-  expect(svgFileName("https://x.test/a/%E0%A4%A.svg")).toBe("%e0%a4%a.svg");
+  await settle();
+  const linked = (id: number) => ({
+    id: `b${id}`,
+    elType: "e-button",
+    settings: {
+      text: { $$type: "string", value: `Go ${id}` },
+      link: {
+        $$type: "link",
+        value: { destination: { $$type: "query", value: { id: { $$type: "number", value: id } } } },
+      },
+    },
+    elements: [],
+  });
+  await paste(JSON.stringify({ title: "Accueil", content: [linked(43), linked(42)] }));
+  await settle();
+  const options = [...document.querySelectorAll("datalist option")].map((o) =>
+    o.getAttribute("value"),
+  );
+  expect(options).toEqual(["/nos-produits"]);
+  const field43 = field("WordPress page 43");
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+      field43,
+      "/nos-produits",
+    );
+    field43.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const field42 = field("WordPress page 42");
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(
+      field42,
+      "javascript:alert(1)",
+    );
+    field42.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  expect(document.body.textContent).toContain("Enter an address such as /contact.");
+  await submit();
+  const layout = JSON.stringify(posted[0]?.data.layout);
+  expect(layout).toContain('"href":"/nos-produits"');
+  expect(layout).not.toContain("javascript");
+  expect(JSON.parse(localStorage.getItem("emvb-elementor-page-links") ?? "{}")).toMatchObject({
+    "43": "/nos-produits",
+  });
+  localStorage.removeItem("emvb-elementor-page-links");
+});
+
+test("W-958: Copy images puts old-site images in the media library and the page uses the copies", async () => {
+  const uploads: string[] = [];
+  const posted: Posted[] = [];
+  const navigation = spyOn(window.location, "assign").mockImplementation(() => undefined);
+  restoreNavigation = () => navigation.mockRestore();
+  const fetcher: Fetcher = async (path, init) => {
+    if (String(path) === "/_emdash/api/media" && init?.body instanceof FormData) {
+      const file = init.body.get("file") as File;
+      uploads.push(file.name);
+      return Response.json({
+        data: { item: { id: `m-${file.name}`, url: `/_emdash/api/media/file/${file.name}` } },
+      });
+    }
+    posted.push(JSON.parse(String(init?.body)) as Posted);
+    return Response.json({ data: { item: { id: "made-1" } } }, { status: 201 });
+  };
+  const fetched: { url: string; credentials: RequestCredentials | undefined }[] = [];
+  const fetchSpy = spyOn(globalThis, "fetch").mockImplementation((async (
+    input: RequestInfo | URL,
+    init?: RequestInit,
+  ) => {
+    const url = String(input);
+    fetched.push({ url, credentials: init?.credentials });
+    if (url.endsWith("hero.jpg"))
+      return new Response(new Blob(["jpg"], { type: "image/jpeg" }), { status: 200 });
+    if (url.endsWith("scan.webp"))
+      return new Response(new Blob(["<p>"], { type: "text/html" }), { status: 200 });
+    throw new TypeError("Failed to fetch");
+  }) as typeof fetch);
+  try {
+    await mount(
+      <ImportElementorDialog fetcher={fetcher} open onOpenChange={() => undefined} target="page" />,
+    );
+    await settle();
+    const image = (name: string) => ({
+      id: name.replace(/\W/g, ""),
+      elType: "e-image",
+      settings: {
+        image: {
+          $$type: "image",
+          value: {
+            src: {
+              $$type: "image-src",
+              value: {
+                url: { $$type: "url", value: `https://old.example/wp-content/uploads/${name}` },
+              },
+            },
+          },
+        },
+      },
+      elements: [],
+    });
+    await paste(
+      JSON.stringify({
+        title: "Gallery",
+        content: [image("hero.jpg"), image("Team%20Photo.png"), image("scan.webp")],
+      }),
+    );
+    const row = () => document.querySelector("[data-emvb-import-images]")?.textContent ?? "";
+    expect(row()).toContain("3 images load from your old site.");
+    await act(async () => button("Copy images").click());
+    for (let i = 0; i < 20 && !row().includes("Copied"); i++) {
+      // oxlint-disable-next-line no-await-in-loop -- waits for the copies to finish
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
+    }
+    expect(row()).toContain("Copied 1 of 3.");
+    expect(fetched.every((f) => f.credentials === "omit")).toBe(true);
+    expect(uploads).toEqual(["hero.jpg"]);
+
+    const input = document.querySelector<HTMLInputElement>("[data-emvb-elementor-images]");
+    if (!input) throw new Error("image file input is missing");
+    Object.defineProperty(input, "files", {
+      value: [
+        new File(["png"], "team photo.png", { type: "image/png" }),
+        new File(["x"], "notes.txt", { type: "text/plain" }),
+      ],
+      configurable: true,
+    });
+    await act(async () => {
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    for (let i = 0; i < 20 && uploads.length < 2; i++) {
+      // oxlint-disable-next-line no-await-in-loop -- waits for the upload
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
+    }
+    await settle();
+    expect(row()).toContain("Copied 1 image to the media library. Not used");
+    expect(row()).toContain("notes.txt");
+    await submit();
+    const layout = JSON.stringify(posted[0]?.data.layout);
+    expect(layout).toContain('"src":"/_emdash/api/media/file/hero.jpg"');
+    expect(layout).toContain('"mediaId":"m-hero.jpg"');
+    expect(layout).toContain('"mediaId":"m-team photo.png"');
+    // The one that couldn't be copied still loads from the old site.
+    expect(layout).toContain("https://old.example/wp-content/uploads/scan.webp");
+  } finally {
+    fetchSpy.mockRestore();
+  }
 });

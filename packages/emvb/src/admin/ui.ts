@@ -240,6 +240,8 @@ export const UI_CSS = `
 .emvb-import-source { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .emvb-import-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
 .emvb-import-label { font-size: 14px; font-weight: 500; color: var(--text-color-kumo-default); }
+.emvb-import-links { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.emvb-import-links > legend { padding: 0; margin-bottom: 4px; }
 .emvb-dialog .emvb-field.emvb-import-json {
   height: auto; min-height: 84px; padding: 8px; resize: vertical;
   font-family: var(--font-mono); font-size: 12px; line-height: 1.4;

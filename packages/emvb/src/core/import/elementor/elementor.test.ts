@@ -806,6 +806,64 @@ describe("Elementor 3 uploaded SVG icons (W-951)", () => {
   });
 });
 
+describe("images copied to the media library (W-958)", () => {
+  const OLD = "https://old.example/wp-content/uploads/";
+  const page = JSON.stringify({
+    content: [
+      {
+        id: "c1",
+        elType: "container",
+        settings: { background_background: "classic", background_image: { url: `${OLD}bg.jpg` } },
+        elements: [
+          {
+            id: "i1",
+            elType: "widget",
+            widgetType: "image",
+            settings: { image: { url: `${OLD}photo.jpg` }, link_to: "file" },
+          },
+        ],
+      },
+    ],
+  });
+
+  test("the export's old-site images are listed for copying", () => {
+    const result = ok(importElementor(page, { icon }));
+    expect(result.images.toSorted()).toEqual([`${OLD}bg.jpg`, `${OLD}photo.jpg`]);
+    expect(result.notes.map((n) => n.message).join("\n")).toContain(
+      "Copy them to the media library",
+    );
+  });
+
+  test("copies replace every use: image source with its media id, file link and background", () => {
+    const media = (url: string) =>
+      url.startsWith(OLD)
+        ? {
+            url: `/_emdash/api/media/file/${url.slice(OLD.length)}`,
+            id: `m-${url.slice(OLD.length)}`,
+          }
+        : undefined;
+    const result = ok(importElementor(page, { icon, media }));
+    const json = JSON.stringify(result.layout);
+    expect(json).not.toContain(OLD);
+    const [image] = ofType(result.layout, "image");
+    expect(props(image)).toMatchObject({
+      src: "/_emdash/api/media/file/photo.jpg",
+      mediaId: "m-photo.jpg",
+      href: "/_emdash/api/media/file/photo.jpg",
+    });
+    expect(json).toContain("/_emdash/api/media/file/bg.jpg");
+    expect(result.notes.map((n) => n.message).join("\n")).not.toContain("original address");
+  });
+
+  test("a copy at an unsafe address is not used", () => {
+    const result = ok(
+      importElementor(page, { icon, media: () => ({ url: "javascript:alert(1)" }) }),
+    );
+    expect(JSON.stringify(result.layout)).not.toContain("javascript");
+    expect(JSON.stringify(result.layout)).toContain(`${OLD}photo.jpg`);
+  });
+});
+
 describe("Elementor HTML to blocks (W-945)", () => {
   const keep = (url: string) => (/^https?:\/\//.test(url) ? url : undefined);
 

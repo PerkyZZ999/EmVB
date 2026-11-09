@@ -24,6 +24,23 @@ Export Kit → Export**, then take `site-settings.json` from the zip).
 3. Read the report. The title comes from the template; change it if you like, and check the slug.
 4. **Import** creates a draft and opens it in the editor. Nothing is published until you publish.
 
+### Images
+
+The dialog lists the images that still load from your old site. **Copy images** puts them in your
+media library and the page uses the copies. Copying works when your old site lets other sites read
+its files; if it doesn't, download them from the WordPress media library and add them with **Add
+image files** (matched by file name). Copies stay in the media library even if you don't import.
+
+### Page links
+
+Links to pages on your old site become the same address on this site (`https://old-site/contact/` →
+`/contact`), so they work once you import those pages with the same slugs. Links to files, the
+WordPress admin and `?p=` addresses keep their old address.
+
+Elementor 4 links to a WordPress page by its number only. Under **Page links**, enter where each
+page goes on this site (`/contact`) or pick one of your pages; the dialog remembers your answers for
+the next import. A page left empty has its links left out.
+
 ### SVG files
 
 SVG icons and the Elementor 4 SVG element point to files on your old site. When the export gives
@@ -111,8 +128,8 @@ are always removed.
 
 ## After importing
 
-- **Images still load from your old site.** Upload them to the media library and swap them in
-  before the old site goes away.
+- **Images you didn't copy still load from your old site.** Copy or upload them before that site
+  goes away.
 - **Fonts:** the report lists the font families the page uses. Make sure your site loads them.
 - **Alt text:** images that had none in the export get one from their file name. Check each one.
 - **Icons** come from EmVB's Font Awesome set. A few renamed or missing icons are listed; pick a

@@ -99,10 +99,10 @@ function plain(value: unknown): { text: string; hadMarkup: boolean } {
 
 const short = (text: string, max = MAX_TEXT_LENGTH) => text.slice(0, max);
 
-export function href(value: unknown): { href?: string; newTab?: boolean } {
+export function href(value: unknown, ctx: ImportContext): { href?: string; newTab?: boolean } {
   const l = link(value);
   if (!l) return {};
-  const safe = sanitizeHref(l.url);
+  const safe = ctx.href(l.url);
   return safe ? { href: safe, ...(l.newTab ? { newTab: true } : {}) } : {};
 }
 
@@ -177,7 +177,7 @@ function blockNodes(blocks: readonly Block[], ctx: ImportContext, el: string): N
 
 /** HTML content → nodes, noting what was flattened or dropped. */
 function htmlNodes(value: unknown, ctx: ImportContext, el: string): N[] {
-  const result = htmlToBlocks(str(value) ?? "", sanitizeHref, safeSrc);
+  const result = htmlToBlocks(str(value) ?? "", (url) => ctx.href(url), safeSrc);
   if (result.flattened)
     ctx.note(
       "approximated",
@@ -390,7 +390,7 @@ const heading: Widget = (s, ctx, el) => {
   const { text, hadMarkup } = plain(s["title"]);
   if (hadMarkup) ctx.note("approximated", el, "Formatting inside a heading became plain text.");
   if (!text) return [];
-  const linkProps = href(s["link"]);
+  const linkProps = href(s["link"], ctx);
   if (level)
     return splitLong(text).map((part) =>
       styled(node(ctx, "heading", { text: part, level: Number(level), ...linkProps }), ds),
@@ -429,7 +429,7 @@ const imageWidget: Widget = (s, ctx, el, env) => {
   const linkTo = str(s["link_to"]);
   const img = image(s["image"]);
   const linkProps =
-    linkTo === "custom" ? href(s["link"]) : linkTo === "file" && img ? { href: img.url } : {};
+    linkTo === "custom" ? href(s["link"], ctx) : linkTo === "file" && img ? { href: img.url } : {};
   const style: Style = { maxWidth: { value: 100, unit: "%" } };
   const ds = deviceStyles(s, ctx, el, [
     (x, d) => {
@@ -533,7 +533,7 @@ function buttonNode(
   const n = node(
     ctx,
     "button",
-    { text, ...href(s[keys.link]) },
+    { text, ...href(s[keys.link], ctx) },
     { style: { ...base, ...ds.style } },
   );
   if (ds.devices) n["devices"] = ds.devices;
@@ -612,7 +612,7 @@ function iconNode(
   if (!icon) return undefined;
   const size = slider(s["size"]);
   const pxSize = size && size.unit === "px" ? Math.round(size.value) : 50;
-  const linkProps = href(s["link"]);
+  const linkProps = href(s["link"], ctx);
   const fill =
     colorAt(s, "primary_color", ctx) ??
     (ctx.useDefaults ? ctx.globalColor(fallbackColor) : undefined);
@@ -659,7 +659,7 @@ function mediaBox(media: N | undefined, s: Settings, ctx: ImportContext, el: str
   const level = Number(/^h([1-6])$/.exec(titleTag)?.[1] ?? 3);
   const title = plain(s["title_text"]).text;
   const description = plain(s["description_text"]).text;
-  const linkProps = href(s["link"]);
+  const linkProps = href(s["link"], ctx);
   const children: N[] = [];
   if (title) {
     children.push(
@@ -733,7 +733,7 @@ const iconList: Widget = (s, ctx, el) => {
     if (!isRecord(raw) || ctx.overBudget) continue;
     const text = short(plain(raw["text"]).text);
     if (!text) continue;
-    const linkProps = href(raw["link"]);
+    const linkProps = href(raw["link"], ctx);
     const label = linkProps.href
       ? node(ctx, "link", { text, ...linkProps })
       : node(ctx, "text", { text });
@@ -1133,7 +1133,7 @@ const socialIcons: Widget = (s, ctx, el) => {
     if (!isRecord(raw) || ctx.overBudget) continue;
     const icon = iconOf(raw["social_icon"] ?? raw["social"], ctx, el);
     if (!icon) continue;
-    const linkProps = href(raw["link"]);
+    const linkProps = href(raw["link"], ctx);
     const pad = slider(s["icon_padding"]) ?? { value: 0.5, unit: "em" as const };
     const brand = icon.name.replace(/^square-/, "");
     icons.push(
@@ -1347,7 +1347,7 @@ const megaMenu: Widget = (s, ctx, _el, env, raw) => {
     return node(
       ctx,
       "menu-item",
-      { text: short(text), ...href(item["item_link"]) },
+      { text: short(text), ...href(item["item_link"], ctx) },
       { children: panel },
     );
   });
@@ -1536,7 +1536,7 @@ const animatedHeadline: Widget = (s, ctx, el) => {
   const level = Number(/^h([1-6])$/.exec(str(s["tag"]) ?? "h3")?.[1] ?? 3);
   return [
     styled(
-      node(ctx, "heading", { text: short(text), level, ...href(s["link"]) }),
+      node(ctx, "heading", { text: short(text), level, ...href(s["link"], ctx) }),
       deviceStyles(s, ctx, el, [
         typographyReader("title_typography", "primary"),
         textReader("title_color", "secondary", "alignment"),
@@ -1676,7 +1676,7 @@ const codeHighlight: Widget = (s, ctx, el) => {
 };
 
 const audio: Widget = (s, ctx, el) => {
-  const linkProps = href(s["link"]);
+  const linkProps = href(s["link"], ctx);
   ctx.note("approximated", el, "Audio players became a link.");
   return linkProps.href ? [node(ctx, "link", { text: "Listen", ...linkProps })] : [];
 };

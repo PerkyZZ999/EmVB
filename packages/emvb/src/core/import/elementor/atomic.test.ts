@@ -118,7 +118,10 @@ describe("Elementor 4 atomic import (W-945)", () => {
       motion: { transition: { property: "all", duration: 200, easing: "ease" } },
     });
     expect(button?.states).toEqual({ hover: { backgroundColor: "#ffd000" } });
-    expect(notes()).toContain("Links to WordPress pages or dynamic values were left out");
+    expect(notes()).toContain(
+      "Links to WordPress pages were left out; choose where each page goes under Page links",
+    );
+    expect(result.pageLinks).toEqual([43]);
   });
 
   test("text keeps its link, and display none on a device hides it there", () => {
@@ -598,5 +601,93 @@ describe("SVG files become recolourable icons (W-951)", () => {
     if (!imported.ok) throw new Error(imported.error);
     expect(JSON.stringify(imported.layout)).not.toMatch(/alert|onload/);
     expect(imported.notes.map((n) => n.message).join("\n")).toContain("stays an image");
+  });
+});
+
+describe("links to the old site (W-958)", () => {
+  test("a link to a WordPress page by id goes where the dialog says", () => {
+    const asked: number[] = [];
+    const imported = importElementor(JSON.stringify(atomicPage), {
+      pageLink: (id) => {
+        asked.push(id);
+        return id === 43 ? " /get-a-quote " : undefined;
+      },
+    });
+    if (!imported.ok) throw new Error(imported.error);
+    const button = nodes(imported.layout).find((n) => n.type === "button");
+    expect(props(button)).toEqual({ text: "Get a quote →", href: "/get-a-quote" });
+    expect(asked).toContain(43);
+    expect(imported.pageLinks).toEqual([43]);
+    expect(imported.notes.map((n) => n.message).join("\n")).not.toContain("Page links");
+  });
+
+  test.each([["javascript:alert(1)"], ["  "], ["data:text/html,x"]])(
+    "an unsafe or empty address leaves the link out: %p",
+    (address) => {
+      const imported = importElementor(JSON.stringify(atomicPage), { pageLink: () => address });
+      if (!imported.ok) throw new Error(imported.error);
+      expect(JSON.stringify(imported.layout)).not.toMatch(/javascript|data:text/);
+      const button = nodes(imported.layout).find((n) => n.type === "button");
+      expect(props(button)).not.toHaveProperty("href");
+    },
+  );
+
+  const linked = (url: string, image = "https://old.example/blog/wp-content/uploads/a.png") => ({
+    content: [
+      {
+        id: "b1",
+        elType: "e-button",
+        settings: {
+          text: { $$type: "string", value: "Go" },
+          link: { $$type: "link", value: { destination: { $$type: "url", value: url } } },
+        },
+        elements: [],
+      },
+      {
+        id: "i1",
+        elType: "e-image",
+        settings: {
+          image: {
+            $$type: "image",
+            value: {
+              src: { $$type: "image-src", value: { url: { $$type: "url", value: image } } },
+            },
+          },
+        },
+        elements: [],
+      },
+    ],
+  });
+  const hrefOf = (url: string, image?: string) => {
+    const imported = importElementor(linked(url, image));
+    if (!imported.ok) throw new Error(imported.error);
+    return props(nodes(imported.layout).find((n) => n.type === "button"))["href"];
+  };
+
+  test("links to pages on the old site become this site's paths", () => {
+    expect(hrefOf("https://old.example/blog/nos-produits/")).toBe("/nos-produits");
+    expect(hrefOf("https://OLD.example/blog/contact/?ref=x#form")).toBe("/contact?ref=x#form");
+    expect(hrefOf("https://old.example/blog/")).toBe("/");
+    const spaced = "http://localhost/Mon site/wordpress/wp-content/uploads/a.png";
+    expect(hrefOf("http://localhost/Mon site/wordpress/a-propos/", spaced)).toBe("/a-propos");
+  });
+
+  test("files, admin, ?p= links and other sites keep their address", () => {
+    for (const url of [
+      "https://old.example/blog/wp-content/uploads/guide.pdf",
+      "https://old.example/blog/wp-admin/",
+      "https://old.example/blog/?p=12",
+      "https://old.example/blog/wp-login.php",
+      "https://old.example/other/page/",
+      "https://elsewhere.example/blog/contact/",
+    ]) {
+      expect(hrefOf(url)).toBe(url);
+    }
+  });
+
+  test("an export with no uploads leaves links as they are", () => {
+    expect(hrefOf("https://old.example/blog/contact/", "https://cdn.example/a.png")).toBe(
+      "https://old.example/blog/contact/",
+    );
   });
 });

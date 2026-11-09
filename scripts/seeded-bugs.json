@@ -42954,7 +42954,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/import/elementor/widgets.ts",
-          "search": "  const safe = sanitizeHref(l.url);",
+          "search": "  const safe = ctx.href(l.url);",
           "replace": "  const safe = l.url;"
         }
       ],
@@ -43332,8 +43332,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/import/elementor/atomic.ts",
-          "search": "    const safe = sanitizeHref(str(un(destination)) ?? \"\");",
-          "replace": "    const safe = str(un(destination)) ?? \"\";"
+          "search": "    const safe = ctx.href(str(un(destination)) ?? \"\");",
+          "replace": "    const safe = str(un(destination));"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
@@ -43908,8 +43908,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
-          "search": "      credentials: \"omit\",",
-          "replace": "      credentials: \"include\","
+          "search": "      credentials: \"omit\",\n      redirect: \"follow\",\n      signal: AbortSignal.timeout(8000),",
+          "replace": "      credentials: \"include\",\n      redirect: \"follow\",\n      signal: AbortSignal.timeout(8000),"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
@@ -44052,6 +44052,160 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
       "expect": "\\(fail\\).*W-955: fluid sizes stay fluid"
+    },
+    {
+      "id": "W-958/old-site-not-found",
+      "requirement": "W-958",
+      "description": "Links to the old site's pages keep its address.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "    this.oldSites = [...found.values()];",
+          "replace": "    this.oldSites = [];"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*links to pages on the old site become"
+    },
+    {
+      "id": "W-958/files-localized",
+      "requirement": "W-958",
+      "description": "Links to old-site files and admin pages are made local.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "      if (/^\\/(?:wp-content|wp-admin|wp-json|wp-includes)(?:\\/|$)|\\.php$/i.test(rest))",
+          "replace": "      if (rest === \"\\u0000\")"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*files, admin"
+    },
+    {
+      "id": "W-958/other-origin-localized",
+      "requirement": "W-958",
+      "description": "Links to other sites with the same path are made local.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "      if (url.origin.toLowerCase() !== site.origin.toLowerCase()) continue;",
+          "replace": "      if (!url.origin) continue;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*files, admin"
+    },
+    {
+      "id": "W-958/page-link-unsafe",
+      "requirement": "W-958",
+      "description": "A typed page-link address is used without the link check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "    return chosen ? sanitizeHref(chosen) : undefined;",
+          "replace": "    return chosen || undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*unsafe or empty"
+    },
+    {
+      "id": "W-958/page-link-ignored",
+      "requirement": "W-958",
+      "description": "A WordPress page link stays out though its address was given.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "      const safe = ctx.pageLink(id);",
+          "replace": "      const safe = ctx.pageLink(id) && undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*goes where the dialog says"
+    },
+    {
+      "id": "W-958/page-links-forgotten",
+      "requirement": "W-958",
+      "description": "Page-link addresses aren't remembered for the next import.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportPageLinks.tsx",
+          "search": "    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...readPageLinks(), ...links }));",
+          "replace": "    void links;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*are remembered"
+    },
+    {
+      "id": "W-958/copies-unused",
+      "requirement": "W-958",
+      "description": "Copied images aren't used by the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "  if (options.media) useCopies(root, ctx);",
+          "replace": "  if (options.media && !root) useCopies(root, ctx);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*copies replace every use"
+    },
+    {
+      "id": "W-958/copy-unsafe",
+      "requirement": "W-958",
+      "description": "A copy's address is used unchecked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/context.ts",
+          "search": "    const safe = found ? sanitizeMediaUrl(found.url) : undefined;",
+          "replace": "    const safe = found?.url;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*unsafe address is not used"
+    },
+    {
+      "id": "W-958/media-id-missing",
+      "requirement": "W-958",
+      "description": "A copied image keeps no media library id.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "  if (props && copy?.id) props[\"mediaId\"] = copy.id;",
+          "replace": "  void copy;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*copies replace every use"
+    },
+    {
+      "id": "W-958/image-fetch-cookies",
+      "requirement": "W-958",
+      "description": "Copy images sends the person's cookies to the old site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "      credentials: \"omit\",\n      redirect: \"follow\",\n      signal: AbortSignal.timeout(20_000),",
+          "replace": "      credentials: \"include\",\n      redirect: \"follow\",\n      signal: AbortSignal.timeout(20_000),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*Copy images puts"
+    },
+    {
+      "id": "W-958/image-type-unchecked",
+      "requirement": "W-958",
+      "description": "Copy images uploads whatever the old site returns.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "    if (!blob.type.startsWith(\"image/\") || blob.size > MAX_IMAGE_FILE) return undefined;",
+          "replace": "    if (blob.size > MAX_IMAGE_FILE) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/import-elementor.test.tsx"],
+      "expect": "\\(fail\\).*Copy images puts"
     }
   ]
 }

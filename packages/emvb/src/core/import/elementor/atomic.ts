@@ -934,8 +934,23 @@ function linkOf(v: unknown, ctx: ImportContext, name: string): { href?: string; 
   const kind = typeOf(destination);
   const newTab = un(raw["isTargetBlank"]) === true;
   if (kind === "url" || typeof destination === "string") {
-    const safe = sanitizeHref(str(un(destination)) ?? "");
+    const safe = ctx.href(str(un(destination)) ?? "");
     return safe ? { href: safe, ...(newTab ? { newTab: true } : {}) } : {};
+  }
+  if (kind === "query") {
+    // W-958: a link to a WordPress page by its id; the import dialog asks where it goes.
+    const target = un(destination);
+    const id = isRecord(target) ? un(target["id"]) : undefined;
+    if (typeof id === "number" && Number.isInteger(id) && id > 0) {
+      const safe = ctx.pageLink(id);
+      if (safe) return { href: safe, ...(newTab ? { newTab: true } : {}) };
+      ctx.note(
+        "skipped",
+        "Links",
+        "Links to WordPress pages were left out; choose where each page goes under Page links in the import dialog.",
+      );
+      return {};
+    }
   }
   if (kind)
     ctx.note(

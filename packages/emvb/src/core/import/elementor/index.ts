@@ -62,6 +62,10 @@ export type ElementorImport =
        * they import as recolourable icons, without it as images.
        */
       svgFiles: string[];
+      /** W-958: WordPress page ids the page links to (their address comes from `pageLink`). */
+      pageLinks: number[];
+      /** W-958: images on the old site the page uses (`media` gives their library copies). */
+      images: string[];
     }
   | { ok: false; error: string };
 
@@ -508,7 +512,7 @@ class Walker {
       ["section", "header", "footer", "main", "article", "aside", "nav", "div"].includes(tag)
         ? { tag }
         : {}),
-      ...(str(s["html_tag"]) === "a" ? href(s["link"]) : {}),
+      ...(str(s["html_tag"]) === "a" ? href(s["link"], ctx) : {}),
     };
     if (tag && !props["tag"] && tag !== "a")
       ctx.note("approximated", "Container", `HTML tag "${tag.slice(0, 20)}" is shown as a div.`);
@@ -794,6 +798,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
   const ctx = new ImportContext(options);
   if (source.record) readSnapshots(source.record, ctx.atomic);
   if (isRecord(options.kit)) readSnapshots(options.kit, ctx.atomic);
+  ctx.findOldSite(JSON.stringify([source.elements, source.pageSettings ?? {}]));
   const walker = new Walker(ctx);
   const children = walker.walk(source.elements, { parentRow: false, depth: 1, walk: walker.walk });
   if (children.length === 0)
@@ -821,6 +826,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
     ...(pageCss ? customCss(pageCss, ctx, "Page") : {}),
   });
   if (pageStyle.devices) root["devices"] = pageStyle.devices;
+  if (options.media) useCopies(root, ctx);
   const candidate: Record<string, unknown> = { schemaVersion: LAYOUT_SCHEMA_VERSION, root };
   const tried = new Set<string>();
   for (let attempt = 0; attempt < 500; attempt++) {
@@ -839,6 +845,8 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
         notes: ctx.report(),
         fonts: [...ctx.fonts].toSorted(),
         svgFiles: [...ctx.svgFiles],
+        pageLinks: [...ctx.pageLinks].toSorted((a, b) => a - b),
+        images: [...ctx.images],
       };
     }
     const issue = checked.ok ? misplaced : checked.issues[0];
@@ -850,4 +858,22 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
     }
   }
   return { ok: false, error: "The imported page couldn't be made valid." };
+}
+
+/**
+ * W-958: points every use of an old-site image at its media library copy: image sources (which
+ * also get the library id), backgrounds and any other stored address equal to it.
+ */
+function useCopies(value: unknown, ctx: ImportContext): unknown {
+  if (typeof value === "string") return ctx.copied(value)?.url ?? value;
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) value[i] = useCopies(value[i], ctx);
+    return value;
+  }
+  if (!isRecord(value)) return value;
+  const props = value["type"] === "image" && isRecord(value["props"]) ? value["props"] : undefined;
+  const copy = props && typeof props["src"] === "string" ? ctx.copied(props["src"]) : undefined;
+  for (const [key, inner] of Object.entries(value)) value[key] = useCopies(inner, ctx);
+  if (props && copy?.id) props["mediaId"] = copy.id;
+  return value;
 }

@@ -12,12 +12,19 @@ import {
 } from "../../core/index.ts";
 import { THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
-import { createPage } from "../content-api.ts";
+import { createPage, listPages, type PageSummary } from "../content-api.ts";
+import { uploadImage } from "../media-api.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { loadIconSet } from "../editor/icons/library.ts";
 import { createThemePart } from "../theme-api.ts";
 import { BUTTON, FIELD } from "../ui.ts";
 import { CreateDialog } from "./CreateDialog.tsx";
+import {
+  ImportPageLinks,
+  type PageLinks,
+  readPageLinks,
+  writePageLinks,
+} from "./ImportPageLinks.tsx";
 
 type IconMap = ReadonlyMap<string, string>;
 const NO_ICONS: IconMap = new Map();
@@ -93,8 +100,8 @@ const MAX_SVG_FILE = 65_536;
 /** Files fetched in one go; an export with more names them in the report. */
 const MAX_SVG_FETCHES = 100;
 
-/** A URL's file name, decoded and lower-cased, to match a chosen file to the export's address. */
-export function svgFileName(url: string): string {
+/** A URL's file name, decoded and lower-cased, to match a chosen file to the export's address (W-951, W-958). */
+export function fileNameOf(url: string): string {
   const last = url.split(/[?#]/)[0]?.split("/").pop() ?? "";
   try {
     return decodeURIComponent(last).toLowerCase();
@@ -118,6 +125,44 @@ async function fetchSvg(url: string): Promise<string | undefined> {
     return undefined;
   }
 }
+
+/** W-958: an image copied into the media library is at most this large. */
+const MAX_IMAGE_FILE = 20 * 1024 * 1024;
+
+/** Fetches an old-site image without cookies; undefined when refused (CORS), not an image or too big. */
+async function fetchImage(url: string): Promise<File | undefined> {
+  try {
+    const response = await fetch(url, {
+      credentials: "omit",
+      redirect: "follow",
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!response.ok) return undefined;
+    const blob = await response.blob();
+    if (!blob.type.startsWith("image/") || blob.size > MAX_IMAGE_FILE) return undefined;
+    return new File([blob], fileNameOf(url) || "image", { type: blob.type });
+  } catch {
+    return undefined;
+  }
+}
+
+/** Runs `run` on every item, at most `limit` at a time. */
+async function eachLimited<T>(
+  items: readonly T[],
+  limit: number,
+  run: (item: T) => Promise<void>,
+): Promise<void> {
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    const index = next++;
+    if (index >= items.length) return;
+    await run(items[index] as T);
+    return worker();
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+}
+
+type Copy = { url: string; id: string };
 
 /** Reads a chosen file as text, refusing one larger than the importer reads. */
 async function readJsonFile(file: File): Promise<string> {
@@ -155,6 +200,14 @@ export function ImportElementorDialog({
   const [svgStatus, setSvgStatus] = React.useState<string>();
   const [fetching, setFetching] = React.useState(false);
   const svgRef = React.useRef<HTMLInputElement>(null);
+  // W-958: where links to WordPress pages (by id) go, remembered across imports.
+  const [pageLinks, setPageLinks] = React.useState<PageLinks>(readPageLinks);
+  const [pages, setPages] = React.useState<PageSummary[]>();
+  // W-958: old-site images copied into the media library, by their old address.
+  const [copies, setCopies] = React.useState<ReadonlyMap<string, Copy>>(new Map());
+  const [imageStatus, setImageStatus] = React.useState<string>();
+  const [copying, setCopying] = React.useState(false);
+  const imageRef = React.useRef<HTMLInputElement>(null);
   const iconsLoad = React.useRef<Promise<IconMap> | undefined>(undefined);
   const fileRef = React.useRef<HTMLInputElement>(null);
   const kitRef = React.useRef<HTMLInputElement>(null);
@@ -173,6 +226,9 @@ export function ImportElementorDialog({
       setPartType("section");
       setSvgs(new Map());
       setSvgStatus(undefined);
+      setPageLinks(readPageLinks());
+      setCopies(new Map());
+      setImageStatus(undefined);
     }
   }
 
@@ -194,8 +250,10 @@ export function ImportElementorDialog({
       defaults,
       icon: (id: string) => map?.get(id),
       svg: (url: string) => svgs.get(url),
+      pageLink: (id: number) => pageLinks[id],
+      media: (url: string) => copies.get(url),
     }),
-    [kit, defaults, svgs],
+    [kit, defaults, svgs, pageLinks, copies],
   );
   const result = React.useMemo(
     () => (json.trim() ? importElementor(json, options(icons)) : undefined),
@@ -203,6 +261,73 @@ export function ImportElementorDialog({
   );
   const suggestedPart = result?.ok ? result.partType : undefined;
   const missingSvgs = result?.ok ? result.svgFiles : [];
+  const linkedPages = result?.ok ? result.pageLinks : [];
+  const oldImages = result?.ok ? result.images.filter((url) => !copies.has(url)) : [];
+
+  const upload = async (url: string, file: File, done: [string, Copy][]) => {
+    try {
+      const item = await uploadImage(fetcher, file);
+      done.push([url, { url: item.url, id: item.id }]);
+    } catch {
+      // Counted as not copied below.
+    }
+  };
+
+  const copyImages = async () => {
+    setCopying(true);
+    const done: [string, Copy][] = [];
+    const urls = [...oldImages];
+    await eachLimited(urls, 4, async (url) => {
+      const file = await fetchImage(url);
+      if (file) await upload(url, file, done);
+    });
+    setCopies((current) => new Map([...current, ...done]));
+    const failed = urls.length - done.length;
+    setImageStatus(
+      failed === 0
+        ? `Copied ${done.length} ${done.length === 1 ? "image" : "images"} to the media library.`
+        : `Copied ${done.length} of ${urls.length}. The rest couldn't be read from your old site from here: download them from its media library and add them with Add image files.`,
+    );
+    setCopying(false);
+  };
+
+  const addImages = async (files: readonly File[]) => {
+    setCopying(true);
+    const wanted = new Map(oldImages.map((url) => [fileNameOf(url), url]));
+    const usable = (file: File) =>
+      file.size <= MAX_IMAGE_FILE &&
+      file.type.startsWith("image/") &&
+      wanted.has(file.name.toLowerCase());
+    const unused = files.filter((file) => !usable(file)).map((file) => file.name);
+    const done: [string, Copy][] = [];
+    await eachLimited(files.filter(usable), 4, (file) =>
+      upload(wanted.get(file.name.toLowerCase()) ?? "", file, done),
+    );
+    setCopies((current) => new Map([...current, ...done]));
+    setImageStatus(
+      `Copied ${done.length} ${done.length === 1 ? "image" : "images"} to the media library.` +
+        (unused.length > 0
+          ? ` Not used (not in this export, not an image, or over 20 MB): ${unused.join(", ")}.`
+          : ""),
+    );
+    setCopying(false);
+  };
+  const needsPages = linkedPages.length > 0 && pages === undefined;
+  React.useEffect(() => {
+    if (!needsPages) return;
+    let live = true;
+    listPages(fetcher).then(
+      (list) => {
+        if (live) setPages(list);
+      },
+      () => {
+        if (live) setPages([]);
+      },
+    );
+    return () => {
+      live = false;
+    };
+  }, [needsPages, fetcher]);
 
   const fetchSvgs = async () => {
     setFetching(true);
@@ -220,7 +345,7 @@ export function ImportElementorDialog({
   };
 
   const addSvgs = async (files: readonly File[]) => {
-    const wanted = new Map(missingSvgs.map((url) => [svgFileName(url), url]));
+    const wanted = new Map(missingSvgs.map((url) => [fileNameOf(url), url]));
     const usable = (file: File) => file.size <= MAX_SVG_FILE && wanted.has(file.name.toLowerCase());
     const unused = files.filter((file) => !usable(file)).map((file) => file.name);
     const added = await Promise.all(
@@ -253,6 +378,7 @@ export function ImportElementorDialog({
         imported ? imported.error : "Choose or paste an Elementor export first.",
       );
     }
+    writePageLinks(pageLinks);
     if (target === "part") {
       const id = await createThemePart(fetcher, { title, slug, partType, layout: imported.layout });
       return editorUrl(id, THEME_PARTS_COLLECTION);
@@ -442,6 +568,51 @@ export function ImportElementorDialog({
             />
           </div>
         )}
+        {(oldImages.length > 0 || imageStatus) && (
+          <div className="emvb-import-row" data-emvb-import-images="">
+            <Button
+              type="button"
+              variant="secondary"
+              className={BUTTON}
+              disabled={copying || oldImages.length === 0}
+              onClick={() => void copyImages()}
+            >
+              {copying ? "Copying…" : "Copy images"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className={BUTTON}
+              disabled={copying || oldImages.length === 0}
+              onClick={() => imageRef.current?.click()}
+            >
+              Add image files
+            </Button>
+            <span className="emvb-helper" role="status">
+              {imageStatus ??
+                `${oldImages.length} ${oldImages.length === 1 ? "image loads" : "images load"} from your old site. Copy them to your media library (copies stay there even if you don't import), or add the files.`}
+            </span>
+            <input
+              ref={imageRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              data-emvb-elementor-images=""
+              onChange={(event) => {
+                const files = [...(event.target.files ?? [])];
+                event.target.value = "";
+                if (files.length > 0) void addImages(files);
+              }}
+            />
+          </div>
+        )}
+        <ImportPageLinks
+          ids={linkedPages}
+          links={pageLinks}
+          pages={pages}
+          onChange={(id, address) => setPageLinks((current) => ({ ...current, [id]: address }))}
+        />
         <Checkbox
           label="Give unstyled widgets Elementor's default colours and fonts"
           checked={defaults}
