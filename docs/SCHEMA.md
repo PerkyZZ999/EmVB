@@ -124,7 +124,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `label` | text |
 | `link` | text, href, newTab |
 | `button` | text, href, newTab, iconId, iconSvg, iconPosition, iconGap, iconSize |
-| `list` | ordered, items |
+| `list` | ordered, marker, start, items |
 | `image` | src, alt, decorative, width, height, mediaId, priority, href, newTab, caption, focalX, focalY, sources, edit |
 | `icon` | iconId, iconSvg, singleColor, size, decorative, title, href, newTab |
 | `video` | url, title, mediaId |
@@ -158,7 +158,7 @@ the same keys except `motion`:
   marginBottom, marginLeft.
 - **Position:** position, top, right, bottom, left, zIndex.
 - **Type:** fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, textAlign, textTransform,
-  textDecoration, fontStyle, whiteSpace, overflowWrap, color.
+  textDecoration, fontStyle, whiteSpace, overflowWrap, color, markerColor, markerSize.
 - **Background:** backgroundColor, backgroundImage, backgroundSize, backgroundPosition,
   backgroundRepeat, backgroundVideo, gradient, overlay.
 - **Border:** borderWidth, borderTopWidth, borderRightWidth, borderBottomWidth, borderLeftWidth,

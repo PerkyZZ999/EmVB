@@ -35,6 +35,35 @@ export const BORDER_STYLES = ["none", "solid", "dashed", "dotted"] as const;
 
 export const OVERFLOWS = ["visible", "hidden", "clip", "scroll", "auto"] as const;
 
+/**
+ * W-952: how a List marks its items. Number styles make it numbered; `steps` puts each number
+ * in a circle (numbered steps).
+ */
+export const LIST_MARKERS = [
+  "disc",
+  "circle",
+  "square",
+  "decimal",
+  "decimal-leading-zero",
+  "lower-alpha",
+  "upper-alpha",
+  "lower-roman",
+  "upper-roman",
+  "steps",
+  "none",
+] as const;
+
+/** List markers that count (the list is an `<ol>`). */
+export const NUMBERED_MARKERS: ReadonlySet<string> = new Set([
+  "decimal",
+  "decimal-leading-zero",
+  "lower-alpha",
+  "upper-alpha",
+  "lower-roman",
+  "upper-roman",
+  "steps",
+]);
+
 /** W-957: upright or italic text. */
 export const FONT_STYLES = ["normal", "italic"] as const;
 

@@ -10,7 +10,7 @@ export type Block =
   | { kind: "heading"; level: number; text: string; href?: string }
   | { kind: "text"; text: string }
   | { kind: "link"; text: string; href: string }
-  | { kind: "list"; ordered: boolean; items: string[] }
+  | { kind: "list"; ordered: boolean; start?: number; items: string[] }
   | { kind: "image"; src: string; alt: string }
   | { kind: "divider" }
   | { kind: "video"; url: string };
@@ -216,7 +216,7 @@ export function htmlToBlocks(
   let links: { href: string; text: string }[] = [];
   let linkDepth = 0;
   let textOutsideLink = false;
-  let list: { ordered: boolean; items: string[] } | undefined;
+  let list: { ordered: boolean; start?: number; items: string[] } | undefined;
   let listDepth = 0;
   let item: string | undefined;
 
@@ -311,7 +311,12 @@ export function htmlToBlocks(
       if (!closing) {
         if (listDepth === 0) {
           flush();
-          list = { ordered: name === "ol", items: [] };
+          const start = name === "ol" ? Number(attributes["start"]) : Number.NaN;
+          list = {
+            ordered: name === "ol",
+            ...(Number.isInteger(start) && start > 1 && start <= 9999 ? { start } : {}),
+            items: [],
+          };
         } else {
           flushItem();
           flattened = true;
@@ -321,8 +326,7 @@ export function htmlToBlocks(
         listDepth--;
         flushItem();
         if (listDepth === 0 && list) {
-          if (list.items.length > 0)
-            push({ kind: "list", ordered: list.ordered, items: list.items });
+          if (list.items.length > 0) push({ kind: "list", ...list });
           list = undefined;
         }
       }
@@ -412,7 +416,7 @@ export function htmlToBlocks(
   flush();
   if (list && list.items.length > 0) {
     flushItem();
-    push({ kind: "list", ordered: list.ordered, items: list.items });
+    push({ kind: "list", ...list });
   }
   return { blocks, flattened, dropped: [...dropped] };
 }

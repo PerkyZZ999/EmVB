@@ -138,7 +138,11 @@ function blockNodes(blocks: readonly Block[], ctx: ImportContext, el: string): N
         break;
       case "list":
         out.push(
-          node(ctx, "list", { items: block.items, ...(block.ordered ? { ordered: true } : {}) }),
+          node(ctx, "list", {
+            items: block.items,
+            ...(block.ordered ? { ordered: true } : {}),
+            ...(block.start ? { start: block.start } : {}),
+          }),
         );
         break;
       case "image": {

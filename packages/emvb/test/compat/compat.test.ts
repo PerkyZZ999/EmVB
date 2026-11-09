@@ -69,6 +69,8 @@ const STYLE_KEYS_ADDED_IN_1X: Record<string, string> = {
   flexBasis: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
   alignSelf: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
   order: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
+  markerColor: "1.0 (W-952): src/core/render/list-markers.test.ts",
+  markerSize: "1.0 (W-952): src/core/render/list-markers.test.ts",
 };
 
 type Style = Record<string, unknown> & { motion?: Record<string, unknown> };

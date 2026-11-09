@@ -23,6 +23,7 @@ import type {
   TextNode,
   VideoNode,
 } from "../schema/layout.ts";
+import { LIST_MARKERS, NUMBERED_MARKERS } from "../css-keywords.ts";
 import { CONTAINER_TAGS, TEXT_TAGS } from "../schema/layout.ts";
 import type { ElementDescriptor } from "../schema/descriptors.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
@@ -378,6 +379,20 @@ function buttonChildren(node: ButtonNode): (VNode | string)[] {
   return node.props.iconPosition === "after" ? [buttonText, icon] : [icon, buttonText];
 }
 
+const MARKER_LABELS: Record<(typeof LIST_MARKERS)[number], string> = {
+  disc: "Bullets",
+  circle: "Circles",
+  square: "Squares",
+  decimal: "1, 2, 3",
+  "decimal-leading-zero": "01, 02, 03",
+  "lower-alpha": "a, b, c",
+  "upper-alpha": "A, B, C",
+  "lower-roman": "i, ii, iii",
+  "upper-roman": "I, II, III",
+  steps: "Numbered steps",
+  none: "None",
+};
+
 const list: ElementDefinition<ListNode> = {
   // W-796: "100." is wider than 1.25em, so three-digit numbers sat outside the list's box.
   baseCss:
@@ -390,16 +405,42 @@ const list: ElementDefinition<ListNode> = {
     defaultTab: "content",
     fields: [
       { key: "ordered", kind: "boolean", label: "Numbered list", optional: true },
+      {
+        key: "marker",
+        kind: "select",
+        label: "Markers",
+        optional: true,
+        options: LIST_MARKERS.map((value) => ({ value, label: MARKER_LABELS[value] })),
+      },
+      { key: "start", kind: "int", label: "Start at", optional: true, min: 1, max: 9999 },
       { key: "items", kind: "list-items", label: "Items" },
     ],
   },
   build: (node, attrs) => {
     // W-275: blank items would be empty bullets on the page; a list of only blanks has none.
     const items = node.props.items.filter((item) => item.trim() !== "");
-    const wide = node.props.ordered === true && items.length >= 100;
+    const marker = node.props.marker;
+    // W-952: a number style or steps makes the list numbered.
+    const ordered =
+      node.props.ordered === true || (marker !== undefined && NUMBERED_MARKERS.has(marker));
+    const wide = ordered && items.length >= 100;
+    const classes = [
+      attrs.class ?? "",
+      wide ? "emvb-list--wide" : "",
+      marker === "steps" ? "emvb-list--steps" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+    const start = node.props.start;
     return {
-      tag: node.props.ordered ? "ol" : "ul",
-      attrs: wide ? { ...attrs, class: `${attrs.class ?? ""} emvb-list--wide`.trim() } : attrs,
+      tag: ordered ? "ol" : "ul",
+      attrs: {
+        ...attrs,
+        ...(classes ? { class: classes } : {}),
+        ...(ordered && typeof start === "number" && Number.isInteger(start) && start > 1
+          ? { start: String(start) }
+          : {}),
+      },
       children: items.map((item) => ({ tag: "li", attrs: {}, children: [item] })),
     };
   },

@@ -10,6 +10,7 @@ EmVB 1.0: the stored page format is frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA
 
 ### Added
 
+- **List markers and numbered steps (W-952).** A List has **Marker** (disc, circle, square, numbers, letters, Roman numerals, or **Steps**: each number in a circle) and **Start at**; Typography has **Marker color** and **Marker size** for lists. Number styles make the list numbered. Imported `<ol start>` keeps its first number. New list props `marker`, `start` and style keys `markerColor`, `markerSize` in the 1.0 schema; pages that don't use them render exactly as before.
 - **Flex item sizing (W-954).** Inside a Flexbox or Container, any element can **Grow** into free space, **Shrink** when space is short and start from a **Basis** size (Size section), and set its own **Align self** and **Order** (Position section). New style keys `flexGrow`, `flexShrink`, `flexBasis`, `alignSelf` and `order` in the 1.0 schema.
 - **Transforms and hover lift (W-953).** Effects has **Transform**: move, scale and rotate an element. In the Hover state it makes cards lift or arrows nudge, and Transition has a **Transform** choice to animate it. It works alongside entrance, scroll and loop motion. New style key `transform` in the 1.0 schema.
 - **Gradient overlays (W-949).** An image or video background's **Overlay** can be a gradient as well as a colour: a scrim that is dark behind the text and clear over the picture. Its opacity fades every stop. `overlay` takes `{ gradient, opacity? }` in the 1.0 schema.

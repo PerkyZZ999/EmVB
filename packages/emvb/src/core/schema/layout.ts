@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { ImageEdit } from "../image-edit/schema.ts";
 import { DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
@@ -276,6 +277,10 @@ export const ListNode = leafNode(
   "list",
   z.strictObject({
     ordered: z.boolean().optional(),
+    /** W-952: the marker style; a number style or `steps` makes the list numbered. */
+    marker: z.enum(LIST_MARKERS).optional(),
+    /** W-952: the first number of a numbered list. */
+    start: z.number().int().min(1).max(9999).optional(),
     items: z.array(z.string().max(MAX_TEXT_LENGTH)).max(200),
   }),
 );

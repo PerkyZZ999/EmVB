@@ -1864,6 +1864,89 @@
             "line-through"
           ]
         },
+        "markerColor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "var": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]{1,40}$"
+                },
+                "from": {
+                  "type": "string",
+                  "enum": [
+                    "color",
+                    "font",
+                    "fontSize",
+                    "spacing"
+                  ]
+                }
+              },
+              "required": [
+                "var"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "markerSize": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "px",
+                    "rem",
+                    "em",
+                    "%",
+                    "vw",
+                    "vh",
+                    "ch"
+                  ]
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "var": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]{1,40}$"
+                },
+                "from": {
+                  "type": "string",
+                  "enum": [
+                    "color",
+                    "font",
+                    "fontSize",
+                    "spacing"
+                  ]
+                }
+              },
+              "required": [
+                "var"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
         "fontStyle": {
           "type": "string",
           "enum": [
@@ -4887,6 +4970,89 @@
             "underline",
             "overline",
             "line-through"
+          ]
+        },
+        "markerColor": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "var": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]{1,40}$"
+                },
+                "from": {
+                  "type": "string",
+                  "enum": [
+                    "color",
+                    "font",
+                    "fontSize",
+                    "spacing"
+                  ]
+                }
+              },
+              "required": [
+                "var"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "markerSize": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": [
+                    "px",
+                    "rem",
+                    "em",
+                    "%",
+                    "vw",
+                    "vh",
+                    "ch"
+                  ]
+                }
+              },
+              "required": [
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "var": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]{1,40}$"
+                },
+                "from": {
+                  "type": "string",
+                  "enum": [
+                    "color",
+                    "font",
+                    "fontSize",
+                    "spacing"
+                  ]
+                }
+              },
+              "required": [
+                "var"
+              ],
+              "additionalProperties": false
+            }
           ]
         },
         "fontStyle": {

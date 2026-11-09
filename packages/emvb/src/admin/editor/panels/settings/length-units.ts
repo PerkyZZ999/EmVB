@@ -26,6 +26,7 @@ const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   // em first, so a typed 1.5 means 1.5 times the font size, not 1.5 px (W-125).
   lineHeight: ["em", "px", "rem", "%", "x"],
   letterSpacing: ["px", "rem", "em"],
+  markerSize: ["em", "px", "rem", "%"],
   borderWidth: ["px", "rem", "em"],
   borderTopWidth: ["px", "rem", "em"],
   borderRightWidth: ["px", "rem", "em"],

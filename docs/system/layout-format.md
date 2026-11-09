@@ -46,7 +46,7 @@ How EmVB stores a page and its site-wide design, at layout schema 18 and design 
 | `label` | `text` | none | `<span>` |
 | `link` | `text`, `href`, optional `newTab` | none | `<a href>` (+ `target`/`rel` when `newTab`) |
 | `button` | `text`, optional `href` and `newTab` | none | `<a href>` when `href` is safe, else `<button type="button">` |
-| `list` | `items` (string[], ≤ 200), optional `ordered` | none | `<ul>` or `<ol>` with `<li>` |
+| `list` | `items` (string[], ≤ 200), optional `ordered`; W-952: optional `marker` (`disc`, `circle`, `square`, `decimal`, `decimal-leading-zero`, `lower-alpha`, `upper-alpha`, `lower-roman`, `upper-roman`, `steps`, `none`; a number style or `steps` makes it numbered) and `start` (1–9999, numbered only) | none | `<ul>` or `<ol>` (with `start`) with `<li>`; the marker is `list-style-type`, `steps` adds `emvb-list--steps` (numbers in circles, CSS sent only when used) |
 | `image` | `src`, `alt`, optional `decorative`, `width`, `height`, `mediaId`, `edit` (editor-only image-editor record, never rendered; see below) | none | `<img loading="lazy">` (decorative → empty `alt` + `role="presentation"`) |
 | `icon` | `iconId` (a bundled Lucide id, or `<set prefix>:<name>` from the icon library, W-236), optional `iconSvg` (the picked icon's SVG, ≤ 32768 chars, W-234 / W-239; `iconId` `upload:<id>` for an uploaded SVG), optional `singleColor` (W-238: `true` paints a picked SVG's own fills, strokes and stops in `currentColor`), `size`, `decorative`, `title`, `href` (≤ 2000) and `newTab` (W-141); a non-empty `href` needs a `title` | none | Inline `<svg>`: `iconSvg` sanitized again at render (allowlist; size, id, role and aria attributes replaced), else the bundled Lucide icon (unknown id and no `iconSvg` → placeholder; never a remote URL); with a safe `href`, the svg is hidden inside `<a class="emvb-icon-link" aria-label="title">` |
 | `video` | `url`, `title`, optional `mediaId` | none | YouTube/Vimeo privacy `<iframe loading="lazy">` or media `<video controls>` (no autoplay) |
@@ -112,6 +112,7 @@ Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "v
 | `textAlign` | `left`, `center`, `right`, `justify` | `text-align` |
 | `textTransform` | `none`, `uppercase`, `lowercase`, `capitalize` | `text-transform` |
 | `textDecoration` | `none`, `underline`, `overline`, `line-through` | `text-decoration` (W-113; a button sets `none` in its base CSS) |
+| `markerColor`, `markerSize` (W-952, Lists) | colour; length | `--emvb-marker-color`, `--emvb-marker-size`, read by the marker and step rules (sent only when a page sets them) |
 | `fontStyle` (W-957) | `normal`, `italic` | `font-style` |
 | `whiteSpace` (W-957) | `normal`, `nowrap`, `pre-line`, `pre-wrap` | `white-space` (a Text element defaults to `pre-line`) |
 | `overflowWrap` (W-957) | `normal`, `break-word`, `anywhere` | `overflow-wrap` |

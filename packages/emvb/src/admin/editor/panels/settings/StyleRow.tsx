@@ -36,6 +36,7 @@ const LENGTH_KEYS = new Set<StyleKey>([
   "minHeight",
   "maxHeight",
   "flexBasis",
+  "markerSize",
   "paddingTop",
   "paddingRight",
   "paddingBottom",
@@ -71,7 +72,7 @@ const GRID_SPAN: NumberSpec = { min: 1, max: 12, integer: true, example: "2" };
 const GRID_LINE: NumberSpec = { min: 1, max: 13, integer: true, example: "1" };
 const OPACITY: NumberSpec = { min: 0, max: 100, scale: 100, example: "50", suffix: "%" };
 
-const COLOR_KEYS = new Set<StyleKey>(["color", "backgroundColor", "borderColor"]);
+const COLOR_KEYS = new Set<StyleKey>(["color", "backgroundColor", "borderColor", "markerColor"]);
 
 const SELECT_OPTIONS: Partial<Record<StyleKey, { value: string; label: string }[]>> = {
   textAlign: [

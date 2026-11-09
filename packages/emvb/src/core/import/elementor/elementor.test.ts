@@ -794,6 +794,19 @@ describe("Elementor HTML to blocks (W-945)", () => {
     expect(dropped).toEqual(["table (its cells are kept as paragraphs)"]);
   });
 
+  test("a numbered list keeps where it starts counting (W-952)", () => {
+    const { blocks } = htmlToBlocks(
+      '<ol start="4"><li>Four</li></ol><ol start="0"><li>Zero</li></ol><ol start="x"><li>X</li></ol>',
+      keep,
+      keep,
+    );
+    expect(blocks).toEqual([
+      { kind: "list", ordered: true, start: 4, items: ["Four"] },
+      { kind: "list", ordered: true, items: ["Zero"] },
+      { kind: "list", ordered: true, items: ["X"] },
+    ]);
+  });
+
   test("entities decode once and source line breaks are spaces", () => {
     const { blocks } = htmlToBlocks(
       "<p>a&amp;b &lt;tag&gt; &#169; &#x1F600;\n next &bogus;</p>",

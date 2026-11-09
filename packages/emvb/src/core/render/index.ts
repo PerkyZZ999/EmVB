@@ -1,4 +1,5 @@
 import { renderableDesign, renderableDynamic, renderableLayout } from "../contract.ts";
+import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_NODES } from "../limits.ts";
 import { loneAbTests, variantShows } from "../audience/variants.ts";
 import { audienceShows, audienceSummary } from "../audience/rules.ts";
@@ -92,6 +93,8 @@ function focalPercent(value: unknown, fallback: number): number | undefined {
   }
   return value;
 }
+
+const LIST_MARKER_SET: ReadonlySet<string> = new Set(LIST_MARKERS);
 
 /** `object-position` only when both axes are whole percentages. A string here would break the sheet. */
 function objectPosition(x: unknown, y: unknown): string | undefined {
@@ -260,6 +263,8 @@ export function renderPage(
   const tocNodes: { node: LayoutNode; vnode: VNode }[] = [];
   const knownVariables = new Set(design.variables.colors.map((c) => c.id));
   let backgroundVideo = false;
+  /** W-952: any List drawn as numbered steps, so their rules are sent. */
+  let listSteps = false;
 
   const domIds = new Map<string, number>();
   const idSuffix = opts.partIds && opts.scope ? `-t${originHash(opts.scope)}` : "";
@@ -381,6 +386,14 @@ export function renderPage(
       if (position) {
         declarations.push({ property: "object-position", value: position });
         declarations.push({ property: "object-fit", value: "cover" });
+      }
+    }
+    if (node.type === "list") {
+      // W-952: the marker style; items inherit it. Steps draw their own numbers.
+      const marker = (node.props as { marker?: unknown }).marker;
+      if (marker === "steps") listSteps = true;
+      else if (typeof marker === "string" && LIST_MARKER_SET.has(marker)) {
+        declarations.push({ property: "list-style-type", value: marker });
       }
     }
     if (node.type === "button") {
@@ -659,6 +672,7 @@ export function renderPage(
     localRules,
     previewStates: mode === "editor",
     backgroundVideo,
+    listSteps,
     ...(mode === "editor" && opts.previewDevice ? { previewDevice: opts.previewDevice } : {}),
   });
   const scope = opts.scope === undefined ? undefined : cssScopeToken(opts.scope);

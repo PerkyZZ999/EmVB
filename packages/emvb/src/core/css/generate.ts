@@ -43,6 +43,8 @@ export type CssInput = {
   previewStates?: boolean;
   /** When a node rendered a background video (W-110). */
   backgroundVideo?: boolean;
+  /** W-952: when a List is drawn as numbered steps. */
+  listSteps?: boolean;
   /**
    * Editor canvas only (W-116): the device the canvas previews. Device rules then follow this
    * device instead of the frame's width, so the Desktop canvas never picks up tablet styles in a
@@ -142,6 +144,7 @@ export function generateCss({
   localRules,
   previewStates = false,
   backgroundVideo = false,
+  listSteps = false,
   previewDevice,
 }: CssInput): string {
   const { colors, fonts, fontSizes, spacings } = design.variables;
@@ -268,7 +271,7 @@ export function generateCss({
       animated.push(selector);
     }
   }
-  return [
+  const sheet = [
     entrances.length > 0
       ? "@keyframes emvb-fade{from{opacity:0}to{opacity:1}}@keyframes emvb-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes emvb-fade-down{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}@keyframes emvb-slide-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}@keyframes emvb-slide-down{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}@keyframes emvb-scale{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:none}}"
       : "",
@@ -308,4 +311,24 @@ export function generateCss({
       ? `@media (prefers-reduced-motion: reduce){${entrances.join(",")}{animation:none}}`
       : "",
   ].join("");
+  // W-952: list marker colour and size, and numbered steps, only on pages that use them, so
+  // every page saved before them keeps the exact CSS it had.
+  return [
+    sheet,
+    sheet.includes("--emvb-marker-") ? LIST_MARKER_CSS : "",
+    listSteps ? LIST_STEPS_CSS : "",
+  ].join("");
 }
+
+/** Markers take the list's marker colour and size when it sets them (W-952). */
+const LIST_MARKER_CSS =
+  ".emvb-list>li::marker{color:var(--emvb-marker-color,inherit);font-size:var(--emvb-marker-size,inherit)}";
+
+/**
+ * Numbered steps (W-952): each number in a circle beside its item, counted by the list's own
+ * `list-item` counter so Start at still applies.
+ */
+const LIST_STEPS_CSS =
+  ".emvb-list--steps{list-style:none;padding-inline-start:0;display:flex;flex-direction:column;gap:0.75em}" +
+  ".emvb-list--steps>li{display:flex;align-items:flex-start;gap:0.75em;counter-increment:list-item}" +
+  ".emvb-list--steps>li::before{content:counter(list-item);flex:none;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-width:2em;height:2em;padding:0 0.4em;border-radius:999px;border:2px solid var(--emvb-marker-color,currentColor);color:var(--emvb-marker-color,currentColor);font-size:var(--emvb-marker-size,1em);font-weight:600;line-height:1}";

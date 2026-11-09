@@ -193,6 +193,8 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "whiteSpace",
     "overflowWrap",
     "color",
+    "markerColor",
+    "markerSize",
   ],
   background: [
     "backgroundColor",
@@ -244,6 +246,8 @@ const ICON_MOVED: StyleKey[] = ["color", "transition"];
 const ONLY_FOR: Partial<Record<StyleKey, string[]>> = {
   objectFit: ["image", "video"],
   objectPosition: ["image", "video"],
+  markerColor: ["list"],
+  markerSize: ["list"],
   ...Object.fromEntries(
     ["iconRotate", "iconFlip", "iconScale", "iconStrokeWidth", "iconShadow", "iconAnimation"].map(
       (key) => [key, ["icon"]],
@@ -371,6 +375,8 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   flexBasis: "Basis",
   alignSelf: "Align self",
   order: "Order",
+  markerColor: "Marker color",
+  markerSize: "Marker size",
   paddingTop: "Padding top",
   paddingRight: "Padding right",
   paddingBottom: "Padding bottom",

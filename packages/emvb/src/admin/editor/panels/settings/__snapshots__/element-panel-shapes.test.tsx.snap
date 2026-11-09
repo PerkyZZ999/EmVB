@@ -3020,12 +3020,28 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
         button data-unchecked="" type="button" tabindex="0" id="id-3" data-kumo-component="Switch" role="switch" aria-checked="false" aria-label="Numbered list" aria-labelledby="id-2"
           div
         input tabindex="-1" aria-hidden="true" type="checkbox"
+    div data-emvb-field="marker"
+      div data-filled=""
+        div id="id-4" data-filled=""
+          span
+            "Markers"
+        button.emvb-field type="button" tabindex="0" id="id-5" role="combobox" aria-expanded="false" aria-haspopup="listbox" data-kumo-component="Select" data-kumo-part="trigger" aria-label="Markers" data-filled=""
+          span
+            "Bullets"
+          span aria-hidden="true"
+            svg
+        input id="id-6" tabindex="-1" aria-hidden="true" value="disc"
+    div
+      label id="id-7" for="id-8"
+        span
+          "Start at"
+      input.emvb-field.emvb-mono id="id-8" data-emvb-field="start" value="" aria-labelledby="id-7"
     div.emvb-field-group data-emvb-field="items"
-      label.emvb-field-label for="id-4"
+      label.emvb-field-label for="id-9"
         "Items"
-      textarea.emvb-field.emvb-textarea id="id-4" aria-describedby="id-4-hint"
+      textarea.emvb-field.emvb-textarea id="id-9" aria-describedby="id-9-hint"
         "Item"
-      span.emvb-helper id="id-4-hint" data-emvb-field-hint=""
+      span.emvb-helper id="id-9-hint" data-emvb-field-hint=""
         "One per line."
     section.emvb-bind data-emvb-audience-editor="" aria-labelledby="emvb-aud-bi1nwpcq-title"
       h3.emvb-bind-title id="emvb-aud-bi1nwpcq-title"
@@ -3035,12 +3051,12 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
           "Show to"
         span.emvb-panel-select data-value="everyone" data-emvb-audience-mode=""
           div
-            button.emvb-field type="button" tabindex="0" id="id-5" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
+            button.emvb-field type="button" tabindex="0" id="id-10" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-labelledby="emvb-aud-bi1nwpcq-show" data-kumo-component="Select" data-kumo-part="trigger"
               span
                 "Everyone"
               span aria-hidden="true"
                 svg
-            input id="id-6" tabindex="-1" aria-hidden="true" value="everyone""
+            input id="id-11" tabindex="-1" aria-hidden="true" value="everyone""
 ,
   "style": 
 "div.emvb-panel-body data-emvb-panel="element" data-emvb-element="list"
@@ -3150,6 +3166,8 @@ exports[`element panel markup (W-021, W-086 M16) list renders the same content a
         div.emvb-style-row data-emvb-style="whiteSpace"
         div.emvb-style-row data-emvb-style="overflowWrap"
         div.emvb-style-row data-emvb-style="color"
+        div.emvb-style-row data-emvb-style="markerColor"
+        div.emvb-style-row data-emvb-style="markerSize" data-unit="em"
     div data-open=""
       button.emvb-section-header type="button" data-panel-open="" tabindex="0" aria-disabled="false" aria-controls="id-10" aria-expanded="true" data-kumo-component="Collapsible" data-kumo-part="trigger" data-emvb-section="background"
         span

@@ -677,6 +677,9 @@ const PROPERTY_MAP: {
   textAlign: { css: "text-align", toValue: cssTextAlign },
   textTransform: { css: "text-transform", toValue: keyword(TEXT_TRANSFORM) },
   textDecoration: { css: "text-decoration", toValue: keyword(TEXT_DECORATION) },
+  // W-952: read by the list marker rules (sent only when a page uses them).
+  markerColor: { css: "--emvb-marker-color", toValue: cssColor },
+  markerSize: { css: "--emvb-marker-size", toValue: cssLength },
   fontStyle: { css: "font-style", toValue: keyword(FONT_STYLE) },
   whiteSpace: { css: "white-space", toValue: keyword(WHITE_SPACE) },
   overflowWrap: { css: "overflow-wrap", toValue: keyword(OVERFLOW_WRAP) },

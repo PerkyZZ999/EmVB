@@ -343,6 +343,9 @@ export const StyleProps = z.strictObject({
   textTransform: z.enum(TEXT_TRANSFORMS).optional(),
   /** W-113. A button sets `none` in its base CSS, so it is not underlined unless a style says so. */
   textDecoration: z.enum(TEXT_DECORATIONS).optional(),
+  /** W-952: a List's markers (bullets, numbers, step circles): their colour and size. */
+  markerColor: ColorValue.optional(),
+  markerSize: LengthValue.optional(),
   /** W-957. */
   fontStyle: z.enum(FONT_STYLES).optional(),
   whiteSpace: z.enum(WHITE_SPACES).optional(),
