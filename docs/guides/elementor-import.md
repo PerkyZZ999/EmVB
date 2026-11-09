@@ -72,9 +72,9 @@ each element, so the import never changes your site's own design system.
 - Each class's desktop, tablet and mobile values and its hover and focus states carry over.
   Laptop and "extra" breakpoints fold into Tablet and Mobile, the way Elementor's desktop-first
   breakpoints reach the smaller screens.
-- Fluid sizes (`max(32px, min(56px, …))`) use their large value on desktop and their small value
-  on phones. Centred wrappers (`min(1180px, calc(100% - 48px))`) keep their maximum width and
-  side gutters.
+- Fluid sizes (`max(32px, min(56px, …))` and `clamp()`) in px or rem stay fluid: they grow from
+  their small value on phones to their large value on wide screens. Centred wrappers (`min(1180px,
+  calc(100% - 48px))`) keep their maximum width and side gutters.
 - Grids keep their columns per device, including uneven ones (`20% repeat(5, 1fr)`), and children
   that span every column.
 - A class's own custom CSS is applied where EmVB has the property (borders on one side, gaps,

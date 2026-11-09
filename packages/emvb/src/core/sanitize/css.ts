@@ -25,6 +25,7 @@ import {
 } from "../css-keywords.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
 import type { FlatStyleProps } from "../schema/style.ts";
+import { fluidClamp } from "../design/tokens.ts";
 import { sanitizeMediaUrl } from "./media-url.ts";
 import { loopDeclarations, motionDeclarations, withLoop, withMotion } from "./motion.ts";
 import { isRecord } from "../record.ts";
@@ -140,6 +141,7 @@ function cssFontFamily(value: unknown): string | undefined {
 
 export function cssLength(value: unknown): string | undefined {
   if (typeof value !== "object" || value === null) return undefined;
+  if ("fluid" in value) return cssFluid((value as { fluid: unknown }).fluid);
   const ref = refOf(value);
   if (ref) {
     if (ref.from === "fontSize") {
@@ -158,6 +160,19 @@ export function cssLength(value: unknown): string | undefined {
   return `${n}${unit}`;
 }
 
+/**
+ * W-955: `{ min, max }` px as a `clamp()` that grows between 360 and 1280 px wide screens. Both
+ * are checked here as well as by the schema, so a stored page can't emit anything else.
+ */
+function cssFluid(fluid: unknown): string | undefined {
+  if (!isRecord(fluid)) return undefined;
+  const { min, max } = fluid;
+  return fluidPx(min) && fluidPx(max) ? fluidClamp(min, max) : undefined;
+}
+
+const fluidPx = (n: unknown): n is number =>
+  typeof n === "number" && Number.isFinite(n) && n >= 0 && n <= 10_000;
+
 /** A length, or `auto` where the property allows it (W-088). */
 const cssLengthOrAuto = (value: unknown): string | undefined =>
   value === "auto" ? "auto" : cssLength(value);
@@ -165,7 +180,8 @@ const cssLengthOrAuto = (value: unknown): string | undefined =>
 /** An offset: `auto`, a variable, or a length from -10000 to 10000 (W-088). */
 function cssOffset(value: unknown): string | undefined {
   if (value === "auto") return "auto";
-  if (typeof value !== "object" || value === null || "var" in value) return cssLength(value);
+  if (typeof value !== "object" || value === null || "var" in value || "fluid" in value)
+    return cssLength(value);
   const { value: n, unit } = value as { value?: unknown; unit?: unknown };
   if (typeof n !== "number" || !Number.isFinite(n) || n < -10_000 || n > 10_000) return undefined;
   if (typeof unit !== "string" || !UNITS.has(unit)) return undefined;

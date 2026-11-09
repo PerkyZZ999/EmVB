@@ -414,6 +414,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -572,6 +601,35 @@
               "additionalProperties": false
             },
             {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
+            },
+            {
               "type": "string",
               "const": "auto"
             }
@@ -627,6 +685,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -680,6 +767,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -731,6 +847,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             },
@@ -790,6 +935,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -841,6 +1015,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             }
@@ -962,6 +1165,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1013,6 +1245,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             }
@@ -1068,6 +1329,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1119,6 +1409,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             }
@@ -1178,6 +1497,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1235,6 +1583,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1292,6 +1669,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1349,6 +1755,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1416,6 +1851,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1473,6 +1937,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1530,6 +2023,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1587,6 +2109,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -1674,6 +2225,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             }
@@ -3522,6 +4102,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -3680,6 +4289,35 @@
               "additionalProperties": false
             },
             {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
+            },
+            {
               "type": "string",
               "const": "auto"
             }
@@ -3735,6 +4373,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -3788,6 +4455,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -3839,6 +4535,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             },
@@ -3898,6 +4623,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -3949,6 +4703,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             }
@@ -4070,6 +4853,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4121,6 +4933,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             }
@@ -4176,6 +5017,35 @@
                 "var"
               ],
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4227,6 +5097,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             }
@@ -4286,6 +5185,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4343,6 +5271,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4400,6 +5357,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4457,6 +5443,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4524,6 +5539,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4581,6 +5625,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4638,6 +5711,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4695,6 +5797,35 @@
             {
               "type": "string",
               "const": "auto"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
+              ],
+              "additionalProperties": false
             }
           ]
         },
@@ -4782,6 +5913,35 @@
               },
               "required": [
                 "var"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "fluid": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    },
+                    "max": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 10000
+                    }
+                  },
+                  "required": [
+                    "min",
+                    "max"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "fluid"
               ],
               "additionalProperties": false
             }

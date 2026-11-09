@@ -168,6 +168,9 @@ the same keys except `motion`:
 - **Icon:** iconRotate, iconFlip, iconScale, iconStrokeWidth, iconShadow.
 - **Motion:** `motion`.
 
+`fontSize`, `gap`, `width`, `height`, `minWidth`, `maxWidth`, `minHeight`, `maxHeight`, padding,
+margins and offsets may also be a fluid size, `{ "fluid": { "min", "max" } }` in px (W-955).
+
 A design is `{ schemaVersion: 17, variables, classes?, fluidRange?, direction?, defaults? }`.
 
 Limits (`core/limits.ts`):

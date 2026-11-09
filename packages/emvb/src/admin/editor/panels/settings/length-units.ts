@@ -54,8 +54,46 @@ const NEGATIVE = new Set<StyleKey>([
   "marginLeft",
 ]);
 
+/** W-955: a fluid size, px on small screens to px on large ones. */
+export type FluidLiteral = { fluid: { min: number; max: number } };
+
+/** Keys that take a fluid size ("32–56"): type, gap, sizes, padding and margins (W-955). */
+const FLUID = new Set<StyleKey>([
+  "fontSize",
+  "gap",
+  "width",
+  "minWidth",
+  "maxWidth",
+  "height",
+  "minHeight",
+  "maxHeight",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+  "marginTop",
+  "marginRight",
+  "marginBottom",
+  "marginLeft",
+]);
+
+export const takesFluid = (key: StyleKey) => FLUID.has(key);
+
+export const isFluid = (value: unknown): value is FluidLiteral =>
+  typeof value === "object" &&
+  value !== null &&
+  "fluid" in value &&
+  typeof (value as FluidLiteral).fluid?.min === "number" &&
+  typeof (value as FluidLiteral).fluid?.max === "number";
+
+/** How a fluid size reads in a length field: "32–56" (px). */
+export const fluidDraft = (value: FluidLiteral) => `${value.fluid.min}–${value.fluid.max}`;
+
+/** "32–56", "32-56px", "32 to 56": small-screen and large-screen px. */
+const FLUID_DRAFT = /^(\d+(?:\.\d+)?)\s*(?:px)?\s*(?:–|—|-|to|→)\s*(\d+(?:\.\d+)?)\s*(?:px)?$/i;
+
 export type ParsedLength =
-  | { ok: true; value: LengthLiteral | "auto" | number | undefined }
+  | { ok: true; value: LengthLiteral | FluidLiteral | "auto" | number | undefined }
   | { ok: false; message: string };
 
 const DRAFT = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(px|rem|em|%|vw|vh|ch)?$/i;
@@ -83,6 +121,18 @@ export function parseLengthDraft(
     return allowed.includes("auto")
       ? { ok: true, value: "auto" }
       : { ok: false, message: `${label} can't be auto. Enter a number.` };
+  }
+  const range = FLUID_DRAFT.exec(text);
+  if (range) {
+    if (!FLUID.has(key)) {
+      return { ok: false, message: `${label} takes one number, not a range.` };
+    }
+    const min = Number(range[1]);
+    const max = Number(range[2]);
+    if (min > 10_000 || max > 10_000) {
+      return { ok: false, message: `${label} can be up to 10000. Enter a smaller number.` };
+    }
+    return { ok: true, value: { fluid: { min, max } } };
   }
   const match = DRAFT.exec(text);
   const n = match ? Number(match[1]) : Number.NaN;

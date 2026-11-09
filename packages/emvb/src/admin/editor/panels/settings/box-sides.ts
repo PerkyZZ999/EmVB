@@ -1,5 +1,5 @@
 import type { FlatStyleProps } from "../../../../core/index.ts";
-import type { LengthUnit } from "./length-units.ts";
+import { fluidDraft, isFluid, type LengthUnit } from "./length-units.ts";
 import type { StyleKey } from "./style-sections.ts";
 
 type Four<T> = readonly [T, T, T, T];
@@ -155,6 +155,7 @@ export function sideDraft(value: unknown, unit: LengthUnit, varName?: string): s
   if (isLiteral(value))
     return value.unit === unit ? String(value.value) : `${value.value}${value.unit}`;
   if (value === "auto") return "auto";
+  if (isFluid(value)) return fluidDraft(value);
   if (typeof value === "object" && value !== null && "var" in value) return varName ?? "";
   return "";
 }

@@ -55,6 +55,19 @@ export const LengthValue = z.union([Length, VariableRef]);
 const SizeValue = z.union([Length, VariableRef, z.literal("auto")]);
 
 /**
+ * W-955: a fluid size, `min` px on small screens growing to `max` px on large ones, emitted as
+ * `clamp()` between 360 and 1280 px wide screens (the design's fluid sizes use the same formula).
+ */
+const FluidLength = z.strictObject({
+  fluid: z.strictObject({
+    min: z.number().finite().min(0).max(10_000),
+    max: z.number().finite().min(0).max(10_000),
+  }),
+});
+const FluidLengthValue = z.union([Length, VariableRef, FluidLength]);
+const FluidSizeValue = z.union([Length, VariableRef, FluidLength, z.literal("auto")]);
+
+/**
  * Top, right, bottom and left may be negative, `auto` or a spacing variable (W-088); so may
  * margins since W-331, to pull an element over its neighbour.
  */
@@ -62,6 +75,7 @@ const OffsetValue = z.union([
   z.strictObject({ value: z.number().finite().min(-10_000).max(10_000), unit: LengthUnit }),
   VariableRef,
   z.literal("auto"),
+  FluidLength,
 ]);
 
 /** `w/h` with whole numbers 1–9999, emitted as `w / h` (W-088). */
@@ -259,7 +273,7 @@ export const StyleProps = z.strictObject({
   flexWrap: z.enum(FLEX_WRAPS).optional(),
   justifyContent: z.enum(JUSTIFY_CONTENT).optional(),
   alignItems: z.enum(ALIGN_ITEMS).optional(),
-  gap: LengthValue.optional(),
+  gap: FluidLengthValue.optional(),
   /** How many grid columns this element spans (1–12). */
   gridColumnSpan: z.number().int().min(1).max(12).optional(),
   /** How many grid rows this element spans (1–12). */
@@ -278,12 +292,12 @@ export const StyleProps = z.strictObject({
   flexBasis: SizeValue.optional(),
   alignSelf: z.enum(ALIGN_SELF).optional(),
   order: z.number().int().min(-99).max(99).optional(),
-  width: SizeValue.optional(),
-  minWidth: LengthValue.optional(),
-  maxWidth: LengthValue.optional(),
-  height: SizeValue.optional(),
-  minHeight: LengthValue.optional(),
-  maxHeight: LengthValue.optional(),
+  width: FluidSizeValue.optional(),
+  minWidth: FluidLengthValue.optional(),
+  maxWidth: FluidLengthValue.optional(),
+  height: FluidSizeValue.optional(),
+  minHeight: FluidLengthValue.optional(),
+  maxHeight: FluidLengthValue.optional(),
   overflow: z.enum(OVERFLOWS).optional(),
   /** W-957: one axis only, after `overflow` so it wins (a table that scrolls sideways). */
   overflowX: z.enum(OVERFLOWS).optional(),
@@ -294,10 +308,10 @@ export const StyleProps = z.strictObject({
   objectFit: z.enum(OBJECT_FITS).optional(),
   /** W-957: which part of an image or video stays in view when it is cropped. */
   objectPosition: z.enum(BACKGROUND_POSITIONS).optional(),
-  paddingTop: LengthValue.optional(),
-  paddingRight: LengthValue.optional(),
-  paddingBottom: LengthValue.optional(),
-  paddingLeft: LengthValue.optional(),
+  paddingTop: FluidLengthValue.optional(),
+  paddingRight: FluidLengthValue.optional(),
+  paddingBottom: FluidLengthValue.optional(),
+  paddingLeft: FluidLengthValue.optional(),
   marginTop: OffsetValue.optional(),
   marginRight: OffsetValue.optional(),
   marginBottom: OffsetValue.optional(),
@@ -314,7 +328,7 @@ export const StyleProps = z.strictObject({
       VariableRef,
     ])
     .optional(),
-  fontSize: LengthValue.optional(),
+  fontSize: FluidLengthValue.optional(),
   /** W-213: any weight 100–900 in steps of 100 (the font must ship it to look different). */
   fontWeight: z
     .union([

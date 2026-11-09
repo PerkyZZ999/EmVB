@@ -77,7 +77,7 @@ Every node may also carry an optional `editorLabel` (`label` before schema 18; 1
 
 ### Style properties (W-017, extended in W-088)
 
-Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "vh" | "ch" }` (`vw` and `vh` since W-088, `ch` since W-331). Colours are hex or `{ "var": "<id>" }`. A **size** is a length, a variable reference or `"auto"`. An **offset** is a size whose value may also be negative (−10000 to 10000).
+Lengths are `{ "value": 0–10000, "unit": "px" | "rem" | "em" | "%" | "vw" | "vh" | "ch" }` (`vw` and `vh` since W-088, `ch` since W-331). Colours are hex or `{ "var": "<id>" }`. A **size** is a length, a variable reference or `"auto"`. An **offset** is a size whose value may also be negative (−10000 to 10000). A **fluid size** (W-955) is `{ "fluid": { "min": 0–10000, "max": 0–10000 } }` in px: written as `clamp()` growing from `min` on 360 px wide screens to `max` on 1280 px ones (the formula the design's fluid sizes use); `fontSize`, `gap`, the width and height keys, padding and margins (and the offsets) take one.
 
 | Key | Value | CSS |
 | --- | --- | --- |

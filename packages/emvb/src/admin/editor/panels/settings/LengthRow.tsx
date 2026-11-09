@@ -4,8 +4,12 @@ import * as React from "react";
 import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import { FIELD } from "../../../ui.ts";
 import {
+  fluidDraft,
+  isFluid,
   parseLengthDraft,
+  takesFluid,
   unitsFor,
+  type FluidLiteral,
   type LengthLiteral,
   type LengthUnit,
   type UnitChoice,
@@ -21,7 +25,9 @@ const isLiteral = (value: unknown): value is LengthLiteral =>
   typeof (value as { unit?: unknown }).unit === "string";
 
 const same = (a: unknown, b: unknown) =>
-  a === b || (isLiteral(a) && isLiteral(b) && a.value === b.value && a.unit === b.unit);
+  a === b ||
+  (isLiteral(a) && isLiteral(b) && a.value === b.value && a.unit === b.unit) ||
+  (isFluid(a) && isFluid(b) && a.fluid.min === b.fluid.min && a.fluid.max === b.fluid.max);
 
 type NumericUnit = LengthUnit | "x";
 
@@ -60,19 +66,22 @@ export function LengthRow({
     () => (isLiteral(value) ? value : typeof value === "number" ? { value, unit: "x" } : undefined),
     [value],
   );
-  const numericUnit = literal?.unit ?? firstNumeric(units);
-  const [draft, setDraft] = React.useState(literal ? String(literal.value) : "");
+  // W-955: a fluid size shows as "32–56" in px.
+  const fluid = isFluid(value) ? value : undefined;
+  const textOf = (): string => (fluid ? fluidDraft(fluid) : literal ? String(literal.value) : "");
+  const numericUnit = literal?.unit ?? (fluid ? "px" : firstNumeric(units));
+  const [draft, setDraft] = React.useState(textOf);
   const [unit, setUnit] = React.useState<UnitChoice>(value === "auto" ? "auto" : numericUnit);
   const lastNumeric = React.useRef<NumericUnit>(numericUnit);
   const [error, setError] = React.useState<string | null>(null);
   React.useEffect(() => {
-    setDraft(literal ? String(literal.value) : "");
-    setUnit(value === "auto" ? "auto" : (literal?.unit ?? lastNumeric.current));
+    setDraft(textOf());
+    setUnit(value === "auto" ? "auto" : (literal?.unit ?? (fluid ? "px" : lastNumeric.current)));
     if (literal) lastNumeric.current = literal.unit;
     setError(null);
   }, [value, literal]);
 
-  const send = (next: LengthLiteral | "auto" | number | undefined) => {
+  const send = (next: LengthLiteral | FluidLiteral | "auto" | number | undefined) => {
     if (!same(next, value)) onPatch({ [styleKey]: next });
   };
 
@@ -97,13 +106,15 @@ export function LengthRow({
     }
     lastNumeric.current = next;
     const parsed = parseLengthDraft(draft, styleKey, next);
-    if (parsed.ok && parsed.value !== undefined && parsed.value !== "auto") {
-      const n = typeof parsed.value === "number" ? parsed.value : parsed.value.value;
-      if (next === "x") {
-        if (n <= 100) send(n);
-        else setError("Line height without a unit can be from 0 to 100.");
-      } else send({ value: n, unit: next });
-    }
+    if (!parsed.ok) return;
+    const typed = parsed.value;
+    // A fluid range is always px; the unit menu leaves it as it is.
+    if (typed === undefined || typed === "auto" || isFluid(typed)) return;
+    const n = typeof typed === "number" ? typed : typed.value;
+    if (next === "x") {
+      if (n <= 100) send(n);
+      else setError("Line height without a unit can be from 0 to 100.");
+    } else send({ value: n, unit: next });
   };
 
   const kind = bindKind(styleKey);
@@ -140,7 +151,7 @@ export function LengthRow({
               placeholder={unit === "auto" ? "auto" : placeholder}
               title={`A number in ${unit === "auto" ? lastNumeric.current : unit}, or with its own unit (2rem, 50%)${
                 units.includes("auto") ? ", or auto" : ""
-              }`}
+              }${takesFluid(styleKey) ? ". A range such as 32–56 grows from phones to large screens (px)" : ""}`}
               aria-invalid={error ? true : undefined}
               onChange={(event) => {
                 if (unit === "auto") setUnit(lastNumeric.current);

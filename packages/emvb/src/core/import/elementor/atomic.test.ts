@@ -67,19 +67,21 @@ describe("Elementor 4 atomic import (W-945)", () => {
     expect(notes()).not.toContain("gradient over an image");
   });
 
-  test("fluid sizes take their large value, phones their small one; laptop folds into tablet", () => {
+  test("W-955: fluid sizes stay fluid from their small to their large value; laptop folds into tablet", () => {
     const title = byLabel("Hero title");
     expect(props(title)).toEqual({ text: "Fast pages, no code.", level: 1 });
     expect(title?.style).toEqual({
       fontFamily: '"Inter", sans-serif',
-      fontSize: { value: 56, unit: "px" },
+      fontSize: { fluid: { min: 32, max: 56 } },
       fontWeight: 800,
       lineHeight: 1.1,
     });
     expect(title?.devices).toEqual({
       tablet: { letterSpacing: { value: -1, unit: "px" } },
-      mobile: { fontSize: { value: 32, unit: "px" }, textAlign: "center" },
+      mobile: { textAlign: "center" },
     });
+    const { css } = renderPage(result.layout, emptyDesign());
+    expect(css).toContain("font-size:clamp(2rem, 1.413rem + 2.6087vw, 3.5rem)");
     expect(notes()).toContain("Laptop and extra breakpoints were folded into Tablet and Mobile.");
   });
 

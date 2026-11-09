@@ -5,7 +5,7 @@ import type { StyleProps } from "../schema/style.ts";
 import { nodeChildren, newNodeId } from "../tree-ops.ts";
 
 type Color = NonNullable<StyleProps["color"]>;
-type Size = NonNullable<StyleProps["fontSize"]>;
+type Size = NonNullable<StyleProps["borderRadius"]>;
 
 /** What a recipe takes from Site styles (W-320); unset parts fall back to plain values. */
 export type RecipeTokens = {

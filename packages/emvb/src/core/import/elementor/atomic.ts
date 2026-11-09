@@ -184,6 +184,45 @@ function gridTracks(template: string): { count: number; tracks?: string[] } | un
   return equal ? { count: tracks.length } : { count: tracks.length, tracks };
 }
 
+/** W-955: style keys that keep a fluid size exactly, as EmVB's `{ fluid: { min, max } }`. */
+const FLUID_KEYS = new Set([
+  "fontSize",
+  "gap",
+  "width",
+  "minWidth",
+  "maxWidth",
+  "height",
+  "minHeight",
+  "maxHeight",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+  "marginTop",
+  "marginRight",
+  "marginBottom",
+  "marginLeft",
+]);
+
+const toPx = (l: Len): number | undefined =>
+  l.unit === "px" ? l.value : l.unit === "rem" ? l.value * 16 : undefined;
+
+/**
+ * W-955: `max(A, min(B, …))` or `clamp(A, …, B)` in px or rem as a fluid size from A to B, when
+ * the key takes one; otherwise the caller keeps B with A for phones.
+ */
+function fluidOf(
+  key: string,
+  s: { len?: Len | "auto"; small?: Len },
+): { fluid: { min: number; max: number } } | undefined {
+  if (!FLUID_KEYS.has(key) || !s.small || !s.len || s.len === "auto") return undefined;
+  const min = toPx(s.small);
+  const max = toPx(s.len);
+  if (min === undefined || max === undefined || min < 0 || max < 0) return undefined;
+  if (min > 10_000 || max > 10_000) return undefined;
+  return { fluid: { min: Math.round(min * 100) / 100, max: Math.round(max * 100) / 100 } };
+}
+
 /** One variant's props → EmVB style keys. */
 function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Converted {
   const out: Converted = { style: {}, phone: {}, unsupported: [] };
@@ -192,6 +231,11 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
     const s = size(v, { negative });
     if (s.len === "auto") {
       if (allowAuto) style[key] = "auto";
+      return;
+    }
+    const fluid = fluidOf(key, s);
+    if (fluid) {
+      style[key] = fluid;
       return;
     }
     if (s.len) style[key] = s.len;
@@ -209,6 +253,11 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
     for (const [side, s] of entries) {
       const sz = size(s, { negative: prefix === "margin" });
       const key = `${prefix}${side}${suffix}`;
+      const fluid = fluidOf(key, sz);
+      if (fluid) {
+        style[key] = fluid;
+        continue;
+      }
       if (sz.len === "auto") {
         if (prefix === "margin") style[key] = "auto";
       } else if (sz.len) style[key] = sz.len;
@@ -422,6 +471,11 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
       case "gap": {
         const raw = un(v);
         const s = isRecord(raw) && "column" in raw ? size(raw["column"]) : size(v);
+        const fluid = fluidOf("gap", s);
+        if (fluid) {
+          style["gap"] = fluid;
+          break;
+        }
         if (s.len && s.len !== "auto") style["gap"] = s.len;
         if (s.small) phone["gap"] = s.small;
         break;
