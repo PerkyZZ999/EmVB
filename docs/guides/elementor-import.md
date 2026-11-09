@@ -50,6 +50,27 @@ pick another type in the dialog if you want.
   date) and the Elementor Pro dynamic tags for the post title and featured image become EmVB's
   dynamic elements.
 
+## Elementor 4 (atomic) pages
+
+Pages built with Elementor 4's new elements (Flexbox, Div Block, Heading, Paragraph, Button,
+Image, SVG, Divider, YouTube, Accordion, Tabs and the Form fields) import with their styles. An
+Elementor 4 export carries the global classes and variables the page uses; EmVB applies them to
+each element, so the import never changes your site's own design system.
+
+- Each class's desktop, tablet and mobile values and its hover and focus states carry over.
+  Laptop and "extra" breakpoints fold into Tablet and Mobile, the way Elementor's desktop-first
+  breakpoints reach the smaller screens.
+- Fluid sizes (`max(32px, min(56px, …))`) use their large value on desktop and their small value
+  on phones. Centred wrappers (`min(1180px, calc(100% - 48px))`) keep their maximum width and
+  side gutters.
+- Grids keep their columns per device, including uneven ones (`20% repeat(5, 1fr)`), and children
+  that span every column.
+- A class's own custom CSS is applied where EmVB has the property (borders on one side, gaps,
+  weights, overflow and so on).
+- Forms keep their fields, labels and the layout around them.
+- A gradient drawn over a background image is shown as an even overlay in the gradient's colour.
+- Transforms, flex grow and shrink, and links to WordPress pages are listed in the report.
+
 ## What is approximated
 
 These keep their content in the closest EmVB form, and the report says so:
