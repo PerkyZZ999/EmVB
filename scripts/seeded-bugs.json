@@ -19045,12 +19045,40 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/store.ts",
-          "search": "      const node = withPageHeadingLevel(action.node, state.page.layout);",
+          "search": "      const node = withPageHeadingLevel(action.node, state.page.layout, state.page.partType);",
           "replace": "      const node = action.node;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
       "expect": "\\(fail\\).*the first Heading on a page without an H1 becomes the H1"
+    },
+    {
+      "id": "W-924/shared-part-heading-h1",
+      "requirement": "W-924",
+      "description": "A new Heading in a header part becomes a second H1 on the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "if (isSharedPart(partType) || hasH1(layout.root)) return node;",
+          "replace": "if (hasH1(layout.root)) return node;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
+      "expect": "\\(fail\\).*in a header part the first Heading stays H2"
+    },
+    {
+      "id": "W-924/clicked-heading-stays-h2",
+      "requirement": "W-924",
+      "description": "A Heading added by clicking stays H2 on a page with no H1.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "    const node = withPageHeadingLevel(added, layout, latest.current.page.partType);",
+          "replace": "    const node = added;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/useNodeActions.test.tsx"],
+      "expect": "\\(fail\\).*a clicked Heading on a page without an H1 becomes the H1"
     },
     {
       "id": "W-148/e2e-button-browser-look",
@@ -21582,8 +21610,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/heading-warning.ts",
-          "search": "  if (!partType || !SHARED_PARTS.has(partType)) return false;",
-          "replace": "  if (!partType) return false;"
+          "search": "partType !== undefined && SHARED_PARTS.has(partType);",
+          "replace": "partType !== undefined;"
         }
       ],
       "command": [
@@ -37527,8 +37555,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
-          "search": "const layout = current ?? startingLayout();\n    const node = newElement(type);",
-          "replace": "if (!current) return;\n    const layout = current;\n    const node = newElement(type);"
+          "search": "const layout = current ?? startingLayout();\n    const added = newElement(type);",
+          "replace": "if (!current) return;\n    const layout = current;\n    const added = newElement(type);"
         }
       ],
       "command": [

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- **Heading level (W-924).** A Heading added by clicking it in the Add panel or the command palette now becomes the page's H1 when the page has none, as a dragged one already did. In a header, footer, popup, float, synced section or loop item a new Heading stays H2, so the part no longer adds a second H1 to the pages it lands on.
+
 ## [0.9.0] - 2026-10-29
 
 EmVB layouts on your own collections, EmDash 1.4.0, and nine smaller additions (W-896 to W-920). Layout schema 17 and design schema 16, unchanged: 0.9.0 reads every 0.8.0 page, and the new props are optional, so 0.8.0 opens pages that don't use them.
