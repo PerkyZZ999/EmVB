@@ -27160,8 +27160,8 @@
       "edits": [
         {
           "file": "site/src/pages/sitemap.xml.ts",
-          "search": ", \"/changelog/\"]",
-          "replace": "]"
+          "search": "  \"/changelog/\",\n",
+          "replace": ""
         }
       ],
       "command": ["bun", "test", "./test/site/changelog.test.ts"],
@@ -45191,6 +45191,76 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/pages/export-dialog.test.tsx"],
       "expect": "\\(fail\\).*Rich text in a collection"
+    },
+    {
+      "id": "W-964/ids-kept",
+      "requirement": "W-964",
+      "description": "Internal ids stay in published docs.",
+      "edits": [
+        {
+          "file": "site/src/markdown/docs.ts",
+          "search": "  return text.replace(ONLY_IDS, \"\").replace(LEADING_IDS, \"(\");",
+          "replace": "  return text;"
+        }
+      ],
+      "command": ["bun", "test", "test/site/docs.test.ts"],
+      "expect": "\\(fail\\).*internal ids"
+    },
+    {
+      "id": "W-964/links-unchanged",
+      "requirement": "W-964",
+      "description": "Links between docs keep pointing at .md files.",
+      "edits": [
+        {
+          "file": "site/src/markdown/docs.ts",
+          "search": "  if (slug) return `/docs/${slug}/${hash ? `#${hash}` : \"\"}`;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "test/site/docs.test.ts"],
+      "expect": "\\(fail\\).*links between docs"
+    },
+    {
+      "id": "W-964/project-docs-published",
+      "requirement": "W-964",
+      "description": "Internal docs under docs/project get a page.",
+      "edits": [
+        {
+          "file": "site/src/markdown/docs.ts",
+          "search": "  if (DOC_FILES[repoPath]) return DOC_FILES[repoPath];",
+          "replace": "  if (DOC_FILES[repoPath]) return DOC_FILES[repoPath];\n  if (repoPath.startsWith(\"docs/project/\")) return \"project\";"
+        }
+      ],
+      "command": ["bun", "test", "test/site/docs.test.ts"],
+      "expect": "\\(fail\\).*links between docs"
+    },
+    {
+      "id": "W-964/tabindex-twice",
+      "requirement": "W-964",
+      "description": "Code blocks get a second tabindex.",
+      "edits": [
+        {
+          "file": "site/src/markdown/docs.ts",
+          "search": "(?=[\\s>])(?![^>]*tabindex)/g",
+          "replace": "(?=[\\s>])/g"
+        }
+      ],
+      "command": ["bun", "test", "test/site/docs.test.ts"],
+      "expect": "\\(fail\\).*focusable once"
+    },
+    {
+      "id": "W-964/guide-unlisted",
+      "requirement": "W-964",
+      "description": "A guide is missing from the Docs list.",
+      "edits": [
+        {
+          "file": "site/src/data/docs.ts",
+          "search": "        slug: \"leaving-emvb\",\n        title: \"Leaving EmVB\",",
+          "replace": "        slug: \"leaving\",\n        title: \"Leaving EmVB\","
+        }
+      ],
+      "command": ["bun", "test", "test/site/docs.test.ts"],
+      "expect": "\\(fail\\).*every listed doc"
     }
   ]
 }

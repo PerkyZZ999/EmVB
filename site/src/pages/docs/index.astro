@@ -1,0 +1,170 @@
+---
+import SiteFooter from "../../components/SiteFooter.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import { DOC_GROUPS } from "../../data/docs";
+import { docModules } from "../../markdown/doc-modules";
+import { withoutIds } from "../../markdown/docs";
+import Base from "../../layouts/Base.astro";
+
+/** Words a doc can be found by: its title, summary and section headings. */
+const searchText = (slug: string, title: string, summary: string) =>
+  [title, summary, ...(docModules.get(slug)?.getHeadings().map((h) => withoutIds(h.text)) ?? [])]
+    .join(" ")
+    .toLowerCase();
+---
+
+<Base
+  title="Docs · EmVB"
+  description="Guides and reference for EmVB: install, build pages, import from Elementor, AI agents, extensions, the schema, and leaving EmVB."
+>
+  <SiteHeader />
+  <main id="content">
+    <section class="section blueprint intro">
+      <div class="wrap">
+        <p class="eyebrow">Documentation</p>
+        <h1>Docs and guides</h1>
+        <p class="lede">
+          How EmVB works, from installing it to building pages, working with AI agents and taking
+          your content elsewhere. These pages are built from the guides in the{" "}
+          <a href="https://github.com/PerkyZZ999/EmVB/tree/main/docs">repository</a>.
+        </p>
+        <div class="search">
+          <label for="docs-search">Search the docs</label>
+          <input id="docs-search" type="search" placeholder="Try “install”, “export” or “agents”" autocomplete="off" data-docs-search />
+          <p class="status" role="status" data-docs-status></p>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap groups">
+      {
+        DOC_GROUPS.map((group) => (
+          <section class="group" data-docs-group>
+            <h2>{group.title}</h2>
+            <ul>
+              {group.docs.map((doc) => (
+                <li data-docs-item data-search={searchText(doc.slug, doc.title, doc.summary)}>
+                  <a href={`/docs/${doc.slug}/`}>
+                    <span class="title">{doc.title}</span>
+                    <span class="summary">{doc.summary}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </main>
+  <SiteFooter />
+</Base>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>("[data-docs-search]");
+  const status = document.querySelector<HTMLElement>("[data-docs-status]");
+  const items = [...document.querySelectorAll<HTMLElement>("[data-docs-item]")];
+  const groups = [...document.querySelectorAll<HTMLElement>("[data-docs-group]")];
+  input?.addEventListener("input", () => {
+    const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const item of items) {
+      const hit = words.every((word) => (item.dataset["search"] ?? "").includes(word));
+      item.hidden = !hit;
+      if (hit) shown += 1;
+    }
+    for (const group of groups) group.hidden = !group.querySelector("[data-docs-item]:not([hidden])");
+    if (status)
+      status.textContent = words.length === 0 ? "" : shown === 0 ? "No guides match." : `${shown} ${shown === 1 ? "guide" : "guides"} match.`;
+  });
+</script>
+
+<style>
+  .intro {
+    padding-block: var(--space-9) var(--space-7);
+  }
+
+  h1 {
+    margin-block: var(--space-3);
+    font-size: var(--text-display);
+  }
+
+  .search {
+    display: grid;
+    gap: var(--space-2);
+    max-width: 32rem;
+    margin-top: var(--space-6);
+  }
+
+  .search label {
+    font-weight: 600;
+  }
+
+  .search input {
+    font: inherit;
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    color: var(--ink);
+  }
+
+  .search input:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .status {
+    min-height: 1.5em;
+    margin: 0;
+    color: var(--ink-soft);
+  }
+
+  .groups {
+    display: grid;
+    gap: var(--space-8);
+    padding-block: var(--space-7) var(--space-9);
+  }
+
+  .group h2 {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-h3);
+  }
+
+  .group ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .group a {
+    display: grid;
+    gap: var(--space-2);
+    height: 100%;
+    padding: var(--space-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-m);
+    background: var(--paper-raised);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .group a:hover {
+    border-color: var(--accent);
+  }
+
+  .group a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .title {
+    font-weight: 600;
+  }
+
+  .summary {
+    color: var(--ink-soft);
+  }
+</style>

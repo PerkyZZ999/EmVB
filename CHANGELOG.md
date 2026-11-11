@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
   Drafts are not exported, and your EmVB pages are not changed.
 
+- **Docs on emvb.dev (W-964).** The project site gains a Docs section: every guide, the schema contract and the Extensions API reference, built from the repository's own docs so they can't drift, with an index grouped by topic, a search box, a sidebar and an on-this-page list. It goes live with this release.
 - **Convert to rich text (W-963).** On an entry in your own collections, **Convert to rich text** copies the layout's words, headings, lists, links and images into the entry's rich-text field (the reverse of Convert to EmVB). A confirm first says how many blocks go in, what is left out (forms, icons, embeds) and whether it replaces what the field holds. The layout itself isn't changed; clear it and save the entry to show the rich text on your site.
 
 ## [1.0.0] - 2026-11-09

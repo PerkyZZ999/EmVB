@@ -6,6 +6,7 @@ export const nav = [
   { href: "/#theme-builder", label: "Theme Builder" },
   { href: "/#under-the-hood", label: "Under the hood" },
   { href: "/#faq", label: "FAQ" },
+  { href: "/docs/", label: "Docs" },
   { href: "/playground/", label: "Playground" },
   { href: "/changelog/", label: "Changelog" },
 ] as const;

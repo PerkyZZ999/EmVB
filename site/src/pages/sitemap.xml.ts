@@ -1,7 +1,14 @@
 import type { APIRoute } from "astro";
+import { ALL_DOCS } from "../data/docs";
 
-/** The site's pages (the home page, the playground and the changelog), on the site's own domain. */
-const PATHS = ["/", "/playground/", "/changelog/"];
+/** The site's pages (home, playground, changelog, docs), on the site's own domain. */
+const PATHS = [
+  "/",
+  "/playground/",
+  "/changelog/",
+  "/docs/",
+  ...ALL_DOCS.map((doc) => `/docs/${doc.slug}/`),
+];
 
 export const GET: APIRoute = ({ site }) => {
   const urls = PATHS.map(

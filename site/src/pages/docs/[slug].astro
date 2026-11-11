@@ -1,0 +1,311 @@
+---
+import SiteFooter from "../../components/SiteFooter.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import { ALL_DOCS, DOC_GROUPS } from "../../data/docs";
+import { docModules } from "../../markdown/doc-modules";
+import { siteHtml, withoutIds } from "../../markdown/docs";
+import Base from "../../layouts/Base.astro";
+
+export function getStaticPaths() {
+  return ALL_DOCS.map((doc) => ({ params: { slug: doc.slug } }));
+}
+
+const { slug } = Astro.params;
+const doc = ALL_DOCS.find((entry) => entry.slug === slug);
+const module = docModules.get(slug);
+if (!doc || !module) throw new Error(`No doc for ${slug}`);
+const raw = await module.compiledContent();
+const html = siteHtml(raw, module.file);
+const sections = module
+  .getHeadings()
+  .filter((h) => h.depth === 2)
+  .map((h) => ({ slug: h.slug, text: withoutIds(h.text) }));
+const index = ALL_DOCS.indexOf(doc);
+const previous = ALL_DOCS[index - 1];
+const next = ALL_DOCS[index + 1];
+const source = slug === "schema" ? "docs/SCHEMA.md" : slug === "extensions-api" ? "docs/EXTENSIONS.md" : `docs/guides/${slug}.md`;
+---
+
+<Base title={`${doc.title} · EmVB docs`} description={doc.summary}>
+  <SiteHeader />
+  <main id="content">
+    <div class="wrap layout">
+      <nav class="sidebar" aria-label="Docs">
+        <a class="all" href="/docs/">All docs</a>
+        {
+          DOC_GROUPS.map((group) => (
+            <div class="group">
+              <p class="heading">{group.title}</p>
+              <ul>
+                {group.docs.map((entry) => (
+                  <li>
+                    <a href={`/docs/${entry.slug}/`} aria-current={entry.slug === slug ? "page" : undefined}>
+                      {entry.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </nav>
+
+      <article class="doc" data-doc>
+        <Fragment set:html={html} />
+        <footer class="doc-footer">
+          <a class="source" href={`https://github.com/PerkyZZ999/EmVB/blob/main/${source}`}>View this page on GitHub</a>
+          <nav class="pager" aria-label="Previous and next">
+            {previous && <a href={`/docs/${previous.slug}/`} rel="prev"><span>Previous</span>{previous.title}</a>}
+            {next && <a href={`/docs/${next.slug}/`} rel="next"><span>Next</span>{next.title}</a>}
+          </nav>
+        </footer>
+      </article>
+
+      {
+        sections.length > 1 && (
+          <nav class="toc" aria-label="On this page">
+            <p class="heading">On this page</p>
+            <ul>
+              {sections.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )
+      }
+    </div>
+  </main>
+  <SiteFooter />
+</Base>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: 14rem minmax(0, 1fr) 13rem;
+    gap: var(--space-8);
+    padding-block: var(--space-8) var(--space-9);
+  }
+
+  .sidebar,
+  .toc {
+    position: sticky;
+    top: calc(var(--header-h) + var(--space-5));
+    align-self: start;
+    max-height: calc(100vh - var(--header-h) - var(--space-7));
+    overflow-y: auto;
+  }
+
+  .all {
+    display: inline-block;
+    margin-bottom: var(--space-5);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .heading {
+    margin: 0 0 var(--space-2);
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .group + .group {
+    margin-top: var(--space-5);
+  }
+
+  .sidebar ul,
+  .toc ul {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sidebar li a,
+  .toc a {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    border-inline-start: 2px solid var(--rule);
+    color: var(--ink-soft);
+    font-size: var(--text-sm);
+    text-decoration: none;
+  }
+
+  .sidebar li a:hover,
+  .toc a:hover {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  .sidebar a[aria-current="page"] {
+    border-color: var(--accent);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .doc {
+    max-width: 76ch;
+    min-width: 0;
+    line-height: 1.7;
+  }
+
+  .doc :global(h1) {
+    margin: 0 0 var(--space-5);
+    font-size: var(--text-display);
+    line-height: 1.1;
+  }
+
+  .doc :global(h2) {
+    scroll-margin-top: calc(var(--header-h) + var(--space-5));
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--rule);
+    font-size: var(--text-h2);
+  }
+
+  .doc :global(h3) {
+    scroll-margin-top: calc(var(--header-h) + var(--space-5));
+    margin-top: var(--space-6);
+    font-size: var(--text-h3);
+  }
+
+  .doc :global(p),
+  .doc :global(li) {
+    color: var(--ink-soft);
+    overflow-wrap: anywhere;
+  }
+
+  .doc :global(strong) {
+    color: var(--ink);
+  }
+
+  .doc :global(a) {
+    color: var(--accent);
+  }
+
+  .doc :global(:not(pre) > code) {
+    padding: 0.1em 0.35em;
+    border-radius: var(--radius-s);
+    background: var(--paper-sunk);
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+
+  .doc :global(pre) {
+    overflow-x: auto;
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-m);
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+  }
+
+  /* The highlighter's comment grey is 3.0:1 on its dark background; this one is 5.6:1. */
+  .doc :global(pre span[style*="#6A737D"]) {
+    color: #959da5 !important;
+  }
+
+  .doc :global(table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+  }
+
+  .doc :global(th),
+  .doc :global(td) {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--rule);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .doc :global(th) {
+    background: var(--paper-sunk);
+    color: var(--ink);
+  }
+
+  .doc :global(blockquote) {
+    margin-inline: 0;
+    padding-inline-start: var(--space-4);
+    border-inline-start: 3px solid var(--accent);
+  }
+
+  .doc-footer {
+    display: grid;
+    gap: var(--space-5);
+    margin-top: var(--space-9);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--rule);
+  }
+
+  .source {
+    color: var(--accent);
+    font-size: var(--text-sm);
+  }
+
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .pager a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-m);
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .pager a[rel="next"] {
+    margin-inline-start: auto;
+    text-align: right;
+  }
+
+  .pager span {
+    color: var(--ink-faint);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 1100px) {
+    .layout {
+      grid-template-columns: 13rem minmax(0, 1fr);
+    }
+
+    .toc {
+      display: none;
+    }
+  }
+
+  @media (max-width: 800px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-6);
+      padding-block-start: var(--space-6);
+    }
+
+    .sidebar {
+      position: static;
+      max-height: none;
+      order: 2;
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--rule);
+    }
+
+    .doc :global(h1) {
+      font-size: var(--text-h2);
+    }
+  }
+</style>

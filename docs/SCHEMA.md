@@ -55,7 +55,7 @@ Rules (`core/contract.ts`, limits in `core/limits.ts`):
 - An element **type** EmVB does not know is kept too, as before (W-022).
 - `motion` inside a state is refused: motion is Normal-only.
 
-Note that D-031 says a document from a *newer* schema version is refused as "newer", not guessed at.
+Note that a document from a *newer* schema version is refused as "newer", not guessed at.
 That still holds for `schemaVersion` above 18. The unknown-key rule is for 1.x documents that still say
 schema 18 but were written by a later 1.x that added optional keys.
 
@@ -194,7 +194,7 @@ are (W-925 audit):
 - **Grid per-device keys.** `columns`, `columnsTablet`, `columnsMobile` and `columnTracks*` are
   props, not `devices` style overrides. The grid's column count is content structure, not style.
   Other per-device values live in `devices.laptop`, `devices.tablet` and `devices.mobile`
-  (`laptop` since W-956; `hiddenOn` also takes `"laptop"`).
+  (`laptop` since 1.0; `hiddenOn` also takes `"laptop"`).
 - **`iconSize` vs `size`.** A `button`'s icon size is `props.iconSize`, because the button's own size
   is its style. An `icon` or `svg` element's size is `props.size`.
 - **`focalX` / `focalY`.** These are image props, whole percentages 0–100 from the left and top. They
