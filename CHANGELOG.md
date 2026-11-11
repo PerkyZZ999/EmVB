@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Performance on large pages, measured (W-979).** A new guide, [Performance on large pages](docs/guides/performance.md), gives what a page of up to 2,000 elements costs: about 17 ms to render on the server and 17 KB of HTML and CSS gzipped, and in the editor about 0.5 s to open and under 100 ms per edit (production build). The closed Accessibility dialog no longer builds its issue list on every edit.
 - **The 1.x promise, clarified (W-971, W-975).** A 1.x page keeps its look and behaviour on every later 1.x; its HTML and CSS bytes may improve for accessibility and page size ([docs/SCHEMA.md](docs/SCHEMA.md)). Each such change is listed here and checked by comparing screenshots of the saved pages.
 - **Tabs markup (W-975).** The tab role moved from the `<label>` (where ARIA allows no role, axe `aria-allowed-role`) to a `<span class="emvb-tab">` inside it. Tabs look and work the same, with and without the tabs script; the script also still handles pages rendered by 1.0. Hosts with CSS for `.emvb-tab-label[aria-selected]` should use `.emvb-tab[aria-selected]`.
 - **Smaller theme CSS (W-971).** The header, footer, popups and floats on a page each repeated the same element base rules, scope rule and print rules in `resolveThemeParts().css`; they are now written once for all of them. Pages look and behave the same (screenshots compared pixel for pixel); each part's own `css` is unchanged.

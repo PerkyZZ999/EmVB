@@ -97,6 +97,11 @@ export const DOC_GROUPS: DocGroup[] = [
         summary: "The Extensions API 1.0 contract.",
       },
       {
+        slug: "performance",
+        title: "Performance on large pages",
+        summary: "What a 2,000-element page costs on the site and in the editor, measured.",
+      },
+      {
         slug: "schema",
         title: "Schema contract",
         summary: "The stored layout and design formats, stable through 1.x.",

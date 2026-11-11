@@ -46013,6 +46013,20 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/search-text.test.ts"],
       "expect": "\\(fail\\).*a layout's words"
+    },
+    {
+      "id": "W-979/closed-a11y-lists",
+      "requirement": "W-979",
+      "description": "The closed Accessibility dialog builds its issue list on every edit again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/A11yCopilot.tsx",
+          "search": "  if (!open) return null;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/a11y-copilot.test.tsx"],
+      "expect": "\\(fail\\).*while closed, the dialog"
     }
   ]
 }

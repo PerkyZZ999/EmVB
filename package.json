@@ -34,6 +34,8 @@
     "seeded-bugs": "bun scripts/seeded-bug.ts",
     "bench:render": "bun scripts/bench-render.ts",
     "bench:css": "bun scripts/css-budget.ts",
+    "bench:large": "bun scripts/bench-large.ts",
+    "bench:editor": "bun scripts/bench-editor.ts",
     "pack:smoke": "bun scripts/pack-smoke.ts",
     "icons:build": "bun scripts/build-icon-sets.ts"
   },

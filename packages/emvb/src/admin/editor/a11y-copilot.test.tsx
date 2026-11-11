@@ -119,3 +119,26 @@ test("W-833: after a fix, focus moves to the next fix, then to Close once nothin
   expect(fixes().length).toBe(0);
   expect(document.activeElement?.hasAttribute("data-emvb-a11y-close")).toBe(true);
 });
+
+test("W-979: while closed, the dialog doesn't build its list of issues", async () => {
+  const report = auditPage(layout, emptyDesign());
+  let listed = 0;
+  const issues = Object.assign([...report.issues], {
+    map(...args: Parameters<typeof Array.prototype.map>) {
+      listed += 1;
+      return Array.prototype.map.apply(this, args);
+    },
+  });
+  const props = {
+    onOpenChange: () => undefined,
+    report: { ...report, issues },
+    layout,
+    onSelect: () => undefined,
+    onApply: () => undefined,
+  };
+  await mount(<A11yDialog open={false} {...props} />);
+  expect(listed).toBe(0);
+  await cleanup();
+  await mount(<A11yDialog open {...props} />);
+  expect(listed).toBeGreaterThan(0);
+});
