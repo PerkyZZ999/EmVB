@@ -4,6 +4,7 @@ import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { api, createPage, parsed, publishPage, setUpEmvbOnce } from "./support/api.ts";
 import { unique } from "./support/helpers.ts";
+import { uploadEmvbPixel } from "./support/media.ts";
 
 /**
  * W-963 acceptance: Export pages on the Pages list downloads a zip of a published page that
@@ -33,6 +34,9 @@ function unzip(bytes: Buffer): Map<string, Buffer> {
 test("W-963: a published page exports as HTML that works on its own", async ({ page, request }) => {
   const title = `Export ${unique()}`;
   const slug = title.toLowerCase().replaceAll(" ", "-");
+  // The page's own image, from the media library: the export must copy it.
+  const pixel = await uploadEmvbPixel(request);
+  const pixelFile = `media/${pixel.url.split("/").pop() ?? ""}`;
   const id = await createPage(
     request,
     title,
@@ -44,6 +48,7 @@ test("W-963: a published page exports as HTML that works on its own", async ({ p
         props: {},
         children: [
           { id: "head0001", type: "heading", props: { text: title, level: 1 } },
+          { id: "imag0001", type: "image", props: { src: pixel.url, alt: "Pixel" } },
           {
             id: "tabs0001",
             type: "tabs",
@@ -101,18 +106,27 @@ test("W-963: a published page exports as HTML that works on its own", async ({ p
   await expect(dialog.locator("[data-emvb-export-status]")).toContainText("Downloaded 1 page.");
 
   const files = unzip(readFileSync(await download.path()));
-  // A site-wide header or footer another test published comes along with its images (the
-  // export holds what the page shows); only those media copies may be added to the list.
-  expect([...files.keys()].filter((name) => !name.startsWith("media/")).toSorted()).toEqual(
-    [
-      `${slug}/index.html`,
-      `${slug}/style.css`,
-      "assets/emvb-tabs.js",
-      "assets/export-index.css",
-      "index.html",
-      "EXPORT-REPORT.md",
-    ].toSorted(),
-  );
+  // Every file the page needs, its own image included, is in the zip.
+  const expected = [
+    `${slug}/index.html`,
+    `${slug}/style.css`,
+    "assets/emvb-tabs.js",
+    "assets/export-index.css",
+    "index.html",
+    "EXPORT-REPORT.md",
+    pixelFile,
+  ];
+  for (const name of expected) expect([...files.keys()]).toContain(name);
+  // Anything else is a media copy one of the exported pages or sheets uses, such as the image of
+  // a site-wide header another test published (the export holds what the page shows).
+  const texts = [...files]
+    .filter(([name]) => name.endsWith(".html") || name.endsWith(".css"))
+    .map(([, data]) => data.toString("utf8"))
+    .join("\n");
+  for (const name of [...files.keys()].filter((n) => !expected.includes(n))) {
+    expect(name).toMatch(/^media\//);
+    expect(texts).toContain(`../${name}`);
+  }
   const html = files.get(`${slug}/index.html`)?.toString("utf8") ?? "";
   expect(html).toContain(`<title>${title}</title>`);
   expect(html).not.toContain("/_emdash/admin");

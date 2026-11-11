@@ -45933,6 +45933,30 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/widgets/export-entry-html.test.tsx"],
       "expect": "\\(fail\\).*W-977: an entry with no published layout"
+    },
+    {
+      "id": "W-963/page-media-dropped",
+      "requirement": "W-963",
+      "description": "The export leaves out media-library files, so a page's own image is missing from the zip.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "      return new URL(url, origin).origin === origin;",
+          "replace": "      return new URL(url, origin).origin === origin && !url.includes(\"/_emdash/api/media/\");"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/export-html.e2e.ts",
+        "--project=node",
+        "--trace",
+        "off",
+        "-g",
+        "W-963: a published page"
+      ],
+      "expect": "✘.*\\[node\\].*W-963: a published page"
     }
   ]
 }
