@@ -1,7 +1,7 @@
 import { project } from "./project";
 
 /**
- * Measured on 2026-10-08 at release 0.2.0: `bun run bench:render`, `bun run bench:css`,
+ * Measured on 2026-11-11 at release 1.1.0 (W-967): `bun run bench:render`, `bun run bench:css`,
  * `bun run test` and the seed count in scripts/seeded-bugs.json. Re-measure before changing one.
  */
 export interface Metric {
@@ -13,24 +13,24 @@ export interface Metric {
 
 export const metrics: Metric[] = [
   {
-    value: "1.1",
+    value: "1.6",
     unit: "ms",
-    label: "median server render of a 300-element page, p95 2.3 ms, against a 20 ms budget",
+    label: "median server render of a 300-element page, p95 2.6 ms, against a 20 ms budget",
     source: "bun run bench:render, 200 runs",
   },
   {
-    value: "995",
+    value: "1,181",
     unit: "B",
     label: "of gzipped CSS for that 300-element page, against a 15 KB budget",
     source: "bun run bench:css",
   },
   {
-    value: "2,323",
+    value: "4,335",
     label: "unit and component tests passing, none failing",
     source: "bun run test",
   },
   {
-    value: "1,518",
+    value: "2,729",
     label: "seeded bugs on record, each one proven to make a test fail",
     source: "scripts/seeded-bugs.json",
   },

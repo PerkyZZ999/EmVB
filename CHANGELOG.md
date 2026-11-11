@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-11
+
+A minor release: everything is additive and 1.0 pages open unchanged. Leave EmVB whenever you like (export pages and your own entries as HTML or rich text), a Wide screen device, search by content and bulk actions in the lists, measured performance on large pages, and the fixes below.
+
 ### Fixed
 
 - **Tab stays inside EmVB's dialogs (W-984).** In the image editor, Export pages and every other EmVB dialog, a quick Tab past the last control could leave the dialog for the page behind (the dialog library moves focus back one frame later). Tab and Shift+Tab now wrap from the last control to the first and back.
@@ -716,7 +720,8 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.7.0...v0.8.0

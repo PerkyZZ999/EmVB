@@ -1,6 +1,6 @@
 {
   "name": "@perkyzz/emvb-mcp",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Local (stdio) MCP server for EmVB pages: lets AI agents build EmDash pages through your site's EmDash MCP endpoint.",
   "keywords": [
     "emdash",
@@ -41,7 +41,7 @@
     "@modelcontextprotocol/server": "2.4.0"
   },
   "devDependencies": {
-    "@perkyzz/emvb": "1.0.0",
+    "@perkyzz/emvb": "1.1.0",
     "zod": "~4.5.4"
   },
   "engines": {
