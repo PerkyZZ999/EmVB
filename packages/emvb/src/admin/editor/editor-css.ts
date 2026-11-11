@@ -502,7 +502,8 @@ iframe[data-emvb-canvas-focus="keyboard"] { outline: 2px solid var(--color-kumo-
   font-family: var(--font-sans); font-size: 12px; line-height: 16px;
 }
 .emvb-chip:hover { background: var(--color-kumo-recessed); }
-.emvb-chip[data-active="true"] { background: var(--color-kumo-brand); color: #fff; }
+/* W-976: white on the plain brand blue was 4.48:1 (#076eff); a darker mix keeps it over 4.5:1. */
+.emvb-chip[data-active="true"] { background: color-mix(in oklch, var(--color-kumo-brand), black 18%); color: #fff; }
 .emvb-chip[data-missing] { background: transparent; box-shadow: inset 0 0 0 1px var(--color-kumo-danger); }
 .emvb-chip[data-missing] .emvb-chip-main { cursor: default; }
 .emvb-chip-main {

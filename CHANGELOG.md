@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- **Style source chip contrast (W-976).** The active chip in the Style panel's style sources (such as **Local**) had white text at 4.48:1 on the brand blue, just under WCAG AA. Its background is now a little darker (over 4.5:1, light and dark).
+
 ### Added
 
 - **dvh and svh (W-974).** Height, Min height and Max height take `dvh` (dynamic viewport height) and `svh` (small viewport height), so a full-height section fits a phone screen with its browser bars. They are stored as `vh` with a new optional `viewportUnits` mark, so EmVB 1.0 still opens the page and draws it in `vh`.

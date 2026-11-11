@@ -45657,6 +45657,20 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/history/diff.test.ts"],
       "expect": "\\(fail\\).*keeps the sections"
+    },
+    {
+      "id": "W-976/chip-plain-brand",
+      "requirement": "W-976",
+      "description": "The active style-source chip goes back to white on the plain brand blue (4.48:1).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/editor-css.ts",
+          "search": ".emvb-chip[data-active=\"true\"] { background: color-mix(in oklch, var(--color-kumo-brand), black 18%); color: #fff; }",
+          "replace": ".emvb-chip[data-active=\"true\"] { background: var(--color-kumo-brand); color: #fff; }"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/chip-contrast.test.ts"],
+      "expect": "\\(fail\\).*darker than the plain brand"
     }
   ]
 }
