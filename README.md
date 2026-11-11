@@ -1,3 +1,12 @@
+<p align="center">
+  <a href="https://emvb.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/docs/brand/logo-dark.svg">
+      <img src="https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/docs/brand/logo-light.svg" alt="EmVB" width="320">
+    </picture>
+  </a>
+</p>
+
 # EmVB
 
 [![Website](https://img.shields.io/badge/website-emvb.dev-1f6feb)](https://emvb.dev) [![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)
@@ -8,11 +17,11 @@ Try it without installing anything in the [playground](https://emvb.dev/playgrou
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
-**Current release:** 1.0.0. The page format is frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17), AI agents co-design pages through reviewable proposals, sites add their own elements and panels ([Extensions API](docs/EXTENSIONS.md)), pages can have a version per language, and pages and templates import from Elementor 3 and 4. The editor adds inline text formatting, fluid sizes, a Laptop device, transforms, flex item sizing, list markers and numbered steps, gradient overlays and more style settings. Upgrading from 0.9: see the [upgrade guide](docs/guides/upgrade-1.0.md). See the [changelog](CHANGELOG.md) for every release.
+**Current release:** 1.1.0. Everything in 1.1 is additive: 1.0 pages open unchanged and the page format stays frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17). 1.1 lets you take your work with you (Export pages as HTML and CSS or as rich text, also for entries of your own collections, and Convert to rich text; see [Leaving EmVB](docs/guides/leaving-emvb.md)), adds a Wide screen device, search by content and bulk Publish, Delete and Export in the Pages and Theme Builder lists, `dvh`/`svh` heights, and measured [performance on large pages](docs/guides/performance.md). See the [changelog](CHANGELOG.md) for every release.
 
 ## Requirements
 
-- **EmDash 1.4.x.** EmVB 1.0.0 is built and tested against EmDash 1.4.0 (0.8.0 was tested on 1.3.1). Its peer range is `emdash` ^1.0.0.
+- **EmDash 1.4.x.** EmVB 1.1.0 is built and tested against EmDash 1.4.0 (0.8.0 was tested on 1.3.1). Its peer range is `emdash` ^1.0.0.
 - **Astro 7, as your EmDash site has it.** No Astro change needed: verified on a stock `create-emdash` 1.4.0 site, which installs Astro 7.4.7 (7.4.8 since 2026-11-09, also verified).
 - **React 19**, `@cloudflare/kumo` 2.6.0 and `@phosphor-icons/react` ^2.1.10. An EmDash site already has these.
 - **Optional:** `@emdash-cms/plugin-forms` ^0.2.9 for forms.
@@ -69,7 +78,7 @@ See the [bridge README](packages/emvb-mcp/README.md) and the [MCP guide](docs/gu
 **Editor**
 
 - Drag, drop and nest elements; edit text on the canvas; copy, paste, undo and redo.
-- Preview desktop, laptop, tablet and mobile.
+- Preview wide screen, desktop, laptop, tablet and mobile.
 - A command palette, a version timeline that restores a whole version or one section, and shareable playground links.
 
 **Elements**
@@ -91,6 +100,10 @@ Give entries in your own collections an EmVB layout: **Edit with EmVB** from the
 **Import from Elementor**
 
 Bring pages and templates over from Elementor: choose the exported `.json`, see what will be kept, changed or left out, and get a draft page or theme part. Containers, sections and the core widgets map faithfully; Pro, theme-builder and third-party widgets keep what EmVB can show. See the [Elementor import guide](docs/guides/elementor-import.md).
+
+**Export and leaving EmVB**
+
+Your pages are yours. **Export pages** downloads published pages as plain HTML and CSS you can host anywhere, or copies them into one of your collections as rich text. **Convert to rich text** does the same for an entry's layout. See [Leaving EmVB](docs/guides/leaving-emvb.md).
 
 **Saved sections**
 
@@ -159,6 +172,7 @@ To try the editor locally, sign in to the demo admin with the dev-only link <htt
 - [Saved sections](docs/guides/saved-sections.md)
 - [Image editor](docs/guides/image-editor.md)
 - [Icon library](docs/guides/icon-library.md)
+- [Leaving EmVB](docs/guides/leaving-emvb.md)
 - [Layout format](docs/system/layout-format.md): how pages and the design system are stored.
 - [Schema contract](docs/SCHEMA.md), [Extensions API](docs/EXTENSIONS.md): the stored formats kept stable through 1.x, with JSON Schema exports in docs/schema/.
 - [Theme parts](docs/system/theme-parts.md): theme parts, conditions, triggers and dynamic data.
