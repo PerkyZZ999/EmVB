@@ -61,7 +61,15 @@ const GROUPING_AT_RULE = /^@(media|supports|container|layer)\b/;
 
 /** Prefixes every style rule in `css`, inside `@media` and `@supports` too. Keyframes stay as they are. */
 export function scopeCss(css: string, token: string): string {
-  const prefix = `:where(.${scopeClass(token)}) `;
+  return scopeWith(css, `:where(.${scopeClass(token)}) `);
+}
+
+/** W-971: the same, scoped to several renders at once (`:where(.emvb-s-a,.emvb-s-b) `). */
+export function scopeCssAll(css: string, tokens: readonly string[]): string {
+  return scopeWith(css, `:where(${tokens.map((t) => `.${scopeClass(t)}`).join(",")}) `);
+}
+
+function scopeWith(css: string, prefix: string): string {
   let out = "";
   let i = 0;
   while (i < css.length) {
@@ -74,7 +82,7 @@ export function scopeCss(css: string, token: string): string {
     const end = blockEnd(css, open);
     const body = css.slice(open + 1, end - 1);
     if (GROUPING_AT_RULE.test(prelude)) {
-      out += `${prelude}{${scopeCss(body, token)}}`;
+      out += `${prelude}{${scopeWith(body, prefix)}}`;
     } else if (prelude.startsWith("@")) {
       out += css.slice(i, end).trim();
     } else {

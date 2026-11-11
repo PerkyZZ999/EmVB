@@ -139,6 +139,22 @@ const usesLoop = (declarations: readonly Declaration[]) =>
  * local states beat class states, and Active beats Hover when both apply. Transitions sit on the
  * base rule, and one closing `prefers-reduced-motion: reduce` block turns them all off.
  */
+/**
+ * The element base rules for these types, in the order every sheet writes them (W-971 reads
+ * the same order to write them once for all theme parts on a page).
+ */
+export function baseRulesFor(
+  types: Iterable<string>,
+  baseCss: ReadonlyMap<string, string>,
+): string {
+  return [...types]
+    .toSorted((a, b) =>
+      cssTypeName(a) < cssTypeName(b) ? -1 : cssTypeName(a) > cssTypeName(b) ? 1 : 0,
+    )
+    .map((type) => baseCss.get(type) ?? "")
+    .join("");
+}
+
 export function generateCss({
   design,
   usedTypes,
@@ -313,11 +329,7 @@ export function generateCss({
         // W-801: a looping video kept playing for visitors who ask for reduced motion.
         "@media (prefers-reduced-motion: reduce){.emvb-bg-video{display:none}}"
       : "",
-    ...[...usedTypes]
-      .toSorted((a, b) =>
-        cssTypeName(a) < cssTypeName(b) ? -1 : cssTypeName(a) > cssTypeName(b) ? 1 : 0,
-      )
-      .map((type) => baseCss.get(type) ?? ""),
+    baseRulesFor(usedTypes, baseCss),
     ...classes,
     ...locals,
     ...localRules

@@ -389,8 +389,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/generate.ts",
-          "search": "    ...[...usedTypes]\n      .toSorted((a, b) =>\n        cssTypeName(a) < cssTypeName(b) ? -1 : cssTypeName(a) > cssTypeName(b) ? 1 : 0,\n      )\n      .map((type) => baseCss.get(type) ?? \"\"),\n",
-          "replace": "    ...baseCss.values(),\n"
+          "search": "    baseRulesFor(usedTypes, baseCss),\n",
+          "replace": "    [...baseCss.values()].join(\"\"),\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core"],
@@ -16834,7 +16834,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "out += `${prelude}{${scopeCss(body, token)}}`;",
+          "search": "out += `${prelude}{${scopeWith(body, prefix)}}`;",
           "replace": "out += `${prelude}{${body}}`;"
         }
       ],
@@ -16854,8 +16854,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/css/scope.ts",
-          "search": "const prefix = `:where(.${scopeClass(token)}) `;",
-          "replace": "const prefix = `.${scopeClass(token)} `;"
+          "search": "return scopeWith(css, `:where(.${scopeClass(token)}) `);",
+          "replace": "return scopeWith(css, `.${scopeClass(token)} `);"
         }
       ],
       "command": [
@@ -22635,8 +22635,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/render.ts",
-          "search": "    needsMenuRuntime,\n    ...(design.direction ? { dir: design.direction } : {}),\n  };",
-          "replace": "    needsMenuRuntime,\n  };"
+          "search": "    needsMenuRuntime,\n    ...(design.direction ? { dir: design.direction } : {}),\n    baseTypes,\n  };",
+          "replace": "    needsMenuRuntime,\n    baseTypes,\n  };"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
@@ -45671,6 +45671,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/chip-contrast.test.ts"],
       "expect": "\\(fail\\).*darker than the plain brand"
+    },
+    {
+      "id": "W-971/not-shared",
+      "requirement": "W-971",
+      "description": "The theme CSS repeats every part's shared rules again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "  const cssParts = [sharedPartCss(ordered)];",
+          "replace": "  const cssParts = [ordered.map((s) => s.css).join(\"\\n\")];"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*newest matching header"
+    },
+    {
+      "id": "W-971/base-dropped",
+      "requirement": "W-971",
+      "description": "Shared base rules are dropped instead of written once.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "  return [wrapper + shared, ...own, print].filter(Boolean).join(\"\\n\");",
+          "replace": "  return [wrapper, ...own, print].filter(Boolean).join(\"\\n\");"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*newest matching header"
     }
   ]
 }

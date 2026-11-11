@@ -5,9 +5,15 @@ import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_NODES } from "../limits.ts";
 import { loneAbTests, variantShows } from "../audience/variants.ts";
 import { audienceShows, audienceSummary } from "../audience/rules.ts";
-import { generateCss } from "../css/generate.ts";
+import { baseRulesFor, generateCss } from "../css/generate.ts";
 import { printCss } from "../css/print.ts";
-import { cssScopeToken, scopeClassName, scopeCss, scopeWrapperCss } from "../css/scope.ts";
+import {
+  cssScopeToken,
+  scopeClassName,
+  scopeCss,
+  scopeCssAll,
+  scopeWrapperCss,
+} from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import { controlId } from "../elements/field-id.ts";
 import { layoutHasForm } from "../forms/binding.ts";
@@ -82,6 +88,8 @@ export type RenderResult = {
   /** The site's text direction when set in Site styles, for the host's `<html dir>` (W-230). */
   dir?: "ltr" | "rtl" | "auto";
   warnings: RenderWarning[];
+  /** W-971: the element types whose base rules this sheet holds (see `sharedPartCss`). */
+  baseTypes: string[];
 };
 
 const ID = /^[A-Za-z0-9_-]{4,24}$/;
@@ -205,6 +213,44 @@ function renameIds(vnode: VNode, base: string, next: string): VNode {
 
 /** Elements synced sections may add to one render, all copies together (W-653): 20 full pages. */
 const MAX_SECTION_ELEMENTS = 20 * MAX_NODES;
+
+const baseCss = new Map(Object.entries(ELEMENTS).map(([type, def]) => [type, def.baseCss]));
+// W-927: placeholder + wrapper styles ship with every page that may hold an extension node.
+baseCss.set("ext", EXTENSION_PLACEHOLDER_CSS);
+
+/**
+ * W-971: theme parts on one page (header, footer, popups, floats) each repeated the scope wrapper
+ * rule, the print rules and the base rules of their element types. Given their sheets (each the
+ * `css` of a scoped `renderPage`), this writes the wrapper and the union of base rules once, scoped
+ * to every part, then each part's own rules, then the print rules once. Base rules have no
+ * specificity of their own beyond their element class and came before every class and local rule
+ * in each sheet, so writing them first keeps the cascade.
+ */
+export function sharedPartCss(
+  sheets: readonly { css: string; scope: string; baseTypes: readonly string[] }[],
+): string {
+  const scopes = sheets.flatMap((s) => {
+    const token = cssScopeToken(s.scope);
+    return token ? [token] : [];
+  });
+  if (scopes.length !== sheets.length || sheets.length < 2)
+    return sheets.map((s) => s.css).join("\n");
+  const wrapper = scopeWrapperCss();
+  const print = printCss();
+  const own: string[] = [];
+  for (const sheet of sheets) {
+    const token = cssScopeToken(sheet.scope) as string;
+    const base = scopeCss(baseRulesFor(sheet.baseTypes, baseCss), token);
+    let css = sheet.css;
+    if (!css.startsWith(wrapper) || !css.endsWith(print) || (base && !css.includes(base)))
+      return sheets.map((s) => s.css).join("\n");
+    css = css.slice(wrapper.length, css.length - print.length);
+    own.push(base ? css.replace(base, "") : css);
+  }
+  const union = new Set(sheets.flatMap((s) => s.baseTypes));
+  const shared = scopeCssAll(baseRulesFor(union, baseCss), scopes);
+  return [wrapper + shared, ...own, print].filter(Boolean).join("\n");
+}
 
 export function renderPage(
   storedLayout: Layout,
@@ -685,9 +731,6 @@ export function renderPage(
       toc.vnode.children = [];
     }
   }
-  const baseCss = new Map(Object.entries(ELEMENTS).map(([type, def]) => [type, def.baseCss]));
-  // W-927: placeholder + wrapper styles ship with every page that may hold an extension node.
-  baseCss.set("ext", EXTENSION_PLACEHOLDER_CSS);
   const css = generateCss({
     design,
     usedTypes,
@@ -712,6 +755,7 @@ export function renderPage(
     needsMenuRuntime: rendered.menuDropdown || layoutHasMenuDropdown(layout),
     ...(design.direction ? { dir: design.direction } : {}),
     warnings,
+    baseTypes: [...usedTypes],
   };
 }
 

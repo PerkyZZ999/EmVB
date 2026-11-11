@@ -19,6 +19,8 @@ export type RenderedPage = {
   needsMenuRuntime: boolean;
   /** The site's text direction when set, for the host's `<html dir>` (W-230). */
   dir?: "ltr" | "rtl" | "auto";
+  /** W-971: the element types whose base rules `css` holds, for `sharedPartCss`. */
+  baseTypes?: string[];
 };
 
 /** The design document through the in-process public route (no HTTP round trip, D-013). */
@@ -92,17 +94,14 @@ export function renderStored(
       ...(design.direction ? { dir: design.direction } : {}),
     };
   }
-  const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime } = renderPage(
-    layout,
-    design,
-    {
+  const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime, baseTypes } =
+    renderPage(layout, design, {
       formDefinitions,
       dynamic,
       scope: pageId,
       ...(partIds ? { partIds } : {}),
       ...(lang ? { lang } : {}),
-    },
-  );
+    });
   return {
     html,
     css,
@@ -110,5 +109,6 @@ export function renderStored(
     needsTabsRuntime,
     needsMenuRuntime,
     ...(design.direction ? { dir: design.direction } : {}),
+    baseTypes,
   };
 }

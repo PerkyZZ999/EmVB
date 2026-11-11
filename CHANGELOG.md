@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Smaller theme CSS (W-971).** The header, footer, popups and floats on a page each repeated the same element base rules, scope rule and print rules in `resolveThemeParts().css`; they are now written once for all of them. Pages look and behave the same (screenshots compared pixel for pixel); each part's own `css` is unchanged.
 - **Page weight and the version timeline (W-973).** The page weight meter counts the images and embeds of one arm of an A/B test (the heavier), not both, since a visitor sees one. The version timeline lists **Page styles** when a version changed the page's own styles or settings, with **Restore page styles**.
 - **My uploads holds 500 icons, without duplicates (W-972).** The icon library's My uploads now holds up to 500 SVGs (was 100), and the server recognises the same drawing uploaded again (also from two tabs at once) and keeps one icon.
 - **Unpublished synced sections are marked (W-970).** The canvas draws a synced section or Loop item from its latest saved version. When that isn't what visitors see, its canvas label says "unpublished changes" or "not published", and its settings explain that visitors see the published version (or nothing) until it is published in Theme Builder.

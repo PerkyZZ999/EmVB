@@ -14,6 +14,7 @@ import {
   parseThemePartType,
   pickThemePartWinner,
   POPUP_CHROME_CSS,
+  sharedPartCss,
   validateConditions,
   validateFloatSettings,
   validateTriggers,
@@ -528,6 +529,8 @@ export async function resolveThemePartsWith(
 
   const byId = new Map(parts.map((part) => [part.id, part]));
   const rendered: RenderedPage[] = [];
+  // W-971: each part's scoped sheet, to write the shared rules once in `css`.
+  const sheets = new Map<string, { css: string; scope: string; baseTypes: readonly string[] }>();
   // W-307: bound fields in a part read site settings and URL parameters too.
   // W-312/W-313: synced sections and Loop items the part uses count too.
   const boundFor = (stored: StoredPart, referenced: ThemeDynamicData | undefined) =>
@@ -571,6 +574,8 @@ export async function resolveThemePartsWith(
       options.lang ?? astro.currentLocale,
     );
     rendered.push(page);
+    if (page.css)
+      sheets.set(stored.id, { css: page.css, scope: stored.id, baseTypes: page.baseTypes ?? [] });
     // W-216: a header or footer part is the page's banner or contentinfo landmark (hosts put it
     // straight in <body> instead of their own <header>/<footer>).
     // W-586: a part that already has its own header or footer box keeps that one as the landmark;
@@ -711,13 +716,12 @@ export async function resolveThemePartsWith(
     )
   ).filter((item): item is RenderedFloat => item !== null);
 
-  const cssParts = [
-    header?.css,
-    content?.css,
-    footer?.css,
-    ...popups.map((p) => p.css),
-    ...floats.map((item) => item.css),
-  ];
+  // W-971: the parts' shared rules (scope wrapper, element base rules, print) are written once.
+  const ordered = [header, content, footer, ...popups, ...floats].flatMap((part) => {
+    const sheet = part ? sheets.get(part.id) : undefined;
+    return sheet ? [sheet] : [];
+  });
+  const cssParts = [sharedPartCss(ordered)];
   if (popups.length > 0) cssParts.push(POPUP_CHROME_CSS);
   if (floats.length > 0) cssParts.push(FLOAT_CHROME_CSS);
   const css = cssParts.filter(Boolean).join("\n");

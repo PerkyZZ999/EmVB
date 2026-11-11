@@ -157,7 +157,15 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.footer?.html).toContain("Footer");
     expect(resolved.content).toBeNull();
     expect(resolved.popups).toEqual([]);
-    expect(resolved.css).toBe([resolved.header?.css, resolved.footer?.css].join("\n"));
+    // W-971: the shared rules are written once; each part keeps its own complete sheet.
+    const full = [resolved.header?.css, resolved.footer?.css].join("\n");
+    expect(resolved.css.length).toBeLessThan(full.length);
+    const once = (text: string) => resolved.css.split(text).length - 1;
+    expect(once(":where(.emvb-scope){display:contents}")).toBe(1);
+    expect(once("@media print{")).toBe(1);
+    expect(resolved.css).toContain(":where(.emvb-s-HEADNEW1,.emvb-s-FOOT0001) .emvb-heading{");
+    for (const rendered of [resolved.header, resolved.footer])
+      expect(rendered?.css).toContain(":where(.emvb-scope){display:contents}");
     expect(resolved.needsPopupsRuntime).toBe(false);
   });
 

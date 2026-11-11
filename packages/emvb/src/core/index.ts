@@ -224,6 +224,7 @@ export {
 } from "./design/devices.ts";
 export {
   renderPage,
+  sharedPartCss,
   type RenderMode,
   type RenderResult,
   type RenderWarning,
