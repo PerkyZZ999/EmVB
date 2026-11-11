@@ -45274,17 +45274,17 @@
         }
       ],
       "command": ["bun", "test", "test/site/nav.test.ts"],
-      "expect": "\\(fail\\).*eight items"
+      "expect": "\\(fail\\).*seven items"
     },
     {
       "id": "W-965/styling-unreachable",
       "requirement": "W-965",
-      "description": "Styling is left out of the footer too.",
+      "description": "Under the hood is left out of the footer too.",
       "edits": [
         {
           "file": "site/src/data/nav.ts",
-          "search": "  { href: \"/#styles\", label: \"Styling\" },\n  ...nav.slice(2),",
-          "replace": "  ...nav.slice(2),"
+          "search": "  { href: \"/#under-the-hood\", label: \"Under the hood\" },\n",
+          "replace": ""
         }
       ],
       "command": ["bun", "test", "test/site/nav.test.ts"],

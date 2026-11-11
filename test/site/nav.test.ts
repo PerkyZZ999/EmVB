@@ -5,12 +5,11 @@ import { footerNav, nav } from "../../site/src/data/nav";
 const read = (path: string) => readFileSync(new URL(`../../${path}`, import.meta.url), "utf8");
 
 describe("emvb.dev top bar and footer (W-965)", () => {
-  test("the top bar has Charles's eight items, in order", () => {
+  test("the top bar has Charles's seven items, in order", () => {
     expect(nav.map((item) => item.label)).toEqual([
       "Home",
       "Features",
       "Theme Builder",
-      "Under the hood",
       "FAQ",
       "Documentation",
       "Playground",
@@ -22,6 +21,7 @@ describe("emvb.dev top bar and footer (W-965)", () => {
     const footer = footerNav.map((item) => item.href);
     for (const item of nav) expect(footer).toContain(item.href);
     expect(footer).toContain("/#styles");
+    expect(footer).toContain("/#under-the-hood");
   });
 
   test("GitHub is an icon button with a name, not a text link in the bar", () => {
