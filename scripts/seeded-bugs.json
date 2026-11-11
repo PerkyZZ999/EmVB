@@ -31592,8 +31592,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/icon-routes.ts",
-          "search": "    if (held.items.length >= UPLOAD_LIST_LIMIT) {",
-          "replace": "    if (held.items.length > UPLOAD_LIST_LIMIT) {"
+          "search": "    if (held.length >= UPLOAD_LIST_LIMIT) {",
+          "replace": "    if (held.length > UPLOAD_LIST_LIMIT) {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/icon-uploads.test.ts"],
@@ -45559,6 +45559,48 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/part-status.test.tsx"],
       "expect": "\\(fail\\).*knows which synced sections"
+    },
+    {
+      "id": "W-972/random-ids",
+      "requirement": "W-972",
+      "description": "Two uploads of the same SVG at once make two rows.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/icon-routes.ts",
+          "search": "    const id = await svgId(prepared.svg);",
+          "replace": "    const id = crypto.randomUUID().replaceAll(\"-\", \"\").slice(0, 16);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/icon-uploads.test.ts"],
+      "expect": "\\(fail\\).*same drawing uploaded again"
+    },
+    {
+      "id": "W-972/no-dedupe",
+      "requirement": "W-972",
+      "description": "A later upload of the same SVG isn't recognised.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/icon-routes.ts",
+          "search": "    const same = held.find(({ data }) => data.svg === prepared.svg);",
+          "replace": "    const same = held.find(({ data }) => data.svg === \"never\");"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/icon-uploads.test.ts"],
+      "expect": "\\(fail\\).*same drawing uploaded again"
+    },
+    {
+      "id": "W-972/one-page",
+      "requirement": "W-972",
+      "description": "My uploads stops at the first storage page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/icon-routes.ts",
+          "search": "    if (!result.hasMore || !result.cursor) break;",
+          "replace": "    break;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/icon-uploads.test.ts"],
+      "expect": "\\(fail\\).*more than one storage page"
     }
   ]
 }

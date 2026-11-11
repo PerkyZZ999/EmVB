@@ -24,16 +24,40 @@ type IconStore = {
   query(options?: {
     orderBy?: Record<string, "asc" | "desc">;
     limit?: number;
-  }): Promise<{ items: Array<{ id: string; data: UploadedIcon }>; hasMore: boolean }>;
+    cursor?: string;
+  }): Promise<{
+    items: Array<{ id: string; data: UploadedIcon }>;
+    hasMore: boolean;
+    cursor?: string;
+  }>;
 };
 
 const store = (ctx: RouteContext<unknown>) => ctx.storage["icons"] as unknown as IconStore;
 
 /**
- * The uploads the picker lists, and the most My uploads holds (W-535): past it the oldest
- * uploads dropped off the list and could no longer be seen or deleted.
+ * The most My uploads holds, and the uploads the picker lists (W-535; 500 since W-972). EmDash
+ * returns plugin storage 100 rows at a time, so the list is read page by page.
  */
-export const UPLOAD_LIST_LIMIT = 100;
+export const UPLOAD_LIST_LIMIT = 500;
+const STORAGE_PAGE = 100;
+
+/** Every upload, newest first, up to the limit, following EmDash's storage cursor (W-972). */
+async function allUploads(ctx: RouteContext<unknown>) {
+  const items: Array<{ id: string; data: UploadedIcon }> = [];
+  let cursor: string | undefined;
+  for (let page = 0; page < UPLOAD_LIST_LIMIT / STORAGE_PAGE; page += 1) {
+    // oxlint-disable-next-line no-await-in-loop -- each page needs the previous page's cursor
+    const result = await store(ctx).query({
+      orderBy: { uploadedAt: "desc" },
+      limit: STORAGE_PAGE,
+      ...(cursor ? { cursor } : {}),
+    });
+    items.push(...result.items);
+    if (!result.hasMore || !result.cursor) break;
+    cursor = result.cursor;
+  }
+  return items.slice(0, UPLOAD_LIST_LIMIT);
+}
 
 /** An icon's label as typed: trimmed and capped (W-655: a rename may hold a slash, as in "AC/DC"). */
 // W-656: control characters become spaces and invisible or direction-changing marks go, so a
@@ -75,11 +99,7 @@ export function publicUploadedIcon(id: string, data: UploadedIcon): UploadedIcon
 export const iconsRoute: PluginRoute = {
   permission: "content:edit_any",
   handler: async (ctx) => {
-    const page = await store(ctx).query({
-      orderBy: { uploadedAt: "desc" },
-      limit: UPLOAD_LIST_LIMIT,
-    });
-    const items = page.items.flatMap(({ id, data }) => {
+    const items = (await allUploads(ctx)).flatMap(({ id, data }) => {
       const item = publicUploadedIcon(id, data);
       return item ? [item] : [];
     });
@@ -100,15 +120,27 @@ export const iconUploadRoute: PluginRoute<z.infer<typeof UploadInput>> = {
   handler: async (ctx) => {
     const prepared = prepareUploadedSvg(ctx.input.svg);
     if (!prepared.ok) throw new PluginRouteError("INVALID_SVG", prepared.message, 422);
-    const held = await store(ctx).query({ limit: UPLOAD_LIST_LIMIT });
-    if (held.items.length >= UPLOAD_LIST_LIMIT) {
+    const held = await allUploads(ctx);
+    // W-972: the same SVG uploaded again (twice at once from two tabs, or later) is the icon
+    // already in My uploads; the check runs on the sanitized markup, so it is the same drawing.
+    const same = held.find(({ data }) => data.svg === prepared.svg);
+    if (same) {
+      return {
+        item: { id: same.id, ...same.data },
+        imagesLeftOut: prepared.imagesLeftOut,
+        duplicate: true,
+      };
+    }
+    if (held.length >= UPLOAD_LIST_LIMIT) {
       throw new PluginRouteError(
         "UPLOADS_FULL",
         `My uploads holds up to ${UPLOAD_LIST_LIMIT} icons. Delete one you no longer use, then upload again.`,
         409,
       );
     }
-    const id = crypto.randomUUID().replaceAll("-", "").slice(0, 16);
+    // W-972: the id is the drawing's hash, so two uploads of the same SVG at the same moment
+    // land on one row instead of two.
+    const id = await svgId(prepared.svg);
     const item: UploadedIcon = {
       name: uploadName(ctx.input.name),
       svg: prepared.svg,
@@ -118,6 +150,14 @@ export const iconUploadRoute: PluginRoute<z.infer<typeof UploadInput>> = {
     return { item: { id, ...item }, imagesLeftOut: prepared.imagesLeftOut };
   },
 };
+
+/** The first 16 hex digits of the SHA-256 of the sanitized markup. */
+async function svgId(svg: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(svg));
+  return [...new Uint8Array(digest).slice(0, 8)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 const IdInput = z.object({
   id: z.string().regex(/^[0-9a-f]{16}$/, "Unknown icon"),

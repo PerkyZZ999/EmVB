@@ -66,25 +66,59 @@ describe("icon upload routes (W-239)", () => {
   });
 
   test("My uploads is full at the list limit, so no upload drops out of sight (W-535)", async () => {
-    const svg = '<svg viewBox="0 0 1 1"><path d="M0 0"/></svg>';
+    // W-972: each icon is its own drawing (the same one again is the upload already there).
+    const svgOf = (i: number) => `<svg viewBox="0 0 1 1"><path d="M${i} 0"/></svg>`;
+    const svg = svgOf(UPLOAD_LIST_LIMIT);
     let firstId = "";
     for (let i = 0; i < UPLOAD_LIST_LIMIT; i++) {
       // oxlint-disable-next-line no-await-in-loop -- one runtime; uploads in turn
       const up = await t.route("icons/upload", {
         user: editor(),
-        body: { name: `i${i}.svg`, svg },
+        body: { name: `i${i}.svg`, svg: svgOf(i) },
       });
       if (i === 0) firstId = (up.body["data"] as { item: Item }).item.id;
     }
     const refused = await t.route("icons/upload", { user: editor(), body: { name: "x.svg", svg } });
     expect(refused.status).toBe(409);
-    expect(JSON.stringify(refused.body)).toContain("My uploads holds up to 100 icons");
+    expect(JSON.stringify(refused.body)).toContain(
+      `My uploads holds up to ${UPLOAD_LIST_LIMIT} icons`,
+    );
     await t.route("icons/delete", { user: editor(), body: { id: firstId } });
     const accepted = await t.route("icons/upload", {
       user: editor(),
       body: { name: "x.svg", svg },
     });
     expect(accepted.status).toBe(200);
+  });
+
+  test("W-972: the same drawing uploaded again is the icon already in My uploads", async () => {
+    const svg = '<svg viewBox="0 0 2 2"><path d="M1 1"/></svg>';
+    const [a, b] = await Promise.all([
+      t.route("icons/upload", { user: editor(), body: { name: "one.svg", svg } }),
+      t.route("icons/upload", { user: editor(), body: { name: "copy.svg", svg } }),
+    ]);
+    const later = await t.route("icons/upload", {
+      user: editor(),
+      body: { name: "again.svg", svg: `<?xml version="1.0"?>\n${svg}` },
+    });
+    const list = await t.route("icons", { user: editor() });
+    const items = (list.body["data"] as { items: Item[] }).items;
+    const ids = [a, b, later].map((r) => (r.body["data"] as { item: Item }).item.id);
+    expect(new Set(ids).size).toBe(1);
+    expect((later.body["data"] as { duplicate?: boolean }).duplicate).toBe(true);
+    expect(items).toHaveLength(1);
+  });
+
+  test("W-972: My uploads lists more than one storage page", async () => {
+    for (let i = 0; i < 130; i++) {
+      // oxlint-disable-next-line no-await-in-loop -- one runtime; uploads in turn
+      await t.route("icons/upload", {
+        user: editor(),
+        body: { name: `p${i}.svg`, svg: `<svg viewBox="0 0 1 1"><path d="M${i} 1"/></svg>` },
+      });
+    }
+    const list = await t.route("icons", { user: editor() });
+    expect((list.body["data"] as { items: Item[] }).items).toHaveLength(130);
   });
 
   test("anonymous visitors and authors can neither list nor upload", async () => {
