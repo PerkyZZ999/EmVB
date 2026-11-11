@@ -35,8 +35,9 @@ describe("renderTabs (W-091)", () => {
         `<input type="radio" name="${g}" id="${g}-0" class="emvb-tab-input" checked="checked">` +
         `<input type="radio" name="${g}" id="${g}-1" class="emvb-tab-input">` +
         '<div class="emvb-tab-list" role="tablist" aria-orientation="horizontal">' +
-        `<label class="emvb-tab-label" for="${g}-0" id="${g}-tab-0" role="tab" aria-selected="true" aria-controls="${g}-panel-0" tabindex="0">One</label>` +
-        `<label class="emvb-tab-label" for="${g}-1" id="${g}-tab-1" role="tab" aria-selected="false" aria-controls="${g}-panel-1" tabindex="-1">Two</label>` +
+        // W-975: the tab role sits on a span inside the label (ARIA allows no role on <label>).
+        `<label class="emvb-tab-label" for="${g}-0"><span class="emvb-tab" id="${g}-tab-0" role="tab" aria-selected="true" aria-controls="${g}-panel-0" tabindex="0">One</span></label>` +
+        `<label class="emvb-tab-label" for="${g}-1"><span class="emvb-tab" id="${g}-tab-1" role="tab" aria-selected="false" aria-controls="${g}-panel-1" tabindex="-1">Two</span></label>` +
         '</div><div class="emvb-tab-panels">' +
         `<div class="emvb-tab-panel" id="${g}-panel-0" role="tabpanel" aria-labelledby="${g}-tab-0"></div>` +
         `<div class="emvb-tab-panel" id="${g}-panel-1" role="tabpanel" aria-labelledby="${g}-tab-1"></div>` +

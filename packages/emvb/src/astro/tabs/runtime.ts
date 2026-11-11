@@ -24,6 +24,13 @@ const KEY_TARGETS: Record<string, (current: number, count: number) => number> = 
   End: (_current, count) => count - 1,
 };
 
+/**
+ * W-975: the element with the tab role: a span inside the label since 1.1; the label itself on
+ * pages rendered before.
+ */
+const tabOf = (label: HTMLElement): HTMLElement =>
+  label.querySelector<HTMLElement>(":scope > [role='tab']") ?? label;
+
 /** Selects tab `index`; only keyboard navigation moves focus, never load or a radio change. */
 function activate(root: HTMLElement, index: number, focus = false): void {
   if (root.dataset["emvbTabsActivating"] === "1") return;
@@ -37,11 +44,13 @@ function activate(root: HTMLElement, index: number, focus = false): void {
     if (!input.checked) input.checked = true;
     for (const [i, label] of labels.entries()) {
       const selected = i === next;
-      label.setAttribute("aria-selected", String(selected));
-      label.tabIndex = selected ? 0 : -1;
+      const tab = tabOf(label);
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
       panels[i]?.setAttribute("aria-hidden", String(!selected));
     }
-    const focusTarget = focus ? labels[next] : undefined;
+    const focusLabel = focus ? labels[next] : undefined;
+    const focusTarget = focusLabel ? tabOf(focusLabel) : undefined;
     if (focusTarget && document.activeElement !== focusTarget) {
       try {
         focusTarget.focus({ preventScroll: true });
@@ -63,13 +72,14 @@ function selectedIndex(root: HTMLElement): number {
 function linkTabs(root: HTMLElement, labels: HTMLElement[], panels: HTMLElement[]): void {
   const prefix = root.id || "emvb-tabs";
   for (const [i, label] of labels.entries()) {
+    const tab = tabOf(label);
     const panel = panels[i];
     const panelId = panel?.id || `${prefix}-panel-${i}`;
     if (panel && !panel.id) panel.id = panelId;
-    label.setAttribute("aria-controls", panelId);
+    tab.setAttribute("aria-controls", panelId);
     if (panel) {
-      if (!label.id) label.id = `${prefix}-tab-${i}`;
-      panel.setAttribute("aria-labelledby", label.id);
+      if (!tab.id) tab.id = `${prefix}-tab-${i}`;
+      panel.setAttribute("aria-labelledby", tab.id);
     }
   }
 }

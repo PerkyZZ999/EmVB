@@ -50,7 +50,7 @@ describe("W-664 blank Tab and Accordion titles", () => {
         { id: "tabp0003", type: "tab-panel", props: { label: "   " }, children: [] },
       ],
     } as LayoutNode;
-    expect(renderPage(page(tabs), design).html).toMatch(/role="tab"[^>]*>Tab 2<\/label>/);
+    expect(renderPage(page(tabs), design).html).toMatch(/role="tab"[^>]*>Tab 2<\/span><\/label>/);
   });
 
   test("an accordion title of only spaces still names its toggle", () => {

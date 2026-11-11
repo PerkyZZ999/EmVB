@@ -3483,8 +3483,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/tabs/runtime.ts",
-          "search": "if (!label.id) label.id = `${prefix}-tab-${i}`;",
-          "replace": "label.id = `${prefix}-tab-${i}`;"
+          "search": "if (!tab.id) tab.id = `${prefix}-tab-${i}`;",
+          "replace": "tab.id = `${prefix}-tab-${i}`;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
@@ -4000,8 +4000,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/tabs/runtime.ts",
-          "search": "    const focusTarget = focus ? labels[next] : undefined;",
-          "replace": "    const focusTarget = labels[next];"
+          "search": "    const focusLabel = focus ? labels[next] : undefined;",
+          "replace": "    const focusLabel = labels[next];"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
@@ -11943,8 +11943,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/tabs/runtime.ts",
-          "search": "    if (panel) {\n      if (!label.id)",
-          "replace": "    {\n      if (!label.id)"
+          "search": "    if (panel) {\n      if (!tab.id)",
+          "replace": "    {\n      if (!tab.id)"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/tabs/runtime.test.ts"],
@@ -45699,6 +45699,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*newest matching header"
+    },
+    {
+      "id": "W-975/role-on-label",
+      "requirement": "W-975",
+      "description": "The tab role goes back on the <label>.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/tabs.ts",
+          "search": "      attrs: { class: \"emvb-tab-label\", for: inputId },",
+          "replace": "      attrs: { class: \"emvb-tab-label\", for: inputId, role: \"tab\" },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*span inside each label is the tab"
+    },
+    {
+      "id": "W-975/runtime-on-label",
+      "requirement": "W-975",
+      "description": "The tabs script marks the label instead of the tab span.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "  label.querySelector<HTMLElement>(\":scope > [role='tab']\") ?? label;",
+          "replace": "  label;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/tabs/runtime.test.ts"],
+      "expect": "\\(fail\\).*span inside each label is the tab"
     }
   ]
 }

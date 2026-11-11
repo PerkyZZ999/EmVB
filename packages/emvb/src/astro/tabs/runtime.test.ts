@@ -343,3 +343,43 @@ describe("links into a closed tab open it (W-414)", () => {
     expect((root.querySelectorAll(".emvb-tab-input")[1] as HTMLInputElement).checked).toBe(true);
   });
 });
+
+describe("tabs rendered by 1.1 (W-975)", () => {
+  test("the span inside each label is the tab: it gets aria-selected, the id and focus", async () => {
+    const { renderPage } = await import("../../core/render/index.ts");
+    const { emptyDesign } = await import("../../core/schema/design.ts");
+    const { html } = renderPage(
+      {
+        schemaVersion: 18,
+        root: {
+          id: "root0001",
+          type: "container",
+          props: {},
+          children: [
+            {
+              id: "tabs0001",
+              type: "tabs",
+              props: {},
+              children: [
+                { id: "tabp0001", type: "tab-panel", props: { label: "One" }, children: [] },
+                { id: "tabp0002", type: "tab-panel", props: { label: "Two" }, children: [] },
+              ],
+            },
+          ],
+        },
+      } as never,
+      emptyDesign(),
+    );
+    document.body.innerHTML = html;
+    initTabs();
+    const tabs = [...document.querySelectorAll<HTMLElement>(".emvb-tab")];
+    expect(tabs.map((t) => t.getAttribute("role"))).toEqual(["tab", "tab"]);
+    expect(document.querySelectorAll("label[role]").length).toBe(0);
+    tabs[0]?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    expect(tabs[1]?.getAttribute("aria-selected")).toBe("true");
+    expect(tabs[0]?.getAttribute("aria-selected")).toBe("false");
+    expect(document.activeElement).toBe(tabs[1] ?? null);
+    const panel = document.getElementById(tabs[1]?.getAttribute("aria-controls") ?? "");
+    expect(panel?.getAttribute("aria-labelledby")).toBe(tabs[1]?.id);
+  });
+});

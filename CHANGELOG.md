@@ -25,6 +25,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **The 1.x promise, clarified (W-971, W-975).** A 1.x page keeps its look and behaviour on every later 1.x; its HTML and CSS bytes may improve for accessibility and page size ([docs/SCHEMA.md](docs/SCHEMA.md)). Each such change is listed here and checked by comparing screenshots of the saved pages.
+- **Tabs markup (W-975).** The tab role moved from the `<label>` (where ARIA allows no role, axe `aria-allowed-role`) to a `<span class="emvb-tab">` inside it. Tabs look and work the same, with and without the tabs script; the script also still handles pages rendered by 1.0. Hosts with CSS for `.emvb-tab-label[aria-selected]` should use `.emvb-tab[aria-selected]`.
 - **Smaller theme CSS (W-971).** The header, footer, popups and floats on a page each repeated the same element base rules, scope rule and print rules in `resolveThemeParts().css`; they are now written once for all of them. Pages look and behave the same (screenshots compared pixel for pixel); each part's own `css` is unchanged.
 - **Page weight and the version timeline (W-973).** The page weight meter counts the images and embeds of one arm of an A/B test (the heavier), not both, since a visitor sees one. The version timeline lists **Page styles** when a version changed the page's own styles or settings, with **Restore page styles**.
 - **My uploads holds 500 icons, without duplicates (W-972).** The icon library's My uploads now holds up to 500 SVGs (was 100), and the server recognises the same drawing uploaded again (also from two tabs at once) and keeps one icon.

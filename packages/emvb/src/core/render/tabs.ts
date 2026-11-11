@@ -29,19 +29,26 @@ export function renderTabs(
     inputs.push({ tag: "input", attrs: inputAttrs, children: [] });
     const panelDomId = `${group}-panel-${i}`;
     const tabDomId = `${group}-tab-${i}`;
+    // W-975: ARIA allows no role on a <label>, so the tab is a span inside it; the label still
+    // switches the radio, which keeps the tabs working without the script.
     labels.push({
       tag: "label",
-      attrs: {
-        class: "emvb-tab-label",
-        for: inputId,
-        id: tabDomId,
-        role: "tab",
-        "aria-selected": i === 0 ? "true" : "false",
-        "aria-controls": panelDomId,
-        tabindex: i === 0 ? "0" : "-1",
-      },
-      // W-664: a label of only spaces made a zero-width tab nobody could click or hear.
-      children: [panel.props.label.trim() || `Tab ${i + 1}`],
+      attrs: { class: "emvb-tab-label", for: inputId },
+      children: [
+        {
+          tag: "span",
+          attrs: {
+            class: "emvb-tab",
+            id: tabDomId,
+            role: "tab",
+            "aria-selected": i === 0 ? "true" : "false",
+            "aria-controls": panelDomId,
+            tabindex: i === 0 ? "0" : "-1",
+          },
+          // W-664: a label of only spaces made a zero-width tab nobody could click or hear.
+          children: [panel.props.label.trim() || `Tab ${i + 1}`],
+        },
+      ],
     });
     // W-598: the panel renders like any element, so its own style, classes and device
     // visibility reach the page; the tab wiring is added on top.

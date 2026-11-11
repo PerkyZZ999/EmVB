@@ -21,10 +21,14 @@ From 1.0, within 1.x:
 
 - No key is removed or renamed, and no key changes meaning.
 - New keys are additive and optional.
-- A 1.x page renders the same on every later 1.x.
+- A 1.x page looks and behaves the same on every later 1.x. The HTML and CSS bytes may still
+  improve for accessibility and page size (since 1.1: the Tabs markup, and theme parts' shared
+  CSS written once); such a change is listed in the CHANGELOG and checked by
+  comparing screenshots of the saved pages before and after.
 - Every older page (0.1–0.9, layout schemas 1–17 and design schemas 1–16) migrates forward
-  automatically on read. Stored 0.x pages render byte-identical HTML and CSS after migration. The
-  `packages/emvb/test/compat` corpus proves this, and it runs in `bun run check`.
+  automatically on read and renders as it did. The `packages/emvb/test/compat` corpus pins the
+  exact HTML and CSS of saved pages, and it runs in `bun run check`; its expected output only
+  changes together with such a listed improvement.
 - A key written by a newer 1.x is **kept and ignored, not stripped** (see below).
 - Breaking changes only come in 2.0, with a migration.
 
