@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- **Tab stays inside EmVB's dialogs (W-984).** In the image editor, Export pages and every other EmVB dialog, a quick Tab past the last control could leave the dialog for the page behind (the dialog library moves focus back one frame later). Tab and Shift+Tab now wrap from the last control to the first and back.
 - **Laptop fixes (W-959).** The Style panel said "Editing Tablet" while editing Laptop; each device now names itself and what it overrides. An Elementor boxed container's Laptop layout values (direction, gap, alignment) were dropped on import; they are kept.
 - **Style source chip contrast (W-976).** The active chip in the Style panel's style sources (such as **Local**) had white text at 4.48:1 on the brand blue, just under WCAG AA. Its background is now a little darker (over 4.5:1, light and dark).
 

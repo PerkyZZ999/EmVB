@@ -46069,6 +46069,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/design/wide-hide.test.ts"],
       "expect": "\\(fail\\).*wide values move to the class"
+    },
+    {
+      "id": "W-984/no-wrap",
+      "requirement": "W-984",
+      "description": "Tab on the last control is left to the browser (and Base UI's guards).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/dialog-tab-wrap.ts",
+          "search": "  event.preventDefault();\n  target.focus();\n  return true;",
+          "replace": "  return false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/dialog-tab-wrap.test.ts"],
+      "expect": "\\(fail\\).*Tab on the last control goes to the first"
+    },
+    {
+      "id": "W-984/any-dialog",
+      "requirement": "W-984",
+      "description": "EmDash's own dialogs are wrapped too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/dialog-tab-wrap.ts",
+          "search": "  return ours ? dialog : null;",
+          "replace": "  return dialog;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/dialog-tab-wrap.test.ts"],
+      "expect": "\\(fail\\).*only EmVB dialogs are wrapped"
     }
   ]
 }
