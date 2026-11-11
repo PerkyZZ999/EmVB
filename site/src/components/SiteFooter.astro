@@ -1,5 +1,5 @@
 ---
-import { externalLinks, nav } from "../data/nav";
+import { externalLinks, footerNav } from "../data/nav";
 import { project } from "../data/project";
 import Logo from "./Logo.astro";
 
@@ -30,7 +30,7 @@ const projectLinks = [
     </div>
     <nav aria-label="Footer sections">
       <p class="heading">Site</p>
-      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      {footerNav.map((item) => <a href={item.href}>{item.label}</a>)}
     </nav>
     <nav aria-label="Project">
       <p class="heading">Project</p>
@@ -40,8 +40,6 @@ const projectLinks = [
       Screenshots show the real editor running on the Node demo. Northfold is a fictional company.
     </p>
   </div>
-
-  <p class="wordmark" aria-hidden="true">EmVB</p>
 </footer>
 
 <style>
@@ -133,22 +131,6 @@ const projectLinks = [
 
   .small {
     grid-column: 1 / -1;
-  }
-
-  /* An outlined wordmark, cropped by the bottom edge. */
-  .wordmark {
-    margin: 0 0 -0.22em;
-    color: transparent;
-    font-family: var(--font-display);
-    font-size: clamp(6rem, 26vw, 22rem);
-    font-weight: 600;
-    letter-spacing: -0.05em;
-    line-height: 0.8;
-    text-align: center;
-    -webkit-text-stroke: 1px var(--rule-strong);
-    user-select: none;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%);
-    background-clip: text;
   }
 
   @media (max-width: 800px) {

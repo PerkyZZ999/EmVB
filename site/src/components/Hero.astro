@@ -44,7 +44,7 @@ const weights = [
 
 <section class="hero blueprint" id="top" aria-labelledby="hero-title">
   <div class="wrap intro">
-    <a class="release" href="/changelog/" aria-label={`EmVB ${project.version} for EmDash CMS 1.4: see what's new in the changelog`}>
+    <a class="release" href="/changelog/" aria-label={`v${project.version} is out for EmDash CMS 1.4: see what's new in the changelog`}>
       <span class="pulse" aria-hidden="true"></span>
       <span>v{project.version} is out</span>
       <span class="sep" aria-hidden="true"></span>
@@ -150,6 +150,8 @@ const weights = [
     --headline-weight: 400;
     position: relative;
     padding-block: var(--space-7) var(--space-9);
+    /* The phone frame leans past the edge on narrow laptops; it must not scroll the page sideways. */
+    overflow-x: clip;
   }
 
   .hero:has(input[value="ember"]:checked) {

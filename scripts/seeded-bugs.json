@@ -45261,6 +45261,48 @@
       ],
       "command": ["bun", "test", "test/site/docs.test.ts"],
       "expect": "\\(fail\\).*every listed doc"
+    },
+    {
+      "id": "W-965/styling-back",
+      "requirement": "W-965",
+      "description": "Styling is back in the top bar.",
+      "edits": [
+        {
+          "file": "site/src/data/nav.ts",
+          "search": "  { href: \"/#features\", label: \"Features\" },\n  { href: \"/#theme-builder\"",
+          "replace": "  { href: \"/#features\", label: \"Features\" },\n  { href: \"/#styles\", label: \"Styling\" },\n  { href: \"/#theme-builder\""
+        }
+      ],
+      "command": ["bun", "test", "test/site/nav.test.ts"],
+      "expect": "\\(fail\\).*eight items"
+    },
+    {
+      "id": "W-965/styling-unreachable",
+      "requirement": "W-965",
+      "description": "Styling is left out of the footer too.",
+      "edits": [
+        {
+          "file": "site/src/data/nav.ts",
+          "search": "  { href: \"/#styles\", label: \"Styling\" },\n  ...nav.slice(2),",
+          "replace": "  ...nav.slice(2),"
+        }
+      ],
+      "command": ["bun", "test", "test/site/nav.test.ts"],
+      "expect": "\\(fail\\).*stays in the footer"
+    },
+    {
+      "id": "W-965/github-unnamed",
+      "requirement": "W-965",
+      "description": "The GitHub button has no accessible name.",
+      "edits": [
+        {
+          "file": "site/src/components/SiteHeader.astro",
+          "search": "aria-label=\"EmVB on GitHub\" title=\"EmVB on GitHub\"",
+          "replace": "title=\"EmVB on GitHub\""
+        }
+      ],
+      "command": ["bun", "test", "test/site/nav.test.ts"],
+      "expect": "\\(fail\\).*icon button"
     }
   ]
 }
