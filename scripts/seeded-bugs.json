@@ -45303,6 +45303,20 @@
       ],
       "command": ["bun", "test", "test/site/nav.test.ts"],
       "expect": "\\(fail\\).*icon button"
+    },
+    {
+      "id": "W-965/sidebar-own-scrollbar",
+      "requirement": "W-965",
+      "description": "The docs menu gets its own scrollbar again.",
+      "edits": [
+        {
+          "file": "site/src/pages/docs/[slug].astro",
+          "search": "  .sidebar {\n    align-self: start;\n  }",
+          "replace": "  .sidebar {\n    position: sticky;\n    align-self: start;\n    max-height: calc(100vh - var(--header-h));\n    overflow-y: auto;\n  }"
+        }
+      ],
+      "command": ["bun", "test", "test/site/nav.test.ts"],
+      "expect": "\\(fail\\).*no inner scrollbar"
     }
   ]
 }

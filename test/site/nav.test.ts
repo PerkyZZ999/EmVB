@@ -47,3 +47,11 @@ test("the GitHub button comes before the Outline toggle (Charles, W-965)", () =>
   const header = read("site/src/components/SiteHeader.astro");
   expect(header.indexOf('class="github"')).toBeLessThan(header.indexOf('class="outline-toggle"'));
 });
+
+test("the docs menu scrolls with the page: no inner scrollbar on either column", () => {
+  const page = read("site/src/pages/docs/[slug].astro");
+  const style = page.slice(page.indexOf("<style>"));
+  expect(style.includes("overflow-y: auto")).toBe(false);
+  expect(style.includes("max-height: calc(")).toBe(false);
+  expect(style).toMatch(/\.sidebar \{\s*align-self: start;\s*\}/);
+});
