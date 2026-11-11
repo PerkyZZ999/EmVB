@@ -45871,6 +45871,26 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/design/wide-hide.test.ts"],
       "expect": "\\(fail\\).*still shows on wide screens"
+    },
+    {
+      "id": "W-962/theme-part-leaks-editor-id",
+      "requirement": "W-962",
+      "description": "A published theme part's wrapper leaks an editor data-emvb-id.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "data-emvb-theme-part=\"${partId}\">${page.html}",
+          "replace": "data-emvb-theme-part=\"${partId}\" data-emvb-id=\"${partId}\">${page.html}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/astro/resolve-theme.test.ts",
+        "-t",
+        "the newest matching header and footer win"
+      ],
+      "expect": "\\(fail\\).*the newest matching header and footer win"
     }
   ]
 }
