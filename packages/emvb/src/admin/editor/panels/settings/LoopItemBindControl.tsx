@@ -139,7 +139,7 @@ function labelFor(part: ThemePartSummary): string {
  * W-970: the canvas draws a part's latest saved version, but visitors only see what is published.
  * Say so when the chosen part has unpublished changes, or was never published.
  */
-export function draftNote(status: string): string {
+function draftNote(status: string): string {
   if (status === "changed")
     return "The canvas shows this part's unpublished changes. Visitors see the published version until you publish it in Theme Builder.";
   if (status === "scheduled")
