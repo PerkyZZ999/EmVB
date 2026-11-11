@@ -56,7 +56,7 @@ export type CopyResult = {
 export async function copyPagesAsRichText(
   fetcher: Fetcher,
   target: RichTextTarget,
-  onlyPageId?: string,
+  onlyPageId?: string | readonly string[],
 ): Promise<CopyResult> {
   const [{ pages }, partItems] = await Promise.all([
     loadExportData(fetcher, onlyPageId),

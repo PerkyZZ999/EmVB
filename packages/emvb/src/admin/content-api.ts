@@ -1,9 +1,10 @@
-import type {
-  ConditionsDoc,
-  FloatSettings,
-  Layout,
-  ThemePartType,
-  TriggersDoc,
+import {
+  layoutSearchText,
+  type ConditionsDoc,
+  type FloatSettings,
+  type Layout,
+  type ThemePartType,
+  type TriggersDoc,
 } from "../core/index.ts";
 import { PAGES_COLLECTION } from "../constants.ts";
 import { listAllItems, requestJson, type Fetcher } from "./api.ts";
@@ -20,6 +21,8 @@ export type PageSummary = {
   slug: string;
   status: string;
   updatedAt: string;
+  /** W-978: the layout's words, for searching by content. */
+  text?: string;
 };
 
 export async function listPages(fetcher: Fetcher): Promise<PageSummary[]> {
@@ -30,6 +33,7 @@ export async function listPages(fetcher: Fetcher): Promise<PageSummary[]> {
     slug: item.slug ?? "",
     status: entryStatus(item),
     updatedAt: item.updatedAt ?? "",
+    text: layoutSearchText(item.data?.["layout"]),
   }));
 }
 

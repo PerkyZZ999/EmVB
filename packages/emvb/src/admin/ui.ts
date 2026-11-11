@@ -82,6 +82,11 @@ export const UI_CSS = `
 .emvb-list-loading .skeleton-line { background: var(--color-kumo-tint); }
 .emvb-list-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .emvb-list-search { max-width: 320px; margin: 12px 0; }
+.emvb-bulk-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; }
+.emvb-bulk-count { font-weight: 600; margin-inline-end: 4px; }
+.emvb-bulk-bar [data-emvb-bulk-status] { flex-basis: 100%; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.emvb-surface-card[data-emvb-list] .emvb-row-select { width: 48px; padding-inline-end: 0; }
+.emvb-row-found { margin-top: 2px; font-size: 12px; color: var(--text-color-kumo-subtle, inherit); overflow-wrap: anywhere; }
 .emvb-page-title { margin: 0; font-size: 24px; line-height: 1.25; font-weight: 600; color: var(--text-color-kumo-default); }
 .emvb-row-title { color: var(--text-color-kumo-default); font-size: 14px; line-height: 20px; font-weight: 600; text-decoration: none; }
 .emvb-row-title:hover { text-decoration: underline; text-underline-offset: 2px; }
@@ -91,8 +96,9 @@ export const UI_CSS = `
 .emvb-row-title, .emvb-row-slug { overflow-wrap: anywhere; }
 /* UX-018: on narrow admin widths the short columns keep one line and the title keeps a readable
    width; the card scrolls sideways before anything breaks mid-word or mid-date. */
-.emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child) { white-space: nowrap; }
-.emvb-surface-card[data-emvb-list] td:first-child { min-width: 180px; }
+/* W-978: the title column wraps and keeps a minimum width; it follows the tick-box column. */
+.emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child):not(:has(> .emvb-row-title)) { white-space: nowrap; }
+.emvb-surface-card[data-emvb-list] td:has(> .emvb-row-title) { min-width: 180px; }
 .emvb-tabular { font-variant-numeric: tabular-nums; color: var(--text-color-kumo-subtle); font-size: 13px; }
 
 /* Elevated EmVB-owned card chrome (lists, empty/setup shells) — not host sidebar/header */
@@ -153,6 +159,8 @@ export const UI_CSS = `
 .emvb-surface-card[data-emvb-list] tbody tr:hover { background: var(--color-kumo-tint); }
 .emvb-surface-card[data-emvb-list] tbody tr:hover .emvb-row-title { text-decoration: underline; text-underline-offset: 2px; }
 .emvb-surface-card[data-emvb-list] .emvb-row-title::after { content: ""; position: absolute; inset: 0; }
+/* W-978: the row's tick box sits above the stretched title link, so it can be clicked. */
+.emvb-surface-card[data-emvb-list] .emvb-row-select > * { position: relative; z-index: 1; }
 .emvb-surface-card .emvb-empty-shell,
 .emvb-empty-shell {
   display: flex;

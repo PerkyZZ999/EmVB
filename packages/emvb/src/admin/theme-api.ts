@@ -6,6 +6,7 @@ import {
   parseThemePartType,
   starterLayout,
   THEME_PART_TYPE_LABELS,
+  layoutSearchText,
   validateLayout,
   type ConditionsDoc,
   type FloatSettings,
@@ -28,6 +29,8 @@ export type ThemePartSummary = {
   status: string;
   updatedAt: string;
   conditionsSummary: string;
+  /** W-978: the layout's words, for searching by content. */
+  text?: string;
 };
 
 export type ThemePartDraft = {
@@ -136,6 +139,7 @@ export async function listThemeParts(fetcher: Fetcher): Promise<ThemePartSummary
     // UX-061: reusable parts never match a location, so say where they're used instead.
     conditionsSummary:
       ITEM_PART_USE_SHORT[partTypeOf(item)] ?? summarizeConditions(item.data?.["conditions"]),
+    text: layoutSearchText(item.data?.["layout"]),
   }));
 }
 

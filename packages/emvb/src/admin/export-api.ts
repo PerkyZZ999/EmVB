@@ -71,7 +71,8 @@ export function entryPath(pattern: string | null | undefined, slug: string): str
 /** Published pages (or one), published theme parts and the published Site styles. */
 export async function loadExportData(
   fetcher: Fetcher,
-  onlyPageId?: string,
+  /** One id, or (W-978) the ticked ones. */
+  onlyPageId?: string | readonly string[],
   /** W-977: export this collection's entries (their canvas layouts) instead of EmVB pages. */
   source?: CanvasSource,
 ) {
@@ -84,7 +85,12 @@ export async function loadExportData(
     loadDesign(fetcher),
   ]);
   const pages: ExportPageInput[] = pageItems
-    .filter((item) => isLive(item) && (!onlyPageId || item.id === onlyPageId))
+    .filter(
+      (item) =>
+        isLive(item) &&
+        (!onlyPageId ||
+          (typeof onlyPageId === "string" ? item.id === onlyPageId : onlyPageId.includes(item.id))),
+    )
     // An entry without a layout shows the site's own template, which an export can't hold.
     .filter((item) => !source || hasLayout(item.data?.[source.field]))
     .map((item) => {
@@ -172,7 +178,7 @@ export type ExportResult = {
 export async function exportSite(
   fetcher: Fetcher,
   options: {
-    onlyPageId?: string;
+    onlyPageId?: string | readonly string[];
     /** W-977: a collection with a canvas field instead of EmVB pages. */
     source?: CanvasSource;
     copyMedia: boolean;

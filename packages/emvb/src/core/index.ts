@@ -93,6 +93,7 @@ export {
   plainTextOf,
   withPlainText,
 } from "./elements/plain-text.ts";
+export { layoutSearchText } from "./search-text.ts";
 export {
   StyleProps,
   FlatStyleProps,

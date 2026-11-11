@@ -30,7 +30,10 @@ function html() {
     const iso = time.getAttribute("datetime") ?? "";
     expect(time.textContent).toBe(iso ? formatted(iso) : "");
   }
-  return host.innerHTML.replace(/(<time[^>]*>)[^<]*(<\/time>)/g, "$1…$2");
+  // Base UI's generated ids depend on what rendered before (W-978's checkboxes).
+  return host.innerHTML
+    .replace(/(<time[^>]*>)[^<]*(<\/time>)/g, "$1…$2")
+    .replace(/ id="base-ui-[^"]*"/g, "");
 }
 
 async function mount(element: React.ReactElement) {

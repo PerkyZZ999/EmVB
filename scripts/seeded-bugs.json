@@ -35293,7 +35293,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/ui.ts",
-          "search": ".emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child) { white-space: nowrap; }",
+          "search": ".emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child):not(:has(> .emvb-row-title)) { white-space: nowrap; }",
           "replace": ""
         }
       ],
@@ -35307,7 +35307,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/ui.ts",
-          "search": ".emvb-surface-card[data-emvb-list] td:first-child { min-width: 180px; }",
+          "search": ".emvb-surface-card[data-emvb-list] td:has(> .emvb-row-title) { min-width: 180px; }",
           "replace": ""
         }
       ],
@@ -45899,8 +45899,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/export-api.ts",
-          "search": "    .filter((item) => isLive(item) && (!onlyPageId || item.id === onlyPageId))\n    // An entry",
-          "replace": "    .filter((item) => !onlyPageId || item.id === onlyPageId)\n    // An entry"
+          "search": "      (item) =>\n        isLive(item) &&\n        (!onlyPageId ||",
+          "replace": "      (item) =>\n        (!onlyPageId ||"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
@@ -45957,6 +45957,62 @@
         "W-963: a published page"
       ],
       "expect": "✘.*\\[node\\].*W-963: a published page"
+    },
+    {
+      "id": "W-978/search-titles-only",
+      "requirement": "W-978",
+      "description": "The Pages list searches titles only again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/PageList.tsx",
+          "search": "matchesSearch(query, page.title, `/${page.slug}`, page.text ?? \"\"),",
+          "replace": "matchesSearch(query, page.title, `/${page.slug}`),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/bulk.test.tsx"],
+      "expect": "\\(fail\\).*finds a page by the words on it"
+    },
+    {
+      "id": "W-978/delete-without-confirm",
+      "requirement": "W-978",
+      "description": "Delete trashes the ticked pages without asking.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/bulk.tsx",
+          "search": "            onClick={() => !busy && setConfirming(true)}",
+          "replace": "            onClick={() => !busy && void run(\"delete\")}"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/bulk.test.tsx"],
+      "expect": "\\(fail\\).*delete moves the ticked pages"
+    },
+    {
+      "id": "W-978/stops-at-first-failure",
+      "requirement": "W-978",
+      "description": "A failing item stops the rest of a bulk action.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/bulk-api.ts",
+          "search": "      result.failed.push({ id, message: message(error) });",
+          "replace": "      result.failed.push({ id, message: message(error) });\n      break;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/bulk.test.tsx"],
+      "expect": "\\(fail\\).*publish the ticked pages"
+    },
+    {
+      "id": "W-978/urls-searched",
+      "requirement": "W-978",
+      "description": "Link addresses count as page words.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/search-text.ts",
+          "search": "  \"suffix\",\n]);",
+          "replace": "  \"suffix\",\n  \"href\",\n]);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/search-text.test.ts"],
+      "expect": "\\(fail\\).*a layout's words"
     }
   ]
 }

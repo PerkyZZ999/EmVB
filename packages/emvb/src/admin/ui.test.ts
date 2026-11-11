@@ -38,10 +38,16 @@ test("UX-017: a display-condition row keeps its Where menu inside the panel", ()
 
 test("UX-018: narrow lists keep dates and badges on one line and scroll sideways instead", () => {
   expect(rule(".emvb-surface-card[data-emvb-list]")).toMatch(/overflow-x: auto;/);
-  expect(rule(".emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child)")).toMatch(
-    /white-space: nowrap;/,
+  // W-978: the title column (after the tick boxes) wraps and keeps its minimum width.
+  expect(
+    rule(
+      ".emvb-surface-card[data-emvb-list] :is(th, td):not(:first-child):not(:has(> .emvb-row-title))",
+    ),
+  ).toMatch(/white-space: nowrap;/);
+  expect(rule(".emvb-surface-card[data-emvb-list] td:has(> .emvb-row-title)")).toMatch(
+    /min-width: 180px;/,
   );
-  expect(rule(".emvb-surface-card[data-emvb-list] td:first-child")).toMatch(/min-width: 180px;/);
+  expect(rule(".emvb-surface-card[data-emvb-list] .emvb-row-select")).toMatch(/width: 48px;/);
 });
 
 test("UX-023: selects in EmVB dialogs span the dialog like its text fields", () => {

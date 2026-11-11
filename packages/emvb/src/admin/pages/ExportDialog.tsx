@@ -25,6 +25,8 @@ import { BUTTON, FIELD, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 const ALL = "__all__";
 /** The "Export from" value for EmVB pages; a collection's slug otherwise (W-977). */
 const PAGES = "__pages__";
+/** W-978: the pages ticked in the list. */
+const SELECTED = "__selected__";
 
 /** Opens Export pages (W-963), next to Import on the Pages list. */
 export function ExportButton({ onClick }: { onClick: () => void }) {
@@ -80,11 +82,14 @@ export function ExportDialog({
   open,
   onOpenChange,
   pages,
+  selectedIds = [],
 }: {
   fetcher: Fetcher;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   pages: readonly PageSummary[];
+  /** W-978: pages ticked in the list; the dialog starts with them. */
+  selectedIds?: readonly string[];
 }) {
   const published = pages.filter(
     (page) => page.status === "published" || page.status === "changed",
@@ -112,6 +117,13 @@ export function ExportDialog({
   React.useEffect(() => {
     if (open) setState({ kind: "idle" });
   }, [open]);
+  const selectedKey = selectedIds.join(" ");
+  React.useEffect(() => {
+    if (open && selectedKey) {
+      setFrom(PAGES);
+      setPageId(SELECTED);
+    }
+  }, [open, selectedKey]);
 
   React.useEffect(() => {
     if (!open) return;
@@ -127,7 +139,7 @@ export function ExportDialog({
 
   React.useEffect(() => {
     setEntries(null);
-    setPageId(ALL);
+    setPageId((current) => (current === SELECTED && !source ? current : ALL));
     if (!source) return;
     let active = true;
     exportableEntries(fetcher, source).then(
@@ -162,7 +174,7 @@ export function ExportDialog({
       const result = await copyPagesAsRichText(
         fetcher,
         target,
-        pageId === ALL ? undefined : pageId,
+        pageId === ALL ? undefined : pageId === SELECTED ? selectedIds : pageId,
       );
       setState({
         kind: result.created.length > 0 ? "done" : "error",
@@ -188,7 +200,7 @@ export function ExportDialog({
     try {
       const date = new Date().toISOString().slice(0, 10);
       const result = await exportSite(fetcher, {
-        ...(pageId === ALL ? {} : { onlyPageId: pageId }),
+        ...(pageId === ALL ? {} : { onlyPageId: pageId === SELECTED ? selectedIds : pageId }),
         ...(source ? { source } : {}),
         copyMedia,
         origin: window.location.origin,
@@ -199,7 +211,7 @@ export function ExportDialog({
         return;
       }
       const name =
-        pageId === ALL
+        pageId === ALL || pageId === SELECTED
           ? `emvb-export-${source ? `${source.collection}-` : ""}${date}.zip`
           : `emvb-export-${result.site.report.pages[0]?.path.replace("/", "") ?? "page"}-${date}.zip`;
       downloadBlob(
@@ -290,15 +302,22 @@ export function ExportDialog({
               value={pageId}
               onValueChange={(value) => setPageId(typeof value === "string" ? value : ALL)}
               renderValue={(value: unknown) =>
-                value === ALL || !value
-                  ? `All published ${nouns} (${choices.length})`
-                  : (choices.find((page) => page.id === value)?.title ??
-                    (source ? "Entry" : "Page"))
+                value === SELECTED
+                  ? `Selected pages (${selectedIds.length})`
+                  : value === ALL || !value
+                    ? `All published ${nouns} (${choices.length})`
+                    : (choices.find((page) => page.id === value)?.title ??
+                      (source ? "Entry" : "Page"))
               }
             >
               <Select.Option value={ALL}>
                 All published {nouns} ({choices.length})
               </Select.Option>
+              {!source && selectedIds.length > 0 && (
+                <Select.Option value={SELECTED}>
+                  Selected pages ({selectedIds.length})
+                </Select.Option>
+              )}
               {choices.map((page) => (
                 <Select.Option key={page.id} value={page.id}>
                   {page.title}
