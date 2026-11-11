@@ -21,7 +21,8 @@ const loop = (children: LayoutNode[]): LayoutNode =>
     ...defaultElement("loop", "loop0001"),
     children: [{ id: "box00001", type: "container", props: {}, children }],
   }) as LayoutNode;
-const level = (l: Layout, id: string) => (findNode(l, id)?.props as { level?: number }).level;
+const level = (l: Layout, id: string) =>
+  (findNode(l, id)?.props as { level?: number } | undefined)?.level;
 
 test("a new Post title inside a Loop is an H2; outside it stays H1 (W-968)", () => {
   const inside = layout([loop([title("pt000001")])]);
