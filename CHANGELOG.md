@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **Post title in a Loop starts as H2 (W-968).** A Post title added inside a Loop (or in a loop item part) is a level 2 heading, so a grid of cards no longer has one H1 per post. A level you choose is kept.
+
 ### Added
 
 - **Export pages (W-963).** **Export pages** on the Pages list takes your published pages (all of them, or one) elsewhere, as either:

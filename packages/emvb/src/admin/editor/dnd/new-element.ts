@@ -1,5 +1,6 @@
 import {
   defaultElement,
+  updateNode,
   ELEMENTS,
   isExtensionType,
   newNodeId,
@@ -8,6 +9,7 @@ import {
   type LayoutNode,
 } from "../../../core/index.ts";
 import type { ThemePartType } from "../../../core/theme/part-types.ts";
+import { indexLayout } from "../../../core/tree-ops.ts";
 import { isSharedPart } from "../panels/settings/heading-warning.ts";
 
 const hasH1 = (node: LayoutNode): boolean =>
@@ -29,6 +31,26 @@ export function withPageHeadingLevel(
   if (node.type !== "heading" || node.props.level !== 2) return node;
   if (isSharedPart(partType) || hasH1(layout.root)) return node;
   return { ...node, props: { ...node.props, level: 1 } };
+}
+
+/**
+ * W-968: a new Post title inside a Loop (or in a loop item part) is an H2. Its default H1 gave a
+ * grid of cards one H1 per post. Run on the layout right after the insert; a title whose level was
+ * already changed, or one moved in later, is left alone.
+ */
+export function withLoopPostTitleLevel(
+  layout: Layout,
+  id: string,
+  partType?: ThemePartType,
+): Layout {
+  const index = indexLayout(layout);
+  const node = index.byId.get(id);
+  if (node?.type !== "post-title" || (node.props as { level?: number }).level !== 1) return layout;
+  let inLoop = partType === "loop_item";
+  for (let at = index.parentOf.get(id); !inLoop && at; at = index.parentOf.get(at))
+    inLoop = index.byId.get(at)?.type === "loop";
+  if (!inLoop) return layout;
+  return updateNode(layout, id, (n) => ({ ...n, props: { ...n.props, level: 2 } }) as LayoutNode);
 }
 
 const textNode = (text: string, random?: () => number): LayoutNode => ({

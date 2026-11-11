@@ -25,7 +25,7 @@ import {
   type LayoutNode,
 } from "../../core/index.ts";
 import { adminExtensionDefaults } from "./extension-manifests.ts";
-import { newElement, withPageHeadingLevel } from "./dnd/new-element.ts";
+import { newElement, withLoopPostTitleLevel, withPageHeadingLevel } from "./dnd/new-element.ts";
 import { ELEMENT_NAMES } from "./element-chrome.ts";
 import type { ItemActions } from "./panels/settings/ItemList.tsx";
 import type { EditorAction, EditorState } from "./store.ts";
@@ -212,7 +212,9 @@ export function useNodeActions({
       notice(result.reason);
       return;
     }
-    dispatch({ type: "apply-arranged", layout: result.layout, selected: result.selected });
+    // W-968: a Post title placed inside a Loop starts as an H2.
+    const placed = withLoopPostTitleLevel(result.layout, node.id, latest.current.page.partType);
+    dispatch({ type: "apply-arranged", layout: placed, selected: result.selected });
     const nameOf = (id: string) => ELEMENT_NAMES[findNode(layout, id)?.type ?? "container"];
     if (result.fallback) {
       // Added next to the nearest ancestor that takes it, rather than refused (W-175).

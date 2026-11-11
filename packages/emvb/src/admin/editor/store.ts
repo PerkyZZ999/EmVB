@@ -15,7 +15,7 @@ import {
   LAYOUT_SCHEMA_VERSION,
   withShiftedMarks,
 } from "../../core/index.ts";
-import { withPageHeadingLevel } from "./dnd/new-element.ts";
+import { withLoopPostTitleLevel, withPageHeadingLevel } from "./dnd/new-element.ts";
 import type { PageDraft } from "../content-api.ts";
 
 /** Editor state (A-07): a pure reducer, so every edit is testable without a browser. */
@@ -216,7 +216,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       if (!state.page.layout) return state;
       const place = { parentId: action.parentId, index: action.index };
       const node = withPageHeadingLevel(action.node, state.page.layout, state.page.partType);
-      return arranged(state, addNode(state.page.layout, node, place));
+      const added = addNode(state.page.layout, node, place);
+      return arranged(
+        state,
+        added.ok
+          ? { ...added, layout: withLoopPostTitleLevel(added.layout, node.id, state.page.partType) }
+          : added,
+      );
     }
     case "move-node":
       if (!state.page.layout) return state;

@@ -45331,6 +45331,48 @@
       ],
       "command": ["bun", "test", "test/site/brand.test.ts"],
       "expect": "\\(fail\\).*header shows the wordmark"
+    },
+    {
+      "id": "W-968/no-loop-ancestor",
+      "requirement": "W-968",
+      "description": "A Post title in a Loop keeps its H1.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "    inLoop = index.byId.get(at)?.type === \"loop\";",
+          "replace": "    inLoop = index.byId.get(at)?.type === \"loops\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/dnd/loop-post-title.test.ts"],
+      "expect": "\\(fail\\).*inside a Loop is an H2"
+    },
+    {
+      "id": "W-968/chosen-level-changed",
+      "requirement": "W-968",
+      "description": "A Post title's chosen level is overwritten in a Loop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "(node.props as { level?: number }).level !== 1) return layout;",
+          "replace": "(node.props as { level?: number }).level === undefined) return layout;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/dnd/loop-post-title.test.ts"],
+      "expect": "\\(fail\\).*chosen level is kept"
+    },
+    {
+      "id": "W-968/drop-path-skipped",
+      "requirement": "W-968",
+      "description": "Dropping a Post title into a Loop skips the H2 rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "? { ...added, layout: withLoopPostTitleLevel(added.layout, node.id, state.page.partType) }",
+          "replace": "? added"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/dnd/loop-post-title.test.ts"],
+      "expect": "\\(fail\\).*dropped into a Loop"
     }
   ]
 }
