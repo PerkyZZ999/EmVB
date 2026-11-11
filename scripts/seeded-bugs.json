@@ -44729,6 +44729,258 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/counter-steps.test.ts"],
       "expect": "\\(fail\\).*counter rules are read only"
+    },
+    {
+      "id": "W-963/zip-crc-table",
+      "requirement": "W-963",
+      "description": "The CRC table uses the wrong polynomial.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/zip.ts",
+          "search": "c & 1 ? 0xedb88320 ^ (c >>> 1)",
+          "replace": "c & 1 ? 0xedb88321 ^ (c >>> 1)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/zip.test.ts"],
+      "expect": "\\(fail\\).*known CRC-32"
+    },
+    {
+      "id": "W-963/zip-allows-dotdot",
+      "requirement": "W-963",
+      "description": "An entry path may climb out of the folder.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/zip.ts",
+          "search": "part !== \"\" && part !== \".\" && part !== \"..\"",
+          "replace": "part !== \"\" && part !== \".\""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/zip.test.ts"],
+      "expect": "\\(fail\\).*refuses paths"
+    },
+    {
+      "id": "W-963/zip-central-offset",
+      "requirement": "W-963",
+      "description": "The central directory points at the wrong local header.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/zip.ts",
+          "search": "head.setUint32(42, offset, true);",
+          "replace": "head.setUint32(42, offset + 1, true);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/zip.test.ts"],
+      "expect": "\\(fail\\).*read back"
+    },
+    {
+      "id": "W-963/site-no-header",
+      "requirement": "W-963",
+      "description": "Matching headers are left out of exported pages.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "const top = headerPart ? renderPart(headerPart) : undefined;",
+          "replace": "const top = undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*header and popup"
+    },
+    {
+      "id": "W-963/site-runtimes-always",
+      "requirement": "W-963",
+      "description": "Every runtime script is written, used or not.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "    if (all.some((r) => r.needsMenuRuntime)) used.push(\"menu\");",
+          "replace": "    used.push(\"menu\");"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*written once"
+    },
+    {
+      "id": "W-963/site-broken-exported",
+      "requirement": "W-963",
+      "description": "An unreadable page is still exported (empty).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "      report.skipped.push({ title: page.title, reason: \"its layout couldn't be read\" });\n      continue;",
+          "replace": "      report.skipped.push({ title: page.title, reason: \"its layout couldn't be read\" });"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\)|[1-9] error"
+    },
+    {
+      "id": "W-963/site-title-unescaped",
+      "requirement": "W-963",
+      "description": "The page title is written into <title> unescaped.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "`<title>${escapeText(opts.title)}</title>`",
+          "replace": "`<title>${opts.title}</title>`"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*escaped in the document head"
+    },
+    {
+      "id": "W-963/site-folder-dotdot",
+      "requirement": "W-963",
+      "description": "A slug of dots becomes a folder that climbs out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": ".replace(/^-+|-+$/g, \"\")\n",
+          "replace": ".replace(/^-+|-+$/g, \"\").replace(/-/g, \".\")\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*page folders"
+    },
+    {
+      "id": "W-963/site-no-form-note",
+      "requirement": "W-963",
+      "description": "Forms aren't named as snapshot-only in the report.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "  if (any((node) => node.type === \"form\"))",
+          "replace": "  if (any((node) => node.type === \"forms\"))"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*snapshot-only"
+    },
+    {
+      "id": "W-963/site-media-srcset",
+      "requirement": "W-963",
+      "description": "srcset candidates are missed in the media list.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "      add(candidate.trim().split(/\\s+/)[0]);",
+          "replace": "      void candidate;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*media URLs"
+    },
+    {
+      "id": "W-963/site-media-not-rewritten",
+      "requirement": "W-963",
+      "description": "Copied media keep pointing at the old site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "      out = out.split(escapeAttr(url)).join(local).split(url).join(local);",
+          "replace": "      out = out.split(url).join(local);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*copied media"
+    },
+    {
+      "id": "W-963/api-exports-drafts",
+      "requirement": "W-963",
+      "description": "Draft pages are exported.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "const isLive = (item: ContentItem) => item.status === \"published\";",
+          "replace": "const isLive = (item: ContentItem) => item.status !== undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*only published"
+    },
+    {
+      "id": "W-963/api-draft-design",
+      "requirement": "W-963",
+      "description": "The draft Site styles are exported instead of the published ones.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "design: design.published ?? design.design",
+          "replace": "design: design.design"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*only published"
+    },
+    {
+      "id": "W-963/api-copies-other-origins",
+      "requirement": "W-963",
+      "description": "Media from other sites are downloaded.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "return new URL(url, origin).origin === origin;",
+          "replace": "return new URL(url, origin).protocol.startsWith(\"http\");"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*own media"
+    },
+    {
+      "id": "W-963/api-failed-not-counted",
+      "requirement": "W-963",
+      "description": "A failed media download isn't counted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "    } catch {\n      failed += 1;\n    }",
+          "replace": "    } catch {\n      // ignored\n    }"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*failed media"
+    },
+    {
+      "id": "W-963/dialog-no-download",
+      "requirement": "W-963",
+      "description": "Export finishes without downloading the zip.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ExportDialog.tsx",
+          "search": "      downloadBlob(",
+          "replace": "      void downloadBlob;\n      (() => undefined)("
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/export-dialog.test.tsx"],
+      "expect": "\\(fail\\).*downloads a zip"
+    },
+    {
+      "id": "W-963/dialog-enabled-empty",
+      "requirement": "W-963",
+      "description": "Export is offered with nothing published.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ExportDialog.tsx",
+          "search": "aria-disabled={busy || published.length === 0}",
+          "replace": "aria-disabled={busy}"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/export-dialog.test.tsx"],
+      "expect": "\\(fail\\).*nothing published"
+    },
+    {
+      "id": "W-963/stale-export-runtime",
+      "requirement": "W-963",
+      "description": "A runtime changes but the export's bundled copy isn't regenerated.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/tabs/runtime.ts",
+          "search": "  ArrowRight: (current) => current + 1,",
+          "replace": "  ArrowRight: (current) => current + 2,"
+        }
+      ],
+      "command": ["bun", "test", "scripts/export-runtimes.test.ts"],
+      "expect": "\\(fail\\).*bundled runtimes match"
     }
   ]
 }

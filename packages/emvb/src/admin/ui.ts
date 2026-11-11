@@ -239,6 +239,7 @@ export const UI_CSS = `
 .emvb-create-fields { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .emvb-create-status { min-height: 18px; }
 /* W-945: Import from Elementor. The JSON box keeps its rows; the report scrolls on its own. */
+.emvb-export-fields { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
 .emvb-import-source { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .emvb-import-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
 .emvb-import-label { font-size: 14px; font-weight: 500; color: var(--text-color-kumo-default); }
