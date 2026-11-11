@@ -42,3 +42,8 @@ describe("emvb.dev top bar and footer (W-965)", () => {
     expect(page).toMatch(/\.all \{[^}]*border-radius: 999px/);
   });
 });
+
+test("the GitHub button comes before the Outline toggle (Charles, W-965)", () => {
+  const header = read("site/src/components/SiteHeader.astro");
+  expect(header.indexOf('class="github"')).toBeLessThan(header.indexOf('class="outline-toggle"'));
+});
