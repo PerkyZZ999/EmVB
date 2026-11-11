@@ -46097,6 +46097,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/dialog-tab-wrap.test.ts"],
       "expect": "\\(fail\\).*only EmVB dialogs are wrapped"
+    },
+    {
+      "id": "W-985/self-check-blind",
+      "requirement": "W-985",
+      "description": "The self-check no longer requires the no-op seed to escape.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  if (noop.status !== \"not-caught\") return `a no-op seed should escape but was ${noop.status}`;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*the self-check needs a caught seed"
+    },
+    {
+      "id": "W-985/setup-failure-counts",
+      "requirement": "W-985",
+      "description": "A failed sign-in step counts as the test that caught the seed.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  if (!match || match[1]?.endsWith(\"-setup\")) return undefined;",
+          "replace": "  if (!match) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*the clean re-run runs only the test that failed"
     }
   ]
 }

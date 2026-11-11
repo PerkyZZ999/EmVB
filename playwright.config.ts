@@ -1,9 +1,26 @@
 import { defineConfig } from "@playwright/test";
 import { baseConfig, server } from "./playwright.shared.ts";
 
+/** W-985: the seeded-bug runner's parallel e2e lanes each use their own demo port. */
+const nodePort = Number(process.env["EMVB_E2E_NODE_PORT"] ?? 4411);
+const cfPort = Number(process.env["EMVB_E2E_CF_PORT"] ?? 4412);
 const allPlatforms = [
-  { name: "node", port: 4411, command: "bun run demo:node" },
-  { name: "cloudflare", port: 4412, command: "bun run demo:cf" },
+  {
+    name: "node",
+    port: nodePort,
+    command:
+      nodePort === 4411
+        ? "bun run demo:node"
+        : `bun run --cwd demos/node astro dev --host 127.0.0.1 --port ${nodePort}`,
+  },
+  {
+    name: "cloudflare",
+    port: cfPort,
+    command:
+      cfPort === 4412
+        ? "bun run demo:cf"
+        : `bun run --cwd demos/cloudflare astro dev --host 127.0.0.1 --port ${cfPort}`,
+  },
 ] as const;
 
 /**

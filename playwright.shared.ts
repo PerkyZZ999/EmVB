@@ -30,7 +30,8 @@ export const server = (command: string, port: number, timeout: number) => ({
   command,
   // The site root, not an EmVB route, so a broken plugin fails tests instead of server startup.
   url: `http://127.0.0.1:${port}/`,
-  reuseExistingServer: !process.env["CI"],
+  // W-985: the seeded-bug runner's warm e2e lane keeps CI=1 (same settings) and reuses its server.
+  reuseExistingServer: !process.env["CI"] || process.env["EMVB_REUSE_SERVER"] === "1",
   timeout,
   stdout: "ignore" as const,
   stderr: "pipe" as const,
