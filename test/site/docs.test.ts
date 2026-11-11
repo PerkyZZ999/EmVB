@@ -2,7 +2,13 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ALL_DOCS } from "../../site/src/data/docs.ts";
-import { docSlug, rewriteLink, siteHtml, withoutIds } from "../../site/src/markdown/docs.ts";
+import {
+  docSlug,
+  rewriteLink,
+  siteHtml,
+  withComingSoon,
+  withoutIds,
+} from "../../site/src/markdown/docs.ts";
 
 const ROOT = join(import.meta.dir, "../..");
 const GUIDE = join(ROOT, "docs/guides/upgrade-1.0.md");
@@ -62,4 +68,14 @@ describe("Docs section (W-964)", () => {
       '<p>See <a href="/docs/co-design/">x</a>.</p><pre class="c" tabindex="0">a</pre><table tabindex="0"><tr><td>1</td></tr></table>',
     );
   });
+});
+
+test("1.1 sections carry a New in 1.1 note while the site shows 1.0, and not after", () => {
+  const html =
+    '<h3 id="as-html-and-css-files-any-host">As HTML</h3><p>x</p><h3 id="as-json">JSON</h3>';
+  const on10 = withComingSoon(html, "leaving-emvb", "1.0.0");
+  expect(on10).toContain('</h3><p class="coming"><span class="coming-badge">New in 1.1</span>');
+  expect(on10.match(/class="coming"/g)?.length).toBe(1);
+  expect(withComingSoon(html, "leaving-emvb", "1.1.0")).toBe(html);
+  expect(withComingSoon(html, "motion", "1.0.0")).toBe(html);
 });

@@ -61,3 +61,33 @@ export function siteHtml(html: string, file: string): string {
         `${start}${rewriteLink(url.replaceAll("&amp;", "&"), file)}${end}`,
     );
 }
+
+/** Sections that describe what ships in 1.1; while the site shows 1.0, they get a note. */
+const COMING_IN_1_1: Readonly<Record<string, readonly { id: string; text: string }[]>> = {
+  "leaving-emvb": [
+    {
+      id: "as-html-and-css-files-any-host",
+      text: "Export pages ships in EmVB 1.1. On 1.0, take your layouts as JSON (below).",
+    },
+    {
+      id: "as-rich-text-in-emdash-keep-emdash-drop-emvb",
+      text: "Copying pages as rich text and Convert to rich text ship in EmVB 1.1.",
+    },
+  ],
+  "native-page-editing": [
+    { id: "back-to-rich-text", text: "Convert to rich text ships in EmVB 1.1." },
+  ],
+};
+
+/** Adds a "New in 1.1" note under sections for features the released version doesn't have yet. */
+export function withComingSoon(html: string, slug: string, version: string): string {
+  if (!version.startsWith("1.0")) return html;
+  let out = html;
+  for (const { id, text } of COMING_IN_1_1[slug] ?? []) {
+    out = out.replace(
+      new RegExp(`(<h([23])[^>]*\\sid="${id}"[^>]*>[\\s\\S]*?</h\\2>)`),
+      `$1<p class="coming"><span class="coming-badge">New in 1.1</span> Coming soon. ${text}</p>`,
+    );
+  }
+  return out;
+}

@@ -3,7 +3,8 @@ import SiteFooter from "../../components/SiteFooter.astro";
 import SiteHeader from "../../components/SiteHeader.astro";
 import { ALL_DOCS, DOC_GROUPS } from "../../data/docs";
 import { docModules } from "../../markdown/doc-modules";
-import { siteHtml, withoutIds } from "../../markdown/docs";
+import { siteHtml, withComingSoon, withoutIds } from "../../markdown/docs";
+import { project } from "../../data/project";
 import Base from "../../layouts/Base.astro";
 
 export function getStaticPaths() {
@@ -15,7 +16,7 @@ const doc = ALL_DOCS.find((entry) => entry.slug === slug);
 const module = docModules.get(slug);
 if (!doc || !module) throw new Error(`No doc for ${slug}`);
 const raw = await module.compiledContent();
-const html = siteHtml(raw, module.file);
+const html = withComingSoon(siteHtml(raw, module.file), slug, project.version);
 const sections = module
   .getHeadings()
   .filter((h) => h.depth === 2)
@@ -276,6 +277,30 @@ const source = slug === "schema" ? "docs/SCHEMA.md" : slug === "extensions-api" 
   /* The highlighter's comment grey is 3.0:1 on its dark background; this one is 5.6:1. */
   .doc :global(pre span[style*="#6A737D"]) {
     color: #959da5 !important;
+  }
+
+  .doc :global(.coming) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    border-radius: var(--radius-m);
+    background: var(--accent-wash);
+    color: var(--ink);
+  }
+
+  .doc :global(.coming-badge) {
+    padding: 0.1em 0.6em;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
 
   .doc :global(table) {
