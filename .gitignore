@@ -36,4 +36,3 @@ demos/*/emdash-env.d.ts
 e2e/.auth/
 e2e/.results/
 .seeded-bug-cache.json
-.seeded-bug-hints.json

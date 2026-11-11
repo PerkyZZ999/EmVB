@@ -46113,8 +46113,64 @@
       "expect": "\\(fail\\).*the self-check needs a caught seed"
     },
     {
-      "id": "W-985/setup-failure-counts",
-      "requirement": "W-985",
+      "id": "W-986/restore-ignores-browser",
+      "requirement": "W-986",
+      "description": "A restore counts while the browser module is still the mutated one.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "    const browserBack = now.client[path] === base.client[path];",
+          "replace": "    const browserBack = true;"
+        }
+      ],
+      "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*a restore counts only when the server re-evaluated it"
+    },
+    {
+      "id": "W-986/applied-without-server",
+      "requirement": "W-986",
+      "description": "A mutation counts as applied before the server module was evaluated again.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "      const serverMoved = restarted || Number.isNaN(nowGen) || nowGen > before;",
+          "replace": "      const serverMoved = true;"
+        }
+      ],
+      "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*a mutation counts as applied only once every signal"
+    },
+    {
+      "id": "W-986/blind-file-proves",
+      "requirement": "W-986",
+      "description": "A file the probe can't see counts as proven, so its seed runs warm unproven.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "    if (!server && !browser) return false;",
+          "replace": "    if (!server && !browser) return true;"
+        }
+      ],
+      "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*a file the probe can't see proves nothing"
+    },
+    {
+      "id": "W-986/specs-probed",
+      "requirement": "W-986",
+      "description": "Edits to e2e specs wait for the dev server, which never serves them.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "    .filter((file) => !/^(e2e|scripts)\\//.test(file))",
+          "replace": "    .filter((file) => file !== \"\")"
+        }
+      ],
+      "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*a file the probe can't see proves nothing"
+    },
+    {
+      "id": "W-986/setup-failure-counts",
+      "requirement": "W-986",
       "description": "A failed sign-in step counts as the test that caught the seed.",
       "edits": [
         {
@@ -46124,7 +46180,21 @@
         }
       ],
       "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
-      "expect": "\\(fail\\).*the clean re-run runs only the test that failed"
+      "expect": "\\(fail\\).*the clean re-run takes the test that failed"
+    },
+    {
+      "id": "W-986/reload-stamps-kept",
+      "requirement": "W-986",
+      "description": "Vite's reload stamps stay in the browser module, so no restore of a React file is ever proven.",
+      "edits": [
+        {
+          "file": "scripts/seeded-bug.ts",
+          "search": "  code.replaceAll(/([?&])t=\\d+&?/g, \"$1\").replaceAll(/[?&](?=[\"'])/g, \"\");",
+          "replace": "  code;"
+        }
+      ],
+      "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
+      "expect": "\\(fail\\).*a restored browser module matches its clean one"
     }
   ]
 }
