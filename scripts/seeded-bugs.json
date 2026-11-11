@@ -26164,7 +26164,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/perf/meter.ts",
-          "search": "      embeds += 1;\n",
+          "search": "      own.embeds += 1;\n",
           "replace": ""
         }
       ],
@@ -45601,6 +45601,62 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/server/icon-uploads.test.ts"],
       "expect": "\\(fail\\).*more than one storage page"
+    },
+    {
+      "id": "W-973/both-arms",
+      "requirement": "W-973",
+      "description": "Both A/B arms' images count.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/perf/meter.ts",
+          "search": "      return zero();\n",
+          "replace": "      return own;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/perf/ab-weight.test.ts"],
+      "expect": "\\(fail\\).*count once"
+    },
+    {
+      "id": "W-973/lighter-arm",
+      "requirement": "W-973",
+      "description": "The lighter arm is counted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/perf/meter.ts",
+          "search": "(b.bytes > a.bytes ? b : a)",
+          "replace": "(b.bytes < a.bytes || a.bytes === 0 ? b : a)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/perf/ab-weight.test.ts"],
+      "expect": "\\(fail\\).*heavier arm wins"
+    },
+    {
+      "id": "W-973/no-page-entry",
+      "requirement": "W-973",
+      "description": "Page style changes don't show in the timeline.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/history/diff.ts",
+          "search": "  if (older.root.id === current.root.id && own(older.root) !== own(current.root)) {",
+          "replace": "  if (older.root.id === current.root.id && own(older.root) === \"never\") {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/history/diff.test.ts"],
+      "expect": "\\(fail\\).*only changed the page's own styles"
+    },
+    {
+      "id": "W-973/restore-drops-sections",
+      "requirement": "W-973",
+      "description": "Restoring page styles brings back the old sections too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/history/diff.ts",
+          "search": "        root: { ...structuredClone(settings), children: current.root.children },",
+          "replace": "        root: { ...structuredClone(settings), children: older.root.children },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/history/diff.test.ts"],
+      "expect": "\\(fail\\).*keeps the sections"
     }
   ]
 }

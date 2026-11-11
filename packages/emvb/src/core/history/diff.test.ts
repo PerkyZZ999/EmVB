@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { validateLayout } from "../validate.ts";
-import type { Layout, LayoutNode } from "../schema/layout.ts";
+import { LAYOUT_SCHEMA_VERSION, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { changedIds, diffSections, restoreSection } from "./diff.ts";
 
 const h = (id: string, text: string) =>
@@ -155,4 +155,48 @@ test("W-636: a restored copy of a section never adds a second copy of a live A/B
   const gone = page(box("sect0002", [armB]));
   const back = restoreSection(gone, before, "sect0001");
   expect(back.ok && JSON.stringify(back.layout)).toContain('"arm":"a"');
+});
+
+describe("page styles in the timeline (W-973)", () => {
+  const base = (style?: Record<string, unknown>): Layout =>
+    ({
+      schemaVersion: LAYOUT_SCHEMA_VERSION,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        ...(style ? { style } : {}),
+        children: [{ id: "head0001", type: "heading", props: { text: "Hi", level: 1 } }],
+      },
+    }) as Layout;
+
+  test("a version that only changed the page's own styles lists Page styles", () => {
+    const changes = diffSections(
+      base({ gap: { value: 8, unit: "px" } }),
+      base({ gap: { value: 24, unit: "px" } }),
+    );
+    expect(changes[0]).toEqual({
+      id: "root0001",
+      type: "container",
+      label: "Page styles",
+      kind: "changed",
+      edits: 1,
+      page: true,
+    });
+    expect(changes.slice(1).map((c) => c.kind)).toEqual(["same"]);
+  });
+
+  test("unchanged page styles add no entry", () => {
+    expect(diffSections(base(), base()).some((c) => c.page)).toBe(false);
+  });
+
+  test("Restore page styles brings back the root's settings and keeps the sections", () => {
+    const before = base({ gap: { value: 8, unit: "px" } });
+    const now = base({ gap: { value: 24, unit: "px" } });
+    now.root.children.push({ id: "text0001", type: "text", props: { text: "New" } });
+    const result = restoreSection(now, before, "root0001");
+    if (!result.ok) throw new Error(result.reason);
+    expect(result.layout.root.style).toEqual({ gap: { value: 8, unit: "px" } });
+    expect(result.layout.root.children.map((c) => c.id)).toEqual(["head0001", "text0001"]);
+  });
 });

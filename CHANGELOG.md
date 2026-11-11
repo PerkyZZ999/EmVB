@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Page weight and the version timeline (W-973).** The page weight meter counts the images and embeds of one arm of an A/B test (the heavier), not both, since a visitor sees one. The version timeline lists **Page styles** when a version changed the page's own styles or settings, with **Restore page styles**.
 - **My uploads holds 500 icons, without duplicates (W-972).** The icon library's My uploads now holds up to 500 SVGs (was 100), and the server recognises the same drawing uploaded again (also from two tabs at once) and keeps one icon.
 - **Unpublished synced sections are marked (W-970).** The canvas draws a synced section or Loop item from its latest saved version. When that isn't what visitors see, its canvas label says "unpublished changes" or "not published", and its settings explain that visitors see the published version (or nothing) until it is published in Theme Builder.
 - **Inherited shadows, entrance and transition (W-969).** On Laptop, Tablet, Mobile or a state, an unset Box shadow, Drop shadow, Entrance or Transition that the element inherits (from a wider device, Normal, a class or the Site styles default) now says what it inherits, and **Edit here** starts from that value instead of the default.

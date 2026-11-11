@@ -11,6 +11,8 @@ export type SectionChange = {
   kind: "added" | "removed" | "changed" | "moved" | "same";
   /** Elements inside that differ (added, removed or edited), for changed sections. */
   edits: number;
+  /** W-973: the page itself (its root's styles, classes and settings), not a section. */
+  page?: true;
 };
 
 /**
@@ -68,6 +70,18 @@ export function diffSections(older: Layout, current: Layout): SectionChange[] {
   const beforeIds = new Map(before.map((node, i) => [node.id, i]));
   const afterIds = new Set(after.map((node) => node.id));
   const changes: SectionChange[] = [];
+  // W-973: the page's own styles (the root's style, devices, states, classes…) are listed first;
+  // a version that only changed those used to read as "no changes".
+  if (older.root.id === current.root.id && own(older.root) !== own(current.root)) {
+    changes.push({
+      id: current.root.id,
+      type: "container",
+      label: "Page styles",
+      kind: "changed",
+      edits: 1,
+      page: true,
+    });
+  }
   const removedAt = new Map<number, LayoutNode[]>();
   for (const [i, node] of before.entries()) {
     if (!afterIds.has(node.id)) removedAt.set(i, [...(removedAt.get(i) ?? []), node]);
@@ -149,6 +163,17 @@ export function restoreSection(
   older: Layout,
   sectionId: string,
 ): { ok: true; layout: Layout } | { ok: false; reason: string } {
+  // W-973: the page's own styles come back without touching its sections.
+  if (sectionId === older.root.id && sectionId === current.root.id) {
+    const { children: _old, ...settings } = older.root;
+    return {
+      ok: true,
+      layout: {
+        ...current,
+        root: { ...structuredClone(settings), children: current.root.children },
+      },
+    };
+  }
   const oldIndex = older.root.children.findIndex((n) => n.id === sectionId);
   const section = older.root.children[oldIndex];
   if (!section) return { ok: false, reason: "That section isn't in this version." };

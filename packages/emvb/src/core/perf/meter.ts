@@ -74,15 +74,16 @@ const isPlayerEmbed = (node: LayoutNode): boolean => {
   return typeof url === "string" && resolveEmbedUrl(url)?.kind === "iframe";
 };
 
+type Weight = { images: number; bytes: number; embeds: number };
+const zero = (): Weight => ({ images: 0, bytes: 0, embeds: 0 });
+const add = (a: Weight, b: Weight) => {
+  a.images += b.images;
+  a.bytes += b.bytes;
+  a.embeds += b.embeds;
+};
+
 /** Images and embeds under a node, with their estimated weight. */
-function media(
-  node: LayoutNode,
-  bgClasses: Set<string>,
-  dynamic?: ThemeDynamicData,
-): { images: number; bytes: number; embeds: number } {
-  let images = 0;
-  let bytes = 0;
-  let embeds = 0;
+function media(node: LayoutNode, bgClasses: Set<string>, dynamic?: ThemeDynamicData): Weight {
   const seen = new Set<Layout>();
   /** W-671: a synced section or Loop Item part the canvas loaded is weighed with the page. */
   const part = (n: LayoutNode): Layout | undefined => {
@@ -97,30 +98,47 @@ function media(
     seen.add(found);
     return found;
   };
-  const walk = (n: LayoutNode): void => {
+  // W-973: a visitor sees one arm of an A/B test, so only the heavier arm's media count.
+  const arms = new Map<string, Map<string, Weight>>();
+  const walk = (n: LayoutNode): Weight => {
+    const own = zero();
     const template = part(n);
-    if (template) walk(template.root);
+    if (template) add(own, walk(template.root));
     if (n.type === "image" || n.type === "post-image") {
       const src = (n.props as { src?: unknown }).src;
       if (n.type === "post-image" || (typeof src === "string" && src.trim())) {
-        images += 1;
-        bytes += imageBytes(n);
+        own.images += 1;
+        own.bytes += imageBytes(n);
       }
     }
     if (hasBackgroundImage(n, bgClasses)) {
-      images += 1;
-      bytes += IMAGE_GUESS;
+      own.images += 1;
+      own.bytes += IMAGE_GUESS;
     }
     // W-508: only a YouTube or Vimeo player is a third-party embed; a media-library video loads
     // its metadata only, and a missing or refused URL renders nothing.
     if (n.type === "video" && isPlayerEmbed(n)) {
-      embeds += 1;
-      bytes += EMBED_BYTES;
+      own.embeds += 1;
+      own.bytes += EMBED_BYTES;
     }
-    if (isParentNode(n)) for (const child of n.children) walk(child);
+    if (isParentNode(n)) for (const child of n.children) add(own, walk(child));
+    const variant = n.variant;
+    if (variant) {
+      const test = arms.get(variant.test) ?? new Map<string, Weight>();
+      const arm = test.get(variant.arm) ?? zero();
+      add(arm, own);
+      test.set(variant.arm, arm);
+      arms.set(variant.test, test);
+      return zero();
+    }
+    return own;
   };
-  walk(node);
-  return { images, bytes, embeds };
+  const total = walk(node);
+  for (const test of arms.values()) {
+    const heaviest = [...test.values()].reduce((a, b) => (b.bytes > a.bytes ? b : a), zero());
+    add(total, heaviest);
+  }
+  return total;
 }
 
 const kb = (bytes: number) => `${Math.round(bytes / 1000)} KB`;
