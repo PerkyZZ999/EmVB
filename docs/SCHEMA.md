@@ -84,6 +84,11 @@ or `{ type: "none" }`. `effects` are the scroll-motion effects (`fade`, `move-x`
 transition easings; `alternate` (default true) plays back and forth; it stops after about 5 s
 unless `loop: true`. Normal-only, off for reduced motion. It has no 0.x key.
 
+Added in 1.1 (W-974, additive): a style record may carry `viewportUnits`, a map from a length key
+(`height`, `minHeight`, `maxHeight` and the other box lengths) to `"dvh"` or `"svh"`. A plain `vh`
+length of that key is then drawn in that unit. The length itself stays `vh`, so 1.0, which keeps
+and ignores the key, draws `vh`.
+
 The design moves to 17 only for the motion folding in class styles, their devices, and tag defaults.
 
 On input, a v18 document with a 0.x flat motion key (such as `style.entrance`) keeps the key as an

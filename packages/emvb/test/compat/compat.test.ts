@@ -71,6 +71,7 @@ const STYLE_KEYS_ADDED_IN_1X: Record<string, string> = {
   order: "1.0 (W-954): src/core/sanitize/style-map.test.ts",
   markerColor: "1.0 (W-952): src/core/render/list-markers.test.ts",
   markerSize: "1.0 (W-952): src/core/render/list-markers.test.ts",
+  viewportUnits: "1.1 (W-974): src/core/sanitize/viewport-units.test.ts",
 };
 
 type Style = Record<string, unknown> & { motion?: Record<string, unknown> };

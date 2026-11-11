@@ -651,6 +651,7 @@ export function StyleRow({
         slider={styleKey === "gap"}
         onPatch={onPatch}
         reset={reset}
+        viewportUnits={style?.viewportUnits}
       />
     );
   }
@@ -678,6 +679,8 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "entrance",
   "scrollMotion",
   "loopMotion",
+  // W-974: set by the Height rows' dvh/svh units (LengthRow), never a row of its own.
+  "viewportUnits",
   "transition",
   "iconRotate",
   "iconFlip",

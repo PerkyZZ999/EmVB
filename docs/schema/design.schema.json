@@ -3721,6 +3721,42 @@
           ],
           "additionalProperties": false
         },
+        "viewportUnits": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "enum": [
+              "width",
+              "minWidth",
+              "maxWidth",
+              "height",
+              "minHeight",
+              "maxHeight",
+              "flexBasis",
+              "gap",
+              "fontSize",
+              "paddingTop",
+              "paddingRight",
+              "paddingBottom",
+              "paddingLeft",
+              "marginTop",
+              "marginRight",
+              "marginBottom",
+              "marginLeft",
+              "top",
+              "right",
+              "bottom",
+              "left"
+            ]
+          },
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "dvh",
+              "svh"
+            ]
+          }
+        },
         "motion": {
           "type": "object",
           "properties": {
@@ -7408,6 +7444,42 @@
             "blur"
           ],
           "additionalProperties": false
+        },
+        "viewportUnits": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "enum": [
+              "width",
+              "minWidth",
+              "maxWidth",
+              "height",
+              "minHeight",
+              "maxHeight",
+              "flexBasis",
+              "gap",
+              "fontSize",
+              "paddingTop",
+              "paddingRight",
+              "paddingBottom",
+              "paddingLeft",
+              "marginTop",
+              "marginRight",
+              "marginBottom",
+              "marginLeft",
+              "top",
+              "right",
+              "bottom",
+              "left"
+            ]
+          },
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "dvh",
+              "svh"
+            ]
+          }
         }
       },
       "additionalProperties": false

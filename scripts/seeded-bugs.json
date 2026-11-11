@@ -6491,8 +6491,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
-          "search": "    if (!same(next, value)) onPatch({ [styleKey]: next });",
-          "replace": "    onPatch({ [styleKey]: next });"
+          "search": "    if (same(stored, value) && !marksChanged) return;\n",
+          "replace": ""
         }
       ],
       "command": [
@@ -21254,8 +21254,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
-          "search": "    [value],\n  );\n  // W-955",
-          "replace": "    [value, {}],\n  );\n  // W-955"
+          "search": "    [value, marked],\n  );",
+          "replace": "    [value, marked, {}],\n  );"
         }
       ],
       "command": [
@@ -27652,8 +27652,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
-          "search": "(px|rem|em|%|vw|vh|ch)?$/i;",
-          "replace": "(px|rem|em|%|vw|vh)?$/i;"
+          "search": "(px|rem|em|%|vw|dvh|svh|vh|ch)?$/i;",
+          "replace": "(px|rem|em|%|vw|dvh|svh|vh)?$/i;"
         }
       ],
       "command": [
@@ -45373,6 +45373,88 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/dnd/loop-post-title.test.ts"],
       "expect": "\\(fail\\).*dropped into a Loop"
+    },
+    {
+      "id": "W-974/not-applied",
+      "requirement": "W-974",
+      "description": "dvh marks are ignored by the renderer.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "  withViewportUnits(declarations, record[\"viewportUnits\"]);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/viewport-units.test.ts"],
+      "expect": "\\(fail\\).*drawn in that unit"
+    },
+    {
+      "id": "W-974/vars-changed",
+      "requirement": "W-974",
+      "description": "A marked fluid or variable height is rewritten too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "      const match = VH_LENGTH.exec(declaration.value);\n      if (match) declaration.value = `${match[1]}${unit}`;",
+          "replace": "      declaration.value = declaration.value.replace(/vh$|\\)$/, unit);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/viewport-units.test.ts"],
+      "expect": "\\(fail\\).*only plain vh"
+    },
+    {
+      "id": "W-974/stored-as-dvh",
+      "requirement": "W-974",
+      "description": "dvh is stored as a dvh length, which 1.0 refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "        ? { value: next.value, unit: \"vh\" as const }\n        : next;",
+          "replace": "        ? next\n        : next;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/viewport-units.test.tsx"
+      ],
+      "expect": "\\(fail\\).*stored as 100vh"
+    },
+    {
+      "id": "W-974/mark-kept",
+      "requirement": "W-974",
+      "description": "Switching away from dvh keeps the old mark.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx",
+          "search": "    else delete marks[styleKey];\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/viewport-units.test.tsx"
+      ],
+      "expect": "\\(fail\\).*drops the mark"
+    },
+    {
+      "id": "W-974/not-offered",
+      "requirement": "W-974",
+      "description": "Heights don't offer dvh and svh.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/length-units.ts",
+          "search": "const HEIGHT: readonly UnitChoice[] = [\"px\", \"%\", \"rem\", \"em\", \"vw\", \"vh\", \"dvh\", \"svh\", \"ch\"];",
+          "replace": "const HEIGHT: readonly UnitChoice[] = [\"px\", \"%\", \"rem\", \"em\", \"vw\", \"vh\", \"ch\"];"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/viewport-units.test.tsx"
+      ],
+      "expect": "\\(fail\\)"
     }
   ]
 }

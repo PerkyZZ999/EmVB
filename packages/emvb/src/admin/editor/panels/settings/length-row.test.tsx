@@ -190,9 +190,9 @@ describe("Line height units (W-125)", () => {
 
 describe("length field messages for other units (W-262)", () => {
   test("a number with a unit the field doesn't take lists the units it does", () => {
-    expect(parseLengthDraft("100dvh", "height", "px")).toEqual({
+    expect(parseLengthDraft("100dvh", "width", "px")).toEqual({
       ok: false,
-      message: "Height takes px, %, rem, em, vw, vh or ch.",
+      message: "Width takes px, %, rem, em, vw, vh or ch.",
     });
     expect(parseLengthDraft("12pt", "fontSize", "px")).toEqual({
       ok: false,

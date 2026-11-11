@@ -268,6 +268,32 @@ const Overlay = z.union([
  * Style properties for layout and text elements (W-017 / R-012). Unknown keys are refused here;
  * `validateLayout` and `validateDesign` keep a newer 1.x key aside and puts it back untouched (D-065, W-925).
  */
+/** W-974: the length keys whose `vh` can be drawn as `dvh` or `svh`. */
+const VIEWPORT_UNIT_KEYS = [
+  "width",
+  "minWidth",
+  "maxWidth",
+  "height",
+  "minHeight",
+  "maxHeight",
+  "flexBasis",
+  "gap",
+  "fontSize",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+  "marginTop",
+  "marginRight",
+  "marginBottom",
+  "marginLeft",
+  "top",
+  "right",
+  "bottom",
+  "left",
+] as const;
+const VIEWPORT_UNITS = ["dvh", "svh"] as const;
+
 export const StyleProps = z.strictObject({
   flexDirection: z.enum(FLEX_DIRECTIONS).optional(),
   flexWrap: z.enum(FLEX_WRAPS).optional(),
@@ -438,6 +464,12 @@ export const StyleProps = z.strictObject({
       color: ColorValue.optional(),
     })
     .optional(),
+  /**
+   * W-974 (1.1): which `vh` lengths in this record are drawn in dynamic (`dvh`) or small (`svh`)
+   * viewport units, for full-height sections on phones. The length itself stays `vh`, so 1.0
+   * (which ignores this key) still draws it in `vh`.
+   */
+  viewportUnits: z.partialRecord(z.enum(VIEWPORT_UNIT_KEYS), z.enum(VIEWPORT_UNITS)).optional(),
   motion: Motion.optional(),
 });
 

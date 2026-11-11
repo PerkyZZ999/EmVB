@@ -738,6 +738,8 @@ const PROPERTY_MAP: {
   iconScale: { css: "scale", toValue: cssIconScale },
   iconStrokeWidth: { css: "--emvb-icon-stroke", toValue: cssIconStroke },
   iconShadow: { css: "--emvb-icon-shadow", toValue: cssIconShadow },
+  // W-974: applied by `withViewportUnits` to the record's lengths; never a declaration of its own.
+  viewportUnits: { css: "--emvb-viewport-units", toValue: () => undefined },
   iconAnimation: { css: "--emvb-icon-animation", toValue: cssIconAnimation },
 };
 
@@ -787,6 +789,28 @@ function transformDeclarations(value: unknown): Declaration[] | undefined {
   return out;
 }
 
+const VH_LENGTH = /^(-?\d+(?:\.\d+)?)vh$/;
+
+/**
+ * W-974: a `vh` length the record marks as `dvh` or `svh` is written in that unit. Only a plain
+ * number with `vh` changes; a variable, `clamp()` or `auto` is left alone.
+ */
+function withViewportUnits(declarations: Declaration[], units: unknown): void {
+  if (!isRecord(units)) return;
+  for (const [key, unit] of Object.entries(units)) {
+    if (unit !== "dvh" && unit !== "svh") continue;
+    const entry = Object.hasOwn(PROPERTY_MAP, key)
+      ? PROPERTY_MAP[key as keyof FlatStyleProps]
+      : undefined;
+    if (!entry) continue;
+    for (const declaration of declarations) {
+      if (declaration.property !== entry.css) continue;
+      const match = VH_LENGTH.exec(declaration.value);
+      if (match) declaration.value = `${match[1]}${unit}`;
+    }
+  }
+}
+
 export function styleDeclarations(style: unknown): {
   declarations: Declaration[];
   rejected: string[];
@@ -807,6 +831,7 @@ export function styleDeclarations(style: unknown): {
     ) {
       continue;
     }
+    if (key === "viewportUnits") continue;
     if (key === "loopMotion") {
       const found = loopDeclarations(raw);
       if (found && found.every((d) => isSafeCssValue(d.value))) loop = found;
@@ -847,6 +872,7 @@ export function styleDeclarations(style: unknown): {
       rejected.push(key);
     }
   }
+  withViewportUnits(declarations, record["viewportUnits"]);
   const background = composeBackground(record);
   declarations.push(...background.declarations);
   rejected.push(...background.rejected);

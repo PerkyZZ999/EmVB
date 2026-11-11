@@ -6,11 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-### Changed
-
-- **Post title in a Loop starts as H2 (W-968).** A Post title added inside a Loop (or in a loop item part) is a level 2 heading, so a grid of cards no longer has one H1 per post. A level you choose is kept.
-
 ### Added
+
+- **dvh and svh (W-974).** Height, Min height and Max height take `dvh` (dynamic viewport height) and `svh` (small viewport height), so a full-height section fits a phone screen with its browser bars. They are stored as `vh` with a new optional `viewportUnits` mark, so EmVB 1.0 still opens the page and draws it in `vh`.
 
 - **Export pages (W-963).** **Export pages** on the Pages list takes your published pages (all of them, or one) elsewhere, as either:
   - **HTML and CSS files:** a zip you can host anywhere, each page in its own folder with the header, footer, popups and floats it shows, the small popup, tabs, menu and float scripts only where a page uses them, an index of the pages and a report. Images and files your site serves can be copied in, and the pages then point at the copies. Loops, bound fields, audience rules and forms need the live site, so the report lists where they appear.
@@ -20,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **Docs on emvb.dev (W-964).** The project site gains a Docs section: every guide, the schema contract and the Extensions API reference, built from the repository's own docs so they can't drift, with an index grouped by topic, a search box, a sidebar and an on-this-page list. It goes live with this release.
 - **Convert to rich text (W-963).** On an entry in your own collections, **Convert to rich text** copies the layout's words, headings, lists, links and images into the entry's rich-text field (the reverse of Convert to EmVB). A confirm first says how many blocks go in, what is left out (forms, icons, embeds) and whether it replaces what the field holds. The layout itself isn't changed; clear it and save the entry to show the rich text on your site.
+
+### Changed
+
+- **Post title in a Loop starts as H2 (W-968).** A Post title added inside a Loop (or in a loop item part) is a level 2 heading, so a grid of cards no longer has one H1 per post. A level you choose is kept.
 
 ## [1.0.0] - 2026-11-09
 

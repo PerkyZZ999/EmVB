@@ -1,17 +1,29 @@
 import { STYLE_LABELS, type StyleKey } from "./style-sections.ts";
 
-export type LengthUnit = "px" | "rem" | "em" | "%" | "vw" | "vh" | "ch";
+export type LengthUnit = "px" | "rem" | "em" | "%" | "vw" | "vh" | "ch" | ViewportUnit;
+/**
+ * W-974: dynamic and small viewport height, for full-height sections on phones. Stored as `vh`
+ * plus the record's `viewportUnits`, so 1.0 still draws them as `vh`.
+ */
+export type ViewportUnit = "dvh" | "svh";
+export const isViewportUnit = (unit: unknown): unit is ViewportUnit =>
+  unit === "dvh" || unit === "svh";
 /** `x` is a unitless number, for Line height only (W-213). */
 export type UnitChoice = LengthUnit | "auto" | "x";
 export type LengthLiteral = { value: number; unit: LengthUnit };
 
 const BOX: readonly UnitChoice[] = ["px", "%", "rem", "em", "vw", "vh", "ch"];
 const BOX_AUTO: readonly UnitChoice[] = [...BOX, "auto"];
+/** Heights also take dvh and svh (W-974). */
+const HEIGHT: readonly UnitChoice[] = ["px", "%", "rem", "em", "vw", "vh", "dvh", "svh", "ch"];
+const HEIGHT_AUTO: readonly UnitChoice[] = [...HEIGHT, "auto"];
 
 /** Units each length property offers in its unit menu (DESIGN.md § Inputs). */
 const UNITS: Partial<Record<StyleKey, readonly UnitChoice[]>> = {
   width: BOX_AUTO,
-  height: BOX_AUTO,
+  height: HEIGHT_AUTO,
+  minHeight: HEIGHT,
+  maxHeight: HEIGHT,
   flexBasis: BOX_AUTO,
   marginTop: BOX_AUTO,
   marginRight: BOX_AUTO,
@@ -96,7 +108,7 @@ export type ParsedLength =
   | { ok: true; value: LengthLiteral | FluidLiteral | "auto" | number | undefined }
   | { ok: false; message: string };
 
-const DRAFT = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(px|rem|em|%|vw|vh|ch)?$/i;
+const DRAFT = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*(px|rem|em|%|vw|dvh|svh|vh|ch)?$/i;
 /** A number with a unit EmVB doesn't take ("100dvh", "12pt"), or a comma decimal ("1,5") (W-262). */
 const OTHER_UNIT = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)\s*[a-z%]+$/i;
 const COMMA_DECIMAL = /^[+-]?\d*,\d+\s*[a-z%]*$/i;

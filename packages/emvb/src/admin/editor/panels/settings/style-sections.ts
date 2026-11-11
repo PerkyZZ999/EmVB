@@ -427,6 +427,7 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   entrance: "Entrance",
   scrollMotion: "Scroll motion",
   loopMotion: "Loop",
+  viewportUnits: "Viewport units",
   iconRotate: "Rotate",
   iconFlip: "Flip",
   iconScale: "Scale",

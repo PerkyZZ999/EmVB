@@ -13,6 +13,7 @@ import {
   type LengthLiteral,
   type LengthUnit,
   type UnitChoice,
+  isViewportUnit,
 } from "./length-units.ts";
 import type { StyleKey } from "./style-sections.ts";
 import { bindKind, boundRef, lengthRef, VariableButton, VariableChip } from "./VariableBinding.tsx";
@@ -45,6 +46,7 @@ export function LengthRow({
   slider = false,
   onPatch,
   reset,
+  viewportUnits,
 }: {
   styleKey: StyleKey;
   label: string;
@@ -57,14 +59,24 @@ export function LengthRow({
   slider?: boolean;
   onPatch: (patch: Partial<FlatStyleProps>) => void;
   reset: React.ReactNode;
+  /** W-974: the record's dvh/svh marks; a marked `vh` length shows as that unit. */
+  viewportUnits?: FlatStyleProps["viewportUnits"];
 }) {
   const units = unitsFor(styleKey);
   // W-213: a plain number is a unitless line height, shown with the `x` unit.
   // W-603: memoized, so a plain number doesn't make a new object each render; the effect below
   // would reset the draft on every keystroke and nothing typed over a unitless value would stick.
+  const marked = viewportUnits?.[styleKey as keyof NonNullable<typeof viewportUnits>];
   const literal = React.useMemo<{ value: number; unit: NumericUnit } | undefined>(
-    () => (isLiteral(value) ? value : typeof value === "number" ? { value, unit: "x" } : undefined),
-    [value],
+    () =>
+      isLiteral(value)
+        ? value.unit === "vh" && marked
+          ? { value: value.value, unit: marked }
+          : value
+        : typeof value === "number"
+          ? { value, unit: "x" }
+          : undefined,
+    [value, marked],
   );
   // W-955: a fluid size shows as "32–56" in px.
   const fluid = isFluid(value) ? value : undefined;
@@ -82,7 +94,28 @@ export function LengthRow({
   }, [value, literal]);
 
   const send = (next: LengthLiteral | FluidLiteral | "auto" | number | undefined) => {
-    if (!same(next, value)) onPatch({ [styleKey]: next });
+    // W-974: dvh and svh are stored as vh plus the record's mark, so 1.0 still draws vh.
+    const nextUnit = isLiteral(next) ? next.unit : undefined;
+    const stored =
+      isLiteral(next) && isViewportUnit(nextUnit)
+        ? { value: next.value, unit: "vh" as const }
+        : next;
+    const marks = { ...viewportUnits } as Record<string, string>;
+    if (isViewportUnit(nextUnit)) marks[styleKey] = nextUnit;
+    else delete marks[styleKey];
+    const marksChanged = (marks[styleKey] ?? null) !== (marked ?? null);
+    if (same(stored, value) && !marksChanged) return;
+    onPatch({
+      [styleKey]: stored,
+      ...(marksChanged
+        ? {
+            viewportUnits:
+              Object.keys(marks).length > 0
+                ? (marks as FlatStyleProps["viewportUnits"])
+                : undefined,
+          }
+        : {}),
+    });
   };
 
   const commit = () => {
