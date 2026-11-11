@@ -970,6 +970,90 @@ describe("Elementor laptop values (W-956)", () => {
   });
 });
 
+describe("Elementor widescreen values (W-959)", () => {
+  const imported = (settings: Record<string, unknown>, extra: Record<string, unknown>[] = []) =>
+    ok(
+      importElementor(
+        JSON.stringify({
+          content: [
+            {
+              id: "h1",
+              elType: "widget",
+              widgetType: "heading",
+              settings: { title: "Hello", ...settings },
+            },
+            ...extra,
+          ],
+        }),
+        { icon },
+      ),
+    );
+
+  test("a widescreen value goes to Wide screen (style.wide), not Desktop", () => {
+    const [found] = ofType(
+      imported({
+        typography_typography: "custom",
+        typography_font_size: { unit: "px", size: 40 },
+        typography_font_size_widescreen: { unit: "px", size: 72 },
+      }).layout,
+      "heading",
+    );
+    expect(found?.style?.["fontSize"]).toEqual({ value: 40, unit: "px" });
+    expect(found?.style?.["wide"]).toEqual({ fontSize: { value: 72, unit: "px" } });
+  });
+
+  test("hide on widescreen, apart from Desktop, only when the site has that breakpoint", () => {
+    const wide = (settings: Record<string, unknown>) =>
+      (
+        ofType(imported(settings).layout, "heading")[0]?.style?.["wide"] as
+          | { hidden?: boolean }
+          | undefined
+      )?.hidden;
+    expect(wide({ hide_desktop: "hidden-desktop" })).toBeUndefined();
+    expect(wide({ hide_desktop: "hidden-desktop", hide_widescreen: "" })).toBe(false);
+    expect(wide({ hide_widescreen: "hidden-widescreen" })).toBe(true);
+    expect(wide({ hide_desktop: "hidden-desktop", hide_widescreen: "hidden-widescreen" })).toBe(
+      undefined,
+    );
+  });
+
+  test("a boxed container keeps its Laptop and Wide screen layout values (W-956 fix)", () => {
+    const result = ok(
+      importElementor(
+        JSON.stringify({
+          content: [
+            {
+              id: "c1",
+              elType: "container",
+              settings: {
+                content_width: "boxed",
+                flex_direction: "row",
+                flex_direction_laptop: "column",
+                flex_direction_widescreen: "row-reverse",
+              },
+              elements: [
+                {
+                  id: "h1",
+                  elType: "widget",
+                  widgetType: "heading",
+                  settings: { title: "Hi" },
+                },
+              ],
+            },
+          ],
+        }),
+        { icon },
+      ),
+    );
+    const containers = ofType(result.layout, "container").filter(
+      (c) => c.style?.["flexDirection"] !== undefined || c.devices?.["laptop"] !== undefined,
+    );
+    const inner = containers.find((c) => c.style?.["maxWidth"] !== undefined);
+    expect(inner?.devices?.["laptop"]).toMatchObject({ flexDirection: "column" });
+    expect(inner?.style?.["wide"]).toMatchObject({ flexDirection: "row-reverse" });
+  });
+});
+
 describe("Elementor HTML to blocks (W-945)", () => {
   const keep = (url: string) => (/^https?:\/\//.test(url) ? url : undefined);
 

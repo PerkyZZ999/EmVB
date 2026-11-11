@@ -721,9 +721,10 @@ function convert(props: Settings, snap: AtomicSnapshots, ctx: ImportContext): Co
   return out;
 }
 
-const DEVICE_OF: Record<string, "desktop" | "laptop" | "tablet" | "mobile"> = {
+const DEVICE_OF: Record<string, "wide" | "desktop" | "laptop" | "tablet" | "mobile"> = {
   desktop: "desktop",
-  widescreen: "desktop",
+  // W-959: EmVB has a Wide screen device (2400 px and up), like Elementor's.
+  widescreen: "wide",
   // W-956: EmVB has a Laptop device (up to 1366 px), like Elementor's.
   laptop: "laptop",
   tablet_extra: "tablet",
@@ -746,7 +747,7 @@ type AtomicStyle = {
   style: Style;
   devices: { laptop?: Style; tablet?: Style; mobile?: Style };
   states: { hover?: Style; focus?: Style; active?: Style };
-  display: { desktop?: string; laptop?: string; tablet?: string; mobile?: string };
+  display: { wide?: string; desktop?: string; laptop?: string; tablet?: string; mobile?: string };
   columns: { desktop?: number; tablet?: number; mobile?: number };
   tracks: { desktop?: string[]; tablet?: string[]; mobile?: string[] };
   fullRow: boolean;
@@ -917,7 +918,8 @@ function atomicStyle(
   /** W-958: only these classes, without Elementor's base styles (a class's own look). */
   only?: readonly ClassDef[],
 ): AtomicStyle {
-  const layers: Record<"desktop" | "laptop" | "tablet" | "mobile", Style> = {
+  const layers: Record<"wide" | "desktop" | "laptop" | "tablet" | "mobile", Style> = {
+    wide: {},
     desktop: {},
     laptop: {},
     tablet: {},
@@ -954,7 +956,7 @@ function atomicStyle(
       unsupported.add(`${breakpoint} breakpoint`);
       continue;
     }
-    if (breakpoint !== device) folded = true;
+    if (breakpoint !== device && breakpoint !== "widescreen") folded = true;
     const converted = convert(isRecord(variant.props) ? variant.props : {}, snap, ctx);
     if (variant.custom_css) {
       const raw = isRecord(variant.custom_css) ? variant.custom_css["raw"] : undefined;
@@ -985,7 +987,9 @@ function atomicStyle(
     if (converted.columns && device === "laptop") {
       // EmVB's grid columns have no laptop value: laptops keep the desktop columns.
       unsupported.add("grid columns for laptops (laptops use the desktop columns)");
-    } else if (converted.columns && device !== "laptop") {
+    } else if (converted.columns && device === "wide") {
+      unsupported.add("grid columns for wide screens (wide screens use the desktop columns)");
+    } else if (converted.columns && device !== "laptop" && device !== "wide") {
       columns[device] = converted.columns;
       if (converted.tracks) tracks[device] = converted.tracks;
       else delete tracks[device];
@@ -995,7 +999,7 @@ function atomicStyle(
     ctx.note(
       "approximated",
       "Breakpoints",
-      "Extra breakpoints were folded into Tablet and Mobile, and Widescreen into Desktop.",
+      "Extra breakpoints were folded into Tablet and Mobile.",
     );
   if (Object.keys(phoneFromFluid).length > 0 && !quiet) {
     ctx.note(
@@ -1007,8 +1011,10 @@ function atomicStyle(
   for (const what of quiet ? [] : unsupported) {
     ctx.note("approximated", name, `Left out a style EmVB has no setting for: ${what}.`);
   }
-  for (const layer of [layers.desktop, layers.laptop, layers.tablet, layers.mobile])
+  for (const layer of [layers.wide, layers.desktop, layers.laptop, layers.tablet, layers.mobile])
     finishBorders(layer);
+  // W-959: Wide screen values build on Desktop's and sit in the style's `wide` record.
+  const wideScreen = changedKeys(layers.desktop, layers.wide);
   const mobile = { ...narrowFromWidth, ...phoneFromFluid, ...layers.mobile };
   const laptop = changedKeys(layers.desktop, layers.laptop);
   const wide = { ...layers.desktop, ...laptop };
@@ -1029,7 +1035,8 @@ function atomicStyle(
       tracks[device] = Array.from({ length: count }, () => "1fr");
     wider = tracks[device] ?? wider;
   }
-  return { style: layers.desktop, devices, states: statesOut, display, columns, tracks, fullRow };
+  const style = isEmptyStyle(wideScreen) ? layers.desktop : { ...layers.desktop, wide: wideScreen };
+  return { style, devices, states: statesOut, display, columns, tracks, fullRow };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1130,6 +1137,12 @@ function applyStyle(n: N, s: AtomicStyle): N {
     (d) => shown[d] === "none",
   );
   if (hidden.length > 0) n["hiddenOn"] = hidden;
+  // W-959: a widescreen display that hides or shows unlike Desktop.
+  if (s.display.wide !== undefined && (s.display.wide === "none") !== hidden.includes("desktop")) {
+    const style = { ...(n["style"] as Style | undefined) };
+    style["wide"] = { ...(style["wide"] as Style | undefined), hidden: s.display.wide === "none" };
+    n["style"] = style;
+  }
   return n;
 }
 

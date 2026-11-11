@@ -8,10 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- **Laptop fixes (W-959).** The Style panel said "Editing Tablet" while editing Laptop; each device now names itself and what it overrides. An Elementor boxed container's Laptop layout values (direction, gap, alignment) were dropped on import; they are kept.
 - **Style source chip contrast (W-976).** The active chip in the Style panel's style sources (such as **Local**) had white text at 4.48:1 on the brand blue, just under WCAG AA. Its background is now a little darker (over 4.5:1, light and dark).
 
 ### Added
 
+- **Wide screen device (W-959).** A Wide screen device (2400 px and up, Elementor's widescreen) sits above Desktop in the device bar, the command palette and Preview (on a screen at least 2400 px wide). Its styles build on Desktop's, for elements and classes. It hides with Desktop unless you set its own Hide, which can also show on wide screens what Desktop hides. The Elementor import keeps widescreen values and Hide on widescreen instead of folding them into Desktop. They are stored in the element's style as `wide`, so EmVB 1.0 still opens the page and shows its Desktop look on wide screens.
 - **dvh and svh (W-974).** Height, Min height and Max height take `dvh` (dynamic viewport height) and `svh` (small viewport height), so a full-height section fits a phone screen with its browser bars. They are stored as `vh` with a new optional `viewportUnits` mark, so EmVB 1.0 still opens the page and draws it in `vh`.
 
 - **Export pages (W-963).** **Export pages** on the Pages list takes your published pages (all of them, or one) elsewhere, as either:

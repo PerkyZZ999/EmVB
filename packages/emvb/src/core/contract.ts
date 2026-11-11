@@ -2,7 +2,7 @@ import { MAX_UNKNOWN_DEPTH, MAX_UNKNOWN_KEYS, UNKNOWN_KEY_PATTERN } from "./limi
 import { flattenMotion, isFlatMotionKey, withoutStrayMotionKeys } from "./migrate/v18.ts";
 import { isRecord } from "./record.ts";
 import { KNOWN_NODE_SCHEMAS } from "./schema/layout.ts";
-import { FlatStyleProps, StyleProps } from "./schema/style.ts";
+import { FlatStyleProps, OwnStyle, StyleProps, WideStyle } from "./schema/style.ts";
 
 /**
  * D-065 (W-925, contract 1.0): a 1.x document may carry keys this version does not know, on a
@@ -30,6 +30,9 @@ for (const schema of KNOWN_NODE_SCHEMAS) {
   if (typeof type === "string") PROP_KEYS.set(type, shapeKeys(shape["props"]));
 }
 const STYLE_KEYS = shapeKeys(StyleProps);
+/** W-959: an element's or class's own style also knows `wide`, whose record is open too. */
+const OWN_STYLE_KEYS = shapeKeys(OwnStyle);
+const WIDE_KEYS = shapeKeys(WideStyle);
 const FLAT_STYLE_KEYS = shapeKeys(FlatStyleProps);
 const STATES = ["hover", "focus", "active"] as const;
 const DEVICES = ["laptop", "tablet", "mobile"] as const;
@@ -92,7 +95,9 @@ class Splitter {
   }
 
   styleRecords(owner: Record<string, unknown>, path: Path): void {
-    this.take(owner["style"], STYLE_KEYS, [...path, "style"]);
+    this.take(owner["style"], OWN_STYLE_KEYS, [...path, "style"]);
+    const style = owner["style"];
+    if (isRecord(style)) this.take(style["wide"], WIDE_KEYS, [...path, "style", "wide"]);
     const states = owner["states"];
     if (isRecord(states)) {
       // `motion` is a known key here so the schema refuses it in a state, not kept as unknown.
@@ -199,6 +204,20 @@ export function renderableStyle<T>(style: T): T {
   return inFlatOrder(known(flattenMotion(withoutStrayMotionKeys(style)), FLAT_STYLE_KEYS), style);
 }
 
+/**
+ * W-959: the renderer reads Wide screen as one more device: `style.wide` becomes `devices.wide`
+ * (known keys only) and its `hidden` becomes `wideHidden`. Without `style.wide` nothing changes.
+ */
+function wideAsDevice(owner: Record<string, unknown>, out: Record<string, unknown>): void {
+  const style = owner["style"];
+  const wide = isRecord(style) ? style["wide"] : undefined;
+  if (!isRecord(wide)) return;
+  const { hidden, ...rest } = wide;
+  const devices = isRecord(out["devices"]) ? out["devices"] : {};
+  if (Object.keys(rest).length > 0) out["devices"] = { ...devices, wide: renderableStyle(rest) };
+  if (typeof hidden === "boolean") out["wideHidden"] = hidden;
+}
+
 function renderableStyles<T extends Record<string, unknown>>(owner: T): T {
   const out: Record<string, unknown> = { ...owner };
   if ("style" in owner) out["style"] = renderableStyle(owner["style"]);
@@ -217,6 +236,7 @@ function renderableStyles<T extends Record<string, unknown>>(owner: T): T {
     for (const [device, style] of Object.entries(devices)) next[device] = renderableStyle(style);
     out["devices"] = next;
   }
+  wideAsDevice(owner, out);
   return out as T;
 }
 

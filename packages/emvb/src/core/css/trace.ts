@@ -2,9 +2,9 @@ import type { DefaultStyleTag, DesignSystem } from "../schema/design.ts";
 import type { LayoutNode } from "../schema/layout.ts";
 import type { StyleStateName } from "../schema/state-names.ts";
 import { flattenMotion } from "../migrate/v18.ts";
-import type { FlatStyleProps, StyleProps } from "../schema/style.ts";
+import type { FlatStyleProps, OwnStyle, StyleProps } from "../schema/style.ts";
 
-export type TraceDevice = "desktop" | "laptop" | "tablet" | "mobile";
+export type TraceDevice = "wide" | "desktop" | "laptop" | "tablet" | "mobile";
 
 /** Where one style value comes from (W-318). */
 export type StyleSource = {
@@ -39,7 +39,24 @@ export function defaultTagFor(node: LayoutNode): DefaultStyleTag | undefined {
   }
 }
 
-const LAYER = { desktop: "Desktop", laptop: "Laptop", tablet: "Tablet", mobile: "Mobile" } as const;
+const LAYER = {
+  wide: "Wide screen",
+  desktop: "Desktop",
+  laptop: "Laptop",
+  tablet: "Tablet",
+  mobile: "Mobile",
+} as const;
+
+/** W-959: an own style's Desktop values and its Wide screen ones (without `hidden`), apart. */
+function splitWide(style: OwnStyle | undefined): { desktop?: StyleProps; wide?: StyleProps } {
+  if (!style) return {};
+  const { wide, ...desktop } = style;
+  const { hidden: _hidden, ...values } = wide ?? {};
+  return {
+    desktop,
+    ...(Object.keys(values).length > 0 ? { wide: values } : {}),
+  };
+}
 const STATE_LABEL: Record<StyleStateName, string> = {
   hover: "Hover",
   focus: "Focus",
@@ -50,7 +67,8 @@ type Owner = {
   kind: "class" | "local";
   label: string;
   classId?: string;
-  style?: StyleProps;
+  desktop?: StyleProps;
+  wide?: StyleProps;
   devices?: { laptop?: StyleProps; tablet?: StyleProps; mobile?: StyleProps };
   states?: Partial<Record<StyleStateName, StyleProps>>;
 };
@@ -84,7 +102,7 @@ export function styleLayers(
       kind: "class",
       label: `.${cls.name}`,
       classId: cls.id,
-      style: cls.style,
+      ...splitWide(cls.style),
     };
     if (cls.devices) owner.devices = cls.devices;
     if (cls.states) owner.states = cls.states;
@@ -93,7 +111,7 @@ export function styleLayers(
   owners.push({
     kind: "local",
     label: "This element",
-    ...(node.style ? { style: node.style } : {}),
+    ...(node.style ? splitWide(node.style) : {}),
     ...(node.devices ? { devices: node.devices } : {}),
     ...(node.states ? { states: node.states as Owner["states"] } : {}),
   });
@@ -103,8 +121,15 @@ export function styleLayers(
       label: owner.label,
       ...(owner.classId ? { classId: owner.classId } : {}),
     };
-    if (owner.style) layers.push({ source: { ...base, layer: LAYER.desktop }, style: owner.style });
-    if (device !== "desktop" && owner.devices?.laptop) {
+    if (owner.desktop)
+      layers.push({ source: { ...base, layer: LAYER.desktop }, style: owner.desktop });
+    if (device === "wide" && owner.wide) {
+      layers.push({ source: { ...base, layer: LAYER.wide }, style: owner.wide });
+    }
+    if (
+      (device === "laptop" || device === "tablet" || device === "mobile") &&
+      owner.devices?.laptop
+    ) {
       layers.push({ source: { ...base, layer: LAYER.laptop }, style: owner.devices.laptop });
     }
     if ((device === "tablet" || device === "mobile") && owner.devices?.tablet) {

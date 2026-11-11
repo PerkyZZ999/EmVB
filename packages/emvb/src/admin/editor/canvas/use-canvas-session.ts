@@ -4,7 +4,7 @@ import {
   isPlainTextNode,
   plainTextOf,
   type Layout,
-  type Device,
+  type EditorDevice,
   type VNode,
 } from "../../../core/index.ts";
 import type { PasteRefusal, ClipboardActions } from "../useClipboardActions.ts";
@@ -65,7 +65,7 @@ export function useCanvasSession({
   layout: Layout | null;
   selection: CanvasSelection;
   statePreview: StatePreview | null;
-  device: Device;
+  device: EditorDevice;
   zoom: CanvasZoom;
   onScale?: (scale: number) => void;
   refusal: PasteRefusal | null;

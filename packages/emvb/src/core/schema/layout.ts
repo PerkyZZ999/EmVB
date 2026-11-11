@@ -2,7 +2,15 @@ import { z } from "zod";
 import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_TEXT_LENGTH } from "../limits.ts";
 import { ImageEdit } from "../image-edit/schema.ts";
-import { ColorValue, DeviceStyles, HiddenOn, Length, StyleProps, StyleStates } from "./style.ts";
+import {
+  ColorValue,
+  DeviceStyles,
+  HiddenOn,
+  Length,
+  OwnStyle,
+  StyleProps,
+  StyleStates,
+} from "./style.ts";
 
 /**
  * 16 since W-481 (D-061): an optional editor-only `edit` record on images (image editor).
@@ -167,7 +175,7 @@ const BoxLink = {
  * `dir`, `container` and `query` before this.
  */
 const sharedNodeFields = {
-  style: StyleProps.optional(),
+  style: OwnStyle.optional(),
   states: StyleStates.optional(),
   devices: DeviceStyles.optional(),
   hiddenOn: HiddenOn.optional(),
@@ -903,7 +911,7 @@ export type NodeExtras = {
 /** Identity, style and extras shared by every node type (W-352). */
 type NodeEnvelope = {
   id: IdOf;
-  style?: StyleOf;
+  style?: z.infer<typeof OwnStyle>;
   states?: StatesOf;
   devices?: DevicesOf;
   hiddenOn?: HiddenOnOf;

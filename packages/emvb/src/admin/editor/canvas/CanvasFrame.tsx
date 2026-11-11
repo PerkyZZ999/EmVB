@@ -1,5 +1,10 @@
 import { createPortal } from "react-dom";
-import { isMultilineText, type Layout, type Device, type VNode } from "../../../core/index.ts";
+import {
+  isMultilineText,
+  type Layout,
+  type EditorDevice,
+  type VNode,
+} from "../../../core/index.ts";
 import type { PasteRefusal } from "../useClipboardActions.ts";
 import { CanvasTextEdit } from "./CanvasTextEdit.tsx";
 import { useFrameFocusRing } from "./frame-focus-ring.ts";
@@ -112,7 +117,7 @@ export function CanvasFrame({
   /** The style state chosen in the Style tab, shown on the selected element (W-089). */
   statePreview?: StatePreview | null;
   /** The previewed device (W-096): its page width, scaled to the stage (W-158, D-046). */
-  device?: Device;
+  device?: EditorDevice;
   /** Fit to the stage or show at 100% (W-158). */
   zoom?: CanvasZoom;
   /** Told the on-screen scale whenever it changes, for the zoom readout (W-158). */

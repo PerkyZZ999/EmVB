@@ -476,6 +476,21 @@ export const StyleProps = z.strictObject({
 export type StyleProps = z.infer<typeof StyleProps>;
 
 /**
+ * W-959 (1.1): Wide screen, 2400 px and up (Elementor's widescreen breakpoint). Its overrides sit
+ * in the element's or class's own `style` as `style.wide`, a key 1.0 keeps and ignores, so a 1.1
+ * page still opens in 1.0 and shows its Desktop look on wide screens. `hidden` overrides the
+ * Desktop hide on wide screens: true hides it there, false shows it; unset follows Desktop.
+ */
+export const WideStyle = StyleProps.extend({ hidden: z.boolean().optional() });
+
+export type WideStyle = z.infer<typeof WideStyle>;
+
+/** An element's or class's own `style`: the Desktop values plus the Wide screen ones. */
+export const OwnStyle = StyleProps.extend({ wide: WideStyle.optional() });
+
+export type OwnStyle = z.infer<typeof OwnStyle>;
+
+/**
  * The pre-1.0 flat style shape: `motion`'s parts as the top-level keys `entrance`, `scrollMotion`,
  * `transition` and `iconAnimation` (W-925). The editor's style rows and the CSS sanitizer work on
  * this shape; `flattenMotion` and `nestMotion` convert. It is never stored.

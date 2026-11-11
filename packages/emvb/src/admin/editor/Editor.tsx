@@ -19,6 +19,9 @@ import {
   type Layout,
   type LayoutNode,
   type Device,
+  type EditorDevice,
+  hiddenOnDevice,
+  wideHideIsOwn,
 } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { EditedNounContext, editedNounOf, useEditedNoun } from "./edited-noun.ts";
@@ -168,7 +171,7 @@ function EditorApp({
   const noun = useEditedNoun();
   const toasts = React.useMemo(() => createKumoToastManager(), []);
   const chrome = useChromeFlags();
-  const [device, setDevice] = React.useState<Device>("desktop");
+  const [device, setDevice] = React.useState<EditorDevice>("desktop");
   const [zoom, setZoom] = React.useState<CanvasZoom>("fit");
   const [scale, setScale] = React.useState(1);
   const [statePreview, setStatePreview] = React.useState<StatePreview | null>(null);
@@ -584,7 +587,8 @@ function EditorApp({
                 <main className="emvb-canvas">
                   <DeviceBar
                     device={device}
-                    hidden={!!selectedNode?.hiddenOn?.includes(device)}
+                    hidden={!!selectedNode && hiddenOnDevice(selectedNode, device)}
+                    inherited={device === "wide" && !!selectedNode && !wideHideIsOwn(selectedNode)}
                     canHide={!!hideOnDevice && !hideOnDevice.disabled}
                     hideLabel={hideOnDevice?.label ?? `Hide on ${device}`}
                     onDevice={setDevice}
@@ -701,7 +705,7 @@ function EditorApp({
             <FieldPreview
               open={fieldPreview}
               onOpenChange={setFieldPreview}
-              device={device === "laptop" ? "desktop" : device}
+              device={device === "laptop" || device === "wide" ? "desktop" : device}
               render={renderFieldPreview}
             />
           )}

@@ -15,7 +15,7 @@ import {
   type ElementType,
   type Layout,
   type LayoutNode,
-  DEVICES,
+  hiddenOnEveryDevice,
 } from "../core/index.ts";
 import { parentChildRefusal } from "../core/arrange.ts";
 import { clipText } from "../core/limits.ts";
@@ -317,8 +317,7 @@ function imagesOf(root: LayoutNode) {
 function hiddenEverywhere(root: LayoutNode) {
   const warnings: { nodeId: string; message: string }[] = [];
   const walk = (node: LayoutNode) => {
-    const hidden = new Set((node as { hiddenOn?: string[] }).hiddenOn ?? []);
-    if (DEVICES.every((device) => hidden.has(device))) {
+    if (hiddenOnEveryDevice(node)) {
       warnings.push({
         nodeId: node.id,
         message:

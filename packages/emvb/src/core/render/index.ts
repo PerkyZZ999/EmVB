@@ -46,7 +46,8 @@ import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { resolvePostForRender, type ThemeDynamicData } from "../theme/dynamic.ts";
 import type { FormDefinitions } from "../forms/definition.ts";
-import { DEVICES, type Device } from "../theme/popup-rules.ts";
+import { DEVICES, type Device, type EditorDevice } from "../theme/popup-rules.ts";
+import { hiddenOnEveryDevice } from "../design/devices.ts";
 import type { RenderContext, RenderMode } from "./context.ts";
 import { isDynamicPostNode, renderDynamicPost } from "./dynamic-post.ts";
 import { renderForm, withFieldOptions } from "./form.ts";
@@ -262,7 +263,7 @@ export function renderPage(
     /** Public renders: wrap the markup and scope the CSS to it, so sheets can't override each other (W-112). */
     scope?: string;
     /** Editor canvas: device rules follow this device, not the frame width (W-116). */
-    previewDevice?: Device;
+    previewDevice?: EditorDevice;
     /**
      * Theme parts (header, footer, popup, float) render apart from the page, so a synced section
      * on both gave form fields, honeypots and tab groups the same ids: a label in a popup focused
@@ -285,6 +286,8 @@ export function renderPage(
     id: string;
     declarations: Declaration[];
     states: StateDeclarations;
+    wide?: Declaration[];
+    wideHidden?: boolean;
     laptop?: Declaration[];
     tablet?: Declaration[];
     mobile?: Declaration[];
@@ -401,7 +404,21 @@ export function renderPage(
     const mobile = styleDeclarations(
       withInheritedLayers(node.devices?.mobile, { ...base, ...laptopStyle, ...tabletStyle }),
     );
-    for (const key of [...rejected, ...laptop.rejected, ...tablet.rejected, ...mobile.rejected]) {
+    // W-959: Wide screen (2400 px and up) builds on Desktop; `renderableNode` moved `style.wide`
+    // here. The narrower devices never overlap it, so they don't inherit it.
+    const { devices: wideDevices, wideHidden } = node as {
+      devices?: { wide?: unknown };
+      wideHidden?: boolean;
+    };
+    const wideStyle = wideDevices?.wide;
+    const wide = styleDeclarations(withInheritedLayers(wideStyle, base));
+    for (const key of [
+      ...rejected,
+      ...wide.rejected,
+      ...laptop.rejected,
+      ...tablet.rejected,
+      ...mobile.rejected,
+    ]) {
       warnings.push({ nodeId, code: "rejected-style", detail: key });
     }
     if (node.type === "spacer") {
@@ -507,6 +524,20 @@ export function renderPage(
         tablet.declarations.push(at(2));
         mobile.declarations.push(at(3));
       }
+      // W-959: a Wide screen placement of its own, on the Desktop column count.
+      const wideOwn = wideStyle as { gridColumnStart?: unknown; gridColumnSpan?: unknown };
+      if (
+        wideOwn &&
+        (wideOwn.gridColumnStart !== undefined || wideOwn.gridColumnSpan !== undefined)
+      ) {
+        const place = { ...node.style, ...wideOwn } as typeof node.style & object;
+        const fit = fitGridColumn(place.gridColumnStart, place.gridColumnSpan, desktopCount);
+        const others = wide.declarations.filter((d) => d.property !== "grid-column");
+        wide.declarations.splice(0, wide.declarations.length, ...others, {
+          property: "grid-column",
+          value: fit.value ?? "auto",
+        });
+      }
     }
     const states = stateDeclarations(node.states);
     for (const key of states.rejected) {
@@ -520,6 +551,8 @@ export function renderPage(
     // W-567: the root is the page itself; hiding it on a device blanked the whole page there.
     const hiddenOn = isRoot ? undefined : node.hiddenOn;
     const responsive =
+      wide.declarations.length > 0 ||
+      (!isRoot && wideHidden !== undefined) ||
       laptop.declarations.length > 0 ||
       tablet.declarations.length > 0 ||
       mobile.declarations.length > 0 ||
@@ -538,6 +571,8 @@ export function renderPage(
         id: ruleId,
         declarations,
         states: states.states,
+        ...(wide.declarations.length > 0 ? { wide: wide.declarations } : {}),
+        ...(!isRoot && wideHidden !== undefined ? { wideHidden } : {}),
         laptop: laptop.declarations,
         tablet: tablet.declarations,
         mobile: mobile.declarations,
@@ -652,7 +687,7 @@ export function renderPage(
     if (node.type === "heading" && pageHeadings?.has(stored) && attrs.id) {
       const text = String((node.props as { text?: unknown }).text ?? "").trim();
       // W-409: a heading hidden on every device has nothing to jump to.
-      const hiddenEverywhere = DEVICES.every((device) => node.hiddenOn?.includes(device));
+      const hiddenEverywhere = hiddenOnEveryDevice(node);
       if (text && !hiddenEverywhere && !renderedHeadings.some((h) => h.id === attrs.id)) {
         // W-793: a heading hidden on some devices (itself or an ancestor) hides its contents
         // entry there too, or the entry was a dead link on those devices.

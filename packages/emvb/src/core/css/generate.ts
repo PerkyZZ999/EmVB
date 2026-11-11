@@ -19,7 +19,7 @@ import {
   type StateDeclarations,
 } from "../sanitize/css.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
-import { DEVICE_MEDIA, type Device } from "../theme/popup-rules.ts";
+import { DEVICE_MEDIA, type Device, type EditorDevice } from "../theme/popup-rules.ts";
 import { LOOP_KEYFRAMES, MOTION_KEYFRAMES } from "../sanitize/motion.ts";
 
 export type CssInput = {
@@ -30,6 +30,9 @@ export type CssInput = {
     id: string;
     declarations: Declaration[];
     states?: StateDeclarations;
+    /** W-959: Wide screen overrides (2400 px and up), and its hide override. */
+    wide?: Declaration[];
+    wideHidden?: boolean;
     /** Laptop (W-956), tablet and mobile overrides (W-096). Desktop stays in `declarations`. */
     laptop?: Declaration[];
     tablet?: Declaration[];
@@ -52,8 +55,26 @@ export type CssInput = {
    * device instead of the frame's width, so the Desktop canvas never picks up tablet styles in a
    * narrow window. Without it, the rules sit in their media queries as usual.
    */
-  previewDevice?: Device;
+  previewDevice?: EditorDevice;
 };
+
+/**
+ * W-959: a class's Wide screen overrides and hide. `renderableDesign` moved the class's
+ * `style.wide` to `devices.wide` and `wideHidden`; the values build on Desktop's.
+ */
+function classWide(cls: unknown): { wide: Declaration[]; wideHidden?: boolean } {
+  const { style, devices, wideHidden } = cls as {
+    style?: unknown;
+    devices?: { wide?: unknown };
+    wideHidden?: unknown;
+  };
+  return {
+    wide: devices?.wide
+      ? styleDeclarations(withInheritedLayers(devices.wide, style ?? {})).declarations
+      : [],
+    ...(typeof wideHidden === "boolean" ? { wideHidden } : {}),
+  };
+}
 
 /** Focus is keyboard focus (W-089): `:focus-visible`, never `:focus`. */
 const STATE_PSEUDO: Readonly<Record<StyleStateName, string>> = {
@@ -216,6 +237,7 @@ export function generateCss({
         ? [
             {
               selector: `.${className}`,
+              ...classWide(cls),
               // W-210: a device that sets one background layer keeps the layers it inherits.
               laptop: styleDeclarations(withInheritedLayers(cls.devices?.laptop, cls.style ?? {}))
                 .declarations,
@@ -238,6 +260,8 @@ export function generateCss({
     }),
     ...localRules.map((rule) => ({
       selector: `.emvb-e-${rule.id}`,
+      wide: rule.wide ?? [],
+      wideHidden: rule.wideHidden,
       laptop: rule.laptop ?? [],
       tablet: rule.tablet ?? [],
       mobile: rule.mobile ?? [],
@@ -246,18 +270,20 @@ export function generateCss({
     })),
   ];
   /** A device block: in its media query, or, for a previewed device, on or off outright. */
-  const forDevices = (devices: readonly Device[], query: string, body: string) => {
+  const forDevices = (devices: readonly EditorDevice[], query: string, body: string) => {
     if (!body) return "";
     if (previewDevice === undefined) return `@media ${query}{${body}}`;
     return devices.includes(previewDevice) ? body : "";
   };
-  const at = (query: string, which: "laptop" | "tablet" | "mobile") =>
+  const at = (query: string, which: "wide" | "laptop" | "tablet" | "mobile") =>
     forDevices(
-      which === "laptop"
-        ? ["laptop", "tablet", "mobile"]
-        : which === "tablet"
-          ? ["tablet", "mobile"]
-          : ["mobile"],
+      which === "wide"
+        ? ["wide"]
+        : which === "laptop"
+          ? ["laptop", "tablet", "mobile"]
+          : which === "tablet"
+            ? ["tablet", "mobile"]
+            : ["mobile"],
       query,
       responsive.map((rule) => block(rule.selector, rule[which])).join(""),
     );
@@ -265,15 +291,35 @@ export function generateCss({
    * W-956: Desktop and Laptop hidden together keep the one `min-width: 1025px` rule every page
    * saved before Laptop had; hidden on only one of them, each gets its own range.
    */
-  const hide = (devices: readonly Device[], query: string) => {
-    const hidden = (rule: { hiddenOn?: readonly Device[] | undefined }) => {
+  /**
+   * W-959: Wide screen follows Desktop's hide unless `wide.hidden` says otherwise. An element
+   * that Wide screen shows again gets a Desktop range that stops at 2399.98 px (`notWide`); one
+   * hidden on Wide screen only gets the Wide screen rule. Rules without `wide.hidden` keep the
+   * CSS they had.
+   */
+  type HideRule = { hiddenOn?: readonly Device[] | undefined; wideHidden?: boolean | undefined };
+  const hide = (
+    devices: readonly Device[],
+    query: string,
+    wide: "follows" | "notWide" | "only" = "follows",
+  ) => {
+    const hidden = (rule: HideRule) => {
       const on = rule.hiddenOn ?? [];
+      if (wide === "only") return rule.wideHidden === true && !on.includes("desktop");
+      if (devices.includes("desktop") && (rule.wideHidden === false) !== (wide === "notWide"))
+        return false;
       if (devices.includes("desktop") && devices.includes("laptop"))
         return on.includes("desktop") && on.includes("laptop");
       if (devices[0] === "desktop") return on.includes("desktop") && !on.includes("laptop");
       if (devices[0] === "laptop") return on.includes("laptop") && !on.includes("desktop");
       return on.includes(devices[0] as Device);
     };
+    const previewed: EditorDevice[] =
+      wide === "only"
+        ? ["wide"]
+        : wide === "follows" && devices.includes("desktop")
+          ? ["wide", ...devices]
+          : [...devices];
     // W-443: a captioned image hides its figure too, or the caption stayed on its own.
     const selectors = responsive
       .filter(hidden)
@@ -283,18 +329,18 @@ export function generateCss({
           : ["hideSelector" in rule && rule.hideSelector ? rule.hideSelector : rule.selector],
       );
     return forDevices(
-      devices,
+      previewed,
       query,
       selectors.length > 0 ? `${selectors.join(",")}{display:none}` : "",
     );
   };
   for (const rule of responsive) {
-    if (usesMotion(rule.laptop) || usesMotion(rule.tablet) || usesMotion(rule.mobile))
-      motion = true;
-    if (usesLoop(rule.laptop) || usesLoop(rule.tablet) || usesLoop(rule.mobile)) loops = true;
+    const devices = [rule.wide ?? [], rule.laptop, rule.tablet, rule.mobile];
+    if (devices.some(usesMotion)) motion = true;
+    if (devices.some(usesLoop)) loops = true;
     if (
       !entrances.includes(rule.selector) &&
-      [...rule.laptop, ...rule.tablet, ...rule.mobile].some((d) => d.property === "animation")
+      devices.flat().some((d) => d.property === "animation")
     ) {
       entrances.push(rule.selector);
     }
@@ -338,11 +384,15 @@ export function generateCss({
         (rule) =>
           `@container (min-width:${rule.queryMin}px){${block(`.emvb-e-${rule.id}`, rule.query ?? [])}}`,
       ),
+    at(DEVICE_MEDIA.wide, "wide"),
     at(DEVICE_MEDIA.laptop, "laptop"),
     at(DEVICE_MEDIA.tablet, "tablet"),
     at(DEVICE_MEDIA.mobile, "mobile"),
     hide(["desktop", "laptop"], DEVICE_MEDIA.hideDesktop),
     hide(["desktop"], DEVICE_MEDIA.hideDesktopOnly),
+    hide(["desktop", "laptop"], DEVICE_MEDIA.hideDesktopNotWide, "notWide"),
+    hide(["desktop"], DEVICE_MEDIA.hideDesktopOnlyNotWide, "notWide"),
+    hide([], DEVICE_MEDIA.wide, "only"),
     hide(["laptop"], DEVICE_MEDIA.hideLaptop),
     hide(["tablet"], DEVICE_MEDIA.hideTablet),
     hide(["mobile"], DEVICE_MEDIA.hideMobile),

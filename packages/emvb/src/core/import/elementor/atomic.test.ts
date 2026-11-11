@@ -809,3 +809,56 @@ describe("Elementor 4 laptop variants (W-956)", () => {
     expect(hiddenOf([display("laptop", "none")])).toEqual(["laptop"]);
   });
 });
+
+describe("Elementor 4 widescreen variants (W-959)", () => {
+  const doc = {
+    content: [
+      {
+        id: "t1",
+        elType: "widget",
+        widgetType: "e-heading",
+        settings: {
+          classes: { $$type: "classes", value: ["g-wide"] },
+          title: { $$type: "html", value: "Big" },
+        },
+        elements: [],
+      },
+    ],
+    global_classes: {
+      items: {
+        "g-wide": {
+          id: "g-wide",
+          label: "wide-title",
+          type: "class",
+          variants: [
+            {
+              meta: { breakpoint: "desktop", state: null },
+              props: { "font-size": { $$type: "size", value: { size: 40, unit: "px" } } },
+              custom_css: null,
+            },
+            {
+              meta: { breakpoint: "widescreen", state: null },
+              props: {
+                "font-size": { $$type: "size", value: { size: 80, unit: "px" } },
+                display: { $$type: "string", value: "none" },
+              },
+              custom_css: null,
+            },
+          ],
+        },
+      },
+      order: ["g-wide"],
+    },
+  };
+
+  test("a widescreen variant is Wide screen, not folded into Desktop", () => {
+    const imported = importElementor(JSON.stringify(doc));
+    if (!imported.ok) throw new Error(imported.error);
+    const title = all(imported.layout.root as Node).find((n) => n.type === "heading");
+    expect(title?.style?.["fontSize"]).toEqual({ value: 40, unit: "px" });
+    expect(title?.style?.["wide"]).toEqual({ fontSize: { value: 80, unit: "px" }, hidden: true });
+    expect(imported.notes.map((n) => n.message).join("\n")).not.toContain("folded");
+    const { css } = renderPage(imported.layout, emptyDesign());
+    expect(css).toContain("@media (min-width: 2400px)");
+  });
+});

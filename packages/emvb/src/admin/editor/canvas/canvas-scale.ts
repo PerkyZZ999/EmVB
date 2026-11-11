@@ -1,4 +1,4 @@
-import { DEVICE_PREVIEW_PX, type Device } from "../../../core/index.ts";
+import { DEVICE_PREVIEW_PX, WIDE_PREVIEW_PX, type EditorDevice } from "../../../core/index.ts";
 
 /** Fit scales the canvas down to the stage; Actual shows it at 100% and scrolls (W-158). */
 export type CanvasZoom = "fit" | "actual";
@@ -9,11 +9,11 @@ export type CanvasZoom = "fit" | "actual";
  * the stage width, never up; Actual keeps 100% and the stage scrolls sideways.
  */
 export function canvasScale(
-  device: Device,
+  device: EditorDevice,
   stageWidth: number,
   zoom: CanvasZoom,
 ): { width: number; scale: number } {
-  const base = DEVICE_PREVIEW_PX[device];
+  const base = device === "wide" ? WIDE_PREVIEW_PX : DEVICE_PREVIEW_PX[device];
   const width = device === "desktop" ? Math.max(base, Math.floor(stageWidth)) : base;
   if (zoom === "actual" || stageWidth <= 0) return { width, scale: 1 };
   return { width, scale: Math.min(1, stageWidth / width) };

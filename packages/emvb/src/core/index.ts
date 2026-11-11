@@ -100,6 +100,8 @@ export {
   type StylePatch,
   StyleStates,
   DeviceStyles,
+  OwnStyle,
+  WideStyle,
   HiddenOn,
   ColorValue,
   Length,
@@ -217,9 +219,15 @@ export {
   type ImportLosses,
 } from "./design/transfer.ts";
 export {
+  hiddenOnDevice,
+  hiddenOnEveryDevice,
   patchClassDevices,
+  patchClassWide,
   patchDeviceStyle,
+  patchWideStyle,
   toggleHidden,
+  toggleHiddenOn,
+  wideHideIsOwn,
   type ResponsiveDevice,
 } from "./design/devices.ts";
 export {
@@ -380,6 +388,10 @@ export {
   POPUP_DEVICES,
   DEVICES,
   type Device,
+  EDITOR_DEVICES,
+  type EditorDevice,
+  WIDE_MIN_PX,
+  WIDE_PREVIEW_PX,
   STYLE_DEVICES,
   type StyleDevice,
   DEVICE_MEDIA,

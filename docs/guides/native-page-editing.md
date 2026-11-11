@@ -16,7 +16,7 @@ Editors and administrators can change the layout field. Authors and contributors
 
 1. Open the entry. The **Canvas** card shows a summary of the layout, or "No layout yet" while the field is empty.
 2. **Edit with EmVB** opens the full editor over the admin.
-3. **Preview** shows your unsaved changes in your site's styles at Desktop, Laptop, Tablet and Mobile widths. **Back to editing** returns to the editor. Preview stores nothing.
+3. **Preview** shows your unsaved changes in your site's styles at Wide screen, Desktop, Laptop, Tablet and Mobile widths. **Back to editing** returns to the editor. Preview stores nothing.
 4. **Apply** puts the layout back into the entry form. Then use the entry's own **Save** (and **Publish**) to keep it. **Exit** without Apply discards the changes.
 
 ## Start from the existing content

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { DESIGN_SCHEMA_VERSION, DesignSystem } from "./schema/design.ts";
 import { CONTRACT_VERSION, KNOWN_NODE_SCHEMAS, LAYOUT_SCHEMA_VERSION } from "./schema/layout.ts";
-import { DeviceStyles, StyleProps, StyleStates } from "./schema/style.ts";
+import { DeviceStyles, OwnStyle, StyleProps, StyleStates, WideStyle } from "./schema/style.ts";
 
 /**
  * JSON Schema (2020-12) exports of the stored formats (W-925, contract 1.0). They describe the
@@ -46,8 +46,15 @@ function styleDefs(): { defs: Json; shared: Map<string, string> } {
     states: withRefs(states, inner),
     devices: withRefs(devices, inner),
   };
+  // W-959: an element's or class's own style carries `wide`, the Wide screen record.
+  const wide = toJson(WideStyle);
+  const own = toJson(OwnStyle);
+  defs["wideStyle"] = wide;
+  defs["ownStyle"] = withRefs(own, new Map([[JSON.stringify(wide), "wideStyle"]]));
   const shared = new Map([
     ...inner,
+    [JSON.stringify(own), "ownStyle"],
+    [JSON.stringify(wide), "wideStyle"],
     [JSON.stringify(states), "states"],
     [JSON.stringify(devices), "devices"],
   ]);

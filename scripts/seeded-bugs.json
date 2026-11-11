@@ -4682,8 +4682,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "  const normal = flattenMotion(cls ? cls.style : node.style);\n  const states = cls ? cls.states : node.states;",
-          "replace": "  const normal = flattenMotion(node.style);\n  const states = node.states;"
+          "search": "(cls ? cls.style : node.style) ?? {};\n  const normal = flattenMotion(cls || node.style ? ownDesktop : undefined);\n  const states = cls ? cls.states : node.states;",
+          "replace": "(node.style) ?? {};\n  const normal = flattenMotion(node.style ? ownDesktop : undefined);\n  const states = node.states;"
         }
       ],
       "command": [
@@ -8321,8 +8321,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "  style: StyleProps.optional(),\n  states: StyleStates.optional(),\n",
-          "replace": "  style: StyleProps.optional(),\n"
+          "search": "  style: OwnStyle.optional(),\n  states: StyleStates.optional(),\n",
+          "replace": "  style: OwnStyle.optional(),\n"
         }
       ],
       "command": [
@@ -8341,8 +8341,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/design.ts",
-          "search": "  style: StyleProps,\n  states: StyleStates.optional(),\n",
-          "replace": "  style: StyleProps,\n"
+          "search": "  style: OwnStyle,\n  states: StyleStates.optional(),\n",
+          "replace": "  style: OwnStyle,\n"
         }
       ],
       "command": [
@@ -9041,7 +9041,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "  const ownInherited = responsive\n    ? {\n        ...normal,\n        // W-956: each device inherits the wider ones: Laptop, then Tablet.\n        ...(responsive !== \"laptop\" ? ownerDevices?.laptop : undefined),\n        ...(responsive === \"mobile\" ? ownerDevices?.tablet : undefined),\n      }\n    : styleState === \"normal\"\n      ? undefined\n      : normal;",
+          "search": "  const ownInherited = responsive\n    ? {\n        ...normal,\n        // W-956: each device inherits the wider ones: Laptop, then Tablet. W-959: Wide screen\n        // builds on Desktop only.\n        ...(responsive !== \"laptop\" && responsive !== \"wide\" ? ownerDevices?.laptop : undefined),\n        ...(responsive === \"mobile\" ? ownerDevices?.tablet : undefined),\n      }\n    : styleState === \"normal\"\n      ? undefined\n      : normal;",
           "replace": "  const ownInherited = undefined;"
         },
         {
@@ -16222,8 +16222,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/editor-chrome.tsx",
-          "search": "const hiddenOn = toggleHidden(node.hiddenOn, device);",
-          "replace": "const hiddenOn = node.hiddenOn;"
+          "search": "toggleHiddenOn(current, device);",
+          "replace": "{ hiddenOn: current.hiddenOn, style: current.style };"
         }
       ],
       "command": [
@@ -29406,8 +29406,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/a11y/audit.ts",
-          "search": "(d) => node.hiddenOn?.includes(d))",
-          "replace": "(d) => node.hiddenOn?.includes(d) && false)"
+          "search": "if (node !== layout.root && hiddenOnEveryDevice(node)) {",
+          "replace": "if (node !== layout.root && hiddenOnEveryDevice(node) && false) {"
         }
       ],
       "command": [
@@ -36739,7 +36739,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "\"Editing Mobile. These styles override Tablet and Desktop.\"",
+          "search": "\"Editing Mobile. These styles override Tablet, Laptop and Desktop.\"",
           "replace": "\"These override Desktop.\""
         }
       ],
@@ -45727,6 +45727,150 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/astro/tabs/runtime.test.ts"],
       "expect": "\\(fail\\).*span inside each label is the tab"
+    },
+    {
+      "id": "W-959/wide-in-desktop",
+      "requirement": "W-959",
+      "description": "Wide screen values never get their own media block.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    at(DEVICE_MEDIA.wide, \"wide\"),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/wide.test.ts"],
+      "expect": "\\(fail\\).*style.wide is its own block"
+    },
+    {
+      "id": "W-959/wide-stripped",
+      "requirement": "W-959",
+      "description": "The renderer never moves style.wide to a device, so it is dropped.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "  wideAsDevice(owner, out);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/wide.test.ts"],
+      "expect": "\\(fail\\).*style.wide is its own block"
+    },
+    {
+      "id": "W-959/show-again-ignored",
+      "requirement": "W-959",
+      "description": "An element hidden on Desktop that Wide screen shows keeps the uncapped Desktop rule.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "      if (devices.includes(\"desktop\") && (rule.wideHidden === false) !== (wide === \"notWide\"))\n        return false;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/css/wide.test.ts"],
+      "expect": "\\(fail\\).*shown again on Wide screen"
+    },
+    {
+      "id": "W-959/desktop-toggle-splits-wide",
+      "requirement": "W-959",
+      "description": "Hiding on Desktop in the editor leaves Wide screen showing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/devices.ts",
+          "search": "  if (device !== \"wide\")\n    return { hiddenOn: toggleHidden(owner.hiddenOn, device), style: owner.style };",
+          "replace": "  if (device !== \"wide\")\n    return {\n      hiddenOn: toggleHidden(owner.hiddenOn, device),\n      style: { ...owner.style, wide: { hidden: !!owner.hiddenOn?.includes(\"desktop\") } },\n    };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/laptop-device.test.tsx"],
+      "expect": "\\(fail\\).*Hide on Desktop in the editor hides at 2400"
+    },
+    {
+      "id": "W-959/wide-writes-desktop",
+      "requirement": "W-959",
+      "description": "Styling on Wide screen writes the Desktop style.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/style-target.ts",
+          "search": "  if (device === \"wide\") return { owner, slot: \"wide\" };\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/laptop-device.test.tsx"],
+      "expect": "\\(fail\\).*styling on Wide screen writes"
+    },
+    {
+      "id": "W-959/laptop-note-says-tablet",
+      "requirement": "W-959",
+      "description": "The Laptop Style note says Tablet again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "  laptop: \"Editing Laptop. These styles override Desktop.\",",
+          "replace": "  laptop: \"Editing Tablet. These styles override Desktop.\","
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/element-panel.test.tsx"
+      ],
+      "expect": "\\(fail\\).*laptop names itself"
+    },
+    {
+      "id": "W-959/import-widescreen-dropped",
+      "requirement": "W-959",
+      "description": "Elementor 3 widescreen values are not read.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/style.ts",
+          "search": "  if (!isEmptyStyle(wide)) desktop[\"wide\"] = wide;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*widescreen value goes to Wide screen"
+    },
+    {
+      "id": "W-959/boxed-laptop-dropped",
+      "requirement": "W-959",
+      "description": "A boxed container drops its Laptop layout values again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "    for (const key of [\"laptop\", \"tablet\", \"mobile\"] as const) {\n      const layout = layoutDevices?.[key];",
+          "replace": "    for (const key of [\"tablet\", \"mobile\"] as const) {\n      const layout = layoutDevices?.[key];"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*boxed container keeps its Laptop"
+    },
+    {
+      "id": "W-959/atomic-folds-wide",
+      "requirement": "W-959",
+      "description": "Elementor 4 widescreen variants fold into Desktop again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/atomic.ts",
+          "search": "  widescreen: \"wide\",",
+          "replace": "  widescreen: \"desktop\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/atomic.test.ts"],
+      "expect": "\\(fail\\).*widescreen variant is Wide screen"
+    },
+    {
+      "id": "W-959/everywhere-ignores-wide",
+      "requirement": "W-959",
+      "description": "Hidden on all four devices counts as never shown even when Wide screen shows it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/devices.ts",
+          "search": "  return (owner.wideHidden ?? owner.style?.wide?.hidden) !== false;",
+          "replace": "  return true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/design/wide-hide.test.ts"],
+      "expect": "\\(fail\\).*still shows on wide screens"
     }
   ]
 }

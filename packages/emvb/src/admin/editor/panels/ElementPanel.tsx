@@ -37,6 +37,7 @@ import {
   inheritedStyle,
   type LayoutNode,
   type Device,
+  type EditorDevice,
   type ResponsiveDevice,
   classStylesInListOrder,
   iconHasAdjustableStroke,
@@ -151,6 +152,14 @@ const NORMAL_ONLY_KEYS = new Set<StyleKey>([
   "scrollMotion",
 ]);
 
+/** UX-063: which device is being edited and what it overrides (W-956 Laptop, W-959 Wide screen). */
+const DEVICE_NOTE: Record<Exclude<EditorDevice, "desktop">, string> = {
+  wide: "Editing Wide screen (2400 px and up). These styles override Desktop.",
+  laptop: "Editing Laptop. These styles override Desktop.",
+  tablet: "Editing Tablet. These styles override Laptop and Desktop.",
+  mobile: "Editing Mobile. These styles override Tablet, Laptop and Desktop.",
+};
+
 const JUMP_HELP: Record<Exclude<StyleStateChoice, "normal">, string> = {
   hover: "Changing size or position on hover can make the page jump.",
   focus: "Changing size or position on focus can make the page jump.",
@@ -220,7 +229,7 @@ type Props = {
   /** The chosen style state, for the canvas preview (W-089). */
   onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
   /** Tablet and mobile edit overrides. Desktop edits `style` (W-096). */
-  device?: Device;
+  device?: EditorDevice;
   /** Add, move and delete for Accordion items and Tabs panels (W-130). */
   items?: ItemActions;
   /** The theme part being edited, if any, for the H1 warning (W-208). */
@@ -440,14 +449,18 @@ function KnownElementPanel({
     onStyleState?.(node.id, tab === "style" ? styleState : "normal");
   }, [node.id, styleState, tab, onStyleState]);
   // W-925: the rows read the flat motion keys; applyStylePatch nests them again.
-  const normal = flattenMotion(cls ? cls.style : node.style);
+  // W-959: the own style's `wide` record is Wide screen's, not a Desktop value.
+  const { wide: storedWide, ...ownDesktop } = (cls ? cls.style : node.style) ?? {};
+  const normal = flattenMotion(cls || node.style ? ownDesktop : undefined);
   const states = cls ? cls.states : node.states;
-  const responsive: ResponsiveDevice | null = device === "desktop" ? null : device;
+  const responsive: ResponsiveDevice | "wide" | null = device === "desktop" ? null : device;
   const storedDevices = cls ? cls.devices : node.devices;
-  const ownerDevices = storedDevices && {
-    laptop: flattenMotion(storedDevices.laptop),
-    tablet: flattenMotion(storedDevices.tablet),
-    mobile: flattenMotion(storedDevices.mobile),
+  const { hidden: _wideHidden, ...wideValues } = storedWide ?? {};
+  const ownerDevices = (storedDevices || storedWide) && {
+    wide: flattenMotion(storedWide ? wideValues : undefined),
+    laptop: flattenMotion(storedDevices?.laptop),
+    tablet: flattenMotion(storedDevices?.tablet),
+    mobile: flattenMotion(storedDevices?.mobile),
   };
   const style = responsive
     ? ownerDevices?.[responsive]
@@ -457,8 +470,9 @@ function KnownElementPanel({
   const ownInherited = responsive
     ? {
         ...normal,
-        // W-956: each device inherits the wider ones: Laptop, then Tablet.
-        ...(responsive !== "laptop" ? ownerDevices?.laptop : undefined),
+        // W-956: each device inherits the wider ones: Laptop, then Tablet. W-959: Wide screen
+        // builds on Desktop only.
+        ...(responsive !== "laptop" && responsive !== "wide" ? ownerDevices?.laptop : undefined),
         ...(responsive === "mobile" ? ownerDevices?.tablet : undefined),
       }
     : styleState === "normal"
@@ -497,6 +511,8 @@ function KnownElementPanel({
     !singleColorOffered &&
     node.props.singleColor !== true &&
     ownColors;
+  // Field values have no laptop or wide screen setting: those devices edit Desktop's.
+  const fieldDevice: Device = device === "laptop" || device === "wide" ? "desktop" : device;
   const patchStyle = (patch: Partial<FlatStyleProps>) => {
     const written = applyStylePatch({
       node,
@@ -602,7 +618,7 @@ function KnownElementPanel({
             </p>
           ) : (
             pairFields(
-              descriptor.fields.filter((field) => fieldShown(field.key, node, device)),
+              descriptor.fields.filter((field) => fieldShown(field.key, node, fieldDevice)),
             ).map((row) => {
               const controls = row.map((field) => (
                 <React.Fragment key={field.key}>
@@ -615,8 +631,7 @@ function KnownElementPanel({
                     duplicateName={
                       field.key === "field" && layout ? duplicateFieldName(layout, node.id) : false
                     }
-                    // Field values have no laptop setting: Laptop edits the desktop value.
-                    device={device === "laptop" ? "desktop" : device}
+                    device={fieldDevice}
                   />
                 </React.Fragment>
               ));
@@ -709,10 +724,8 @@ function KnownElementPanel({
           ) : (
             // UX-063: say which device is being edited, as states say "Editing Hover".
             <p className="emvb-helper" data-emvb-device-note={device}>
-              {device === "mobile"
-                ? "Editing Mobile. These styles override Tablet and Desktop."
-                : "Editing Tablet. These styles override Desktop."}{" "}
-              Hover, Focus and Active are set on Desktop and apply on every device.
+              {DEVICE_NOTE[device]} Hover, Focus and Active are set on Desktop and apply on every
+              device.
             </p>
           )}
           {!cls && <StyleSources node={node} design={design} device={device} state={styleState} />}

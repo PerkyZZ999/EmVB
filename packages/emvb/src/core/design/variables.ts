@@ -33,7 +33,7 @@ export function refMatchesKind(ref: VariableRefLike, kind: VariableKind): boolea
 const matches = (value: unknown, id: string, kind: VariableKind | undefined) =>
   isVariableRef(value) && value.var === id && (kind === undefined || refMatchesKind(value, kind));
 
-const NESTED_COLOR_KEYS = new Set(["boxShadow", "iconShadow", "gradient", "overlay"]);
+const NESTED_COLOR_KEYS = new Set(["boxShadow", "iconShadow", "gradient", "overlay", "wide"]);
 
 /** Every value that can be a variable, including nested colours (W-356). */
 export function forEachStyleRef(
@@ -57,6 +57,9 @@ export function forEachStyleRef(
       visit(stop.color, `overlay.gradient.stops.${index}`);
     });
   }
+  // W-959: an own style's Wide screen values use variables too.
+  const wide = (style as { wide?: StyleProps }).wide;
+  if (wide) forEachStyleRef(wide, (value, path) => visit(value, `wide.${path}`));
 }
 
 function collectStyleUsages(
@@ -166,6 +169,16 @@ function stripRefsFromStyle(
   ) {
     delete next["overlay"];
     changed = true;
+  }
+  // W-959: and in the own style's Wide screen values (`hidden` stays when they all go).
+  const wide = (style as { wide?: StyleProps & { hidden?: boolean } }).wide;
+  if (wide) {
+    const stripped = stripRefsFromStyle(wide, id, kind);
+    if (stripped !== wide) {
+      changed = true;
+      if (stripped) next["wide"] = stripped;
+      else delete next["wide"];
+    }
   }
   if (!changed) return style;
   return Object.keys(next).length === 0 ? undefined : (next as StyleProps);

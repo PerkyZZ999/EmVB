@@ -19,8 +19,11 @@ import {
   deviceStyles,
   entrance,
   flexReader,
+  type Device,
   hiddenOn,
+  mergeStyles,
   type Style,
+  wideHidden,
   widthReader,
 } from "./style.ts";
 import { isRecord, num, type Settings, slider, str } from "./values.ts";
@@ -318,6 +321,12 @@ class Walker {
     }
     const hidden = hiddenOn(s);
     if (hidden) target["hiddenOn"] = hidden;
+    const wide = wideHidden(s);
+    if (wide !== undefined) {
+      const style = { ...(target["style"] as Style | undefined) };
+      style["wide"] = { ...(style["wide"] as Style | undefined), hidden: wide };
+      target["style"] = style;
+    }
     const id = str(s["_element_id"]) ?? str(s["css_id"]);
     if (id) {
       if (isValidHtmlId(id) && !ctx.htmlIds.has(id) && !target["htmlId"]) {
@@ -566,7 +575,7 @@ class Walker {
     const layoutDevices = layoutDs.devices;
 
     if (!boxed) {
-      const style = { ...outerStyle, ...innerStyle };
+      const style = mergeStyles(outerStyle, innerStyle);
       const n = grid
         ? node(
             ctx,
@@ -582,6 +591,14 @@ class Walker {
     const boxedWidth = slider(s["boxed_width"]) ?? { value: 1140, unit: "px" as const };
     const minHeight = innerStyle["minHeight"];
     delete innerStyle["minHeight"];
+    // W-959: and its Wide screen min height, like the other devices' below.
+    const innerWide = innerStyle["wide"] as Style | undefined;
+    if (innerWide && "minHeight" in innerWide) {
+      const { minHeight: wideMin, ...rest } = innerWide;
+      outerStyle["wide"] = { ...(outerStyle["wide"] as Style | undefined), minHeight: wideMin };
+      if (Object.keys(rest).length > 0) innerStyle["wide"] = rest;
+      else delete innerStyle["wide"];
+    }
     const inner = grid
       ? node(ctx, "grid", gridProps(columns), {
           style: {
@@ -610,8 +627,9 @@ class Walker {
         );
     // Min height belongs to the outer box on every device, as on desktop.
     const outerDevices = { ...outerDs.devices };
-    const innerDevices: { tablet?: Style; mobile?: Style } = {};
-    for (const key of ["tablet", "mobile"] as const) {
+    const innerDevices: { laptop?: Style; tablet?: Style; mobile?: Style } = {};
+    // W-956: Laptop's layout values (direction, gap) go to the inner box too; they were dropped.
+    for (const key of ["laptop", "tablet", "mobile"] as const) {
       const layout = layoutDevices?.[key];
       if (!layout) continue;
       const { minHeight: deviceMin, ...rest } = layout;
@@ -705,7 +723,7 @@ function verticalOf(style: Style, grid: boolean): string {
 }
 
 /** Grid gaps and minimum height per device (column counts are props, see gridColumns). */
-const gridReader = (s: Settings, d: "" | "_laptop" | "_tablet" | "_mobile"): Style => {
+const gridReader = (s: Settings, d: Device): Style => {
   const style: Style = {};
   const gaps = s[`grid_gaps${d}`];
   const gap = isRecord(gaps)

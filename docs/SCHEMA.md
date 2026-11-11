@@ -40,7 +40,7 @@ A document may carry keys this version does not know. They are allowed in exactl
 | --- | --- |
 | a node | `root.children[0].futureKey` |
 | a node's `props` (for a known element type) | `props.futureProp` |
-| a node's style records: `style`, `states.hover/focus/active`, `devices.laptop/tablet/mobile`, `query.style` | `style.futureStyle` |
+| a node's style records: `style`, `style.wide` (since 1.1), `states.hover/focus/active`, `devices.laptop/tablet/mobile`, `query.style` | `style.futureStyle` |
 | a design class's `style`, `states` and `devices`, and a tag default in `defaults` | `classes[0].style.futureStyle` |
 
 Rules (`core/contract.ts`, limits in `core/limits.ts`):
@@ -92,6 +92,14 @@ Added in 1.1 (W-974, additive): a style record may carry `viewportUnits`, a map 
 (`height`, `minHeight`, `maxHeight` and the other box lengths) to `"dvh"` or `"svh"`. A plain `vh`
 length of that key is then drawn in that unit. The length itself stays `vh`, so 1.0, which keeps
 and ignores the key, draws `vh`.
+
+Added in 1.1 (W-959, additive): an element's or class's own `style` may carry `wide`, the Wide
+screen record (2400 px and up, Elementor's widescreen): the same keys as `style`, built on the
+Desktop values, plus `hidden`. `hidden: true` hides the element on wide screens, `hidden: false`
+shows it there even when it is hidden on Desktop, and without `hidden` Wide screen follows Desktop.
+It is not a `devices` key or a `hiddenOn` value, because 1.0 refuses those; 1.0 keeps and ignores
+`style.wide`, so a 1.1 page opens there with its Desktop look on wide screens. Only an own `style`
+reads it: `wide` inside a state, a device or another `wide` is kept as an unknown key.
 
 The design moves to 17 only for the motion folding in class styles, their devices, and tag defaults.
 

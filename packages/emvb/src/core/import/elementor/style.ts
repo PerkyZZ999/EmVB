@@ -25,7 +25,7 @@ import {
 } from "./values.ts";
 
 export type Style = Record<string, unknown>;
-export type Device = "" | "_laptop" | "_tablet" | "_mobile";
+export type Device = "" | "_widescreen" | "_laptop" | "_tablet" | "_mobile";
 
 /** Reads one device's style from a widget's settings. */
 export type Reader = (s: Settings, d: Device, ctx: ImportContext, el: string) => Style;
@@ -39,6 +39,8 @@ export function deviceStyles(
 ): { style?: Style; devices?: { laptop?: Style; tablet?: Style; mobile?: Style } } {
   const read = (d: Device) => Object.assign({}, ...readers.map((r) => r(s, d, ctx, el))) as Style;
   const desktop = read("");
+  // W-959: Elementor's widescreen values (`key_widescreen`), on Desktop's, in `style.wide`.
+  const wide = changedKeys(desktop, read("_widescreen"));
   // W-956: Elementor's laptop values (`key_laptop`), between desktop and tablet.
   const laptop = changedKeys(desktop, read("_laptop"));
   const tablet = changedKeys({ ...desktop, ...laptop }, read("_tablet"));
@@ -47,6 +49,7 @@ export function deviceStyles(
   if (!isEmptyStyle(laptop)) devices.laptop = laptop;
   if (!isEmptyStyle(tablet)) devices.tablet = tablet;
   if (!isEmptyStyle(mobile)) devices.mobile = mobile;
+  if (!isEmptyStyle(wide)) desktop["wide"] = wide;
   return {
     ...(isEmptyStyle(desktop) ? {} : { style: desktop }),
     ...(Object.keys(devices).length > 0 ? { devices } : {}),
@@ -398,6 +401,23 @@ export function entrance(s: Settings, ctx: ImportContext, el: string): Style | u
  * without Elementor's laptop breakpoint (no `hide_laptop` setting) hides "desktop" from 1025 px,
  * laptops included.
  */
+/**
+ * W-959: `hide_widescreen` when the site has Elementor's widescreen breakpoint and it hides or
+ * shows unlike Desktop (`style.wide.hidden`); undefined when Wide screen follows Desktop.
+ */
+export function wideHidden(s: Settings): boolean | undefined {
+  if (!("hide_widescreen" in s)) return undefined;
+  const wide = !!str(s["hide_widescreen"]);
+  return wide === !!str(s["hide_desktop"]) ? undefined : wide;
+}
+
+/** Two styles one after the other; their Wide screen records merge too (W-959). */
+export function mergeStyles(a: Style | undefined, b: Style | undefined): Style {
+  const out: Style = { ...a, ...b };
+  if (isRecord(a?.["wide"]) && isRecord(b?.["wide"])) out["wide"] = { ...a["wide"], ...b["wide"] };
+  return out;
+}
+
 export function hiddenOn(s: Settings): ("desktop" | "laptop" | "tablet" | "mobile")[] | undefined {
   const out: ("desktop" | "laptop" | "tablet" | "mobile")[] = [];
   const laptopActive = "hide_laptop" in s;

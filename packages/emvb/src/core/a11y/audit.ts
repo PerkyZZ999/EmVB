@@ -6,6 +6,7 @@ import { boxBecomesLink } from "../render/extras.ts";
 import { ICON_ANIMATION_LIMIT_MS, iconAnimationRuns } from "../icons/animation-runs.ts";
 import { updateNode } from "../tree-ops.ts";
 import { DEVICES } from "../theme/popup-rules.ts";
+import { hiddenOnEveryDevice } from "../design/devices.ts";
 
 /**
  * W-572: text as a screen reader says it: invisible format characters (zero-width space, word
@@ -255,7 +256,7 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
   const menuNames = DEVICES.map(() => new Set<string>());
   const walk = (node: LayoutNode, bg: string | undefined, color: string | undefined): void => {
     // W-413: an element hidden on every device (and what's inside it) is never shown or read.
-    if (node !== layout.root && DEVICES.every((d) => node.hiddenOn?.includes(d))) {
+    if (node !== layout.root && hiddenOnEveryDevice(node)) {
       return;
     }
     const variant = node.variant;

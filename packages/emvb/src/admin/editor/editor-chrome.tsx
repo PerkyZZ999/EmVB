@@ -4,11 +4,11 @@ import type { SavedSectionActions } from "./useSavedSections.ts";
 import * as React from "react";
 import {
   findNode,
-  toggleHidden,
+  toggleHiddenOn,
   type A11yReport,
   type ElementType,
   type LayoutNode,
-  type Device,
+  type EditorDevice,
   type ThemeDynamicData,
 } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
@@ -167,19 +167,21 @@ async function revertToPublished({
 /** Hide or show the selected element on the current device (W-096). */
 export function hideSelectedOnDevice(
   state: EditorState,
-  device: Device,
+  device: EditorDevice,
   dispatch: React.Dispatch<EditorAction>,
 ): void {
   const id = state.selectedId;
   const node = state.page.layout && id ? findNode(state.page.layout, id) : undefined;
   if (!node) return;
-  const hiddenOn = toggleHidden(node.hiddenOn, device);
   dispatch({
     type: "update-node",
     id: node.id,
     update: (current) => {
-      const next = { ...current, hiddenOn };
+      // W-959: Wide screen's hide sits in `style.wide.hidden`; the rest in `hiddenOn`.
+      const { hiddenOn, style } = toggleHiddenOn(current, device);
+      const next = { ...current, hiddenOn, style };
       if (!hiddenOn) delete next.hiddenOn;
+      if (!style) delete next.style;
       return next;
     },
   });

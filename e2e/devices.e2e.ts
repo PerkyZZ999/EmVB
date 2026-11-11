@@ -203,3 +203,50 @@ test("W-956: a published page uses its laptop styles and Hide on Laptop only on 
   expect(await colorAt(800)).toBe("rgb(85, 85, 85)");
   await expect(page.getByRole("heading", { name: `${text} desk` })).toBeVisible();
 });
+
+test("W-959: Hide on Desktop also hides on wide screens; Wide screen has its own styles and hide", async ({
+  page,
+  request,
+}) => {
+  const text = `Wide ${unique()}`;
+  const slug = `wide-${unique()}`;
+  const id = await createPage(request, text, layoutFor(text), slug);
+  await openEditor(page, id, text);
+  await canvas(page).getByRole("heading", { name: text }).click();
+  // Hide on Desktop: Wide screen follows it.
+  await page.getByRole("tab", { name: "Desktop" }).click();
+  await page.getByRole("checkbox", { name: "Hide on desktop" }).check();
+  await page.getByRole("tab", { name: "Wide screen" }).click();
+  await expect(page.locator("[data-emvb-device]")).toHaveAttribute("data-emvb-device", "wide");
+  await expect(page.getByRole("checkbox", { name: /Hide on wide screen/ })).toBeChecked();
+  await expect(page.locator("[data-emvb-hide-inherited]")).toBeVisible();
+  await saveDraft(page);
+  await publishPage(request, id);
+  const shown = async (width: number) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`/${slug}`);
+    return page.getByRole("heading", { name: text, exact: true }).isVisible();
+  };
+  expect(await shown(1440)).toBe(false);
+  expect(await shown(2560)).toBe(false);
+  expect(await shown(1200)).toBe(true);
+
+  // Show it again on Wide screen only: its own choice.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openEditor(page, id);
+  // Hidden on Desktop and Wide screen: select it where it shows, then switch.
+  await page.getByRole("tab", { name: "Laptop" }).click();
+  await canvas(page).getByRole("heading", { name: text }).click();
+  await page.getByRole("tab", { name: "Wide screen" }).click();
+  await page.getByRole("checkbox", { name: /Hide on wide screen/ }).uncheck();
+  await expect(page.locator("[data-emvb-hide-inherited]")).toHaveCount(0);
+  await saveDraft(page);
+  const stored = await storedLayout<{
+    root: { children?: { hiddenOn?: string[]; style?: { wide?: { hidden?: boolean } } }[] };
+  }>(request, id);
+  expect(stored.root.children?.[0]?.hiddenOn).toEqual(["desktop"]);
+  expect(stored.root.children?.[0]?.style?.wide).toEqual({ hidden: false });
+  await publishPage(request, id);
+  expect(await shown(2560)).toBe(true);
+  expect(await shown(1440)).toBe(false);
+});

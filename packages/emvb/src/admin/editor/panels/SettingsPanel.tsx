@@ -1,6 +1,6 @@
 import type * as React from "react";
 import type { Deletion } from "../restore-deleted.ts";
-import type { DesignSystem, LayoutNode, Device } from "../../../core/index.ts";
+import type { DesignSystem, LayoutNode, EditorDevice } from "../../../core/index.ts";
 import type { Fetcher } from "../../api.ts";
 import type { EditorAction, EditorState } from "../store.ts";
 import { ElementPanel } from "./ElementPanel.tsx";
@@ -54,7 +54,7 @@ export function SettingsPanel({
   /** The Style tab's chosen state, for the canvas preview (W-089). */
   onStyleState?: (nodeId: string, state: StyleStateChoice) => void;
   /** Which device's styles the Style tab edits (W-096). */
-  device?: Device;
+  device?: EditorDevice;
   /** Accordion and Tabs item actions (W-130). */
   items?: ItemActions;
 }) {

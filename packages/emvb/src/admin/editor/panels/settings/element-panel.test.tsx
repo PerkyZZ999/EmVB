@@ -349,8 +349,33 @@ test("UX-063: on Mobile the Style tab says Mobile is being edited and what it ov
   const tab = [...document.querySelectorAll('[role="tab"]')].find((t) => t.textContent === "Style");
   await act(async () => (tab as HTMLElement | undefined)?.click());
   expect(document.querySelector('[data-emvb-device-note="mobile"]')?.textContent ?? "no note").toBe(
-    "Editing Mobile. These styles override Tablet and Desktop. Hover, Focus and Active are set on Desktop and apply on every device.",
+    "Editing Mobile. These styles override Tablet, Laptop and Desktop. Hover, Focus and Active are set on Desktop and apply on every device.",
   );
+});
+
+test.each([
+  ["laptop", "Editing Laptop. These styles override Desktop."],
+  ["wide", "Editing Wide screen (2400 px and up). These styles override Desktop."],
+] as const)("W-959: %s names itself in the Style tab's note", async (device, text) => {
+  const head = { id: "head0012", type: "heading", props: { text: "Hi", level: 2 } } as LayoutNode;
+  await mount(
+    <ElementPanel
+      node={head}
+      layout={{ ...layout, root: { ...layout.root, children: [head] } }}
+      design={emptyDesign()}
+      rejection={null}
+      fetcher={stubFetcher}
+      device={device}
+      onChange={() => undefined}
+      onDesignChange={async () => undefined}
+      onSelect={() => undefined}
+    />,
+  );
+  const tab = [...document.querySelectorAll('[role="tab"]')].find((t) => t.textContent === "Style");
+  await act(async () => (tab as HTMLElement | undefined)?.click());
+  expect(
+    document.querySelector(`[data-emvb-device-note="${device}"]`)?.textContent ?? "no note",
+  ).toStartWith(text);
 });
 
 test("UX-065: the breadcrumb's last part is the current element, not a button back to it", async () => {

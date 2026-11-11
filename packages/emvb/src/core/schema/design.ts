@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { HEX_COLOR } from "../css-keywords.ts";
-import { DeviceStyles, HiddenOn, StyleProps, StyleStates } from "./style.ts";
+import { DeviceStyles, HiddenOn, OwnStyle, StyleProps, StyleStates } from "./style.ts";
 
 /**
  * 17 since W-925 (contract 1.0): the motion style keys sit under one `motion` record.
@@ -65,7 +65,7 @@ export type FluidRange = z.infer<typeof FluidRange>;
 const StyleClass = z.strictObject({
   id: VariableId,
   name: z.string().min(1).max(60),
-  style: StyleProps,
+  style: OwnStyle,
   states: StyleStates.optional(),
   devices: DeviceStyles.optional(),
   hiddenOn: HiddenOn.optional(),
