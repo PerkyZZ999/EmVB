@@ -163,8 +163,11 @@ test("W-977: collections with a canvas field are export sources, with their URL 
   expect(sources).toEqual([
     { collection: "posts", label: "Posts", field: "canvas", urlPattern: "/blog/{slug}" },
   ]);
-  expect(entryPath("/blog/{slug}", "hello")).toBe("/blog/hello");
-  expect(entryPath(null, "hello")).toBe("/hello");
+  const entry = { collection: "posts", slug: "hello", id: "e1" };
+  expect(entryPath("/blog/{slug}", entry)).toBe("/blog/hello");
+  expect(entryPath("/p/{id}", entry)).toBe("/p/e1");
+  // W-980: without a pattern EmDash serves entries under the collection's slug.
+  expect(entryPath(null, entry)).toBe("/posts/hello");
 });
 
 test("W-977: published entries with a layout export like pages, with the header for their collection", async () => {

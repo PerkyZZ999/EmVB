@@ -62,9 +62,17 @@ export async function canvasSources(fetcher: Fetcher): Promise<CanvasSource[]> {
   }));
 }
 
-/** An entry's public path from its collection's URL pattern (`/blog/{slug}`), or `/<slug>`. */
-export function entryPath(pattern: string | null | undefined, slug: string): string {
-  const path = (pattern || "/{slug}").replace("{slug}", encodeURIComponent(slug));
+/**
+ * An entry's public path from its collection's URL pattern (`/blog/{slug}`, `{id}` too). Without
+ * a pattern EmDash serves entries at `/<collection>/<slug>` (W-980).
+ */
+export function entryPath(
+  pattern: string | null | undefined,
+  entry: { collection: string; slug: string; id: string },
+): string {
+  const path = (pattern || `/${entry.collection}/{slug}`)
+    .replaceAll("{slug}", encodeURIComponent(entry.slug))
+    .replaceAll("{id}", encodeURIComponent(entry.id));
   return path.startsWith("/") ? path : `/${path}`;
 }
 
@@ -103,7 +111,11 @@ export async function loadExportData(
       };
       if (source) {
         page.collection = source.collection;
-        page.path = entryPath(source.urlPattern, slug);
+        page.path = entryPath(source.urlPattern, {
+          collection: source.collection,
+          slug,
+          id: item.id,
+        });
       }
       if (item.seo?.description) page.description = item.seo.description;
       return page;
