@@ -44,6 +44,15 @@ page, every image, and what only works on the live site:
 Links between pages keep the paths they had on your site, so host the folders at the same paths
 or update the links.
 
+Entries in your own collections that have an EmVB layout export the same way (since 1.1):
+
+- In **Export pages**, choose the collection under **Export from**, then all its published
+  entries or one. Entries without a layout use your site's own template, so they aren't included.
+- Or open the entry and click **Export HTML** on its Canvas card.
+
+Each entry becomes a folder named after its slug, with the header, footer, popups and floats that
+show on that entry's page.
+
 ### As rich text in EmDash (keep EmDash, drop EmVB)
 
 For EmVB pages:

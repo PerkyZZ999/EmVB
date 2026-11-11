@@ -46,6 +46,9 @@ export type ExportPageInput = {
   slug: string;
   layout: unknown;
   description?: string;
+  /** W-977: an entry of one of your collections: its public path and collection. */
+  path?: string;
+  collection?: string;
 };
 
 /** A published theme part as the content API returns it (`data` fields). */
@@ -334,12 +337,13 @@ export function buildSiteExport(input: {
     }
     const folder = pageFolder(page.slug, page.id, taken);
     const ctx: ThemeRequestContext = {
-      path: `/${page.slug}`,
+      path: page.path ?? `/${page.slug}`,
       isFront: false,
       is404: false,
       isSearch: false,
       kind: "singular",
       entryId: page.id,
+      ...(page.collection ? { collection: page.collection } : {}),
     };
     const header = pickThemePartWinner(candidates, "header", ctx);
     const footer = pickThemePartWinner(candidates, "footer", ctx);

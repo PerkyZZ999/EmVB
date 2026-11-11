@@ -44961,7 +44961,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/ExportDialog.tsx",
-          "search": "  const unavailable = published.length === 0 || (rich && !target);",
+          "search": "  const unavailable = choices.length === 0 || (rich && !target);",
           "replace": "  const unavailable = rich && !target;"
         }
       ],
@@ -45891,6 +45891,48 @@
         "the newest matching header and footer win"
       ],
       "expect": "\\(fail\\).*the newest matching header and footer win"
+    },
+    {
+      "id": "W-977/drafts-exported",
+      "requirement": "W-977",
+      "description": "Unpublished entries are exported too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "    .filter((item) => isLive(item) && (!onlyPageId || item.id === onlyPageId))\n    // An entry",
+          "replace": "    .filter((item) => !onlyPageId || item.id === onlyPageId)\n    // An entry"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*W-977: published entries with a layout"
+    },
+    {
+      "id": "W-977/no-collection-context",
+      "requirement": "W-977",
+      "description": "Exported entries are matched to theme parts without their collection.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "      ...(page.collection ? { collection: page.collection } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*W-977: published entries with a layout"
+    },
+    {
+      "id": "W-977/unpublished-silent",
+      "requirement": "W-977",
+      "description": "Export HTML on an unpublished entry says nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/ExportEntryHtml.tsx",
+          "search": "      if (!page) {\n        setState({",
+          "replace": "      if (!page) {\n        return;\n        setState({"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/widgets/export-entry-html.test.tsx"],
+      "expect": "\\(fail\\).*W-977: an entry with no published layout"
     }
   ]
 }

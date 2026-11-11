@@ -11,12 +11,20 @@ import {
   type CopyResult,
   type RichTextTarget,
 } from "../copy-rich-text.ts";
-import { exportSite, type ExportResult } from "../export-api.ts";
+import {
+  canvasSources,
+  exportableEntries,
+  exportSite,
+  type CanvasSource,
+  type ExportResult,
+} from "../export-api.ts";
 import { downloadBlob } from "../image-editor/flatten.ts";
 import { leftOutText } from "../widgets/ConvertToRichText.tsx";
 import { BUTTON, FIELD, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 
 const ALL = "__all__";
+/** The "Export from" value for EmVB pages; a collection's slug otherwise (W-977). */
+const PAGES = "__pages__";
 
 /** Opens Export pages (W-963), next to Import on the Pages list. */
 export function ExportButton({ onClick }: { onClick: () => void }) {
@@ -36,9 +44,9 @@ export function ExportButton({ onClick }: { onClick: () => void }) {
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 /** What the finished export holds, in a sentence or two. */
-function exportSummary(result: ExportResult): string {
+function exportSummary(result: ExportResult, noun = "page"): string {
   const { report } = result.site;
-  const parts = [`Downloaded ${plural(report.pages.length, "page")}.`];
+  const parts = [`Downloaded ${plural(report.pages.length, noun)}.`];
   if (report.skipped.length > 0)
     parts.push(
       `${plural(report.skipped.length, "page")} couldn't be read and ${report.skipped.length === 1 ? "is" : "are"} left out.`,
@@ -82,6 +90,11 @@ export function ExportDialog({
     (page) => page.status === "published" || page.status === "changed",
   );
   const [pageId, setPageId] = React.useState(ALL);
+  // W-977: EmVB pages, or one of your collections with a canvas field.
+  const [from, setFrom] = React.useState(PAGES);
+  const [sources, setSources] = React.useState<CanvasSource[]>([]);
+  const [entries, setEntries] = React.useState<{ id: string; title: string }[] | null>(null);
+  const source = sources.find((s) => s.collection === from);
   const [copyMedia, setCopyMedia] = React.useState(true);
   const [format, setFormat] = React.useState<"html" | "rich">("html");
   const [targets, setTargets] = React.useState<RichTextTarget[] | null>(null);
@@ -99,6 +112,32 @@ export function ExportDialog({
   React.useEffect(() => {
     if (open) setState({ kind: "idle" });
   }, [open]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    let active = true;
+    canvasSources(fetcher).then(
+      (found) => active && setSources(found),
+      () => active && setSources([]),
+    );
+    return () => {
+      active = false;
+    };
+  }, [open, fetcher]);
+
+  React.useEffect(() => {
+    setEntries(null);
+    setPageId(ALL);
+    if (!source) return;
+    let active = true;
+    exportableEntries(fetcher, source).then(
+      (found) => active && setEntries(found),
+      () => active && setEntries([]),
+    );
+    return () => {
+      active = false;
+    };
+  }, [source, fetcher]);
 
   React.useEffect(() => {
     if (!open || format !== "rich" || targets) return;
@@ -136,8 +175,12 @@ export function ExportDialog({
       });
     }
   };
-  const rich = format === "rich";
-  const unavailable = published.length === 0 || (rich && !target);
+  // Entries of your own collections already have Convert to rich text on their Canvas card.
+  const rich = format === "rich" && !source;
+  const choices = source ? (entries ?? []) : published;
+  const noun = source ? "entry" : "page";
+  const nouns = source ? "entries" : "pages";
+  const unavailable = choices.length === 0 || (rich && !target);
 
   const run = async () => {
     if (busy) return;
@@ -146,6 +189,7 @@ export function ExportDialog({
       const date = new Date().toISOString().slice(0, 10);
       const result = await exportSite(fetcher, {
         ...(pageId === ALL ? {} : { onlyPageId: pageId }),
+        ...(source ? { source } : {}),
         copyMedia,
         origin: window.location.origin,
         date,
@@ -156,13 +200,13 @@ export function ExportDialog({
       }
       const name =
         pageId === ALL
-          ? `emvb-export-${date}.zip`
+          ? `emvb-export-${source ? `${source.collection}-` : ""}${date}.zip`
           : `emvb-export-${result.site.report.pages[0]?.path.replace("/", "") ?? "page"}-${date}.zip`;
       downloadBlob(
         new Blob([result.zip as Uint8Array<ArrayBuffer>], { type: "application/zip" }),
         name,
       );
-      setState({ kind: "done", text: exportSummary(result) });
+      setState({ kind: "done", text: exportSummary(result, noun) });
     } catch (error) {
       setState({
         kind: "error",
@@ -188,40 +232,74 @@ export function ExportDialog({
             your EmVB pages aren't changed.
           </Dialog.Description>
           <div className="emvb-export-fields">
-            <Radio.Group
-              legend="Export as"
-              appearance="card"
-              value={format}
-              onValueChange={(value) => {
-                setFormat(value === "rich" ? "rich" : "html");
-                setState({ kind: "idle" });
-              }}
-              disabled={busy}
-            >
-              <Radio.Item
-                value="html"
-                label="HTML and CSS files"
-                description="A zip you can host anywhere, with the header, footer and popups each page shows."
-              />
-              <Radio.Item
-                value="rich"
-                label="Rich text in a collection"
-                description="A draft entry per page in one of your collections, with its words, headings, lists, links and images. The design doesn't come across."
-              />
-            </Radio.Group>
+            {sources.length > 0 && (
+              <Select
+                label="Export from"
+                className={FIELD}
+                value={from}
+                onValueChange={(value) => {
+                  setFrom(typeof value === "string" ? value : PAGES);
+                  setState({ kind: "idle" });
+                }}
+                renderValue={(value: unknown) =>
+                  sources.find((s) => s.collection === value)?.label ?? "EmVB pages"
+                }
+                data-emvb-export-from=""
+              >
+                <Select.Option value={PAGES}>EmVB pages</Select.Option>
+                {sources.map((s) => (
+                  <Select.Option key={s.collection} value={s.collection}>
+                    {s.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
+            {source && (
+              <p className="emvb-helper" data-emvb-export-entries-note="">
+                Published entries with an EmVB layout, as HTML and CSS. Entries without a layout use
+                your site&apos;s own template, so they aren&apos;t included.
+              </p>
+            )}
+            {!source && (
+              <Radio.Group
+                legend="Export as"
+                appearance="card"
+                value={format}
+                onValueChange={(value) => {
+                  setFormat(value === "rich" ? "rich" : "html");
+                  setState({ kind: "idle" });
+                }}
+                disabled={busy}
+              >
+                <Radio.Item
+                  value="html"
+                  label="HTML and CSS files"
+                  description="A zip you can host anywhere, with the header, footer and popups each page shows."
+                />
+                <Radio.Item
+                  value="rich"
+                  label="Rich text in a collection"
+                  description="A draft entry per page in one of your collections, with its words, headings, lists, links and images. The design doesn't come across."
+                />
+              </Radio.Group>
+            )}
+            {source && entries === null && <p className="emvb-helper">Finding entries…</p>}
             <Select
-              label="Pages"
+              label={source ? "Entries" : "Pages"}
               className={FIELD}
               value={pageId}
               onValueChange={(value) => setPageId(typeof value === "string" ? value : ALL)}
               renderValue={(value: unknown) =>
                 value === ALL || !value
-                  ? `All published pages (${published.length})`
-                  : (published.find((page) => page.id === value)?.title ?? "Page")
+                  ? `All published ${nouns} (${choices.length})`
+                  : (choices.find((page) => page.id === value)?.title ??
+                    (source ? "Entry" : "Page"))
               }
             >
-              <Select.Option value={ALL}>All published pages ({published.length})</Select.Option>
-              {published.map((page) => (
+              <Select.Option value={ALL}>
+                All published {nouns} ({choices.length})
+              </Select.Option>
+              {choices.map((page) => (
                 <Select.Option key={page.id} value={page.id}>
                   {page.title}
                 </Select.Option>

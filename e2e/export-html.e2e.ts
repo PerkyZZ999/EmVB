@@ -101,7 +101,9 @@ test("W-963: a published page exports as HTML that works on its own", async ({ p
   await expect(dialog.locator("[data-emvb-export-status]")).toContainText("Downloaded 1 page.");
 
   const files = unzip(readFileSync(await download.path()));
-  expect([...files.keys()].toSorted()).toEqual(
+  // A site-wide header or footer another test published comes along with its images (the
+  // export holds what the page shows); only those media copies may be added to the list.
+  expect([...files.keys()].filter((name) => !name.startsWith("media/")).toSorted()).toEqual(
     [
       `${slug}/index.html`,
       `${slug}/style.css`,
@@ -194,4 +196,68 @@ test("W-963: published pages copy into a collection as rich-text drafts", async 
   expect(copy?.data["title"]).toBe(title);
   expect(JSON.stringify(parsed(copy?.data["content"]))).toContain("Words to keep");
   if (copy) await api(request, "DELETE", `/_emdash/api/content/pages/${copy.id}`);
+});
+
+test("W-977: an entry of your own collection exports as HTML, from its Canvas card and Export pages", async ({
+  page,
+  request,
+}) => {
+  // The demos' `pages` collection carries an emvb:canvas field (W-902).
+  const title = `Entry export ${unique()}`;
+  const slug = title.toLowerCase().replaceAll(" ", "-");
+  const canvasLayout = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [{ id: "head0001", type: "heading", props: { text: title, level: 1 } }],
+    },
+  };
+  const created = await api(request, "POST", "/_emdash/api/content/pages", {
+    data: { title, canvas: canvasLayout },
+    slug,
+  });
+  expect(created.status).toBe(201);
+  const id = ((created.json ?? {})["data"] as { item: { id: string } }).item.id;
+  const read = await api(request, "GET", `/_emdash/api/content/pages/${id}`);
+  const rev = ((read.json ?? {})["data"] as Record<string, string>)["_rev"];
+  const published = await api(request, "POST", `/_emdash/api/content/pages/${id}/publish`, {
+    _rev: rev,
+  });
+  expect(published.status).toBe(200);
+
+  // From the entry's Canvas card.
+  await page.goto(`/_emdash/admin/content/pages/${id}`);
+  const widget = page.locator('[data-emvb-widget="canvas"]');
+  const [fromCard] = await Promise.all([
+    page.waitForEvent("download"),
+    widget.getByRole("button", { name: "Export HTML" }).click(),
+  ]);
+  await expect(widget.locator('[data-emvb-export-entry-status="done"]')).toBeVisible();
+  const cardFiles = unzip(readFileSync(await fromCard.path()));
+  expect(cardFiles.get(`${slug}/index.html`)?.toString("utf8")).toContain(title);
+
+  // From Export pages, choosing the collection and the entry.
+  await page.goto("/_emdash/admin/plugins/emvb/pages");
+  await page.getByRole("button", { name: "Export pages", exact: true }).click();
+  const dialog = page.locator('[data-emvb-dialog="export-pages"]');
+  await dialog.getByRole("combobox", { name: "Export from" }).click();
+  await page.getByRole("option", { name: "EmVB pages" }).waitFor();
+  const optionNames = await page.getByRole("option").allTextContents();
+  const collection = optionNames.find((name) => name !== "EmVB pages");
+  if (!collection) throw new Error("no canvas collection offered");
+  await page.getByRole("option", { name: collection, exact: true }).click();
+  await expect(dialog.locator("[data-emvb-export-entries-note]")).toBeVisible();
+  await expect(dialog.getByText("Rich text in a collection")).toHaveCount(0);
+  await dialog.getByRole("combobox", { name: "Entries" }).click();
+  await page.getByRole("option", { name: title, exact: true }).click();
+  const [fromDialog] = await Promise.all([
+    page.waitForEvent("download"),
+    dialog.getByRole("button", { name: "Export", exact: true }).click(),
+  ]);
+  await expect(dialog.locator("[data-emvb-export-status]")).toContainText("Downloaded 1 entry.");
+  const files = unzip(readFileSync(await fromDialog.path()));
+  expect(files.get(`${slug}/index.html`)?.toString("utf8")).toContain(title);
+  expect(files.get("EXPORT-REPORT.md")?.toString("utf8")).toContain(title);
 });

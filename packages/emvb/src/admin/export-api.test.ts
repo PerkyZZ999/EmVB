@@ -1,7 +1,14 @@
 import { expect, test } from "bun:test";
 import { emptyDesign, LAYOUT_SCHEMA_VERSION, type Layout } from "../core/index.ts";
 import type { Fetcher } from "./api.ts";
-import { copyableMedia, exportSite, loadExportData } from "./export-api.ts";
+import {
+  canvasSources,
+  copyableMedia,
+  entryPath,
+  exportableEntries,
+  exportSite,
+  loadExportData,
+} from "./export-api.ts";
 
 const layout = (text: string, src?: string): Layout => ({
   schemaVersion: LAYOUT_SCHEMA_VERSION,
@@ -92,4 +99,90 @@ test("only this site's own media are copied", () => {
       "https://site.test",
     ),
   ).toEqual(["/a.png", "https://site.test/b.png"]);
+});
+
+/** W-977: a site with a `posts` collection whose entries carry a canvas layout. */
+const headerFor = (collection: string) => ({
+  id: "h1",
+  slug: "h1",
+  status: "published",
+  updatedAt: "2026-11-01T00:00:00Z",
+  data: {
+    title: "Posts header",
+    part_type: "header",
+    layout: layout("Posts header"),
+    conditions: {
+      schemaVersion: 1,
+      rules: [
+        { id: "r1", op: "include", group: "singular", name: "collection", args: { collection } },
+      ],
+    },
+  },
+});
+const postsSite: Fetcher = async (path) => {
+  if (path === "/_emdash/api/schema/collections")
+    return Response.json({ data: { items: [{ slug: "posts", label: "Posts" }] } });
+  if (path.startsWith("/_emdash/api/schema/collections/posts"))
+    return Response.json({
+      data: {
+        item: {
+          slug: "posts",
+          urlPattern: "/blog/{slug}",
+          fields: [{ slug: "canvas", type: "json", widget: "emvb:canvas" }],
+        },
+      },
+    });
+  if (path.startsWith("/_emdash/api/content/posts"))
+    return Response.json({
+      data: {
+        items: [
+          // Stored as a JSON string, as some hosts do.
+          {
+            id: "e1",
+            slug: "hello",
+            status: "published",
+            data: { title: "Hello", canvas: JSON.stringify(layout("Hello post")) },
+          },
+          { id: "e2", slug: "plain", status: "published", data: { title: "Plain", canvas: null } },
+          {
+            id: "e3",
+            slug: "draft",
+            status: "draft",
+            data: { title: "Draft", canvas: layout("Draft post") },
+          },
+        ],
+      },
+    });
+  if (path.startsWith("/_emdash/api/content/emvb_theme_parts"))
+    return Response.json({ data: { items: [headerFor("posts")] } });
+  return fakeSite(path);
+};
+
+test("W-977: collections with a canvas field are export sources, with their URL pattern", async () => {
+  const sources = await canvasSources(postsSite);
+  expect(sources).toEqual([
+    { collection: "posts", label: "Posts", field: "canvas", urlPattern: "/blog/{slug}" },
+  ]);
+  expect(entryPath("/blog/{slug}", "hello")).toBe("/blog/hello");
+  expect(entryPath(null, "hello")).toBe("/hello");
+});
+
+test("W-977: published entries with a layout export like pages, with the header for their collection", async () => {
+  const [source] = await canvasSources(postsSite);
+  if (!source) throw new Error("no source");
+  expect(await exportableEntries(postsSite, source)).toEqual([{ id: "e1", title: "Hello" }]);
+  const result = await exportSite(postsSite, {
+    source,
+    copyMedia: false,
+    origin: "https://site.test",
+  });
+  expect(result.site.report.pages).toEqual([{ title: "Hello", path: "hello/" }]);
+  const html = result.site.files.find((f) => f.path === "hello/index.html")?.data as string;
+  expect(html).toContain("Hello post");
+  // The header that shows on single posts comes along.
+  expect(html).toContain("Posts header");
+  // EmVB pages don't get a header meant for posts.
+  const pages = await exportSite(postsSite, { copyMedia: false, origin: "https://site.test" });
+  const home = pages.site.files.find((f) => f.path === "home/index.html")?.data as string;
+  expect(home).not.toContain("Posts header");
 });
