@@ -6,7 +6,8 @@
     "@fortawesome/fontawesome-free",
     "@tabler/icons",
     "lucide-static",
-    "remixicon"
+    "remixicon",
+    "sharp"
   ],
   "boundaries": {
     "zones": [

@@ -1,3 +1,4 @@
+import { editorAttributesIn } from "../core/public-attributes.ts";
 import { beforeEach, describe, expect, test } from "bun:test";
 import { THEME_PARTS_COLLECTION } from "../constants.ts";
 import type { ContentPort } from "./content-port.ts";
@@ -151,9 +152,9 @@ describe("resolveThemeParts (R-062)", () => {
       '<header class="emvb-theme-header" data-emvb-theme-part="HEADNEW1">',
     );
     expect(resolved.header?.html).toEndWith("</header>");
-    // Public output: data-emvb-theme-part on the wrapper and no editor attribute (layout-format.md).
-    expect(resolved.header?.html).not.toMatch(/data-emvb-(?!theme-part=)/);
-    expect(resolved.footer?.html).not.toMatch(/data-emvb-(?!theme-part=)/);
+    // Public output: only the documented public hooks (layout-format.md, "Rendered output").
+    expect(editorAttributesIn(resolved.header?.html ?? "")).toEqual([]);
+    expect(editorAttributesIn(resolved.footer?.html ?? "")).toEqual([]);
     expect(resolved.header?.html).toContain("New header");
     expect(resolved.footer?.html).toStartWith('<footer class="emvb-theme-footer"');
     expect(resolved.footer?.html).toEndWith("</footer>");

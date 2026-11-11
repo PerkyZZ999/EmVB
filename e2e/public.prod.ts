@@ -1,3 +1,4 @@
+import { editorAttributesIn } from "../packages/emvb/src/core/public-attributes.ts";
 import { expect, request as requestFactory, test, type APIRequestContext } from "@playwright/test";
 import { api, createPage, ensureEmvbSetup, getPage, publishPage } from "./support/api.ts";
 import { setClass, setColor, setSpacing } from "./support/design.ts";
@@ -84,14 +85,6 @@ async function publishedHtml(
   return response.text();
 }
 
-/**
- * An editor attribute on a public page. docs/system/layout-format.md ("Rendered output"): public
- * output has no editor data-emvb-* attributes; a theme part's wrapper carries exactly
- * data-emvb-theme-part (docs/system/theme-parts.md, "Public render"), which a site-wide header or
- * footer published by another test adds to every page.
- */
-const EDITOR_ATTRIBUTE = /data-emvb-(?!theme-part=)/;
-
 const scriptsOf = (html: string) => html.match(/<script\b[^>]*>[\s\S]*?<\/script>/gi) ?? [];
 
 test("a published page renders from the production build with its content and CSS, and adds no script", async ({
@@ -102,7 +95,8 @@ test("a published page renders from the production build with its content and CS
   const html = await publishedHtml(request, "Public check", layoutWith(text), slug);
   expect(html).toContain(`<h1 class="emvb-heading">${text}</h1>`);
   expect(html).toMatch(/<style>[^<]*\.emvb-root\{[^<]*gap:24px/);
-  expect(html).not.toMatch(EDITOR_ATTRIBUTE);
+  // Only the documented public hooks (docs/system/layout-format.md, "Rendered output").
+  expect(editorAttributesIn(html)).toEqual([]);
 
   // The site's own layout may bring scripts; EmVB adds none. Compare with a plain layout page.
   const baseline = await (await request.get("/this-page-does-not-exist-" + unique())).text();
@@ -416,7 +410,8 @@ test("hover, focus and active states from local styles and a class work on the p
     expect(html).toContain(".emvb-e-btn00001:active{");
     expect(html).toContain(`.emvb-k-${classId}:hover{`);
     expect(html).toContain("@media (prefers-reduced-motion: reduce)");
-    expect(html).not.toMatch(EDITOR_ATTRIBUTE);
+    // Only the documented public hooks (docs/system/layout-format.md, "Rendered output").
+    expect(editorAttributesIn(html)).toEqual([]);
 
     await page.goto(`/${slug}`);
     const live = page.locator(".emvb-e-btn00001");
