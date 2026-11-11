@@ -23,6 +23,10 @@ Editors and administrators can change the layout field. Authors and contributors
 
 While the field is empty, **Convert to EmVB** builds a starter layout from the entry's saved rich-text body: headings, paragraphs, lists and images. Other blocks are left out, and the note under the button says how many blocks were converted. The original body is never changed. Save the entry to keep the new layout.
 
+## Back to rich text
+
+**Convert to rich text** (on the Canvas card when the field has a layout) copies the layout's words, headings, lists, links and images into the entry's rich-text field, after a confirm that says what goes in, what is left out and whether it replaces what the field holds. The layout isn't changed, and the entry reloads to show the result. See [Leaving EmVB](leaving-emvb.md).
+
 ## On the site
 
 An entry with a layout renders it inside your site layout; an entry with an empty field keeps using your own template. To go back to the template, clear the layout in the editor, Apply and save the entry.
