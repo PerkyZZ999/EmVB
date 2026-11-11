@@ -1,17 +1,24 @@
-import { Button, Checkbox, Dialog, Loader, Select } from "@cloudflare/kumo";
-import { DownloadSimpleIcon } from "@phosphor-icons/react";
+import { Button, Checkbox, Dialog, Loader, Radio, Select } from "@cloudflare/kumo";
+import { CopySimpleIcon, DownloadSimpleIcon } from "@phosphor-icons/react";
 import * as React from "react";
 import type { Fetcher } from "../api.ts";
 import type { PageSummary } from "../content-api.ts";
 import { DialogCloseButton } from "../editor/DialogCloseButton.tsx";
 import { useMediaQuery } from "../editor/useMediaQuery.ts";
+import {
+  copyPagesAsRichText,
+  richTextTargets,
+  type CopyResult,
+  type RichTextTarget,
+} from "../copy-rich-text.ts";
 import { exportSite, type ExportResult } from "../export-api.ts";
 import { downloadBlob } from "../image-editor/flatten.ts";
+import { leftOutText } from "../widgets/ConvertToRichText.tsx";
 import { BUTTON, FIELD, SOLID_PRIMARY, UI_CSS } from "../ui.ts";
 
 const ALL = "__all__";
 
-/** Opens Export as HTML (W-963), next to Import on the Pages list. */
+/** Opens Export pages (W-963), next to Import on the Pages list. */
 export function ExportButton({ onClick }: { onClick: () => void }) {
   return (
     <Button
@@ -19,9 +26,9 @@ export function ExportButton({ onClick }: { onClick: () => void }) {
       className={BUTTON}
       icon={<DownloadSimpleIcon aria-hidden="true" />}
       onClick={onClick}
-      data-emvb-export-html=""
+      data-emvb-export-pages=""
     >
-      Export as HTML
+      Export pages
     </Button>
   );
 }
@@ -50,6 +57,16 @@ function exportSummary(result: ExportResult): string {
   return parts.join(" ");
 }
 
+/** What copying as rich text did, in a sentence or two. */
+function copySummary(result: CopyResult, target: RichTextTarget): string {
+  const parts = [`Created ${plural(result.created.length, "draft")} in ${target.label}.`];
+  if (result.failed.length > 0)
+    parts.push(`Not copied: ${result.failed.map((f) => `${f.title} (${f.message})`).join("; ")}.`);
+  const left = leftOutText(result.skipped);
+  if (left) parts.push(`Left out, as rich text can't hold them: ${left}.`);
+  return parts.join(" ");
+}
+
 export function ExportDialog({
   fetcher,
   open,
@@ -66,6 +83,10 @@ export function ExportDialog({
   );
   const [pageId, setPageId] = React.useState(ALL);
   const [copyMedia, setCopyMedia] = React.useState(true);
+  const [format, setFormat] = React.useState<"html" | "rich">("html");
+  const [targets, setTargets] = React.useState<RichTextTarget[] | null>(null);
+  const [targetSlug, setTargetSlug] = React.useState("");
+  const target = targets?.find((t) => t.slug === targetSlug);
   const [state, setState] = React.useState<
     | { kind: "idle" }
     | { kind: "busy" }
@@ -78,6 +99,45 @@ export function ExportDialog({
   React.useEffect(() => {
     if (open) setState({ kind: "idle" });
   }, [open]);
+
+  React.useEffect(() => {
+    if (!open || format !== "rich" || targets) return;
+    let active = true;
+    richTextTargets(fetcher).then(
+      (found) => {
+        if (!active) return;
+        setTargets(found);
+        setTargetSlug((current) => current || found[0]?.slug || "");
+      },
+      () => active && setTargets([]),
+    );
+    return () => {
+      active = false;
+    };
+  }, [open, format, targets, fetcher]);
+
+  const copy = async () => {
+    if (busy || !target) return;
+    setState({ kind: "busy" });
+    try {
+      const result = await copyPagesAsRichText(
+        fetcher,
+        target,
+        pageId === ALL ? undefined : pageId,
+      );
+      setState({
+        kind: result.created.length > 0 ? "done" : "error",
+        text: copySummary(result, target),
+      });
+    } catch (error) {
+      setState({
+        kind: "error",
+        text: `Copying didn't finish: ${error instanceof Error ? error.message : String(error)}. Try again.`,
+      });
+    }
+  };
+  const rich = format === "rich";
+  const unavailable = published.length === 0 || (rich && !target);
 
   const run = async () => {
     if (busy) return;
@@ -121,14 +181,34 @@ export function ExportDialog({
     >
       <Dialog size="base" className="p-6">
         <style>{UI_CSS}</style>
-        <div data-emvb-dialog="export-html" className="emvb-dialog">
-          <Dialog.Title>Export as HTML</Dialog.Title>
+        <div data-emvb-dialog="export-pages" className="emvb-dialog">
+          <Dialog.Title>Export pages</Dialog.Title>
           <Dialog.Description>
-            Download published pages as plain HTML and CSS files you can host anywhere, with the
-            header, footer and popups each page shows. Drafts and unpublished changes aren't
-            included.
+            Take your published pages elsewhere. Drafts and unpublished changes aren't included, and
+            your EmVB pages aren't changed.
           </Dialog.Description>
           <div className="emvb-export-fields">
+            <Radio.Group
+              legend="Export as"
+              appearance="card"
+              value={format}
+              onValueChange={(value) => {
+                setFormat(value === "rich" ? "rich" : "html");
+                setState({ kind: "idle" });
+              }}
+              disabled={busy}
+            >
+              <Radio.Item
+                value="html"
+                label="HTML and CSS files"
+                description="A zip you can host anywhere, with the header, footer and popups each page shows."
+              />
+              <Radio.Item
+                value="rich"
+                label="Rich text in a collection"
+                description="A draft entry per page in one of your collections, with its words, headings, lists, links and images. The design doesn't come across."
+              />
+            </Radio.Group>
             <Select
               label="Pages"
               className={FIELD}
@@ -147,18 +227,43 @@ export function ExportDialog({
                 </Select.Option>
               ))}
             </Select>
-            <Checkbox
-              label="Copy this site's images and files into the export"
-              checked={copyMedia}
-              onCheckedChange={(checked: boolean) => setCopyMedia(checked)}
-            />
+            {!rich && (
+              <Checkbox
+                label="Copy this site's images and files into the export"
+                checked={copyMedia}
+                onCheckedChange={(checked: boolean) => setCopyMedia(checked)}
+              />
+            )}
+            {rich && targets === null && <p className="emvb-helper">Finding collections…</p>}
+            {rich && targets?.length === 0 && (
+              <p className="emvb-helper" data-emvb-no-targets="">
+                None of your collections has a rich-text field to copy into.
+              </p>
+            )}
+            {rich && targets && targets.length > 0 && (
+              <Select
+                label="Collection"
+                className={FIELD}
+                value={targetSlug}
+                onValueChange={(value) => setTargetSlug(typeof value === "string" ? value : "")}
+                renderValue={(value: unknown) =>
+                  targets.find((t) => t.slug === value)?.label ?? "Choose a collection"
+                }
+              >
+                {targets.map((t) => (
+                  <Select.Option key={t.slug} value={t.slug}>
+                    {t.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            )}
           </div>
           <p
             className={state.kind === "error" ? "emvb-helper emvb-danger-text" : "emvb-helper"}
             role="status"
             data-emvb-export-status=""
           >
-            {state.kind === "busy" && "Exporting…"}
+            {state.kind === "busy" && (rich ? "Copying…" : "Exporting…")}
             {(state.kind === "done" || state.kind === "error") && state.text}
           </p>
           <div className="emvb-dialog-actions">
@@ -170,17 +275,20 @@ export function ExportDialog({
               icon={
                 busy && !reducedMotion ? (
                   <Loader size={14} />
+                ) : rich ? (
+                  <CopySimpleIcon aria-hidden="true" />
                 ) : (
                   <DownloadSimpleIcon aria-hidden="true" />
                 )
               }
-              aria-disabled={busy || published.length === 0}
+              aria-disabled={busy || unavailable}
               aria-busy={busy}
               onClick={() => {
-                if (published.length > 0) void run();
+                if (unavailable) return;
+                void (rich ? copy() : run());
               }}
             >
-              {busy ? "Exporting…" : "Export"}
+              {busy ? (rich ? "Copying…" : "Exporting…") : rich ? "Copy pages" : "Export"}
             </Button>
           </div>
         </div>

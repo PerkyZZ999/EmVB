@@ -7,7 +7,18 @@ import { ExportDialog } from "./ExportDialog.tsx";
 
 afterEach(cleanup);
 
-const fakeSite: Fetcher = async (path) => {
+const posted: unknown[] = [];
+const fakeSite: Fetcher = async (path, init) => {
+  if (path === "/_emdash/api/schema/collections")
+    return Response.json({ data: { items: [{ slug: "pages", label: "Site pages" }] } });
+  if (path.startsWith("/_emdash/api/schema/collections/pages"))
+    return Response.json({
+      data: { item: { slug: "pages", fields: [{ slug: "content", type: "portableText" }] } },
+    });
+  if (init?.method === "POST") {
+    posted.push(JSON.parse(String(init.body)));
+    return Response.json({ data: { item: { id: "n1" } } }, { status: 201 });
+  }
   if (path.startsWith("/_emdash/api/content/emvb_pages"))
     return Response.json({
       data: {
@@ -74,4 +85,32 @@ test("with nothing published, Export is unavailable", async () => {
   );
   await settle();
   expect(exportButton().getAttribute("aria-disabled")).toBe("true");
+});
+
+test("Rich text in a collection creates drafts there (W-963)", async () => {
+  posted.length = 0;
+  await mount(
+    <ExportDialog fetcher={fakeSite} open onOpenChange={() => undefined} pages={pages} />,
+  );
+  await settle();
+  const rich = [...document.querySelectorAll('[role="radio"], input[type="radio"]')].find((el) =>
+    (el.closest("label")?.textContent ?? el.parentElement?.textContent ?? "").includes(
+      "Rich text in a collection",
+    ),
+  );
+  if (!(rich instanceof HTMLElement)) throw new Error("Rich text option is missing");
+  await act(async () => rich.click());
+  for (let i = 0; i < 10 && !document.body.textContent?.includes("Site pages"); i += 1)
+    // oxlint-disable-next-line no-await-in-loop -- waits for the collections to load
+    await settle();
+  const copy = [...document.querySelectorAll("button")].find((b) => b.textContent === "Copy pages");
+  if (!copy) throw new Error("Copy pages is missing");
+  await act(async () => copy.click());
+  for (let i = 0; i < 20 && !document.body.textContent?.includes("Created"); i += 1)
+    // oxlint-disable-next-line no-await-in-loop -- waits for the copy to finish
+    await settle();
+  expect(document.querySelector("[data-emvb-export-status]")?.textContent).toBe(
+    "Created 1 draft in Site pages.",
+  );
+  expect(posted).toHaveLength(1);
 });

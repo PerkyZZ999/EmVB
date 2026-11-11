@@ -44961,8 +44961,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/ExportDialog.tsx",
-          "search": "aria-disabled={busy || published.length === 0}",
-          "replace": "aria-disabled={busy}"
+          "search": "  const unavailable = published.length === 0 || (rich && !target);",
+          "replace": "  const unavailable = rich && !target;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/pages/export-dialog.test.tsx"],
@@ -44981,6 +44981,216 @@
       ],
       "command": ["bun", "test", "scripts/export-runtimes.test.ts"],
       "expect": "\\(fail\\).*bundled runtimes match"
+    },
+    {
+      "id": "W-963/pt-heading-normal",
+      "requirement": "W-963",
+      "description": "Headings come across as normal paragraphs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/portable-text-export.ts",
+          "search": "block(\n          text,\n          `h${Number(props[\"level\"]) || 2}`,",
+          "replace": "block(\n          text,\n          \"normal\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/portable-text-export.test.ts"],
+      "expect": "\\(fail\\).*reading order"
+    },
+    {
+      "id": "W-963/pt-no-bold",
+      "requirement": "W-963",
+      "description": "Bold words lose their mark.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/portable-text-export.ts",
+          "search": "        if (m.bold) names.push(\"strong\");\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/portable-text-export.test.ts"],
+      "expect": "\\(fail\\).*become marks"
+    },
+    {
+      "id": "W-963/pt-unsafe-link",
+      "requirement": "W-963",
+      "description": "Unsafe link schemes are kept.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/portable-text-export.ts",
+          "search": "  return sanitizeUrl(href, schemes);",
+          "replace": "  return href;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/portable-text-export.test.ts"],
+      "expect": "\\(fail\\).*unsafe links"
+    },
+    {
+      "id": "W-963/pt-skip-uncounted",
+      "requirement": "W-963",
+      "description": "Left-out elements aren't counted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/portable-text-export.ts",
+          "search": "        if (!QUIET.has(node.type)) skip(node.type);",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/portable-text-export.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-963/pt-both-arms",
+      "requirement": "W-963",
+      "description": "Both arms of an A/B test come across.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/portable-text-export.ts",
+          "search": "    if (node.variant?.arm === \"b\") {",
+          "replace": "    if (node.variant?.arm === \"c\" as string) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/portable-text-export.test.ts"],
+      "expect": "\\(fail\\).*A/B test keeps only A"
+    },
+    {
+      "id": "W-963/pt-list-unordered",
+      "requirement": "W-963",
+      "description": "Numbered lists become bullets.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/portable-text-export.ts",
+          "search": "last.listItem = ordered ? \"number\" : \"bullet\";",
+          "replace": "last.listItem = \"bullet\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/portable-text-export.test.ts"],
+      "expect": "\\(fail\\).*reading order"
+    },
+    {
+      "id": "W-963/pt-sections-ignored",
+      "requirement": "W-963",
+      "description": "Synced sections' words are left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/portable-text-export.ts",
+          "search": "        if (synced && !seen.has(partId)) {",
+          "replace": "        if (synced && seen.has(partId)) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/portable-text-export.test.ts"],
+      "expect": "\\(fail\\).*synced sections"
+    },
+    {
+      "id": "W-963/rich-no-replace-flag",
+      "requirement": "W-963",
+      "description": "The confirm doesn't say existing content is replaced.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/convert-body.ts",
+          "search": "  const replaces =\n",
+          "replace": "  const replaces = false &&\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/widgets/convert-rich-text.test.tsx"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-963/rich-writes-before-confirm",
+      "requirement": "W-963",
+      "description": "Convert to rich text writes before the confirm.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/ConvertToRichText.tsx",
+          "search": "      setState(plan.ok ? { kind: \"confirm\", plan } : { kind: \"error\", message: plan.message });",
+          "replace": "      if (plan.ok) await writeRichText(fetcher, entry, plan);\n      setState(plan.ok ? { kind: \"confirm\", plan } : { kind: \"error\", message: plan.message });"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/widgets/convert-rich-text.test.tsx"],
+      "expect": "\\(fail\\).*nothing is written until"
+    },
+    {
+      "id": "W-963/rich-writes-whole-entry",
+      "requirement": "W-963",
+      "description": "The write sends the whole entry, not only the rich-text field.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/convert-body.ts",
+          "search": "    body: { data: { [plan.field]: plan.body } },",
+          "replace": "    body: { data: { [plan.field]: plan.body, title: \"\" } },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/widgets/convert-rich-text.test.tsx"],
+      "expect": "\\(fail\\).*only the rich-text field"
+    },
+    {
+      "id": "W-963/rich-no-reload",
+      "requirement": "W-963",
+      "description": "The entry doesn't reload after the write.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/widgets/ConvertToRichText.tsx",
+          "search": "      await writeRichText(fetcher, entry, plan);\n      reload();",
+          "replace": "      await writeRichText(fetcher, entry, plan);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/widgets/convert-rich-text.test.tsx"],
+      "expect": "\\(fail\\).*entry reloads"
+    },
+    {
+      "id": "W-963/copy-hidden-targets",
+      "requirement": "W-963",
+      "description": "EmVB's own hidden collections are offered as targets.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/copy-rich-text.ts",
+          "search": "      .filter((c) => !c.hidden)\n",
+          "replace": "      .filter((c) => c.slug !== \"\")\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/copy-rich-text.test.ts"],
+      "expect": "\\(fail\\).*only visible collections"
+    },
+    {
+      "id": "W-963/copy-publishes",
+      "requirement": "W-963",
+      "description": "Copied entries are published.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/copy-rich-text.ts",
+          "search": "            ...(page.slug ? { slug: page.slug } : {}),",
+          "replace": "            ...(page.slug ? { slug: page.slug } : {}),\n            status: \"published\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/copy-rich-text.test.ts"],
+      "expect": "\\(fail\\).*draft entries"
+    },
+    {
+      "id": "W-963/copy-stops-on-conflict",
+      "requirement": "W-963",
+      "description": "One taken address stops the whole copy.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/copy-rich-text.ts",
+          "search": "    } catch (error) {\n      result.failed.push({",
+          "replace": "    } catch (error) {\n      throw error;\n      result.failed.push({"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/copy-rich-text.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-963/dialog-rich-not-run",
+      "requirement": "W-963",
+      "description": "Copy pages runs the HTML export instead.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ExportDialog.tsx",
+          "search": "void (rich ? copy() : run());",
+          "replace": "void run();"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/export-dialog.test.tsx"],
+      "expect": "\\(fail\\).*Rich text in a collection"
     }
   ]
 }

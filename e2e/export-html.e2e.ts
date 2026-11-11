@@ -2,11 +2,11 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { AxeBuilder } from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import { createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
+import { api, createPage, parsed, publishPage, setUpEmvbOnce } from "./support/api.ts";
 import { unique } from "./support/helpers.ts";
 
 /**
- * W-963 acceptance: Export as HTML on the Pages list downloads a zip of a published page that
+ * W-963 acceptance: Export pages on the Pages list downloads a zip of a published page that
  * opens on its own, with the tabs script it needs, and a report.
  */
 
@@ -71,8 +71,8 @@ test("W-963: a published page exports as HTML that works on its own", async ({ p
   await publishPage(request, id);
 
   await page.goto("/_emdash/admin/plugins/emvb/pages");
-  await page.getByRole("button", { name: "Export as HTML", exact: true }).click();
-  const dialog = page.locator('[data-emvb-dialog="export-html"]');
+  await page.getByRole("button", { name: "Export pages", exact: true }).click();
+  const dialog = page.locator('[data-emvb-dialog="export-pages"]');
   await expect(dialog).toBeVisible();
   await dialog.getByRole("combobox", { name: "Pages" }).click();
   await page.getByRole("option", { name: title, exact: true }).click();
@@ -80,7 +80,7 @@ test("W-963: a published page exports as HTML that works on its own", async ({ p
   for (const colorScheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme });
     const axe = await new AxeBuilder({ page })
-      .include('[data-emvb-dialog="export-html"]')
+      .include('[data-emvb-dialog="export-pages"]')
       .analyze();
     expect(
       axe.violations
@@ -129,4 +129,69 @@ test("W-963: a published page exports as HTML that works on its own", async ({ p
   await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("tab", { name: "Second" })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByText("Second panel")).toBeVisible();
+});
+
+test("W-963: published pages copy into a collection as rich-text drafts", async ({
+  page,
+  request,
+}) => {
+  const title = `Rich copy ${unique()}`;
+  const slug = title.toLowerCase().replaceAll(" ", "-");
+  const id = await createPage(
+    request,
+    title,
+    {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          { id: "head0001", type: "heading", props: { text: title, level: 1 } },
+          { id: "text0001", type: "text", props: { text: "Words to keep" } },
+        ],
+      },
+    },
+    slug,
+  );
+  await publishPage(request, id);
+  await page.goto("/_emdash/admin/plugins/emvb/pages");
+  await page.getByRole("button", { name: "Export pages", exact: true }).click();
+  const dialog = page.locator('[data-emvb-dialog="export-pages"]');
+  await dialog.getByText("Rich text in a collection", { exact: true }).click();
+  await dialog.getByRole("combobox", { name: "Collection" }).click();
+  await page.getByRole("option", { name: "Pages", exact: true }).click();
+  await dialog.getByRole("combobox", { name: "Pages" }).click();
+  await page.getByRole("option", { name: title, exact: true }).click();
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    const axe = await new AxeBuilder({ page })
+      .include('[data-emvb-dialog="export-pages"]')
+      .analyze();
+    expect(
+      axe.violations
+        .filter((v) => ["serious", "critical"].includes(v.impact ?? ""))
+        .map((v) => v.id),
+    ).toEqual([]);
+    await dialog.screenshot({ path: test.info().outputPath(`copy-dialog-${colorScheme}.png`) });
+  }
+  await page.emulateMedia({ colorScheme: null });
+  await dialog.getByRole("button", { name: "Copy pages", exact: true }).click();
+  await expect(dialog.locator("[data-emvb-export-status]")).toHaveText("Created 1 draft in Pages.");
+
+  const list = await api(
+    request,
+    "GET",
+    `/_emdash/api/content/pages?limit=50&orderBy=updatedAt&order=desc`,
+  );
+  const items = (
+    (list.json ?? {})["data"] as {
+      items: { id: string; slug: string; status: string; data: Record<string, unknown> }[];
+    }
+  ).items;
+  const copy = items.find((item) => item.slug === slug);
+  expect(copy?.status).toBe("draft");
+  expect(copy?.data["title"]).toBe(title);
+  expect(JSON.stringify(parsed(copy?.data["content"]))).toContain("Words to keep");
+  if (copy) await api(request, "DELETE", `/_emdash/api/content/pages/${copy.id}`);
 });

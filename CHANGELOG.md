@@ -8,7 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **Export as HTML (W-963).** **Export as HTML** on the Pages list downloads your published pages (all of them, or one) as a zip of plain HTML and CSS you can host anywhere: each page in its own folder with the header, footer, popups and floats it shows, the small popup, tabs, menu and float scripts only where a page uses them, an index of the pages and a report. Images and files your site serves can be copied in, and the pages then point at the copies. Loops, bound fields, audience rules and forms need the live site, so the report lists where they appear. Drafts are not exported.
+- **Export pages (W-963).** **Export pages** on the Pages list takes your published pages (all of them, or one) elsewhere, as either:
+  - **HTML and CSS files:** a zip you can host anywhere, each page in its own folder with the header, footer, popups and floats it shows, the small popup, tabs, menu and float scripts only where a page uses them, an index of the pages and a report. Images and files your site serves can be copied in, and the pages then point at the copies. Loops, bound fields, audience rules and forms need the live site, so the report lists where they appear.
+  - **Rich text in a collection:** a draft entry per page in one of your collections (any with a rich-text field), holding the page's words, headings, lists, links and images. Nothing is published.
+
+  Drafts are not exported, and your EmVB pages are not changed.
+
+- **Convert to rich text (W-963).** On an entry in your own collections, **Convert to rich text** copies the layout's words, headings, lists, links and images into the entry's rich-text field (the reverse of Convert to EmVB). A confirm first says how many blocks go in, what is left out (forms, icons, embeds) and whether it replaces what the field holds. The layout itself isn't changed; clear it and save the entry to show the rich text on your site.
 
 ## [1.0.0] - 2026-11-09
 

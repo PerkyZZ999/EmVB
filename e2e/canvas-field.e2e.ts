@@ -358,3 +358,69 @@ test("W-912: Convert to EmVB starts a layout from the saved body and never chang
     .toContain("Our story");
   expect(JSON.stringify((await stored()).item.data["content"])).toBe(before);
 });
+
+test("W-963: Convert to rich text copies the layout's words into content after a confirm", async ({
+  page,
+  request,
+}) => {
+  const title = `Rich ${unique()}`;
+  const old = [
+    {
+      _type: "block",
+      _key: "o1",
+      style: "normal",
+      markDefs: [],
+      children: [{ _type: "span", _key: "s1", text: "Old body", marks: [] }],
+    },
+  ];
+  const canvasLayout = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        { id: "head0001", type: "heading", props: { text: "From the canvas", level: 2 } },
+        {
+          id: "text0001",
+          type: "text",
+          props: { text: "Bold words here", marks: [{ start: 0, end: 4, bold: true }] },
+        },
+        { id: "list0001", type: "list", props: { items: ["Alpha", "Beta"] } },
+      ],
+    },
+  };
+  const { id } = await createHostPage(request, { title, content: old, canvas: canvasLayout });
+  await page.goto(`/_emdash/admin/content/pages/${id}`);
+  const widget = page.locator('[data-emvb-widget="canvas"]');
+  await widget.getByRole("button", { name: "Convert to rich text" }).click();
+  const dialog = page.locator('[data-emvb-dialog="convert-rich-text"]');
+  await expect(dialog).toContainText("Copy this layout into content?");
+  await expect(dialog).toContainText("replacing what it holds now");
+  // Nothing is written before the confirm.
+  const body = async () =>
+    parsed(
+      (
+        ((await api(request, "GET", `/_emdash/api/content/pages/${id}`)).json ?? {})["data"] as {
+          item: { data: Record<string, unknown> };
+        }
+      ).item.data["content"],
+    ) as { style?: string; listItem?: string; children?: { text: string; marks: string[] }[] }[];
+  expect(JSON.stringify(await body())).toContain("Old body");
+  await Promise.all([
+    page.waitForEvent("load"),
+    dialog.getByRole("button", { name: "Replace content" }).click(),
+  ]);
+  const blocks = await body();
+  expect(
+    blocks.map((b) => [b.listItem ?? b.style, b.children?.map((c) => c.text).join("")]),
+  ).toEqual([
+    ["h2", "From the canvas"],
+    ["normal", "Bold words here"],
+    ["bullet", "Alpha"],
+    ["bullet", "Beta"],
+  ]);
+  expect(blocks[1]?.children?.[0]?.marks).toEqual(["strong"]);
+  // The layout is left alone.
+  expect(JSON.stringify(await storedCanvas(request, id))).toContain("From the canvas");
+});

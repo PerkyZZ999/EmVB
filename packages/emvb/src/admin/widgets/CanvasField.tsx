@@ -11,6 +11,7 @@ import { EditorHostContext, type EditorHost } from "../editor/host.ts";
 import { layerPreview } from "../editor/panels/LayersPanel.tsx";
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
 import { convertEntryBody, hostEntryFromLocation } from "./convert-body.ts";
+import { ConvertToRichText } from "./ConvertToRichText.tsx";
 import { createFieldFetcher, FIELD_ENTRY_ID, readFieldLayout } from "./field-fetcher.ts";
 import type { FieldWidgetProps } from "./LayoutField.tsx";
 
@@ -177,6 +178,9 @@ export function CanvasField({
                 >
                   Convert to EmVB
                 </Button>
+              )}
+              {entry && layout && !unreadable && (layout.root.children ?? []).length > 0 && (
+                <ConvertToRichText fetcher={fetcher} entry={entry} layout={layout} />
               )}
             </div>
           )}
