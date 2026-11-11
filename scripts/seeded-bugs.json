@@ -45979,8 +45979,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/pages/bulk.tsx",
-          "search": "            onClick={() => !busy && setConfirming(true)}",
-          "replace": "            onClick={() => !busy && void run(\"delete\")}"
+          "search": "              setInUse(null);\n              setConfirming(true);",
+          "replace": "              setInUse(null);\n              void run(\"delete\");"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/pages/bulk.test.tsx"],
@@ -46027,6 +46027,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/a11y-copilot.test.tsx"],
       "expect": "\\(fail\\).*while closed, the dialog"
+    },
+    {
+      "id": "W-981/entry-path-root",
+      "requirement": "W-981",
+      "description": "Entries of a collection without a URL pattern export at /<slug> again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "  const path = (pattern || `/${entry.collection}/{slug}`)",
+          "replace": "  const path = (pattern || \"/{slug}\")"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*W-977: collections with a canvas field"
+    },
+    {
+      "id": "W-982/in-use-unsaid",
+      "requirement": "W-982",
+      "description": "The delete confirm no longer says which theme parts pages still use.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ThemePartList.tsx",
+          "search": "        usage={(ids) => partsInUse(fetcher, ids)}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/pages/bulk.test.tsx"],
+      "expect": "\\(fail\\).*W-980: deleting a synced section"
     }
   ]
 }

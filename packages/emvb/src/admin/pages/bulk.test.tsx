@@ -4,6 +4,7 @@ import { cleanup, mount, settle } from "../../../test/dom/mount.ts";
 import type { Fetcher } from "../api.ts";
 import { contentSnippet } from "../search.ts";
 import { PageList } from "./PageList.tsx";
+import { ThemePartList } from "./ThemePartList.tsx";
 
 afterEach(cleanup);
 
@@ -143,4 +144,70 @@ test("W-978: delete moves the ticked pages to the trash after a confirm, and Res
   await click('[data-emvb-bulk="restore"]');
   expect(await waitForStatus("Restored")).toContain("Restored 3 pages.");
   expect(calls.filter((c) => c.endsWith("/restore"))).toHaveLength(3);
+});
+
+test("W-980: deleting a synced section that a page uses says where, before anything is deleted", async () => {
+  const calls: string[] = [];
+  const fetcher: Fetcher = async (path, init) => {
+    if ((init?.method ?? "GET") !== "GET") {
+      calls.push(path);
+      return Response.json({ data: {} });
+    }
+    if (path.startsWith("/_emdash/api/content/emvb_theme_parts"))
+      return Response.json({
+        data: {
+          items: [
+            {
+              id: "S1",
+              slug: "s1",
+              status: "published",
+              data: { title: "Promo band", part_type: "section", layout: layout("Promo") },
+            },
+            {
+              id: "S2",
+              slug: "s2",
+              status: "published",
+              data: { title: "Unused band", part_type: "section", layout: layout("Spare") },
+            },
+          ],
+        },
+      });
+    if (path.startsWith("/_emdash/api/content/emvb_pages"))
+      return Response.json({
+        data: {
+          items: [
+            {
+              id: "P1",
+              slug: "home",
+              status: "published",
+              data: {
+                title: "Home",
+                layout: {
+                  schemaVersion: 18,
+                  root: {
+                    id: "root0001",
+                    type: "container",
+                    props: {},
+                    children: [{ id: "ref00001", type: "part-ref", props: { partId: "S1" } }],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      });
+    return Response.json({ data: { items: [] } });
+  };
+  await mount(<ThemePartList fetcher={fetcher} />);
+  await settle();
+  await click('[data-emvb-select-row="S1"]');
+  await click('[data-emvb-select-row="S2"]');
+  await click('[data-emvb-bulk="delete"]');
+  for (let i = 0; i < 20 && !document.querySelector("[data-emvb-bulk-in-use]"); i += 1)
+    // oxlint-disable-next-line no-await-in-loop -- waits for the usage lookup
+    await settle();
+  const note = document.querySelector("[data-emvb-bulk-in-use]")?.textContent ?? "";
+  expect(note).toContain("Promo band is used on Home");
+  expect(note).not.toContain("Unused band");
+  expect(calls).toEqual([]);
 });

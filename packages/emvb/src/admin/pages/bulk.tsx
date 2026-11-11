@@ -104,6 +104,7 @@ export function BulkBar({
   onChanged,
   onExport,
   deleteNote,
+  usage,
 }: {
   fetcher: Fetcher;
   collection: string;
@@ -117,7 +118,10 @@ export function BulkBar({
   onExport?: (ids: string[]) => void;
   /** What else the delete confirm should say. */
   deleteNote?: string;
+  /** W-980: where the chosen items are still used, by id, for the delete confirm. */
+  usage?: (ids: string[]) => Promise<Map<string, string[]>>;
 }) {
+  const [inUse, setInUse] = React.useState<Map<string, string[]> | null>(null);
   const [state, setState] = React.useState<BulkState>({ kind: "idle" });
   const [confirming, setConfirming] = React.useState(false);
   const ids = [...selection.selected];
@@ -213,7 +217,12 @@ export function BulkBar({
               )
             }
             aria-disabled={busy}
-            onClick={() => !busy && setConfirming(true)}
+            onClick={() => {
+              if (busy) return;
+              setInUse(null);
+              setConfirming(true);
+              usage?.(ids).then(setInUse, () => setInUse(new Map()));
+            }}
             data-emvb-bulk="delete"
           >
             Delete
@@ -262,6 +271,17 @@ export function BulkBar({
                 : `They go to EmDash's trash and leave the site.`}{" "}
               You can restore them right after, or later from the trash.
             </Dialog.Description>
+            {inUse && inUse.size > 0 && (
+              <ul className="emvb-helper emvb-danger-text" data-emvb-bulk-in-use="">
+                {[...inUse].map(([id, where]) => (
+                  <li key={id}>
+                    {titles.get(id) ?? id} is used on {where.slice(0, 3).join(", ")}
+                    {where.length > 3 ? ` and ${where.length - 3} more` : ""}; it will show nothing
+                    there.
+                  </li>
+                ))}
+              </ul>
+            )}
             {deleteNote && <p className="emvb-helper">{deleteNote}</p>}
             <div className="emvb-dialog-actions">
               <DialogCloseButton>Cancel</DialogCloseButton>

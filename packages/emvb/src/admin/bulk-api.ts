@@ -1,4 +1,6 @@
-import { ApiError, requestJson, type Fetcher } from "./api.ts";
+import { ApiError, listAllItems, requestJson, type Fetcher } from "./api.ts";
+import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../constants.ts";
+import { titleOf, type ContentItem } from "./content-item.ts";
 import { publishEntry } from "./content-api.ts";
 
 /** What a bulk action did: the ids it changed and, for the rest, why not. */
@@ -38,3 +40,28 @@ export const trashMany = (fetcher: Fetcher, collection: string, ids: readonly st
 /** W-978: brings entries back from the trash. */
 export const restoreMany = (fetcher: Fetcher, collection: string, ids: readonly string[]) =>
   each(ids, (id) => requestJson(fetcher, path(collection, id, "/restore"), { method: "POST" }));
+
+/**
+ * W-980: which of `ids` (theme parts) published pages and parts still use, as synced sections or
+ * loop items, with the titles of where. Deleting one leaves nothing in its place there.
+ */
+export async function partsInUse(
+  fetcher: Fetcher,
+  ids: readonly string[],
+): Promise<Map<string, string[]>> {
+  const [pages, parts] = await Promise.all([
+    listAllItems<ContentItem>(fetcher, `/_emdash/api/content/${PAGES_COLLECTION}`),
+    listAllItems<ContentItem>(fetcher, `/_emdash/api/content/${THEME_PARTS_COLLECTION}`),
+  ]);
+  const used = new Map<string, string[]>();
+  for (const item of [...pages, ...parts]) {
+    if (ids.includes(item.id)) continue;
+    const layout = item.data?.["layout"];
+    const text = typeof layout === "string" ? layout : JSON.stringify(layout ?? null);
+    for (const id of ids) {
+      if (!text.includes(`"partId":${JSON.stringify(id)}`)) continue;
+      used.set(id, [...(used.get(id) ?? []), titleOf(item, "Untitled")]);
+    }
+  }
+  return used;
+}

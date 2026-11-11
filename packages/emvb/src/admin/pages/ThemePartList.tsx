@@ -8,6 +8,7 @@ import { listThemeParts, partTypeLabel } from "../theme-api.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { matchesSearch } from "../search.ts";
 import { BulkBar, SelectAll, SelectRow, useSelection } from "./bulk.tsx";
+import { partsInUse } from "../bulk-api.ts";
 import { FoundIn } from "./PageList.tsx";
 import {
   EditedTime,
@@ -180,6 +181,7 @@ export function ThemePartList({ fetcher }: { fetcher: Fetcher }) {
         nouns="theme parts"
         onChanged={list.retry}
         deleteNote="Pages that use a deleted synced section or loop item show nothing in its place until you restore it."
+        usage={(ids) => partsInUse(fetcher, ids)}
       />
       {list.state === "loading" && <ListLoading label="Loading theme parts…" />}
       {list.state === "error" && (
