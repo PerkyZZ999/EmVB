@@ -10,6 +10,7 @@ import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
 import { radioGroupKeys } from "./ChoiceGroup.tsx";
+import { InheritedStart, shadowSummary } from "./EffectsControls.tsx";
 import { NumberField, ResetButton, type NumberSpec } from "./NumberRow.tsx";
 import { HintedSwitch } from "./HintedSwitch.tsx";
 
@@ -146,11 +147,14 @@ const ICON_SHADOW_FIELDS: ReadonlyArray<[key: "x" | "y" | "blur", label: string,
 
 export function IconShadowControl({
   value,
+  inherited,
   design,
   onChange,
   onDesignChange,
 }: {
   value: IconShadow | undefined;
+  /** W-969: the drop shadow this device or state inherits, shown and used by Edit here. */
+  inherited?: IconShadow | undefined;
   design: DesignSystem;
   onChange: (next: IconShadow | undefined) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
@@ -166,6 +170,7 @@ export function IconShadowControl({
       className="emvb-style-row"
       data-emvb-style="iconShadow"
       data-set={value ? "true" : undefined}
+      data-inherited={!value && inherited ? "true" : undefined}
     >
       <div className="emvb-field-group emvb-shadow">
         <span className="emvb-var-field-label">Drop shadow</span>
@@ -191,6 +196,12 @@ export function IconShadowControl({
               ))}
             </div>
           </>
+        ) : inherited ? (
+          <InheritedStart
+            summary={shadowSummary(inherited)}
+            label="drop shadow"
+            onEdit={() => onChange({ ...inherited })}
+          />
         ) : (
           <Button
             type="button"

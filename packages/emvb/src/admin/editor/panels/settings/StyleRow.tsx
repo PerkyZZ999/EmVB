@@ -539,6 +539,7 @@ export function StyleRow({
     return (
       <IconShadowControl
         value={style?.iconShadow}
+        inherited={inherited?.iconShadow}
         design={design}
         onChange={(iconShadow) => onPatch({ iconShadow })}
         onDesignChange={onDesignChange}
@@ -559,6 +560,7 @@ export function StyleRow({
     return (
       <ShadowControl
         value={style?.boxShadow}
+        inherited={inherited?.boxShadow}
         design={design}
         onChange={(boxShadow) => onPatch({ boxShadow })}
         onDesignChange={onDesignChange}
@@ -571,6 +573,7 @@ export function StyleRow({
     return (
       <EntranceControl
         value={style?.entrance}
+        inherited={inherited?.entrance}
         onChange={(entrance) => onPatch({ entrance })}
         reset={reset}
       />
@@ -601,6 +604,7 @@ export function StyleRow({
     return (
       <TransitionControl
         value={style?.transition}
+        inherited={inherited?.transition}
         onChange={(transition) => onPatch({ transition })}
         reset={reset}
       />

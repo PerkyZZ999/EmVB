@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Button, Select } from "@cloudflare/kumo";
-import { PlusIcon } from "@phosphor-icons/react";
+import { PencilSimpleIcon, PlusIcon } from "@phosphor-icons/react";
 import type { DesignSystem, FlatStyleProps } from "../../../../core/index.ts";
 import { BUTTON, FIELD } from "../../../ui.ts";
 import { ColorControl } from "../ColorControl.tsx";
@@ -12,6 +12,57 @@ type Transition = NonNullable<FlatStyleProps["transition"]>;
 type Entrance = NonNullable<FlatStyleProps["entrance"]>;
 
 /** DESIGN.md: Add shadow starts at 0 4 12 0, 18 % black. */
+/**
+ * W-969: a composite style (shadow, entrance, transition, drop shadow) that is unset here but
+ * inherited (from a wider device, the Normal state, a class or the Site styles default) says what
+ * it inherits, and Edit here starts from that value instead of the default.
+ */
+export function InheritedStart({
+  summary,
+  label,
+  onEdit,
+}: {
+  summary: string;
+  label: string;
+  onEdit: () => void;
+}) {
+  return (
+    <>
+      <p className="emvb-helper" data-emvb-inherited-note="">
+        Inherited: {summary}.
+      </p>
+      <Button
+        type="button"
+        variant="secondary"
+        className={`${BUTTON} emvb-add-shadow`}
+        icon={<PencilSimpleIcon aria-hidden="true" />}
+        onClick={onEdit}
+        aria-label={`Edit ${label} here`}
+      >
+        Edit here
+      </Button>
+    </>
+  );
+}
+
+const hexOf = (color: unknown) =>
+  typeof color === "string"
+    ? color
+    : color && typeof color === "object" && "var" in color
+      ? `variable ${String((color as { var: unknown }).var)}`
+      : "";
+
+export const shadowSummary = (s: {
+  x: number;
+  y: number;
+  blur: number;
+  spread?: number;
+  color?: unknown;
+}) =>
+  [`${s.x} ${s.y} ${s.blur}${s.spread !== undefined ? ` ${s.spread}` : ""} px`, hexOf(s.color)]
+    .filter(Boolean)
+    .join(", ");
+
 const NEW_SHADOW: Shadow = { x: 0, y: 4, blur: 12, spread: 0, color: "#0000002e" };
 
 const OFFSET: NumberSpec = { min: -1000, max: 1000, example: "4" };
@@ -27,12 +78,14 @@ const SHADOW_FIELDS: ReadonlyArray<
 /** One box shadow: Add shadow when unset; X, Y, blur, spread, colour and inset when set. */
 export function ShadowControl({
   value,
+  inherited,
   design,
   onChange,
   onDesignChange,
   reset,
 }: {
   value: Shadow | undefined;
+  inherited?: Shadow | undefined;
   design: DesignSystem;
   onChange: (next: Shadow | undefined) => void;
   onDesignChange: (design: DesignSystem) => Promise<void>;
@@ -49,6 +102,7 @@ export function ShadowControl({
       className="emvb-style-row"
       data-emvb-style="boxShadow"
       data-set={value ? "true" : undefined}
+      data-inherited={!value && inherited ? "true" : undefined}
     >
       <div className="emvb-field-group emvb-shadow">
         <span className="emvb-var-field-label">Box shadow</span>
@@ -88,6 +142,12 @@ export function ShadowControl({
               ))}
             </div>
           </>
+        ) : inherited ? (
+          <InheritedStart
+            summary={shadowSummary(inherited)}
+            label="box shadow"
+            onEdit={() => onChange({ ...inherited })}
+          />
         ) : (
           <Button
             type="button"
@@ -335,10 +395,12 @@ const ENTRANCE_TYPES: { value: Entrance["type"]; label: string }[] = [
 /** Plays once on load (W-101, Normal only). Add entrance starts at Fade, 400 ms. */
 export function EntranceControl({
   value,
+  inherited,
   onChange,
   reset,
 }: {
   value: Entrance | undefined;
+  inherited?: Entrance | undefined;
   onChange: (next: Entrance | undefined) => void;
   reset: React.ReactNode;
 }) {
@@ -347,6 +409,7 @@ export function EntranceControl({
       className="emvb-style-row"
       data-emvb-style="entrance"
       data-set={value ? "true" : undefined}
+      data-inherited={!value && inherited ? "true" : undefined}
     >
       <div className="emvb-field-group emvb-transition">
         <span className="emvb-var-field-label">Entrance</span>
@@ -385,6 +448,12 @@ export function EntranceControl({
               }
             />
           </>
+        ) : inherited ? (
+          <InheritedStart
+            summary={`${ENTRANCE_TYPES.find((t) => t.value === inherited.type)?.label ?? inherited.type}, ${inherited.duration} ms`}
+            label="entrance"
+            onEdit={() => onChange({ ...inherited })}
+          />
         ) : (
           <Button
             type="button"
@@ -405,10 +474,12 @@ export function EntranceControl({
 /** One transition (W-089, Normal only): Add transition when unset; duration, delay, easing, property when set. */
 export function TransitionControl({
   value,
+  inherited,
   onChange,
   reset,
 }: {
   value: Transition | undefined;
+  inherited?: Transition | undefined;
   onChange: (next: Transition | undefined) => void;
   reset: React.ReactNode;
 }) {
@@ -423,6 +494,7 @@ export function TransitionControl({
       className="emvb-style-row"
       data-emvb-style="transition"
       data-set={value ? "true" : undefined}
+      data-inherited={!value && inherited ? "true" : undefined}
     >
       <div className="emvb-field-group emvb-transition">
         <span className="emvb-var-field-label">Transition</span>
@@ -457,6 +529,12 @@ export function TransitionControl({
               onChange={(property) => patch({ property })}
             />
           </>
+        ) : inherited ? (
+          <InheritedStart
+            summary={`${inherited.duration} ms, ${EASINGS.find((e) => e.value === inherited.easing)?.label ?? inherited.easing}`}
+            label="transition"
+            onEdit={() => onChange({ ...inherited })}
+          />
         ) : (
           <Button
             type="button"

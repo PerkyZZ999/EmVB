@@ -45455,6 +45455,78 @@
         "packages/emvb/src/admin/editor/panels/settings/viewport-units.test.tsx"
       ],
       "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-969/edit-starts-default",
+      "requirement": "W-969",
+      "description": "Edit here on an inherited shadow starts from the default.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "            label=\"box shadow\"\n            onEdit={() => onChange({ ...inherited })}",
+          "replace": "            label=\"box shadow\"\n            onEdit={() => onChange(NEW_SHADOW)}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/inherited-composites.test.tsx"
+      ],
+      "expect": "\\(fail\\).*inherited boxShadow"
+    },
+    {
+      "id": "W-969/entrance-not-passed",
+      "requirement": "W-969",
+      "description": "The entrance row doesn't get its inherited value.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx",
+          "search": "        inherited={inherited?.entrance}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/inherited-composites.test.tsx"
+      ],
+      "expect": "\\(fail\\).*inherited entrance"
+    },
+    {
+      "id": "W-969/icon-shadow-hidden",
+      "requirement": "W-969",
+      "description": "An inherited drop shadow reads as unset.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx",
+          "search": "        ) : inherited ? (\n          <InheritedStart\n            summary={shadowSummary(inherited)}\n            label=\"drop shadow\"",
+          "replace": "        ) : false ? (\n          <InheritedStart\n            summary={shadowSummary(inherited)}\n            label=\"drop shadow\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/inherited-composites.test.tsx"
+      ],
+      "expect": "\\(fail\\).*inherited iconShadow"
+    },
+    {
+      "id": "W-969/note-over-own",
+      "requirement": "W-969",
+      "description": "The inherited note shows over a value set here.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx",
+          "search": "        {value ? (\n          <>\n            <ColorControl\n              label=\"Shadow color\"",
+          "replace": "        {value && !inherited ? (\n          <>\n            <ColorControl\n              label=\"Shadow color\""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/inherited-composites.test.tsx"
+      ],
+      "expect": "\\(fail\\).*set here hides"
     }
   ]
 }
