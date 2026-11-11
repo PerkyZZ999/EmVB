@@ -92,27 +92,36 @@ test("an author can't change a host layout and sees it read-only (D-061)", async
   request,
 }, info) => {
   const { id } = await createHostPage(request, { title: "Author view", canvas: layout("Kept") });
-  changed = info.project.name;
-  setDevRole(changed, ROLES.author);
-  const wipe = await api(request, "PUT", `/_emdash/api/content/pages/${id}`, {
-    data: { canvas: null },
-  });
-  expect(wipe.status).toBeGreaterThanOrEqual(400);
-  await page.goto(`/_emdash/admin/content/pages/${id}`);
-  const widget = page.locator('[data-emvb-widget="canvas"]');
-  await expect(widget).toContainText("Only editors and administrators can change this layout.");
-  await expect(widget.getByRole("button", { name: "Edit with EmVB" })).toHaveCount(0);
-  for (const scheme of ["light", "dark"] as const) {
-    await page.emulateMedia({ colorScheme: scheme });
-    await widget.scrollIntoViewIfNeeded();
-    await widget.screenshot({
-      path: `${SHOTS}/canvas-card-author-${info.project.name}-${scheme}.png`,
-    });
+  const platform = info.project.name;
+  changed = platform;
+  setDevRole(platform, ROLES.author);
+  try {
+    await authorChecks();
+  } finally {
+    // Other files on this platform run as the admin; never leave the author role behind.
+    setDevRole(platform, ROLES.admin);
+    changed = null;
   }
-  await page.emulateMedia({ colorScheme: "light" });
-  setDevRole(changed, ROLES.admin);
-  changed = null;
   expect(await storedCanvas(request, id)).toEqual(layout("Kept"));
+
+  async function authorChecks() {
+    const wipe = await api(request, "PUT", `/_emdash/api/content/pages/${id}`, {
+      data: { canvas: null },
+    });
+    expect(wipe.status).toBeGreaterThanOrEqual(400);
+    await page.goto(`/_emdash/admin/content/pages/${id}`);
+    const widget = page.locator('[data-emvb-widget="canvas"]');
+    await expect(widget).toContainText("Only editors and administrators can change this layout.");
+    await expect(widget.getByRole("button", { name: "Edit with EmVB" })).toHaveCount(0);
+    for (const scheme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: scheme });
+      await widget.scrollIntoViewIfNeeded();
+      await widget.screenshot({
+        path: `${SHOTS}/canvas-card-author-${info.project.name}-${scheme}.png`,
+      });
+    }
+    await page.emulateMedia({ colorScheme: "light" });
+  }
 });
 
 test("an admin edits the field in EmVB, applies, saves the entry, and the page renders it", async ({
