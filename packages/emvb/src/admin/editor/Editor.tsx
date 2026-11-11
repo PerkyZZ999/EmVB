@@ -58,7 +58,7 @@ import {
   type LoadedDesign,
 } from "./useEditorData.ts";
 import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
-import { usePartTemplates } from "./section-templates.ts";
+import { partDraftLabel, usePartTemplates } from "./section-templates.ts";
 import { useCollectionPreviews, withPartLayouts } from "./collection-previews.ts";
 import { useEditorPresence } from "./presence.ts";
 import { useCoDesign } from "./useCoDesign.ts";
@@ -264,7 +264,10 @@ function EditorApp({
     if (chrome.leaving) exit();
   }, [chrome.leaving, exit]);
 
-  const { sectionTemplates, loopTemplates } = usePartTemplates(state.page.layout, fetcher);
+  const { sectionTemplates, loopTemplates, partStatus } = usePartTemplates(
+    state.page.layout,
+    fetcher,
+  );
   const partDynamic = React.useMemo(
     () => ({ sectionTemplates, loopTemplates }),
     [sectionTemplates, loopTemplates],
@@ -371,7 +374,12 @@ function EditorApp({
     selectedId: selectedNode ? state.selectedId : null,
     labelFor: (id) => {
       const node = layoutIndex?.byId.get(id);
-      return node ? (node.editorLabel ?? ELEMENT_NAMES[node.type] ?? node.type) : "Element";
+      if (!node) return "Element";
+      const name = node.editorLabel ?? ELEMENT_NAMES[node.type] ?? node.type;
+      // W-970: a synced section or Loop item drawn from unpublished changes says so on the canvas.
+      const partId = (node.props as { partId?: unknown } | undefined)?.partId;
+      const status = typeof partId === "string" ? partStatus?.[partId] : undefined;
+      return status && status !== "published" ? `${name} · ${partDraftLabel(status)}` : name;
     },
     canDelete,
     canMove,

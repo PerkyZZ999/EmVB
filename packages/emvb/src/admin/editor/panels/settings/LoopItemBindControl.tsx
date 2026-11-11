@@ -56,6 +56,7 @@ export function LoopItemBindControl({
 
   if (parts && parts.length > 0) {
     const known = parts.some((part) => part.id === value);
+    const chosen = parts.find((part) => part.id === value);
     const selectValue = value === "" ? NONE : known ? value : MANUAL;
     return (
       <div {...{ [`data-emvb-${marker}-bind`]: "list" }}>
@@ -98,6 +99,11 @@ export function LoopItemBindControl({
           Optional published {label} theme part. Leave blank to use nested elements.
           {adminLinks && <a href="/_emdash/admin/plugins/emvb/theme"> Open Theme Builder</a>}
         </p>
+        {chosen && chosen.status !== "published" && (
+          <p className="emvb-helper" role="note" data-emvb-part-draft={chosen.status}>
+            {draftNote(chosen.status)}
+          </p>
+        )}
       </div>
     );
   }
@@ -127,4 +133,16 @@ export function LoopItemBindControl({
 function labelFor(part: ThemePartSummary): string {
   const status = part.status === "published" ? "" : ` (${part.status})`;
   return `${part.title}${status}`;
+}
+
+/**
+ * W-970: the canvas draws a part's latest saved version, but visitors only see what is published.
+ * Say so when the chosen part has unpublished changes, or was never published.
+ */
+export function draftNote(status: string): string {
+  if (status === "changed")
+    return "The canvas shows this part's unpublished changes. Visitors see the published version until you publish it in Theme Builder.";
+  if (status === "scheduled")
+    return "The canvas shows this part as scheduled. Visitors see it once it goes live.";
+  return "This part isn't published yet. The canvas shows its draft, but visitors see nothing here until you publish it in Theme Builder.";
 }

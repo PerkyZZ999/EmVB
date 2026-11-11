@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Unpublished synced sections are marked (W-970).** The canvas draws a synced section or Loop item from its latest saved version. When that isn't what visitors see, its canvas label says "unpublished changes" or "not published", and its settings explain that visitors see the published version (or nothing) until it is published in Theme Builder.
 - **Inherited shadows, entrance and transition (W-969).** On Laptop, Tablet, Mobile or a state, an unset Box shadow, Drop shadow, Entrance or Transition that the element inherits (from a wider device, Normal, a class or the Site styles default) now says what it inherits, and **Edit here** starts from that value instead of the default.
 - **Post title in a Loop starts as H2 (W-968).** A Post title added inside a Loop (or in a loop item part) is a level 2 heading, so a grid of cards no longer has one H1 per post. A level you choose is kept.
 

@@ -6,7 +6,7 @@ import {
   type ThemePartType,
 } from "../../core/index.ts";
 import type { Fetcher } from "../api.ts";
-import { themePartLayout } from "../theme-api.ts";
+import { listThemeParts, themePartLayout } from "../theme-api.ts";
 
 const MAX_DEPTH = 8;
 
@@ -48,6 +48,8 @@ export async function loadSectionTemplates(
 export interface PartTemplates {
   sectionTemplates: Record<string, Layout>;
   loopTemplates: Record<string, Layout>;
+  /** W-970: each loaded part's publish state ("published", "changed", "draft"…). */
+  partStatus?: Record<string, string>;
 }
 
 const MAX_PARTS = 64;
@@ -124,9 +126,21 @@ export function usePartTemplates(layout: Layout | null, fetcher: Fetcher): PartT
       return;
     }
     let cancelled = false;
-    void loadPartTemplates(fetcher, current).then(
-      (acc) => {
-        if (!cancelled) setTemplates(acc);
+    void Promise.all([
+      loadPartTemplates(fetcher, current),
+      // W-970: the canvas draws parts' latest saved version; the list says which are published.
+      listThemeParts(fetcher).catch(() => []),
+    ]).then(
+      ([acc, parts]) => {
+        if (cancelled) return;
+        const loaded = new Set([
+          ...Object.keys(acc.sectionTemplates),
+          ...Object.keys(acc.loopTemplates),
+        ]);
+        const partStatus = Object.fromEntries(
+          parts.filter((part) => loaded.has(part.id)).map((part) => [part.id, part.status]),
+        );
+        setTemplates({ ...acc, partStatus });
       },
       () => {
         if (!cancelled) setTemplates(NO_PARTS);
@@ -139,3 +153,11 @@ export function usePartTemplates(layout: Layout | null, fetcher: Fetcher): PartT
 
   return templates;
 }
+
+/** W-970: the canvas label's suffix for a part visitors don't see as drawn. */
+export const partDraftLabel = (status: string): string =>
+  status === "changed"
+    ? "unpublished changes"
+    : status === "scheduled"
+      ? "scheduled"
+      : "not published";
