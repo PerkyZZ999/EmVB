@@ -1,0 +1,29 @@
+---
+/**
+ * The EmVB wordmark (W-966): the serif "Em" in the page's ink, the outlined "VB" in its accent,
+ * so it follows light and dark. Source: docs/brand/logo-light.svg; the VB line keeps 1.4 px at
+ * any size (non-scaling stroke), so it reads in the header.
+ */
+import svg from "../brand/wordmark.svg?raw";
+
+interface Props {
+  height?: number;
+}
+
+const { height = 32 } = Astro.props;
+---
+
+<span class="wordmark" style={`--wordmark-h: ${height}px`} set:html={svg} />
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .wordmark :global(svg) {
+    display: block;
+    height: var(--wordmark-h);
+    width: auto;
+  }
+</style>

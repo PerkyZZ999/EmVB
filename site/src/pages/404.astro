@@ -1,5 +1,5 @@
 ---
-import Logo from "../components/Logo.astro";
+import Wordmark from "../components/Wordmark.astro";
 import Base from "../layouts/Base.astro";
 
 // Cloudflare Pages serves this file, with a 404 status, for any path the site doesn't have.
@@ -13,7 +13,7 @@ import Base from "../layouts/Base.astro";
   noindex
 >
   <main id="content" class="wrap missing" data-site-404="">
-    <a class="brand" href="/" aria-label="EmVB home"><Logo size={32} /></a>
+    <a class="brand" href="/" aria-label="EmVB home"><Wordmark height={36} /></a>
     <h1>Page not found</h1>
     <p>There's nothing at this address on emvb.dev. The link may be old or mistyped.</p>
     <p class="actions">

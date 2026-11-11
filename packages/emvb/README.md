@@ -1,3 +1,12 @@
+<p align="center">
+  <a href="https://emvb.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/docs/brand/logo-dark.svg">
+      <img src="https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/docs/brand/logo-light.svg" alt="EmVB" width="320">
+    </picture>
+  </a>
+</p>
+
 # @perkyzz/emvb
 
 [![Website](https://img.shields.io/badge/website-emvb.dev-1f6feb)](https://emvb.dev) [![npm](https://img.shields.io/npm/v/@perkyzz/emvb)](https://www.npmjs.com/package/@perkyzz/emvb)

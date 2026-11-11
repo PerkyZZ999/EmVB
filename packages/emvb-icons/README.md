@@ -1,3 +1,12 @@
+<p align="center">
+  <a href="https://emvb.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/docs/brand/logo-dark.svg">
+      <img src="https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/docs/brand/logo-light.svg" alt="EmVB" width="320">
+    </picture>
+  </a>
+</p>
+
 # @perkyzz/emvb-icons
 
 The icon sets for the [EmVB](https://emvb.dev) editor's Icon library: Lucide, Font Awesome Free, Tabler and Remix Icon, as compact JSON. `@perkyzz/emvb` depends on an exact version of this package, so `npm i @perkyzz/emvb` installs it; you don't install or import it yourself.

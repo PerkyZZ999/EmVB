@@ -81,32 +81,9 @@ function download(filename: string, text: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/** The EmVB icon (W-966), the site's favicon. */
 function Logo() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <rect x="1.5" y="1.5" width="29" height="29" rx="7" fill="currentColor" />
-      <rect x="7" y="8" width="18" height="4" rx="1" fill="var(--color-kumo-base, #fff)" />
-      <rect
-        x="7"
-        y="15"
-        width="11"
-        height="9"
-        rx="1"
-        fill="var(--color-kumo-base, #fff)"
-        opacity="0.55"
-      />
-      <rect
-        x="20"
-        y="15"
-        width="5"
-        height="9"
-        rx="1"
-        fill="none"
-        stroke="#0a5ce6"
-        strokeWidth="1.6"
-      />
-    </svg>
-  );
+  return <img className="pg-logo" src="/favicon.svg" width={22} height={22} alt="" />;
 }
 
 function SmallScreenGate({

@@ -1,3 +1,12 @@
+<p align="center">
+  <a href="https://emvb.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/docs/brand/logo-dark.svg">
+      <img src="https://raw.githubusercontent.com/PerkyZZ999/EmVB/main/docs/brand/logo-light.svg" alt="EmVB" width="320">
+    </picture>
+  </a>
+</p>
+
 # @perkyzz/emvb-mcp
 
 A local (stdio) MCP server that lets AI agents build [EmVB](https://emvb.dev) pages on your

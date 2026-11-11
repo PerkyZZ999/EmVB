@@ -45317,6 +45317,20 @@
       ],
       "command": ["bun", "test", "test/site/nav.test.ts"],
       "expect": "\\(fail\\).*no inner scrollbar"
+    },
+    {
+      "id": "W-966/old-header-mark",
+      "requirement": "W-966",
+      "description": "The header goes back to the old mark and text.",
+      "edits": [
+        {
+          "file": "site/src/components/SiteHeader.astro",
+          "search": "      <Wordmark />\n",
+          "replace": "      <span>EmVB</span>\n"
+        }
+      ],
+      "command": ["bun", "test", "test/site/brand.test.ts"],
+      "expect": "\\(fail\\).*header shows the wordmark"
     }
   ]
 }
