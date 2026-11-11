@@ -18409,8 +18409,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/design/classes.ts",
-          "search": "  const cleared = withLocalStyle(node, local.hiddenOn ? { hiddenOn: local.hiddenOn } : {});",
-          "replace": "  const cleared = node;"
+          "search": "  const cleared = withLocalStyle(node, {\n",
+          "replace": "  const cleared = withLocalStyle(node, {\n    ...localStyleOf(node),\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/design/classes.test.ts"],
@@ -46055,6 +46055,20 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/pages/bulk.test.tsx"],
       "expect": "\\(fail\\).*W-980: deleting a synced section"
+    },
+    {
+      "id": "W-983/wide-hide-dropped",
+      "requirement": "W-983",
+      "description": "Save as class drops the element's Wide screen hide.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/design/classes.ts",
+          "search": "    ...(wideHidden !== undefined ? { style: { wide: { hidden: wideHidden } } } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/design/wide-hide.test.ts"],
+      "expect": "\\(fail\\).*wide values move to the class"
     }
   ]
 }

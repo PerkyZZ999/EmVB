@@ -1,4 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import { emptyDesign } from "../schema/design.ts";
+import type { LayoutNode } from "../schema/layout.ts";
+import { hasLocalStyles, localStylesToClass } from "./classes.ts";
 import { hiddenOnDevice, hiddenOnEveryDevice, toggleHiddenOn } from "./devices.ts";
 
 describe("Wide screen hide (W-959)", () => {
@@ -44,5 +47,34 @@ describe("Wide screen hide (W-959)", () => {
       false,
     );
     expect(hiddenOnEveryDevice({ hiddenOn: [...all], wideHidden: false })).toBe(false);
+  });
+});
+
+describe("Save as class keeps the Wide screen hide on the element (W-983)", () => {
+  test("wide values move to the class; wide.hidden stays with hiddenOn", () => {
+    const node = {
+      id: "head0001",
+      type: "heading",
+      props: { text: "Hi", level: 2 },
+      hiddenOn: ["desktop"],
+      style: { color: "#111111", wide: { color: "#222222", hidden: false } },
+    } as LayoutNode;
+    const moved = localStylesToClass(emptyDesign(), node, "Hero");
+    expect(moved?.design.classes?.[0]?.style).toEqual({
+      color: "#111111",
+      wide: { color: "#222222" },
+    });
+    expect(moved?.node.hiddenOn).toEqual(["desktop"]);
+    expect(moved?.node.style).toEqual({ wide: { hidden: false } });
+  });
+
+  test("an element whose only own style is the Wide screen hide has nothing to save", () => {
+    const node = {
+      id: "head0001",
+      type: "heading",
+      props: { text: "Hi", level: 2 },
+      style: { wide: { hidden: true } },
+    } as LayoutNode;
+    expect(hasLocalStyles(node)).toBe(false);
   });
 });

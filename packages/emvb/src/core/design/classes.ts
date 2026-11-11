@@ -2,7 +2,7 @@ import { clipText } from "../limits.ts";
 import type { DesignSystem } from "../schema/design.ts";
 import type { Layout, LayoutNode } from "../schema/layout.ts";
 import { patchNestedStyle } from "../migrate/v18.ts";
-import type { StylePatch, StyleProps } from "../schema/style.ts";
+import type { OwnStyle, StylePatch, StyleProps } from "../schema/style.ts";
 import { localStyleOf, withLocalStyle } from "../local-style.ts";
 import { forEachNode, slugify, updateNode } from "../tree-ops.ts";
 
@@ -82,10 +82,26 @@ const filled = (style: object | undefined) =>
   !!style && Object.values(style).some((value) => value !== undefined);
 
 /** Whether an element has local styles: base, hover/focus/active or tablet/mobile (W-134). */
+/**
+ * W-983: an own style split into what moves to a class and the Wide screen hide
+ * (`style.wide.hidden`), which is visibility and stays on the element like `hiddenOn`.
+ */
+function splitWideHide(style: OwnStyle | undefined): {
+  style: OwnStyle | undefined;
+  hidden: boolean | undefined;
+} {
+  const hidden = style?.wide?.hidden;
+  if (!style || hidden === undefined) return { style, hidden: undefined };
+  const { wide, ...rest } = style;
+  const { hidden: _hidden, ...values } = wide ?? {};
+  const next: OwnStyle = Object.keys(values).length > 0 ? { ...rest, wide: values } : rest;
+  return { style: Object.keys(next).length > 0 ? next : undefined, hidden };
+}
+
 export function hasLocalStyles(node: LayoutNode): boolean {
   const local = localStyleOf(node);
   return (
-    filled(local.style) ||
+    filled(splitWideHide(local.style).style) ||
     Object.values(local.states ?? {}).some(filled) ||
     Object.values(local.devices ?? {}).some(filled)
   );
@@ -120,7 +136,7 @@ export function localToClassRefusal(design: DesignSystem, node: LayoutNode): str
 /**
  * Moves an element's local, state and tablet/mobile styles into a new class, applied last on the
  * element and added last in Site styles, so it wins over the element's other classes as the local
- * styles did (W-134). Visibility (`hiddenOn`) stays on the element. Null when it can't run. Pure.
+ * styles did (W-134). Visibility (`hiddenOn`, and W-983 the Wide screen hide) stays on the element. Null when it can't run. Pure.
  */
 export function localStylesToClass(
   design: DesignSystem,
@@ -135,14 +151,18 @@ export function localStylesToClass(
   let id = base;
   for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
   const local = localStyleOf(node);
+  const { style: moved, hidden: wideHidden } = splitWideHide(local.style);
   const cls = {
     id,
     name: trimmed,
-    style: (local.style ?? {}) as StyleProps,
+    style: (moved ?? {}) as StyleProps,
     ...(local.states ? { states: local.states } : {}),
     ...(local.devices ? { devices: local.devices } : {}),
   };
-  const cleared = withLocalStyle(node, local.hiddenOn ? { hiddenOn: local.hiddenOn } : {});
+  const cleared = withLocalStyle(node, {
+    ...(local.hiddenOn ? { hiddenOn: local.hiddenOn } : {}),
+    ...(wideHidden !== undefined ? { style: { wide: { hidden: wideHidden } } } : {}),
+  });
   return {
     design: { ...design, classes: [...classes, cls] },
     node: { ...cleared, classes: addClassId(node.classes ?? [], id) },
