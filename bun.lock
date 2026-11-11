@@ -53,6 +53,7 @@
         "emvb-ext-hello": "workspace:*",
         "react": "19.3.1",
         "react-dom": "19.3.1",
+        "sharp": "0.35.5",
       },
     },
     "examples/emvb-ext-hello": {

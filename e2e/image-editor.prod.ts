@@ -653,7 +653,13 @@ test("save a copy (W-485): a new WebP in the library, the original untouched, pu
   const img = visitor.locator("img[alt='A garden in autumn']");
   await expect(img).toBeVisible();
   expect(await img.getAttribute("src")).toContain(String(props["src"]));
-  expect(await img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBe(640);
+  // W-962: wait for it to load (Astro's image service may serve it resized through /_image, so
+  // check that it decodes with the copy's 4:3 shape rather than one exact width).
+  await expect
+    .poll(() => img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0))
+    .toBe(true);
+  const [w, h] = await img.evaluate((el: HTMLImageElement) => [el.naturalWidth, el.naturalHeight]);
+  expect((w ?? 0) / (h ?? 1)).toBeCloseTo(640 / 480, 2);
   await visitor.close();
 
   // Re-opening (after a reload: publishing moved the page on) loads the original and puts the
