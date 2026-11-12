@@ -18,6 +18,10 @@ A security patch from an audit of 1.1.0. Update if editors, contributors or agen
 - **Co-editing on EmDash 1.5 can't slip a contributor's layout past the role check (W-991, S-04).** EmDash 1.5's real-time co-editing saves a room's changes as one person and lists everyone who took part in `editedBy`; EmVB only checked the person saving. It now checks each of them too: a save with a contributor (or anyone EmVB can't look up) in the room is refused for EmVB pages and theme parts, and leaves an `emvb:canvas` field as stored. EmVB asks for EmDash's `users:read` capability for this (no change to your site). On EmDash 1.4, which has no co-editing, nothing changes.
 - **Uploading a crafted SVG can't hold the server (W-988, S-07).** The cleanup of uploaded SVGs (prolog, comments, doctype, metadata, titles, editor elements) used lazy patterns that rescanned to the end of the file for every unclosed opener: one 256 KB `icons/upload` request took up to 9 s of CPU. It now reads the file left to right, so a crafted file costs milliseconds, and a file where a tag, comment or declaration never closes is refused as not well formed. Well-formed files are cleaned exactly as before (41,675 SVG files compared byte for byte).
 
+### Fixed
+
+- **Installs on EmDash 1.5 (W-993).** EmDash 1.5.0 pins Kumo 2.15.0, and EmVB's Kumo peer named only 1.4's 2.6.0, so `npm install @perkyzz/emvb` stopped with a dependency conflict on a new 1.5 site (1.1.0 too). The peer is now `2.6.0 || 2.15.0`: the exact Kumo of each supported EmDash, so there is still one copy. Checked on a fresh EmDash 1.5.0 site: it installs, type-checks and runs the editor and public pages.
+
 ## [1.1.0] - 2026-11-11
 
 A minor release: everything is additive and 1.0 pages open unchanged. Leave EmVB whenever you like (export pages and your own entries as HTML or rich text), a Wide screen device, search by content and bulk actions in the lists, measured performance on large pages, and the fixes below.

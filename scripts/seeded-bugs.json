@@ -2859,7 +2859,7 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "\"peerDependencies\": {\n    \"@cloudflare/kumo\": \"2.6.0\",",
+          "search": "\"peerDependencies\": {\n    \"@cloudflare/kumo\": \"2.6.0 || 2.15.0\",",
           "replace": "\"peerDependencies\": {\n    \"@cloudflare/kumo\": \"^2.6.0\","
         }
       ],
@@ -46649,6 +46649,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
       "expect": "\\(fail\\).*the plugin asks EmDash for users:read"
+    },
+    {
+      "id": "W-993/kumo-peer-1.4-only",
+      "requirement": "W-993",
+      "description": "The Kumo peer names only EmDash 1.4's pin again, so npm refuses EmVB on a stock EmDash 1.5 site.",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "\"@cloudflare/kumo\": \"2.6.0 || 2.15.0\",",
+          "replace": "\"@cloudflare/kumo\": \"2.6.0\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/deps/emdash-pins.test.ts"],
+      "expect": "\\(fail\\).*one per supported EmDash"
+    },
+    {
+      "id": "W-993/kumo-peer-range",
+      "requirement": "W-993",
+      "description": "The Kumo peer becomes a range that lets npm pick a Kumo no EmDash pins.",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "\"@cloudflare/kumo\": \"2.6.0 || 2.15.0\",",
+          "replace": "\"@cloudflare/kumo\": \">=2.6.0 <3\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/deps/emdash-pins.test.ts"],
+      "expect": "\\(fail\\).*exact versions only"
     }
   ]
 }
