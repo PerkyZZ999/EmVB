@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Security
+
+- **`describe_page` no longer connects where the request's Host header points (W-995, S-05).** Its required-form-field warnings read the forms plugin's definitions over HTTP from an address built from the request, following redirects, so on a host that forwards any Host header an editor token could make the site send requests to a server of the caller's choosing. It now uses only the site URL from EmDash's settings and follows no redirect; without a site URL set, `describe_page` skips those warnings. The AI agents page shows the MCP endpoint on the same configured address (or on the address you opened the admin with).
+
 ## [1.1.1] - 2026-11-12
 
 A security patch from an audit of 1.1.0. Update if editors, contributors or agents you don't fully trust can reach your site, and before anyone runs `emvb-mcp watch`. No schema change: pages and designs saved by 1.1.0 open and save unchanged. It installs on EmDash 1.4 with no change to your site and works with EmDash 1.5. One behaviour change: a request written in the editor's Agent tab now goes only to its author's own agent.

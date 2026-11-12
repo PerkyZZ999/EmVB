@@ -1,3 +1,4 @@
+import { trustedOrigin } from "./site-origin.ts";
 import {
   PluginRouteError,
   type ContentPolicyDecision,
@@ -67,6 +68,14 @@ export async function appendAgentLog(
 
 export const agentLog = (ctx: PluginContext) => ctx.storage["agentlog"] as unknown as LogQuery;
 
+const MCP_PATH = "/_emdash/api/mcp";
+
+/** EmDash's MCP endpoint on the configured site origin, or its path when none is set. */
+export function endpointFor(siteUrl: unknown): string {
+  const origin = trustedOrigin(siteUrl);
+  return origin ? new URL(MCP_PATH, origin).toString() : MCP_PATH;
+}
+
 /** Agents tab: the settings, the MCP endpoint and the last 50 agent changes. Admins only. */
 export const agentsRoute: PluginRoute = {
   permission: "plugins:manage",
@@ -76,7 +85,9 @@ export const agentsRoute: PluginRoute = {
     return {
       settings,
       revision,
-      endpoint: new URL("/_emdash/api/mcp", ctx.request.url).toString(),
+      // S-05 (W-995): from the configured site URL, not the request's Host; the path alone when
+      // none is set, and the admin page resolves it against its own address.
+      endpoint: endpointFor(ctx.site?.url),
       // W-932: EmDash has run one of this version's EmVB tools, so it approved this tool list.
       toolsServed: await servedCurrent(ctx.kv as never, toolListFingerprint(TOOLS)),
       activity: log.items.map((item) => Object.assign({ id: item.id }, item.data as object)),

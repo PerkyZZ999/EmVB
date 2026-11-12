@@ -55,6 +55,8 @@ export async function createTestRuntime({
     sandboxEnabled: false,
     sandboxedPluginEntries: [],
     createSandboxRunner: null,
+    // S-05 (W-995): the site URL from configuration; EmVB never builds URLs from the Host header.
+    siteInfo: { url: "http://site.test" },
   } as unknown as Parameters<typeof EmDashRuntime.create>[0]);
   const schema = new SchemaRegistry(runtime.db);
   // W-497: `setUp: false` is a site before "Set up EmVB" (no pages collection).

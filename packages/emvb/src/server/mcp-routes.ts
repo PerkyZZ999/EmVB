@@ -12,6 +12,7 @@ import { callerKey, hitRateLimit, type RateStore } from "../mcp/rate-limit.ts";
 import { runTool, type ToolDef } from "../mcp/tools.ts";
 import { publishDesignDraft, readDesign, writeDesignDraft } from "./design-routes.ts";
 import { appendAgentLog, readAgentSettings } from "./agent-settings.ts";
+import { trustedOrigin } from "./site-origin.ts";
 
 type Item = {
   id: string;
@@ -76,18 +77,23 @@ const FORMS_DEFINITION = "/_emdash/api/plugins/emdash-forms/definition";
 /**
  * W-511: form fields for describe_page's required-field warnings, from the forms plugin's public
  * definition route on this site. A plugin route has no in-process handle on another plugin, so
- * this is a same-origin request with a short timeout; a form it can't read is left out.
+ * this is a request with a short timeout; a form it can't read is left out. S-05 (W-995): the
+ * request goes only to the configured site origin and follows no redirect; without a configured
+ * origin there are no warnings.
  */
-async function loadFormFieldsFromSite(
-  origin: string,
+export async function loadFormFieldsFromSite(
+  origin: string | undefined,
   formIds: readonly string[],
+  fetcher: typeof fetch = fetch,
 ): Promise<Map<string, RequiredFieldInfo[]>> {
   const found = new Map<string, RequiredFieldInfo[]>();
+  if (!origin) return found;
   await Promise.all(
     formIds.slice(0, 20).map(async (id) => {
       try {
-        const response = await fetch(new URL(FORMS_DEFINITION, origin), {
+        const response = await fetcher(new URL(FORMS_DEFINITION, origin), {
           method: "POST",
+          redirect: "error",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ id }),
           signal: AbortSignal.timeout(3000),
@@ -148,7 +154,7 @@ function pluginPorts(ctx: RouteContext<unknown>): EmvbPorts {
         collection: PAGES_COLLECTION,
         id,
       }),
-    formFields: (formIds) => loadFormFieldsFromSite(ctx.request.url, formIds),
+    formFields: (formIds) => loadFormFieldsFromSite(trustedOrigin(ctx.site?.url), formIds),
     async rateLimit(cls) {
       await hitRateLimit(
         ctx.kv as unknown as RateStore,

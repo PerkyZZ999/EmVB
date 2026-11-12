@@ -46695,6 +46695,76 @@
         "packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
       ],
       "expect": "\\(fail\\).*the field list keeps the same options"
+    },
+    {
+      "id": "W-995/forms-from-request-host",
+      "requirement": "W-995",
+      "description": "describe_page reads form definitions from the request's Host again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/mcp-routes.ts",
+          "search": "loadFormFieldsFromSite(trustedOrigin(ctx.site?.url), formIds)",
+          "replace": "loadFormFieldsFromSite(new URL(ctx.request.url).origin, formIds)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-live-round2.test.ts"],
+      "expect": "\\(fail\\).*a required field missing from the form"
+    },
+    {
+      "id": "W-995/redirect-followed",
+      "requirement": "W-995",
+      "description": "The form definition request follows redirects again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/mcp-routes.ts",
+          "search": "          redirect: \"error\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/site-origin.test.ts"],
+      "expect": "\\(fail\\).*follow no redirect"
+    },
+    {
+      "id": "W-995/any-scheme-origin",
+      "requirement": "W-995",
+      "description": "A site URL with any scheme counts as the site's origin.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/site-origin.ts",
+          "search": "    return url.protocol === \"https:\" || url.protocol === \"http:\" ? url.origin : undefined;",
+          "replace": "    return url.origin;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/site-origin.test.ts"],
+      "expect": "\\(fail\\).*uses the configured origin, or only its path"
+    },
+    {
+      "id": "W-995/endpoint-from-request-host",
+      "requirement": "W-995",
+      "description": "The Agents tab shows an endpoint built from the request's Host again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/agent-settings.ts",
+          "search": "      endpoint: endpointFor(ctx.site?.url),",
+          "replace": "      endpoint: new URL(\"/_emdash/api/mcp\", ctx.request.url).toString(),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/site-origin.test.ts"],
+      "expect": "\\(fail\\).*Agents tab shows the configured site's endpoint"
+    },
+    {
+      "id": "W-995/endpoint-path-unresolved",
+      "requirement": "W-995",
+      "description": "An endpoint path from the server is shown as a bare path.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/agents-api.ts",
+          "search": "  return { ...state, endpoint: new URL(state.endpoint, globalThis.location?.href).toString() };",
+          "replace": "  return state;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/agent-setup.test.tsx"],
+      "expect": "\\(fail\\).*W-995: an endpoint path from the server"
     }
   ]
 }

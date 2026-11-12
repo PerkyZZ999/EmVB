@@ -385,6 +385,8 @@ describe("describe_page warns about required form fields (W-511)", () => {
     expect(
       asked.some((line) => line.includes("/emdash-forms/definition") && line.includes('"contact"')),
     ).toBe(true);
+    // S-05 (W-995): the configured site URL, not the request's host (http://localhost here).
+    expect(asked.every((line) => line.startsWith("http://site.test/"))).toBe(true);
     expect(messages.some((m) => m.includes("“Email” is required but hidden on mobile"))).toBe(true);
     expect(d.warnings?.find((w) => w.message.includes("“Phone”"))?.nodeId).toBe(formId);
     expect(messages.some((m) => m.includes("Note"))).toBe(false);

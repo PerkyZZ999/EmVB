@@ -25,7 +25,11 @@ export type AgentsState = {
 
 const base = `/_emdash/api/plugins/${PLUGIN_ID}`;
 
-export const loadAgents = (fetcher: Fetcher) => requestJson<AgentsState>(fetcher, `${base}/agents`);
+/** S-05 (W-995): the server may send the endpoint's path alone; it is resolved against this page. */
+export async function loadAgents(fetcher: Fetcher): Promise<AgentsState> {
+  const state = await requestJson<AgentsState>(fetcher, `${base}/agents`);
+  return { ...state, endpoint: new URL(state.endpoint, globalThis.location?.href).toString() };
+}
 
 /** Saves the agent settings; the returned revision is the one the next save must send. */
 export async function saveAgentSettings(

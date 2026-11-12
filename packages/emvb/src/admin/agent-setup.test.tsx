@@ -2,7 +2,7 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import { mount, settle, unmount } from "../../test/dom/mount.ts";
 import type { Fetcher } from "./api.ts";
-import { checkAgentSetup } from "./agents-api.ts";
+import { checkAgentSetup, loadAgents } from "./agents-api.ts";
 import { AgentSetupCard } from "./pages/AgentSetup.tsx";
 
 afterEach(unmount);
@@ -82,4 +82,13 @@ describe("agent setup check (W-932)", () => {
     await settle();
     expect(fetcher.calls.length).toBeGreaterThan(before);
   });
+});
+
+test("W-995: an endpoint path from the server is shown as a full URL on this admin's address", async () => {
+  const state = { settings: {}, revision: null, activity: [] };
+  const fetcher = (async () =>
+    Response.json({ data: { ...state, endpoint: "/_emdash/api/mcp" } })) as Fetcher;
+  const loaded = await loadAgents(fetcher);
+  expect(loaded.endpoint).toBe(new URL("/_emdash/api/mcp", location.href).toString());
+  expect(loaded.endpoint.startsWith("http")).toBe(true);
 });
