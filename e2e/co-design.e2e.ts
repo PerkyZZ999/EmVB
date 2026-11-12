@@ -190,6 +190,9 @@ test("W-934: emvb-mcp watch hands an editor request to the local agent, whose an
       connection.site,
       "--agent",
       "bun e2e/support/scripted-agent.ts",
+      // The scripted agent calls the site itself with EMVB_TOKEN; since W-990 watch keeps the
+      // token from the agent unless asked.
+      "--pass-token",
     ],
     { env: { ...process.env, EMVB_TOKEN: connection.token }, encoding: "utf8", timeout: 60_000 },
   );

@@ -8,7 +8,8 @@ const brief = await new Response(Bun.stdin.stream()).text();
 const site = process.env["EMVB_SITE"] ?? "";
 const pageId = process.env["EMVB_PAGE_ID"] ?? "";
 const requestId = process.env["EMVB_REQUEST_ID"] ?? "";
-const asked = /<request>\n([\s\S]*?)\n<\/request>/.exec(brief)?.[1] ?? "";
+// W-990: the request sits between tags named with a random nonce.
+const asked = /<(request-[0-9a-f]+)>\n([\s\S]*?)\n<\/\1>/.exec(brief)?.[2] ?? "";
 const remote = httpRemote(
   new URL("/_emdash/api/mcp", site),
   process.env["EMVB_TOKEN"] ?? "",
