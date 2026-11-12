@@ -11411,7 +11411,7 @@
     {
       "id": "W-091/e2e-a11y-image-alt-dropped",
       "requirement": "W-041",
-      "description": "the renderer drops the alt attribute from images",
+      "description": "the renderer drops the alt attribute from images. Since W-987 a refused attribute empties its element instead of failing the page, so the image is left out and the axe scan sees nothing; the image tests catch it.",
       "edits": [
         {
           "file": "packages/emvb/src/core/render/vnode.ts",
@@ -11419,16 +11419,8 @@
           "replace": "|src|srcset|sizes|width|"
         }
       ],
-      "command": [
-        "bun",
-        "run",
-        "e2e",
-        "e2e/a11y.e2e.ts",
-        "--project=node",
-        "-g",
-        "no serious axe violations"
-      ],
-      "expect": "✘.*\\[node\\].*no serious axe violations"
+      "command": ["bun", "test", "./packages/emvb/src/core"],
+      "expect": "\\(fail\\).*renders img with alt, dimensions, and lazy loading"
     },
     {
       "id": "W-091/e2e-parity-justify-lost",
