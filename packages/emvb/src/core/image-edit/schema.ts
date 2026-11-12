@@ -1,3 +1,4 @@
+import { boundedArray } from "../bounded-array.ts";
 import { z } from "zod";
 
 /**
@@ -50,7 +51,7 @@ const Blur = z
   .partial();
 
 const CurvePoint = z.tuple([Unit, Unit]);
-const CurveChannel = z.array(CurvePoint).min(2).max(IMAGE_EDIT_CURVE_POINTS_MAX).nullable();
+const CurveChannel = boundedArray(CurvePoint, IMAGE_EDIT_CURVE_POINTS_MAX, 2).nullable();
 const Curves = z.tuple([CurveChannel, CurveChannel, CurveChannel, CurveChannel]);
 
 /** Corner targets may sit a little outside the frame (perspective pulls). */

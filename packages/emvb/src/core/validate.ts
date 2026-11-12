@@ -1,3 +1,4 @@
+import { capIssues } from "./issue-cap.ts";
 import type { z } from "zod";
 import { restoreExtras, splitDesignExtras, splitLayoutExtras } from "./contract.ts";
 import { MAX_DEPTH, MAX_DESIGN_BYTES, MAX_LAYOUT_BYTES, MAX_NODES } from "./limits.ts";
@@ -147,7 +148,7 @@ export function validateDesign(
   const extras = splitDesignExtras(upgraded.doc);
   if (extras.issues.length > 0) return { ok: false, issues: extras.issues };
   const parsed = DesignSystem.safeParse(upgraded.doc);
-  if (!parsed.success) return { ok: false, issues: parsed.error.issues.map(toIssue) };
+  if (!parsed.success) return { ok: false, issues: capIssues(parsed.error.issues, toIssue, "") };
   return {
     ok: true,
     design: restoreExtras(parsed.data, extras.extras),
@@ -176,7 +177,7 @@ export function validateLayout(
   if (!parsed.success) {
     return {
       ok: false,
-      issues: parsed.error.issues.map((issue: z.core.$ZodIssue) => toIssue(issue)),
+      issues: capIssues(parsed.error.issues, toIssue, ""),
     };
   }
   const layout = parsed.data as Layout;

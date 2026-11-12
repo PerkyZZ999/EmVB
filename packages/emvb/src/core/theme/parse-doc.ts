@@ -1,3 +1,4 @@
+import { capIssues } from "../issue-cap.ts";
 import type { z } from "zod";
 
 export type DocIssue = { path: string; code: string; message: string };
@@ -27,10 +28,14 @@ export function parseDoc<T>(
   if (parsed.success) return { ok: true, doc: parsed.data };
   return {
     ok: false,
-    issues: parsed.error.issues.map((issue) => ({
-      path: issue.path.length ? `${root}.${issue.path.join(".")}` : root,
-      code: issue.code,
-      message: issue.message,
-    })),
+    issues: capIssues(
+      parsed.error.issues,
+      (issue) => ({
+        path: issue.path.length ? `${root}.${issue.path.join(".")}` : root,
+        code: issue.code,
+        message: issue.message,
+      }),
+      root,
+    ),
   };
 }

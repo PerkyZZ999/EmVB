@@ -42200,8 +42200,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/bounded-array.ts",
-          "search": "if (value.length > max || value.length < min) {",
-          "replace": "if (value.length < min) {"
+          "search": "if (Array.isArray(value) && value.length > max) {",
+          "replace": "if (Array.isArray(value) && value.length < min) {"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/bounded-array.test.ts"],
@@ -46335,6 +46335,90 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/sanitize/svg-upload.test.ts"],
       "expect": "\\(fail\\).*a style with many paint declarations in one tag is read once"
+    },
+    {
+      "id": "W-989/node-issues-uncapped",
+      "requirement": "W-989",
+      "description": "An element re-emits every issue of its own, one per bad item.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "issues.slice(0, MAX_NODE_ISSUES)",
+          "replace": "issues"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate-bounds.test.ts"],
+      "expect": "\\(fail\\).*an element reports ten issues, then how many more"
+    },
+    {
+      "id": "W-989/children-never-stop",
+      "requirement": "W-989",
+      "description": "Every child is parsed and reports its issues, however many came before.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "if (reported >= MAX_CHILD_ISSUES) {",
+          "replace": "if (reported < 0) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate-bounds.test.ts"],
+      "expect": "\\(fail\\).*children stop being read once they have reported enough"
+    },
+    {
+      "id": "W-989/hidden-on-unbounded",
+      "requirement": "W-989",
+      "description": "hiddenOn parses every item before it checks its length again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/style.ts",
+          "search": "export const HiddenOn = boundedArray(z.enum(DEVICES), 4);",
+          "replace": "export const HiddenOn = z.array(z.enum(DEVICES)).max(4);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate-bounds.test.ts"],
+      "expect": "\\(fail\\).*250,000 hiddenOn items"
+    },
+    {
+      "id": "W-989/colors-unbounded",
+      "requirement": "W-989",
+      "description": "Design colours parse every item before their length is checked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "colors: boundedArray(ColorVariable, 200)",
+          "replace": "colors: z.array(ColorVariable).max(200)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate-bounds.test.ts"],
+      "expect": "\\(fail\\).*an oversized design array is one issue about its length"
+    },
+    {
+      "id": "W-989/issues-uncapped",
+      "requirement": "W-989",
+      "description": "A validation returns every issue instead of 49 and a count.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/issue-cap.ts",
+          "search": "  if (issues.length <= MAX_REPORTED_ISSUES) return issues.map(map);",
+          "replace": "  return issues.map(map);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate-bounds.test.ts"],
+      "expect": "\\(fail\\).*a document reports 49 issues, then how many more"
+    },
+    {
+      "id": "W-989/depth-copies-arrays",
+      "requirement": "W-989",
+      "description": "The unknown-key depth check copies a long array item by item again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "Array.isArray(v) ? v : Object.values(v)",
+          "replace": "Object.values(v)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/validate-bounds.test.ts"],
+      "expect": "\\(fail\\).*an unknown key holding a long array"
     }
   ]
 }

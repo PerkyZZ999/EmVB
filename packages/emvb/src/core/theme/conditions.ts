@@ -1,3 +1,4 @@
+import { boundedArray } from "../bounded-array.ts";
 import { z } from "zod";
 import { parseDoc } from "./parse-doc.ts";
 import { type ContentThemePartType, type ThemePartType } from "./part-types.ts";
@@ -17,7 +18,7 @@ const ConditionRuleSchema = z.strictObject({
 
 const ConditionsDocSchema = z.strictObject({
   schemaVersion: z.literal(CONDITIONS_SCHEMA_VERSION),
-  rules: z.array(ConditionRuleSchema).max(MAX_CONDITION_RULES),
+  rules: boundedArray(ConditionRuleSchema, MAX_CONDITION_RULES),
 });
 
 export type ConditionRule = z.infer<typeof ConditionRuleSchema>;

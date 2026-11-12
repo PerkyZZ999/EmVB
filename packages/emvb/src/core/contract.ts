@@ -52,7 +52,10 @@ function depthOf(value: unknown, limit: number): number {
     if (typeof v !== "object" || v === null) continue;
     max = Math.max(max, depth);
     if (max > limit) return max;
-    for (const child of Object.values(v)) stack.push({ value: child, depth: depth + 1 });
+    // S-03: only objects go on the stack; a long array of numbers held one entry per item.
+    for (const child of Array.isArray(v) ? v : Object.values(v))
+      if (typeof child === "object" && child !== null)
+        stack.push({ value: child, depth: depth + 1 });
   }
   return max;
 }

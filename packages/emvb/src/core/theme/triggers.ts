@@ -1,3 +1,4 @@
+import { boundedArray } from "../bounded-array.ts";
 import { z } from "zod";
 import { parseDoc } from "./parse-doc.ts";
 import { POPUP_DEVICES, TRIGGER_LIMITS } from "./popup-rules.ts";
@@ -46,14 +47,14 @@ const DeviceSchema = z.enum(POPUP_DEVICES);
  */
 const AdvancedRulesSchema = z.strictObject({
   showTimes: z.number().int().min(1).max(MAX_SHOW_TIMES).nullable().optional(),
-  devices: z.array(DeviceSchema).max(3).nullable().optional(),
+  devices: boundedArray(DeviceSchema, 3).nullable().optional(),
 });
 
 export type PopupAdvancedRules = z.infer<typeof AdvancedRulesSchema>;
 
 const TriggersDocSchema = z.strictObject({
   schemaVersion: z.literal(TRIGGERS_SCHEMA_VERSION),
-  open: z.array(PopupOpenTriggerSchema).min(1).max(MAX_POPUP_TRIGGERS),
+  open: boundedArray(PopupOpenTriggerSchema, MAX_POPUP_TRIGGERS, 1),
   advanced: AdvancedRulesSchema.default({}),
 });
 

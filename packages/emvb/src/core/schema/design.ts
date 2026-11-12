@@ -1,3 +1,4 @@
+import { boundedArray } from "../bounded-array.ts";
 import { z } from "zod";
 import { HEX_COLOR } from "../css-keywords.ts";
 import { DeviceStyles, HiddenOn, OwnStyle, StyleProps, StyleStates } from "./style.ts";
@@ -75,12 +76,12 @@ const StyleClass = z.strictObject({
 export const DesignSystem = z.strictObject({
   schemaVersion: z.literal(DESIGN_SCHEMA_VERSION),
   variables: z.strictObject({
-    colors: z.array(ColorVariable).max(200),
-    fonts: z.array(FontVariable).max(50).optional(),
-    fontSizes: z.array(LengthVariable).max(50).optional(),
-    spacings: z.array(LengthVariable).max(100).optional(),
+    colors: boundedArray(ColorVariable, 200),
+    fonts: boundedArray(FontVariable, 50).optional(),
+    fontSizes: boundedArray(LengthVariable, 50).optional(),
+    spacings: boundedArray(LengthVariable, 100).optional(),
   }),
-  classes: z.array(StyleClass).max(100).optional(),
+  classes: boundedArray(StyleClass, 100).optional(),
   fluidRange: FluidRange.optional(),
   /**
    * Site text direction (W-230). Unset is left to right. Rendered as `dir` on every EmVB root

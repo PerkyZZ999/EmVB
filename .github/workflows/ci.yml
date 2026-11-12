@@ -35,7 +35,8 @@ jobs:
         with:
           bun-version: 1.4.3
       # D-070 (2026-11-08): GHSA-mrhx-c7xc-m3w5 (zod <4.6.6) is ignored while EmDash 1.4 pins
-      # zod 4.5.4 (D-058). EmVB's request arrays check their length before their items
-      # (core/bounded-array.ts); layouts and designs are size-checked before zod. Revisit when
-      # EmDash moves zod.
+      # zod 4.5.4 (D-058). Every bounded array EmVB parses, in requests, layouts, designs,
+      # conditions and triggers, checks its length before its items (core/bounded-array.ts), and
+      # an element and its children cap the issues they report (W-989, S-03): the audit's
+      # proof of concept now stays under 10 MB. Remove when EmDash moves to zod 4.6.6 or later.
       - run: bun audit --audit-level=high --ignore=GHSA-mrhx-c7xc-m3w5

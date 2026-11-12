@@ -1,3 +1,4 @@
+import { boundedArray } from "../bounded-array.ts";
 import { z } from "zod";
 import {
   ALIGN_ITEMS,
@@ -552,6 +553,6 @@ export const DeviceStyles = z.strictObject({
 export type DeviceStyles = z.infer<typeof DeviceStyles>;
 
 /** Devices on which the element is `display: none`. Empty means shown everywhere. */
-export const HiddenOn = z.array(z.enum(DEVICES)).max(4);
+export const HiddenOn = boundedArray(z.enum(DEVICES), 4);
 
 export type HiddenOn = z.infer<typeof HiddenOn>;

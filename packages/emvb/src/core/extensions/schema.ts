@@ -1,3 +1,4 @@
+import { boundedArray } from "../bounded-array.ts";
 /**
  * Compile an extension's declarative prop schema into Zod, with EmVB limits on top
  * (W-927). Extensions never pass us a Zod instance — only ExtensionPropSchema.
@@ -55,7 +56,7 @@ function compileAt(schema: ExtensionPropSchema, depth: number): z.ZodType {
     }
     case "array": {
       const maxItems = Math.min(schema.maxItems ?? EXT_MAX_ARRAY, EXT_MAX_ARRAY);
-      const a = z.array(compileAt(schema.items, depth + 1)).max(maxItems);
+      const a = boundedArray(compileAt(schema.items, depth + 1), maxItems);
       return schema.default !== undefined ? a.default([...schema.default]) : a;
     }
     case "object": {

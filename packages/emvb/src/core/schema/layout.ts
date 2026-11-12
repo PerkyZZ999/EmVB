@@ -1,3 +1,4 @@
+import { boundedArray } from "../bounded-array.ts";
 import { z } from "zod";
 import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_TEXT_LENGTH } from "../limits.ts";
@@ -41,7 +42,7 @@ export const CONTRACT_VERSION = "1.0";
 export const NodeId = z
   .string()
   .regex(/^[A-Za-z0-9_-]{4,24}$/, "Ids are 4-24 letters, digits, _ or -");
-const ClassIds = z.array(z.string().regex(/^[a-z0-9-]{1,40}$/)).max(20);
+const ClassIds = boundedArray(z.string().regex(/^[a-z0-9-]{1,40}$/), 20);
 /** CSS id attribute (Advanced). Letters first; unique on the page (checked in validateLayout). */
 const HtmlId = z
   .string()
@@ -76,7 +77,7 @@ const HtmlAttribute = z.strictObject({
   value: z.string().max(200),
 });
 
-const HtmlAttributes = z.array(HtmlAttribute).max(20);
+const HtmlAttributes = boundedArray(HtmlAttribute, 20);
 
 /** Where a bound field reads its live value (W-307). */
 export const BIND_SOURCES = ["post", "site", "param"] as const;
@@ -140,14 +141,14 @@ export const Audience = z.strictObject({
     .min(1)
     .max(50)
     .optional(),
-  devices: z.array(z.enum(AUDIENCE_DEVICES)).min(1).max(3).optional(),
+  devices: boundedArray(z.enum(AUDIENCE_DEVICES), 3, 1).optional(),
   visitor: z.enum(["new", "returning"]).optional(),
   /** From hour `from` up to (not including) hour `to`, 0–24; wraps past midnight when to < from. */
   hours: z
     .strictObject({ from: z.number().int().min(0).max(23), to: z.number().int().min(0).max(24) })
     .optional(),
   /** Days of the week, 0 = Sunday. */
-  days: z.array(z.number().int().min(0).max(6)).min(1).max(7).optional(),
+  days: boundedArray(z.number().int().min(0).max(6), 7, 1).optional(),
   /** IANA time zone for hours and days, e.g. America/Toronto. Unset = UTC. */
   timeZone: z
     .string()
@@ -158,7 +159,7 @@ export const Audience = z.strictObject({
    * Visitor segments the host passes (W-329), e.g. `member`, `plan:pro`: the rule matches a
    * visitor in any of them. A letter or digit, then letters, digits, `:`, `_` or `-`, up to 64.
    */
-  segments: z.array(z.string().regex(AUDIENCE_SEGMENT, SEGMENT_HINT)).min(1).max(20).optional(),
+  segments: boundedArray(z.string().regex(AUDIENCE_SEGMENT, SEGMENT_HINT), 20, 1).optional(),
   hide: z.boolean().optional(),
 });
 export type Audience = z.infer<typeof Audience>;
@@ -218,7 +219,7 @@ const parentNode = <T extends string, P extends z.ZodType>(type: T, props: P) =>
   z.strictObject({
     ...nodeFields(type, props),
     get children(): z.ZodType<LayoutNode[]> {
-      return z.array(LayoutNode);
+      return ChildList;
     },
   });
 
@@ -240,7 +241,7 @@ export const TextMark = z.strictObject({
   newTab: z.literal(true).optional(),
 });
 export type TextMark = z.infer<typeof TextMark>;
-const TextMarks = z.array(TextMark).max(MAX_TEXT_MARKS);
+const TextMarks = boundedArray(TextMark, MAX_TEXT_MARKS);
 
 export const HeadingNode = leafNode(
   "heading",
@@ -313,7 +314,7 @@ export const ListNode = leafNode(
     marker: z.enum(LIST_MARKERS).optional(),
     /** W-952: the first number of a numbered list. */
     start: z.number().int().min(1).max(9999).optional(),
-    items: z.array(z.string().max(MAX_TEXT_LENGTH)).max(200),
+    items: boundedArray(z.string().max(MAX_TEXT_LENGTH), 200),
   }),
 );
 
@@ -445,7 +446,7 @@ export const FlexboxNode = parentNode("flexbox", z.strictObject({ ...BoxLink }))
  */
 const GRID_TRACK =
   /^(?:1fr|2fr|3fr|auto|min-content|max-content|0|(?:\d+(?:\.\d+)?)(?:px|rem|em|%|vw|vh|ch))$/;
-const GridTracks = z.array(z.string().regex(GRID_TRACK)).min(1).max(12);
+const GridTracks = boundedArray(z.string().regex(GRID_TRACK), 12, 1);
 
 export const GridNode = parentNode(
   "grid",
@@ -808,7 +809,7 @@ const UnknownNodeSchema = z.strictObject({
   props: z.record(z.string(), z.unknown()),
   ...sharedNodeFields,
   get children(): z.ZodType<LayoutNode[] | undefined> {
-    return z.array(LayoutNode).optional();
+    return ChildList.optional();
   },
 });
 
@@ -1093,6 +1094,9 @@ export type LayoutNode =
   | MenuItemNode
   | UnknownNode;
 
+/** S-03: the issues one element reports before "…and N more". */
+const MAX_NODE_ISSUES = 10;
+
 /**
  * Prefer the known-type schema when `type` is registered so path-specific Zod issues stay
  * intact; only fall through to UnknownNode for types EmVB does not implement (W-022 / R-033).
@@ -1114,7 +1118,8 @@ const LayoutNode: z.ZodType<LayoutNode> = z.lazy(() =>
       ? KnownLayoutNode.safeParse(input)
       : UnknownNodeSchema.safeParse(input);
     if (!result.success) {
-      for (const issue of result.error.issues) {
+      const issues = result.error.issues;
+      for (const issue of issues.slice(0, MAX_NODE_ISSUES)) {
         ctx.addIssue({
           code: "custom",
           path: issue.path,
@@ -1122,9 +1127,65 @@ const LayoutNode: z.ZodType<LayoutNode> = z.lazy(() =>
           params: { zodCode: issue.code },
         });
       }
+      // S-03: a node re-emits a few issues, not one per bad item, so a parent's count stays small.
+      if (issues.length > MAX_NODE_ISSUES) {
+        ctx.addIssue({
+          code: "custom",
+          path: [],
+          message: `…and ${issues.length - MAX_NODE_ISSUES} more problems in this element.`,
+          params: { zodCode: "too_many_issues" },
+        });
+      }
       return z.NEVER;
     }
     return result.data as LayoutNode;
+  }),
+);
+
+/** S-03: the issues a list of children reports before the rest of them is skipped. */
+const MAX_CHILD_ISSUES = 40;
+
+/**
+ * Children parse one at a time and stop once they have reported MAX_CHILD_ISSUES issues: a
+ * page of a thousand bad elements cost one issue list per element (180 MB on a 512 KB page).
+ */
+const ChildList: z.ZodType<LayoutNode[]> = z.lazy(() =>
+  z.array(z.unknown()).transform((items, ctx) => {
+    const nodes: LayoutNode[] = [];
+    let reported = 0;
+    for (const [index, item] of items.entries()) {
+      if (reported >= MAX_CHILD_ISSUES) {
+        ctx.addIssue({
+          code: "custom",
+          path: [index],
+          message: "…and more problems in the elements after this one.",
+          params: { zodCode: "too_many_issues" },
+        });
+        return z.NEVER;
+      }
+      const result = LayoutNode.safeParse(item);
+      if (result.success) {
+        nodes.push(result.data);
+        continue;
+      }
+      for (const issue of result.error.issues) {
+        const params =
+          "params" in issue ? (issue.params as { zodCode?: unknown } | undefined) : undefined;
+        ctx.addIssue({
+          code: "custom",
+          path: [index, ...issue.path],
+          message: issue.message,
+          params: {
+            zodCode:
+              issue.code === "custom" && typeof params?.zodCode === "string"
+                ? params.zodCode
+                : issue.code,
+          },
+        });
+        reported++;
+      }
+    }
+    return reported > 0 ? z.NEVER : nodes;
   }),
 );
 
