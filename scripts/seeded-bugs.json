@@ -417,8 +417,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/hooks.ts",
-          "search": "if (event.actor && event.actor.role < EDITOR_ROLE) {",
-          "replace": "if (event.actor && event.actor.role < 0) {"
+          "search": "if (event.actor && event.actor.role < EDITOR_ROLE) return true;",
+          "replace": "if (event.actor && event.actor.role < 0) return true;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server"],
@@ -1109,8 +1109,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/server/hooks.ts",
-          "search": "if (event.actor && event.actor.role < EDITOR_ROLE) {",
-          "replace": "if (event.actor && event.actor.role < 0) {"
+          "search": "if (event.actor && event.actor.role < EDITOR_ROLE) return true;",
+          "replace": "if (event.actor && event.actor.role < 0) return true;"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/access.e2e.ts", "--project=node", "-g", "author"],
@@ -46559,6 +46559,104 @@
       ],
       "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
       "expect": "\\(fail\\).*no EMVB_TOKEN unless --pass-token"
+    },
+    {
+      "id": "W-991/edited-by-ignored",
+      "requirement": "W-991",
+      "description": "The page and theme part gate checks the actor only, as on EmDash 1.4, so a contributor in a 1.5 room passes under an editor's name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  if (await lowerRoleSave(event, ctx)) {",
+          "replace": "  if (event.actor && event.actor.role < EDITOR_ROLE) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
+      "expect": "\\(fail\\).*an EmVB page or theme part saved with a contributor in the room is refused"
+    },
+    {
+      "id": "W-991/canvas-edited-by-ignored",
+      "requirement": "W-991",
+      "description": "The canvas field gate checks the actor only.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  const lowerRole = await lowerRoleSave(event, ctx);",
+          "replace": "  const lowerRole = event.actor !== undefined && event.actor.role < EDITOR_ROLE;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
+      "expect": "\\(fail\\).*a canvas field: a contributor in the room can't change it"
+    },
+    {
+      "id": "W-991/no-users-opens",
+      "requirement": "W-991",
+      "description": "Without users access a co-edited save passes instead of failing closed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  if (!users) return true;",
+          "replace": "  if (!users) return false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
+      "expect": "\\(fail\\).*fail closed"
+    },
+    {
+      "id": "W-991/unknown-user-passes",
+      "requirement": "W-991",
+      "description": "A user the site can't find (or a failed lookup) counts as an editor.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  return roles.some((role) => typeof role !== \"number\" || role < EDITOR_ROLE);",
+          "replace": "  return roles.some((role) => typeof role === \"number\" && role < EDITOR_ROLE);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
+      "expect": "\\(fail\\).*fail closed"
+    },
+    {
+      "id": "W-991/malformed-list-passes",
+      "requirement": "W-991",
+      "description": "An editedBy that isn't a list of ids is ignored instead of failing closed.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  if (!Array.isArray(editedBy)) return true;",
+          "replace": "  if (!Array.isArray(editedBy)) return false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
+      "expect": "\\(fail\\).*fail closed"
+    },
+    {
+      "id": "W-991/actor-looked-up",
+      "requirement": "W-991",
+      "description": "The actor is looked up again, so a save by the actor alone fails on a site without users access.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "    if (id !== event.actor?.id) others.add(id);",
+          "replace": "    others.add(id);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
+      "expect": "\\(fail\\).*only the actor in editedBy needs no lookup"
+    },
+    {
+      "id": "W-991/no-users-capability",
+      "requirement": "W-991",
+      "description": "The plugin no longer asks for users:read, so EmDash gives it no ctx.users and every co-edited save is refused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "      \"users:read\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
+      "expect": "\\(fail\\).*the plugin asks EmDash for users:read"
     }
   ]
 }

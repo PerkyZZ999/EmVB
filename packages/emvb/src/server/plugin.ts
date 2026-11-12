@@ -57,6 +57,8 @@ export function createPlugin(
       "content:publish",
       "content:revisions:read",
       "hooks.content-policy:register",
+      // W-991 (S-04): check every co-editor EmDash 1.5 lists in a save's `editedBy`.
+      "users:read",
     ],
     // W-239: uploaded SVG icons (EmDash's media library refuses SVG by default).
     storage: {

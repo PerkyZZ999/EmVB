@@ -20,6 +20,36 @@ function parseJsonField(raw: unknown): unknown {
 
 const OWNED = new Set([PAGES_COLLECTION, THEME_PARTS_COLLECTION]);
 
+/**
+ * S-04 (W-991): true when anyone behind this save is below editor. EmDash 1.5's co-editing saves
+ * a room's changes as one actor and lists every participant in `editedBy` (absent on 1.4, where
+ * only the actor counts). Each listed user is looked up once (`users:read`); one who is missing,
+ * below editor, or can't be looked up makes it a lower-role save (fail closed).
+ */
+async function lowerRoleSave(event: ContentHookEvent, ctx: PluginContext): Promise<boolean> {
+  if (event.actor && event.actor.role < EDITOR_ROLE) return true;
+  const editedBy = (event as { editedBy?: unknown }).editedBy;
+  if (editedBy === undefined || editedBy === null) return false;
+  if (!Array.isArray(editedBy)) return true;
+  const others = new Set<string>();
+  for (const id of editedBy) {
+    if (typeof id !== "string" || !id) return true;
+    if (id !== event.actor?.id) others.add(id);
+  }
+  if (others.size === 0) return false;
+  const users = ctx.users;
+  if (!users) return true;
+  const roles = await Promise.all(
+    [...others].map((id) =>
+      users.get(id).then(
+        (user) => user?.role,
+        () => undefined,
+      ),
+    ),
+  );
+  return roles.some((role) => typeof role !== "number" || role < EDITOR_ROLE);
+}
+
 type FieldValidation =
   | { ok: true; value: unknown }
   | { ok: false; issues: { code: string; message: string }[] };
@@ -64,7 +94,7 @@ export async function beforeSave(
   if (!OWNED.has(event.collection)) return;
   const pageId = event.id ?? null;
   const kind = event.collection === THEME_PARTS_COLLECTION ? "theme part" : "page";
-  if (event.actor && event.actor.role < EDITOR_ROLE) {
+  if (await lowerRoleSave(event, ctx)) {
     ctx.log.warn(`emvb: ${kind} save rejected`, { pageId, code: "role" });
     throw new ContentSaveRejectedError(`Only editors and administrators can save EmVB ${kind}s.`);
   }
@@ -157,7 +187,7 @@ async function canvasFieldsBeforeSave(
   );
   if (fields.length === 0) return;
 
-  const lowerRole = event.actor !== undefined && event.actor.role < EDITOR_ROLE;
+  const lowerRole = await lowerRoleSave(event, ctx);
   if (lowerRole) {
     const stored = event.id ? await ctx.content?.get(event.collection, event.id) : null;
     for (const slug of fields) {
