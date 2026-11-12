@@ -14,8 +14,10 @@ in **Ask your agent** and click **Send to agent**. The request waits, marked **W
 your agent reads it; its answer shows up below as a proposal and the request is marked
 **Answered**. The tab says when an agent last checked in, so you know whether one is listening.
 
-A request is at most 2,000 characters, a page holds five waiting requests, and a request is no
-longer offered to agents after a day. **Cancel** removes one.
+A request is private to you: only your own agent (one signed in with your API token) receives it,
+and the tab lists only your requests. A request is at most 2,000 characters, you can have five
+waiting on a page, and a request is no longer offered to agents after a day. **Cancel** removes
+one; an admin can also cancel anyone's.
 
 To answer requests automatically, run the bridge's watcher on your computer with your agent
 command, for example:
@@ -24,7 +26,8 @@ command, for example:
 EMVB_TOKEN=… npx -y @perkyzz/emvb-mcp watch --site https://your.site --agent "claude -p"
 ```
 
-It hands each request to the command on its standard input, never on the command line.
+It hands each request to the command on its standard input, never on the command line. Give it
+an agent limited to the EmVB tools, with no shell or file tools: see the bridge's README.
 
 ## Review a proposal
 

@@ -21,7 +21,8 @@ import { proposalSafetyRefusal } from "./proposals-safety.ts";
 const Revision = z.string().min(1).max(256);
 export const ProposalTarget = z.strictObject({
   collection: z.string().regex(/^[a-z][a-z0-9_-]{0,127}$/),
-  id: z.string().min(1).max(128),
+  // S-01: EmDash ids are ULIDs; anything else (newlines included) is refused.
+  id: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/),
 });
 const Value = z.record(z.string(), z.unknown());
 const Position = { parentId: NodeId, index: z.number().int().min(0).max(2000) };

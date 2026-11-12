@@ -11,6 +11,10 @@ import { queued } from "../mcp/queue.ts";
  * Agent tab; their own agent reads it with get_requests and answers with propose_changes. Nothing
  * here calls a model or holds a key. Requests are the person's words for their agent: they are
  * shown back as plain text and never reach a page.
+ *
+ * W-990 (S-01): a request is private to its author. Only an agent signed in as that person (its
+ * token) reads it, answers it or sees it listed; a row without an author goes to nobody. Any
+ * editor's text reached whoever ran `emvb-mcp watch` before, as if they had written it.
  */
 
 const COLLECTION = "emvb_requests";
@@ -18,12 +22,15 @@ const ID = /^[0-9a-f]{16}$/;
 /** Requests older than this are no longer offered to agents. */
 const REQUEST_TTL_MS = 24 * 3_600_000;
 const SEEN_KEY = "relay:seen";
+/** EmDash's admin role: may cancel anyone's request. */
+const ADMIN_ROLE = 50;
 
 type Target = z.infer<typeof ProposalTarget>;
 type Stored = {
   target: Target;
   prompt: string;
   createdAt: string;
+  /** The author; a row without one (written before W-990 by a signed-out call) goes to nobody. */
   userId: string | null;
   status: "open" | "answered";
   proposalId?: string;
@@ -74,6 +81,7 @@ const nextCreatedAt = (nowMs: number) => {
 };
 
 const sameTarget = (a: Target, b: Target) => a.collection === b.collection && a.id === b.id;
+const ownedBy = (s: Stored, userId: string | null) => userId !== null && s.userId === userId;
 
 /** Same per-isolate write queue pattern as proposals; `now` is injectable for tests. */
 export function requestsPort(store: Store, kv: Kv, now: () => number = Date.now): RequestsPort {
@@ -88,14 +96,14 @@ export function requestsPort(store: Store, kv: Kv, now: () => number = Date.now)
   };
   const live = (s: Stored) => now() - Date.parse(s.createdAt) < REQUEST_TTL_MS;
   return {
-    async list(target) {
+    async list(target, userId) {
       return (await all())
-        .filter((r) => sameTarget(r.stored.target, target))
+        .filter((r) => ownedBy(r.stored, userId) && sameTarget(r.stored.target, target))
         .map((r) => toRequest(r.id, r.stored));
     },
-    async open(target) {
+    async open(userId, target) {
       return (await all())
-        .filter((r) => r.stored.status === "open" && live(r.stored))
+        .filter((r) => r.stored.status === "open" && live(r.stored) && ownedBy(r.stored, userId))
         .filter((r) => !target || sameTarget(r.stored.target, target))
         .map((r) => toRequest(r.id, r.stored))
         .toSorted((a, b) => a.createdAt.localeCompare(b.createdAt));
@@ -109,9 +117,14 @@ export function requestsPort(store: Store, kv: Kv, now: () => number = Date.now)
             ok: false as const,
             reason: `Keep a request under ${MAX_REQUEST_PROMPT} characters.`,
           };
+        if (userId === null)
+          return { ok: false as const, reason: "Sign in to write a request for your agent." };
         const open = (await all()).filter(
           (r) =>
-            r.stored.status === "open" && live(r.stored) && sameTarget(r.stored.target, target),
+            r.stored.status === "open" &&
+            live(r.stored) &&
+            ownedBy(r.stored, userId) &&
+            sameTarget(r.stored.target, target),
         );
         if (open.length >= MAX_OPEN_REQUESTS_PER_PAGE)
           return {
@@ -129,12 +142,25 @@ export function requestsPort(store: Store, kv: Kv, now: () => number = Date.now)
         await store.put(id, stored);
         return { ok: true as const, request: toRequest(id, stored) };
       }),
-    cancel: (id) => queued("requests", async () => ID.test(id) && (await store.delete(id))),
-    answer: (id, target, proposalId) =>
+    cancel: (id, userId, isAdmin) =>
       queued("requests", async () => {
         if (!ID.test(id)) return false;
         const stored = read(await store.get(id));
-        if (!stored || stored.status !== "open" || !sameTarget(stored.target, target)) return false;
+        // S-01: the author or an admin; anyone else sees no such request.
+        if (!stored || !(isAdmin || ownedBy(stored, userId))) return false;
+        return store.delete(id);
+      }),
+    answer: (id, target, proposalId, userId) =>
+      queued("requests", async () => {
+        if (!ID.test(id)) return false;
+        const stored = read(await store.get(id));
+        if (
+          !stored ||
+          stored.status !== "open" ||
+          !ownedBy(stored, userId) ||
+          !sameTarget(stored.target, target)
+        )
+          return false;
         await store.put(id, {
           ...stored,
           status: "answered",
@@ -162,7 +188,10 @@ export const requestsRoute: PluginRoute<z.infer<typeof ProposalTarget>> = {
   input: ProposalTarget,
   handler: async (ctx) => {
     const port = requestsPortOf(ctx);
-    return { items: await port.list(ctx.input), agentSeenAt: await port.lastSeen() };
+    return {
+      items: await port.list(ctx.input, ctx.user?.id ?? null),
+      agentSeenAt: await port.lastSeen(),
+    };
   },
 };
 
@@ -189,7 +218,8 @@ export const requestCancelRoute: PluginRoute<z.infer<typeof IdInput>> = {
   permission: "content:edit_any",
   input: IdInput,
   handler: async (ctx) => {
-    if (!(await requestsPortOf(ctx).cancel(ctx.input.id)))
+    const isAdmin = Number(ctx.user?.role ?? 0) >= ADMIN_ROLE;
+    if (!(await requestsPortOf(ctx).cancel(ctx.input.id, ctx.user?.id ?? null, isAdmin)))
       throw new PluginRouteError("NOT_FOUND", "No such request.", 404);
     return { id: ctx.input.id };
   },

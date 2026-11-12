@@ -123,18 +123,27 @@ export type AgentRequest = {
 };
 
 export interface RequestsPort {
-  /** Every request for the page, newest first (the editor's list). */
-  list(target: Proposal["target"]): Promise<AgentRequest[]>;
-  /** Open, unexpired requests, oldest first (what an agent should answer). */
-  open(target?: Proposal["target"]): Promise<AgentRequest[]>;
+  /** The person's requests for the page, newest first (the editor's list). */
+  list(target: Proposal["target"], userId: string | null): Promise<AgentRequest[]>;
+  /**
+   * The person's open, unexpired requests, oldest first (what their agent should answer). A
+   * request is private to its author (W-990, S-01): no one else's are ever returned.
+   */
+  open(userId: string | null, target?: Proposal["target"]): Promise<AgentRequest[]>;
   create(
     target: Proposal["target"],
     prompt: string,
     userId: string | null,
   ): Promise<{ ok: true; request: AgentRequest } | { ok: false; reason: string }>;
-  cancel(id: string): Promise<boolean>;
-  /** Marks an open request for `target` answered by a proposal; false when it isn't one. */
-  answer(id: string, target: Proposal["target"], proposalId: string): Promise<boolean>;
+  /** Deletes a request of the person's own, or anyone's for an admin. */
+  cancel(id: string, userId: string | null, isAdmin: boolean): Promise<boolean>;
+  /** Marks the person's open request for `target` answered by a proposal; false otherwise. */
+  answer(
+    id: string,
+    target: Proposal["target"],
+    proposalId: string,
+    userId: string | null,
+  ): Promise<boolean>;
   /** An agent checked for requests now (the editor's "connected" status). */
   seen(): Promise<void>;
   lastSeen(): Promise<string | null>;

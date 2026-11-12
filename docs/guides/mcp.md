@@ -100,9 +100,12 @@ the token, never the token. Calls signed in without a token are counted per user
   `withdraw_proposal` removes one. A site keeps at most 100 proposals and a page at most 10 waiting for review (`REFUSED` past that).
 - **`emvb-mcp watch`** (1.0) is the reference way to answer them: it polls `get_requests` and runs
   your agent command (for example `--agent "claude -p"`) once per request, with the request on
-  stdin and never in the command line. See the bridge's README.
+  stdin and never in the command line. Run an agent limited to the EmVB tools, with no shell or
+  file tools; `watch` keeps `EMVB_TOKEN` out of its environment unless `--pass-token`. See the
+  bridge's README.
 - **Requests from the editor (prompt relay):** in the editor's **Agent** tab a person types what
-  they want and clicks **Send to agent**. Their own agent reads open requests with `get_requests`
+  they want and clicks **Send to agent**. Their own agent (signed in with their token; a request is
+  private to its author, and `get_requests` never returns anyone else's) reads open requests with `get_requests`
   (oldest first, optionally for one page) and answers with `propose_changes` plus the
   `requestId`; the request then shows **Answered** and the proposal waits for review. No model runs
   on the site and no key is stored: the agent runs wherever the person runs it (D-063). Requests

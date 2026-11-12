@@ -56,7 +56,16 @@ The request is on the command's stdin, inside a short brief that says how to ans
 and `EMVB_REQUEST_ID` are set. The request text never goes into the command line. The agent needs
 the EmVB tools itself (this bridge in its MCP config). Requests run one at a time, each once;
 an unanswered one is logged, not retried. Options: `--interval <s>` (15, 5–3600), `--timeout <s>`
-per run (600), `--once`.
+per run (600), `--once`, `--pass-token`.
+
+**Run an agent restricted to the EmVB MCP tools, with no shell or file tools.** A request is text
+a person typed on the site, and an agent that may run commands or read files would let that text
+reach them. Since 1.1.1 `watch` only ever receives requests written by the person whose token it
+uses (each request is private to its author), quotes the request between tags with a random
+name so it can't end the quote, skips a request whose ids aren't ids, and removes `EMVB_TOKEN`
+from the agent's environment (give the agent the EmVB tools through its own MCP config, or pass
+`--pass-token` if it really needs the token). With Claude Code, for example:
+`--agent "claude -p --allowedTools 'mcp__emvb__*'"`.
 
 Needs Node 20+ on the agent's computer, and on the site EmDash 1.2+ with `mcp: true`,
 `@perkyzz/emvb` 0.5.0+ (0.8.0 recommended) with **Set up EmVB** done, and agents turned on in **Pages VisualBuilder →

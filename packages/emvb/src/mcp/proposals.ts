@@ -131,7 +131,8 @@ export const ProposeChangesOutput = z.object({
 
 export async function proposeChanges(ports: EmvbPorts, input: z.infer<typeof ProposeChangesInput>) {
   if (input.requestId) {
-    const open = await requestsOf(ports).open(targetOf(input.pageId));
+    // S-01: only the caller's own request can be answered.
+    const open = await requestsOf(ports).open(ports.caller.userId, targetOf(input.pageId));
     if (!open.some((r) => r.id === input.requestId))
       throw new McpToolError(
         "NOT_FOUND",
@@ -157,7 +158,12 @@ export async function proposeChanges(ports: EmvbPorts, input: z.infer<typeof Pro
     summary: `Proposed ${changes} ${changes === 1 ? "change" : "changes"} for review`,
   });
   const answered = input.requestId
-    ? await requestsOf(ports).answer(input.requestId, targetOf(input.pageId), created.id)
+    ? await requestsOf(ports).answer(
+        input.requestId,
+        targetOf(input.pageId),
+        created.id,
+        ports.caller.userId,
+      )
     : undefined;
   return {
     proposalId: created.id,
@@ -182,11 +188,17 @@ export const GetRequestsOutput = z.object({
   ),
 });
 
-/** W-931: what people asked their agent in the editor, oldest first. Records that an agent looked. */
+/**
+ * W-931: what the caller asked their agent in the editor, oldest first; other people's requests
+ * are never returned (W-990, S-01). Records that an agent looked.
+ */
 export async function getRequests(ports: EmvbPorts, input: z.infer<typeof GetRequestsInput>) {
   const port = requestsOf(ports);
   await port.seen();
-  const open = await port.open(input.pageId ? targetOf(input.pageId) : undefined);
+  const open = await port.open(
+    ports.caller.userId,
+    input.pageId ? targetOf(input.pageId) : undefined,
+  );
   return {
     requests: open
       .filter((r) => r.target.collection === PAGES_COLLECTION)

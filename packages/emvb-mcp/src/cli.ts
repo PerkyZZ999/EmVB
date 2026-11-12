@@ -5,20 +5,26 @@ import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { BRIDGE_VERSION, createBridgeServer } from "./bridge.ts";
 import { OptionsError, parseOptions } from "./options.ts";
 import { httpRemote } from "./remote.ts";
-import { parseWatchOptions, watchOnce, WatchOptionsError, type RunAgent } from "./watch.ts";
+import {
+  agentEnv,
+  parseWatchOptions,
+  watchOnce,
+  WatchOptionsError,
+  type RunAgent,
+} from "./watch.ts";
 
 // stdout is the MCP channel; every log line goes to stderr.
 const log = (message: string) => process.stderr.write(`[emvb-mcp] ${message}\n`);
 
 /** W-934: the person's own command, through their shell; request text only on stdin and env. */
 const runAgent =
-  (command: string): RunAgent =>
+  (command: string, passToken: boolean): RunAgent =>
   (input, env, timeoutMs) =>
     new Promise((resolve) => {
       const child = spawn(command, {
         shell: true,
         stdio: ["pipe", "inherit", "inherit"],
-        env: { ...process.env, ...env },
+        env: agentEnv(process.env, env, passToken),
       });
       let timedOut = false;
       const timer = setTimeout(() => {
@@ -39,7 +45,7 @@ async function watch(argv: string[]) {
   const remote = httpRemote(options.endpoint, options.token, BRIDGE_VERSION);
   const deps = {
     remote,
-    run: runAgent(watchOptions.agent),
+    run: runAgent(watchOptions.agent, watchOptions.passToken),
     site: options.site,
     timeoutMs: watchOptions.timeoutMs,
     log,

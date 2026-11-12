@@ -42426,7 +42426,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/mcp/proposals.ts",
-          "search": "    ? await requestsOf(ports).answer(input.requestId, targetOf(input.pageId), created.id)\n",
+          "search": "    ? await requestsOf(ports).answer(\n        input.requestId,\n        targetOf(input.pageId),\n        created.id,\n        ports.caller.userId,\n      )\n",
           "replace": "    ? false\n"
         }
       ],
@@ -42622,8 +42622,8 @@
       "edits": [
         {
           "file": "packages/emvb-mcp/src/watch.ts",
-          "search": "    \"<request>\",\n    request.prompt,\n    \"</request>\",\n",
-          "replace": "    request.prompt,\n"
+          "search": "    `<${tag}>`,\n    quoted,\n    `</${tag}>`,\n",
+          "replace": "    quoted,\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
@@ -46419,6 +46419,146 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/validate-bounds.test.ts"],
       "expect": "\\(fail\\).*an unknown key holding a long array"
+    },
+    {
+      "id": "W-990/requests-not-scoped",
+      "requirement": "W-990",
+      "description": "get_requests hands every editor's open requests to whoever calls it, as before 1.1.1.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "        .filter((r) => r.stored.status === \"open\" && live(r.stored) && ownedBy(r.stored, userId))",
+          "replace": "        .filter((r) => r.stored.status === \"open\" && live(r.stored))"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*another editor's agent never receives it"
+    },
+    {
+      "id": "W-990/null-author-shared",
+      "requirement": "W-990",
+      "description": "A request with no author is shared with every signed-out caller.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "const ownedBy = (s: Stored, userId: string | null) => userId !== null && s.userId === userId;",
+          "replace": "const ownedBy = (s: Stored, userId: string | null) => s.userId === userId;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*a request without an author goes to nobody"
+    },
+    {
+      "id": "W-990/list-not-scoped",
+      "requirement": "W-990",
+      "description": "The editor's list shows every editor's requests for the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "        .filter((r) => ownedBy(r.stored, userId) && sameTarget(r.stored.target, target))",
+          "replace": "        .filter((r) => sameTarget(r.stored.target, target))"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*another editor's agent never receives it"
+    },
+    {
+      "id": "W-990/cancel-anyone",
+      "requirement": "W-990",
+      "description": "Any editor can cancel another person's request.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "        if (!stored || !(isAdmin || ownedBy(stored, userId))) return false;",
+          "replace": "        if (!stored) return false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*only the author or an admin can cancel it"
+    },
+    {
+      "id": "W-990/admin-cannot-cancel",
+      "requirement": "W-990",
+      "description": "An admin can no longer cancel another person's request.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "    const isAdmin = Number(ctx.user?.role ?? 0) >= ADMIN_ROLE;",
+          "replace": "    const isAdmin = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*only the author or an admin can cancel it"
+    },
+    {
+      "id": "W-990/target-id-any-text",
+      "requirement": "W-990",
+      "description": "A target id may hold a newline or any other text again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/proposals.ts",
+          "search": "  id: z.string().regex(/^[A-Za-z0-9_-]{1,128}$/),",
+          "replace": "  id: z.string().min(1).max(128),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/mcp-requests.test.ts"],
+      "expect": "\\(fail\\).*a page id with a newline"
+    },
+    {
+      "id": "W-990/delimiter-not-stripped",
+      "requirement": "W-990",
+      "description": "A copy of the brief's closing tag in a request ends the quote.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/watch.ts",
+          "search": "  const quoted = request.prompt.replace(new RegExp(`</?${tag}>`, \"gi\"), \"[removed]\");",
+          "replace": "  const quoted = request.prompt;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
+      "expect": "\\(fail\\).*text that closes the quote can't end it"
+    },
+    {
+      "id": "W-990/fixed-delimiter",
+      "requirement": "W-990",
+      "description": "Every brief quotes the request between the same tags, so a request can close them.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/watch.ts",
+          "search": "export function briefFor(request: Request, site: URL, nonce: string = newNonce()): string {",
+          "replace": "export function briefFor(request: Request, site: URL, nonce: string = \"0\"): string {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
+      "expect": "\\(fail\\).*text that closes the quote can't end it"
+    },
+    {
+      "id": "W-990/ids-not-checked",
+      "requirement": "W-990",
+      "description": "watch runs the agent for a request whose page id holds a newline and more text.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/watch.ts",
+          "search": "    if (!REQUEST_ID.test(request.requestId) || !PAGE_ID.test(request.pageId)) {",
+          "replace": "    if (!request.requestId) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
+      "expect": "\\(fail\\).*a request whose page id or request id isn't an id is skipped"
+    },
+    {
+      "id": "W-990/token-passed",
+      "requirement": "W-990",
+      "description": "The agent's environment keeps EMVB_TOKEN without --pass-token.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/watch.ts",
+          "search": "    if (value !== undefined && (passToken || key !== \"EMVB_TOKEN\")) env[key] = value;",
+          "replace": "    if (value !== undefined) env[key] = value;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/watch.test.ts"],
+      "expect": "\\(fail\\).*no EMVB_TOKEN unless --pass-token"
     }
   ]
 }
