@@ -222,6 +222,36 @@ describe("field-name recovery (W-720)", () => {
     expect(document.activeElement === input() && input() === before).toBe(true);
     expect(document.querySelector("[data-emvb-field-name-error]")?.textContent ?? null).toBeNull();
   });
+
+  test("W-994: the field list keeps the same options whether or not the name is a known field", async () => {
+    // Kumo 2.15's Select picks an option by its index; an option that comes and goes as the
+    // name changes made a click choose the field next to the one clicked.
+    const listed = async () => {
+      const trigger = document.querySelector<HTMLElement>('[role="combobox"][aria-label="Field"]');
+      await act(async () => {
+        trigger?.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+        trigger?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+        trigger?.click();
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      });
+      const options = [...document.querySelectorAll<HTMLElement>('[role="option"]')];
+      const out = options.map(
+        (o) => `${o.textContent}${o.getAttribute("aria-disabled") === "true" ? " (off)" : ""}`,
+      );
+      await act(async () => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+      });
+      return out;
+    };
+    await boundField("note");
+    const known = await listed();
+    await typeName("bad name");
+    const unknown = await listed();
+    expect(known.map((o) => o.replace(" (off)", ""))).toEqual(
+      unknown.map((o) => o.replace(" (off)", "")),
+    );
+    expect(known[0]).toBe("Choose a field… (off)");
+  });
 });
 
 test("UX-042: the Image switches say when to turn them on, and the switch is described by it", async () => {

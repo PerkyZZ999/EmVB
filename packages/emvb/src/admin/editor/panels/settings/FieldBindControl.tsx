@@ -120,7 +120,12 @@ export function FieldBindControl({
             return field ? fieldLabel(field) : CHOOSE;
           }}
         >
-          {!known && <Select.Option value={MANUAL}>{CHOOSE}</Select.Option>}
+          {/* W-994: always listed (disabled once a field is picked). Kumo 2.15's Select maps a
+              click to an option by its index, so an option that came and went picked the wrong
+              field. */}
+          <Select.Option value={MANUAL} disabled={known}>
+            {CHOOSE}
+          </Select.Option>
           {fields.map((field) => (
             <Select.Option key={field.name} value={field.name}>
               {fieldLabel(field)}

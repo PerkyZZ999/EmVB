@@ -21,6 +21,11 @@ A security patch from an audit of 1.1.0. Update if editors, contributors or agen
 ### Fixed
 
 - **Installs on EmDash 1.5 (W-993).** EmDash 1.5.0 pins Kumo 2.15.0, and EmVB's Kumo peer named only 1.4's 2.6.0, so `npm install @perkyzz/emvb` stopped with a dependency conflict on a new 1.5 site (1.1.0 too). The peer is now `2.6.0 || 2.15.0`: the exact Kumo of each supported EmDash, so there is still one copy. Checked on a fresh EmDash 1.5.0 site: it installs, type-checks and runs the editor and public pages.
+- **Picking a form field on EmDash 1.5 (W-994).** With EmDash 1.5's Kumo 2.15, choosing a field in a form field's **Field** list after typing a name that isn't one of the form's fields could pick the neighbouring field (the list's "Choose a field…" entry came and went, and Kumo 2.15 picks by position). The entry now stays in the list, greyed out once a field is chosen.
+
+### Known issues
+
+- On EmDash 1.5 (Kumo 2.15) some admin markup differs from 1.4 (attribute order, scroll buttons on long tab rows); it looks and works the same. EmVB's own markup snapshot tests are recorded on 1.4; 1.2 adds a 1.5 test run.
 
 ## [1.1.0] - 2026-11-11
 

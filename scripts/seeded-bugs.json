@@ -46677,6 +46677,24 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/deps/emdash-pins.test.ts"],
       "expect": "\\(fail\\).*exact versions only"
+    },
+    {
+      "id": "W-994/manual-option-comes-and-goes",
+      "requirement": "W-994",
+      "description": "The \"Choose a field…\" option is listed only while the name isn't a known field, so on Kumo 2.15 a click picks the field next to the one clicked.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/FieldBindControl.tsx",
+          "search": "          <Select.Option value={MANUAL} disabled={known}>\n            {CHOOSE}\n          </Select.Option>",
+          "replace": "          {!known && <Select.Option value={MANUAL}>{CHOOSE}</Select.Option>}"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/field-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*the field list keeps the same options"
     }
   ]
 }
