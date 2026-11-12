@@ -17617,7 +17617,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PLUGIN_VERSION = \"1.1.0\";",
+          "search": "export const PLUGIN_VERSION = \"1.1.1\";",
           "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
         }
       ],
@@ -17631,7 +17631,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/constants.ts",
-          "search": "export const PLUGIN_VERSION = \"1.1.0\";",
+          "search": "export const PLUGIN_VERSION = \"1.1.1\";",
           "replace": "export const PLUGIN_VERSION = \"0.0.0\";"
         }
       ],
@@ -29056,7 +29056,7 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "\"@perkyzz/emvb-icons\": \"1.1.0\"",
+          "search": "\"@perkyzz/emvb-icons\": \"1.1.1\"",
           "replace": "\"@perkyzz/emvb-icons\": \"0.1.1\""
         }
       ],
@@ -30484,7 +30484,7 @@
       "edits": [
         {
           "file": "packages/emvb-mcp/src/bridge.ts",
-          "search": "export const BRIDGE_VERSION = \"1.1.0\";",
+          "search": "export const BRIDGE_VERSION = \"1.1.1\";",
           "replace": "export const BRIDGE_VERSION = \"0.4.9\";"
         }
       ],
