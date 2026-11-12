@@ -375,7 +375,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/vnode.ts",
-          "search": "if (!TAGS.has(node.tag)) throw new Error(`EmVB: tag \"${node.tag}\" is not allowed`);",
+          "search": "if (!TAGS.has(node.tag)) throw new RefusedMarkup(`EmVB: tag \"${node.tag}\" is not allowed`);",
           "replace": ""
         }
       ],
@@ -1291,8 +1291,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/render/vnode.ts",
-          "search": "  if (VOID.has(node.tag)) return `<${node.tag}${attrs}>`;\n  return `<${node.tag}${attrs}>${node.children.map(serialize).join(\"\")}</${node.tag}>`;",
-          "replace": "  if (VOID.has(node.tag)) return `<${node.tag}${attrs}>`;\n  if (node.tag === \"li\") return `<${node.tag}${attrs}>${node.children.map((c) => (typeof c === \"string\" ? c : serialize(c))).join(\"\")}</${node.tag}>`;\n  return `<${node.tag}${attrs}>${node.children.map(serialize).join(\"\")}</${node.tag}>`;"
+          "search": "  if (VOID.has(node.tag)) return `<${node.tag}${attrs}>`;\n  return `<${node.tag}${attrs}>${node.children.map(inner).join(\"\")}</${node.tag}>`;",
+          "replace": "  if (VOID.has(node.tag)) return `<${node.tag}${attrs}>`;\n  if (node.tag === \"li\") return `<${node.tag}${attrs}>${node.children.map((c) => (typeof c === \"string\" ? c : inner(c))).join(\"\")}</${node.tag}>`;\n  return `<${node.tag}${attrs}>${node.children.map(inner).join(\"\")}</${node.tag}>`;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements"],
@@ -19976,8 +19976,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "stored.float,\n            surface,\n",
-          "replace": "stored.float,\n            true,\n"
+          "search": "stored.float,\n              surface,\n",
+          "replace": "stored.float,\n              true,\n"
         }
       ],
       "command": [
@@ -21402,8 +21402,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "        const { html, css } = await renderOne(\n          stored,\n          extraTemplates.get(stored.id),\n          extraBound.get(stored.id) ?? {},\n        );\n        const layout = readLayout(stored.layout);",
-          "replace": "        const { html, css } = await renderOne(stored, undefined, extraBound.get(stored.id) ?? {});\n        const layout = readLayout(stored.layout);"
+          "search": "          const { html, css } = await renderOne(\n            stored,\n            extraTemplates.get(stored.id),\n            extraBound.get(stored.id) ?? {},\n          );\n          const layout = readLayout(stored.layout);",
+          "replace": "          const { html, css } = await renderOne(stored, undefined, extraBound.get(stored.id) ?? {});\n          const layout = readLayout(stored.layout);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
@@ -21416,8 +21416,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "        const { html, css } = await renderOne(\n          stored,\n          extraTemplates.get(stored.id),\n          extraBound.get(stored.id) ?? {},\n        );\n        const popup: RenderedPopup = {",
-          "replace": "        const { html, css } = await renderOne(stored, undefined, extraBound.get(stored.id) ?? {});\n        const popup: RenderedPopup = {"
+          "search": "          const { html, css } = await renderOne(\n            stored,\n            extraTemplates.get(stored.id),\n            extraBound.get(stored.id) ?? {},\n          );\n          const popup: RenderedPopup = {",
+          "replace": "          const { html, css } = await renderOne(stored, undefined, extraBound.get(stored.id) ?? {});\n          const popup: RenderedPopup = {"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
@@ -46195,6 +46195,76 @@
       ],
       "command": ["bun", "test", "scripts/seeded-bug.test.ts"],
       "expect": "\\(fail\\).*a restored browser module matches its clean one"
+    },
+    {
+      "id": "W-987/mask-refused",
+      "requirement": "W-987",
+      "description": "The serializer refuses the SVG mask attribute the sanitizer keeps, so a page with a masked SVG fails to render.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "|clip-path|mask|method|",
+          "replace": "|clip-path|method|"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/svg-serializer.test.ts"],
+      "expect": "\\(fail\\).*every tag and attribute the SVG sanitizer allows passes"
+    },
+    {
+      "id": "W-987/soft-rethrows",
+      "requirement": "W-987",
+      "description": "Refused markup throws even in soft mode, so one bad element still fails the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "    soft.onRefused(node, error);\n    return \"\";",
+          "replace": "    throw error;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/svg-serializer.test.ts"],
+      "expect": "\\(fail\\).*with soft mode only the element holding the refused name is left out"
+    },
+    {
+      "id": "W-987/page-not-soft",
+      "requirement": "W-987",
+      "description": "renderPage empties the whole page instead of the one element the serializer refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "    isElement: (node) => elementIds.has(node),",
+          "replace": "    isElement: () => false,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/svg-serializer.test.ts"],
+      "expect": "\\(fail\\).*renders every other element and reports the refused one"
+    },
+    {
+      "id": "W-987/stored-throws",
+      "requirement": "W-987",
+      "description": "renderStored lets a render error escape, so the public page answers 500.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "    // S-02: a layout that can't render leaves the page empty instead of failing the request.\n",
+          "replace": "    throw error;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/render.test.ts"],
+      "expect": "\\(fail\\).*a layout that throws while rendering leaves the page empty"
+    },
+    {
+      "id": "W-987/part-not-skipped",
+      "requirement": "W-987",
+      "description": "A theme part that throws takes every theme part of the site down with it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    orSkip(winner?.id ?? \"\", () => renderPartOf(winner));",
+          "replace": "    renderPartOf(winner);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*a part that fails to render is left out"
     }
   ]
 }

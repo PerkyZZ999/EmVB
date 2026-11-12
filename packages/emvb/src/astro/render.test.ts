@@ -123,6 +123,24 @@ describe("rendering a stored layout (R-031, R-033)", () => {
   });
 });
 
+test("a layout that throws while rendering leaves the page empty, never a failed request (S-02)", () => {
+  const logged = spyOn(console, "error").mockImplementation(() => undefined);
+  try {
+    const raw = {
+      schemaVersion: 1,
+      get root() {
+        throw new Error("unrenderable");
+      },
+    };
+    expect(renderStored(raw, DESIGN, "01PAGE").html).toBe("");
+    expect(logged.mock.calls).toEqual([
+      ["emvb: stored layout failed to render", { pageId: "01PAGE", error: "Error" }],
+    ]);
+  } finally {
+    logged.mockRestore();
+  }
+});
+
 test("renderStored reports the site's text direction, also for an unreadable layout (W-230)", () => {
   const rtl = { ...DESIGN, direction: "rtl" as const };
   expect(renderStored(s1Page(), rtl, "01PAGE").dir).toBe("rtl");

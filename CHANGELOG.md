@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Security
+
+- **An SVG with a mask no longer takes a page down (W-987, S-02).** The SVG sanitizer kept the `mask` attribute but the HTML serializer refused it, so a saved SVG or icon with `mask="url(#…)"` made its page answer 500 (every page, when it sat in a header, footer or popup part), and `icons/upload` failed on such a file. `mask` now renders. Rendering also fails soft: markup the serializer refuses empties only the element that holds it, a stored layout that can't render gives an empty page instead of an error, and a theme part that fails is left out while the rest of the site renders. Each is logged with ids only.
+
 ## [1.1.0] - 2026-11-11
 
 A minor release: everything is additive and 1.0 pages open unchanged. Leave EmVB whenever you like (export pages and your own entries as HTML or rich text), a Wide screen device, search by content and bulk actions in the lists, measured performance on large pages, and the fixes below.

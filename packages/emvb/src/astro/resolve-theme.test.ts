@@ -173,6 +173,20 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.needsPopupsRuntime).toBe(false);
   });
 
+  test("a part that fails to render is left out and the rest of the site renders (S-02)", async () => {
+    const broken = part("HEADBAD1", "header", [heading("head0001", "Broken header")]);
+    broken.data["layout"] = {
+      schemaVersion: 1,
+      get root() {
+        throw new Error("unrenderable");
+      },
+    };
+    themeEntries = [broken, part("FOOT0001", "footer", [heading("head0002", "Footer")])];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect(resolved.header).toBeNull();
+    expect(resolved.footer?.html).toContain("Footer");
+  });
+
   test("a header part with its own header box isn't nested in a second header (W-586)", async () => {
     const own: LayoutNode = {
       id: "box00001",

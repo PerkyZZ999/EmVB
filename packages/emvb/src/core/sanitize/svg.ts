@@ -9,7 +9,7 @@ import type { VNode } from "../render/vnode.ts";
  * iframe, style elements/attrs, event handlers, and javascript:/data: urls.
  */
 
-const SVG_TAGS = new Set([
+export const SVG_TAGS: ReadonlySet<string> = new Set([
   "svg",
   "g",
   "path",
@@ -36,7 +36,7 @@ const SVG_TAGS = new Set([
   "tspan",
 ]);
 
-const ATTR_ALLOW = new Set([
+export const SVG_ATTRS: ReadonlySet<string> = new Set([
   "viewBox",
   "xmlns",
   "fill",
@@ -217,7 +217,7 @@ function parseAttrs(tag: string, raw: string): ParsedAttrs | undefined {
   let match: RegExpExecArray | null;
   while ((match = re.exec(raw))) {
     const name = match[1] ?? "";
-    if (!ATTR_ALLOW.has(name)) continue;
+    if (!SVG_ATTRS.has(name)) continue;
     const value = decodeEntities(match[2] ?? match[3] ?? "");
     if (/[<>`]|javascript:/i.test(value)) return undefined;
     const imageHref = tag === "image" && isHrefName(name);

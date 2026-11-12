@@ -75,7 +75,7 @@ export { FORMS_SUBMIT_PATH } from "./form.ts";
 
 export type RenderWarning = {
   nodeId: string;
-  code: "unknown-type" | "rejected-style" | "unknown-variable";
+  code: "unknown-type" | "rejected-style" | "unknown-variable" | "refused-markup";
   detail: string;
 };
 export type RenderResult = {
@@ -313,6 +313,8 @@ export function renderPage(
   const renderedHeadings: { id: string; text: string; tocClass?: string }[] = [];
   const emittedIds = new Set<string>();
   const tocNodes: { node: LayoutNode; vnode: VNode }[] = [];
+  // S-02: markup the serializer refuses empties its element instead of failing the whole page.
+  const elementIds = new WeakMap<VNode, string>();
   const knownVariables = new Set(design.variables.colors.map((c) => c.id));
   let backgroundVideo = false;
   /** W-952: any List drawn as numbered steps, so their rules are sent. */
@@ -739,7 +741,9 @@ export function renderPage(
     if (!vnode) return undefined;
     const src = videoOf(node);
     if (src) backgroundVideo = true;
-    return applyBackgroundVideo(applyBoxLink(node, vnode), src);
+    const out = applyBackgroundVideo(applyBoxLink(node, vnode), src);
+    elementIds.set(out, node.id);
+    return out;
   }
 
   function bindingData(dynamic: ThemeDynamicData | undefined): BindingData {
@@ -780,7 +784,15 @@ export function renderPage(
   const vnode = scope
     ? { tag: "div", attrs: { class: scopeClassName(scope) }, children: [page] }
     : page;
-  const html = serialize(vnode);
+  const html = serialize(vnode, {
+    isElement: (node) => elementIds.has(node),
+    onRefused: (element, error) =>
+      warnings.push({
+        nodeId: elementIds.get(element) ?? "(page)",
+        code: "refused-markup",
+        detail: error.message,
+      }),
+  });
   return {
     vnode,
     html,

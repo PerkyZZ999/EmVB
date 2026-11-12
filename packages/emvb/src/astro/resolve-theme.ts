@@ -441,6 +441,20 @@ export async function resolveThemeParts(
   return resolveThemePartsWith(emdashContent, astro, ctx, options);
 }
 
+/** S-02: a part that fails to render is left out, so the rest of the site still renders. */
+async function orSkip<T>(id: string, render: () => Promise<T | null>): Promise<T | null> {
+  try {
+    return await render();
+  } catch (error) {
+    // oxlint-disable-next-line no-console
+    console.error("emvb: theme part failed to render", {
+      partId: id,
+      error: error instanceof Error ? error.name : "unknown",
+    });
+    return null;
+  }
+}
+
 /** Same as `resolveThemeParts`, with a content port so tests can pass a fake (W-359). */
 export async function resolveThemePartsWith(
   port: ContentPort,
@@ -605,7 +619,9 @@ export async function resolveThemePartsWith(
 
   let pastLastPage = false;
   let archiveInfo: { title?: string; page: number; titleText?: string } | undefined;
-  const renderPart = async (
+  const renderPart = (winner: ThemePartCandidate | null): Promise<RenderedThemePart | null> =>
+    orSkip(winner?.id ?? "", () => renderPartOf(winner));
+  const renderPartOf = async (
     winner: ThemePartCandidate | null,
   ): Promise<RenderedThemePart | null> => {
     const stored = winner ? byId.get(winner.id) : undefined;
@@ -665,54 +681,58 @@ export async function resolveThemePartsWith(
 
   const popups = (
     await Promise.all(
-      popupMatches.map(async (match) => {
-        const stored = byId.get(match.id);
-        if (!stored) return null;
-        const { html, css } = await renderOne(
-          stored,
-          extraTemplates.get(stored.id),
-          extraBound.get(stored.id) ?? {},
-        );
-        const popup: RenderedPopup = {
-          id: stored.id,
-          title: stored.title,
-          html: wrapPopupMarkup(stored.id, html, stored.triggers, options.labels),
-          css,
-          triggers: stored.triggers,
-        };
-        return popup;
-      }),
+      popupMatches.map((match) =>
+        orSkip(match.id, async () => {
+          const stored = byId.get(match.id);
+          if (!stored) return null;
+          const { html, css } = await renderOne(
+            stored,
+            extraTemplates.get(stored.id),
+            extraBound.get(stored.id) ?? {},
+          );
+          const popup: RenderedPopup = {
+            id: stored.id,
+            title: stored.title,
+            html: wrapPopupMarkup(stored.id, html, stored.triggers, options.labels),
+            css,
+            triggers: stored.triggers,
+          };
+          return popup;
+        }),
+      ),
     )
   ).filter((popup): popup is RenderedPopup => popup !== null);
 
   const floats = (
     await Promise.all(
-      floatMatches.map(async (match) => {
-        const stored = byId.get(match.id);
-        if (!stored) return null;
-        const { html, css } = await renderOne(
-          stored,
-          extraTemplates.get(stored.id),
-          extraBound.get(stored.id) ?? {},
-        );
-        const layout = readLayout(stored.layout);
-        const surface = !layout || !floatHasOwnSurface(layout, design);
-        const item: RenderedFloat = {
-          id: stored.id,
-          title: stored.title,
-          html: wrapFloatMarkup(
-            stored.id,
-            stored.title,
-            html,
-            stored.float,
-            surface,
-            options.labels?.close,
-          ),
-          css,
-          settings: stored.float,
-        };
-        return item;
-      }),
+      floatMatches.map((match) =>
+        orSkip(match.id, async () => {
+          const stored = byId.get(match.id);
+          if (!stored) return null;
+          const { html, css } = await renderOne(
+            stored,
+            extraTemplates.get(stored.id),
+            extraBound.get(stored.id) ?? {},
+          );
+          const layout = readLayout(stored.layout);
+          const surface = !layout || !floatHasOwnSurface(layout, design);
+          const item: RenderedFloat = {
+            id: stored.id,
+            title: stored.title,
+            html: wrapFloatMarkup(
+              stored.id,
+              stored.title,
+              html,
+              stored.float,
+              surface,
+              options.labels?.close,
+            ),
+            css,
+            settings: stored.float,
+          };
+          return item;
+        }),
+      ),
     )
   ).filter((item): item is RenderedFloat => item !== null);
 

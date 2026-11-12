@@ -78,20 +78,58 @@ const TAGS = new Set([
 const VOID = new Set(["hr", "img", "input", "br"]);
 // iframe/video are not void — they need closing tags.
 const ATTR_NAME =
-  /^(?:class|id|href|src|srcset|sizes|alt|width|height|loading|decoding|fetchpriority|dir|lang|hreflang|role|type|checked|target|rel|aria-[a-z][a-z0-9-]*|title|allow|referrerpolicy|preload|controls|allowfullscreen|sandbox|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|stroke-dasharray|stroke-opacity|fill-opacity|opacity|transform|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|xlink:href|preserveAspectRatio|gradientUnits|gradientTransform|offset|stop-color|stop-opacity|clipPathUnits|maskUnits|maskContentUnits|patternUnits|patternContentUnits|patternTransform|markerUnits|markerWidth|markerHeight|refX|refY|orient|font-size|font-family|font-weight|text-anchor|dominant-baseline|dx|dy|clip-path|method|action|name|value|placeholder|for|tabindex|autocomplete|open|datetime|muted|loop|playsinline|autoplay|required|novalidate|minlength|maxlength|min|max|pattern|step|start|data-[a-z][a-z0-9-]*)$/;
+  /^(?:class|id|href|src|srcset|sizes|alt|width|height|loading|decoding|fetchpriority|dir|lang|hreflang|role|type|checked|target|rel|aria-[a-z][a-z0-9-]*|title|allow|referrerpolicy|preload|controls|allowfullscreen|sandbox|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|stroke-dasharray|stroke-opacity|fill-opacity|opacity|transform|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|xlink:href|preserveAspectRatio|gradientUnits|gradientTransform|offset|stop-color|stop-opacity|clipPathUnits|maskUnits|maskContentUnits|patternUnits|patternContentUnits|patternTransform|markerUnits|markerWidth|markerHeight|refX|refY|orient|font-size|font-family|font-weight|text-anchor|dominant-baseline|dx|dy|clip-path|mask|method|action|name|value|placeholder|for|tabindex|autocomplete|open|datetime|muted|loop|playsinline|autoplay|required|novalidate|minlength|maxlength|min|max|pattern|step|start|data-[a-z][a-z0-9-]*)$/;
 
 export const isAllowedTag = (tag: string) => TAGS.has(tag);
 export const isAllowedAttr = (name: string) => ATTR_NAME.test(name);
 
-/** Serializes a VNode tree. Text and attribute values are always escaped; tags and attribute names are allowlisted. */
-export function serialize(node: VNode | string): string {
+/** A tag or attribute name outside the allowlist. */
+class RefusedMarkup extends Error {}
+
+/** How `serialize` handles refused markup inside a page instead of throwing (S-02). */
+export type SoftSerialize = {
+  /** True for the root node of a layout element: refused markup empties the nearest one. */
+  isElement: (node: VNode) => boolean;
+  onRefused: (element: VNode, error: Error) => void;
+};
+
+function write(node: VNode | string, inner: (child: VNode | string) => string): string {
   if (typeof node === "string") return escapeText(node);
-  if (!TAGS.has(node.tag)) throw new Error(`EmVB: tag "${node.tag}" is not allowed`);
+  if (!TAGS.has(node.tag)) throw new RefusedMarkup(`EmVB: tag "${node.tag}" is not allowed`);
   let attrs = "";
   for (const [name, value] of Object.entries(node.attrs)) {
-    if (!ATTR_NAME.test(name)) throw new Error(`EmVB: attribute "${name}" is not allowed`);
+    if (!ATTR_NAME.test(name)) throw new RefusedMarkup(`EmVB: attribute "${name}" is not allowed`);
     attrs += ` ${name}="${escapeAttr(value)}"`;
   }
   if (VOID.has(node.tag)) return `<${node.tag}${attrs}>`;
-  return `<${node.tag}${attrs}>${node.children.map(serialize).join("")}</${node.tag}>`;
+  return `<${node.tag}${attrs}>${node.children.map(inner).join("")}</${node.tag}>`;
+}
+
+const strict = (node: VNode | string): string => write(node, strict);
+
+function softWrite(node: VNode | string, soft: SoftSerialize): string {
+  return write(node, (child) =>
+    typeof child !== "string" && soft.isElement(child)
+      ? guarded(child, soft)
+      : softWrite(child, soft),
+  );
+}
+
+function guarded(node: VNode, soft: SoftSerialize): string {
+  try {
+    return softWrite(node, soft);
+  } catch (error) {
+    if (!(error instanceof RefusedMarkup)) throw error;
+    soft.onRefused(node, error);
+    return "";
+  }
+}
+
+/**
+ * Serializes a VNode tree. Text and attribute values are always escaped; tags and attribute names
+ * are allowlisted. A refused name throws, or with `soft` empties the element that holds it.
+ */
+export function serialize(node: VNode | string, soft?: SoftSerialize): string {
+  if (!soft || typeof node === "string") return strict(node);
+  return guarded(node, soft);
 }

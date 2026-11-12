@@ -77,31 +77,48 @@ export function renderStored(
   /** The page's language, e.g. "fr-CA", for Post Dates (W-688). */
   lang?: string,
 ): RenderedPage {
-  const { layout, problem } = inspectLayout(raw);
-  if (!layout) {
-    if (raw !== null && raw !== undefined && raw !== "") {
-      // Public renders have no plugin logger. The page id and where the layout first fails
-      // (a structural path and an issue code), never layout content or issue messages (W-182).
-      // oxlint-disable-next-line no-console
-      console.error("emvb: stored layout is unreadable", { pageId, ...problem });
+  const empty: RenderedPage = {
+    html: "",
+    css: "",
+    needsFormsRuntime: false,
+    needsTabsRuntime: false,
+    needsMenuRuntime: false,
+    ...(design.direction ? { dir: design.direction } : {}),
+  };
+  let result: ReturnType<typeof renderPage>;
+  try {
+    const { layout, problem } = inspectLayout(raw);
+    if (!layout) {
+      if (raw !== null && raw !== undefined && raw !== "") {
+        // Public renders have no plugin logger. The page id and where the layout first fails
+        // (a structural path and an issue code), never layout content or issue messages (W-182).
+        // oxlint-disable-next-line no-console
+        console.error("emvb: stored layout is unreadable", { pageId, ...problem });
+      }
+      return empty;
     }
-    return {
-      html: "",
-      css: "",
-      needsFormsRuntime: false,
-      needsTabsRuntime: false,
-      needsMenuRuntime: false,
-      ...(design.direction ? { dir: design.direction } : {}),
-    };
-  }
-  const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime, baseTypes } =
-    renderPage(layout, design, {
+    result = renderPage(layout, design, {
       formDefinitions,
       dynamic,
       scope: pageId,
       ...(partIds ? { partIds } : {}),
       ...(lang ? { lang } : {}),
     });
+  } catch (error) {
+    // S-02: a layout that can't render leaves the page empty instead of failing the request.
+    // oxlint-disable-next-line no-console
+    console.error("emvb: stored layout failed to render", {
+      pageId,
+      error: error instanceof Error ? error.name : "unknown",
+    });
+    return empty;
+  }
+  const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime, baseTypes } = result;
+  for (const warning of result.warnings) {
+    if (warning.code !== "refused-markup") continue;
+    // oxlint-disable-next-line no-console
+    console.error("emvb: an element could not render", { pageId, nodeId: warning.nodeId });
+  }
   return {
     html,
     css,
