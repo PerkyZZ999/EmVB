@@ -48,7 +48,15 @@ const STYLE_VALUE =
 
 /** `style="fill:#f00;stroke:none"` → ` fill="#f00" stroke="none"`, skipping attributes already set. */
 function styleToAttrs(tag: string): string {
-  const has = (name: string) => new RegExp(`\\s${name}\\s*=`, "i").test(tag);
+  const seen = new Map<string, boolean>();
+  const has = (name: string) => {
+    let found = seen.get(name);
+    if (found === undefined) {
+      found = new RegExp(`\\s${name}\\s*=`, "i").test(tag);
+      seen.set(name, found);
+    }
+    return found;
+  };
   return tag.replace(/\sstyle\s*=\s*("([^"]*)"|'([^']*)')/i, (_match, _quoted, dq, sq) => {
     let out = "";
     for (const decl of String(dq ?? sq ?? "").split(";")) {
@@ -63,28 +71,267 @@ function styleToAttrs(tag: string): string {
   });
 }
 
-/** What design tools add around the drawing: prolog, comments, doctype, editor metadata. */
-export function tidyUploadedSvg(raw: string): string {
-  let text = raw.replace(/^\uFEFF/, "");
-  text = text.replace(/<\?[\s\S]*?\?>/g, "");
-  text = text.replace(/<!--[\s\S]*?-->/g, "");
-  text = text.replace(/<!DOCTYPE[^[>]*(?:\[[\s\S]*?\])?\s*>/gi, "");
-  text = text.replace(/<metadata\b[\s\S]*?<\/metadata\s*>/gi, "");
-  text = text.replace(/<metadata\b[^>]*\/>/gi, "");
-  // The Icon's title names it; a file's own <title>/<desc> would add a stray tooltip.
-  text = text.replace(/<(title|desc)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "");
-  // Editor elements (sodipodi:namedview, inkscape:grid, …): any prefixed element but svg/xlink.
-  text = text.replace(/<((?!svg:|xlink:)[a-z][\w.-]*:[\w.-]+)\b[^>]*\/>/gi, "");
-  text = text.replace(/<((?!svg:|xlink:)[a-z][\w.-]*:[\w.-]+)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "");
-  // Prefixed attributes and namespace declarations, except xlink:href and xml:space.
-  text = text.replace(/<[a-z][^>]*>/gi, (tag) =>
-    styleToAttrs(
-      tag.replace(
-        /\s(?!xlink:href\b|xml:space\b)[a-z][\w.-]*:[\w.-]+\s*=\s*("[^"]*"|'[^']*')/gi,
-        "",
-      ),
-    ),
-  );
+/*
+ * S-07: the tidy step scans left to right with indexOf, so a crafted file costs time in
+ * proportion to its size. Lazy regexes rescanned to the end of the file for every unclosed
+ * opener (seconds per 256 KB request). A construct that never closes means the file isn't well
+ * formed, and it's refused.
+ */
+
+const WORD = /\w/;
+const SPACE = /\s/;
+const NAME_CHAR = /[\w.-]/;
+const isWord = (c: string | undefined) => c !== undefined && WORD.test(c);
+
+/** A file that isn't well formed. */
+const MALFORMED = Symbol("malformed");
+type Pass = string | typeof MALFORMED;
+
+/** Removes every `open … close` (shortest match). */
+function removeBetween(s: string, open: string, close: string): Pass {
+  let out = "";
+  let pos = 0;
+  for (;;) {
+    const start = s.indexOf(open, pos);
+    if (start < 0) return out + s.slice(pos);
+    const end = s.indexOf(close, start + open.length);
+    if (end < 0) return MALFORMED;
+    out += s.slice(pos, start);
+    pos = end + close.length;
+  }
+}
+
+/** The end of `</name\s*>` (its `>`) at or after `from`, case-insensitively, or -1. */
+function closerEnd(s: string, lower: string, name: string, from: number): number {
+  const opener = `</${name}`;
+  for (let at = lower.indexOf(opener, from); at >= 0; at = lower.indexOf(opener, at + 1)) {
+    let k = at + opener.length;
+    while (k < s.length && SPACE.test(s.charAt(k))) k++;
+    if (s.charAt(k) === ">") return k;
+  }
+  return -1;
+}
+
+/** `<!DOCTYPE …>`, with or without an internal subset in brackets. */
+function removeDoctype(s: string): Pass {
+  const lower = s.toLowerCase();
+  let out = "";
+  let pos = 0;
+  for (;;) {
+    const start = lower.indexOf("<!doctype", pos);
+    if (start < 0) return out + s.slice(pos);
+    let k = start + 9;
+    while (k < s.length && s[k] !== "[" && s[k] !== ">") k++;
+    if (k >= s.length) return MALFORMED;
+    if (s[k] === "[") {
+      let end = -1;
+      for (let close = s.indexOf("]", k + 1); close >= 0; close = s.indexOf("]", close + 1)) {
+        let m = close + 1;
+        while (m < s.length && SPACE.test(s.charAt(m))) m++;
+        if (s[m] === ">") {
+          end = m;
+          break;
+        }
+      }
+      if (end < 0) return MALFORMED;
+      k = end;
+    }
+    out += s.slice(pos, start);
+    pos = k + 1;
+  }
+}
+
+/** The next `<name` at or after `from` that ends on a word boundary, or -1. */
+function nextOpener(s: string, lower: string, name: string, from: number): number {
+  for (let at = lower.indexOf(`<${name}`, from); at >= 0; at = lower.indexOf(`<${name}`, at + 1))
+    if (!isWord(s[at + name.length + 1])) return at;
+  return -1;
+}
+
+/** `<metadata>…</metadata>` and `<metadata/>`. */
+function removeMetadata(s: string): Pass {
+  let lower = s.toLowerCase();
+  let out = "";
+  let pos = 0;
+  for (;;) {
+    const start = nextOpener(s, lower, "metadata", pos);
+    if (start < 0) break;
+    const end = closerEnd(s, lower, "metadata", start + 9);
+    if (end < 0) break;
+    out += s.slice(pos, start);
+    pos = end + 1;
+  }
+  const paired = out + s.slice(pos);
+  lower = paired.toLowerCase();
+  out = "";
+  pos = 0;
+  for (let from = 0; ;) {
+    const start = nextOpener(paired, lower, "metadata", from);
+    if (start < 0) return out + paired.slice(pos);
+    const gt = paired.indexOf(">", start + 9);
+    if (gt < 0 || paired[gt - 1] !== "/" || gt - 1 < start + 9) return MALFORMED;
+    out += paired.slice(pos, start);
+    pos = gt + 1;
+    from = pos;
+  }
+}
+
+/** `<title>…</title>` and `<desc>…</desc>`: the Icon's title names it. */
+function removeTitles(s: string): Pass {
+  const lower = s.toLowerCase();
+  let out = "";
+  let pos = 0;
+  let title = -1;
+  let desc = -1;
+  const next = (name: string, at: number) => {
+    // A search starts where the last match ended, so a far opener isn't searched for again.
+    if (at >= pos) return at;
+    const found = nextOpener(s, lower, name, pos);
+    return found < 0 ? Number.POSITIVE_INFINITY : found;
+  };
+  for (;;) {
+    title = next("title", title);
+    desc = next("desc", desc);
+    const start = Math.min(title, desc);
+    if (start === Number.POSITIVE_INFINITY) return out + s.slice(pos);
+    const name = start === title ? "title" : "desc";
+    const gt = s.indexOf(">", start + name.length + 1);
+    if (gt < 0) return MALFORMED;
+    const end = closerEnd(s, lower, name, gt + 1);
+    if (end < 0) return MALFORMED;
+    out += s.slice(pos, start);
+    pos = end + 1;
+  }
+}
+
+/**
+ * An editor element's name at `<` (sodipodi:namedview, inkscape:grid, …: any prefixed name but
+ * svg: and xlink:), as the names it can be read as, longest first; empty when there is none.
+ */
+function prefixedNames(s: string, lt: number): string[] {
+  const first = lt + 1;
+  if (!/[a-z]/i.test(s.charAt(first))) return [];
+  if (/^(?:svg|xlink):/i.test(s.slice(first, first + 6))) return [];
+  let colon = first + 1;
+  while (colon < s.length && NAME_CHAR.test(s.charAt(colon))) colon++;
+  if (s[colon] !== ":") return [];
+  let end = colon + 1;
+  while (end < s.length && NAME_CHAR.test(s.charAt(end))) end++;
+  const names: string[] = [];
+  for (let k = end; k > colon + 1; k--)
+    if (isWord(s[k - 1]) !== isWord(s[k])) names.push(s.slice(first, k));
+  return names;
+}
+
+/** Every `</name\s*>` of the text: lower-cased name → the positions of its `<` and `>`. */
+function closersByName(s: string): Map<string, { at: number; end: number }[]> {
+  const closers = new Map<string, { at: number; end: number }[]>();
+  for (let at = s.indexOf("</"); at >= 0; at = s.indexOf("</", at + 2)) {
+    let k = at + 2;
+    while (k < s.length && !SPACE.test(s.charAt(k)) && s[k] !== ">" && s[k] !== "<") k++;
+    const name = s.slice(at + 2, k).toLowerCase();
+    while (k < s.length && SPACE.test(s.charAt(k))) k++;
+    if (s[k] !== ">" || !name) continue;
+    const list = closers.get(name);
+    if (list) list.push({ at, end: k });
+    else closers.set(name, [{ at, end: k }]);
+  }
+  return closers;
+}
+
+/** The first closer that starts after `from`. */
+function firstAfter(list: { at: number; end: number }[] | undefined, from: number) {
+  if (!list) return undefined;
+  let low = 0;
+  let high = list.length;
+  while (low < high) {
+    const mid = (low + high) >> 1;
+    if ((list[mid]?.at ?? 0) > from) high = mid;
+    else low = mid + 1;
+  }
+  return list[low];
+}
+
+/** Editor elements: `<inkscape:grid/>`, then `<inkscape:grid>…</inkscape:grid>`. */
+function removePrefixedElements(s: string): Pass {
+  let out = "";
+  let pos = 0;
+  let gt = -1;
+  for (let lt = s.indexOf("<"); lt >= 0; lt = s.indexOf("<", lt + 1)) {
+    const name = prefixedNames(s, lt)[0];
+    if (name === undefined) continue;
+    if (gt < lt) gt = s.indexOf(">", lt);
+    if (gt < 0) break;
+    if (s[gt - 1] !== "/" || gt - 1 < lt + 1 + name.length) continue;
+    out += s.slice(pos, lt);
+    pos = gt + 1;
+    lt = gt;
+  }
+  const kept = out + s.slice(pos);
+  const closers = closersByName(kept);
+  out = "";
+  pos = 0;
+  gt = -1;
+  for (let lt = kept.indexOf("<"); lt >= 0; lt = kept.indexOf("<", lt + 1)) {
+    const names = prefixedNames(kept, lt);
+    if (names.length === 0) continue;
+    if (gt < lt) gt = kept.indexOf(">", lt);
+    if (gt < 0) return MALFORMED;
+    let closer: { at: number; end: number } | undefined;
+    for (const name of names) {
+      closer = firstAfter(closers.get(name.toLowerCase()), gt);
+      if (closer) break;
+    }
+    if (!closer) return MALFORMED;
+    out += kept.slice(pos, lt);
+    pos = closer.end + 1;
+    lt = closer.end;
+  }
+  return out + kept.slice(pos);
+}
+
+/** Prefixed attributes and namespace declarations go, except xlink:href and xml:space. */
+function tidyTags(s: string): Pass {
+  let out = "";
+  let pos = 0;
+  for (let lt = s.indexOf("<"); lt >= 0; lt = s.indexOf("<", lt + 1)) {
+    if (!/[a-z]/i.test(s.charAt(lt + 1))) continue;
+    const gt = s.indexOf(">", lt);
+    if (gt < 0) return MALFORMED;
+    const tag = s.slice(lt, gt + 1);
+    out +=
+      s.slice(pos, lt) +
+      styleToAttrs(
+        tag.replace(
+          /\s(?!xlink:href\b|xml:space\b)[a-z][\w.-]*:[\w.-]+\s*=\s*("[^"]*"|'[^']*')/gi,
+          "",
+        ),
+      );
+    pos = gt + 1;
+    lt = gt;
+  }
+  return out + s.slice(pos);
+}
+
+/**
+ * What design tools add around the drawing: prolog, comments, doctype, editor metadata.
+ * Undefined when the file isn't well formed.
+ */
+export function tidyUploadedSvg(raw: string): string | undefined {
+  let text: Pass = raw.replace(/^﻿/, "");
+  const passes: ((s: string) => Pass)[] = [
+    (s) => removeBetween(s, "<?", "?>"),
+    (s) => removeBetween(s, "<!--", "-->"),
+    removeDoctype,
+    removeMetadata,
+    removeTitles,
+    removePrefixedElements,
+    tidyTags,
+  ];
+  for (const pass of passes) {
+    text = pass(text);
+    if (text === MALFORMED) return undefined;
+  }
   return text.trim();
 }
 
@@ -172,6 +419,12 @@ export function prepareUploadedSvg(raw: string): PreparedSvg {
       message: `This file is ${kb(size)}. Upload an SVG up to ${kb(UPLOAD_SVG_MAX_BYTES)}.`,
     };
   const text = tidyUploadedSvg(raw);
+  if (text === undefined)
+    return {
+      ok: false,
+      message:
+        "This SVG is not well formed: a tag, comment or declaration in it never closes. Export it again as plain SVG and retry.",
+    };
   // The sanitizer refuses markup over its limit outright; say it's the size.
   if (text.length > ICON_SVG_MAX) return tooBig(utf8(text));
   const report = sanitizeSvgReport(text);

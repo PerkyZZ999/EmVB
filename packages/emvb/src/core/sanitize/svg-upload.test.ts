@@ -185,3 +185,51 @@ describe("viewBox and size (W-239)", () => {
     expect(sanitizeSvgMarkup(atCap)).toBeDefined();
   });
 });
+
+describe("crafted uploads cost time in proportion to their size (S-07)", () => {
+  const MALFORMED =
+    "This SVG is not well formed: a tag, comment or declaration in it never closes. Export it again as plain SVG and retry.";
+  const at256 = (unit: string, head = "<svg>") =>
+    (head + unit.repeat(Math.ceil(256_000 / unit.length))).slice(0, 256_000);
+  /** The fastest of up to three runs, so a busy machine doesn't fail a fast scan. */
+  const fastest = (input: string) => {
+    let best = Number.POSITIVE_INFINITY;
+    for (let run = 0; run < 3 && best >= 50; run++) {
+      const started = performance.now();
+      prepareUploadedSvg(input);
+      best = Math.min(best, performance.now() - started);
+    }
+    return best;
+  };
+
+  test.each([
+    ["processing instructions", "<?"],
+    ["comments", "<!--"],
+    ["doctypes", "<!DOCTYPE ["],
+    ["metadata", "<metadata "],
+    ["titles", "<title>"],
+    ["editor elements", "<a:b>"],
+    ["editor elements before one >", "<a:b "],
+    ["distinct editor elements", "<a:b1><a:b2><a:b3><a:b4><a:b5><a:b6><a:b7><a:b8><a:b9>"],
+    ["repeated style paint", '<path style="fill:#f00;'],
+  ])("%s that never close: 256 KB in under 50 ms", (_label, unit) => {
+    expect(fastest(at256(unit))).toBeLessThan(50);
+  });
+
+  test("a style with many paint declarations in one tag is read once", () => {
+    const tag = `<svg><path style="${"fill:#f00;".repeat(25_000)}"/></svg>`;
+    expect(fastest(tag)).toBeLessThan(50);
+  });
+
+  test.each([
+    "<svg viewBox='0 0 1 1'><?xml <path d='M0 0'/></svg>",
+    "<svg viewBox='0 0 1 1'><!-- note <path d='M0 0'/></svg>",
+    "<!DOCTYPE svg [ <svg viewBox='0 0 1 1'><path d='M0 0'/></svg>",
+    "<svg viewBox='0 0 1 1'><metadata><path d='M0 0'/></svg>",
+    "<svg viewBox='0 0 1 1'><title>Logo<path d='M0 0'/></svg>",
+    "<svg viewBox='0 0 1 1'><inkscape:grid><path d='M0 0'/></svg>",
+    "<svg viewBox='0 0 1 1'><path d='M0 0'/></svg><g",
+  ])("a construct that never closes refuses the file: %p", (raw) => {
+    expect(refused(raw)).toBe(MALFORMED);
+  });
+});

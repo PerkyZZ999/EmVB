@@ -23255,7 +23255,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
-          "search": "  text = text.replace(/<(title|desc)\\b[^>]*>[\\s\\S]*?<\\/\\1\\s*>/gi, \"\");",
+          "search": "    removeTitles,\n",
           "replace": ""
         }
       ],
@@ -46265,6 +46265,76 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
       "expect": "\\(fail\\).*a part that fails to render is left out"
+    },
+    {
+      "id": "W-988/comments-regex",
+      "requirement": "W-988",
+      "description": "Comments are removed with the lazy regex again, which rescans to the end of the file for every unclosed <!--.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "    (s) => removeBetween(s, \"<!--\", \"-->\"),",
+          "replace": "    (s) => s.replace(/<!--[\\s\\S]*?-->/g, \"\"),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\).*comments that never close: 256 KB in under 50 ms"
+    },
+    {
+      "id": "W-988/titles-regex",
+      "requirement": "W-988",
+      "description": "Titles are removed with the lazy regex again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "    removeTitles,",
+          "replace": "    (s) => s.replace(/<(title|desc)\\b[^>]*>[\\s\\S]*?<\\/\\1\\s*>/gi, \"\"),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\).*titles that never close: 256 KB in under 50 ms"
+    },
+    {
+      "id": "W-988/metadata-regex",
+      "requirement": "W-988",
+      "description": "Metadata is removed with the lazy regexes again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "    removeMetadata,",
+          "replace": "    (s) => s.replace(/<metadata\\b[\\s\\S]*?<\\/metadata\\s*>/gi, \"\").replace(/<metadata\\b[^>]*\\/>/gi, \"\"),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\).*metadata that never close: 256 KB in under 50 ms"
+    },
+    {
+      "id": "W-988/prefixed-regex",
+      "requirement": "W-988",
+      "description": "Editor elements are removed with the lazy back-referencing regexes again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "    removePrefixedElements,",
+          "replace": "    (s) => s.replace(/<((?!svg:|xlink:)[a-z][\\w.-]*:[\\w.-]+)\\b[^>]*\\/>/gi, \"\").replace(/<((?!svg:|xlink:)[a-z][\\w.-]*:[\\w.-]+)\\b[^>]*>[\\s\\S]*?<\\/\\1\\s*>/gi, \"\"),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\).*editor elements.*that never close: 256 KB in under 50 ms"
+    },
+    {
+      "id": "W-988/style-has-rescans",
+      "requirement": "W-988",
+      "description": "Every style declaration searches the whole tag for an existing attribute again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/svg-upload.ts",
+          "search": "    let found = seen.get(name);",
+          "replace": "    let found: boolean | undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/sanitize/svg-upload.test.ts"],
+      "expect": "\\(fail\\).*a style with many paint declarations in one tag is read once"
     }
   ]
 }

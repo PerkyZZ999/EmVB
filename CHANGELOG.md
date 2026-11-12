@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Security
 
 - **An SVG with a mask no longer takes a page down (W-987, S-02).** The SVG sanitizer kept the `mask` attribute but the HTML serializer refused it, so a saved SVG or icon with `mask="url(#…)"` made its page answer 500 (every page, when it sat in a header, footer or popup part), and `icons/upload` failed on such a file. `mask` now renders. Rendering also fails soft: markup the serializer refuses empties only the element that holds it, a stored layout that can't render gives an empty page instead of an error, and a theme part that fails is left out while the rest of the site renders. Each is logged with ids only.
+- **Uploading a crafted SVG can't hold the server (W-988, S-07).** The cleanup of uploaded SVGs (prolog, comments, doctype, metadata, titles, editor elements) used lazy patterns that rescanned to the end of the file for every unclosed opener: one 256 KB `icons/upload` request took up to 9 s of CPU. It now reads the file left to right, so a crafted file costs milliseconds, and a file where a tag, comment or declaration never closes is refused as not well formed. Well-formed files are cleaned exactly as before (41,675 SVG files compared byte for byte).
 
 ## [1.1.0] - 2026-11-11
 
