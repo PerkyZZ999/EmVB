@@ -1,3 +1,4 @@
+import { outline } from "../../../../test/dom/outline.ts";
 import { afterEach, describe, expect, test } from "bun:test";
 import { act, useState } from "react";
 import type { DesignSystem, Layout, VariableKind } from "../../../core/index.ts";
@@ -56,11 +57,8 @@ const layout: Layout = {
 
 /** The section's HTML with generated element ids numbered by first appearance. */
 function html() {
-  const ids = new Map<string, string>();
-  return host.innerHTML.replace(/base-ui-[\w-]+|_r_[0-9a-z]+_/g, (id) => {
-    if (!ids.has(id)) ids.set(id, `id-${ids.size}`);
-    return ids.get(id) ?? id;
-  });
+  // W-1009: EmVB's own markup, the same on every supported Kumo.
+  return outline(host);
 }
 
 async function mount(element: React.ReactElement) {

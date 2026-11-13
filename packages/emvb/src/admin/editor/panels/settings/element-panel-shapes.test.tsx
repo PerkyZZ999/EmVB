@@ -1,3 +1,4 @@
+import { outline as emvbOutline } from "../../../../../test/dom/outline.ts";
 import { afterEach, describe, expect, test } from "bun:test";
 import * as React from "react";
 import { act } from "react";
@@ -17,42 +18,12 @@ afterEach(async () => {
 
 const ALL_SECTIONS = ["layout", "spacing", "typography", "background", "border", "advanced"];
 
-const KEPT =
-  /^(data-|aria-|role$|type$|name$|value$|placeholder$|href$|disabled$|checked$|for$|id$|tabindex$)/;
-
-/**
- * The panel as an indented outline: tags, behaviour attributes, EmVB classes and text. Kumo's
- * utility classes, icon paths and the inside of each style row are left out; generated ids are numbered by first appearance.
- */
-function outline(host: HTMLElement) {
-  const ids = new Map<string, string>();
-  const stable = (value: string) =>
-    value.replace(/base-ui-[\w-]+|«[^»]*»|:r[0-9a-z]+:|_r_[0-9a-z]+_/g, (id) => {
-      if (!ids.has(id)) ids.set(id, `id-${ids.size}`);
-      return ids.get(id) ?? id;
-    });
-  const lines: string[] = [];
-  const walk = (node: Node, depth: number) => {
-    const pad = "  ".repeat(depth);
-    if (node.nodeType === Node.TEXT_NODE) {
-      const text = node.textContent?.trim();
-      if (text) lines.push(`${pad}"${text}"`);
-      return;
-    }
-    if (!(node instanceof Element)) return;
-    const own = [...node.classList].filter((name) => name.startsWith("emvb-"));
-    const attrs = [...node.attributes]
-      .filter((attr) => KEPT.test(attr.name))
-      .map((attr) => `${attr.name}="${stable(attr.value)}"`);
-    const tag = [node.tagName.toLowerCase(), ...own.map((name) => `.${name}`)].join("");
-    lines.push(`${pad}${[tag, ...attrs].join(" ")}`);
-    // StyleRow has its own tests; here only which rows appear, and in what order, matters.
-    if (node.tagName.toLowerCase() === "svg" || own.includes("emvb-style-row")) return;
-    for (const child of node.childNodes) walk(child, depth + 1);
-  };
-  for (const child of host.childNodes) walk(child, 0);
-  return lines.join("\n");
-}
+/** StyleRow has its own tests; here only which rows appear, and in what order, matters. */
+const outline = (host: HTMLElement) =>
+  emvbOutline(host, {
+    stopAt: (node) =>
+      node.tagName.toLowerCase() === "svg" || node.classList.contains("emvb-style-row"),
+  });
 
 function seeded() {
   let n = 0;

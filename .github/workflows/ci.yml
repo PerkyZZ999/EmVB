@@ -27,9 +27,8 @@ jobs:
       - run: bun run test:astro
 
   emdash-1-5:
-    # W-1002: the same unit tests on the latest EmDash (1.5.0, Kumo 2.15.0). Snapshots of
-    # Kumo's own markup are rewritten here (its attribute order and extra controls differ);
-    # every other assertion must pass as on 1.4.
+    # W-1002: the same unit tests on the latest EmDash (1.5.0, Kumo 2.15.0). Since W-1009 the
+    # snapshots hold EmVB's own markup only, so they must match as on 1.4.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -38,7 +37,7 @@ jobs:
           bun-version: 1.4.3
       - run: bun scripts/use-emdash.ts 1.5.0
       - run: bun install
-      - run: bun test ./packages ./scripts ./test --update-snapshots
+      - run: bun test ./packages ./scripts ./test
       - run: bun run test:astro
       # W-1007: EmDash 1.5 brings zod 4.6.7, which has no open advisory; nothing is ignored here.
       - run: bun audit --audit-level=high

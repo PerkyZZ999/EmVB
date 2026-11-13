@@ -47312,6 +47312,62 @@
       ],
       "command": ["bun", "test", "scripts/use-emdash.test.ts"],
       "expect": "\\(fail\\).*CI runs the unit tests on EmDash 1.5"
+    },
+    {
+      "id": "W-1009/kumo-wrappers-kept",
+      "requirement": "W-1009",
+      "description": "Kumo's plain wrapper divs and spans stay in snapshots, so EmDash 1.5's Kumo fails them.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/dom/outline.ts",
+          "search": "    if ((name === \"div\" || name === \"span\") && own.length === 0 && attrs.length === 0) {",
+          "replace": "    if (name === \"never\") {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/dom/outline.test.ts"],
+      "expect": "\\(fail\\).*Kumo's classes, wrappers"
+    },
+    {
+      "id": "W-1009/overflow-controls-kept",
+      "requirement": "W-1009",
+      "description": "Kumo 2.15's tab scroll buttons show up in snapshots.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/dom/outline.ts",
+          "search": "const KUMO_ONLY = '[data-kumo-part=\"overflow-control\"]';",
+          "replace": "const KUMO_ONLY = \"never-matches\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/dom/outline.test.ts"],
+      "expect": "\\(fail\\).*Kumo's classes, wrappers"
+    },
+    {
+      "id": "W-1009/generated-ids-kept",
+      "requirement": "W-1009",
+      "description": "Generated Base UI ids stay in snapshots.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/dom/outline.ts",
+          "search": "      .filter((attr) => !(attr.name === \"id\" && generated(attr.value)))",
+          "replace": "      .filter(() => true)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/dom/outline.test.ts"],
+      "expect": "\\(fail\\).*Kumo's classes, wrappers"
+    },
+    {
+      "id": "W-1009/emvb-markup-dropped",
+      "requirement": "W-1009",
+      "description": "The outline drops EmVB's own data attributes too.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/dom/outline.ts",
+          "search": "/^(data-|aria-|role$|",
+          "replace": "/^(aria-|role$|"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/dom/outline.test.ts"],
+      "expect": "\\(fail\\).*EmVB's own markup stays"
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { outline } from "../../../test/dom/outline.ts";
 import { afterEach, describe, expect, test } from "bun:test";
 import { act } from "react";
 import type { Fetcher } from "../api.ts";
@@ -30,10 +31,9 @@ function html() {
     const iso = time.getAttribute("datetime") ?? "";
     expect(time.textContent).toBe(iso ? formatted(iso) : "");
   }
-  // Base UI's generated ids depend on what rendered before (W-978's checkboxes).
-  return host.innerHTML
-    .replace(/(<time[^>]*>)[^<]*(<\/time>)/g, "$1…$2")
-    .replace(/ id="base-ui-[^"]*"/g, "");
+  // W-1009: EmVB's own markup, the same on every supported Kumo; <time> text was checked above.
+  for (const time of host.querySelectorAll("time")) time.textContent = "…";
+  return outline(host);
 }
 
 async function mount(element: React.ReactElement) {
