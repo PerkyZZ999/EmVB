@@ -1160,7 +1160,7 @@ describe("Elementor HTML to blocks (W-945)", () => {
   });
 });
 
-describe("Elementor import: the 1.2 widgets (PLAN_1.2 part D)", () => {
+describe("Elementor import: the 1.2 widgets", () => {
   const one = (widgetType: string, settings: Record<string, unknown>) =>
     ok(
       importElementor(JSON.stringify([{ id: "w", elType: "widget", widgetType, settings }]), {

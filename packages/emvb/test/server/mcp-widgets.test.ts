@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { s1Page } from "../fixtures/layouts.ts";
 import { createTestRuntime, ROLES, userWithRole } from "./runtime.ts";
 
-// PLAN_1.2 part D: agents list, add and change the 1.2 widgets like any element.
+// The 1.2 widgets: agents list, add and change the 1.2 widgets like any element.
 
 let t: Awaited<ReturnType<typeof createTestRuntime>>;
 beforeEach(async () => {

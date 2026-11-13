@@ -4,7 +4,7 @@ import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/
 import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
 import { uploadEmvbPixel } from "./support/media.ts";
 
-// PLAN_1.2 part D: each 1.2 widget is added from the Add panel, set up in its settings, saved,
+// Each 1.2 widget is added from the Add panel, set up in its settings, saved,
 // and published with no EmVB script unless it opts in.
 
 setUpEmvbOnce();

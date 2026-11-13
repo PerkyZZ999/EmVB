@@ -1,5 +1,5 @@
 /**
- * The 1.2 widgets (PLAN_1.2 part D): elements built from plain markup and CSS. Each one renders
+ * The 1.2 widgets: elements built from plain markup and CSS. Each one renders
  * without script; the few interactive extras are opt-in runtimes.
  */
 import type {

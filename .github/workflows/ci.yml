@@ -36,8 +36,8 @@ jobs:
     # W-1008: development runs on EmDash 1.5 + Astro 7.4; EmVB still installs on stock EmDash 1.4
     # (the floor). The same unit and Astro tests run here on EmDash 1.4.0 (Kumo 2.6.0, forms
     # 0.2.12, zod 4.5.4), still on Astro 7.4. The repository-level script tests don't depend on
-    # EmDash and run in the main job. Releases also install the packed plugin on a stock 1.4.0
-    # and 1.5.0 site (the release gate in docs/project/PLAN_1.2.md).
+    # EmDash and run in the main job. Every release is also installed on a stock EmDash 1.4.0
+    # and 1.5.0 site.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0

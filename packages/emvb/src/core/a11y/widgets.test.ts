@@ -3,7 +3,7 @@ import { emptyDesign } from "../schema/design.ts";
 import type { Layout } from "../schema/layout.ts";
 import { auditPage } from "./audit.ts";
 
-// The 1.2 widgets (PLAN_1.2 part D): what the accessibility check says about each.
+// The 1.2 widgets: what the accessibility check says about each.
 const audit = (...children: unknown[]) =>
   auditPage(
     {
