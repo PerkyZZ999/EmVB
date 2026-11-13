@@ -55,7 +55,12 @@ export type ProposalBase = {
   designRevision: string | null;
   design: unknown;
 };
-export type ProposalRecord = { proposal: Proposal; createdAt: string };
+export type ProposalRecord = {
+  proposal: Proposal;
+  createdAt: string;
+  /** S-09 (W-998): who proposed it; records from before 1.1.2 have none. */
+  createdBy?: string;
+};
 export type ProposalRefusal = Refusal & {
   code: "INVALID_PROPOSAL" | "STALE_BASE" | "NOT_FOUND" | "PROPOSALS_FULL";
   opIndex?: number;

@@ -5,6 +5,7 @@ import { ProposalTarget } from "../core/proposals.ts";
 import { isRecord } from "../core/record.ts";
 import type { AgentRequest, RequestsPort } from "../mcp/ports.ts";
 import { queued } from "../mcp/queue.ts";
+import { isEmvbTarget } from "./targets.ts";
 
 /**
  * W-931 prompt relay (D-063: bring-your-own agent). A person writes a request in the editor's
@@ -22,6 +23,10 @@ const ID = /^[0-9a-f]{16}$/;
 /** Requests older than this are no longer offered to agents. */
 const REQUEST_TTL_MS = 24 * 3_600_000;
 const SEEN_KEY = "relay:seen";
+/** S-09 (W-998): open requests one person may have across the site. */
+const MAX_OPEN_REQUESTS_PER_USER = 20;
+/** Expired requests deleted per new request. */
+const PURGE_BATCH = 50;
 /** EmDash's admin role: may cancel anyone's request. */
 const ADMIN_ROLE = 50;
 
@@ -119,7 +124,19 @@ export function requestsPort(store: Store, kv: Kv, now: () => number = Date.now)
           };
         if (userId === null)
           return { ok: false as const, reason: "Sign in to write a request for your agent." };
-        const open = (await all()).filter(
+        const rows = await all();
+        // S-09 (W-998): expired requests are deleted as new ones come in, a few at a time.
+        const expired = rows.filter((r) => !live(r.stored)).slice(0, PURGE_BATCH);
+        await Promise.all(expired.map((r) => store.delete(r.id)));
+        const mine = rows.filter(
+          (r) => r.stored.status === "open" && live(r.stored) && ownedBy(r.stored, userId),
+        );
+        if (mine.length >= MAX_OPEN_REQUESTS_PER_USER)
+          return {
+            ok: false as const,
+            reason: `You already have ${MAX_OPEN_REQUESTS_PER_USER} requests waiting. Cancel one or wait for answers.`,
+          };
+        const open = rows.filter(
           (r) =>
             r.stored.status === "open" &&
             live(r.stored) &&
@@ -203,6 +220,8 @@ export const requestCreateRoute: PluginRoute<z.infer<typeof CreateInput>> = {
   permission: "content:edit_any",
   input: CreateInput,
   handler: async (ctx) => {
+    if (!(await isEmvbTarget(ctx, ctx.input.target)))
+      throw new PluginRouteError("NOT_FOUND", "No such page.", 404);
     const made = await requestsPortOf(ctx).create(
       ctx.input.target,
       ctx.input.prompt,

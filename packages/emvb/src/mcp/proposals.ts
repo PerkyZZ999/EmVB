@@ -139,13 +139,16 @@ export async function proposeChanges(ports: EmvbPorts, input: z.infer<typeof Pro
         `No open request ${input.requestId} for this page. Call get_requests, or propose without requestId.`,
       );
   }
-  const created = await portOf(ports).create({
-    version: 1,
-    target: targetOf(input.pageId),
-    baseRevision: input.baseRevision,
-    baseDesignRevision: input.baseDesignRevision,
-    ops: input.ops,
-  });
+  const created = await portOf(ports).create(
+    {
+      version: 1,
+      target: targetOf(input.pageId),
+      baseRevision: input.baseRevision,
+      baseDesignRevision: input.baseDesignRevision,
+      ops: input.ops,
+    },
+    ports.caller.userId,
+  );
   if (!created.ok) throw refused(created);
   const changes = created.record.proposal.ops.length;
   await ports.log({
@@ -262,6 +265,9 @@ export async function getProposal(ports: EmvbPorts, input: z.infer<typeof GetPro
   };
 }
 
+/** EmDash's admin role. */
+const ADMIN_ROLE = 50;
+
 // ---------------------------------------------------------------- withdraw_proposal
 
 export const WithdrawProposalInput = z.strictObject({ proposalId: ProposalId });
@@ -276,6 +282,13 @@ export async function withdrawProposal(
 ) {
   const proposals = portOf(ports);
   const found = await proposals.get(input.proposalId);
+  // S-09 (W-998): an agent withdraws its own person's proposals; an admin's agent, any.
+  const author = found?.ok ? found.record.createdBy : undefined;
+  if (author && author !== ports.caller.userId && ports.caller.role < ADMIN_ROLE)
+    throw new McpToolError(
+      "FORBIDDEN",
+      "Only the person who proposed this (or an admin) can withdraw it. The person editing the page can reject it in the editor.",
+    );
   if (!found || !(await proposals.withdraw(input.proposalId))) {
     throw new McpToolError("NOT_FOUND", `No proposal with id ${input.proposalId}.`);
   }

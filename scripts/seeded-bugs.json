@@ -46854,6 +46854,90 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/server/canvas-fields.test.ts"],
       "expect": "\\(fail\\).*a collection missing from canvasCollections is gated too"
+    },
+    {
+      "id": "W-998/request-any-target",
+      "requirement": "W-998",
+      "description": "A request may name a page that doesn't exist, or any collection.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "    if (!(await isEmvbTarget(ctx, ctx.input.target)))\n      throw new PluginRouteError(\"NOT_FOUND\", \"No such page.\", 404);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/targets.test.ts"],
+      "expect": "\\(fail\\).*a request names an existing page"
+    },
+    {
+      "id": "W-998/presence-any-target",
+      "requirement": "W-998",
+      "description": "A presence lease may be written for a page that doesn't exist.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/presence.ts",
+          "search": "    if (ctx.input.open && !(await isEmvbTarget(ctx, ctx.input.target)))",
+          "replace": "    if (ctx.input.open && ctx.input.target.id === \"\")"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/targets.test.ts"],
+      "expect": "\\(fail\\).*a presence lease needs an existing page"
+    },
+    {
+      "id": "W-998/no-user-cap",
+      "requirement": "W-998",
+      "description": "One person may keep any number of requests waiting.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": "        if (mine.length >= MAX_OPEN_REQUESTS_PER_USER)",
+          "replace": "        if (mine.length < 0)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/targets.test.ts"],
+      "expect": "\\(fail\\).*at most 20 waiting requests"
+    },
+    {
+      "id": "W-998/expired-kept",
+      "requirement": "W-998",
+      "description": "Expired requests stay in storage forever.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/requests.ts",
+          "search": ".slice(0, PURGE_BATCH);",
+          "replace": ".slice(0, 0);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/targets.test.ts"],
+      "expect": "\\(fail\\).*expired requests are deleted"
+    },
+    {
+      "id": "W-998/withdraw-anyones",
+      "requirement": "W-998",
+      "description": "Any agent withdraws another person's proposal.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/mcp/proposals.ts",
+          "search": "  if (author && author !== ports.caller.userId && ports.caller.role < ADMIN_ROLE)",
+          "replace": "  if (author && author === \"never\")"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/targets.test.ts"],
+      "expect": "\\(fail\\).*withdraws only its own person's proposals"
+    },
+    {
+      "id": "W-998/creator-not-stored",
+      "requirement": "W-998",
+      "description": "A proposal's creator isn't stored, so anyone can withdraw it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/proposals.ts",
+          "search": "          ...(createdBy ? { createdBy } : {}),",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/targets.test.ts"],
+      "expect": "\\(fail\\).*withdraws only its own person's proposals"
     }
   ]
 }

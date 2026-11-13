@@ -39,7 +39,14 @@ function readRecord(raw: unknown): { ok: true; record: ProposalRecord } | Propos
   }
   const read = readProposal(raw.proposal);
   return read.ok
-    ? { ok: true, record: { proposal: read.proposal, createdAt: raw.createdAt } }
+    ? {
+        ok: true,
+        record: {
+          proposal: read.proposal,
+          createdAt: raw.createdAt,
+          ...(typeof raw.createdBy === "string" ? { createdBy: raw.createdBy } : {}),
+        },
+      }
     : read;
 }
 
@@ -71,7 +78,7 @@ export function proposalsPort(
       }
       return items;
     },
-    create: (raw) =>
+    create: (raw, createdBy) =>
       queued("proposals", async () => {
         const read = readProposal(raw);
         if (!read.ok) return read;
@@ -114,7 +121,11 @@ export function proposalsPort(
         const rechecked = applyProposal(latest, read.proposal);
         if (!rechecked.ok) return rechecked;
         const id = crypto.randomUUID().replaceAll("-", "").slice(0, 16);
-        const record = { proposal: read.proposal, createdAt: new Date().toISOString() };
+        const record: ProposalRecord = {
+          proposal: read.proposal,
+          createdAt: new Date().toISOString(),
+          ...(createdBy ? { createdBy } : {}),
+        };
         await store.put(id, record);
         return { ok: true, id, record };
       }),
@@ -191,7 +202,8 @@ const CreateInput = z.strictObject({ proposal: z.unknown() });
 export const proposalCreateRoute: PluginRoute<z.infer<typeof CreateInput>> = {
   permission: "content:edit_any",
   input: CreateInput,
-  handler: async (ctx) => unwrap(await proposalPortOf(ctx).create(ctx.input.proposal)),
+  handler: async (ctx) =>
+    unwrap(await proposalPortOf(ctx).create(ctx.input.proposal, ctx.user?.id ?? null)),
 };
 const WithdrawInput = IdInput.extend({
   /** W-933: the person's review, when the editor closes a proposal it decided. */

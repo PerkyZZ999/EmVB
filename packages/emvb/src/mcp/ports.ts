@@ -164,6 +164,8 @@ export interface SavedSectionsPort {
 export interface ProposalsPort {
   create(
     proposal: unknown,
+    /** S-09 (W-998): the proposer, so only they (or an admin) withdraw it from an agent. */
+    createdBy?: string | null,
   ): Promise<{ ok: true; id: string; record: ProposalRecord } | ProposalRefusal>;
   get(
     id: string,

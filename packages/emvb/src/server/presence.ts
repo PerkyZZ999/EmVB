@@ -1,4 +1,5 @@
-import type { PluginRoute, RouteContext } from "emdash";
+import { PluginRouteError, type PluginRoute, type RouteContext } from "emdash";
+import { isEmvbTarget } from "./targets.ts";
 import { z } from "zod";
 import { isRecord } from "../core/record.ts";
 import { ProposalTarget } from "../core/proposals.ts";
@@ -70,6 +71,9 @@ export const presenceRoute: PluginRoute<z.infer<typeof PresenceInput>> = {
   input: PresenceInput,
   handler: async (ctx: RouteContext<z.infer<typeof PresenceInput>>) => {
     const userId = ctx.user?.id;
+    // S-09 (W-998): a lease only for an entry that exists; closing never needs the check.
+    if (ctx.input.open && !(await isEmvbTarget(ctx, ctx.input.target)))
+      throw new PluginRouteError("NOT_FOUND", "No such page.", 404);
     if (userId) {
       await setPresence(ctx.kv as unknown as Kv, ctx.input.target, userId, ctx.input.open);
     }
