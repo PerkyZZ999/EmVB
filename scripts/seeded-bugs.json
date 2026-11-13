@@ -48756,6 +48756,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/top-bar.test.tsx"],
       "expect": "\\(fail\\).*W-1027"
+    },
+    {
+      "id": "W-1029/site-icon-missing",
+      "requirement": "W-1029",
+      "description": "The site's icon map leaves out the Carousel, so the features grid shows it with the fallback icon.",
+      "edits": [
+        {
+          "file": "site/src/data/element-icons.ts",
+          "search": "  carousel: SlideshowIcon,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "test/site/element-icons.test.ts"],
+      "expect": "\\(fail\\).*W-1029"
+    },
+    {
+      "id": "W-1029/site-icon-differs",
+      "requirement": "W-1029",
+      "description": "The site shows the Gallery with a different icon from the editor's.",
+      "edits": [
+        {
+          "file": "site/src/data/element-icons.ts",
+          "search": "  gallery: ImagesIcon,",
+          "replace": "  gallery: ImageIcon,"
+        }
+      ],
+      "command": ["bun", "test", "test/site/element-icons.test.ts"],
+      "expect": "\\(fail\\).*W-1029"
     }
   ]
 }
