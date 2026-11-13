@@ -47508,6 +47508,48 @@
       ],
       "command": ["bun", "test", "scripts/dependabot.test.ts"],
       "expect": "\\(fail\\).*update as groups"
+    },
+    {
+      "id": "W-1016/smoke-not-bumped",
+      "requirement": "W-1016",
+      "description": "The release script forgets the smoke test's version.",
+      "edits": [
+        {
+          "file": "scripts/release.ts",
+          "search": "  { file: \"e2e/smoke.e2e.ts\", patterns: [(v) => `version: \"${v}\" }`] },\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/release.test.ts"],
+      "expect": "\\(fail\\).*no other tracked file quotes the current version"
+    },
+    {
+      "id": "W-1016/notes-run-on",
+      "requirement": "W-1016",
+      "description": "Release notes run on into the older versions' sections.",
+      "edits": [
+        {
+          "file": "scripts/release.ts",
+          "search": "  const end = body.search(/^## \\[|^\\[Unreleased\\]:/m);",
+          "replace": "  const end = body.search(/^\\[Unreleased\\]:/m);"
+        }
+      ],
+      "command": ["bun", "test", "scripts/release.test.ts"],
+      "expect": "\\(fail\\).*release notes are that version's section only"
+    },
+    {
+      "id": "W-1016/no-dated-heading",
+      "requirement": "W-1016",
+      "description": "The CHANGELOG cut drops the release date.",
+      "edits": [
+        {
+          "file": "scripts/release.ts",
+          "search": "    .replace(heading, `${heading}\\n## [${to}] - ${date}\\n`)",
+          "replace": "    .replace(heading, `${heading}\\n## [${to}]\\n`)"
+        }
+      ],
+      "command": ["bun", "test", "scripts/release.test.ts"],
+      "expect": "\\(fail\\).*Unreleased moves under a dated heading"
     }
   ]
 }
