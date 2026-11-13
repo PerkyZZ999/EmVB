@@ -133,9 +133,9 @@ test("W-1005: EmVB names and describes itself for EmDash's plugins screen", () =
 });
 
 test("W-1005: EmDash 1.5 gets EmVB's name and description; 1.4 ignores them", async () => {
-  const { version } = (await import("emdash/package.json", { with: { type: "json" } })).default as {
-    version: string;
-  };
+  // The installed EmDash: 1.4 here, 1.5 in CI's emdash-1-5 job.
+  const manifest = Bun.resolveSync("emdash/package.json", import.meta.dir);
+  const { version } = (await Bun.file(manifest).json()) as { version: string };
   const plugin = createPlugin() as unknown as { displayName?: string; description?: string };
   if (Bun.semver.satisfies(version, ">=1.5.0")) {
     expect(plugin.displayName).toBe("EmVB");
