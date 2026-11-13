@@ -47270,6 +47270,48 @@
       ],
       "command": ["bun", "test", "scripts/use-emdash.test.ts"],
       "expect": "\\(fail\\).*swaps emdash, Kumo and the forms plugin together"
+    },
+    {
+      "id": "W-1007/zod-pinned-to-4.5",
+      "requirement": "W-1007",
+      "description": "EmVB pins zod ~4.5.4 again, so an EmDash 1.5 site installs a second zod.",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "\"zod\": \">=4.5.4 <5\"",
+          "replace": "\"zod\": \"~4.5.4\""
+        }
+      ],
+      "command": ["bun", "test", "scripts/use-emdash.test.ts"],
+      "expect": "\\(fail\\).*EmVB's zod range admits both"
+    },
+    {
+      "id": "W-1007/1.5-run-old-zod",
+      "requirement": "W-1007",
+      "description": "The EmDash 1.5 run keeps zod 4.5.4, so it never tests 1.5's zod.",
+      "edits": [
+        {
+          "file": "scripts/use-emdash.ts",
+          "search": "\"1.5.0\": \"4.6.7\"",
+          "replace": "\"1.5.0\": \"4.5.4\""
+        }
+      ],
+      "command": ["bun", "test", "scripts/use-emdash.test.ts"],
+      "expect": "\\(fail\\).*uses 1.5's zod"
+    },
+    {
+      "id": "W-1007/1.5-audit-dropped",
+      "requirement": "W-1007",
+      "description": "CI stops auditing the EmDash 1.5 install.",
+      "edits": [
+        {
+          "file": ".github/workflows/ci.yml",
+          "search": "      - run: bun audit --audit-level=high\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/use-emdash.test.ts"],
+      "expect": "\\(fail\\).*CI runs the unit tests on EmDash 1.5"
     }
   ]
 }

@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **EmVB shares your site's zod (W-1007).** EmVB depended on zod `~4.5.4`, matching EmDash 1.4; with EmDash 1.5 (zod 4.6.7) that installed a second copy. It now takes any zod 4 from 4.5.4 up, so it uses the one EmDash brings. CI checks it on EmDash 1.5 with zod 4.6.7, where `bun audit` reports nothing.
+
 ## [1.1.2] - 2026-11-13
 
 The rest of the 1.1.0 security audit. No schema change: pages and designs saved by 1.1.1 open and save unchanged, and the new options are off unless you set them. It installs on EmDash 1.4 with no change to your site and is tested on EmDash 1.5. Three behaviour changes to check: on a plain Node host, Visitors country rules no longer read the country headers unless you add `emvb({ trustGeoHeaders: true })` (Cloudflare and Vercel are unaffected); `emvb-mcp` refuses a token file other users can read; and Export pages leaves links to files (a PDF link) as links instead of copying them.

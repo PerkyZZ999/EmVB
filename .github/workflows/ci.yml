@@ -40,6 +40,8 @@ jobs:
       - run: bun install
       - run: bun test ./packages ./scripts ./test --update-snapshots
       - run: bun run test:astro
+      # W-1007: EmDash 1.5 brings zod 4.6.7, which has no open advisory; nothing is ignored here.
+      - run: bun audit --audit-level=high
 
   audit:
     # Separate from the offline checks: needs the advisory database (W-890).

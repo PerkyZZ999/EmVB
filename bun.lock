@@ -69,7 +69,7 @@
       "dependencies": {
         "@perkyzz/emvb-icons": "1.1.2",
         "photocn": "0.1.2",
-        "zod": "~4.5.4",
+        "zod": ">=4.5.4 <5",
       },
       "devDependencies": {
         "@cloudflare/kumo": "2.6.0",
