@@ -12,8 +12,8 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.4.3
       - run: bun install --frozen-lockfile
@@ -30,8 +30,8 @@ jobs:
     # Separate from the offline checks: needs the advisory database (W-890).
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.4.3
       # D-070 (2026-11-08): GHSA-mrhx-c7xc-m3w5 (zod <4.6.6) is ignored while EmDash 1.4 pins

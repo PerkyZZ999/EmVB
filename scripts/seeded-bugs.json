@@ -47149,6 +47149,48 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/deps/emdash-pins.test.ts"],
       "expect": "\\(fail\\).*the EmDash peer starts at 1.4"
+    },
+    {
+      "id": "W-1001/ci-action-by-tag",
+      "requirement": "W-1001",
+      "description": "A CI action is used by its movable tag again.",
+      "edits": [
+        {
+          "file": ".github/workflows/ci.yml",
+          "search": "      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0\n        with:\n          bun-version: 1.4.3\n      # D-070",
+          "replace": "      - uses: oven-sh/setup-bun@v2\n        with:\n          bun-version: 1.4.3\n      # D-070"
+        }
+      ],
+      "command": ["bun", "test", "scripts/ci-pins.test.ts"],
+      "expect": "\\(fail\\).*pinned to a full commit SHA"
+    },
+    {
+      "id": "W-1001/site-no-nosniff",
+      "requirement": "W-1001",
+      "description": "emvb.dev stops sending X-Content-Type-Options: nosniff.",
+      "edits": [
+        {
+          "file": "site/public/_headers",
+          "search": "  X-Content-Type-Options: nosniff\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/site-headers.test.ts"],
+      "expect": "\\(fail\\).*emvb.dev sends a CSP"
+    },
+    {
+      "id": "W-1001/site-framable",
+      "requirement": "W-1001",
+      "description": "Any site can frame emvb.dev.",
+      "edits": [
+        {
+          "file": "site/public/_headers",
+          "search": "; frame-ancestors 'self'",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/site-headers.test.ts"],
+      "expect": "\\(fail\\).*emvb.dev sends a CSP"
     }
   ]
 }

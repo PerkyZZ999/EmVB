@@ -1,0 +1,8 @@
+# S-12 (W-1001): security headers for emvb.dev (Cloudflare Pages reads this file).
+# Inline scripts are Astro's own islands and JSON-LD; nothing loads scripts from elsewhere.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-src 'self' blob: https://www.youtube-nocookie.com https://player.vimeo.com; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
