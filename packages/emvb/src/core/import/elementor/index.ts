@@ -899,7 +899,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
     ...(pageCss ? customCss(pageCss, ctx, "Page") : {}),
   });
   if (pageStyle.devices) root["devices"] = pageStyle.devices;
-  if (options.media) useCopies(root, ctx);
+  if (options.media) pointAtCopies(root, ctx);
   const candidate: Record<string, unknown> = { schemaVersion: LAYOUT_SCHEMA_VERSION, root };
   const tried = new Set<string>();
   for (let attempt = 0; attempt < 500; attempt++) {
@@ -921,7 +921,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
         pageLinks: [...ctx.pageLinks].toSorted((a, b) => a - b),
         images: [...ctx.images],
         classes: usedClasses(checked.layout, ctx).map((cls) =>
-          options.media ? (useCopies(structuredClone(cls), ctx) as StyleClass) : cls,
+          options.media ? (pointAtCopies(structuredClone(cls), ctx) as StyleClass) : cls,
         ),
       };
     }
@@ -940,17 +940,17 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
  * W-958: points every use of an old-site image at its media library copy: image sources (which
  * also get the library id), backgrounds and any other stored address equal to it.
  */
-function useCopies(value: unknown, ctx: ImportContext): unknown {
+function pointAtCopies(value: unknown, ctx: ImportContext): unknown {
   if (typeof value === "string")
     return /^https?:\/\//i.test(value) ? (ctx.copied(value)?.url ?? value) : value;
   if (Array.isArray(value)) {
-    for (let i = 0; i < value.length; i++) value[i] = useCopies(value[i], ctx);
+    for (let i = 0; i < value.length; i++) value[i] = pointAtCopies(value[i], ctx);
     return value;
   }
   if (!isRecord(value)) return value;
   const props = value["type"] === "image" && isRecord(value["props"]) ? value["props"] : undefined;
   const copy = props && typeof props["src"] === "string" ? ctx.copied(props["src"]) : undefined;
-  for (const [key, inner] of Object.entries(value)) value[key] = useCopies(inner, ctx);
+  for (const [key, inner] of Object.entries(value)) value[key] = pointAtCopies(inner, ctx);
   if (props && copy?.id) props["mediaId"] = copy.id;
   return value;
 }

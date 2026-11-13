@@ -44166,8 +44166,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/import/elementor/index.ts",
-          "search": "  if (options.media) useCopies(root, ctx);",
-          "replace": "  if (options.media && !root) useCopies(root, ctx);"
+          "search": "  if (options.media) pointAtCopies(root, ctx);",
+          "replace": "  if (options.media && !root) pointAtCopies(root, ctx);"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
@@ -47410,6 +47410,48 @@
       ],
       "command": ["bun", "test", "scripts/demo-deps.test.ts"],
       "expect": "\\(fail\\).*pins @astrojs/react 7.1.2"
+    },
+    {
+      "id": "W-1012/baseline-any-rule",
+      "requirement": "W-1012",
+      "description": "Any off-override counts as lint baseline, so the generator would drop the repo's own overrides.",
+      "edits": [
+        {
+          "file": "scripts/lint-baseline.ts",
+          "search": "    rules[0]?.[1] === \"off\" &&\n",
+          "replace": "    rules[0]?.[1] === \"off\" ||\n"
+        }
+      ],
+      "command": ["bun", "test", "scripts/lint-baseline.test.ts"],
+      "expect": "\\(fail\\).*only single-rule off-overrides"
+    },
+    {
+      "id": "W-1012/stale-entry-passes",
+      "requirement": "W-1012",
+      "description": "The baseline check reports stale entries but still passes.",
+      "edits": [
+        {
+          "file": "scripts/lint-baseline.ts",
+          "search": "      process.exit(1);\n",
+          "replace": "      process.exit(0);\n"
+        }
+      ],
+      "command": ["bun", "test", "scripts/lint-baseline.test.ts"],
+      "expect": "\\(fail\\).*no longer has the finding is reported"
+    },
+    {
+      "id": "W-1012/plugins-off",
+      "requirement": "W-1012",
+      "description": "The jsx-a11y plugin is turned off again.",
+      "edits": [
+        {
+          "file": ".oxlintrc.json",
+          "search": "\"jsx-a11y\",",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/lint-baseline.test.ts"],
+      "expect": "\\(fail\\).*plugins are on"
     }
   ]
 }
