@@ -140,3 +140,32 @@ describe("Testimonial over MCP (W-1022)", () => {
     ).toBe(false);
   });
 });
+
+describe("Social icons over MCP (W-1024)", () => {
+  test("Social links are allowed only in Social icons; add_element adds a list with links", async () => {
+    const types = await catalogue();
+    expect(types.get("social-icons")?.name).toBe("Social icons");
+    expect(
+      (types.get("social-link") as { allowedParents?: string[] } | undefined)?.allowedParents,
+    ).toEqual(["social-icons"]);
+    const pageId = await newPage();
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "social-icons",
+        props: { shape: "circle" },
+        children: [
+          { type: "social-link", props: { network: "github", href: "https://github.com/emvb" } },
+        ],
+      },
+    });
+    expect(added.success).toBe(true);
+    const stray = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "social-link", props: { network: "github", href: "https://github.com/x" } },
+    });
+    expect(stray.success).toBe(false);
+  });
+});

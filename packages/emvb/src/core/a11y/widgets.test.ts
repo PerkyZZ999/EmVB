@@ -104,3 +104,53 @@ describe("Testimonial (W-1022)", () => {
     expect(audit(quote("  "))).toEqual(["empty-alert:warning:tsti0001"]);
   });
 });
+
+describe("Social icons (W-1024)", () => {
+  const icons = (props: Record<string, unknown>, ...links: [string, string][]) => ({
+    id: "soci0001",
+    type: "social-icons",
+    props,
+    children: links.map(([network, href], i) => ({
+      id: `sl00000${i}`,
+      type: "social-link",
+      props: { network, href },
+    })),
+  });
+
+  test("links with addresses and readable colours are fine", () => {
+    expect(audit(icons({ brandColors: true }, ["facebook", "https://facebook.com/x"]))).toEqual([]);
+  });
+
+  test("a link with no usable address warns", () => {
+    expect(audit(icons({}, ["x", ""], ["github", "javascript:alert(1)"]))).toEqual([
+      "link-name:warning:sl000000",
+      "link-name:warning:sl000001",
+    ]);
+  });
+
+  test("brand colours under 3:1 on white are named once", () => {
+    const issues = auditPage(
+      {
+        schemaVersion: 18,
+        root: {
+          id: "root0001",
+          type: "container",
+          props: {},
+          children: [
+            { id: "head0001", type: "heading", props: { text: "T", level: 1 } },
+            icons(
+              { brandColors: true },
+              ["whatsapp", "https://wa.me/1"],
+              ["whatsapp", "https://wa.me/2"],
+              ["spotify", "https://open.spotify.com/x"],
+            ),
+          ],
+        },
+      } as Layout,
+      emptyDesign(),
+    ).issues;
+    expect(issues.map((i) => `${i.rule}:${i.nodeId}`)).toEqual(["contrast:soci0001"]);
+    expect(issues[0]?.message).toContain("WhatsApp, Spotify");
+    expect(audit(icons({}, ["whatsapp", "https://wa.me/1"]))).toEqual([]);
+  });
+});

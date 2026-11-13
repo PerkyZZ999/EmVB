@@ -1,4 +1,4 @@
-import { MAX_DEPTH, MAX_NODES, MAX_TABS } from "./limits.ts";
+import { MAX_DEPTH, MAX_NODES, MAX_SOCIAL_LINKS, MAX_TABS } from "./limits.ts";
 import {
   isContainerNode,
   isFormFieldType,
@@ -64,6 +64,9 @@ export const REASONS = {
   onlyAccordionItems: "An accordion can only hold accordion items.",
   itemOutsideMenu: "Menu items can only go inside a Menu.",
   onlyMenuItems: "A menu can only hold menu items.",
+  linkOutsideSocial: "Social links can only go inside Social icons.",
+  onlySocialLinks: "Social icons can only hold social links.",
+  tooManySocialLinks: `Social icons can hold up to ${MAX_SOCIAL_LINKS} links.`,
   emptyOutsideLoop: "An Empty state can only go inside a Loop.",
 } as const;
 
@@ -143,6 +146,12 @@ export function parentChildRefusal(
     return REASONS.itemOutsideMenu;
   }
   if (parent.type === "menu" && child.type !== "menu-item") return REASONS.onlyMenuItems;
+  if (child.type === "social-link" && parent.type !== "social-icons") {
+    return REASONS.linkOutsideSocial;
+  }
+  if (parent.type === "social-icons" && child.type !== "social-link") {
+    return REASONS.onlySocialLinks;
+  }
   if (isFormNode(child) && inForm) return REASONS.nestedForm;
   if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;
   return undefined;
@@ -158,6 +167,14 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
       !nodeChildren(into.node).some((child) => child.id === node.id) &&
       nodeChildren(into.node).length >= MAX_TABS,
     REASONS.tooManyTabs,
+  ],
+  // W-1024: as Tabs, a full Social icons takes no new link; moving within it is fine.
+  [
+    ({ node, into }) =>
+      into.node.type === "social-icons" &&
+      !nodeChildren(into.node).some((child) => child.id === node.id) &&
+      nodeChildren(into.node).length >= MAX_SOCIAL_LINKS,
+    REASONS.tooManySocialLinks,
   ],
   [({ node, into }) => into.depth + height(node) > MAX_DEPTH, REASONS.tooDeep],
   [

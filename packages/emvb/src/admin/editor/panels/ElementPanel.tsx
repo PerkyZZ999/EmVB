@@ -608,7 +608,7 @@ function KnownElementPanel({
       />
       {tab === "content" && (
         <div className="emvb-panel-body" data-emvb-tab="content">
-          {hasItemList(node.type) ? (
+          {hasItemList(node.type) && descriptor.fields.length === 0 ? (
             <ItemList node={node} onChange={onChange} onSelect={onSelect} actions={items} />
           ) : descriptor.fields.length === 0 ? (
             <p className="emvb-helper">
@@ -643,6 +643,10 @@ function KnownElementPanel({
                 controls
               );
             })
+          )}
+          {/* W-1024: an element with its own settings lists its items after them. */}
+          {hasItemList(node.type) && descriptor.fields.length > 0 && (
+            <ItemList node={node} onChange={onChange} onSelect={onSelect} actions={items} />
           )}
           <BindingsEditor node={node} onChange={onChange} post={SAMPLE_POST} />
           <AudienceEditor node={node} isRoot={layout?.root.id === node.id} onChange={onChange} />

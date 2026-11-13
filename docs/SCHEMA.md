@@ -140,6 +140,8 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `icon-box` | iconId, iconSvg, iconSize, title, titleLevel, text, position, href, newTab |
 | `image-box` | src, alt, decorative, mediaId, width, height, focalX, focalY, imageSize, title, titleLevel, text, position, href, newTab |
 | `testimonial` | quote, name, role, src, alt, mediaId, width, height, focalX, focalY, rating, ratingMax |
+| `social-icons` | label, shape, brandColors |
+| `social-link` | network, href, label, newTab |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { emptyDesign, renderPage, validateLayout, type LayoutNode } from "../index.ts";
+import { parentChildRefusal } from "../arrange.ts";
+import { SOCIAL_NETWORKS } from "../schema/layout.ts";
+import { SOCIAL_COLORS, SOCIAL_NAMES } from "./widgets.ts";
 
 const page = (...children: unknown[]) =>
   validateLayout({
@@ -262,5 +265,90 @@ describe("Testimonial (W-1022)", () => {
   test("ratings above 10 or fractional star counts are refused", () => {
     expect(page(testimonialNode({ rating: 11 })).ok).toBe(false);
     expect(page(testimonialNode({ rating: 3, ratingMax: 4.5 })).ok).toBe(false);
+  });
+});
+
+const socialLinkNode = (id: string, props: Record<string, unknown>) => ({
+  id,
+  type: "social-link",
+  props: { network: "instagram", href: "https://instagram.com/emvb", ...props },
+});
+const socialNode = (props: Record<string, unknown>, children: unknown[]) => ({
+  id: "soci0001",
+  type: "social-icons",
+  props,
+  children,
+});
+
+describe("Social icons (W-1024)", () => {
+  test("a named list of links, each named for its network, its brand icon hidden", () => {
+    const html = render(
+      socialNode({}, [
+        socialLinkNode("sl000001", { newTab: true }),
+        socialLinkNode("sl000002", { network: "email", href: "mailto:hi@example.com" }),
+      ]),
+    );
+    expect(html).toContain(
+      '<ul class="emvb-social-icons emvb-social-plain" aria-label="Social media">',
+    );
+    expect(html).toMatch(
+      /<li class="emvb-social-link emvb-social-instagram"><a href="https:\/\/instagram.com\/emvb" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><svg [^>]*class="emvb-social-svg" fill="currentColor" aria-hidden="true"/,
+    );
+    expect(html).toContain('<a href="mailto:hi@example.com" aria-label="Email">');
+  });
+
+  test("shape, brand colours, a list name and a link's own name are used", () => {
+    const result = page(
+      socialNode({ shape: "circle", brandColors: true, label: "Follow us" }, [
+        socialLinkNode("sl000001", { label: "Our Instagram" }),
+      ]),
+    );
+    if (!result.ok) throw new Error("invalid");
+    const { html, css } = renderPage(result.layout, emptyDesign());
+    expect(html).toContain(
+      '<ul class="emvb-social-icons emvb-social-circle emvb-social-brand" aria-label="Follow us">',
+    );
+    expect(html).toContain('aria-label="Our Instagram"');
+    expect(css).toContain(".emvb-social-brand .emvb-social-instagram{--emvb-social:#e4405f}");
+  });
+
+  test("a link without a safe address shows its icon dimmed, with no link", () => {
+    const html = render(
+      socialNode({}, [socialLinkNode("sl000001", { href: "javascript:alert(1)" })]),
+    );
+    expect(html.includes("<a ")).toBe(false);
+    expect(html).toContain(
+      'emvb-social-instagram emvb-social-empty"><span aria-hidden="true"><svg',
+    );
+  });
+
+  test("every network has an icon, a name and a colour", () => {
+    for (const network of SOCIAL_NETWORKS) {
+      const html = render(socialNode({}, [socialLinkNode("sl000001", { network })]));
+      expect(html).toContain("<svg");
+      expect(html).toContain(`aria-label="${SOCIAL_NAMES[network]}"`);
+      expect(SOCIAL_COLORS[network]).toMatch(/^#[0-9a-f]{6}$/);
+    }
+  });
+
+  test("Social icons hold only links; a link lives only in Social icons; networks are known", () => {
+    const icons = socialNode({}, []) as unknown as LayoutNode;
+    const link = socialLinkNode("sl000001", {}) as unknown as LayoutNode;
+    const heading = {
+      id: "head0001",
+      type: "heading",
+      props: { text: "x", level: 2 },
+    } as LayoutNode;
+    const box = { id: "box00001", type: "container", props: {}, children: [] } as LayoutNode;
+    expect(parentChildRefusal(icons, link, false)).toBeUndefined();
+    expect(parentChildRefusal(icons, heading, false)).toBe(
+      "Social icons can only hold social links.",
+    );
+    expect(parentChildRefusal(box, link, false)).toBe(
+      "Social links can only go inside Social icons.",
+    );
+    expect(page(socialNode({}, [socialLinkNode("sl000001", { network: "myspace" })])).ok).toBe(
+      false,
+    );
   });
 });

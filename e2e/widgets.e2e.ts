@@ -252,3 +252,68 @@ test("a Testimonial gets a 5-star rating and a new quote, and publishes as a fig
   await expect(published.locator("figcaption")).toContainText("Sam Rivera");
   await expect(published.locator("figcaption")).toContainText("Head of Marketing");
 });
+
+test("Social icons are added with three links, one is switched to GitHub, and they publish as named links in circles (W-1024)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Social");
+  await overlay(page).locator('[data-emvb-add-tile="social-icons"]').click();
+  const list = canvas(page).locator("ul.emvb-social-icons");
+  await expect(list.locator(".emvb-social-link")).toHaveCount(3);
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Social icons");
+  await overlay(page).getByLabel("Shape").click();
+  await page.getByRole("option", { name: "Circle", exact: true }).click();
+  await overlay(page).getByRole("switch", { name: "Brand colours" }).click();
+  await expect(list).toHaveClass(/emvb-social-circle/);
+
+  // The third link opens in its own panel; it becomes GitHub.
+  await canvas(page).locator(".emvb-social-linkedin").click();
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Social link");
+  await overlay(page).getByLabel("Network").click();
+  await page.getByRole("option", { name: "GitHub", exact: true }).click();
+  const address = overlay(page).getByLabel("Profile address", { exact: true });
+  await address.fill("https://github.com/emvb");
+  await address.blur();
+
+  await saveDraft(page);
+  const stored = await storedLayout<{
+    root: { children: { type: string; props: unknown; children?: { props: unknown }[] }[] };
+  }>(request, id);
+  const social = stored.root.children[1];
+  expect(social).toMatchObject({
+    type: "social-icons",
+    props: { shape: "circle", brandColors: true },
+  });
+  expect(social?.children?.[2]?.props).toMatchObject({
+    network: "github",
+    href: "https://github.com/emvb",
+  });
+
+  await publishPage(request, id);
+  await page.goto(`/${slug}`);
+  const published = page.getByRole("list", { name: "Social media" });
+  await expect(published.getByRole("link")).toHaveCount(3);
+  const github = published.getByRole("link", { name: "GitHub" });
+  await expect(github).toHaveAttribute("href", "https://github.com/emvb");
+  await expect(github).toHaveAttribute("target", "_blank");
+  // A circle badge in GitHub's colour, the icon inside it in white.
+  const look = await github.evaluate((a) => {
+    const css = getComputedStyle(a);
+    const svg = a.querySelector("svg");
+    return {
+      round: css.borderRadius,
+      background: css.backgroundColor,
+      icon: svg ? getComputedStyle(svg).color : "",
+      square:
+        Math.round(a.getBoundingClientRect().width) ===
+        Math.round(a.getBoundingClientRect().height),
+    };
+  });
+  expect(look).toEqual({
+    round: "50%",
+    background: "rgb(24, 23, 23)",
+    icon: "rgb(255, 255, 255)",
+    square: true,
+  });
+});

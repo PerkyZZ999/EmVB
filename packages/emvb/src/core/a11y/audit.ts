@@ -7,6 +7,8 @@ import { ICON_ANIMATION_LIMIT_MS, iconAnimationRuns } from "../icons/animation-r
 import { updateNode } from "../tree-ops.ts";
 import { DEVICES } from "../theme/popup-rules.ts";
 import { hiddenOnEveryDevice } from "../design/devices.ts";
+import { sanitizeHref } from "../sanitize/href.ts";
+import { SOCIAL_COLORS, SOCIAL_NAMES } from "../elements/widgets.ts";
 
 /**
  * W-572: text as a screen reader says it: invisible format characters (zero-width space, word
@@ -501,6 +503,38 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         severity: "warning",
         message: "This testimonial has no quote, so screen readers find an empty quotation.",
       });
+    }
+    // W-1024: a Social link without a usable address shows a dimmed icon that goes nowhere.
+    if (node.type === "social-link" && !node.bind) {
+      const href = typeof props["href"] === "string" ? props["href"].trim() : "";
+      if (!href || !sanitizeHref(href)) {
+        add({
+          nodeId: node.id,
+          rule: "link-name",
+          severity: "warning",
+          message:
+            "This social link has no address it can use, so it shows a dimmed icon and links nowhere.",
+        });
+      }
+    }
+    // W-1024: some networks' own colours are too faint on white for an icon (under 3:1).
+    if (node.type === "social-icons" && props["brandColors"] === true && isParentNode(node)) {
+      const faint = node.children
+        .map((child) => (child.props as { network?: string }).network)
+        .filter(
+          (network): network is keyof typeof SOCIAL_COLORS =>
+            typeof network === "string" &&
+            network in SOCIAL_COLORS &&
+            contrastRatio(SOCIAL_COLORS[network as keyof typeof SOCIAL_COLORS], "#ffffff") < 3,
+        );
+      if (faint.length > 0) {
+        add({
+          nodeId: node.id,
+          rule: "contrast",
+          severity: "warning",
+          message: `On a light background, ${[...new Set(faint)].map((n) => SOCIAL_NAMES[n]).join(", ")} in brand colours is under 3:1, as an icon or as a badge behind a white icon. Turn Brand colours off or put the icons on a dark background.`,
+        });
+      }
     }
     // W-1025: a notice with neither title nor text is a coloured box screen readers call a note.
     if (node.type === "alert" && !spoken(props["title"]) && !spoken(props["text"]) && !node.bind) {

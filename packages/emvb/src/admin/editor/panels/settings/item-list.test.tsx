@@ -364,3 +364,37 @@ describe("opening the accordion item that holds the selection (W-130)", () => {
     expect(open()).toEqual([false, true, true]);
   });
 });
+
+describe("Social icons links (W-1024)", () => {
+  test("a new Social icons starts with three valid links; Add link cycles the networks", async () => {
+    const node = newElement("social-icons");
+    if (!node || node.type !== "social-icons") throw new Error("expected social icons");
+    const network = (c: LayoutNode) => (c.props as { network?: string }).network;
+    expect(kidsOf(node).map(network)).toEqual(["facebook", "instagram", "linkedin"]);
+    expect(validateLayout(layoutWith(node)).ok).toBe(true);
+    const calls = await panel(node);
+    expect(inputLabelled("Link 2 address").value).toBe("https://instagram.com/");
+    await act(async () => button("Add link").click());
+    expect(kidsOf(calls.changed.at(-1)).map(network)).toEqual([
+      "facebook",
+      "instagram",
+      "linkedin",
+      "youtube",
+    ]);
+  });
+
+  test("Add link is off once a Social icons holds 20 links", async () => {
+    const full = {
+      id: "soci0001",
+      type: "social-icons",
+      props: {},
+      children: Array.from({ length: 20 }, (_, i) => ({
+        id: `sl${String(i).padStart(6, "0")}`,
+        type: "social-link",
+        props: { network: "x", href: "https://x.com/" },
+      })),
+    } as LayoutNode;
+    await panel(full);
+    expect(button("Add link").disabled).toBe(true);
+  });
+});

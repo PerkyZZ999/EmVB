@@ -17982,7 +17982,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
-          "search": "{hasItemList(node.type) ? (",
+          "search": "{hasItemList(node.type) && descriptor.fields.length === 0 ? (",
           "replace": "{false ? ("
         }
       ],
@@ -20870,8 +20870,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "      !nodeChildren(into.node).some((child) => child.id === node.id) &&\n",
-          "replace": ""
+          "search": "      into.node.type === \"tabs\" &&\n      !nodeChildren(into.node).some((child) => child.id === node.id) &&\n",
+          "replace": "      into.node.type === \"tabs\" &&\n"
         }
       ],
       "command": [
@@ -48076,6 +48076,156 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
       "expect": "\\(fail\\).*widget details survive"
+    },
+    {
+      "id": "W-1024/link-unnamed",
+      "requirement": "W-1024",
+      "description": "Social links have no name for screen readers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "            \"aria-label\": name,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*each named for its network"
+    },
+    {
+      "id": "W-1024/unsafe-link-kept",
+      "requirement": "W-1024",
+      "description": "A Social link keeps a javascript: address.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "    const safe = href.trim() ? sanitizeHref(href) : undefined;",
+          "replace": "    const safe = href.trim() ? href : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*without a safe address shows its icon dimmed"
+    },
+    {
+      "id": "W-1024/any-child",
+      "requirement": "W-1024",
+      "description": "Social icons take any element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "if (parent.type === \"social-icons\" && child.type !== \"social-link\") {",
+          "replace": "if (parent.type === \"social-icons\" && child.type === \"loop\") {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/arrange-social.test.ts"],
+      "expect": "\\(fail\\).*drops only into Social icons"
+    },
+    {
+      "id": "W-1024/no-cap",
+      "requirement": "W-1024",
+      "description": "Social icons take a 21st link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "      nodeChildren(into.node).length >= MAX_SOCIAL_LINKS,",
+          "replace": "      nodeChildren(into.node).length > MAX_SOCIAL_LINKS,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/arrange-social.test.ts"],
+      "expect": "\\(fail\\).*refuses a 21st link"
+    },
+    {
+      "id": "W-1024/no-item-list",
+      "requirement": "W-1024",
+      "description": "Social icons have no list of links in their panel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ItemList.tsx",
+          "search": "  \"social-icons\": {",
+          "replace": "  \"social-icons-off\": {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-1024"
+    },
+    {
+      "id": "W-1024/fields-hidden",
+      "requirement": "W-1024",
+      "description": "Social icons' Shape and Brand colours fields are hidden by the link list.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "          ) : descriptor.fields.length === 0 ? (\n",
+          "replace": "          ) : descriptor.fields.length === 0 || hasItemList(node.type) ? (\n"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1024/faint-unflagged",
+      "requirement": "W-1024",
+      "description": "Brand colours under 3:1 pass the accessibility check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "contrastRatio(SOCIAL_COLORS[network as keyof typeof SOCIAL_COLORS], \"#ffffff\") < 3,",
+          "replace": "contrastRatio(SOCIAL_COLORS[network as keyof typeof SOCIAL_COLORS], \"#ffffff\") < 1,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*under 3:1 on white are named once"
+    },
+    {
+      "id": "W-1024/import-colours-lost",
+      "requirement": "W-1024",
+      "description": "Imported Social Icons lose Elementor's brand colours.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "        ...(custom ? {} : { brandColors: true }),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*one link per profile"
+    },
+    {
+      "id": "W-1024/presets-stale",
+      "requirement": "W-1024",
+      "description": "The committed brand presets no longer match the icon library.",
+      "edits": [
+        {
+          "file": "scripts/build-social-icons.ts",
+          "search": "  x: [\"x-twitter\", 2],",
+          "replace": "  x: [\"square-x-twitter\", 2],"
+        }
+      ],
+      "command": ["bun", "test", "scripts/build-social-icons.test.ts"],
+      "expect": "\\(fail\\).*presets are up to date"
+    },
+    {
+      "id": "W-1024/badge-icon-dark",
+      "requirement": "W-1024",
+      "description": "Icons on badges keep the badge's colour, so they vanish.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "width:1.1em;height:1.1em;color:#fff}",
+          "replace": "width:1.1em;height:1.1em}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

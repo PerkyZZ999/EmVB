@@ -20,6 +20,7 @@ When an editor picks an icon, its SVG is stored with the page and shown inline o
 - Icons: Font Awesome Free by Fonticons, Inc., licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Full text: [`licenses/fontawesome-free.LICENSE`](licenses/fontawesome-free.LICENSE).
 - Changes: the attribution comment in each SVG file is removed by EmVB's sanitizer, so this notice carries the attribution. Each path's `fill="currentColor"` moves to the root `<svg>`.
 - Brand icons are trademarks of their owners. Use them only to represent the company, product or service they refer to.
+- The Social icons element (W-1024) ships 22 of these icons in the plugin itself (`src/core/icons/social.generated.ts`, built by `scripts/build-social-icons.ts` from the icon library's set), so public pages draw them without the library: 19 brand icons and the solid envelope, RSS and globe icons. Same license and changes as above.
 
 ## Tabler Icons
 

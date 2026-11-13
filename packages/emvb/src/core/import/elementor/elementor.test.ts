@@ -294,9 +294,9 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
       "accordion",
       "accordion-item",
       "text",
-      "container",
-      "icon",
-      "icon",
+      "social-icons",
+      "social-link",
+      "social-link",
       "grid",
       "image",
       "image",
@@ -1138,6 +1138,50 @@ describe("Elementor import: the 1.2 widgets (PLAN_1.2 part D)", () => {
     });
     expect(alert?.style).toEqual({ backgroundColor: "#ffeeee", borderColor: "#cc0000" });
     expect(notes(result)).not.toContain("dismissed");
+  });
+
+  test("W-1024: Social Icons become Social icons with one link per profile, in brand colours", () => {
+    const fa = (value: string, url: string) => ({
+      social_icon: { value, library: "fa-brands" },
+      link: { url, is_external: "on" },
+    });
+    const result = one("social-icons", {
+      shape: "circle",
+      social_icon_list: [
+        fa("fab fa-x-twitter", "https://x.com/emvb"),
+        fa("fab fa-linkedin-in", "https://linkedin.com/company/emvb"),
+      ],
+    });
+    const [icons] = ofType(result.layout, "social-icons");
+    expect(props(icons)).toEqual({ shape: "circle", brandColors: true });
+    expect(ofType(result.layout, "social-link").map((n) => props(n))).toEqual([
+      { network: "x", href: "https://x.com/emvb", newTab: true },
+      { network: "linkedin", href: "https://linkedin.com/company/emvb", newTab: true },
+    ]);
+  });
+
+  test("W-1024: a network without a preset keeps the widget as icons, nothing lost", () => {
+    const settings = {
+      social_icon_list: [
+        {
+          social_icon: { value: "fab fa-facebook", library: "fa-brands" },
+          link: { url: "https://facebook.com/x" },
+        },
+        {
+          social_icon: { value: "fab fa-vimeo-v", library: "fa-brands" },
+          link: { url: "https://vimeo.com/x" },
+        },
+      ],
+    };
+    // Every icon resolves here, so the fallback's two Icons are both kept.
+    const result = ok(
+      importElementor(
+        JSON.stringify([{ id: "w", elType: "widget", widgetType: "social-icons", settings }]),
+        { icon: () => SVG },
+      ),
+    );
+    expect(ofType(result.layout, "social-icons")).toEqual([]);
+    expect(ofType(result.layout, "icon")).toHaveLength(2);
   });
 
   test("W-1025: an unknown kind is an info Alert; an empty one is left out", () => {

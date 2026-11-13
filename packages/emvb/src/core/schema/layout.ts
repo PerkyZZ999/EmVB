@@ -776,6 +776,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "icon-box",
   "image-box",
   "testimonial",
+  "social-icons",
+  "social-link",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -920,6 +922,59 @@ export const TestimonialNode = leafNode(
   }),
 );
 
+/** W-1024: the Social icons presets (Font Awesome Free brand icons, plus email, RSS, website). */
+export const SOCIAL_NETWORKS = [
+  "facebook",
+  "instagram",
+  "x",
+  "linkedin",
+  "youtube",
+  "tiktok",
+  "bluesky",
+  "mastodon",
+  "threads",
+  "github",
+  "pinterest",
+  "whatsapp",
+  "discord",
+  "twitch",
+  "reddit",
+  "dribbble",
+  "behance",
+  "telegram",
+  "spotify",
+  "email",
+  "rss",
+  "website",
+] as const;
+/** W-1024: how each icon is drawn: on its own, or in a circle, rounded or square badge. */
+export const SOCIAL_SHAPES = ["plain", "circle", "rounded", "square"] as const;
+
+/**
+ * W-1024: a list of links to the site's social profiles, each a brand icon named for screen
+ * readers ("Instagram"). Holds Social links only. `label` names the list (unset "Social media");
+ * `brandColors` paints each icon in its network's colour; icons follow the font size.
+ */
+export const SocialIconsNodeSchema = parentNode(
+  "social-icons",
+  z.strictObject({
+    label: z.string().max(80).optional(),
+    shape: z.enum(SOCIAL_SHAPES).optional(),
+    brandColors: z.boolean().optional(),
+  }),
+);
+
+/** W-1024: one profile link in Social icons. `label` replaces the network's name. */
+export const SocialLinkNode = leafNode(
+  "social-link",
+  z.strictObject({
+    network: z.enum(SOCIAL_NETWORKS),
+    href: z.string().max(2000),
+    label: z.string().max(80).optional(),
+    newTab: z.boolean().optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -958,6 +1013,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   IconBoxNode,
   ImageBoxNode,
   TestimonialNode,
+  SocialIconsNodeSchema,
+  SocialLinkNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -1003,6 +1060,7 @@ export type AlertNode = z.infer<typeof AlertNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
+export type SocialLinkNode = z.infer<typeof SocialLinkNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
 export type TextNode = z.infer<typeof TextNode>;
@@ -1168,6 +1226,12 @@ export type AccordionNode = NodeEnvelope & {
   children: LayoutNode[];
 };
 
+export type SocialIconsNode = NodeEnvelope & {
+  type: "social-icons";
+  props: z.infer<typeof SocialIconsNodeSchema>["props"];
+  children: LayoutNode[];
+};
+
 export type MenuNode = NodeEnvelope & {
   type: "menu";
   props: { direction: "row" | "column"; label?: string };
@@ -1207,6 +1271,8 @@ export type LayoutNode =
   | IconBoxNode
   | ImageBoxNode
   | TestimonialNode
+  | SocialIconsNode
+  | SocialLinkNode
   | SpacerNode
   | DividerNode
   | TextNode
@@ -1415,7 +1481,8 @@ export const isParentNode = (
   | AccordionNode
   | AccordionItemNode
   | MenuNode
-  | MenuItemNode =>
+  | MenuItemNode
+  | SocialIconsNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -1430,7 +1497,8 @@ export const isParentNode = (
   node.type === "accordion" ||
   node.type === "accordion-item" ||
   node.type === "menu" ||
-  node.type === "menu-item";
+  node.type === "menu-item" ||
+  node.type === "social-icons";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

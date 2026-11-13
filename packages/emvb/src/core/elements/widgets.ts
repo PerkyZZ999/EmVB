@@ -8,9 +8,18 @@ import type {
   ImageBoxNode,
   LayoutNode,
   RatingNode,
+  SocialIconsNode,
+  SocialLinkNode,
   TestimonialNode,
 } from "../schema/layout.ts";
-import { ALERT_VARIANTS, MAX_RATING, type MEDIA_BOX_POSITIONS } from "../schema/layout.ts";
+import {
+  ALERT_VARIANTS,
+  MAX_RATING,
+  type MEDIA_BOX_POSITIONS,
+  SOCIAL_NETWORKS,
+} from "../schema/layout.ts";
+import { SOCIAL_ICONS } from "../icons/social.generated.ts";
+import { sanitizeSvgMarkup } from "../sanitize/svg.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { iconGlyph } from "./icon-svg.ts";
@@ -513,5 +522,182 @@ export const testimonial: ElementDefinition<TestimonialNode> = {
         children: caption,
       });
     return { tag: "figure", attrs, children };
+  },
+};
+
+type Network = SocialLinkNode["props"]["network"];
+
+/** W-1024: what screen readers call each network's link, unless the link has its own label. */
+export const SOCIAL_NAMES: Record<Network, string> = {
+  facebook: "Facebook",
+  instagram: "Instagram",
+  x: "X",
+  linkedin: "LinkedIn",
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  bluesky: "Bluesky",
+  mastodon: "Mastodon",
+  threads: "Threads",
+  github: "GitHub",
+  pinterest: "Pinterest",
+  whatsapp: "WhatsApp",
+  discord: "Discord",
+  twitch: "Twitch",
+  reddit: "Reddit",
+  dribbble: "Dribbble",
+  behance: "Behance",
+  telegram: "Telegram",
+  spotify: "Spotify",
+  email: "Email",
+  rss: "RSS feed",
+  website: "Website",
+};
+
+/** W-1024: each network's own colour, used when Brand colours is on. */
+export const SOCIAL_COLORS: Record<Network, string> = {
+  facebook: "#1877f2",
+  instagram: "#e4405f",
+  x: "#000000",
+  linkedin: "#0a66c2",
+  youtube: "#ff0000",
+  tiktok: "#000000",
+  bluesky: "#1185fe",
+  mastodon: "#6364ff",
+  threads: "#000000",
+  github: "#181717",
+  pinterest: "#bd081c",
+  whatsapp: "#25d366",
+  discord: "#5865f2",
+  twitch: "#9146ff",
+  reddit: "#ff4500",
+  dribbble: "#ea4c89",
+  behance: "#1769ff",
+  telegram: "#26a5e4",
+  spotify: "#1db954",
+  email: "#555555",
+  rss: "#ee802f",
+  website: "#555555",
+};
+
+/** A preset's icon as an aria-hidden SVG one em square. */
+function socialSvg(network: Network): VNode | undefined {
+  const icon = SOCIAL_ICONS[network];
+  const svg = sanitizeSvgMarkup(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}">${icon.body}</svg>`,
+  );
+  if (!svg) return undefined;
+  return {
+    ...svg,
+    attrs: {
+      ...svg.attrs,
+      class: "emvb-social-svg",
+      fill: "currentColor",
+      "aria-hidden": "true",
+      focusable: "false",
+    },
+  };
+}
+
+export const socialIcons: ElementDefinition<SocialIconsNode> = {
+  baseCss:
+    ".emvb-social-icons{display:flex;flex-wrap:wrap;align-items:center;gap:0.5em;margin:0;padding:0;list-style:none;font-size:1.5em}.emvb-social-link{display:flex}.emvb-social-link>a,.emvb-social-link>span{display:inline-flex;align-items:center;justify-content:center;color:inherit;text-decoration:none}.emvb-social-svg{display:block;width:1em;height:1em}.emvb-social-brand.emvb-social-plain .emvb-social-link>*{color:var(--emvb-social,currentColor)}.emvb-social-icons:not(.emvb-social-plain) .emvb-social-link>*{width:2em;height:2em;background:var(--emvb-social,currentColor)}.emvb-social-icons:not(.emvb-social-plain) .emvb-social-svg{width:1.1em;height:1.1em;color:#fff}.emvb-social-circle .emvb-social-link>*{border-radius:50%}.emvb-social-rounded .emvb-social-link>*{border-radius:0.4em}.emvb-social-link>a:focus-visible{outline:2px solid currentColor;outline-offset:2px}.emvb-social-empty{opacity:0.4}" +
+    SOCIAL_NETWORKS.map(
+      (network) =>
+        `.emvb-social-brand .emvb-social-${network}{--emvb-social:${SOCIAL_COLORS[network]}}`,
+    ).join(""),
+  defaults: () => ({ type: "social-icons", props: {}, children: [] }),
+  descriptor: {
+    type: "social-icons",
+    name: "Social icons",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "label",
+        kind: "text",
+        label: "List name",
+        optional: true,
+        message: "What screen readers call the list. Leave it empty for Social media.",
+      },
+      {
+        key: "shape",
+        kind: "select",
+        label: "Shape",
+        optional: true,
+        options: [
+          { value: "plain", label: "Icon only" },
+          { value: "circle", label: "Circle" },
+          { value: "rounded", label: "Rounded square" },
+          { value: "square", label: "Square" },
+        ],
+      },
+      { key: "brandColors", kind: "boolean", label: "Brand colours", optional: true },
+    ],
+  },
+  build: (node, attrs, children) => ({
+    tag: "ul",
+    attrs: {
+      ...attrs,
+      class:
+        `${attrs["class"] ?? ""} emvb-social-${node.props.shape ?? "plain"}${node.props.brandColors ? " emvb-social-brand" : ""}`.trim(),
+      "aria-label": node.props.label?.trim() || "Social media",
+    },
+    children,
+  }),
+};
+
+export const socialLink: ElementDefinition<SocialLinkNode> = {
+  baseCss: "",
+  defaults: () => ({
+    type: "social-link",
+    props: { network: "facebook", href: "https://facebook.com/", newTab: true },
+  }),
+  descriptor: {
+    type: "social-link",
+    name: "Social link",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "network",
+        kind: "select",
+        label: "Network",
+        options: SOCIAL_NETWORKS.map((value) => ({ value, label: SOCIAL_NAMES[value] })),
+      },
+      {
+        key: "href",
+        kind: "href",
+        label: "Profile address",
+        message: "Use a full URL such as https://instagram.com/yourname, or mailto: for email.",
+      },
+      {
+        key: "label",
+        kind: "text",
+        label: "Name for screen readers",
+        optional: true,
+        message: "Leave it empty to use the network's name.",
+      },
+      { key: "newTab", kind: "boolean", label: "Open in a new tab", optional: true },
+    ],
+  },
+  build: (node, attrs) => {
+    const { network, href, label, newTab } = node.props;
+    const icon = socialSvg(network);
+    const safe = href.trim() ? sanitizeHref(href) : undefined;
+    const name = label?.trim() || SOCIAL_NAMES[network];
+    const className =
+      `${attrs["class"] ?? ""} emvb-social-${network}${safe ? "" : " emvb-social-empty"}`.trim();
+    const inner: VNode = safe
+      ? {
+          tag: "a",
+          attrs: {
+            href: safe,
+            "aria-label": name,
+            ...(newTab ? { target: "_blank", rel: "noopener noreferrer" } : {}),
+          },
+          children: icon ? [icon] : [],
+        }
+      : { tag: "span", attrs: { "aria-hidden": "true" }, children: icon ? [icon] : [] };
+    return { tag: "li", attrs: { ...attrs, class: className }, children: [inner] };
   },
 };

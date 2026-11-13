@@ -7,9 +7,14 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import { MAX_TABS, type FieldDescriptor, type LayoutNode } from "../../../../core/index.ts";
+import {
+  MAX_SOCIAL_LINKS,
+  MAX_TABS,
+  type FieldDescriptor,
+  type LayoutNode,
+} from "../../../../core/index.ts";
 import { BUTTON } from "../../../ui.ts";
-import { newAccordionItem, newTabPanel } from "../../dnd/new-element.ts";
+import { newAccordionItem, newSocialLink, newTabPanel } from "../../dnd/new-element.ts";
 import { DraftTextField } from "./DraftTextField.tsx";
 
 /** Layout operations the list runs through the editor, so limits, history and Restore apply. */
@@ -38,6 +43,13 @@ const KINDS: Record<string, Kind> = {
     field: (n) => ({ key: "label", kind: "text", label: `Tab ${n} label` }),
     make: (n) => newTabPanel(n),
     max: MAX_TABS,
+  },
+  // W-1024: each row edits the link's address; its network and name are in its own panel.
+  "social-icons": {
+    noun: "link",
+    field: (n) => ({ key: "href", kind: "href", label: `Link ${n} address` }),
+    make: (n) => newSocialLink(n),
+    max: MAX_SOCIAL_LINKS,
   },
 };
 

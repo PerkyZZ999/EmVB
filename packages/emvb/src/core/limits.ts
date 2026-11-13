@@ -7,6 +7,8 @@ export const MAX_NODES = 2000;
 export const MAX_TEXT_LENGTH = 2000;
 /** Tabs show at most this many panels; the CSS-only switcher has a rule per tab. */
 export const MAX_TABS = 12;
+/** W-1024: most links one Social icons element holds. */
+export const MAX_SOCIAL_LINKS = 20;
 
 /**
  * W-509: `text` cut to at most `max` UTF-16 units, as schema limits count, without leaving half

@@ -83,6 +83,22 @@ export function newTabPanel(n: number, random?: () => number): LayoutNode {
   };
 }
 
+/** W-1024: the networks new Social links cycle through, and an example profile for each. */
+const STARTER_NETWORKS = [
+  ["facebook", "https://facebook.com/"],
+  ["instagram", "https://instagram.com/"],
+  ["linkedin", "https://linkedin.com/"],
+  ["youtube", "https://youtube.com/"],
+  ["x", "https://x.com/"],
+] as const;
+
+/** W-1024: a Social link for a new Social icons element or its Add link. */
+export function newSocialLink(n: number, random?: () => number): LayoutNode {
+  const [network, href] =
+    STARTER_NETWORKS[(n - 1) % STARTER_NETWORKS.length] ?? STARTER_NETWORKS[0];
+  return { id: newNodeId(random), type: "social-link", props: { network, href, newTab: true } };
+}
+
 /**
  * Default node for a new element from the Add panel. Only new inserts get starter children;
  * saved Accordions and Tabs with no items keep working as they are (W-130).
@@ -138,6 +154,12 @@ export function newElement(
         ]),
         item("About", "/about"),
       ],
+    };
+  }
+  if (type === "social-icons") {
+    return {
+      ...defaultElement("social-icons", newNodeId(random)),
+      children: [1, 2, 3].map((n) => newSocialLink(n, random)),
     };
   }
   if (type === "accordion") {

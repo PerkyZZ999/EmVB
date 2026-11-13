@@ -1204,7 +1204,103 @@ const BRANDS: Record<string, string> = {
   "square-x-twitter": "#000000",
 };
 
-const socialIcons: Widget = (s, ctx, el) => {
+/** W-1024: Font Awesome icon names Elementor's Social Icons use → EmVB's Social link networks. */
+const SOCIAL_FROM_FA: Record<string, string> = {
+  facebook: "facebook",
+  "facebook-f": "facebook",
+  "square-facebook": "facebook",
+  instagram: "instagram",
+  "square-instagram": "instagram",
+  twitter: "x",
+  "x-twitter": "x",
+  "square-x-twitter": "x",
+  "square-twitter": "x",
+  linkedin: "linkedin",
+  "linkedin-in": "linkedin",
+  youtube: "youtube",
+  "square-youtube": "youtube",
+  tiktok: "tiktok",
+  bluesky: "bluesky",
+  mastodon: "mastodon",
+  threads: "threads",
+  "square-threads": "threads",
+  github: "github",
+  "square-github": "github",
+  pinterest: "pinterest",
+  "pinterest-p": "pinterest",
+  "square-pinterest": "pinterest",
+  whatsapp: "whatsapp",
+  "square-whatsapp": "whatsapp",
+  discord: "discord",
+  twitch: "twitch",
+  reddit: "reddit",
+  "reddit-alien": "reddit",
+  dribbble: "dribbble",
+  behance: "behance",
+  telegram: "telegram",
+  "telegram-plane": "telegram",
+  spotify: "spotify",
+  envelope: "email",
+  rss: "rss",
+  globe: "website",
+};
+
+/**
+ * W-1024: Elementor's Social Icons → Social icons, one Social link per profile. Elementor's
+ * default colours are the brands', so they stay brand colours; custom ones become the badge
+ * colour. A network EmVB has no preset for (Vimeo, Snapchat…) keeps the whole widget as icons.
+ */
+const socialIcons: Widget = (s, ctx, el, env, raw) => {
+  const items = (Array.isArray(s["social_icon_list"]) ? s["social_icon_list"] : [])
+    .filter(isRecord)
+    .slice(0, 20);
+  const networks = items.map((item) => {
+    const value = item["social_icon"] ?? item["social"];
+    const name = isRecord(value) ? str(value["value"]) : str(value);
+    return SOCIAL_FROM_FA[(name ?? "").replace(/^fa[brs]? fa-/, "").replace(/^fa-/, "")];
+  });
+  if (items.length === 0 || networks.some((network) => !network))
+    return socialIconsAsIcons(s, ctx, el, env, raw);
+  const links = items.map((item, i) => {
+    const linkProps = href(item["link"], ctx);
+    return node(ctx, "social-link", {
+      network: networks[i],
+      href: linkProps.href ?? "",
+      ...(linkProps.newTab ? { newTab: true } : {}),
+    });
+  });
+  const shape = str(s["shape"]) ?? "rounded";
+  const custom = str(s["icon_color"]) === "custom";
+  const style: Style = {};
+  const size = slider(s["icon_size"]);
+  if (size && size.unit === "px") style.fontSize = { value: Math.round(size.value), unit: "px" };
+  const gap = slider(s["icon_spacing"]);
+  if (gap) style.gap = gap;
+  const where = textAlign(s["align"]);
+  if (where)
+    style.justifyContent =
+      where === "left" ? "flex-start" : where === "right" ? "flex-end" : "center";
+  if (custom) {
+    const badge = colorAt(s, "icon_primary_color", ctx);
+    if (badge) style.color = badge;
+    if (colorAt(s, "icon_secondary_color", ctx))
+      ctx.note("approximated", el, "Social icons draw their icons in white on the badge colour.");
+  }
+  return [
+    node(
+      ctx,
+      "social-icons",
+      {
+        shape: shape === "circle" || shape === "square" ? shape : "rounded",
+        ...(custom ? {} : { brandColors: true }),
+      },
+      { children: links, ...(Object.keys(style).length > 0 ? { style } : {}) },
+    ),
+  ];
+};
+
+/** Before W-1024, and still for networks without a preset: each icon an Icon on its colour. */
+const socialIconsAsIcons: Widget = (s, ctx, el) => {
   const items = Array.isArray(s["social_icon_list"]) ? s["social_icon_list"].slice(0, 50) : [];
   const size = slider(s["icon_size"]);
   const px = size && size.unit === "px" ? Math.round(size.value) : 25;
