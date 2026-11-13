@@ -242,3 +242,31 @@ test("page titles and descriptions are escaped in the document head", () => {
   expect(html).toContain('content="&quot;&gt;&lt;b&gt;"');
   expect(html.includes("<script>x")).toBe(false);
 });
+
+describe("buildSiteExport writes widget runtimes (W-1025)", () => {
+  const alert = (dismissible: boolean): LayoutNode =>
+    ({
+      id: "alrt0001",
+      type: "alert",
+      props: { variant: "info", text: "Saved.", ...(dismissible ? { dismissible } : {}) },
+    }) as LayoutNode;
+  const out = buildSiteExport({
+    design: emptyDesign(),
+    pages: [
+      { id: "p1", title: "Closable", slug: "closable", layout: layout([alert(true)]) },
+      { id: "p2", title: "Fixed", slug: "fixed", layout: layout([alert(false)]) },
+    ],
+    parts: [],
+    date: "2026-11-12",
+  });
+  const byPath = files(out);
+
+  test("a page with a dismissible Alert links the alerts script; one without doesn't", () => {
+    expect(byPath.get("closable/index.html")).toContain(
+      '<script src="../assets/emvb-alerts.js" defer></script>',
+    );
+    expect(byPath.get("fixed/index.html")?.includes("emvb-alerts.js")).toBe(false);
+    expect(byPath.get("assets/emvb-alerts.js")).toBe(EXPORT_RUNTIMES.alerts);
+    expect(EXPORT_RUNTIMES.alerts).toContain("data-emvb-alert-dismiss");
+  });
+});

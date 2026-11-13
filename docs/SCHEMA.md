@@ -136,6 +136,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `toc` | title |
 | `language-switcher` | label |
 | `rating` | value, max, label, size |
+| `alert` | variant, title, text, hideIcon, dismissible, dismissLabel |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

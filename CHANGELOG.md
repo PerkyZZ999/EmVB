@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Added
 
 - **Star rating (W-1023).** A new element in Add → Content: stars filled to a rating such as 4.5 out of 5, in the element's text colour, with half and part-filled stars. Screen readers hear "Rated 4.5 out of 5" (or your own text, with {value} and {max} filled in); the accessibility check warns when custom text doesn't say the rating. No script. Elementor's Star Rating widget now imports as one, title beside it, instead of star characters. Agents can add it over MCP.
+- **Alert (W-1025).** A notice in four kinds (information, success, warning, danger) with an optional title, its icon and colours that meet 7:1 contrast. "Visitors can dismiss it" adds a close button; its small script loads only on pages with such an Alert, and until it runs the button stays hidden, so it never does nothing. Closing it moves keyboard focus to what comes next. The accessibility check warns about an empty Alert. Elementor's Alert widget imports as one, dismiss included. Agents can add it over MCP.
+- **Widget scripts load themselves (W-1025).** `EmVBPage` now mounts the opt-in scripts of the 1.2 widgets a page uses, so pages need no change. For theme parts, add `<EmVBWidgetRuntimes names={theme.runtimes} />` (from `@perkyzz/emvb/astro/widgets`) to your site layout once. The HTML/CSS export writes the same scripts next to the pages that use them.
 
 ### Changed
 

@@ -277,9 +277,7 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
       "container",
       "text",
       "rating",
-      "container",
-      "text",
-      "text",
+      "alert",
       "tabs",
       "tab-panel",
       "text",
@@ -328,8 +326,15 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
     );
     expect(nodes(result.layout).some((n) => n.htmlId === "contact")).toBe(true);
     expect(ofType(result.layout, "text").map((n) => props(n)["text"])).toEqual(
-      expect.arrayContaining(["12500+", "Pages built", "Rated", "Heads up", "From HTML"]),
+      expect.arrayContaining(["12500+", "Pages built", "Rated", "From HTML"]),
     );
+    // W-1025: an Alert is an Alert of the same kind, without the icon Elementor doesn't show.
+    expect(props(ofType(result.layout, "alert")[0])).toEqual({
+      variant: "warning",
+      title: "Heads up",
+      text: "Backups run nightly.",
+      hideIcon: true,
+    });
     // W-1023: a Star Rating is a Rating, its title beside it.
     expect(props(ofType(result.layout, "rating")[0])).toEqual({ value: 4, max: 5 });
     expect(props(ofType(result.layout, "accordion-item")[0])).toMatchObject({ open: true });
@@ -1095,5 +1100,44 @@ describe("Elementor HTML to blocks (W-945)", () => {
       keep,
     );
     expect(blocks).toEqual([{ kind: "text", text: "a&b <tag> © 😀 next &bogus;" }]);
+  });
+});
+
+describe("Elementor import: the 1.2 widgets (PLAN_1.2 part D)", () => {
+  const one = (widgetType: string, settings: Record<string, unknown>) =>
+    ok(
+      importElementor(JSON.stringify([{ id: "w", elType: "widget", widgetType, settings }]), {
+        icon,
+      }),
+    );
+
+  test("W-1025: a dismissible Alert stays dismissible, with its own colours", () => {
+    const result = one("alert", {
+      alert_type: "danger",
+      alert_description: "Payment failed.",
+      show_dismiss: "show",
+      background: "#ffeeee",
+      border_color: "#cc0000",
+    });
+    const [alert] = ofType(result.layout, "alert");
+    expect(props(alert)).toEqual({
+      variant: "danger",
+      text: "Payment failed.",
+      hideIcon: true,
+      dismissible: true,
+    });
+    expect(alert?.style).toEqual({ backgroundColor: "#ffeeee", borderColor: "#cc0000" });
+    expect(notes(result)).not.toContain("dismissed");
+  });
+
+  test("W-1025: an unknown kind is an info Alert; an empty one is left out", () => {
+    expect(
+      props(ofType(one("alert", { alert_type: "odd", alert_title: "T" }).layout, "alert")[0]),
+    ).toMatchObject({ variant: "info", title: "T", text: "" });
+    const empty = importElementor(
+      JSON.stringify([{ id: "w", elType: "widget", widgetType: "alert", settings: {} }]),
+      { icon },
+    );
+    expect(empty.ok).toBe(false);
   });
 });

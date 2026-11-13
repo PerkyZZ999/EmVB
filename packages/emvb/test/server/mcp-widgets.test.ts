@@ -57,3 +57,25 @@ describe("Star rating over MCP (W-1023)", () => {
     expect(JSON.stringify(refused.error)).toContain("value");
   });
 });
+
+describe("Alert over MCP (W-1025)", () => {
+  test("add_element adds a dismissible warning; an unknown kind is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("alert")?.name).toBe("Alert");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "alert",
+        props: { variant: "warning", text: "Maintenance tonight.", dismissible: true },
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "alert", props: { variant: "error", text: "x" } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});

@@ -22627,8 +22627,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/render.ts",
-          "search": "    needsMenuRuntime,\n    ...(design.direction ? { dir: design.direction } : {}),\n    baseTypes,\n  };",
-          "replace": "    needsMenuRuntime,\n    baseTypes,\n  };"
+          "search": "    ...(runtimes.length > 0 ? { runtimes } : {}),\n    ...(design.direction ? { dir: design.direction } : {}),\n    baseTypes,\n  };",
+          "replace": "    ...(runtimes.length > 0 ? { runtimes } : {}),\n    baseTypes,\n  };"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
@@ -47681,6 +47681,133 @@
       "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
       "env": { "CI": "1" },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1025/runtime-never-asked",
+      "requirement": "W-1025",
+      "description": "A dismissible Alert no longer asks for the alerts runtime.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "  if (node.type === \"alert\" && (node as AlertNode).props.dismissible) return \"alerts\";",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*asks for the alerts runtime"
+    },
+    {
+      "id": "W-1025/dismiss-keeps-alert",
+      "requirement": "W-1025",
+      "description": "Pressing an Alert's close button leaves it on the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/alerts.ts",
+          "search": "      alert.hidden = true;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/alerts.test.ts"],
+      "expect": "\\(fail\\).*hides the Alert"
+    },
+    {
+      "id": "W-1025/page-skips-runtime",
+      "requirement": "W-1025",
+      "description": "EmVBPage no longer mounts the widget runtimes its page needs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/EmVBPage.astro",
+          "search": "      <EmVBWidgetRuntimes names={page.runtimes} />\n      <slot />\n    </>",
+          "replace": "      <slot />\n    </>"
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "FAIL.*W-1025"
+    },
+    {
+      "id": "W-1025/export-skips-runtime",
+      "requirement": "W-1025",
+      "description": "The HTML/CSS export leaves out the alerts script a page needs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "    for (const name of new Set(all.flatMap((r) => r.runtimes))) used.push(name);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*dismissible Alert links the alerts script"
+    },
+    {
+      "id": "W-1025/theme-skips-runtime",
+      "requirement": "W-1025",
+      "description": "Theme parts with a dismissible Alert don't report the alerts runtime.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve-theme.ts",
+          "search": "    ...partRuntimes(rendered),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*W-1025"
+    },
+    {
+      "id": "W-1025/dead-button-shown",
+      "requirement": "W-1025",
+      "description": "The close button shows before the script that makes it work.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": ".emvb-alert-dismiss:not([data-emvb-ready]){display:none}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*asks for the alerts runtime"
+    },
+    {
+      "id": "W-1025/hidden-beaten-by-flex",
+      "requirement": "W-1025",
+      "description": "A dismissed Alert stays visible: its display:flex beats the hidden attribute.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": ".emvb-alert[hidden]{display:none}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
+      "env": { "CI": "1" },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1025/import-icon-shown",
+      "requirement": "W-1025",
+      "description": "An imported Elementor Alert gains an icon Elementor didn't show.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "        hideIcon: true,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*W-1025"
+    },
+    {
+      "id": "W-1025/a11y-empty-silent",
+      "requirement": "W-1025",
+      "description": "An empty Alert passes the accessibility check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    if (node.type === \"alert\" && !spoken(props[\"title\"]) && !spoken(props[\"text\"]) && !node.bind) {",
+          "replace": "    if (node.type === \"alert\" && !spoken(props[\"title\"]) && !spoken(props[\"text\"]) && node.bind) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*an empty one warns"
     }
   ]
 }

@@ -91,3 +91,40 @@ test("a Star rating is added, set to 3.5 of 4, and published as an image with it
   ]);
   expect(await page.locator("script[src*='emvb'], script[data-emvb]").count()).toBe(0);
 });
+
+test("an Alert is added as a dismissible warning; on the page its close button hides it and keeps focus (W-1025)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Alerts");
+  await overlay(page).locator('[data-emvb-add-tile="alert"]').click();
+  const box = canvas(page).locator(".emvb-alert");
+  await expect(box).toHaveClass(/emvb-alert-info/);
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Alert");
+
+  await overlay(page).getByLabel("Kind").click();
+  await page.getByRole("option", { name: "Warning", exact: true }).click();
+  await expect(box).toHaveClass(/emvb-alert-warning/);
+  await overlay(page).getByRole("switch", { name: "Visitors can dismiss it" }).click();
+  // In the editor the close button stays hidden: the script runs on the public page only.
+  await expect(box.locator(".emvb-alert-dismiss")).toBeHidden();
+
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]).toMatchObject({
+    type: "alert",
+    props: { variant: "warning", dismissible: true },
+  });
+
+  await publishPage(request, id);
+  await page.goto(`/${slug}`);
+  const note = page.getByRole("note");
+  await expect(note).toContainText("Something your visitors should know.");
+  const close = note.getByRole("button", { name: "Dismiss" });
+  await expect(close).toBeVisible();
+  await close.focus();
+  await page.keyboard.press("Enter");
+  await expect(note).toBeHidden();
+  // Focus didn't fall back to the page: it is on an element, not the body.
+  expect(await page.evaluate(() => document.activeElement?.tagName ?? "")).not.toBe("BODY");
+});

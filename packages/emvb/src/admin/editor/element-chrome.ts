@@ -38,6 +38,7 @@ import {
   TextTIcon,
   UserIcon,
   VideoCameraIcon,
+  WarningCircleIcon,
   type Icon,
 } from "@phosphor-icons/react";
 import { ELEMENT_DESCRIPTORS } from "../../core/index.ts";
@@ -78,6 +79,7 @@ export const ELEMENT_ICONS: Record<string, Icon> = {
   toc: ListNumbersIcon,
   "language-switcher": TranslateIcon,
   rating: StarIcon,
+  alert: WarningCircleIcon,
   video: VideoCameraIcon,
   form: ArticleIcon,
   "text-input": TextboxIcon,

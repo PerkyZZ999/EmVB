@@ -2,8 +2,8 @@
  * The 1.2 widgets (PLAN_1.2 part D): elements built from plain markup and CSS. Each one renders
  * without script; the few interactive extras are opt-in runtimes.
  */
-import type { RatingNode } from "../schema/layout.ts";
-import { MAX_RATING } from "../schema/layout.ts";
+import type { AlertNode, LayoutNode, RatingNode } from "../schema/layout.ts";
+import { ALERT_VARIANTS, MAX_RATING } from "../schema/layout.ts";
 import type { VNode } from "../render/vnode.ts";
 import type { ElementDefinition } from "./definition.ts";
 
@@ -89,6 +89,146 @@ export const rating: ElementDefinition<RatingNode> = {
       tag: "div",
       attrs: { ...attrs, role: "img", "aria-label": ratingLabel(node.props) },
       children: stars,
+    };
+  },
+};
+
+/** W-1025: the opt-in public scripts the 1.2 widgets use; a page loads only the ones it needs. */
+export type WidgetRuntime = "alerts";
+
+/** The widget runtime one element needs, if any: only when it opts in. */
+export function nodeRuntime(node: LayoutNode): WidgetRuntime | undefined {
+  if (node.type === "alert" && (node as AlertNode).props.dismissible) return "alerts";
+  return undefined;
+}
+
+const ALERT_LABELS: Record<AlertNode["props"]["variant"], string> = {
+  info: "Information",
+  success: "Success",
+  warning: "Warning",
+  danger: "Danger",
+};
+
+/** Icon outlines on a 24 × 24 grid (stroke), one per variant. */
+const ALERT_ICONS: Record<AlertNode["props"]["variant"], VNode[]> = {
+  info: [
+    { tag: "circle", attrs: { cx: "12", cy: "12", r: "10" }, children: [] },
+    { tag: "path", attrs: { d: "M12 16v-4M12 8h.01" }, children: [] },
+  ],
+  success: [
+    { tag: "circle", attrs: { cx: "12", cy: "12", r: "10" }, children: [] },
+    { tag: "path", attrs: { d: "m9 12 2 2 4-4" }, children: [] },
+  ],
+  warning: [
+    {
+      tag: "path",
+      attrs: { d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" },
+      children: [],
+    },
+    { tag: "path", attrs: { d: "M12 9v4M12 17h.01" }, children: [] },
+  ],
+  danger: [
+    { tag: "circle", attrs: { cx: "12", cy: "12", r: "10" }, children: [] },
+    { tag: "path", attrs: { d: "m15 9-6 6M9 9l6 6" }, children: [] },
+  ],
+};
+
+const strokeSvg = (className: string, size: number, children: VNode[]): VNode => ({
+  tag: "svg",
+  attrs: {
+    xmlns: "http://www.w3.org/2000/svg",
+    class: className,
+    width: String(size),
+    height: String(size),
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    "stroke-width": "2",
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+    "aria-hidden": "true",
+    focusable: "false",
+  },
+  children,
+});
+
+/** Text colour, background and border per variant; every pair is at least 7:1. */
+const ALERT_COLORS: Record<AlertNode["props"]["variant"], [string, string, string]> = {
+  info: ["#0b3d75", "#eaf2fd", "#b6d3f5"],
+  success: ["#14532d", "#e9f7ef", "#b7e4c7"],
+  warning: ["#5c3b00", "#fff7e0", "#f5d48a"],
+  danger: ["#7f1d1d", "#fdecec", "#f5b5b5"],
+};
+
+export const alert: ElementDefinition<AlertNode> = {
+  baseCss:
+    ".emvb-alert{display:flex;gap:0.75em;align-items:flex-start;padding:0.875em 1em;border:1px solid;border-radius:6px}.emvb-alert[hidden]{display:none}.emvb-alert-icon{flex:none;margin-top:0.125em}.emvb-alert-body{flex:1;min-width:0}.emvb-alert-title{margin:0 0 0.25em;font-weight:600}.emvb-alert-text{margin:0;white-space:pre-line}.emvb-alert-dismiss{flex:none;display:inline-flex;margin:-0.25em -0.25em 0 0;padding:0.25em;border:0;border-radius:4px;background:none;color:inherit;cursor:pointer}.emvb-alert-dismiss:not([data-emvb-ready]){display:none}.emvb-alert-dismiss:focus-visible{outline:2px solid currentColor;outline-offset:2px}" +
+    ALERT_VARIANTS.map((variant) => {
+      const [color, background, border] = ALERT_COLORS[variant];
+      return `.emvb-alert-${variant}{color:${color};background-color:${background};border-color:${border}}`;
+    }).join(""),
+  defaults: () => ({
+    type: "alert",
+    props: { variant: "info", title: "Heads up", text: "Something your visitors should know." },
+  }),
+  descriptor: {
+    type: "alert",
+    name: "Alert",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "variant",
+        kind: "select",
+        label: "Kind",
+        options: ALERT_VARIANTS.map((value) => ({ value, label: ALERT_LABELS[value] })),
+      },
+      { key: "title", kind: "text", label: "Title", optional: true },
+      { key: "text", kind: "textarea", label: "Text" },
+      { key: "hideIcon", kind: "boolean", label: "Hide the icon", optional: true },
+      { key: "dismissible", kind: "boolean", label: "Visitors can dismiss it", optional: true },
+      {
+        key: "dismissLabel",
+        kind: "text",
+        label: "Dismiss button name",
+        optional: true,
+        message: "What screen readers call the close button. Leave it empty for Dismiss.",
+      },
+    ],
+  },
+  build: (node, attrs) => {
+    const { variant, title, text, hideIcon, dismissible, dismissLabel } = node.props;
+    const body: VNode[] = [];
+    if (title?.trim())
+      body.push({ tag: "p", attrs: { class: "emvb-alert-title" }, children: [title] });
+    if (text.trim()) body.push({ tag: "p", attrs: { class: "emvb-alert-text" }, children: [text] });
+    const children: (VNode | string)[] = [];
+    if (!hideIcon) children.push(strokeSvg("emvb-alert-icon", 20, ALERT_ICONS[variant]));
+    children.push({ tag: "div", attrs: { class: "emvb-alert-body" }, children: body });
+    if (dismissible) {
+      children.push({
+        tag: "button",
+        attrs: {
+          type: "button",
+          class: "emvb-alert-dismiss",
+          "data-emvb-alert-dismiss": "",
+          "aria-label": dismissLabel?.trim() || "Dismiss",
+        },
+        children: [
+          strokeSvg("emvb-alert-close", 16, [
+            { tag: "path", attrs: { d: "M18 6 6 18M6 6l12 12" }, children: [] },
+          ]),
+        ],
+      });
+    }
+    return {
+      tag: "div",
+      attrs: {
+        ...attrs,
+        class: `${attrs["class"] ?? ""} emvb-alert-${variant}`.trim(),
+        role: "note",
+      },
+      children,
     };
   },
 };

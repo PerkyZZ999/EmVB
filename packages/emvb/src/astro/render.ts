@@ -9,6 +9,7 @@ import {
   type Layout,
   type ThemeDynamicData,
 } from "../core/index.ts";
+import type { WidgetRuntime } from "../core/elements/widgets.ts";
 import { PLUGIN_ID } from "../constants.ts";
 
 export type RenderedPage = {
@@ -17,6 +18,11 @@ export type RenderedPage = {
   needsFormsRuntime: boolean;
   needsTabsRuntime: boolean;
   needsMenuRuntime: boolean;
+  /**
+   * W-1025: the opt-in widget scripts this page needs (a dismissible Alert…). `EmVBPage` loads
+   * them itself; set only when there is one.
+   */
+  runtimes?: WidgetRuntime[];
   /** The site's text direction when set, for the host's `<html dir>` (W-230). */
   dir?: "ltr" | "rtl" | "auto";
   /** W-971: the element types whose base rules `css` holds, for `sharedPartCss`. */
@@ -113,7 +119,8 @@ export function renderStored(
     });
     return empty;
   }
-  const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime, baseTypes } = result;
+  const { html, css, needsFormsRuntime, needsTabsRuntime, needsMenuRuntime, baseTypes, runtimes } =
+    result;
   for (const warning of result.warnings) {
     if (warning.code !== "refused-markup") continue;
     // oxlint-disable-next-line no-console
@@ -125,6 +132,7 @@ export function renderStored(
     needsFormsRuntime,
     needsTabsRuntime,
     needsMenuRuntime,
+    ...(runtimes.length > 0 ? { runtimes } : {}),
     ...(design.direction ? { dir: design.direction } : {}),
     baseTypes,
   };

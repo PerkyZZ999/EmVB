@@ -16,6 +16,7 @@ import { EmVBPopupsRuntime } from "@perkyzz/emvb/astro/popups";
 import { EmVBFormsRuntime } from "@perkyzz/emvb/astro/forms/client";
 import { EmVBMenuRuntime } from "@perkyzz/emvb/astro/menu";
 import { EmVBTabsRuntime } from "@perkyzz/emvb/astro/tabs";
+import { EmVBWidgetRuntimes } from "@perkyzz/emvb/astro/widgets";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
 interface Props {
@@ -175,6 +176,7 @@ const pageCtx = createPublicPageContext({
 		{theme.needsTabsRuntime && <EmVBTabsRuntime />}
 		{theme.needsFormsRuntime && <EmVBFormsRuntime />}
 		{theme.needsMenuRuntime && <EmVBMenuRuntime />}
+		<EmVBWidgetRuntimes names={theme.runtimes} />
 
 		<EmDashBodyEnd page={pageCtx} />
 	</body>

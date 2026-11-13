@@ -351,3 +351,10 @@ the page (see Unknown element types above). Each renders without script.
 | Type | `props` | Children | Renders as |
 | --- | --- | --- | --- |
 | `rating` (shown as "Star rating", W-1023) | `value` (0–10, any decimal; shown to one decimal), optional `max` (whole number 1–10, unset 5; a `value` above it shows as `max`, so lowering it never makes a page invalid), `label` (≤ 120; `{value}` and `{max}` are filled in; unset "Rated {value} out of {max}"), `size` (8–128 px per star, unset 20) | none | `<div role="img" aria-label="Rated 4.5 out of 5">` with one `aria-hidden` star SVG per point, filled in the element's text colour; a part-filled star is the filled star cut by its `viewBox` over a 25 % star. Right to left, stars fill from the right |
+| `alert` (W-1025) | `variant` (`info`, `success`, `warning`, `danger`), optional `title` (≤ 200), `text` (≤ 2000; line breaks kept), optional `hideIcon`, `dismissible`, `dismissLabel` (≤ 80, unset "Dismiss") | none | `<div role="note" class="emvb-alert emvb-alert-<variant>">` in the variant's colours (text on background at least 7:1, overridable by the element's styles), its `aria-hidden` icon unless `hideIcon`, then the title and text paragraphs. `dismissible` adds `<button type="button" data-emvb-alert-dismiss aria-label="Dismiss">`, hidden by CSS until the opt-in alerts runtime marks it ready; that script hides the Alert on press and moves focus to the next focusable element. The page then lists `"alerts"` in `runtimes` |
+
+**Widget runtimes (W-1025).** `renderPage` returns `runtimes`, the opt-in widget scripts the rendered
+elements asked for (sorted; empty for most pages). `renderStored` and `resolveThemeParts` set it only
+when it is not empty. `EmVBPage` mounts them itself; a site layout mounts its theme parts' with
+`<EmVBWidgetRuntimes names={theme.runtimes} />` from `@perkyzz/emvb/astro/widgets`. The HTML/CSS
+export writes each one next to the pages that use it (`assets/emvb-alerts.js`).

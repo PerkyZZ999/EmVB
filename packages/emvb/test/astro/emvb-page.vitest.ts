@@ -107,3 +107,30 @@ test("blank canvas mode uses the page's language, and ignores one that isn't a l
   });
   expect(odd.startsWith('<html lang="en">')).toBe(true);
 });
+
+test("W-1025: a page with a dismissible Alert loads the alerts script; others load none", async () => {
+  const container = await AstroContainer.create();
+  const layout = s1Page();
+  layout.root.children = [
+    {
+      id: "alrt0001",
+      type: "alert",
+      props: { variant: "info", text: "Saved.", dismissible: true },
+    } as never,
+  ];
+  const { html, css, runtimes } = renderPage(layout, DESIGN);
+  expect(runtimes).toEqual(["alerts"]);
+  const output = await container.renderToString(EmVBPage, {
+    props: { page: { html, css, runtimes } },
+  });
+  expect(output.match(/<script/g)).toHaveLength(1);
+  expect(output).toContain("EmVBAlertsRuntime");
+  const standalone = await container.renderToString(EmVBPage, {
+    props: { page: { html, css, runtimes }, standalone: true, title: "T" },
+  });
+  expect(standalone.match(/<script/g)).toHaveLength(1);
+  const plain = await container.renderToString(EmVBPage, {
+    props: { page: { html, css, runtimes: [] } },
+  });
+  expect(plain).not.toContain("<script");
+});

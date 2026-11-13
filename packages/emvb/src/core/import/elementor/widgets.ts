@@ -999,39 +999,37 @@ const starRating: Widget = (s, ctx, el) => {
   ];
 };
 
-const INFO_ALERT: [string, string, string] = ["#d9edf7", "#bcdff1", "#31708f"];
-const ALERTS: Record<string, [string, string, string]> = {
-  info: ["#d9edf7", "#bcdff1", "#31708f"],
-  success: ["#dff0d8", "#cae6be", "#3c763d"],
-  warning: ["#fcf8e3", "#f9f0c3", "#8a6d3b"],
-  danger: ["#f2dede", "#e8c4c4", "#a94442"],
-};
+const ALERT_KINDS = new Set(["info", "success", "warning", "danger"]);
 
-const alert: Widget = (s, ctx, el) => {
-  const [bg, border, ink] = ALERTS[str(s["alert_type"]) ?? "info"] ?? INFO_ALERT;
-  const children: N[] = [];
+/**
+ * W-1025: Elementor's Alert → an Alert of the same kind. Elementor shows no icon, so neither does
+ * the import; its own colours, when set, stay as the element's styles; Dismiss stays dismissible.
+ */
+const alert: Widget = (s, ctx) => {
   const title = plain(s["alert_title"]).text;
-  if (title)
-    children.push(
-      node(ctx, "text", { text: short(title), tag: "div" }, { style: { fontWeight: "bold" } }),
-    );
   const description = plain(s["alert_description"]).text;
-  if (description) children.push(node(ctx, "text", { text: short(description) }));
-  if (children.length === 0) return [];
-  if (str(s["show_dismiss"]) === "show") ctx.note("approximated", el, "Alerts can't be dismissed.");
+  if (!title && !description) return [];
+  const kind = str(s["alert_type"]) ?? "info";
+  const style: Style = {};
+  const background = colorAt(s, "background", ctx);
+  const border = colorAt(s, "border_color", ctx);
+  const ink = colorAt(s, "title_color", ctx);
+  if (background) style.backgroundColor = background;
+  if (border) style.borderColor = border;
+  if (ink) style.color = ink;
   return [
-    box(ctx, children, {
-      gap: { value: 5, unit: "px" },
-      backgroundColor: colorAt(s, "background", ctx) ?? bg,
-      borderStyle: "solid",
-      borderLeftWidth: { value: 5, unit: "px" },
-      borderColor: colorAt(s, "border_color", ctx) ?? border,
-      color: colorAt(s, "title_color", ctx) ?? ink,
-      paddingTop: { value: 15, unit: "px" },
-      paddingBottom: { value: 15, unit: "px" },
-      paddingLeft: { value: 15, unit: "px" },
-      paddingRight: { value: 15, unit: "px" },
-    }),
+    node(
+      ctx,
+      "alert",
+      {
+        variant: ALERT_KINDS.has(kind) ? kind : "info",
+        ...(title ? { title: short(title, 200) } : {}),
+        text: short(description),
+        hideIcon: true,
+        ...(str(s["show_dismiss"]) === "show" ? { dismissible: true } : {}),
+      },
+      Object.keys(style).length > 0 ? { style } : {},
+    ),
   ];
 };
 

@@ -1,5 +1,5 @@
 /**
- * Bundles the public popup, tabs, menu and float scripts into strings the HTML/CSS export writes
+ * Bundles the public popup, tabs, menu, float and widget scripts into strings the HTML/CSS export writes
  * next to exported pages (W-963). The package ships TypeScript source, so the bundles are
  * generated here and committed; `export-runtimes.test.ts` fails when they are out of date.
  *
@@ -16,6 +16,7 @@ const RUNTIMES = {
   tabs: ["tabs/runtime.ts", "initTabs"],
   menu: ["menu/runtime.ts", "initMenus"],
   floats: ["floats/runtime.ts", "initFloats"],
+  alerts: ["widgets/alerts.ts", "initAlerts"],
 } as const;
 
 async function bundle(file: string, init: string): Promise<string> {

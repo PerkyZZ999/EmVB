@@ -38,3 +38,20 @@ describe("Star rating (W-1023)", () => {
     expect(audit(rating("Customer rating"))).toEqual(["image-alt:warning:rate0001"]);
   });
 });
+
+describe("Alert (W-1025)", () => {
+  const alert = (props: Record<string, unknown>) => ({
+    id: "alrt0001",
+    type: "alert",
+    props: { variant: "info", text: "", ...props },
+  });
+
+  test("a title or text is enough", () => {
+    expect(audit(alert({ text: "Saved." }))).toEqual([]);
+    expect(audit(alert({ title: "Saved" }))).toEqual([]);
+  });
+
+  test("an empty one warns", () => {
+    expect(audit(alert({ title: " ", text: "\u200b" }))).toEqual(["empty-alert:warning:alrt0001"]);
+  });
+});

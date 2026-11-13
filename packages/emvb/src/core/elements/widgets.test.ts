@@ -69,3 +69,55 @@ describe("Star rating (W-1023)", () => {
     );
   });
 });
+
+const alertNode = (props: Record<string, unknown>) => ({
+  id: "alrt0001",
+  type: "alert",
+  props: { variant: "info", text: "Backups run nightly.", ...props },
+});
+
+describe("Alert (W-1025)", () => {
+  test("a note with its icon, title and text, in the variant's colours", () => {
+    const result = page(alertNode({ variant: "warning", title: "Heads up" }));
+    if (!result.ok) throw new Error("invalid");
+    const { html, css, runtimes } = renderPage(result.layout, emptyDesign());
+    expect(html).toContain('class="emvb-alert emvb-alert-warning" role="note"');
+    expect(html).toContain('<svg xmlns="http://www.w3.org/2000/svg" class="emvb-alert-icon"');
+    expect(html).toContain(
+      '<div class="emvb-alert-body"><p class="emvb-alert-title">Heads up</p><p class="emvb-alert-text">Backups run nightly.</p></div>',
+    );
+    expect(css).toContain(
+      ".emvb-alert-warning{color:#5c3b00;background-color:#fff7e0;border-color:#f5d48a}",
+    );
+    expect(html.includes("<button")).toBe(false);
+    expect(runtimes).toEqual([]);
+  });
+
+  test("hideIcon drops the icon; an empty title is left out; text is escaped", () => {
+    const html = render(alertNode({ hideIcon: true, title: "  ", text: "<script>x</script>" }));
+    expect(html.includes("emvb-alert-icon")).toBe(false);
+    expect(html.includes("emvb-alert-title")).toBe(false);
+    expect(html).toContain("&lt;script&gt;x&lt;/script&gt;");
+  });
+
+  test("dismissible adds a named close button and asks for the alerts runtime", () => {
+    const result = page(alertNode({ dismissible: true, dismissLabel: "Close notice" }));
+    if (!result.ok) throw new Error("invalid");
+    const { html, css, runtimes } = renderPage(result.layout, emptyDesign());
+    expect(html).toContain(
+      '<button type="button" class="emvb-alert-dismiss" data-emvb-alert-dismiss="" aria-label="Close notice">',
+    );
+    // Without the script, the button stays out of sight.
+    expect(css).toContain(".emvb-alert-dismiss:not([data-emvb-ready]){display:none}");
+    // The runtime hides a dismissed Alert with the hidden attribute, which display:flex would beat.
+    expect(css).toContain(".emvb-alert[hidden]{display:none}");
+    expect(runtimes).toEqual(["alerts"]);
+    expect(render(alertNode({ dismissible: true }))).toContain('aria-label="Dismiss"');
+  });
+
+  test("only the four kinds are accepted", () => {
+    expect(page(alertNode({ variant: "error" })).ok).toBe(false);
+    for (const variant of ["info", "success", "warning", "danger"])
+      expect(page(alertNode({ variant })).ok).toBe(true);
+  });
+});

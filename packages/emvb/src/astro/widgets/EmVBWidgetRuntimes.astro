@@ -1,0 +1,15 @@
+---
+/**
+ * W-1025: the opt-in scripts of the 1.2 widgets, each mounted only when `names` asks for it.
+ * `EmVBPage` renders this for its page; for theme parts, pass `theme.runtimes`.
+ */
+import EmVBAlertsRuntime from "./EmVBAlertsRuntime.astro";
+
+interface Props {
+  names?: readonly string[] | undefined;
+}
+
+const names = new Set(Astro.props.names ?? []);
+---
+
+{names.has("alerts") && <EmVBAlertsRuntime />}

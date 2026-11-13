@@ -453,6 +453,22 @@ describe("resolveThemeParts (R-062)", () => {
     expect((await resolveThemeParts(astro("/about"))).needsTabsRuntime).toBe(true);
   });
 
+  test("W-1025: a dismissible Alert in any winning part lists the alerts runtime once", async () => {
+    const alert = (id: string, dismissible: boolean): LayoutNode =>
+      ({
+        id,
+        type: "alert",
+        props: { variant: "info", text: "Note", ...(dismissible ? { dismissible } : {}) },
+      }) as LayoutNode;
+    themeEntries = [part("HEAD0001", "header", [alert("alrt0001", false)])];
+    expect((await resolveThemeParts(astro("/about"))).runtimes).toBeUndefined();
+    themeEntries = [
+      part("HEAD0001", "header", [alert("alrt0001", true)]),
+      part("POPUP001", "popup", [alert("alrt0002", true)]),
+    ];
+    expect((await resolveThemeParts(astro("/about"))).runtimes).toEqual(["alerts"]);
+  });
+
   test("a form in a header asks for the forms runtime", async () => {
     const form = {
       id: "form0001",

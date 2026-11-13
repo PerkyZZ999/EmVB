@@ -16,6 +16,7 @@ import {
   scopeWrapperCss,
 } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
+import { nodeRuntime, type WidgetRuntime } from "../elements/widgets.ts";
 import { controlId } from "../elements/field-id.ts";
 import { layoutHasForm } from "../forms/binding.ts";
 import { nodeChildren, someNode } from "../tree-ops.ts";
@@ -87,6 +88,11 @@ export type RenderResult = {
   needsTabsRuntime: boolean;
   /** A Menu has a dropdown: hosts load `EmVBMenuRuntime` (W-197). */
   needsMenuRuntime: boolean;
+  /**
+   * W-1025: the opt-in widget scripts the page's elements asked for, sorted; empty for most
+   * pages. `EmVBPage` loads them; a theme part's go to `EmVBWidgetRuntimes`.
+   */
+  runtimes: WidgetRuntime[];
   /** The site's text direction when set in Site styles, for the host's `<html dir>` (W-230). */
   dir?: "ltr" | "rtl" | "auto";
   warnings: RenderWarning[];
@@ -326,6 +332,7 @@ export function renderPage(
   // W-253: runtimes follow what renders, including synced section and loop item contents,
   // which the page's own layout doesn't hold.
   const rendered = { form: false, tabs: false, menuDropdown: false };
+  const runtimes = new Set<WidgetRuntime>();
   let sectionBudget = MAX_SECTION_ELEMENTS;
   const ctx: RenderContext = {
     takeSectionBudget: (nodes) => {
@@ -645,6 +652,8 @@ export function renderPage(
     if (isFormNode(node) && node.props.formId.trim()) rendered.form = true;
     if (isTabsNode(node)) rendered.tabs = true;
     if (type === "menu-item" && hasChildren(node)) rendered.menuDropdown = true;
+    const runtime = nodeRuntime(node as LayoutNode);
+    if (runtime) runtimes.add(runtime);
     const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
     const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId);
     if (mode === "editor" && hasBindings(stored)) attrs["data-emvb-bound"] = "";
@@ -801,6 +810,7 @@ export function renderPage(
     needsFormsRuntime: rendered.form || layoutHasForm(layout),
     needsTabsRuntime: rendered.tabs || layoutHasTabs(layout),
     needsMenuRuntime: rendered.menuDropdown || layoutHasMenuDropdown(layout),
+    runtimes: [...runtimes].toSorted(),
     ...(design.direction ? { dir: design.direction } : {}),
     warnings,
     baseTypes: [...usedTypes],

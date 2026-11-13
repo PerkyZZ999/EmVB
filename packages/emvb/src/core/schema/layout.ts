@@ -772,6 +772,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "toc",
   "language-switcher",
   "rating",
+  "alert",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -812,6 +813,27 @@ export const RatingNode = leafNode(
   }),
 );
 
+/** W-1025: the kinds of Alert, each with its own colours and icon. */
+export const ALERT_VARIANTS = ["info", "success", "warning", "danger"] as const;
+
+/**
+ * W-1025: a notice: an optional title and text in the variant's colours, with its icon unless
+ * `hideIcon`. `dismissible` adds a close button that the opt-in alerts runtime shows and wires;
+ * without that script the notice simply stays.
+ */
+export const AlertNode = leafNode(
+  "alert",
+  z.strictObject({
+    variant: z.enum(ALERT_VARIANTS),
+    title: z.string().max(200).optional(),
+    text: z.string().max(MAX_TEXT_LENGTH),
+    hideIcon: z.boolean().optional(),
+    dismissible: z.boolean().optional(),
+    /** The close button's name for screen readers. Unset = "Dismiss". */
+    dismissLabel: z.string().max(80).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -846,6 +868,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   TocNode,
   LanguageSwitcherNode,
   RatingNode,
+  AlertNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -887,6 +910,7 @@ export type HeadingNode = z.infer<typeof HeadingNode>;
 export type TocNode = z.infer<typeof TocNode>;
 export type LanguageSwitcherNode = z.infer<typeof LanguageSwitcherNode>;
 export type RatingNode = z.infer<typeof RatingNode>;
+export type AlertNode = z.infer<typeof AlertNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
 export type TextNode = z.infer<typeof TextNode>;
@@ -1087,6 +1111,7 @@ export type LayoutNode =
   | TocNode
   | LanguageSwitcherNode
   | RatingNode
+  | AlertNode
   | SpacerNode
   | DividerNode
   | TextNode

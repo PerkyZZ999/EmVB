@@ -257,6 +257,7 @@ const RUNTIME_FILES = {
   floats: "assets/emvb-floats.js",
   tabs: "assets/emvb-tabs.js",
   menu: "assets/emvb-menu.js",
+  alerts: "assets/emvb-alerts.js",
 } as const;
 
 function documentHtml(opts: {
@@ -414,6 +415,8 @@ export function buildSiteExport(input: {
     if (floatRenders.length > 0) used.push("floats");
     if (all.some((r) => r.needsTabsRuntime)) used.push("tabs");
     if (all.some((r) => r.needsMenuRuntime)) used.push("menu");
+    // W-1025: the widget runtimes a page asked for.
+    for (const name of new Set(all.flatMap((r) => r.runtimes))) used.push(name);
     for (const name of used) runtimes.add(name);
 
     files.push(

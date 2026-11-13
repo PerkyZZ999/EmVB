@@ -42,7 +42,8 @@ export type A11yIssue = {
     | "control-name"
     | "empty-heading"
     | "landmark-name"
-    | "motion";
+    | "motion"
+    | "empty-alert";
   severity: "error" | "warning";
   message: string;
   /** The one-click fix, when there is a safe one. */
@@ -472,6 +473,15 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
             "This rating's text for screen readers doesn't say the rating. Add {value}, such as \"Rated {value} out of {max}\".",
         });
       }
+    }
+    // W-1025: a notice with neither title nor text is a coloured box screen readers call a note.
+    if (node.type === "alert" && !spoken(props["title"]) && !spoken(props["text"]) && !node.bind) {
+      add({
+        nodeId: node.id,
+        rule: "empty-alert",
+        severity: "warning",
+        message: "This alert has no title or text, so it shows an empty box and says nothing.",
+      });
     }
     // W-419: an empty heading still shows up in screen readers' heading list, with nothing to say.
     if (node.type === "heading" && !spoken(props["text"]) && !node.bind) {
