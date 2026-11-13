@@ -551,8 +551,10 @@ const weights = [
   }
 
   @media (prefers-reduced-motion: no-preference) {
+    /* W-1031: the words rise without fading in, so they are on screen from the first frame;
+       a fade from zero holds back the largest contentful paint (the lede on phones). */
     .intro > * {
-      animation: rise var(--dur-slow) var(--ease-out) both;
+      animation: lift var(--dur-slow) var(--ease-out) both;
     }
 
     .intro > h1 {
@@ -598,6 +600,12 @@ const weights = [
         animation-timeline: view();
         animation-range: entry 0% cover 45%;
       }
+    }
+  }
+
+  @keyframes lift {
+    from {
+      transform: translateY(var(--space-5));
     }
   }
 

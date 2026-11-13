@@ -11,7 +11,6 @@ import {
   listPages,
   type PageSummary,
 } from "../../../packages/emvb/src/admin/content-api.ts";
-import { Editor } from "../../../packages/emvb/src/admin/editor/Editor.tsx";
 import { EditorHostContext } from "../../../packages/emvb/src/admin/editor/host.ts";
 import { BUTTON, SOLID_DESTRUCTIVE, UI_CSS } from "../../../packages/emvb/src/admin/ui.ts";
 import { PAGES_COLLECTION } from "../../../packages/emvb/src/constants.ts";
@@ -21,7 +20,14 @@ import {
   starterLayout,
   type SharedPage,
 } from "../../../packages/emvb/src/core/index.ts";
-import { playgroundHost as host, SITE_HOME, smallScreenStep, TOO_NARROW } from "./host.ts";
+import {
+  playgroundHost as host,
+  SITE_HOME,
+  SMALL_SCREEN_TEXT,
+  SMALL_SCREEN_TITLE,
+  smallScreenStep,
+  TOO_NARROW,
+} from "./host.ts";
 import { createBackend, type KeyValueStore } from "./mock/backend.ts";
 import { PreviewOverlay } from "./PreviewOverlay.tsx";
 import { browserUploads } from "./uploads.ts";
@@ -32,6 +38,14 @@ import { exportPage } from "./view.ts";
  * emvb.dev/playground: the real EmVB editor, running against an in-browser stand-in for EmDash.
  * Nothing leaves the browser; edits are kept in localStorage until Reset.
  */
+
+/**
+ * The editor loads on its own, once it is needed: a phone first sees the small-screen notice,
+ * which paints without waiting for the editor's code (Core Web Vitals, W-1031).
+ */
+const Editor = React.lazy(() =>
+  import("../../../packages/emvb/src/admin/editor/Editor.tsx").then((m) => ({ default: m.Editor })),
+);
 
 const STARTER_ENTRY = "page-landing";
 /** The editor's own minimum (EDITOR_MIN_WIDTH_QUERY). Below it, the playground asks first. */
@@ -97,11 +111,8 @@ function SmallScreenGate({
     <main className="pg-gate" data-pg-small-screen={tooNarrow ? "too-narrow" : "ask"}>
       <div className="pg-gate-card">
         <Logo />
-        <h1>The EmVB editor is best on a larger screen</h1>
-        <p>
-          It's a desktop page builder: layers on the left, the canvas in the middle and styles on
-          the right. A window at least 1280 px wide works best.
-        </p>
+        <h1>{SMALL_SCREEN_TITLE}</h1>
+        <p>{SMALL_SCREEN_TEXT}</p>
         {tooNarrow ? (
           <p role="status">{TOO_NARROW}</p>
         ) : (
@@ -418,12 +429,20 @@ export default function Playground() {
           <p role="status">{shared ? "Opening a shared page…" : "Reading the shared link…"}</p>
         </main>
       ) : (
-        <Editor
-          key={`${entryId}:${generation}`}
-          fetcher={backend.fetcher}
-          entryId={entryId}
-          collection={PAGES_COLLECTION}
-        />
+        <React.Suspense
+          fallback={
+            <div className="pg-loading" role="status">
+              Loading the EmVB editor…
+            </div>
+          }
+        >
+          <Editor
+            key={`${entryId}:${generation}`}
+            fetcher={backend.fetcher}
+            entryId={entryId}
+            collection={PAGES_COLLECTION}
+          />
+        </React.Suspense>
       )}
       <ResetDialog open={resetOpen} onOpenChange={setResetOpen} onReset={reset} />
       <SharedDialog

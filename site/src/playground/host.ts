@@ -29,6 +29,11 @@ export function smallScreenStep(
   return continued ? "too-narrow" : "ask";
 }
 
+/** The small-screen notice, shared with the page's static placeholder so both say the same (W-1031). */
+export const SMALL_SCREEN_TITLE = "The EmVB editor is best on a larger screen";
+export const SMALL_SCREEN_TEXT =
+  "It's a desktop page builder: layers on the left, the canvas in the middle and styles on the right. A window at least 1280 px wide works best.";
+
 /** The notice for "too-narrow": Continue anyway can't help, so it says how to make room. */
 export const TOO_NARROW =
   "This window is still narrower than 1024 px, the least the editor needs. Make the window wider, or zoom the page out (Ctrl or ⌘ and −), and the editor opens.";

@@ -3,6 +3,7 @@
 import "@emdash-cms/admin/styles.css";
 import "../../playground/playground.css";
 import Playground from "../../playground/Playground.tsx";
+import { SITE_HOME, SMALL_SCREEN_TEXT, SMALL_SCREEN_TITLE } from "../../playground/host.ts";
 
 const site = Astro.site ?? new URL("https://emvb.dev");
 const canonical = new URL(Astro.url.pathname, site).href;
@@ -39,7 +40,22 @@ const description =
   </head>
   <body class="isolate">
     <Playground client:only="react">
-      <div slot="fallback" class="pg-loading" role="status">Loading the EmVB editor…</div>
+      <div slot="fallback">
+        <div class="pg-loading pg-loading--wide" role="status">Loading the EmVB editor…</div>
+        {
+          /* W-1031: on a small screen the notice the playground shows first is plain HTML here, so
+             it paints before the editor's code arrives; the island then replaces it. */
+        }
+        <main class="pg-gate pg-gate--static" data-pg-small-screen="loading">
+          <div class="pg-gate-card">
+            <img class="pg-logo" src="/favicon.svg" width="22" height="22" alt="" />
+            <h1>{SMALL_SCREEN_TITLE}</h1>
+            <p>{SMALL_SCREEN_TEXT}</p>
+            <p role="status">Loading the playground…</p>
+            <div class="pg-gate-actions"><a href={SITE_HOME}>Back to emvb.dev</a></div>
+          </div>
+        </main>
+      </div>
     </Playground>
     <noscript>
       <p class="pg-loading">

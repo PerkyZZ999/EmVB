@@ -249,6 +249,27 @@ body {
   box-shadow: 0 8px 30px rgb(0 0 0 / 8%);
 }
 
+/* W-1031: the static placeholder shows the small-screen notice below the editor's width. */
+.pg-gate--static {
+  display: none;
+}
+
+.pg-gate--static a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 1023px) {
+  .pg-gate--static {
+    display: grid;
+  }
+
+  .pg-loading--wide {
+    display: none;
+  }
+}
+
 .pg-loading {
   display: grid;
   place-items: center;

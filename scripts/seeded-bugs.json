@@ -48812,6 +48812,76 @@
       ],
       "command": ["bun", "test", "scripts/site-headers.test.ts"],
       "expect": "\\(fail\\).*W-1030"
+    },
+    {
+      "id": "W-1031/hero-fades-from-zero",
+      "requirement": "W-1031",
+      "description": "The hero's words fade in from opacity 0 again, holding back the largest contentful paint.",
+      "edits": [
+        {
+          "file": "site/src/components/Hero.astro",
+          "search": "  @keyframes lift {\n    from {\n      transform: translateY(var(--space-5));",
+          "replace": "  @keyframes lift {\n    from {\n      opacity: 0;\n      transform: translateY(var(--space-5));"
+        }
+      ],
+      "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
+      "expect": "\\(fail\\).*W-1031"
+    },
+    {
+      "id": "W-1031/editor-imported-eagerly",
+      "requirement": "W-1031",
+      "description": "The playground imports the editor up front, so phones download it before the notice paints.",
+      "edits": [
+        {
+          "file": "site/src/playground/Playground.tsx",
+          "search": "const Editor = React.lazy(() =>\n  import(\"../../../packages/emvb/src/admin/editor/Editor.tsx\").then((m) => ({ default: m.Editor })),\n);",
+          "replace": "import { Editor as EagerEditor } from \"../../../packages/emvb/src/admin/editor/Editor.tsx\";\nconst Editor = EagerEditor;"
+        }
+      ],
+      "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
+      "expect": "\\(fail\\).*W-1031"
+    },
+    {
+      "id": "W-1031/css-never-inlined",
+      "requirement": "W-1031",
+      "description": "Page stylesheets stay render-blocking files: the inline limit only applies to tiny ones.",
+      "edits": [
+        {
+          "file": "site/astro.config.ts",
+          "search": "export const INLINE_CSS_LIMIT = 64 * 1024;",
+          "replace": "export const INLINE_CSS_LIMIT = 4 * 1024;"
+        }
+      ],
+      "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
+      "expect": "\\(fail\\).*W-1031"
+    },
+    {
+      "id": "W-1031/assets-not-cached",
+      "requirement": "W-1031",
+      "description": "Hashed build files are revalidated on every visit instead of cached.",
+      "edits": [
+        {
+          "file": "site/public/_headers",
+          "search": "  Cache-Control: public, max-age=31536000, immutable",
+          "replace": "  Cache-Control: public, max-age=0, must-revalidate"
+        }
+      ],
+      "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
+      "expect": "\\(fail\\).*W-1031"
+    },
+    {
+      "id": "W-1031/playground-notice-not-static",
+      "requirement": "W-1031",
+      "description": "The playground's small-screen notice waits for the island again: the static placeholder never shows it.",
+      "edits": [
+        {
+          "file": "site/src/playground/playground.css",
+          "search": "@media (max-width: 1023px) {\n  .pg-gate--static {\n    display: grid;",
+          "replace": "@media (max-width: 1023px) {\n  .pg-gate--static {\n    display: none;"
+        }
+      ],
+      "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
+      "expect": "\\(fail\\).*W-1031"
     }
   ]
 }
