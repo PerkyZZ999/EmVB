@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Tests hold on EmDash 1.5's Kumo (W-1009).** EmVB's admin snapshot tests recorded Kumo's own markup, so the 56 that differed under Kumo 2.15 (attribute order, wrappers, tab scroll buttons) had to be rewritten for EmDash 1.5. They now record EmVB's own markup only, and the whole unit suite passes unchanged on EmDash 1.4 and 1.5.
 - **Upgrading a site from EmDash 1.4 to 1.5 keeps your EmVB data (W-1004).** Checked on Node (SQLite) and Cloudflare (local D1): Site styles, published pages, uploaded icons, agent settings and requests carry over EmDash 1.5's migrations, and new pages save. The install guide says how to upgrade.
 - **EmVB has a name on EmDash 1.5's plugins screen (W-1005).** It shows as "EmVB" with a one-line description there; EmDash 1.4 ignores both.
+- **Convert to EmVB and Convert to rich text work with EmDash 1.5 co-editing (W-1006).** Checked on an entry open in a co-editing room: the converted content is kept through the room's autosave and saves.
 
 ## [1.1.2] - 2026-11-13
 
