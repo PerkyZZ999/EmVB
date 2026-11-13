@@ -168,6 +168,10 @@ const theme = await resolveThemeParts(Astro, undefined, { visitor }); // theme p
 - **Visitors rules are presentation, not access control.** A visitor controls their own cookies (A/B arm, returning visitor), and off Cloudflare and Vercel they can also send the country headers. Never hide something with a Visitors rule that a visitor mustn't see.
 - **Country detection (since 1.1.2).** EmVB reads `cf-ipcountry` only on Cloudflare Workers and `x-vercel-ip-country` only on Vercel, where the edge sets them, plus Cloudflare's `request.cf`. Behind your own proxy that sets one of these headers and strips the visitor's copy, add `emvb({ trustGeoHeaders: true })`; `false` never reads them. Or pass `country` yourself as above.
 
+### Moving your site from EmDash 1.4 to 1.5
+
+EmVB needs no change for EmDash 1.5. Upgrade EmDash the usual way (with the Cloudflare adapter, upgrade `emdash` and `@emdash-cms/cloudflare` together); on its first start EmDash 1.5 runs its own migrations, and your EmVB pages, theme parts, Site styles, uploaded icons, agent settings and requests carry over (checked on Node with SQLite and on Cloudflare with D1, `bun run check:upgrade` in EmVB's repository).
+
 ## 4. First-run setup
 
 1. Start the site (`bunx --bun astro dev` or your host’s script).

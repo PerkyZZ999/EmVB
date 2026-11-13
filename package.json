@@ -37,6 +37,7 @@
     "bench:large": "bun scripts/bench-large.ts",
     "bench:editor": "bun scripts/bench-editor.ts",
     "pack:smoke": "bun scripts/pack-smoke.ts",
+    "check:upgrade": "bun scripts/upgrade-check.ts",
     "icons:build": "bun scripts/build-icon-sets.ts"
   },
   "devDependencies": {

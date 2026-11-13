@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **EmVB shares your site's zod (W-1007).** EmVB depended on zod `~4.5.4`, matching EmDash 1.4; with EmDash 1.5 (zod 4.6.7) that installed a second copy. It now takes any zod 4 from 4.5.4 up, so it uses the one EmDash brings. CI checks it on EmDash 1.5 with zod 4.6.7, where `bun audit` reports nothing.
 - **Tests hold on EmDash 1.5's Kumo (W-1009).** EmVB's admin snapshot tests recorded Kumo's own markup, so the 56 that differed under Kumo 2.15 (attribute order, wrappers, tab scroll buttons) had to be rewritten for EmDash 1.5. They now record EmVB's own markup only, and the whole unit suite passes unchanged on EmDash 1.4 and 1.5.
+- **Upgrading a site from EmDash 1.4 to 1.5 keeps your EmVB data (W-1004).** Checked on Node (SQLite) and Cloudflare (local D1): Site styles, published pages, uploaded icons, agent settings and requests carry over EmDash 1.5's migrations, and new pages save. The install guide says how to upgrade.
 
 ## [1.1.2] - 2026-11-13
 
