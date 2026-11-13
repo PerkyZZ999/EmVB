@@ -659,10 +659,8 @@ if (import.meta.main) {
     // production or non-Node seed) runs again cold, exactly as with --cold-e2e.
     const ports = laneEnv(lane);
     const port = lanePort("node", lane);
-    await copyFile(
-      join(root, "scripts/seed-probe.ts"),
-      join(laneRoot, "demos/node/src/pages/seed-probe.ts"),
-    );
+    const probe = join(laneRoot, "demos/node/src/pages/seed-probe.ts");
+    await copyFile(join(root, "scripts/seed-probe.ts"), probe);
     const servers: Servers = {};
     liveServers.push(servers);
     // The lane signs in once (Playwright's setup project) on its warm server, which keeps that
@@ -791,6 +789,8 @@ if (import.meta.main) {
       }
     } finally {
       await stopServer();
+      // The probe is the lane's own; with --jobs 1 lane 0 is this checkout, so it must not stay.
+      await rm(probe, { force: true });
     }
   };
 
