@@ -258,6 +258,7 @@ const RUNTIME_FILES = {
   tabs: "assets/emvb-tabs.js",
   menu: "assets/emvb-menu.js",
   alerts: "assets/emvb-alerts.js",
+  lightbox: "assets/emvb-lightbox.js",
 } as const;
 
 function documentHtml(opts: {

@@ -64,6 +64,8 @@ const ADDED_IN_1X: Record<string, string> = {
   testimonial: "1.2 (W-1022): src/core/elements/widgets.test.ts",
   "social-icons": "1.2 (W-1024): src/core/elements/widgets.test.ts",
   "social-link": "1.2 (W-1024): src/core/elements/widgets.test.ts",
+  gallery: "1.2 (W-1019): src/core/elements/widgets.test.ts",
+  "gallery-image": "1.2 (W-1019): src/core/elements/widgets.test.ts",
 };
 
 /** Style keys added after 0.9.0, so no released page has them: where each one is tested. */

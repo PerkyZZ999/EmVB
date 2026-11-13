@@ -169,3 +169,29 @@ describe("Social icons over MCP (W-1024)", () => {
     expect(stray.success).toBe(false);
   });
 });
+
+describe("Gallery over MCP (W-1019)", () => {
+  test("add_element adds a lightbox gallery with pictures; a picture alone is refused", async () => {
+    expect((await catalogue()).get("gallery")?.name).toBe("Gallery");
+    const pageId = await newPage();
+    const added = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "gallery",
+        props: { lightbox: true, columns: 2 },
+        children: [
+          { type: "gallery-image", props: { src: "/_emdash/api/media/file/a.jpg", alt: "A" } },
+          { type: "gallery-image", props: { src: "/_emdash/api/media/file/b.jpg", alt: "B" } },
+        ],
+      },
+    });
+    expect(added.success).toBe(true);
+    const stray = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "gallery-image", props: { src: "/a.jpg", alt: "A" } },
+    });
+    expect(stray.success).toBe(false);
+  });
+});

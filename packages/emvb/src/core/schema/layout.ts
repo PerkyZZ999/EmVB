@@ -778,6 +778,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "testimonial",
   "social-icons",
   "social-link",
+  "gallery",
+  "gallery-image",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -975,6 +977,44 @@ export const SocialLinkNode = leafNode(
   }),
 );
 
+/** W-1019: a Gallery's layout: equal squares in a grid, or each picture its own height. */
+export const GALLERY_LAYOUTS = ["grid", "masonry"] as const;
+
+/**
+ * W-1019: pictures from the media library in a grid or masonry columns (1–6 on wide screens; at
+ * most 2 on tablets and 1 on phones). Holds Gallery images only. `lightbox` opts in to a script
+ * that opens each picture large in a native dialog; without it the gallery uses no script.
+ */
+export const GalleryNodeSchema = parentNode(
+  "gallery",
+  z.strictObject({
+    layout: z.enum(GALLERY_LAYOUTS).optional(),
+    columns: z.number().int().min(1).max(6).optional(),
+    lightbox: z.boolean().optional(),
+    /** Names the list for screen readers. Unset = no name. */
+    label: z.string().max(80).optional(),
+  }),
+);
+
+/** W-1019: one picture in a Gallery: an Image's picture keys, alt text and an optional caption. */
+export const GalleryImageNode = leafNode(
+  "gallery-image",
+  z.strictObject({
+    src: z.string().max(2000),
+    alt: z.string().max(500),
+    decorative: z.boolean().optional(),
+    mediaId: z.string().min(1).max(128).optional(),
+    width: z.number().int().positive().max(10000).optional(),
+    height: z.number().int().positive().max(10000).optional(),
+    focalX: z.number().int().min(0).max(100).optional(),
+    focalY: z.number().int().min(0).max(100).optional(),
+    caption: z.string().max(500).optional(),
+  }),
+).refine((node) => node.props.decorative === true || node.props.alt.length > 0, {
+  message: "Alt text is required unless the picture is marked decorative.",
+  path: ["props", "alt"],
+});
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1015,6 +1055,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   TestimonialNode,
   SocialIconsNodeSchema,
   SocialLinkNode,
+  GalleryNodeSchema,
+  GalleryImageNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -1061,6 +1103,7 @@ export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
 export type SocialLinkNode = z.infer<typeof SocialLinkNode>;
+export type GalleryImageNode = z.infer<typeof GalleryImageNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
 export type TextNode = z.infer<typeof TextNode>;
@@ -1232,6 +1275,12 @@ export type SocialIconsNode = NodeEnvelope & {
   children: LayoutNode[];
 };
 
+export type GalleryNode = NodeEnvelope & {
+  type: "gallery";
+  props: z.infer<typeof GalleryNodeSchema>["props"];
+  children: LayoutNode[];
+};
+
 export type MenuNode = NodeEnvelope & {
   type: "menu";
   props: { direction: "row" | "column"; label?: string };
@@ -1273,6 +1322,8 @@ export type LayoutNode =
   | TestimonialNode
   | SocialIconsNode
   | SocialLinkNode
+  | GalleryNode
+  | GalleryImageNode
   | SpacerNode
   | DividerNode
   | TextNode
@@ -1482,7 +1533,8 @@ export const isParentNode = (
   | AccordionItemNode
   | MenuNode
   | MenuItemNode
-  | SocialIconsNode =>
+  | SocialIconsNode
+  | GalleryNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -1498,7 +1550,8 @@ export const isParentNode = (
   node.type === "accordion-item" ||
   node.type === "menu" ||
   node.type === "menu-item" ||
-  node.type === "social-icons";
+  node.type === "social-icons" ||
+  node.type === "gallery";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

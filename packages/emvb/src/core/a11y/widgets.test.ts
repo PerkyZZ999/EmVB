@@ -154,3 +154,17 @@ describe("Social icons (W-1024)", () => {
     expect(audit(icons({}, ["whatsapp", "https://wa.me/1"]))).toEqual([]);
   });
 });
+
+describe("Gallery (W-1019)", () => {
+  const gallery = (alt: string) => ({
+    id: "gall0001",
+    type: "gallery",
+    props: {},
+    children: [{ id: "pict0001", type: "gallery-image", props: { src: "/a.jpg", alt } }],
+  });
+
+  test("pictures need real alt text, as Images do", () => {
+    expect(audit(gallery("The harbour at dawn"))).toEqual([]);
+    expect(audit(gallery("DSC_0042.jpg"))).toEqual(["image-alt:error:pict0001"]);
+  });
+});

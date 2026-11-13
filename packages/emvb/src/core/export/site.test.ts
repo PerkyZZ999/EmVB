@@ -270,3 +270,33 @@ describe("buildSiteExport writes widget runtimes (W-1025)", () => {
     expect(EXPORT_RUNTIMES.alerts).toContain("data-emvb-alert-dismiss");
   });
 });
+
+test("W-1019: a lightbox gallery's page links the lightbox script", () => {
+  const out = buildSiteExport({
+    design: emptyDesign(),
+    pages: [
+      {
+        id: "p1",
+        title: "Photos",
+        slug: "photos",
+        layout: layout([
+          {
+            id: "gall0001",
+            type: "gallery",
+            props: { lightbox: true },
+            children: [
+              { id: "pict0001", type: "gallery-image", props: { src: "/a.jpg", alt: "A" } },
+            ],
+          } as LayoutNode,
+        ]),
+      },
+    ],
+    parts: [],
+    date: "2026-11-13",
+  });
+  const byPath = files(out);
+  expect(byPath.get("photos/index.html")).toContain(
+    '<script src="../assets/emvb-lightbox.js" defer></script>',
+  );
+  expect(byPath.get("assets/emvb-lightbox.js")).toBe(EXPORT_RUNTIMES.lightbox);
+});

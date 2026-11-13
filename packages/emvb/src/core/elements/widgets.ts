@@ -8,6 +8,8 @@ import type {
   ImageBoxNode,
   LayoutNode,
   RatingNode,
+  GalleryImageNode,
+  GalleryNode,
   SocialIconsNode,
   SocialLinkNode,
   TestimonialNode,
@@ -116,11 +118,12 @@ function ratingStars(props: RatingNode["props"], attrs: Record<string, string>):
 }
 
 /** W-1025: the opt-in public scripts the 1.2 widgets use; a page loads only the ones it needs. */
-export type WidgetRuntime = "alerts";
+export type WidgetRuntime = "alerts" | "lightbox";
 
 /** The widget runtime one element needs, if any: only when it opts in. */
 export function nodeRuntime(node: LayoutNode): WidgetRuntime | undefined {
   if (node.type === "alert" && (node as AlertNode).props.dismissible) return "alerts";
+  if (node.type === "gallery" && (node as GalleryNode).props.lightbox) return "lightbox";
   return undefined;
 }
 
@@ -699,5 +702,94 @@ export const socialLink: ElementDefinition<SocialLinkNode> = {
         }
       : { tag: "span", attrs: { "aria-hidden": "true" }, children: icon ? [icon] : [] };
     return { tag: "li", attrs: { ...attrs, class: className }, children: [inner] };
+  },
+};
+
+export const gallery: ElementDefinition<GalleryNode> = {
+  baseCss:
+    ".emvb-gallery{display:grid;gap:0.5em;margin:0;padding:0;list-style:none;grid-template-columns:repeat(var(--emvb-gallery-cols,3),minmax(0,1fr))}.emvb-gallery-image{margin:0;min-width:0}.emvb-gallery-image figure{margin:0}.emvb-gallery-image img{display:block;width:100%;height:auto}.emvb-gallery-grid .emvb-gallery-image img{aspect-ratio:1;object-fit:cover}.emvb-gallery-image figcaption{margin-top:0.25em;font-size:0.875em}.emvb-gallery-masonry{display:block;columns:var(--emvb-gallery-cols,3);column-gap:0.5em}.emvb-gallery-masonry .emvb-gallery-image{break-inside:avoid;margin-bottom:0.5em}.emvb-gallery-open{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}.emvb-gallery-open:focus-visible{outline:2px solid currentColor;outline-offset:2px}" +
+    [1, 2, 3, 4, 5, 6].map((n) => `.emvb-gallery-cols-${n}{--emvb-gallery-cols:${n}}`).join("") +
+    "@media (max-width:1024px){.emvb-gallery:is(.emvb-gallery-cols-3,.emvb-gallery-cols-4,.emvb-gallery-cols-5,.emvb-gallery-cols-6){--emvb-gallery-cols:2}}@media (max-width:767px){.emvb-gallery{--emvb-gallery-cols:1}}" +
+    ".emvb-lightbox{max-width:min(96vw,1400px);max-height:96vh;padding:0;border:0;background:#111;color:#fff}.emvb-lightbox::backdrop{background:rgb(0 0 0/0.85)}.emvb-lightbox-figure{margin:0;display:flex;flex-direction:column;align-items:center}.emvb-lightbox img{display:block;max-width:100%;max-height:calc(96vh - 4em);object-fit:contain}.emvb-lightbox-bar{display:flex;align-items:center;gap:0.5em;width:100%;padding:0.5em}.emvb-lightbox-caption{flex:1;text-align:center}.emvb-lightbox button{min-width:2.75em;min-height:2.75em;border:0;border-radius:4px;background:rgb(255 255 255/0.15);color:#fff;font:inherit;cursor:pointer}.emvb-lightbox button:focus-visible{outline:2px solid #fff;outline-offset:2px}",
+  defaults: () => ({ type: "gallery", props: {}, children: [] }),
+  descriptor: {
+    type: "gallery",
+    name: "Gallery",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "layout",
+        kind: "select",
+        label: "Layout",
+        optional: true,
+        options: [
+          { value: "grid", label: "Grid of squares" },
+          { value: "masonry", label: "Masonry" },
+        ],
+      },
+      { key: "columns", kind: "int", label: "Columns", optional: true, max: 6 },
+      {
+        key: "lightbox",
+        kind: "boolean",
+        label: "Open pictures large (lightbox)",
+        optional: true,
+      },
+      {
+        key: "label",
+        kind: "text",
+        label: "Gallery name",
+        optional: true,
+        message: "What screen readers call the gallery, such as Project photos.",
+      },
+    ],
+  },
+  build: (node, attrs, children) => ({
+    tag: "ul",
+    attrs: {
+      ...attrs,
+      class:
+        `${attrs["class"] ?? ""} emvb-gallery-${node.props.layout ?? "grid"} emvb-gallery-cols-${node.props.columns ?? 3}`.trim(),
+      ...(node.props.label?.trim() ? { "aria-label": node.props.label.trim() } : {}),
+      ...(node.props.lightbox ? { "data-emvb-lightbox": "" } : {}),
+    },
+    children,
+  }),
+};
+
+export const galleryImage: ElementDefinition<GalleryImageNode> = {
+  baseCss: "",
+  defaults: () => ({ type: "gallery-image", props: { src: "", alt: "Image" } }),
+  descriptor: {
+    type: "gallery-image",
+    name: "Gallery image",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "src", kind: "media", label: "Image" },
+      { key: "alt", kind: "text", label: "Alt text" },
+      { key: "decorative", kind: "boolean", label: "Decorative", optional: true },
+      { key: "caption", kind: "text", label: "Caption", optional: true },
+    ],
+  },
+  build: (node, attrs) => {
+    const src = node.props.src.trim() ? sanitizeMediaUrl(node.props.src.trim()) : undefined;
+    const caption = node.props.caption?.trim();
+    const figure: VNode[] = [];
+    if (src)
+      figure.push({
+        tag: "img",
+        attrs: {
+          src,
+          alt: node.props.decorative ? "" : node.props.alt,
+          ...(node.props.width ? { width: String(node.props.width) } : {}),
+          ...(node.props.height ? { height: String(node.props.height) } : {}),
+          loading: "lazy",
+          decoding: "async",
+        },
+        children: [],
+      });
+    if (caption) figure.push({ tag: "figcaption", attrs: {}, children: [caption] });
+    return { tag: "li", attrs, children: [{ tag: "figure", attrs: {}, children: figure }] };
   },
 };

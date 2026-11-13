@@ -8,13 +8,19 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react";
 import {
+  MAX_GALLERY_IMAGES,
   MAX_SOCIAL_LINKS,
   MAX_TABS,
   type FieldDescriptor,
   type LayoutNode,
 } from "../../../../core/index.ts";
 import { BUTTON } from "../../../ui.ts";
-import { newAccordionItem, newSocialLink, newTabPanel } from "../../dnd/new-element.ts";
+import {
+  newAccordionItem,
+  newGalleryImage,
+  newSocialLink,
+  newTabPanel,
+} from "../../dnd/new-element.ts";
 import { DraftTextField } from "./DraftTextField.tsx";
 
 /** Layout operations the list runs through the editor, so limits, history and Restore apply. */
@@ -50,6 +56,13 @@ const KINDS: Record<string, Kind> = {
     field: (n) => ({ key: "href", kind: "href", label: `Link ${n} address` }),
     make: (n) => newSocialLink(n),
     max: MAX_SOCIAL_LINKS,
+  },
+  // W-1019: each row edits the picture's alt text; the picture itself is chosen in its panel.
+  gallery: {
+    noun: "picture",
+    field: (n) => ({ key: "alt", kind: "text", label: `Picture ${n} alt text` }),
+    make: () => newGalleryImage(),
+    max: MAX_GALLERY_IMAGES,
   },
 };
 

@@ -99,6 +99,11 @@ export function newSocialLink(n: number, random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "social-link", props: { network, href, newTab: true } };
 }
 
+/** W-1019: an empty Gallery image for a Gallery's Add picture; its panel picks the picture. */
+export function newGalleryImage(random?: () => number): LayoutNode {
+  return { id: newNodeId(random), type: "gallery-image", props: { src: "", alt: "Image" } };
+}
+
 /**
  * Default node for a new element from the Add panel. Only new inserts get starter children;
  * saved Accordions and Tabs with no items keep working as they are (W-130).

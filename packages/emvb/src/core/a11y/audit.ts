@@ -308,7 +308,8 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
       });
     } else if (
       // W-1021: an image box's picture needs real alt text as an Image does, once it has one.
-      (node.type === "image" || (node.type === "image-box" && spoken(props["src"]))) &&
+      (node.type === "image" ||
+        ((node.type === "image-box" || node.type === "gallery-image") && spoken(props["src"]))) &&
       props["decorative"] !== true
     ) {
       const alt = typeof props["alt"] === "string" ? spoken(props["alt"]) : "";

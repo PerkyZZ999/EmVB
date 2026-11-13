@@ -1165,9 +1165,58 @@ function gallery(
   ];
 }
 
+/**
+ * W-1019: Elementor's Image Gallery and Gallery → a Gallery of Gallery images (up to 60), with
+ * Elementor's lightbox kept (on unless the widget turns it off) and masonry when it used it.
+ */
+function galleryWidget(
+  list: unknown,
+  columns: number,
+  s: Settings,
+  ctx: ImportContext,
+  el: string,
+): N[] {
+  const items = Array.isArray(list) ? list : [];
+  if (items.length > 60) ctx.note("skipped", el, "Galleries keep their first 60 pictures.");
+  const pictures: N[] = [];
+  for (const item of items.slice(0, 60)) {
+    if (ctx.overBudget) break;
+    const img = imageNode(ctx, el, item);
+    if (!img) continue;
+    const props = img["props"] as Record<string, unknown>;
+    pictures.push(
+      node(
+        ctx,
+        "gallery-image",
+        Object.fromEntries(
+          ["src", "alt", "decorative", "mediaId", "width", "height"]
+            .filter((key) => props[key] !== undefined)
+            .map((key) => [key, props[key]]),
+        ),
+      ),
+    );
+  }
+  if (pictures.length === 0) return [];
+  const lightbox = str(s["open_lightbox"]) !== "no";
+  const masonry = str(s["gallery_layout"]) === "masonry" || s["masonry"] === "yes";
+  return [
+    node(
+      ctx,
+      "gallery",
+      {
+        ...(masonry ? { layout: "masonry" } : {}),
+        columns: Math.min(6, Math.max(1, Math.round(columns))),
+        ...(lightbox ? { lightbox: true } : {}),
+      },
+      { children: pictures },
+    ),
+  ];
+}
+
 const imageGallery: Widget = (s, ctx, el) =>
-  gallery(s["wp_gallery"], num(s["gallery_columns"]) ?? 4, ctx, el);
-const proGallery: Widget = (s, ctx, el) => gallery(s["gallery"], num(s["columns"]) ?? 4, ctx, el);
+  galleryWidget(s["wp_gallery"], num(s["gallery_columns"]) ?? 4, s, ctx, el);
+const proGallery: Widget = (s, ctx, el) =>
+  galleryWidget(s["gallery"], num(s["columns"]) ?? 4, s, ctx, el);
 const imageCarousel: Widget = (s, ctx, el) => {
   ctx.note("approximated", el, "Carousels are shown as a grid of their slides.");
   return gallery(s["carousel"], num(s["slides_to_show"]) ?? 3, ctx, el);

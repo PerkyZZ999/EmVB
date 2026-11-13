@@ -26030,8 +26030,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "columns: z.number().int().min(1).max(6).optional(),",
-          "replace": "columns: z.number().optional(),"
+          "search": "    /** Columns for grid and cards, 1–6 (one column on phones). Unset = 3. */\n    columns: z.number().int().min(1).max(6).optional(),",
+          "replace": "    /** Columns for grid and cards, 1–6 (one column on phones). Unset = 3. */\n    columns: z.number().optional(),"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/render/collection-loop.test.ts"],
@@ -47969,8 +47969,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/a11y/audit.ts",
-          "search": "(node.type === \"image\" || (node.type === \"image-box\" && spoken(props[\"src\"]))) &&",
-          "replace": "node.type === \"image\" &&"
+          "search": "(node.type === \"image-box\" || node.type === \"gallery-image\") && spoken(props[\"src\"])",
+          "replace": "node.type === \"gallery-image\" && spoken(props[\"src\"])"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
@@ -48225,6 +48225,147 @@
       "env": {
         "CI": "1"
       },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1019/lightbox-never-asked",
+      "requirement": "W-1019",
+      "description": "A lightbox gallery doesn't ask for the lightbox script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "  if (node.type === \"gallery\" && (node as GalleryNode).props.lightbox) return \"lightbox\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*lightbox is opt-in"
+    },
+    {
+      "id": "W-1019/focus-lost",
+      "requirement": "W-1019",
+      "description": "Closing the lightbox leaves focus nowhere.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/lightbox.ts",
+          "search": "    showing?.opener.focus();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/lightbox.test.ts"],
+      "expect": "\\(fail\\).*returns focus"
+    },
+    {
+      "id": "W-1019/buttons-unnamed",
+      "requirement": "W-1019",
+      "description": "Lightbox picture buttons have no name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/lightbox.ts",
+          "search": "      const opener = button(`View larger: ${pictureName(image, index, images.length)}`, \"\");",
+          "replace": "      const opener = button(\"\", \"\");"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/lightbox.test.ts"],
+      "expect": "\\(fail\\).*named button"
+    },
+    {
+      "id": "W-1019/no-wrap",
+      "requirement": "W-1019",
+      "description": "Next on the last picture stays there.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/lightbox.ts",
+          "search": "  showing.index = (showing.index + by + total) % total;",
+          "replace": "  showing.index = Math.min(Math.max(showing.index + by, 0), total - 1);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/lightbox.test.ts"],
+      "expect": "\\(fail\\).*Next and Previous wrap"
+    },
+    {
+      "id": "W-1019/decorative-alt-kept",
+      "requirement": "W-1019",
+      "description": "A decorative gallery picture keeps its alt.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "          alt: node.props.decorative ? \"\" : node.props.alt,",
+          "replace": "          alt: node.props.alt,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*decorative pictures have empty alt"
+    },
+    {
+      "id": "W-1019/no-cap",
+      "requirement": "W-1019",
+      "description": "A gallery takes a 61st picture.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "      nodeChildren(into.node).length >= MAX_GALLERY_IMAGES,",
+          "replace": "      nodeChildren(into.node).length > MAX_GALLERY_IMAGES,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/arrange-social.test.ts"],
+      "expect": "\\(fail\\).*61st picture"
+    },
+    {
+      "id": "W-1019/any-child",
+      "requirement": "W-1019",
+      "description": "A gallery holds any element.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  if (parent.type === \"gallery\" && child.type !== \"gallery-image\") {",
+          "replace": "  if (parent.type === \"gallery\" && child.type === \"loop\") {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*holds only pictures"
+    },
+    {
+      "id": "W-1019/export-no-lightbox",
+      "requirement": "W-1019",
+      "description": "The HTML export's bundled lightbox script is out of date.",
+      "edits": [
+        {
+          "file": "scripts/build-export-runtimes.ts",
+          "search": "  lightbox: [\"widgets/lightbox.ts\", \"initLightbox\"],\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/export-runtimes.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-1019/import-lightbox-off",
+      "requirement": "W-1019",
+      "description": "Imported Elementor galleries lose their lightbox.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  const lightbox = str(s[\"open_lightbox\"]) !== \"no\";",
+          "replace": "  const lightbox = str(s[\"open_lightbox\"]) === \"yes\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*W-1019"
+    },
+    {
+      "id": "W-1019/runtime-not-mounted",
+      "requirement": "W-1019",
+      "description": "Pages never load the lightbox script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/EmVBWidgetRuntimes.astro",
+          "search": "{names.has(\"lightbox\") && <EmVBLightboxRuntime />}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
+      "env": { "CI": "1" },
       "expect": "✘.*\\[node\\]"
     }
   ]

@@ -2,6 +2,7 @@ import path from "node:path";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
+import { uploadEmvbPixel } from "./support/media.ts";
 
 // PLAN_1.2 part D: each 1.2 widget is added from the Add panel, set up in its settings, saved,
 // and published with no EmVB script unless it opts in.
@@ -316,4 +317,63 @@ test("Social icons are added with three links, one is switched to GitHub, and th
     icon: "rgb(255, 255, 255)",
     square: true,
   });
+});
+
+test("a Gallery is set to two masonry columns with a lightbox, and on the page a picture opens large, steps and closes back to it (W-1019)", async ({
+  page,
+  request,
+}) => {
+  const media = await uploadEmvbPixel(request);
+  const slug = `widgets-${unique()}`;
+  const picture = (id: string, alt: string) => ({
+    id,
+    type: "gallery-image",
+    props: { src: media.url, alt, width: 1, height: 1 },
+  });
+  const layout = startPage("Gallery");
+  (layout.root.children as unknown[]).push({
+    id: "gall0001",
+    type: "gallery",
+    props: { label: "Harbour photos" },
+    children: [picture("pict0001", "Boats at dawn"), picture("pict0002", "The old pier")],
+  });
+  const id = await createPage(request, "Gallery", layout, slug);
+  await openEditor(page, id, "Gallery");
+  await openLayers(page);
+  await overlay(page).locator('[data-emvb-layer="gall0001"] .emvb-layer-select').click();
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Gallery");
+  await overlay(page).getByLabel("Layout").click();
+  await page.getByRole("option", { name: "Masonry", exact: true }).click();
+  const columns = overlay(page).getByLabel("Columns", { exact: true });
+  await columns.fill("2");
+  await columns.blur();
+  await overlay(page).getByRole("switch", { name: "Open pictures large (lightbox)" }).click();
+  await expect(canvas(page).locator("ul.emvb-gallery")).toHaveClass(
+    /emvb-gallery-masonry emvb-gallery-cols-2/,
+  );
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]?.props).toEqual({
+    label: "Harbour photos",
+    layout: "masonry",
+    columns: 2,
+    lightbox: true,
+  });
+
+  await publishPage(request, id);
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await page.goto(`/${slug}`);
+  const gallery = page.getByRole("list", { name: "Harbour photos" });
+  const first = gallery.getByRole("button", { name: "View larger: Boats at dawn" });
+  await first.click();
+  const viewer = page.getByRole("dialog", { name: "Picture viewer" });
+  await expect(viewer).toBeVisible();
+  await expect(viewer.getByRole("img", { name: "Boats at dawn" })).toBeVisible();
+  await expect(viewer).toContainText("1 of 2");
+  await page.keyboard.press("ArrowRight");
+  await expect(viewer).toContainText("2 of 2");
+  await expect(viewer.getByRole("img", { name: "The old pier" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(viewer).toBeHidden();
+  await expect(first).toBeFocused();
 });

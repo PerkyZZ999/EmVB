@@ -142,6 +142,8 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `testimonial` | quote, name, role, src, alt, mediaId, width, height, focalX, focalY, rating, ratingMax |
 | `social-icons` | label, shape, brandColors |
 | `social-link` | network, href, label, newTab |
+| `gallery` | layout, columns, lightbox, label |
+| `gallery-image` | src, alt, decorative, mediaId, width, height, focalX, focalY, caption |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

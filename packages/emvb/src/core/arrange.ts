@@ -1,4 +1,4 @@
-import { MAX_DEPTH, MAX_NODES, MAX_SOCIAL_LINKS, MAX_TABS } from "./limits.ts";
+import { MAX_DEPTH, MAX_GALLERY_IMAGES, MAX_NODES, MAX_SOCIAL_LINKS, MAX_TABS } from "./limits.ts";
 import {
   isContainerNode,
   isFormFieldType,
@@ -67,6 +67,9 @@ export const REASONS = {
   linkOutsideSocial: "Social links can only go inside Social icons.",
   onlySocialLinks: "Social icons can only hold social links.",
   tooManySocialLinks: `Social icons can hold up to ${MAX_SOCIAL_LINKS} links.`,
+  imageOutsideGallery: "Gallery images can only go inside a Gallery.",
+  onlyGalleryImages: "A gallery can only hold gallery images.",
+  tooManyGalleryImages: `A gallery can hold up to ${MAX_GALLERY_IMAGES} pictures.`,
   emptyOutsideLoop: "An Empty state can only go inside a Loop.",
 } as const;
 
@@ -152,6 +155,12 @@ export function parentChildRefusal(
   if (parent.type === "social-icons" && child.type !== "social-link") {
     return REASONS.onlySocialLinks;
   }
+  if (child.type === "gallery-image" && parent.type !== "gallery") {
+    return REASONS.imageOutsideGallery;
+  }
+  if (parent.type === "gallery" && child.type !== "gallery-image") {
+    return REASONS.onlyGalleryImages;
+  }
   if (isFormNode(child) && inForm) return REASONS.nestedForm;
   if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;
   return undefined;
@@ -175,6 +184,14 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
       !nodeChildren(into.node).some((child) => child.id === node.id) &&
       nodeChildren(into.node).length >= MAX_SOCIAL_LINKS,
     REASONS.tooManySocialLinks,
+  ],
+  // W-1019: a full Gallery takes no new picture; moving within it is fine.
+  [
+    ({ node, into }) =>
+      into.node.type === "gallery" &&
+      !nodeChildren(into.node).some((child) => child.id === node.id) &&
+      nodeChildren(into.node).length >= MAX_GALLERY_IMAGES,
+    REASONS.tooManyGalleryImages,
   ],
   [({ node, into }) => into.depth + height(node) > MAX_DEPTH, REASONS.tooDeep],
   [

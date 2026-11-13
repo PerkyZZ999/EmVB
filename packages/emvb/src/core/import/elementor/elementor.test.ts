@@ -297,9 +297,9 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
       "social-icons",
       "social-link",
       "social-link",
-      "grid",
-      "image",
-      "image",
+      "gallery",
+      "gallery-image",
+      "gallery-image",
       "link",
       "container",
       "text",
@@ -1158,6 +1158,18 @@ describe("Elementor import: the 1.2 widgets (PLAN_1.2 part D)", () => {
       { network: "x", href: "https://x.com/emvb", newTab: true },
       { network: "linkedin", href: "https://linkedin.com/company/emvb", newTab: true },
     ]);
+  });
+
+  test("W-1019: an Image Gallery is a Gallery with its pictures and Elementor's lightbox", () => {
+    const pics = [
+      { id: 1, url: "https://old.example/a.jpg", alt: "A" },
+      { id: 2, url: "https://old.example/b.jpg", alt: "B" },
+    ];
+    const on = one("image-gallery", { wp_gallery: pics, gallery_columns: 2 });
+    expect(props(ofType(on.layout, "gallery")[0])).toEqual({ columns: 2, lightbox: true });
+    expect(ofType(on.layout, "gallery-image").map((n) => props(n)["alt"])).toEqual(["A", "B"]);
+    const off = one("image-gallery", { wp_gallery: pics, gallery_columns: 9, open_lightbox: "no" });
+    expect(props(ofType(off.layout, "gallery")[0])).toEqual({ columns: 6 });
   });
 
   test("W-1024: a network without a preset keeps the widget as icons, nothing lost", () => {

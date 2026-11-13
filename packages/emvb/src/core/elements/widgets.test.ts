@@ -352,3 +352,80 @@ describe("Social icons (W-1024)", () => {
     );
   });
 });
+
+const pictureNode = (id: string, props: Record<string, unknown>) => ({
+  id,
+  type: "gallery-image",
+  props: { src: `/_emdash/api/media/file/${id}.jpg`, alt: `Photo ${id}`, ...props },
+});
+const galleryNode = (props: Record<string, unknown>, children: unknown[]) => ({
+  id: "gall0001",
+  type: "gallery",
+  props,
+  children,
+});
+
+describe("Gallery (W-1019)", () => {
+  test("a list of figures with lazy pictures and captions, three columns of squares by default", () => {
+    const result = page(
+      galleryNode({ label: "Project photos" }, [
+        pictureNode("pict0001", { width: 800, height: 600, caption: "The site" }),
+        pictureNode("pict0002", {}),
+      ]),
+    );
+    if (!result.ok) throw new Error(JSON.stringify(result.issues));
+    const { html, css, runtimes } = renderPage(result.layout, emptyDesign());
+    expect(html).toContain(
+      '<ul class="emvb-gallery emvb-gallery-grid emvb-gallery-cols-3" aria-label="Project photos">',
+    );
+    expect(html).toContain(
+      '<li class="emvb-gallery-image"><figure><img src="/_emdash/api/media/file/pict0001.jpg" alt="Photo pict0001" width="800" height="600" loading="lazy" decoding="async"><figcaption>The site</figcaption></figure></li>',
+    );
+    expect(css).toContain(
+      ".emvb-gallery-grid .emvb-gallery-image img{aspect-ratio:1;object-fit:cover}",
+    );
+    expect(css).toContain("@media (max-width:767px){.emvb-gallery{--emvb-gallery-cols:1}}");
+    expect(runtimes).toEqual([]);
+    expect(html.includes("data-emvb-lightbox")).toBe(false);
+  });
+
+  test("masonry and columns are classes; the lightbox is opt-in and asks for its script", () => {
+    const result = page(
+      galleryNode({ layout: "masonry", columns: 4, lightbox: true }, [pictureNode("pict0001", {})]),
+    );
+    if (!result.ok) throw new Error("invalid");
+    const { html, runtimes } = renderPage(result.layout, emptyDesign());
+    expect(html).toContain(
+      'class="emvb-gallery emvb-gallery-masonry emvb-gallery-cols-4" data-emvb-lightbox=""',
+    );
+    expect(runtimes).toEqual(["lightbox"]);
+  });
+
+  test("decorative pictures have empty alt; an unsafe or empty address shows no picture", () => {
+    const html = render(
+      galleryNode({}, [
+        pictureNode("pict0001", { decorative: true }),
+        pictureNode("pict0002", { src: "javascript:alert(1)" }),
+      ]),
+    );
+    expect(html).toContain('alt=""');
+    expect(html.match(/<img /g)).toHaveLength(1);
+  });
+
+  test("alt text is required; 7 columns and unknown layouts are refused", () => {
+    expect(page(galleryNode({}, [pictureNode("pict0001", { alt: "" })])).ok).toBe(false);
+    expect(page(galleryNode({ columns: 7 }, [])).ok).toBe(false);
+    expect(page(galleryNode({ layout: "carousel" }, [])).ok).toBe(false);
+  });
+
+  test("a gallery holds only pictures; a picture lives only in a gallery", () => {
+    const list = galleryNode({}, []) as unknown as LayoutNode;
+    const picture = pictureNode("pict0001", {}) as unknown as LayoutNode;
+    const box = { id: "box00001", type: "container", props: {}, children: [] } as LayoutNode;
+    expect(parentChildRefusal(list, picture, false)).toBeUndefined();
+    expect(parentChildRefusal(list, box, false)).toBe("A gallery can only hold gallery images.");
+    expect(parentChildRefusal(box, picture, false)).toBe(
+      "Gallery images can only go inside a Gallery.",
+    );
+  });
+});

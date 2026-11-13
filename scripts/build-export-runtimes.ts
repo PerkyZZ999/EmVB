@@ -17,6 +17,7 @@ const RUNTIMES = {
   menu: ["menu/runtime.ts", "initMenus"],
   floats: ["floats/runtime.ts", "initFloats"],
   alerts: ["widgets/alerts.ts", "initAlerts"],
+  lightbox: ["widgets/lightbox.ts", "initLightbox"],
 } as const;
 
 async function bundle(file: string, init: string): Promise<string> {

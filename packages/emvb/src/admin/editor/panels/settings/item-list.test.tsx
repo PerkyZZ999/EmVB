@@ -398,3 +398,21 @@ describe("Social icons links (W-1024)", () => {
     expect(button("Add link").disabled).toBe(true);
   });
 });
+
+describe("Gallery pictures (W-1019)", () => {
+  test("the panel shows the gallery's settings, then its pictures by alt text; Add picture adds one", async () => {
+    const node = {
+      id: "gall0001",
+      type: "gallery",
+      props: {},
+      children: [{ id: "pict0001", type: "gallery-image", props: { src: "/a.jpg", alt: "Dawn" } }],
+    } as LayoutNode;
+    const calls = await panel(node);
+    expect(document.body.textContent).toContain("Open pictures large (lightbox)");
+    expect(inputLabelled("Picture 1 alt text").value).toBe("Dawn");
+    await act(async () => button("Add picture").click());
+    const added = kidsOf(calls.changed.at(-1)).at(-1);
+    expect(added?.type).toBe("gallery-image");
+    expect(added?.props).toEqual({ src: "", alt: "Image" });
+  });
+});
