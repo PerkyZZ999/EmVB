@@ -13,7 +13,28 @@ test("emvb.dev sends a CSP, nosniff, frame-ancestors and a referrer policy on ev
   expect(csp).toContain("default-src 'self'");
   expect(csp).toContain("frame-ancestors 'self'");
   expect(csp).toContain("object-src 'none'");
-  expect(csp).not.toMatch(/script-src[^;]*(?:https?:|\*)/);
+  expect(csp).not.toContain("*");
   expect(headers["x-content-type-options"]).toBe("nosniff");
   expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+});
+
+// W-1030: Cloudflare injects its Web Analytics beacon; the CSP lets exactly that script and the host
+// it reports to through, and nothing else from outside.
+test("W-1030: the only outside hosts are Cloudflare Web Analytics's beacon and its reporting host", () => {
+  const text = readFileSync(join(import.meta.dir, "../site/public/_headers"), "utf8");
+  const csp = /Content-Security-Policy:\s*(.+)/.exec(text)?.[1] ?? "";
+  const directive = (name: string) =>
+    csp
+      .split(";")
+      .map((part) => part.trim().split(/\s+/))
+      .find(([key]) => key === name)
+      ?.slice(1) ?? [];
+  const outside = (name: string) =>
+    directive(name).filter(
+      (source) => /^(?:https?:|wss?:|\*)/.test(source) || source.includes("."),
+    );
+  expect(outside("script-src")).toEqual(["https://static.cloudflareinsights.com"]);
+  expect(outside("connect-src")).toEqual(["https://cloudflareinsights.com"]);
+  expect(outside("default-src")).toEqual([]);
+  expect(directive("script-src-elem")).toEqual([]);
 });

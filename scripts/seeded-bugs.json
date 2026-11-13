@@ -48784,6 +48784,34 @@
       ],
       "command": ["bun", "test", "test/site/element-icons.test.ts"],
       "expect": "\\(fail\\).*W-1029"
+    },
+    {
+      "id": "W-1030/csp-extra-script-host",
+      "requirement": "W-1030",
+      "description": "The CSP lets a second outside script host through beside Cloudflare's beacon.",
+      "edits": [
+        {
+          "file": "site/public/_headers",
+          "search": "https://static.cloudflareinsights.com;",
+          "replace": "https://static.cloudflareinsights.com https://cdn.example.com;"
+        }
+      ],
+      "command": ["bun", "test", "scripts/site-headers.test.ts"],
+      "expect": "\\(fail\\).*W-1030"
+    },
+    {
+      "id": "W-1030/csp-connect-any-https",
+      "requirement": "W-1030",
+      "description": "connect-src allows any https host instead of only Cloudflare's analytics host.",
+      "edits": [
+        {
+          "file": "site/public/_headers",
+          "search": "connect-src 'self' https://cloudflareinsights.com;",
+          "replace": "connect-src 'self' https:;"
+        }
+      ],
+      "command": ["bun", "test", "scripts/site-headers.test.ts"],
+      "expect": "\\(fail\\).*W-1030"
     }
   ]
 }
