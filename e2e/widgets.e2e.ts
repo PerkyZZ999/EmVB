@@ -128,3 +128,48 @@ test("an Alert is added as a dismissible warning; on the page its close button h
   // Focus didn't fall back to the page: it is on an element, not the body.
   expect(await page.evaluate(() => document.activeElement?.tagName ?? "")).not.toBe("BODY");
 });
+
+test("an Icon box is added, linked, set beside its text, and on the page the whole box opens its link (W-1020)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Icon boxes");
+  await overlay(page).locator('[data-emvb-add-tile="icon-box"]').click();
+  const box = canvas(page).locator(".emvb-icon-box");
+  await expect(box.locator(".emvb-media-box-title")).toHaveText("A clear benefit");
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Icon box");
+
+  const title = overlay(page).getByLabel("Title", { exact: true });
+  await title.fill("Fast pages");
+  await title.blur();
+  await overlay(page).getByLabel("Position").click();
+  await page.getByRole("option", { name: "Before the text", exact: true }).click();
+  const link = overlay(page).getByLabel("Link", { exact: true });
+  await link.fill("/");
+  await link.blur();
+  await expect(box).toHaveClass(/emvb-media-box-left/);
+  await expect(box.locator(".emvb-media-box-title")).toHaveText("Fast pages");
+
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]).toMatchObject({
+    type: "icon-box",
+    props: { title: "Fast pages", position: "left", href: "/" },
+  });
+
+  await publishPage(request, id);
+  await page.goto(`/${slug}`);
+  const published = page.locator(".emvb-icon-box");
+  // The icon sits before the words, and the box has one link named by its title.
+  const [media, content] = await Promise.all([
+    published.locator(".emvb-media-box-media").boundingBox(),
+    published.locator(".emvb-media-box-content").boundingBox(),
+  ]);
+  expect((media?.x ?? 0) + (media?.width ?? 0)).toBeLessThanOrEqual(content?.x ?? 0);
+  await expect(published.getByRole("link")).toHaveCount(1);
+  await expect(published.getByRole("link", { name: "Fast pages" })).toBeVisible();
+  // A click on the text, away from the title, still follows the link.
+  const text = await published.locator(".emvb-media-box-text").boundingBox();
+  await page.mouse.click((text?.x ?? 0) + 4, (text?.y ?? 0) + 4);
+  await expect(page).toHaveURL(/\/$/);
+});

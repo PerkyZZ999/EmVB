@@ -121,3 +121,55 @@ describe("Alert (W-1025)", () => {
       expect(page(alertNode({ variant })).ok).toBe(true);
   });
 });
+
+const iconBoxNode = (props: Record<string, unknown>) => ({
+  id: "ibox0001",
+  type: "icon-box",
+  props: { iconId: "star", title: "Fast", text: "Pages load quickly.", ...props },
+});
+
+describe("Icon box (W-1020)", () => {
+  test("the icon above an h3 title and the text; the icon is hidden from screen readers", () => {
+    const html = render(iconBoxNode({}));
+    expect(html).toContain('class="emvb-icon-box emvb-media-box emvb-media-box-top"');
+    expect(html).toMatch(
+      /<div class="emvb-media-box-media"><svg [^>]*width="48" height="48"[^>]*aria-hidden="true"/,
+    );
+    expect(html).toContain(
+      '<div class="emvb-media-box-content"><h3 class="emvb-media-box-title">Fast</h3><p class="emvb-media-box-text">Pages load quickly.</p></div>',
+    );
+  });
+
+  test("position, title level and icon size are used; empty words are left out", () => {
+    const html = render(iconBoxNode({ position: "left", titleLevel: 4, iconSize: 32, text: " " }));
+    expect(html).toContain("emvb-media-box-left");
+    expect(html).toContain('<h4 class="emvb-media-box-title">Fast</h4>');
+    expect(html).toMatch(/width="32" height="32"/);
+    expect(html.includes("emvb-media-box-text")).toBe(false);
+  });
+
+  test("a link makes the title the one link, stretched over the whole box", () => {
+    const result = page(iconBoxNode({ href: "/features", newTab: true }));
+    if (!result.ok) throw new Error("invalid");
+    const { html, css } = renderPage(result.layout, emptyDesign());
+    expect(html).toContain("emvb-media-box-linked");
+    expect(html).toContain(
+      '<h3 class="emvb-media-box-title"><a class="emvb-media-box-link" href="/features" target="_blank" rel="noopener noreferrer">Fast</a></h3>',
+    );
+    expect(html.match(/<a /g)).toHaveLength(1);
+    expect(css).toContain('.emvb-media-box-link::after{content:"";position:absolute;inset:0}');
+    expect(css).toContain(".emvb-media-box-linked{position:relative}");
+  });
+
+  test("an unsafe link is dropped; an unknown icon leaves no media box", () => {
+    const html = render(iconBoxNode({ href: "javascript:alert(1)", iconId: "no-such-icon" }));
+    expect(html.includes("<a ")).toBe(false);
+    expect(html.includes("emvb-media-box-linked")).toBe(false);
+    expect(html.includes("emvb-media-box-media")).toBe(false);
+  });
+
+  test("an icon box needs an icon id; level 1 titles are refused", () => {
+    expect(page(iconBoxNode({ iconId: "" })).ok).toBe(false);
+    expect(page(iconBoxNode({ titleLevel: 1 })).ok).toBe(false);
+  });
+});

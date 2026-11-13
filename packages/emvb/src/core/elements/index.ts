@@ -39,7 +39,7 @@ import type { ElementDefinition } from "./definition.ts";
 import { ICON_STROKE_WIDTHS, iconGlyph } from "./icon-svg.ts";
 export { iconHasAdjustableStroke, iconHasOwnColors } from "./icon-svg.ts";
 import { menu, menuItem } from "./menu.ts";
-import { alert, rating } from "./widgets.ts";
+import { alert, iconBox, rating } from "./widgets.ts";
 import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
 import {
   loop,
@@ -1103,6 +1103,7 @@ export const ELEMENTS = {
   "language-switcher": languageSwitcher,
   rating,
   alert,
+  "icon-box": iconBox,
   container,
   "layout-section": layoutSection,
   spacer,

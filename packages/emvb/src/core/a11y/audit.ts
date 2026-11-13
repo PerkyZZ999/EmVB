@@ -474,6 +474,21 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         });
       }
     }
+    // W-1020: a box's link is its title; with no title the link is left out of the page.
+    if (
+      node.type === "icon-box" &&
+      spoken(props["href"]) &&
+      !spoken(props["title"]) &&
+      !node.bind
+    ) {
+      add({
+        nodeId: node.id,
+        rule: "link-name",
+        severity: "warning",
+        message:
+          "This box has a link but no title. The title is the link, so the link is left out.",
+      });
+    }
     // W-1025: a notice with neither title nor text is a coloured box screen readers call a note.
     if (node.type === "alert" && !spoken(props["title"]) && !spoken(props["text"]) && !node.bind) {
       add({

@@ -773,6 +773,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "language-switcher",
   "rating",
   "alert",
+  "icon-box",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -834,6 +835,36 @@ export const AlertNode = leafNode(
   }),
 );
 
+/** W-1020: where a media box puts its icon or image: above, or before or after the words. */
+export const MEDIA_BOX_POSITIONS = ["top", "left", "right"] as const;
+
+/** W-1020 / W-1021: what an icon box and an image box share: title, text, link, layout. */
+const MediaBoxText = {
+  title: z.string().max(200),
+  /** The title's heading level. Unset = 3. */
+  titleLevel: z.number().int().min(2).max(6).optional(),
+  text: z.string().max(MAX_TEXT_LENGTH),
+  position: z.enum(MEDIA_BOX_POSITIONS).optional(),
+  /** Optional link: the title is the link, and the whole box is clickable. */
+  href: z.string().max(2000).optional(),
+  newTab: z.boolean().optional(),
+};
+
+/**
+ * W-1020: an icon above (or beside) a title and text, like Elementor's Icon Box. The icon is
+ * decorative: the title says what the box is. `iconId` and `iconSvg` work as on an Icon.
+ */
+export const IconBoxNode = leafNode(
+  "icon-box",
+  z.strictObject({
+    iconId: z.string().min(1).max(64),
+    iconSvg: z.string().max(ICON_SVG_MAX).optional(),
+    /** The icon's width and height in px. Unset = 48. */
+    iconSize: z.number().int().min(8).max(512).optional(),
+    ...MediaBoxText,
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -869,6 +900,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   LanguageSwitcherNode,
   RatingNode,
   AlertNode,
+  IconBoxNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -911,6 +943,7 @@ export type TocNode = z.infer<typeof TocNode>;
 export type LanguageSwitcherNode = z.infer<typeof LanguageSwitcherNode>;
 export type RatingNode = z.infer<typeof RatingNode>;
 export type AlertNode = z.infer<typeof AlertNode>;
+export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
 export type TextNode = z.infer<typeof TextNode>;
@@ -1112,6 +1145,7 @@ export type LayoutNode =
   | LanguageSwitcherNode
   | RatingNode
   | AlertNode
+  | IconBoxNode
   | SpacerNode
   | DividerNode
   | TextNode

@@ -87,11 +87,14 @@ export function IconPicker({
   node,
   fetcher,
   onChange,
+  optional = node.type === "button",
 }: {
   node: LayoutNode;
   /** Enables My uploads in the library (W-239). */
   fetcher?: Fetcher;
   onChange: (node: LayoutNode) => void;
+  /** W-1020: only an optional icon (a Button's) can be removed; an Icon box needs one. */
+  optional?: boolean;
 }) {
   const props = propsOf(node);
   const current = typeof props.iconId === "string" ? props.iconId : "";
@@ -124,7 +127,7 @@ export function IconPicker({
     onChange(withProps(node, patch));
   };
   // W-387: a Button's icon is optional, so it can be taken off again.
-  const removable = node.type !== "icon" && (current !== "" || typeof props.iconSvg === "string");
+  const removable = optional && (current !== "" || typeof props.iconSvg === "string");
   const remove = () => {
     const { iconId: _id, iconSvg: _svg, ...rest } = propsOf(node);
     onChange({ ...node, props: rest } as LayoutNode);

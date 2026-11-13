@@ -160,12 +160,19 @@ describe("Elementor import: containers (W-945)", () => {
   });
 
   test("icon and image boxes keep media, title and description", () => {
-    const [top, left] = ofType(result.layout, "icon").map((n) => props(n));
-    expect(top).toMatchObject({ iconId: "fa-solid:bolt", decorative: true });
-    expect(left).toMatchObject({ iconId: "fa-solid:universal-access" });
+    // W-1020: Icon Boxes are Icon boxes, with their icon, title, text and position.
+    const [top, left] = ofType(result.layout, "icon-box").map((n) => props(n));
+    expect(top).toMatchObject({ iconId: "fa-solid:bolt", title: "Fast" });
+    expect(top).not.toHaveProperty("position");
+    expect(left).toMatchObject({
+      iconId: "fa-solid:universal-access",
+      title: "Accessible",
+      position: "left",
+    });
+    expect(typeof left?.["iconSvg"]).toBe("string");
     expect(ofType(result.layout, "image").map((n) => props(n)["alt"])).toEqual(["Our team"]);
     expect(ofType(result.layout, "heading").map((n) => props(n)["text"])).toEqual(
-      expect.arrayContaining(["Fast", "Accessible", "People"]),
+      expect.arrayContaining(["People"]),
     );
   });
 

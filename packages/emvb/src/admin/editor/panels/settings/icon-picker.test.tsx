@@ -189,3 +189,21 @@ describe("a Button's icon (W-387)", () => {
     expect(choose !== null && document.activeElement === choose).toBe(true);
   });
 });
+
+describe("an Icon box's icon (W-1020)", () => {
+  const box = (props: Record<string, unknown>): LayoutNode =>
+    ({
+      id: "ibox0001",
+      type: "icon-box",
+      props: { iconId: "star", title: "Fast", text: "Quick.", ...props },
+    }) as LayoutNode;
+
+  test("picking an icon stores its SVG and keeps the box valid; there is no Remove", async () => {
+    const { state } = await mountPanel(box({}));
+    expect(document.querySelector("[data-emvb-icon-remove]")).toBeNull();
+    await pickInLibrary("heart", "lucide:heart");
+    expect(state.current.props).toMatchObject({ iconId: "lucide:heart", title: "Fast" });
+    expect(typeof (state.current.props as { iconSvg?: unknown }).iconSvg).toBe("string");
+    expect(validateLayout(layoutWith(state.current)).ok).toBe(true);
+  });
+});

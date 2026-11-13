@@ -79,3 +79,25 @@ describe("Alert over MCP (W-1025)", () => {
     expect(refused.success).toBe(false);
   });
 });
+
+describe("Icon box over MCP (W-1020)", () => {
+  test("add_element adds a linked icon box; an empty icon id is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("icon-box")?.name).toBe("Icon box");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "icon-box",
+        props: { iconId: "star", title: "Fast", text: "Quick.", href: "/features" },
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "icon-box", props: { iconId: "", title: "Fast", text: "Quick." } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});

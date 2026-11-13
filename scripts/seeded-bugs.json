@@ -22827,8 +22827,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "    iconSvg: z.string().max(ICON_SVG_MAX).optional(),",
-          "replace": "    iconSvg: z.string().optional(),"
+          "search": "    iconSvg: z.string().max(ICON_SVG_MAX).optional(),\n    /** W-238: paint a multi-colour SVG in the icon's colour (fills and strokes → currentColor). */",
+          "replace": "    iconSvg: z.string().optional(),\n    /** W-238: paint a multi-colour SVG in the icon's colour (fills and strokes → currentColor). */"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
@@ -47814,6 +47814,111 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
       "expect": "\\(fail\\).*an empty one warns"
+    },
+    {
+      "id": "W-1020/link-not-stretched",
+      "requirement": "W-1020",
+      "description": "An Icon box's link covers only its title, not the box.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": ".emvb-media-box-link::after{content:\"\";position:absolute;inset:0}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*stretched over the whole box"
+    },
+    {
+      "id": "W-1020/icon-spoken",
+      "requirement": "W-1020",
+      "description": "An Icon box's icon is read out next to its title.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "iconGlyph(node.props, node.props.iconSize ?? 48, { \"aria-hidden\": \"true\" })",
+          "replace": "iconGlyph(node.props, node.props.iconSize ?? 48, { role: \"img\" })"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*icon is hidden from screen readers"
+    },
+    {
+      "id": "W-1020/unsafe-link-kept",
+      "requirement": "W-1020",
+      "description": "An Icon box keeps a javascript: link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "  const safe = props.href?.trim() ? sanitizeHref(props.href) : undefined;",
+          "replace": "  const safe = props.href?.trim() ? props.href : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*unsafe link is dropped"
+    },
+    {
+      "id": "W-1020/required-icon-removable",
+      "requirement": "W-1020",
+      "description": "The icon picker offers Remove on an Icon box, which needs its icon.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx",
+          "search": "  const removable = optional && (current",
+          "replace": "  const removable = node.type !== \"icon\" && (current"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/icon-picker.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-1020"
+    },
+    {
+      "id": "W-1020/import-position-lost",
+      "requirement": "W-1020",
+      "description": "An imported Icon Box loses its side position.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "    ...(position === \"left\" || position === \"right\" ? { position } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*icon and image boxes keep media"
+    },
+    {
+      "id": "W-1020/a11y-lost-link-silent",
+      "requirement": "W-1020",
+      "description": "A linked Icon box without a title passes the check though its link is left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      node.type === \"icon-box\" &&\n      spoken(props[\"href\"]) &&\n      !spoken(props[\"title\"]) &&",
+          "replace": "      node.type === \"icon-box\" &&\n      spoken(props[\"href\"]) &&\n      spoken(props[\"title\"]) &&"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*link without a title warns"
+    },
+    {
+      "id": "W-1020/left-stacks",
+      "requirement": "W-1020",
+      "description": "An Icon box set beside its text still stacks the icon above.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": ".emvb-media-box-left{flex-direction:row;align-items:flex-start}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

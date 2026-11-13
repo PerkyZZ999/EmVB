@@ -2,8 +2,10 @@
  * The 1.2 widgets (PLAN_1.2 part D): elements built from plain markup and CSS. Each one renders
  * without script; the few interactive extras are opt-in runtimes.
  */
-import type { AlertNode, LayoutNode, RatingNode } from "../schema/layout.ts";
-import { ALERT_VARIANTS, MAX_RATING } from "../schema/layout.ts";
+import type { AlertNode, IconBoxNode, LayoutNode, RatingNode } from "../schema/layout.ts";
+import { ALERT_VARIANTS, MAX_RATING, type MEDIA_BOX_POSITIONS } from "../schema/layout.ts";
+import { sanitizeHref } from "../sanitize/href.ts";
+import { iconGlyph } from "./icon-svg.ts";
 import type { VNode } from "../render/vnode.ts";
 import type { ElementDefinition } from "./definition.ts";
 
@@ -231,4 +233,129 @@ export const alert: ElementDefinition<AlertNode> = {
       children,
     };
   },
+};
+
+type MediaBoxProps = {
+  title: string;
+  titleLevel?: number | undefined;
+  text: string;
+  position?: (typeof MEDIA_BOX_POSITIONS)[number] | undefined;
+  href?: string | undefined;
+  newTab?: boolean | undefined;
+};
+
+/**
+ * W-1020 / W-1021: the shared layout of an icon box and an image box: the media, then a heading
+ * and text. With a safe link the title is the one link, stretched over the box so the whole box
+ * is clickable while screen readers hear a single named link.
+ */
+function mediaBox(
+  props: MediaBoxProps,
+  attrs: Record<string, string>,
+  media: VNode | undefined,
+): VNode {
+  const position = props.position ?? "top";
+  const safe = props.href?.trim() ? sanitizeHref(props.href) : undefined;
+  const title = props.title.trim()
+    ? safe
+      ? {
+          tag: "a",
+          attrs: {
+            class: "emvb-media-box-link",
+            href: safe,
+            ...(props.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {}),
+          },
+          children: [props.title],
+        }
+      : props.title
+    : undefined;
+  const content: VNode[] = [];
+  if (title)
+    content.push({
+      tag: `h${props.titleLevel ?? 3}`,
+      attrs: { class: "emvb-media-box-title" },
+      children: [title],
+    });
+  if (props.text.trim())
+    content.push({ tag: "p", attrs: { class: "emvb-media-box-text" }, children: [props.text] });
+  const children: VNode[] = [];
+  if (media)
+    children.push({ tag: "div", attrs: { class: "emvb-media-box-media" }, children: [media] });
+  children.push({ tag: "div", attrs: { class: "emvb-media-box-content" }, children: content });
+  return {
+    tag: "div",
+    attrs: {
+      ...attrs,
+      class:
+        `${attrs["class"] ?? ""} emvb-media-box emvb-media-box-${position}${safe ? " emvb-media-box-linked" : ""}`.trim(),
+    },
+    children,
+  };
+}
+
+/** Base rules the icon box and image box share. */
+const MEDIA_BOX_CSS =
+  '.emvb-media-box{display:flex;flex-direction:column;gap:1em;min-width:0}.emvb-media-box-left{flex-direction:row;align-items:flex-start}.emvb-media-box-right{flex-direction:row-reverse;align-items:flex-start}.emvb-media-box-media{flex:none;line-height:0}.emvb-media-box-content{flex:1;min-width:0}.emvb-media-box-title{margin:0 0 0.5em;font-size:1.25em}.emvb-media-box-text{margin:0;white-space:pre-line}.emvb-media-box-linked{position:relative}.emvb-media-box-link{color:inherit;text-decoration:none}.emvb-media-box-link::after{content:"";position:absolute;inset:0}.emvb-media-box-link:focus-visible{outline:none}.emvb-media-box-linked:has(.emvb-media-box-link:focus-visible){outline:2px solid currentColor;outline-offset:4px}';
+
+const POSITION_OPTIONS = [
+  { value: "top", label: "Above" },
+  { value: "left", label: "Before the text" },
+  { value: "right", label: "After the text" },
+];
+
+/** The title, text, layout and link fields of an icon box and an image box. */
+const MEDIA_BOX_FIELDS = [
+  { key: "title", kind: "text" as const, label: "Title" },
+  {
+    key: "titleLevel",
+    kind: "select" as const,
+    label: "Title level",
+    optional: true,
+    options: [2, 3, 4, 5, 6].map((level) => ({ value: level, label: `H${level}` })),
+  },
+  { key: "text", kind: "textarea" as const, label: "Text" },
+  {
+    key: "position",
+    kind: "select" as const,
+    label: "Position",
+    optional: true,
+    options: POSITION_OPTIONS,
+  },
+  {
+    key: "href",
+    kind: "href" as const,
+    label: "Link",
+    optional: true,
+    message: "Use a full URL such as https://example.com or a path such as /pricing.",
+  },
+  { key: "newTab", kind: "boolean" as const, label: "Open in a new tab", optional: true },
+];
+
+export const iconBox: ElementDefinition<IconBoxNode> = {
+  baseCss: `${MEDIA_BOX_CSS}.emvb-icon-box .emvb-media-box-media svg{display:block;max-width:100%}`,
+  defaults: () => ({
+    type: "icon-box",
+    props: {
+      iconId: "star",
+      title: "A clear benefit",
+      text: "One or two sentences that explain it.",
+    },
+  }),
+  descriptor: {
+    type: "icon-box",
+    name: "Icon box",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "iconId", kind: "icon", label: "Icon" },
+      { key: "iconSize", kind: "int", label: "Icon size (px)", optional: true, min: 8, max: 512 },
+      ...MEDIA_BOX_FIELDS,
+    ],
+  },
+  build: (node, attrs) =>
+    mediaBox(
+      node.props,
+      attrs,
+      iconGlyph(node.props, node.props.iconSize ?? 48, { "aria-hidden": "true" }),
+    ),
 };

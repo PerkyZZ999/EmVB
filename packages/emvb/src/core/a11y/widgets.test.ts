@@ -55,3 +55,19 @@ describe("Alert (W-1025)", () => {
     expect(audit(alert({ title: " ", text: "\u200b" }))).toEqual(["empty-alert:warning:alrt0001"]);
   });
 });
+
+describe("Icon box (W-1020)", () => {
+  const box = (props: Record<string, unknown>) => ({
+    id: "ibox0001",
+    type: "icon-box",
+    props: { iconId: "star", title: "Fast", text: "Quick.", ...props },
+  });
+
+  test("a linked box with a title is fine", () => {
+    expect(audit(box({ href: "/features" }))).toEqual([]);
+  });
+
+  test("a link without a title warns that the link is left out", () => {
+    expect(audit(box({ href: "/features", title: "" }))).toEqual(["link-name:warning:ibox0001"]);
+  });
+});

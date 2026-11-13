@@ -719,7 +719,62 @@ function mediaBox(media: N | undefined, s: Settings, ctx: ImportContext, el: str
   ];
 }
 
-const iconBox: Widget = (s, ctx, el) => mediaBox(iconNode(s, ctx, el), s, ctx, el);
+/** Elementor's title, text, link and position settings as an icon or image box's props. */
+function mediaBoxProps(s: Settings, ctx: ImportContext): Record<string, unknown> {
+  const level = Number(/^h([1-6])$/.exec(str(s["title_size"]) ?? "h3")?.[1] ?? 3);
+  const position = str(s["position"]);
+  const linkProps = href(s["link"], ctx);
+  return {
+    title: short(plain(s["title_text"]).text, 200),
+    ...(level === 3 ? {} : { titleLevel: Math.max(2, level) }),
+    text: short(plain(s["description_text"]).text),
+    ...(position === "left" || position === "right" ? { position } : {}),
+    ...linkProps,
+  };
+}
+
+/** The box's own styles: alignment, and one colour for icon and words (EmVB's box has one). */
+function mediaBoxStyle(s: Settings, ctx: ImportContext, el: string): Style {
+  const style: Style = {};
+  const where = textAlign(s["text_align"]);
+  if (where) style.textAlign = where;
+  const ink = colorAt(s, "title_color", ctx) ?? colorAt(s, "primary_color", ctx) ?? undefined;
+  if (ink) style.color = ink;
+  if (
+    s["title_typography_typography"] ||
+    s["description_typography_typography"] ||
+    s["description_color"]
+  )
+    ctx.note(
+      "approximated",
+      el,
+      "Icon and image boxes keep one text style; title and description fonts and colours were simplified.",
+    );
+  return style;
+}
+
+/** W-1020: Elementor's Icon Box → an Icon box; without a usable icon, the old layout. */
+const iconBox: Widget = (s, ctx, el) => {
+  const icon = iconOf(s["selected_icon"] ?? s["icon"], ctx, el);
+  if (!icon) return mediaBox(undefined, s, ctx, el);
+  const size = slider(s["size"]);
+  const style = mediaBoxStyle(s, ctx, el);
+  return [
+    node(
+      ctx,
+      "icon-box",
+      {
+        iconId: icon.iconId,
+        ...(icon.iconSvg ? { iconSvg: icon.iconSvg } : {}),
+        ...(size && size.unit === "px"
+          ? { iconSize: Math.min(512, Math.max(8, Math.round(size.value))) }
+          : {}),
+        ...mediaBoxProps(s, ctx),
+      },
+      Object.keys(style).length > 0 ? { style } : {},
+    ),
+  ];
+};
 
 const imageBox: Widget = (s, ctx, el) => {
   const img = imageNode(ctx, el, s["image"]);

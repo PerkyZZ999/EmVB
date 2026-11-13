@@ -103,7 +103,15 @@ export function FieldControl({
   }
 
   if (field.kind === "icon") {
-    return <IconPicker key={field.key} node={node} fetcher={fetcher} onChange={onChange} />;
+    return (
+      <IconPicker
+        key={field.key}
+        node={node}
+        fetcher={fetcher}
+        onChange={onChange}
+        optional={field.optional === true}
+      />
+    );
   }
 
   if (field.kind === "marks") {
