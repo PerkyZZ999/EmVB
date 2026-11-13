@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import type { Layout, LayoutNode } from "../core/index.ts";
 import type { ContentPort } from "./content-port.ts";
 import { bindingDataFor } from "./request-data.ts";
+import { setLoopCollections } from "../core/loop-collections.ts";
 import { themePostFromEntry } from "./theme-posts.ts";
 
 const calls: { collection: string; filter: unknown }[] = [];
@@ -98,5 +99,35 @@ describe("Loop options (W-330)", () => {
     expect(post?.permalink).toBe("/p/01X/x");
     expect(post?.featuredImageUrl).toBeUndefined();
     expect(post?.excerpt).toBe("");
+  });
+});
+
+describe("loopCollections (W-1000, S-11)", () => {
+  const listed = async () => {
+    calls.length = 0;
+    const data = await bindingDataFor(
+      loop({}),
+      new URL("https://site.test/"),
+      undefined,
+      [],
+      {},
+      content,
+    );
+    return { entries: data.collections?.["loop0001"]?.length ?? 0, queried: calls.length };
+  };
+
+  test("a Loop on a collection outside the list renders empty and isn't even queried", async () => {
+    try {
+      setLoopCollections(["posts"]);
+      expect(await listed()).toEqual({ entries: 0, queried: 0 });
+      setLoopCollections(["posts", "team"]);
+      expect(await listed()).toEqual({ entries: 1, queried: 1 });
+    } finally {
+      setLoopCollections(undefined);
+    }
+  });
+
+  test("without the option every collection can be listed, as before", async () => {
+    expect(await listed()).toEqual({ entries: 1, queried: 1 });
   });
 });

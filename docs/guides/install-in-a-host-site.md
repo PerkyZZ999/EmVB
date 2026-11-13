@@ -83,6 +83,16 @@ const emvb =
 - EmVB asks for the `schema:read` capability to find your emvb:canvas fields.
 - The demo sites' `pages` collection has a `canvas` field set up this way.
 
+### Which collections Loops may list (optional)
+
+A Loop element lists the published entries of a collection your editors pick, with fields they choose. If you keep a collection published but not meant to be listed on pages (members, internal notes), name the ones Loops may use (since 1.1.2):
+
+```js
+emvb({ loopCollections: ["posts", "team"] });
+```
+
+A Loop on any other collection then renders empty. Without the option, Loops can list any collection, as before.
+
 ## 3. Public route
 
 Copy the pattern from EmVB’s demos (`demos/node/src/pages/[slug].astro`): try `resolveEmVBPage` first, then fall through to the site’s own pages, and rewrite to `/404` when neither matches.

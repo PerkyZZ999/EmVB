@@ -2,6 +2,7 @@ import type { PluginDescriptor } from "emdash";
 import { ADMIN_ENTRY, PACKAGE_NAME, PLUGIN_ID, PLUGIN_VERSION } from "./constants.ts";
 import { canvasCollectionSlugs } from "./core/canvas-collections.ts";
 import { canvasStyleUrls } from "./core/canvas-styles.ts";
+import { loopCollectionSlugs } from "./core/loop-collections.ts";
 import {
   rememberExtensions,
   type EmVBExtension,
@@ -35,6 +36,12 @@ export type EmVBOptions = {
    * client copies), `false` never reads them. Visitors rules are presentation, not access control.
    */
   trustGeoHeaders?: boolean;
+  /**
+   * S-11 (W-1000): the collections Loops may list on the public site, such as `["posts"]`. A
+   * Loop on any other collection renders empty. Unset, Loops can list the published entries of
+   * any collection, so set it if you keep a collection published but not meant to be listed.
+   */
+  loopCollections?: string[];
 };
 
 /** Descriptor that host sites add to `emdash({ plugins: [...] })` in astro.config. */
@@ -52,6 +59,9 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
       ...(canvasStyles.length > 0 ? { canvasStyles } : {}),
       ...(canvasCollections.length > 0 ? { canvasCollections } : {}),
       ...(extensions.length > 0 ? { extensions } : {}),
+      ...(Array.isArray(options.loopCollections)
+        ? { loopCollections: loopCollectionSlugs(options.loopCollections) ?? [] }
+        : {}),
       ...(typeof options.trustGeoHeaders === "boolean"
         ? { trustGeoHeaders: options.trustGeoHeaders }
         : {}),

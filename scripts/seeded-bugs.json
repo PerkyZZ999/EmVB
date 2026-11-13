@@ -47009,6 +47009,48 @@
       "command": ["bun", "run", "e2e", "e2e/personalize.e2e.ts", "--project=node"],
       "env": { "CI": "1" },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1000/allowlist-ignored",
+      "requirement": "W-1000",
+      "description": "Loops list any collection even when the site set loopCollections.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/request-data.ts",
+          "search": "  if (!loopCollectionAllowed(loop.collection)) return [];\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/loop-options.test.ts"],
+      "expect": "\\(fail\\).*outside the list renders empty"
+    },
+    {
+      "id": "W-1000/unset-blocks-all",
+      "requirement": "W-1000",
+      "description": "Without loopCollections no Loop lists anything, breaking every existing site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/loop-collections.ts",
+          "search": "  return allowed === undefined || allowed.includes(collection);",
+          "replace": "  return allowed !== undefined && allowed.includes(collection);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/loop-options.test.ts"],
+      "expect": "\\(fail\\).*without the option every collection can be listed"
+    },
+    {
+      "id": "W-1000/option-dropped",
+      "requirement": "W-1000",
+      "description": "emvb({ loopCollections }) never reaches the plugin.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "  setLoopCollections(options.loopCollections);",
+          "replace": "  setLoopCollections(undefined);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/loop-collections-option.test.ts"],
+      "expect": "\\(fail\\).*reaches the renderer"
     }
   ]
 }

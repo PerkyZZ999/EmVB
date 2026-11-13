@@ -1,3 +1,4 @@
+import { setLoopCollections } from "../core/loop-collections.ts";
 import { setGeoTrust } from "../core/geo-trust.ts";
 import {
   proposalCreateRoute,
@@ -43,9 +44,11 @@ export function createPlugin(
     canvasCollections?: unknown;
     extensions?: unknown;
     trustGeoHeaders?: unknown;
+    loopCollections?: unknown;
   } = {},
 ) {
   setGeoTrust(options.trustGeoHeaders);
+  setLoopCollections(options.loopCollections);
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
   const extensions = manifestsFromOptions(options.extensions);

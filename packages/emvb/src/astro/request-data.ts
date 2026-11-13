@@ -1,3 +1,4 @@
+import { loopCollectionAllowed } from "../core/loop-collections.ts";
 import { emdashContent, type ContentPort } from "./content-port.ts";
 import { siteFor } from "./render-session.ts";
 import {
@@ -31,6 +32,8 @@ const ORDER_BY: Record<CollectionLoop["order"], Record<string, "asc" | "desc">> 
 
 /** Published entries for one collection Loop (W-308); a failing query lists nothing. */
 async function loopEntries(loop: CollectionLoop, content: ContentPort): Promise<ThemePostFields[]> {
+  // S-11 (W-1000): a site that lists its Loop collections shows nothing from the others.
+  if (!loopCollectionAllowed(loop.collection)) return [];
   try {
     const result = await content.getCollection(loop.collection, {
       status: "published",
