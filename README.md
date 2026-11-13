@@ -17,11 +17,11 @@ Try it without installing anything in the [playground](https://emvb.dev/playgrou
 
 ![The EmVB editor: the element tree, the canvas and the Style panel](site/public/screenshots/editor-1600.webp)
 
-**Current release:** 1.1.2, the second security patch for 1.1.0 (see the [changelog](CHANGELOG.md)). Everything in 1.1 is additive: 1.0 pages open unchanged and the page format stays frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17). 1.1 lets you take your work with you (Export pages as HTML and CSS or as rich text, also for entries of your own collections, and Convert to rich text; see [Leaving EmVB](docs/guides/leaving-emvb.md)), adds a Wide screen device, search by content and bulk Publish, Delete and Export in the Pages and Theme Builder lists, `dvh`/`svh` heights, and measured [performance on large pages](docs/guides/performance.md). See the [changelog](CHANGELOG.md) for every release.
+**Current release:** 1.2.0 (see the [changelog](CHANGELOG.md)). It adds the common widgets (Carousel, Gallery with lightbox, Icon box, Image box, Testimonial, Star rating, Social icons, Alert), imports more of Elementor (those widgets, sticky elements, menu links), and schedules publishing from the editor. Everything is additive: 1.0 and 1.1 pages open unchanged and the page format stays frozen for 1.x ([docs/SCHEMA.md](docs/SCHEMA.md): layout schema 18, design schema 17). Public pages load no script unless an element opts in. See the [changelog](CHANGELOG.md) for every release.
 
 ## Requirements
 
-- **EmDash 1.4.x.** EmVB 1.1.2 is built and tested against EmDash 1.4.0 and tested on EmDash 1.5.0 (0.8.0 was tested on 1.3.1). Its peer range is `emdash` >=1.4.0 <2 (since 1.1.2; earlier EmDash versions were never tested with its role checks).
+- **EmDash 1.4 and 1.5.** EmVB 1.2.0 is built and tested against EmDash 1.5.0 and tested on EmDash 1.4.0 (CI runs both; every release is installed on a stock 1.4.0 and 1.5.0 site). Its peer range is `emdash` >=1.4.0 <2.
 - **Astro 7, as your EmDash site has it.** No Astro change needed: verified on a stock `create-emdash` 1.4.0 site, which installs Astro 7.4.7 (7.4.8 since 2026-11-09, also verified).
 - **React 19**, `@cloudflare/kumo` 2.6.0 (EmDash 1.4) or 2.15.0 (EmDash 1.5) and `@phosphor-icons/react` ^2.1.10. An EmDash site already has these.
 - **Optional:** `@emdash-cms/plugin-forms` ^0.2.9 for forms.
