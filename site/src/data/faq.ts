@@ -8,11 +8,11 @@ export interface Faq {
 export const faqs: Faq[] = [
   {
     q: "Does EmVB add JavaScript to my site?",
-    a: "Not to a normal page. A few small scripts load only where a page needs them: popups, floating bars, keyboard support for tabs (which already work with CSS alone) and Escape for menu dropdowns. Forms use the EmDash forms plugin’s own script.",
+    a: "Not to a normal page. A few small scripts load only where a page needs them: popups, floating bars, keyboard support for tabs (which already work with CSS alone), Escape for menu dropdowns, and the widget options that need one (a dismissible alert, a gallery lightbox, carousel buttons and autoplay). Forms use the EmDash forms plugin’s own script.",
   },
   {
     q: "Which EmDash version does it need?",
-    a: "EmDash CMS 1.0 to 1.4 (built and tested on 1.4.0). EmVB is a native plugin. It adds its own section to the admin sidebar with Pages VisualBuilder and Theme Builder.",
+    a: "EmDash CMS 1.4 or 1.5. EmVB is developed on 1.5.0, every change is tested on 1.4.0 and 1.5.0, and each release is installed on a fresh site of both. EmVB is a native plugin. It adds its own section to the admin sidebar with Pages VisualBuilder and Theme Builder.",
   },
   {
     q: "Where does it run?",

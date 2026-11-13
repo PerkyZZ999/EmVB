@@ -37,6 +37,14 @@ export const featureGroups: FeatureGroup[] = [
         body: "Over 14,000 icons from Lucide, Font Awesome Free, Tabler and Remix, or upload your own SVG.",
       },
       {
+        title: "Common widgets",
+        body: "Star rating, alert, icon and image boxes, testimonial, social icons, a gallery with a lightbox and a carousel, accessible and script-free unless you turn on an option that needs one.",
+      },
+      {
+        title: "Schedule publishing",
+        body: "Pick the date and time a page or theme part goes live; EmDash publishes it by itself.",
+      },
+      {
         title: "Synced sections and templates",
         body: "A Section element renders a shared part live. New pages can start from a page template.",
       },

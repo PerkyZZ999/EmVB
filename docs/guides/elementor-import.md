@@ -71,10 +71,19 @@ pick another type in the dialog if you want.
   radius, box shadow, typography (family, size, weight, line height, letter spacing, case,
   decoration), text colour and alignment, entrance animations, visibility per device, and the
   wide screen, laptop, tablet and mobile values of all of these (wide screen since 1.1).
+- **Sticky (since 1.2):** Elementor's Sticky setting becomes CSS sticky positioning with its edge
+  (top or bottom), offset and devices.
 - **Widgets:** Heading, Text Editor, Image, Button (with its icon and hover colours), Spacer,
-  Divider, Icon, Icon Box, Image Box, Icon List, Video (YouTube, Vimeo, files), Counter, Progress
-  Bar, Testimonial, Star Rating, Alert, Tabs, Accordion, Toggle, Nested Tabs, Nested Accordion,
-  Social Icons, Basic Gallery, Menu Anchor, and HTML (as plain elements).
+  Divider, Icon, Icon List, Video (YouTube, Vimeo, files), Counter, Progress Bar, Tabs, Accordion,
+  Toggle, Nested Tabs, Nested Accordion, Menu Anchor, and HTML (as plain elements).
+- **Widgets that become EmVB's own (since 1.2):** Star Rating, Alert (dismiss included), Icon Box,
+  Image Box, Testimonial, Social Icons (when every network is one EmVB knows; otherwise as icons),
+  Basic Gallery and Pro Gallery (as a Gallery, lightbox included), and Image
+  Carousel and Media Carousel (as a Carousel with their arrows, dots and looping; autoplay only
+  when the widget had it on). See [Widgets](widgets.md).
+- **Nav Menu (since 1.2):** the Menu is filled with the links of your site's menu of the same name,
+  as EmDash's WordPress import brings it over; links to pages and posts go to their addresses
+  here. When the site has no menu of that name, the Menu stays empty and the report says so.
 - **Theme builder:** Post Title, Post Content, Post Excerpt, Featured Image, Post Info (author and
   date) and the Elementor Pro dynamic tags for the post title and featured image become EmVB's
   dynamic elements.
@@ -113,9 +122,8 @@ These keep their content in the closest EmVB form, and the report says so:
 
 - **Pro widgets:** Form (its fields; connect it to a form in the forms plugin), Call to Action,
   Price Table, Flip Box (back below the front), Animated Headline (no animation), Slides and
-  carousels (stacked or as a grid), Blockquote, Table of Contents, Code Highlight.
-- **Google Maps** becomes a link to the map; **Star Rating** shows star characters; counters and
-  progress bars show their final value.
+  Testimonial Carousel (stacked), Blockquote, Table of Contents, Code Highlight.
+- **Google Maps** becomes a link to the map; counters and progress bars show their final value.
 - **Text formatting** inside headings and paragraphs keeps bold, italic, coloured and linked words,
   including the colour your site's CSS gives emphasised words in a class (the gold word of a hero
   title). Other formatting (underline, superscript, highlights) becomes plain text. Paragraphs,
@@ -129,10 +137,10 @@ These keep their content in the closest EmVB form, and the report says so:
 
 ## What is left out
 
-WordPress-only things: shortcodes, WordPress widgets and sidebars, menus (the Menu element is
-created empty: add its links), the site logo and title, post lists and loops (rebuild them with
+WordPress-only things: shortcodes, WordPress widgets and sidebars, menus the site doesn't have (see
+Nav Menu above), the site logo and title, post lists and loops (rebuild them with
 EmVB's Loop element), comments, search and login forms, countdowns, share buttons, Lottie,
-hotspots, motion effects, sticky positioning and Elementor CSS classes. Scripts and styles in HTML
+hotspots, motion effects and Elementor CSS classes. Scripts and styles in HTML
 are always removed.
 
 ## After importing

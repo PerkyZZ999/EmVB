@@ -27,6 +27,12 @@ export const DOC_GROUPS: DocGroup[] = [
     title: "Build pages",
     docs: [
       {
+        slug: "widgets",
+        title: "Widgets",
+        summary:
+          "Star rating, alert, icon and image boxes, testimonial, social icons, gallery, carousel.",
+      },
+      {
         slug: "saved-sections",
         title: "Saved sections",
         summary: "Save any element and reuse it, as a copy or synced everywhere.",
@@ -56,6 +62,11 @@ export const DOC_GROUPS: DocGroup[] = [
   {
     title: "Content in and out",
     docs: [
+      {
+        slug: "scheduled-publishing",
+        title: "Schedule publishing",
+        summary: "Pick when a page or theme part goes live; EmDash publishes it then.",
+      },
       {
         slug: "elementor-import",
         title: "Import from Elementor",

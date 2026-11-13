@@ -4,7 +4,7 @@ EmVB is a **native** EmDash plugin: add the package, register it in `astro.confi
 
 Project website: <https://emvb.dev>. Package: [`@perkyzz/emvb`](https://www.npmjs.com/package/@perkyzz/emvb).
 
-EmVB 1.0 is verified on EmDash 1.4.0 (a fresh `create-emdash` 1.4.0 site, node and Cloudflare templates as created, with Astro 7.4.7, and again on 2026-11-09 with Astro 7.4.8 and the 1.0 extras, following this guide; 0.9.0 was verified the same way with Astro 7.3.5); earlier releases were verified on 1.0.1 and 1.2.0. The package ships TypeScript source (no `bun build` step for the plugin).
+EmVB 1.2 is verified on EmDash 1.4.0 and 1.5.0: each release is installed on a fresh `create-emdash` site of each version, following this guide (on 2026-11-13 with Astro 7.4.10 on 1.4.0 and Astro 7.4.11 on 1.5.0), and every change is tested on both in CI. EmVB 1.0 was verified on EmDash 1.4.0 with Astro 7.4.7 and 7.4.8; earlier releases on 1.0.1 and 1.2.0. The package ships TypeScript source (no `bun build` step for the plugin).
 
 ## 1. Install the package
 
@@ -15,7 +15,7 @@ npm i @perkyzz/emvb
 # or: bun add @perkyzz/emvb
 ```
 
-EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.x site already has: `emdash` ^1.0.0, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash's exact pin) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own. Keep the Astro version your EmDash site came with; you don't need to change it. A stock EmDash 1.4.0 site installs Astro 7.4.7, and EmVB builds, passes `astro check` and runs there. Your site ends up with two copies of zod (EmDash and EmVB use 4.5.4, Astro uses a newer one); that is expected and harmless.
+EmVB ships TypeScript source and has no build step; your site's Vite build compiles it. Its peers are what an EmDash 1.4 or 1.5 site already has: `emdash` >=1.4.0 <2, `astro` ^7, `react` and `react-dom` ^19, `@cloudflare/kumo` 2.6.0 (EmDash 1.4's exact pin) or 2.15.0 (EmDash 1.5's) and `@phosphor-icons/react` ^2.1.10. npm and Bun install missing peers on their own. Keep the Astro version your EmDash site came with; you don't need to change it. EmVB takes any zod 4 from 4.5.4 up, so it can share EmDash's copy; if your package manager still installs another copy for Astro, that is expected and harmless.
 
 It also installs two dependencies: `zod` and `@perkyzz/emvb-icons`, the icon sets for the editor's Icon library (pinned to the exact version EmVB was built with). Only the editor loads the icon sets; a placed icon is saved into the page as SVG, so public pages never fetch them.
 
@@ -145,7 +145,7 @@ Blank-canvas EmVB pages use `standalone` on `EmVBPage` (see the demos).
 
 `@perkyzz/emvb/astro/forms` does not import the forms plugin, so a site can always import it and the build still succeeds; rendering it does nothing. When `@emdash-cms/plugin-forms` is installed, import `EmVBFormsRuntime` from `@perkyzz/emvb/astro/forms/client` instead. That subpath calls `initForms`.
 
-Public pages are script-free except for these runtimes, and each one is mounted only when the page says it needs it: `needsFormsRuntime` (a Form element), `needsTabsRuntime` (a Tabs element, `@perkyzz/emvb/astro/tabs`) and `needsMenuRuntime` (a Menu element, `@perkyzz/emvb/astro/menu`). Theme parts report their own flags from `resolveThemeParts`, with popups (`@perkyzz/emvb/astro/popups`) and floats (`@perkyzz/emvb/astro/floats`) in addition; mount those in the site layout as `demos/node/src/layouts/Base.astro` does. Since 1.2, widgets with an opt-in script (a dismissible Alert) list it in `runtimes`: `EmVBPage` mounts a page's own, so a page needs no change; for theme parts, add `<EmVBWidgetRuntimes names={theme.runtimes} />` from `@perkyzz/emvb/astro/widgets` once to the site layout, and later widgets' scripts come through it too. See [Theme parts § Public render](../system/theme-parts.md#public-render).
+Public pages are script-free except for these runtimes, and each one is mounted only when the page says it needs it: `needsFormsRuntime` (a Form element), `needsTabsRuntime` (a Tabs element, `@perkyzz/emvb/astro/tabs`) and `needsMenuRuntime` (a Menu element, `@perkyzz/emvb/astro/menu`). Theme parts report their own flags from `resolveThemeParts`, with popups (`@perkyzz/emvb/astro/popups`) and floats (`@perkyzz/emvb/astro/floats`) in addition; mount those in the site layout as `demos/node/src/layouts/Base.astro` does. Since 1.2, widgets with an opt-in script (a dismissible Alert, a Gallery that opens pictures large, a Carousel with buttons or autoplay) list it in `runtimes`: `EmVBPage` mounts a page's own, so a page needs no change; for theme parts, add `<EmVBWidgetRuntimes names={theme.runtimes} />` from `@perkyzz/emvb/astro/widgets` once to the site layout, and later widgets' scripts come through it too. See [Theme parts § Public render](../system/theme-parts.md#public-render).
 
 ### Tell EmVB what you know about the visitor
 
