@@ -101,3 +101,25 @@ describe("Icon box over MCP (W-1020)", () => {
     expect(refused.success).toBe(false);
   });
 });
+
+describe("Image box over MCP (W-1021)", () => {
+  test("add_element adds one with alt text; one without alt is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("image-box")?.name).toBe("Image box");
+    const element = (alt: string) => ({
+      type: "image-box",
+      props: { src: "/_emdash/api/media/file/a.jpg", alt, title: "People", text: "Us." },
+    });
+    expect(
+      (await call("add_element", { pageId, parentId: "root0001", element: element("Our team") }))
+        .success,
+    ).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: element(""),
+    });
+    expect(refused.success).toBe(false);
+    expect(JSON.stringify(refused.error)).toContain("Alt text is required");
+  });
+});

@@ -71,3 +71,23 @@ describe("Icon box (W-1020)", () => {
     expect(audit(box({ href: "/features", title: "" }))).toEqual(["link-name:warning:ibox0001"]);
   });
 });
+
+describe("Image box (W-1021)", () => {
+  const box = (props: Record<string, unknown>) => ({
+    id: "imbx0001",
+    type: "image-box",
+    props: { src: "/a.jpg", alt: "Our team", title: "People", text: "", ...props },
+  });
+
+  test("real alt text, a decorative picture or no picture yet is fine", () => {
+    expect(audit(box({}))).toEqual([]);
+    expect(audit(box({ alt: "", decorative: true }))).toEqual([]);
+    expect(audit(box({ src: "", alt: "Image" }))).toEqual([]);
+  });
+
+  test("a file-name or placeholder alt is an error; a link without a title warns", () => {
+    expect(audit(box({ alt: "IMG_2041.jpg" }))).toEqual(["image-alt:error:imbx0001"]);
+    expect(audit(box({ alt: "Image" }))).toEqual(["image-alt:error:imbx0001"]);
+    expect(audit(box({ href: "/team", title: "" }))).toEqual(["link-name:warning:imbx0001"]);
+  });
+});

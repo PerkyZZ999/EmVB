@@ -2,9 +2,16 @@
  * The 1.2 widgets (PLAN_1.2 part D): elements built from plain markup and CSS. Each one renders
  * without script; the few interactive extras are opt-in runtimes.
  */
-import type { AlertNode, IconBoxNode, LayoutNode, RatingNode } from "../schema/layout.ts";
+import type {
+  AlertNode,
+  IconBoxNode,
+  ImageBoxNode,
+  LayoutNode,
+  RatingNode,
+} from "../schema/layout.ts";
 import { ALERT_VARIANTS, MAX_RATING, type MEDIA_BOX_POSITIONS } from "../schema/layout.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
+import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { iconGlyph } from "./icon-svg.ts";
 import type { VNode } from "../render/vnode.ts";
 import type { ElementDefinition } from "./definition.ts";
@@ -358,4 +365,66 @@ export const iconBox: ElementDefinition<IconBoxNode> = {
       attrs,
       iconGlyph(node.props, node.props.iconSize ?? 48, { "aria-hidden": "true" }),
     ),
+};
+
+/** W-1021: the picture of an image box, or undefined when it has no safe address. */
+function boxImage(props: ImageBoxNode["props"]): VNode | undefined {
+  const src = props.src.trim() ? sanitizeMediaUrl(props.src.trim()) : undefined;
+  if (!src) return undefined;
+  return {
+    tag: "img",
+    attrs: {
+      src,
+      alt: props.decorative ? "" : props.alt,
+      ...(props.width ? { width: String(props.width) } : {}),
+      ...(props.height ? { height: String(props.height) } : {}),
+      loading: "lazy",
+      decoding: "async",
+    },
+    children: [],
+  };
+}
+
+export const imageBox: ElementDefinition<ImageBoxNode> = {
+  baseCss: `${MEDIA_BOX_CSS}.emvb-image-box .emvb-media-box-media img{display:block;width:100%;height:auto}.emvb-image-box.emvb-media-box-top .emvb-media-box-media{width:100%}.emvb-image-box:is(.emvb-media-box-left,.emvb-media-box-right) .emvb-media-box-media{flex-basis:40%;max-width:40%}.emvb-image-box.emvb-image-box-small:is(.emvb-media-box-left,.emvb-media-box-right) .emvb-media-box-media{flex-basis:25%;max-width:25%}.emvb-image-box.emvb-image-box-large:is(.emvb-media-box-left,.emvb-media-box-right) .emvb-media-box-media{flex-basis:60%;max-width:60%}.emvb-image-box.emvb-image-box-full:is(.emvb-media-box-left,.emvb-media-box-right) .emvb-media-box-media{flex-basis:100%;max-width:100%}`,
+  defaults: () => ({
+    type: "image-box",
+    props: {
+      src: "",
+      alt: "Image",
+      title: "A clear benefit",
+      text: "One or two sentences that explain it.",
+    },
+  }),
+  descriptor: {
+    type: "image-box",
+    name: "Image box",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "src", kind: "media", label: "Image" },
+      { key: "alt", kind: "text", label: "Alt text" },
+      { key: "decorative", kind: "boolean", label: "Decorative", optional: true },
+      {
+        key: "imageSize",
+        kind: "select",
+        label: "Image width beside the text",
+        optional: true,
+        options: [
+          { value: "small", label: "Small (25%)" },
+          { value: "medium", label: "Medium (40%)" },
+          { value: "large", label: "Large (60%)" },
+          { value: "full", label: "Full" },
+        ],
+      },
+      ...MEDIA_BOX_FIELDS,
+    ],
+  },
+  build: (node, attrs) => {
+    const box = mediaBox(node.props, attrs, boxImage(node.props));
+    const size = node.props.imageSize;
+    if (size && size !== "medium")
+      box.attrs["class"] = `${box.attrs["class"]} emvb-image-box-${size}`;
+    return box;
+  },
 };

@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { Fetcher } from "./api.ts";
-import { ImageNode } from "../core/schema/layout.ts";
+import { ImageBoxNode, ImageNode } from "../core/schema/layout.ts";
+import { defaultElement } from "../core/elements/index.ts";
 import {
   getMedia,
   propsFromEdited,
@@ -305,4 +306,19 @@ describe("propsFromMedia focal point (W-915)", () => {
   test("an out-of-range library focal point is ignored", () => {
     expect(propsFromMedia({}, item({ focalX: 4, focalY: 0.5 })).focalX).toBeUndefined();
   });
+});
+
+test("W-1021: a library image picked for an Image box fills its picture keys and keeps it valid", () => {
+  const box = defaultElement("image-box", "imbx0001");
+  const props = propsFromMedia(
+    box.props as Record<string, unknown>,
+    item({ focalX: 30, focalY: 40 } as never),
+  );
+  expect(props).toMatchObject({
+    src: "/_emdash/api/media/file/01MEDIA.png",
+    mediaId: "01MEDIA",
+    alt: "Hero shot",
+    title: "A clear benefit",
+  });
+  expect(ImageBoxNode.safeParse({ ...box, props }).success).toBe(true);
 });

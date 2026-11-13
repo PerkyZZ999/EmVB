@@ -776,16 +776,39 @@ const iconBox: Widget = (s, ctx, el) => {
   ];
 };
 
+/** W-1021: Elementor's image width (a % of the box) as the nearest Image box size. */
+function imageBoxSize(percent: number | undefined): string | undefined {
+  if (percent === undefined) return "small"; // Elementor's default is 30 %
+  if (percent <= 32) return "small";
+  if (percent <= 50) return undefined;
+  if (percent <= 75) return "large";
+  return "full";
+}
+
+/** W-1021: Elementor's Image Box → an Image box; without a usable image, the old layout. */
 const imageBox: Widget = (s, ctx, el) => {
   const img = imageNode(ctx, el, s["image"]);
-  if (img) {
-    const width = slider(s["image_size"]);
-    img["style"] = {
-      width: width ? { value: width.value, unit: "%" } : { value: 30, unit: "%" },
-      maxWidth: { value: 100, unit: "%" },
-    };
-  }
-  return mediaBox(img, s, ctx, el);
+  if (!img) return mediaBox(undefined, s, ctx, el);
+  const picture = img["props"] as Record<string, unknown>;
+  const width = slider(s["image_size"]);
+  const size = imageBoxSize(width?.unit === "%" ? width.value : undefined);
+  const style = mediaBoxStyle(s, ctx, el);
+  return [
+    node(
+      ctx,
+      "image-box",
+      {
+        ...Object.fromEntries(
+          ["src", "alt", "decorative", "mediaId", "width", "height"]
+            .filter((key) => picture[key] !== undefined)
+            .map((key) => [key, picture[key]]),
+        ),
+        ...(size ? { imageSize: size } : {}),
+        ...mediaBoxProps(s, ctx),
+      },
+      Object.keys(style).length > 0 ? { style } : {},
+    ),
+  ];
 };
 
 const iconList: Widget = (s, ctx, el) => {

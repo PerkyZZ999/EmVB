@@ -138,6 +138,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `rating` | value, max, label, size |
 | `alert` | variant, title, text, hideIcon, dismissible, dismissLabel |
 | `icon-box` | iconId, iconSvg, iconSize, title, titleLevel, text, position, href, newTab |
+| `image-box` | src, alt, decorative, mediaId, width, height, focalX, focalY, imageSize, title, titleLevel, text, position, href, newTab |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

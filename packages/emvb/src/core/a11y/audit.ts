@@ -304,7 +304,11 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         severity: "error",
         message: "This image is a link but is marked decorative, so the link has no name.",
       });
-    } else if (node.type === "image" && props["decorative"] !== true) {
+    } else if (
+      // W-1021: an image box's picture needs real alt text as an Image does, once it has one.
+      (node.type === "image" || (node.type === "image-box" && spoken(props["src"]))) &&
+      props["decorative"] !== true
+    ) {
       const alt = typeof props["alt"] === "string" ? spoken(props["alt"]) : "";
       if (USELESS_ALT.test(alt)) {
         add({
@@ -476,7 +480,7 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
     }
     // W-1020: a box's link is its title; with no title the link is left out of the page.
     if (
-      node.type === "icon-box" &&
+      (node.type === "icon-box" || node.type === "image-box") &&
       spoken(props["href"]) &&
       !spoken(props["title"]) &&
       !node.bind

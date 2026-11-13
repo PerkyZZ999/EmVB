@@ -1716,8 +1716,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": ".refine((node) => node.props.decorative === true || node.props.alt.length > 0, {",
-          "replace": ".refine(() => true, {"
+          "search": "    edit: ImageEdit.optional(),\n  }),\n).refine((node) => node.props.decorative === true || node.props.alt.length > 0, {",
+          "replace": "    edit: ImageEdit.optional(),\n  }),\n).refine(() => true, {"
         }
       ],
       "command": [
@@ -13550,8 +13550,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/schema/layout.ts",
-          "search": "  path: [\"props\", \"alt\"],\n",
-          "replace": ""
+          "search": "    edit: ImageEdit.optional(),\n  }),\n).refine((node) => node.props.decorative === true || node.props.alt.length > 0, {\n  message: \"Alt text is required unless the image is marked decorative.\",\n  path: [\"props\", \"alt\"],\n",
+          "replace": "    edit: ImageEdit.optional(),\n  }),\n).refine((node) => node.props.decorative === true || node.props.alt.length > 0, {\n  message: \"Alt text is required unless the image is marked decorative.\",\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/schema/schema-edges.test.ts"],
@@ -47896,8 +47896,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/a11y/audit.ts",
-          "search": "      node.type === \"icon-box\" &&\n      spoken(props[\"href\"]) &&\n      !spoken(props[\"title\"]) &&",
-          "replace": "      node.type === \"icon-box\" &&\n      spoken(props[\"href\"]) &&\n      spoken(props[\"title\"]) &&"
+          "search": "      (node.type === \"icon-box\" || node.type === \"image-box\") &&\n      spoken(props[\"href\"]) &&\n      !spoken(props[\"title\"]) &&",
+          "replace": "      (node.type === \"icon-box\" || node.type === \"image-box\") &&\n      spoken(props[\"href\"]) &&\n      spoken(props[\"title\"]) &&"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
@@ -47911,6 +47911,93 @@
         {
           "file": "packages/emvb/src/core/elements/widgets.ts",
           "search": ".emvb-media-box-left{flex-direction:row;align-items:flex-start}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1021/decorative-alt-spoken",
+      "requirement": "W-1021",
+      "description": "A decorative Image box picture keeps its alt text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "      alt: props.decorative ? \"\" : props.alt,",
+          "replace": "      alt: props.alt,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*decorative pictures have empty alt"
+    },
+    {
+      "id": "W-1021/unsafe-src-kept",
+      "requirement": "W-1021",
+      "description": "An Image box renders a javascript: address.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "  const src = props.src.trim() ? sanitizeMediaUrl(props.src.trim()) : undefined;",
+          "replace": "  const src = props.src.trim() || undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*unsafe address leaves no media part"
+    },
+    {
+      "id": "W-1021/eager-picture",
+      "requirement": "W-1021",
+      "description": "Image box pictures load eagerly.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "      loading: \"lazy\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*lazy, above the title"
+    },
+    {
+      "id": "W-1021/a11y-alt-unchecked",
+      "requirement": "W-1021",
+      "description": "The accessibility check ignores an Image box's file-name alt text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "(node.type === \"image\" || (node.type === \"image-box\" && spoken(props[\"src\"]))) &&",
+          "replace": "node.type === \"image\" &&"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*file-name or placeholder alt is an error"
+    },
+    {
+      "id": "W-1021/import-size-default",
+      "requirement": "W-1021",
+      "description": "An imported Image Box at Elementor's 30 % comes in at 40 %.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  if (percent === undefined) return \"small\"; // Elementor's default is 30 %",
+          "replace": "  if (percent === undefined) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*icon and image boxes keep media"
+    },
+    {
+      "id": "W-1021/small-is-medium",
+      "requirement": "W-1021",
+      "description": "A small Image box picture takes 40 % beside the words.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": ".emvb-image-box.emvb-image-box-small:is(.emvb-media-box-left,.emvb-media-box-right) .emvb-media-box-media{flex-basis:25%;max-width:25%}",
           "replace": ""
         }
       ],

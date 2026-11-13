@@ -1,3 +1,4 @@
+import path from "node:path";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
@@ -172,4 +173,48 @@ test("an Icon box is added, linked, set beside its text, and on the page the who
   const text = await published.locator(".emvb-media-box-text").boundingBox();
   await page.mouse.click((text?.x ?? 0) + 4, (text?.y ?? 0) + 4);
   await expect(page).toHaveURL(/\/$/);
+});
+
+test("an Image box gets an uploaded picture with alt text, sits after its text at 25%, and publishes lazily (W-1021)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Image boxes");
+  await overlay(page).locator('[data-emvb-add-tile="image-box"]').click();
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Image box");
+  await overlay(page)
+    .locator("[data-emvb-media-upload]")
+    .setInputFiles(path.join(process.cwd(), "e2e/fixtures/emvb-pixel.png"));
+  const box = canvas(page).locator(".emvb-image-box");
+  await expect(box.locator(".emvb-media-box-media img")).toHaveCount(1, { timeout: 20_000 });
+  const alt = overlay(page).getByLabel("Alt text", { exact: true });
+  await alt.fill("A single test pixel");
+  await alt.blur();
+  await overlay(page).getByLabel("Position").click();
+  await page.getByRole("option", { name: "After the text", exact: true }).click();
+  await overlay(page).getByLabel("Image width beside the text").click();
+  await page.getByRole("option", { name: "Small (25%)", exact: true }).click();
+  await expect(box).toHaveClass(/emvb-image-box-small/);
+
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]).toMatchObject({
+    type: "image-box",
+    props: { alt: "A single test pixel", position: "right", imageSize: "small" },
+  });
+
+  await publishPage(request, id);
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await page.goto(`/${slug}`);
+  const published = page.locator(".emvb-image-box");
+  const picture = published.getByRole("img", { name: "A single test pixel" });
+  await expect(picture).toHaveAttribute("loading", "lazy");
+  const [whole, media, content] = await Promise.all([
+    published.boundingBox(),
+    published.locator(".emvb-media-box-media").boundingBox(),
+    published.locator(".emvb-media-box-content").boundingBox(),
+  ]);
+  // After the text, about a quarter of the box wide.
+  expect(media?.x ?? 0).toBeGreaterThanOrEqual((content?.x ?? 0) + (content?.width ?? 0));
+  expect(Math.round(((media?.width ?? 0) / (whole?.width ?? 1)) * 100)).toBe(25);
 });

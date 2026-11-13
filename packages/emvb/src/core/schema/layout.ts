@@ -774,6 +774,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "rating",
   "alert",
   "icon-box",
+  "image-box",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -865,6 +866,34 @@ export const IconBoxNode = leafNode(
   }),
 );
 
+/** W-1021: how much of the box's width an image box's picture takes when beside the words. */
+export const IMAGE_BOX_SIZES = ["small", "medium", "large", "full"] as const;
+
+/**
+ * W-1021: a picture above (or beside) a title and text, like Elementor's Image Box. The picture
+ * keys are an Image's, so the media library fills them the same way; alt text is required unless
+ * the picture is decorative.
+ */
+export const ImageBoxNode = leafNode(
+  "image-box",
+  z.strictObject({
+    src: z.string().max(2000),
+    alt: z.string().max(500),
+    decorative: z.boolean().optional(),
+    mediaId: z.string().min(1).max(128).optional(),
+    width: z.number().int().positive().max(10000).optional(),
+    height: z.number().int().positive().max(10000).optional(),
+    focalX: z.number().int().min(0).max(100).optional(),
+    focalY: z.number().int().min(0).max(100).optional(),
+    /** Beside the words: small 25 %, medium 40 %, large 60 % of the box. Unset = medium. */
+    imageSize: z.enum(IMAGE_BOX_SIZES).optional(),
+    ...MediaBoxText,
+  }),
+).refine((node) => node.props.decorative === true || node.props.alt.length > 0, {
+  message: "Alt text is required unless the image is marked decorative.",
+  path: ["props", "alt"],
+});
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -901,6 +930,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   RatingNode,
   AlertNode,
   IconBoxNode,
+  ImageBoxNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -944,6 +974,7 @@ export type LanguageSwitcherNode = z.infer<typeof LanguageSwitcherNode>;
 export type RatingNode = z.infer<typeof RatingNode>;
 export type AlertNode = z.infer<typeof AlertNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
+export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
 export type TextNode = z.infer<typeof TextNode>;
@@ -1146,6 +1177,7 @@ export type LayoutNode =
   | RatingNode
   | AlertNode
   | IconBoxNode
+  | ImageBoxNode
   | SpacerNode
   | DividerNode
   | TextNode

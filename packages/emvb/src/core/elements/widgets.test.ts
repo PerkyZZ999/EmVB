@@ -173,3 +173,50 @@ describe("Icon box (W-1020)", () => {
     expect(page(iconBoxNode({ titleLevel: 1 })).ok).toBe(false);
   });
 });
+
+const imageBoxNode = (props: Record<string, unknown>) => ({
+  id: "imbx0001",
+  type: "image-box",
+  props: {
+    src: "/_emdash/api/media/file/team.jpg",
+    alt: "Our team at the office",
+    width: 1200,
+    height: 800,
+    title: "People",
+    text: "Who we are.",
+    ...props,
+  },
+});
+
+describe("Image box (W-1021)", () => {
+  test("the picture with its alt and size, lazy, above the title and text", () => {
+    const html = render(imageBoxNode({}));
+    expect(html).toContain('class="emvb-image-box emvb-media-box emvb-media-box-top"');
+    expect(html).toContain(
+      '<div class="emvb-media-box-media"><img src="/_emdash/api/media/file/team.jpg" alt="Our team at the office" width="1200" height="800" loading="lazy" decoding="async"></div>',
+    );
+    expect(html).toContain('<h3 class="emvb-media-box-title">People</h3>');
+  });
+
+  test("decorative pictures have empty alt; image width beside the words is a class", () => {
+    const html = render(imageBoxNode({ decorative: true, position: "right", imageSize: "small" }));
+    expect(html).toContain('alt=""');
+    expect(html).toContain("emvb-media-box-right emvb-image-box-small");
+    expect(render(imageBoxNode({ imageSize: "medium" })).includes("emvb-image-box-medium")).toBe(
+      false,
+    );
+  });
+
+  test("no picture or an unsafe address leaves no media part; alt is required", () => {
+    expect(render(imageBoxNode({ src: "" })).includes("emvb-media-box-media")).toBe(false);
+    expect(render(imageBoxNode({ src: "javascript:alert(1)" })).includes("<img")).toBe(false);
+    expect(page(imageBoxNode({ alt: "" })).ok).toBe(false);
+    expect(page(imageBoxNode({ alt: "", decorative: true })).ok).toBe(true);
+  });
+
+  test("a link stretches over the box, picture included", () => {
+    const html = render(imageBoxNode({ href: "https://example.com/team" }));
+    expect(html).toContain("emvb-media-box-linked");
+    expect(html.match(/<a /g)).toHaveLength(1);
+  });
+});

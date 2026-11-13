@@ -170,10 +170,10 @@ describe("Elementor import: containers (W-945)", () => {
       position: "left",
     });
     expect(typeof left?.["iconSvg"]).toBe("string");
-    expect(ofType(result.layout, "image").map((n) => props(n)["alt"])).toEqual(["Our team"]);
-    expect(ofType(result.layout, "heading").map((n) => props(n)["text"])).toEqual(
-      expect.arrayContaining(["People"]),
-    );
+    // W-1021: the Image Box is an Image box with its picture, alt text and title.
+    const [people] = ofType(result.layout, "image-box").map((n) => props(n));
+    expect(people).toMatchObject({ alt: "Our team", title: "People", imageSize: "small" });
+    expect(typeof people?.["src"]).toBe("string");
   });
 
   test("a grid container keeps its columns per device", () => {
