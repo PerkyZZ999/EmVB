@@ -1756,8 +1756,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "    if (!picked && !bundled) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
-          "replace": "    if (!picked && !bundled) {\n      return {\n        tag: \"img\",\n        attrs: {\n          ...attrs,\n          src: node.props.iconId,\n          alt: \"\",\n        },\n        children: [],\n      };\n    }"
+          "search": "    if (!svg) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
+          "replace": "    if (!svg) {\n      return {\n        tag: \"img\",\n        attrs: {\n          ...attrs,\n          src: node.props.iconId,\n          alt: \"\",\n        },\n        children: [],\n      };\n    }"
         }
       ],
       "command": [
@@ -1781,8 +1781,8 @@
         },
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "    if (!picked && !bundled) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
-          "replace": "    if (!picked && !bundled) {\n      return {\n        tag: \"script\",\n        attrs: {},\n        children: [\"alert(1)\"],\n      };\n    }"
+          "search": "    if (!svg) {\n      // Never treat iconId as a URL or raw HTML (R-032 / R-033).\n      return {\n        tag: \"span\",\n        attrs: {\n          ...attrs,\n          class: `${attrs.class ?? \"\"} emvb-icon-missing`.trim(),\n          \"aria-hidden\": \"true\",\n        },\n        children: [],\n      };\n    }",
+          "replace": "    if (!svg) {\n      return {\n        tag: \"script\",\n        attrs: {},\n        children: [\"alert(1)\"],\n      };\n    }"
         }
       ],
       "command": [
@@ -14087,8 +14087,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "const size = node.props.size ?? 24;",
-          "replace": "const size = node.props.size ?? 48;"
+          "search": "node.props.size ?? 24",
+          "replace": "node.props.size ?? 48"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
@@ -14101,8 +14101,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "    const decorative = node.props.decorative === true;\n    const size = node.props.size ?? 24;",
-          "replace": "    const decorative = false;\n    const size = node.props.size ?? 24;"
+          "search": "    const decorative = node.props.decorative === true;\n    const aria",
+          "replace": "    const decorative = false;\n    const aria"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
@@ -14115,8 +14115,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "      svgAttrs.role = \"img\";\n      if (node.props.title) svgAttrs[\"aria-label\"] = node.props.title;\n    }\n    const children",
-          "replace": "      svgAttrs.role = \"img\";\n    }\n    const children"
+          "search": "{ role: \"img\", ...(node.props.title ? { \"aria-label\": node.props.title } : {}) }",
+          "replace": "{ role: \"img\" }"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
@@ -14128,9 +14128,9 @@
       "description": "icon paths lose their attributes",
       "edits": [
         {
-          "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "      : (bundled?.children ?? []).map((child) => ({\n          tag: child.tag,\n          attrs: { ...child.attrs },\n          children: [],\n        }));",
-          "replace": "      : (bundled?.children ?? []).map((child) => ({\n          tag: child.tag,\n          attrs: {},\n          children: [],\n        }));"
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
+          "search": "    : (bundled?.children ?? []).map((child) => ({\n        tag: child.tag,\n        attrs: { ...child.attrs },\n        children: [],\n      }));",
+          "replace": "    : (bundled?.children ?? []).map((child) => ({\n        tag: child.tag,\n        attrs: {},\n        children: [],\n      }));"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/media-elements.test.ts"],
@@ -22770,9 +22770,9 @@
       "description": "A library icon's stored SVG is ignored, so picked icons render as placeholders",
       "edits": [
         {
-          "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "    const picked = node.props.iconSvg ? sanitizeSvgMarkup(node.props.iconSvg) : undefined;",
-          "replace": "    const picked = node.props.iconSvg && false ? sanitizeSvgMarkup(node.props.iconSvg) : undefined;"
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
+          "search": "  const picked = props.iconSvg ? sanitizeSvgMarkup(props.iconSvg) : undefined;",
+          "replace": "  const picked = props.iconSvg && false ? sanitizeSvgMarkup(props.iconSvg) : undefined;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
@@ -22784,7 +22784,7 @@
       "description": "The stored SVG's own width, height and id are kept next to the element's",
       "edits": [
         {
-          "file": "packages/emvb/src/core/elements/index.ts",
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
           "search": "    if (name === \"width\" || name === \"height\" || name === \"id\" || name === \"role\") continue;\n",
           "replace": ""
         }
@@ -22798,7 +22798,7 @@
       "description": "aria-* and focusable from the stored SVG override the element's name",
       "edits": [
         {
-          "file": "packages/emvb/src/core/elements/index.ts",
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
           "search": "    if (name.startsWith(\"aria-\") || name === \"focusable\") continue;\n",
           "replace": ""
         }
@@ -22812,7 +22812,7 @@
       "description": "A stored SVG without viewBox renders without one",
       "edits": [
         {
-          "file": "packages/emvb/src/core/elements/index.ts",
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
           "search": "  if (!kept.viewBox) kept.viewBox = \"0 0 24 24\";\n",
           "replace": ""
         }
@@ -23186,9 +23186,9 @@
       "description": "Uploaded multi-colour SVGs lose their colours even with Force single colour off.",
       "edits": [
         {
-          "file": "packages/emvb/src/core/elements/index.ts",
-          "search": "    const single = picked !== undefined && node.props.singleColor === true;",
-          "replace": "    const single = picked !== undefined;"
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
+          "search": "  const single = picked !== undefined && props.singleColor === true;",
+          "replace": "  const single = picked !== undefined;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-style.test.ts"],
@@ -23200,7 +23200,7 @@
       "description": "With Force single colour on, an SVG root without a fill still paints black.",
       "edits": [
         {
-          "file": "packages/emvb/src/core/elements/index.ts",
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
           "search": "  if (attrs.fill === undefined || ownColor(attrs.fill)) attrs.fill = \"currentColor\";",
           "replace": "  if (ownColor(attrs.fill)) attrs.fill = \"currentColor\";"
         }
@@ -47012,7 +47012,9 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/personalize.e2e.ts", "--project=node"],
-      "env": { "CI": "1" },
+      "env": {
+        "CI": "1"
+      },
       "expect": "✘.*\\[node\\]"
     },
     {
@@ -47679,7 +47681,9 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
-      "env": { "CI": "1" },
+      "env": {
+        "CI": "1"
+      },
       "expect": "✘.*\\[node\\]"
     },
     {
@@ -47778,7 +47782,9 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
-      "env": { "CI": "1" },
+      "env": {
+        "CI": "1"
+      },
       "expect": "✘.*\\[node\\]"
     },
     {

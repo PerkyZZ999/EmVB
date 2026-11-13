@@ -36,6 +36,8 @@ import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import type { VNode } from "../render/vnode.ts";
 
 import type { ElementDefinition } from "./definition.ts";
+import { ICON_STROKE_WIDTHS, iconGlyph } from "./icon-svg.ts";
+export { iconHasAdjustableStroke, iconHasOwnColors } from "./icon-svg.ts";
 import { menu, menuItem } from "./menu.ts";
 import { alert, rating } from "./widgets.ts";
 import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
@@ -609,9 +611,6 @@ function imageSources(
   return parts.join(", ");
 }
 
-/** Root stroke widths the Stroke width control can override (W-237); Lucide and Tabler use 2. */
-const ICON_STROKE_WIDTHS = ["1", "1.5", "2", "2.5", "3"] as const;
-
 const icon: ElementDefinition<IconNode> = {
   baseCss:
     // W-237: the glyph reads the wrapper's icon custom properties (rotate, flip, shadow, loop,
@@ -652,10 +651,12 @@ const icon: ElementDefinition<IconNode> = {
     ],
   },
   build: (node, attrs) => {
-    // W-234: a picked library icon carries its own SVG; the allowlist checks it on every render.
-    const picked = node.props.iconSvg ? sanitizeSvgMarkup(node.props.iconSvg) : undefined;
-    const bundled = picked ? undefined : getBundledIcon(node.props.iconId);
-    if (!picked && !bundled) {
+    const decorative = node.props.decorative === true;
+    const aria: Record<string, string> = decorative
+      ? { "aria-hidden": "true" }
+      : { role: "img", ...(node.props.title ? { "aria-label": node.props.title } : {}) };
+    const svg = iconGlyph(node.props, node.props.size ?? 24, aria);
+    if (!svg) {
       // Never treat iconId as a URL or raw HTML (R-032 / R-033).
       return {
         tag: "span",
@@ -667,48 +668,7 @@ const icon: ElementDefinition<IconNode> = {
         children: [],
       };
     }
-    const decorative = node.props.decorative === true;
-    const size = node.props.size ?? 24;
-    const svgAttrs: Record<string, string> = picked
-      ? {
-          ...pickedIconAttrs(picked.attrs),
-          width: String(size),
-          height: String(size),
-          focusable: "false",
-        }
-      : {
-          xmlns: "http://www.w3.org/2000/svg",
-          width: String(size),
-          height: String(size),
-          viewBox: "0 0 24 24",
-          fill: "none",
-          stroke: "currentColor",
-          "stroke-width": "2",
-          "stroke-linecap": "round",
-          "stroke-linejoin": "round",
-          focusable: "false",
-        };
-    if (decorative) {
-      svgAttrs["aria-hidden"] = "true";
-    } else {
-      svgAttrs.role = "img";
-      if (node.props.title) svgAttrs["aria-label"] = node.props.title;
-    }
-    const children: (VNode | string)[] = picked
-      ? picked.children
-      : (bundled?.children ?? []).map((child) => ({
-          tag: child.tag,
-          attrs: { ...child.attrs },
-          children: [],
-        }));
-    strokeClass(svgAttrs);
-    const single = picked !== undefined && node.props.singleColor === true;
-    if (single) monochromeRoot(svgAttrs);
-    const svg: VNode = {
-      tag: "svg",
-      attrs: svgAttrs,
-      children: single ? monochrome(children) : children,
-    };
+    const svgAttrs = svg.attrs;
     // A linked icon is named by its title on the link, so the svg inside is hidden.
     const title = node.props.title?.trim();
     const { role: _role, "aria-label": _label, ...plain } = svgAttrs;
@@ -721,84 +681,6 @@ const icon: ElementDefinition<IconNode> = {
     return { tag: "span", attrs, children: [linked ?? svg] };
   },
 };
-
-/**
- * W-237: a stroke icon's root `stroke-width` moves into a class whose CSS reads the wrapper's
- * `--emvb-icon-stroke` with the original width as fallback; any other width stays as it was.
- */
-function strokeClass(svgAttrs: Record<string, string>): void {
-  const width = svgAttrs["stroke-width"];
-  if (!width || !(ICON_STROKE_WIDTHS as readonly string[]).includes(width)) return;
-  if (!svgAttrs.stroke || svgAttrs.stroke === "none") return;
-  delete svgAttrs["stroke-width"];
-  const cls = `emvb-icon-sw${width.replace(".", "_")}`;
-  svgAttrs.class = svgAttrs.class ? `${svgAttrs.class} ${cls}` : cls;
-}
-
-/** Whether an icon's SVG is stroke-drawn with an adjustable width (the panel shows the control). */
-export function iconHasAdjustableStroke(svg: string | undefined): boolean {
-  if (!svg) return true; // bundled Lucide
-  const picked = sanitizeSvgMarkup(svg);
-  if (!picked) return false;
-  const attrs = pickedIconAttrs(picked.attrs);
-  const before = attrs["stroke-width"];
-  strokeClass(attrs);
-  return before !== undefined && attrs["stroke-width"] === undefined;
-}
-
-/** Paint attributes a multi-colour SVG sets its colours with (W-238). */
-const PAINT_ATTRS = ["fill", "stroke", "stop-color"] as const;
-
-const ownColor = (value: string | undefined) =>
-  value !== undefined && value !== "none" && value.toLowerCase() !== "currentcolor";
-
-/** W-238: every fill, stroke and gradient stop becomes the icon's colour; `none` stays none. */
-function monochrome(nodes: (VNode | string)[]): (VNode | string)[] {
-  return nodes.map((child) => {
-    if (typeof child === "string") return child;
-    const attrs = { ...child.attrs };
-    for (const name of PAINT_ATTRS) if (ownColor(attrs[name])) attrs[name] = "currentColor";
-    return { ...child, attrs, children: monochrome(child.children) };
-  });
-}
-
-/** The root too; without a fill, SVG paints black, so it gets the icon's colour. */
-function monochromeRoot(attrs: Record<string, string>): void {
-  if (attrs.fill === undefined || ownColor(attrs.fill)) attrs.fill = "currentColor";
-  if (ownColor(attrs.stroke)) attrs.stroke = "currentColor";
-}
-
-/**
- * Whether an icon's SVG paints with its own colours (W-238): any fill, stroke or stop other than
- * `none`/`currentColor`, or a root without a fill (SVG's default is black). The panel offers
- * Force single colour only then. Bundled Lucide icons follow the icon's colour already.
- */
-export function iconHasOwnColors(svg: string | undefined): boolean {
-  if (!svg) return false;
-  const picked = sanitizeSvgMarkup(svg);
-  if (!picked) return false;
-  if (picked.attrs.fill === undefined || PAINT_ATTRS.some((name) => ownColor(picked.attrs[name])))
-    return true;
-  const walk = (nodes: (VNode | string)[]): boolean =>
-    nodes.some(
-      (child) =>
-        typeof child !== "string" &&
-        (PAINT_ATTRS.some((name) => ownColor(child.attrs[name])) || walk(child.children)),
-    );
-  return walk(picked.children);
-}
-
-/** A picked icon's root attributes minus what the element sets itself (size, name, id). */
-function pickedIconAttrs(attrs: Record<string, string>): Record<string, string> {
-  const kept: Record<string, string> = { xmlns: "http://www.w3.org/2000/svg" };
-  for (const [name, value] of Object.entries(attrs)) {
-    if (name === "width" || name === "height" || name === "id" || name === "role") continue;
-    if (name.startsWith("aria-") || name === "focusable") continue;
-    kept[name] = value;
-  }
-  if (!kept.viewBox) kept.viewBox = "0 0 24 24";
-  return kept;
-}
 
 const video: ElementDefinition<VideoNode> = {
   baseCss:
