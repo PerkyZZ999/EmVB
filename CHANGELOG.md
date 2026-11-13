@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Visitors country rules can't be steered by a visitor off Cloudflare and Vercel (W-999, S-10).** EmVB took the country from the `cf-ipcountry` and `x-vercel-ip-country` request headers everywhere, so on a plain Node host a visitor could send any country and see content meant for another. These headers now count only on Cloudflare Workers and Vercel, whose edge sets them (Cloudflare's `request.cf` still counts too). Behind a proxy of your own that sets one of them, add `emvb({ trustGeoHeaders: true })`; `false` turns them off everywhere. The install guide now says plainly that Visitors rules are presentation, not access control.
 - **Choose which collections Loops may list (W-1000, S-11).** A Loop can list the published entries of any collection, with fields the editor picks. Sites that keep a collection published but not meant for listing can now name the allowed ones: `emvb({ loopCollections: ["posts"] })`; a Loop on another collection renders empty. Without the option nothing changes.
 - **emvb-mcp keeps its token to itself (W-1001, S-12).** A token file other users of the computer can read is now refused, like ssh refuses a loose key (`chmod 600` it, or pass `--allow-loose-token-file` to use it with a warning as before), and the bridge no longer follows a redirect from the site, which would have carried the token to another address.
+- **Smaller public surface (W-1001, S-12).** The public `health` check no longer tells the exact EmVB version (editors read it from the new `version` route), and EmVB now requires EmDash 1.4 or later (`>=1.4.0 <2`): its role checks were never tested on 1.0 to 1.3.
+
+### Fixed
+
+- **Editors get the site's styles in the canvas (W-1001).** The `editor/config` route had no permission, so EmDash kept it to administrators and an editor's canvas loaded without the `canvasStyles` and extensions; editors can read it now.
 
 ## [1.1.1] - 2026-11-12
 

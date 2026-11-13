@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { layoutOfBytes, s1Page } from "../fixtures/layouts.ts";
 import { emptyDesign, MAX_DESIGN_BYTES, MAX_LAYOUT_BYTES } from "../../src/core/index.ts";
 import { designDraftRoute, designRoute, designSaveRoute } from "../../src/server/design-routes.ts";
-import { DESIGN_DRAFT_KEY, DESIGN_KEY } from "../../src/constants.ts";
+import { DESIGN_DRAFT_KEY, DESIGN_KEY, PLUGIN_VERSION } from "../../src/constants.ts";
 import { createPlugin } from "../../src/server/plugin.ts";
 import { createTestRuntime, ROLES, userWithRole } from "./runtime.ts";
 
@@ -320,11 +320,26 @@ describe("design routes", () => {
     expect(result).toMatchObject({ status: 403, body: { error: { code: "CSRF_REJECTED" } } });
   });
 
-  test("health is public", async () => {
-    expect(await t.route("health")).toMatchObject({
+  test("health is public and doesn't tell the version (W-1001)", async () => {
+    const health = await t.route("health");
+    expect(health).toMatchObject({ status: 200, body: { data: { ok: true, plugin: "emvb" } } });
+    expect(JSON.stringify(health.body)).not.toContain(PLUGIN_VERSION);
+  });
+
+  test("the version is for editors and above (W-1001)", async () => {
+    expect((await t.route("version")).status).toBe(401);
+    expect((await t.route("version", { user: userWithRole(ROLES.contributor) })).status).toBe(403);
+    expect(await t.route("version", { user: userWithRole(ROLES.editor) })).toMatchObject({
       status: 200,
-      body: { data: { ok: true, plugin: "emvb" } },
+      body: { data: { plugin: "emvb", version: PLUGIN_VERSION } },
     });
+  });
+
+  test("an editor can read editor/config (W-1001; it was admin-only)", async () => {
+    expect((await t.route("editor/config", { user: userWithRole(ROLES.editor) })).status).toBe(200);
+    expect((await t.route("editor/config", { user: userWithRole(ROLES.contributor) })).status).toBe(
+      403,
+    );
   });
 });
 

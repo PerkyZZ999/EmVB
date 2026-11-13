@@ -3,9 +3,14 @@ import { expect, test } from "@playwright/test";
 test("the EmVB plugin is loaded by the host", async ({ request }) => {
   const res = await request.get("/_emdash/api/plugins/emvb/health");
   expect(res.status()).toBe(200);
-  expect(await res.json()).toEqual({
+  expect(await res.json()).toEqual({ success: true, data: { ok: true, plugin: "emvb" } });
+  // W-1001: the version is for signed-in editors only.
+  const version = await request.get("/_emdash/api/plugins/emvb/version", {
+    headers: { "X-EmDash-Request": "1" },
+  });
+  expect(await version.json()).toEqual({
     success: true,
-    data: { ok: true, plugin: "emvb", version: "1.1.1" },
+    data: { plugin: "emvb", version: "1.1.1" },
   });
 });
 

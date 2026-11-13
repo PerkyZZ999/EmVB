@@ -47093,6 +47093,62 @@
       ],
       "command": ["bun", "test", "packages/emvb-mcp/test/remote.test.ts"],
       "expect": "\\(fail\\).*follow no redirect"
+    },
+    {
+      "id": "W-1001/health-tells-version",
+      "requirement": "W-1001",
+      "description": "The public health check tells everyone the exact plugin version again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "        handler: async () => ({ ok: true, plugin: PLUGIN_ID }),",
+          "replace": "        handler: async () => ({ ok: true, plugin: PLUGIN_ID, version: PLUGIN_VERSION }),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/plugin.test.ts"],
+      "expect": "\\(fail\\).*health is public and doesn't tell the version"
+    },
+    {
+      "id": "W-1001/version-public",
+      "requirement": "W-1001",
+      "description": "The version route answers anyone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "      version: {\n        permission: \"content:edit_any\",",
+          "replace": "      version: {\n        public: true,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/plugin.test.ts"],
+      "expect": "\\(fail\\).*the version is for editors and above"
+    },
+    {
+      "id": "W-1001/editor-config-admin-only",
+      "requirement": "W-1001",
+      "description": "editor/config falls back to admin-only, so an editor's canvas lacks the site's styles.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "      \"editor/config\": {\n        permission: \"content:edit_any\",",
+          "replace": "      \"editor/config\": {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/plugin.test.ts"],
+      "expect": "\\(fail\\).*an editor can read editor/config"
+    },
+    {
+      "id": "W-1001/peer-from-1.0",
+      "requirement": "W-1001",
+      "description": "The EmDash peer range lets npm install EmVB next to EmDash 1.0–1.3, which its role checks were never tested on.",
+      "edits": [
+        {
+          "file": "packages/emvb/package.json",
+          "search": "    \"emdash\": \">=1.4.0 <2\",",
+          "replace": "    \"emdash\": \"^1.0.0\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/deps/emdash-pins.test.ts"],
+      "expect": "\\(fail\\).*the EmDash peer starts at 1.4"
     }
   ]
 }

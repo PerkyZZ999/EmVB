@@ -103,12 +103,20 @@ export function createPlugin(
       ],
     },
     routes: {
+      // S-12 (W-1001): the public check says the plugin is loaded, not which version (a version
+      // tells an attacker which advisories apply); editors read it from `version`.
       health: {
         public: true,
-        handler: async () => ({ ok: true, plugin: PLUGIN_ID, version: PLUGIN_VERSION }),
+        handler: async () => ({ ok: true, plugin: PLUGIN_ID }),
       },
-      // W-327: what the editor needs from the host's `emvb()` options.
+      version: {
+        permission: "content:edit_any",
+        handler: async () => ({ plugin: PLUGIN_ID, version: PLUGIN_VERSION }),
+      },
+      // W-327: what the editor needs from the host's `emvb()` options. S-12 (W-1001): without a
+      // permission the route was admin-only, so an editor's canvas lacked the site's styles.
       "editor/config": {
+        permission: "content:edit_any",
         handler: async () => ({
           canvasStyles,
           canvasCollections,

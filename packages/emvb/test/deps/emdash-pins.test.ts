@@ -44,3 +44,8 @@ describe("EmDash's exact pins (D-030)", () => {
 function peerVersions(plugin: Manifest): string[] {
   return (plugin.peerDependencies?.["@cloudflare/kumo"] ?? "").split(" || ");
 }
+
+test("W-1001: the EmDash peer starts at 1.4, the oldest EmDash the role checks are tested on", async () => {
+  const plugin = await read(pluginDir);
+  expect(plugin.peerDependencies?.["emdash"]).toBe(">=1.4.0 <2");
+});
