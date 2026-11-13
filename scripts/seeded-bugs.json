@@ -47550,6 +47550,48 @@
       ],
       "command": ["bun", "test", "scripts/release.test.ts"],
       "expect": "\\(fail\\).*Unreleased moves under a dated heading"
+    },
+    {
+      "id": "W-1017/wrong-scope",
+      "requirement": "W-1017",
+      "description": "Snapshots render under the version instead of the case name, so expected output can't match the corpus.",
+      "edits": [
+        {
+          "file": "scripts/compat-snapshot.ts",
+          "search": "      scope: name,\n",
+          "replace": "      scope: version,\n"
+        }
+      ],
+      "command": ["bun", "test", "scripts/compat-snapshot.test.ts"],
+      "expect": "\\(fail\\).*snapshotted again"
+    },
+    {
+      "id": "W-1017/journal-without-posts",
+      "requirement": "W-1017",
+      "description": "The Journal page is stored without its posts.",
+      "edits": [
+        {
+          "file": "scripts/compat-snapshot.ts",
+          "search": "dynamic: { posts: [...seed.SEED_POSTS] } },",
+          "replace": "dynamic: undefined },"
+        }
+      ],
+      "command": ["bun", "test", "scripts/compat-snapshot.test.ts"],
+      "expect": "\\(fail\\).*with the Journal's posts"
+    },
+    {
+      "id": "W-1017/minor-without-pages",
+      "requirement": "W-1017",
+      "description": "A minor release is recorded without adding its pages to the corpus.",
+      "edits": [
+        {
+          "file": "packages/emvb/test/compat/compat.test.ts",
+          "search": "  \"1.1.2\": 18,\n",
+          "replace": "  \"1.1.2\": 18,\n  \"1.2.0\": 18,\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/compat/compat.test.ts"],
+      "expect": "\\(fail\\).*every released 1.x minor has its playground pages"
     }
   ]
 }

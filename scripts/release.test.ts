@@ -33,7 +33,7 @@ describe("W-1016: version bump", () => {
         (f) =>
           f &&
           !listed.has(f) &&
-          !/^(docs\/|CHANGELOG\.md$|README\.md$|bun\.lock$|packages\/emvb-icons\/[^/]+\.json$)/.test(
+          !/^(docs\/|CHANGELOG\.md$|README\.md$|bun\.lock$|packages\/emvb-icons\/[^/]+\.json$|packages\/emvb\/test\/compat\/)/.test(
             f,
           ) &&
           /\.(ts|tsx|json|mjs|astro)$/.test(f),

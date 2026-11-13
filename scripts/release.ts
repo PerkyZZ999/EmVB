@@ -3,7 +3,8 @@
  *
  *   bun scripts/release.ts prepare <version> [--date YYYY-MM-DD]
  *     Bumps the three packages, their exact cross-dependencies, PLUGIN_VERSION, BRIDGE_VERSION,
- *     the smoke test and the seeds that name them, and cuts the CHANGELOG's Unreleased section.
+ *     the smoke test and the seeds that name them, cuts the CHANGELOG's Unreleased section and,
+ *     for a minor release, adds its pages to the compatibility corpus (W-1017).
  *     Review the diff, update the README's release line by hand, run the release gate, commit.
  *
  *   bun scripts/release.ts pack <version> [--out <dir>]
@@ -117,6 +118,8 @@ async function prepare(to: string, date: string) {
   const changelog = join(ROOT, "CHANGELOG.md");
   await Bun.write(changelog, cutChangelog(await Bun.file(changelog).text(), from, to, date));
   await $`bun install`.cwd(ROOT).quiet();
+  // W-1017: a minor release adds its playground pages to the compatibility corpus.
+  if (to.endsWith(".0")) await $`bun ${join(ROOT, "scripts/compat-snapshot.ts")} ${to}`.cwd(ROOT);
   return [
     `Prepared ${from} → ${to} (${date}).`,
     "Next: write the [" + to + "] summary line in CHANGELOG.md, update the README's release line,",
