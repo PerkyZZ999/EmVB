@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { s1Page } from "../fixtures/layouts.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../src/constants.ts";
 import { beforeSave } from "../../src/server/hooks.ts";
-import { createPlugin } from "../../src/server/plugin.ts";
+import { createPlugin, PLUGIN_META } from "../../src/server/plugin.ts";
 import { ROLES } from "./runtime.ts";
 
 // W-991 (S-04): EmDash 1.5 co-editing saves a room's changes as one actor and lists every
@@ -122,4 +122,25 @@ describe("a co-edited save checks every editor in editedBy (W-991, S-04)", () =>
 test("the plugin asks EmDash for users:read, which co-edited saves need (W-991)", () => {
   const capabilities = (createPlugin() as unknown as { capabilities: string[] }).capabilities;
   expect(capabilities.includes("users:read")).toBe(true);
+});
+
+test("W-1005: EmVB names and describes itself for EmDash's plugins screen", () => {
+  expect(PLUGIN_META).toEqual({
+    displayName: "EmVB",
+    description:
+      "Visual page builder: pages, theme parts and site styles, edited on a live canvas.",
+  });
+});
+
+test("W-1005: EmDash 1.5 gets EmVB's name and description; 1.4 ignores them", async () => {
+  const { version } = (await import("emdash/package.json", { with: { type: "json" } })).default as {
+    version: string;
+  };
+  const plugin = createPlugin() as unknown as { displayName?: string; description?: string };
+  if (Bun.semver.satisfies(version, ">=1.5.0")) {
+    expect(plugin.displayName).toBe("EmVB");
+    expect(plugin.description).toContain("Visual page builder");
+  } else {
+    expect(plugin.displayName).toBeUndefined();
+  }
 });

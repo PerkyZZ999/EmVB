@@ -38,6 +38,12 @@ import { manifestsFromOptions } from "../core/extensions/index.ts";
 import { TOOLS } from "../mcp/tools.ts";
 import { mcpRoutes, mcpToolConfig } from "./mcp-routes.ts";
 
+/** W-1005: the name and description EmDash 1.5 shows for the plugin. */
+export const PLUGIN_META = {
+  displayName: "EmVB",
+  description: "Visual page builder: pages, theme parts and site styles, edited on a live canvas.",
+};
+
 export function createPlugin(
   options: {
     canvasStyles?: unknown;
@@ -53,6 +59,9 @@ export function createPlugin(
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
   const extensions = manifestsFromOptions(options.extensions);
   return definePlugin({
+    // W-1005: EmDash 1.5 shows these on its plugins screen; 1.4 ignores them. Spread from a
+    // constant because 1.4's types don't list them.
+    ...PLUGIN_META,
     id: PLUGIN_ID,
     version: PLUGIN_VERSION,
     capabilities: [

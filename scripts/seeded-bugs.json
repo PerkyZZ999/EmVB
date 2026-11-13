@@ -47368,6 +47368,20 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/dom/outline.test.ts"],
       "expect": "\\(fail\\).*EmVB's own markup stays"
+    },
+    {
+      "id": "W-1005/plugin-unnamed",
+      "requirement": "W-1005",
+      "description": "EmVB's plugin meta loses its name.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "  displayName: \"EmVB\",",
+          "replace": "  displayName: \"\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
+      "expect": "\\(fail\\).*names and describes itself"
     }
   ]
 }
