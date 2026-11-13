@@ -4,6 +4,7 @@ import type { Fetcher } from "./api.ts";
 import {
   canvasSources,
   copyableMedia,
+  mediaRequest,
   entryPath,
   exportableEntries,
   exportSite,
@@ -69,7 +70,7 @@ test("the zip holds the page and copies same-origin media (W-963)", async () => 
     origin: "https://site.test",
     get: async (url) => {
       asked.push(url);
-      return new Response(new Uint8Array([7]));
+      return new Response(new Uint8Array([7]), { headers: { "content-type": "image/png" } });
     },
   });
   expect(asked).toEqual(["https://site.test/_emdash/api/media/file/a.png"]);
@@ -99,6 +100,36 @@ test("only this site's own media are copied", () => {
       "https://site.test",
     ),
   ).toEqual(["/a.png", "https://site.test/b.png"]);
+  // S-06 (W-996): under /_emdash/ only the media library's files.
+  expect(
+    copyableMedia(
+      ["/_emdash/api/admin/users", "/_emdash/api/media/file/a.png", "/_emdash/admin/x.png"],
+      "https://site.test",
+    ),
+  ).toEqual(["/_emdash/api/media/file/a.png"]);
+});
+
+test("S-06 (W-996): a response that isn't media is not written into the zip", async () => {
+  const result = await exportSite(fakeSite, {
+    copyMedia: true,
+    origin: "https://site.test",
+    get: async () =>
+      new Response('{"users":[{"email":"a@b.test"}]}', {
+        headers: { "content-type": "application/json" },
+      }),
+  });
+  expect(result.copied).toBe(0);
+  expect(result.failed).toBe(1);
+  expect(result.site.files.some((f) => f.path.startsWith("media/"))).toBe(false);
+});
+
+test("S-06 (W-996): only media library files are fetched with the session cookie", () => {
+  const origin = "https://site.test";
+  expect(mediaRequest("/_emdash/api/media/file/a.png", origin)).toEqual({
+    credentials: "same-origin",
+    redirect: "error",
+  });
+  expect(mediaRequest("/images/a.png", origin)).toEqual({ credentials: "omit", redirect: "error" });
 });
 
 /** W-977: a site with a `posts` collection whose entries carry a canvas layout. */

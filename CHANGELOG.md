@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Security
 
 - **`describe_page` no longer connects where the request's Host header points (W-995, S-05).** Its required-form-field warnings read the forms plugin's definitions over HTTP from an address built from the request, following redirects, so on a host that forwards any Host header an editor token could make the site send requests to a server of the caller's choosing. It now uses only the site URL from EmDash's settings and follows no redirect; without a site URL set, `describe_page` skips those warnings. The AI agents page shows the MCP endpoint on the same configured address (or on the address you opened the admin with).
+- **Export pages copies media files only (W-996, S-06).** With **Copy images and files**, the export downloaded any same-origin URL that looked like media, links included, with your session cookie, and wrote the answer into the zip. An editor could plant a link such as `/_emdash/api/admin/users?x=.png`, and an admin's export then carried that admin-only answer into a public zip. Now only images, video, posters and CSS backgrounds count; the file type is read from the path, not the query; nothing under `/_emdash/` is copied except media-library files; only image, video, audio, font and PDF answers are kept; and only media-library downloads send the session cookie. A link to a PDF stays a link to the live site.
 
 ## [1.1.1] - 2026-11-12
 

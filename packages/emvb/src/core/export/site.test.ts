@@ -167,7 +167,19 @@ test("media URLs come from src, srcset, poster and CSS url()", () => {
       '<img src="/a.png" srcset="/b.webp 1x, /c.webp 2x"><video poster="/p.jpg"></video><a href="/page">x</a><a href="/doc.pdf">d</a>',
       '.x{background-image:url("/bg.avif")}.y{background:url(data:image/png;base64,AA)}',
     ).toSorted(),
-  ).toEqual(["/a.png", "/b.webp", "/bg.avif", "/c.webp", "/doc.pdf", "/p.jpg"]);
+  ).toEqual(["/a.png", "/b.webp", "/bg.avif", "/c.webp", "/p.jpg"]);
+});
+
+test("S-06 (W-996): links and API URLs dressed as media aren't media", () => {
+  expect(
+    mediaUrls(
+      '<a href="/doc.pdf">d</a><img src="/_emdash/api/admin/users?x=.png"><img src="/report.json#a.png"><img data-src="/z.png">',
+      ".x{background:url(/_emdash/api/settings?.webp)}",
+    ),
+  ).toEqual([]);
+  expect(mediaUrls('<img src="/_emdash/api/media/file/abc?w=200">', "")).toEqual([
+    "/_emdash/api/media/file/abc?w=200",
+  ]);
 });
 
 test("copied media go in media/ and pages point there (W-963)", () => {

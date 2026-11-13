@@ -44911,8 +44911,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/export-api.ts",
-          "search": "return new URL(url, origin).origin === origin;",
-          "replace": "return new URL(url, origin).protocol.startsWith(\"http\");"
+          "search": "      if (parsed.origin !== origin) return false;",
+          "replace": "      if (!parsed.protocol.startsWith(\"http\")) return false;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
@@ -45933,8 +45933,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/export-api.ts",
-          "search": "      return new URL(url, origin).origin === origin;",
-          "replace": "      return new URL(url, origin).origin === origin && !url.includes(\"/_emdash/api/media/\");"
+          "search": "      if (parsed.origin !== origin) return false;",
+          "replace": "      if (parsed.origin !== origin || url.includes(\"/_emdash/api/media/\")) return false;"
         }
       ],
       "command": [
@@ -46765,6 +46765,76 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/agent-setup.test.tsx"],
       "expect": "\\(fail\\).*W-995: an endpoint path from the server"
+    },
+    {
+      "id": "W-996/href-is-media",
+      "requirement": "W-996",
+      "description": "Links and data-src count as media again, so the export fetches any same-origin URL a link points at.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "const ATTR_URL = /\\s(?:src|poster)=\"([^\"]+)\"/g;",
+          "replace": "const ATTR_URL = /\\s(?:src|poster|href|data-src)=\"([^\"]+)\"/g;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*links and API URLs dressed as media"
+    },
+    {
+      "id": "W-996/extension-on-query",
+      "requirement": "W-996",
+      "description": "The media extension is tested on the whole URL, so ?x=.png makes an API URL look like an image.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "MEDIA_EXT.test(path)",
+          "replace": "MEDIA_EXT.test(url.split(\"#\")[0] ?? url)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*links and API URLs dressed as media"
+    },
+    {
+      "id": "W-996/emdash-paths-copyable",
+      "requirement": "W-996",
+      "description": "Any same-origin path, admin API included, is copied.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "      return !parsed.pathname.startsWith(\"/_emdash/\") || parsed.pathname.startsWith(MEDIA_LIBRARY);",
+          "replace": "      return true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*only this site's own media are copied"
+    },
+    {
+      "id": "W-996/any-content-type",
+      "requirement": "W-996",
+      "description": "A JSON answer is written into the zip as a media file.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "      if (!MEDIA_TYPE.test(response.headers.get(\"content-type\") ?? \"\")) throw new Error(\"type\");\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*a response that isn't media is not written"
+    },
+    {
+      "id": "W-996/cookie-everywhere",
+      "requirement": "W-996",
+      "description": "Every media download carries the session cookie.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/export-api.ts",
+          "search": "\"same-origin\" : \"omit\"",
+          "replace": "\"same-origin\" : \"same-origin\""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
+      "expect": "\\(fail\\).*only media library files are fetched with the session cookie"
     }
   ]
 }

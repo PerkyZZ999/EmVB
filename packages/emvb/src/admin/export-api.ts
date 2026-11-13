@@ -134,16 +134,32 @@ export async function loadExportData(
   return { pages, parts, design: design.published ?? design.design };
 }
 
-/** Media this site serves itself (same origin), which the export can copy. */
+const MEDIA_LIBRARY = "/_emdash/api/media/file/";
+
+/**
+ * Media this site serves itself (same origin), which the export can copy. S-06 (W-996): nothing
+ * under /_emdash/ but the media library's files, so an API answer can't end up in the zip.
+ */
 export function copyableMedia(urls: readonly string[], origin: string): string[] {
   return urls.filter((url) => {
     try {
-      return new URL(url, origin).origin === origin;
+      const parsed = new URL(url, origin);
+      if (parsed.origin !== origin) return false;
+      return !parsed.pathname.startsWith("/_emdash/") || parsed.pathname.startsWith(MEDIA_LIBRARY);
     } catch {
       return false;
     }
   });
 }
+
+/** S-06: what a copied file may be; anything else (JSON, HTML) is left as a link. */
+const MEDIA_TYPE = /^(?:image|video|audio|font)\/|^application\/(?:pdf|font-woff2?|x-font-woff)\b/i;
+
+/** S-06: the media library needs the session cookie; public files are fetched without one. */
+export const mediaRequest = (url: string, origin: string): RequestInit => ({
+  credentials: new URL(url, origin).pathname.startsWith(MEDIA_LIBRARY) ? "same-origin" : "omit",
+  redirect: "error",
+});
 
 /** Up to this many media files are copied, so an export can't fill the browser's memory. */
 const MAX_COPIED_MEDIA = 500;
@@ -163,6 +179,7 @@ async function fetchMedia(
       // oxlint-disable-next-line no-await-in-loop -- one at a time keeps memory and load low
       const response = await get(new URL(url, origin).href);
       if (!response.ok) throw new Error(String(response.status));
+      if (!MEDIA_TYPE.test(response.headers.get("content-type") ?? "")) throw new Error("type");
       // oxlint-disable-next-line no-await-in-loop -- same
       const bytes = new Uint8Array(await response.arrayBuffer());
       total += bytes.length;
@@ -207,7 +224,7 @@ export async function exportSite(
   let copied = 0;
   let failed = 0;
   if (options.copyMedia) {
-    const get = options.get ?? ((url: string) => fetch(url, { credentials: "same-origin" }));
+    const get = options.get ?? ((url: string) => fetch(url, mediaRequest(url, options.origin)));
     const result = await fetchMedia(
       copyableMedia(site.report.media, options.origin),
       options.origin,

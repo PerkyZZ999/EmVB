@@ -209,10 +209,21 @@ function snapshotNotes(layouts: Layout[]): string[] {
   return notes;
 }
 
-const ATTR_URL = /\s(?:src|poster|href|data-src)="([^"]+)"/g;
+// S-06 (W-996): only attributes that load media; a link's href is a page the visitor may open,
+// and copying it fetched any same-origin URL (admin API answers included) into the zip.
+const ATTR_URL = /\s(?:src|poster)="([^"]+)"/g;
 const SRCSET = /\ssrcset="([^"]+)"/g;
 const CSS_URL = /url\(\s*(?:"([^"]+)"|'([^']+)'|([^)'"\s]+))\s*\)/g;
-const MEDIA_EXT = /\.(?:avif|webp|png|jpe?g|gif|svg|ico|mp4|webm|ogg|mp3|pdf|woff2?)(?:[?#]|$)/i;
+const MEDIA_EXT = /\.(?:avif|webp|png|jpe?g|gif|svg|ico|mp4|webm|ogg|mp3|pdf|woff2?)$/i;
+
+/** S-06: the URL's path alone, so `?x=.png` can't make an API URL look like a media file. */
+function pathOf(url: string): string {
+  try {
+    return new URL(url, "https://export.invalid/").pathname;
+  } catch {
+    return "";
+  }
+}
 
 const unescapeAttr = (value: string) =>
   value
@@ -229,7 +240,8 @@ export function mediaUrls(html: string, css: string): string[] {
     const url = raw?.trim();
     if (!url || url.startsWith("#") || url.startsWith("data:")) return;
     if (/^(?:mailto|tel|javascript):/i.test(url)) return;
-    const isMediaPath = url.includes("/_emdash/api/media/") || MEDIA_EXT.test(url);
+    const path = pathOf(url);
+    const isMediaPath = path.startsWith("/_emdash/api/media/") || MEDIA_EXT.test(path);
     if (isMediaPath) found.add(url);
   };
   for (const m of html.matchAll(ATTR_URL)) add(unescapeAttr(m[1] ?? ""));
