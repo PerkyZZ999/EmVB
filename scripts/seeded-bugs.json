@@ -47237,6 +47237,34 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/render/shadowing-ids.test.ts"],
       "expect": "\\(fail\\).*shadows a browser global is left out"
+    },
+    {
+      "id": "W-1002/no-1.5-job",
+      "requirement": "W-1002",
+      "description": "CI stops testing on EmDash 1.5.",
+      "edits": [
+        {
+          "file": ".github/workflows/ci.yml",
+          "search": "      - run: bun scripts/use-emdash.ts 1.5.0\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/use-emdash.test.ts"],
+      "expect": "\\(fail\\).*CI runs the unit tests on EmDash 1.5"
+    },
+    {
+      "id": "W-1002/1.5-keeps-old-kumo",
+      "requirement": "W-1002",
+      "description": "The EmDash 1.5 run keeps Kumo 2.6, so it never tests 1.5's admin.",
+      "edits": [
+        {
+          "file": "scripts/use-emdash.ts",
+          "search": "  \"1.5.0\": { emdash: \"1.5.0\", \"@cloudflare/kumo\": \"2.15.0\",",
+          "replace": "  \"1.5.0\": { emdash: \"1.5.0\", \"@cloudflare/kumo\": \"2.6.0\","
+        }
+      ],
+      "command": ["bun", "test", "scripts/use-emdash.test.ts"],
+      "expect": "\\(fail\\).*swaps emdash, Kumo and the forms plugin together"
     }
   ]
 }
