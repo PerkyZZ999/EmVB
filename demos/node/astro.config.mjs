@@ -37,6 +37,8 @@ export default defineConfig({
           canvasStyles: ["/site.css"],
           canvasCollections: ["pages"],
           extensions: [hello],
+          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).
+          trustGeoHeaders: true,
         }),
       ],
     }),

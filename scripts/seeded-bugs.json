@@ -190,7 +190,7 @@
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
-          "search": "      plugins: [\n        formsPlugin(),\n        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n        }),\n      ],",
+          "search": "      plugins: [\n        formsPlugin(),\n        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n        }),\n      ],",
           "replace": "      plugins: [\n        formsPlugin(),\n      ],"
         }
       ],
@@ -40748,8 +40748,8 @@
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
-          "search": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n        }),",
-          "replace": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          extensions: [hello],\n        }),"
+          "search": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n        }),",
+          "replace": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n        }),"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
@@ -46938,6 +46938,77 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/server/targets.test.ts"],
       "expect": "\\(fail\\).*withdraws only its own person's proposals"
+    },
+    {
+      "id": "W-999/cf-header-anywhere",
+      "requirement": "W-999",
+      "description": "Cloudflare's country header counts on any server, so a visitor can choose their country.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "const onCloudflare = () => globalThis.navigator?.userAgent === \"Cloudflare-Workers\";",
+          "replace": "const onCloudflare = () => true;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/geo-trust.test.ts"],
+      "expect": "\\(fail\\).*visitor-sent headers are ignored"
+    },
+    {
+      "id": "W-999/vercel-header-anywhere",
+      "requirement": "W-999",
+      "description": "Vercel's country header counts on any server.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "  Boolean(",
+          "replace": "  true || Boolean("
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/geo-trust.test.ts"],
+      "expect": "\\(fail\\).*visitor-sent headers are ignored"
+    },
+    {
+      "id": "W-999/false-still-trusts",
+      "requirement": "W-999",
+      "description": "trustGeoHeaders: false still reads Cloudflare's header on Cloudflare.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/visitor.ts",
+          "search": "    trust === true || (trust === undefined && onCloudflare())",
+          "replace": "    trust === true || onCloudflare()"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/geo-trust.test.ts"],
+      "expect": "\\(fail\\).*false trusts neither"
+    },
+    {
+      "id": "W-999/option-dropped",
+      "requirement": "W-999",
+      "description": "emvb({ trustGeoHeaders }) never reaches the plugin.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "  setGeoTrust(options.trustGeoHeaders);",
+          "replace": "  setGeoTrust(undefined);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/geo-trust-option.test.ts"],
+      "expect": "\\(fail\\).*reaches the renderer through the plugin"
+    },
+    {
+      "id": "W-999/node-demo-untrusted",
+      "requirement": "W-999",
+      "description": "The Node demo no longer trusts the country header its e2e sends, so the Canada rule can't be checked there.",
+      "edits": [
+        {
+          "file": "demos/node/astro.config.mjs",
+          "search": "          trustGeoHeaders: true,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/personalize.e2e.ts", "--project=node"],
+      "env": { "CI": "1" },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

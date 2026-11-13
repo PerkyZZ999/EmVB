@@ -1,3 +1,4 @@
+import { geoTrust } from "../core/geo-trust.ts";
 import {
   AUDIENCE_SEGMENT,
   abCookieName,
@@ -113,16 +114,34 @@ const COUNTRY = /^[A-Z]{2}$/;
 /** XX is Cloudflare's "unknown" and T1 is Tor: neither is a country (W-514: host facts too). */
 const isCountry = (code: string) => COUNTRY.test(code) && code !== "XX" && code !== "T1";
 
+const onCloudflare = () => globalThis.navigator?.userAgent === "Cloudflare-Workers";
+const onVercel = () =>
+  Boolean(
+    (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.[
+      "VERCEL"
+    ],
+  );
+
 /**
- * The visitor's country from the edge: Cloudflare's header or `request.cf`, or Vercel's header.
+ * The visitor's country from the edge: `request.cf`, Cloudflare's header or Vercel's header.
  * Not `Astro.locals.runtime.cf`: since Astro 6 the Cloudflare adapter throws when it is read.
+ * S-10 (W-999): a header counts only where that edge sets it (on Cloudflare Workers, on
+ * Vercel); elsewhere the visitor could send it. `emvb({ trustGeoHeaders: true })` trusts them
+ * behind a proxy that strips client copies; `false` trusts none.
  */
-function countryOf(astro: VisitorAstro): string | undefined {
+export function countryOf(
+  astro: VisitorAstro,
+  trust: boolean | undefined = geoTrust(),
+): string | undefined {
   const headers = astro.request?.headers;
   const cf = (astro.request as { cf?: { country?: unknown } } | undefined)?.cf;
   const candidates = [
-    headers?.get("cf-ipcountry"),
-    headers?.get("x-vercel-ip-country"),
+    trust === true || (trust === undefined && onCloudflare())
+      ? headers?.get("cf-ipcountry")
+      : undefined,
+    trust === true || (trust === undefined && onVercel())
+      ? headers?.get("x-vercel-ip-country")
+      : undefined,
     cf?.country,
   ];
   for (const value of candidates) {

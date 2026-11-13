@@ -28,6 +28,13 @@ export type EmVBOptions = {
    * EmDash passes into `createPlugin`.
    */
   extensions?: EmVBExtension[];
+  /**
+   * S-10 (W-999): whether Visitors country rules may read `cf-ipcountry` and
+   * `x-vercel-ip-country`. Unset, they are read only on Cloudflare Workers and Vercel, whose edge
+   * sets them; elsewhere a visitor could send them. `true` trusts them (a proxy in front strips
+   * client copies), `false` never reads them. Visitors rules are presentation, not access control.
+   */
+  trustGeoHeaders?: boolean;
 };
 
 /** Descriptor that host sites add to `emdash({ plugins: [...] })` in astro.config. */
@@ -45,6 +52,9 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
       ...(canvasStyles.length > 0 ? { canvasStyles } : {}),
       ...(canvasCollections.length > 0 ? { canvasCollections } : {}),
       ...(extensions.length > 0 ? { extensions } : {}),
+      ...(typeof options.trustGeoHeaders === "boolean"
+        ? { trustGeoHeaders: options.trustGeoHeaders }
+        : {}),
     },
   };
 }

@@ -1,3 +1,4 @@
+import { setGeoTrust } from "../core/geo-trust.ts";
 import {
   proposalCreateRoute,
   proposalGetRoute,
@@ -41,8 +42,10 @@ export function createPlugin(
     canvasStyles?: unknown;
     canvasCollections?: unknown;
     extensions?: unknown;
+    trustGeoHeaders?: unknown;
   } = {},
 ) {
+  setGeoTrust(options.trustGeoHeaders);
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
   const extensions = manifestsFromOptions(options.extensions);

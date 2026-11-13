@@ -155,6 +155,8 @@ const theme = await resolveThemeParts(Astro, undefined, { visitor }); // theme p
 - `segments`: names your editors type in Visitors → Segments (a lowercase letter or digit, then lowercase letters, digits, `:`, `_` or `-`, up to 64 characters, so `plan:pro` works). A name that doesn't fit is dropped. A rule matches a visitor in any of its segments.
 - `country` (two letters), `device` (`mobile`, `tablet`, `desktop`) and `returning` (true or false) replace what EmVB detects from the request, when your site knows better.
 - Pages with Visitors rules are sent with `Cache-Control: private, no-store`, so one visitor's version is never cached for another.
+- **Visitors rules are presentation, not access control.** A visitor controls their own cookies (A/B arm, returning visitor), and off Cloudflare and Vercel they can also send the country headers. Never hide something with a Visitors rule that a visitor mustn't see.
+- **Country detection (since 1.1.2).** EmVB reads `cf-ipcountry` only on Cloudflare Workers and `x-vercel-ip-country` only on Vercel, where the edge sets them, plus Cloudflare's `request.cf`. Behind your own proxy that sets one of these headers and strips the visitor's copy, add `emvb({ trustGeoHeaders: true })`; `false` never reads them. Or pass `country` yourself as above.
 
 ## 4. First-run setup
 

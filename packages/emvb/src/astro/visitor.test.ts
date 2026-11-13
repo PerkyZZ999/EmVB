@@ -1,6 +1,12 @@
-import { describe, expect, test } from "bun:test";
+import { setGeoTrust } from "../core/geo-trust.ts";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import type { Layout } from "../core/index.ts";
 import { abArmsFor, visitorFor } from "./visitor.ts";
+
+// These cases send Cloudflare's country header, as the edge does (S-10, W-999: trusted on
+// Cloudflare Workers; bun isn't one, so the tests trust it explicitly).
+beforeAll(() => setGeoTrust(true));
+afterAll(() => setGeoTrust(undefined));
 
 const layout = {
   schemaVersion: 18,
