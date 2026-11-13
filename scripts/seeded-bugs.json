@@ -47452,6 +47452,34 @@
       ],
       "command": ["bun", "test", "scripts/lint-baseline.test.ts"],
       "expect": "\\(fail\\).*plugins are on"
+    },
+    {
+      "id": "W-1014/dupes-blocking",
+      "requirement": "W-1014",
+      "description": "fallow dupes runs in CI as a blocking step.",
+      "edits": [
+        {
+          "file": ".github/workflows/ci.yml",
+          "search": "      - run: bun run fallow:dupes\n        continue-on-error: true\n",
+          "replace": "      - run: bun run fallow:dupes\n"
+        }
+      ],
+      "command": ["bun", "test", "scripts/ci-pins.test.ts"],
+      "expect": "\\(fail\\).*W-1014"
+    },
+    {
+      "id": "W-1014/health-no-baseline",
+      "requirement": "W-1014",
+      "description": "fallow health runs without its baseline.",
+      "edits": [
+        {
+          "file": "package.json",
+          "search": "\"fallow health --baseline scripts/fallow/health-baseline.json\"",
+          "replace": "\"fallow health\""
+        }
+      ],
+      "command": ["bun", "test", "scripts/ci-pins.test.ts"],
+      "expect": "\\(fail\\).*W-1014"
     }
   ]
 }
