@@ -23,3 +23,9 @@ describe("package identity (W-123)", () => {
     expect(emvb().version).toBe((await manifest()).version);
   });
 });
+
+test("W-1011: the entrypoint exports createPlugin by name only, as EmDash imports it", async () => {
+  const entry = (await import("../../src/index.ts")) as Record<string, unknown>;
+  expect(typeof entry["createPlugin"]).toBe("function");
+  expect(Object.hasOwn(entry, "default")).toBe(false);
+});

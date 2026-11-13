@@ -69,8 +69,9 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
   };
 }
 
+// EmDash imports `createPlugin` by name from the entrypoint (1.4 and 1.5). The default export
+// that repeated it was dropped in 1.2 (W-1011).
 export { createPlugin };
-export default createPlugin;
 
 export type { EmVBExtension, ExtensionManifest };
 export {

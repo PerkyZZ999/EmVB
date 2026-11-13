@@ -47384,6 +47384,20 @@
       "expect": "\\(fail\\).*names and describes itself"
     },
     {
+      "id": "W-1011/default-export-back",
+      "requirement": "W-1011",
+      "description": "The entrypoint exports createPlugin twice again (named and default).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/index.ts",
+          "search": "export { createPlugin };\n",
+          "replace": "export { createPlugin };\nexport default createPlugin;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/deps/package-identity.test.ts"],
+      "expect": "\\(fail\\).*exports createPlugin by name only"
+    },
+    {
       "id": "W-1010/node-demo-react-unpinned",
       "requirement": "W-1010",
       "description": "The node demo takes @astrojs/react 7.1.8, whose renderer breaks admin hydration on Astro 7.3.",
