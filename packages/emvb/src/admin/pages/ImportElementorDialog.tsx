@@ -16,6 +16,8 @@ import { THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
 import { createPage, listPages, type PageSummary } from "../content-api.ts";
 import { uploadImage } from "../media-api.ts";
+import { loadSiteMenus } from "../menus-api.ts";
+import type { MenuLink } from "../../core/import/elementor/context.ts";
 import { editorUrl } from "../editor/exit.ts";
 import { loadIconSet } from "../editor/icons/library.ts";
 import { createThemePart } from "../theme-api.ts";
@@ -214,6 +216,9 @@ export function ImportElementorDialog({
   const [imageStatus, setImageStatus] = React.useState<string>();
   const [copying, setCopying] = React.useState(false);
   const imageRef = React.useRef<HTMLInputElement>(null);
+  // W-1026: the site's own menus (from its WordPress import) for imported Nav Menus, by name.
+  // A menu the site doesn't have is kept as no links, so it is asked for once.
+  const [siteMenus, setSiteMenus] = React.useState<ReadonlyMap<string, MenuLink[]>>(new Map());
   const iconsLoad = React.useRef<Promise<IconMap> | undefined>(undefined);
   const fileRef = React.useRef<HTMLInputElement>(null);
   const kitRef = React.useRef<HTMLInputElement>(null);
@@ -236,6 +241,7 @@ export function ImportElementorDialog({
       setPageLinks(readPageLinks());
       setCopies(new Map());
       setImageStatus(undefined);
+      setSiteMenus(new Map());
     }
   }
 
@@ -260,8 +266,9 @@ export function ImportElementorDialog({
       svg: (url: string) => svgs.get(url),
       pageLink: (id: number) => pageLinks[id],
       media: (url: string) => copies.get(url),
+      menu: (name: string) => siteMenus.get(name),
     }),
-    [kit, defaults, useClasses, svgs, pageLinks, copies],
+    [kit, defaults, useClasses, svgs, pageLinks, copies, siteMenus],
   );
   const result = React.useMemo(
     () => (json.trim() ? importElementor(json, options(icons)) : undefined),
@@ -320,6 +327,23 @@ export function ImportElementorDialog({
     );
     setCopying(false);
   };
+  // W-1026: fetch each menu the export's Nav Menus name once; the import re-runs with them.
+  const wantedMenus = (result?.ok ? result.menus : []).filter((name) => !siteMenus.has(name));
+  const wantedKey = wantedMenus.join("\u0000");
+  React.useEffect(() => {
+    if (!wantedKey) return;
+    const names = wantedKey.split("\u0000");
+    let live = true;
+    void loadSiteMenus(fetcher, names).then((found) => {
+      if (!live) return;
+      setSiteMenus(
+        (current) => new Map([...current, ...names.map((n) => [n, found.get(n) ?? []] as const)]),
+      );
+    });
+    return () => {
+      live = false;
+    };
+  }, [wantedKey, fetcher]);
   const needsPages = linkedPages.length > 0 && pages === undefined;
   React.useEffect(() => {
     if (!needsPages) return;

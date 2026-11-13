@@ -161,3 +161,50 @@ test("W-945: an Elementor 4 page keeps its class styles in the editor", async ({
   expect(size).toBeLessThanOrEqual(56);
   await expect(heading).toHaveCSS("font-weight", "800");
 });
+
+test("W-1026: a sticky header's Nav Menu imports with the site's Primary menu links", async ({
+  page,
+  request,
+}) => {
+  const title = `Sticky menu ${unique()}`;
+  await page.goto("/_emdash/admin/plugins/emvb/pages");
+  await page.getByRole("button", { name: "Import from Elementor", exact: true }).click();
+  const dialog = page.locator('[data-emvb-dialog="import-elementor"]');
+  await dialog.locator("[data-emvb-elementor-file]").setInputFiles({
+    name: "sticky-menu.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(
+      JSON.stringify({
+        title,
+        type: "page",
+        content: [
+          {
+            id: "bar",
+            elType: "container",
+            settings: { sticky: "top", sticky_offset: 0 },
+            elements: [
+              {
+                id: "nav",
+                elType: "widget",
+                widgetType: "nav-menu",
+                settings: { menu: "primary" },
+              },
+            ],
+          },
+        ],
+      }),
+    ),
+  });
+  const report = dialog.locator("[data-emvb-import-report]");
+  await expect(report).toContainText("Ready to import");
+  await expect(report).not.toContainText("isn't on this site");
+  await dialog.getByRole("button", { name: "Import", exact: true }).click();
+  await expect(overlay(page)).toBeVisible({ timeout: 20_000 });
+  const menu = canvas(page).locator(".emvb-menu");
+  for (const name of ["Home", "Posts", "About"])
+    await expect(menu.getByRole("link", { name, exact: true })).toBeVisible();
+  const stored = await storedLayout<{
+    root: { children: { style?: Record<string, unknown> }[] };
+  }>(request, editorEntry(page.url()));
+  expect(stored.root.children[0]?.style).toMatchObject({ position: "sticky", zIndex: 99 });
+});

@@ -375,8 +375,55 @@ describe("Elementor import: theme builder, Pro widgets and kits (W-945)", () => 
     expect(result.title).toBe("Main header");
     expect(types(result.layout)).toEqual(["container", "container", "container", "menu", "button"]);
     expect(result.layout.root.style).toMatchObject({ backgroundColor: "#fafafa" });
-    expect(notes(result)).toContain('The WordPress menu "main-menu" isn\'t in the export');
+    expect(notes(result)).toContain('The WordPress menu "main-menu" isn\'t on this site');
     expect(notes(result)).toContain("The site logo comes from WordPress settings");
+    expect(result.menus).toEqual(["main-menu"]);
+  });
+
+  test("W-1026: the Nav Menu is filled with the site menu's links, three levels deep", () => {
+    const asked: string[] = [];
+    const result = ok(
+      importElementor(fixture("header-template"), {
+        icon,
+        menu: (name) => {
+          asked.push(name);
+          return [
+            { text: "Home", href: "/" },
+            {
+              text: "Work",
+              href: "/work",
+              children: [
+                {
+                  text: "Projects",
+                  href: "/work/projects",
+                  children: [
+                    {
+                      text: "2026",
+                      href: "/work/2026",
+                      children: [{ text: "Too deep", href: "/x" }],
+                    },
+                  ],
+                },
+              ],
+            },
+            { text: "Shop", href: "https://shop.example.com", newTab: true },
+          ];
+        },
+      }),
+    );
+    expect(asked).toEqual(["main-menu"]);
+    const menu = ofType(result.layout, "menu")[0];
+    const item = (n: Node | undefined) => props(n);
+    expect(menu?.children?.map(item)).toEqual([
+      { text: "Home", href: "/" },
+      { text: "Work", href: "/work" },
+      { text: "Shop", href: "https://shop.example.com", newTab: true },
+    ]);
+    const projects = menu?.children?.[1]?.children?.[0];
+    expect(item(projects)).toEqual({ text: "Projects", href: "/work/projects" });
+    expect(projects?.children?.map(item)).toEqual([{ text: "2026", href: "/work/2026" }]);
+    expect(projects?.children?.[0]?.children).toEqual([]);
+    expect(notes(result)).not.toContain("isn't on this site");
   });
 
   test("Pro widgets are rebuilt as well as EmVB can, and say so", () => {
@@ -1158,6 +1205,38 @@ describe("Elementor import: the 1.2 widgets (PLAN_1.2 part D)", () => {
       { network: "x", href: "https://x.com/emvb", newTab: true },
       { network: "linkedin", href: "https://linkedin.com/company/emvb", newTab: true },
     ]);
+  });
+
+  test("W-1026: Elementor's Sticky becomes CSS sticky with its edge, offset and devices", () => {
+    const box = (settings: Record<string, unknown>) =>
+      importElementor(
+        JSON.stringify([
+          {
+            id: "c",
+            elType: "container",
+            settings,
+            elements: [
+              { id: "h", elType: "widget", widgetType: "heading", settings: { title: "Hi" } },
+            ],
+          },
+        ]),
+        { icon },
+      );
+    const top = ok(box({ sticky: "top", sticky_offset: 12 })).layout.root.children?.[0] as Node;
+    expect(top.style).toMatchObject({
+      position: "sticky",
+      top: { value: 12, unit: "px" },
+      zIndex: 99,
+    });
+    expect(top.devices).toBeUndefined();
+    const desktopOnly = ok(box({ sticky: "bottom", sticky_on: ["desktop"] })).layout.root
+      .children?.[0] as Node;
+    expect(desktopOnly.style).toMatchObject({
+      position: "sticky",
+      bottom: { value: 0, unit: "px" },
+    });
+    expect(desktopOnly.devices).toMatchObject({ tablet: { position: "static" } });
+    expect(notes(ok(box({ sticky: "top" })))).not.toContain("Sticky positioning wasn't imported");
   });
 
   test("W-1018: an Image Carousel is a Carousel with a slide per picture and its navigation", () => {

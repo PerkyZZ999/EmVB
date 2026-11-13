@@ -53,8 +53,21 @@ export type ImportOptions = {
    * `classes` for the dialog to add to the site), instead of copying the classes' styles in.
    */
   classes?: boolean;
+  /**
+   * W-1026: the links of a site menu by the name an Elementor Nav Menu points at (the WordPress
+   * menu's slug), as EmDash's WordPress import brings them over; fetched by the dialog.
+   */
+  menu?: (name: string) => readonly MenuLink[] | undefined;
   /** Random source for node ids (tests). */
   random?: () => number;
+};
+
+/** W-1026: one link of a site menu, with the links under it. */
+export type MenuLink = {
+  text: string;
+  href?: string;
+  newTab?: boolean;
+  children?: readonly MenuLink[];
 };
 
 /** Elementor's stock kit: what an unstyled site shows. */
@@ -93,6 +106,10 @@ export class ImportContext {
   private readonly svg: ImportOptions["svg"];
   private readonly pageLinkOf: ImportOptions["pageLink"];
   private readonly mediaOf: ImportOptions["media"];
+  /** W-1026: the site menu a Nav Menu points at, by its name. */
+  readonly menuOf: ImportOptions["menu"];
+  /** W-1026: the menu names the export's Nav Menus point at, so the dialog can fetch them. */
+  readonly menus = new Set<string>();
   /** W-958: Elementor class id → its EmVB class, or undefined when it can't be one. */
   readonly imported = new Map<string, ImportedClass | undefined>();
   readonly useClasses: boolean;
@@ -121,6 +138,7 @@ export class ImportContext {
     this.svg = options.svg;
     this.pageLinkOf = options.pageLink;
     this.mediaOf = options.media;
+    this.menuOf = options.menu;
     this.useClasses = options.classes === true;
     this.useDefaults = options.defaults ?? true;
     this.kitGiven = this.readKit(options.kit);

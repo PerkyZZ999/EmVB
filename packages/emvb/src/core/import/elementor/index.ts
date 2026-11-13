@@ -69,6 +69,8 @@ export type ElementorImport =
       svgFiles: string[];
       /** W-958: WordPress page ids the page links to (their address comes from `pageLink`). */
       pageLinks: number[];
+      /** W-1026: the site menus the page's Nav Menus point at (their links come from `menu`). */
+      menus: string[];
       /** W-958: images on the old site the page uses (`media` gives their library copies). */
       images: string[];
       /** W-958: with `classes`, the EmVB classes the page's elements point at, to add to the site. */
@@ -378,8 +380,17 @@ class Walker {
         "Scrolling and mouse motion effects weren't imported; add scroll motion in the editor.",
       );
     }
-    if (s["sticky"] && s["sticky"] !== "")
-      ctx.note("approximated", name, "Sticky positioning wasn't imported.");
+    // W-1026: Elementor's Sticky (top or bottom, its offset and devices) as CSS sticky.
+    const sticky = stickyStyles(s);
+    if (sticky) {
+      target["style"] = { ...(target["style"] as Style | undefined), ...sticky.style };
+      if (sticky.devices) {
+        const devices = { ...(target["devices"] as Record<string, Style> | undefined) };
+        for (const [device, style] of Object.entries(sticky.devices))
+          devices[device] = { ...devices[device], ...style };
+        target["devices"] = devices;
+      }
+    }
     return nodes;
   }
 
@@ -919,6 +930,7 @@ export function importElementor(input: unknown, options: ImportOptions = {}): El
         fonts: [...ctx.fonts].toSorted(),
         svgFiles: [...ctx.svgFiles],
         pageLinks: [...ctx.pageLinks].toSorted((a, b) => a - b),
+        menus: [...ctx.menus].toSorted(),
         images: [...ctx.images],
         classes: usedClasses(checked.layout, ctx).map((cls) =>
           options.media ? (pointAtCopies(structuredClone(cls), ctx) as StyleClass) : cls,
@@ -964,4 +976,35 @@ function usedClasses(layout: Layout, ctx: ImportContext): StyleClass[] {
   };
   visit(layout.root);
   return [...ctx.imported.values()].flatMap((c) => (c && used.has(c.id) ? [c.cls] : []));
+}
+
+/**
+ * W-1026: Elementor's Sticky settings (`sticky`: top or bottom, `sticky_offset` in px,
+ * `sticky_on`: the devices) as `position: sticky` with that edge, above the content around it,
+ * and `static` on the devices it is off for.
+ */
+function stickyStyles(
+  s: Record<string, unknown>,
+): { style: Style; devices?: Record<string, Style> } | undefined {
+  const edge = s["sticky"];
+  if (edge !== "top" && edge !== "bottom") return undefined;
+  const offset =
+    typeof s["sticky_offset"] === "number" ? s["sticky_offset"] : Number(s["sticky_offset"] ?? 0);
+  const at = {
+    value: Number.isFinite(offset) ? Math.min(10_000, Math.max(0, Math.round(offset))) : 0,
+    unit: "px" as const,
+  };
+  const on = Array.isArray(s["sticky_on"])
+    ? s["sticky_on"].filter((d): d is string => typeof d === "string")
+    : ["desktop", "tablet", "mobile"];
+  const sticky: Style = { position: "sticky", [edge]: at, zIndex: 99 };
+  const flat: Style = { position: "static" };
+  const style = on.includes("desktop") ? sticky : flat;
+  const devices: Record<string, Style> = {};
+  const desktop = on.includes("desktop");
+  const tablet = on.includes("tablet");
+  const mobile = on.includes("mobile");
+  if (tablet !== desktop) devices["tablet"] = tablet ? sticky : flat;
+  if (mobile !== tablet) devices["mobile"] = mobile ? sticky : flat;
+  return Object.keys(devices).length > 0 ? { style, devices } : { style };
 }

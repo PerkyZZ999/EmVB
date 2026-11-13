@@ -454,3 +454,65 @@ test("W-958: with Add Elementor's classes on, classes join the site without chan
   expect(layout).toContain(`"classes":["${copy?.id}"]`);
   expect(layout).not.toContain('"classes":["acme-title"]');
 });
+
+test("W-1026: a Nav Menu gets the links of the site menu with its name", async () => {
+  const posted: Posted[] = [];
+  const asked: string[] = [];
+  const navigation = spyOn(window.location, "assign").mockImplementation(() => undefined);
+  restoreNavigation = () => navigation.mockRestore();
+  const fetcher: Fetcher = async (path, init) => {
+    if ((init?.method ?? "GET") === "GET") {
+      asked.push(path);
+      if (path === "/_emdash/api/menus")
+        return Response.json({ data: [{ name: "main-menu", label: "Main" }] });
+      if (path === "/_emdash/api/menus/main-menu")
+        return Response.json({
+          data: {
+            items: [
+              {
+                id: "a",
+                parentId: null,
+                sortOrder: 0,
+                type: "custom",
+                customUrl: "/",
+                label: "Home",
+              },
+              {
+                id: "b",
+                parentId: null,
+                sortOrder: 1,
+                type: "custom",
+                customUrl: "/shop",
+                label: "Shop",
+              },
+            ],
+          },
+        });
+      return Response.json({}, { status: 404 });
+    }
+    posted.push(JSON.parse(String(init?.body)) as Posted);
+    return Response.json({ data: { item: { id: "made-1" } } }, { status: 201 });
+  };
+  await mount(
+    <ImportElementorDialog fetcher={fetcher} open onOpenChange={() => undefined} target="part" />,
+  );
+  await settle();
+  await paste(
+    JSON.stringify({
+      title: "Site header",
+      type: "header",
+      content: [
+        { id: "n", elType: "widget", widgetType: "nav-menu", settings: { menu: "main-menu" } },
+      ],
+    }),
+  );
+  for (let i = 0; i < 20 && report().includes("isn't on this site"); i++)
+    // oxlint-disable-next-line no-await-in-loop -- waits for the menu fetch to land
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 10)));
+  expect(report()).not.toContain("isn't on this site");
+  await submit();
+  const layout = JSON.stringify(posted[0]?.data.layout);
+  expect(layout).toContain('"text":"Home","href":"/"');
+  expect(layout).toContain('"text":"Shop","href":"/shop"');
+  expect(asked.filter((p) => p === "/_emdash/api/menus")).toHaveLength(1);
+});

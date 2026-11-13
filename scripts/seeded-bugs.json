@@ -48522,6 +48522,119 @@
       "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
       "env": { "CI": "1" },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1026/sticky-dropped",
+      "requirement": "W-1026",
+      "description": "Elementor's Sticky is dropped again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "  if (edge !== \"top\" && edge !== \"bottom\") return undefined;",
+          "replace": "  if (edge !== \"top\" && edge !== \"bottom\") return undefined;\n  if (edge) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*Sticky becomes CSS sticky"
+    },
+    {
+      "id": "W-1026/sticky-all-devices",
+      "requirement": "W-1026",
+      "description": "A sticky element meant for desktop only stays sticky on tablets.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/index.ts",
+          "search": "  if (tablet !== desktop) devices[\"tablet\"] = tablet ? sticky : flat;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*Sticky becomes CSS sticky"
+    },
+    {
+      "id": "W-1026/menu-too-deep",
+      "requirement": "W-1026",
+      "description": "Imported menus keep links deeper than the Menu shows.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "      { children: depth < 2 && entry.children ? menuItems(ctx, entry.children, depth + 1) : [] },",
+          "replace": "      { children: entry.children ? menuItems(ctx, entry.children, depth + 1) : [] },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*three levels deep"
+    },
+    {
+      "id": "W-1026/menu-ignored",
+      "requirement": "W-1026",
+      "description": "The Nav Menu stays empty though the site has its menu.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  const links = name ? ctx.menuOf?.(name) : undefined;",
+          "replace": "  const links: readonly MenuLink[] | undefined = undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*three levels deep"
+    },
+    {
+      "id": "W-1026/menus-unlisted",
+      "requirement": "W-1026",
+      "description": "The import doesn't say which menus the page asks for.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  if (name) ctx.menus.add(name.slice(0, 100));\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*header template maps to a header theme part"
+    },
+    {
+      "id": "W-1026/post-links-as-pages",
+      "requirement": "W-1026",
+      "description": "Menu links to posts go to page addresses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/menus-api.ts",
+          "search": "  return item.referenceCollection === \"pages\"",
+          "replace": "  return item.referenceCollection !== \"pages-x\""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/menus-api.test.ts"],
+      "expect": "\\(fail\\).*nested links in order"
+    },
+    {
+      "id": "W-1026/label-unmatched",
+      "requirement": "W-1026",
+      "description": "A site menu is found only by its exact name, not its label.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/menus-api.ts",
+          "search": "      const menu = menus.find((m) => menuKey(m.name) === key || menuKey(m.label ?? \"\") === key);",
+          "replace": "      const menu = menus.find((m) => menuKey(m.name) === key);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/menus-api.test.ts"],
+      "expect": "\\(fail\\).*nested links in order"
+    },
+    {
+      "id": "W-1026/dialog-no-menus",
+      "requirement": "W-1026",
+      "description": "The import dialog never hands the site's menus to the import.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/pages/ImportElementorDialog.tsx",
+          "search": "      menu: (name: string) => siteMenus.get(name),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/elementor-import.e2e.ts", "--project=node"],
+      "env": { "CI": "1" },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

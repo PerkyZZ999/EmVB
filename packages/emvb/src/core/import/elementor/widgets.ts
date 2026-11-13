@@ -8,7 +8,7 @@ import { MAX_TABS, MAX_TEXT_LENGTH } from "../../limits.ts";
 import { FIELD_NAME_PATTERN, ICON_SVG_MAX } from "../../schema/layout.ts";
 import { sanitizeHref } from "../../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../../sanitize/media-url.ts";
-import { type ImportContext, svgFileId } from "./context.ts";
+import { type ImportContext, type MenuLink, svgFileId } from "./context.ts";
 import {
   type Block,
   cleanText,
@@ -1567,14 +1567,46 @@ const form: Widget = (s, ctx, el) => {
   ];
 };
 
-const navMenu: Widget = (s, ctx, el) => {
-  ctx.note(
-    "approximated",
-    el,
-    `The WordPress menu${str(s["menu"]) ? ` "${(str(s["menu"]) ?? "").slice(0, 40)}"` : ""} isn't in the export; add its links to the Menu in the editor.`,
+/** W-1026: a site menu's links as Menu items (three levels, as the Menu shows). */
+function menuItems(ctx: ImportContext, links: readonly MenuLink[], depth = 0): N[] {
+  return links.slice(0, 50).map((entry) =>
+    node(
+      ctx,
+      "menu-item",
+      {
+        text: short(entry.text || "Link", 200),
+        ...(entry.href ? { href: entry.href.slice(0, 2000) } : {}),
+        ...(entry.newTab ? { newTab: true } : {}),
+      },
+      { children: depth < 2 && entry.children ? menuItems(ctx, entry.children, depth + 1) : [] },
+    ),
   );
+}
+
+/**
+ * Elementor's Nav Menu → a Menu. W-1026: filled with the site menu's links when the dialog
+ * found it (EmDash's WordPress import keeps the menu's name); otherwise empty, with a note.
+ */
+const navMenu: Widget = (s, ctx, el) => {
+  const name = str(s["menu"])?.trim();
   const vertical = str(s["layout"]) === "vertical" || str(s["layout"]) === "dropdown";
-  return [node(ctx, "menu", { direction: vertical ? "column" : "row" }, { children: [] })];
+  if (name) ctx.menus.add(name.slice(0, 100));
+  const links = name ? ctx.menuOf?.(name) : undefined;
+  if (!links || links.length === 0) {
+    ctx.note(
+      "approximated",
+      el,
+      `The WordPress menu${name ? ` "${name.slice(0, 40)}"` : ""} isn't on this site; add its links to the Menu in the editor.`,
+    );
+  }
+  return [
+    node(
+      ctx,
+      "menu",
+      { direction: vertical ? "column" : "row" },
+      { children: links ? menuItems(ctx, links) : [] },
+    ),
+  ];
 };
 
 const megaMenu: Widget = (s, ctx, _el, env, raw) => {
