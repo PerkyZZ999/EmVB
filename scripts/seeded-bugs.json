@@ -30532,7 +30532,7 @@
     {
       "id": "W-475/loose-token-silent",
       "requirement": "W-475",
-      "description": "The bridge stops warning about a token file other users can read.",
+      "description": "The bridge stops noticing a token file other users can read (since W-1001 it refuses one).",
       "edits": [
         {
           "file": "packages/emvb-mcp/src/token-file.ts",
@@ -30545,9 +30545,9 @@
         "test",
         "./packages/emvb-mcp/test/live-round2.test.ts",
         "-t",
-        "chmod warning"
+        "a file other users can read is refused"
       ],
-      "expect": "\\(fail\\).*chmod warning"
+      "expect": "\\(fail\\).*a file other users can read is refused"
     },
     {
       "id": "W-476/skill-limits-missing",
@@ -40744,12 +40744,17 @@
     {
       "id": "W-902/demo-not-listed",
       "requirement": "W-902",
-      "description": "The Node demo no longer lists `pages` in canvasCollections, so its canvas field goes unchecked.",
+      "description": "The Node demo no longer lists `pages` in canvasCollections and the unlisted-collection gate (W-997) is gone, so its canvas field goes unchecked.",
       "edits": [
         {
           "file": "demos/node/astro.config.mjs",
           "search": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          canvasCollections: [\"pages\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n        }),",
           "replace": "        emvb({\n          canvasStyles: [\"/site.css\"],\n          extensions: [hello],\n          // The e2e sends Cloudflare's country header to this local server (S-10, W-999).\n          trustGeoHeaders: true,\n        }),"
+        },
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  if (!OWNED.has(event.collection)) return canvasFieldsBeforeSave(event, ctx, true);",
+          "replace": "  if (!OWNED.has(event.collection)) return;"
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/canvas-field.e2e.ts", "--project=node"],
