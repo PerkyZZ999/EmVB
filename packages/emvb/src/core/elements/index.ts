@@ -37,6 +37,7 @@ import type { VNode } from "../render/vnode.ts";
 
 import type { ElementDefinition } from "./definition.ts";
 import { menu, menuItem } from "./menu.ts";
+import { rating } from "./widgets.ts";
 import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
 import {
   loop,
@@ -1218,6 +1219,7 @@ export const ELEMENTS = {
   heading,
   toc,
   "language-switcher": languageSwitcher,
+  rating,
   container,
   "layout-section": layoutSection,
   spacer,

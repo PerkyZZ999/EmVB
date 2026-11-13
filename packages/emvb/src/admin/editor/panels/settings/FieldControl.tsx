@@ -294,6 +294,7 @@ export const IMPLEMENTED_FIELD_KINDS = [
   "textarea",
   "number",
   "int",
+  "decimal",
   "select",
   "boolean",
   "href",

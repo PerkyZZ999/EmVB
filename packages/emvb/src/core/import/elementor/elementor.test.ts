@@ -274,7 +274,9 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
       "image",
       "text",
       "text",
+      "container",
       "text",
+      "rating",
       "container",
       "text",
       "text",
@@ -326,14 +328,10 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
     );
     expect(nodes(result.layout).some((n) => n.htmlId === "contact")).toBe(true);
     expect(ofType(result.layout, "text").map((n) => props(n)["text"])).toEqual(
-      expect.arrayContaining([
-        "12500+",
-        "Pages built",
-        "Rated ★★★★☆ (4/5)",
-        "Heads up",
-        "From HTML",
-      ]),
+      expect.arrayContaining(["12500+", "Pages built", "Rated", "Heads up", "From HTML"]),
     );
+    // W-1023: a Star Rating is a Rating, its title beside it.
+    expect(props(ofType(result.layout, "rating")[0])).toEqual({ value: 4, max: 5 });
     expect(props(ofType(result.layout, "accordion-item")[0])).toMatchObject({ open: true });
     expect(props(ofType(result.layout, "accordion-item")[2])).not.toHaveProperty("open");
   });

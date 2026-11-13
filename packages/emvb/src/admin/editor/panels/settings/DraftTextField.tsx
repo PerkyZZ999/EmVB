@@ -32,7 +32,7 @@ function CommitInput({
   label: string;
   className: string;
   description?: string;
-  inputMode?: "numeric";
+  inputMode?: "numeric" | "decimal";
   fieldKey: string;
   draft: string;
   error: string | null;
@@ -171,6 +171,38 @@ export function DraftTextField({
           </p>
         )}
       </div>
+    );
+  }
+
+  if (field.kind === "decimal") {
+    // W-1023: a plain number such as 4.5; its maximum may come from another prop (Stars).
+    const min = field.min ?? 0;
+    const fromProp = field.maxProp ? props[field.maxProp] : undefined;
+    const max = typeof fromProp === "number" ? fromProp : field.max;
+    const commit = () => {
+      if (commitClearable()) return;
+      const value = fieldNumber(draft);
+      if (!Number.isFinite(value) || value < min || (max !== undefined && value > max)) {
+        setError(
+          field.message ??
+            (max === undefined ? `Enter ${min} or more.` : `Enter a number from ${min} to ${max}.`),
+        );
+        return;
+      }
+      setError(null);
+      onChange(withProp(node, field.key, value));
+    };
+    return (
+      <CommitInput
+        label={field.label}
+        className={`${FIELD} emvb-mono`}
+        inputMode="decimal"
+        fieldKey={field.key}
+        draft={draft}
+        error={error}
+        setDraft={setDraft}
+        commit={commit}
+      />
     );
   }
 

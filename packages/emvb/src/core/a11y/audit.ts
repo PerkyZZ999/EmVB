@@ -459,6 +459,20 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         if (shownOn[i]) names.add(key);
       });
     }
+    // W-1023: a Rating is an image of stars; its screen-reader text is the only way to hear the
+    // rating, so a custom one has to say it ({value}, or the number written out).
+    if (node.type === "rating") {
+      const label = spoken(props["label"]);
+      if (label && !label.includes("{value}") && !/\d/.test(label)) {
+        add({
+          nodeId: node.id,
+          rule: "image-alt",
+          severity: "warning",
+          message:
+            "This rating's text for screen readers doesn't say the rating. Add {value}, such as \"Rated {value} out of {max}\".",
+        });
+      }
+    }
     // W-419: an empty heading still shows up in screen readers' heading list, with nothing to say.
     if (node.type === "heading" && !spoken(props["text"]) && !node.bind) {
       add({

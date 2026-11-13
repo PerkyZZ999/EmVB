@@ -135,6 +135,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `heading` | text, level, href, newTab, marks |
 | `toc` | title |
 | `language-switcher` | label |
+| `rating` | value, max, label, size |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

@@ -771,6 +771,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "layout-section",
   "toc",
   "language-switcher",
+  "rating",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -789,6 +790,25 @@ export const LanguageSwitcherNode = leafNode(
   "language-switcher",
   z.strictObject({
     label: z.string().max(80).optional(),
+  }),
+);
+
+/** W-1023: most stars a Rating shows. */
+export const MAX_RATING = 10;
+
+/**
+ * W-1023: a star rating, `value` out of `max` (5 when unset), in steps as fine as a tenth. Screen
+ * readers hear `label` with {value} and {max} filled in; unset it says "Rated 4.5 out of 5".
+ * A value above `max` shows as `max`, so lowering the number of stars never makes a page invalid.
+ */
+export const RatingNode = leafNode(
+  "rating",
+  z.strictObject({
+    value: z.number().min(0).max(MAX_RATING),
+    max: z.number().int().min(1).max(MAX_RATING).optional(),
+    label: z.string().max(120).optional(),
+    /** Each star's width and height in px. Unset = 20. */
+    size: z.number().int().min(8).max(128).optional(),
   }),
 );
 
@@ -825,6 +845,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   HeadingNode,
   TocNode,
   LanguageSwitcherNode,
+  RatingNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -865,6 +886,7 @@ export const KNOWN_NODE_SCHEMAS = KnownLayoutNode.options;
 export type HeadingNode = z.infer<typeof HeadingNode>;
 export type TocNode = z.infer<typeof TocNode>;
 export type LanguageSwitcherNode = z.infer<typeof LanguageSwitcherNode>;
+export type RatingNode = z.infer<typeof RatingNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
 export type TextNode = z.infer<typeof TextNode>;
@@ -1064,6 +1086,7 @@ export type LayoutNode =
   | HeadingNode
   | TocNode
   | LanguageSwitcherNode
+  | RatingNode
   | SpacerNode
   | DividerNode
   | TextNode

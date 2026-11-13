@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Star rating (W-1023).** A new element in Add → Content: stars filled to a rating such as 4.5 out of 5, in the element's text colour, with half and part-filled stars. Screen readers hear "Rated 4.5 out of 5" (or your own text, with {value} and {max} filled in); the accessibility check warns when custom text doesn't say the rating. No script. Elementor's Star Rating widget now imports as one, title beside it, instead of star characters. Agents can add it over MCP.
+
 ### Changed
 
 - **EmVB shares your site's zod (W-1007).** EmVB depended on zod `~4.5.4`, matching EmDash 1.4; with EmDash 1.5 (zod 4.6.7) that installed a second copy. It now takes any zod 4 from 4.5.4 up, so it uses the one EmDash brings. CI checks it on EmDash 1.5 with zod 4.6.7, where `bun audit` reports nothing.

@@ -968,25 +968,34 @@ const testimonial: Widget = (s, ctx, el) => {
   ];
 };
 
+/** W-1023: Elementor's Star Rating → a Rating, with its title as text beside it. */
 const starRating: Widget = (s, ctx, el) => {
   const scale = Math.min(10, Math.max(1, Math.round(num(s["rating_scale"]) ?? 5)));
-  const rating = Math.min(
+  const value = Math.min(
     scale,
     Math.max(0, num(isRecord(s["rating"]) ? s["rating"]["size"] : s["rating"]) ?? scale),
   );
-  const full = Math.round(rating);
-  const stars = `${"★".repeat(full)}${"☆".repeat(scale - full)}`;
+  const size = num(isRecord(s["icon_size"]) ? s["icon_size"]["size"] : undefined);
+  const rating = node(
+    ctx,
+    "rating",
+    {
+      value: Math.round(value * 10) / 10,
+      max: scale,
+      ...(size ? { size: Math.min(128, Math.max(8, Math.round(size))) } : {}),
+    },
+    { style: { color: colorAt(s, "stars_color", ctx) ?? "#f0ad4e" } },
+  );
+  if (s["star_style"] === "star_unicode" || s["unmarked_star_style"] === "outline")
+    ctx.note("approximated", el, "Star ratings use EmVB's filled stars.");
   const title = plain(s["title"]).text;
-  ctx.note("approximated", el, "Star ratings are shown as star characters.");
+  if (!title) return [rating];
   return [
-    node(
-      ctx,
-      "text",
-      { text: short(`${title ? `${title} ` : ""}${stars} (${rating}/${scale})`) },
-      {
-        style: { color: colorAt(s, "stars_color", ctx) ?? "#f0ad4e" },
-      },
-    ),
+    box(ctx, [node(ctx, "text", { text: short(title) }), rating], {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: { value: 8, unit: "px" },
+    }),
   ];
 };
 

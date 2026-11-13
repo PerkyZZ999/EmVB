@@ -47592,6 +47592,95 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/compat/compat.test.ts"],
       "expect": "\\(fail\\).*every released 1.x minor has its playground pages"
+    },
+    {
+      "id": "W-1023/label-without-value",
+      "requirement": "W-1023",
+      "description": "The Rating's default screen-reader text drops the rating.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "  const template = props.label?.trim() || \"Rated {value} out of {max}\";",
+          "replace": "  const template = props.label?.trim() || \"Rating\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*names the rating for screen readers"
+    },
+    {
+      "id": "W-1023/half-star-whole",
+      "requirement": "W-1023",
+      "description": "A part-filled star keeps the whole viewBox, so it is squashed instead of cut.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "      viewBox: `0 0 ${Math.round(24 * part * 1000) / 1000} 24`,",
+          "replace": "      viewBox: \"0 0 24 24\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*half star is cut by its viewBox"
+    },
+    {
+      "id": "W-1023/decimal-ignores-stars",
+      "requirement": "W-1023",
+      "description": "The Rating field ignores the number of stars set beside it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/DraftTextField.tsx",
+          "search": "    const max = typeof fromProp === \"number\" ? fromProp : field.max;",
+          "replace": "    const max = field.max;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/draft-text-field.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-1023"
+    },
+    {
+      "id": "W-1023/a11y-silent",
+      "requirement": "W-1023",
+      "description": "The accessibility check no longer flags a rating whose text doesn't say the rating.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      if (label && !label.includes(\"{value}\") && !/\\d/.test(label)) {",
+          "replace": "      if (label && !label.includes(\"{value}\") && !/\\d/.test(label) && label.length > 80) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*doesn't say the rating warns"
+    },
+    {
+      "id": "W-1023/import-scale-lost",
+      "requirement": "W-1023",
+      "description": "An imported Star Rating loses its scale.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "      max: scale,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*widget details survive"
+    },
+    {
+      "id": "W-1023/fill-not-overlaid",
+      "requirement": "W-1023",
+      "description": "The filled part of each star sits after it instead of over it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": ".emvb-rating-fill{position:absolute;top:0;left:0}",
+          "replace": ".emvb-rating-fill{top:0;left:0}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
+      "env": { "CI": "1" },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

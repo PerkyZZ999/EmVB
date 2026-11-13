@@ -361,3 +361,40 @@ test("W-788: refused SVG markup marks the field invalid and points to the reason
   );
   expect(good.querySelector("textarea")?.getAttribute("aria-invalid")).toBeNull();
 });
+
+test("W-1023: a decimal field takes 4.5, keeps it a number, and reads its maximum from Stars", async () => {
+  const field: FieldDescriptor = {
+    key: "value",
+    kind: "decimal",
+    label: "Rating",
+    min: 0,
+    max: 5,
+    maxProp: "max",
+  };
+  const node = (props: Record<string, unknown>) =>
+    ({ id: "rate0001", type: "rating", props }) as unknown as LayoutNode;
+  const commit = async (props: Record<string, unknown>, typed: string) => {
+    const sent: unknown[] = [];
+    const host = await mount(
+      <DraftTextField
+        field={field}
+        node={node(props)}
+        onChange={(next) => sent.push((next.props as Record<string, unknown>)["value"])}
+      />,
+    );
+    const input = host.querySelector("input") as HTMLInputElement;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(input, typed);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+    });
+    const label = host.querySelector("label")?.textContent;
+    const error = host.textContent?.replace(label ?? "", "") ?? "";
+    return { sent, label, error };
+  };
+  expect(await commit({ value: 4 }, "4.5")).toEqual({ sent: [4.5], label: "Rating", error: "" });
+  expect((await commit({ value: 4 }, "6")).sent).toEqual([]);
+  expect((await commit({ value: 4 }, "6")).error).toContain("from 0 to 5");
+  expect((await commit({ value: 4, max: 10 }, "6")).sent).toEqual([6]);
+  expect((await commit({ value: 4 }, "-1")).sent).toEqual([]);
+});

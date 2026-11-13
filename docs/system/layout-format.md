@@ -342,3 +342,12 @@ list), `proposals/get`, `proposals/create`, `proposals/withdraw`. Every route re
 APIs; W-929 adds MCP tools and W-930 adds review UI later. Withdrawal only removes
 review data; it cannot affect a page. No per-op review states or agent publish path
 are implemented here.
+
+## 1.2 widgets (W-1018–W-1025)
+
+Added in 1.2, additive: new element types only, so an older 1.x keeps them on save and leaves them out of
+the page (see Unknown element types above). Each renders without script.
+
+| Type | `props` | Children | Renders as |
+| --- | --- | --- | --- |
+| `rating` (shown as "Star rating", W-1023) | `value` (0–10, any decimal; shown to one decimal), optional `max` (whole number 1–10, unset 5; a `value` above it shows as `max`, so lowering it never makes a page invalid), `label` (≤ 120; `{value}` and `{max}` are filled in; unset "Rated {value} out of {max}"), `size` (8–128 px per star, unset 20) | none | `<div role="img" aria-label="Rated 4.5 out of 5">` with one `aria-hidden` star SVG per point, filled in the element's text colour; a part-filled star is the filled star cut by its `viewBox` over a 25 % star. Right to left, stars fill from the right |
