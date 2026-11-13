@@ -1,5 +1,5 @@
 export const PLUGIN_ID = "emvb";
-export const PLUGIN_VERSION = "1.1.1";
+export const PLUGIN_VERSION = "1.1.2";
 export const PACKAGE_NAME = "@perkyzz/emvb";
 export const ADMIN_ENTRY = `${PACKAGE_NAME}/admin`;
 export const PAGES_COLLECTION = "emvb_pages";

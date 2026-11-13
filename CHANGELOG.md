@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-11-13
+
+The rest of the 1.1.0 security audit. No schema change: pages and designs saved by 1.1.1 open and save unchanged, and the new options are off unless you set them. It installs on EmDash 1.4 with no change to your site and is tested on EmDash 1.5. Three behaviour changes to check: on a plain Node host, Visitors country rules no longer read the country headers unless you add `emvb({ trustGeoHeaders: true })` (Cloudflare and Vercel are unaffected); `emvb-mcp` refuses a token file other users can read; and Export pages leaves links to files (a PDF link) as links instead of copying them.
+
 ### Security
 
 - **`describe_page` no longer connects where the request's Host header points (W-995, S-05).** Its required-form-field warnings read the forms plugin's definitions over HTTP from an address built from the request, following redirects, so on a host that forwards any Host header an editor token could make the site send requests to a server of the caller's choosing. It now uses only the site URL from EmDash's settings and follows no redirect; without a site URL set, `describe_page` skips those warnings. The AI agents page shows the MCP endpoint on the same configured address (or on the address you opened the admin with).
@@ -761,7 +765,8 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PerkyZZ999/EmVB/compare/v0.9.0...v1.0.0
