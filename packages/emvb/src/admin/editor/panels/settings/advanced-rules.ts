@@ -1,3 +1,4 @@
+import { isShadowingId } from "../../../../core/shadowing-ids.ts";
 import type { Layout, LayoutNode } from "../../../../core/index.ts";
 import { isReservedAttribute } from "../../../../core/render/extras.ts";
 import { nodeChildren } from "../../../../core/tree-ops.ts";
@@ -29,6 +30,8 @@ export function htmlIdError(value: string, layout: Layout | null, nodeId: string
   // W-418: EmVB names headings (emvb-h-…), form fields and tabs with emvb- ids; reusing one
   // made two elements share an id, so a contents link or a label could point at the wrong one.
   if (/^emvb-/i.test(value)) return "Ids starting with emvb- are reserved; choose another.";
+  if (isShadowingId(value))
+    return `"${value}" is the name of a browser built-in that scripts on the page use; choose another.`;
   if (otherHtmlIds(layout, nodeId).has(value)) return "Another element already uses this CSS id.";
   return null;
 }

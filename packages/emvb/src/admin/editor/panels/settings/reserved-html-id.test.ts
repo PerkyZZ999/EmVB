@@ -11,3 +11,12 @@ describe("emvb- ids are reserved (W-418)", () => {
     expect(htmlIdError("my-emvb-box", null, "text0001")).toBeNull();
   });
 });
+
+describe("ids that shadow browser globals (W-1001, S-12)", () => {
+  test("the editor refuses them; top and other words stay allowed", () => {
+    for (const id of ["location", "document", "name", "self", "window"])
+      expect(htmlIdError(id, null, "text0001")).toContain("browser built-in");
+    expect(htmlIdError("top", null, "text0001")).toBeNull();
+    expect(htmlIdError("Location", null, "text0001")).toBeNull();
+  });
+});

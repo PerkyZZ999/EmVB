@@ -47191,6 +47191,52 @@
       ],
       "command": ["bun", "test", "scripts/site-headers.test.ts"],
       "expect": "\\(fail\\).*emvb.dev sends a CSP"
+    },
+    {
+      "id": "W-1001/shadowing-id-rendered",
+      "requirement": "W-1001",
+      "description": "An id like location is written to the page, where it shadows window.location for host scripts.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "node.htmlId && HTML_ID.test(node.htmlId) && !isShadowingId(node.htmlId)",
+          "replace": "node.htmlId && HTML_ID.test(node.htmlId)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/shadowing-ids.test.ts"],
+      "expect": "\\(fail\\).*shadows a browser global is left out"
+    },
+    {
+      "id": "W-1001/shadowing-id-accepted",
+      "requirement": "W-1001",
+      "description": "The editor accepts a CSS id that shadows a browser global.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/advanced-rules.ts",
+          "search": "  if (isShadowingId(value))",
+          "replace": "  if (value === \"\\u0000\")"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/reserved-html-id.test.ts"
+      ],
+      "expect": "\\(fail\\).*the editor refuses them"
+    },
+    {
+      "id": "W-1001/top-refused",
+      "requirement": "W-1001",
+      "description": "top is treated as shadowing, so every #top link on existing pages breaks.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/shadowing-ids.ts",
+          "search": "  \"status\",\n",
+          "replace": "  \"status\",\n  \"top\",\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/shadowing-ids.test.ts"],
+      "expect": "\\(fail\\).*shadows a browser global is left out"
     }
   ]
 }

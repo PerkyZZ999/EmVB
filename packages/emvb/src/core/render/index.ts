@@ -1,3 +1,4 @@
+import { isShadowingId } from "../shadowing-ids.ts";
 import { renderableDesign, renderableDynamic, renderableLayout } from "../contract.ts";
 import { markColors } from "../text-marks.ts";
 import type { TextMark } from "../schema/layout.ts";
@@ -591,7 +592,7 @@ export function renderPage(
     const attrs: Record<string, string> = { class: classes.join(" "), ...customAttributes(node) };
     if (mode === "editor" && id) attrs["data-emvb-id"] = id;
     const htmlId =
-      node.htmlId && HTML_ID.test(node.htmlId)
+      node.htmlId && HTML_ID.test(node.htmlId) && !isShadowingId(node.htmlId)
         ? node.htmlId
         : node.type === "heading" && id && layoutHasToc
           ? `emvb-h-${id}`
