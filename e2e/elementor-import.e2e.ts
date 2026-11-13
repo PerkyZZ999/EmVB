@@ -110,7 +110,7 @@ test("W-945: a header template from Elementor becomes a header theme part", asyn
   );
   await expect(dialog.locator("[data-emvb-import-report]")).toContainText("as a header.");
   await expect(dialog.locator("[data-emvb-import-report]")).toContainText(
-    'The WordPress menu "main" isn\'t in the export',
+    'The WordPress menu "main" isn\'t on this site',
   );
   await expect(dialog.getByRole("combobox", { name: "Type" })).toContainText("Header");
   await dialog.getByRole("button", { name: "Import", exact: true }).click();
