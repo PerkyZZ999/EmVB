@@ -77,7 +77,7 @@ const emvb =
 ```
 
 - Slugs must be lowercase letters, digits and `_`; `emvb_pages`, `emvb_theme_parts` and anything else are ignored. At most 20.
-- Saves are checked on the server: an invalid layout is refused, and only editors and administrators can change the field (authors see a read-only summary).
+- Saves are checked on the server: an invalid layout is refused, and only editors and administrators can change the field (authors see a read-only summary). Since 1.1.2 this holds for every collection with an `emvb:canvas` field, listed or not.
 - An AI agent publishing such an entry follows the **AI agents** publish setting, like an EmVB page.
 - A hosted layout always renders in your site layout (no blank canvas mode). Preview in a field renders in the browser, so it shows dynamic data the same way the editor canvas does.
 - EmVB asks for the `schema:read` capability to find your emvb:canvas fields.

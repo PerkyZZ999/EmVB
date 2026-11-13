@@ -20,7 +20,7 @@ export type EmVBOptions = {
   canvasStyles?: string[];
   /**
    * Host collections (such as `pages`) whose entries can hold an `emvb:canvas` "Edit with EmVB"
-   * field (W-897). EmVB validates and guards that field on save and publish for these only.
+   * field (W-897). EmVB validates and guards that field on save for every collection that has it (S-08), and on agent publish for these.
    */
   canvasCollections?: string[];
   /**
