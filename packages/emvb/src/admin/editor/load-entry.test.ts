@@ -56,6 +56,7 @@ describe("loadEntry reads a page for the editor (W-091)", () => {
       seoNoIndex: true,
       seoImage: "/_emdash/api/media/file/og.png",
       status: "published",
+      scheduledAt: null,
       rev: "rev-7",
       layout,
     });
@@ -75,6 +76,7 @@ describe("loadEntry reads a page for the editor (W-091)", () => {
       seoNoIndex: false,
       seoImage: "",
       status: "draft",
+      scheduledAt: null,
       rev: null,
       layout: null,
     });

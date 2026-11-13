@@ -33,6 +33,8 @@ export type EditorEntry = {
   seoNoIndex?: boolean;
   seoImage?: string;
   status: string;
+  /** W-1027: when EmDash publishes the entry by itself (ISO), or null. */
+  scheduledAt?: string | null;
   rev: string | null;
   layout: Layout | null;
   partType?: ThemePartType;
@@ -64,6 +66,7 @@ type ContentResponse = {
     slug?: string | null;
     status?: string;
     draftRevisionId?: string | null;
+    scheduledAt?: string | null;
     data?: Record<string, unknown>;
     seo?: {
       title?: string | null;
@@ -100,6 +103,7 @@ export async function loadEntry(
     seoNoIndex: body?.item?.seo?.noIndex === true,
     seoImage: text(body?.item?.seo?.image),
     status: entryStatus(body?.item),
+    scheduledAt: body?.item?.scheduledAt ?? null,
     rev: body?.["_rev"] ?? null,
     layout: readLayout(data["layout"]),
   };

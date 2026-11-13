@@ -48635,6 +48635,105 @@
       "command": ["bun", "run", "e2e", "e2e/elementor-import.e2e.ts", "--project=node"],
       "env": { "CI": "1" },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1027/local-time-sent",
+      "requirement": "W-1027",
+      "description": "The scheduled time is sent without its offset.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "{ scheduledAt: at.toISOString(),",
+          "replace": "{ scheduledAt: at.toISOString().slice(0, 16),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/schedule.test.tsx"],
+      "expect": "\\(fail\\).*sends the time as ISO"
+    },
+    {
+      "id": "W-1027/cancel-posts",
+      "requirement": "W-1027",
+      "description": "Cancelling a schedule posts instead of deleting it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/content-api.ts",
+          "search": "      : { method: \"DELETE\" },",
+          "replace": "      : { method: \"POST\", body: {} },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/schedule.test.tsx"],
+      "expect": "\\(fail\\).*cancelling deletes"
+    },
+    {
+      "id": "W-1027/publish-keeps-schedule",
+      "requirement": "W-1027",
+      "description": "After Publish the top bar still shows the old scheduled time.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "      return { ...state, rev: action.rev, status: \"published\", scheduledAt: null };",
+          "replace": "      return { ...state, rev: action.rev, status: \"published\" };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/schedule.test.tsx"],
+      "expect": "\\(fail\\).*until Publish clears it"
+    },
+    {
+      "id": "W-1027/past-accepted",
+      "requirement": "W-1027",
+      "description": "A time already past can be chosen.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/ScheduleDialog.tsx",
+          "search": "      if (at.getTime() <= now().getTime() + 60_000) {",
+          "replace": "      if (at.getTime() <= now().getTime() - 3_600_000) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/schedule.test.tsx"],
+      "expect": "\\(fail\\).*already past"
+    },
+    {
+      "id": "W-1027/load-ignores-time",
+      "requirement": "W-1027",
+      "description": "The editor doesn't know a page is scheduled when it opens.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useEditorData.ts",
+          "search": "    scheduledAt: body?.item?.scheduledAt ?? null,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/schedule.test.tsx"],
+      "expect": "\\(fail\\).*loads the scheduled time"
+    },
+    {
+      "id": "W-1027/unsaved-not-saved",
+      "requirement": "W-1027",
+      "description": "Scheduling skips unsaved edits, so the old draft publishes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "      const rev = at ? await flush() : latest.current.rev;",
+          "replace": "      const rev = latest.current.rev;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*W-1027|\\(fail\\).*saved first"
+    },
+    {
+      "id": "W-1027/no-button",
+      "requirement": "W-1027",
+      "description": "The editor has no Schedule publish button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "                {...(host.field ? {} : { onSchedule: () => chrome.open(\"schedule\") })}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/schedule.e2e.ts", "--project=node"],
+      "env": { "CI": "1" },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

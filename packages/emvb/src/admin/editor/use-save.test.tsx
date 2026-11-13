@@ -290,3 +290,48 @@ test("W-836: a save asked for during Overwrite waits for it and uses its new rev
   expect(revs).toEqual(["r9", "r10"]);
   expect(live.state?.rev).toBe("r11");
 });
+
+describe("schedule (W-1027)", () => {
+  test("unsaved edits are saved first, then that revision is scheduled", async () => {
+    const at = new Date("2026-12-01T14:30:00Z");
+    const { fetcher, calls } = server({
+      [`PUT ${PAGE}`]: ok("r2"),
+      [`POST ${PAGE}/schedule`]: ok("r3", {
+        item: { status: "scheduled", scheduledAt: "2026-12-01T14:30:00.000Z" },
+      }),
+    });
+    await start(fetcher, state());
+    expect(await run(() => hook().schedule(at))).toBeNull();
+    expect(calls.map((c) => `${c.method} ${c.path}`)).toEqual([
+      `PUT ${PAGE}`,
+      `POST ${PAGE}/schedule`,
+    ]);
+    expect(calls[1]?.body).toEqual({ scheduledAt: "2026-12-01T14:30:00.000Z", _rev: "r2" });
+    expect([live.state?.status, live.state?.scheduledAt, live.state?.rev]).toEqual([
+      "scheduled",
+      "2026-12-01T14:30:00.000Z",
+      "r3",
+    ]);
+  });
+
+  test("a save that fails stops the schedule and says why; a stale revision opens the conflict", async () => {
+    const failing = server({});
+    await start(failing.fetcher, state());
+    expect(await run(() => hook().schedule(new Date("2026-12-01T14:30:00Z")))).toBe(
+      "Your changes couldn't be saved, so nothing was scheduled.",
+    );
+    expect(failing.calls.some((c) => c.path.endsWith("/schedule"))).toBe(false);
+    await cleanup();
+    const stale = server({
+      [`POST ${PAGE}/schedule`]: {
+        status: 409,
+        body: { error: { code: "CONFLICT", message: "x" } },
+      },
+    });
+    const h = await start(stale.fetcher, state({}, { version: 1, savedVersion: 1 }));
+    expect(await run(() => hook().schedule(new Date("2026-12-01T14:30:00Z")))).toContain(
+      "changed somewhere else",
+    );
+    expect(h.hook.conflict).toBe(true);
+  });
+});

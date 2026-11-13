@@ -23,6 +23,8 @@ export type EditorState = {
   id: string;
   page: PageDraft;
   status: string;
+  /** W-1027: when EmDash will publish the saved draft by itself (ISO), or null. */
+  scheduledAt?: string | null;
   rev: string | null;
   design: DesignSystem;
   designRevision: string | null;
@@ -59,6 +61,7 @@ export type EditorAction =
   | { type: "apply-arranged"; layout: Layout; selected: string }
   | { type: "saved"; rev: string; version: number }
   | { type: "published"; rev: string }
+  | { type: "scheduled"; rev: string; status: string; at: string | null }
   | { type: "set-design"; design: DesignSystem; revision: string | null }
   /**
    * W-536: a site styles edit shown before its save lands, so the next edit builds on it. The
@@ -238,7 +241,10 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         status: state.status === "published" ? "changed" : state.status,
       };
     case "published":
-      return { ...state, rev: action.rev, status: "published" };
+      return { ...state, rev: action.rev, status: "published", scheduledAt: null };
+    case "scheduled":
+      // W-1027: scheduling (or cancelling it) keeps the draft; EmDash publishes it at `at`.
+      return { ...state, rev: action.rev, status: action.status, scheduledAt: action.at };
     case "preview-design":
       return { ...state, design: action.design };
     case "set-design":

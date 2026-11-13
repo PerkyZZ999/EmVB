@@ -148,6 +148,35 @@ export async function publishEntry(
 }
 
 /**
+ * W-1027: has EmDash publish the saved draft of entry `id` by itself at `at` (sent as ISO with
+ * its offset), or with `at` null cancels that. `rev` makes a stale draft fail with 409.
+ */
+export async function scheduleEntry(
+  fetcher: Fetcher,
+  contentPath: string,
+  id: string,
+  at: Date | null,
+  rev: string | null,
+): Promise<{ rev: string; status: string; scheduledAt: string | null }> {
+  const path = `${contentPath}/${encodeURIComponent(id)}/schedule`;
+  const body = await requestJson<{
+    _rev: string;
+    item: { status?: string; scheduledAt?: string | null; draftRevisionId?: string | null };
+  }>(
+    fetcher,
+    path,
+    at
+      ? { method: "POST", body: { scheduledAt: at.toISOString(), ...(rev ? { _rev: rev } : {}) } }
+      : { method: "DELETE" },
+  );
+  return {
+    rev: body["_rev"],
+    status: entryStatus(body.item),
+    scheduledAt: body.item.scheduledAt ?? null,
+  };
+}
+
+/**
  * Drops the saved draft of entry `id` so it is back to its published version (W-193). EmDash's
  * `discard-draft` checks `rev`, so a draft saved elsewhere meanwhile fails with 409.
  */

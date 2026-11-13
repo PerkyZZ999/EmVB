@@ -2,6 +2,7 @@ import { Button, DropdownMenu, Loader } from "@cloudflare/kumo";
 import * as React from "react";
 import {
   ArrowSquareOutIcon,
+  CalendarBlankIcon,
   CaretDownIcon,
   CheckIcon,
   EyeIcon,
@@ -19,6 +20,7 @@ import {
 } from "@phosphor-icons/react";
 import { BUTTON, SOLID_PRIMARY } from "../ui.ts";
 import { statusLabel } from "../entry-status.ts";
+import { scheduleLabel } from "./ScheduleDialog.tsx";
 import type { SaveStatus } from "./useSave.ts";
 import { WIDE_MIN_PX, type EditorDevice } from "../../core/index.ts";
 import { useMediaQuery } from "./useMediaQuery.ts";
@@ -32,7 +34,12 @@ const PREVIEW_SIZES = [
   { device: "mobile", label: "Mobile (390 px)", icon: DeviceMobileIcon },
 ] as const;
 
-export type TopBarPage = { title: string; status: string };
+export type TopBarPage = {
+  title: string;
+  status: string;
+  /** W-1027: when EmDash publishes the saved draft by itself. */
+  scheduledAt?: string | null;
+};
 
 const wideScreenFits = () =>
   typeof window !== "undefined" && (window.screen?.availWidth ?? 0) >= WIDE_MIN_PX;
@@ -87,6 +94,7 @@ export function TopBar({
   stylesUnpublished = false,
   canRevert = false,
   onRevert,
+  onSchedule,
   tools,
   onApply,
 }: {
@@ -107,6 +115,8 @@ export function TopBar({
   canRevert?: boolean;
   /** Shown once the entry has a published version; asks before discarding. */
   onRevert?: () => void;
+  /** W-1027: opens Schedule publishing. */
+  onSchedule?: () => void;
   /** Extra tools beside Site styles: the page weight and accessibility meters, … (W-310). */
   tools?: React.ReactNode;
   /** Field mode (W-900): one Apply button replaces Preview, Revert, Save draft and Publish. */
@@ -148,6 +158,12 @@ export function TopBar({
               <span className="emvb-status-dot" aria-hidden="true" />
               {statusLabel(page.status)}
             </span>
+            {page.scheduledAt && (
+              <span className="emvb-status" data-emvb-scheduled="">
+                <CalendarBlankIcon size={12} aria-hidden="true" />
+                Publishes {scheduleLabel(page.scheduledAt)}
+              </span>
+            )}
           </>
         )}
       </div>
@@ -321,6 +337,21 @@ export function TopBar({
               Save draft
               {dirty && <span className="emvb-unsaved-dot" aria-hidden="true" />}
             </Button>
+            {onSchedule && (
+              <Button
+                variant="secondary"
+                shape="square"
+                className="emvb-icon-btn"
+                aria-label={page?.scheduledAt ? "Change scheduled publishing" : "Schedule publish"}
+                title={page?.scheduledAt ? "Change scheduled publishing" : "Schedule publish"}
+                aria-disabled={busy !== null}
+                onClick={() => {
+                  if (busy === null) onSchedule();
+                }}
+              >
+                <CalendarBlankIcon size={16} aria-hidden="true" />
+              </Button>
+            )}
             <Button
               variant="primary"
               className={`${BUTTON} emvb-publish-button`}

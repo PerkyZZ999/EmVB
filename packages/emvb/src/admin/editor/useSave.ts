@@ -2,7 +2,7 @@ import * as React from "react";
 import { byteLength, MAX_LAYOUT_BYTES, nodeIdAtPath, type Layout } from "../../core/index.ts";
 import { PAGES_COLLECTION, THEME_PARTS_COLLECTION } from "../../constants.ts";
 import { ApiError, type Fetcher } from "../api.ts";
-import { publishPage, savePage } from "../content-api.ts";
+import { publishPage, savePage, scheduleEntry } from "../content-api.ts";
 import { publishThemePart, saveThemePart } from "../theme-api.ts";
 import type { EditorAction, EditorState } from "./store.ts";
 import { loadEntry } from "./useEditorData.ts";
@@ -214,7 +214,8 @@ export function useSave(
     await run;
   }, [fetcher, write, collection]);
 
-  const publish = React.useCallback(async (): Promise<boolean> => {
+  /** The revision to publish or schedule: after the running save, and with unsaved edits saved. */
+  const flush = React.useCallback(async (): Promise<string | null | false> => {
     let rev: string | null = latest.current.rev;
     const pending = queued.current ?? inFlight.current;
     if (pending) {
@@ -227,6 +228,12 @@ export function useSave(
       rev = await start(rev);
       if (!rev) return false;
     }
+    return rev;
+  }, [start]);
+
+  const publish = React.useCallback(async (): Promise<boolean> => {
+    const rev = await flush();
+    if (rev === false) return false;
     try {
       const result =
         collection === THEME_PARTS_COLLECTION
@@ -240,12 +247,49 @@ export function useSave(
       setStatus({ kind: "error", message: publishFailureMessage(error), retry: false });
       return false;
     }
-  }, [fetcher, dispatch, start, collection]);
+  }, [fetcher, dispatch, flush, collection]);
+
+  /**
+   * W-1027: has EmDash publish the saved draft at `at` (unsaved edits are saved first), or with
+   * `at` null cancels the schedule. Returns the error message, or null when it worked.
+   */
+  const schedule = React.useCallback(
+    async (at: Date | null): Promise<string | null> => {
+      const rev = at ? await flush() : latest.current.rev;
+      if (rev === false) return "Your changes couldn't be saved, so nothing was scheduled.";
+      try {
+        const result = await scheduleEntry(
+          fetcher,
+          `/_emdash/api/content/${collection}`,
+          latest.current.id,
+          at,
+          rev,
+        );
+        dispatch({
+          type: "scheduled",
+          rev: result.rev,
+          status: result.status,
+          at: result.scheduledAt,
+        });
+        setStatus({ kind: "saved" });
+        return null;
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 409) {
+          setConflict(true);
+          return "This page was changed somewhere else. Reload or overwrite it, then schedule again.";
+        }
+        if (error instanceof ApiError && error.status === 400) return error.message;
+        return publishFailureMessage(error);
+      }
+    },
+    [fetcher, dispatch, flush, collection],
+  );
 
   return {
     status,
     save,
     publish,
+    schedule,
     overwrite,
     conflict,
     closeConflict: () => setConflict(false),

@@ -18,6 +18,7 @@ import { saveEditedCopy } from "../media-api.ts";
 import { A11yDialog } from "./A11yCopilot.tsx";
 import { CommandPalette } from "./CommandPalette.tsx";
 import { ConflictDialog, DeleteSubtreeDialog, LeaveDialog, RevertDialog } from "./dialogs.tsx";
+import { ScheduleDialog } from "./ScheduleDialog.tsx";
 import type { EditorCommand } from "./editor-commands.ts";
 import { paletteItems } from "./palette-items.ts";
 import { PerfMeterDialog } from "./PerfMeter.tsx";
@@ -47,6 +48,7 @@ export const initialState = (entry: EditorEntry, design: LoadedDesign): EditorSt
     float: entry.float,
   },
   status: entry.status,
+  scheduledAt: entry.scheduledAt ?? null,
   rev: entry.rev,
   design: design.design,
   designRevision: design.revision,
@@ -69,6 +71,7 @@ const CLOSED = {
   a11y: false,
   leave: false,
   revert: false,
+  schedule: false,
   imageEditor: false,
 };
 
@@ -358,6 +361,12 @@ export function EditorDialogs({
         onOpenChange={(open) => !open && saver.closeConflict()}
         onReload={() => void reloadEntry({ fetcher, collection, state, dispatch, saver })}
         onOverwrite={() => void saver.overwrite()}
+      />
+      <ScheduleDialog
+        open={chrome.flags.schedule}
+        onOpenChange={chrome.setOpen("schedule")}
+        scheduledAt={state.scheduledAt ?? null}
+        onSchedule={saver.schedule}
       />
       <RevertDialog
         open={chrome.flags.revert}

@@ -482,7 +482,11 @@ function EditorApp({
           {wideEnough ? (
             <>
               <TopBar
-                page={{ title: state.page.title, status: state.status }}
+                page={{
+                  title: state.page.title,
+                  status: state.status,
+                  scheduledAt: state.scheduledAt ?? null,
+                }}
                 dirty={dirty}
                 status={saver.status}
                 busy={busy}
@@ -495,6 +499,7 @@ function EditorApp({
                 stylesUnpublished={state.designUnpublished === true}
                 canRevert={canRevert}
                 onRevert={() => chrome.open("revert")}
+                {...(host.field ? {} : { onSchedule: () => chrome.open("schedule") })}
                 {...(host.field ? { onApply: () => host.field?.apply(state.page.layout) } : {})}
                 tools={
                   <>
