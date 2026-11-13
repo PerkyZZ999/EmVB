@@ -220,3 +220,47 @@ describe("Image box (W-1021)", () => {
     expect(html.match(/<a /g)).toHaveLength(1);
   });
 });
+
+const testimonialNode = (props: Record<string, unknown>) => ({
+  id: "tsti0001",
+  type: "testimonial",
+  props: { quote: "It works.", name: "Ada Lovelace", role: "Engineer", ...props },
+});
+
+describe("Testimonial (W-1022)", () => {
+  test("a figure: the quote as a blockquote, then the name and role in its caption", () => {
+    const html = render(testimonialNode({}));
+    expect(html).toContain(
+      '<figure class="emvb-testimonial"><blockquote class="emvb-testimonial-quote"><p>It works.</p></blockquote><figcaption class="emvb-testimonial-caption"><span class="emvb-testimonial-who"><span class="emvb-testimonial-name">Ada Lovelace</span><span class="emvb-testimonial-role">Engineer</span></span></figcaption></figure>',
+    );
+  });
+
+  test("a rating comes first, named as the Star rating is; the photo is decorative", () => {
+    const html = render(
+      testimonialNode({
+        rating: 4,
+        ratingMax: 5,
+        src: "/_emdash/api/media/file/ada.jpg",
+        alt: "Ada",
+      }),
+    );
+    expect(html).toMatch(
+      /<figure [^>]*><div class="emvb-rating" role="img" aria-label="Rated 4 out of 5">/,
+    );
+    expect(html).toContain(
+      '<img class="emvb-testimonial-photo" src="/_emdash/api/media/file/ada.jpg" alt="" width="48" height="48" loading="lazy" decoding="async">',
+    );
+  });
+
+  test("no rating, no photo, no role: none of their markup; an unsafe photo is dropped", () => {
+    const html = render(testimonialNode({ role: undefined, src: "javascript:alert(1)" }));
+    expect(html.includes("emvb-rating")).toBe(false);
+    expect(html.includes("<img")).toBe(false);
+    expect(html.includes("emvb-testimonial-role")).toBe(false);
+  });
+
+  test("ratings above 10 or fractional star counts are refused", () => {
+    expect(page(testimonialNode({ rating: 11 })).ok).toBe(false);
+    expect(page(testimonialNode({ rating: 3, ratingMax: 4.5 })).ok).toBe(false);
+  });
+});

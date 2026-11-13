@@ -218,3 +218,37 @@ test("an Image box gets an uploaded picture with alt text, sits after its text a
   expect(media?.x ?? 0).toBeGreaterThanOrEqual((content?.x ?? 0) + (content?.width ?? 0));
   expect(Math.round(((media?.width ?? 0) / (whole?.width ?? 1)) * 100)).toBe(25);
 });
+
+test("a Testimonial gets a 5-star rating and a new quote, and publishes as a figure with a blockquote (W-1022)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Testimonials");
+  await overlay(page).locator('[data-emvb-add-tile="testimonial"]').click();
+  const figure = canvas(page).locator("figure.emvb-testimonial");
+  await expect(figure.locator(".emvb-testimonial-name")).toHaveText("Sam Rivera");
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Testimonial");
+
+  const quote = overlay(page).getByLabel("Quote", { exact: true });
+  await quote.fill("Our launch page took one afternoon.");
+  await quote.blur();
+  const rating = overlay(page).getByLabel("Rating", { exact: true });
+  await rating.fill("5");
+  await rating.blur();
+  await expect(figure.locator(".emvb-rating")).toHaveAttribute("aria-label", "Rated 5 out of 5");
+
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]).toMatchObject({
+    type: "testimonial",
+    props: { quote: "Our launch page took one afternoon.", rating: 5 },
+  });
+
+  await publishPage(request, id);
+  await page.goto(`/${slug}`);
+  const published = page.getByRole("figure");
+  await expect(published.locator("blockquote")).toHaveText("Our launch page took one afternoon.");
+  await expect(published.getByRole("img", { name: "Rated 5 out of 5" })).toBeVisible();
+  await expect(published.locator("figcaption")).toContainText("Sam Rivera");
+  await expect(published.locator("figcaption")).toContainText("Head of Marketing");
+});

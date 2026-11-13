@@ -47955,8 +47955,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/elements/widgets.ts",
-          "search": "      loading: \"lazy\",\n",
-          "replace": ""
+          "search": "      ...(props.height ? { height: String(props.height) } : {}),\n      loading: \"lazy\",\n",
+          "replace": "      ...(props.height ? { height: String(props.height) } : {}),\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
@@ -48006,6 +48006,76 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1022/photo-spoken",
+      "requirement": "W-1022",
+      "description": "A Testimonial's photo repeats the name for screen readers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "          alt: \"\",\n",
+          "replace": "          alt: node.props.alt ?? \"\",\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*the photo is decorative"
+    },
+    {
+      "id": "W-1022/quote-not-blockquote",
+      "requirement": "W-1022",
+      "description": "A Testimonial's quote is a plain div, not a blockquote.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "      tag: \"blockquote\",",
+          "replace": "      tag: \"div\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*quote as a blockquote"
+    },
+    {
+      "id": "W-1022/rating-dropped",
+      "requirement": "W-1022",
+      "description": "A Testimonial's rating is never shown.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "    if (value !== undefined)",
+          "replace": "    if (value !== undefined && value > 10)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*rating comes first"
+    },
+    {
+      "id": "W-1022/a11y-empty-silent",
+      "requirement": "W-1022",
+      "description": "An empty Testimonial passes the accessibility check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "if (node.type === \"testimonial\" && !spoken(props[\"quote\"]) && !node.bind) {",
+          "replace": "if (node.type === \"testimonial\" && !spoken(props[\"quote\"]) && node.bind) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*an empty one warns"
+    },
+    {
+      "id": "W-1022/import-job-lost",
+      "requirement": "W-1022",
+      "description": "An imported Testimonial loses its job title.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "        ...(job ? { role: short(job, 200) } : {}),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*widget details survive"
     }
   ]
 }

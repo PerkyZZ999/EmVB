@@ -775,6 +775,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "alert",
   "icon-box",
   "image-box",
+  "testimonial",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -894,6 +895,31 @@ export const ImageBoxNode = leafNode(
   path: ["props", "alt"],
 });
 
+/**
+ * W-1022: a quote in a figure: the words as a blockquote, then who said them (name and role) with
+ * an optional photo, and an optional star rating read as "Rated 5 out of 5". The photo is shown
+ * beside the name, so it is decorative; its keys are an Image's so the media library fills them.
+ */
+export const TestimonialNode = leafNode(
+  "testimonial",
+  z.strictObject({
+    quote: z.string().max(MAX_TEXT_LENGTH),
+    name: z.string().max(200),
+    role: z.string().max(200).optional(),
+    src: z.string().max(2000).optional(),
+    /** Written by the media library; never rendered (the photo is beside the name). */
+    alt: z.string().max(500).optional(),
+    mediaId: z.string().min(1).max(128).optional(),
+    width: z.number().int().positive().max(10000).optional(),
+    height: z.number().int().positive().max(10000).optional(),
+    focalX: z.number().int().min(0).max(100).optional(),
+    focalY: z.number().int().min(0).max(100).optional(),
+    /** Stars out of `ratingMax` (unset 5); no stars when unset. */
+    rating: z.number().min(0).max(MAX_RATING).optional(),
+    ratingMax: z.number().int().min(1).max(MAX_RATING).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -931,6 +957,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   AlertNode,
   IconBoxNode,
   ImageBoxNode,
+  TestimonialNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -975,6 +1002,7 @@ export type RatingNode = z.infer<typeof RatingNode>;
 export type AlertNode = z.infer<typeof AlertNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
+export type TestimonialNode = z.infer<typeof TestimonialNode>;
 export type SpacerNode = z.infer<typeof SpacerNode>;
 export type DividerNode = z.infer<typeof DividerNode>;
 export type TextNode = z.infer<typeof TextNode>;
@@ -1178,6 +1206,7 @@ export type LayoutNode =
   | AlertNode
   | IconBoxNode
   | ImageBoxNode
+  | TestimonialNode
   | SpacerNode
   | DividerNode
   | TextNode

@@ -91,3 +91,16 @@ describe("Image box (W-1021)", () => {
     expect(audit(box({ href: "/team", title: "" }))).toEqual(["link-name:warning:imbx0001"]);
   });
 });
+
+describe("Testimonial (W-1022)", () => {
+  const quote = (text: string) => ({
+    id: "tsti0001",
+    type: "testimonial",
+    props: { quote: text, name: "Ada" },
+  });
+
+  test("a quote is fine; an empty one warns", () => {
+    expect(audit(quote("It works."))).toEqual([]);
+    expect(audit(quote("  "))).toEqual(["empty-alert:warning:tsti0001"]);
+  });
+});

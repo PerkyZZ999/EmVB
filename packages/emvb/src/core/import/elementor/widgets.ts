@@ -990,59 +990,41 @@ const progress: Widget = (s, ctx, el) => {
   return [box(ctx, children, { gap: { value: 8, unit: "px" } })];
 };
 
+/** W-1022: Elementor's Testimonial → a Testimonial: quote, photo, name and job. */
 const testimonial: Widget = (s, ctx, el) => {
-  const children: N[] = [];
-  const content = plain(s["testimonial_content"]).text;
-  if (content) {
-    children.push(
-      styled(
-        node(
-          ctx,
-          "text",
-          { text: short(content) },
-          { style: { fontSize: { value: 1.3, unit: "em" } } },
-        ),
-        deviceStyles(s, ctx, el, [
-          typographyReader("content_typography", "text"),
-          textReader("content_content_color", "text"),
-        ]),
-      ),
-    );
-  }
-  const img = imageNode(ctx, el, s["testimonial_image"]);
-  if (img) {
-    img["style"] = {
-      width: { value: 60, unit: "px" },
-      height: { value: 60, unit: "px" },
-      borderRadius: { value: 50, unit: "%" },
-      objectFit: "cover",
-    };
-    children.push(img);
-  }
+  const quote = plain(s["testimonial_content"]).text;
   const name = plain(s["testimonial_name"]).text;
-  if (name)
-    children.push(
-      styled(
-        node(ctx, "text", { text: short(name), tag: "div" }, { style: { fontWeight: "bold" } }),
-        deviceStyles(s, ctx, el, [textReader("name_text_color", "primary")]),
-      ),
-    );
+  if (!quote && !name) return [];
   const job = plain(s["testimonial_job"]).text;
-  if (job)
-    children.push(
-      styled(
-        node(ctx, "text", { text: short(job), tag: "div" }),
-        deviceStyles(s, ctx, el, [textReader("job_text_color", "secondary")]),
-      ),
-    );
-  if (children.length === 0) return [];
+  const img = imageNode(ctx, el, s["testimonial_image"]);
+  const photo = (img?.["props"] ?? {}) as Record<string, unknown>;
   const where = textAlign(s["testimonial_alignment"]) ?? "center";
+  const style: Style = { textAlign: where };
+  if (where !== "left") style.alignItems = where === "right" ? "flex-end" : "center";
+  const ink = colorAt(s, "content_content_color", ctx);
+  if (ink) style.color = ink;
+  if (s["content_typography_typography"] || s["name_text_color"] || s["job_text_color"])
+    ctx.note(
+      "approximated",
+      el,
+      "Testimonials keep one text style; name and job colours and fonts were simplified.",
+    );
   return [
-    box(ctx, children, {
-      gap: { value: 15, unit: "px" },
-      textAlign: where,
-      alignItems: where === "left" ? "flex-start" : where === "right" ? "flex-end" : "center",
-    }),
+    node(
+      ctx,
+      "testimonial",
+      {
+        quote: short(quote),
+        name: short(name, 200),
+        ...(job ? { role: short(job, 200) } : {}),
+        ...Object.fromEntries(
+          ["src", "alt", "mediaId", "width", "height"]
+            .filter((key) => photo[key] !== undefined)
+            .map((key) => [key, photo[key]]),
+        ),
+      },
+      { style },
+    ),
   ];
 };
 

@@ -123,3 +123,20 @@ describe("Image box over MCP (W-1021)", () => {
     expect(JSON.stringify(refused.error)).toContain("Alt text is required");
   });
 });
+
+describe("Testimonial over MCP (W-1022)", () => {
+  test("add_element adds a rated testimonial; a rating above 10 is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("testimonial")?.name).toBe("Testimonial");
+    const element = (rating: number) => ({
+      type: "testimonial",
+      props: { quote: "It works.", name: "Ada", rating },
+    });
+    expect(
+      (await call("add_element", { pageId, parentId: "root0001", element: element(5) })).success,
+    ).toBe(true);
+    expect(
+      (await call("add_element", { pageId, parentId: "root0001", element: element(11) })).success,
+    ).toBe(false);
+  });
+});

@@ -61,6 +61,7 @@ const ADDED_IN_1X: Record<string, string> = {
   alert: "1.2 (W-1025): src/core/elements/widgets.test.ts",
   "icon-box": "1.2 (W-1020): src/core/elements/widgets.test.ts",
   "image-box": "1.2 (W-1021): src/core/elements/widgets.test.ts",
+  testimonial: "1.2 (W-1022): src/core/elements/widgets.test.ts",
 };
 
 /** Style keys added after 0.9.0, so no released page has them: where each one is tested. */

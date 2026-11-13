@@ -39,7 +39,7 @@ import type { ElementDefinition } from "./definition.ts";
 import { ICON_STROKE_WIDTHS, iconGlyph } from "./icon-svg.ts";
 export { iconHasAdjustableStroke, iconHasOwnColors } from "./icon-svg.ts";
 import { menu, menuItem } from "./menu.ts";
-import { alert, iconBox, imageBox, rating } from "./widgets.ts";
+import { alert, iconBox, imageBox, rating, testimonial } from "./widgets.ts";
 import { checkbox, form, radio, selectEl, submit, textInput, textareaEl } from "./form-elements.ts";
 import {
   loop,
@@ -1105,6 +1105,7 @@ export const ELEMENTS = {
   alert,
   "icon-box": iconBox,
   "image-box": imageBox,
+  testimonial,
   container,
   "layout-section": layoutSection,
   spacer,

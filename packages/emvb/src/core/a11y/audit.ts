@@ -493,6 +493,15 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
           "This box has a link but no title. The title is the link, so the link is left out.",
       });
     }
+    // W-1022: a testimonial without words is an empty quotation.
+    if (node.type === "testimonial" && !spoken(props["quote"]) && !node.bind) {
+      add({
+        nodeId: node.id,
+        rule: "empty-alert",
+        severity: "warning",
+        message: "This testimonial has no quote, so screen readers find an empty quotation.",
+      });
+    }
     // W-1025: a notice with neither title nor text is a coloured box screen readers call a note.
     if (node.type === "alert" && !spoken(props["title"]) && !spoken(props["text"]) && !node.bind) {
       add({

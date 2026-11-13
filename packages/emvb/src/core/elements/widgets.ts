@@ -8,6 +8,7 @@ import type {
   ImageBoxNode,
   LayoutNode,
   RatingNode,
+  TestimonialNode,
 } from "../schema/layout.ts";
 import { ALERT_VARIANTS, MAX_RATING, type MEDIA_BOX_POSITIONS } from "../schema/layout.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
@@ -87,20 +88,23 @@ export const rating: ElementDefinition<RatingNode> = {
       { key: "label", kind: "text", label: "Text for screen readers", optional: true },
     ],
   },
-  build: (node, attrs) => {
-    const max = node.props.max ?? 5;
-    const value = Math.min(Math.max(node.props.value, 0), max);
-    const size = node.props.size ?? 20;
-    const stars = Array.from({ length: max }, (_, i) =>
-      star(size, Math.min(Math.max(value - i, 0), 1)),
-    );
-    return {
-      tag: "div",
-      attrs: { ...attrs, role: "img", "aria-label": ratingLabel(node.props) },
-      children: stars,
-    };
-  },
+  build: (node, attrs) => ratingStars(node.props, attrs),
 };
+
+/** The stars of a rating as one named image (W-1023; a Testimonial's rating too, W-1022). */
+function ratingStars(props: RatingNode["props"], attrs: Record<string, string>): VNode {
+  const max = props.max ?? 5;
+  const value = Math.min(Math.max(props.value, 0), max);
+  const size = props.size ?? 20;
+  const stars = Array.from({ length: max }, (_, i) =>
+    star(size, Math.min(Math.max(value - i, 0), 1)),
+  );
+  return {
+    tag: "div",
+    attrs: { ...attrs, role: "img", "aria-label": ratingLabel(props) },
+    children: stars,
+  };
+}
 
 /** W-1025: the opt-in public scripts the 1.2 widgets use; a page loads only the ones it needs. */
 export type WidgetRuntime = "alerts";
@@ -426,5 +430,88 @@ export const imageBox: ElementDefinition<ImageBoxNode> = {
     if (size && size !== "medium")
       box.attrs["class"] = `${box.attrs["class"]} emvb-image-box-${size}`;
     return box;
+  },
+};
+
+export const testimonial: ElementDefinition<TestimonialNode> = {
+  baseCss: `${rating.baseCss}.emvb-testimonial{display:flex;flex-direction:column;gap:1em;margin:0}.emvb-testimonial-quote{margin:0;font-size:1.125em}.emvb-testimonial-quote p{margin:0;white-space:pre-line}.emvb-testimonial-caption{display:flex;align-items:center;gap:0.75em}.emvb-testimonial-photo{flex:none;width:48px;height:48px;border-radius:50%;object-fit:cover}.emvb-testimonial-who{display:flex;flex-direction:column}.emvb-testimonial-name{font-weight:600}.emvb-testimonial-role{opacity:0.8}.emvb-testimonial .emvb-rating{color:#b45309}`,
+  defaults: () => ({
+    type: "testimonial",
+    props: {
+      quote: "It changed how our team works. We ship pages in an afternoon now.",
+      name: "Sam Rivera",
+      role: "Head of Marketing",
+    },
+  }),
+  descriptor: {
+    type: "testimonial",
+    name: "Testimonial",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "quote", kind: "textarea", label: "Quote" },
+      { key: "name", kind: "text", label: "Name" },
+      { key: "role", kind: "text", label: "Role or company", optional: true },
+      { key: "src", kind: "media", label: "Photo" },
+      {
+        key: "rating",
+        kind: "decimal",
+        label: "Rating",
+        optional: true,
+        min: 0,
+        max: 5,
+        maxProp: "ratingMax",
+        message: "Enter a number from 0 up to the number of stars, or leave it empty for none.",
+      },
+      {
+        key: "ratingMax",
+        kind: "int",
+        label: "Stars",
+        optional: true,
+        max: MAX_RATING,
+        message: `From 1 to ${MAX_RATING} stars.`,
+      },
+    ],
+  },
+  build: (node, attrs) => {
+    const { quote, name, role, rating: value, ratingMax } = node.props;
+    const children: VNode[] = [];
+    if (value !== undefined)
+      children.push(ratingStars({ value, max: ratingMax ?? 5 }, { class: "emvb-rating" }));
+    children.push({
+      tag: "blockquote",
+      attrs: { class: "emvb-testimonial-quote" },
+      children: [{ tag: "p", attrs: {}, children: [quote] }],
+    });
+    const src = node.props.src?.trim() ? sanitizeMediaUrl(node.props.src.trim()) : undefined;
+    const caption: VNode[] = [];
+    if (src)
+      caption.push({
+        tag: "img",
+        attrs: {
+          class: "emvb-testimonial-photo",
+          src,
+          alt: "",
+          width: "48",
+          height: "48",
+          loading: "lazy",
+          decoding: "async",
+        },
+        children: [],
+      });
+    const who: VNode[] = [];
+    if (name.trim())
+      who.push({ tag: "span", attrs: { class: "emvb-testimonial-name" }, children: [name] });
+    if (role?.trim())
+      who.push({ tag: "span", attrs: { class: "emvb-testimonial-role" }, children: [role] });
+    if (who.length > 0)
+      caption.push({ tag: "span", attrs: { class: "emvb-testimonial-who" }, children: who });
+    if (caption.length > 0)
+      children.push({
+        tag: "figcaption",
+        attrs: { class: "emvb-testimonial-caption" },
+        children: caption,
+      });
+    return { tag: "figure", attrs, children };
   },
 };

@@ -276,11 +276,7 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
       "container",
       "container",
       "text",
-      "container",
-      "text",
-      "image",
-      "text",
-      "text",
+      "testimonial",
       "container",
       "text",
       "rating",
@@ -335,6 +331,13 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
     expect(ofType(result.layout, "text").map((n) => props(n)["text"])).toEqual(
       expect.arrayContaining(["12500+", "Pages built", "Rated", "From HTML"]),
     );
+    // W-1022: the Testimonial is one, with its quote, photo, name and job.
+    expect(props(ofType(result.layout, "testimonial")[0])).toMatchObject({
+      quote: "It just works.",
+      name: "Ada",
+      role: "Engineer",
+      alt: "Ada",
+    });
     // W-1025: an Alert is an Alert of the same kind, without the icon Elementor doesn't show.
     expect(props(ofType(result.layout, "alert")[0])).toEqual({
       variant: "warning",
