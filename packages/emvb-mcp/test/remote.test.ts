@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { connectWithRetry } from "../src/remote.ts";
+import { connectWithRetry, siteRequestInit } from "../src/remote.ts";
 
 describe("bridge connect retry (W-894)", () => {
   const noSleep = (waits: number[]) => async (ms: number) => {
@@ -37,5 +37,12 @@ describe("bridge connect retry (W-894)", () => {
     }, noSleep([]));
     await expect(run).rejects.toThrow("401");
     expect(tries).toBe(1);
+  });
+});
+
+test("W-1001: requests to the site follow no redirect, so the token never goes elsewhere", () => {
+  expect(siteRequestInit("ec_pat_secret")).toEqual({
+    headers: { authorization: "Bearer ec_pat_secret" },
+    redirect: "error",
   });
 });

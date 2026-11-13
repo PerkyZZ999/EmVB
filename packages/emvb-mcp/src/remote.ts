@@ -57,6 +57,12 @@ export async function connectWithRetry<T>(
   }
 }
 
+/** S-12 (W-1001): the token as a Bearer, and no redirect, which would carry it elsewhere. */
+export const siteRequestInit = (token: string): RequestInit => ({
+  headers: { authorization: `Bearer ${token}` },
+  redirect: "error",
+});
+
 /** An MCP client to `https://site/_emdash/api/mcp` with the token as a Bearer, connected lazily. */
 export function httpRemote(endpoint: URL, token: string, version: string): Remote {
   let connected: Promise<Client> | null = null;
@@ -64,7 +70,7 @@ export function httpRemote(endpoint: URL, token: string, version: string): Remot
     connected ??= connectWithRetry(async () => {
       const client = new Client({ name: "emvb-mcp", version });
       const transport = new StreamableHTTPClientTransport(endpoint, {
-        requestInit: { headers: { authorization: `Bearer ${token}` } },
+        requestInit: siteRequestInit(token),
       });
       await client.connect(transport, { timeout: CALL_TIMEOUT_MS });
       return client;

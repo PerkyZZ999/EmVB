@@ -51,7 +51,7 @@ Bridge options:
 | --- | --- |
 | `--site <url>` | Your site. `https://` is required, except `http://` for `localhost`, `127.0.0.1`, `[::1]` and `*.localhost`. |
 | `EMVB_TOKEN` | The API token (environment variable). |
-| `--token-file <path>` | Reads the token from a file instead. The bridge warns when other users can read it; run `chmod 600` on it. |
+| `--token-file <path>` | Reads the token from a file instead. Since 1.1.2 the bridge refuses a file other users can read; run `chmod 600` on it, or pass `--allow-loose-token-file` to use it with a warning. |
 | `--allow-publish` | Lists `publish_page` and `publish_site_styles`. The site's AI agents settings still decide whether they run. |
 
 The bridge refuses a token passed on the command line (`--token`), and logs to stderr only.

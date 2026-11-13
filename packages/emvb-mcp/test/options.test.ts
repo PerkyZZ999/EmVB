@@ -88,3 +88,18 @@ describe("tokens that would leak or be ignored (W-498)", () => {
     expect((e as Error).message).toBe('Headers.append: "Bearer [token]" is invalid');
   });
 });
+
+test("W-1001: --allow-loose-token-file reaches the token file reader", () => {
+  const asked: boolean[] = [];
+  const reader = (path: string, allowLoose: boolean) => {
+    asked.push(allowLoose);
+    return path === "/tok" ? "ec_pat_file" : "";
+  };
+  parseOptions(["--site", "https://a.dev", "--token-file", "/tok"], {}, reader);
+  parseOptions(
+    ["--site", "https://a.dev", "--token-file", "/tok", "--allow-loose-token-file"],
+    {},
+    reader,
+  );
+  expect(asked).toEqual([false, true]);
+});

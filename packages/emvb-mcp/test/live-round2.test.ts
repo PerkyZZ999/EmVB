@@ -25,11 +25,15 @@ async function bridgeWith(remote: Remote) {
 
 describe("token file (W-474)", () => {
   const dir = mkdtempSync(join(tmpdir(), "emvb-token-"));
-  test("a file other users can read is used, with a chmod warning", () => {
+  test("a file other users can read is refused, or used with a warning when allowed (W-1001)", () => {
     const path = join(dir, "loose.token");
     writeFileSync(path, "secret", { mode: 0o644 });
     const warnings: string[] = [];
-    expect(readTokenFile((m) => warnings.push(m))(path)).toBe("secret");
+    if (process.platform !== "win32") {
+      expect(() => readTokenFile((m) => warnings.push(m))(path)).toThrow("chmod 600");
+      expect(() => readTokenFile((m) => warnings.push(m))(path)).toThrow(OptionsError);
+    }
+    expect(readTokenFile((m) => warnings.push(m))(path, true)).toBe("secret");
     if (process.platform !== "win32") expect(warnings.join(" ")).toContain("chmod 600");
   });
   test("a private file reads without a warning", () => {

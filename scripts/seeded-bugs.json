@@ -47051,6 +47051,48 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/server/loop-collections-option.test.ts"],
       "expect": "\\(fail\\).*reaches the renderer"
+    },
+    {
+      "id": "W-1001/loose-token-file-used",
+      "requirement": "W-1001",
+      "description": "A token file other users can read is used with only a warning again.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/token-file.ts",
+          "search": "      if (loose && !allowLoose)",
+          "replace": "      if (loose && allowLoose === null)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/live-round2.test.ts"],
+      "expect": "\\(fail\\).*a file other users can read is refused"
+    },
+    {
+      "id": "W-1001/allow-loose-ignored",
+      "requirement": "W-1001",
+      "description": "--allow-loose-token-file is parsed but never passed on.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/options.ts",
+          "search": "    else if (arg === \"--allow-loose-token-file\") allowLoose = true;",
+          "replace": "    else if (arg === \"--allow-loose-token-file\") allowLoose = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/options.test.ts"],
+      "expect": "\\(fail\\).*--allow-loose-token-file reaches the token file reader"
+    },
+    {
+      "id": "W-1001/bridge-follows-redirects",
+      "requirement": "W-1001",
+      "description": "The bridge follows a redirect with the bearer token attached.",
+      "edits": [
+        {
+          "file": "packages/emvb-mcp/src/remote.ts",
+          "search": "  redirect: \"error\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-mcp/test/remote.test.ts"],
+      "expect": "\\(fail\\).*follow no redirect"
     }
   ]
 }

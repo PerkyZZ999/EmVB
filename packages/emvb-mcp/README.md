@@ -28,8 +28,10 @@ EmDash site. It forwards tool calls to your site's EmDash MCP endpoint and adds 
 Options:
 
 - `--site <url>`: your site, `https://` (or `http://` for localhost).
-- `EMVB_TOKEN`, or `--token-file <path>` to read the token from a file (keep it `chmod 600`; the
-  bridge warns otherwise). A token on the command line is refused.
+- `EMVB_TOKEN`, or `--token-file <path>` to read the token from a file (keep it `chmod 600`;
+  since 1.1.2 the bridge refuses a file other users can read unless you pass
+  `--allow-loose-token-file`). A token on the command line is refused. The bridge follows no
+  redirect, so the token only ever goes to `--site`.
 - `--allow-publish`: list `publish_page` and `publish_site_styles`. The site's AI agents settings
   still decide whether they run.
 
