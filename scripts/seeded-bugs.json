@@ -2873,7 +2873,7 @@
       "edits": [
         {
           "file": "packages/emvb/package.json",
-          "search": "\"devDependencies\": {\n    \"@cloudflare/kumo\": \"2.6.0\",",
+          "search": "\"devDependencies\": {\n    \"@cloudflare/kumo\": \"2.15.0\",",
           "replace": "\"devDependencies\": {\n    \"@cloudflare/kumo\": \"2.14.0\","
         }
       ],
@@ -47164,8 +47164,8 @@
       "edits": [
         {
           "file": ".github/workflows/ci.yml",
-          "search": "      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0\n        with:\n          bun-version: 1.4.3\n      # D-070",
-          "replace": "      - uses: oven-sh/setup-bun@v2\n        with:\n          bun-version: 1.4.3\n      # D-070"
+          "search": "      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0\n        with:\n          bun-version: 1.4.3\n      - run: bun install --frozen-lockfile\n      - run: bun audit --audit-level=high",
+          "replace": "      - uses: oven-sh/setup-bun@v2\n        with:\n          bun-version: 1.4.3\n      - run: bun install --frozen-lockfile\n      - run: bun audit --audit-level=high"
         }
       ],
       "command": ["bun", "test", "scripts/ci-pins.test.ts"],
@@ -47246,18 +47246,18 @@
       "expect": "\\(fail\\).*shadows a browser global is left out"
     },
     {
-      "id": "W-1002/no-1.5-job",
-      "requirement": "W-1002",
-      "description": "CI stops testing on EmDash 1.5.",
+      "id": "W-1008/no-1.4-job",
+      "requirement": "W-1008",
+      "description": "CI stops testing the EmDash 1.4 floor.",
       "edits": [
         {
           "file": ".github/workflows/ci.yml",
-          "search": "      - run: bun scripts/use-emdash.ts 1.5.0\n",
+          "search": "      - run: bun scripts/use-emdash.ts 1.4.0\n",
           "replace": ""
         }
       ],
       "command": ["bun", "test", "scripts/use-emdash.test.ts"],
-      "expect": "\\(fail\\).*CI runs the unit tests on EmDash 1.5"
+      "expect": "\\(fail\\).*CI keeps the EmDash 1.4 floor tested"
     },
     {
       "id": "W-1002/1.5-keeps-old-kumo",
@@ -47313,7 +47313,7 @@
         }
       ],
       "command": ["bun", "test", "scripts/use-emdash.test.ts"],
-      "expect": "\\(fail\\).*CI runs the unit tests on EmDash 1.5"
+      "expect": "\\(fail\\).*CI keeps the EmDash 1.4 floor tested"
     },
     {
       "id": "W-1009/kumo-wrappers-kept",
@@ -47400,18 +47400,18 @@
       "expect": "\\(fail\\).*exports createPlugin by name only"
     },
     {
-      "id": "W-1010/node-demo-react-unpinned",
-      "requirement": "W-1010",
-      "description": "The node demo takes @astrojs/react 7.1.8, whose renderer breaks admin hydration on Astro 7.3.",
+      "id": "W-1008/demo-astro-drifts",
+      "requirement": "W-1008",
+      "description": "The Cloudflare demo stays on Astro 7.3 while the rest moved to 7.4.",
       "edits": [
         {
-          "file": "demos/node/package.json",
-          "search": "\"@astrojs/react\": \"7.1.2\"",
-          "replace": "\"@astrojs/react\": \"^7.1.8\""
+          "file": "demos/cloudflare/package.json",
+          "search": "\"astro\": \"7.4.11\"",
+          "replace": "\"astro\": \"7.3.5\""
         }
       ],
       "command": ["bun", "test", "scripts/demo-deps.test.ts"],
-      "expect": "\\(fail\\).*pins @astrojs/react 7.1.2"
+      "expect": "\\(fail\\).*both demos run the same"
     },
     {
       "id": "W-1012/baseline-any-rule",

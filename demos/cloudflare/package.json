@@ -10,13 +10,13 @@
     "start": "wrangler dev --ip 127.0.0.1 --port 4422"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "~14.3.4",
+    "@astrojs/cloudflare": "~14.4.7",
     "@astrojs/react": "^7.1.8",
-    "@emdash-cms/cloudflare": "1.4.0",
-    "@emdash-cms/plugin-forms": "0.2.12",
+    "@emdash-cms/cloudflare": "1.5.0",
+    "@emdash-cms/plugin-forms": "0.2.13",
     "@perkyzz/emvb": "workspace:*",
-    "astro": "7.3.5",
-    "emdash": "1.4.0",
+    "astro": "7.4.11",
+    "emdash": "1.5.0",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

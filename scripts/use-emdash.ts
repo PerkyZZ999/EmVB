@@ -1,9 +1,9 @@
 /**
- * W-1002: switch this checkout's EmDash to another release for a test run (CI's EmDash 1.5
- * job). Sets the plugin's dev versions of emdash, Kumo and the forms plugin to the ones that
+ * W-1002: switch this checkout's EmDash to another release for a test run. Development runs on
+ * EmDash 1.5 since W-1008; CI's EmDash 1.4 job switches to the 1.4 floor. Sets the plugin's dev versions of emdash, Kumo and the forms plugin to the ones that
  * EmDash release pins, then `bun install` picks them up. Never commit the result.
  *
- *   bun scripts/use-emdash.ts 1.5.0 && bun install
+ *   bun scripts/use-emdash.ts 1.4.0 && bun install
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
