@@ -214,7 +214,7 @@ describe("ElementPanel (W-021)", () => {
   test("unknown element panel explains it can be moved or deleted but not edited", async () => {
     const unknown = {
       id: "car00001",
-      type: "carousel",
+      type: "future-widget",
       props: { slides: 3 },
     } as LayoutNode;
     await mount(
@@ -232,7 +232,7 @@ describe("ElementPanel (W-021)", () => {
         onSelect={() => undefined}
       />,
     );
-    expect(document.querySelector('[data-emvb-element="carousel"]')?.textContent).toContain(
+    expect(document.querySelector('[data-emvb-element="future-widget"]')?.textContent).toContain(
       "can be moved or deleted, but not edited",
     );
     expect(document.querySelector('[data-emvb-tab="content"]')?.outerHTML ?? null).toBeNull();

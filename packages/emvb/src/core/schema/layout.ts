@@ -780,6 +780,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "social-link",
   "gallery",
   "gallery-image",
+  "carousel",
+  "carousel-slide",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -1015,6 +1017,37 @@ export const GalleryImageNode = leafNode(
   path: ["props", "alt"],
 });
 
+/**
+ * W-1018: slides on a horizontal track that snaps to each one, swiped, scrolled or moved with
+ * the arrow keys, with no script. `arrows`, `dots` and `autoplay` opt in to the carousel
+ * script, which adds those controls. Autoplay is off unless set; when on, a visible Pause button
+ * comes first, hovering or focusing the carousel pauses it, and under reduced motion it starts
+ * paused (WCAG 2.2.2). `perView` slides show at once (at most 2 on tablets, 1 on phones).
+ */
+export const CarouselNodeSchema = parentNode(
+  "carousel",
+  z.strictObject({
+    /** Names the carousel for screen readers. Unset = "Carousel". */
+    label: z.string().max(80).optional(),
+    perView: z.number().int().min(1).max(4).optional(),
+    arrows: z.boolean().optional(),
+    dots: z.boolean().optional(),
+    autoplay: z.boolean().optional(),
+    /** Seconds per slide while playing. Unset = 6. */
+    interval: z.number().int().min(3).max(30).optional(),
+    /** After the last slide, Next and autoplay go back to the first. */
+    loop: z.boolean().optional(),
+  }),
+);
+
+/** W-1018: one slide; holds any elements. `label` names it instead of "2 of 5". */
+export const CarouselSlideNode = parentNode(
+  "carousel-slide",
+  z.strictObject({
+    label: z.string().max(80).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1057,6 +1090,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   SocialLinkNode,
   GalleryNodeSchema,
   GalleryImageNode,
+  CarouselNodeSchema,
+  CarouselSlideNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -1275,6 +1310,18 @@ export type SocialIconsNode = NodeEnvelope & {
   children: LayoutNode[];
 };
 
+export type CarouselNode = NodeEnvelope & {
+  type: "carousel";
+  props: z.infer<typeof CarouselNodeSchema>["props"];
+  children: LayoutNode[];
+};
+
+export type CarouselSlideNode = NodeEnvelope & {
+  type: "carousel-slide";
+  props: { label?: string };
+  children: LayoutNode[];
+};
+
 export type GalleryNode = NodeEnvelope & {
   type: "gallery";
   props: z.infer<typeof GalleryNodeSchema>["props"];
@@ -1324,6 +1371,8 @@ export type LayoutNode =
   | SocialLinkNode
   | GalleryNode
   | GalleryImageNode
+  | CarouselNode
+  | CarouselSlideNode
   | SpacerNode
   | DividerNode
   | TextNode
@@ -1502,7 +1551,8 @@ export const isLayoutParentNode = (
   | SectionNode
   | LoopEmptyNode
   | AccordionItemNode
-  | MenuItemNode =>
+  | MenuItemNode
+  | CarouselSlideNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -1512,7 +1562,8 @@ export const isLayoutParentNode = (
   node.type === "part-ref" ||
   node.type === "loop-empty" ||
   node.type === "accordion-item" ||
-  node.type === "menu-item";
+  node.type === "menu-item" ||
+  node.type === "carousel-slide";
 
 /** Nodes that may hold children. */
 export const isParentNode = (
@@ -1534,7 +1585,9 @@ export const isParentNode = (
   | MenuNode
   | MenuItemNode
   | SocialIconsNode
-  | GalleryNode =>
+  | GalleryNode
+  | CarouselNode
+  | CarouselSlideNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -1551,7 +1604,9 @@ export const isParentNode = (
   node.type === "menu" ||
   node.type === "menu-item" ||
   node.type === "social-icons" ||
-  node.type === "gallery";
+  node.type === "gallery" ||
+  node.type === "carousel" ||
+  node.type === "carousel-slide";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

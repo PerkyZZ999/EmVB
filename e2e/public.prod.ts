@@ -250,7 +250,7 @@ test("a published page with an unknown node still renders its other elements wit
         { id: "head0001", type: "heading", props: { text, level: 1 } },
         {
           id: "car00001",
-          type: "carousel",
+          type: "future-widget",
           props: { slides: 2 },
           children: [{ id: "head0002", type: "heading", props: { text: "Hidden", level: 2 } }],
         },
@@ -259,7 +259,7 @@ test("a published page with an unknown node still renders its other elements wit
   };
   const html = await publishedHtml(request, "Unknown check", layout, slug);
   expect(html).toContain(`<h1 class="emvb-heading">${text}</h1>`);
-  expect(html).not.toContain("carousel");
+  expect(html).not.toContain("future-widget");
   expect(html).not.toContain("Unknown element");
   expect(html).not.toContain("Hidden");
 });

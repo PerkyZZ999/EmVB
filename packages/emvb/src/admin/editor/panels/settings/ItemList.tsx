@@ -8,6 +8,7 @@ import {
   TrashIcon,
 } from "@phosphor-icons/react";
 import {
+  MAX_CAROUSEL_SLIDES,
   MAX_GALLERY_IMAGES,
   MAX_SOCIAL_LINKS,
   MAX_TABS,
@@ -17,6 +18,7 @@ import {
 import { BUTTON } from "../../../ui.ts";
 import {
   newAccordionItem,
+  newCarouselSlide,
   newGalleryImage,
   newSocialLink,
   newTabPanel,
@@ -63,6 +65,13 @@ const KINDS: Record<string, Kind> = {
     field: (n) => ({ key: "alt", kind: "text", label: `Picture ${n} alt text` }),
     make: () => newGalleryImage(),
     max: MAX_GALLERY_IMAGES,
+  },
+  // W-1018: each row names a slide; its content is edited on the canvas.
+  carousel: {
+    noun: "slide",
+    field: (n) => ({ key: "label", kind: "text", label: `Slide ${n} name`, optional: true }),
+    make: (n) => newCarouselSlide(n),
+    max: MAX_CAROUSEL_SLIDES,
   },
 };
 

@@ -144,6 +144,8 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `social-link` | network, href, label, newTab |
 | `gallery` | layout, columns, lightbox, label |
 | `gallery-image` | src, alt, decorative, mediaId, width, height, focalX, focalY, caption |
+| `carousel` | label, perView, arrows, dots, autoplay, interval, loop |
+| `carousel-slide` | label |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

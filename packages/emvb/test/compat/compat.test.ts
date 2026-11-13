@@ -66,6 +66,8 @@ const ADDED_IN_1X: Record<string, string> = {
   "social-link": "1.2 (W-1024): src/core/elements/widgets.test.ts",
   gallery: "1.2 (W-1019): src/core/elements/widgets.test.ts",
   "gallery-image": "1.2 (W-1019): src/core/elements/widgets.test.ts",
+  carousel: "1.2 (W-1018): src/core/elements/widgets.test.ts",
+  "carousel-slide": "1.2 (W-1018): src/core/elements/widgets.test.ts",
 };
 
 /** Style keys added after 0.9.0, so no released page has them: where each one is tested. */

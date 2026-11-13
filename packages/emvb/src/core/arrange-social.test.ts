@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { canDrop, moveNode, REASONS } from "./arrange.ts";
 import { defaultElement } from "./index.ts";
-import { MAX_GALLERY_IMAGES, MAX_SOCIAL_LINKS } from "./limits.ts";
+import { MAX_CAROUSEL_SLIDES, MAX_GALLERY_IMAGES, MAX_SOCIAL_LINKS } from "./limits.ts";
 import { nestingIssues } from "./nesting.ts";
 import type { Layout, LayoutNode } from "./schema/layout.ts";
 
@@ -65,5 +65,25 @@ describe("Gallery arrange rules (W-1019)", () => {
       reason: REASONS.imageOutsideGallery,
     });
     expect(moveNode(layout, "pc000000", "gall0001", MAX_GALLERY_IMAGES).ok).toBe(true);
+  });
+});
+
+describe("Carousel arrange rules (W-1018)", () => {
+  test("a full Carousel refuses a 21st slide; any element drops into a slide", () => {
+    const slides = Array.from({ length: MAX_CAROUSEL_SLIDES }, (_, i) =>
+      defaultElement("carousel-slide", `cs${String(i).padStart(6, "0")}`),
+    );
+    const layout = layoutWith([{ ...defaultElement("carousel", "caro0001"), children: slides }]);
+    expect(
+      canDrop(
+        layout,
+        { kind: "new", node: defaultElement("carousel-slide", "new00001") },
+        "caro0001",
+      ),
+    ).toEqual({ ok: false, reason: REASONS.tooManySlides });
+    expect(
+      canDrop(layout, { kind: "new", node: defaultElement("heading", "head0001") }, "cs000000").ok,
+    ).toBe(true);
+    expect(moveNode(layout, "cs000000", "caro0001", MAX_CAROUSEL_SLIDES).ok).toBe(true);
   });
 });

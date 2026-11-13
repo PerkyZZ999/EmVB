@@ -1132,39 +1132,6 @@ const googleMaps: Widget = (s, ctx, el) => {
   ];
 };
 
-/** Galleries and carousels → a grid of images. */
-function gallery(
-  list: unknown,
-  columns: number,
-  ctx: ImportContext,
-  el: string,
-  imageKey?: string,
-): N[] {
-  const items = Array.isArray(list) ? list.slice(0, 100) : [];
-  const images: N[] = [];
-  for (const item of items) {
-    if (ctx.overBudget) break;
-    const value = imageKey && isRecord(item) ? item[imageKey] : item;
-    const n = imageNode(ctx, el, value);
-    if (n) {
-      n["style"] = { width: { value: 100, unit: "%" }, height: "auto", objectFit: "cover" };
-      images.push(n);
-    }
-  }
-  if (images.length === 0) return [];
-  return [
-    node(
-      ctx,
-      "grid",
-      { columns: Math.min(12, Math.max(1, Math.round(columns))) },
-      {
-        style: { gap: { value: 10, unit: "px" } },
-        children: images,
-      },
-    ),
-  ];
-}
-
 /**
  * W-1019: Elementor's Image Gallery and Gallery → a Gallery of Gallery images (up to 60), with
  * Elementor's lightbox kept (on unless the widget turns it off) and masonry when it used it.
@@ -1217,14 +1184,64 @@ const imageGallery: Widget = (s, ctx, el) =>
   galleryWidget(s["wp_gallery"], num(s["gallery_columns"]) ?? 4, s, ctx, el);
 const proGallery: Widget = (s, ctx, el) =>
   galleryWidget(s["gallery"], num(s["columns"]) ?? 4, s, ctx, el);
-const imageCarousel: Widget = (s, ctx, el) => {
-  ctx.note("approximated", el, "Carousels are shown as a grid of their slides.");
-  return gallery(s["carousel"], num(s["slides_to_show"]) ?? 3, ctx, el);
-};
-const mediaCarousel: Widget = (s, ctx, el) => {
-  ctx.note("approximated", el, "Carousels are shown as a grid of their slides.");
-  return gallery(s["slides"], num(s["slides_per_view"]) ?? 3, ctx, el, "image");
-};
+/**
+ * W-1018: Elementor's Image Carousel and Media Carousel → a Carousel with one picture per slide.
+ * Navigation and looping follow Elementor's settings. Elementor plays by default; EmVB doesn't,
+ * so autoplay comes over only when the widget turned it on explicitly (with its speed).
+ */
+function carouselWidget(
+  list: unknown,
+  perView: number,
+  s: Settings,
+  ctx: ImportContext,
+  el: string,
+  imageKey?: string,
+): N[] {
+  const items = Array.isArray(list) ? list : [];
+  if (items.length > 20) ctx.note("skipped", el, "Carousels keep their first 20 slides.");
+  const slides: N[] = [];
+  for (const item of items.slice(0, 20)) {
+    if (ctx.overBudget) break;
+    const img = imageNode(ctx, el, imageKey && isRecord(item) ? item[imageKey] : item);
+    if (!img) continue;
+    img["style"] = { width: { value: 100, unit: "%" }, height: "auto" };
+    slides.push(node(ctx, "carousel-slide", {}, { children: [img] }));
+  }
+  if (slides.length === 0) return [];
+  const navigation = str(s["navigation"]) ?? "both";
+  const autoplay = str(s["autoplay"]);
+  if (autoplay !== "yes" && autoplay !== "no")
+    ctx.note(
+      "approximated",
+      el,
+      "Carousels don't play by themselves unless you turn on Play automatically.",
+    );
+  const speed = num(s["autoplay_speed"]);
+  return [
+    node(
+      ctx,
+      "carousel",
+      {
+        perView: Math.min(4, Math.max(1, Math.round(perView))),
+        ...(navigation === "both" || navigation === "arrows" ? { arrows: true } : {}),
+        ...(navigation === "both" || navigation === "dots" ? { dots: true } : {}),
+        ...(autoplay === "yes"
+          ? {
+              autoplay: true,
+              ...(speed ? { interval: Math.min(30, Math.max(3, Math.round(speed / 1000))) } : {}),
+            }
+          : {}),
+        ...(str(s["infinite"]) === "no" ? {} : { loop: true }),
+      },
+      { children: slides },
+    ),
+  ];
+}
+
+const imageCarousel: Widget = (s, ctx, el) =>
+  carouselWidget(s["carousel"], num(s["slides_to_show"]) ?? 3, s, ctx, el);
+const mediaCarousel: Widget = (s, ctx, el) =>
+  carouselWidget(s["slides"], num(s["slides_per_view"]) ?? 3, s, ctx, el, "image");
 
 const BRANDS: Record<string, string> = {
   facebook: "#3b5998",

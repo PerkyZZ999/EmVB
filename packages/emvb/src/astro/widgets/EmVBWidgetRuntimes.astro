@@ -4,6 +4,7 @@
  * `EmVBPage` renders this for its page; for theme parts, pass `theme.runtimes`.
  */
 import EmVBAlertsRuntime from "./EmVBAlertsRuntime.astro";
+import EmVBCarouselRuntime from "./EmVBCarouselRuntime.astro";
 import EmVBLightboxRuntime from "./EmVBLightboxRuntime.astro";
 
 interface Props {
@@ -15,3 +16,4 @@ const names = new Set(Astro.props.names ?? []);
 
 {names.has("alerts") && <EmVBAlertsRuntime />}
 {names.has("lightbox") && <EmVBLightboxRuntime />}
+{names.has("carousel") && <EmVBCarouselRuntime />}

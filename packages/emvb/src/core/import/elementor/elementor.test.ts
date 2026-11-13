@@ -1160,6 +1160,36 @@ describe("Elementor import: the 1.2 widgets (PLAN_1.2 part D)", () => {
     ]);
   });
 
+  test("W-1018: an Image Carousel is a Carousel with a slide per picture and its navigation", () => {
+    const pics = [
+      { id: 1, url: "https://old.example/a.jpg", alt: "A" },
+      { id: 2, url: "https://old.example/b.jpg", alt: "B" },
+    ];
+    const plain = one("image-carousel", { carousel: pics, slides_to_show: 6 });
+    expect(props(ofType(plain.layout, "carousel")[0])).toEqual({
+      perView: 4,
+      arrows: true,
+      dots: true,
+      loop: true,
+    });
+    expect(ofType(plain.layout, "carousel-slide")).toHaveLength(2);
+    expect(ofType(plain.layout, "image").map((n) => props(n)["alt"])).toEqual(["A", "B"]);
+    expect(notes(plain)).toContain("don't play by themselves");
+    const playing = one("image-carousel", {
+      carousel: pics,
+      navigation: "dots",
+      autoplay: "yes",
+      autoplay_speed: 4000,
+      infinite: "no",
+    });
+    expect(props(ofType(playing.layout, "carousel")[0])).toEqual({
+      perView: 3,
+      dots: true,
+      autoplay: true,
+      interval: 4,
+    });
+  });
+
   test("W-1019: an Image Gallery is a Gallery with its pictures and Elementor's lightbox", () => {
     const pics = [
       { id: 1, url: "https://old.example/a.jpg", alt: "A" },

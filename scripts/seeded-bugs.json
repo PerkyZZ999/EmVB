@@ -48367,6 +48367,161 @@
       "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
       "env": { "CI": "1" },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1018/reduced-motion-plays",
+      "requirement": "W-1018",
+      "description": "Autoplay runs even when the visitor prefers reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "  c.stopped = reduced;",
+          "replace": "  c.stopped = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/carousel.test.ts"],
+      "expect": "\\(fail\\).*reduced motion autoplay starts paused"
+    },
+    {
+      "id": "W-1018/pause-after-slides",
+      "requirement": "W-1018",
+      "description": "The Pause button comes after the slides in keyboard order.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "  c.track.before(bar);",
+          "replace": "  c.track.after(bar);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/carousel.test.ts"],
+      "expect": "\\(fail\\).*Pause button comes before the slides"
+    },
+    {
+      "id": "W-1018/plays-while-held",
+      "requirement": "W-1018",
+      "description": "Autoplay moves on while the carousel is hovered or focused.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "    if (!c.stopped && !c.held) go(c, c.index + 1, true);",
+          "replace": "    if (!c.stopped) go(c, c.index + 1, true);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/carousel.test.ts"],
+      "expect": "\\(fail\\).*waits while the carousel is hovered"
+    },
+    {
+      "id": "W-1018/ends-open",
+      "requirement": "W-1018",
+      "description": "Previous stays enabled on the first slide of a carousel that doesn't loop.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "  if (c.prev) c.prev.disabled = !c.loop && c.index <= 0;",
+          "replace": "  if (c.prev) c.prev.disabled = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/carousel.test.ts"],
+      "expect": "\\(fail\\).*ends disable without loop"
+    },
+    {
+      "id": "W-1018/script-always",
+      "requirement": "W-1018",
+      "description": "Every carousel asks for the carousel script, even without controls.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "    if (arrows || dots || autoplay) return \"carousel\";",
+          "replace": "    return \"carousel\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*no script by default"
+    },
+    {
+      "id": "W-1018/slides-unnumbered",
+      "requirement": "W-1018",
+      "description": "Slides lose their \"1 of 3\" names.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "        : { ...slide, attrs: { ...slide.attrs, \"aria-label\": `${i + 1} of ${total}` } },",
+          "replace": "        : slide,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*numbered slides"
+    },
+    {
+      "id": "W-1018/track-unfocusable",
+      "requirement": "W-1018",
+      "description": "The slide track can't be reached with the keyboard.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "            tabindex: \"0\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*focusable snapping track"
+    },
+    {
+      "id": "W-1018/a11y-fast-silent",
+      "requirement": "W-1018",
+      "description": "Slides changing every 3 seconds pass the accessibility check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      const seconds = typeof props[\"interval\"] === \"number\" ? props[\"interval\"] : 6;",
+          "replace": "      const seconds = 6;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*under 5 seconds warn"
+    },
+    {
+      "id": "W-1018/import-autoplays",
+      "requirement": "W-1018",
+      "description": "Imported carousels play by themselves when Elementor didn't ask explicitly.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "        ...(autoplay === \"yes\"",
+          "replace": "        ...(autoplay !== \"no\""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*W-1018"
+    },
+    {
+      "id": "W-1018/export-no-carousel",
+      "requirement": "W-1018",
+      "description": "The HTML export's bundled carousel script is out of date.",
+      "edits": [
+        {
+          "file": "scripts/build-export-runtimes.ts",
+          "search": "  carousel: [\"widgets/carousel.ts\", \"initCarousels\"],\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/export-runtimes.test.ts"],
+      "expect": "\\(fail\\)"
+    },
+    {
+      "id": "W-1018/runtime-not-mounted",
+      "requirement": "W-1018",
+      "description": "Pages never load the carousel script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/EmVBWidgetRuntimes.astro",
+          "search": "{names.has(\"carousel\") && <EmVBCarouselRuntime />}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
+      "env": { "CI": "1" },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }

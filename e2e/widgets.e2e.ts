@@ -377,3 +377,53 @@ test("a Gallery is set to two masonry columns with a lightbox, and on the page a
   await expect(viewer).toBeHidden();
   await expect(first).toBeFocused();
 });
+
+test("a Carousel gets arrows, dots and autoplay; on the page Next moves a slide, Pause stops it, and reduced motion starts paused (W-1018)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Carousel");
+  await overlay(page).locator('[data-emvb-add-tile="carousel"]').click();
+  const carousel = canvas(page).locator("section.emvb-carousel");
+  await expect(carousel.locator(".emvb-carousel-slide")).toHaveCount(3);
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Carousel");
+  for (const name of ["Previous and Next buttons", "Slide buttons (dots)", "Play automatically"])
+    await overlay(page).getByRole("switch", { name }).click();
+  // The editor shows the slides; the controls are the public page's script.
+  await expect(carousel.locator(".emvb-carousel-controls")).toHaveCount(0);
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]).toMatchObject({
+    type: "carousel",
+    props: { arrows: true, dots: true, autoplay: true },
+  });
+
+  await publishPage(request, id);
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await page.goto(`/${slug}`);
+  const region = page.getByRole("region", { name: "Carousel" });
+  const pause = region.getByRole("button", { name: "Pause slides" });
+  await expect(pause).toBeVisible();
+  // The rotation control comes before the slides in keyboard order.
+  const order = await region.evaluate((el) =>
+    [...el.querySelectorAll("button, [tabindex='0']")].map(
+      (n) => n.getAttribute("aria-label") ?? n.className,
+    ),
+  );
+  expect(order[0]).toBe("Pause slides");
+  await pause.click();
+  await expect(region.getByRole("button", { name: "Play slides" })).toBeVisible();
+  const track = region.locator(".emvb-carousel-track");
+  await region.getByRole("button", { name: "Next slide" }).click();
+  await expect.poll(() => track.evaluate((el) => Math.round(el.scrollLeft))).toBeGreaterThan(0);
+  await expect(region.getByRole("button", { name: "Go to slide 2" })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(
+    page.getByRole("region", { name: "Carousel" }).getByRole("button", { name: "Play slides" }),
+  ).toBeVisible();
+});

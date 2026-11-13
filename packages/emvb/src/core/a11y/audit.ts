@@ -537,6 +537,18 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         });
       }
     }
+    // W-1018: slides that move on by themselves faster than about 5 seconds are hard to read.
+    if (node.type === "carousel" && props["autoplay"] === true) {
+      const seconds = typeof props["interval"] === "number" ? props["interval"] : 6;
+      if (seconds < 5) {
+        add({
+          nodeId: node.id,
+          rule: "motion",
+          severity: "warning",
+          message: `Slides change every ${seconds} seconds; many people need longer to read them. Use 5 seconds or more.`,
+        });
+      }
+    }
     // W-1025: a notice with neither title nor text is a coloured box screen readers call a note.
     if (node.type === "alert" && !spoken(props["title"]) && !spoken(props["text"]) && !node.bind) {
       add({

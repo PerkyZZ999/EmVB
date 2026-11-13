@@ -41,6 +41,8 @@ export { iconHasAdjustableStroke, iconHasOwnColors } from "./icon-svg.ts";
 import { menu, menuItem } from "./menu.ts";
 import {
   alert,
+  carousel,
+  carouselSlide,
   gallery,
   galleryImage,
   iconBox,
@@ -1120,6 +1122,8 @@ export const ELEMENTS = {
   "social-link": socialLink,
   gallery,
   "gallery-image": galleryImage,
+  carousel,
+  "carousel-slide": carouselSlide,
   container,
   "layout-section": layoutSection,
   spacer,

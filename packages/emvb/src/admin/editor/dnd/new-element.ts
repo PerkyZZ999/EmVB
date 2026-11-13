@@ -99,6 +99,19 @@ export function newSocialLink(n: number, random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "social-link", props: { network, href, newTab: true } };
 }
 
+/** W-1018: a Carousel slide holding a heading and a Text, for a new Carousel or its Add slide. */
+export function newCarouselSlide(n: number, random?: () => number): LayoutNode {
+  return {
+    id: newNodeId(random),
+    type: "carousel-slide",
+    props: {},
+    children: [
+      { id: newNodeId(random), type: "heading", props: { text: `Slide ${n}`, level: 3 } },
+      textNode(`What slide ${n} says. Replace this text or add elements here.`, random),
+    ],
+  };
+}
+
 /** W-1019: an empty Gallery image for a Gallery's Add picture; its panel picks the picture. */
 export function newGalleryImage(random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "gallery-image", props: { src: "", alt: "Image" } };
@@ -159,6 +172,12 @@ export function newElement(
         ]),
         item("About", "/about"),
       ],
+    };
+  }
+  if (type === "carousel") {
+    return {
+      ...defaultElement("carousel", newNodeId(random)),
+      children: [1, 2, 3].map((n) => newCarouselSlide(n, random)),
     };
   }
   if (type === "social-icons") {

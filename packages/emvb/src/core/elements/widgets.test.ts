@@ -429,3 +429,80 @@ describe("Gallery (W-1019)", () => {
     );
   });
 });
+
+const slideNode = (id: string, props: Record<string, unknown> = {}) => ({
+  id,
+  type: "carousel-slide",
+  props,
+  children: [{ id: `h${id}`, type: "heading", props: { text: id, level: 3 } }],
+});
+const carouselNode = (props: Record<string, unknown>, children: unknown[]) => ({
+  id: "caro0001",
+  type: "carousel",
+  props,
+  children,
+});
+
+describe("Carousel (W-1018)", () => {
+  test("no script by default: a named carousel with a focusable snapping track of numbered slides", () => {
+    const result = page(
+      carouselNode({}, [slideNode("slid0001"), slideNode("slid0002", { label: "Our team" })]),
+    );
+    if (!result.ok) throw new Error(JSON.stringify(result.issues));
+    const { html, css, runtimes } = renderPage(result.layout, emptyDesign());
+    expect(html).toContain(
+      '<section class="emvb-carousel emvb-carousel-per-1" aria-roledescription="carousel" aria-label="Carousel"><div class="emvb-carousel-track" tabindex="0" aria-live="polite">',
+    );
+    expect(html).toContain('role="group" aria-roledescription="slide" aria-label="1 of 2"');
+    expect(html).toContain('aria-label="Our team"');
+    expect(html.includes("2 of 2")).toBe(false);
+    expect(css).toContain("scroll-snap-type:x mandatory");
+    expect(css).toContain(
+      "@media (prefers-reduced-motion:no-preference){.emvb-carousel-track{scroll-behavior:smooth}}",
+    );
+    expect(runtimes).toEqual([]);
+    expect(html.includes("data-emvb-")).toBe(false);
+  });
+
+  test("arrows, dots, autoplay and loop opt in to the carousel script; autoplay turns off live updates", () => {
+    const result = page(
+      carouselNode(
+        {
+          arrows: true,
+          dots: true,
+          autoplay: true,
+          interval: 8,
+          loop: true,
+          perView: 3,
+          label: "Stories",
+        },
+        [slideNode("slid0001")],
+      ),
+    );
+    if (!result.ok) throw new Error("invalid");
+    const { html, runtimes } = renderPage(result.layout, emptyDesign());
+    expect(html).toContain(
+      'class="emvb-carousel emvb-carousel-per-3" aria-roledescription="carousel" aria-label="Stories" data-emvb-arrows="" data-emvb-dots="" data-emvb-autoplay="8" data-emvb-loop=""',
+    );
+    expect(html).toContain('aria-live="off"');
+    expect(runtimes).toEqual(["carousel"]);
+    expect(render(carouselNode({ autoplay: true }, [slideNode("slid0001")]))).toContain(
+      'data-emvb-autoplay="6"',
+    );
+  });
+
+  test("autoplay faster than 3 seconds, 5 per view and unknown keys are refused", () => {
+    expect(page(carouselNode({ autoplay: true, interval: 2 }, [])).ok).toBe(false);
+    expect(page(carouselNode({ perView: 5 }, [])).ok).toBe(false);
+  });
+
+  test("a carousel holds only slides; a slide lives only in a carousel and holds anything", () => {
+    const list = carouselNode({}, []) as unknown as LayoutNode;
+    const slide = slideNode("slid0001") as unknown as LayoutNode;
+    const box = { id: "box00001", type: "container", props: {}, children: [] } as LayoutNode;
+    expect(parentChildRefusal(list, slide, false)).toBeUndefined();
+    expect(parentChildRefusal(list, box, false)).toBe("A carousel can only hold slides.");
+    expect(parentChildRefusal(box, slide, false)).toBe("Slides can only go inside a Carousel.");
+    expect(parentChildRefusal(slide, box, false)).toBeUndefined();
+  });
+});

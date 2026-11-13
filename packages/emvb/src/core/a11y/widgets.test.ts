@@ -168,3 +168,18 @@ describe("Gallery (W-1019)", () => {
     expect(audit(gallery("DSC_0042.jpg"))).toEqual(["image-alt:error:pict0001"]);
   });
 });
+
+describe("Carousel (W-1018)", () => {
+  const carousel = (props: Record<string, unknown>) => ({
+    id: "caro0001",
+    type: "carousel",
+    props,
+    children: [{ id: "slid0001", type: "carousel-slide", props: {}, children: [] }],
+  });
+
+  test("still or slow carousels are fine; slides moving under 5 seconds warn", () => {
+    expect(audit(carousel({}))).toEqual([]);
+    expect(audit(carousel({ autoplay: true }))).toEqual([]);
+    expect(audit(carousel({ autoplay: true, interval: 3 }))).toEqual(["motion:warning:caro0001"]);
+  });
+});

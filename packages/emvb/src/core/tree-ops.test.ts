@@ -125,7 +125,7 @@ describe("layout index (W-373)", () => {
     const withUnknownPage = twoHeadings();
     withUnknownPage.root.children.push({
       id: "car00001",
-      type: "carousel",
+      type: "future-widget",
       props: {},
       children: [{ id: "head0009", type: "heading", props: { text: "Slide", level: 2 } }],
     } as (typeof page.root.children)[number]);
@@ -140,7 +140,7 @@ describe("shared tree walk (W-353)", () => {
   test("forEachNode visits children of an unknown node; knownChildren does not", () => {
     const unknown = {
       id: "car00001",
-      type: "carousel",
+      type: "future-widget",
       props: {},
       children: [{ id: "head0009", type: "heading" as const, props: { text: "Slide", level: 2 } }],
     };

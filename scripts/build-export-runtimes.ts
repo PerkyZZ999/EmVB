@@ -18,6 +18,7 @@ const RUNTIMES = {
   floats: ["floats/runtime.ts", "initFloats"],
   alerts: ["widgets/alerts.ts", "initAlerts"],
   lightbox: ["widgets/lightbox.ts", "initLightbox"],
+  carousel: ["widgets/carousel.ts", "initCarousels"],
 } as const;
 
 async function bundle(file: string, init: string): Promise<string> {

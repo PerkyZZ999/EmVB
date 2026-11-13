@@ -195,3 +195,33 @@ describe("Gallery over MCP (W-1019)", () => {
     expect(stray.success).toBe(false);
   });
 });
+
+describe("Carousel over MCP (W-1018)", () => {
+  test("add_element adds a carousel of slides holding elements; a slide alone is refused", async () => {
+    expect((await catalogue()).get("carousel")?.name).toBe("Carousel");
+    const pageId = await newPage();
+    const added = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "carousel",
+        props: { arrows: true, dots: true },
+        children: [
+          {
+            type: "carousel-slide",
+            props: {},
+            children: [{ type: "heading", props: { text: "One", level: 3 } }],
+          },
+          { type: "carousel-slide", props: { label: "Two" }, children: [] },
+        ],
+      },
+    });
+    expect(added.success).toBe(true);
+    const stray = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "carousel-slide", props: {}, children: [] },
+    });
+    expect(stray.success).toBe(false);
+  });
+});

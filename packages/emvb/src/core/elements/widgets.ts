@@ -8,6 +8,8 @@ import type {
   ImageBoxNode,
   LayoutNode,
   RatingNode,
+  CarouselNode,
+  CarouselSlideNode,
   GalleryImageNode,
   GalleryNode,
   SocialIconsNode,
@@ -118,12 +120,16 @@ function ratingStars(props: RatingNode["props"], attrs: Record<string, string>):
 }
 
 /** W-1025: the opt-in public scripts the 1.2 widgets use; a page loads only the ones it needs. */
-export type WidgetRuntime = "alerts" | "lightbox";
+export type WidgetRuntime = "alerts" | "carousel" | "lightbox";
 
 /** The widget runtime one element needs, if any: only when it opts in. */
 export function nodeRuntime(node: LayoutNode): WidgetRuntime | undefined {
   if (node.type === "alert" && (node as AlertNode).props.dismissible) return "alerts";
   if (node.type === "gallery" && (node as GalleryNode).props.lightbox) return "lightbox";
+  if (node.type === "carousel") {
+    const { arrows, dots, autoplay } = (node as CarouselNode).props;
+    if (arrows || dots || autoplay) return "carousel";
+  }
   return undefined;
 }
 
@@ -792,4 +798,110 @@ export const galleryImage: ElementDefinition<GalleryImageNode> = {
     if (caption) figure.push({ tag: "figcaption", attrs: {}, children: [caption] });
     return { tag: "li", attrs, children: [{ tag: "figure", attrs: {}, children: figure }] };
   },
+};
+
+export const carousel: ElementDefinition<CarouselNode> = {
+  baseCss:
+    ".emvb-carousel{position:relative;min-width:0}.emvb-carousel-track{display:flex;gap:var(--emvb-carousel-gap,1em);overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:thin}.emvb-carousel-track:focus-visible{outline:2px solid currentColor;outline-offset:2px}.emvb-carousel-slide{flex:0 0 calc((100% - (var(--emvb-carousel-per,1) - 1) * var(--emvb-carousel-gap,1em)) / var(--emvb-carousel-per,1));min-width:0;scroll-snap-align:start;display:flex;flex-direction:column}" +
+    [1, 2, 3, 4].map((n) => `.emvb-carousel-per-${n}{--emvb-carousel-per:${n}}`).join("") +
+    "@media (max-width:1024px){.emvb-carousel:is(.emvb-carousel-per-3,.emvb-carousel-per-4){--emvb-carousel-per:2}}@media (max-width:767px){.emvb-carousel{--emvb-carousel-per:1}}@media (prefers-reduced-motion:no-preference){.emvb-carousel-track{scroll-behavior:smooth}}" +
+    '.emvb-carousel-controls{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0.5em;margin-top:0.75em}.emvb-carousel-controls button{display:inline-flex;align-items:center;justify-content:center;min-width:2.75em;min-height:2.75em;padding:0 0.75em;border:1px solid currentColor;border-radius:999px;background:none;color:inherit;font:inherit;cursor:pointer}.emvb-carousel-controls button:disabled{opacity:0.4;cursor:default}.emvb-carousel-controls button:focus-visible{outline:2px solid currentColor;outline-offset:2px}.emvb-carousel-dots{display:flex;gap:0.25em}.emvb-carousel-dots button{min-width:2.75em;padding:0}.emvb-carousel-dots button::before{content:"";width:0.6em;height:0.6em;border-radius:50%;background:currentColor;opacity:0.35}.emvb-carousel-dots button[aria-current=true]::before{opacity:1}',
+  defaults: () => ({ type: "carousel", props: {}, children: [] }),
+  descriptor: {
+    type: "carousel",
+    name: "Carousel",
+    group: "layout",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "label",
+        kind: "text",
+        label: "Carousel name",
+        optional: true,
+        message:
+          "What screen readers call it, such as Customer stories. Leave it empty for Carousel.",
+      },
+      { key: "perView", kind: "int", label: "Slides shown at once", optional: true, max: 4 },
+      { key: "arrows", kind: "boolean", label: "Previous and Next buttons", optional: true },
+      { key: "dots", kind: "boolean", label: "Slide buttons (dots)", optional: true },
+      { key: "loop", kind: "boolean", label: "Go round from the last slide", optional: true },
+      { key: "autoplay", kind: "boolean", label: "Play automatically", optional: true },
+      {
+        key: "interval",
+        kind: "int",
+        label: "Seconds per slide",
+        optional: true,
+        min: 3,
+        max: 30,
+        message: "From 3 to 30 seconds. Leave it empty for 6.",
+      },
+    ],
+  },
+  build: (node, attrs, children) => {
+    const { label, perView, arrows, dots, autoplay, interval, loop } = node.props;
+    const total = children.length;
+    // Each slide is named by its place unless it has its own name.
+    const slides = children.map((slide, i) =>
+      slide.attrs["aria-label"]
+        ? slide
+        : { ...slide, attrs: { ...slide.attrs, "aria-label": `${i + 1} of ${total}` } },
+    );
+    const options: Record<string, string> = {};
+    if (arrows) options["data-emvb-arrows"] = "";
+    if (dots) options["data-emvb-dots"] = "";
+    if (autoplay) options["data-emvb-autoplay"] = String(interval ?? 6);
+    if (loop) options["data-emvb-loop"] = "";
+    return {
+      tag: "section",
+      attrs: {
+        ...attrs,
+        class: `${attrs["class"] ?? ""} emvb-carousel-per-${perView ?? 1}`.trim(),
+        "aria-roledescription": "carousel",
+        "aria-label": label?.trim() || "Carousel",
+        ...options,
+      },
+      children: [
+        {
+          tag: "div",
+          attrs: {
+            class: "emvb-carousel-track",
+            tabindex: "0",
+            "aria-live": autoplay ? "off" : "polite",
+          },
+          children: slides,
+        },
+      ],
+    };
+  },
+};
+
+export const carouselSlide: ElementDefinition<CarouselSlideNode> = {
+  baseCss: "",
+  defaults: () => ({ type: "carousel-slide", props: {}, children: [] }),
+  descriptor: {
+    type: "carousel-slide",
+    name: "Slide",
+    group: "layout",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "label",
+        kind: "text",
+        label: "Slide name",
+        optional: true,
+        message:
+          "What screen readers call this slide. Leave it empty for its place, such as 2 of 5.",
+      },
+    ],
+  },
+  build: (node, attrs, children) => ({
+    tag: "div",
+    attrs: {
+      ...attrs,
+      role: "group",
+      "aria-roledescription": "slide",
+      ...(node.props.label?.trim() ? { "aria-label": node.props.label.trim() } : {}),
+    },
+    children,
+  }),
 };

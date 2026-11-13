@@ -300,3 +300,28 @@ test("W-1019: a lightbox gallery's page links the lightbox script", () => {
   );
   expect(byPath.get("assets/emvb-lightbox.js")).toBe(EXPORT_RUNTIMES.lightbox);
 });
+
+test("W-1018: a carousel with arrows links the carousel script; one without doesn't", () => {
+  const carousel = (arrows: boolean): LayoutNode =>
+    ({
+      id: "caro0001",
+      type: "carousel",
+      props: arrows ? { arrows } : {},
+      children: [{ id: "slid0001", type: "carousel-slide", props: {}, children: [] }],
+    }) as LayoutNode;
+  const out = buildSiteExport({
+    design: emptyDesign(),
+    pages: [
+      { id: "p1", title: "A", slug: "a", layout: layout([carousel(true)]) },
+      { id: "p2", title: "B", slug: "b", layout: layout([carousel(false)]) },
+    ],
+    parts: [],
+    date: "2026-11-13",
+  });
+  const byPath = files(out);
+  expect(byPath.get("a/index.html")).toContain(
+    '<script src="../assets/emvb-carousel.js" defer></script>',
+  );
+  expect(byPath.get("b/index.html")?.includes("emvb-carousel.js")).toBe(false);
+  expect(byPath.get("assets/emvb-carousel.js")).toBe(EXPORT_RUNTIMES.carousel);
+});

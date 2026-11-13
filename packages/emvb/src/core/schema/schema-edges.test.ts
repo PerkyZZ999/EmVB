@@ -113,7 +113,7 @@ describe("type guards (W-091)", () => {
   const node = (type: string) => ({ id: "node0001", type, props: {}, children: [] }) as LayoutNode;
 
   test("each guard matches its own type only", () => {
-    const types = ["div-block", "flexbox", "heading", "tab-panel", "container", "carousel"];
+    const types = ["div-block", "flexbox", "heading", "tab-panel", "container", "future-widget"];
     const table = types.map((type) => [
       type,
       isDivBlockNode(node(type)),
@@ -128,7 +128,7 @@ describe("type guards (W-091)", () => {
       ["heading", false, false, true, false, false],
       ["tab-panel", false, false, false, true, false],
       ["container", false, false, false, false, false],
-      ["carousel", false, false, false, false, true],
+      ["future-widget", false, false, false, false, true],
     ]);
   });
 });

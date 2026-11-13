@@ -1,4 +1,11 @@
-import { MAX_DEPTH, MAX_GALLERY_IMAGES, MAX_NODES, MAX_SOCIAL_LINKS, MAX_TABS } from "./limits.ts";
+import {
+  MAX_CAROUSEL_SLIDES,
+  MAX_DEPTH,
+  MAX_GALLERY_IMAGES,
+  MAX_NODES,
+  MAX_SOCIAL_LINKS,
+  MAX_TABS,
+} from "./limits.ts";
 import {
   isContainerNode,
   isFormFieldType,
@@ -70,6 +77,9 @@ export const REASONS = {
   imageOutsideGallery: "Gallery images can only go inside a Gallery.",
   onlyGalleryImages: "A gallery can only hold gallery images.",
   tooManyGalleryImages: `A gallery can hold up to ${MAX_GALLERY_IMAGES} pictures.`,
+  slideOutsideCarousel: "Slides can only go inside a Carousel.",
+  onlySlides: "A carousel can only hold slides.",
+  tooManySlides: `A carousel can hold up to ${MAX_CAROUSEL_SLIDES} slides.`,
   emptyOutsideLoop: "An Empty state can only go inside a Loop.",
 } as const;
 
@@ -161,6 +171,10 @@ export function parentChildRefusal(
   if (parent.type === "gallery" && child.type !== "gallery-image") {
     return REASONS.onlyGalleryImages;
   }
+  if (child.type === "carousel-slide" && parent.type !== "carousel") {
+    return REASONS.slideOutsideCarousel;
+  }
+  if (parent.type === "carousel" && child.type !== "carousel-slide") return REASONS.onlySlides;
   if (isFormNode(child) && inForm) return REASONS.nestedForm;
   if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;
   return undefined;
@@ -192,6 +206,14 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
       !nodeChildren(into.node).some((child) => child.id === node.id) &&
       nodeChildren(into.node).length >= MAX_GALLERY_IMAGES,
     REASONS.tooManyGalleryImages,
+  ],
+  // W-1018: a full Carousel takes no new slide; moving within it is fine.
+  [
+    ({ node, into }) =>
+      into.node.type === "carousel" &&
+      !nodeChildren(into.node).some((child) => child.id === node.id) &&
+      nodeChildren(into.node).length >= MAX_CAROUSEL_SLIDES,
+    REASONS.tooManySlides,
   ],
   [({ node, into }) => into.depth + height(node) > MAX_DEPTH, REASONS.tooDeep],
   [

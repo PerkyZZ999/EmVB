@@ -416,3 +416,23 @@ describe("Gallery pictures (W-1019)", () => {
     expect(added?.props).toEqual({ src: "", alt: "Image" });
   });
 });
+
+describe("Carousel slides (W-1018)", () => {
+  test("a new Carousel starts with three slides; its panel lists them by name after its settings", async () => {
+    const node = newElement("carousel");
+    if (!node || node.type !== "carousel") throw new Error("expected a carousel");
+    expect(kidsOf(node).map((c) => kidsOf(c).map((k) => k.type))).toEqual([
+      ["heading", "text"],
+      ["heading", "text"],
+      ["heading", "text"],
+    ]);
+    expect(validateLayout(layoutWith(node)).ok).toBe(true);
+    const calls = await panel(node);
+    expect(document.body.textContent).toContain("Play automatically");
+    await type(inputLabelled("Slide 2 name"), "Our team");
+    const named = kidsOf(calls.changed.at(-1))[1]?.props as { label?: string } | undefined;
+    expect(named?.label).toBe("Our team");
+    await act(async () => button("Add slide").click());
+    expect(kidsOf(calls.changed.at(-1))).toHaveLength(4);
+  });
+});
