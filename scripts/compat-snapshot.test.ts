@@ -30,7 +30,7 @@ const read = async (dir: string, name: string) =>
   (await Bun.file(join(CORPUS, dir, `${name}.json`)).json()) as unknown;
 
 test("W-1017: a corpus name carries the layout schema, the version and the page", () => {
-  expect(caseName(18, "1.2.0", "landing")).toBe("v18-1.2.0-playground-landing");
+  expect(caseName(18, "9.8.0", "landing")).toBe("v18-9.8.0-playground-landing");
 });
 
 test("W-1017: the landing and Journal pages, with the Journal's posts", () => {

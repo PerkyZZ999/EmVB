@@ -1,0 +1,2036 @@
+{
+  "source": "The playground's landing page as EmVB 1.2.0 saves it (W-1017); expected output rendered by 1.2.0.",
+  "design": {
+    "schemaVersion": 17,
+    "variables": {
+      "colors": [
+        {
+          "id": "ink",
+          "name": "Ink",
+          "value": "#14161a"
+        },
+        {
+          "id": "paper",
+          "name": "Paper",
+          "value": "#faf8f3"
+        },
+        {
+          "id": "brand",
+          "name": "Brand",
+          "value": "#2f5bea"
+        },
+        {
+          "id": "brand-dark",
+          "name": "Brand dark",
+          "value": "#2347c4"
+        },
+        {
+          "id": "brand-soft",
+          "name": "Brand soft",
+          "value": "#e8eefd"
+        },
+        {
+          "id": "accent",
+          "name": "Accent",
+          "value": "#f2994a"
+        },
+        {
+          "id": "muted",
+          "name": "Muted text",
+          "value": "#545b66"
+        },
+        {
+          "id": "line",
+          "name": "Line",
+          "value": "#e4dfd3"
+        }
+      ],
+      "fonts": [
+        {
+          "id": "display",
+          "name": "Display",
+          "value": "Georgia, \"Times New Roman\", serif"
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "value": "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
+        }
+      ],
+      "fontSizes": [
+        {
+          "id": "lede",
+          "name": "Lede",
+          "value": {
+            "value": 1.25,
+            "unit": "rem"
+          }
+        },
+        {
+          "id": "small",
+          "name": "Small",
+          "value": {
+            "value": 0.875,
+            "unit": "rem"
+          }
+        }
+      ],
+      "spacings": [
+        {
+          "id": "section",
+          "name": "Section padding",
+          "value": {
+            "value": 96,
+            "unit": "px"
+          }
+        },
+        {
+          "id": "gutter",
+          "name": "Gutter",
+          "value": {
+            "value": 24,
+            "unit": "px"
+          }
+        }
+      ]
+    },
+    "classes": [
+      {
+        "id": "card",
+        "name": "Card",
+        "style": {
+          "flexDirection": "column",
+          "gap": {
+            "value": 12,
+            "unit": "px"
+          },
+          "paddingTop": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 28,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 28,
+            "unit": "px"
+          },
+          "backgroundColor": "#ffffff",
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "line"
+          },
+          "borderRadius": {
+            "value": 18,
+            "unit": "px"
+          },
+          "motion": {
+            "transition": {
+              "duration": 200,
+              "easing": "ease-out",
+              "property": "all"
+            }
+          }
+        },
+        "states": {
+          "hover": {
+            "borderColor": {
+              "var": "brand"
+            },
+            "boxShadow": {
+              "x": 0,
+              "y": 12,
+              "blur": 32,
+              "spread": -12,
+              "color": "#2f5bea55"
+            }
+          }
+        }
+      },
+      {
+        "id": "eyebrow",
+        "name": "Eyebrow",
+        "style": {
+          "color": {
+            "var": "brand"
+          },
+          "fontSize": {
+            "var": "small",
+            "from": "fontSize"
+          },
+          "fontWeight": 600,
+          "letterSpacing": {
+            "value": 0.08,
+            "unit": "em"
+          },
+          "textTransform": "uppercase"
+        }
+      },
+      {
+        "id": "button-primary",
+        "name": "Button primary",
+        "style": {
+          "backgroundColor": {
+            "var": "brand"
+          },
+          "color": "#ffffff",
+          "paddingTop": {
+            "value": 14,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 22,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 14,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 22,
+            "unit": "px"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "textDecoration": "none",
+          "motion": {
+            "transition": {
+              "duration": 150,
+              "easing": "ease-out",
+              "property": "colors"
+            }
+          }
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "brand-dark"
+            }
+          }
+        }
+      },
+      {
+        "id": "button-ghost",
+        "name": "Button ghost",
+        "style": {
+          "backgroundColor": "#00000000",
+          "color": {
+            "var": "ink"
+          },
+          "paddingTop": {
+            "value": 13,
+            "unit": "px"
+          },
+          "paddingRight": {
+            "value": 21,
+            "unit": "px"
+          },
+          "paddingBottom": {
+            "value": 13,
+            "unit": "px"
+          },
+          "paddingLeft": {
+            "value": 21,
+            "unit": "px"
+          },
+          "borderWidth": {
+            "value": 1,
+            "unit": "px"
+          },
+          "borderStyle": "solid",
+          "borderColor": {
+            "var": "ink"
+          },
+          "borderRadius": {
+            "value": 999,
+            "unit": "px"
+          },
+          "fontWeight": 600,
+          "textDecoration": "none"
+        },
+        "states": {
+          "hover": {
+            "backgroundColor": {
+              "var": "ink"
+            },
+            "color": {
+              "var": "paper"
+            }
+          }
+        }
+      }
+    ],
+    "defaults": {
+      "h1": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 3.5,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.08,
+        "letterSpacing": {
+          "value": -0.02,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h2": {
+        "fontFamily": {
+          "var": "display",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 2.4,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "lineHeight": 1.15,
+        "letterSpacing": {
+          "value": -0.01,
+          "unit": "em"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "h3": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "fontSize": {
+          "value": 1.2,
+          "unit": "rem"
+        },
+        "fontWeight": 600,
+        "color": {
+          "var": "ink"
+        }
+      },
+      "p": {
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "lineHeight": 1.6,
+        "color": {
+          "var": "muted"
+        }
+      },
+      "a": {
+        "color": {
+          "var": "brand"
+        }
+      }
+    }
+  },
+  "layout": {
+    "schemaVersion": 18,
+    "root": {
+      "id": "pg-root",
+      "type": "container",
+      "props": {},
+      "style": {
+        "flexDirection": "column",
+        "backgroundColor": {
+          "var": "paper"
+        },
+        "fontFamily": {
+          "var": "body",
+          "from": "font"
+        },
+        "color": {
+          "var": "ink"
+        }
+      },
+      "children": [
+        {
+          "id": "pg-header",
+          "type": "layout-section",
+          "props": {
+            "tag": "header"
+          },
+          "editorLabel": "Header",
+          "style": {
+            "paddingTop": {
+              "value": 18,
+              "unit": "px"
+            },
+            "paddingBottom": {
+              "value": 18,
+              "unit": "px"
+            },
+            "paddingLeft": {
+              "value": 24,
+              "unit": "px"
+            },
+            "paddingRight": {
+              "value": 24,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "pg-header-row",
+              "type": "flexbox",
+              "props": {},
+              "style": {
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "alignItems": "center",
+                "gap": {
+                  "value": 24,
+                  "unit": "px"
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-brand",
+                  "type": "link",
+                  "props": {
+                    "text": "◆ Fieldnote",
+                    "href": "#top"
+                  },
+                  "style": {
+                    "fontFamily": {
+                      "var": "display",
+                      "from": "font"
+                    },
+                    "fontSize": {
+                      "value": 1.4,
+                      "unit": "rem"
+                    },
+                    "fontWeight": 700,
+                    "color": {
+                      "var": "ink"
+                    },
+                    "textDecoration": "none"
+                  }
+                },
+                {
+                  "id": "pg-nav",
+                  "type": "menu",
+                  "props": {
+                    "direction": "row",
+                    "label": "Main"
+                  },
+                  "style": {
+                    "gap": {
+                      "value": 28,
+                      "unit": "px"
+                    }
+                  },
+                  "hiddenOn": ["mobile"],
+                  "children": [
+                    {
+                      "id": "pg-nav-features",
+                      "type": "menu-item",
+                      "props": {
+                        "text": "Features",
+                        "href": "#features"
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "pg-nav-stories",
+                      "type": "menu-item",
+                      "props": {
+                        "text": "Stories",
+                        "href": "#stories"
+                      },
+                      "children": []
+                    },
+                    {
+                      "id": "pg-nav-faq",
+                      "type": "menu-item",
+                      "props": {
+                        "text": "FAQ",
+                        "href": "#faq"
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "pg-header-cta",
+                  "type": "button",
+                  "props": {
+                    "text": "Start free",
+                    "href": "#signup"
+                  },
+                  "classes": ["button-primary"],
+                  "style": {
+                    "paddingTop": {
+                      "value": 10,
+                      "unit": "px"
+                    },
+                    "paddingBottom": {
+                      "value": 10,
+                      "unit": "px"
+                    },
+                    "paddingLeft": {
+                      "value": 18,
+                      "unit": "px"
+                    },
+                    "paddingRight": {
+                      "value": 18,
+                      "unit": "px"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "pg-main",
+          "type": "container",
+          "props": {
+            "tag": "main"
+          },
+          "style": {
+            "flexDirection": "column"
+          },
+          "children": [
+            {
+              "id": "pg-hero",
+              "type": "layout-section",
+              "props": {
+                "tag": "section"
+              },
+              "style": {
+                "flexDirection": "column",
+                "gap": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "paddingTop": {
+                  "value": 56,
+                  "unit": "px"
+                },
+                "paddingBottom": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingLeft": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "paddingRight": {
+                  "var": "gutter",
+                  "from": "spacing"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "paddingTop": {
+                    "value": 56,
+                    "unit": "px"
+                  },
+                  "paddingBottom": {
+                    "value": 56,
+                    "unit": "px"
+                  }
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-hero-grid",
+                  "type": "grid",
+                  "props": {
+                    "columns": 2,
+                    "columnsTablet": 1
+                  },
+                  "style": {
+                    "gap": {
+                      "value": 56,
+                      "unit": "px"
+                    },
+                    "alignItems": "center"
+                  },
+                  "children": [
+                    {
+                      "id": "pg-hero-copy",
+                      "type": "flexbox",
+                      "props": {},
+                      "style": {
+                        "flexDirection": "column",
+                        "gap": {
+                          "value": 20,
+                          "unit": "px"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "pg-hero-eyebrow",
+                          "type": "label",
+                          "props": {
+                            "text": "New · Shared notebooks"
+                          },
+                          "classes": ["eyebrow"]
+                        },
+                        {
+                          "id": "pg-hero-title",
+                          "type": "heading",
+                          "props": {
+                            "text": "Notes your whole team will actually read.",
+                            "level": 1
+                          },
+                          "devices": {
+                            "mobile": {
+                              "fontSize": {
+                                "value": 2.4,
+                                "unit": "rem"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-hero-lede",
+                          "type": "text",
+                          "props": {
+                            "text": "Fieldnote turns meeting scraps, decisions and to-dos into one calm, searchable notebook. Write once, and everyone who needs it finds it."
+                          },
+                          "style": {
+                            "fontSize": {
+                              "var": "lede",
+                              "from": "fontSize"
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-hero-actions",
+                          "type": "flexbox",
+                          "props": {},
+                          "style": {
+                            "flexDirection": "row",
+                            "flexWrap": "wrap",
+                            "gap": {
+                              "value": 12,
+                              "unit": "px"
+                            }
+                          },
+                          "children": [
+                            {
+                              "id": "pg-hero-cta",
+                              "type": "button",
+                              "props": {
+                                "text": "Start free",
+                                "href": "#signup"
+                              },
+                              "classes": ["button-primary"]
+                            },
+                            {
+                              "id": "pg-hero-tour",
+                              "type": "button",
+                              "props": {
+                                "text": "See how it works",
+                                "href": "#features"
+                              },
+                              "classes": ["button-ghost"]
+                            }
+                          ]
+                        },
+                        {
+                          "id": "pg-hero-note",
+                          "type": "text",
+                          "props": {
+                            "text": "Free for teams up to 5. No card needed."
+                          },
+                          "style": {
+                            "fontSize": {
+                              "var": "small",
+                              "from": "fontSize"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-hero-image",
+                      "type": "image",
+                      "props": {
+                        "src": "/playground/media/fieldnote-app.webp",
+                        "alt": "The Fieldnote app: a notebook list beside an open note",
+                        "width": 1200,
+                        "height": 860,
+                        "mediaId": "media-app",
+                        "priority": true
+                      },
+                      "style": {
+                        "width": {
+                          "value": 100,
+                          "unit": "%"
+                        },
+                        "borderRadius": {
+                          "value": 24,
+                          "unit": "px"
+                        },
+                        "boxShadow": {
+                          "x": 0,
+                          "y": 30,
+                          "blur": 60,
+                          "spread": -30,
+                          "color": "#2f5bea66"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "label": "Hero"
+            },
+            {
+              "id": "pg-stats",
+              "type": "layout-section",
+              "props": {
+                "tag": "section"
+              },
+              "style": {
+                "flexDirection": "column",
+                "gap": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "paddingTop": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "paddingBottom": {
+                  "value": 40,
+                  "unit": "px"
+                },
+                "paddingLeft": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "paddingRight": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "borderTopWidth": {
+                  "value": 1,
+                  "unit": "px"
+                },
+                "borderBottomWidth": {
+                  "value": 1,
+                  "unit": "px"
+                },
+                "borderStyle": "solid",
+                "borderColor": {
+                  "var": "line"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "paddingTop": {
+                    "value": 56,
+                    "unit": "px"
+                  },
+                  "paddingBottom": {
+                    "value": 56,
+                    "unit": "px"
+                  }
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-stats-grid",
+                  "type": "grid",
+                  "props": {
+                    "columns": 3,
+                    "columnsMobile": 1
+                  },
+                  "style": {
+                    "gap": {
+                      "value": 24,
+                      "unit": "px"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "pg-stat-teams",
+                      "type": "flexbox",
+                      "props": {},
+                      "style": {
+                        "flexDirection": "column",
+                        "gap": {
+                          "value": 4,
+                          "unit": "px"
+                        },
+                        "alignItems": "center"
+                      },
+                      "children": [
+                        {
+                          "id": "pg-stat-teams-v",
+                          "type": "text",
+                          "props": {
+                            "text": "12,000+"
+                          },
+                          "style": {
+                            "fontFamily": {
+                              "var": "display",
+                              "from": "font"
+                            },
+                            "fontSize": {
+                              "value": 2.2,
+                              "unit": "rem"
+                            },
+                            "fontWeight": 700,
+                            "lineHeight": 1.2,
+                            "color": {
+                              "var": "brand"
+                            },
+                            "textAlign": "center"
+                          }
+                        },
+                        {
+                          "id": "pg-stat-teams-l",
+                          "type": "text",
+                          "props": {
+                            "text": "teams write in Fieldnote"
+                          },
+                          "style": {
+                            "textAlign": "center"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-stat-time",
+                      "type": "flexbox",
+                      "props": {},
+                      "style": {
+                        "flexDirection": "column",
+                        "gap": {
+                          "value": 4,
+                          "unit": "px"
+                        },
+                        "alignItems": "center"
+                      },
+                      "children": [
+                        {
+                          "id": "pg-stat-time-v",
+                          "type": "text",
+                          "props": {
+                            "text": "3 hrs"
+                          },
+                          "style": {
+                            "fontFamily": {
+                              "var": "display",
+                              "from": "font"
+                            },
+                            "fontSize": {
+                              "value": 2.2,
+                              "unit": "rem"
+                            },
+                            "fontWeight": 700,
+                            "lineHeight": 1.2,
+                            "color": {
+                              "var": "brand"
+                            },
+                            "textAlign": "center"
+                          }
+                        },
+                        {
+                          "id": "pg-stat-time-l",
+                          "type": "text",
+                          "props": {
+                            "text": "saved per person, every week"
+                          },
+                          "style": {
+                            "textAlign": "center"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-stat-rating",
+                      "type": "flexbox",
+                      "props": {},
+                      "style": {
+                        "flexDirection": "column",
+                        "gap": {
+                          "value": 4,
+                          "unit": "px"
+                        },
+                        "alignItems": "center"
+                      },
+                      "children": [
+                        {
+                          "id": "pg-stat-rating-v",
+                          "type": "text",
+                          "props": {
+                            "text": "4.9 / 5"
+                          },
+                          "style": {
+                            "fontFamily": {
+                              "var": "display",
+                              "from": "font"
+                            },
+                            "fontSize": {
+                              "value": 2.2,
+                              "unit": "rem"
+                            },
+                            "fontWeight": 700,
+                            "lineHeight": 1.2,
+                            "color": {
+                              "var": "brand"
+                            },
+                            "textAlign": "center"
+                          }
+                        },
+                        {
+                          "id": "pg-stat-rating-l",
+                          "type": "text",
+                          "props": {
+                            "text": "average rating from reviewers"
+                          },
+                          "style": {
+                            "textAlign": "center"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "label": "Stats"
+            },
+            {
+              "id": "pg-features",
+              "type": "layout-section",
+              "props": {
+                "tag": "section"
+              },
+              "style": {
+                "flexDirection": "column",
+                "gap": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "paddingTop": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingBottom": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingLeft": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "paddingRight": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "backgroundColor": {
+                  "var": "brand-soft"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "paddingTop": {
+                    "value": 56,
+                    "unit": "px"
+                  },
+                  "paddingBottom": {
+                    "value": 56,
+                    "unit": "px"
+                  }
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-feat-eyebrow",
+                  "type": "label",
+                  "props": {
+                    "text": "Features"
+                  },
+                  "classes": ["eyebrow"],
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "id": "pg-feat-title",
+                  "type": "heading",
+                  "props": {
+                    "text": "Everything in one calm place",
+                    "level": 2
+                  },
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "id": "pg-feat-lede",
+                  "type": "text",
+                  "props": {
+                    "text": "Hover a card to see a class with a Hover state. Click any element on the canvas to change it."
+                  },
+                  "style": {
+                    "textAlign": "center",
+                    "maxWidth": {
+                      "value": 620,
+                      "unit": "px"
+                    },
+                    "marginLeft": "auto",
+                    "marginRight": "auto"
+                  }
+                },
+                {
+                  "id": "pg-feat-grid",
+                  "type": "grid",
+                  "props": {
+                    "columns": 3,
+                    "columnsTablet": 2,
+                    "columnsMobile": 1
+                  },
+                  "style": {
+                    "gap": {
+                      "value": 24,
+                      "unit": "px"
+                    },
+                    "marginTop": {
+                      "value": 24,
+                      "unit": "px"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "pg-feat-search",
+                      "type": "flexbox",
+                      "props": {},
+                      "classes": ["card"],
+                      "children": [
+                        {
+                          "id": "pg-feat-search-ic",
+                          "type": "icon",
+                          "props": {
+                            "iconId": "search",
+                            "decorative": true,
+                            "size": 28
+                          },
+                          "style": {
+                            "color": {
+                              "var": "brand"
+                            },
+                            "backgroundColor": {
+                              "var": "brand-soft"
+                            },
+                            "paddingTop": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingBottom": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingRight": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "borderRadius": {
+                              "value": 12,
+                              "unit": "px"
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-feat-search-h",
+                          "type": "heading",
+                          "props": {
+                            "text": "Find anything",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "pg-feat-search-t",
+                          "type": "text",
+                          "props": {
+                            "text": "Search every notebook at once, including the text inside attached images."
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-feat-clock",
+                      "type": "flexbox",
+                      "props": {},
+                      "classes": ["card"],
+                      "children": [
+                        {
+                          "id": "pg-feat-clock-ic",
+                          "type": "icon",
+                          "props": {
+                            "iconId": "clock",
+                            "decorative": true,
+                            "size": 28
+                          },
+                          "style": {
+                            "color": {
+                              "var": "brand"
+                            },
+                            "backgroundColor": {
+                              "var": "brand-soft"
+                            },
+                            "paddingTop": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingBottom": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingRight": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "borderRadius": {
+                              "value": 12,
+                              "unit": "px"
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-feat-clock-h",
+                          "type": "heading",
+                          "props": {
+                            "text": "Decisions with dates",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "pg-feat-clock-t",
+                          "type": "text",
+                          "props": {
+                            "text": "Every decision keeps who made it and when, so nobody re-argues last month."
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-feat-globe",
+                      "type": "flexbox",
+                      "props": {},
+                      "classes": ["card"],
+                      "children": [
+                        {
+                          "id": "pg-feat-globe-ic",
+                          "type": "icon",
+                          "props": {
+                            "iconId": "globe",
+                            "decorative": true,
+                            "size": 28
+                          },
+                          "style": {
+                            "color": {
+                              "var": "brand"
+                            },
+                            "backgroundColor": {
+                              "var": "brand-soft"
+                            },
+                            "paddingTop": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingBottom": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingRight": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "borderRadius": {
+                              "value": 12,
+                              "unit": "px"
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-feat-globe-h",
+                          "type": "heading",
+                          "props": {
+                            "text": "Share a page",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "pg-feat-globe-t",
+                          "type": "text",
+                          "props": {
+                            "text": "Publish one note as a web page for clients, without giving them an account."
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-feat-check",
+                      "type": "flexbox",
+                      "props": {},
+                      "classes": ["card"],
+                      "children": [
+                        {
+                          "id": "pg-feat-check-ic",
+                          "type": "icon",
+                          "props": {
+                            "iconId": "circle-check",
+                            "decorative": true,
+                            "size": 28
+                          },
+                          "style": {
+                            "color": {
+                              "var": "brand"
+                            },
+                            "backgroundColor": {
+                              "var": "brand-soft"
+                            },
+                            "paddingTop": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingBottom": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingRight": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "borderRadius": {
+                              "value": 12,
+                              "unit": "px"
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-feat-check-h",
+                          "type": "heading",
+                          "props": {
+                            "text": "To-dos that finish",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "pg-feat-check-t",
+                          "type": "text",
+                          "props": {
+                            "text": "Tasks written in a note show up in one list, with owners and due dates."
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-feat-heart",
+                      "type": "flexbox",
+                      "props": {},
+                      "classes": ["card"],
+                      "children": [
+                        {
+                          "id": "pg-feat-heart-ic",
+                          "type": "icon",
+                          "props": {
+                            "iconId": "heart",
+                            "decorative": true,
+                            "size": 28
+                          },
+                          "style": {
+                            "color": {
+                              "var": "brand"
+                            },
+                            "backgroundColor": {
+                              "var": "brand-soft"
+                            },
+                            "paddingTop": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingBottom": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingRight": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "borderRadius": {
+                              "value": 12,
+                              "unit": "px"
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-feat-heart-h",
+                          "type": "heading",
+                          "props": {
+                            "text": "Made for focus",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "pg-feat-heart-t",
+                          "type": "text",
+                          "props": {
+                            "text": "No badges, no streaks, no feed. Just your team's notes, quietly in sync."
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-feat-settings",
+                      "type": "flexbox",
+                      "props": {},
+                      "classes": ["card"],
+                      "children": [
+                        {
+                          "id": "pg-feat-settings-ic",
+                          "type": "icon",
+                          "props": {
+                            "iconId": "settings",
+                            "decorative": true,
+                            "size": 28
+                          },
+                          "style": {
+                            "color": {
+                              "var": "brand"
+                            },
+                            "backgroundColor": {
+                              "var": "brand-soft"
+                            },
+                            "paddingTop": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingBottom": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingLeft": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "paddingRight": {
+                              "value": 10,
+                              "unit": "px"
+                            },
+                            "borderRadius": {
+                              "value": 12,
+                              "unit": "px"
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-feat-settings-h",
+                          "type": "heading",
+                          "props": {
+                            "text": "Yours to shape",
+                            "level": 3
+                          }
+                        },
+                        {
+                          "id": "pg-feat-settings-t",
+                          "type": "text",
+                          "props": {
+                            "text": "Templates, tags and notebook rules per team, set up in minutes."
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "label": "Features",
+              "htmlId": "features"
+            },
+            {
+              "id": "pg-split",
+              "type": "layout-section",
+              "props": {
+                "tag": "section"
+              },
+              "style": {
+                "flexDirection": "column",
+                "gap": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "paddingTop": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingBottom": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingLeft": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "paddingRight": {
+                  "var": "gutter",
+                  "from": "spacing"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "paddingTop": {
+                    "value": 56,
+                    "unit": "px"
+                  },
+                  "paddingBottom": {
+                    "value": 56,
+                    "unit": "px"
+                  }
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-split-grid",
+                  "type": "grid",
+                  "props": {
+                    "columns": 2,
+                    "columnsTablet": 1
+                  },
+                  "style": {
+                    "gap": {
+                      "value": 56,
+                      "unit": "px"
+                    },
+                    "alignItems": "center"
+                  },
+                  "children": [
+                    {
+                      "id": "pg-split-image",
+                      "type": "image",
+                      "props": {
+                        "src": "/playground/media/shared-notebooks.webp",
+                        "alt": "Shared notebooks fanned out on a blue background",
+                        "width": 1000,
+                        "height": 760,
+                        "mediaId": "media-notebooks"
+                      },
+                      "style": {
+                        "width": {
+                          "value": 100,
+                          "unit": "%"
+                        },
+                        "borderRadius": {
+                          "value": 24,
+                          "unit": "px"
+                        }
+                      }
+                    },
+                    {
+                      "id": "pg-split-copy",
+                      "type": "flexbox",
+                      "props": {},
+                      "style": {
+                        "flexDirection": "column",
+                        "gap": {
+                          "value": 18,
+                          "unit": "px"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "pg-split-eyebrow",
+                          "type": "label",
+                          "props": {
+                            "text": "Shared notebooks"
+                          },
+                          "classes": ["eyebrow"]
+                        },
+                        {
+                          "id": "pg-split-title",
+                          "type": "heading",
+                          "props": {
+                            "text": "One notebook per project, open to the right people",
+                            "level": 2
+                          }
+                        },
+                        {
+                          "id": "pg-split-list",
+                          "type": "list",
+                          "props": {
+                            "items": [
+                              "Invite a client to one notebook, not your whole workspace",
+                              "See who read a note, and who still needs to",
+                              "Pin the decisions that matter to the top"
+                            ]
+                          },
+                          "style": {
+                            "color": {
+                              "var": "muted"
+                            },
+                            "lineHeight": 1.9
+                          }
+                        },
+                        {
+                          "id": "pg-split-link",
+                          "type": "link",
+                          "props": {
+                            "text": "Read how teams use notebooks →",
+                            "href": "#stories"
+                          },
+                          "style": {
+                            "fontWeight": 600
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "label": "Split"
+            },
+            {
+              "id": "pg-quote",
+              "type": "layout-section",
+              "props": {
+                "tag": "section"
+              },
+              "style": {
+                "flexDirection": "column",
+                "gap": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "paddingTop": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingBottom": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingLeft": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "paddingRight": {
+                  "var": "gutter",
+                  "from": "spacing"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "paddingTop": {
+                    "value": 56,
+                    "unit": "px"
+                  },
+                  "paddingBottom": {
+                    "value": 56,
+                    "unit": "px"
+                  }
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-quote-card",
+                  "type": "flexbox",
+                  "props": {},
+                  "style": {
+                    "flexDirection": "column",
+                    "alignItems": "center",
+                    "gap": {
+                      "value": 20,
+                      "unit": "px"
+                    },
+                    "maxWidth": {
+                      "value": 780,
+                      "unit": "px"
+                    },
+                    "marginLeft": "auto",
+                    "marginRight": "auto"
+                  },
+                  "children": [
+                    {
+                      "id": "pg-quote-text",
+                      "type": "text",
+                      "props": {
+                        "text": "“We stopped losing decisions in chat. Our Monday meeting went from an hour to fifteen minutes.”"
+                      },
+                      "style": {
+                        "fontFamily": {
+                          "var": "display",
+                          "from": "font"
+                        },
+                        "fontSize": {
+                          "value": 1.75,
+                          "unit": "rem"
+                        },
+                        "lineHeight": 1.35,
+                        "color": {
+                          "var": "ink"
+                        },
+                        "textAlign": "center"
+                      }
+                    },
+                    {
+                      "id": "pg-quote-avatar",
+                      "type": "image",
+                      "props": {
+                        "src": "/playground/media/avatar-maya.webp",
+                        "alt": "Portrait illustration of Maya",
+                        "width": 600,
+                        "height": 600,
+                        "mediaId": "media-avatar"
+                      },
+                      "style": {
+                        "width": {
+                          "value": 56,
+                          "unit": "px"
+                        },
+                        "height": {
+                          "value": 56,
+                          "unit": "px"
+                        },
+                        "borderRadius": {
+                          "value": 999,
+                          "unit": "px"
+                        },
+                        "objectFit": "cover"
+                      }
+                    },
+                    {
+                      "id": "pg-quote-who",
+                      "type": "text",
+                      "props": {
+                        "text": "Maya Okafor · Head of Product, Lumen Studio"
+                      },
+                      "style": {
+                        "fontSize": {
+                          "var": "small",
+                          "from": "fontSize"
+                        },
+                        "textAlign": "center"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "label": "Testimonial",
+              "htmlId": "stories"
+            },
+            {
+              "id": "pg-faq",
+              "type": "layout-section",
+              "props": {
+                "tag": "section"
+              },
+              "style": {
+                "flexDirection": "column",
+                "gap": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "paddingTop": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingBottom": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingLeft": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "paddingRight": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "backgroundColor": "#ffffff"
+              },
+              "devices": {
+                "mobile": {
+                  "paddingTop": {
+                    "value": 56,
+                    "unit": "px"
+                  },
+                  "paddingBottom": {
+                    "value": 56,
+                    "unit": "px"
+                  }
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-faq-title",
+                  "type": "heading",
+                  "props": {
+                    "text": "Questions, answered",
+                    "level": 2
+                  },
+                  "style": {
+                    "textAlign": "center"
+                  }
+                },
+                {
+                  "id": "pg-faq-list",
+                  "type": "accordion",
+                  "props": {},
+                  "style": {
+                    "maxWidth": {
+                      "value": 760,
+                      "unit": "px"
+                    },
+                    "marginLeft": "auto",
+                    "marginRight": "auto",
+                    "width": {
+                      "value": 100,
+                      "unit": "%"
+                    }
+                  },
+                  "children": [
+                    {
+                      "id": "pg-faq-free",
+                      "type": "accordion-item",
+                      "props": {
+                        "summary": "Is there a free plan?",
+                        "open": true
+                      },
+                      "children": [
+                        {
+                          "id": "pg-faq-free-a",
+                          "type": "text",
+                          "props": {
+                            "text": "Yes. Teams of up to five people use Fieldnote free, with no time limit."
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-faq-import",
+                      "type": "accordion-item",
+                      "props": {
+                        "summary": "Can we bring our old notes?"
+                      },
+                      "children": [
+                        {
+                          "id": "pg-faq-import-a",
+                          "type": "text",
+                          "props": {
+                            "text": "Import from Markdown, Notion, Google Docs or plain text. Folders become notebooks."
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-faq-offline",
+                      "type": "accordion-item",
+                      "props": {
+                        "summary": "Does it work offline?"
+                      },
+                      "children": [
+                        {
+                          "id": "pg-faq-offline-a",
+                          "type": "text",
+                          "props": {
+                            "text": "Every notebook you open is kept on your device and syncs when you're back online."
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "label": "FAQ",
+              "htmlId": "faq"
+            },
+            {
+              "id": "pg-signup",
+              "type": "layout-section",
+              "props": {
+                "tag": "section"
+              },
+              "style": {
+                "flexDirection": "column",
+                "gap": {
+                  "value": 24,
+                  "unit": "px"
+                },
+                "paddingTop": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingBottom": {
+                  "var": "section",
+                  "from": "spacing"
+                },
+                "paddingLeft": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "paddingRight": {
+                  "var": "gutter",
+                  "from": "spacing"
+                },
+                "backgroundColor": {
+                  "var": "ink"
+                }
+              },
+              "devices": {
+                "mobile": {
+                  "paddingTop": {
+                    "value": 56,
+                    "unit": "px"
+                  },
+                  "paddingBottom": {
+                    "value": 56,
+                    "unit": "px"
+                  }
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-signup-grid",
+                  "type": "grid",
+                  "props": {
+                    "columns": 2,
+                    "columnsTablet": 1
+                  },
+                  "style": {
+                    "gap": {
+                      "value": 48,
+                      "unit": "px"
+                    },
+                    "alignItems": "center"
+                  },
+                  "children": [
+                    {
+                      "id": "pg-signup-copy",
+                      "type": "flexbox",
+                      "props": {},
+                      "style": {
+                        "flexDirection": "column",
+                        "gap": {
+                          "value": 16,
+                          "unit": "px"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "pg-signup-title",
+                          "type": "heading",
+                          "props": {
+                            "text": "Try Fieldnote with your team",
+                            "level": 2
+                          },
+                          "style": {
+                            "color": {
+                              "var": "paper"
+                            }
+                          }
+                        },
+                        {
+                          "id": "pg-signup-text",
+                          "type": "text",
+                          "props": {
+                            "text": "Leave your details and we'll set up a workspace for you. (In this playground, the form shows what happens without sending anything.)"
+                          },
+                          "style": {
+                            "color": "#c9cdd6"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "pg-signup-form",
+                      "type": "form",
+                      "props": {
+                        "formId": "contact"
+                      },
+                      "style": {
+                        "flexDirection": "column",
+                        "gap": {
+                          "value": 14,
+                          "unit": "px"
+                        },
+                        "backgroundColor": "#ffffff",
+                        "paddingTop": {
+                          "value": 28,
+                          "unit": "px"
+                        },
+                        "paddingBottom": {
+                          "value": 28,
+                          "unit": "px"
+                        },
+                        "paddingLeft": {
+                          "value": 28,
+                          "unit": "px"
+                        },
+                        "paddingRight": {
+                          "value": 28,
+                          "unit": "px"
+                        },
+                        "borderRadius": {
+                          "value": 18,
+                          "unit": "px"
+                        }
+                      },
+                      "children": [
+                        {
+                          "id": "pg-f-name",
+                          "type": "text-input",
+                          "props": {
+                            "field": "name",
+                            "label": "Name",
+                            "placeholder": "Maya Okafor"
+                          }
+                        },
+                        {
+                          "id": "pg-f-email",
+                          "type": "text-input",
+                          "props": {
+                            "field": "email",
+                            "label": "Work email",
+                            "placeholder": "maya@lumen.studio"
+                          }
+                        },
+                        {
+                          "id": "pg-f-message",
+                          "type": "textarea",
+                          "props": {
+                            "field": "message",
+                            "label": "What does your team need?"
+                          }
+                        },
+                        {
+                          "id": "pg-f-submit",
+                          "type": "submit",
+                          "props": {
+                            "label": "Request a workspace"
+                          },
+                          "classes": ["button-primary"]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "label": "Sign up",
+              "htmlId": "signup"
+            }
+          ],
+          "editorLabel": "Main content"
+        },
+        {
+          "id": "pg-footer",
+          "type": "layout-section",
+          "props": {
+            "tag": "footer"
+          },
+          "editorLabel": "Footer",
+          "style": {
+            "paddingTop": {
+              "value": 28,
+              "unit": "px"
+            },
+            "paddingBottom": {
+              "value": 28,
+              "unit": "px"
+            },
+            "paddingLeft": {
+              "value": 24,
+              "unit": "px"
+            },
+            "paddingRight": {
+              "value": 24,
+              "unit": "px"
+            }
+          },
+          "children": [
+            {
+              "id": "pg-footer-row",
+              "type": "flexbox",
+              "props": {},
+              "style": {
+                "flexDirection": "row",
+                "flexWrap": "wrap",
+                "justifyContent": "space-between",
+                "alignItems": "center",
+                "gap": {
+                  "value": 12,
+                  "unit": "px"
+                }
+              },
+              "children": [
+                {
+                  "id": "pg-footer-copy",
+                  "type": "text",
+                  "props": {
+                    "text": "© 2026 Fieldnote. A made-up product, built in the EmVB playground."
+                  },
+                  "style": {
+                    "fontSize": {
+                      "var": "small",
+                      "from": "fontSize"
+                    }
+                  }
+                },
+                {
+                  "id": "pg-footer-link",
+                  "type": "link",
+                  "props": {
+                    "text": "Made with EmVB ↗",
+                    "href": "https://emvb.dev",
+                    "newTab": true
+                  },
+                  "style": {
+                    "fontSize": {
+                      "var": "small",
+                      "from": "fontSize"
+                    },
+                    "fontWeight": 600
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

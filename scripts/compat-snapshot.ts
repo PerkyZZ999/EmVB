@@ -8,6 +8,7 @@
  * The release script runs it for each new version; for an older one, point --root at a worktree
  * of its release commit (its core and playground seed are read from there).
  */
+import { $ } from "bun";
 import { join } from "node:path";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -78,6 +79,8 @@ if (import.meta.main) {
     );
     written.push(name);
   }
+  // The files are committed, so they get the repository's formatting.
+  await $`bunx oxfmt ${written.flatMap((name) => [join(CORPUS, "cases", `${name}.json`), join(CORPUS, "expected", `${name}.json`)])}`.quiet();
   // oxlint-disable-next-line no-console -- a CLI
   console.log(`compat corpus: added ${written.join(", ")}`);
 }

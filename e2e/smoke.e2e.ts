@@ -10,7 +10,7 @@ test("the EmVB plugin is loaded by the host", async ({ request }) => {
   });
   expect(await version.json()).toEqual({
     success: true,
-    data: { plugin: "emvb", version: "1.1.2" },
+    data: { plugin: "emvb", version: "1.2.0" },
   });
 });
 

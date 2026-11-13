@@ -10,7 +10,7 @@ import {
 } from "@perkyzz/emvb/mcp";
 import { CALL_TIMEOUT_MS, type Remote, type ToolResult } from "./remote.ts";
 
-export const BRIDGE_VERSION = "1.1.2";
+export const BRIDGE_VERSION = "1.2.0";
 
 const failure = (message: string): ToolResult => ({
   content: [{ type: "text", text: message }],
