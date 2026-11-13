@@ -1,0 +1,28 @@
+# W-1015: weekly update PRs for the Bun workspace (root lockfile) and the pinned CI actions.
+# EmDash, Kumo and Astro are grouped so a host upgrade lands as one PR; CI's EmDash 1.4 and 1.5
+# jobs decide whether it is compatible. Dev tooling is grouped separately.
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      emdash:
+        patterns:
+          - emdash
+          - "@emdash-cms/*"
+          - "@cloudflare/kumo"
+      astro:
+        patterns:
+          - astro
+          - "@astrojs/*"
+      dev-tooling:
+        dependency-type: development
+        patterns:
+          - "*"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

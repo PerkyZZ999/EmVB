@@ -47480,6 +47480,34 @@
       ],
       "command": ["bun", "test", "scripts/ci-pins.test.ts"],
       "expect": "\\(fail\\).*W-1014"
+    },
+    {
+      "id": "W-1015/no-actions",
+      "requirement": "W-1015",
+      "description": "Dependabot stops watching the pinned CI actions.",
+      "edits": [
+        {
+          "file": ".github/dependabot.yml",
+          "search": "  - package-ecosystem: github-actions\n",
+          "replace": "  - package-ecosystem: docker\n"
+        }
+      ],
+      "command": ["bun", "test", "scripts/dependabot.test.ts"],
+      "expect": "\\(fail\\).*watches the Bun workspace"
+    },
+    {
+      "id": "W-1015/kumo-ungrouped",
+      "requirement": "W-1015",
+      "description": "Kumo updates apart from EmDash.",
+      "edits": [
+        {
+          "file": ".github/dependabot.yml",
+          "search": "          - \"@cloudflare/kumo\"\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "scripts/dependabot.test.ts"],
+      "expect": "\\(fail\\).*update as groups"
     }
   ]
 }
