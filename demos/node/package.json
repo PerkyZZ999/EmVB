@@ -10,8 +10,8 @@
     "start": "HOST=127.0.0.1 PORT=4421 bun ./dist/server/entry.mjs"
   },
   "dependencies": {
-    "@astrojs/node": "^11.1.9",
-    "@astrojs/react": "^7.1.2",
+    "@astrojs/node": "^11.1.12",
+    "@astrojs/react": "7.1.2",
     "@emdash-cms/plugin-forms": "0.2.12",
     "@perkyzz/emvb": "workspace:*",
     "astro": "7.3.5",

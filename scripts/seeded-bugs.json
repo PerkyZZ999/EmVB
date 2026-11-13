@@ -47382,6 +47382,20 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/server/co-editors.test.ts"],
       "expect": "\\(fail\\).*names and describes itself"
+    },
+    {
+      "id": "W-1010/node-demo-react-unpinned",
+      "requirement": "W-1010",
+      "description": "The node demo takes @astrojs/react 7.1.8, whose renderer breaks admin hydration on Astro 7.3.",
+      "edits": [
+        {
+          "file": "demos/node/package.json",
+          "search": "\"@astrojs/react\": \"7.1.2\"",
+          "replace": "\"@astrojs/react\": \"^7.1.8\""
+        }
+      ],
+      "command": ["bun", "test", "scripts/demo-deps.test.ts"],
+      "expect": "\\(fail\\).*pins @astrojs/react 7.1.2"
     }
   ]
 }
