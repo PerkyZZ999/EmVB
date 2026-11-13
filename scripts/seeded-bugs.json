@@ -47589,7 +47589,7 @@
         {
           "file": "packages/emvb/test/compat/compat.test.ts",
           "search": "  \"1.1.2\": 18,\n",
-          "replace": "  \"1.1.2\": 18,\n  \"1.2.0\": 18,\n"
+          "replace": "  \"1.1.2\": 18,\n  \"1.3.0\": 18,\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/test/compat/compat.test.ts"],
@@ -48365,7 +48365,9 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
-      "env": { "CI": "1" },
+      "env": {
+        "CI": "1"
+      },
       "expect": "✘.*\\[node\\]"
     },
     {
@@ -48520,7 +48522,9 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node"],
-      "env": { "CI": "1" },
+      "env": {
+        "CI": "1"
+      },
       "expect": "✘.*\\[node\\]"
     },
     {
@@ -48633,7 +48637,9 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/elementor-import.e2e.ts", "--project=node"],
-      "env": { "CI": "1" },
+      "env": {
+        "CI": "1"
+      },
       "expect": "✘.*\\[node\\]"
     },
     {
@@ -48732,8 +48738,24 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/schedule.e2e.ts", "--project=node"],
-      "env": { "CI": "1" },
+      "env": {
+        "CI": "1"
+      },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1027/schedule-named-publish",
+      "requirement": "W-1027",
+      "description": "The Schedule button's name contains Publish, so two buttons answer to Publish.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/TopBar.tsx",
+          "search": "                aria-label={page?.scheduledAt ? \"Change schedule\" : \"Schedule\"}",
+          "replace": "                aria-label={page?.scheduledAt ? \"Change scheduled publishing\" : \"Schedule publish\"}"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/top-bar.test.tsx"],
+      "expect": "\\(fail\\).*W-1027"
     }
   ]
 }

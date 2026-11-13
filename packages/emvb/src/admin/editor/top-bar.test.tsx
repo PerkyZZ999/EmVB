@@ -6,6 +6,8 @@ import type { SaveStatus } from "./useSave.ts";
 
 afterEach(cleanup);
 
+const noop = () => undefined;
+
 for (const action of ["save", "publish"] as const) {
   test(`W-726: ${action} reports pending work over an earlier saved status`, async () => {
     const view = await bar({ busy: action, status: { kind: "saved" } });
@@ -203,4 +205,32 @@ test("W-828: a save in flight keeps Revert focusable and ignores the press; idle
   const idle = await bar({ page, dirty: true, canRevert: true });
   await idle.click("Revert to published");
   expect(idle.calls).toEqual(["revert"]);
+});
+
+test("W-1027: Schedule sits beside Publish without taking its name; a set time is shown", async () => {
+  const scheduled: string[] = [];
+  await mount(
+    <TopBar
+      page={{ title: "Home", status: "draft", scheduledAt: "2026-12-01T14:30:00.000Z" }}
+      dirty={false}
+      status={{ kind: "idle" }}
+      busy={null}
+      onExit={noop}
+      onShortcuts={noop}
+      onPreview={noop}
+      onSave={noop}
+      onPublish={noop}
+      onSchedule={() => scheduled.push("open")}
+    />,
+  );
+  const names = [...document.querySelectorAll("button")].map(
+    (b) => b.getAttribute("aria-label") ?? b.textContent?.trim() ?? "",
+  );
+  expect(names.filter((name) => /publish/i.test(name))).toEqual(["Publish"]);
+  expect(names).toContain("Change schedule");
+  expect(document.querySelector("[data-emvb-scheduled]")?.textContent).toContain("Publishes");
+  await act(async () =>
+    document.querySelector<HTMLButtonElement>('button[aria-label="Change schedule"]')?.click(),
+  );
+  expect(scheduled).toEqual(["open"]);
 });

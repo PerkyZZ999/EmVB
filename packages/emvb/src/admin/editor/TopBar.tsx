@@ -342,8 +342,9 @@ export function TopBar({
                 variant="secondary"
                 shape="square"
                 className="emvb-icon-btn"
-                aria-label={page?.scheduledAt ? "Change scheduled publishing" : "Schedule publish"}
-                title={page?.scheduledAt ? "Change scheduled publishing" : "Schedule publish"}
+                // Named without "Publish", so the Publish button keeps a name of its own.
+                aria-label={page?.scheduledAt ? "Change schedule" : "Schedule"}
+                title={page?.scheduledAt ? "Change scheduled publishing" : "Schedule publishing"}
                 aria-disabled={busy !== null}
                 onClick={() => {
                   if (busy === null) onSchedule();

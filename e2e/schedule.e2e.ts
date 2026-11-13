@@ -34,7 +34,7 @@ test("a page is scheduled from the editor, the top bar says when, and the schedu
     `schedule-${unique()}`,
   );
   await openEditor(page, id, "Launch day");
-  await overlay(page).getByRole("button", { name: "Schedule publish" }).click();
+  await overlay(page).getByRole("button", { name: "Schedule", exact: true }).click();
   const dialog = page.locator('[data-emvb-dialog="schedule"]');
   await expect(dialog).toBeVisible();
   const when = new Date(Date.now() + 3 * 24 * 3_600_000);
@@ -49,7 +49,7 @@ test("a page is scheduled from the editor, the top bar says when, and the schedu
   expect(scheduled.status).toBe("scheduled");
   expect(new Date(scheduled.scheduledAt ?? "").getTime()).toBe(when.getTime());
 
-  await overlay(page).getByRole("button", { name: "Change scheduled publishing" }).click();
+  await overlay(page).getByRole("button", { name: "Change schedule", exact: true }).click();
   await expect(dialog.getByLabel("Publish on")).toHaveValue(local);
   await dialog.getByRole("button", { name: "Cancel schedule" }).click();
   await expect(dialog).toBeHidden({ timeout: 30_000 });
