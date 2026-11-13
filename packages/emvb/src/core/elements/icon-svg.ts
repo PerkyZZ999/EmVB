@@ -14,7 +14,7 @@ export const ICON_STROKE_WIDTHS = ["1", "1.5", "2", "2.5", "3"] as const;
  * W-237: a stroke icon's root `stroke-width` moves into a class whose CSS reads the wrapper's
  * `--emvb-icon-stroke` with the original width as fallback; any other width stays as it was.
  */
-export function strokeClass(svgAttrs: Record<string, string>): void {
+function strokeClass(svgAttrs: Record<string, string>): void {
   const width = svgAttrs["stroke-width"];
   if (!width || !(ICON_STROKE_WIDTHS as readonly string[]).includes(width)) return;
   if (!svgAttrs.stroke || svgAttrs.stroke === "none") return;
@@ -41,7 +41,7 @@ const ownColor = (value: string | undefined) =>
   value !== undefined && value !== "none" && value.toLowerCase() !== "currentcolor";
 
 /** W-238: every fill, stroke and gradient stop becomes the icon's colour; `none` stays none. */
-export function monochrome(nodes: (VNode | string)[]): (VNode | string)[] {
+function monochrome(nodes: (VNode | string)[]): (VNode | string)[] {
   return nodes.map((child) => {
     if (typeof child === "string") return child;
     const attrs = { ...child.attrs };
@@ -51,7 +51,7 @@ export function monochrome(nodes: (VNode | string)[]): (VNode | string)[] {
 }
 
 /** The root too; without a fill, SVG paints black, so it gets the icon's colour. */
-export function monochromeRoot(attrs: Record<string, string>): void {
+function monochromeRoot(attrs: Record<string, string>): void {
   if (attrs.fill === undefined || ownColor(attrs.fill)) attrs.fill = "currentColor";
   if (ownColor(attrs.stroke)) attrs.stroke = "currentColor";
 }
@@ -77,7 +77,7 @@ export function iconHasOwnColors(svg: string | undefined): boolean {
 }
 
 /** A picked icon's root attributes minus what the element sets itself (size, name, id). */
-export function pickedIconAttrs(attrs: Record<string, string>): Record<string, string> {
+function pickedIconAttrs(attrs: Record<string, string>): Record<string, string> {
   const kept: Record<string, string> = { xmlns: "http://www.w3.org/2000/svg" };
   for (const [name, value] of Object.entries(attrs)) {
     if (name === "width" || name === "height" || name === "id" || name === "role") continue;
