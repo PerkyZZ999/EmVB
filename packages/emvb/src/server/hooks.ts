@@ -91,7 +91,9 @@ export async function beforeSave(
   canvasCollections: readonly string[] = [],
 ): Promise<Record<string, unknown> | void> {
   if (canvasCollections.includes(event.collection)) return canvasFieldsBeforeSave(event, ctx);
-  if (!OWNED.has(event.collection)) return;
+  // S-08 (W-997): a collection with an emvb:canvas field is gated even when the site forgot to
+  // list it in `canvasCollections` (rendering and protecting were configured in two places).
+  if (!OWNED.has(event.collection)) return canvasFieldsBeforeSave(event, ctx, true);
   const pageId = event.id ?? null;
   const kind = event.collection === THEME_PARTS_COLLECTION ? "theme part" : "page";
   if (await lowerRoleSave(event, ctx)) {
@@ -180,11 +182,14 @@ function sameValue(a: unknown, b: unknown): boolean {
 async function canvasFieldsBeforeSave(
   event: ContentHookEvent,
   ctx: PluginContext,
+  unlisted = false,
 ): Promise<Record<string, unknown> | void> {
   const pageId = event.id ?? null;
-  const fields = (await canvasFieldSlugs(ctx, event.collection)).filter(
-    (slug) => event.content[slug] !== undefined,
-  );
+  // An unlisted collection whose schema can't be read saves as before 1.1.2.
+  const slugs = unlisted
+    ? await canvasFieldSlugs(ctx, event.collection).catch(() => [])
+    : await canvasFieldSlugs(ctx, event.collection);
+  const fields = slugs.filter((slug) => event.content[slug] !== undefined);
   if (fields.length === 0) return;
 
   const lowerRole = await lowerRoleSave(event, ctx);

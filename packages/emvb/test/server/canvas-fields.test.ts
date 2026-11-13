@@ -37,12 +37,24 @@ describe("emvb:canvas fields in canvasCollections (W-898)", () => {
     expect(message(bad)).toContain("root.children[0].props.level");
   });
 
-  test("only the emvb:canvas field is validated, and only in listed collections", async () => {
+  test("only the emvb:canvas field is validated", async () => {
     await setUp();
     expect((await create({ title: "N", notes: badLayout() })).success).toBe(true);
-    await t.dispose();
+  });
+
+  test("S-08 (W-997): a collection missing from canvasCollections is gated too", async () => {
     await setUp(false);
-    expect((await create({ title: "Off", canvas: badLayout() })).success).toBe(true);
+    const bad = await create({ title: "Off", canvas: badLayout() });
+    expect(bad).toMatchObject({ success: false, error: { code: "SAVE_REJECTED" } });
+    const id = idOf(await create({ title: "Home", canvas: s1Page() }));
+    const changed = { ...s1Page(), root: { ...s1Page().root, children: [] } };
+    expect(message(await update(id, { title: "Home", canvas: changed }, ROLES.author))).toContain(
+      "Only editors and administrators can change an EmVB layout",
+    );
+    expect((await create({ title: "Mine", canvas: s1Page() }, ROLES.author)).success).toBe(false);
+    expect((await update(id, { title: "Renamed", canvas: s1Page() }, ROLES.author)).success).toBe(
+      true,
+    );
   });
 
   test("an author can't clear, wipe or change the field, but can edit the rest", async () => {

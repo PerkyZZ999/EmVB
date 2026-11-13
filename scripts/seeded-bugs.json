@@ -40563,6 +40563,11 @@
           "file": "packages/emvb/src/server/hooks.ts",
           "search": "  if (canvasCollections.includes(event.collection)) return canvasFieldsBeforeSave(event, ctx);",
           "replace": ""
+        },
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  if (!OWNED.has(event.collection)) return canvasFieldsBeforeSave(event, ctx, true);",
+          "replace": "  if (!OWNED.has(event.collection)) return;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/test/server/canvas-fields.test.ts"],
@@ -46835,6 +46840,20 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/export-api.test.ts"],
       "expect": "\\(fail\\).*only media library files are fetched with the session cookie"
+    },
+    {
+      "id": "W-997/unlisted-ungated",
+      "requirement": "W-997",
+      "description": "A collection with an emvb:canvas field but missing from canvasCollections takes any layout from any role again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/hooks.ts",
+          "search": "  if (!OWNED.has(event.collection)) return canvasFieldsBeforeSave(event, ctx, true);",
+          "replace": "  if (!OWNED.has(event.collection)) return;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/canvas-fields.test.ts"],
+      "expect": "\\(fail\\).*a collection missing from canvasCollections is gated too"
     }
   ]
 }
