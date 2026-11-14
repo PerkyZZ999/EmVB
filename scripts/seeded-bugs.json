@@ -49795,6 +49795,98 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
       "expect": "\\(fail\\).*Pause button"
+    },
+    {
+      "id": "W-1045/hover-everywhere",
+      "requirement": "W-1045",
+      "description": "The Flip box turns on hover even on touch screens, where a tap leaves it turned.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "return `.emvb-flip-${dir} .emvb-flip-back{transform:${turn}}${on}{transform:${turn}}@media (hover:hover){.emvb-flip-${dir}:hover .emvb-flip-inner{transform:${turn}}}`;",
+          "replace": "return `.emvb-flip-${dir} .emvb-flip-back{transform:${turn}}${on}{transform:${turn}}.emvb-flip-${dir}:hover .emvb-flip-inner{transform:${turn}}`;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*where devices hover"
+    },
+    {
+      "id": "W-1045/turns-under-reduced-motion",
+      "requirement": "W-1045",
+      "description": "The Flip box still turns for visitors who prefer reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "    \"@media (prefers-reduced-motion:reduce){.emvb-flip-inner{transition:none}}\",",
+          "replace": "    \"\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*reduced motion"
+    },
+    {
+      "id": "W-1045/back-hidden-from-sr",
+      "requirement": "W-1045",
+      "description": "The back face is hidden from screen readers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "        attrs: { class: `emvb-flip-face emvb-flip-${side}` },",
+          "replace": "        attrs: { class: `emvb-flip-face emvb-flip-${side}`, ...(side === \"back\" ? { \"aria-hidden\": \"true\" } : {}) },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*both faces stay"
+    },
+    {
+      "id": "W-1045/focus-doesnt-turn",
+      "requirement": "W-1045",
+      "description": "Keyboard focus on the back's link doesn't turn the card.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": ",.emvb-flip-${dir}:has(.emvb-flip-back :focus-visible) .emvb-flip-inner`;",
+          "replace": "`;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1045"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1045/checkbox-ignored",
+      "requirement": "W-1045",
+      "description": "The Turn over tick box doesn't turn the card.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "const on = `.emvb-flip-${dir}:has(.emvb-flip-check:checked) .emvb-flip-inner,",
+          "replace": "const on = `"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1045"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }

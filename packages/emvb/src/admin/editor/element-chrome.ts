@@ -1,4 +1,5 @@
 import {
+  ArrowsClockwiseIcon,
   ArrowsLeftRightIcon,
   ArrowsVerticalIcon,
   ArticleIcon,
@@ -114,6 +115,7 @@ export const ELEMENT_ICONS: Record<string, Icon> = {
   "price-list": ListDashesIcon,
   "price-list-item": CurrencyDollarIcon,
   cta: MegaphoneIcon,
+  "flip-box": ArrowsClockwiseIcon,
   video: VideoCameraIcon,
   form: ArticleIcon,
   "text-input": TextboxIcon,

@@ -85,7 +85,7 @@ describe("countdown runtime (W-1040)", () => {
       live.delete(id);
     }) as unknown as typeof clearInterval;
     const tick = () => {
-      for (const fn of [...live.values()]) fn();
+      for (const fn of live.values()) fn();
     };
     try {
       at("2026-11-30T09:00:00Z");

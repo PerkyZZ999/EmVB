@@ -411,3 +411,59 @@ describe("Call to action (W-1044)", () => {
     expect(css).toContain("background:rgb(0 0 0 / 0.55)");
   });
 });
+
+const flip = (props: Record<string, unknown>) => ({
+  id: "flip0001",
+  type: "flip-box",
+  props: { frontTitle: "Front", ...props },
+});
+
+describe("Flip box (W-1045)", () => {
+  test("both faces stay in the page, with a native Turn over checkbox and no script", () => {
+    const { html, runtimes } = rendered(
+      flip({
+        frontText: "Teaser",
+        backTitle: "Back",
+        backText: "Detail",
+        buttonText: "Go",
+        href: "/go",
+      }),
+    );
+    expect(html).toContain('class="emvb-flip-box emvb-flip-right"');
+    expect(html).toContain(
+      '<div class="emvb-flip-face emvb-flip-front"><h3 class="emvb-flip-title">Front</h3><p class="emvb-flip-text">Teaser</p></div><div class="emvb-flip-face emvb-flip-back"><h3 class="emvb-flip-title">Back</h3><p class="emvb-flip-text">Detail</p><a class="emvb-flip-button" href="/go">Go</a></div>',
+    );
+    expect(html).toContain(
+      '<label class="emvb-flip-toggle"><input type="checkbox" class="emvb-flip-check"><span>Turn over</span></label>',
+    );
+    expect(html.includes("aria-hidden")).toBe(false);
+    expect(runtimes).toEqual([]);
+  });
+
+  test("it turns on hover only where devices hover, on the checkbox, and when focus reaches the back", () => {
+    const { css } = rendered(flip({ direction: "up" }));
+    expect(css).toContain(
+      ".emvb-flip-up:has(.emvb-flip-check:checked) .emvb-flip-inner,.emvb-flip-up:has(.emvb-flip-back :focus-visible) .emvb-flip-inner{transform:rotateX(180deg)}",
+    );
+    expect(css).toContain(
+      "@media (hover:hover){.emvb-flip-up:hover .emvb-flip-inner{transform:rotateX(180deg)}}",
+    );
+    expect(css).toContain(".emvb-flip-face{grid-area:1/1;");
+    expect(css).toContain("backface-visibility:hidden");
+  });
+
+  test("under reduced motion the faces swap without the turn", () => {
+    expect(rendered(flip({})).css).toContain(
+      "@media (prefers-reduced-motion:reduce){.emvb-flip-inner{transition:none}}",
+    );
+  });
+
+  test("an unsafe link drops the button; the control text and title level can change", () => {
+    const html = rendered(
+      flip({ buttonText: "Go", href: "javascript:x", toggleLabel: "Show details", titleLevel: 4 }),
+    ).html;
+    expect(html.includes("emvb-flip-button")).toBe(false);
+    expect(html).toContain("<span>Show details</span>");
+    expect(html).toContain('<h4 class="emvb-flip-title">Front</h4>');
+  });
+});

@@ -4,6 +4,7 @@
  * reaches the browser. test/site/element-icons.test.ts keeps the two lists the same.
  */
 import {
+  ArrowsClockwiseIcon,
   ArrowsLeftRightIcon,
   ArrowsVerticalIcon,
   ArticleIcon,
@@ -110,6 +111,7 @@ export const ELEMENT_ICONS: Record<string, ElementIconComponent> = {
   "price-list": ListDashesIcon,
   "price-list-item": CurrencyDollarIcon,
   cta: MegaphoneIcon,
+  "flip-box": ArrowsClockwiseIcon,
   video: VideoCameraIcon,
   form: ArticleIcon,
   "text-input": TextboxIcon,

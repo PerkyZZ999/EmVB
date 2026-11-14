@@ -375,3 +375,25 @@ describe("Call to action over MCP (W-1044)", () => {
     expect(refused.success).toBe(false);
   });
 });
+
+describe("Flip box over MCP (W-1045)", () => {
+  test("add_element adds a Flip box; an unknown direction is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("flip-box")?.name).toBe("Flip box");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "flip-box",
+        props: { frontTitle: "Our team", backTitle: "Meet us", direction: "up" },
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "flip-box", props: { frontTitle: "x", direction: "around" } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});

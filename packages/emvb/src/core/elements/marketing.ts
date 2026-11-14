@@ -6,6 +6,7 @@ import type {
   CountdownNode,
   CounterNode,
   CtaNode,
+  FlipBoxNode,
   MapNode,
   PriceListItemNode,
   PriceListNode,
@@ -936,5 +937,134 @@ export const cta: ElementDefinition<CtaNode> = {
     const classes = [attrs["class"] ?? "", `emvb-cta-${src ? layout : "top"}`];
     if (link) classes.push("emvb-cta-linked");
     return { tag: "div", attrs: { ...attrs, class: classes.join(" ").trim() }, children };
+  },
+};
+
+const FLIP_TURNS = {
+  left: "rotateY(-180deg)",
+  right: "rotateY(180deg)",
+  up: "rotateX(180deg)",
+  down: "rotateX(-180deg)",
+} as const;
+
+export const flipBox: ElementDefinition<FlipBoxNode> = {
+  baseCss:
+    ":where(.emvb-flip-box){color:#fff;border-radius:8px}.emvb-flip-box{position:relative;perspective:1200px}.emvb-flip-inner{display:grid;transition:transform 0.6s ease;transform-style:preserve-3d}.emvb-flip-face{grid-area:1/1;display:flex;flex-direction:column;justify-content:center;gap:0.75em;min-height:16em;padding:1.5em 1.5em 3em;border-radius:inherit;background:#1f2937;color:inherit;backface-visibility:hidden;-webkit-backface-visibility:hidden}.emvb-flip-back{background:#374151}.emvb-flip-title{margin:0;font-size:1.25em}.emvb-flip-text{margin:0;white-space:pre-line}.emvb-flip-button{align-self:flex-start;padding:0.625em 1.25em;border:1px solid currentColor;border-radius:6px;color:inherit;text-decoration:none}.emvb-flip-button:focus-visible{outline:2px solid currentColor;outline-offset:2px}.emvb-flip-toggle{position:absolute;right:0.75em;bottom:0.75em;z-index:1;display:inline-flex;gap:0.375em;align-items:center;font-size:0.875em;cursor:pointer}.emvb-flip-check{margin:0;accent-color:currentColor}.emvb-flip-check:focus-visible{outline:2px solid currentColor;outline-offset:2px}" +
+    (Object.keys(FLIP_TURNS) as (keyof typeof FLIP_TURNS)[])
+      .map((dir) => {
+        const turn = FLIP_TURNS[dir];
+        const on = `.emvb-flip-${dir}:has(.emvb-flip-check:checked) .emvb-flip-inner,.emvb-flip-${dir}:has(.emvb-flip-back :focus-visible) .emvb-flip-inner`;
+        return `.emvb-flip-${dir} .emvb-flip-back{transform:${turn}}${on}{transform:${turn}}@media (hover:hover){.emvb-flip-${dir}:hover .emvb-flip-inner{transform:${turn}}}`;
+      })
+      .join("") +
+    "@media (prefers-reduced-motion:reduce){.emvb-flip-inner{transition:none}}",
+  defaults: () => ({
+    type: "flip-box",
+    props: {
+      frontTitle: "Hover or tap to learn more",
+      frontText: "A short teaser on the front.",
+      backTitle: "Here is the detail",
+      backText: "The back says more and can link somewhere.",
+      buttonText: "Read more",
+      href: "/about",
+    },
+  }),
+  descriptor: {
+    type: "flip-box",
+    name: "Flip box",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "frontTitle", kind: "text", label: "Front title" },
+      { key: "frontText", kind: "textarea", label: "Front text", optional: true },
+      { key: "backTitle", kind: "text", label: "Back title", optional: true },
+      { key: "backText", kind: "textarea", label: "Back text", optional: true },
+      {
+        key: "titleLevel",
+        kind: "select",
+        label: "Title level",
+        optional: true,
+        options: [2, 3, 4, 5, 6].map((level) => ({ value: level, label: `H${level}` })),
+      },
+      { key: "buttonText", kind: "text", label: "Button text", optional: true },
+      {
+        key: "href",
+        kind: "href",
+        label: "Button link",
+        optional: true,
+        message: "Use a full URL such as https://example.com or a path such as /about.",
+      },
+      { key: "newTab", kind: "boolean", label: "Open in a new tab", optional: true },
+      {
+        key: "direction",
+        kind: "select",
+        label: "Turns",
+        optional: true,
+        options: [
+          { value: "right", label: "Right" },
+          { value: "left", label: "Left" },
+          { value: "up", label: "Up" },
+          { value: "down", label: "Down" },
+        ],
+      },
+      {
+        key: "toggleLabel",
+        kind: "text",
+        label: "Turn-over control text",
+        optional: true,
+        message: "The tick box that turns the card on touch screens. Leave it empty for Turn over.",
+      },
+    ],
+  },
+  build: (node, attrs) => {
+    const p = node.props;
+    const heading = `h${p.titleLevel ?? 3}`;
+    const face = (
+      side: "front" | "back",
+      title?: string,
+      text?: string,
+      extra: VNode[] = [],
+    ): VNode => {
+      const children: VNode[] = [];
+      if (title?.trim())
+        children.push({ tag: heading, attrs: { class: "emvb-flip-title" }, children: [title] });
+      if (text?.trim())
+        children.push({ tag: "p", attrs: { class: "emvb-flip-text" }, children: [text] });
+      return {
+        tag: "div",
+        attrs: { class: `emvb-flip-face emvb-flip-${side}` },
+        children: [...children, ...extra],
+      };
+    };
+    const link = linkAttrs(p.href, p.newTab);
+    const button: VNode[] =
+      link && p.buttonText?.trim()
+        ? [{ tag: "a", attrs: { class: "emvb-flip-button", ...link }, children: [p.buttonText] }]
+        : [];
+    return {
+      tag: "div",
+      attrs: {
+        ...attrs,
+        class: `${attrs["class"] ?? ""} emvb-flip-${p.direction ?? "right"}`.trim(),
+      },
+      children: [
+        {
+          tag: "div",
+          attrs: { class: "emvb-flip-inner" },
+          children: [
+            face("front", p.frontTitle, p.frontText),
+            face("back", p.backTitle, p.backText, button),
+          ],
+        },
+        {
+          tag: "label",
+          attrs: { class: "emvb-flip-toggle" },
+          children: [
+            { tag: "input", attrs: { type: "checkbox", class: "emvb-flip-check" }, children: [] },
+            { tag: "span", attrs: {}, children: [p.toggleLabel?.trim() || "Turn over"] },
+          ],
+        },
+      ],
+    };
   },
 };

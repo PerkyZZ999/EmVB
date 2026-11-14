@@ -790,6 +790,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "price-list",
   "price-list-item",
   "cta",
+  "flip-box",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -1252,6 +1253,33 @@ export const CtaNode = leafNode(
   }),
 );
 
+/** W-1045: which way a Flip box turns over. */
+export const FLIP_DIRECTIONS = ["left", "right", "up", "down"] as const;
+
+/**
+ * W-1045: a card with a front and a back. It turns over on hover (where the device can hover)
+ * and when keyboard focus reaches the back; a native checkbox ("Turn over") turns it on touch
+ * screens and for keyboards, with no script. Both faces stay in the page for screen readers.
+ * Under reduced motion it swaps faces without the turn.
+ */
+export const FlipBoxNode = leafNode(
+  "flip-box",
+  z.strictObject({
+    frontTitle: z.string().max(200),
+    frontText: z.string().max(MAX_TEXT_LENGTH).optional(),
+    backTitle: z.string().max(200).optional(),
+    backText: z.string().max(MAX_TEXT_LENGTH).optional(),
+    /** Both titles' heading level. Unset = 3. */
+    titleLevel: z.number().int().min(2).max(6).optional(),
+    buttonText: z.string().max(80).optional(),
+    href: z.string().max(2000).optional(),
+    newTab: z.boolean().optional(),
+    direction: z.enum(FLIP_DIRECTIONS).optional(),
+    /** The checkbox's words. Unset = "Turn over". */
+    toggleLabel: z.string().max(40).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1299,6 +1327,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   PriceListNodeSchema,
   PriceListItemNode,
   CtaNode,
+  FlipBoxNode,
   CounterNode,
   ProgressNode,
   CountdownNode,
@@ -1353,6 +1382,7 @@ export type MapNode = z.infer<typeof MapNode>;
 export type PriceTableNode = z.infer<typeof PriceTableNode>;
 export type PriceListItemNode = z.infer<typeof PriceListItemNode>;
 export type CtaNode = z.infer<typeof CtaNode>;
+export type FlipBoxNode = z.infer<typeof FlipBoxNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
@@ -1606,6 +1636,7 @@ export type LayoutNode =
   | PriceListNode
   | PriceListItemNode
   | CtaNode
+  | FlipBoxNode
   | SpacerNode
   | DividerNode
   | TextNode

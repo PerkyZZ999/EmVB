@@ -375,3 +375,44 @@ test("a Call to action gets a ribbon and publishes with its title as the one lin
   await page.mouse.click((text?.x ?? 0) + 5, (text?.y ?? 0) + 5);
   await expect(page).toHaveURL(/\/$/);
 });
+
+test("a Flip box turns up; on the page the tick box and keyboard focus on its link turn it over (W-1045)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Flips");
+  await overlay(page).locator('[data-emvb-add-tile="flip-box"]').click();
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Flip box");
+  await overlay(page).getByLabel("Turns").click();
+  await page.getByRole("option", { name: "Up", exact: true }).click();
+  await expect(canvas(page).locator(".emvb-flip-box")).toHaveClass(/emvb-flip-up/);
+
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]).toMatchObject({ type: "flip-box", props: { direction: "up" } });
+
+  await publishPage(request, id);
+  await page.goto(`/${slug}`);
+  const inner = page.locator(".emvb-flip-inner");
+  const turned = () => inner.evaluate((el) => getComputedStyle(el).transform !== "none");
+  // Move the pointer away so hover doesn't turn it.
+  await page.mouse.move(0, 0);
+  await expect.poll(turned).toBe(false);
+  // Both faces are there for screen readers.
+  await expect(page.getByRole("heading", { name: "Here is the detail" })).toBeAttached();
+  const toggle = page.getByRole("checkbox", { name: "Turn over" });
+  await toggle.focus();
+  await page.keyboard.press("Space");
+  await expect(toggle).toBeChecked();
+  await expect.poll(turned).toBe(true);
+  await page.keyboard.press("Space");
+  await expect(toggle).not.toBeChecked();
+  await expect.poll(turned).toBe(false);
+  // Keyboard focus moving onto the back's link turns the card to show it.
+  await page.getByRole("link", { name: "Read more" }).focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Read more" })).toBeFocused();
+  await expect.poll(turned).toBe(true);
+  expect(await page.locator("script[src*='emvb'], script[data-emvb]").count()).toBe(0);
+});
