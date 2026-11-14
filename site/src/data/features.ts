@@ -41,6 +41,10 @@ export const featureGroups: FeatureGroup[] = [
         body: "Star rating, alert, icon and image boxes, testimonial, social icons, a gallery with a lightbox and a carousel, accessible and script-free unless you turn on an option that needs one.",
       },
       {
+        title: "Marketing widgets",
+        body: "Counters, progress bars, countdowns, maps that load on request, price tables and lists, calls to action, flip boxes, animated headlines, share buttons and hotspots, with motion that respects reduced-motion settings and can be paused.",
+      },
+      {
         title: "Schedule publishing",
         body: "Pick the date and time a page or theme part goes live; EmDash publishes it by itself.",
       },

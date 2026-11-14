@@ -77,6 +77,11 @@ the token, never the token. Calls signed in without a token are counted per user
 | --- | --- | --- | --- |
 | `list_pages`, `get_layout`, `describe_page`, `list_element_types`, `get_site_styles`, `list_section_recipes`, `get_accessibility_findings`, `list_versions`, `list_saved_sections` | `create_page`, `add_element`, `move_element`, `update_element`, `remove_element`, `apply_section_recipe`, `restore_version`, `update_site_styles`, `save_section`, `insert_saved_section`, `delete_saved_section` | `publish_page`, `publish_site_styles` | `list_page_outline`, `propose_changes`, `get_proposal`, `withdraw_proposal`, `get_requests` |
 
+- `list_element_types` lists every element with its settings, including the 1.3 marketing widgets
+  (Counter, Progress bar, Countdown, Map, Price table, Price list, Call to action, Flip box,
+  Animated headline, Share buttons, Hotspots). Like Social links and Gallery pictures, Price list
+  items, Share links and Hotspots go only inside their own parent: add the parent with its
+  `children`, or add them to it.
 - Writes take an optional `expectedRev`; a stale one returns `CONFLICT`. Every write returns a new
   `rev`: pass that one to the next write.
 - Style references to a site variable can leave out `from`; EmVB fills it in from the variable's

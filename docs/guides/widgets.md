@@ -1,13 +1,17 @@
 # Widgets
 
 EmVB 1.2 adds the common widgets site builders expect: Star rating, Alert, Icon box, Image box,
-Testimonial, Social icons, Gallery and Carousel. They are in the editor's Add panel under Content
+Testimonial, Social icons, Gallery and Carousel. EmVB 1.3 adds the marketing widgets: Counter,
+Progress bar, Countdown, Map, Price table, Price list, Call to action, Flip box, Animated headline,
+Share buttons and Hotspots. They are in the editor's Add panel under Content
 (the Carousel under Layout), AI agents can add them over MCP, and the accessibility check knows
 each one.
 
 Like every EmVB element they publish plain HTML and CSS. Most use no script at all. The Alert,
-Gallery and Carousel have options that need a small script; it loads only on a page that turns
-one of those options on, and the page works without it until it arrives.
+Gallery, Carousel, Counter, Countdown, Map, Animated headline and Share buttons have options that
+need a small script; it loads only on a page that turns one of those options on, and the page
+works without it until it arrives. Anything that moves respects visitors who prefer reduced
+motion, and anything that keeps moving for more than five seconds can be paused.
 
 ## Star rating
 
@@ -85,11 +89,92 @@ These options add a small script, loaded only on that page:
 Each slide is named "2 of 5" for screen readers, or by its own **Slide name**. The accessibility
 check warns when slides change faster than every 5 seconds.
 
+## Counter
+
+A number to show off, such as "1,200+ happy clients": the **Number**, text **Before** and **After**
+it, a **Title**, **Decimals** and a **Thousands separator**. It is plain text on the page. Turn on
+**Count up when scrolled into view** and it counts from **Count from** (0 unless you set it) in at
+most five seconds; visitors who prefer reduced motion see the final number at once, and screen
+readers hear only the final number. The accessibility check warns about a counter without a title.
+
+## Progress bar
+
+A bar filled to a **Value** out of a **Maximum** (100 unless you set it), in the element's text
+colour, with its **Title** and, if you like, the percentage. Pick its **Meaning**: a measurement
+such as a skill (screen readers hear a meter) or how far a task has got (a progress bar).
+**Grow in when scrolled into view** animates the fill with CSS only, in browsers that support
+scroll-driven animations, and not for visitors who prefer reduced motion. No script.
+
+## Countdown
+
+A deadline written as a date: "Ends 1 Dec 2026, 09:00 UTC−5". Type the **Ends at** date with its
+time zone offset, such as `2026-12-01T09:00-05:00` (or `Z` for UTC). **Show a live countdown** adds
+days, hours, minutes and seconds (or no seconds) that tick, with a **Pause** button; screen readers
+keep reading the date rather than a number every second. **When time is up** it shows your ended
+text, shows it as a link, or hides the countdown.
+
+## Map
+
+An **Address** with a link to it on OpenStreetMap or Google Maps, at exact coordinates if you give a
+**Latitude** and **Longitude**. **Visitors can load the map on the page** adds a Show the map button:
+the map service is contacted only when a visitor presses it, so pages stay private and fast. An
+OpenStreetMap map needs the coordinates; Google Maps can show the address. If your site sends a
+Content Security Policy, allow `frame-src https://www.openstreetmap.org https://www.google.com`.
+
+## Price table and Price list
+
+A **Price table** is a plan card: title, description, price with **Currency** and **Period**, a
+**Regular price** struck through when it is on sale, what is **Included** and **Not included** (one
+per line), a button and a **Featured** ribbon. Screen readers hear which price is the sale price
+and which features aren't included.
+
+A **Price list** is a menu: each row has a title, a dotted leader and the price on one line, an
+optional description, picture and link. Add, reorder and name rows in the panel. No script.
+
+## Call to action
+
+A box with a **Picture** behind the words (under a dark overlay that keeps white text readable) or
+above or beside them, a title, text, a button and an optional ribbon. Give it a **Link** and the
+whole box opens it through its title, so screen readers hear one link instead of two. No script.
+
+## Flip box
+
+A card with a front and a back that turns over on hover, when keyboard focus reaches the back's
+link, or with its **Turn over** tick box on touch screens, all without script. Pick the direction
+it turns. Screen readers read both faces, and visitors who prefer reduced motion see the faces swap
+without the turn.
+
+## Animated headline
+
+A heading with **Highlighted words** between text **Before** and **After** them, marked with an
+underline, a circle or a strike drawn once (already drawn for visitors who prefer reduced motion).
+List **Other words** and turn on **Rotate the words** to swap the highlight through them for a few
+**Rounds** with a Pause button, then stop on the first; screen readers read one steady sentence.
+The accessibility check counts it as a heading.
+
+## Share buttons
+
+Links that share the page on Facebook, X, LinkedIn, WhatsApp, Telegram, Reddit, Bluesky, Threads
+or by email, with the same icons, shapes and brand colours as Social icons, named for screen
+readers ("Share on X"). They are plain links to each service's own share page, so there is no
+tracking script and nothing is sent to those services until a visitor clicks. **Add the device's
+Share button** adds a Share… button for the phone's or browser's own share sheet where it has one.
+`resolveEmVBPage` gives the links the page's address; the HTML export leaves them out, because it
+doesn't know your site's address.
+
+## Hotspots
+
+A **Picture** with numbered markers. Each marker has a **Title** and a **Note** and sits at a place
+**Across** and **Down** the picture in percent, with its own places on tablets and phones if you
+like. A marker is a button named by its title that opens its note with the browser's built-in
+popover: no script, Escape or a click outside closes it, and keyboards and screen readers reach
+every marker. Where the browser supports it, the note appears next to its marker.
+
 ## Scripts in theme parts
 
 A page built with `EmVBPage` mounts the scripts its own widgets need, with no change to your site.
-To use a dismissible Alert, a lightbox Gallery or Carousel controls inside a header, footer or other
-theme part, add this once to your site layout (see the
+To use a dismissible Alert, a lightbox Gallery, Carousel controls or any of the 1.3 widgets' scripts
+inside a header, footer or other theme part, add this once to your site layout (see the
 [install guide](install-in-a-host-site.md#3-public-route)):
 
 ```astro
@@ -104,5 +189,8 @@ The [HTML and CSS export](leaving-emvb.md) writes the same scripts next to the p
 ## From Elementor
 
 Elementor's Star Rating, Alert, Icon Box, Image Box, Testimonial, Social Icons, Basic and Pro
-Gallery, and Image and Media Carousel widgets import as these elements, with their options. See
+Gallery, and Image and Media Carousel widgets import as these elements, with their options. Since
+1.3 so do its Counter, Progress Bar, Countdown, Google Maps, Price Table, Price List, Call to
+Action, Flip Box, Animated Headline, Share Buttons and Hotspot, and Slides and Testimonial Carousel
+become a Carousel. See
 [Import from Elementor](elementor-import.md).
