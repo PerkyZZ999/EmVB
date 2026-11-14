@@ -31,6 +31,11 @@
         "count": 1
       }
     },
+    "e2e/widgets.e2e.ts": {
+      "crap_moderate": {
+        "count": 2
+      }
+    },
     "examples/emvb-ext-hello/src/index.ts": {
       "crap_moderate": {
         "count": 1
@@ -79,6 +84,11 @@
         "count": 1
       }
     },
+    "packages/emvb/src/admin/editor/ScheduleDialog.tsx": {
+      "complexity_moderate": {
+        "count": 1
+      }
+    },
     "packages/emvb/src/admin/editor/ShareLink.tsx": {
       "complexity_moderate": {
         "count": 1
@@ -94,6 +104,9 @@
     },
     "packages/emvb/src/admin/editor/TopBar.tsx": {
       "complexity_high": {
+        "count": 1
+      },
+      "crap_high": {
         "count": 1
       }
     },
@@ -468,6 +481,9 @@
     "packages/emvb/src/admin/editor/useEditorData.ts": {
       "complexity_moderate": {
         "count": 1
+      },
+      "crap_moderate": {
+        "count": 1
       }
     },
     "packages/emvb/src/admin/editor/useEditorShortcuts.ts": {
@@ -488,7 +504,7 @@
         "count": 1
       },
       "crap_moderate": {
-        "count": 2
+        "count": 1
       }
     },
     "packages/emvb/src/admin/image-editor/Canvas.tsx": {
@@ -741,7 +757,10 @@
       }
     },
     "packages/emvb/src/core/arrange.ts": {
-      "complexity_moderate": {
+      "complexity_high": {
+        "count": 1
+      },
+      "crap_high": {
         "count": 1
       }
     },
@@ -821,17 +840,16 @@
       "complexity_critical": {
         "count": 1
       },
-      "complexity_high": {
-        "count": 1
-      },
       "crap_critical": {
-        "count": 1
-      },
-      "crap_high": {
         "count": 1
       },
       "crap_moderate": {
         "count": 3
+      }
+    },
+    "packages/emvb/src/core/elements/widgets.ts": {
+      "crap_moderate": {
+        "count": 2
       }
     },
     "packages/emvb/src/core/export/site.ts": {
@@ -979,7 +997,7 @@
         "count": 4
       },
       "crap_moderate": {
-        "count": 1
+        "count": 2
       }
     },
     "packages/emvb/src/core/import/elementor/inline-marks.ts": {
@@ -1005,16 +1023,16 @@
         "count": 4
       },
       "complexity_high": {
-        "count": 4
+        "count": 6
       },
       "crap_critical": {
         "count": 4
       },
       "crap_high": {
-        "count": 6
+        "count": 8
       },
       "crap_moderate": {
-        "count": 7
+        "count": 11
       }
     },
     "packages/emvb/src/core/migrate/v18.ts": {
@@ -1391,103 +1409,109 @@
     "packages/emvb/src/core/design/devices.ts:high impact",
     "packages/emvb/src/core/stable-json.ts:high impact",
     "packages/emvb/src/core/import/elementor/css.ts:high impact",
+    "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx:complexity",
     "packages/emvb/src/core/design/classes.ts:high impact",
     "packages/emvb/src/admin/pages/ExportDialog.tsx:high impact",
-    "packages/emvb/src/admin/editor/panels/settings/FieldControl.tsx:complexity",
     "packages/emvb/src/admin/editor/useEditorCommands.ts:complexity",
-    "packages/emvb/src/server/mcp-routes.ts:hidden coupling",
     "packages/emvb/src/server/hooks.ts:high impact",
+    "packages/emvb/src/server/mcp-routes.ts:hidden coupling",
     "packages/emvb/src/core/import/elementor/style.ts:high impact",
     "packages/emvb/src/core/render/extras.ts:high impact",
-    "packages/emvb/src/core/theme/dynamic.ts:high impact",
     "packages/emvb/src/admin/access/role.ts:high impact",
     "packages/emvb/src/core/design/variables.ts:high impact",
-    "packages/emvb/src/admin/editor/Editor.tsx:complexity",
-    "packages/emvb/src/core/contract.ts:high impact",
-    "packages/emvb/src/server/requests.ts:high impact",
+    "packages/emvb/src/core/theme/dynamic.ts:high impact",
     "packages/emvb/src/core/record.ts:high impact",
-    "packages/emvb/src/admin/editor/palette-items.ts:high impact",
+    "packages/emvb/src/core/contract.ts:high impact",
     "packages/emvb/src/core/text-marks.ts:high impact",
+    "packages/emvb/src/server/requests.ts:high impact",
+    "packages/emvb/src/admin/editor/palette-items.ts:high impact",
     "packages/emvb/src/astro/theme-posts.ts:high impact",
+    "packages/emvb/src/admin/editor/Editor.tsx:complexity",
     "packages/emvb/src/core/perf/meter.ts:high impact",
-    "packages/emvb/src/admin/editor/useEditorShortcuts.ts:complexity",
     "packages/emvb/src/admin/widgets/convert-body.ts:high impact",
     "packages/emvb/src/astro/forms-definitions.ts:high impact",
+    "packages/emvb/src/admin/editor/useEditorShortcuts.ts:complexity",
     "packages/emvb/src/core/proposals.ts:high impact",
     "packages/emvb/src/admin/search.ts:high impact",
     "packages/emvb/src/core/sanitize/motion.ts:high impact",
-    "packages/emvb/src/admin/editor/panels/LayersPanel.tsx:complexity",
     "packages/emvb/src/admin/editor/panels/settings/StyleRow.tsx:complexity",
     "packages/emvb/src/core/data/bindings.ts:high impact",
+    "packages/emvb/src/admin/editor/panels/LayersPanel.tsx:complexity",
     "packages/emvb/src/astro/resolve.ts:complexity",
     "packages/emvb/src/core/portable-text.ts:high impact",
     "packages/emvb/src/admin/editor/co-design.ts:high impact",
-    "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx:hidden coupling",
+    "demos/cloudflare/src/layouts/Base.astro:hidden coupling",
+    "demos/node/src/layouts/Base.astro:hidden coupling",
     "packages/emvb/src/admin/editor/panels/settings/advanced-rules.ts:high impact",
+    "packages/emvb/src/admin/editor/panels/settings/IconControls.tsx:hidden coupling",
+    "packages/emvb/src/core/arrange.ts:high impact",
     "packages/emvb/src/core/design/diff.ts:high impact",
     "packages/emvb/src/core/extensions/namespace.ts:high impact",
     "packages/emvb/src/admin/editor/panels/settings/LengthRow.tsx:complexity",
     "packages/emvb/src/admin/editor/panels/variable-values.ts:high impact",
-    "packages/emvb/src/core/theme/pagination.ts:high impact",
-    "packages/emvb/src/core/arrange.ts:high impact",
     "packages/emvb/src/core/image-edit/summary.ts:complexity",
-    "demos/cloudflare/src/layouts/Base.astro:hidden coupling",
-    "demos/node/src/layouts/Base.astro:hidden coupling",
+    "packages/emvb/src/core/theme/pagination.ts:high impact",
     "packages/emvb/test/dom/outline.ts:high impact",
-    "packages/emvb/src/core/extensions/schema.ts:high impact",
     "packages/emvb/src/admin/editor/useEditorData.ts:high impact",
+    "packages/emvb/src/core/extensions/schema.ts:high impact",
     "packages/emvb/src/core/import/elementor/values.ts:high impact",
     "packages/emvb/src/core/import/elementor/index.ts:high impact",
     "packages/emvb/src/admin/editor/extension-manifests.ts:high impact",
-    "packages/emvb/src/mcp/write.ts:high impact",
     "packages/emvb/src/core/audience/rules.ts:high impact",
+    "packages/emvb/src/mcp/write.ts:high impact",
     "packages/emvb/src/admin/editor/panels/color-space.ts:high impact",
     "packages/emvb/src/core/audience/variants.ts:high impact",
-    "packages/emvb/src/admin/editor/panels/PageSettings.tsx:hidden coupling",
+    "packages/emvb/src/admin/editor/icons/use-icon-library.ts:complexity",
     "packages/emvb/src/admin/copy-rich-text.ts:complexity",
     "packages/emvb/src/admin/editor/dnd/drag-stash.ts:high impact",
     "packages/emvb/src/core/portable-text-export.ts:high impact",
-    "packages/emvb/src/admin/content-api.ts:hidden coupling",
-    "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx:hidden coupling",
     "packages/emvb/src/core/css/trace.ts:complexity",
     "packages/emvb/test/dom/select.ts:high impact",
+    "packages/emvb/src/admin/content-api.ts:hidden coupling",
     "packages/emvb/src/admin/editor/dnd/drop-target.ts:high impact",
+    "packages/emvb/src/admin/editor/panels/settings/IconPicker.tsx:hidden coupling",
     "packages/emvb/src/core/import/elementor/atomic.ts:complexity",
     "packages/emvb/src/core/migrate/v18.ts:high impact",
-    "packages/emvb/src/admin/image-editor/MetadataPanel.tsx:high impact",
     "packages/emvb-mcp/src/bridge.ts:hidden coupling",
+    "packages/emvb/src/admin/editor/TopBar.tsx:complexity",
+    "packages/emvb/src/admin/image-editor/MetadataPanel.tsx:high impact",
     "packages/emvb/src/core/sanitize/embed-url.ts:high impact",
     "packages/emvb/src/admin/image-editor/Canvas.tsx:complexity",
     "packages/emvb/src/admin/editor/panels/settings/AudienceEditor.tsx:untested risk",
-    "packages/emvb/src/astro/popups/runtime.ts:untested risk",
-    "packages/emvb/src/admin/editor/icons/use-icon-library.ts:complexity",
     "packages/emvb/src/admin/editor/panels/settings/class-suggest.ts:high impact",
+    "packages/emvb/src/astro/popups/runtime.ts:untested risk",
     "packages/emvb/src/astro/tabs/runtime.ts:untested risk",
     "packages/emvb/src/admin/editor/palette.ts:high impact",
     "packages/emvb/src/admin/image-editor/ExportDialog.tsx:complexity",
+    "packages/emvb/src/core/import/elementor/widgets.ts:complexity",
     "packages/emvb/src/core/sanitize/svg-upload.ts:untested risk",
-    "packages/emvb/src/admin/editor/TopBar.tsx:complexity",
     "packages/emvb/src/astro/responsive-images.ts:high impact",
-    "packages/emvb/src/core/render/form.ts:complexity",
     "packages/emvb/src/admin/editor/ime.ts:high impact",
+    "packages/emvb/src/core/elements/widgets.ts:hidden coupling",
+    "packages/emvb/src/core/render/form.ts:complexity",
     "packages/emvb/src/admin/pages/ImportElementorDialog.tsx:complexity",
     "packages/emvb/src/admin/editor/panels/settings/icon-picker.test.tsx:hidden coupling",
-    "packages/emvb/src/core/import/elementor/widgets.ts:complexity",
     "packages/emvb/src/core/import/elementor/html.ts:high impact",
+    "packages/emvb/test/compat/compat.test.ts:hidden coupling",
     "packages/emvb/src/core/search-text.ts:complexity",
     "packages/emvb/src/admin/editor/panels/settings/EffectsControls.tsx:hidden coupling",
     "packages/emvb/src/core/render/pagination.ts:hidden coupling",
-    "packages/emvb/test/server/mcp-read.test.ts:hidden coupling",
     "e2e/smoke.e2e.ts:hidden coupling",
+    "packages/emvb/test/server/mcp-read.test.ts:hidden coupling",
     "packages/emvb/src/admin/image-editor/crop-geometry.ts:complexity",
-    "packages/emvb/src/core/render/pagination.test.ts:hidden coupling",
     "packages/emvb/src/core/export/site.ts:complexity",
+    "packages/emvb/src/core/render/pagination.test.ts:hidden coupling",
+    "packages/emvb/src/admin/editor/element-chrome.ts:hidden coupling",
     "packages/emvb/src/admin/editor/panels/settings/style-sections.test.tsx:hidden coupling",
     "packages/emvb/src/core/import/elementor/atomic.test.ts:hidden coupling",
+    "packages/emvb/src/core/a11y/widgets.test.ts:hidden coupling",
     "packages/emvb/src/core/import/elementor/elementor.test.ts:hidden coupling",
     "packages/emvb/src/admin/image-editor/image-editor-dialog.test.tsx:hidden coupling",
+    "e2e/widgets.e2e.ts:hidden coupling",
     "scripts/seeded-bug.ts:complexity",
+    "packages/emvb/test/server/mcp-widgets.test.ts:hidden coupling",
     "packages/emvb/src/core/elements/icon-style.test.ts:hidden coupling",
+    "packages/emvb/src/core/elements/widgets.test.ts:hidden coupling",
     "packages/emvb/test/server/mcp-write.test.ts:hidden coupling",
     "e2e/image-editor.prod.ts:hidden coupling"
   ]

@@ -876,6 +876,15 @@ export const IconBoxNode = leafNode(
 /** W-1021: how much of the box's width an image box's picture takes when beside the words. */
 export const IMAGE_BOX_SIZES = ["small", "medium", "large", "full"] as const;
 
+/** A picture picked from the media library: its id, intrinsic size and focal point (as Image). */
+const PICKED_MEDIA = {
+  mediaId: z.string().min(1).max(128).optional(),
+  width: z.number().int().positive().max(10000).optional(),
+  height: z.number().int().positive().max(10000).optional(),
+  focalX: z.number().int().min(0).max(100).optional(),
+  focalY: z.number().int().min(0).max(100).optional(),
+};
+
 /**
  * W-1021: a picture above (or beside) a title and text, like Elementor's Image Box. The picture
  * keys are an Image's, so the media library fills them the same way; alt text is required unless
@@ -887,11 +896,7 @@ export const ImageBoxNode = leafNode(
     src: z.string().max(2000),
     alt: z.string().max(500),
     decorative: z.boolean().optional(),
-    mediaId: z.string().min(1).max(128).optional(),
-    width: z.number().int().positive().max(10000).optional(),
-    height: z.number().int().positive().max(10000).optional(),
-    focalX: z.number().int().min(0).max(100).optional(),
-    focalY: z.number().int().min(0).max(100).optional(),
+    ...PICKED_MEDIA,
     /** Beside the words: small 25 %, medium 40 %, large 60 % of the box. Unset = medium. */
     imageSize: z.enum(IMAGE_BOX_SIZES).optional(),
     ...MediaBoxText,
@@ -915,11 +920,7 @@ export const TestimonialNode = leafNode(
     src: z.string().max(2000).optional(),
     /** Written by the media library; never rendered (the photo is beside the name). */
     alt: z.string().max(500).optional(),
-    mediaId: z.string().min(1).max(128).optional(),
-    width: z.number().int().positive().max(10000).optional(),
-    height: z.number().int().positive().max(10000).optional(),
-    focalX: z.number().int().min(0).max(100).optional(),
-    focalY: z.number().int().min(0).max(100).optional(),
+    ...PICKED_MEDIA,
     /** Stars out of `ratingMax` (unset 5); no stars when unset. */
     rating: z.number().min(0).max(MAX_RATING).optional(),
     ratingMax: z.number().int().min(1).max(MAX_RATING).optional(),
@@ -1005,11 +1006,7 @@ export const GalleryImageNode = leafNode(
     src: z.string().max(2000),
     alt: z.string().max(500),
     decorative: z.boolean().optional(),
-    mediaId: z.string().min(1).max(128).optional(),
-    width: z.number().int().positive().max(10000).optional(),
-    height: z.number().int().positive().max(10000).optional(),
-    focalX: z.number().int().min(0).max(100).optional(),
-    focalY: z.number().int().min(0).max(100).optional(),
+    ...PICKED_MEDIA,
     caption: z.string().max(500).optional(),
   }),
 ).refine((node) => node.props.decorative === true || node.props.alt.length > 0, {
