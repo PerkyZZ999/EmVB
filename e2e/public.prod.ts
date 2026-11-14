@@ -94,7 +94,8 @@ test("a published page renders from the production build with its content and CS
   const text = `Published ${slug}`;
   const html = await publishedHtml(request, "Public check", layoutWith(text), slug);
   expect(html).toContain(`<h1 class="emvb-heading">${text}</h1>`);
-  expect(html).toMatch(/<style>[^<]*\.emvb-root\{[^<]*gap:24px/);
+  // The root's own styles are its element rule, inside the page's scope.
+  expect(html).toMatch(/<style>[^<]*\.emvb-e-root0001\{[^<]*gap:24px/);
   // Only the documented public hooks (docs/system/layout-format.md, "Rendered output").
   expect(editorAttributesIn(html)).toEqual([]);
 

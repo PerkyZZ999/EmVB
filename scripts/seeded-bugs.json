@@ -48910,6 +48910,90 @@
       ],
       "command": ["bun", "test", "scripts/dependabot.test.ts"],
       "expect": "\\(fail\\).*W-1032"
+    },
+    {
+      "id": "W-1035/e2e-reuses-dev-demo",
+      "requirement": "W-1035",
+      "description": "Outside CI, Playwright reuses a running demo again, with the developer's data.",
+      "edits": [
+        {
+          "file": "playwright.shared.ts",
+          "search": "  reuseExistingServer: process.env[\"EMVB_REUSE_SERVER\"] === \"1\",",
+          "replace": "  reuseExistingServer: !process.env[\"CI\"] || process.env[\"EMVB_REUSE_SERVER\"] === \"1\","
+        }
+      ],
+      "command": ["bun", "test", "test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1035"
+    },
+    {
+      "id": "W-1035/node-demo-ignores-data",
+      "requirement": "W-1035",
+      "description": "The node demo keeps using ./data.db when e2e gives it a data folder.",
+      "edits": [
+        {
+          "file": "demos/node/astro.config.mjs",
+          "search": "url: `file:${data ? join(data, \"data.db\") : \"./data.db\"}`",
+          "replace": "url: \"file:./data.db\""
+        }
+      ],
+      "command": ["bun", "test", "test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1035"
+    },
+    {
+      "id": "W-1035/run-data-left-behind",
+      "requirement": "W-1035",
+      "description": "A run's data folder stays after the run.",
+      "edits": [
+        {
+          "file": "e2e/support/demo-data.ts",
+          "search": "  if (dir && process.env[\"EMVB_E2E_DATA_OWNED\"] === \"1\")\n    rmSync(dir, { recursive: true, force: true });",
+          "replace": "  if (dir && process.env[\"EMVB_E2E_DATA_OWNED\"] === \"2\")\n    rmSync(dir, { recursive: true, force: true });"
+        }
+      ],
+      "command": ["bun", "test", "test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1035"
+    },
+    {
+      "id": "W-1035/prune-removes-current-run",
+      "requirement": "W-1035",
+      "description": "Pruning old runs also removes the folder of the run in progress.",
+      "edits": [
+        {
+          "file": "e2e/support/demo-data.ts",
+          "search": "if (!name.startsWith(\"run-\") || dir === current) continue;",
+          "replace": "if (!name.startsWith(\"run-\") || dir === `${current}-`) continue;"
+        }
+      ],
+      "command": ["bun", "test", "test/e2e-demo-data.test.ts"],
+      "expect": "\\(fail\\).*W-1035"
+    },
+    {
+      "id": "W-1037/desktop-shots-no-phone-size",
+      "requirement": "W-1037",
+      "description": "Desktop screenshots start at 1600 px again, so phones download the large one.",
+      "edits": [
+        {
+          "file": "site/src/data/shots.ts",
+          "search": "const desktopWidths = [800, 1600, 2400] as const;",
+          "replace": "const desktopWidths = [1600, 2400] as const;"
+        }
+      ],
+      "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
+      "expect": "\\(fail\\).*W-1037"
+    },
+    {
+      "id": "W-1037/width-without-file",
+      "requirement": "W-1037",
+      "description": "A width is listed for phone shots that no file exists for.",
+      "edits": [
+        {
+          "file": "site/src/data/shots.ts",
+          "search": "const phoneWidths = [390, 780, 1170] as const;",
+          "replace": "const phoneWidths = [360, 780, 1170] as const;"
+        }
+      ],
+      "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
+      "expect": "\\(fail\\).*W-1037"
     }
   ]
 }

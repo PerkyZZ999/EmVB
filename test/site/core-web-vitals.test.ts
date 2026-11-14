@@ -52,3 +52,18 @@ test("W-1031: on a small screen the playground's notice is in the page's HTML, w
   expect(island).toContain("<h1>{SMALL_SCREEN_TITLE}</h1>");
   expect(island).toContain("<p>{SMALL_SCREEN_TEXT}</p>");
 });
+
+test("W-1037: phones get a phone-sized screenshot, and every listed width exists", async () => {
+  const { shots, shotSize, shotSrc } = await import("../../site/src/data/shots.ts");
+  expect(shotSize.desktop.widths[0]).toBeLessThanOrEqual(800);
+  expect(shotSize.phone.widths[0]).toBeLessThanOrEqual(390);
+  const files = Object.values(shots).flatMap((shot) =>
+    shotSize[shot.kind].widths.map((width) => shotSrc(shot.name, width)),
+  );
+  const missing = (
+    await Promise.all(
+      files.map(async (src) => ((await Bun.file(join(SITE, "public", src)).exists()) ? [] : [src])),
+    )
+  ).flat();
+  expect(missing).toEqual([]);
+});

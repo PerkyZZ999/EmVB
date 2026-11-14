@@ -19,6 +19,7 @@ bun run check                                   # lint, format, types, dead code
 bun run e2e e2e/<area>.e2e.ts --project=node    # the e2e specs for what you touched
 ```
 
+- **e2e runs on its own data.** Each Playwright run starts the demo servers on a fresh data folder (`e2e/.data/run-…`, removed at the end), never on your `demos/node/data.db` or `demos/cloudflare/.wrangler`, so what you made in the demos can't change a result. `bun run e2e:prod` builds the node demo for that run's folder: run `bun run demo:node:build` again before using `demo:node:prod` yourself.
 - **Tests prove themselves.** Every new or changed test needs a seeded bug in `scripts/seeded-bugs.json` that makes it fail. Run it with `bun run seeded-bugs --only <id>`.
 
 ### Running seeded bugs fast
@@ -48,7 +49,7 @@ Keep commits small, one change each, in the form `feat(scope): …`, `fix(scope)
 - **The Node demo exits with `null is not an object (evaluating 'server.address.port')` or `transport was disconnected`.** Use `bun run demo:node`, which runs Astro on Node. Forcing Bun with `bun --bun astro dev` can trigger a restart during Astro's first update check on macOS. Bun still handles installs, tests and the Node demo's build and production server.
 - **The first admin load after a dev-server start shows "Loading EmDash..." or a hydration error.** Reload; `e2e/auth.setup.ts` retries until two clean loads.
 - **Don't run `astro build` for a demo while its dev server is running.** It can leave the dev admin unable to hydrate; restart the dev server.
-- **Port already in use** (4411, 4412, 4421, 4422): a demo is still running. Stop it, or run Playwright without `CI=1` to reuse it.
+- **Port already in use** (4411, 4412, 4421, 4422): a demo is still running. Stop it, or give the e2e servers other ports (`EMVB_E2E_NODE_PORT`, `EMVB_E2E_CF_PORT`). Playwright no longer reuses a running demo, because it has your data.
 - **A failing `bun test` prints megabytes of object dump:** an assertion was given a DOM element. Assert on its markup or on a boolean instead.
 - **workerd crashes with `SIGXFSZ`:** a file-size limit (`ulimit -f`) is set in your shell. Don't limit file size or address space when running the demos or e2e; cap memory instead if you need to.
 - **Playwright failures** keep a trace in `test-results/<test>/trace.zip`.

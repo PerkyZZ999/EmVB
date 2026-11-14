@@ -241,7 +241,14 @@ const DEMOS = {
 /** W-985: e2e lane n uses ports 4411/4412 plus 100 × n, so lanes never share a server. */
 const lanePort = (platform: "node" | "cloudflare", lane: number) =>
   DEMOS[platform].port + 100 * lane;
-const laneEnv = (lane: number): Record<string, string> => ({
+/** W-1035: a warm lane's demo data, kept for its runs and removed when the lane ends. */
+const laneData = (laneRoot: string, lane: number) => join(laneRoot, "e2e/.data", `lane-${lane}`);
+/**
+ * Lane n's ports. A warm lane (laneRoot given) also names its data folder, so every run on its
+ * warm server finds that server's database; a cold run makes its own fresh one (W-1035).
+ */
+const laneEnv = (lane: number, laneRoot?: string): Record<string, string> => ({
+  ...(laneRoot ? { EMVB_E2E_DATA: laneData(laneRoot, lane) } : {}),
   EMVB_E2E_NODE_PORT: String(lanePort("node", lane)),
   EMVB_E2E_CF_PORT: String(lanePort("cloudflare", lane)),
   // W-986: and the production servers of e2e:prod seeds, ten above the dev servers.
@@ -280,7 +287,11 @@ async function startDemo(root: string, platform: "node" | "cloudflare", lane: nu
     ["setsid", "bun", "x", "astro", "dev", "--host", "127.0.0.1", "--port", String(port)],
     {
       cwd: join(root, DEMOS[platform].dir),
-      env: { ...process.env, ASTRO_DEV_BACKGROUND: "1" },
+      env: {
+        ...process.env,
+        ASTRO_DEV_BACKGROUND: "1",
+        EMVB_DEMO_DATA: join(laneData(root, lane), platform),
+      },
       stdout: "ignore",
       stderr: "ignore",
     },
@@ -657,7 +668,7 @@ if (import.meta.main) {
     // the clean code (the no-op after the seeds): a catch counts only if its test passes there.
     // Anything not proven that way (not caught warm, a probe timeout, a failed clean re-run, a
     // production or non-Node seed) runs again cold, exactly as with --cold-e2e.
-    const ports = laneEnv(lane);
+    const ports = laneEnv(lane, laneRoot);
     const port = lanePort("node", lane);
     const probe = join(laneRoot, "demos/node/src/pages/seed-probe.ts");
     await copyFile(join(root, "scripts/seed-probe.ts"), probe);
@@ -781,7 +792,7 @@ if (import.meta.main) {
             // oxlint-disable-next-line no-await-in-loop -- one seed at a time per lane
             const done = await timed(`e2e-cold-${lane}`, laneRoot, {
               ...seed,
-              env: { ...seed.env, ...ports },
+              env: { ...seed.env, ...laneEnv(lane) },
             });
             report({ ...done, seed, lane: `e2e-cold-${lane} (${why})` });
           }
@@ -791,6 +802,7 @@ if (import.meta.main) {
       await stopServer();
       // The probe is the lane's own; with --jobs 1 lane 0 is this checkout, so it must not stay.
       await rm(probe, { force: true });
+      await rm(laneData(laneRoot, lane), { recursive: true, force: true });
     }
   };
 

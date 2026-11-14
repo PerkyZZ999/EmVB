@@ -1,6 +1,5 @@
-import { readdirSync } from "node:fs";
-import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { demoDatabase } from "./demo-data.ts";
 
 /** The dev bypass always signs in this user (EmDash `auth/dev-bypass.ts`). */
 const DEV_USER_EMAIL = "dev@emdash.local";
@@ -12,17 +11,6 @@ export const ROLES = {
   editor: 40,
   admin: 50,
 } as const;
-
-function demoDatabase(platform: string): string {
-  if (platform === "node") return "demos/node/data.db";
-  // Wrangler keeps the local D1 database as a SQLite file named by a hash.
-  const dir = "demos/cloudflare/.wrangler/state/v3/d1/miniflare-D1DatabaseObject";
-  const file = readdirSync(dir).find(
-    (name) => name.endsWith(".sqlite") && name !== "metadata.sqlite",
-  );
-  if (!file) throw new Error(`No local D1 database in ${dir}`);
-  return join(dir, file);
-}
 
 /**
  * Changes the signed-in dev user's role in the demo database. EmDash reads the role on every

@@ -1,5 +1,10 @@
 import { defineConfig } from "@playwright/test";
+import { platformDataDir, pruneStaleRuns } from "./e2e/support/demo-data.ts";
 import { baseConfig, server } from "./playwright.shared.ts";
+
+// W-1035: this run's own demo data, shared by each platform's dev and production servers.
+platformDataDir("node");
+pruneStaleRuns();
 
 // Production-output checks (W-011): pages are authored through the dev servers (dev-bypass
 // sign-in) and read back from the production builds, which share the same database.
@@ -30,11 +35,16 @@ const devCommand = (p: Platform) =>
   custom(p)
     ? `bun run --cwd ${p.dir} astro dev --host 127.0.0.1 --port ${p.dev}`
     : `bun run ${p.script}`;
+/**
+ * The node build bakes the run's database path in (its config reads EMVB_DEMO_DATA at build time);
+ * Wrangler's production server is told where the dev server keeps the run's local D1 and R2.
+ */
 const prodCommand = (p: Platform) => {
-  if (!custom(p)) return `bun run ${p.script}:prod`;
+  const persist = p.name === "cloudflare" ? ` --persist-to ${platformDataDir(p.name)}` : "";
+  if (!custom(p)) return `bun run ${p.script}:prod${persist}`;
   return p.name === "node"
     ? `cd ${p.dir} && HOST=127.0.0.1 PORT=${p.prod} bun ./dist/server/entry.mjs`
-    : `cd ${p.dir} && bunx wrangler dev --ip 127.0.0.1 --port ${p.prod}`;
+    : `cd ${p.dir} && bunx wrangler dev --ip 127.0.0.1 --port ${p.prod}${persist}`;
 };
 
 /**
@@ -58,6 +68,7 @@ const servers = platforms.filter(
 export default defineConfig({
   ...baseConfig,
   testDir: "./e2e",
+  globalTeardown: "./e2e/support/demo-data.ts",
   projects: platforms.flatMap(({ name, dev, prod }) => [
     {
       name: `${name}-setup`,
@@ -76,8 +87,13 @@ export default defineConfig({
   // warm `astro dev` in the same project left the dev admin unable to hydrate (VALIDATION W-011).
   webServer: [
     ...servers.map((p) =>
-      server(`bun run ${p.script}:build && ${prodCommand(p)}`, p.prod, 300_000),
+      server(
+        `bun run ${p.script}:build && ${prodCommand(p)}`,
+        p.prod,
+        300_000,
+        platformDataDir(p.name),
+      ),
     ),
-    ...servers.map((p) => server(devCommand(p), p.dev, 180_000)),
+    ...servers.map((p) => server(devCommand(p), p.dev, 180_000, platformDataDir(p.name))),
   ],
 });

@@ -1,7 +1,8 @@
 /**
  * Screenshots of the real EmVB editor and the Northfold demo site, captured by
  * `scripts/capture-screenshots.ts`. Desktop shots are 1440 × 900 CSS px at 2×,
- * phone shots 390 × 844 at 3×, each exported as WebP at two widths.
+ * phone shots 390 × 844 at 3×, each exported as WebP at three widths (the smallest for phones,
+ * W-1037).
  */
 export type ShotKind = "desktop" | "phone";
 
@@ -12,8 +13,8 @@ export interface Shot {
   caption: string;
 }
 
-const desktopWidths = [1600, 2400] as const;
-const phoneWidths = [780, 1170] as const;
+const desktopWidths = [800, 1600, 2400] as const;
+const phoneWidths = [390, 780, 1170] as const;
 
 export const shotSize = {
   desktop: { widths: desktopWidths, ratio: 900 / 1440 },

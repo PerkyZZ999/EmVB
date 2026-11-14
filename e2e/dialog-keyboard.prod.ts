@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { createPage, ensureEmvbSetup } from "./support/api.ts";
+import { unique } from "./support/helpers.ts";
 
 // W-984: in the production build, Tab never leaves an EmVB dialog (Base UI's end guard could
 // let focus fall to the page behind). The image editor has its own check (W-487).
@@ -9,6 +11,12 @@ test.use({
 });
 
 test("W-984: Tab and Shift+Tab stay inside the Export pages dialog", async ({ page }) => {
+  // Export pages shows once there is a page to export; the run's data starts empty (W-1035).
+  await ensureEmvbSetup(page);
+  await createPage(page.request, `Export focus ${unique()}`, {
+    schemaVersion: 17,
+    root: { id: "root0001", type: "container", props: {}, children: [] },
+  });
   await page.goto("/_emdash/admin/plugins/emvb/pages");
   await page.getByRole("button", { name: "Export pages", exact: true }).click();
   const dialog = page.locator('[data-emvb-dialog="export-pages"]');

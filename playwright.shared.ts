@@ -25,15 +25,18 @@ export const baseConfig = {
   use: { launchOptions: { executablePath }, trace: "retain-on-failure" },
 } satisfies PlaywrightTestConfig;
 
-/** A demo server Playwright starts, reuses outside CI, and waits on at the site root. */
-export const server = (command: string, port: number, timeout: number) => ({
+/**
+ * A demo server Playwright starts on its own data (W-1035) and waits on at the site root. It
+ * reuses a server already on the port only when asked (`EMVB_REUSE_SERVER=1`: the seeded-bug
+ * runner's warm lanes, which name their data folder); a developer's own demo has their data.
+ */
+export const server = (command: string, port: number, timeout: number, data: string) => ({
   command,
   // The site root, not an EmVB route, so a broken plugin fails tests instead of server startup.
   url: `http://127.0.0.1:${port}/`,
-  // W-985: the seeded-bug runner's warm e2e lane keeps CI=1 (same settings) and reuses its server.
-  reuseExistingServer: !process.env["CI"] || process.env["EMVB_REUSE_SERVER"] === "1",
+  reuseExistingServer: process.env["EMVB_REUSE_SERVER"] === "1",
   timeout,
   stdout: "ignore" as const,
   stderr: "pipe" as const,
-  env: foregroundDevEnv,
+  env: { ...foregroundDevEnv, EMVB_DEMO_DATA: data },
 });

@@ -1,5 +1,10 @@
 import { defineConfig } from "@playwright/test";
+import { platformDataDir, pruneStaleRuns } from "./e2e/support/demo-data.ts";
 import { baseConfig, server } from "./playwright.shared.ts";
+
+// W-1035: this run's own demo data; leftovers of interrupted runs go first.
+platformDataDir("node");
+pruneStaleRuns();
 
 /** W-985: the seeded-bug runner's parallel e2e lanes each use their own demo port. */
 const nodePort = Number(process.env["EMVB_E2E_NODE_PORT"] ?? 4411);
@@ -51,6 +56,7 @@ export default defineConfig({
   ...baseConfig,
   testDir: "./e2e",
   testMatch: /.*\.e2e\.ts$/,
+  globalTeardown: "./e2e/support/demo-data.ts",
   projects: platforms.flatMap(({ name, port }) => [
     {
       name: `${name}-setup`,
@@ -63,5 +69,7 @@ export default defineConfig({
       use: { baseURL: `http://127.0.0.1:${port}`, storageState: `e2e/.auth/${name}.json` },
     },
   ]),
-  webServer: servers.map(({ port, command }) => server(command, port, 180_000)),
+  webServer: servers.map(({ name, port, command }) =>
+    server(command, port, 180_000, platformDataDir(name)),
+  ),
 });

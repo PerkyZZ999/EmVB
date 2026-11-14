@@ -5,7 +5,8 @@
  *
  * Each shot is a 1440×900 viewport at deviceScaleFactor 2 (the phone shots use 390×844), saved as
  * PNG under site/scripts/.raw/ and then converted to WebP in site/public/screenshots/ with
- * ImageMagick (`magick`) at 1600 and 2400 px wide. The public-page shots use a signed-out browser.
+ * ImageMagick (`magick`) at 800, 1600 and 2400 px wide (phone shots 390, 780 and 1170). The
+ * public-page shots use a signed-out browser.
  */
 import {
   chromium,
@@ -138,7 +139,7 @@ async function shoot(page: Page, name: string) {
   await page.mouse.move(0, viewport.height - 1);
   await page.waitForTimeout(500);
   await page.screenshot({ path: join(RAW, `${name}.png`) });
-  convert(name, viewport.width < 600 ? [780, 1170] : [1600, 2400]);
+  convert(name, viewport.width < 600 ? [390, 780, 1170] : [800, 1600, 2400]);
   // oxlint-disable-next-line no-console -- progress for a CLI
   console.log(`shot ${name}`);
 }

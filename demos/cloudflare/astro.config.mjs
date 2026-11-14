@@ -6,9 +6,12 @@ import { formsPlugin } from "@emdash-cms/plugin-forms";
 import { emvb } from "@perkyzz/emvb";
 import emdash from "emdash/astro";
 
+/** W-1035: e2e runs give the demo a fresh folder for local D1 and R2 (default .wrangler/state). */
+const data = process.env["EMVB_DEMO_DATA"];
+
 export default defineConfig({
   output: "server",
-  adapter: cloudflare(),
+  adapter: cloudflare(data ? { persistState: { path: data } } : {}),
   image: {
     layout: "constrained",
     responsiveStyles: true,
