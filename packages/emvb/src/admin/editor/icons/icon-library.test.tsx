@@ -10,8 +10,12 @@ import {
   visibleRows,
 } from "./IconLibraryDialog.tsx";
 import { loadIconSet, type LibraryIcon } from "./library.ts";
+import { fmt } from "./use-icon-library.ts";
 
 afterEach(cleanup);
+
+/** Lucide's icon count as the dialog writes it ("2,359"), from the set itself, not a copy. */
+const lucideCount = async () => fmt((await loadIconSet("lucide")).length);
 
 // W-236: the icon library dialog. Sidebar of sets, word search, a virtualized listbox grid.
 
@@ -150,7 +154,7 @@ describe("icon library dialog (W-236)", () => {
     const count = dialog()?.querySelector(
       '[data-emvb-icon-category="lucide"] .emvb-icon-library-count',
     );
-    expect(count?.textContent).toBe("2,171");
+    expect(count?.textContent).toBe(await lucideCount());
     expect(dialog()?.textContent).toContain("Remix · Apache-2.0");
   });
 
@@ -212,7 +216,8 @@ describe("icon library dialog (W-236)", () => {
     await key(listbox, "ArrowDown");
     expect(Number(activeOption()?.getAttribute("aria-posinset"))).toBeGreaterThan(1000);
     await type("arrow");
-    await until(() => statusText() !== "2,171 icons", "the search");
+    const all = `${await lucideCount()} icons`;
+    await until(() => statusText() !== all, "the search");
     expect(Number(statusText().replace(/\D/g, ""))).toBeGreaterThan(100);
     const first = dialog()?.querySelector('[role="option"][aria-posinset="1"]');
     expect(first?.getAttribute("data-emvb-icon-id")?.startsWith("lucide:")).toBe(true);

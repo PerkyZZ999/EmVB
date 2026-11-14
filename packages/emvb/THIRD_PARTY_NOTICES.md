@@ -10,7 +10,7 @@ When an editor picks an icon, its SVG is stored with the page and shown inline o
 
 ## Lucide
 
-- Package: `lucide-static` 1.61.0, <https://lucide.dev>
+- Package: `lucide-static` 1.73.0, <https://lucide.dev>
 - License: ISC, Copyright (c) 2026 Lucide Icons and Contributors. Icons derived from Feather: MIT, Copyright (c) 2013-present Cole Bemis. Full text: [`licenses/lucide-static.LICENSE`](licenses/lucide-static.LICENSE).
 - The 26 icons EmVB bundled before the library (`src/core/icons/catalog.ts`) are also Lucide icons, under the same license.
 
@@ -24,7 +24,7 @@ When an editor picks an icon, its SVG is stored with the page and shown inline o
 
 ## Tabler Icons
 
-- Package: `@tabler/icons` 3.49.0, <https://tabler.io/icons>
+- Package: `@tabler/icons` 3.52.0, <https://tabler.io/icons>
 - License: MIT, Copyright (c) 2020-2026 Paweł Kuna. Full text: [`licenses/tabler-icons.LICENSE`](licenses/tabler-icons.LICENSE).
 - Changes: the invisible 24×24 bounding path (`M0 0h24v24H0z`) is left out.
 

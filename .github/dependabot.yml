@@ -8,6 +8,11 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    # W-1032: Remix Icon 4.9+ is under the custom Remix Icon License v1.0, which doesn't allow
+    # shipping its icons inside another icon library (D-052): stay on 4.8.0, the last Apache-2.0.
+    ignore:
+      - dependency-name: remixicon
+        versions: [">=4.9.0"]
     groups:
       emdash:
         patterns:

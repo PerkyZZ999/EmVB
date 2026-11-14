@@ -45,7 +45,7 @@ export const DOC_GROUPS: DocGroup[] = [
       {
         slug: "icon-library",
         title: "Icon library",
-        summary: "About 14,400 open-source icons, plus your own uploads.",
+        summary: "About 15,000 open-source icons, plus your own uploads.",
       },
       {
         slug: "image-editor",

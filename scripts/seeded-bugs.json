@@ -47406,7 +47406,7 @@
       "edits": [
         {
           "file": "demos/cloudflare/package.json",
-          "search": "\"astro\": \"7.4.11\"",
+          "search": "\"astro\": \"7.4.12\"",
           "replace": "\"astro\": \"7.3.5\""
         }
       ],
@@ -48882,6 +48882,34 @@
       ],
       "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
       "expect": "\\(fail\\).*W-1031"
+    },
+    {
+      "id": "W-1032/remixicon-past-apache",
+      "requirement": "W-1032",
+      "description": "Remix Icon moves to 4.9+, whose license doesn't allow shipping it in another icon library.",
+      "edits": [
+        {
+          "file": "package.json",
+          "search": "\"remixicon\": \"4.8.0\"",
+          "replace": "\"remixicon\": \"4.9.1\""
+        }
+      ],
+      "command": ["bun", "test", "scripts/dependabot.test.ts"],
+      "expect": "\\(fail\\).*W-1032"
+    },
+    {
+      "id": "W-1032/dependabot-bumps-remix",
+      "requirement": "W-1032",
+      "description": "Dependabot is free to propose Remix Icon 4.9+.",
+      "edits": [
+        {
+          "file": ".github/dependabot.yml",
+          "search": "        versions: [\">=4.9.0\"]",
+          "replace": "        versions: [\">=9.0.0\"]"
+        }
+      ],
+      "command": ["bun", "test", "scripts/dependabot.test.ts"],
+      "expect": "\\(fail\\).*W-1032"
     }
   ]
 }

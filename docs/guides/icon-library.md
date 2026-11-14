@@ -1,6 +1,6 @@
 # The icon library
 
-The Icon element's **Icon** field opens a library of about 14,400 open-source icons, in the style
+The Icon element's **Icon** field opens a library of about 15,000 open-source icons, in the style
 of the icon libraries other page builders have, with EmVB's own look. More about EmVB: <https://emvb.dev>.
 
 ## Picking an icon
@@ -110,7 +110,7 @@ an icon set. The SVG is checked against EmVB's SVG allowlist when pasted or rend
 event handlers, styles or external links), and is limited to 32 KB.
 
 The icon sets themselves load only in the editor, each as its own file, the first time you open
-it in the library (Lucide about 130 KB compressed; All icons loads all four, about 1.6 MB
+it in the library (Lucide about 140 KB compressed; All icons loads all four, about 1.6 MB
 compressed). The grid only draws the icons on screen, so scrolling thousands of icons stays fast.
 
 Icon elements made before the library (ids such as `star`) keep working unchanged. The library
@@ -120,9 +120,9 @@ shows them as Lucide icons, and they switch to the new storage only when you ins
 
 | Set | Version | License |
 | --- | --- | --- |
-| Lucide (`lucide-static`) | 1.61.0 | ISC |
+| Lucide (`lucide-static`) | 1.73.0 | ISC |
 | Font Awesome Free (`@fortawesome/fontawesome-free`) | 7.3.1 | Icons CC BY 4.0 |
-| Tabler Icons (`@tabler/icons`) | 3.49.0 | MIT |
+| Tabler Icons (`@tabler/icons`) | 3.52.0 | MIT |
 | Remix Icon (`remixicon`) | 4.8.0 | Apache-2.0 |
 
 The sets themselves are in the `@perkyzz/emvb-icons` package, which `@perkyzz/emvb` installs as a dependency; only the editor loads them. The notices and license texts ship with both packages (`THIRD_PARTY_NOTICES.md` and `licenses/` in `@perkyzz/emvb`, `NOTICE.md` and `licenses/` in `@perkyzz/emvb-icons`).
