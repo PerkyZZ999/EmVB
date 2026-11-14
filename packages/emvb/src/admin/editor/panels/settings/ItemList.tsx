@@ -10,6 +10,7 @@ import {
 import {
   MAX_CAROUSEL_SLIDES,
   MAX_GALLERY_IMAGES,
+  MAX_HOTSPOTS,
   MAX_PRICE_ITEMS,
   MAX_SHARE_LINKS,
   MAX_SOCIAL_LINKS,
@@ -22,6 +23,7 @@ import {
   newAccordionItem,
   newCarouselSlide,
   newGalleryImage,
+  newHotspot,
   newPriceListItem,
   newShareLink,
   newSocialLink,
@@ -96,6 +98,13 @@ const KINDS: Record<string, Kind> = {
     }),
     make: (n) => newShareLink(n),
     max: MAX_SHARE_LINKS,
+  },
+  // W-1048: each row edits the marker's title; its place and note are in its own panel.
+  hotspots: {
+    noun: "marker",
+    field: (n) => ({ key: "title", kind: "text", label: `Marker ${n} title` }),
+    make: (n) => newHotspot(n),
+    max: MAX_HOTSPOTS,
   },
 };
 

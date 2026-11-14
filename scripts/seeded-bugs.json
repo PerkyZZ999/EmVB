@@ -47969,8 +47969,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/a11y/audit.ts",
-          "search": "(node.type === \"image-box\" || node.type === \"gallery-image\") && spoken(props[\"src\"])",
-          "replace": "node.type === \"gallery-image\" && spoken(props[\"src\"])"
+          "search": "(node.type === \"image-box\" || node.type === \"gallery-image\" || node.type === \"hotspots\")",
+          "replace": "(node.type === \"gallery-image\" || node.type === \"hotspots\")"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
@@ -50091,6 +50091,101 @@
       ],
       "command": ["bun", "test", "packages/emvb/src/astro/widgets/share.test.ts"],
       "expect": "\\(fail\\).*opens its sheet"
+    },
+    {
+      "id": "W-1048/marker-unnamed",
+      "requirement": "W-1048",
+      "description": "Hotspot markers have no name for screen readers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "          \"aria-label\": title,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*numbered buttons"
+    },
+    {
+      "id": "W-1048/no-popover",
+      "requirement": "W-1048",
+      "description": "A Hotspot's note is no longer a popover.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "attrs: { id: noteId, class: \"emvb-hotspot-note\", popover: \"auto\" },",
+          "replace": "attrs: { id: noteId, class: \"emvb-hotspot-note\" },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*numbered buttons"
+    },
+    {
+      "id": "W-1048/phone-place-ignored",
+      "requirement": "W-1048",
+      "description": "A Hotspot's phone place is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "      props.xMobile === undefined && props.yMobile === undefined\n        ? []",
+          "replace": "      true\n        ? []"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*tablet and phone places"
+    },
+    {
+      "id": "W-1048/popover-attr-refused",
+      "requirement": "W-1048",
+      "description": "The markup allowlist refuses popovertarget.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "|open|popover|popovertarget|popovertargetaction|datetime|",
+          "replace": "|open|popover|datetime|"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*numbered buttons"
+    },
+    {
+      "id": "W-1048/no-alt-check",
+      "requirement": "W-1048",
+      "description": "The accessibility check misses a Hotspots picture without alt text.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "(node.type === \"image-box\" || node.type === \"gallery-image\" || node.type === \"hotspots\")",
+          "replace": "(node.type === \"image-box\" || node.type === \"gallery-image\")"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*without alt text"
+    },
+    {
+      "id": "W-1048/markers-not-placed",
+      "requirement": "W-1048",
+      "description": "Hotspot markers aren't moved to their places.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      declarations.push(...placeAt(place.desktop));\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1048"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }

@@ -446,3 +446,30 @@ describe("Share buttons over MCP (W-1047)", () => {
     expect(refused.success).toBe(false);
   });
 });
+
+describe("Hotspots over MCP (W-1048)", () => {
+  test("add_element adds a picture with a marker; a marker off the picture is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("hotspots")?.name).toBe("Hotspots");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "hotspots",
+        props: { src: "/media/car.jpg", alt: "A car" },
+        children: [{ type: "hotspot", props: { title: "Wheel", x: 20, y: 70 } }],
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "hotspots",
+        props: { src: "/media/car.jpg", alt: "A car" },
+        children: [{ type: "hotspot", props: { title: "Wheel", x: 120, y: 70 } }],
+      },
+    });
+    expect(refused.success).toBe(false);
+  });
+});

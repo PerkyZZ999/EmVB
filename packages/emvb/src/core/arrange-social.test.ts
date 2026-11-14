@@ -4,6 +4,7 @@ import { defaultElement } from "./index.ts";
 import {
   MAX_CAROUSEL_SLIDES,
   MAX_GALLERY_IMAGES,
+  MAX_HOTSPOTS,
   MAX_PRICE_ITEMS,
   MAX_SHARE_LINKS,
   MAX_SOCIAL_LINKS,
@@ -136,5 +137,26 @@ describe("Share buttons arrange rules (W-1047)", () => {
     expect(
       canDrop(layout, { kind: "new", node: defaultElement("heading", "head0001") }, "shar0001"),
     ).toEqual({ ok: false, reason: REASONS.onlyShareLinks });
+  });
+});
+
+describe("Hotspots arrange rules (W-1048)", () => {
+  test("a full Hotspots picture refuses a 21st marker; markers drop only onto a Hotspots picture", () => {
+    const markers = Array.from({ length: MAX_HOTSPOTS }, (_, i) =>
+      defaultElement("hotspot", `hs${String(i).padStart(6, "0")}`),
+    );
+    const layout = layoutWith([{ ...defaultElement("hotspots", "spot0001"), children: markers }]);
+    const marker = defaultElement("hotspot", "new00001");
+    expect(canDrop(layout, { kind: "new", node: marker }, "spot0001")).toEqual({
+      ok: false,
+      reason: REASONS.tooManyHotspots,
+    });
+    expect(canDrop(layout, { kind: "new", node: marker }, "root0001")).toEqual({
+      ok: false,
+      reason: REASONS.hotspotOutsidePicture,
+    });
+    expect(
+      canDrop(layout, { kind: "new", node: defaultElement("heading", "head0001") }, "spot0001"),
+    ).toEqual({ ok: false, reason: REASONS.onlyHotspots });
   });
 });

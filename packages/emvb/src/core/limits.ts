@@ -17,6 +17,8 @@ export const MAX_CAROUSEL_SLIDES = 20;
 export const MAX_PRICE_ITEMS = 50;
 /** W-1047: most share links one Share buttons element holds. */
 export const MAX_SHARE_LINKS = 12;
+/** W-1048: most markers one Hotspots picture holds. */
+export const MAX_HOTSPOTS = 20;
 
 /**
  * W-509: `text` cut to at most `max` UTF-16 units, as schema limits count, without leaving half

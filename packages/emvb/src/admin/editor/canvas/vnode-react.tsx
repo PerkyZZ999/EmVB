@@ -20,6 +20,9 @@ const REACT_ATTR: Record<string, string> = {
   playsinline: "playsInline",
   autoplay: "autoPlay",
   datetime: "dateTime",
+  // W-1048: Hotspots open their notes with the Popover API.
+  popovertarget: "popoverTarget",
+  popovertargetaction: "popoverTargetAction",
   // The canvas never updates a radio from props, so a tab chosen there stays chosen (QA-5).
   checked: "defaultChecked",
 };

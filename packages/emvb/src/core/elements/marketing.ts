@@ -8,6 +8,8 @@ import type {
   CtaNode,
   FlipBoxNode,
   HeadlineNode,
+  HotspotNode,
+  HotspotsNode,
   MapNode,
   PriceListItemNode,
   PriceListNode,
@@ -1347,3 +1349,142 @@ export const shareLink: ElementDefinition<ShareLinkNode> = {
   // The editor shows where it would lead from an example page; public pages use their own URL.
   build: (node, attrs) => shareLinkVNode(node, attrs, "https://example.com/"),
 };
+
+export const hotspots: ElementDefinition<HotspotsNode> = {
+  baseCss:
+    ".emvb-hotspots{position:relative;margin:0;line-height:0}.emvb-hotspots-image{display:block;width:100%;height:auto}.emvb-hotspots-list{margin:0;padding:0;list-style:none;counter-reset:emvb-hotspot}.emvb-hotspot{position:absolute;line-height:1.4;counter-increment:emvb-hotspot;transform:translate(-50%,-50%)}.emvb-hotspot-button{display:flex;align-items:center;justify-content:center;width:2em;height:2em;padding:0;border:2px solid #fff;border-radius:50%;background:#1f2937;color:#fff;font:inherit;font-weight:700;box-shadow:0 1px 4px rgb(0 0 0 / 0.4);cursor:pointer}.emvb-hotspot-button::before{content:counter(emvb-hotspot)}.emvb-hotspot-button:focus-visible{outline:3px solid #fff;outline-offset:2px}.emvb-hotspot-note{max-width:min(20em,90vw);margin:auto;padding:0.75em 1em;border:1px solid rgb(0 0 0 / 0.2);border-radius:8px;background:#fff;color:#1f2937;line-height:1.4;box-shadow:0 4px 16px rgb(0 0 0 / 0.2)}.emvb-hotspot-title{margin:0;font-weight:600}.emvb-hotspot-text{margin:0.25em 0 0;white-space:pre-line}@supports (position-area:bottom){.emvb-hotspot-note{margin:0.5em;position-area:bottom;position-try-fallbacks:flip-block,flip-inline}}",
+  defaults: () => ({ type: "hotspots", props: { src: "", alt: "Image" }, children: [] }),
+  descriptor: {
+    type: "hotspots",
+    name: "Hotspots",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "src", kind: "media", label: "Picture" },
+      { key: "alt", kind: "text", label: "Alt text" },
+      { key: "decorative", kind: "boolean", label: "Decorative", optional: true },
+      {
+        key: "label",
+        kind: "text",
+        label: "Markers list name",
+        optional: true,
+        message: "What screen readers call the markers. Leave it empty for Points on the picture.",
+      },
+    ],
+  },
+  build: (node, attrs, children) => {
+    const p = node.props;
+    const src = p.src.trim() ? sanitizeMediaUrl(p.src.trim()) : undefined;
+    const image: VNode[] = src
+      ? [
+          {
+            tag: "img",
+            attrs: {
+              class: "emvb-hotspots-image",
+              src,
+              alt: p.decorative ? "" : p.alt,
+              ...(p.width ? { width: String(p.width) } : {}),
+              ...(p.height ? { height: String(p.height) } : {}),
+              loading: "lazy",
+              decoding: "async",
+            },
+            children: [],
+          },
+        ]
+      : [];
+    return {
+      tag: "div",
+      attrs,
+      children: [
+        ...image,
+        {
+          tag: "ol",
+          attrs: {
+            class: "emvb-hotspots-list",
+            "aria-label": p.label?.trim() || "Points on the picture",
+          },
+          children,
+        },
+      ],
+    };
+  },
+};
+
+export const hotspot: ElementDefinition<HotspotNode> = {
+  baseCss: "",
+  defaults: () => ({ type: "hotspot", props: { title: "Point", x: 50, y: 50 } }),
+  descriptor: {
+    type: "hotspot",
+    name: "Hotspot",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "title", kind: "text", label: "Title" },
+      { key: "text", kind: "textarea", label: "Note", optional: true },
+      {
+        key: "x",
+        kind: "decimal",
+        label: "Across (%)",
+        max: 100,
+        message: "From 0 (left edge) to 100 (right edge).",
+      },
+      {
+        key: "y",
+        kind: "decimal",
+        label: "Down (%)",
+        max: 100,
+        message: "From 0 (top) to 100 (bottom).",
+      },
+      { key: "xTablet", kind: "decimal", label: "Across on tablets (%)", optional: true, max: 100 },
+      { key: "yTablet", kind: "decimal", label: "Down on tablets (%)", optional: true, max: 100 },
+      { key: "xMobile", kind: "decimal", label: "Across on phones (%)", optional: true, max: 100 },
+      { key: "yMobile", kind: "decimal", label: "Down on phones (%)", optional: true, max: 100 },
+    ],
+  },
+  build: (node, attrs) => {
+    const { title, text } = node.props;
+    const noteId = `emvb-hotspot-${node.id}`;
+    const note: VNode[] = [{ tag: "p", attrs: { class: "emvb-hotspot-title" }, children: [title] }];
+    if (text?.trim())
+      note.push({ tag: "p", attrs: { class: "emvb-hotspot-text" }, children: [text] });
+    const marker: VNode[] = [
+      {
+        tag: "button",
+        attrs: {
+          type: "button",
+          class: "emvb-hotspot-button",
+          popovertarget: noteId,
+          "aria-label": title,
+        },
+        children: [],
+      },
+      {
+        tag: "div",
+        attrs: { id: noteId, class: "emvb-hotspot-note", popover: "auto" },
+        children: note,
+      },
+    ];
+    return { tag: "li", attrs, children: marker };
+  },
+};
+
+/** A percentage with at most two decimals. */
+const pct = (n: number) => `${Math.round(n * 100) / 100}%`;
+
+/** W-1048: a marker's place as CSS, desktop first; unset devices follow the wider one. */
+export function hotspotPlace(props: HotspotNode["props"]): {
+  desktop: string[];
+  tablet: string[];
+  mobile: string[];
+} {
+  const tx = props.xTablet ?? props.x;
+  const ty = props.yTablet ?? props.y;
+  return {
+    desktop: [pct(props.x), pct(props.y)],
+    tablet: props.xTablet === undefined && props.yTablet === undefined ? [] : [pct(tx), pct(ty)],
+    mobile:
+      props.xMobile === undefined && props.yMobile === undefined
+        ? []
+        : [pct(props.xMobile ?? tx), pct(props.yMobile ?? ty)],
+  };
+}

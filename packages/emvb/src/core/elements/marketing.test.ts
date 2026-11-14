@@ -587,3 +587,50 @@ describe("Share buttons (W-1047)", () => {
     expect(page(shares({}, "myspace")).ok).toBe(false);
   });
 });
+
+const spots = (props: Record<string, unknown>, ...markers: Record<string, unknown>[]) => ({
+  id: "spot0001",
+  type: "hotspots",
+  props: { src: "/media/car.jpg", alt: "A car", ...props },
+  children: markers.map((m, i) => ({
+    id: `hspt000${i}`,
+    type: "hotspot",
+    props: { title: `Point ${i + 1}`, x: 20, y: 30, ...m },
+  })),
+});
+
+describe("Hotspots (W-1048)", () => {
+  test("a picture and a named list of numbered buttons that open their notes as popovers, no script", () => {
+    const { html, runtimes } = rendered(spots({}, { title: "Wheel", text: "Alloy." }));
+    expect(html).toContain('<img class="emvb-hotspots-image" src="/media/car.jpg" alt="A car"');
+    expect(html).toContain('<ol class="emvb-hotspots-list" aria-label="Points on the picture">');
+    expect(html).toContain(
+      '<button type="button" class="emvb-hotspot-button" popovertarget="emvb-hotspot-hspt0000" aria-label="Wheel"></button><div id="emvb-hotspot-hspt0000" class="emvb-hotspot-note" popover="auto"><p class="emvb-hotspot-title">Wheel</p><p class="emvb-hotspot-text">Alloy.</p></div>',
+    );
+    expect(runtimes).toEqual([]);
+  });
+
+  test("each marker sits at its own place, with tablet and phone places when set", () => {
+    const { css } = rendered(spots({}, { x: 20, y: 30.555, xMobile: 50 }));
+    expect(css).toContain(".emvb-e-hspt0000{left:20%;top:30.56%}");
+    expect(css).toContain("@media (max-width: 767.98px){.emvb-e-hspt0000{left:50%;top:30.56%}}");
+  });
+
+  test("markers are numbered by CSS and notes sit by their marker where browsers can", () => {
+    const { css } = rendered(spots({}, {}));
+    expect(css).toContain(".emvb-hotspot-button::before{content:counter(emvb-hotspot)}");
+    expect(css).toContain("@supports (position-area:bottom){.emvb-hotspot-note{");
+  });
+
+  test("hotspots go only on a Hotspots picture; places stay on the picture", () => {
+    const issues = (...children: unknown[]) => {
+      const result = page(...children);
+      if (!result.ok) throw new Error("invalid");
+      return nestingIssues(result.layout).length;
+    };
+    expect(issues({ id: "hspt0009", type: "hotspot", props: { title: "x", x: 1, y: 1 } })).toBe(1);
+    expect(issues(spots({}, {}))).toBe(0);
+    expect(page(spots({}, { x: 101 })).ok).toBe(false);
+    expect(page(spots({}, { title: "" })).ok).toBe(false);
+  });
+});

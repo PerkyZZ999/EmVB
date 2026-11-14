@@ -481,3 +481,22 @@ describe("Share links (W-1047)", () => {
     expect((added?.props as { network?: string } | undefined)?.network).toBe("whatsapp");
   });
 });
+
+describe("Hotspot markers (W-1048)", () => {
+  test("a new Hotspots picture starts with three markers apart; the panel lists them by title", async () => {
+    const node = newElement("hotspots");
+    if (!node || node.type !== "hotspots") throw new Error("expected hotspots");
+    const places = kidsOf(node).map((c) => {
+      const p = c.props as { x: number; y: number };
+      return `${p.x},${p.y}`;
+    });
+    expect(new Set(places).size).toBe(3);
+    const calls = await panel(node);
+    await type(inputLabelled("Marker 1 title"), "Steering wheel");
+    expect((kidsOf(calls.changed.at(-1))[0]?.props as { title?: string } | undefined)?.title).toBe(
+      "Steering wheel",
+    );
+    await act(async () => button("Add marker").click());
+    expect(kidsOf(calls.changed.at(-1))).toHaveLength(4);
+  });
+});

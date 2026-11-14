@@ -158,6 +158,8 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `headline` | level, before, highlight, after, mark, rotate, rotating, interval, turns |
 | `share-buttons` | label, shape, brandColors, nativeShare |
 | `share-link` | network, label |
+| `hotspots` | src, alt, decorative, mediaId, width, height, focalX, focalY, label |
+| `hotspot` | title, text, x, y, xTablet, yTablet, xMobile, yMobile |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

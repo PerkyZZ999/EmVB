@@ -1,7 +1,7 @@
 import { isShadowingId } from "../shadowing-ids.ts";
 import { renderableDesign, renderableDynamic, renderableLayout } from "../contract.ts";
 import { markColors } from "../text-marks.ts";
-import type { ShareLinkNode, TextMark } from "../schema/layout.ts";
+import type { HotspotNode, ShareLinkNode, TextMark } from "../schema/layout.ts";
 import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_NODES } from "../limits.ts";
 import { loneAbTests, variantShows } from "../audience/variants.ts";
@@ -17,7 +17,7 @@ import {
 } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import { nodeRuntime, type WidgetRuntime } from "../elements/widgets.ts";
-import { shareLinkVNode } from "../elements/marketing.ts";
+import { hotspotPlace, shareLinkVNode } from "../elements/marketing.ts";
 import { controlId } from "../elements/field-id.ts";
 import { layoutHasForm } from "../forms/binding.ts";
 import { nodeChildren, someNode } from "../tree-ops.ts";
@@ -488,6 +488,13 @@ export function renderPage(
         declarations.push({ property: "gap", value: `${gap}px` });
       }
     }
+    if (node.type === "hotspot") {
+      // W-1048: each marker sits at its own place on the picture, per device.
+      const place = hotspotPlace(node.props as HotspotNode["props"]);
+      declarations.push(...placeAt(place.desktop));
+      if (place.tablet.length > 0) tablet.declarations.unshift(...placeAt(place.tablet));
+      if (place.mobile.length > 0) mobile.declarations.unshift(...placeAt(place.mobile));
+    }
     const queryStyle = node.query ? styleDeclarations(node.query.style) : undefined;
     for (const key of queryStyle?.rejected ?? []) {
       warnings.push({ nodeId, code: "rejected-style", detail: key });
@@ -858,6 +865,12 @@ const columnCount = (tracks: unknown, columns: unknown): number | undefined =>
       : undefined;
 
 /** A grid's column count on desktop, tablet and mobile; unset follows the next wider device. */
+/** W-1048: a Hotspot marker's left and top. */
+const placeAt = ([left, top]: string[]) => [
+  { property: "left", value: left ?? "50%" },
+  { property: "top", value: top ?? "50%" },
+];
+
 function gridColumnCounts(grid: LayoutNode): [number, number, number] {
   const props = grid.props as Record<string, unknown>;
   const desktop = columnCount(props["columnTracks"], props["columns"]) ?? 1;

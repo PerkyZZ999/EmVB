@@ -135,6 +135,25 @@ export function newShareLink(n: number, random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "share-link", props: { network } };
 }
 
+/** W-1048: where new Hotspots land, so markers added one after another don't overlap. */
+const STARTER_SPOTS = [
+  [25, 35],
+  [60, 25],
+  [45, 70],
+  [80, 60],
+  [15, 80],
+] as const;
+
+/** W-1048: a Hotspot for a new Hotspots picture or its Add marker. */
+export function newHotspot(n: number, random?: () => number): LayoutNode {
+  const [x, y] = STARTER_SPOTS[(n - 1) % STARTER_SPOTS.length] ?? STARTER_SPOTS[0];
+  return {
+    id: newNodeId(random),
+    type: "hotspot",
+    props: { title: `Point ${n}`, text: `What point ${n} shows.`, x, y },
+  };
+}
+
 /** W-1019: an empty Gallery image for a Gallery's Add picture; its panel picks the picture. */
 export function newGalleryImage(random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "gallery-image", props: { src: "", alt: "Image" } };
@@ -201,6 +220,12 @@ export function newElement(
     return {
       ...defaultElement("carousel", newNodeId(random)),
       children: [1, 2, 3].map((n) => newCarouselSlide(n, random)),
+    };
+  }
+  if (type === "hotspots") {
+    return {
+      ...defaultElement("hotspots", newNodeId(random)),
+      children: [1, 2, 3].map((n) => newHotspot(n, random)),
     };
   }
   if (type === "share-buttons") {

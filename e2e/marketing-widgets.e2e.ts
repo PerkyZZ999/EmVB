@@ -1,6 +1,7 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { createPage, publishPage, setUpEmvbOnce, storedLayout } from "./support/api.ts";
 import { canvas, openEditor, openLayers, overlay, saveDraft, unique } from "./support/helpers.ts";
+import { uploadEmvbPixel } from "./support/media.ts";
 
 // Each 1.3 marketing widget is added from the Add panel, set up in its settings, saved, and
 // published with no EmVB script unless it opts in.
@@ -502,5 +503,73 @@ test("Share buttons get a Bluesky link and publish as share links to this page, 
     `mailto:?body=${here}`,
   );
   await expect(list.getByRole("link")).toHaveCount(4);
+  expect(await page.locator("script[src*='emvb'], script[data-emvb]").count()).toBe(0);
+});
+
+test("Hotspots get a picture and a renamed marker; on the page each marker opens its note with the keyboard and Escape closes it (W-1048)", async ({
+  page,
+  request,
+}) => {
+  const slug = `marketing-${unique()}`;
+  const layout = startPage("Hotspots");
+  const media = await uploadEmvbPixel(request);
+  layout.root.children.push({
+    id: "spot0001",
+    type: "hotspots",
+    props: { src: media.url, alt: "A test picture", width: 1200, height: 600 },
+    children: [
+      {
+        id: "hspt0001",
+        type: "hotspot",
+        props: { title: "First point", text: "One.", x: 25, y: 40 },
+      },
+      {
+        id: "hspt0002",
+        type: "hotspot",
+        props: { title: "Second point", x: 75, y: 60, xMobile: 50 },
+      },
+    ],
+  } as never);
+  const id = await createPage(request, "Hotspots", layout, slug);
+  await openEditor(page, id, "Hotspots");
+  await openLayers(page);
+  await overlay(page).locator('[data-emvb-layer="spot0001"] .emvb-layer-select').click();
+  await setField(page, "Marker 2 title", "Back seat");
+  await expect(canvas(page).locator(".emvb-hotspot-button").nth(1)).toHaveAttribute(
+    "aria-label",
+    "Back seat",
+  );
+  await saveDraft(page);
+
+  await publishPage(request, id);
+  await page.setViewportSize({ width: 1200, height: 900 });
+  await page.goto(`/${slug}`);
+  const markers = page.getByRole("list", { name: "Points on the picture" }).getByRole("button");
+  await expect(markers).toHaveCount(2);
+  // Each marker sits where it was put on the picture.
+  const placed = await page.locator(".emvb-hotspots").evaluate((box) => {
+    const b = box.getBoundingClientRect();
+    return [...box.querySelectorAll(".emvb-hotspot")].map((li) => {
+      const r = li.getBoundingClientRect();
+      return Math.round(((r.left + r.width / 2 - b.left) / b.width) * 100);
+    });
+  });
+  expect(placed).toEqual([25, 75]);
+  await markers.first().focus();
+  await page.keyboard.press("Enter");
+  const note = page.locator("#emvb-hotspot-hspt0001");
+  await expect(note).toBeVisible();
+  await expect(note).toContainText("One.");
+  await page.keyboard.press("Escape");
+  await expect(note).toBeHidden();
+  await expect(markers.first()).toBeFocused();
+  // On a phone the second marker takes its own place.
+  await page.setViewportSize({ width: 390, height: 800 });
+  const phone = await page.locator(".emvb-hotspots").evaluate((box) => {
+    const b = box.getBoundingClientRect();
+    const r = box.querySelectorAll(".emvb-hotspot")[1]?.getBoundingClientRect();
+    return Math.round((((r?.left ?? 0) + (r?.width ?? 0) / 2 - b.left) / b.width) * 100);
+  });
+  expect(phone).toBe(50);
   expect(await page.locator("script[src*='emvb'], script[data-emvb]").count()).toBe(0);
 });

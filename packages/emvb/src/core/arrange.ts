@@ -3,6 +3,7 @@ import {
   MAX_DEPTH,
   MAX_GALLERY_IMAGES,
   MAX_NODES,
+  MAX_HOTSPOTS,
   MAX_PRICE_ITEMS,
   MAX_SHARE_LINKS,
   MAX_SOCIAL_LINKS,
@@ -88,6 +89,9 @@ export const REASONS = {
   shareOutsideButtons: "Share links can only go inside Share buttons.",
   onlyShareLinks: "Share buttons can only hold share links.",
   tooManyShareLinks: `Share buttons can hold up to ${MAX_SHARE_LINKS} links.`,
+  hotspotOutsidePicture: "Hotspots can only go inside a Hotspots picture.",
+  onlyHotspots: "A Hotspots picture can only hold hotspots.",
+  tooManyHotspots: `A Hotspots picture can hold up to ${MAX_HOTSPOTS} markers.`,
   emptyOutsideLoop: "An Empty state can only go inside a Loop.",
 } as const;
 
@@ -195,6 +199,10 @@ export function parentChildRefusal(
   if (parent.type === "share-buttons" && child.type !== "share-link") {
     return REASONS.onlyShareLinks;
   }
+  if (child.type === "hotspot" && parent.type !== "hotspots") {
+    return REASONS.hotspotOutsidePicture;
+  }
+  if (parent.type === "hotspots" && child.type !== "hotspot") return REASONS.onlyHotspots;
   if (isFormNode(child) && inForm) return REASONS.nestedForm;
   if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;
   return undefined;
@@ -250,6 +258,14 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
       !nodeChildren(into.node).some((child) => child.id === node.id) &&
       nodeChildren(into.node).length >= MAX_SHARE_LINKS,
     REASONS.tooManyShareLinks,
+  ],
+  // W-1048: a full Hotspots picture takes no new marker; moving within it is fine.
+  [
+    ({ node, into }) =>
+      into.node.type === "hotspots" &&
+      !nodeChildren(into.node).some((child) => child.id === node.id) &&
+      nodeChildren(into.node).length >= MAX_HOTSPOTS,
+    REASONS.tooManyHotspots,
   ],
   [({ node, into }) => into.depth + height(node) > MAX_DEPTH, REASONS.tooDeep],
   [

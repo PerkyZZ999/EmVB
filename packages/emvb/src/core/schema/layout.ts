@@ -794,6 +794,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "headline",
   "share-buttons",
   "share-link",
+  "hotspots",
+  "hotspot",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -1349,6 +1351,43 @@ export const ShareLinkNode = leafNode(
   }),
 );
 
+/**
+ * W-1048: a picture with numbered markers. Holds Hotspots only. The picture keys are an Image's;
+ * `label` names the list of markers for screen readers (unset "Points on the picture").
+ */
+export const HotspotsNodeSchema = parentNode(
+  "hotspots",
+  z.strictObject({
+    src: z.string().max(2000),
+    alt: z.string().max(500),
+    decorative: z.boolean().optional(),
+    ...PICKED_MEDIA,
+    label: z.string().max(80).optional(),
+  }),
+);
+
+/** A marker's place across or down the picture, in percent. */
+const HotspotPlace = z.number().min(0).max(100);
+
+/**
+ * W-1048: one marker: a numbered button at `x`/`y` percent of the picture (tablet and mobile
+ * values follow the wider device when unset) that opens its note, `title` and `text`, with the
+ * native Popover API: no script, Escape and a click outside close it.
+ */
+export const HotspotNode = leafNode(
+  "hotspot",
+  z.strictObject({
+    title: z.string().min(1).max(120),
+    text: z.string().max(1000).optional(),
+    x: HotspotPlace,
+    y: HotspotPlace,
+    xTablet: HotspotPlace.optional(),
+    yTablet: HotspotPlace.optional(),
+    xMobile: HotspotPlace.optional(),
+    yMobile: HotspotPlace.optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1400,6 +1439,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   HeadlineNode,
   ShareButtonsNodeSchema,
   ShareLinkNode,
+  HotspotsNodeSchema,
+  HotspotNode,
   CounterNode,
   ProgressNode,
   CountdownNode,
@@ -1457,6 +1498,7 @@ export type CtaNode = z.infer<typeof CtaNode>;
 export type FlipBoxNode = z.infer<typeof FlipBoxNode>;
 export type HeadlineNode = z.infer<typeof HeadlineNode>;
 export type ShareLinkNode = z.infer<typeof ShareLinkNode>;
+export type HotspotNode = z.infer<typeof HotspotNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
@@ -1651,6 +1693,12 @@ export type ShareButtonsNode = NodeEnvelope & {
   children: LayoutNode[];
 };
 
+export type HotspotsNode = NodeEnvelope & {
+  type: "hotspots";
+  props: z.infer<typeof HotspotsNodeSchema>["props"];
+  children: LayoutNode[];
+};
+
 export type PriceListNode = NodeEnvelope & {
   type: "price-list";
   props: z.infer<typeof PriceListNodeSchema>["props"];
@@ -1720,6 +1768,8 @@ export type LayoutNode =
   | HeadlineNode
   | ShareButtonsNode
   | ShareLinkNode
+  | HotspotsNode
+  | HotspotNode
   | SpacerNode
   | DividerNode
   | TextNode
@@ -1936,7 +1986,8 @@ export const isParentNode = (
   | CarouselNode
   | CarouselSlideNode
   | PriceListNode
-  | ShareButtonsNode =>
+  | ShareButtonsNode
+  | HotspotsNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -1957,7 +2008,8 @@ export const isParentNode = (
   node.type === "carousel" ||
   node.type === "carousel-slide" ||
   node.type === "price-list" ||
-  node.type === "share-buttons";
+  node.type === "share-buttons" ||
+  node.type === "hotspots";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

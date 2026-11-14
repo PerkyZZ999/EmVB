@@ -222,3 +222,16 @@ describe("Animated headline (W-1046)", () => {
     expect(audit(line(2))).toEqual([]);
   });
 });
+
+describe("Hotspots (W-1048)", () => {
+  test("a Hotspots picture without alt text is reported like an image", () => {
+    const pic = (alt: string) => ({
+      id: "spot0001",
+      type: "hotspots",
+      props: { src: "/a.jpg", alt },
+      children: [],
+    });
+    expect(audit(pic("A car"))).toEqual([]);
+    expect(audit(pic(" "))).toEqual(["image-alt:error:spot0001"]);
+  });
+});
