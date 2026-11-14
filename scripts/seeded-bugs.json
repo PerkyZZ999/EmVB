@@ -49050,6 +49050,751 @@
       ],
       "command": ["bun", "test", "packages/emvb/test/server/canvas-collections-option.test.ts"],
       "expect": "\\(fail\\).*W-1036"
+    },
+    {
+      "id": "W-1038/runtime-never-asked",
+      "requirement": "W-1038",
+      "description": "A Counter that counts up no longer asks for the counter runtime.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "  if (node.type === \"counter\" && (node as CounterNode).props.countUp) return \"counter\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*asks for the counter runtime"
+    },
+    {
+      "id": "W-1038/no-grouping",
+      "requirement": "W-1038",
+      "description": "A Counter's thousands separator is ignored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/counter-format.ts",
+          "search": "  const grouped = separator ? whole.replace(/\\B(?=(\\d{3})+(?!\\d))/g, separator) : whole;",
+          "replace": "  const grouped = whole;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*groups thousands"
+    },
+    {
+      "id": "W-1038/longer-than-5s",
+      "requirement": "W-1038",
+      "description": "A count-up may run longer than 5 seconds.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    duration: z.number().int().min(300).max(5000).optional(),",
+          "replace": "    duration: z.number().int().min(300).max(60000).optional(),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*longer than 5 seconds"
+    },
+    {
+      "id": "W-1038/reduced-motion-counts",
+      "requirement": "W-1038",
+      "description": "The count-up runs for visitors who prefer reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/counter.ts",
+          "search": "  if (reduced || typeof IntersectionObserver === \"undefined\") return;",
+          "replace": "  if (typeof IntersectionObserver === \"undefined\") return;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/counter.test.ts"],
+      "expect": "\\(fail\\).*reduced motion"
+    },
+    {
+      "id": "W-1038/sr-hears-steps",
+      "requirement": "W-1038",
+      "description": "Screen readers hear every step of the count-up instead of the final number.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/counter.ts",
+          "search": "  c.el.setAttribute(\"aria-hidden\", \"true\");\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/counter.test.ts"],
+      "expect": "\\(fail\\).*counts up in view"
+    },
+    {
+      "id": "W-1038/ends-off",
+      "requirement": "W-1038",
+      "description": "The count-up stops one frame short of the rendered number.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/counter.ts",
+          "search": "      finish(c);\n      return;",
+          "replace": "      return;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/counter.test.ts"],
+      "expect": "\\(fail\\).*counts up in view"
+    },
+    {
+      "id": "W-1038/no-title-warning",
+      "requirement": "W-1038",
+      "description": "The accessibility check no longer warns about a Counter without a title.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    if (node.type === \"counter\" && !spoken(props[\"title\"]) && !node.bind) {",
+          "replace": "    if (node.type === \"counter\" && false) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*number says nothing"
+    },
+    {
+      "id": "W-1038/runtime-not-mounted",
+      "requirement": "W-1038",
+      "description": "EmVBWidgetRuntimes no longer mounts the counter script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/EmVBWidgetRuntimes.astro",
+          "search": "{names.has(\"counter\") && <EmVBCounterRuntime />}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "FAIL.*W-1038"
+    },
+    {
+      "id": "W-1038/count-up-public",
+      "requirement": "W-1038",
+      "description": "A published Counter never counts up.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/counter.ts",
+          "search": "        run(c);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/marketing-widgets.e2e.ts", "--project=node"],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1039/no-role",
+      "requirement": "W-1039",
+      "description": "A Progress bar is no longer a meter for screen readers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "        role: kind ?? \"meter\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*named meter"
+    },
+    {
+      "id": "W-1039/past-full",
+      "requirement": "W-1039",
+      "description": "A value above max fills past the end of the bar.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "  return Math.min(100, Math.max(0, (props.value / max) * 100));",
+          "replace": "  return Math.max(0, (props.value / max) * 100);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*never past full"
+    },
+    {
+      "id": "W-1039/grows-under-reduced-motion",
+      "requirement": "W-1039",
+      "description": "The fill grows in even for visitors who prefer reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "@media (prefers-reduced-motion:no-preference){@supports (animation-timeline:view()){.emvb-progress-grow .emvb-progress-fill{transform-box:fill-box;transform-origin:left center;animation:emvb-progress-grow linear both;animation-timeline:view();animation-range:entry 10% cover 40%}}}",
+          "replace": "@supports (animation-timeline:view()){.emvb-progress-grow .emvb-progress-fill{transform-box:fill-box;transform-origin:left center;animation:emvb-progress-grow linear both;animation-timeline:view();animation-range:entry 10% cover 40%}}"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*reduced motion leaves out"
+    },
+    {
+      "id": "W-1039/no-title-warning",
+      "requirement": "W-1039",
+      "description": "The accessibility check no longer warns about a Progress bar without a title.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    if (node.type === \"progress\" && !spoken(props[\"label\"]) && !node.bind) {",
+          "replace": "    if (node.type === \"progress\" && false) {"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*can't name it"
+    },
+    {
+      "id": "W-1039/max-zero",
+      "requirement": "W-1039",
+      "description": "A Progress bar accepts a maximum of 0.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "    max: z.number().positive().max(MAX_PROGRESS).optional(),",
+          "replace": "    max: z.number().min(0).max(MAX_PROGRESS).optional(),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*max of 0"
+    },
+    {
+      "id": "W-1039/value-ignores-max",
+      "requirement": "W-1039",
+      "description": "The Value field no longer reads its highest number from Maximum.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "        maxProp: \"max\",\n        message: \"Enter a number from 0 up to the maximum, such as 75.\",",
+          "replace": "        message: \"Enter a number from 0 up to the maximum, such as 75.\","
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1039"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1040/runtime-never-asked",
+      "requirement": "W-1040",
+      "description": "A ticking Countdown no longer asks for the countdown runtime.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "  if (node.type === \"countdown\" && (node as CountdownNode).props.ticking) return \"countdown\";\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*Pause button"
+    },
+    {
+      "id": "W-1040/clock-read-aloud",
+      "requirement": "W-1040",
+      "description": "Screen readers hear the ticking clock.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "          attrs: { class: \"emvb-countdown-units\", \"aria-hidden\": \"true\" },",
+          "replace": "          attrs: { class: \"emvb-countdown-units\" },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*hidden from screen readers"
+    },
+    {
+      "id": "W-1040/no-offset-needed",
+      "requirement": "W-1040",
+      "description": "A Countdown target without a UTC offset is accepted.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "(?::([0-5]\\d))?(Z|[+-](?:[01]\\d|2[0-3]):[0-5]\\d)$/;",
+          "replace": "(?::([0-5]\\d))?(Z|[+-](?:[01]\\d|2[0-3]):[0-5]\\d)?$/;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*UTC offset"
+    },
+    {
+      "id": "W-1040/wrong-zone-sign",
+      "requirement": "W-1040",
+      "description": "A negative UTC offset is written as positive.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "    offset = `${zone[0] === \"-\" ? \"\\u2212\" : \"+\"}${hours}${min === \"00\" ? \"\" : `:${min}`}`;",
+          "replace": "    offset = `+${hours}${min === \"00\" ? \"\" : `:${min}`}`;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*no script"
+    },
+    {
+      "id": "W-1040/unsafe-ended-link",
+      "requirement": "W-1040",
+      "description": "The ended link is not sanitised.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "      const href = action === \"link\" && expiredHref ? sanitizeHref(expiredHref) : undefined;",
+          "replace": "      const href = action === \"link\" && expiredHref ? expiredHref : undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*can be a link"
+    },
+    {
+      "id": "W-1040/pause-ignored",
+      "requirement": "W-1040",
+      "description": "Pause doesn't stop the clock.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/countdown.ts",
+          "search": "    else if (timer !== undefined) {\n      clearInterval(timer);\n      timer = undefined;\n    }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/countdown.test.ts"],
+      "expect": "\\(fail\\).*Pause stops"
+    },
+    {
+      "id": "W-1040/never-ends",
+      "requirement": "W-1040",
+      "description": "A Countdown keeps its clock after time is up.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/countdown.ts",
+          "search": "    if (left.total === 0) end();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/countdown.test.ts"],
+      "expect": "\\(fail\\).*time is up"
+    },
+    {
+      "id": "W-1040/runtime-not-mounted",
+      "requirement": "W-1040",
+      "description": "EmVBWidgetRuntimes no longer mounts the countdown script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/EmVBWidgetRuntimes.astro",
+          "search": "{names.has(\"countdown\") && <EmVBCountdownRuntime />}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "FAIL.*W-1040"
+    },
+    {
+      "id": "W-1040/clock-never-shown",
+      "requirement": "W-1040",
+      "description": "A published ticking Countdown keeps its clock hidden.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/countdown.ts",
+          "search": "    el.dataset[\"emvbReady\"] = \"\";\n    start(el, target);",
+          "replace": "    start(el, target);"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1040"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1041/address-unencoded",
+      "requirement": "W-1041",
+      "description": "A Map's address goes into its link unencoded.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "  const query = encodeURIComponent(address.trim());",
+          "replace": "  const query = address.trim();"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*address and a link"
+    },
+    {
+      "id": "W-1041/osm-embeds-without-coords",
+      "requirement": "W-1041",
+      "description": "An OpenStreetMap Map without coordinates offers an embed that can't work.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "  if (!at) return { link: `https://www.openstreetmap.org/search?query=${query}` };",
+          "replace": "  if (!at) return { link: `https://www.openstreetmap.org/search?query=${query}`, embed: `https://www.openstreetmap.org/export/embed.html?query=${query}` };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*stays a link"
+    },
+    {
+      "id": "W-1041/button-shown-without-script",
+      "requirement": "W-1041",
+      "description": "The Show the map button shows before its script runs.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": ".emvb-map:not([data-emvb-ready]) .emvb-map-frame{display:none}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*loads the map on request"
+    },
+    {
+      "id": "W-1041/any-src",
+      "requirement": "W-1041",
+      "description": "The map runtime loads any source it is given.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/map.ts",
+          "search": "  if (!ALLOWED.test(src)) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/map.test.ts"],
+      "expect": "\\(fail\\).*never loaded"
+    },
+    {
+      "id": "W-1041/loads-at-once",
+      "requirement": "W-1041",
+      "description": "The map runtime loads the map without waiting for the button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/map.ts",
+          "search": "    button.addEventListener(\"click\", () => load(frame));",
+          "replace": "    load(frame);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/map.test.ts"],
+      "expect": "\\(fail\\).*no iframe until"
+    },
+    {
+      "id": "W-1041/runtime-not-mounted",
+      "requirement": "W-1041",
+      "description": "EmVBWidgetRuntimes no longer mounts the map script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/EmVBWidgetRuntimes.astro",
+          "search": "{names.has(\"map\") && <EmVBMapRuntime />}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "FAIL.*W-1041"
+    },
+    {
+      "id": "W-1041/no-focus",
+      "requirement": "W-1041",
+      "description": "Loading the map leaves focus on the removed button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/map.ts",
+          "search": "  iframe.focus();\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1041"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1042/excluded-unannounced",
+      "requirement": "W-1042",
+      "description": "Screen readers aren't told a feature isn't included.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "          srText(\"emvb-price-table-sr\", \"Not included: \"),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*plan card with its title"
+    },
+    {
+      "id": "W-1042/sale-unannounced",
+      "requirement": "W-1042",
+      "description": "Screen readers aren't told which price is the regular one.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "        children: [srText(\"emvb-price-table-sr\", \"Regular price: \"), `${currency ?? \"\"}${regular}`],",
+          "replace": "        children: [`${currency ?? \"\"}${regular}`],"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*on sale"
+    },
+    {
+      "id": "W-1042/unsafe-button",
+      "requirement": "W-1042",
+      "description": "The button link is not sanitised.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "  const safe = href ? sanitizeHref(href) : undefined;",
+          "replace": "  const safe = href;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*unsafe or missing link"
+    },
+    {
+      "id": "W-1042/blank-without-noopener",
+      "requirement": "W-1042",
+      "description": "A button opening a new tab leaves window.opener to the other site.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "  return newTab ? { href: safe, target: \"_blank\", rel: \"noopener noreferrer\" } : { href: safe };",
+          "replace": "  return newTab ? { href: safe, target: \"_blank\" } : { href: safe };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*unsafe or missing link"
+    },
+    {
+      "id": "W-1042/no-ribbon",
+      "requirement": "W-1042",
+      "description": "Featured plans lose their ribbon.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "    if (p.featured)\n      children.push({\n        tag: \"p\",",
+          "replace": "    if (false)\n      children.push({\n        tag: \"p\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*featured adds the ribbon"
+    },
+    {
+      "id": "W-1042/ribbon-inside",
+      "requirement": "W-1042",
+      "description": "The ribbon sits inside the card instead of on its edge.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": ".emvb-price-table-ribbon{position:absolute;top:0;right:1.5em;transform:translateY(-50%);",
+          "replace": ".emvb-price-table-ribbon{"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1042"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1043/leader-read-aloud",
+      "requirement": "W-1043",
+      "description": "Screen readers read the dotted leader.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "            attrs: { class: \"emvb-price-list-leader\", \"aria-hidden\": \"true\" },",
+          "replace": "            attrs: { class: \"emvb-price-list-leader\" },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*dotted leader"
+    },
+    {
+      "id": "W-1043/picture-unnamed-alt",
+      "requirement": "W-1043",
+      "description": "A Price list picture's alt text is dropped.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "          class: \"emvb-price-list-image\",\n          src,\n          alt: p.alt?.trim() ?? \"\",",
+          "replace": "          class: \"emvb-price-list-image\",\n          src,\n          alt: \"\","
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*decorative unless"
+    },
+    {
+      "id": "W-1043/stray-row-allowed",
+      "requirement": "W-1043",
+      "description": "A Price list item may sit outside a Price list.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "  if (child.type === \"price-list-item\" && parent.type !== \"price-list\") {\n    return REASONS.itemOutsidePriceList;\n  }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/arrange-social.test.ts"],
+      "expect": "\\(fail\\).*51st item"
+    },
+    {
+      "id": "W-1043/no-cap",
+      "requirement": "W-1043",
+      "description": "A Price list takes more than 50 items.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/arrange.ts",
+          "search": "      nodeChildren(into.node).length >= MAX_PRICE_ITEMS,",
+          "replace": "      false,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/arrange-social.test.ts"],
+      "expect": "\\(fail\\).*51st item"
+    },
+    {
+      "id": "W-1043/no-starter-rows",
+      "requirement": "W-1043",
+      "description": "A new Price list starts empty.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "      children: [1, 2, 3].map((n) => newPriceListItem(n, random)),",
+          "replace": "      children: [],"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/item-list.test.tsx"
+      ],
+      "expect": "\\(fail\\).*three rows"
+    },
+    {
+      "id": "W-1043/leader-not-filling",
+      "requirement": "W-1043",
+      "description": "The leader no longer fills the gap between title and price.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": ".emvb-price-list-leader{flex:1;min-width:1em;",
+          "replace": ".emvb-price-list-leader{min-width:1em;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1043"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1044/button-announced",
+      "requirement": "W-1044",
+      "description": "Screen readers hear the Call to action's button as well as its link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "        attrs: { class: \"emvb-cta-button\", \"aria-hidden\": \"true\" },",
+          "replace": "        attrs: { class: \"emvb-cta-button\" },"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*for the eye only"
+    },
+    {
+      "id": "W-1044/unsafe-link",
+      "requirement": "W-1044",
+      "description": "A Call to action's link is not sanitised.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "    const link = linkAttrs(p.href, p.newTab);\n    const children: VNode[] = [];\n    if (p.ribbon?.trim())",
+          "replace": "    const link = p.href ? { href: p.href } : undefined;\n    const children: VNode[] = [];\n    if (p.ribbon?.trim())"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*without a safe link"
+    },
+    {
+      "id": "W-1044/no-overlay",
+      "requirement": "W-1044",
+      "description": "The picture behind the words has no dark overlay.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": ".emvb-cta-behind .emvb-cta-media::after{content:\"\";position:absolute;inset:0;background:rgb(0 0 0 / 0.55)}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*overlay behind the words"
+    },
+    {
+      "id": "W-1044/box-not-clickable",
+      "requirement": "W-1044",
+      "description": "Only the title, not the whole box, opens the link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": ".emvb-cta-link::after{content:\"\";position:absolute;inset:0;z-index:1}",
+          "replace": ".emvb-cta-link::after{content:none}"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1044"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1040/clock-stays-when-ended",
+      "requirement": "W-1040",
+      "description": "An ended Countdown's clock stays on screen.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": ".emvb-countdown[hidden],.emvb-countdown-clock[hidden]{display:none}",
+          "replace": ".emvb-countdown[hidden]{display:none}"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*Pause button"
     }
   ]
 }

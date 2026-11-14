@@ -45,7 +45,8 @@ export type A11yIssue = {
     | "empty-heading"
     | "landmark-name"
     | "motion"
-    | "empty-alert";
+    | "empty-alert"
+    | "counter-title";
   severity: "error" | "warning";
   message: string;
   /** The one-click fix, when there is a safe one. */
@@ -556,6 +557,26 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         rule: "empty-alert",
         severity: "warning",
         message: "This alert has no title or text, so it shows an empty box and says nothing.",
+      });
+    }
+    // W-1039: a bar without a title is a meter screen readers can't name.
+    if (node.type === "progress" && !spoken(props["label"]) && !node.bind) {
+      add({
+        nodeId: node.id,
+        rule: "control-name",
+        severity: "warning",
+        message:
+          'This progress bar has no title, so screen readers can\'t say what it measures. Add a title such as "Design".',
+      });
+    }
+    // W-1038: a Counter's number alone ("1,200+") doesn't say what was counted.
+    if (node.type === "counter" && !spoken(props["title"]) && !node.bind) {
+      add({
+        nodeId: node.id,
+        rule: "counter-title",
+        severity: "warning",
+        message:
+          'This counter has no title, so its number doesn\'t say what it counts. Add a title such as "Happy clients".',
       });
     }
     // W-419: an empty heading still shows up in screen readers' heading list, with nothing to say.

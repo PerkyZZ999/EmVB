@@ -183,3 +183,29 @@ describe("Carousel (W-1018)", () => {
     expect(audit(carousel({ autoplay: true, interval: 3 }))).toEqual(["motion:warning:caro0001"]);
   });
 });
+
+describe("Counter (W-1038)", () => {
+  const counter = (title?: string) => ({
+    id: "cntr0001",
+    type: "counter",
+    props: { value: 1200, ...(title === undefined ? {} : { title }) },
+  });
+
+  test("a counter without a title warns that its number says nothing", () => {
+    expect(audit(counter("Happy clients"))).toEqual([]);
+    expect(audit(counter())).toEqual(["counter-title:warning:cntr0001"]);
+    expect(audit(counter("  "))).toEqual(["counter-title:warning:cntr0001"]);
+  });
+});
+
+describe("Progress bar (W-1039)", () => {
+  test("a bar without a title warns that screen readers can't name it", () => {
+    const bar = (label?: string) => ({
+      id: "prog0001",
+      type: "progress",
+      props: { value: 50, ...(label === undefined ? {} : { label }) },
+    });
+    expect(audit(bar("Design"))).toEqual([]);
+    expect(audit(bar())).toEqual(["control-name:warning:prog0001"]);
+  });
+});

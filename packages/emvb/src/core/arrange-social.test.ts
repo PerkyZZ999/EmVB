@@ -1,7 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { canDrop, moveNode, REASONS } from "./arrange.ts";
 import { defaultElement } from "./index.ts";
-import { MAX_CAROUSEL_SLIDES, MAX_GALLERY_IMAGES, MAX_SOCIAL_LINKS } from "./limits.ts";
+import {
+  MAX_CAROUSEL_SLIDES,
+  MAX_GALLERY_IMAGES,
+  MAX_PRICE_ITEMS,
+  MAX_SOCIAL_LINKS,
+} from "./limits.ts";
 import { nestingIssues } from "./nesting.ts";
 import type { Layout, LayoutNode } from "./schema/layout.ts";
 
@@ -85,5 +90,27 @@ describe("Carousel arrange rules (W-1018)", () => {
       canDrop(layout, { kind: "new", node: defaultElement("heading", "head0001") }, "cs000000").ok,
     ).toBe(true);
     expect(moveNode(layout, "cs000000", "caro0001", MAX_CAROUSEL_SLIDES).ok).toBe(true);
+  });
+});
+
+describe("Price list arrange rules (W-1043)", () => {
+  test("a full Price list refuses a 51st item; items drop only into a price list, which takes nothing else", () => {
+    const items = Array.from({ length: MAX_PRICE_ITEMS }, (_, i) =>
+      defaultElement("price-list-item", `pi${String(i).padStart(6, "0")}`),
+    );
+    const layout = layoutWith([{ ...defaultElement("price-list", "plst0001"), children: items }]);
+    const item = defaultElement("price-list-item", "new00001");
+    expect(canDrop(layout, { kind: "new", node: item }, "plst0001")).toEqual({
+      ok: false,
+      reason: REASONS.tooManyPriceItems,
+    });
+    expect(canDrop(layout, { kind: "new", node: item }, "root0001")).toEqual({
+      ok: false,
+      reason: REASONS.itemOutsidePriceList,
+    });
+    expect(
+      canDrop(layout, { kind: "new", node: defaultElement("heading", "head0001") }, "plst0001"),
+    ).toEqual({ ok: false, reason: REASONS.onlyPriceItems });
+    expect(moveNode(layout, "pi000000", "plst0001", MAX_PRICE_ITEMS).ok).toBe(true);
   });
 });

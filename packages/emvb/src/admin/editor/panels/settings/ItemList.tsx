@@ -10,6 +10,7 @@ import {
 import {
   MAX_CAROUSEL_SLIDES,
   MAX_GALLERY_IMAGES,
+  MAX_PRICE_ITEMS,
   MAX_SOCIAL_LINKS,
   MAX_TABS,
   type FieldDescriptor,
@@ -20,6 +21,7 @@ import {
   newAccordionItem,
   newCarouselSlide,
   newGalleryImage,
+  newPriceListItem,
   newSocialLink,
   newTabPanel,
 } from "../../dnd/new-element.ts";
@@ -72,6 +74,13 @@ const KINDS: Record<string, Kind> = {
     field: (n) => ({ key: "label", kind: "text", label: `Slide ${n} name`, optional: true }),
     make: (n) => newCarouselSlide(n),
     max: MAX_CAROUSEL_SLIDES,
+  },
+  // W-1043: each row edits the item's title; its price and the rest are in its own panel.
+  "price-list": {
+    noun: "item",
+    field: (n) => ({ key: "title", kind: "text", label: `Item ${n} title` }),
+    make: (n) => newPriceListItem(n),
+    max: MAX_PRICE_ITEMS,
   },
 };
 

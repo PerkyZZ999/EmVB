@@ -3,6 +3,7 @@ import {
   MAX_DEPTH,
   MAX_GALLERY_IMAGES,
   MAX_NODES,
+  MAX_PRICE_ITEMS,
   MAX_SOCIAL_LINKS,
   MAX_TABS,
 } from "./limits.ts";
@@ -80,6 +81,9 @@ export const REASONS = {
   slideOutsideCarousel: "Slides can only go inside a Carousel.",
   onlySlides: "A carousel can only hold slides.",
   tooManySlides: `A carousel can hold up to ${MAX_CAROUSEL_SLIDES} slides.`,
+  itemOutsidePriceList: "Price list items can only go inside a Price list.",
+  onlyPriceItems: "A price list can only hold price list items.",
+  tooManyPriceItems: `A price list can hold up to ${MAX_PRICE_ITEMS} items.`,
   emptyOutsideLoop: "An Empty state can only go inside a Loop.",
 } as const;
 
@@ -175,6 +179,12 @@ export function parentChildRefusal(
     return REASONS.slideOutsideCarousel;
   }
   if (parent.type === "carousel" && child.type !== "carousel-slide") return REASONS.onlySlides;
+  if (child.type === "price-list-item" && parent.type !== "price-list") {
+    return REASONS.itemOutsidePriceList;
+  }
+  if (parent.type === "price-list" && child.type !== "price-list-item") {
+    return REASONS.onlyPriceItems;
+  }
   if (isFormNode(child) && inForm) return REASONS.nestedForm;
   if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;
   return undefined;
@@ -214,6 +224,14 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
       !nodeChildren(into.node).some((child) => child.id === node.id) &&
       nodeChildren(into.node).length >= MAX_CAROUSEL_SLIDES,
     REASONS.tooManySlides,
+  ],
+  // W-1043: a full Price list takes no new item; moving within it is fine.
+  [
+    ({ node, into }) =>
+      into.node.type === "price-list" &&
+      !nodeChildren(into.node).some((child) => child.id === node.id) &&
+      nodeChildren(into.node).length >= MAX_PRICE_ITEMS,
+    REASONS.tooManyPriceItems,
   ],
   [({ node, into }) => into.depth + height(node) > MAX_DEPTH, REASONS.tooDeep],
   [

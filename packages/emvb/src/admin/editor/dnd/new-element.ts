@@ -112,6 +112,20 @@ export function newCarouselSlide(n: number, random?: () => number): LayoutNode {
   };
 }
 
+/** W-1043: the rows a new Price list starts with, then its Add item cycles through them. */
+const STARTER_PRICES = [
+  ["Espresso", "$3", "A double shot, served short."],
+  ["Cappuccino", "$4.50", "Espresso, steamed milk and foam."],
+  ["Croissant", "$3.75", "Baked every morning."],
+] as const;
+
+/** W-1043: a Price list item for a new Price list or its Add item. */
+export function newPriceListItem(n: number, random?: () => number): LayoutNode {
+  const [title, price, description] =
+    STARTER_PRICES[(n - 1) % STARTER_PRICES.length] ?? STARTER_PRICES[0];
+  return { id: newNodeId(random), type: "price-list-item", props: { title, price, description } };
+}
+
 /** W-1019: an empty Gallery image for a Gallery's Add picture; its panel picks the picture. */
 export function newGalleryImage(random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "gallery-image", props: { src: "", alt: "Image" } };
@@ -178,6 +192,12 @@ export function newElement(
     return {
       ...defaultElement("carousel", newNodeId(random)),
       children: [1, 2, 3].map((n) => newCarouselSlide(n, random)),
+    };
+  }
+  if (type === "price-list") {
+    return {
+      ...defaultElement("price-list", newNodeId(random)),
+      children: [1, 2, 3].map((n) => newPriceListItem(n, random)),
     };
   }
   if (type === "social-icons") {

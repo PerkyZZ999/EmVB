@@ -10,8 +10,11 @@ import type {
   RatingNode,
   CarouselNode,
   CarouselSlideNode,
+  CountdownNode,
+  CounterNode,
   GalleryImageNode,
   GalleryNode,
+  MapNode,
   SocialIconsNode,
   SocialLinkNode,
   TestimonialNode,
@@ -27,6 +30,7 @@ import { sanitizeSvgMarkup } from "../sanitize/svg.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { iconGlyph } from "./icon-svg.ts";
+import { mapUrls } from "./marketing.ts";
 import type { VNode } from "../render/vnode.ts";
 import type { ElementDefinition } from "./definition.ts";
 
@@ -119,13 +123,21 @@ function ratingStars(props: RatingNode["props"], attrs: Record<string, string>):
   };
 }
 
-/** W-1025: the opt-in public scripts the 1.2 widgets use; a page loads only the ones it needs. */
-export type WidgetRuntime = "alerts" | "carousel" | "lightbox";
+/** W-1025: the opt-in public scripts the widgets use (W-1038: the Counter's count-up); a page loads only the ones it needs. */
+export type WidgetRuntime = "alerts" | "carousel" | "countdown" | "counter" | "lightbox" | "map";
 
 /** The widget runtime one element needs, if any: only when it opts in. */
 export function nodeRuntime(node: LayoutNode): WidgetRuntime | undefined {
   if (node.type === "alert" && (node as AlertNode).props.dismissible) return "alerts";
   if (node.type === "gallery" && (node as GalleryNode).props.lightbox) return "lightbox";
+  if (node.type === "counter" && (node as CounterNode).props.countUp) return "counter";
+  if (node.type === "countdown" && (node as CountdownNode).props.ticking) return "countdown";
+  if (
+    node.type === "map" &&
+    (node as MapNode).props.embed &&
+    mapUrls((node as MapNode).props).embed
+  )
+    return "map";
   if (node.type === "carousel") {
     const { arrows, dots, autoplay } = (node as CarouselNode).props;
     if (arrows || dots || autoplay) return "carousel";

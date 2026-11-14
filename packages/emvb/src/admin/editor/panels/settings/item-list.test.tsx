@@ -436,3 +436,26 @@ describe("Carousel slides (W-1018)", () => {
     expect(kidsOf(calls.changed.at(-1))).toHaveLength(4);
   });
 });
+
+describe("Price list items (W-1043)", () => {
+  test("a new Price list starts with three rows; its panel lists them by title; Add item adds one", async () => {
+    const node = newElement("price-list");
+    if (!node || node.type !== "price-list") throw new Error("expected a price list");
+    expect(kidsOf(node).map((c) => (c.props as { title?: string }).title)).toEqual([
+      "Espresso",
+      "Cappuccino",
+      "Croissant",
+    ]);
+    expect(validateLayout(layoutWith(node)).ok).toBe(true);
+    const calls = await panel(node);
+    expect(document.body.textContent).toContain("List name");
+    await type(inputLabelled("Item 2 title"), "Flat white");
+    expect((kidsOf(calls.changed.at(-1))[1]?.props as { title?: string } | undefined)?.title).toBe(
+      "Flat white",
+    );
+    await act(async () => button("Add item").click());
+    const added = kidsOf(calls.changed.at(-1)).at(-1);
+    expect(added?.type).toBe("price-list-item");
+    expect((added?.props as { title?: string } | undefined)?.title).toBe("Espresso");
+  });
+});

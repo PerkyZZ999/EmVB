@@ -146,6 +146,14 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `gallery-image` | src, alt, decorative, mediaId, width, height, focalX, focalY, caption |
 | `carousel` | label, perView, arrows, dots, autoplay, interval, loop |
 | `carousel-slide` | label |
+| `counter` | value, start, decimals, separator, prefix, suffix, title, countUp, duration |
+| `progress` | value, max, label, showValue, kind, thickness, grow |
+| `countdown` | target, title, label, ticking, hideSeconds, expired, expiredText, expiredHref |
+| `map` | address, provider, lat, lng, zoom, linkText, embed, height |
+| `price-table` | title, titleLevel, description, price, currency, period, regularPrice, features, excluded, buttonText, buttonHref, newTab, featured, ribbon |
+| `price-list` | label |
+| `price-list-item` | title, price, description, src, alt, mediaId, width, height, focalX, focalY, href, newTab |
+| `cta` | title, titleLevel, text, src, alt, mediaId, width, height, focalX, focalY, layout, buttonText, href, newTab, ribbon |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

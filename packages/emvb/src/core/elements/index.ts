@@ -40,6 +40,16 @@ import { ICON_STROKE_WIDTHS, iconGlyph } from "./icon-svg.ts";
 export { iconHasAdjustableStroke, iconHasOwnColors } from "./icon-svg.ts";
 import { menu, menuItem } from "./menu.ts";
 import {
+  countdown,
+  counter,
+  cta,
+  map,
+  priceList,
+  priceListItem,
+  priceTable,
+  progress,
+} from "./marketing.ts";
+import {
   alert,
   carousel,
   carouselSlide,
@@ -1124,6 +1134,14 @@ export const ELEMENTS = {
   "gallery-image": galleryImage,
   carousel,
   "carousel-slide": carouselSlide,
+  counter,
+  progress,
+  countdown,
+  map,
+  "price-table": priceTable,
+  "price-list": priceList,
+  "price-list-item": priceListItem,
+  cta,
   container,
   "layout-section": layoutSection,
   spacer,

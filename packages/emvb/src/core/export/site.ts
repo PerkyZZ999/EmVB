@@ -260,6 +260,9 @@ const RUNTIME_FILES = {
   alerts: "assets/emvb-alerts.js",
   lightbox: "assets/emvb-lightbox.js",
   carousel: "assets/emvb-carousel.js",
+  counter: "assets/emvb-counter.js",
+  countdown: "assets/emvb-countdown.js",
+  map: "assets/emvb-map.js",
 } as const;
 
 function documentHtml(opts: {

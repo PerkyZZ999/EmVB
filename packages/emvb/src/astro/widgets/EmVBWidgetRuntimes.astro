@@ -5,7 +5,10 @@
  */
 import EmVBAlertsRuntime from "./EmVBAlertsRuntime.astro";
 import EmVBCarouselRuntime from "./EmVBCarouselRuntime.astro";
+import EmVBCountdownRuntime from "./EmVBCountdownRuntime.astro";
+import EmVBCounterRuntime from "./EmVBCounterRuntime.astro";
 import EmVBLightboxRuntime from "./EmVBLightboxRuntime.astro";
+import EmVBMapRuntime from "./EmVBMapRuntime.astro";
 
 interface Props {
   names?: readonly string[] | undefined;
@@ -17,3 +20,6 @@ const names = new Set(Astro.props.names ?? []);
 {names.has("alerts") && <EmVBAlertsRuntime />}
 {names.has("lightbox") && <EmVBLightboxRuntime />}
 {names.has("carousel") && <EmVBCarouselRuntime />}
+{names.has("counter") && <EmVBCounterRuntime />}
+{names.has("countdown") && <EmVBCountdownRuntime />}
+{names.has("map") && <EmVBMapRuntime />}

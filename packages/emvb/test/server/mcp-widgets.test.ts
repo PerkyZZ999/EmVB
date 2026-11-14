@@ -225,3 +225,153 @@ describe("Carousel over MCP (W-1018)", () => {
     expect(stray.success).toBe(false);
   });
 });
+
+describe("Counter over MCP (W-1038)", () => {
+  test("add_element adds a counting Counter; a count-up over 5 seconds is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("counter")?.name).toBe("Counter");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "counter",
+        props: { value: 500, suffix: "+", title: "Sites", countUp: true },
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "counter", props: { value: 5, duration: 9000 } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});
+
+describe("Progress bar over MCP (W-1039)", () => {
+  test("add_element adds a progress bar; a max of 0 is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("progress")?.name).toBe("Progress bar");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "progress",
+        props: { value: 3, max: 4, label: "Setup", kind: "progressbar" },
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "progress", props: { value: 3, max: 0 } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});
+
+describe("Countdown over MCP (W-1040)", () => {
+  test("add_element adds a ticking Countdown; a target without a UTC offset is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("countdown")?.name).toBe("Countdown");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "countdown",
+        props: { target: "2027-01-01T00:00+01:00", ticking: true, expired: "hide" },
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "countdown", props: { target: "2027-01-01T00:00" } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});
+
+describe("Map over MCP (W-1041)", () => {
+  test("add_element adds a Map that loads on request; a latitude off the globe is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("map")?.name).toBe("Map");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "map", props: { address: "Main St", lat: 45.5, lng: -73.56, embed: true } },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "map", props: { address: "Main St", lat: 95 } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});
+
+describe("Price table over MCP (W-1042)", () => {
+  test("add_element adds a plan on sale; a price over 20 characters is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("price-table")?.name).toBe("Price table");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "price-table",
+        props: { title: "Team", price: "19", regularPrice: "29", features: ["5 seats"] },
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "price-table", props: { title: "Team", price: "x".repeat(21) } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});
+
+describe("Price list over MCP (W-1043)", () => {
+  test("add_element adds a price list with rows; a row outside a price list is refused", async () => {
+    const pageId = await newPage();
+    const types = await catalogue();
+    expect(types.get("price-list")?.name).toBe("Price list");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "price-list",
+        props: { label: "Drinks" },
+        children: [{ type: "price-list-item", props: { title: "Tea", price: "$2" } }],
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "price-list-item", props: { title: "Tea", price: "$2" } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});
+
+describe("Call to action over MCP (W-1044)", () => {
+  test("add_element adds a linked Call to action; an unknown layout is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("cta")?.name).toBe("Call to action");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "cta", props: { title: "Join", href: "/join", buttonText: "Join now" } },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "cta", props: { title: "Join", layout: "under" } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});

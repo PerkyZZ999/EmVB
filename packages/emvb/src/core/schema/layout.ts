@@ -782,6 +782,14 @@ export const KNOWN_ELEMENT_TYPES = [
   "gallery-image",
   "carousel",
   "carousel-slide",
+  "counter",
+  "progress",
+  "countdown",
+  "map",
+  "price-table",
+  "price-list",
+  "price-list-item",
+  "cta",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -840,6 +848,148 @@ export const AlertNode = leafNode(
     dismissible: z.boolean().optional(),
     /** The close button's name for screen readers. Unset = "Dismiss". */
     dismissLabel: z.string().max(80).optional(),
+  }),
+);
+
+/** W-1038: the thousands separators a Counter can use. */
+export const COUNTER_SEPARATORS = [",", ".", " ", "'"] as const;
+
+/** W-1038: the largest number a Counter shows, either way (beyond it, rounding shows). */
+export const MAX_COUNTER = 1e12;
+
+/**
+ * W-1038: a number to show off, such as "1,200+ clients": `value` with optional `prefix`,
+ * `suffix` and `title`, as text. `countUp` asks for the opt-in counter runtime, which counts from
+ * `start` (unset 0) to `value` over `duration` ms when the number scrolls into view; under
+ * reduced motion, and without the script, the final number shows at once.
+ */
+export const CounterNode = leafNode(
+  "counter",
+  z.strictObject({
+    value: z.number().min(-MAX_COUNTER).max(MAX_COUNTER),
+    start: z.number().min(-MAX_COUNTER).max(MAX_COUNTER).optional(),
+    /** Digits after the decimal point. Unset = 0. */
+    decimals: z.number().int().min(0).max(3).optional(),
+    /** Thousands separator. Unset = none. */
+    separator: z.enum(COUNTER_SEPARATORS).optional(),
+    prefix: z.string().max(20).optional(),
+    suffix: z.string().max(20).optional(),
+    title: z.string().max(200).optional(),
+    countUp: z.boolean().optional(),
+    /** How long the count-up takes, in ms; at most 5 s, so it never needs a pause (WCAG 2.2.2). Unset = 2000. */
+    duration: z.number().int().min(300).max(5000).optional(),
+  }),
+);
+
+/** W-1039: what a Progress bar means: a measurement (a skill level) or how far a task has got. */
+export const PROGRESS_KINDS = ["meter", "progressbar"] as const;
+
+/** W-1039: the largest `max` a Progress bar takes. */
+export const MAX_PROGRESS = 1e6;
+
+/**
+ * W-1039: a labelled bar filled to `value` out of `max` (unset 100). Screen readers get it as a
+ * meter or a progress bar (`kind`, unset meter) with the value as text. `grow` lets the fill grow
+ * in as it scrolls into view, with CSS only and not under reduced motion. A value above `max`
+ * shows as full, so lowering `max` never makes a page invalid.
+ */
+export const ProgressNode = leafNode(
+  "progress",
+  z.strictObject({
+    value: z.number().min(0).max(MAX_PROGRESS),
+    max: z.number().positive().max(MAX_PROGRESS).optional(),
+    label: z.string().max(120).optional(),
+    showValue: z.boolean().optional(),
+    kind: z.enum(PROGRESS_KINDS).optional(),
+    /** The bar's height in px. Unset = 8. */
+    thickness: z.number().int().min(2).max(48).optional(),
+    grow: z.boolean().optional(),
+  }),
+);
+
+/** W-1040: a date and time with its UTC offset, such as 2026-12-01T09:00-05:00 or …T14:00Z. */
+export const COUNTDOWN_TARGET =
+  /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?(Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
+
+/** W-1040: what a ticking Countdown does when its time is up. */
+export const COUNTDOWN_EXPIRED = ["text", "hide", "link"] as const;
+
+/**
+ * W-1040: a deadline. Without script it is a sentence with the target as `<time>` ("Ends 1 Dec
+ * 2026, 09:00 UTC−5"). `ticking` asks for the opt-in countdown runtime: days, hours, minutes and
+ * seconds that screen readers skip (the sentence stays for them), a Pause button, and at the end
+ * `expired`: show `expiredText`, hide the Countdown, or show `expiredText` as a link to
+ * `expiredHref`.
+ */
+export const CountdownNode = leafNode(
+  "countdown",
+  z.strictObject({
+    target: z
+      .string()
+      .regex(COUNTDOWN_TARGET, "Use a date, time and UTC offset such as 2026-12-01T09:00-05:00")
+      .refine((value) => !Number.isNaN(Date.parse(value)), "This date doesn't exist"),
+    title: z.string().max(200).optional(),
+    /** The words before the date. Unset = "Ends". */
+    label: z.string().max(40).optional(),
+    ticking: z.boolean().optional(),
+    hideSeconds: z.boolean().optional(),
+    expired: z.enum(COUNTDOWN_EXPIRED).optional(),
+    /** Unset = "This offer has ended." */
+    expiredText: z.string().max(200).optional(),
+    expiredHref: z.string().max(2000).optional(),
+  }),
+);
+
+/** W-1041: the map services a Map links to and embeds. */
+export const MAP_PROVIDERS = ["osm", "google"] as const;
+
+/**
+ * W-1041: a place. Without script it is the address and a link to it on OpenStreetMap or Google
+ * Maps (`provider`, unset osm), at `lat`/`lng` when set. `embed` asks for the opt-in map runtime:
+ * a "Show the map" button that loads the map in an iframe only when pressed, so the page makes
+ * no request to the map service until the visitor asks. OpenStreetMap embeds need `lat`/`lng`.
+ */
+export const MapNode = leafNode(
+  "map",
+  z.strictObject({
+    address: z.string().min(1).max(300),
+    provider: z.enum(MAP_PROVIDERS).optional(),
+    lat: z.number().min(-90).max(90).optional(),
+    lng: z.number().min(-180).max(180).optional(),
+    /** Unset = 15. */
+    zoom: z.number().int().min(1).max(19).optional(),
+    /** The link's words. Unset = "Open in OpenStreetMap" or "Open in Google Maps". */
+    linkText: z.string().max(80).optional(),
+    embed: z.boolean().optional(),
+    /** The embedded map's height in px. Unset = 360. */
+    height: z.number().int().min(150).max(800).optional(),
+  }),
+);
+
+/**
+ * W-1042: a plan card: title, price (with `currency` and `period`; `regularPrice` shows struck
+ * through before it as on sale), what is in the plan (`features`) and what isn't (`excluded`),
+ * a button link, and an optional ribbon when `featured`. No script.
+ */
+export const PriceTableNode = leafNode(
+  "price-table",
+  z.strictObject({
+    title: z.string().max(120),
+    /** The title's heading level. Unset = 3. */
+    titleLevel: z.number().int().min(2).max(6).optional(),
+    description: z.string().max(500).optional(),
+    price: z.string().max(20),
+    currency: z.string().max(5).optional(),
+    period: z.string().max(40).optional(),
+    regularPrice: z.string().max(20).optional(),
+    features: boundedArray(z.string().max(200), 30).optional(),
+    excluded: boundedArray(z.string().max(200), 30).optional(),
+    buttonText: z.string().max(80).optional(),
+    buttonHref: z.string().max(2000).optional(),
+    newTab: z.boolean().optional(),
+    featured: z.boolean().optional(),
+    /** The ribbon's words when `featured`. Unset = "Featured". */
+    ribbon: z.string().max(30).optional(),
   }),
 );
 
@@ -1045,6 +1195,63 @@ export const CarouselSlideNode = parentNode(
   }),
 );
 
+/**
+ * W-1043: a menu-style list of items with prices, such as a restaurant menu or a list of
+ * services. Holds Price list items only. `label` names the list for screen readers.
+ */
+export const PriceListNodeSchema = parentNode(
+  "price-list",
+  z.strictObject({
+    label: z.string().max(80).optional(),
+  }),
+);
+
+/**
+ * W-1043: one row of a Price list: the title, a dotted leader and the price on one line, an
+ * optional description under them, an optional picture before them (its alt text unset: the
+ * picture is decorative) and an optional link on the title.
+ */
+export const PriceListItemNode = leafNode(
+  "price-list-item",
+  z.strictObject({
+    title: z.string().max(120),
+    price: z.string().max(20),
+    description: z.string().max(500).optional(),
+    src: z.string().max(2000).optional(),
+    alt: z.string().max(500).optional(),
+    ...PICKED_MEDIA,
+    href: z.string().max(2000).optional(),
+    newTab: z.boolean().optional(),
+  }),
+);
+
+/** W-1044: where a Call to action puts its picture: behind the words, or above or beside them. */
+export const CTA_LAYOUTS = ["behind", "top", "left", "right"] as const;
+
+/**
+ * W-1044: a box with a picture, title, text and a button. With `href` the title is the link and
+ * the whole box opens it (the button repeats it for the eye only). `layout` (unset `behind`)
+ * puts the picture behind the words under a dark overlay, or above or beside them. `ribbon`
+ * adds a small label in a corner.
+ */
+export const CtaNode = leafNode(
+  "cta",
+  z.strictObject({
+    title: z.string().max(200),
+    /** The title's heading level. Unset = 3. */
+    titleLevel: z.number().int().min(2).max(6).optional(),
+    text: z.string().max(MAX_TEXT_LENGTH).optional(),
+    src: z.string().max(2000).optional(),
+    alt: z.string().max(500).optional(),
+    ...PICKED_MEDIA,
+    layout: z.enum(CTA_LAYOUTS).optional(),
+    buttonText: z.string().max(80).optional(),
+    href: z.string().max(2000).optional(),
+    newTab: z.boolean().optional(),
+    ribbon: z.string().max(30).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1089,6 +1296,14 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   GalleryImageNode,
   CarouselNodeSchema,
   CarouselSlideNode,
+  PriceListNodeSchema,
+  PriceListItemNode,
+  CtaNode,
+  CounterNode,
+  ProgressNode,
+  CountdownNode,
+  MapNode,
+  PriceTableNode,
   SpacerNode,
   DividerNode,
   TextNode,
@@ -1131,6 +1346,13 @@ export type TocNode = z.infer<typeof TocNode>;
 export type LanguageSwitcherNode = z.infer<typeof LanguageSwitcherNode>;
 export type RatingNode = z.infer<typeof RatingNode>;
 export type AlertNode = z.infer<typeof AlertNode>;
+export type CounterNode = z.infer<typeof CounterNode>;
+export type ProgressNode = z.infer<typeof ProgressNode>;
+export type CountdownNode = z.infer<typeof CountdownNode>;
+export type MapNode = z.infer<typeof MapNode>;
+export type PriceTableNode = z.infer<typeof PriceTableNode>;
+export type PriceListItemNode = z.infer<typeof PriceListItemNode>;
+export type CtaNode = z.infer<typeof CtaNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
@@ -1319,6 +1541,12 @@ export type CarouselSlideNode = NodeEnvelope & {
   children: LayoutNode[];
 };
 
+export type PriceListNode = NodeEnvelope & {
+  type: "price-list";
+  props: z.infer<typeof PriceListNodeSchema>["props"];
+  children: LayoutNode[];
+};
+
 export type GalleryNode = NodeEnvelope & {
   type: "gallery";
   props: z.infer<typeof GalleryNodeSchema>["props"];
@@ -1370,6 +1598,14 @@ export type LayoutNode =
   | GalleryImageNode
   | CarouselNode
   | CarouselSlideNode
+  | CounterNode
+  | ProgressNode
+  | CountdownNode
+  | MapNode
+  | PriceTableNode
+  | PriceListNode
+  | PriceListItemNode
+  | CtaNode
   | SpacerNode
   | DividerNode
   | TextNode
@@ -1584,7 +1820,8 @@ export const isParentNode = (
   | SocialIconsNode
   | GalleryNode
   | CarouselNode
-  | CarouselSlideNode =>
+  | CarouselSlideNode
+  | PriceListNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -1603,7 +1840,8 @@ export const isParentNode = (
   node.type === "social-icons" ||
   node.type === "gallery" ||
   node.type === "carousel" ||
-  node.type === "carousel-slide";
+  node.type === "carousel-slide" ||
+  node.type === "price-list";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);
