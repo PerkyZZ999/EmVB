@@ -155,6 +155,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `price-list-item` | title, price, description, src, alt, mediaId, width, height, focalX, focalY, href, newTab |
 | `cta` | title, titleLevel, text, src, alt, mediaId, width, height, focalX, focalY, layout, buttonText, href, newTab, ribbon |
 | `flip-box` | frontTitle, frontText, backTitle, backText, titleLevel, buttonText, href, newTab, direction, toggleLabel |
+| `headline` | level, before, highlight, after, mark, rotate, rotating, interval, turns |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

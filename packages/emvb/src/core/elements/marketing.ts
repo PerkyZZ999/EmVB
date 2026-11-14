@@ -7,6 +7,7 @@ import type {
   CounterNode,
   CtaNode,
   FlipBoxNode,
+  HeadlineNode,
   MapNode,
   PriceListItemNode,
   PriceListNode,
@@ -1065,6 +1066,118 @@ export const flipBox: ElementDefinition<FlipBoxNode> = {
           ],
         },
       ],
+    };
+  },
+};
+
+/** The circle drawn around a highlighted word, on a 100 × 40 grid stretched to the word. */
+const HEADLINE_CIRCLE = "M50 3C20 2 3 10 3 20s20 18 48 17 47-8 46-17S78 3 46 4";
+
+export const headline: ElementDefinition<HeadlineNode> = {
+  baseCss: `.emvb-headline{margin:0}.emvb-headline-mark{position:relative;display:inline-block;white-space:nowrap}.emvb-headline-underline .emvb-headline-mark{background:linear-gradient(var(--emvb-headline-mark,#f59e0b),var(--emvb-headline-mark,#f59e0b)) no-repeat 0 92%/100% 0.12em}.emvb-headline-strike .emvb-headline-mark{background:linear-gradient(var(--emvb-headline-mark,#f59e0b),var(--emvb-headline-mark,#f59e0b)) no-repeat 0 55%/100% 0.1em}.emvb-headline-shape{position:absolute;left:-0.25em;top:-0.15em;width:calc(100% + 0.5em);height:calc(100% + 0.3em);overflow:visible;pointer-events:none;color:var(--emvb-headline-mark,#f59e0b)}.emvb-headline-shape path{stroke-dasharray:300;stroke-dashoffset:0}.emvb-headline-pause{margin:0.5em 0 0;padding:0.25em 0.75em;border:1px solid currentColor;border-radius:4px;background:none;color:inherit;font:inherit;font-size:0.875em;cursor:pointer}.emvb-headline-pause:focus-visible{outline:2px solid currentColor;outline-offset:2px}.emvb-headline-sr{${SR_ONLY}}@keyframes emvb-headline-line{from{background-size:0 0.12em}}@keyframes emvb-headline-strike{from{background-size:0 0.1em}}@keyframes emvb-headline-circle{from{stroke-dashoffset:300}}@media (prefers-reduced-motion:no-preference){.emvb-headline-underline .emvb-headline-mark{animation:emvb-headline-line 0.8s ease-out 0.3s both}.emvb-headline-strike .emvb-headline-mark{animation:emvb-headline-strike 0.8s ease-out 0.3s both}.emvb-headline-shape path{animation:emvb-headline-circle 1s ease-out 0.3s both}}`,
+  defaults: () => ({
+    type: "headline",
+    props: {
+      level: 2,
+      before: "We build",
+      highlight: "fast",
+      after: "websites",
+      rotate: ["accessible", "beautiful"],
+    },
+  }),
+  descriptor: {
+    type: "headline",
+    name: "Animated headline",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      { key: "before", kind: "text", label: "Before", optional: true },
+      { key: "highlight", kind: "text", label: "Highlighted words" },
+      { key: "after", kind: "text", label: "After", optional: true },
+      {
+        key: "level",
+        kind: "select",
+        label: "Level",
+        optional: true,
+        options: [1, 2, 3, 4, 5, 6].map((level) => ({ value: level, label: `H${level}` })),
+      },
+      {
+        key: "mark",
+        kind: "select",
+        label: "Mark",
+        optional: true,
+        options: [
+          { value: "underline", label: "Underline" },
+          { value: "circle", label: "Circle" },
+          { value: "strike", label: "Strike through" },
+          { value: "none", label: "None" },
+        ],
+      },
+      {
+        key: "rotate",
+        kind: "list-items",
+        label: "Other words",
+        optional: true,
+        message: "One per line. They take turns with the highlighted words.",
+      },
+      { key: "rotating", kind: "boolean", label: "Rotate the words", optional: true },
+      {
+        key: "interval",
+        kind: "decimal",
+        label: "Seconds per word",
+        optional: true,
+        min: 1.5,
+        max: 10,
+        message: "From 1.5 to 10 seconds.",
+      },
+      {
+        key: "turns",
+        kind: "int",
+        label: "Rounds before it stops",
+        optional: true,
+        min: 1,
+        max: 5,
+      },
+    ],
+  },
+  build: (node, attrs) => {
+    const p = node.props;
+    const style = p.mark ?? "underline";
+    const words = (p.rotate ?? []).map((w) => w.trim()).filter(Boolean);
+    const rotating = Boolean(p.rotating) && words.length > 0;
+    const markChildren: (VNode | string)[] = [p.highlight];
+    if (style === "circle")
+      markChildren.push({
+        tag: "svg",
+        attrs: {
+          xmlns: "http://www.w3.org/2000/svg",
+          class: "emvb-headline-shape",
+          viewBox: "0 0 100 40",
+          preserveAspectRatio: "none",
+          fill: "none",
+          stroke: "currentColor",
+          "stroke-width": "2.5",
+          "stroke-linecap": "round",
+          "aria-hidden": "true",
+          focusable: "false",
+        },
+        children: [{ tag: "path", attrs: { d: HEADLINE_CIRCLE }, children: [] }],
+      });
+    const markAttrs: Record<string, string> = { class: "emvb-headline-mark" };
+    if (rotating) {
+      markAttrs["data-emvb-rotate"] = JSON.stringify([p.highlight, ...words]);
+      markAttrs["data-interval"] = String(p.interval ?? 2.5);
+      markAttrs["data-turns"] = String(p.turns ?? 2);
+    }
+    const children: (VNode | string)[] = [];
+    if (p.before?.trim()) children.push(`${p.before.trim()} `);
+    children.push({ tag: "span", attrs: markAttrs, children: markChildren });
+    if (p.after?.trim()) children.push(` ${p.after.trim()}`);
+    // The runtime adds its Pause button after the heading, so the heading reads as one sentence.
+    return {
+      tag: `h${p.level ?? 2}`,
+      attrs: { ...attrs, class: `${attrs["class"] ?? ""} emvb-headline-${style}`.trim() },
+      children,
     };
   },
 };

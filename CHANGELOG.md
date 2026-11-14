@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Price list (W-1043).** A menu-style list: each row has a title, a dotted leader and the price on one line, an optional description below and an optional picture and link. A new list starts with three rows; the panel lists them by title and adds more (up to 50). No script. Agents can add it over MCP.
 - **Call to action (W-1044).** A box with a picture, title, text and button, the picture behind the words (under a dark overlay) or above or beside them, and an optional ribbon. With a link, the whole box opens it through its title, so screen readers hear one link, not two. No script. Agents can add it over MCP.
 - **Flip box (W-1045).** A card with a front and a back that turns over on hover, when keyboard focus reaches the back's link, or with its Turn over tick box on touch screens, all without script. Screen readers read both faces. Visitors who prefer reduced motion see the faces swap without the turn. Agents can add it over MCP.
+- **Animated headline (W-1046).** A heading with highlighted words that get an underline, circle or strike drawn once in CSS (already drawn for visitors who prefer reduced motion). "Rotate the words" swaps the highlight through other words for a few rounds with a Pause button, then stops on the first; screen readers read one steady sentence. The script loads only on pages with rotating words. The accessibility check counts it as a heading. Agents can add it over MCP.
 
 ### Changed
 

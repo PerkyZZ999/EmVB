@@ -397,3 +397,25 @@ describe("Flip box over MCP (W-1045)", () => {
     expect(refused.success).toBe(false);
   });
 });
+
+describe("Animated headline over MCP (W-1046)", () => {
+  test("add_element adds a rotating headline; empty highlighted words are refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("headline")?.name).toBe("Animated headline");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "headline",
+        props: { highlight: "fast", rotate: ["safe"], rotating: true, mark: "circle" },
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "headline", props: { highlight: "" } },
+    });
+    expect(refused.success).toBe(false);
+  });
+});

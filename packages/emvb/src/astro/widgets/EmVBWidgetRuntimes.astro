@@ -7,6 +7,7 @@ import EmVBAlertsRuntime from "./EmVBAlertsRuntime.astro";
 import EmVBCarouselRuntime from "./EmVBCarouselRuntime.astro";
 import EmVBCountdownRuntime from "./EmVBCountdownRuntime.astro";
 import EmVBCounterRuntime from "./EmVBCounterRuntime.astro";
+import EmVBHeadlineRuntime from "./EmVBHeadlineRuntime.astro";
 import EmVBLightboxRuntime from "./EmVBLightboxRuntime.astro";
 import EmVBMapRuntime from "./EmVBMapRuntime.astro";
 
@@ -23,3 +24,4 @@ const names = new Set(Astro.props.names ?? []);
 {names.has("counter") && <EmVBCounterRuntime />}
 {names.has("countdown") && <EmVBCountdownRuntime />}
 {names.has("map") && <EmVBMapRuntime />}
+{names.has("headline") && <EmVBHeadlineRuntime />}

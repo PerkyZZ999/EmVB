@@ -791,6 +791,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "price-list-item",
   "cta",
   "flip-box",
+  "headline",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -1280,6 +1281,33 @@ export const FlipBoxNode = leafNode(
   }),
 );
 
+/** W-1046: how an Animated headline marks its highlighted words. */
+export const HEADLINE_MARKS = ["underline", "circle", "strike", "none"] as const;
+
+/**
+ * W-1046: a heading (`level`, unset 2) of `before`, the highlighted `highlight` and `after`,
+ * read as one sentence. `mark` (unset underline) is drawn once in CSS, already drawn under
+ * reduced motion. `rotate` lists other words for the highlight: `rotating` asks for the opt-in
+ * headline runtime, which cycles them every `interval` seconds for `turns` rounds and stops on
+ * the first word, with a Pause button; screen readers keep the sentence with the first word.
+ */
+export const HeadlineNode = leafNode(
+  "headline",
+  z.strictObject({
+    level: z.number().int().min(1).max(6).optional(),
+    before: z.string().max(200).optional(),
+    highlight: z.string().min(1).max(120),
+    after: z.string().max(200).optional(),
+    mark: z.enum(HEADLINE_MARKS).optional(),
+    rotate: boundedArray(z.string().max(120), 10).optional(),
+    rotating: z.boolean().optional(),
+    /** Seconds per word. Unset = 2.5. */
+    interval: z.number().min(1.5).max(10).optional(),
+    /** Rounds through the words before it stops. Unset = 2. */
+    turns: z.number().int().min(1).max(5).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1328,6 +1356,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   PriceListItemNode,
   CtaNode,
   FlipBoxNode,
+  HeadlineNode,
   CounterNode,
   ProgressNode,
   CountdownNode,
@@ -1383,6 +1412,7 @@ export type PriceTableNode = z.infer<typeof PriceTableNode>;
 export type PriceListItemNode = z.infer<typeof PriceListItemNode>;
 export type CtaNode = z.infer<typeof CtaNode>;
 export type FlipBoxNode = z.infer<typeof FlipBoxNode>;
+export type HeadlineNode = z.infer<typeof HeadlineNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
@@ -1637,6 +1667,7 @@ export type LayoutNode =
   | PriceListItemNode
   | CtaNode
   | FlipBoxNode
+  | HeadlineNode
   | SpacerNode
   | DividerNode
   | TextNode

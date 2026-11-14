@@ -193,3 +193,22 @@ test("W-1041: a page with a Map that loads on request gets the map script only",
   expect(output).toContain("EmVBMapRuntime");
   expect(output.includes("<iframe")).toBe(false);
 });
+
+test("W-1046: a page with rotating headline words loads the headline script only", async () => {
+  const container = await AstroContainer.create();
+  const layout = s1Page();
+  layout.root.children = [
+    {
+      id: "hdln0001",
+      type: "headline",
+      props: { highlight: "fast", rotate: ["safe"], rotating: true },
+    } as never,
+  ];
+  const { html, css, runtimes } = renderPage(layout, DESIGN);
+  expect(runtimes).toEqual(["headline"]);
+  const output = await container.renderToString(EmVBPage, {
+    props: { page: { html, css, runtimes } },
+  });
+  expect(output.match(/<script/g)).toHaveLength(1);
+  expect(output).toContain("EmVBHeadlineRuntime");
+});

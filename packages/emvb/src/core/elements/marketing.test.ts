@@ -467,3 +467,46 @@ describe("Flip box (W-1045)", () => {
     expect(html).toContain('<h4 class="emvb-flip-title">Front</h4>');
   });
 });
+
+const headlineNode = (props: Record<string, unknown>) => ({
+  id: "hdln0001",
+  type: "headline",
+  props: { before: "We build", highlight: "fast", after: "sites", ...props },
+});
+
+describe("Animated headline (W-1046)", () => {
+  test("one heading that reads as a sentence, the highlight underlined in CSS, no script", () => {
+    const { html, css, runtimes } = rendered(headlineNode({}));
+    expect(html).toContain(
+      '<h2 class="emvb-headline emvb-headline-underline">We build <span class="emvb-headline-mark">fast</span> sites</h2>',
+    );
+    expect(css).toContain(
+      "@media (prefers-reduced-motion:no-preference){.emvb-headline-underline .emvb-headline-mark{animation:",
+    );
+    expect(runtimes).toEqual([]);
+  });
+
+  test("the circle is an aria-hidden drawing around the words", () => {
+    const html = rendered(headlineNode({ mark: "circle", level: 1 })).html;
+    expect(html).toContain('<h1 class="emvb-headline emvb-headline-circle">');
+    expect(html).toContain('<svg xmlns="http://www.w3.org/2000/svg" class="emvb-headline-shape"');
+    expect(html).toContain('aria-hidden="true" focusable="false"><path d=');
+  });
+
+  test("rotating words ask for the headline runtime only when there are other words", () => {
+    const { html, runtimes } = rendered(
+      headlineNode({ rotate: ["accessible", " "], rotating: true, interval: 3, turns: 1 }),
+    );
+    expect(runtimes).toEqual(["headline"]);
+    expect(html).toContain(
+      'data-emvb-rotate="[&quot;fast&quot;,&quot;accessible&quot;]" data-interval="3" data-turns="1"',
+    );
+    expect(rendered(headlineNode({ rotate: ["x"] })).runtimes).toEqual([]);
+    expect(rendered(headlineNode({ rotating: true })).runtimes).toEqual([]);
+  });
+
+  test("refuses empty highlighted words and too-fast rotation", () => {
+    expect(page(headlineNode({ highlight: "" })).ok).toBe(false);
+    expect(page(headlineNode({ interval: 1 })).ok).toBe(false);
+  });
+});

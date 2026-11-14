@@ -49887,6 +49887,101 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-1046/never-stops",
+      "requirement": "W-1046",
+      "description": "The headline keeps rotating after its rounds.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/headline.ts",
+          "search": "    if (step >= last) stop();\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/headline.test.ts"],
+      "expect": "\\(fail\\).*stops on the first"
+    },
+    {
+      "id": "W-1046/sr-hears-rotation",
+      "requirement": "W-1046",
+      "description": "Screen readers hear every rotating word.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/headline.ts",
+          "search": "  mark.setAttribute(\"aria-hidden\", \"true\");\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/headline.test.ts"],
+      "expect": "\\(fail\\).*keep the sentence"
+    },
+    {
+      "id": "W-1046/rotates-under-reduced-motion",
+      "requirement": "W-1046",
+      "description": "The headline rotates for visitors who prefer reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/headline.ts",
+          "search": "  if (reduced) return;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/headline.test.ts"],
+      "expect": "\\(fail\\).*reduced motion"
+    },
+    {
+      "id": "W-1046/not-a-heading",
+      "requirement": "W-1046",
+      "description": "The accessibility check doesn't count an Animated headline as a heading.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    if (node.type === \"heading\" || node.type === \"headline\") {\n      const level = typeof props[\"level\"] === \"number\" ? props[\"level\"] : 2;",
+          "replace": "    if (node.type === \"heading\") {\n      const level = typeof props[\"level\"] === \"number\" ? props[\"level\"] : 2;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*counts as a heading"
+    },
+    {
+      "id": "W-1046/runtime-not-mounted",
+      "requirement": "W-1046",
+      "description": "EmVBWidgetRuntimes no longer mounts the headline script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/EmVBWidgetRuntimes.astro",
+          "search": "{names.has(\"headline\") && <EmVBHeadlineRuntime />}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "test:astro"],
+      "expect": "FAIL.*W-1046"
+    },
+    {
+      "id": "W-1046/pause-missing",
+      "requirement": "W-1046",
+      "description": "The rotating headline has no Pause button.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/headline.ts",
+          "search": "  heading.after(pause);\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1046"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
     }
   ]
 }

@@ -151,7 +151,8 @@ function px(value: unknown, design?: DesignSystem): number | undefined {
 const HEADING_PX = [32, 24, 18.72, 16, 13.28, 10.72];
 
 const headingLevel = (node: LayoutNode): number | undefined => {
-  if (node.type !== "heading") return undefined;
+  // W-1046: an Animated headline is a heading too.
+  if (node.type !== "heading" && node.type !== "headline") return undefined;
   const level = (node.props as { level?: unknown }).level;
   return typeof level === "number" && level >= 1 && level <= 6 ? level : 2;
 };
@@ -588,7 +589,7 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         message: "This heading is empty; screen readers list it as a heading with no words.",
       });
     }
-    if (node.type === "heading") {
+    if (node.type === "heading" || node.type === "headline") {
       const level = typeof props["level"] === "number" ? props["level"] : 2;
       if (level === 1) {
         h1s = h1s.map((count, i) => count + (shownOn[i] ? 1 : 0));
@@ -764,7 +765,7 @@ export function applyAllA11yFixes(layout: Layout, issues: A11yIssue[]): Layout {
   const levels = new Map<string, number>();
   let last = 0;
   const walk = (node: LayoutNode) => {
-    if (node.type === "heading") {
+    if (node.type === "heading" || node.type === "headline") {
       const own = typeof node.props["level"] === "number" ? node.props["level"] : 2;
       const level = order.has(node.id) ? Math.min(own, Math.max(2, last + 1)) : own;
       if (level !== own) levels.set(node.id, level);

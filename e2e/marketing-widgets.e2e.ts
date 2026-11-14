@@ -416,3 +416,49 @@ test("a Flip box turns up; on the page the tick box and keyboard focus on its li
   await expect.poll(turned).toBe(true);
   expect(await page.locator("script[src*='emvb'], script[data-emvb]").count()).toBe(0);
 });
+
+test("an Animated headline is circled and rotates on the page until Pause, but not under reduced motion (W-1046)", async ({
+  page,
+  request,
+  browser,
+}) => {
+  const { id, slug } = await addTab(page, request, "Headlines");
+  await overlay(page).locator('[data-emvb-add-tile="headline"]').click();
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Animated headline");
+  await overlay(page).getByLabel("Mark", { exact: true }).click();
+  await page.getByRole("option", { name: "Circle" }).click();
+  await expect(canvas(page).locator(".emvb-headline-shape")).toHaveCount(1);
+  await overlay(page).getByRole("switch", { name: "Rotate the words" }).click();
+  await setField(page, "Seconds per word", "1.5");
+
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]).toMatchObject({
+    type: "headline",
+    props: { mark: "circle", rotating: true, interval: 1.5 },
+  });
+
+  await publishPage(request, id);
+  await page.goto(`/${slug}`);
+  const heading = page.getByRole("heading", { name: "We build fast websites", level: 2 });
+  await expect(heading).toBeVisible();
+  const mark = page.locator(".emvb-headline-mark");
+  await expect(mark).toContainText("accessible", { timeout: 5000 });
+  // While it rotates, screen readers still hear the sentence with the first word.
+  await expect(heading).toHaveAccessibleName("We build fast websites");
+  await page.getByRole("button", { name: "Pause" }).click();
+  await expect(mark).toHaveText("fast");
+  await expect(page.getByRole("button", { name: "Pause" })).toHaveCount(0);
+
+  const reduced = await browser.newContext({ reducedMotion: "reduce" });
+  try {
+    const still = await reduced.newPage();
+    await still.goto(new URL(`/${slug}`, page.url()).toString());
+    await still.waitForLoadState("load");
+    await still.waitForTimeout(2000);
+    await expect(still.locator(".emvb-headline-mark")).toHaveText("fast");
+    await expect(still.getByRole("button", { name: "Pause" })).toHaveCount(0);
+  } finally {
+    await reduced.close();
+  }
+});

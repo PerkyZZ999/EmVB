@@ -209,3 +209,16 @@ describe("Progress bar (W-1039)", () => {
     expect(audit(bar())).toEqual(["control-name:warning:prog0001"]);
   });
 });
+
+describe("Animated headline (W-1046)", () => {
+  test("counts as a heading: a second H1 and a skipped level are reported", () => {
+    const line = (level: number) => ({
+      id: `hdln000${level}`,
+      type: "headline",
+      props: { highlight: "fast", level },
+    });
+    expect(audit(line(1))).toEqual(["multiple-h1:warning:hdln0001"]);
+    expect(audit(line(4)).some((issue) => issue.startsWith("heading-order"))).toBe(true);
+    expect(audit(line(2))).toEqual([]);
+  });
+});
