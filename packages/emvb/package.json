@@ -55,7 +55,7 @@
     "zod": ">=4.5.4 <5"
   },
   "devDependencies": {
-    "@cloudflare/kumo": "2.15.0",
+    "@cloudflare/kumo": "2.18.0",
     "@emdash-cms/plugin-forms": "0.2.13",
     "@phosphor-icons/react": "2.1.10",
     "@types/react": "19.3.0",
