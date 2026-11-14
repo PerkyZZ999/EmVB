@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-14
+
+The marketing widgets and the second part of the Elementor import. Everything is additive: new element types only, so pages saved by 1.2 open and save unchanged (layout schema 18, design schema 17), and an older EmVB keeps the new elements on save without showing them. Public pages still load no script unless an element opts in, and moving widgets respect reduced motion and can be paused. It installs on stock EmDash 1.4 with no change to your site and is tested on EmDash 1.4 and 1.5. If you already mount `<EmVBWidgetRuntimes names={theme.runtimes} />` for theme parts, the new widgets' scripts come through it too.
+
 ### Added
 
 - **Counter (W-1038).** A new element in Add → Content: a number to show off, such as "1,200+ happy clients", with text before and after it, a title, decimals and a thousands separator. It is plain text on the page. "Count up when scrolled into view" adds a small script, loaded only on pages that use it, that counts from a start number in at most 5 seconds; visitors who prefer reduced motion see the final number at once, and screen readers hear only the final number. The accessibility check warns about a counter without a title. Agents can add it over MCP.
@@ -811,7 +815,8 @@ The first release, published on npm as [`@perkyzz/emvb`](https://www.npmjs.com/p
 - Video embeds use privacy-friendly domains and never autoplay (W-026).
 - The editor canvas is a sandboxed iframe (W-009), and an XSS test corpus runs against the editor and published pages in a real browser (W-042).
 
-[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/PerkyZZ999/EmVB/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/PerkyZZ999/EmVB/compare/v1.1.0...v1.1.1

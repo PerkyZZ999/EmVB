@@ -45,8 +45,9 @@ describe("W-1016: version bump", () => {
   test("a bump replaces versions and cross-dependencies, nothing else", () => {
     const pkg = VERSIONED.find((v) => v.file === "packages/emvb-mcp/package.json");
     const before = `"version": "1.2.3",\n"@perkyzz/emvb": "1.2.3",\n"zod": "1.2.3"`;
-    expect(bumpText(before, pkg?.patterns ?? [], "1.2.3", "1.3.0")).toEqual({
-      text: `"version": "1.3.0",\n"@perkyzz/emvb": "1.3.0",\n"zod": "1.2.3"`,
+    // The example versions are never real ones, so a real release never quotes them.
+    expect(bumpText(before, pkg?.patterns ?? [], "1.2.3", "9.8.7")).toEqual({
+      text: `"version": "9.8.7",\n"@perkyzz/emvb": "9.8.7",\n"zod": "1.2.3"`,
       count: 2,
     });
   });
