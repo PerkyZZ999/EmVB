@@ -48994,6 +48994,62 @@
       ],
       "command": ["bun", "test", "test/site/core-web-vitals.test.ts"],
       "expect": "\\(fail\\).*W-1037"
+    },
+    {
+      "id": "W-1036/never-warns",
+      "requirement": "W-1036",
+      "description": "Rendering a layout from a collection the site doesn't list in canvasCollections stays silent.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/canvas-collections.ts",
+          "search": "  if (warned.has(collection)) return false;\n  warned.add(collection);\n  return true;",
+          "replace": "  if (warned.has(collection)) return false;\n  warned.add(collection);\n  return false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*canvasCollections warns once"
+    },
+    {
+      "id": "W-1036/warns-every-render",
+      "requirement": "W-1036",
+      "description": "The canvasCollections warning repeats on every render instead of once per collection.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/canvas-collections.ts",
+          "search": "  if (warned.has(collection)) return false;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*canvasCollections warns once"
+    },
+    {
+      "id": "W-1036/warns-listed",
+      "requirement": "W-1036",
+      "description": "A collection listed in canvasCollections warns as if it were missing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/canvas-collections.ts",
+          "search": "  if (listed === undefined || listed.includes(collection) || OWN.has(collection)) return false;",
+          "replace": "  if (listed === undefined || OWN.has(collection)) return false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/resolve.test.ts"],
+      "expect": "\\(fail\\).*canvasCollections warns once"
+    },
+    {
+      "id": "W-1036/plugin-never-sets",
+      "requirement": "W-1036",
+      "description": "The plugin no longer records canvasCollections for the renderer.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/plugin.ts",
+          "search": "  setCanvasCollections(options.canvasCollections);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/canvas-collections-option.test.ts"],
+      "expect": "\\(fail\\).*W-1036"
     }
   ]
 }

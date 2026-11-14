@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **A warning for collections missing from `canvasCollections` (W-1036).** `resolveEmVBPage(Astro, { collection })` on a collection the site doesn't list in `emvb({ canvasCollections })` now logs one warning per collection naming the option, and still renders the layout. EmVB 2.0 will not render it; add the collection to the option.
+
 ## [1.2.0] - 2026-11-13
 
 The common widgets, the first part of a fuller Elementor import, scheduled publishing, and EmDash 1.5 as the development base. Everything is additive: new element types and options only, so pages saved by 1.1 open and save unchanged (layout schema 18, design schema 17), and an older EmVB keeps the new elements on save without showing them. Public pages still load no script unless an element opts in. It installs on stock EmDash 1.4 with no change to your site and is tested on EmDash 1.4 and 1.5. One optional step: to use dismissible Alerts, lightbox Galleries or Carousel controls inside theme parts, add `<EmVBWidgetRuntimes names={theme.runtimes} />` to your site layout once.

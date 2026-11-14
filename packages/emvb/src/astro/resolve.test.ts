@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, spyOn, test } from "bun:test";
 import { decodeSlug } from "emdash";
 import { defaultElement, type Layout, type LayoutNode } from "../core/index.ts";
+import { setCanvasCollections } from "../core/canvas-collections.ts";
 import type { ContentPort } from "./content-port.ts";
 import { resolveEmVBPageWith } from "./resolve.ts";
 
@@ -246,6 +247,41 @@ describe("resolveEmVBPage(Astro, { collection, field }) (W-901)", () => {
       (await resolveEmVBPage(astro({ slug: "about" }), { collection: "pages", field: "body" }))
         ?.html,
     ).toContain("Hello");
+  });
+
+  test("a collection the site doesn't list in canvasCollections warns once, and still renders (W-1036)", async () => {
+    const forget = () => {
+      const held = globalThis as unknown as Record<symbol, unknown>;
+      delete held[Symbol.for("emvb.canvasCollections")];
+      delete held[Symbol.for("emvb.canvasCollectionsWarned")];
+    };
+    const warn = spyOn(console, "warn").mockImplementation(() => {});
+    lookup = async () => page({ title: "About", canvas: layout(heading) });
+    const open = { collection: "pages" };
+    try {
+      forget();
+      await resolveEmVBPage(astro({ slug: "about" }), open);
+      setCanvasCollections(["pages"]);
+      await resolveEmVBPage(astro({ slug: "about" }), open);
+      await resolveEmVBPage(astro({ slug: "about" }));
+      expect(warn.mock.calls.length).toBe(0);
+      setCanvasCollections(["posts"]);
+      const first = await resolveEmVBPage(astro({ slug: "about" }), open);
+      await resolveEmVBPage(astro({ slug: "about" }), open);
+      await resolveEmVBPage(astro({ slug: "about" }), { collection: "team" });
+      expect(first?.html).toContain("Hello");
+      expect(warn.mock.calls.map((call) => JSON.stringify(call))).toEqual([
+        expect.stringContaining("canvasCollections"),
+        expect.stringContaining("canvasCollections"),
+      ]);
+      expect(warn.mock.calls.map((call) => (call[1] as { collection: string }).collection)).toEqual(
+        ["pages", "team"],
+      );
+      expect(JSON.stringify(warn.mock.calls)).not.toContain("Hello");
+    } finally {
+      warn.mockRestore();
+      forget();
+    }
   });
 });
 

@@ -33,7 +33,7 @@ import {
   pageAgentVersionsRoute,
 } from "./agent-settings.ts";
 import { canvasStyleUrls } from "../core/canvas-styles.ts";
-import { canvasCollectionSlugs } from "../core/canvas-collections.ts";
+import { canvasCollectionSlugs, setCanvasCollections } from "../core/canvas-collections.ts";
 import { manifestsFromOptions } from "../core/extensions/index.ts";
 import { TOOLS } from "../mcp/tools.ts";
 import { mcpRoutes, mcpToolConfig } from "./mcp-routes.ts";
@@ -55,6 +55,7 @@ export function createPlugin(
 ) {
   setGeoTrust(options.trustGeoHeaders);
   setLoopCollections(options.loopCollections);
+  setCanvasCollections(options.canvasCollections);
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
   const extensions = manifestsFromOptions(options.extensions);

@@ -10,7 +10,7 @@ Editors and administrators can change the layout field. Authors and contributors
 
 1. Open **Host collections** in the EmVB section of the admin sidebar. It lists your collections, whether each has a layout field, and whether the site config lists it.
 2. Click **Add canvas field** on a collection. This adds a `canvas` field with the **Edit with EmVB** widget to its schema. Existing entries keep their content and show it until a layout is added.
-3. Copy the `emvb({ canvasCollections: [...] })` line from **Site config** into `astro.config` and restart or redeploy the site. EmVB can't change that file itself. Until the site lists the collection, layouts there aren't checked on save or rendered.
+3. Copy the `emvb({ canvasCollections: [...] })` line from **Site config** into `astro.config` and restart or redeploy the site. EmVB can't change that file itself. Saves are checked either way (since 1.1.2). Until the site lists the collection, rendering a layout from it logs a warning (since 1.3), and EmVB 2.0 will not render it.
 
 ## Edit an entry's layout
 

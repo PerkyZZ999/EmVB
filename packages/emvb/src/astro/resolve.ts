@@ -1,4 +1,5 @@
 import { PAGES_COLLECTION } from "../constants.ts";
+import { unlistedCanvasCollectionFirstSeen } from "../core/canvas-collections.ts";
 import { forEachNode } from "../core/tree-ops.ts";
 import type { Layout, LayoutNode } from "../core/schema/layout.ts";
 import { emdashContent, type ContentPort } from "./content-port.ts";
@@ -136,6 +137,14 @@ export async function resolveEmVBPageWith(
   const stored = hosted ? data[options.field ?? "canvas"] : data["layout"];
   // An empty canvas field leaves the entry to the host's own template.
   if (hosted && (stored === null || stored === undefined || stored === "")) return null;
+  if (hosted && unlistedCanvasCollectionFirstSeen(options.collection as string)) {
+    // W-1036 (S-08): once per collection and process; 2.0 will refuse to render it.
+    // oxlint-disable-next-line no-console
+    console.warn(
+      "emvb: rendering a layout from a collection missing from emvb({ canvasCollections }); add it there (EmVB 2.0 will not render it)",
+      { collection: options.collection },
+    );
+  }
   const handler = content.pluginHandler(astro.locals as never);
   const design = await designFor(astro, handler, astro.url);
   const layout = readLayout(stored);
