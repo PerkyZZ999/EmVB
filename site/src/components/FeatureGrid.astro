@@ -50,7 +50,7 @@ import SectionIntro from "./SectionIntro.astro";
       <div class="add-groups">
         {
           addPanel.map((group) => (
-            <div class="add-group" data-add-group>
+            <div class={`add-group add-${group.id}`} data-add-group>
               <h4>{group.label}</h4>
               <ul>
                 {group.items.map((item) => (
@@ -207,10 +207,42 @@ import SectionIntro from "./SectionIntro.astro";
     box-shadow: 0 0 0 3px var(--accent-wash);
   }
 
+  /*
+   * Content has far more elements than the other groups, so it takes half the width (six tiles a
+   * row) and the other three share the other half: Layout and Dynamic side by side, Form under
+   * them, six tiles a row. Both halves end up about the same height.
+   */
   .add-groups {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-areas:
+      "layout dynamic content content"
+      "form form content content";
+    /* Content's extra height goes to the second row, so Form sits right under Layout and Dynamic. */
+    grid-template-rows: auto 1fr;
+    align-items: start;
     gap: var(--space-6) var(--space-5);
+  }
+
+  .add-layout {
+    grid-area: layout;
+  }
+
+  .add-dynamic {
+    grid-area: dynamic;
+  }
+
+  .add-form {
+    grid-area: form;
+  }
+
+  .add-content {
+    grid-area: content;
+  }
+
+  .add-group.add-content ul,
+  .add-group.add-form ul {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .add-group[hidden],
@@ -278,6 +310,11 @@ import SectionIntro from "./SectionIntro.astro";
   @media (max-width: 1100px) {
     .add-groups {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-areas:
+        "layout dynamic"
+        "content content"
+        "form form";
+      grid-template-rows: auto;
     }
   }
 
@@ -293,12 +330,18 @@ import SectionIntro from "./SectionIntro.astro";
       grid-template-columns: minmax(0, 1fr);
     }
 
+    .add-groups {
+      grid-template-areas: "layout" "content" "dynamic" "form";
+    }
+
     .group,
     .add {
       padding: var(--space-5);
     }
 
-    .add-group ul {
+    .add-group ul,
+    .add-group.add-content ul,
+    .add-group.add-form ul {
       grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
     }
 
