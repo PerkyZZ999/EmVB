@@ -268,14 +268,8 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
       "icon",
       "link",
       "video",
-      "container",
-      "text",
-      "text",
-      "container",
-      "text",
-      "container",
-      "container",
-      "text",
+      "counter",
+      "progress",
       "testimonial",
       "container",
       "text",
@@ -300,7 +294,7 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
       "gallery",
       "gallery-image",
       "gallery-image",
-      "link",
+      "map",
       "container",
       "text",
     ]);
@@ -329,8 +323,27 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
     );
     expect(nodes(result.layout).some((n) => n.htmlId === "contact")).toBe(true);
     expect(ofType(result.layout, "text").map((n) => props(n)["text"])).toEqual(
-      expect.arrayContaining(["12500+", "Pages built", "Rated", "From HTML"]),
+      expect.arrayContaining(["Rated", "From HTML"]),
     );
+    // W-1049: the Counter, Progress Bar and Google Maps become EmVB's own.
+    expect(props(ofType(result.layout, "counter")[0])).toEqual({
+      value: 12500,
+      suffix: "+",
+      title: "Pages built",
+      countUp: true,
+      duration: 2000,
+    });
+    expect(props(ofType(result.layout, "progress")[0])).toMatchObject({
+      value: 70,
+      label: "Done",
+      showValue: true,
+      grow: true,
+    });
+    expect(props(ofType(result.layout, "map")[0])).toEqual({
+      address: "London Eye, London",
+      provider: "google",
+      embed: true,
+    });
     // W-1022: the Testimonial is one, with its quote, photo, name and job.
     expect(props(ofType(result.layout, "testimonial")[0])).toMatchObject({
       quote: "It just works.",
@@ -354,8 +367,8 @@ describe("Elementor import: legacy sections and core widgets (W-945)", () => {
   test("the report names what was approximated or left out", () => {
     const text = notes(result);
     for (const expected of [
-      "Counters show their final number",
-      "Google Maps embeds became a link",
+      "Text inside progress bars was left out",
+      "Google Maps load when a visitor presses Show the map",
       'The shortcode [contact-form-7 id="5"] needs WordPress',
       "WordPress widgets weren't imported",
       "Left out: script",
@@ -441,9 +454,35 @@ describe("Elementor import: theme builder, Pro widgets and kits (W-945)", () => 
       ["text-input", "field_6"],
       ["submit", "Send it"],
     ]);
-    expect(ofType(result.layout, "text").map((n) => props(n)["text"])).toContain("€29 / month");
-    expect(ofType(result.layout, "heading").map((n) => props(n)["text"])).toEqual(
-      expect.arrayContaining(["Ready?", "Front", "Back", "We build pages fast", "Styled by CSS"]),
+    // W-1049: Price Table, Call to Action, Flip Box and Animated Headline become EmVB's own.
+    expect(props(ofType(result.layout, "price-table")[0])).toMatchObject({
+      title: "Pro",
+      price: "29",
+      currency: "€",
+      period: "month",
+      features: ["Unlimited pages", "Support"],
+      buttonText: "Buy",
+    });
+    expect(props(ofType(result.layout, "cta")[0])).toMatchObject({
+      title: "Ready?",
+      text: "Start today.",
+      buttonText: "Go",
+      href: "https://example.com/go",
+    });
+    expect(props(ofType(result.layout, "flip-box")[0])).toMatchObject({
+      frontTitle: "Front",
+      backTitle: "Back",
+      buttonText: "Learn more",
+    });
+    expect(props(ofType(result.layout, "headline")[0])).toMatchObject({
+      before: "We build",
+      highlight: "pages",
+      after: "fast",
+      rotate: ["sites", "shops"],
+      rotating: true,
+    });
+    expect(ofType(result.layout, "heading").map((n) => props(n)["text"])).toContain(
+      "Styled by CSS",
     );
     const styled = ofType(result.layout, "heading").find(
       (n) => props(n)["text"] === "Styled by CSS",

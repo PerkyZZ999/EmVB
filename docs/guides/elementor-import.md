@@ -74,13 +74,22 @@ pick another type in the dialog if you want.
 - **Sticky (since 1.2):** Elementor's Sticky setting becomes CSS sticky positioning with its edge
   (top or bottom), offset and devices.
 - **Widgets:** Heading, Text Editor, Image, Button (with its icon and hover colours), Spacer,
-  Divider, Icon, Icon List, Video (YouTube, Vimeo, files), Counter, Progress Bar, Tabs, Accordion,
+  Divider, Icon, Icon List, Video (YouTube, Vimeo, files), Tabs, Accordion,
   Toggle, Nested Tabs, Nested Accordion, Menu Anchor, and HTML (as plain elements).
 - **Widgets that become EmVB's own (since 1.2):** Star Rating, Alert (dismiss included), Icon Box,
   Image Box, Testimonial, Social Icons (when every network is one EmVB knows; otherwise as icons),
   Basic Gallery and Pro Gallery (as a Gallery, lightbox included), and Image
   Carousel and Media Carousel (as a Carousel with their arrows, dots and looping; autoplay only
   when the widget had it on). See [Widgets](widgets.md).
+- **Marketing widgets that become EmVB's own (since 1.3):** Counter (counting up, in 5 seconds at
+  most), Progress Bar (growing in; text inside the bar is left out), Countdown with a due date
+  (ticking, with its ending: hide, message or a link where Elementor redirected; Elementor stores
+  the date without a time zone, so EmVB reads it as UTC; check it), Google Maps (a Map that loads
+  Google's map only when a visitor asks), Price Table (sale price and ribbon included), Price
+  List, Call to Action (picture behind or beside, ribbon), Flip Box (its direction; a front image
+  or icon is left out), Animated Headline (highlight shape or rotating words), Share Buttons (the
+  services EmVB has), Hotspot (each marker's place on every device), and Slides and Testimonial
+  Carousel (as a Carousel of slides, no longer stacked).
 - **Nav Menu (since 1.2):** the Menu is filled with the links of your site's menu of the same name,
   as EmDash's WordPress import brings it over; links to pages and posts go to their addresses
   here. When the site has no menu of that name, the Menu stays empty and the report says so.
@@ -120,10 +129,10 @@ copy ("Card 2"). The page looks the same either way.
 
 These keep their content in the closest EmVB form, and the report says so:
 
-- **Pro widgets:** Form (its fields; connect it to a form in the forms plugin), Call to Action,
-  Price Table, Flip Box (back below the front), Animated Headline (no animation), Slides and
-  Testimonial Carousel (stacked), Blockquote, Table of Contents, Code Highlight.
-- **Google Maps** becomes a link to the map; counters and progress bars show their final value.
+- **Pro widgets:** Form (its fields; connect it to a form in the forms plugin), Blockquote, Table
+  of Contents, Code Highlight.
+- **Hover effects** of Call to Action boxes and the exact look of Elementor's highlight shapes
+  (curly, zigzag and double lines become an underline; an X becomes a strike).
 - **Text formatting** inside headings and paragraphs keeps bold, italic, coloured and linked words,
   including the colour your site's CSS gives emphasised words in a class (the gold word of a hero
   title). Other formatting (underline, superscript, highlights) becomes plain text. Paragraphs,
@@ -139,8 +148,9 @@ These keep their content in the closest EmVB form, and the report says so:
 
 WordPress-only things: shortcodes, WordPress widgets and sidebars, menus the site doesn't have (see
 Nav Menu above), the site logo and title, post lists and loops (rebuild them with
-EmVB's Loop element), comments, search and login forms, countdowns, share buttons, Lottie,
-hotspots, motion effects and Elementor CSS classes. Scripts and styles in HTML
+EmVB's Loop element), comments, search and login forms, evergreen countdowns (a timer per
+visitor), share buttons for services EmVB has no link for, Lottie, motion effects and Elementor CSS
+classes. Scripts and styles in HTML
 are always removed.
 
 ## After importing

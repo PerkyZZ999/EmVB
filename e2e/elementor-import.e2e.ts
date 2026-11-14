@@ -208,3 +208,49 @@ test("W-1026: a sticky header's Nav Menu imports with the site's Primary menu li
   }>(request, editorEntry(page.url()));
   expect(stored.root.children[0]?.style).toMatchObject({ position: "sticky", zIndex: 99 });
 });
+
+test("W-1049: Elementor's Counter, Price List and Slides import as EmVB's Counter, Price list and Carousel", async ({
+  page,
+}) => {
+  const title = `Marketing import ${unique()}`;
+  await page.goto("/_emdash/admin/plugins/emvb/pages");
+  await page.getByRole("button", { name: "Import from Elementor", exact: true }).click();
+  const dialog = page.locator('[data-emvb-dialog="import-elementor"]');
+  await dialog.locator("[data-emvb-elementor-file]").setInputFiles({
+    name: "marketing.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(
+      JSON.stringify({
+        title,
+        type: "page",
+        content: [
+          {
+            id: "c",
+            elType: "widget",
+            widgetType: "counter",
+            settings: { ending_number: 250, suffix: "+", title: "Clients" },
+          },
+          {
+            id: "p",
+            elType: "widget",
+            widgetType: "price-list",
+            settings: { price_list: [{ title: "Tea", price: "$2" }] },
+          },
+          {
+            id: "s",
+            elType: "widget",
+            widgetType: "slides",
+            settings: { slides: [{ heading: "One" }, { heading: "Two" }], navigation: "arrows" },
+          },
+        ],
+      }),
+    ),
+  });
+  const report = dialog.locator("[data-emvb-import-report]");
+  await expect(report).toContainText("Ready to import");
+  await dialog.getByRole("button", { name: "Import", exact: true }).click();
+  await expect(overlay(page)).toBeVisible({ timeout: 20_000 });
+  await expect(canvas(page).locator(".emvb-counter-value")).toHaveText("250");
+  await expect(canvas(page).locator(".emvb-price-list-title")).toHaveText("Tea");
+  await expect(canvas(page).locator(".emvb-carousel-slide")).toHaveCount(2);
+});

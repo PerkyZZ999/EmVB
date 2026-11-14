@@ -887,107 +887,71 @@ const video: Widget = (s, ctx, el) => {
   return [node(ctx, "video", { url: safe, title: "Video" })];
 };
 
+/** A number a Counter can show. */
+const clamp = (n: number) => Math.min(1e12, Math.max(-1e12, n));
+
+/** W-1049: Elementor's Counter → a Counter that counts up as it does (5 s at most). */
 const counter: Widget = (s, ctx, el) => {
-  const end = num(s["ending_number"]) ?? 100;
+  const end = clamp(num(s["ending_number"]) ?? 100);
+  const start = clamp(num(s["starting_number"]) ?? 0);
+  const sep = str(s["thousand_separator_char"]);
   const separator =
-    str(s["thousand_separator"]) !== "" && s["thousand_separator"] !== undefined
-      ? (str(s["thousand_separator_char"]) ?? ",")
-      : "";
-  const digits = String(Math.trunc(Math.abs(end))).replace(
-    /\B(?=(\d{3})+(?!\d))/g,
-    separator === "space" ? " " : separator,
-  );
-  const number = `${plain(s["prefix"]).text}${end < 0 ? "-" : ""}${digits}${plain(s["suffix"]).text}`;
-  ctx.note("approximated", el, "Counters show their final number, without the counting animation.");
-  const children = [
-    styled(
-      node(
-        ctx,
-        "text",
-        { text: short(number), tag: "div" },
-        { style: { fontSize: { value: 69, unit: "px" }, fontWeight: 600, lineHeight: 1 } },
-      ),
-      deviceStyles(s, ctx, el, [
-        typographyReader("typography_number", "primary"),
-        textReader("number_color", "primary"),
-      ]),
-    ),
-  ];
+    s["thousand_separator"] === "yes" || (s["thousand_separator"] === undefined && sep)
+      ? sep === "." || sep === "'"
+        ? sep
+        : sep === " " || sep === "space"
+          ? " "
+          : ","
+      : undefined;
+  const decimals = (String(end).split(".")[1] ?? "").length;
+  const duration = num(s["duration"]) ?? 2000;
+  if (duration > 5000) ctx.note("approximated", el, "Counters count up in 5 seconds at most.");
   const title = plain(s["title"]).text;
-  if (title) {
-    children.push(
-      styled(
-        node(
-          ctx,
-          "text",
-          { text: short(title), tag: "div" },
-          { style: { fontSize: { value: 19, unit: "px" } } },
-        ),
-        deviceStyles(s, ctx, el, [
-          typographyReader("typography_title", "secondary"),
-          textReader("title_color", "secondary"),
-        ]),
-      ),
-    );
-  }
   return [
-    box(ctx, children, {
-      alignItems: "center",
-      textAlign: "center",
-      gap: { value: 5, unit: "px" },
-    }),
+    styled(
+      node(ctx, "counter", {
+        value: end,
+        ...(start !== 0 ? { start } : {}),
+        ...(decimals ? { decimals: Math.min(3, decimals) } : {}),
+        ...(separator ? { separator } : {}),
+        ...(plain(s["prefix"]).text ? { prefix: plain(s["prefix"]).text.slice(0, 20) } : {}),
+        ...(plain(s["suffix"]).text ? { suffix: plain(s["suffix"]).text.slice(0, 20) } : {}),
+        ...(title ? { title: title.slice(0, 200) } : {}),
+        countUp: true,
+        duration: Math.min(5000, Math.max(300, Math.round(duration))),
+      }),
+      deviceStyles(s, ctx, el, [textReader("number_color", "primary")]),
+    ),
   ];
 };
 
+/** W-1049: Elementor's Progress Bar → a Progress bar that grows in, as Elementor's does. */
 const progress: Widget = (s, ctx, el) => {
   const percent = Math.min(
     100,
-    Math.max(
-      0,
-      Math.round(num(isRecord(s["percent"]) ? s["percent"]["size"] : s["percent"]) ?? 50),
-    ),
+    Math.max(0, num(isRecord(s["percent"]) ? s["percent"]["size"] : s["percent"]) ?? 50),
   );
+  const title = plain(s["title"]).text;
+  if (plain(s["inner_text"]).text)
+    ctx.note("approximated", el, "Text inside progress bars was left out; the title stays.");
   const bar =
     colorAt(s, "bar_color", ctx) ??
     (ctx.useDefaults ? ctx.globalColor("primary") : undefined) ??
     "#6ec1e4";
-  const children: N[] = [];
-  const title = plain(s["title"]).text;
-  if (title) children.push(node(ctx, "text", { text: short(title), tag: "div" }));
-  const inner = plain(s["inner_text"]).text;
-  const fill = box(
-    ctx,
-    inner
-      ? [
-          node(
-            ctx,
-            "text",
-            { text: short(inner), tag: "div" },
-            {
-              style: {
-                color: "#ffffff",
-                paddingLeft: { value: 15, unit: "px" },
-                lineHeight: { value: 30, unit: "px" },
-              },
-            },
-          ),
-        ]
-      : [],
-    {
-      width: { value: percent, unit: "%" },
-      minHeight: { value: 30, unit: "px" },
-      backgroundColor: bar,
-      justifyContent: "center",
-    },
-  );
-  children.push(
-    box(ctx, [fill], {
-      backgroundColor: colorAt(s, "bar_bg_color", ctx) ?? "#eeeeee",
-      minHeight: { value: 30, unit: "px" },
-    }),
-  );
-  ctx.note("approximated", el, "Progress bars are shown filled, without their animation.");
-  return [box(ctx, children, { gap: { value: 8, unit: "px" } })];
+  return [
+    node(
+      ctx,
+      "progress",
+      {
+        value: Math.round(percent * 100) / 100,
+        ...(title ? { label: title.slice(0, 120) } : {}),
+        ...(str(s["display_percentage"]) === "hide" ? {} : { showValue: true }),
+        thickness: 30,
+        grow: true,
+      },
+      { style: { color: bar } },
+    ),
+  ];
 };
 
 /** W-1022: Elementor's Testimonial → a Testimonial: quote, photo, name and job. */
@@ -1119,15 +1083,24 @@ const menuAnchor: Widget = (s, ctx, el) => {
   return [box(ctx, [], {}, { htmlId: anchor, editorLabel: `Anchor ${anchor}`.slice(0, 80) })];
 };
 
+/** W-1049: Elementor's Google Maps → a Map that loads Google's map when a visitor asks. */
 const googleMaps: Widget = (s, ctx, el) => {
-  const address = plain(s["address"]).text;
-  ctx.note("approximated", el, "Google Maps embeds became a link to the map.");
+  const address = plain(s["address"]).text.slice(0, 300);
   if (!address) return [];
+  const zoom = num(isRecord(s["zoom"]) ? s["zoom"]["size"] : s["zoom"]);
+  const height = num(isRecord(s["height"]) ? s["height"]["size"] : s["height"]);
+  ctx.note(
+    "approximated",
+    el,
+    "Google Maps load when a visitor presses Show the map, so Google isn't contacted before.",
+  );
   return [
-    node(ctx, "link", {
-      text: short(`View map: ${address}`),
-      href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.slice(0, 500))}`,
-      newTab: true,
+    node(ctx, "map", {
+      address,
+      provider: "google",
+      embed: true,
+      ...(zoom ? { zoom: Math.min(19, Math.max(1, Math.round(zoom))) } : {}),
+      ...(height ? { height: Math.min(800, Math.max(150, Math.round(height))) } : {}),
     }),
   ];
 };
@@ -1207,35 +1180,7 @@ function carouselWidget(
     img["style"] = { width: { value: 100, unit: "%" }, height: "auto" };
     slides.push(node(ctx, "carousel-slide", {}, { children: [img] }));
   }
-  if (slides.length === 0) return [];
-  const navigation = str(s["navigation"]) ?? "both";
-  const autoplay = str(s["autoplay"]);
-  if (autoplay !== "yes" && autoplay !== "no")
-    ctx.note(
-      "approximated",
-      el,
-      "Carousels don't play by themselves unless you turn on Play automatically.",
-    );
-  const speed = num(s["autoplay_speed"]);
-  return [
-    node(
-      ctx,
-      "carousel",
-      {
-        perView: Math.min(4, Math.max(1, Math.round(perView))),
-        ...(navigation === "both" || navigation === "arrows" ? { arrows: true } : {}),
-        ...(navigation === "both" || navigation === "dots" ? { dots: true } : {}),
-        ...(autoplay === "yes"
-          ? {
-              autoplay: true,
-              ...(speed ? { interval: Math.min(30, Math.max(3, Math.round(speed / 1000))) } : {}),
-            }
-          : {}),
-        ...(str(s["infinite"]) === "no" ? {} : { loop: true }),
-      },
-      { children: slides },
-    ),
-  ];
+  return carouselFrom(slides, perView, s, ctx, el);
 }
 
 const imageCarousel: Widget = (s, ctx, el) =>
@@ -1630,142 +1575,153 @@ const megaMenu: Widget = (s, ctx, _el, env, raw) => {
   return [node(ctx, "menu", { direction: "row" }, { children })];
 };
 
+/** W-1049: Elementor's Call to Action → a Call to action: picture, title, text, button, ribbon. */
 const callToAction: Widget = (s, ctx, el) => {
-  const children: N[] = [];
-  const style: Style = {
-    gap: { value: 15, unit: "px" },
-    paddingTop: { value: 35, unit: "px" },
-    paddingBottom: { value: 35, unit: "px" },
-    paddingLeft: { value: 35, unit: "px" },
-    paddingRight: { value: 35, unit: "px" },
-    alignItems: "center",
-    textAlign: "center",
-  };
+  const title = plain(s["title"]).text.slice(0, 200);
+  if (!title) return [];
+  const level = Number(/^h([2-6])$/.exec(str(s["title_tag"]) ?? "h2")?.[1] ?? 2);
   const bg = image(s["bg_image"]);
-  if (bg && !/[()\\\s"'`]/.test(bg.url)) {
-    style["backgroundImage"] = bg.url;
-    style["backgroundSize"] = "cover";
-    style["backgroundPosition"] = "center";
-  }
-  const fill = colorAt(s, "background_color", ctx);
-  if (fill) style["backgroundColor"] = fill;
-  const title = plain(s["title"]).text;
-  const level = Number(/^h([1-6])$/.exec(str(s["title_tag"]) ?? "h2")?.[1] ?? 2);
-  if (title) children.push(node(ctx, "heading", { text: short(title), level }));
+  if (bg) ctx.externalImage(bg.url);
+  const layout = str(s["layout"]);
+  const where =
+    str(s["skin"]) === "cover"
+      ? "behind"
+      : layout === "left"
+        ? "left"
+        : layout === "right"
+          ? "right"
+          : "top";
+  const target = href(s["link"], ctx);
+  const btn = plain(s["button"]).text.slice(0, 80);
   const description = plain(s["description"]).text;
-  if (description) children.push(node(ctx, "text", { text: short(description) }));
-  const btn = buttonNode(s, ctx, el, { text: "button", link: "link", icon: "selected_icon" });
-  if (btn) children.push(btn);
-  ctx.note(
-    "approximated",
-    el,
-    "Call to Action boxes keep their text, image and button, not their hover effects.",
-  );
-  return children.length > 0 ? [box(ctx, children, style)] : [];
+  const ribbon = plain(s["ribbon_title"]).text.slice(0, 30);
+  ctx.note("approximated", el, "Call to Action boxes keep their content, not their hover effects.");
+  const fill = colorAt(s, "background_color", ctx);
+  return [
+    node(
+      ctx,
+      "cta",
+      {
+        title,
+        ...(level !== 3 ? { titleLevel: level } : {}),
+        ...(description ? { text: short(description) } : {}),
+        ...(bg ? { src: bg.url, alt: bg.alt ?? "" } : {}),
+        layout: where,
+        ...(btn && target.href ? { buttonText: btn } : {}),
+        ...target,
+        ...(ribbon ? { ribbon } : {}),
+      },
+      fill ? { style: { backgroundColor: fill } } : {},
+    ),
+  ];
 };
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  dollar: "$",
+  euro: "€",
+  pound: "£",
+  yen: "¥",
+  rupee: "₹",
+  franc: "₣",
+  real: "R$",
+  baht: "฿",
+  krona: "kr",
+  lira: "₺",
+  peseta: "₧",
+  peso: "₱",
+  shekel: "₪",
+  won: "₩",
+  guilder: "ƒ",
+};
+
+/** W-1049: Elementor's Price Table → a Price table: price, sale price, features, button, ribbon. */
 const priceTable: Widget = (s, ctx, el) => {
-  const children: N[] = [];
-  const headingText = plain(s["heading"]).text;
-  if (headingText)
-    children.push(
-      node(ctx, "heading", {
-        text: short(headingText),
-        level: Number(/^h([1-6])$/.exec(str(s["heading_tag"]) ?? "h3")?.[1] ?? 3),
-      }),
-    );
-  const sub = plain(s["sub_heading"]).text;
-  if (sub) children.push(node(ctx, "text", { text: short(sub) }));
-  const symbols: Record<string, string> = {
-    dollar: "$",
-    euro: "€",
-    pound: "£",
-    yen: "¥",
-    rupee: "₹",
-    franc: "₣",
-    real: "R$",
-    baht: "฿",
-    krona: "kr",
-    lira: "₺",
-    peseta: "₧",
-    peso: "₱",
-    shekel: "₪",
-    won: "₩",
-    guilder: "ƒ",
-  };
-  const currency =
+  const title = plain(s["heading"]).text.slice(0, 120);
+  const price = plain(s["price"]).text.slice(0, 20);
+  if (!title && !price) return [];
+  const currency = (
     str(s["currency_symbol"]) === "custom"
       ? plain(s["currency_symbol_custom"]).text
-      : (symbols[str(s["currency_symbol"]) ?? "dollar"] ?? "");
-  const price = plain(s["price"]).text;
-  if (price) {
-    const period = plain(s["period"]).text;
-    children.push(
-      node(
-        ctx,
-        "text",
-        { text: short(`${currency}${price}${period ? ` / ${period}` : ""}`), tag: "div" },
-        { style: { fontSize: { value: 2.5, unit: "em" }, fontWeight: 600 } },
-      ),
-    );
-  }
+      : (CURRENCY_SYMBOLS[str(s["currency_symbol"]) ?? "dollar"] ?? "")
+  ).slice(0, 5);
+  const regular = s["sale"] === "yes" ? plain(s["original_price"]).text.slice(0, 20) : "";
   const features = (Array.isArray(s["features_list"]) ? s["features_list"] : [])
     .filter(isRecord)
-    .map((f) => short(plain(f["item_text"]).text))
+    .map((f) => plain(f["item_text"]).text.slice(0, 200))
     .filter(Boolean)
-    .slice(0, 200);
-  if (features.length > 0) children.push(node(ctx, "list", { items: features }));
-  const btn = buttonNode(s, ctx, el, { text: "button_text", link: "link" });
-  if (btn) children.push(btn);
+    .slice(0, 30);
+  const sub = plain(s["sub_heading"]).text;
   const footer = plain(s["footer_additional_info"]).text;
-  if (footer) children.push(node(ctx, "text", { text: short(footer) }));
-  ctx.note(
-    "approximated",
-    el,
-    "Price tables keep their content in EmVB's default look; ribbons are left out.",
-  );
-  return children.length > 0
-    ? [
-        box(ctx, children, {
-          gap: { value: 12, unit: "px" },
-          alignItems: "center",
-          textAlign: "center",
-        }),
-      ]
-    : [];
+  const description = [sub, footer].filter(Boolean).join("\n").slice(0, 500);
+  const target = href(s["link"], ctx);
+  const btn = plain(s["button_text"]).text.slice(0, 80);
+  const ribbon = s["show_ribbon"] === "yes" ? plain(s["ribbon_title"]).text.slice(0, 30) : "";
+  if (footer) ctx.note("approximated", el, "A price table's footer text joined its description.");
+  const level = Number(/^h([2-6])$/.exec(str(s["heading_tag"]) ?? "h3")?.[1] ?? 3);
+  return [
+    node(ctx, "price-table", {
+      title: title || price,
+      ...(level !== 3 ? { titleLevel: level } : {}),
+      ...(description ? { description } : {}),
+      price: price || "0",
+      ...(currency ? { currency } : {}),
+      ...(plain(s["period"]).text ? { period: plain(s["period"]).text.slice(0, 40) } : {}),
+      ...(regular ? { regularPrice: regular } : {}),
+      ...(features.length > 0 ? { features } : {}),
+      ...(btn && target.href ? { buttonText: btn, buttonHref: target.href } : {}),
+      ...(target.newTab && btn ? { newTab: true } : {}),
+      ...(s["show_ribbon"] === "yes" ? { featured: true, ...(ribbon ? { ribbon } : {}) } : {}),
+    }),
+  ];
 };
 
+/** W-1049: Elementor's Price List → a Price list, one item per row with its picture and link. */
+const priceList: Widget = (s, ctx, el) => {
+  const rows = (Array.isArray(s["price_list"]) ? s["price_list"] : []).filter(isRecord);
+  if (rows.length > 50) ctx.note("skipped", el, "Price lists keep their first 50 items.");
+  const items: N[] = [];
+  for (const row of rows.slice(0, 50)) {
+    const title = plain(row["title"]).text.slice(0, 120);
+    if (!title) continue;
+    const img = image(row["image"]);
+    if (img) ctx.externalImage(img.url);
+    const target = href(row["link"], ctx);
+    const description = plain(row["item_description"]).text.slice(0, 500);
+    items.push(
+      node(ctx, "price-list-item", {
+        title,
+        price: plain(row["price"]).text.slice(0, 20),
+        ...(description ? { description } : {}),
+        ...(img ? { src: img.url, ...(img.alt ? { alt: img.alt } : {}) } : {}),
+        ...target,
+      }),
+    );
+  }
+  return items.length > 0 ? [node(ctx, "price-list", {}, { children: items })] : [];
+};
+
+/** W-1049: Elementor's Flip Box → a Flip box: front and back, its direction and button. */
 const flipBox: Widget = (s, ctx, el) => {
-  const side = (suffix: "a" | "b") => {
-    const parts: N[] = [];
-    const title = plain(s[`title_text_${suffix}`]).text;
-    if (title) parts.push(node(ctx, "heading", { text: short(title), level: 3 }));
-    const text = plain(s[`description_text_${suffix}`]).text;
-    if (text) parts.push(node(ctx, "text", { text: short(text) }));
-    const fill = colorAt(s, `background_color_${suffix}`, ctx);
-    return parts.length > 0
-      ? box(ctx, parts, {
-          gap: { value: 10, unit: "px" },
-          alignItems: "center",
-          textAlign: "center",
-          ...(fill ? { backgroundColor: fill } : {}),
-          paddingTop: { value: 35, unit: "px" },
-          paddingBottom: { value: 35, unit: "px" },
-          paddingLeft: { value: 35, unit: "px" },
-          paddingRight: { value: 35, unit: "px" },
-        })
-      : undefined;
-  };
-  const front = side("a");
-  const back = side("b");
-  const btn = buttonNode(s, ctx, el, { text: "button_text", link: "link" });
-  if (back && btn) (back["children"] as N[]).push(btn);
-  ctx.note(
-    "approximated",
-    el,
-    "Flip boxes show their back side below the front, without the flip.",
-  );
-  return [front, back].filter((n): n is N => n !== undefined);
+  const frontTitle = plain(s["title_text_a"]).text.slice(0, 200);
+  const backTitle = plain(s["title_text_b"]).text.slice(0, 200);
+  if (!frontTitle && !backTitle) return [];
+  const frontText = plain(s["description_text_a"]).text;
+  const backText = plain(s["description_text_b"]).text;
+  const target = href(s["link"], ctx);
+  const btn = plain(s["button_text"]).text.slice(0, 80);
+  const direction = str(s["flip_direction"]);
+  if (image(s["image"]) || isRecord(s["selected_icon"]))
+    ctx.note("approximated", el, "A flip box's front image or icon was left out.");
+  return [
+    node(ctx, "flip-box", {
+      frontTitle: frontTitle || backTitle,
+      ...(frontText ? { frontText: short(frontText) } : {}),
+      ...(backTitle ? { backTitle } : {}),
+      ...(backText ? { backText: short(backText) } : {}),
+      ...(btn && target.href ? { buttonText: btn, ...target } : {}),
+      ...(direction === "left" || direction === "up" || direction === "down" ? { direction } : {}),
+    }),
+  ];
 };
 
 const blockquote: Widget = (s, ctx) => {
@@ -1794,25 +1750,45 @@ const blockquote: Widget = (s, ctx) => {
   ];
 };
 
+/** Elementor's highlight shapes → the closest Animated headline mark. */
+const HEADLINE_MARKERS: Record<string, "underline" | "circle" | "strike"> = {
+  circle: "circle",
+  curly: "underline",
+  underline: "underline",
+  double: "underline",
+  double_underline: "underline",
+  underline_zigzag: "underline",
+  diagonal: "strike",
+  strikethrough: "strike",
+  x: "strike",
+};
+
+/** W-1049: Elementor's Animated Headline → an Animated headline with its mark or rotating words. */
 const animatedHeadline: Widget = (s, ctx, el) => {
-  const rotating = (str(s["rotating_text"]) ?? "").split("\n")[0] ?? "";
-  const middle =
-    str(s["headline_style"]) === "rotate" ? rotating : (str(s["highlighted_text"]) ?? "");
-  const text = cleanText(
-    [plain(s["before_text"]).text, plain(middle).text, plain(s["after_text"]).text]
-      .filter(Boolean)
-      .join(" "),
-  );
-  if (!text) return [];
-  ctx.note(
-    "approximated",
-    el,
-    "Animated headlines are shown without their animation (rotating headlines show their first word).",
-  );
+  const rotate = str(s["headline_style"]) === "rotate";
+  const words = (str(s["rotating_text"]) ?? "")
+    .split("\n")
+    .map((w) => plain(w).text.slice(0, 120))
+    .filter(Boolean);
+  const highlight = (rotate ? words[0] : plain(s["highlighted_text"]).text)?.slice(0, 120) ?? "";
+  const before = plain(s["before_text"]).text.slice(0, 200);
+  const after = plain(s["after_text"]).text.slice(0, 200);
+  if (!highlight && !before && !after) return [];
   const level = Number(/^h([1-6])$/.exec(str(s["tag"]) ?? "h3")?.[1] ?? 3);
+  if (link(s["link"])) ctx.note("approximated", el, "An animated headline's link was left out.");
+  const marker = HEADLINE_MARKERS[str(s["marker"]) ?? "circle"] ?? "underline";
   return [
     styled(
-      node(ctx, "heading", { text: short(text), level, ...href(s["link"], ctx) }),
+      node(ctx, "headline", {
+        level,
+        ...(before ? { before } : {}),
+        highlight: highlight || before || after,
+        ...(after && highlight ? { after } : {}),
+        mark: rotate ? "none" : marker,
+        ...(rotate && words.length > 1
+          ? { rotate: words.slice(1, 11), rotating: true, turns: s["loop"] === "yes" ? 5 : 1 }
+          : {}),
+      }),
       deviceStyles(s, ctx, el, [
         typographyReader("title_typography", "primary"),
         textReader("title_color", "secondary", "alignment"),
@@ -1871,11 +1847,55 @@ const siteLogo: Widget = (s, ctx, el, env) => {
   return [align(n, s["align"], env, "center")];
 };
 
+/**
+ * W-1018 carousel settings from an Elementor carousel-like widget: arrows and dots from
+ * `navigation`, autoplay and its speed, looping.
+ */
+function carouselFrom(
+  slides: N[],
+  perView: number,
+  s: Settings,
+  ctx: ImportContext,
+  el: string,
+): N[] {
+  if (slides.length === 0) return [];
+  const navigation = str(s["navigation"]) ?? "both";
+  const autoplay = str(s["autoplay"]);
+  if (autoplay !== "yes" && autoplay !== "no")
+    ctx.note(
+      "approximated",
+      el,
+      "Carousels don't play by themselves unless you turn on Play automatically.",
+    );
+  const speed = num(s["autoplay_speed"]);
+  return [
+    node(
+      ctx,
+      "carousel",
+      {
+        perView: Math.min(4, Math.max(1, Math.round(perView))),
+        ...(navigation === "both" || navigation === "arrows" ? { arrows: true } : {}),
+        ...(navigation === "both" || navigation === "dots" ? { dots: true } : {}),
+        ...(autoplay === "yes"
+          ? {
+              autoplay: true,
+              ...(speed ? { interval: Math.min(30, Math.max(3, Math.round(speed / 1000))) } : {}),
+            }
+          : {}),
+        ...(str(s["infinite"]) === "no" ? {} : { loop: true }),
+      },
+      { children: slides },
+    ),
+  ];
+}
+
+/** W-1049: Elementor's Slides → a Carousel, one slide per Elementor slide with its content. */
 const slides: Widget = (s, ctx, el) => {
-  const list = (Array.isArray(s["slides"]) ? s["slides"] : []).filter(isRecord).slice(0, 20);
+  const list = (Array.isArray(s["slides"]) ? s["slides"] : []).filter(isRecord);
+  if (list.length > 20) ctx.note("skipped", el, "Carousels keep their first 20 slides.");
   const height = slider(s["slides_height"]) ?? { value: 400, unit: "px" as const };
   const out: N[] = [];
-  for (const slide of list) {
+  for (const slide of list.slice(0, 20)) {
     const parts: N[] = [];
     const title = plain(slide["heading"]).text;
     if (title) parts.push(node(ctx, "heading", { text: short(title), level: 2 }));
@@ -1898,16 +1918,18 @@ const slides: Widget = (s, ctx, el) => {
       style["backgroundImage"] = bg.url;
       style["backgroundSize"] = "cover";
     }
-    out.push(box(ctx, parts, style));
+    out.push(node(ctx, "carousel-slide", {}, { children: [box(ctx, parts, style)] }));
   }
-  if (out.length > 0) ctx.note("approximated", el, "Slides are shown stacked, one after another.");
-  return out;
+  return carouselFrom(out, 1, s, ctx, el);
 };
 
+/** W-1049: Elementor's Testimonial Carousel and Reviews → a Carousel of Testimonials. */
 const testimonialCarousel: Widget = (s, ctx, el, env, raw) => {
-  const list = (Array.isArray(s["slides"]) ? s["slides"] : []).filter(isRecord).slice(0, 30);
-  const out = list.flatMap((slide) =>
-    testimonial(
+  const list = (Array.isArray(s["slides"]) ? s["slides"] : []).filter(isRecord);
+  if (list.length > 20) ctx.note("skipped", el, "Carousels keep their first 20 slides.");
+  const out: N[] = [];
+  for (const slide of list.slice(0, 20)) {
+    const quote = testimonial(
       {
         testimonial_content: slide["content"],
         testimonial_name: slide["name"],
@@ -1918,20 +1940,134 @@ const testimonialCarousel: Widget = (s, ctx, el, env, raw) => {
       el,
       env,
       raw,
-    ),
+    );
+    if (quote.length > 0) out.push(node(ctx, "carousel-slide", {}, { children: quote }));
+  }
+  return carouselFrom(out, num(s["slides_per_view"]) ?? 1, s, ctx, el);
+};
+
+/** Elementor's Countdown time (site time, no zone) as a Countdown target in UTC. */
+function countdownTarget(value: unknown): string | undefined {
+  const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/.exec(str(value) ?? "");
+  return m ? `${m[1]}T${m[2]}:${m[3]}Z` : undefined;
+}
+
+/** W-1049: Elementor's Countdown (due date) → a live Countdown with its ending action. */
+const countdown: Widget = (s, ctx, el) => {
+  if (str(s["countdown_type"]) === "evergreen") {
+    ctx.note("skipped", el, "Evergreen countdowns (a timer per visitor) weren't imported.");
+    return [];
+  }
+  const target = countdownTarget(s["due_date"]);
+  if (!target) return [];
+  ctx.note(
+    "approximated",
+    el,
+    "Countdown dates have no time zone in Elementor; they were read as UTC. Check the time.",
   );
-  if (out.length > 0)
-    ctx.note("approximated", el, "Carousels are shown as a grid of their slides.");
-  return out.length > 0
-    ? [
-        node(
-          ctx,
-          "grid",
-          { columns: Math.min(12, Math.max(1, num(s["slides_per_view"]) ?? 3)) },
-          { style: { gap: { value: 20, unit: "px" } }, children: out },
-        ),
-      ]
-    : [];
+  const actions = Array.isArray(s["expire_actions"]) ? s["expire_actions"].map(String) : [];
+  const message = plain(s["message_after_expire"]).text.slice(0, 200);
+  const redirect = href(s["expire_redirect_url"], ctx).href;
+  const expired = actions.includes("hide")
+    ? { expired: "hide" }
+    : redirect
+      ? { expired: "link", expiredHref: redirect, ...(message ? { expiredText: message } : {}) }
+      : message
+        ? { expiredText: message }
+        : {};
+  if (actions.includes("redirect"))
+    ctx.note("approximated", el, "A countdown that redirected now shows a link instead.");
+  return [
+    node(ctx, "countdown", {
+      target,
+      ticking: true,
+      ...(s["show_seconds"] === "" || s["show_seconds"] === "no" ? { hideSeconds: true } : {}),
+      ...expired,
+    }),
+  ];
+};
+
+/** Elementor's share buttons → EmVB's Share link services. */
+const SHARE_FROM_ELEMENTOR: Record<string, string> = {
+  facebook: "facebook",
+  twitter: "x",
+  "x-twitter": "x",
+  linkedin: "linkedin",
+  whatsapp: "whatsapp",
+  telegram: "telegram",
+  reddit: "reddit",
+  threads: "threads",
+  bluesky: "bluesky",
+  email: "email",
+};
+
+/** W-1049: Elementor's Share Buttons → Share buttons with the services EmVB has. */
+const shareButtons: Widget = (s, ctx, el) => {
+  const list = (Array.isArray(s["share_buttons"]) ? s["share_buttons"] : []).filter(isRecord);
+  const networks = list.map((b) => SHARE_FROM_ELEMENTOR[str(b["button"]) ?? ""]);
+  if (networks.some((n) => !n))
+    ctx.note("skipped", el, "Share buttons for services EmVB has no link for were left out.");
+  const links = [...new Set(networks.filter((n): n is string => Boolean(n)))]
+    .slice(0, 12)
+    .map((network) => node(ctx, "share-link", { network }));
+  if (links.length === 0) return [];
+  const shape = str(s["shape"]);
+  return [
+    node(
+      ctx,
+      "share-buttons",
+      {
+        shape: shape === "circle" || shape === "rounded" ? shape : "square",
+        ...(str(s["color_source"]) === "custom" ? {} : { brandColors: true }),
+      },
+      { children: links },
+    ),
+  ];
+};
+
+/** One hotspot offset (Elementor's slider in %). */
+const offset = (value: unknown): number | undefined => {
+  const n = num(isRecord(value) ? value["size"] : value);
+  return n === undefined ? undefined : Math.min(100, Math.max(0, Math.round(n * 100) / 100));
+};
+
+/** W-1049: Elementor's Hotspot → Hotspots: its picture and a marker per hotspot, per device. */
+const hotspotWidget: Widget = (s, ctx, el) => {
+  const img = image(s["image"]);
+  if (!img) return [];
+  ctx.externalImage(img.url);
+  const list = (Array.isArray(s["hotspot"]) ? s["hotspot"] : []).filter(isRecord);
+  if (list.length > 20) ctx.note("skipped", el, "Hotspots keep their first 20 markers.");
+  const markers = list.slice(0, 20).map((spot, i) => {
+    const title = plain(spot["hotspot_label"]).text.slice(0, 120) || `Point ${i + 1}`;
+    const text = plain(spot["hotspot_tooltip_content"]).text.slice(0, 1000);
+    const at = (key: string) => offset(spot[key]);
+    const place: Record<string, number> = {};
+    for (const [prop, key] of [
+      ["xTablet", "hotspot_offset_x_tablet"],
+      ["yTablet", "hotspot_offset_y_tablet"],
+      ["xMobile", "hotspot_offset_x_mobile"],
+      ["yMobile", "hotspot_offset_y_mobile"],
+    ] as const) {
+      const v = at(key);
+      if (v !== undefined) place[prop] = v;
+    }
+    return node(ctx, "hotspot", {
+      title,
+      ...(text ? { text } : {}),
+      x: at("hotspot_offset_x") ?? 50,
+      y: at("hotspot_offset_y") ?? 50,
+      ...place,
+    });
+  });
+  return [
+    node(
+      ctx,
+      "hotspots",
+      { src: img.url, alt: img.alt ?? altFromUrl(img.url) },
+      { children: markers },
+    ),
+  ];
 };
 
 const codeHighlight: Widget = (s, ctx, el) => {
@@ -2007,6 +2143,7 @@ export const WIDGETS: Record<string, Widget> = {
   "mega-menu": megaMenu,
   "call-to-action": callToAction,
   "price-table": priceTable,
+  "price-list": priceList,
   "flip-box": flipBox,
   blockquote,
   "animated-headline": animatedHeadline,
@@ -2046,12 +2183,12 @@ export const WIDGETS: Record<string, Widget> = {
   "theme-site-title": skip("The site title comes from WordPress settings; add it as a Heading."),
   "read-more": skip("WordPress's Read More tag has no EmVB equivalent."),
   sidebar: skip("WordPress sidebars weren't imported."),
-  countdown: skip("Countdown timers weren't imported."),
-  "share-buttons": skip("Share buttons weren't imported; add Icon links instead."),
+  countdown,
+  "share-buttons": shareButtons,
   "search-form": skip("Search forms weren't imported."),
   login: skip("Login forms weren't imported."),
   lottie: skip("Lottie animations weren't imported."),
-  hotspot: skip("Hotspots weren't imported."),
+  hotspot: hotspotWidget,
   "paypal-button": skip("PayPal buttons weren't imported."),
   "progress-tracker": skip("Reading progress bars weren't imported."),
   posts: skip(LOOPS),

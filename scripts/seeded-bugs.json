@@ -50186,6 +50186,153 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-1049/counter-no-cap",
+      "requirement": "W-1049",
+      "description": "Imported Counters keep Elementor's counting time over 5 seconds.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "        duration: Math.min(5000, Math.max(300, Math.round(duration))),",
+          "replace": "        duration: Math.max(300, Math.round(duration)),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/import/elementor/elementor-marketing.test.ts"
+      ],
+      "expect": "\\(fail\\).*5 s at most"
+    },
+    {
+      "id": "W-1049/countdown-no-zone",
+      "requirement": "W-1049",
+      "description": "An imported Countdown's date gets no time zone.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  return m ? `${m[1]}T${m[2]}:${m[3]}Z` : undefined;",
+          "replace": "  return m ? `${m[1]}T${m[2]}:${m[3]}` : undefined;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/import/elementor/elementor-marketing.test.ts"
+      ],
+      "expect": "\\(fail\\).*due date ticks"
+    },
+    {
+      "id": "W-1049/sale-dropped",
+      "requirement": "W-1049",
+      "description": "An imported Price Table on sale loses its regular price.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  const regular = s[\"sale\"] === \"yes\" ? plain(s[\"original_price\"]).text.slice(0, 20) : \"\";",
+          "replace": "  const regular = \"\";"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/import/elementor/elementor-marketing.test.ts"
+      ],
+      "expect": "\\(fail\\).*on sale"
+    },
+    {
+      "id": "W-1049/hotspot-phone-dropped",
+      "requirement": "W-1049",
+      "description": "Imported Hotspots lose their phone places.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "      [\"xMobile\", \"hotspot_offset_x_mobile\"],\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/import/elementor/elementor-marketing.test.ts"
+      ],
+      "expect": "\\(fail\\).*every device"
+    },
+    {
+      "id": "W-1049/slides-stacked",
+      "requirement": "W-1049",
+      "description": "Imported Slides are stacked again instead of a Carousel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  return carouselFrom(out, 1, s, ctx, el);",
+          "replace": "  return out;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/import/elementor/elementor-marketing.test.ts"
+      ],
+      "expect": "\\(fail\\).*not a stack"
+    },
+    {
+      "id": "W-1049/share-unknown-kept",
+      "requirement": "W-1049",
+      "description": "Imported Share Buttons don't say which services were left out.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  if (networks.some((n) => !n))\n    ctx.note(\"skipped\", el, \"Share buttons for services EmVB has no link for were left out.\");\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/core/import/elementor/elementor-marketing.test.ts"
+      ],
+      "expect": "\\(fail\\).*say which were left out"
+    },
+    {
+      "id": "W-1049/maps-as-link",
+      "requirement": "W-1049",
+      "description": "Imported Google Maps become a link again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "      provider: \"google\",\n      embed: true,\n",
+          "replace": "      provider: \"google\",\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*widget details survive"
+    },
+    {
+      "id": "W-1049/price-list-unmapped",
+      "requirement": "W-1049",
+      "description": "Elementor's Price List is no longer imported.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  \"price-list\": priceList,\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/elementor-import.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1049"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
     }
   ]
 }
