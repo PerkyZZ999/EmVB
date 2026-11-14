@@ -1,7 +1,7 @@
 import { isShadowingId } from "../shadowing-ids.ts";
 import { renderableDesign, renderableDynamic, renderableLayout } from "../contract.ts";
 import { markColors } from "../text-marks.ts";
-import type { TextMark } from "../schema/layout.ts";
+import type { ShareLinkNode, TextMark } from "../schema/layout.ts";
 import { LIST_MARKERS } from "../css-keywords.ts";
 import { MAX_NODES } from "../limits.ts";
 import { loneAbTests, variantShows } from "../audience/variants.ts";
@@ -17,6 +17,7 @@ import {
 } from "../css/scope.ts";
 import { ELEMENTS } from "../elements/index.ts";
 import { nodeRuntime, type WidgetRuntime } from "../elements/widgets.ts";
+import { shareLinkVNode } from "../elements/marketing.ts";
 import { controlId } from "../elements/field-id.ts";
 import { layoutHasForm } from "../forms/binding.ts";
 import { nodeChildren, someNode } from "../tree-ops.ts";
@@ -684,6 +685,12 @@ export function renderPage(
       );
     }
     if (isTabsNode(node)) return finish(node, renderTabs(node, id, attrs, ctx, dynamic));
+    // W-1047: share links point at this page; a public page without its address shows none.
+    if (node.type === "share-link") {
+      const url = dynamic?.pageUrl ?? (mode === "editor" ? "https://example.com/" : undefined);
+      if (!url) return undefined;
+      return finish(node, shareLinkVNode(node as ShareLinkNode, attrs, url));
+    }
     if (node.type === "language-switcher") {
       const links = languageLinks(dynamic?.translations, mode);
       // W-937: a page in one language has nothing to switch to; the public page shows nothing.

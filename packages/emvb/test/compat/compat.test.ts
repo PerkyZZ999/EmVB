@@ -78,6 +78,8 @@ const ADDED_IN_1X: Record<string, string> = {
   cta: "1.3 (W-1044): src/core/elements/marketing.test.ts",
   "flip-box": "1.3 (W-1045): src/core/elements/marketing.test.ts",
   headline: "1.3 (W-1046): src/core/elements/marketing.test.ts",
+  "share-buttons": "1.3 (W-1047): src/core/elements/marketing.test.ts",
+  "share-link": "1.3 (W-1047): src/core/elements/marketing.test.ts",
 };
 
 /** Style keys added after 0.9.0, so no released page has them: where each one is tested. */

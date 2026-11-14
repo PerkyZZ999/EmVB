@@ -1,4 +1,5 @@
 import { loopCollectionAllowed } from "../core/loop-collections.ts";
+import { someNode } from "../core/tree-ops.ts";
 import { emdashContent, type ContentPort } from "./content-port.ts";
 import { siteFor } from "./render-session.ts";
 import {
@@ -18,6 +19,7 @@ type RequestData = {
   site?: Record<string, string>;
   params?: Record<string, string>;
   origin?: string;
+  pageUrl?: string;
   collections?: Record<string, ThemePostFields[]>;
   abArms?: Record<string, "a" | "b">;
   visitor?: VisitorInfo;
@@ -93,6 +95,10 @@ export async function bindingDataFor(
   if (loops.length > 0) {
     const lists = await Promise.all(loops.map((loop) => loopEntries(loop, content)));
     data.collections = Object.fromEntries(loops.map((loop, i) => [loop.nodeId, lists[i] ?? []]));
+  }
+  // W-1047: Share buttons share this page's address, without its query or hash.
+  if (someNode(layout.root, (node) => node.type === "share-buttons")) {
+    data.pageUrl = `${url.origin}${url.pathname}`;
   }
   if (layoutUsesSource(layout.root, "param")) {
     data.params = paramsFromSearch(url.searchParams);

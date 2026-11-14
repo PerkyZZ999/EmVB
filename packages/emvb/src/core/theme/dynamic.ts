@@ -70,6 +70,8 @@ export type ThemeDynamicData = {
   params?: Readonly<Record<string, string>>;
   /** The page's own origin, e.g. `https://example.com`: URL-parameter links stay on it (W-307). */
   origin?: string;
+  /** W-1047: this page's address, without its query, for Share buttons. Hosts fill this. */
+  pageUrl?: string;
 };
 
 /** Editor canvas placeholders when no live post is bound. */

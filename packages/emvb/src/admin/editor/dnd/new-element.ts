@@ -126,6 +126,15 @@ export function newPriceListItem(n: number, random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "price-list-item", props: { title, price, description } };
 }
 
+/** W-1047: the services new Share links cycle through. */
+const STARTER_SHARES = ["facebook", "x", "linkedin", "email", "whatsapp", "bluesky"] as const;
+
+/** W-1047: a Share link for new Share buttons or their Add link. */
+export function newShareLink(n: number, random?: () => number): LayoutNode {
+  const network = STARTER_SHARES[(n - 1) % STARTER_SHARES.length] ?? STARTER_SHARES[0];
+  return { id: newNodeId(random), type: "share-link", props: { network } };
+}
+
 /** W-1019: an empty Gallery image for a Gallery's Add picture; its panel picks the picture. */
 export function newGalleryImage(random?: () => number): LayoutNode {
   return { id: newNodeId(random), type: "gallery-image", props: { src: "", alt: "Image" } };
@@ -192,6 +201,12 @@ export function newElement(
     return {
       ...defaultElement("carousel", newNodeId(random)),
       children: [1, 2, 3].map((n) => newCarouselSlide(n, random)),
+    };
+  }
+  if (type === "share-buttons") {
+    return {
+      ...defaultElement("share-buttons", newNodeId(random)),
+      children: [1, 2, 3, 4].map((n) => newShareLink(n, random)),
     };
   }
   if (type === "price-list") {

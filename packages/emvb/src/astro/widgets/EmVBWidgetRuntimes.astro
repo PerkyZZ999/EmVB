@@ -10,6 +10,7 @@ import EmVBCounterRuntime from "./EmVBCounterRuntime.astro";
 import EmVBHeadlineRuntime from "./EmVBHeadlineRuntime.astro";
 import EmVBLightboxRuntime from "./EmVBLightboxRuntime.astro";
 import EmVBMapRuntime from "./EmVBMapRuntime.astro";
+import EmVBShareRuntime from "./EmVBShareRuntime.astro";
 
 interface Props {
   names?: readonly string[] | undefined;
@@ -25,3 +26,4 @@ const names = new Set(Astro.props.names ?? []);
 {names.has("countdown") && <EmVBCountdownRuntime />}
 {names.has("map") && <EmVBMapRuntime />}
 {names.has("headline") && <EmVBHeadlineRuntime />}
+{names.has("share") && <EmVBShareRuntime />}

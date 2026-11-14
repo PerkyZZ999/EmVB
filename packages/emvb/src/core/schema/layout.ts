@@ -792,6 +792,8 @@ export const KNOWN_ELEMENT_TYPES = [
   "cta",
   "flip-box",
   "headline",
+  "share-buttons",
+  "share-link",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -1308,6 +1310,45 @@ export const HeadlineNode = leafNode(
   }),
 );
 
+/** W-1047: the services a Share link can share to; each has a Social icons preset icon. */
+export const SHARE_NETWORKS = [
+  "facebook",
+  "x",
+  "linkedin",
+  "whatsapp",
+  "telegram",
+  "reddit",
+  "bluesky",
+  "threads",
+  "email",
+] as const;
+
+/**
+ * W-1047: links that share the current page, with no tracking script: each a service's own
+ * share address with the page's URL in it. Holds Share links only. The host gives the page URL
+ * (`resolveEmVBPage` does); without it the public page shows no links. `nativeShare` opts in to
+ * the share runtime, which adds a Share button for the browser's own share sheet where it has
+ * one. `label` names the list (unset "Share this page").
+ */
+export const ShareButtonsNodeSchema = parentNode(
+  "share-buttons",
+  z.strictObject({
+    label: z.string().max(80).optional(),
+    shape: z.enum(SOCIAL_SHAPES).optional(),
+    brandColors: z.boolean().optional(),
+    nativeShare: z.boolean().optional(),
+  }),
+);
+
+/** W-1047: one share link. `label` replaces "Share on Facebook". */
+export const ShareLinkNode = leafNode(
+  "share-link",
+  z.strictObject({
+    network: z.enum(SHARE_NETWORKS),
+    label: z.string().max(80).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1357,6 +1398,8 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   CtaNode,
   FlipBoxNode,
   HeadlineNode,
+  ShareButtonsNodeSchema,
+  ShareLinkNode,
   CounterNode,
   ProgressNode,
   CountdownNode,
@@ -1413,6 +1456,7 @@ export type PriceListItemNode = z.infer<typeof PriceListItemNode>;
 export type CtaNode = z.infer<typeof CtaNode>;
 export type FlipBoxNode = z.infer<typeof FlipBoxNode>;
 export type HeadlineNode = z.infer<typeof HeadlineNode>;
+export type ShareLinkNode = z.infer<typeof ShareLinkNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
@@ -1601,6 +1645,12 @@ export type CarouselSlideNode = NodeEnvelope & {
   children: LayoutNode[];
 };
 
+export type ShareButtonsNode = NodeEnvelope & {
+  type: "share-buttons";
+  props: z.infer<typeof ShareButtonsNodeSchema>["props"];
+  children: LayoutNode[];
+};
+
 export type PriceListNode = NodeEnvelope & {
   type: "price-list";
   props: z.infer<typeof PriceListNodeSchema>["props"];
@@ -1668,6 +1718,8 @@ export type LayoutNode =
   | CtaNode
   | FlipBoxNode
   | HeadlineNode
+  | ShareButtonsNode
+  | ShareLinkNode
   | SpacerNode
   | DividerNode
   | TextNode
@@ -1883,7 +1935,8 @@ export const isParentNode = (
   | GalleryNode
   | CarouselNode
   | CarouselSlideNode
-  | PriceListNode =>
+  | PriceListNode
+  | ShareButtonsNode =>
   node.type === "container" ||
   node.type === "div-block" ||
   node.type === "layout-section" ||
@@ -1903,7 +1956,8 @@ export const isParentNode = (
   node.type === "gallery" ||
   node.type === "carousel" ||
   node.type === "carousel-slide" ||
-  node.type === "price-list";
+  node.type === "price-list" ||
+  node.type === "share-buttons";
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

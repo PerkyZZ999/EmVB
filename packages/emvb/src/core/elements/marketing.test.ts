@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { emptyDesign, renderPage, validateLayout } from "../index.ts";
 import { nestingIssues } from "../nesting.ts";
 import { formatCounter } from "./counter-format.ts";
+import { shareHref } from "./marketing.ts";
 
 const page = (...children: unknown[]) =>
   validateLayout({
@@ -508,5 +509,81 @@ describe("Animated headline (W-1046)", () => {
   test("refuses empty highlighted words and too-fast rotation", () => {
     expect(page(headlineNode({ highlight: "" })).ok).toBe(false);
     expect(page(headlineNode({ interval: 1 })).ok).toBe(false);
+  });
+});
+
+const shares = (props: Record<string, unknown>, ...networks: string[]) => ({
+  id: "shar0001",
+  type: "share-buttons",
+  props,
+  children: networks.map((network, i) => ({
+    id: `shl0000${i}`,
+    type: "share-link",
+    props: { network },
+  })),
+});
+function renderedWith(dynamic: Record<string, unknown>, ...children: unknown[]) {
+  const result = page(...children);
+  if (!result.ok) throw new Error(JSON.stringify(result.issues));
+  return renderPage(result.layout, emptyDesign(), { dynamic });
+}
+
+describe("Share buttons (W-1047)", () => {
+  test("each service's own share address carries the encoded page URL", () => {
+    const url = "https://example.com/a page?x";
+    expect(shareHref("facebook", url)).toBe(
+      "https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fexample.com%2Fa%20page%3Fx",
+    );
+    expect(shareHref("x", url)).toStartWith("https://x.com/intent/post?url=https%3A%2F%2F");
+    expect(shareHref("email", url)).toStartWith("mailto:?body=https%3A%2F%2F");
+  });
+
+  test("a named list of share links to this page, each named for screen readers, with no script", () => {
+    const { html, runtimes } = renderedWith(
+      { pageUrl: "https://example.com/post" },
+      shares({ shape: "circle" }, "facebook", "email"),
+    );
+    expect(html).toContain(
+      '<ul class="emvb-share-buttons emvb-share-circle" aria-label="Share this page">',
+    );
+    expect(html).toContain(
+      '<a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fexample.com%2Fpost" aria-label="Share on Facebook" target="_blank" rel="noopener noreferrer"><svg',
+    );
+    expect(html).toContain(
+      '<a href="mailto:?body=https%3A%2F%2Fexample.com%2Fpost" aria-label="Share by email"><svg',
+    );
+    expect(html.includes("<script")).toBe(false);
+    expect(runtimes).toEqual([]);
+  });
+
+  test("without the page's address a public page shows no share links", () => {
+    const { html } = rendered(shares({}, "facebook"));
+    expect(html.includes("sharer.php")).toBe(false);
+  });
+
+  test("nativeShare adds a Share button hidden until the script runs, and asks for the share runtime", () => {
+    const { html, css, runtimes } = renderedWith(
+      { pageUrl: "https://example.com/" },
+      shares({ nativeShare: true, label: "Share" }, "x"),
+    );
+    expect(runtimes).toEqual(["share"]);
+    expect(html).toContain(
+      '<button type="button" class="emvb-share-native" data-emvb-share="">Share…</button>',
+    );
+    expect(html).toContain('aria-label="Share" data-emvb-share-list=""');
+    expect(css).toContain(
+      ".emvb-share-buttons:not([data-emvb-ready]) .emvb-share-native-item{display:none}",
+    );
+  });
+
+  test("share links go only in Share buttons, which hold only share links", () => {
+    const issues = (...children: unknown[]) => {
+      const result = page(...children);
+      if (!result.ok) throw new Error("invalid");
+      return nestingIssues(result.layout).length;
+    };
+    expect(issues({ id: "shl00001", type: "share-link", props: { network: "x" } })).toBe(1);
+    expect(issues(shares({}, "x"))).toBe(0);
+    expect(page(shares({}, "myspace")).ok).toBe(false);
   });
 });

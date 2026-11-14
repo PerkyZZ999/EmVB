@@ -49982,6 +49982,115 @@
       "env": {
         "CI": "1"
       }
+    },
+    {
+      "id": "W-1047/url-unencoded",
+      "requirement": "W-1047",
+      "description": "The page URL goes into share links unencoded.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "  const u = encodeURIComponent(url);",
+          "replace": "  const u = url;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*encoded page URL"
+    },
+    {
+      "id": "W-1047/unnamed-links",
+      "requirement": "W-1047",
+      "description": "Share links have no name for screen readers.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": "          \"aria-label\": label?.trim() || shareName(network),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*named for screen readers"
+    },
+    {
+      "id": "W-1047/example-url-public",
+      "requirement": "W-1047",
+      "description": "A public page without its address shares the editor's example URL.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      const url = dynamic?.pageUrl ?? (mode === \"editor\" ? \"https://example.com/\" : undefined);",
+          "replace": "      const url = dynamic?.pageUrl ?? \"https://example.com/\";"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*shows no share links"
+    },
+    {
+      "id": "W-1047/share-button-always",
+      "requirement": "W-1047",
+      "description": "The device Share button shows before its script finds a share sheet.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/marketing.ts",
+          "search": ".emvb-share-buttons:not([data-emvb-ready]) .emvb-share-native-item{display:none}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/marketing.test.ts"],
+      "expect": "\\(fail\\).*hidden until the script"
+    },
+    {
+      "id": "W-1047/no-page-url",
+      "requirement": "W-1047",
+      "description": "The host never gives Share buttons the page's address.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/request-data.ts",
+          "search": "    data.pageUrl = `${url.origin}${url.pathname}`;\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/request-data.test.ts"],
+      "expect": "\\(fail\\).*W-1047"
+    },
+    {
+      "id": "W-1047/query-kept",
+      "requirement": "W-1047",
+      "description": "Share links share the page's tracking query too.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/request-data.ts",
+          "search": "    data.pageUrl = `${url.origin}${url.pathname}`;",
+          "replace": "    data.pageUrl = url.href;"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/marketing-widgets.e2e.ts",
+        "--project=node",
+        "-g",
+        "W-1047"
+      ],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1047/sheet-never-opens",
+      "requirement": "W-1047",
+      "description": "The device Share button doesn't open the share sheet.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/share.ts",
+          "search": "      nav.share({ title: doc.title, url: doc.location.href.split(\"#\")[0] }).catch(() => {});\n",
+          "replace": "      void doc;\n"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/share.test.ts"],
+      "expect": "\\(fail\\).*opens its sheet"
     }
   ]
 }

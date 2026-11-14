@@ -13,14 +13,18 @@ import type {
   PriceListNode,
   PriceTableNode,
   ProgressNode,
+  ShareButtonsNode,
+  ShareLinkNode,
 } from "../schema/layout.ts";
 import {
+  SHARE_NETWORKS,
   COUNTDOWN_TARGET,
   COUNTER_SEPARATORS,
   MAX_COUNTER,
   MAX_PROGRESS,
 } from "../schema/layout.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
+import { SOCIAL_COLORS, SOCIAL_NAMES, socialSvg } from "./widgets.ts";
 import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import type { VNode } from "../render/vnode.ts";
 import { formatCounter } from "./counter-format.ts";
@@ -417,7 +421,7 @@ const MAP_NAMES = { osm: "OpenStreetMap", google: "Google Maps" } as const;
 const coord = (value: number) => String(Math.round(value * 1e6) / 1e6);
 
 /** W-1041: where a Map's link goes and what its embed loads (undefined: it can't be embedded). */
-export function mapUrls(props: MapNode["props"]): { link: string; embed?: string } {
+function mapUrls(props: MapNode["props"]): { link: string; embed?: string } {
   const { address, lat, lng } = props;
   const zoom = props.zoom ?? 15;
   const at = lat !== undefined && lng !== undefined ? [coord(lat), coord(lng)] : undefined;
@@ -1180,4 +1184,166 @@ export const headline: ElementDefinition<HeadlineNode> = {
       children,
     };
   },
+};
+
+type ShareNetwork = (typeof SHARE_NETWORKS)[number];
+
+/** W-1047: each service's own share address for `url` (no tracking script, no API key). */
+export function shareHref(network: ShareNetwork, url: string): string {
+  const u = encodeURIComponent(url);
+  switch (network) {
+    case "facebook":
+      return `https://www.facebook.com/sharer/sharer.php?u=${u}`;
+    case "x":
+      return `https://x.com/intent/post?url=${u}`;
+    case "linkedin":
+      return `https://www.linkedin.com/sharing/share-offsite/?url=${u}`;
+    case "whatsapp":
+      return `https://wa.me/?text=${u}`;
+    case "telegram":
+      return `https://t.me/share/url?url=${u}`;
+    case "reddit":
+      return `https://www.reddit.com/submit?url=${u}`;
+    case "bluesky":
+      return `https://bsky.app/intent/compose?text=${u}`;
+    case "threads":
+      return `https://www.threads.net/intent/post?text=${u}`;
+    case "email":
+      return `mailto:?body=${u}`;
+  }
+}
+
+/** What screen readers call a share link: "Share on X", "Share by email". */
+const shareName = (network: ShareNetwork) =>
+  network === "email" ? "Share by email" : `Share on ${SOCIAL_NAMES[network]}`;
+
+export const shareButtons: ElementDefinition<ShareButtonsNode> = {
+  baseCss:
+    ".emvb-share-buttons{display:flex;flex-wrap:wrap;align-items:center;gap:0.5em;margin:0;padding:0;list-style:none;font-size:1.5em}.emvb-share-link{display:flex}.emvb-share-link>a,.emvb-share-native{display:inline-flex;align-items:center;justify-content:center;color:inherit;text-decoration:none}.emvb-share-buttons .emvb-social-svg{display:block;width:1em;height:1em}.emvb-share-brand.emvb-share-plain .emvb-share-link>a{color:var(--emvb-social,currentColor)}.emvb-share-buttons:not(.emvb-share-plain) .emvb-share-link>a{width:2em;height:2em;background:var(--emvb-social,currentColor)}.emvb-share-buttons:not(.emvb-share-plain) .emvb-social-svg{width:1.1em;height:1.1em;color:#fff}.emvb-share-circle .emvb-share-link>a{border-radius:50%}.emvb-share-rounded .emvb-share-link>a{border-radius:0.4em}.emvb-share-link>a:focus-visible,.emvb-share-native:focus-visible{outline:2px solid currentColor;outline-offset:2px}.emvb-share-native{gap:0.375em;padding:0.25em 0.75em;border:1px solid currentColor;border-radius:999px;background:none;font:inherit;font-size:0.6em;cursor:pointer}.emvb-share-buttons:not([data-emvb-ready]) .emvb-share-native-item{display:none}" +
+    SHARE_NETWORKS.map(
+      (network) =>
+        `.emvb-share-brand .emvb-share-${network}{--emvb-social:${SOCIAL_COLORS[network]}}`,
+    ).join(""),
+  defaults: () => ({ type: "share-buttons", props: { shape: "circle" }, children: [] }),
+  descriptor: {
+    type: "share-buttons",
+    name: "Share buttons",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "label",
+        kind: "text",
+        label: "List name",
+        optional: true,
+        message: "What screen readers call the list. Leave it empty for Share this page.",
+      },
+      {
+        key: "shape",
+        kind: "select",
+        label: "Shape",
+        optional: true,
+        options: [
+          { value: "plain", label: "Icon only" },
+          { value: "circle", label: "Circle" },
+          { value: "rounded", label: "Rounded square" },
+          { value: "square", label: "Square" },
+        ],
+      },
+      { key: "brandColors", kind: "boolean", label: "Brand colours", optional: true },
+      {
+        key: "nativeShare",
+        kind: "boolean",
+        label: "Add the device's Share button where it has one",
+        optional: true,
+      },
+    ],
+  },
+  build: (node, attrs, children) => {
+    const items: VNode[] = [...children];
+    if (node.props.nativeShare)
+      items.push({
+        tag: "li",
+        attrs: { class: "emvb-share-native-item" },
+        children: [
+          {
+            tag: "button",
+            attrs: { type: "button", class: "emvb-share-native", "data-emvb-share": "" },
+            children: ["Share…"],
+          },
+        ],
+      });
+    const classes = [
+      attrs["class"] ?? "",
+      `emvb-share-${node.props.shape ?? "plain"}`,
+      ...(node.props.brandColors ? ["emvb-share-brand"] : []),
+    ];
+    return {
+      tag: "ul",
+      attrs: {
+        ...attrs,
+        class: classes.join(" ").trim(),
+        "aria-label": node.props.label?.trim() || "Share this page",
+        ...(node.props.nativeShare ? { "data-emvb-share-list": "" } : {}),
+      },
+      children: items,
+    };
+  },
+};
+
+/** W-1047: a share link for `url`; the renderer passes the page's address. */
+export function shareLinkVNode(
+  node: ShareLinkNode,
+  attrs: Record<string, string>,
+  url: string,
+): VNode {
+  const { network, label } = node.props;
+  const icon = socialSvg(network);
+  const href = sanitizeHref(shareHref(network, url)) ?? "#";
+  return {
+    tag: "li",
+    attrs: { ...attrs, class: `${attrs["class"] ?? ""} emvb-share-${network}`.trim() },
+    children: [
+      {
+        tag: "a",
+        attrs: {
+          href,
+          "aria-label": label?.trim() || shareName(network),
+          ...(network === "email" ? {} : { target: "_blank", rel: "noopener noreferrer" }),
+        },
+        children: icon ? [icon] : [],
+      },
+    ],
+  };
+}
+
+export const shareLink: ElementDefinition<ShareLinkNode> = {
+  baseCss: "",
+  defaults: () => ({ type: "share-link", props: { network: "facebook" } }),
+  descriptor: {
+    type: "share-link",
+    name: "Share link",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "network",
+        kind: "select",
+        label: "Share to",
+        options: SHARE_NETWORKS.map((value) => ({
+          value,
+          label: value === "email" ? "Email" : SOCIAL_NAMES[value],
+        })),
+      },
+      {
+        key: "label",
+        kind: "text",
+        label: "Name for screen readers",
+        optional: true,
+        message: "Leave it empty for Share on and the service's name.",
+      },
+    ],
+  },
+  // The editor shows where it would lead from an example page; public pages use their own URL.
+  build: (node, attrs) => shareLinkVNode(node, attrs, "https://example.com/"),
 };

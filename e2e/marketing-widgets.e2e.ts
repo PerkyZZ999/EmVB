@@ -462,3 +462,45 @@ test("an Animated headline is circled and rotates on the page until Pause, but n
     await reduced.close();
   }
 });
+
+test("Share buttons get a Bluesky link and publish as share links to this page, named for screen readers (W-1047)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Sharing");
+  await overlay(page).locator('[data-emvb-add-tile="share-buttons"]').click();
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Share buttons");
+  const links = canvas(page).locator(".emvb-share-link");
+  await expect(links).toHaveCount(4);
+  await overlay(page).getByRole("button", { name: "Edit link 2" }).click();
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Share link");
+  await overlay(page).getByLabel("Share to").click();
+  await page.getByRole("option", { name: "Bluesky" }).click();
+  await expect(links.nth(1)).toHaveClass(/emvb-share-bluesky/);
+
+  await saveDraft(page);
+  const stored = await storedLayout<{
+    root: { children: { type: string; children?: { props: Record<string, unknown> }[] }[] };
+  }>(request, id);
+  expect(stored.root.children[1]?.children?.map((c) => c.props["network"])).toEqual([
+    "facebook",
+    "bluesky",
+    "linkedin",
+    "email",
+  ]);
+
+  await publishPage(request, id);
+  await page.goto(`/${slug}?utm_source=test`);
+  const list = page.getByRole("list", { name: "Share this page" });
+  const here = encodeURIComponent(new URL(`/${slug}`, page.url()).toString());
+  await expect(list.getByRole("link", { name: "Share on Bluesky" })).toHaveAttribute(
+    "href",
+    `https://bsky.app/intent/compose?text=${here}`,
+  );
+  await expect(list.getByRole("link", { name: "Share by email" })).toHaveAttribute(
+    "href",
+    `mailto:?body=${here}`,
+  );
+  await expect(list.getByRole("link")).toHaveCount(4);
+  expect(await page.locator("script[src*='emvb'], script[data-emvb]").count()).toBe(0);
+});

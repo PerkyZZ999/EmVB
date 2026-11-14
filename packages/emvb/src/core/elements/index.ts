@@ -50,6 +50,8 @@ import {
   priceListItem,
   priceTable,
   progress,
+  shareButtons,
+  shareLink,
 } from "./marketing.ts";
 import {
   alert,
@@ -1146,6 +1148,8 @@ export const ELEMENTS = {
   cta,
   "flip-box": flipBox,
   headline,
+  "share-buttons": shareButtons,
+  "share-link": shareLink,
   container,
   "layout-section": layoutSection,
   spacer,

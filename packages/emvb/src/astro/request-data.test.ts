@@ -112,3 +112,14 @@ describe("W-329 the host's visitor facts reach the request data", () => {
     expect(none.visitor?.segments).toBeUndefined();
   });
 });
+
+describe("W-1047 Share buttons get the page's address", () => {
+  test("a page with Share buttons gets its URL without query or hash; others don't", async () => {
+    const url = new URL("https://example.com/blog/post?utm_source=x#top");
+    const sharing = page([
+      { id: "shar0001", type: "share-buttons", props: {}, children: [] } as never,
+    ]);
+    expect((await bindingDataFor(sharing, url)).pageUrl).toBe("https://example.com/blog/post");
+    expect((await bindingDataFor(page([]), url)).pageUrl).toBeUndefined();
+  });
+});

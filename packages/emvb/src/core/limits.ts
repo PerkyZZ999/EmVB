@@ -15,6 +15,8 @@ export const MAX_GALLERY_IMAGES = 60;
 export const MAX_CAROUSEL_SLIDES = 20;
 /** W-1043: most rows one Price list holds. */
 export const MAX_PRICE_ITEMS = 50;
+/** W-1047: most share links one Share buttons element holds. */
+export const MAX_SHARE_LINKS = 12;
 
 /**
  * W-509: `text` cut to at most `max` UTF-16 units, as schema limits count, without leaving half

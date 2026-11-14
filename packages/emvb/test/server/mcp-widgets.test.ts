@@ -419,3 +419,30 @@ describe("Animated headline over MCP (W-1046)", () => {
     expect(refused.success).toBe(false);
   });
 });
+
+describe("Share buttons over MCP (W-1047)", () => {
+  test("add_element adds Share buttons with links; an unknown service is refused", async () => {
+    const pageId = await newPage();
+    expect((await catalogue()).get("share-buttons")?.name).toBe("Share buttons");
+    const added = await call<{ changed: string[] }>("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "share-buttons",
+        props: { shape: "rounded" },
+        children: [{ type: "share-link", props: { network: "bluesky" } }],
+      },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: {
+        type: "share-buttons",
+        props: {},
+        children: [{ type: "share-link", props: { network: "myspace" } }],
+      },
+    });
+    expect(refused.success).toBe(false);
+  });
+});

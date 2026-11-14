@@ -4,6 +4,7 @@ import {
   MAX_GALLERY_IMAGES,
   MAX_NODES,
   MAX_PRICE_ITEMS,
+  MAX_SHARE_LINKS,
   MAX_SOCIAL_LINKS,
   MAX_TABS,
 } from "./limits.ts";
@@ -84,6 +85,9 @@ export const REASONS = {
   itemOutsidePriceList: "Price list items can only go inside a Price list.",
   onlyPriceItems: "A price list can only hold price list items.",
   tooManyPriceItems: `A price list can hold up to ${MAX_PRICE_ITEMS} items.`,
+  shareOutsideButtons: "Share links can only go inside Share buttons.",
+  onlyShareLinks: "Share buttons can only hold share links.",
+  tooManyShareLinks: `Share buttons can hold up to ${MAX_SHARE_LINKS} links.`,
   emptyOutsideLoop: "An Empty state can only go inside a Loop.",
 } as const;
 
@@ -185,6 +189,12 @@ export function parentChildRefusal(
   if (parent.type === "price-list" && child.type !== "price-list-item") {
     return REASONS.onlyPriceItems;
   }
+  if (child.type === "share-link" && parent.type !== "share-buttons") {
+    return REASONS.shareOutsideButtons;
+  }
+  if (parent.type === "share-buttons" && child.type !== "share-link") {
+    return REASONS.onlyShareLinks;
+  }
   if (isFormNode(child) && inForm) return REASONS.nestedForm;
   if (isFormFieldType(child.type) && !inForm) return REASONS.fieldOutsideForm;
   return undefined;
@@ -232,6 +242,14 @@ const DROP_RULES: [breaks: (drop: Drop) => boolean, reason: string][] = [
       !nodeChildren(into.node).some((child) => child.id === node.id) &&
       nodeChildren(into.node).length >= MAX_PRICE_ITEMS,
     REASONS.tooManyPriceItems,
+  ],
+  // W-1047: a full Share buttons takes no new link; moving within it is fine.
+  [
+    ({ node, into }) =>
+      into.node.type === "share-buttons" &&
+      !nodeChildren(into.node).some((child) => child.id === node.id) &&
+      nodeChildren(into.node).length >= MAX_SHARE_LINKS,
+    REASONS.tooManyShareLinks,
   ],
   [({ node, into }) => into.depth + height(node) > MAX_DEPTH, REASONS.tooDeep],
   [

@@ -212,3 +212,25 @@ test("W-1046: a page with rotating headline words loads the headline script only
   expect(output.match(/<script/g)).toHaveLength(1);
   expect(output).toContain("EmVBHeadlineRuntime");
 });
+
+test("W-1047: Share buttons with the device's Share button load the share script only", async () => {
+  const container = await AstroContainer.create();
+  const layout = s1Page();
+  layout.root.children = [
+    {
+      id: "shar0001",
+      type: "share-buttons",
+      props: { nativeShare: true },
+      children: [{ id: "shl00001", type: "share-link", props: { network: "x" } }],
+    } as never,
+  ];
+  const { html, css, runtimes } = renderPage(layout, DESIGN, {
+    dynamic: { pageUrl: "https://example.com/" },
+  });
+  expect(runtimes).toEqual(["share"]);
+  const output = await container.renderToString(EmVBPage, {
+    props: { page: { html, css, runtimes } },
+  });
+  expect(output.match(/<script/g)).toHaveLength(1);
+  expect(output).toContain("EmVBShareRuntime");
+});

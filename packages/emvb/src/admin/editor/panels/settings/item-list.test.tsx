@@ -459,3 +459,25 @@ describe("Price list items (W-1043)", () => {
     expect((added?.props as { title?: string } | undefined)?.title).toBe("Espresso");
   });
 });
+
+describe("Share links (W-1047)", () => {
+  test("new Share buttons start with four links; the panel names each one", async () => {
+    const node = newElement("share-buttons");
+    if (!node || node.type !== "share-buttons") throw new Error("expected share buttons");
+    expect(kidsOf(node).map((c) => (c.props as { network?: string }).network)).toEqual([
+      "facebook",
+      "x",
+      "linkedin",
+      "email",
+    ]);
+    expect(validateLayout(layoutWith(node)).ok).toBe(true);
+    const calls = await panel(node);
+    await type(inputLabelled("Link 2 name"), "Post it on X");
+    expect((kidsOf(calls.changed.at(-1))[1]?.props as { label?: string } | undefined)?.label).toBe(
+      "Post it on X",
+    );
+    await act(async () => button("Add link").click());
+    const added = kidsOf(calls.changed.at(-1)).at(-1);
+    expect((added?.props as { network?: string } | undefined)?.network).toBe("whatsapp");
+  });
+});

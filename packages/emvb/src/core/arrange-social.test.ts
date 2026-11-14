@@ -5,6 +5,7 @@ import {
   MAX_CAROUSEL_SLIDES,
   MAX_GALLERY_IMAGES,
   MAX_PRICE_ITEMS,
+  MAX_SHARE_LINKS,
   MAX_SOCIAL_LINKS,
 } from "./limits.ts";
 import { nestingIssues } from "./nesting.ts";
@@ -112,5 +113,28 @@ describe("Price list arrange rules (W-1043)", () => {
       canDrop(layout, { kind: "new", node: defaultElement("heading", "head0001") }, "plst0001"),
     ).toEqual({ ok: false, reason: REASONS.onlyPriceItems });
     expect(moveNode(layout, "pi000000", "plst0001", MAX_PRICE_ITEMS).ok).toBe(true);
+  });
+});
+
+describe("Share buttons arrange rules (W-1047)", () => {
+  test("a full Share buttons refuses a 13th link; share links drop only into Share buttons", () => {
+    const shareLinks = Array.from({ length: MAX_SHARE_LINKS }, (_, i) =>
+      defaultElement("share-link", `sh${String(i).padStart(6, "0")}`),
+    );
+    const layout = layoutWith([
+      { ...defaultElement("share-buttons", "shar0001"), children: shareLinks },
+    ]);
+    const link = defaultElement("share-link", "new00001");
+    expect(canDrop(layout, { kind: "new", node: link }, "shar0001")).toEqual({
+      ok: false,
+      reason: REASONS.tooManyShareLinks,
+    });
+    expect(canDrop(layout, { kind: "new", node: link }, "root0001")).toEqual({
+      ok: false,
+      reason: REASONS.shareOutsideButtons,
+    });
+    expect(
+      canDrop(layout, { kind: "new", node: defaultElement("heading", "head0001") }, "shar0001"),
+    ).toEqual({ ok: false, reason: REASONS.onlyShareLinks });
   });
 });
