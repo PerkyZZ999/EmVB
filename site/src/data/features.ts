@@ -36,6 +36,12 @@ export const featureGroups: FeatureGroup[] = [
         title: "An icon library",
         body: "Over 14,000 icons from Lucide, Font Awesome Free, Tabler and Remix, or upload your own SVG.",
       },
+    ],
+  },
+  {
+    id: "widgets",
+    label: "Widgets and publishing",
+    items: [
       {
         title: "Common widgets",
         body: "Star rating, alert, icon and image boxes, testimonial, social icons, a gallery with a lightbox and a carousel, accessible and script-free unless you turn on an option that needs one.",
