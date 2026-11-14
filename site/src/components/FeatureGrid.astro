@@ -209,18 +209,13 @@ import SectionIntro from "./SectionIntro.astro";
   }
 
   /*
-   * Content has far more elements than the other groups, so it takes half the width (six tiles a
-   * row) and the other three share the other half: Layout and Dynamic side by side, Form under
-   * them, six tiles a row. Both halves end up about the same height.
+   * Content has far more elements than the other groups. Layout, Dynamic and Form sit side by side
+   * at two tiles a row, and Content beside them at six, so all four end about level.
    */
   .add-groups {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-template-areas:
-      "layout dynamic content content"
-      "form form content content";
-    /* Content's extra height goes to the second row, so Form sits right under Layout and Dynamic. */
-    grid-template-rows: auto 1fr;
+    grid-template-columns: 2fr 2fr 2fr 6fr;
+    grid-template-areas: "layout dynamic form content";
     align-items: start;
     gap: var(--space-6) var(--space-5);
   }
@@ -241,8 +236,11 @@ import SectionIntro from "./SectionIntro.astro";
     grid-area: content;
   }
 
-  .add-group.add-content ul,
-  .add-group.add-form ul {
+  .add-group ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .add-group.add-content ul {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
@@ -263,7 +261,6 @@ import SectionIntro from "./SectionIntro.astro";
 
   .add-group ul {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-2);
     margin: 0;
     padding: 0;
@@ -310,12 +307,10 @@ import SectionIntro from "./SectionIntro.astro";
 
   @media (max-width: 1100px) {
     .add-groups {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       grid-template-areas:
-        "layout dynamic"
-        "content content"
-        "form form";
-      grid-template-rows: auto;
+        "layout dynamic form"
+        "content content content";
     }
   }
 
@@ -341,8 +336,7 @@ import SectionIntro from "./SectionIntro.astro";
     }
 
     .add-group ul,
-    .add-group.add-content ul,
-    .add-group.add-form ul {
+    .add-group.add-content ul {
       grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
     }
 
