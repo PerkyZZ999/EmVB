@@ -209,13 +209,13 @@ import SectionIntro from "./SectionIntro.astro";
   }
 
   /*
-   * Content has far more elements than the other groups. Layout, Dynamic and Form sit side by side
-   * at two tiles a row, and Content beside them at six, so all four end about level.
+   * Content has far more elements than the other groups. It sits second at six tiles a row, and
+   * Layout, Dynamic and Form beside it at two, so all four end about level.
    */
   .add-groups {
     display: grid;
-    grid-template-columns: 2fr 2fr 2fr 6fr;
-    grid-template-areas: "layout dynamic form content";
+    grid-template-columns: 2fr 6fr 2fr 2fr;
+    grid-template-areas: "layout content dynamic form";
     align-items: start;
     gap: var(--space-6) var(--space-5);
   }
