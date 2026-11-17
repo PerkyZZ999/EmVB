@@ -49,3 +49,47 @@ describe("Search form (W-1073)", () => {
     expect(validateLayout(page({ placeholder: "Search" })).ok).toBe(true);
   });
 });
+
+describe("light and dark (W-1067)", () => {
+  const design = (dark?: string) => {
+    const d = emptyDesign();
+    d.variables.colors = [
+      { id: "bg", name: "Background", value: "#ffffff", ...(dark ? { dark } : {}) },
+    ];
+    return d;
+  };
+  const used = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      style: { backgroundColor: { var: "bg" } },
+      children: [],
+    },
+  } as Layout;
+
+  test("a colour's dark value applies with the system's dark setting or a dark choice", () => {
+    const { css } = renderPage(used, design("#0b1220"), { scope: "p" });
+    expect(css).toContain(
+      '@media (prefers-color-scheme: dark){:where(.emvb-s-p) .emvb-root:not(:is([data-emvb-theme="light"] *)){--emvb-c-bg:#0b1220;color-scheme:dark}}',
+    );
+    expect(css).toContain(
+      ':where(.emvb-s-p) .emvb-root:is([data-emvb-theme="dark"] *){--emvb-c-bg:#0b1220;color-scheme:dark}',
+    );
+    expect(renderPage(used, design(), { scope: "p" }).css.includes("prefers-color-scheme")).toBe(
+      false,
+    );
+  });
+
+  test("the Theme toggle is a toggle button that waits for its script", () => {
+    const toggle = page({}) as unknown as { root: { children: unknown[] } };
+    toggle.root.children = [{ id: "thme0001", type: "theme-toggle", props: {} }];
+    const { html, runtimes, css } = renderPage(toggle as unknown as Layout, emptyDesign());
+    expect(html).toContain(
+      '<button class="emvb-theme-toggle" type="button" aria-pressed="false" data-emvb-theme-toggle="">Dark mode</button>',
+    );
+    expect(runtimes).toEqual(["theme"]);
+    expect(css).toContain(".emvb-theme-toggle:not([data-emvb-ready]){display:none}");
+  });
+});

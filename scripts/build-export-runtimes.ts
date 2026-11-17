@@ -25,6 +25,7 @@ const RUNTIMES = {
   headline: ["widgets/headline.ts", "initHeadlines"],
   share: ["widgets/share.ts", "initShare"],
   sticky: ["widgets/sticky.ts", "initSticky"],
+  theme: ["widgets/theme.ts", "initTheme"],
 } as const;
 
 async function bundle(file: string, init: string): Promise<string> {

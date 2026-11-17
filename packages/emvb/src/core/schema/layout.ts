@@ -797,6 +797,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "hotspots",
   "hotspot",
   "search-form",
+  "theme-toggle",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -1404,6 +1405,18 @@ export const SearchFormNode = leafNode(
   }),
 );
 
+/**
+ * W-1067: a button that switches the site between light and dark (colour variables' dark
+ * values), remembered on the visitor's browser. It needs the opt-in theme runtime, so without it
+ * the button stays hidden. `label` is its text (unset "Dark mode"); it is a toggle (aria-pressed).
+ */
+export const ThemeToggleNode = leafNode(
+  "theme-toggle",
+  z.strictObject({
+    label: z.string().max(40).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1458,6 +1471,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   HotspotsNodeSchema,
   HotspotNode,
   SearchFormNode,
+  ThemeToggleNode,
   CounterNode,
   ProgressNode,
   CountdownNode,
@@ -1517,6 +1531,7 @@ export type HeadlineNode = z.infer<typeof HeadlineNode>;
 export type ShareLinkNode = z.infer<typeof ShareLinkNode>;
 export type HotspotNode = z.infer<typeof HotspotNode>;
 export type SearchFormNode = z.infer<typeof SearchFormNode>;
+export type ThemeToggleNode = z.infer<typeof ThemeToggleNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
@@ -1789,6 +1804,7 @@ export type LayoutNode =
   | HotspotsNode
   | HotspotNode
   | SearchFormNode
+  | ThemeToggleNode
   | SpacerNode
   | DividerNode
   | TextNode

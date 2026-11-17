@@ -134,10 +134,13 @@ export type WidgetRuntime =
   | "lightbox"
   | "map"
   | "share"
-  | "sticky";
+  | "sticky"
+  | "theme";
 
 /** The widget runtime one element needs, if any: only when it opts in. */
 export function nodeRuntime(node: LayoutNode): WidgetRuntime | undefined {
+  // W-1067: the Theme toggle is nothing without its script.
+  if (node.type === "theme-toggle") return "theme";
   if (node.type === "alert" && (node as AlertNode).props.dismissible) return "alerts";
   if (node.type === "gallery" && (node as GalleryNode).props.lightbox) return "lightbox";
   if (node.type === "counter" && (node as CounterNode).props.countUp) return "counter";

@@ -1,4 +1,4 @@
-import type { SearchFormNode } from "../schema/layout.ts";
+import type { SearchFormNode, ThemeToggleNode } from "../schema/layout.ts";
 import { sanitizeHref } from "../sanitize/href.ts";
 import type { ElementDefinition } from "./definition.ts";
 
@@ -71,4 +71,37 @@ export const searchForm: ElementDefinition<SearchFormNode> = {
       ],
     };
   },
+};
+
+export const themeToggle: ElementDefinition<ThemeToggleNode> = {
+  baseCss:
+    ".emvb-theme-toggle{display:inline-flex;align-items:center;gap:0.5em;padding:0.4em 0.9em;border:1px solid currentColor;border-radius:999px;background:none;color:inherit;font:inherit;cursor:pointer}.emvb-theme-toggle:not([data-emvb-ready]){display:none}.emvb-theme-toggle:focus-visible{outline:2px solid currentColor;outline-offset:2px}",
+  defaults: () => ({ type: "theme-toggle", props: {} }),
+  descriptor: {
+    type: "theme-toggle",
+    name: "Theme toggle",
+    group: "content",
+    defaultTab: "content",
+    fields: [
+      {
+        key: "label",
+        kind: "text",
+        label: "Text",
+        optional: true,
+        message:
+          "Leave it empty for Dark mode. Give colour variables a Dark mode value in Site styles.",
+      },
+    ],
+  },
+  build: (node, attrs) => ({
+    tag: "button",
+    attrs: {
+      ...attrs,
+      type: "button",
+      "aria-pressed": "false",
+      // The theme script marks it ready and so shows it: without the script, no dead button.
+      "data-emvb-theme-toggle": "",
+    },
+    children: [node.props.label?.trim() || "Dark mode"],
+  }),
 };

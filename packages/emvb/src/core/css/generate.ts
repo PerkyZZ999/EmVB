@@ -150,6 +150,25 @@ function declare<T extends { id: string }>(
   });
 }
 
+/**
+ * W-1067: colour variables' dark values. They apply when the visitor's system prefers dark and no
+ * Theme toggle chose light, and whenever it chose dark; the toggle marks `<html>` with
+ * `data-emvb-theme`. Written as `.emvb-root:is([…] *)` so the sheet's scope prefix still matches.
+ */
+function darkCss(colors: DesignSystem["variables"]["colors"]): string {
+  const dark = declare(
+    colors.filter((color) => color.dark !== undefined),
+    colorVariableName,
+    (color) => safe(color.dark ?? ""),
+  );
+  if (dark.length === 0) return "";
+  const declarations = [...dark, { property: "color-scheme", value: "dark" }];
+  return (
+    `@media (prefers-color-scheme: dark){${block('.emvb-root:not(:is([data-emvb-theme="light"] *))', declarations)}}` +
+    block('.emvb-root:is([data-emvb-theme="dark"] *)', declarations)
+  );
+}
+
 /** W-319: declarations that play scroll motion. */
 const usesMotion = (declarations: readonly Declaration[]) =>
   declarations.some((d) => d.property === "animation" && /\bemvb-m[otsrb]\b/.test(d.value));
@@ -378,6 +397,7 @@ export function generateCss({
     entrances.length > 0 && loops ? LOOP_KEYFRAMES : "",
     entrances.length > 0 && sticky ? STICKY_KEYFRAMES : "",
     block(".emvb-root", variables),
+    darkCss(colors),
     defaultsCss,
     backgroundVideo
       ? ".emvb-has-bg-video{position:relative;overflow:hidden}.emvb-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;pointer-events:none}.emvb-has-bg-video>:not(.emvb-bg-video){position:relative;z-index:1}" +

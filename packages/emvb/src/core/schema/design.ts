@@ -25,6 +25,11 @@ export const ColorVariable = z.strictObject({
   id: VariableId,
   name: z.string().min(1).max(60),
   value: z.string().regex(HEX_COLOR, "Use a hex color such as #1a2b3c"),
+  /**
+   * W-1067: the colour in dark mode: when the visitor's system prefers dark, unless a Theme
+   * toggle chose light; and whenever it chose dark. Unset keeps `value`.
+   */
+  dark: z.string().regex(HEX_COLOR, "Use a hex color such as #1a2b3c").optional(),
 });
 
 /** Font stack string — commas and quoted family names allowed; `generateCss` drops an unsafe one. */

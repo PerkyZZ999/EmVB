@@ -178,6 +178,17 @@ script, and it works before any script loads. In its settings you can change the
 button's text, the name screen readers hear (unset "Search") and the search page, such as
 `/fr/recherche` for a French page. Pair it with a **Search Results** template in Theme Builder.
 
+## Light and dark, and the Theme toggle
+
+In **Site styles → Colors**, open a colour and give it a **Dark mode** value. Visitors whose device
+is set to dark see those colours (and dark scrollbars and form controls); the others see the
+normal ones. Colours without a dark value stay the same in both.
+
+Add → Content → **Theme toggle** adds a "Dark mode" button (a toggle screen readers hear as on or
+off) that lets visitors choose for themselves; the choice is remembered in their browser. It needs
+a small script that loads only on pages with a toggle, so on a page without it no button shows.
+The first moment of a page load uses the device setting, then the stored choice applies.
+
 ## Scripts in theme parts
 
 A page built with `EmVBPage` mounts the scripts its own widgets need, with no change to your site.

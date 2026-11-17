@@ -220,6 +220,13 @@ exports[`VariableSection color: list, filter, rename, value, create: open 1`] = 
           "var("
           "--emvb-c-brand"
           ")"
+      div.emvb-site-item-body data-emvb-var-dark=""
+        div.emvb-site-value-row
+          label for="(generated)"
+            "Dark mode"
+          input.emvb-field.emvb-site-value-input aria-labelledby="(generated)" placeholder="Same as light" value=""
+        p.emvb-helper
+          "Used when the visitor's device is set to dark, or a Theme toggle chose dark."
     li.emvb-site-item data-emvb-var-id="ink"
       div.emvb-site-item-row
         button.emvb-site-item-main aria-expanded="false" type="button"
@@ -308,6 +315,13 @@ exports[`VariableSection color: list, filter, rename, value, create: create row 
           "var("
           "--emvb-c-brand"
           ")"
+      div.emvb-site-item-body data-emvb-var-dark=""
+        div.emvb-site-value-row
+          label for="(generated)"
+            "Dark mode"
+          input.emvb-field.emvb-site-value-input aria-labelledby="(generated)" placeholder="Same as light" value=""
+        p.emvb-helper
+          "Used when the visitor's device is set to dark, or a Theme toggle chose dark."
     li.emvb-site-item data-emvb-var-id="ink"
       div.emvb-site-item-row
         button.emvb-site-item-main aria-expanded="false" type="button"
@@ -731,6 +745,13 @@ exports[`VariableSection color: list, filter, rename, value, create: after 1`] =
           "var("
           "--emvb-c-brand"
           ")"
+      div.emvb-site-item-body data-emvb-var-dark=""
+        div.emvb-site-value-row
+          label for="(generated)"
+            "Dark mode"
+          input.emvb-field.emvb-site-value-input aria-labelledby="(generated)" placeholder="Same as light" value=""
+        p.emvb-helper
+          "Used when the visitor's device is set to dark, or a Theme toggle chose dark."
     li.emvb-site-item data-emvb-var-id="ink"
       div.emvb-site-item-row
         button.emvb-site-item-main aria-expanded="false" type="button"

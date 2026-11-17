@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Light and dark Site styles (W-1067).** A colour variable can have a Dark mode value. Visitors whose device prefers dark see those colours; the new **Theme toggle** element lets visitors choose light or dark and remembers it (a small script, only on pages with a toggle). Colours without a dark value stay the same.
 - **Off-canvas panels (W-1071).** A popup can show as a panel that slides in from the left or right edge and fills the screen's height (Triggers → Show as), narrow, medium or wide: for a mobile menu, filters or a cart, opened by a click trigger on a button. It keeps the popup's keyboard and screen reader behaviour.
 - **Sticky header effects (W-1070).** A sticky or fixed element gets **When the page scrolls** in Position: a background and shadow once the page has scrolled, smaller top and bottom padding so a header shrinks, and **Hide while scrolling down**, which slides it away while reading and back on scrolling up (never while keyboard focus is in it). The effects are CSS; hiding loads a small script only on pages that use it. Off for visitors who prefer reduced motion.
 - **Popups by address and date (W-1081).** A popup's Advanced settings can now limit it to page addresses with (or without) a query parameter, such as `?utm_source=newsletter`, and to a time window with **Show from** and **Show until**. The visitor's browser checks them, so cached pages stay right.

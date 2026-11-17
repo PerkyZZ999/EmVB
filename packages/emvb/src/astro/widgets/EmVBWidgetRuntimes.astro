@@ -12,6 +12,7 @@ import EmVBLightboxRuntime from "./EmVBLightboxRuntime.astro";
 import EmVBMapRuntime from "./EmVBMapRuntime.astro";
 import EmVBShareRuntime from "./EmVBShareRuntime.astro";
 import EmVBStickyRuntime from "./EmVBStickyRuntime.astro";
+import EmVBThemeRuntime from "./EmVBThemeRuntime.astro";
 
 interface Props {
   names?: readonly string[] | undefined;
@@ -29,3 +30,4 @@ const names = new Set(Astro.props.names ?? []);
 {names.has("headline") && <EmVBHeadlineRuntime />}
 {names.has("share") && <EmVBShareRuntime />}
 {names.has("sticky") && <EmVBStickyRuntime />}
+{names.has("theme") && <EmVBThemeRuntime />}

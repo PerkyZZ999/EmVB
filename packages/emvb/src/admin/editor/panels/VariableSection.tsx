@@ -217,6 +217,59 @@ function ValueEditor({
   );
 }
 
+/**
+ * W-1067: the colour in dark mode, under a colour variable's value. Empty: the same colour in
+ * both. Enter or blur saves a valid change once.
+ */
+function DarkValue({
+  value,
+  onCommit,
+}: {
+  value: string | undefined;
+  onCommit: (dark: string | undefined) => void;
+}) {
+  const [text, setText] = React.useState(value ?? "");
+  const [error, setError] = React.useState<string | null>(null);
+  const commit = (raw: string) => {
+    const trimmed = raw.trim();
+    if (trimmed === (value ?? "")) return setError(null);
+    if (trimmed === "") {
+      setError(null);
+      onCommit(undefined);
+      return;
+    }
+    const parsed = parseValue("color", trimmed);
+    if (!parsed.ok || typeof parsed.value !== "string") {
+      setError(parsed.ok ? "Use a hex color such as #1a2b3c." : parsed.error);
+      return;
+    }
+    setError(null);
+    onCommit(parsed.value);
+  };
+  return (
+    <div className="emvb-site-item-body" data-emvb-var-dark="">
+      <div className="emvb-site-value-row">
+        <Input
+          label="Dark mode"
+          className={`${FIELD} emvb-site-value-input`}
+          placeholder="Same as light"
+          value={text}
+          aria-invalid={error ? true : undefined}
+          onChange={(event) => setText(event.target.value)}
+          onBlur={(event) => commit(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if (isCommitEnter(event)) commit(event.currentTarget.value);
+          }}
+        />
+      </div>
+      {error ? <InlineError>{error}</InlineError> : null}
+      <p className="emvb-helper">
+        Used when the visitor's device is set to dark, or a Theme toggle chose dark.
+      </p>
+    </div>
+  );
+}
+
 /** "2 on page", and the classes that use it too: "2 on page · 1 class" (W-150). */
 const usageText = (onPage: number, inClasses: number) =>
   inClasses
@@ -275,6 +328,20 @@ export function VariableSection({
           // W-316: typing a fixed size ends a token's fluid sizing.
           const { fluid: _fluid, ...fixed } = entry as typeof entry & { fluid?: unknown };
           return Object.assign({}, fixed, { value: next });
+        }),
+      },
+    });
+
+  // W-1067: a colour's dark-mode value; undefined removes it.
+  const saveDark = (id: string, dark: string | undefined) =>
+    void onSave({
+      ...design,
+      variables: {
+        ...design.variables,
+        colors: design.variables.colors.map((entry) => {
+          if (entry.id !== id) return entry;
+          const { dark: _old, ...light } = entry;
+          return dark === undefined ? light : { ...light, dark };
         }),
       },
     });
@@ -501,13 +568,22 @@ export function VariableSection({
                 />
               </div>
               {isOpen && (
-                <ValueEditor
-                  key={text}
-                  kind={kind}
-                  item={item}
-                  token={token}
-                  onCommit={(next) => saveValue(item.id, next)}
-                />
+                <>
+                  <ValueEditor
+                    key={text}
+                    kind={kind}
+                    item={item}
+                    token={token}
+                    onCommit={(next) => saveValue(item.id, next)}
+                  />
+                  {kind === "color" && (
+                    <DarkValue
+                      key={`dark:${(item as { dark?: string }).dark ?? ""}`}
+                      value={(item as { dark?: string }).dark}
+                      onCommit={(dark) => saveDark(item.id, dark)}
+                    />
+                  )}
+                </>
               )}
             </li>
           );

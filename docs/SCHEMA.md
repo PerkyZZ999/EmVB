@@ -88,6 +88,9 @@ or `{ type: "none" }`. `effects` are the scroll-motion effects (`fade`, `move-x`
 transition easings; `alternate` (default true) plays back and forth; it stops after about 5 s
 unless `loop: true`. Normal-only, off for reduced motion. It has no 0.x key.
 
+Added in 1.4 (W-1067, additive, design): a colour variable may have `dark` (a hex): the colour
+when the visitor's system prefers dark and no Theme toggle chose light, and when one chose dark.
+
 Added in 1.4 (W-1070, additive): `motion.sticky` is `{ distance?, background?, shadow?, padding?,
 hide? }` (at least one of the last four) or `{ type: "none" }`. Over the page's first `distance` px
 (10–2000, unset 120) the element takes `background` (a colour), a `shadow` and `padding` (top and
@@ -167,6 +170,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `hotspots` | src, alt, decorative, mediaId, width, height, focalX, focalY, label |
 | `hotspot` | title, text, x, y, xTablet, yTablet, xMobile, yMobile |
 | `search-form` | action, label, placeholder, buttonText |
+| `theme-toggle` | label |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

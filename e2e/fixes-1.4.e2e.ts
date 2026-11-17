@@ -7,6 +7,7 @@ import {
   publishThemePart,
   setUpEmvbOnce,
 } from "./support/api.ts";
+import { loadDraft, publishStyles, removeColorsNamed, saveDesign } from "./support/design.ts";
 import { unique } from "./support/helpers.ts";
 
 // 1.4 fixes and hardening (PLAN_1.4 B and D), each on a published page in a real browser.
@@ -216,5 +217,55 @@ test("a popup shown as a panel from the right opens at that edge at full height 
     await expect(dialog).toBeHidden();
   } finally {
     await api(request, "DELETE", `/_emdash/api/content/emvb_theme_parts/${panelId}`);
+  }
+});
+
+test("a colour's dark value follows the system, and a Theme toggle switches and remembers (W-1067)", async ({
+  page,
+  request,
+}) => {
+  const tag = unique()
+    .replace(/[^a-z0-9]/g, "")
+    .slice(-8);
+  const name = `Dark test ${tag}`;
+  const id = `dark-${tag}`;
+  const draft = await loadDraft(request);
+  const colors = [
+    ...draft.design.variables.colors,
+    { id, name, value: "#ffffff", dark: "#0b1220" },
+  ];
+  await saveDesign(
+    request,
+    { ...draft.design, variables: { ...draft.design.variables, colors } },
+    draft.revision,
+  );
+  await publishStyles(request, draft.publishedRevision);
+  try {
+    const slug = `dark-${unique()}`;
+    const layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        style: { backgroundColor: { var: id } },
+        children: [{ id: "thme0001", type: "theme-toggle", props: {} }],
+      },
+    };
+    await publishPage(request, await createPage(request, "Dark", layout, slug));
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto(`/${slug}`);
+    const root = page.locator(".emvb-root").first();
+    const background = () => root.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(await background()).toBe("rgb(11, 18, 32)");
+    const toggle = page.getByRole("button", { name: "Dark mode" });
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await toggle.click();
+    await expect.poll(background).toBe("rgb(255, 255, 255)");
+    await expect(toggle).toHaveAttribute("aria-pressed", "false");
+    await page.reload();
+    await expect.poll(background).toBe("rgb(255, 255, 255)");
+  } finally {
+    await removeColorsNamed(request, name);
   }
 });

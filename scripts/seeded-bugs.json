@@ -51252,6 +51252,130 @@
         "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx"
       ],
       "expect": "\\(fail\\).*keep the panel"
+    },
+    {
+      "id": "W-1067/no-dark-css",
+      "requirement": "W-1067",
+      "description": "Colour variables' dark values are never written.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    darkCss(colors),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/site.test.ts"],
+      "expect": "\\(fail\\).*dark value applies"
+    },
+    {
+      "id": "W-1067/no-dark-css-e2e",
+      "requirement": "W-1067",
+      "description": "A published page ignores the dark values.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    darkCss(colors),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1067"],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1067/light-choice-ignored",
+      "requirement": "W-1067",
+      "description": "Choosing light can't override the system's dark setting.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "`@media (prefers-color-scheme: dark){${block('.emvb-root:not(:is([data-emvb-theme=\"light\"] *))', declarations)}}`",
+          "replace": "`@media (prefers-color-scheme: dark){${block(\".emvb-root\", declarations)}}`"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/site.test.ts"],
+      "expect": "\\(fail\\).*dark value applies"
+    },
+    {
+      "id": "W-1067/choice-forgotten",
+      "requirement": "W-1067",
+      "description": "A stored theme choice isn't applied on the next page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/theme.ts",
+          "search": "  if (choice) document.documentElement.dataset[\"emvbTheme\"] = choice;",
+          "replace": "  void choice;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/widgets/theme.test.ts"],
+      "expect": "\\(fail\\).*stored choice applies"
+    },
+    {
+      "id": "W-1067/always-dark",
+      "requirement": "W-1067",
+      "description": "The Theme toggle only ever turns dark on.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/theme.ts",
+          "search": "      const next = isDark() ? \"light\" : \"dark\";",
+          "replace": "      const next = \"dark\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/widgets/theme.test.ts"],
+      "expect": "\\(fail\\).*follows the system until the visitor chooses"
+    },
+    {
+      "id": "W-1067/dead-button",
+      "requirement": "W-1067",
+      "description": "The Theme toggle shows on pages without its script.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/site.ts",
+          "search": ".emvb-theme-toggle:not([data-emvb-ready]){display:none}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/site.test.ts"],
+      "expect": "\\(fail\\).*waits for its script"
+    },
+    {
+      "id": "W-1067/schema-refuses-dark",
+      "requirement": "W-1067",
+      "description": "The design refuses a colour's dark value.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/design.ts",
+          "search": "  dark: z.string().regex(HEX_COLOR, \"Use a hex color such as #1a2b3c\").optional(),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1067"],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1067/editor-drops-dark",
+      "requirement": "W-1067",
+      "description": "The Dark mode field saves nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/VariableSection.tsx",
+          "search": "          return dark === undefined ? light : { ...light, dark };",
+          "replace": "          return light;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/site-sections.test.tsx",
+        "-t",
+        "W-1067"
+      ],
+      "expect": "\\(fail\\).*W-1067"
     }
   ]
 }

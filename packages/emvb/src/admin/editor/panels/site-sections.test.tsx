@@ -202,6 +202,23 @@ describe("VariableSection", () => {
     });
   }
 
+  test("W-1067: an open colour takes a dark-mode value; empty removes it; a bad one says why", async () => {
+    await mountVars("color", "Colors");
+    await act(async () => varRow("brand")?.click());
+    const dark = () =>
+      host.querySelector<HTMLInputElement>("[data-emvb-var-dark] input") ?? undefined;
+    await type(dark(), "#0b1220");
+    await press(dark() ?? null, "Enter");
+    const last = () => (saved.at(-1) as DesignSystem | undefined)?.variables.colors[0];
+    expect(last()?.dark).toBe("#0b1220");
+    expect(last()?.value === design.variables.colors[0]?.value).toBe(true);
+    const before = saved.length;
+    await type(dark(), "dark blue");
+    await press(dark() ?? null, "Enter");
+    expect(saved.length).toBe(before);
+    expect(host.querySelector("[data-emvb-var-dark] [role=alert]") !== null).toBe(true);
+  });
+
   test("W-278: New and Rename refuse a name another variable of the kind has (any case)", async () => {
     await mountVars("color", "Colors");
     const nameError = () =>
