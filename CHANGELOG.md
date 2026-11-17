@@ -26,6 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Carousel autoplay (W-1058).** Hovering and keyboard focus now pause autoplay separately: moving the pointer away while focus is still in the carousel (or the reverse) no longer restarts it.
 - **Animated headline focus (W-1059).** When the rotation ends while its Pause button has focus, focus moves to what follows the heading instead of to the page.
 - **A Spacer in a row (W-1062).** A Spacer between items in a horizontal container added no gap, because it only had a height. It now makes a gap as wide as it is tall there; one you gave a width or flex basis keeps it.
+- **Headings in theme parts (W-1077).** A heading in a header or footer with a Table of contents could get the same anchor as a heading on the page, so the page's contents jumped to the header. Theme parts' anchors are now their own.
 - **A menu used twice (W-1078).** When the same menu was in the header and the footer, opening a dropdown in one closed the open one in the other. Each copy now opens on its own.
 - **Countdown end (W-1060).** The live countdown showed its ended text up to a second before the deadline; it now ends at the deadline.
 

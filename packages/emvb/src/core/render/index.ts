@@ -636,7 +636,9 @@ export function renderPage(
       node.htmlId && HTML_ID.test(node.htmlId) && !isShadowingId(node.htmlId)
         ? node.htmlId
         : node.type === "heading" && id && layoutHasToc
-          ? `emvb-h-${id}`
+          ? // W-1077: a theme part's anchors get its suffix, as its other generated ids do (W-527),
+            // so a header heading never takes the page's own heading's anchor.
+            `emvb-h-${id}${idSuffix}`
           : undefined;
     // W-649: a Loop renders its item design once per entry; an id repeated on the page is invalid
     // and every Table of contents link or label would point at the first copy only.

@@ -136,3 +136,25 @@ describe("headings inside a box hidden on every device stay out of the contents 
     expect(toc).toContain("Wide screens");
   });
 });
+
+test("a theme part's heading anchors carry its suffix, so they never repeat the page's (W-1077)", () => {
+  const withToc = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        { id: "toc00001", type: "toc", props: {} },
+        { id: "head0001", type: "heading", props: { text: "Intro", level: 2 } },
+      ],
+    },
+  } as unknown as Layout;
+  const page = renderPage(withToc, emptyDesign(), { scope: "page" }).html;
+  const part = renderPage(withToc, emptyDesign(), { scope: "header", partIds: true }).html;
+  expect(page).toContain('id="emvb-h-head0001"');
+  expect(page).toContain('href="#emvb-h-head0001"');
+  const anchor = /id="(emvb-h-head0001-t[^"]+)"/.exec(part)?.[1];
+  expect(anchor === undefined).toBe(false);
+  expect(part).toContain(`href="#${anchor}"`);
+});

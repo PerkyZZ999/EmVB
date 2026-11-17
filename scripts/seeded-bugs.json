@@ -50923,6 +50923,20 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts"],
       "expect": "\\(fail\\).*two markers with one title"
+    },
+    {
+      "id": "W-1077/part-anchor-unsuffixed",
+      "requirement": "W-1077",
+      "description": "A theme part's heading anchors repeat the page's.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "            `emvb-h-${id}${idSuffix}`",
+          "replace": "            `emvb-h-${id}`"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/render/toc.test.ts"],
+      "expect": "\\(fail\\).*heading anchors carry its suffix"
     }
   ]
 }
