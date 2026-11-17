@@ -70,4 +70,29 @@ describe("headline runtime (W-1046)", () => {
     expect(mark.hasAttribute("aria-hidden")).toBe(false);
     expect(document.querySelectorAll(".emvb-headline-pause").length).toBe(0);
   });
+
+  test("when the rotation ends with Pause focused, focus moves on instead of to the page (W-1059)", () => {
+    setup();
+    initHeadlines(document);
+    document.querySelector<HTMLButtonElement>(".emvb-headline-pause")?.focus();
+    tick();
+    tick();
+    tick();
+    expect(document.querySelectorAll(".emvb-headline-pause").length).toBe(0);
+    expect(document.activeElement?.id).toBe("next");
+  });
+
+  test("when the rotation ends with focus elsewhere, focus stays there (W-1059)", () => {
+    setup();
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      '<button type="button" id="other">Other</button>',
+    );
+    initHeadlines(document);
+    document.querySelector<HTMLButtonElement>("#other")?.focus();
+    tick();
+    tick();
+    tick();
+    expect(document.activeElement?.id).toBe("other");
+  });
 });

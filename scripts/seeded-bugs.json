@@ -10839,8 +10839,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "if (latest.current.version !== latest.current.savedVersion) {",
-          "replace": "if (true) {"
+          "search": "      if (version === savedVersion || justSaved) return rev;",
+          "replace": "      if (version !== version) return rev;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
@@ -10867,8 +10867,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "if (!rev) return false;",
-          "replace": ""
+          "search": "      return (await write(rev)) ?? false;",
+          "replace": "      return (await write(rev)) ?? rev;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
@@ -21366,8 +21366,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "    if (!pending) return start(latest.current.rev);",
-          "replace": "    if (pending || !pending) return start(latest.current.rev);"
+          "search": "    if (!tail.current) return serial(() => write(latest.current.rev));",
+          "replace": "    if (tail.current || !tail.current) return write(latest.current.rev);"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
@@ -21380,8 +21380,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "      return start(rev ?? latest.current.rev);",
-          "replace": "      return start(\"r1\");"
+          "search": "      return write(prev ?? latest.current.rev);",
+          "replace": "      return write(\"r1\");"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/use-save.test.tsx"],
@@ -39290,8 +39290,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "    inFlight.current = run;\n    await run;",
-          "replace": "    await run;"
+          "search": "    await serial(async () => {\n      try {\n        const stored",
+          "replace": "    await ((f: () => Promise<string | null>) => f())(async () => {\n      try {\n        const stored"
         }
       ],
       "command": [
@@ -48405,7 +48405,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/widgets/carousel.ts",
-          "search": "    if (!c.stopped && !c.held) go(c, c.index + 1, true);",
+          "search": "    if (!c.stopped && !c.hovered && !c.focused) go(c, c.index + 1, true);",
           "replace": "    if (!c.stopped) go(c, c.index + 1, true);"
         }
       ],
@@ -48719,8 +48719,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/useSave.ts",
-          "search": "      const rev = at ? await flush() : latest.current.rev;",
-          "replace": "      const rev = latest.current.rev;"
+          "search": "        const rev = at ? await settle(prev) : (prev ?? latest.current.rev);",
+          "replace": "        const rev = prev ?? latest.current.rev;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/admin/editor/use-save.test.tsx"],
@@ -49352,7 +49352,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/widgets/countdown.ts",
-          "search": "    else if (timer !== undefined) {\n      clearInterval(timer);\n      timer = undefined;\n    }\n",
+          "search": "    else halt();\n",
           "replace": ""
         }
       ],
@@ -49366,8 +49366,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/widgets/countdown.ts",
-          "search": "    if (left.total === 0) end();\n",
-          "replace": ""
+          "search": "  const end = () => {\n    halt();\n",
+          "replace": "  const end = () => {\n    halt();\n    return;\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/astro/widgets/countdown.test.ts"],
@@ -49895,8 +49895,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/widgets/headline.ts",
-          "search": "    if (step >= last) stop();\n",
-          "replace": ""
+          "search": "    if (step < last) return;\n",
+          "replace": "    if (step < Infinity) return;\n"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/astro/widgets/headline.test.ts"],
@@ -50329,6 +50329,293 @@
         "-g",
         "W-1049"
       ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1052/writes-race",
+      "requirement": "W-1052",
+      "description": "A save asked for during Publish runs alongside the publish instead of after it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "      const run = before ? before.then(step) : step(undefined);",
+          "replace": "      const run = step(undefined);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*waits for the publish, then saves"
+    },
+    {
+      "id": "W-1052/stale-saved-version",
+      "requirement": "W-1052",
+      "description": "Publish right after a save saves the same draft again from stale state.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useSave.ts",
+          "search": "      const justSaved = last !== null && last.rev === prev && last.version === version;",
+          "replace": "      const justSaved = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/use-save.test.tsx"],
+      "expect": "\\(fail\\).*publishes that save's revision"
+    },
+    {
+      "id": "W-1053/restore-any-deletion",
+      "requirement": "W-1053",
+      "description": "Restore brings back whichever deletion is last, not the one its toast named.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/store.ts",
+          "search": "      if (!removed || removed.node.id !== action.id || !state.page.layout) return state;",
+          "replace": "      if (!removed || !state.page.layout) return state;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/store.test.ts"],
+      "expect": "\\(fail\\).*Undo took back doesn't bring back"
+    },
+    {
+      "id": "W-1053/toast-outlives-undo",
+      "requirement": "W-1053",
+      "description": "The Restore toast stays after Undo brings the element back.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/useNodeActions.ts",
+          "search": "    toasts.close(open.toast);",
+          "replace": "    void open.toast;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/editing.test.tsx"],
+      "expect": "\\(fail\\).*its Restore toast goes away"
+    },
+    {
+      "id": "W-1054/hidden-radio-focus",
+      "requirement": "W-1054",
+      "description": "Dismissing an Alert focuses elements taken out of the Tab order.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/alerts.ts",
+          "search": "      el.tabIndex >= 0 &&\n      !el.closest(\"[hidden], [inert], [aria-hidden='true']\"),",
+          "replace": "      !el.closest(\"[hidden]\"),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/alerts.test.ts"],
+      "expect": "\\(fail\\).*not its hidden radio"
+    },
+    {
+      "id": "W-1054/hidden-radio-focus-e2e",
+      "requirement": "W-1054",
+      "description": "Dismissing an Alert before Tabs focuses the hidden radio on the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/alerts.ts",
+          "search": "      el.tabIndex >= 0 &&\n      !el.closest(\"[hidden], [inert], [aria-hidden='true']\"),",
+          "replace": "      !el.closest(\"[hidden]\"),"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1054"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1055/dots-built-once",
+      "requirement": "W-1055",
+      "description": "Carousel dots are never rebuilt after a resize.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "  if (typeof ResizeObserver === \"function\") new ResizeObserver(() => refresh(c)).observe(track);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/carousel.test.ts"],
+      "expect": "\\(fail\\).*a resize rebuilds the dots"
+    },
+    {
+      "id": "W-1055/dots-built-once-e2e",
+      "requirement": "W-1055",
+      "description": "Carousel dots stay as built at load on the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "  if (typeof ResizeObserver === \"function\") new ResizeObserver(() => refresh(c)).observe(track);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1055"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1056/phone-rule-loses",
+      "requirement": "W-1056",
+      "description": "The tablet carousel rule out-specifies the phone rule again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "@media (max-width:767px){.emvb-carousel:is(.emvb-carousel-per-2,.emvb-carousel-per-3,.emvb-carousel-per-4){--emvb-carousel-per:1}}",
+          "replace": "@media (max-width:767px){.emvb-carousel{--emvb-carousel-per:1}}"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/elements/widgets.test.ts"],
+      "expect": "\\(fail\\).*phones show one slide"
+    },
+    {
+      "id": "W-1056/phone-rule-loses-e2e",
+      "requirement": "W-1056",
+      "description": "Phones show two slides for a carousel set to 3 per view.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/widgets.ts",
+          "search": "@media (max-width:767px){.emvb-carousel:is(.emvb-carousel-per-2,.emvb-carousel-per-3,.emvb-carousel-per-4){--emvb-carousel-per:1}}",
+          "replace": "@media (max-width:767px){.emvb-carousel{--emvb-carousel-per:1}}"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1056"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1057/signed-scroll",
+      "requirement": "W-1057",
+      "description": "The carousel reads RTL's negative scroll position as is.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "  const at = Math.abs(c.track.scrollLeft);",
+          "replace": "  const at = c.track.scrollLeft;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/carousel.test.ts"],
+      "expect": "\\(fail\\).*in RTL the dot follows"
+    },
+    {
+      "id": "W-1057/gapless-index",
+      "requirement": "W-1057",
+      "description": "The carousel divides the scroll position by the slide width, ignoring gaps.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "    if (Math.abs(offset - at) < Math.abs((all[best] ?? 0) - at)) best = i;",
+          "replace": "    best = Math.round(at / (c.slides[0]?.offsetWidth || 1)) + 0 * offset + 0 * i + 0 * all.length;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/carousel.test.ts"],
+      "expect": "\\(fail\\).*gaps add up"
+    },
+    {
+      "id": "W-1057/signed-scroll-e2e",
+      "requirement": "W-1057",
+      "description": "The current dot is lost after scrolling an RTL carousel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "  const at = Math.abs(c.track.scrollLeft);",
+          "replace": "  const at = c.track.scrollLeft;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1057"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1058/one-hold",
+      "requirement": "W-1058",
+      "description": "The pointer leaving also releases the hold that focus put on autoplay.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "    c.hovered = false;",
+          "replace": "    c.hovered = false;\n    c.focused = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/carousel.test.ts"],
+      "expect": "\\(fail\\).*hold autoplay separately"
+    },
+    {
+      "id": "W-1058/one-hold-e2e",
+      "requirement": "W-1058",
+      "description": "Autoplay moves on while focus is still in the carousel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/carousel.ts",
+          "search": "    c.hovered = false;",
+          "replace": "    c.hovered = false;\n    c.focused = false;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1058"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1059/focus-dropped",
+      "requirement": "W-1059",
+      "description": "The headline's focused Pause button goes at the end of the rotation and focus with it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/headline.ts",
+          "search": "    if (focused) moveOn(next);",
+          "replace": "    void focused;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/headline.test.ts"],
+      "expect": "\\(fail\\).*focus moves on instead of to the page"
+    },
+    {
+      "id": "W-1059/focus-dropped-e2e",
+      "requirement": "W-1059",
+      "description": "Focus falls to the page when a headline's rotation ends.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/headline.ts",
+          "search": "    if (focused) moveOn(next);",
+          "replace": "    void focused;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1059"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1060/early-end",
+      "requirement": "W-1060",
+      "description": "The countdown ends once the whole seconds left round down to zero.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/countdown.ts",
+          "search": "    if (ms <= 0) end();",
+          "replace": "    if (left.total === 0) end();"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/widgets/countdown.test.ts"],
+      "expect": "\\(fail\\).*waits for the target itself"
+    },
+    {
+      "id": "W-1060/early-end-e2e",
+      "requirement": "W-1060",
+      "description": "The countdown on a page shows its ended text before the target.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/countdown.ts",
+          "search": "    if (ms <= 0) end();",
+          "replace": "    if (left.total === 0) end();"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1060"],
       "env": {
         "CI": "1"
       },

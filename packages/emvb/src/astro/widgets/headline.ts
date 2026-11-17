@@ -52,7 +52,12 @@ function start(mark: HTMLElement, r: Rotation): void {
   const timer = setInterval(() => {
     step++;
     text.textContent = r.words[step % r.words.length] ?? "";
-    if (step >= last) stop();
+    if (step < last) return;
+    // W-1059: the button goes away at the end; if it had focus, focus moves on as after Pause.
+    const focused = doc.activeElement === pause;
+    const next = pause.nextElementSibling;
+    stop();
+    if (focused) moveOn(next);
   }, r.interval * 1000);
 
   function stop(): void {
@@ -62,10 +67,8 @@ function start(mark: HTMLElement, r: Rotation): void {
     spoken.remove();
     pause.remove();
   }
-  // Pausing ends the rotation for good, back on the first word.
-  pause.addEventListener("click", () => {
-    const next = pause.nextElementSibling;
-    stop();
+  /** Focus after the removed button: the control that followed it, else the heading. */
+  function moveOn(next: Element | null): void {
     if (
       next instanceof HTMLElement &&
       next.matches("a[href], button, input, select, textarea, [tabindex]")
@@ -75,6 +78,12 @@ function start(mark: HTMLElement, r: Rotation): void {
       heading.tabIndex = -1;
       heading.focus();
     }
+  }
+  // Pausing ends the rotation for good, back on the first word.
+  pause.addEventListener("click", () => {
+    const next = pause.nextElementSibling;
+    stop();
+    moveOn(next);
   });
 }
 

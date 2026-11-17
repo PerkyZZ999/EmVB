@@ -6,6 +6,8 @@
  *   - autoplay (`data-emvb-autoplay="<seconds>"`) with a visible Pause/Play button placed before
  *     the slides, paused while the carousel is hovered or holds focus, and starting paused when
  *     the visitor prefers reduced motion (WCAG 2.2.2).
+ * The dots follow the track's size (W-1055): a resize, or a carousel shown from a hidden tab,
+ * rebuilds them for the start positions that view can reach.
  */
 
 type Carousel = {
@@ -16,12 +18,14 @@ type Carousel = {
   index: number;
   prev?: HTMLButtonElement;
   next?: HTMLButtonElement;
+  dotsBox?: HTMLElement;
   dots: HTMLButtonElement[];
   timer?: ReturnType<typeof setInterval>;
   /** The visitor pressed Pause (or reduced motion started it paused). */
   stopped: boolean;
-  /** Hovered or focused: paused for now. */
-  held: boolean;
+  /** Hovered or holding focus: paused for now, until both have ended (W-1058). */
+  hovered: boolean;
+  focused: boolean;
 };
 
 function button(label: string, text: string, className = ""): HTMLButtonElement {
@@ -51,6 +55,45 @@ function update(c: Carousel): void {
     if (i === c.index) dot.setAttribute("aria-current", "true");
     else dot.removeAttribute("aria-current");
   });
+}
+
+/** How far each slide starts from the first, in scroll pixels (positive in RTL too). */
+const offsets = (c: Carousel): number[] => {
+  const origin = c.slides[0]?.offsetLeft ?? 0;
+  return c.slides.map((slide) => Math.abs(slide.offsetLeft - origin));
+};
+
+/** The slide the track is scrolled to: the nearest real offset, so gaps and RTL count (W-1057). */
+function scrolledIndex(c: Carousel): number {
+  const at = Math.abs(c.track.scrollLeft);
+  let best = 0;
+  offsets(c).forEach((offset, i, all) => {
+    if (Math.abs(offset - at) < Math.abs((all[best] ?? 0) - at)) best = i;
+  });
+  return Math.min(best, lastStart(c));
+}
+
+/** One dot per start position the current view can reach; rebuilt when that number changes. */
+function renderDots(c: Carousel): void {
+  if (!c.dotsBox) return;
+  const count = lastStart(c) + 1;
+  if (c.dots.length === count) return;
+  const focusedAt = c.dots.findIndex((dot) => dot === document.activeElement);
+  c.dots = [];
+  for (let i = 0; i < count; i++) {
+    const dot = button(`Go to slide ${i + 1}`, "");
+    dot.addEventListener("click", () => go(c, i, false));
+    c.dots.push(dot);
+  }
+  c.dotsBox.replaceChildren(...c.dots);
+  if (focusedAt >= 0) c.dots[Math.min(focusedAt, count - 1)]?.focus();
+}
+
+/** Re-reads the layout after a resize or once a hidden carousel can be measured. */
+function refresh(c: Carousel): void {
+  renderDots(c);
+  c.index = scrolledIndex(c);
+  update(c);
 }
 
 /** Shows slide `index` (wrapped when looping or playing, else kept in range). */
@@ -83,7 +126,8 @@ function setup(root: HTMLElement): void {
     index: 0,
     dots: [],
     stopped: false,
-    held: false,
+    hovered: false,
+    focused: false,
   };
   if (c.slides.length < 2) return;
   const controls = document.createElement("div");
@@ -95,15 +139,10 @@ function setup(root: HTMLElement): void {
     c.next.addEventListener("click", () => go(c, c.index + 1));
   }
   if (root.hasAttribute("data-emvb-dots")) {
-    const dots = document.createElement("div");
-    dots.className = "emvb-carousel-dots";
-    for (let i = 0; i <= lastStart(c); i++) {
-      const dot = button(`Go to slide ${i + 1}`, "");
-      dot.addEventListener("click", () => go(c, i, false));
-      c.dots.push(dot);
-      dots.append(dot);
-    }
-    controls.append(...present([c.prev, dots, c.next]));
+    c.dotsBox = document.createElement("div");
+    c.dotsBox.className = "emvb-carousel-dots";
+    renderDots(c);
+    controls.append(...present([c.prev, c.dotsBox, c.next]));
   } else {
     controls.append(...present([c.prev, c.next]));
   }
@@ -115,13 +154,12 @@ function setup(root: HTMLElement): void {
   track.addEventListener("scroll", () => {
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => {
-      const first = c.slides[0];
-      const step = first?.offsetWidth ?? 0;
-      if (step <= 0) return;
-      c.index = Math.min(Math.round(track.scrollLeft / step), lastStart(c));
+      if ((c.slides[0]?.offsetWidth ?? 0) <= 0) return;
+      c.index = scrolledIndex(c);
       update(c);
     });
   });
+  if (typeof ResizeObserver === "function") new ResizeObserver(() => refresh(c)).observe(track);
   update(c);
 }
 
@@ -134,7 +172,7 @@ function autoplay(c: Carousel, seconds: number): void {
     toggle.setAttribute("aria-label", c.stopped ? "Play slides" : "Pause slides");
   };
   const tick = () => {
-    if (!c.stopped && !c.held) go(c, c.index + 1, true);
+    if (!c.stopped && !c.hovered && !c.focused) go(c, c.index + 1, true);
   };
   toggle.addEventListener("click", () => {
     c.stopped = !c.stopped;
@@ -146,14 +184,17 @@ function autoplay(c: Carousel, seconds: number): void {
   bar.className = "emvb-carousel-controls emvb-carousel-autoplay";
   bar.append(toggle);
   c.track.before(bar);
-  const hold = (held: boolean) => () => {
-    c.held = held;
-  };
-  c.root.addEventListener("pointerenter", hold(true));
-  c.root.addEventListener("pointerleave", hold(false));
-  c.root.addEventListener("focusin", hold(true));
+  c.root.addEventListener("pointerenter", () => {
+    c.hovered = true;
+  });
+  c.root.addEventListener("pointerleave", () => {
+    c.hovered = false;
+  });
+  c.root.addEventListener("focusin", () => {
+    c.focused = true;
+  });
   c.root.addEventListener("focusout", (event) => {
-    if (!c.root.contains(event.relatedTarget as Node | null)) c.held = false;
+    if (!c.root.contains(event.relatedTarget as Node | null)) c.focused = false;
   });
   c.timer = setInterval(tick, seconds * 1000);
 }

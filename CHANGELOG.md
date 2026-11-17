@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- **Publishing while a save is running no longer reports a conflict with yourself (W-1052).** Pressing Ctrl+S (or Undo then Ctrl+S) while Publish was still saving your changes could make Publish fail with "This page was changed somewhere else". The editor now sends its own saves, publishes and schedules one at a time, each with the revision the one before it left.
+- **Restore after Undo (W-1053).** After deleting two elements and pressing Undo, the second deletion's Restore button could bring back the first element. A deletion's toast now closes once Undo brings its element back, and Restore only ever restores its own deletion.
+- **Alert dismissal before Tabs (W-1054).** Closing a dismissible Alert right before Tabs moved keyboard focus to the hidden radio behind the tabs; it now goes to the selected tab.
+- **Carousel controls follow the layout (W-1055, W-1057).** The slide buttons (dots) are rebuilt when the carousel is resized or first shown from a hidden tab, so there is one per reachable position. The current dot follows scrolling in right-to-left pages and on long carousels with gaps.
+- **Carousels on phones (W-1056).** A carousel set to show 3 or 4 slides showed 2 on phones; phones now show one slide for every setting.
+- **Carousel autoplay (W-1058).** Hovering and keyboard focus now pause autoplay separately: moving the pointer away while focus is still in the carousel (or the reverse) no longer restarts it.
+- **Animated headline focus (W-1059).** When the rotation ends while its Pause button has focus, focus moves to what follows the heading instead of to the page.
+- **Countdown end (W-1060).** The live countdown showed its ended text up to a second before the deadline; it now ends at the deadline.
+
 ## [1.3.0] - 2026-11-14
 
 The marketing widgets and the second part of the Elementor import. Everything is additive: new element types only, so pages saved by 1.2 open and save unchanged (layout schema 18, design schema 17), and an older EmVB keeps the new elements on save without showing them. Public pages still load no script unless an element opts in, and moving widgets respect reduced motion and can be paused. It installs on stock EmDash 1.4 with no change to your site and is tested on EmDash 1.4 and 1.5. If you already mount `<EmVBWidgetRuntimes names={theme.runtimes} />` for theme parts, the new widgets' scripts come through it too.

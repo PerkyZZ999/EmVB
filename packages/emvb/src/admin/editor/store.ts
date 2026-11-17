@@ -54,7 +54,8 @@ export type EditorAction =
   | { type: "select"; id: string | null }
   | { type: "update-node"; id: string; update: (node: LayoutNode) => LayoutNode }
   | { type: "delete-node"; id: string }
-  | { type: "restore" }
+  /** Restores the deletion of `id`, only while it is still the last one (W-1053). */
+  | { type: "restore"; id: string }
   | { type: "add-root-container" }
   | { type: "add-node"; node: LayoutNode; parentId: string; index: number }
   | { type: "move-node"; id: string; parentId: string; index: number }
@@ -205,7 +206,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     }
     case "restore": {
       const removed = state.lastDeleted;
-      if (!removed || !state.page.layout) return state;
+      // W-1053: a Restore left over from a deletion that Undo already took back does nothing.
+      if (!removed || removed.node.id !== action.id || !state.page.layout) return state;
       const layout = insertNode(state.page.layout, removed.parentId, removed.index, removed.node);
       return withLayout(state, layout, removed.node.id, null);
     }

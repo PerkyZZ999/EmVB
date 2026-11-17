@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { s1Page } from "../../../test/fixtures/layouts.ts";
 import { emptyDesign, findNode, isContainerNode, type LayoutNode } from "../../core/index.ts";
-import { editorReducer, isDirty, type EditorState } from "./store.ts";
+import { editorReducer, emptyHistory, historyReducer, isDirty, type EditorState } from "./store.ts";
 
 const initial = (): EditorState => {
   const layout = s1Page();
@@ -49,7 +49,7 @@ describe("editor store (A-07)", () => {
     state = editorReducer(state, { type: "delete-node", id: "head0001" });
     expect(state.selectedId).toBe("head0002");
     expect(state.page.layout?.root.children.map((c) => c.id)).toEqual(["head0002"]);
-    state = editorReducer(state, { type: "restore" });
+    state = editorReducer(state, { type: "restore", id: "head0001" });
     expect(state.page.layout).toEqual(initial().page.layout);
     expect(state.selectedId).toBe("head0001");
     expect(state.lastDeleted).toBeNull();
@@ -58,9 +58,21 @@ describe("editor store (A-07)", () => {
   test("only the most recent delete can be restored", () => {
     let state = editorReducer(initial(), { type: "delete-node", id: "head0001" });
     state = editorReducer(state, { type: "delete-node", id: "head0002" });
-    state = editorReducer(state, { type: "restore" });
+    expect(editorReducer(state, { type: "restore", id: "head0001" })).toBe(state);
+    state = editorReducer(state, { type: "restore", id: "head0002" });
     expect(state.page.layout?.root.children.map((c) => c.id)).toEqual(["head0002"]);
-    expect(editorReducer(state, { type: "restore" })).toBe(state);
+    expect(editorReducer(state, { type: "restore", id: "head0002" })).toBe(state);
+  });
+
+  test("a Restore for a deletion that Undo took back doesn't bring back the one before (W-1053)", () => {
+    let history = emptyHistory(initial());
+    history = historyReducer(history, { type: "delete-node", id: "head0001" });
+    history = historyReducer(history, { type: "delete-node", id: "head0002" });
+    history = historyReducer(history, { type: "undo" });
+    const ids = (h: typeof history) => h.present.page.layout?.root.children.map((c) => c.id);
+    expect(ids(history)).toEqual(["head0002"]);
+    history = historyReducer(history, { type: "restore", id: "head0002" });
+    expect(ids(history)).toEqual(["head0002"]);
   });
 
   test("the root can't be deleted", () => {

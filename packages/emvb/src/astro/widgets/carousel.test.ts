@@ -108,4 +108,111 @@ describe("carousel runtime (W-1018)", () => {
     ticks[0]?.();
     expect(current()).toBe(0);
   });
+
+  test("pointer and focus hold autoplay separately: releasing one keeps it held (W-1058)", () => {
+    const root = fixture('data-emvb-autoplay="3" data-emvb-dots');
+    const track = root.querySelector<HTMLElement>(".emvb-carousel-track");
+    root.dispatchEvent(new Event("pointerenter"));
+    track?.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    root.dispatchEvent(new Event("pointerleave"));
+    ticks[0]?.();
+    expect(current()).toBe(0);
+    root.dispatchEvent(new Event("pointerenter"));
+    track?.dispatchEvent(new FocusEvent("focusout", { bubbles: true, relatedTarget: null }));
+    ticks[0]?.();
+    expect(current()).toBe(0);
+    root.dispatchEvent(new Event("pointerleave"));
+    ticks[0]?.();
+    expect(current()).toBe(1);
+  });
+});
+
+// A fake layout: `width` px track, slides `slide` px wide with `gap` px between, RTL negative.
+function measured(count: number, options: { width: number; slide: number; gap: number }) {
+  const slides = Array.from(
+    { length: count },
+    (_, i) => `<div role="group" aria-label="${i + 1} of ${count}">${i}</div>`,
+  ).join("");
+  document.body.innerHTML = `
+    <section class="emvb-carousel" aria-label="Stories" data-emvb-dots data-emvb-arrows>
+      <div class="emvb-carousel-track" tabindex="0">${slides}</div>
+    </section>`;
+  const root = document.querySelector<HTMLElement>("section") as HTMLElement;
+  const track = root.querySelector<HTMLElement>(".emvb-carousel-track") as HTMLElement;
+  const layout = { ...options, rtl: false, scroll: 0 };
+  Object.defineProperty(track, "clientWidth", { get: () => layout.width });
+  Object.defineProperty(track, "scrollLeft", { get: () => layout.scroll });
+  [...track.children].forEach((el, i) => {
+    Object.defineProperty(el, "offsetWidth", { get: () => layout.slide });
+    Object.defineProperty(el, "offsetLeft", {
+      get: () => (layout.rtl ? -1 : 1) * i * (layout.slide + layout.gap),
+    });
+  });
+  return { root, track, layout };
+}
+
+describe("carousel runtime follows the real layout", () => {
+  let resized: (() => void)[] = [];
+  const realObserver = globalThis.ResizeObserver;
+  beforeEach(() => {
+    resized = [];
+    globalThis.ResizeObserver = class {
+      constructor(callback: () => void) {
+        resized.push(callback);
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as never;
+    spyOn(globalThis, "requestAnimationFrame").mockImplementation(((fn: () => void) => {
+      fn();
+      return 1;
+    }) as never);
+  });
+  afterEach(() => {
+    globalThis.ResizeObserver = realObserver;
+  });
+  const dots = () => document.querySelectorAll(".emvb-carousel-dots button").length;
+
+  test("a resize rebuilds the dots for the start positions the new width can reach (W-1055)", () => {
+    const { track, layout } = measured(5, { width: 1384, slide: 450, gap: 16 });
+    initCarousels(document);
+    expect(dots()).toBe(3);
+    named("Next slide")?.click();
+    Object.assign(layout, { width: 884, slide: 434, scroll: 450 });
+    resized.forEach((fn) => fn());
+    expect(dots()).toBe(4);
+    expect(current()).toBe(1);
+    expect(named("Next slide")?.disabled).toBe(false);
+    expect(track.isConnected).toBe(true);
+  });
+
+  test("a carousel set up hidden gets its dots once it can be measured (W-1055)", () => {
+    const { layout } = measured(5, { width: 0, slide: 0, gap: 16 });
+    initCarousels(document);
+    expect(dots()).toBe(5);
+    Object.assign(layout, { width: 1384, slide: 450 });
+    resized.forEach((fn) => fn());
+    expect(dots()).toBe(3);
+    named("Go to slide 3")?.click();
+    expect(named("Next slide")?.disabled).toBe(true);
+  });
+
+  test("in RTL the dot follows the negative scroll position (W-1057)", () => {
+    const { track, layout } = measured(5, { width: 1385, slide: 1385, gap: 16 });
+    layout.rtl = true;
+    initCarousels(document);
+    layout.scroll = -1401;
+    track.dispatchEvent(new Event("scroll"));
+    expect(current()).toBe(1);
+    expect(named("Previous slide")?.disabled).toBe(false);
+  });
+
+  test("gaps add up: slide 12 of 14 marks dot 12, not 13 (W-1057)", () => {
+    const { track, layout } = measured(14, { width: 300, slide: 300, gap: 16 });
+    initCarousels(document);
+    layout.scroll = 11 * 316;
+    track.dispatchEvent(new Event("scroll"));
+    expect(current()).toBe(11);
+  });
 });

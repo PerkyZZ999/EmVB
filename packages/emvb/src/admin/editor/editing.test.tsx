@@ -333,6 +333,27 @@ describe("delete and restore (D-025)", () => {
     expect(editor()?.querySelector('[data-emvb-panel="element"]') !== null).toBe(true);
   });
 
+  test("after Undo takes back a deletion, its Restore toast goes away (W-1053)", async () => {
+    const two = s1Page();
+    two.root.children = [heading("head0001", "One", 2), heading("head0002", "Two", 2)];
+    const { fetcher } = fakeServer({ layout: two });
+    await render(fetcher);
+    await openLayers();
+    const rowWith = (text: string) =>
+      [...document.querySelectorAll<HTMLButtonElement>(".emvb-layer-select")].find((row) =>
+        row.textContent?.includes(text),
+      );
+    await click(rowWith("One"));
+    await press("Delete");
+    await click(rowWith("Two"));
+    await press("Delete");
+    expect(document.body.textContent).toContain("Heading deleted");
+    await click(button("Undo"));
+    expect(Boolean(rowWith("Two"))).toBe(true);
+    expect(button("Restore")?.outerHTML).toBeUndefined();
+    expect(rowWith("One")?.outerHTML).toBeUndefined();
+  });
+
   test("Delete in a text field edits the text, not the page", async () => {
     const { fetcher } = fakeServer();
     await render(fetcher);

@@ -109,6 +109,8 @@ export function useSave(
   const [slugError, setSlugError] = React.useState<string | null>(null);
   const [rejection, setRejection] = React.useState<string | null>(null);
 
+  // The last write's revision and version, known before the re-render puts them in `state`.
+  const savedNow = React.useRef<{ rev: string; version: number } | null>(null);
   const write = React.useCallback(
     async (rev: string | null): Promise<string | null> => {
       const current = latest.current;
@@ -150,6 +152,7 @@ export function useSave(
               )
             : await savePage(fetcher, current.id, current.page, rev);
         dispatch({ type: "saved", rev: next, version: current.version });
+        savedNow.current = { rev: next, version: current.version };
         setStatus({ kind: "saved" });
         return next;
       } catch (error) {
@@ -165,41 +168,47 @@ export function useSave(
     [fetcher, dispatch, collection],
   );
 
-  // W-199: one save at a time. A save asked for while one is in flight (Ctrl+S, autosave) runs once
-  // after it, with the revision that save returned, instead of racing it with a stale `_rev`
-  // and reporting a conflict with itself.
-  const inFlight = React.useRef<Promise<string | null> | null>(null);
+  // W-199, W-836, W-1052: the editor's own writes (save, overwrite, publish, schedule) run one at
+  // a time, each with the revision the write before it left, so none races another with a stale
+  // `_rev` and reports a conflict with itself. A save asked for while one waits joins that one.
+  const tail = React.useRef<Promise<string | null> | null>(null);
   const queued = React.useRef<Promise<string | null> | null>(null);
-  const start = React.useCallback(
-    (rev: string | null): Promise<string | null> => {
-      const run = write(rev).finally(() => {
-        if (inFlight.current === run) inFlight.current = null;
-      });
-      inFlight.current = run;
+  /**
+   * Runs `step` after every write already asked for. `prev` is the revision that write left, null
+   * when its save failed, or undefined when nothing ran before. The step resolves to the
+   * revision it leaves (null when its save failed).
+   */
+  const serial = React.useCallback(
+    (step: (prev: string | null | undefined) => Promise<string | null>): Promise<string | null> => {
+      const before = tail.current;
+      const run = before ? before.then(step) : step(undefined);
+      // A step that throws by mistake still lets the writes after it run.
+      const link: Promise<string | null> = run
+        .catch(() => null)
+        .finally(() => {
+          if (tail.current === link) tail.current = null;
+        });
+      tail.current = link;
       return run;
     },
-    [write],
+    [],
   );
   const save = React.useCallback((): Promise<string | null> => {
     if (queued.current) return queued.current;
-    const pending = inFlight.current;
-    if (!pending) return start(latest.current.rev);
-    // The state may not have re-rendered yet, so take the new revision from the save itself.
-    const after = pending.then((rev) => {
+    if (!tail.current) return serial(() => write(latest.current.rev));
+    // The state may not have re-rendered yet, so take the new revision from the write before.
+    const after = serial((prev) => {
       queued.current = null;
-      return start(rev ?? latest.current.rev);
+      return write(prev ?? latest.current.rev);
     });
     queued.current = after;
     return after;
-  }, [start]);
+  }, [serial, write]);
 
   /** Conflict → Overwrite: take the stored revision and save over it. */
-  // W-836: the overwrite counts as the save in flight, so a save asked for meanwhile (Save draft,
-  // Ctrl+S, autosave) waits for it and uses its new revision instead of the stale one, which
-  // reopened the conflict right after a successful overwrite.
   const overwrite = React.useCallback(async () => {
     setConflict(false);
-    const run: Promise<string | null> = (async () => {
+    await serial(async () => {
       try {
         const stored = await loadEntry(fetcher, latest.current.id, collection);
         return await write(stored.rev);
@@ -207,47 +216,46 @@ export function useSave(
         setStatus({ kind: "error", message: OFFLINE, retry: true });
         return null;
       }
-    })().finally(() => {
-      if (inFlight.current === run) inFlight.current = null;
     });
-    inFlight.current = run;
-    await run;
-  }, [fetcher, write, collection]);
+  }, [fetcher, serial, write, collection]);
 
-  /** The revision to publish or schedule: after the running save, and with unsaved edits saved. */
-  const flush = React.useCallback(async (): Promise<string | null | false> => {
-    let rev: string | null = latest.current.rev;
-    const pending = queued.current ?? inFlight.current;
-    if (pending) {
-      // W-199: publish the revision the running save makes, never race it.
-      const saved = await pending;
-      if (!saved) return false;
-      rev = saved;
-    }
-    if (latest.current.version !== latest.current.savedVersion) {
-      rev = await start(rev);
-      if (!rev) return false;
-    }
-    return rev;
-  }, [start]);
+  /** Inside a step: the revision to publish or schedule, with unsaved edits saved first. */
+  const settle = React.useCallback(
+    async (prev: string | null | undefined): Promise<string | null | false> => {
+      // W-199: the save before this one failed, so its edits aren't stored; don't publish.
+      if (prev === null) return false;
+      const rev = prev ?? latest.current.rev;
+      const { version, savedVersion } = latest.current;
+      const last = savedNow.current;
+      const justSaved = last !== null && last.rev === prev && last.version === version;
+      if (version === savedVersion || justSaved) return rev;
+      return (await write(rev)) ?? false;
+    },
+    [write],
+  );
 
   const publish = React.useCallback(async (): Promise<boolean> => {
-    const rev = await flush();
-    if (rev === false) return false;
-    try {
-      const result =
-        collection === THEME_PARTS_COLLECTION
-          ? await publishThemePart(fetcher, latest.current.id, rev)
-          : await publishPage(fetcher, latest.current.id, rev);
-      dispatch({ type: "published", rev: result.rev });
-      setStatus({ kind: "saved" });
-      return true;
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 409) setConflict(true);
-      setStatus({ kind: "error", message: publishFailureMessage(error), retry: false });
-      return false;
-    }
-  }, [fetcher, dispatch, flush, collection]);
+    let published = false;
+    await serial(async (prev) => {
+      const rev = await settle(prev);
+      if (rev === false) return null;
+      try {
+        const result =
+          collection === THEME_PARTS_COLLECTION
+            ? await publishThemePart(fetcher, latest.current.id, rev)
+            : await publishPage(fetcher, latest.current.id, rev);
+        dispatch({ type: "published", rev: result.rev });
+        setStatus({ kind: "saved" });
+        published = true;
+        return result.rev;
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 409) setConflict(true);
+        setStatus({ kind: "error", message: publishFailureMessage(error), retry: false });
+        return rev;
+      }
+    });
+    return published;
+  }, [fetcher, dispatch, serial, settle, collection]);
 
   /**
    * W-1027: has EmDash publish the saved draft at `at` (unsaved edits are saved first), or with
@@ -255,34 +263,42 @@ export function useSave(
    */
   const schedule = React.useCallback(
     async (at: Date | null): Promise<string | null> => {
-      const rev = at ? await flush() : latest.current.rev;
-      if (rev === false) return "Your changes couldn't be saved, so nothing was scheduled.";
-      try {
-        const result = await scheduleEntry(
-          fetcher,
-          `/_emdash/api/content/${collection}`,
-          latest.current.id,
-          at,
-          rev,
-        );
-        dispatch({
-          type: "scheduled",
-          rev: result.rev,
-          status: result.status,
-          at: result.scheduledAt,
-        });
-        setStatus({ kind: "saved" });
-        return null;
-      } catch (error) {
-        if (error instanceof ApiError && error.status === 409) {
-          setConflict(true);
-          return "This page was changed somewhere else. Reload or overwrite it, then schedule again.";
+      let message: string | null = null;
+      await serial(async (prev) => {
+        const rev = at ? await settle(prev) : (prev ?? latest.current.rev);
+        if (rev === false) {
+          message = "Your changes couldn't be saved, so nothing was scheduled.";
+          return null;
         }
-        if (error instanceof ApiError && error.status === 400) return error.message;
-        return publishFailureMessage(error);
-      }
+        try {
+          const result = await scheduleEntry(
+            fetcher,
+            `/_emdash/api/content/${collection}`,
+            latest.current.id,
+            at,
+            rev,
+          );
+          dispatch({
+            type: "scheduled",
+            rev: result.rev,
+            status: result.status,
+            at: result.scheduledAt,
+          });
+          setStatus({ kind: "saved" });
+          return result.rev;
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 409) {
+            setConflict(true);
+            message =
+              "This page was changed somewhere else. Reload or overwrite it, then schedule again.";
+          } else if (error instanceof ApiError && error.status === 400) message = error.message;
+          else message = publishFailureMessage(error);
+          return rev;
+        }
+      });
+      return message;
     },
-    [fetcher, dispatch, flush, collection],
+    [fetcher, dispatch, serial, settle, collection],
   );
 
   return {

@@ -49,4 +49,25 @@ describe("alerts runtime (W-1025)", () => {
     expect(clicks).toBe(1);
     expect(document.querySelector<HTMLElement>(".emvb-alert")?.hidden).toBe(true);
   });
+
+  test("before enhanced Tabs, focus goes to the selected tab, not its hidden radio (W-1054)", () => {
+    document.body.innerHTML = `
+      <div class="emvb-alert" role="note">
+        <p>Saved.</p>
+        <button type="button" data-emvb-alert-dismiss aria-label="Dismiss"></button>
+      </div>
+      <div class="emvb-tabs">
+        <input type="radio" class="emvb-tab-input" tabindex="-1" aria-hidden="true" checked>
+        <input type="radio" class="emvb-tab-input" tabindex="-1" aria-hidden="true">
+        <div class="emvb-tab-list" role="tablist">
+          <label role="tab" id="first" tabindex="0" aria-selected="true">One</label>
+          <label role="tab" id="second" tabindex="-1">Two</label>
+        </div>
+      </div>`;
+    initAlerts(document);
+    const button = document.querySelector<HTMLButtonElement>("[data-emvb-alert-dismiss]");
+    button?.focus();
+    button?.click();
+    expect(document.activeElement?.id).toBe("first");
+  });
 });

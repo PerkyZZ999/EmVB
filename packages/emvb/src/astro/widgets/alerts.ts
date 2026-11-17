@@ -7,10 +7,17 @@
 const FOCUSABLE =
   "a[href], button:not([disabled]), input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1']), summary, iframe";
 
-/** The first focusable element after `from` in the document, else the last one before it. */
+/**
+ * The first element after `from` that Tab reaches, else the last one before it. Elements taken out
+ * of the Tab order (`tabindex="-1"`, such as the radios behind enhanced Tabs) or hidden from
+ * assistive tech don't count (W-1054).
+ */
 function neighbour(from: Element): HTMLElement | null {
   const all = [...from.ownerDocument.querySelectorAll<HTMLElement>(FOCUSABLE)].filter(
-    (el) => !from.contains(el) && !el.closest("[hidden]"),
+    (el) =>
+      !from.contains(el) &&
+      el.tabIndex >= 0 &&
+      !el.closest("[hidden], [inert], [aria-hidden='true']"),
   );
   const after = all.find(
     (el) => from.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING,

@@ -84,6 +84,15 @@ export function useNodeActions({
     count: number;
   } | null>(null);
   const lastToast = React.useRef<string | null>(null);
+  // W-1053: once Undo brings the deleted element back, its toast has nothing left to restore.
+  const restoreToast = React.useRef<{ toast: string; node: string } | null>(null);
+  const pageLayout = state.page.layout;
+  React.useEffect(() => {
+    const open = restoreToast.current;
+    if (!open || !pageLayout || !findNode(pageLayout, open.node)) return;
+    toasts.close(open.toast);
+    restoreToast.current = null;
+  }, [pageLayout, toasts]);
 
   const canDelete = (id: string) => !!state.page.layout && state.page.layout.root.id !== id;
   const canMove = canDelete;
@@ -107,7 +116,7 @@ export function useNodeActions({
           children: "Restore",
           variant: "secondary",
           onClick: () => {
-            dispatch({ type: "restore" });
+            dispatch({ type: "restore", id });
             toasts.close(toastId);
             // The toast is closing with focus in it; the restored element's row takes it.
             keepFocusInLayers(true);
@@ -116,6 +125,7 @@ export function useNodeActions({
       ],
     });
     lastToast.current = toastId;
+    restoreToast.current = { toast: toastId, node: id };
   };
 
   const remove = (id: string) => {

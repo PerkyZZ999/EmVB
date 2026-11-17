@@ -26,10 +26,16 @@ function start(root: HTMLElement, target: number): void {
     nums.set(el.dataset["unit"] ?? "", el);
   const pause = root.querySelector<HTMLButtonElement>(".emvb-countdown-pause");
   let timer: ReturnType<typeof setInterval> | undefined;
+  let finish: ReturnType<typeof setTimeout> | undefined;
+  const halt = () => {
+    if (timer !== undefined) clearInterval(timer);
+    if (finish !== undefined) clearTimeout(finish);
+    timer = undefined;
+    finish = undefined;
+  };
 
   const end = () => {
-    if (timer !== undefined) clearInterval(timer);
-    timer = undefined;
+    halt();
     if (root.dataset["expired"] === "hide") {
       root.hidden = true;
       return;
@@ -48,7 +54,15 @@ function start(root: HTMLElement, target: number): void {
       const el = nums.get(unit);
       if (el) el.textContent = pad(shown[unit]);
     }
-    if (left.total === 0) end();
+    // W-1060: time is up only when the clock reaches the target, not when the whole seconds
+    // left round down to zero; the last part-second gets its own timer so the end isn't late.
+    const ms = target - Date.now();
+    if (ms <= 0) end();
+    else if (ms < 1000 && finish === undefined)
+      finish = setTimeout(() => {
+        finish = undefined;
+        tick();
+      }, ms);
   };
 
   const run = () => {
@@ -61,10 +75,7 @@ function start(root: HTMLElement, target: number): void {
     const paused = pause.getAttribute("aria-pressed") === "true";
     pause.setAttribute("aria-pressed", String(!paused));
     if (paused) run();
-    else if (timer !== undefined) {
-      clearInterval(timer);
-      timer = undefined;
-    }
+    else halt();
   });
   run();
 }

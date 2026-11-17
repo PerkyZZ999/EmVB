@@ -335,3 +335,58 @@ describe("schedule (W-1027)", () => {
     expect(h.hook.conflict).toBe(true);
   });
 });
+
+describe("the editor's own writes never conflict with each other (W-1052)", () => {
+  /** A server that checks `_rev` like EmDash: a write with an old revision gets 409. */
+  function revisioned(gateFirst: Promise<void>) {
+    let rev = 1;
+    let first = true;
+    const log: string[] = [];
+    const fetcher: Fetcher = async (path, init) => {
+      const method = init?.method ?? "GET";
+      const sent = (JSON.parse(String(init?.body)) as Record<string, unknown>)["_rev"];
+      if (first) {
+        first = false;
+        await gateFirst;
+      }
+      const kind = `${method} ${path.endsWith("/publish") ? "publish" : "draft"} ${String(sent)}`;
+      if (sent !== `r${rev}`) {
+        log.push(`${kind} → 409`);
+        return Response.json({ error: { code: "CONFLICT", message: "x" } }, { status: 409 });
+      }
+      rev += 1;
+      log.push(`${kind} → r${rev}`);
+      return Response.json({ data: { _rev: `r${rev}`, item: { slug: "site-header" } } });
+    };
+    return { fetcher, log };
+  }
+
+  test("a save asked for while Publish saves its draft waits for the publish, then saves", async () => {
+    const gate = Promise.withResolvers<void>();
+    const { fetcher, log } = revisioned(gate.promise);
+    await start(fetcher, state());
+    const [published, saved] = await run(async () => {
+      const publishing = hook().publish();
+      const saving = hook().save();
+      gate.resolve();
+      return Promise.all([publishing, saving]);
+    });
+    expect(log).toEqual(["PUT draft r1 → r2", "POST publish r2 → r3", "PUT draft r3 → r4"]);
+    expect([published, saved, live.hook?.conflict]).toEqual([true, "r4", false]);
+  });
+
+  test("Publish asked for while a save runs publishes that save's revision", async () => {
+    const gate = Promise.withResolvers<void>();
+    const { fetcher, log } = revisioned(gate.promise);
+    await start(fetcher, state());
+    const published = await run(async () => {
+      const saving = hook().save();
+      const publishing = hook().publish();
+      gate.resolve();
+      await saving;
+      return publishing;
+    });
+    expect(log).toEqual(["PUT draft r1 → r2", "POST publish r2 → r3"]);
+    expect([published, live.state?.rev]).toEqual([true, "r3"]);
+  });
+});

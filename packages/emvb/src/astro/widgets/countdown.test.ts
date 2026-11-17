@@ -123,4 +123,38 @@ describe("countdown runtime (W-1040)", () => {
     pause.click();
     expect(pause.getAttribute("aria-pressed")).toBe("true");
   });
+
+  test("the ended text waits for the target itself, not the last whole second (W-1060)", () => {
+    const intervals: (() => void)[] = [];
+    const timeouts: { fn: () => void; ms: number }[] = [];
+    const real = {
+      setInterval: globalThis.setInterval,
+      clearInterval: globalThis.clearInterval,
+      setTimeout: globalThis.setTimeout,
+      clearTimeout: globalThis.clearTimeout,
+    };
+    globalThis.setInterval = ((fn: () => void) =>
+      intervals.push(fn)) as unknown as typeof setInterval;
+    globalThis.clearInterval = (() => undefined) as unknown as typeof clearInterval;
+    globalThis.setTimeout = ((fn: () => void, ms: number) =>
+      timeouts.push({ fn, ms })) as unknown as typeof setTimeout;
+    globalThis.clearTimeout = (() => undefined) as unknown as typeof clearTimeout;
+    const shown = (root: HTMLElement) =>
+      root.querySelector(".emvb-countdown-expired")?.hasAttribute("data-emvb-shown") === true;
+    try {
+      at("2026-12-01T08:59:59.700Z");
+      const root = fixture();
+      initCountdowns(document);
+      expect(shown(root)).toBe(false);
+      expect(timeouts.map((t) => t.ms)).toEqual([300]);
+      at("2026-12-01T08:59:59.900Z");
+      intervals[0]?.();
+      expect(shown(root)).toBe(false);
+      at("2026-12-01T09:00:00Z");
+      timeouts[0]?.fn();
+      expect(shown(root)).toBe(true);
+    } finally {
+      Object.assign(globalThis, real);
+    }
+  });
 });

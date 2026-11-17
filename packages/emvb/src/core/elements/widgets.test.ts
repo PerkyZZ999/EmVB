@@ -496,6 +496,20 @@ describe("Carousel (W-1018)", () => {
     expect(page(carouselNode({ perView: 5 }, [])).ok).toBe(false);
   });
 
+  test("phones show one slide for every setting: the phone rule is as specific as the tablet one (W-1056)", () => {
+    const result = page(carouselNode({ perView: 3 }, [slideNode("slid0001")]));
+    if (!result.ok) throw new Error(JSON.stringify(result.issues));
+    const { css } = renderPage(result.layout, emptyDesign());
+    const tablet = css.indexOf(
+      "@media (max-width:1024px){.emvb-carousel:is(.emvb-carousel-per-3,.emvb-carousel-per-4){--emvb-carousel-per:2}}",
+    );
+    const phone = css.indexOf(
+      "@media (max-width:767px){.emvb-carousel:is(.emvb-carousel-per-2,.emvb-carousel-per-3,.emvb-carousel-per-4){--emvb-carousel-per:1}}",
+    );
+    expect(tablet).toBeGreaterThan(-1);
+    expect(phone).toBeGreaterThan(tablet);
+  });
+
   test("a carousel holds only slides; a slide lives only in a carousel and holds anything", () => {
     const list = carouselNode({}, []) as unknown as LayoutNode;
     const slide = slideNode("slid0001") as unknown as LayoutNode;
