@@ -87,9 +87,61 @@ describe("popup triggers editor (W-087)", () => {
   test("the copy speaks to people, not to the roadmap", async () => {
     await show(doc([{ type: "page_load" }]));
     const text = document.body.textContent ?? "";
-    expect(text).toContain("Limit how often the popup shows, and on which devices.");
+    expect(text).toContain(
+      "Limit how often the popup shows, on which devices, on which addresses and when.",
+    );
     expect(text).toContain("All devices when none are checked.");
     expect(text).not.toContain("MVP");
     expect(text).not.toContain("localStorage");
+  });
+});
+
+describe("popup address rules and show dates (W-1081)", () => {
+  const type = async (
+    el: HTMLInputElement | HTMLTextAreaElement | null | undefined,
+    value: string,
+  ) => {
+    expect(Boolean(el)).toBe(true);
+    await act(async () => {
+      const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement : HTMLInputElement;
+      Object.getOwnPropertyDescriptor(proto.prototype, "value")?.set?.call(el, value);
+      el?.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      el?.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+      el?.dispatchEvent(new FocusEvent("blur"));
+    });
+  };
+  const rules = () => document.querySelector<HTMLTextAreaElement>("[data-emvb-url-rules] textarea");
+  const dateField = (label: string) => {
+    const el = [...document.querySelectorAll("label")].find((l) => l.textContent?.trim() === label);
+    const id = el?.getAttribute("for");
+    return id ? document.querySelector<HTMLInputElement>(`[id="${id}"]`) : null;
+  };
+
+  test("rules typed one per line are saved; a line that isn't a rule says why and saves nothing", async () => {
+    await show(doc([{ type: "page_load" }]));
+    await type(rules(), "utm_source=news\n!preview");
+    expect(sent.at(-1)?.advanced).toEqual({
+      urlParams: [
+        { name: "utm_source", value: "news" },
+        { name: "preview", absent: true },
+      ],
+    });
+    const before = sent.length;
+    await type(rules(), "not a rule");
+    expect(sent.length).toBe(before);
+    expect(document.querySelector("[data-emvb-url-rules] [role='alert']")?.textContent).toContain(
+      "isn't a rule",
+    );
+  });
+
+  test("a start date with its offset is saved; a day that doesn't exist isn't", async () => {
+    await show(doc([{ type: "page_load" }]));
+    await type(dateField("Show from"), "2026-12-01T09:00-05:00");
+    expect(sent.at(-1)?.advanced).toEqual({ from: "2026-12-01T09:00-05:00" });
+    const before = sent.length;
+    await type(dateField("Show until"), "2026-02-30T09:00Z");
+    expect(sent.length).toBe(before);
   });
 });

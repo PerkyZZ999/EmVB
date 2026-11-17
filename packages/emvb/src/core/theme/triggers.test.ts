@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { deviceForWidth, matchesPopupDevices, withinShowTimes } from "./popup-rules.ts";
+import {
+  deviceForWidth,
+  matchesPopupDevices,
+  matchesUrlParams,
+  withinShowDates,
+  withinShowTimes,
+} from "./popup-rules.ts";
 import { defaultTriggers, isSafeClickSelector, validateTriggers } from "./triggers.ts";
 
 describe("validateTriggers", () => {
@@ -111,5 +117,58 @@ describe("device and show-times helpers", () => {
     expect(withinShowTimes({}, 99)).toBe(true);
     expect(withinShowTimes({ showTimes: 1 }, 0)).toBe(true);
     expect(withinShowTimes({ showTimes: 1 }, 1)).toBe(false);
+  });
+});
+
+describe("URL rules and show dates (W-1081)", () => {
+  const withAdvanced = (advanced: unknown) =>
+    validateTriggers({ schemaVersion: 1, open: [{ type: "page_load" }], advanced });
+
+  test("rules on the page address and a start and end are accepted", () => {
+    expect(
+      withAdvanced({
+        urlParams: [
+          { name: "utm_source", value: "newsletter" },
+          { name: "coupon" },
+          { name: "preview", absent: true },
+        ],
+        from: "2026-12-01T09:00-05:00",
+        until: "2026-12-24T00:00Z",
+      }).ok,
+    ).toBe(true);
+  });
+
+  test("bad names, too many rules, bad dates and an end before the start are refused", () => {
+    expect(withAdvanced({ urlParams: [{ name: "a b" }] }).ok).toBe(false);
+    expect(withAdvanced({ urlParams: Array.from({ length: 6 }, () => ({ name: "x" })) }).ok).toBe(
+      false,
+    );
+    expect(withAdvanced({ from: "2026-12-01" }).ok).toBe(false);
+    expect(withAdvanced({ from: "2026-02-30T09:00Z" }).ok).toBe(false);
+    expect(withAdvanced({ from: "2026-12-02T00:00Z", until: "2026-12-01T00:00Z" }).ok).toBe(false);
+  });
+
+  test("every rule must hold; a value, any value, or not there", () => {
+    const rules = {
+      urlParams: [
+        { name: "utm_source", value: "news" },
+        { name: "x", absent: true as const },
+      ],
+    };
+    expect(matchesUrlParams(rules, "?utm_source=news")).toBe(true);
+    expect(matchesUrlParams(rules, "?utm_source=news&x=1")).toBe(false);
+    expect(matchesUrlParams(rules, "?utm_source=ads")).toBe(false);
+    expect(matchesUrlParams({ urlParams: [{ name: "coupon" }] }, "?coupon=")).toBe(true);
+    expect(matchesUrlParams({ urlParams: [{ name: "coupon" }] }, "")).toBe(false);
+    expect(matchesUrlParams({ urlParams: null }, "")).toBe(true);
+    expect(matchesUrlParams(undefined, "?a=1")).toBe(true);
+  });
+
+  test("shown from the start up to the end, not at it", () => {
+    const dates = { from: "2026-12-01T00:00Z", until: "2026-12-02T00:00Z" };
+    expect(withinShowDates(dates, Date.parse("2026-11-30T23:59:59Z"))).toBe(false);
+    expect(withinShowDates(dates, Date.parse("2026-12-01T00:00Z"))).toBe(true);
+    expect(withinShowDates(dates, Date.parse("2026-12-02T00:00Z"))).toBe(false);
+    expect(withinShowDates({ until: null }, 0)).toBe(true);
   });
 });

@@ -1,14 +1,20 @@
 import { boundedArray } from "../bounded-array.ts";
 import { z } from "zod";
 import { parseDoc } from "./parse-doc.ts";
-import { POPUP_DEVICES, TRIGGER_LIMITS } from "./popup-rules.ts";
+import { COUNTDOWN_TARGET } from "../schema/layout.ts";
+import {
+  MAX_URL_PARAM_RULES,
+  POPUP_DEVICES,
+  TRIGGER_LIMITS,
+  URL_PARAM_NAME,
+} from "./popup-rules.ts";
 
 export const TRIGGERS_SCHEMA_VERSION = 1;
 export const MAX_POPUP_TRIGGERS = 8;
 const MAX_CLICK_SELECTOR_LENGTH = TRIGGER_LIMITS.maxClickSelectorLength;
 const MAX_SHOW_TIMES = 100;
 
-/** Open triggers (Elementor-inspired). URL rules / scheduling / A/B deferred (W-081). */
+/** Open triggers (Elementor-inspired). A/B stays deferred (W-081). */
 const PageLoadTrigger = z.strictObject({ type: z.literal("page_load") });
 const DelayTrigger = z.strictObject({
   type: z.literal("delay"),
@@ -45,10 +51,48 @@ const DeviceSchema = z.enum(POPUP_DEVICES);
  * Advanced rules — MVP-thin (D-TB-11).
  * `showTimes` null = unlimited; `devices` null/empty = all devices.
  */
-const AdvancedRulesSchema = z.strictObject({
-  showTimes: z.number().int().min(1).max(MAX_SHOW_TIMES).nullable().optional(),
-  devices: boundedArray(DeviceSchema, 3).nullable().optional(),
+/**
+ * W-1081: one rule on the page address's query. With `value`, the parameter has that value;
+ * without, it is there at all. `absent` turns the rule round: the parameter (or that value) isn't.
+ */
+const UrlParamRuleSchema = z.strictObject({
+  name: z.string().regex(URL_PARAM_NAME, "Use letters, digits, - _ . [ or ] (up to 64)"),
+  value: z.string().max(200).optional(),
+  absent: z.literal(true).optional(),
 });
+
+/** W-1081: a date and time with its UTC offset, as for a Countdown. */
+const ShowDate = z
+  .string()
+  .regex(COUNTDOWN_TARGET, "Use a date, time and UTC offset such as 2026-12-01T09:00-05:00")
+  .refine(onTheCalendar, "This date doesn't exist");
+
+/**
+ * W-1081: the day exists in its month. `Date.parse` rolls 30 February over to 2 March in Bun and
+ * Node, so it can't tell. (A Countdown's target keeps its looser check: tightening it would
+ * refuse pages saved by 1.3, D-065.)
+ */
+function onTheCalendar(value: string): boolean {
+  const match = COUNTDOWN_TARGET.exec(value);
+  if (!match) return false;
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  return day <= new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+const AdvancedRulesSchema = z
+  .strictObject({
+    showTimes: z.number().int().min(1).max(MAX_SHOW_TIMES).nullable().optional(),
+    devices: boundedArray(DeviceSchema, 3).nullable().optional(),
+    urlParams: boundedArray(UrlParamRuleSchema, MAX_URL_PARAM_RULES).nullable().optional(),
+    /** W-1081: shown from this moment on. */
+    from: ShowDate.nullable().optional(),
+    /** W-1081: no longer shown from this moment. */
+    until: ShowDate.nullable().optional(),
+  })
+  .refine((a) => !a.from || !a.until || Date.parse(a.until) > Date.parse(a.from), {
+    message: "The end must come after the start.",
+    path: ["until"],
+  });
 
 export type PopupAdvancedRules = z.infer<typeof AdvancedRulesSchema>;
 

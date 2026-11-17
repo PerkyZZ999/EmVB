@@ -6,10 +6,13 @@ import {
   MAX_POPUP_TRIGGERS,
   type PopupOpenTrigger,
   type TriggersDoc,
+  type UrlParamRule,
+  validateTriggers,
 } from "../../../core/index.ts";
 import { BUTTON, FIELD } from "../../ui.ts";
 import { TriggerSettings } from "./TriggerSettings.tsx";
 import { isCommitEnter } from "../ime.ts";
+import { formatUrlRules, parseUrlRules } from "./url-rules.ts";
 
 type Props = {
   triggers: TriggersDoc | undefined;
@@ -77,9 +80,106 @@ function ShowTimesField({
   );
 }
 
+/** W-1081: a show-from or show-until moment, typed as a Countdown's target; empty clears it. */
+function ShowDateField({
+  label,
+  value,
+  onCommit,
+}: {
+  label: string;
+  value: string | null;
+  onCommit: (value: string | null) => void;
+}) {
+  const [draft, setDraft] = React.useState(value ?? "");
+  const [error, setError] = React.useState<string | null>(null);
+  const commit = () => {
+    const raw = draft.trim();
+    if (raw === "") {
+      setError(null);
+      if (value !== null) onCommit(null);
+      return;
+    }
+    if (
+      !validateTriggers({
+        schemaVersion: 1,
+        open: [{ type: "page_load" }],
+        advanced: { from: raw },
+      }).ok
+    ) {
+      setError("Use a date, time and UTC offset such as 2026-12-01T09:00-05:00.");
+      return;
+    }
+    setError(null);
+    if (raw !== value) onCommit(raw);
+  };
+  return (
+    <Input
+      label={label}
+      className={FIELD}
+      placeholder="2026-12-01T09:00-05:00"
+      value={draft}
+      {...(error ? { error } : {})}
+      onChange={(event) => setDraft(event.currentTarget.value)}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (isCommitEnter(event)) commit();
+      }}
+    />
+  );
+}
+
+/** W-1081: the URL rules, one per line, committed on blur when every line reads. */
+function UrlRulesField({
+  value,
+  onCommit,
+}: {
+  value: UrlParamRule[] | null;
+  onCommit: (rules: UrlParamRule[] | null) => void;
+}) {
+  const id = React.useId();
+  const [draft, setDraft] = React.useState(formatUrlRules(value));
+  const [error, setError] = React.useState<string | null>(null);
+  const commit = () => {
+    const parsed = parseUrlRules(draft);
+    if (!parsed.ok) {
+      setError(parsed.message);
+      return;
+    }
+    setError(null);
+    const next = parsed.rules.length > 0 ? parsed.rules : null;
+    if (formatUrlRules(next) !== formatUrlRules(value)) onCommit(next);
+  };
+  return (
+    <div className="emvb-field-group" data-emvb-url-rules="">
+      <label className="emvb-field-label" htmlFor={id}>
+        Only when the page address has
+      </label>
+      <textarea
+        id={id}
+        className={`${FIELD} emvb-textarea`}
+        rows={3}
+        value={draft}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={`${id}-hint${error ? ` ${id}-error` : ""}`}
+        onChange={(event) => setDraft(event.currentTarget.value)}
+        onBlur={commit}
+      />
+      <p className="emvb-helper" id={`${id}-hint`}>
+        One rule per line: utm_source=newsletter (that value), coupon (any value), or !preview (not
+        there). Every rule must hold. Empty: every address.
+      </p>
+      {error && (
+        <p className="emvb-inline-error" role="alert" id={`${id}-error`}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /**
- * Popup open triggers + thin advanced rules (S7b / W-081).
- * Gaps vs Elementor (deferred): URL rules, scheduling, A/B.
+ * Popup open triggers + advanced rules (S7b / W-081): how often, devices, the page address and
+ * show dates (W-1081). Gap vs Elementor (deferred): A/B.
  */
 export function TriggersEditor({ triggers, onChange }: Props) {
   const doc = triggers ?? defaultTriggers();
@@ -166,7 +266,9 @@ export function TriggersEditor({ triggers, onChange }: Props) {
       )}
 
       <h3 className="emvb-section-label">Advanced</h3>
-      <p className="emvb-helper">Limit how often the popup shows, and on which devices.</p>
+      <p className="emvb-helper">
+        Limit how often the popup shows, on which devices, on which addresses and when.
+      </p>
       <ShowTimesField
         key={String(advanced.showTimes ?? "")}
         value={advanced.showTimes ?? null}
@@ -210,6 +312,29 @@ export function TriggersEditor({ triggers, onChange }: Props) {
           );
         })}
       </fieldset>
+      <UrlRulesField
+        key={formatUrlRules(advanced.urlParams)}
+        value={advanced.urlParams ?? null}
+        onCommit={(urlParams) =>
+          onChange({ schemaVersion: 1, open: doc.open, advanced: { ...advanced, urlParams } })
+        }
+      />
+      <ShowDateField
+        key={`from:${advanced.from ?? ""}`}
+        label="Show from"
+        value={advanced.from ?? null}
+        onCommit={(from) =>
+          onChange({ schemaVersion: 1, open: doc.open, advanced: { ...advanced, from } })
+        }
+      />
+      <ShowDateField
+        key={`until:${advanced.until ?? ""}`}
+        label="Show until"
+        value={advanced.until ?? null}
+        onCommit={(until) =>
+          onChange({ schemaVersion: 1, open: doc.open, advanced: { ...advanced, until } })
+        }
+      />
     </div>
   );
 }

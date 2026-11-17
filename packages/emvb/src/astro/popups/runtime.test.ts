@@ -128,6 +128,28 @@ describe("public popup runtime (S7b, W-081)", () => {
     expect(popup("free", doc([{ type: "page_load" }], { showTimes: null })).hidden).toBe(false);
   });
 
+  test("W-1081: URL rules and show dates decide whether it opens, a click included", () => {
+    const opens = (advanced: unknown, trigger: unknown = { type: "page_load" }) => {
+      document.body.innerHTML = "";
+      return !popup("rules", doc([trigger], advanced)).hidden;
+    };
+    window.history.replaceState(null, "", "?utm_source=news");
+    expect(opens({ urlParams: [{ name: "utm_source", value: "news" }] })).toBe(true);
+    expect(opens({ urlParams: [{ name: "utm_source", value: "ads" }] })).toBe(false);
+    expect(opens({ urlParams: [{ name: "utm_source", absent: true }] })).toBe(false);
+    window.history.replaceState(null, "", window.location.pathname);
+    const soon = new Date(Date.now() + 3_600_000).toISOString().slice(0, 16) + "Z";
+    const past = new Date(Date.now() - 3_600_000).toISOString().slice(0, 16) + "Z";
+    expect(opens({ from: soon })).toBe(false);
+    expect(opens({ until: past })).toBe(false);
+    expect(opens({ from: past, until: soon })).toBe(true);
+    // A click can't open a popup outside its dates.
+    document.body.innerHTML = '<button class="go">Go</button>';
+    const root = popup("clicked", doc([{ type: "click", selector: ".go" }], { from: soon }));
+    document.querySelector<HTMLButtonElement>(".go")?.click();
+    expect(root.hidden).toBe(true);
+  });
+
   test("W-846: a click opens a popup past its show limit and isn't counted", () => {
     localStorage.setItem("emvb-popup-shown:clicked", "1");
     const trigger = document.createElement("button");

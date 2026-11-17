@@ -3,15 +3,18 @@
  * `resolveThemeParts().needsPopupsRuntime` is true (R-031).
  *
  * Triggers: page_load, delay, scroll, click, exit_intent, inactivity (W-081).
- * Advanced (thin): showTimes (localStorage), devices (viewport width).
- * Gaps vs Elementor (deferred): URL/query, scheduling, A/B.
+ * Advanced: showTimes (localStorage), devices (viewport width), URL query rules and show dates
+ * (W-1081). Gap vs Elementor (deferred): A/B.
  */
 
 import {
   clampScrollPercent,
   matchesPopupDevices,
+  matchesUrlParams,
   type PopupDevice,
   TRIGGER_LIMITS,
+  type UrlParamRule,
+  withinShowDates,
   withinShowTimes,
 } from "../../core/theme/popup-rules.ts";
 
@@ -26,6 +29,9 @@ type OpenTrigger =
 type Advanced = {
   showTimes?: number | null;
   devices?: PopupDevice[] | null;
+  urlParams?: UrlParamRule[] | null;
+  from?: string | null;
+  until?: string | null;
 };
 
 type TriggersDoc = {
@@ -85,6 +91,9 @@ function isValidSelector(selector: string): boolean {
 function canOpen(config: PopupConfig, byClick: boolean): boolean {
   const advanced = config.triggers.advanced;
   if (!matchesPopupDevices(advanced, window.innerWidth)) return false;
+  // W-1081: where and when the popup runs at all, so a click is held to them too.
+  if (!matchesUrlParams(advanced, window.location.search)) return false;
+  if (!withinShowDates(advanced, Date.now())) return false;
   if (!byClick && !withinShowTimes(advanced, timesShown(config.id))) return false;
   return true;
 }

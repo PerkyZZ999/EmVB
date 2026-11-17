@@ -98,3 +98,39 @@ export function withinShowTimes(
   if (limit === null || limit === undefined) return true;
   return timesShown < limit;
 }
+
+/** W-1081: a query parameter name a URL rule can test. */
+export const URL_PARAM_NAME = /^[A-Za-z0-9_.\-[\]]{1,64}$/;
+export const MAX_URL_PARAM_RULES = 5;
+
+export type UrlParamRule = { name: string; value?: string | undefined; absent?: true | undefined };
+
+/**
+ * W-1081: true when every URL rule holds for the page address's query (`location.search`);
+ * no rules always hold.
+ */
+export function matchesUrlParams(
+  advanced: { urlParams?: readonly UrlParamRule[] | null | undefined } | undefined,
+  search: string,
+): boolean {
+  const rules = advanced?.urlParams;
+  if (!rules || rules.length === 0) return true;
+  const params = new URLSearchParams(search);
+  return rules.every((rule) => {
+    const values = params.getAll(rule.name);
+    const has = rule.value === undefined ? values.length > 0 : values.includes(rule.value);
+    return rule.absent ? !has : has;
+  });
+}
+
+/** W-1081: true from `from` (inclusive) until `until` (exclusive); unset ends are open. */
+export function withinShowDates(
+  advanced: { from?: string | null | undefined; until?: string | null | undefined } | undefined,
+  now: number,
+): boolean {
+  const from = advanced?.from ? Date.parse(advanced.from) : Number.NaN;
+  const until = advanced?.until ? Date.parse(advanced.until) : Number.NaN;
+  if (!Number.isNaN(from) && now < from) return false;
+  if (!Number.isNaN(until) && now >= until) return false;
+  return true;
+}

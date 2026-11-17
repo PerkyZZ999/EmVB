@@ -399,6 +399,9 @@ export {
   DEVICE_PREVIEW_PX,
   matchesPopupDevices,
   withinShowTimes,
+  MAX_URL_PARAM_RULES,
+  URL_PARAM_NAME,
+  type UrlParamRule,
   type PopupDevice,
 } from "./theme/popup-rules.ts";
 

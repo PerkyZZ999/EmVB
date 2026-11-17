@@ -74,9 +74,11 @@ MVP vocabulary: `general/entire_site`, `singular/{all,front,not_found,collection
 | `scroll` | Opens when scroll depth ≥ `percent` (0–100) |
 | `click` | Opens when an element matching `selector` is clicked (safe CSS selectors only) |
 
-**Advanced (MVP-thin):** `showTimes` caps opens per browser via `localStorage`; a click trigger ignores it and isn't counted (D-055); `devices` filters by viewport (`mobile` &lt;768, `tablet` &lt;1025, else `desktop`). Null/omitted = unlimited / all devices.
+**Advanced:** `showTimes` caps opens per browser via `localStorage`; a click trigger ignores it and isn't counted (D-055); `devices` filters by viewport (`mobile` &lt;768, `tablet` &lt;1025, else `desktop`). Null/omitted = unlimited / all devices.
 
-**Gaps vs Elementor (deferred):** URL/query rules, scheduling, A/B, per-session vs per-user distinctions beyond localStorage. Exit-intent and inactivity shipped in W-081.
+**Address and dates (W-1081, 1.4):** `urlParams` (up to 5 rules, all must hold) tests the page address's query: `{ "name": "utm_source", "value": "newsletter" }` (that value), `{ "name": "coupon" }` (there at all), `{ "name": "preview", "absent": true }` (not there). `from` and `until` are a date, time and UTC offset (as a Countdown's target, `until` after `from`): the popup shows from `from` and stops at `until`. Both are checked in the visitor's browser, so a cached page stays right, and they hold for a click trigger too (unlike `showTimes`: they decide where and when the popup exists at all). The editor writes rules one per line (`utm_source=newsletter`, `coupon`, `!preview`).
+
+**Gaps vs Elementor (deferred):** A/B, per-session vs per-user distinctions beyond localStorage. Exit-intent and inactivity shipped in W-081.
 
 Default on create: `{ open: [{ type: "page_load" }], advanced: {} }`.
 

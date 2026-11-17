@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
-import { createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
+import {
+  api,
+  createPage,
+  createThemePart,
+  publishPage,
+  publishThemePart,
+  setUpEmvbOnce,
+} from "./support/api.ts";
 import { unique } from "./support/helpers.ts";
 
 // 1.4 fixes and hardening (PLAN_1.4 B and D), each on a published page in a real browser.
@@ -75,4 +82,45 @@ test("an arrow icon points the other way on a right-to-left page, a star doesn't
   expect(await transform("Next")).toBe("matrix(-1, 0, 0, 1, 0, 0)");
   expect(await transform("Favourite")).toBe("none");
   expect(await transform("Forward")).toBe("none");
+});
+
+test("a popup with an address rule opens only on addresses that have it (W-1081)", async ({
+  page,
+  request,
+}) => {
+  const tag = unique();
+  const title = `Promo ${tag}`;
+  const popupId = await createThemePart(request, {
+    title,
+    partType: "popup",
+    slug: `promo-${tag}`,
+    triggers: {
+      schemaVersion: 1,
+      open: [{ type: "page_load" }],
+      advanced: { urlParams: [{ name: "promo", value: tag }], from: "2020-01-01T00:00Z" },
+    },
+  });
+  try {
+    await publishThemePart(request, popupId);
+    const slug = `fixes-${unique()}`;
+    const layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [{ id: "head0001", type: "heading", props: { text: "Home", level: 1 } }],
+      },
+    };
+    await publishPage(request, await createPage(request, "Promo page", layout, slug));
+    const dialog = page.getByRole("dialog", { name: title });
+    await page.goto(`/${slug}`);
+    await page.waitForLoadState("load");
+    await expect(dialog).toBeHidden();
+    await page.goto(`/${slug}?promo=${tag}`);
+    await expect(dialog).toBeVisible();
+  } finally {
+    // A published popup for the whole site would sit on every later spec's pages.
+    await api(request, "DELETE", `/_emdash/api/content/emvb_theme_parts/${popupId}`);
+  }
 });
