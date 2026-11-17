@@ -22,6 +22,16 @@ as you edit.
 A loop stops on its own after about 5 seconds. **Loop forever** keeps it going; use it sparingly:
 motion visitors can't pause can distract, and the accessibility check flags it.
 
+## Sticky headers
+
+Set a header's (or any box's) **Position** to **Sticky** with **Top** 0, and **When the page scrolls**
+appears below: a **Background** and **Shadow** once scrolled, smaller **Top and bottom padding**
+(the header shrinks), over the first 120 px of scrolling unless you change **Changes over the
+first**. **Hide while scrolling down** slides the header away as the visitor reads down and brings
+it back as soon as they scroll up; it never hides while keyboard focus is in it. Hiding uses a
+small script that loads only on pages that use it; the rest is CSS. Browsers without scroll-driven
+animations, and visitors who prefer reduced motion, see the header as you made it.
+
 ## Hover effects
 
 Use the **Normal / Hover / Focus / Active** switch under the Classes box with a **Transition**:

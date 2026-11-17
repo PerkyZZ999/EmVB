@@ -265,6 +265,7 @@ const RUNTIME_FILES = {
   map: "assets/emvb-map.js",
   headline: "assets/emvb-headline.js",
   share: "assets/emvb-share.js",
+  sticky: "assets/emvb-sticky.js",
 } as const;
 
 function documentHtml(opts: {

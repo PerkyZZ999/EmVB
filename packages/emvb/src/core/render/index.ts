@@ -228,6 +228,17 @@ const baseCss = new Map(Object.entries(ELEMENTS).map(([type, def]) => [type, def
 baseCss.set("ext", EXTENSION_PLACEHOLDER_CSS);
 
 /**
+ * W-1070: the element's own style asks to slide away while the page scrolls down (stored as
+ * `motion.sticky`, flat `stickyMotion` once the style is read for CSS).
+ */
+function hidesOnScroll(node: LayoutNode): boolean {
+  const style = node.style as
+    | { motion?: { sticky?: { hide?: unknown } }; stickyMotion?: { hide?: unknown } }
+    | undefined;
+  return (style?.stickyMotion ?? style?.motion?.sticky)?.hide === true;
+}
+
+/**
  * W-1078: a Menu's dropdowns share a `<details name>` group, so one opens at a time. The name was
  * the menu's id, so the same menu twice (a synced header menu repeated in the footer) shared one
  * group and opening a dropdown in one copy closed the other's. Each copy gets its own names.
@@ -692,6 +703,11 @@ export function renderPage(
     if (runtime) runtimes.add(runtime);
     const ruleId = id === undefined ? undefined : ruleIdFor(id, dynamic?.idOrigin ?? "");
     const attrs = nodeAttrs(node, isRoot, id, nodeId, ruleId);
+    // W-1070: hides on scroll down with the opt-in sticky script (any element type).
+    if (hidesOnScroll(node as LayoutNode)) {
+      attrs["data-emvb-sticky-hide"] = "";
+      runtimes.add("sticky");
+    }
     if (mode === "editor" && hasBindings(stored)) attrs["data-emvb-bound"] = "";
     if (mode === "editor" && stored.audience) {
       attrs["data-emvb-audience"] = audienceSummary(stored.audience);

@@ -210,6 +210,30 @@ const LoopMotion = z.union([
 ]);
 
 /**
+ * W-1070: what a sticky (or fixed) element does as the page scrolls, over its first `distance`
+ * px (unset 120): it takes `background`, a `shadow` and `padding` (top and bottom), with CSS
+ * scroll-driven animations; browsers without them keep it as it is, and padding doesn't change
+ * for visitors who prefer reduced motion. `hide` slides it away while the visitor scrolls down
+ * and back on scrolling up, with the opt-in sticky script; never while focus is inside it.
+ * `{ type: "none" }` stops what a wider device sets.
+ */
+const StickyMotion = z.union([
+  z
+    .strictObject({
+      distance: z.number().int().min(10).max(2000).optional(),
+      background: ColorValue.optional(),
+      shadow: z.boolean().optional(),
+      padding: LengthValue.optional(),
+      hide: z.boolean().optional(),
+    })
+    .refine(
+      (s) => s.background !== undefined || s.shadow || s.padding !== undefined || s.hide,
+      "Choose at least one effect.",
+    ),
+  z.strictObject({ type: z.literal("none") }),
+]);
+
+/**
  * Plays once (W-101, W-107). `delay` waits before it starts. `view` starts as the element
  * scrolls into view, using CSS scroll-driven animations, and falls back to playing on load.
  * Not a state style.
@@ -233,6 +257,7 @@ export const Motion = z.strictObject({
   transition: Transition.optional(),
   icon: IconAnimation.optional(),
   loop: LoopMotion.optional(),
+  sticky: StickyMotion.optional(),
 });
 
 export type Motion = z.infer<typeof Motion>;
@@ -505,6 +530,7 @@ const FlatStyleShape = StyleProps.omit({ motion: true }).extend({
   scrollMotion: ScrollMotion.optional(),
   entrance: Entrance.optional(),
   loopMotion: LoopMotion.optional(),
+  stickyMotion: StickyMotion.optional(),
 });
 const flatShape: Record<string, z.ZodType> = {};
 for (const [key, schema] of Object.entries(StyleProps.omit({ motion: true }).shape)) {
@@ -516,6 +542,8 @@ for (const [key, schema] of Object.entries(StyleProps.omit({ motion: true }).sha
     flatShape["entrance"] = Entrance.optional();
     // W-938: added in 1.0, so after every 0.x key (0.x pages keep their CSS order).
     flatShape["loopMotion"] = LoopMotion.optional();
+    // W-1070: added in 1.4, last for the same reason.
+    flatShape["stickyMotion"] = StickyMotion.optional();
   }
 }
 export const FlatStyleProps = z.strictObject(flatShape) as unknown as typeof FlatStyleShape;

@@ -88,6 +88,12 @@ or `{ type: "none" }`. `effects` are the scroll-motion effects (`fade`, `move-x`
 transition easings; `alternate` (default true) plays back and forth; it stops after about 5 s
 unless `loop: true`. Normal-only, off for reduced motion. It has no 0.x key.
 
+Added in 1.4 (W-1070, additive): `motion.sticky` is `{ distance?, background?, shadow?, padding?,
+hide? }` (at least one of the last four) or `{ type: "none" }`. Over the page's first `distance` px
+(10–2000, unset 120) the element takes `background` (a colour), a `shadow` and `padding` (top and
+bottom, a length), as CSS scroll-driven animations; `hide` slides it up while the visitor scrolls
+down (the opt-in `sticky` runtime). Normal-only, off for reduced motion. It has no 0.x key.
+
 Added in 1.1 (W-974, additive): a style record may carry `viewportUnits`, a map from a length key
 (`height`, `minHeight`, `maxHeight` and the other box lengths) to `"dvh"` or `"svh"`. A plain `vh`
 length of that key is then drawn in that unit. The length itself stays `vh`, so 1.0, which keeps

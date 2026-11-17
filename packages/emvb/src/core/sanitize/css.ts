@@ -733,6 +733,8 @@ const PROPERTY_MAP: {
   scrollMotion: { css: "animation", toValue: () => undefined },
   // W-938: written by `loopDeclarations` in `styleDeclarations`; this entry only names it.
   loopMotion: { css: "animation", toValue: () => undefined },
+  // W-1070: written by `stickyDeclarations` in `styleDeclarations`; this entry only names it.
+  stickyMotion: { css: "animation", toValue: () => undefined },
   iconRotate: { css: "--emvb-icon-rotate", toValue: cssIconRotate },
   iconFlip: { css: "--emvb-icon-flip", toValue: cssIconFlip },
   iconScale: { css: "scale", toValue: cssIconScale },
@@ -811,6 +813,46 @@ function withViewportUnits(declarations: Declaration[], units: unknown): void {
   }
 }
 
+/**
+ * Declarations for a `stickyMotion` value (W-1070): one page-scroll animation per effect over
+ * 0 to `distance` px, and the values the keyframes read. Undefined for a bad value; `{ type:
+ * "none" }` is `animation: none`. `hide` writes no CSS here: the element gets an attribute.
+ */
+function stickyDeclarations(value: unknown): Declaration[] | undefined {
+  if (typeof value !== "object" || value === null) return undefined;
+  const record = value as Record<string, unknown>;
+  if (record["type"] === "none" && Object.keys(record).length === 1) {
+    return [{ property: "animation", value: "none" }];
+  }
+  const allowed = new Set(["distance", "background", "shadow", "padding", "hide"]);
+  if (Object.keys(record).some((key) => !allowed.has(key))) return undefined;
+  const { distance, background, shadow, padding, hide } = record;
+  if (
+    distance !== undefined &&
+    (!Number.isInteger(distance) || (distance as number) < 10 || (distance as number) > 2000)
+  )
+    return undefined;
+  if (shadow !== undefined && typeof shadow !== "boolean") return undefined;
+  if (hide !== undefined && typeof hide !== "boolean") return undefined;
+  const color = background === undefined ? undefined : cssColor(background);
+  const pad = padding === undefined ? undefined : cssLength(padding);
+  if ((background !== undefined && !color) || (padding !== undefined && !pad)) return undefined;
+  const names = [
+    ...(color ? ["emvb-sticky-bg"] : []),
+    ...(shadow ? ["emvb-sticky-shadow"] : []),
+    ...(pad ? ["emvb-sticky-pad"] : []),
+  ];
+  if (names.length === 0) return hide ? [] : undefined;
+  const range = `0px ${(distance as number | undefined) ?? 120}px`;
+  return [
+    { property: "animation", value: names.map((n) => `${n} linear both`).join(", ") },
+    { property: "animation-timeline", value: names.map(() => "scroll(root)").join(", ") },
+    { property: "animation-range", value: names.map(() => range).join(", ") },
+    ...(color ? [{ property: "--emvb-sticky-bg", value: color }] : []),
+    ...(pad ? [{ property: "--emvb-sticky-pad", value: pad }] : []),
+  ];
+}
+
 export function styleDeclarations(style: unknown): {
   declarations: Declaration[];
   rejected: string[];
@@ -821,6 +863,7 @@ export function styleDeclarations(style: unknown): {
   const record = style as Record<string, unknown>;
   let motion: Declaration[] = [];
   let loop: Declaration[] = [];
+  let sticky: Declaration[] = [];
   for (const [key, raw] of shorthandsFirst(record)) {
     if (BACKGROUND_KEYS.has(key)) continue;
     if (
@@ -835,6 +878,12 @@ export function styleDeclarations(style: unknown): {
     if (key === "loopMotion") {
       const found = loopDeclarations(raw);
       if (found && found.every((d) => isSafeCssValue(d.value))) loop = found;
+      else rejected.push(key);
+      continue;
+    }
+    if (key === "stickyMotion") {
+      const found = stickyDeclarations(raw);
+      if (found && found.every((d) => isSafeCssValue(d.value))) sticky = found;
       else rejected.push(key);
       continue;
     }
@@ -888,11 +937,19 @@ export function styleDeclarations(style: unknown): {
   if (column.badSpan) rejected.push("gridColumnSpan");
   if (row.badStart) rejected.push("gridRowStart");
   if (row.badSpan) rejected.push("gridRowSpan");
-  return { declarations: withLoop(withMotion(declarations, motion), loop), rejected };
+  // W-1070: sticky effects join the same animation list, last (withLoop appends any animation).
+  const animated = withLoop(withLoop(withMotion(declarations, motion), loop), sticky);
+  return { declarations: animated, rejected };
 }
 
 /** Normal only (W-089, W-237): a state's `transition` and `iconAnimation` are dropped and reported. */
-const NORMAL_ONLY = ["transition", "iconAnimation", "scrollMotion", "loopMotion"] as const;
+const NORMAL_ONLY = [
+  "transition",
+  "iconAnimation",
+  "scrollMotion",
+  "loopMotion",
+  "stickyMotion",
+] as const;
 const withoutTransition = (style: unknown): unknown => {
   if (typeof style !== "object" || style === null) return style;
   if (!NORMAL_ONLY.some((key) => key in style)) return style;
@@ -901,6 +958,7 @@ const withoutTransition = (style: unknown): unknown => {
     iconAnimation: _loop,
     scrollMotion: _scroll,
     loopMotion: _loopMotion,
+    stickyMotion: _sticky,
     ...rest
   } = style as Record<string, unknown>;
   return rest;
@@ -951,7 +1009,7 @@ const BACKGROUND_LAYER_KEYS = [
  * gradient) are filled in from `inherited` here. Otherwise they vanish on that device.
  */
 /** Both write `animation` (W-319), so one set alone would drop the other it inherits. */
-const ANIMATION_KEYS = ["entrance", "scrollMotion", "loopMotion"] as const;
+const ANIMATION_KEYS = ["entrance", "scrollMotion", "loopMotion", "stickyMotion"] as const;
 
 /**
  * A style that sets an entrance or scroll motion keeps the other one it inherits from a wider

@@ -124,3 +124,47 @@ test("a popup with an address rule opens only on addresses that have it (W-1081)
     await api(request, "DELETE", `/_emdash/api/content/emvb_theme_parts/${popupId}`);
   }
 });
+
+test("a sticky header takes its scrolled background and hides while scrolling down (W-1070)", async ({
+  page,
+  request,
+}) => {
+  const slug = `sticky-${unique()}`;
+  const layout = {
+    schemaVersion: 18,
+    root: {
+      id: "root0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "head0001",
+          type: "container",
+          props: {},
+          style: {
+            position: "sticky",
+            top: { value: 0, unit: "px" },
+            backgroundColor: "#ffffff",
+            motion: { sticky: { background: "#112233", hide: true, distance: 100 } },
+          },
+          children: [{ id: "menu0001", type: "link", props: { text: "Home", href: "/" } }],
+        },
+        { id: "spac0001", type: "spacer", props: { height: { value: 3000, unit: "px" } } },
+      ],
+    },
+  };
+  const id = await createPage(request, "Sticky", layout, slug);
+  await publishPage(request, id);
+  await page.setViewportSize({ width: 1200, height: 800 });
+  await page.goto(`/${slug}`);
+  const header = page.locator(".emvb-e-head0001");
+  const background = () => header.evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(await background()).toBe("rgb(255, 255, 255)");
+  await page.mouse.wheel(0, 400);
+  await expect.poll(background).toBe("rgb(17, 34, 51)");
+  await expect(header).toHaveAttribute("data-emvb-away", "");
+  await expect(header).not.toBeInViewport();
+  await page.mouse.wheel(0, -100);
+  await expect(header).not.toHaveAttribute("data-emvb-away");
+  await expect(header).toBeInViewport();
+});

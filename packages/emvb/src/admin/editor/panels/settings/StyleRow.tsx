@@ -1,6 +1,7 @@
 import { Input, Select } from "@cloudflare/kumo";
 import { MotionControl } from "./MotionControl.tsx";
 import { LoopControl } from "./LoopControl.tsx";
+import { StickyControl } from "./StickyControl.tsx";
 import { isSafeFontStack, type DesignSystem, type FlatStyleProps } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
@@ -590,6 +591,18 @@ export function StyleRow({
     );
   }
 
+  if (styleKey === "stickyMotion") {
+    return (
+      <StickyControl
+        value={style?.stickyMotion}
+        design={design}
+        onChange={(stickyMotion) => onPatch({ stickyMotion })}
+        onDesignChange={onDesignChange}
+        reset={reset}
+      />
+    );
+  }
+
   if (styleKey === "loopMotion") {
     return (
       <LoopControl
@@ -683,6 +696,7 @@ export const IMPLEMENTED_STYLE_KEYS: StyleKey[] = [
   "entrance",
   "scrollMotion",
   "loopMotion",
+  "stickyMotion",
   // W-974: set by the Height rows' dvh/svh units (LengthRow), never a row of its own.
   "viewportUnits",
   "transition",

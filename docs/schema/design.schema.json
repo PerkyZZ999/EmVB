@@ -4041,6 +4041,123 @@
                   "additionalProperties": false
                 }
               ]
+            },
+            "sticky": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "distance": {
+                      "type": "integer",
+                      "minimum": 10,
+                      "maximum": 2000
+                    },
+                    "background": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "var": {
+                              "type": "string",
+                              "pattern": "^[a-z0-9-]{1,40}$"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "color",
+                                "font",
+                                "fontSize",
+                                "spacing"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "var"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "shadow": {
+                      "type": "boolean"
+                    },
+                    "padding": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 10000
+                            },
+                            "unit": {
+                              "type": "string",
+                              "enum": [
+                                "px",
+                                "rem",
+                                "em",
+                                "%",
+                                "vw",
+                                "vh",
+                                "ch"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "unit"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "var": {
+                              "type": "string",
+                              "pattern": "^[a-z0-9-]{1,40}$"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "color",
+                                "font",
+                                "fontSize",
+                                "spacing"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "var"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "hide": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "none"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             }
           },
           "additionalProperties": false
@@ -11231,6 +11348,123 @@
                   "additionalProperties": false
                 }
               ]
+            },
+            "sticky": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "distance": {
+                      "type": "integer",
+                      "minimum": 10,
+                      "maximum": 2000
+                    },
+                    "background": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "var": {
+                              "type": "string",
+                              "pattern": "^[a-z0-9-]{1,40}$"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "color",
+                                "font",
+                                "fontSize",
+                                "spacing"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "var"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "shadow": {
+                      "type": "boolean"
+                    },
+                    "padding": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 10000
+                            },
+                            "unit": {
+                              "type": "string",
+                              "enum": [
+                                "px",
+                                "rem",
+                                "em",
+                                "%",
+                                "vw",
+                                "vh",
+                                "ch"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "unit"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "var": {
+                              "type": "string",
+                              "pattern": "^[a-z0-9-]{1,40}$"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "color",
+                                "font",
+                                "fontSize",
+                                "spacing"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "var"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "hide": {
+                      "type": "boolean"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "none"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             }
           },
           "additionalProperties": false
@@ -14942,6 +15176,123 @@
                     "effects",
                     "duration"
                   ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "none"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "sticky": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "distance": {
+                      "type": "integer",
+                      "minimum": 10,
+                      "maximum": 2000
+                    },
+                    "background": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "var": {
+                              "type": "string",
+                              "pattern": "^[a-z0-9-]{1,40}$"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "color",
+                                "font",
+                                "fontSize",
+                                "spacing"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "var"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "shadow": {
+                      "type": "boolean"
+                    },
+                    "padding": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "value": {
+                              "type": "number",
+                              "minimum": 0,
+                              "maximum": 10000
+                            },
+                            "unit": {
+                              "type": "string",
+                              "enum": [
+                                "px",
+                                "rem",
+                                "em",
+                                "%",
+                                "vw",
+                                "vh",
+                                "ch"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "value",
+                            "unit"
+                          ],
+                          "additionalProperties": false
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "var": {
+                              "type": "string",
+                              "pattern": "^[a-z0-9-]{1,40}$"
+                            },
+                            "from": {
+                              "type": "string",
+                              "enum": [
+                                "color",
+                                "font",
+                                "fontSize",
+                                "spacing"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "var"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "hide": {
+                      "type": "boolean"
+                    }
+                  },
                   "additionalProperties": false
                 },
                 {

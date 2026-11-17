@@ -133,7 +133,8 @@ export type WidgetRuntime =
   | "headline"
   | "lightbox"
   | "map"
-  | "share";
+  | "share"
+  | "sticky";
 
 /** The widget runtime one element needs, if any: only when it opts in. */
 export function nodeRuntime(node: LayoutNode): WidgetRuntime | undefined {

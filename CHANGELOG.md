@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Sticky header effects (W-1070).** A sticky or fixed element gets **When the page scrolls** in Position: a background and shadow once the page has scrolled, smaller top and bottom padding so a header shrinks, and **Hide while scrolling down**, which slides it away while reading and back on scrolling up (never while keyboard focus is in it). The effects are CSS; hiding loads a small script only on pages that use it. Off for visitors who prefer reduced motion.
 - **Popups by address and date (W-1081).** A popup's Advanced settings can now limit it to page addresses with (or without) a query parameter, such as `?utm_source=newsletter`, and to a time window with **Show from** and **Show until**. The visitor's browser checks them, so cached pages stay right.
 - **Search form (W-1073).** A new element in Add → Content: a search box and button that send the words to your site's search page (`/search?q=…`, as EmDash's own Search widget does), with its own placeholder, button text and search page. It is a plain form with no script. Elementor's Search Form now imports as one. Agents can add it over MCP.
 

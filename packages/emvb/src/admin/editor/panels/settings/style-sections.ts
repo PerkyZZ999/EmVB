@@ -179,7 +179,17 @@ const SECTION_KEYS: Record<StyleSectionId, StyleKey[]> = {
     "flexShrink",
     "flexBasis",
   ],
-  position: ["position", "top", "right", "bottom", "left", "zIndex", "alignSelf", "order"],
+  position: [
+    "position",
+    "top",
+    "right",
+    "bottom",
+    "left",
+    "zIndex",
+    "alignSelf",
+    "order",
+    "stickyMotion",
+  ],
   typography: [
     "fontFamily",
     "fontSize",
@@ -300,6 +310,10 @@ const TYPE_SECTION_KEYS: Record<string, Partial<Record<StyleSectionId, StyleKey[
 
 const OFFSETS = new Set<StyleKey>(["top", "right", "bottom", "left"]);
 
+/** W-1070: "When the page scrolls" is for elements that stay in view: sticky or fixed. */
+const pinned = (position: FlatStyleProps["position"]) =>
+  position === "sticky" || position === "fixed";
+
 /** Offsets only do anything once the element is positioned (W-088). */
 export const offsetsApply = (position: FlatStyleProps["position"]) =>
   position !== undefined && position !== "static";
@@ -319,7 +333,9 @@ export function keysFor(
     (
       TYPE_SECTION_KEYS[type]?.[section] ??
       SECTION_KEYS[section].filter((key) => ONLY_FOR[key]?.includes(type) ?? true)
-    ).filter((key) => !OFFSETS.has(key) || offsetsApply(position)),
+    )
+      .filter((key) => !OFFSETS.has(key) || offsetsApply(position))
+      .filter((key) => key !== "stickyMotion" || pinned(position)),
   );
   const keys = SECTION_KEYS[section].filter(
     (key) => offered.has(key) || style?.[key] !== undefined,
@@ -427,6 +443,7 @@ export const STYLE_LABELS: Record<StyleKey, string> = {
   entrance: "Entrance",
   scrollMotion: "Scroll motion",
   loopMotion: "Loop",
+  stickyMotion: "When the page scrolls",
   viewportUnits: "Viewport units",
   iconRotate: "Rotate",
   iconFlip: "Flip",

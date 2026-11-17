@@ -20,7 +20,12 @@ import {
 } from "../sanitize/css.ts";
 import { STYLE_STATES, type StyleStateName } from "../schema/state-names.ts";
 import { DEVICE_MEDIA, type Device, type EditorDevice } from "../theme/popup-rules.ts";
-import { LOOP_KEYFRAMES, MOTION_KEYFRAMES } from "../sanitize/motion.ts";
+import {
+  LOOP_KEYFRAMES,
+  MOTION_KEYFRAMES,
+  STICKY_KEYFRAMES,
+  usesSticky,
+} from "../sanitize/motion.ts";
 
 export type CssInput = {
   design: DesignSystem;
@@ -199,6 +204,8 @@ export function generateCss({
   let motion = false;
   /** W-938: any loop on the page, so its keyframes are sent. */
   let loops = false;
+  /** W-1070: any sticky effect, so its keyframes are sent. */
+  let sticky = false;
   const rules = (selector: string, declarations: Declaration[], states: StateDeclarations) => [
     block(selector, declarations),
     ...STYLE_STATES.map((state) =>
@@ -215,6 +222,7 @@ export function generateCss({
     if (declarations.some((d) => d.property === "animation")) entrances.push(selector);
     if (usesMotion(declarations)) motion = true;
     if (usesLoop(declarations)) loops = true;
+    if (usesSticky(declarations)) sticky = true;
     return declarations;
   };
   const classes = (design.classes ?? []).flatMap((cls) => {
@@ -338,6 +346,7 @@ export function generateCss({
     const devices = [rule.wide ?? [], rule.laptop, rule.tablet, rule.mobile];
     if (devices.some(usesMotion)) motion = true;
     if (devices.some(usesLoop)) loops = true;
+    if (devices.some(usesSticky)) sticky = true;
     if (
       !entrances.includes(rule.selector) &&
       devices.flat().some((d) => d.property === "animation")
@@ -353,6 +362,7 @@ export function generateCss({
     const selector = `.emvb-e-${rule.id}`;
     if (usesMotion(query)) motion = true;
     if (usesLoop(query)) loops = true;
+    if (usesSticky(query)) sticky = true;
     if (!entrances.includes(selector) && query.some((d) => d.property === "animation")) {
       entrances.push(selector);
     }
@@ -366,6 +376,7 @@ export function generateCss({
       : "",
     entrances.length > 0 && motion ? MOTION_KEYFRAMES : "",
     entrances.length > 0 && loops ? LOOP_KEYFRAMES : "",
+    entrances.length > 0 && sticky ? STICKY_KEYFRAMES : "",
     block(".emvb-root", variables),
     defaultsCss,
     backgroundVideo

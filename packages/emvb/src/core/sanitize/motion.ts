@@ -243,3 +243,15 @@ export function withLoop(declarations: Declaration[], loop: Declaration[]): Decl
     ...vars,
   ];
 }
+
+/**
+ * W-1070: keyframes for a sticky element's look once the page has scrolled: they exist only
+ * where scroll-driven animations do; padding also waits for no reduced-motion preference.
+ */
+export const STICKY_KEYFRAMES =
+  "@supports (animation-timeline: scroll()){@keyframes emvb-sticky-bg{to{background-color:var(--emvb-sticky-bg)}}@keyframes emvb-sticky-shadow{to{box-shadow:0 2px 12px rgb(0 0 0 / 15%)}}}" +
+  "@media (prefers-reduced-motion: no-preference){@supports (animation-timeline: scroll()){@keyframes emvb-sticky-pad{to{padding-top:var(--emvb-sticky-pad);padding-bottom:var(--emvb-sticky-pad)}}}}";
+
+/** W-1070: whether declarations play a sticky effect, so the page sends STICKY_KEYFRAMES. */
+export const usesSticky = (declarations: readonly Declaration[]) =>
+  declarations.some((d) => d.property === "animation" && d.value.includes("emvb-sticky-"));

@@ -7051,8 +7051,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
-          "search": "    ).filter((key) => !OFFSETS.has(key) || offsetsApply(position)),",
-          "replace": "    ),"
+          "search": "      .filter((key) => !OFFSETS.has(key) || offsetsApply(position))\n",
+          "replace": ""
         }
       ],
       "command": [
@@ -26650,8 +26650,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"scrollMotion\", \"loopMotion\"] as const;",
-          "replace": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"loopMotion\"] as const;"
+          "search": "  \"scrollMotion\",\n  \"loopMotion\",\n  \"stickyMotion\",\n] as const;",
+          "replace": "  \"loopMotion\",\n  \"stickyMotion\",\n] as const;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/css/motion.test.ts"],
@@ -42902,8 +42902,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/sanitize/css.ts",
-          "search": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"scrollMotion\", \"loopMotion\"] as const;",
-          "replace": "const NORMAL_ONLY = [\"transition\", \"iconAnimation\", \"scrollMotion\"] as const;"
+          "search": "  \"scrollMotion\",\n  \"loopMotion\",\n  \"stickyMotion\",\n] as const;",
+          "replace": "  \"scrollMotion\",\n  \"stickyMotion\",\n] as const;"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/core/sanitize/loop-motion.test.ts"],
@@ -51038,6 +51038,143 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1070/css-dropped",
+      "requirement": "W-1070",
+      "description": "Sticky effects write no CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "      if (found && found.every((d) => isSafeCssValue(d.value))) sticky = found;",
+          "replace": "      if (found && found.length < 0) sticky = found;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/sticky-motion.test.ts"],
+      "expect": "\\(fail\\).*background, shadow and padding run"
+    },
+    {
+      "id": "W-1070/no-keyframes",
+      "requirement": "W-1070",
+      "description": "Pages with sticky effects get no sticky keyframes.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/css/generate.ts",
+          "search": "    entrances.length > 0 && sticky ? STICKY_KEYFRAMES : \"\",",
+          "replace": "    \"\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/sticky-motion.test.ts"],
+      "expect": "\\(fail\\).*background, shadow and padding run"
+    },
+    {
+      "id": "W-1070/default-distance",
+      "requirement": "W-1070",
+      "description": "The unset distance isn't 120 px.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/sanitize/css.ts",
+          "search": "?? 120}px`;",
+          "replace": "?? 12}px`;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/sticky-motion.test.ts"],
+      "expect": "\\(fail\\).*unset distance is 120 px"
+    },
+    {
+      "id": "W-1070/no-hide-attr",
+      "requirement": "W-1070",
+      "description": "Hide while scrolling down marks nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "  return (style?.stickyMotion ?? style?.motion?.sticky)?.hide === true;",
+          "replace": "  return false;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/sanitize/sticky-motion.test.ts"],
+      "expect": "\\(fail\\).*hide marks the element"
+    },
+    {
+      "id": "W-1070/no-hide-attr-e2e",
+      "requirement": "W-1070",
+      "description": "A published sticky header never hides.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "  return (style?.stickyMotion ?? style?.motion?.sticky)?.hide === true;",
+          "replace": "  return false;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1070"],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1070/hides-with-focus",
+      "requirement": "W-1070",
+      "description": "The header hides while focus is inside it.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/sticky.ts",
+          "search": "      if (down && y > el.offsetHeight && !el.contains(document.activeElement)) {",
+          "replace": "      if (down && y > el.offsetHeight) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/widgets/sticky.test.ts"],
+      "expect": "\\(fail\\).*stays while focus is inside"
+    },
+    {
+      "id": "W-1070/transition-reduced",
+      "requirement": "W-1070",
+      "description": "The header slides even under reduced motion.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/sticky.ts",
+          "search": "    if (!reduced) el.style.transition = \"translate 0.25s ease\";",
+          "replace": "    el.style.transition = \"translate 0.25s ease\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/widgets/sticky.test.ts"],
+      "expect": "\\(fail\\).*reduced motion it moves without a transition"
+    },
+    {
+      "id": "W-1070/row-always",
+      "requirement": "W-1070",
+      "description": "Position never offers When the page scrolls.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/style-sections.ts",
+          "search": "      .filter((key) => key !== \"stickyMotion\" || pinned(position)),",
+          "replace": "      .filter((key) => key !== \"stickyMotion\" || position === \"fixed\"),"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/sticky-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*offers it for sticky and fixed"
+    },
+    {
+      "id": "W-1070/empty-kept",
+      "requirement": "W-1070",
+      "description": "Turning the last effect off leaves an empty value the schema refuses.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/StickyControl.tsx",
+          "search": "  return any ? kept : undefined;",
+          "replace": "  return kept;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/settings/sticky-control.test.tsx"
+      ],
+      "expect": "\\(fail\\).*turning the last effect off clears it"
     }
   ]
 }
