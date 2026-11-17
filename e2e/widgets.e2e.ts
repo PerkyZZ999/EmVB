@@ -427,3 +427,35 @@ test("a Carousel gets arrows, dots and autoplay; on the page Next moves a slide,
     page.getByRole("region", { name: "Carousel" }).getByRole("button", { name: "Play slides" }),
   ).toBeVisible();
 });
+
+test("a Search form is added with its own button text; on the page it sends the words to /search as q (W-1073)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await addTab(page, request, "Search");
+  await overlay(page).locator('[data-emvb-add-tile="search-form"]').click();
+  await expect(overlay(page).locator("h2.emvb-panel-title")).toHaveText("Search form");
+  const form = canvas(page).locator("form.emvb-search-form");
+  await expect(form.locator('input[type="search"]')).toHaveAttribute(
+    "placeholder",
+    "Search this site",
+  );
+  const text = overlay(page).getByLabel("Button text", { exact: true });
+  await text.fill("Find");
+  await text.press("Tab");
+  await expect(form.locator("button")).toHaveText("Find");
+
+  await saveDraft(page);
+  const stored = await storedLayout<Stored>(request, id);
+  expect(stored.root.children[1]).toMatchObject({
+    type: "search-form",
+    props: { placeholder: "Search this site", buttonText: "Find" },
+  });
+
+  await publishPage(request, id);
+  await page.goto(`/${slug}`);
+  const search = page.getByRole("search", { name: "Search" });
+  await search.getByRole("searchbox", { name: "Search" }).fill("carousel");
+  await search.getByRole("button", { name: "Find" }).click();
+  await expect(page).toHaveURL(/\/search\?q=carousel$/);
+});

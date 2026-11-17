@@ -993,6 +993,24 @@ const testimonial: Widget = (s, ctx, el) => {
 };
 
 /** W-1023: Elementor's Star Rating → a Rating, with its title as text beside it. */
+/**
+ * W-1073: Elementor Pro's Search Form becomes EmVB's, sending `?q=` to the site's /search page
+ * (WordPress's `?s=` doesn't apply on EmDash). The icon-only button and the full-screen skin
+ * become a field and a text button.
+ */
+const searchForm: Widget = (s, ctx, el) => {
+  const placeholder = plain(s["placeholder"]).text;
+  const buttonText = plain(s["button_text"]).text;
+  if (s["skin"] === "full_screen" || s["button_type"] === "icon")
+    ctx.note("approximated", el, "Search forms show a field and a Search button.");
+  return [
+    node(ctx, "search-form", {
+      ...(placeholder ? { placeholder: placeholder.slice(0, 120) } : {}),
+      ...(buttonText && s["button_type"] !== "icon" ? { buttonText: buttonText.slice(0, 40) } : {}),
+    }),
+  ];
+};
+
 const starRating: Widget = (s, ctx, el) => {
   const scale = Math.min(10, Math.max(1, Math.round(num(s["rating_scale"]) ?? 5)));
   const value = Math.min(
@@ -2185,7 +2203,7 @@ export const WIDGETS: Record<string, Widget> = {
   sidebar: skip("WordPress sidebars weren't imported."),
   countdown,
   "share-buttons": shareButtons,
-  "search-form": skip("Search forms weren't imported."),
+  "search-form": searchForm,
   login: skip("Login forms weren't imported."),
   lottie: skip("Lottie animations weren't imported."),
   hotspot: hotspotWidget,

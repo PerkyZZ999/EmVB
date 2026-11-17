@@ -1355,3 +1355,32 @@ describe("Elementor import: the 1.2 widgets", () => {
     expect(empty.ok).toBe(false);
   });
 });
+
+describe("Elementor import: the 1.4 widgets", () => {
+  const one = (widgetType: string, settings: Record<string, unknown>) =>
+    ok(
+      importElementor(JSON.stringify([{ id: "w", elType: "widget", widgetType, settings }]), {
+        icon,
+      }),
+    );
+
+  test("W-1073: a Search Form keeps its placeholder and button text and searches /search", () => {
+    const result = one("search-form", { placeholder: "Find a post", button_text: "Find" });
+    expect(props(ofType(result.layout, "search-form")[0])).toEqual({
+      placeholder: "Find a post",
+      buttonText: "Find",
+    });
+    expect(validateLayout(result.layout).ok).toBe(true);
+    expect(notes(result)).toBe("");
+  });
+
+  test("W-1073: an icon button or full-screen skin becomes a text button, noted", () => {
+    const result = one("search-form", {
+      skin: "full_screen",
+      button_type: "icon",
+      button_text: "x",
+    });
+    expect(props(ofType(result.layout, "search-form")[0])).toEqual({});
+    expect(notes(result)).toContain("Search forms show a field and a Search button.");
+  });
+});

@@ -796,6 +796,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "share-link",
   "hotspots",
   "hotspot",
+  "search-form",
 ] as const;
 
 /** Headings on this page, as a list of links. No script (W-345). */
@@ -1388,6 +1389,21 @@ export const HotspotNode = leafNode(
   }),
 );
 
+/**
+ * W-1073: a site search box: a plain GET form to `action` (unset "/search", the page EmDash's
+ * own Search widget and site templates use) with the words in `q`. No script. `label` names the
+ * field and the search landmark for screen readers (unset "Search"); `buttonText` unset "Search".
+ */
+export const SearchFormNode = leafNode(
+  "search-form",
+  z.strictObject({
+    action: z.string().max(500).optional(),
+    label: z.string().max(80).optional(),
+    placeholder: z.string().max(120).optional(),
+    buttonText: z.string().max(40).optional(),
+  }),
+);
+
 const knownTypeSet = new Set<string>(KNOWN_ELEMENT_TYPES);
 
 /**
@@ -1441,6 +1457,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   ShareLinkNode,
   HotspotsNodeSchema,
   HotspotNode,
+  SearchFormNode,
   CounterNode,
   ProgressNode,
   CountdownNode,
@@ -1499,6 +1516,7 @@ export type FlipBoxNode = z.infer<typeof FlipBoxNode>;
 export type HeadlineNode = z.infer<typeof HeadlineNode>;
 export type ShareLinkNode = z.infer<typeof ShareLinkNode>;
 export type HotspotNode = z.infer<typeof HotspotNode>;
+export type SearchFormNode = z.infer<typeof SearchFormNode>;
 export type IconBoxNode = z.infer<typeof IconBoxNode>;
 export type ImageBoxNode = z.infer<typeof ImageBoxNode>;
 export type TestimonialNode = z.infer<typeof TestimonialNode>;
@@ -1770,6 +1788,7 @@ export type LayoutNode =
   | ShareLinkNode
   | HotspotsNode
   | HotspotNode
+  | SearchFormNode
   | SpacerNode
   | DividerNode
   | TextNode

@@ -170,6 +170,14 @@ like. A marker is a button named by its title that opens its note with the brows
 popover: no script, Escape or a click outside closes it, and keyboards and screen readers reach
 every marker. Where the browser supports it, the note appears next to its marker.
 
+## Search form
+
+Add → Content → **Search form** is a search box and a button that send the words to your site's
+search page, `/search?q=…`, the page EmDash's own Search widget uses. It is a plain form: no
+script, and it works before any script loads. In its settings you can change the placeholder, the
+button's text, the name screen readers hear (unset "Search") and the search page, such as
+`/fr/recherche` for a French page. Pair it with a **Search Results** template in Theme Builder.
+
 ## Scripts in theme parts
 
 A page built with `EmVBPage` mounts the scripts its own widgets need, with no change to your site.

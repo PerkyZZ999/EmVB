@@ -148,7 +148,7 @@ These keep their content in the closest EmVB form, and the report says so:
 
 WordPress-only things: shortcodes, WordPress widgets and sidebars, menus the site doesn't have (see
 Nav Menu above), the site logo and title, post lists and loops (rebuild them with
-EmVB's Loop element), comments, search and login forms, evergreen countdowns (a timer per
+EmVB's Loop element), comments, login forms, evergreen countdowns (a timer per
 visitor), share buttons for services EmVB has no link for, Lottie, motion effects and Elementor CSS
 classes. Scripts and styles in HTML
 are always removed.

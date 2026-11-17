@@ -50794,6 +50794,79 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-space.test.ts"],
       "expect": "\\(fail\\).*white and black are left alone"
+    },
+    {
+      "id": "W-1073/any-action",
+      "requirement": "W-1073",
+      "description": "A Search form sends the words to a mail or phone link.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/site.ts",
+          "search": "  return safe && !/^(mailto|tel):/i.test(safe) ? safe : \"/search\";",
+          "replace": "  return safe ?? \"/search\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/site.test.ts"],
+      "expect": "\\(fail\\).*only a site path or web address"
+    },
+    {
+      "id": "W-1073/wrong-param",
+      "requirement": "W-1073",
+      "description": "A Search form sends the words as s instead of q.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/site.ts",
+          "search": "            name: \"q\",",
+          "replace": "            name: \"s\","
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/site.test.ts"],
+      "expect": "\\(fail\\).*plain GET search landmark"
+    },
+    {
+      "id": "W-1073/wrong-param-e2e",
+      "requirement": "W-1073",
+      "description": "The published Search form doesn't reach /search?q=.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/site.ts",
+          "search": "            name: \"q\",",
+          "replace": "            name: \"s\","
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/widgets.e2e.ts", "--project=node", "-g", "W-1073"],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1073/no-landmark",
+      "requirement": "W-1073",
+      "description": "A Search form isn't a search landmark.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/site.ts",
+          "search": "        role: \"search\",\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/site.test.ts"],
+      "expect": "\\(fail\\).*plain GET search landmark"
+    },
+    {
+      "id": "W-1073/elementor-skipped",
+      "requirement": "W-1073",
+      "description": "Elementor's Search Form is skipped again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/import/elementor/widgets.ts",
+          "search": "  \"search-form\": searchForm,",
+          "replace": "  \"search-form\": skip(\"Search forms weren't imported.\"),"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/import/elementor/elementor.test.ts"],
+      "expect": "\\(fail\\).*W-1073"
     }
   ]
 }

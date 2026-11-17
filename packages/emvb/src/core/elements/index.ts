@@ -39,6 +39,7 @@ import type { ElementDefinition } from "./definition.ts";
 import { ICON_STROKE_WIDTHS, iconGlyph } from "./icon-svg.ts";
 export { iconHasAdjustableStroke, iconHasOwnColors } from "./icon-svg.ts";
 import { menu, menuItem } from "./menu.ts";
+import { searchForm } from "./site.ts";
 import {
   countdown,
   counter,
@@ -1154,6 +1155,7 @@ export const ELEMENTS = {
   "share-link": shareLink,
   hotspots,
   hotspot,
+  "search-form": searchForm,
   container,
   "layout-section": layoutSection,
   spacer,

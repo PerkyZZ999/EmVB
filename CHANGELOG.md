@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Search form (W-1073).** A new element in Add → Content: a search box and button that send the words to your site's search page (`/search?q=…`, as EmDash's own Search widget does), with its own placeholder, button text and search page. It is a plain form with no script. Elementor's Search Form now imports as one. Agents can add it over MCP.
+
 ### Changed
 
 - **Arrows on right-to-left pages (W-1079).** Arrow, chevron, caret and angle icons that point left or right are mirrored on right-to-left pages, so "next" still points forward.

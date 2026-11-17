@@ -160,6 +160,7 @@ Element types and their props (see layout-format.md for each prop's type and lim
 | `share-link` | network, label |
 | `hotspots` | src, alt, decorative, mediaId, width, height, focalX, focalY, label |
 | `hotspot` | title, text, x, y, xTablet, yTablet, xMobile, yMobile |
+| `search-form` | action, label, placeholder, buttonText |
 | `spacer` | height |
 | `divider` | (none) |
 | `text` | text, tag, marks |

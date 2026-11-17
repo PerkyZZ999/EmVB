@@ -473,3 +473,30 @@ describe("Hotspots over MCP (W-1048)", () => {
     expect(refused.success).toBe(false);
   });
 });
+
+describe("Search form over MCP (W-1073)", () => {
+  test("list_element_types describes it; add_element adds one; a too-long button text is refused", async () => {
+    const search = (await catalogue()).get("search-form");
+    expect(search?.name).toBe("Search form");
+    expect(Object.keys(search?.props.properties ?? {}).toSorted()).toEqual([
+      "action",
+      "buttonText",
+      "label",
+      "placeholder",
+    ]);
+    const pageId = await newPage();
+    const added = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "search-form", props: { placeholder: "Search posts" } },
+    });
+    expect(added.success).toBe(true);
+    const refused = await call("add_element", {
+      pageId,
+      parentId: "root0001",
+      element: { type: "search-form", props: { buttonText: "x".repeat(41) } },
+    });
+    expect(refused.success).toBe(false);
+    expect(JSON.stringify(refused.error)).toContain("buttonText");
+  });
+});
