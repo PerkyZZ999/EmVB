@@ -50867,6 +50867,62 @@
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/import/elementor/elementor.test.ts"],
       "expect": "\\(fail\\).*W-1073"
+    },
+    {
+      "id": "W-1076/carousel-names",
+      "requirement": "W-1076",
+      "description": "Two carousels with one name pass the check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "      if (carouselNames.some((names, i) => shownOn[i] && names.has(key))) {",
+          "replace": "      if (key === \"\\u0000\") {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*two carousels named alike"
+    },
+    {
+      "id": "W-1076/flip-empty-back",
+      "requirement": "W-1076",
+      "description": "A flip box with an empty back passes the check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "        !spoken(props[\"backTitle\"]) &&\n",
+          "replace": "        false &&\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*flip box with an empty front title or an empty back"
+    },
+    {
+      "id": "W-1076/countdown-title",
+      "requirement": "W-1076",
+      "description": "A countdown without a title passes the check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "    if (node.type === \"countdown\" && !spoken(props[\"title\"]) && !node.bind) {",
+          "replace": "    if (node.type === \"countdown\" && !spoken(props[\"label\"]) && !node.bind) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*countdown without a title"
+    },
+    {
+      "id": "W-1076/hotspot-names",
+      "requirement": "W-1076",
+      "description": "Two markers with one title pass the check.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/a11y/audit.ts",
+          "search": "        if (title && seen.has(title)) {",
+          "replace": "        if (title && seen.has(`${title} `)) {"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/a11y/widgets.test.ts"],
+      "expect": "\\(fail\\).*two markers with one title"
     }
   ]
 }

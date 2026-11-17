@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **The accessibility check covers more widgets (W-1076).** It now warns about two carousels with the same name, a flip box with an empty front title or an empty back, a countdown without a title, and two hotspot markers with the same title.
 - **Arrows on right-to-left pages (W-1079).** Arrow, chevron, caret and angle icons that point left or right are mirrored on right-to-left pages, so "next" still points forward.
 - **OKLCH colours outside sRGB (W-1082).** A typed OKLCH colour that a screen can't show is brought into range the way browsers do it (CSS Color 4): it keeps its lightness and hue and loses chroma, instead of each channel being cut, which shifted the colour. The note under the field now says "Mapped to".
 

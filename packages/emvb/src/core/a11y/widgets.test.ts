@@ -235,3 +235,60 @@ describe("Hotspots (W-1048)", () => {
     expect(audit(pic(" "))).toEqual(["image-alt:error:spot0001"]);
   });
 });
+
+describe("the 1.3 widgets (W-1076)", () => {
+  const carousel = (id: string, label?: string) => ({
+    id,
+    type: "carousel",
+    props: label === undefined ? {} : { label },
+    children: [{ id: `s${id.slice(1)}`, type: "carousel-slide", props: {}, children: [] }],
+  });
+
+  test("two carousels named alike warn on the second; their own names don't", () => {
+    expect(audit(carousel("caro0001"), carousel("caro0002"))).toEqual([
+      "landmark-name:warning:caro0002",
+    ]);
+    expect(audit(carousel("caro0001", "Stories"), carousel("caro0002", "stories"))).toEqual([
+      "landmark-name:warning:caro0002",
+    ]);
+    expect(audit(carousel("caro0001", "Stories"), carousel("caro0002", "Team"))).toEqual([]);
+  });
+
+  test("a flip box with an empty front title or an empty back warns", () => {
+    const flip = (props: Record<string, unknown>) => ({ id: "flip0001", type: "flip-box", props });
+    expect(audit(flip({ frontTitle: "Plans", backText: "From $5" }))).toEqual([]);
+    expect(audit(flip({ frontTitle: "Plans", buttonText: "See plans", href: "/p" }))).toEqual([]);
+    expect(audit(flip({ frontTitle: " ", backText: "x" }))).toEqual([
+      "flip-box-face:warning:flip0001",
+    ]);
+    expect(audit(flip({ frontTitle: "Plans" }))).toEqual(["flip-box-face:warning:flip0001"]);
+  });
+
+  test("a countdown without a title warns", () => {
+    const countdown = (title?: string) => ({
+      id: "cdwn0001",
+      type: "countdown",
+      props: { target: "2027-01-01T00:00Z", ...(title === undefined ? {} : { title }) },
+    });
+    expect(audit(countdown("Launch sale"))).toEqual([]);
+    expect(audit(countdown())).toEqual(["countdown-title:warning:cdwn0001"]);
+  });
+
+  test("two markers with one title on a picture warn on the second", () => {
+    const marker = (id: string, title: string) => ({
+      id,
+      type: "hotspot",
+      props: { title, x: 10, y: 10 },
+    });
+    const hotspots = (...children: unknown[]) => ({
+      id: "hots0001",
+      type: "hotspots",
+      props: { src: "/a.jpg", alt: "A car" },
+      children,
+    });
+    expect(audit(hotspots(marker("hspt0001", "Wheel"), marker("hspt0002", "Door")))).toEqual([]);
+    expect(audit(hotspots(marker("hspt0001", "Wheel"), marker("hspt0002", "wheel")))).toEqual([
+      "hotspot-names:warning:hspt0002",
+    ]);
+  });
+});

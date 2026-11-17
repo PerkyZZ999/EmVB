@@ -46,7 +46,10 @@ export type A11yIssue = {
     | "landmark-name"
     | "motion"
     | "empty-alert"
-    | "counter-title";
+    | "counter-title"
+    | "flip-box-face"
+    | "countdown-title"
+    | "hotspot-names";
   severity: "error" | "warning";
   message: string;
   /** The one-click fix, when there is a safe one. */
@@ -259,6 +262,8 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
   let fade = 1;
   // W-445: per device, like H1s, so a desktop menu and a mobile menu may share a name.
   const menuNames = DEVICES.map(() => new Set<string>());
+  // W-1076: carousels are regions, listed by name like menus.
+  const carouselNames = DEVICES.map(() => new Set<string>());
   const walk = (node: LayoutNode, bg: string | undefined, color: string | undefined): void => {
     // W-413: an element hidden on every device (and what's inside it) is never shown or read.
     if (node !== layout.root && hiddenOnEveryDevice(node)) {
@@ -580,6 +585,72 @@ export function auditPage(layout: Layout, design: DesignSystem): A11yReport {
         message:
           'This counter has no title, so its number doesn\'t say what it counts. Add a title such as "Happy clients".',
       });
+    }
+    // W-1076: screen readers list carousels as regions by name; two with one name sound the same.
+    if (node.type === "carousel") {
+      const name = spoken(props["label"]) || "Carousel";
+      const key = name.toLowerCase();
+      if (carouselNames.some((names, i) => shownOn[i] && names.has(key))) {
+        add({
+          nodeId: node.id,
+          rule: "landmark-name",
+          severity: "warning",
+          message: `Another carousel on this page is also named "${name}"; give each carousel its own name, such as "Customer stories".`,
+        });
+      }
+      carouselNames.forEach((listed, i) => {
+        if (shownOn[i]) listed.add(key);
+      });
+    }
+    // W-1076: a Flip box's faces are headings and text; an empty one turns over to nothing.
+    if (node.type === "flip-box" && !node.bind) {
+      if (!spoken(props["frontTitle"])) {
+        add({
+          nodeId: node.id,
+          rule: "flip-box-face",
+          severity: "warning",
+          message:
+            "This flip box's front has no title, so its heading is empty. Add a front title.",
+        });
+      } else if (
+        !spoken(props["backTitle"]) &&
+        !spoken(props["backText"]) &&
+        !spoken(props["buttonText"])
+      ) {
+        add({
+          nodeId: node.id,
+          rule: "flip-box-face",
+          severity: "warning",
+          message:
+            "This flip box's back is empty, so turning it over shows nothing. Add a back title, text or button.",
+        });
+      }
+    }
+    // W-1076: "Ends 1 Dec 2026" alone doesn't say what ends.
+    if (node.type === "countdown" && !spoken(props["title"]) && !node.bind) {
+      add({
+        nodeId: node.id,
+        rule: "countdown-title",
+        severity: "warning",
+        message:
+          'This countdown has no title, so its date doesn\'t say what ends. Add a title such as "Launch sale".',
+      });
+    }
+    // W-1076: each marker is a button named by its title; two alike can't be told apart.
+    if (node.type === "hotspots" && isParentNode(node)) {
+      const seen = new Set<string>();
+      for (const marker of node.children) {
+        const title = spoken((marker.props as Record<string, unknown>)["title"]).toLowerCase();
+        if (title && seen.has(title)) {
+          add({
+            nodeId: marker.id,
+            rule: "hotspot-names",
+            severity: "warning",
+            message: `Another marker on this picture is also called "${spoken((marker.props as Record<string, unknown>)["title"])}"; screen readers can't tell them apart. Give each its own title.`,
+          });
+        }
+        seen.add(title);
+      }
     }
     // W-419: an empty heading still shows up in screen readers' heading list, with nothing to say.
     if (node.type === "heading" && !spoken(props["text"]) && !node.bind) {
