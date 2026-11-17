@@ -94,6 +94,7 @@ export function TokenScales({
           <span className="emvb-bind-label">{kind === "type" ? "Body size" : "Base gap"} (px)</span>
           <Input
             className={FIELD}
+            aria-label={`${kind === "type" ? "Body size" : "Base gap"} (px)`}
             inputMode="decimal"
             value={base}
             data-emvb-tokens-base=""
@@ -132,6 +133,7 @@ export function TokenScales({
             <span className="emvb-bind-label">On small screens (px)</span>
             <Input
               className={FIELD}
+              aria-label="On small screens (px)"
               inputMode="decimal"
               value={minBase}
               data-emvb-tokens-min=""

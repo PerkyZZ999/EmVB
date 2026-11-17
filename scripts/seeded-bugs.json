@@ -40015,8 +40015,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/settings/AudienceEditor.tsx",
-          "search": "className={FIELD}\n              value={countryText}",
-          "replace": "className=\"emvb-native-input\"\n              value={countryText}"
+          "search": "className={FIELD}\n              aria-label=\"Countries (two-letter codes)\"",
+          "replace": "className=\"emvb-native-input\"\n              aria-label=\"Countries (two-letter codes)\""
         }
       ]
     },
@@ -50616,6 +50616,79 @@
         }
       ],
       "command": ["bun", "run", "e2e", "e2e/bombadil.e2e.ts", "--project=node", "-g", "W-1060"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1061/unnamed-token-field",
+      "requirement": "W-1061",
+      "description": "The type scale's base size field loses its name, so Kumo warns and screen readers say nothing.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TokenScales.tsx",
+          "search": "            aria-label={`${kind === \"type\" ? \"Body size\" : \"Base gap\"} (px)`}\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/token-scales.test.tsx"],
+      "expect": "Kumo Input\\]: Input must have an accessible name"
+    },
+    {
+      "id": "W-1061/kumo-warning-prints",
+      "requirement": "W-1061",
+      "description": "Kumo's unnamed-field warning only prints again, so a new unnamed field passes the tests.",
+      "edits": [
+        {
+          "file": "test/setup/happydom.ts",
+          "search": "    throw new Error(first.split(\"\\n\")[0]);\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./test/setup/happydom.test.ts"],
+      "expect": "\\(fail\\).*unnamed-field warning fails"
+    },
+    {
+      "id": "W-1062/spacer-no-basis",
+      "requirement": "W-1062",
+      "description": "A Spacer in a row adds no gap again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        declarations.push({ property: \"flex-basis\", value: height });\n",
+          "replace": "        void height;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
+      "expect": "\\(fail\\).*spacer is a single aria-hidden div"
+    },
+    {
+      "id": "W-1062/spacer-basis-beats-width",
+      "requirement": "W-1062",
+      "description": "A Spacer's basis overrides the width it was given.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "      if (height && sized?.width === undefined && sized?.flexBasis === undefined)\n",
+          "replace": "      if (height)\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/elements.test.ts"],
+      "expect": "\\(fail\\).*its own width wins"
+    },
+    {
+      "id": "W-1062/spacer-no-basis-e2e",
+      "requirement": "W-1062",
+      "description": "A Spacer in a row on a published page adds no gap.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        declarations.push({ property: \"flex-basis\", value: height });\n",
+          "replace": "        void height;\n"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1062"],
       "env": {
         "CI": "1"
       },

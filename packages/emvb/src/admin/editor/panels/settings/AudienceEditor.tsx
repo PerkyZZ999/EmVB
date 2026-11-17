@@ -137,6 +137,7 @@ export function AudienceEditor({
             <span className="emvb-bind-label">Countries (two-letter codes)</span>
             <Input
               className={FIELD}
+              aria-label="Countries (two-letter codes)"
               value={countryText}
               placeholder="CA, US"
               data-emvb-audience-countries=""
@@ -188,6 +189,7 @@ export function AudienceEditor({
             <span className="emvb-bind-label">Segments (from your site)</span>
             <Input
               className={FIELD}
+              aria-label="Segments (from your site)"
               value={segmentText}
               placeholder="member, plan:pro"
               data-emvb-audience-segments=""
@@ -298,6 +300,7 @@ export function AudienceEditor({
               <span className="emvb-bind-label">Time zone</span>
               <Input
                 className={FIELD}
+                aria-label="Time zone"
                 value={zoneText}
                 placeholder="UTC"
                 data-emvb-audience-zone=""

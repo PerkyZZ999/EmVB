@@ -92,3 +92,17 @@ describe("failing assertions on DOM nodes print small (2026-09-30 out-of-memory)
     expect(failure(() => expect({ a: 1 }).not.toEqual({ a: 1 }))).toContain("Expected: not");
   });
 });
+
+// oxlint-disable no-console -- these tests call the console.warn the preload wraps.
+describe("Kumo's unnamed-field warning fails the test (W-1061)", () => {
+  test("the warning throws where the field renders; other warnings only print", () => {
+    const kumo =
+      "[Kumo Input]: Input must have an accessible name. Provide either:\n  - label prop";
+    expect(failure(() => console.warn(kumo))).toBe(
+      "[Kumo Input]: Input must have an accessible name. Provide either:",
+    );
+    const before = console.warn;
+    expect(failure(() => console.warn("[Kumo Input]: variant is deprecated"))).toBe("passed");
+    expect(console.warn === before).toBe(true);
+  });
+});

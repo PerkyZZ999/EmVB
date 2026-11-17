@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Carousels on phones (W-1056).** A carousel set to show 3 or 4 slides showed 2 on phones; phones now show one slide for every setting.
 - **Carousel autoplay (W-1058).** Hovering and keyboard focus now pause autoplay separately: moving the pointer away while focus is still in the carousel (or the reverse) no longer restarts it.
 - **Animated headline focus (W-1059).** When the rotation ends while its Pause button has focus, focus moves to what follows the heading instead of to the page.
+- **A Spacer in a row (W-1062).** A Spacer between items in a horizontal container added no gap, because it only had a height. It now makes a gap as wide as it is tall there; one you gave a width or flex basis keeps it.
 - **Countdown end (W-1060).** The live countdown showed its ended text up to a second before the deadline; it now ends at the deadline.
 
 ## [1.3.0] - 2026-11-14

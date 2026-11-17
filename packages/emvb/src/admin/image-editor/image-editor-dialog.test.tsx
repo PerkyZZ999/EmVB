@@ -54,7 +54,9 @@ let version = 0;
 const change = (patch: Partial<typeof state>) => {
   Object.assign(state, patch);
   version++;
-  for (const fn of listeners) fn();
+  act(() => {
+    for (const fn of listeners) fn();
+  });
 };
 const record =
   (name: string, then?: (...args: unknown[]) => void) =>
@@ -292,7 +294,9 @@ const q = <T extends Element = HTMLElement>(sel: string) => document.querySelect
 const click = async (sel: string) => {
   const el = q<HTMLButtonElement>(sel);
   if (!el) throw new Error(`no ${sel}`);
-  el.click();
+  await act(async () => {
+    el.click();
+  });
   await settle();
 };
 
@@ -335,16 +339,22 @@ describe("image editor in photocn's layout (W-483)", () => {
       "Metadata",
     ]);
     expect(tools[0]?.getAttribute("aria-pressed")).toBe("true");
-    tools[0]?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    await act(async () => {
+      tools[0]?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    });
     await settle();
     expect(q("[data-emvb-image-panel]")?.dataset.emvbImagePanel).toBe("compose");
-    tools[1]?.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    await act(async () => {
+      tools[1]?.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+    });
     await settle();
     expect(q("[data-emvb-image-panel]")?.dataset.emvbImagePanel).toBe("metadata");
     // W-680: Alt/Ctrl/Cmd + arrows belong to the browser.
-    tools[5]?.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "ArrowLeft", altKey: true, bubbles: true }),
-    );
+    await act(async () => {
+      tools[5]?.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowLeft", altKey: true, bubbles: true }),
+      );
+    });
     await settle();
     expect(q("[data-emvb-image-panel]")?.dataset.emvbImagePanel).toBe("metadata");
   });
@@ -368,7 +378,9 @@ describe("image editor in photocn's layout (W-483)", () => {
     const zoom = () => q("[data-emvb-image-zoom]")?.dataset.emvbImageZoom;
     const out = () => q<HTMLButtonElement>("[data-emvb-image-zoom-out]");
     const press = async (el: HTMLElement | null) => {
-      el?.click();
+      await act(async () => {
+        el?.click();
+      });
       await settle();
     };
     expect(zoom()).toBe("100");
@@ -393,7 +405,9 @@ describe("image editor in photocn's layout (W-483)", () => {
         configurable: true,
         value: [new File([text], "r.recipe.json", { type: "application/json" })],
       });
-      input.dispatchEvent(new Event("change", { bubbles: true }));
+      await act(async () => {
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
       await settle();
       await settle();
     };
@@ -429,7 +443,10 @@ describe("image editor in photocn's layout (W-483)", () => {
   test("W-839: a toolbar button that runs out hands focus to its nearest enabled neighbour", async () => {
     serveImage();
     await open({ src: "/a.jpg", alt: "A" });
-    const wait = () => new Promise((resolve) => setTimeout(resolve, 120));
+    const wait = () =>
+      act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 120));
+      });
     const name = () =>
       document.activeElement?.getAttribute("aria-label") ?? document.activeElement?.textContent;
     change({ canUndo: true, edited: true });
@@ -471,8 +488,12 @@ describe("image editor in photocn's layout (W-483)", () => {
     if (!slider) throw new Error("no slider");
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
     setter?.call(slider, "2.5");
-    slider.dispatchEvent(new Event("input", { bubbles: true }));
-    slider.dispatchEvent(new Event("pointerup", { bubbles: true }));
+    await act(async () => {
+      slider.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      slider.dispatchEvent(new Event("pointerup", { bubbles: true }));
+    });
     await settle();
     expect(q(".emvb-ie-slider-value")?.textContent).toBe("+2.5°");
     await click(".emvb-ie-slider-value");
@@ -499,12 +520,15 @@ describe("image editor in photocn's layout (W-483)", () => {
     await open({ src: "/a.jpg", alt: "A" });
     change({ tool: "compose", editingCorners: true });
     await settle();
-    document.activeElement?.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-    );
-    q("[data-emvb-image-panel]")?.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
-    );
+    // One Escape press reaching both listeners in the same moment.
+    await act(async () => {
+      document.activeElement?.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+      q("[data-emvb-image-panel]")?.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+    });
     await settle();
     expect(openChanges).not.toContain(false);
     expect(calls).toContainEqual(["setEditingCorners", false]);
@@ -546,7 +570,9 @@ describe("image editor in photocn's layout (W-483)", () => {
       configurable: true,
       value: [new File(["nope"], "r.recipe.json", { type: "application/json" })],
     });
-    input.dispatchEvent(new Event("change", { bubbles: true }));
+    await act(async () => {
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     await settle();
     await settle();
     expect(q("[data-emvb-image-recipe-error]")?.textContent).toContain(
@@ -714,26 +740,40 @@ const setRange = async (sel: string, v: string) => {
   const el = q<HTMLInputElement>(sel);
   if (!el) throw new Error(`no ${sel}`);
   Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(el, v);
-  el.dispatchEvent(new Event("input", { bubbles: true }));
-  el.dispatchEvent(new Event("pointerup", { bubbles: true }));
+  await act(async () => {
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  await act(async () => {
+    el.dispatchEvent(new Event("pointerup", { bubbles: true }));
+  });
   await settle();
 };
 const typeInto = async (sel: string, v: string) => {
   const el = q<HTMLInputElement>(sel);
   if (!el) throw new Error(`no ${sel}`);
   el.focus();
-  el.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+  await act(async () => {
+    el.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+  });
   await settle();
   Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(el, v);
-  el.dispatchEvent(new Event("input", { bubbles: true }));
+  await act(async () => {
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
   await settle();
-  el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  await act(async () => {
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+  });
   await settle();
 };
 const key = async (el: Element | null, k: string, init: KeyboardEventInit = {}) => {
   if (!el) throw new Error("no element for key");
-  el.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, ...init }));
-  el.dispatchEvent(new KeyboardEvent("keyup", { key: k, bubbles: true, ...init }));
+  await act(async () => {
+    el.dispatchEvent(new KeyboardEvent("keydown", { key: k, bubbles: true, ...init }));
+  });
+  await act(async () => {
+    el.dispatchEvent(new KeyboardEvent("keyup", { key: k, bubbles: true, ...init }));
+  });
   await settle();
 };
 const tab = (name: string) =>
@@ -766,7 +806,9 @@ describe("tone tools in photocn's panels (W-484)", () => {
     expect(calls.at(-2)).toEqual(["setLights", expect.objectContaining({ gamma: 1 })]);
     await click('[data-emvb-image-section-reset="lights"]');
     expect(calls.at(-1)).toEqual(["resetSection", "lights"]);
-    tab("Color")?.click();
+    await act(async () => {
+      tab("Color")?.click();
+    });
     await settle();
     expect(q("[data-emvb-image-section]")?.dataset.emvbImageSection).toBe("colors");
     await setRange('[data-emvb-image-slider="saturation"]', "-0.5");
@@ -819,7 +861,9 @@ describe("tone tools in photocn's panels (W-484)", () => {
     expect(q("[data-emvb-image-panel-reset]")?.hasAttribute("disabled")).toBe(true);
     const mid = points()[2];
     (mid as unknown as HTMLElement).focus();
-    mid?.dispatchEvent(new FocusEvent("focus"));
+    await act(async () => {
+      mid?.dispatchEvent(new FocusEvent("focus"));
+    });
     await settle();
     await key(mid ?? null, "ArrowUp", { shiftKey: true });
     const moved = calls.find((c) => c[0] === "setCurves")?.[1] as [number, number][][];
@@ -838,7 +882,9 @@ describe("tone tools in photocn's panels (W-484)", () => {
     expect(points()).toHaveLength(5);
     expect(q("[data-emvb-image-panel-reset]")?.hasAttribute("disabled")).toBe(false);
     // Channels are tabs; a channel starts on the identity curve.
-    tab("R")?.click();
+    await act(async () => {
+      tab("R")?.click();
+    });
     await settle();
     expect(q("[data-emvb-image-curve]")?.getAttribute("data-emvb-image-curve")).toBe("r");
     expect(points()[2]?.getAttribute("aria-valuetext")).toBe("input 128, output 128");
@@ -851,7 +897,9 @@ describe("tone tools in photocn's panels (W-484)", () => {
     expect(q("[data-emvb-image-panel-reset]")?.hasAttribute("disabled")).toBe(true);
     await typeInto('[data-emvb-image-number="bokeh-strength"]', "60");
     expect(calls).toContainEqual(["setBlur", expect.objectContaining({ bokehStrength: 0.6 })]);
-    tab("Gaussian")?.click();
+    await act(async () => {
+      tab("Gaussian")?.click();
+    });
     await settle();
     expect(q("[data-emvb-image-section]")?.dataset.emvbImageSection).toBe("gaussian");
     await setRange('[data-emvb-image-slider="gaussian-radius"]', "80");

@@ -435,6 +435,11 @@ export function renderPage(
     if (node.type === "spacer") {
       const height = cssLength((node as { props: { height: unknown } }).props.height);
       if (height) declarations.push({ property: "height", value: height });
+      // W-1062: in a flex box the basis is the size along its direction, so in a row the Spacer
+      // makes a gap as wide as it is tall. Its own width or basis, if set, wins.
+      const sized = node.style as { width?: unknown; flexBasis?: unknown } | undefined;
+      if (height && sized?.width === undefined && sized?.flexBasis === undefined)
+        declarations.push({ property: "flex-basis", value: height });
     }
     if (node.type === "layout-section") {
       // The inner box's width (W-156): full width, or a length; unset keeps the 1140 px default.

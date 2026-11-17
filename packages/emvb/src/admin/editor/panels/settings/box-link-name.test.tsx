@@ -2,7 +2,8 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { emptyDesign, type Layout, type LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { ElementPanel } from "../ElementPanel.tsx";
-import { cleanup, mount } from "../../../../../test/dom/mount.ts";
+import { act } from "react";
+import { cleanup, mount, settle } from "../../../../../test/dom/mount.ts";
 import { unnamedBoxLink } from "./box-link-name.ts";
 
 const stubFetcher: Fetcher = async () => new Response("{}", { status: 200 });
@@ -70,8 +71,8 @@ describe("a linked box with nothing that names it (W-261)", () => {
     const tab = [...document.querySelectorAll('[role="tab"]')].find((el) =>
       /content/i.test(el.textContent ?? ""),
     ) as HTMLElement | undefined;
-    if (tab) tab.click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await act(async () => tab?.click());
+    await settle();
     expect(document.querySelector("[data-emvb-unnamed-link]")?.textContent).toContain("aria-label");
   });
 });
@@ -108,8 +109,8 @@ describe("a box Link held back by what's inside (W-669)", () => {
     const tab = [...document.querySelectorAll('[role="tab"]')].find((el) =>
       /content/i.test(el.textContent ?? ""),
     ) as HTMLElement | undefined;
-    if (tab) tab.click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await act(async () => tab?.click());
+    await settle();
     expect(document.querySelector("[data-emvb-held-back-link]")?.textContent).toContain(
       "isn't used",
     );

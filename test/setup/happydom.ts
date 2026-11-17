@@ -13,6 +13,19 @@ GlobalRegistrator.register({
 // Tells React that component tests wrap updates in act().
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
+// W-1061: Kumo warns, and screen readers get no name, when a field has no `label`, `aria-label`
+// or `aria-labelledby` prop (a wrapping <label> doesn't count for its check). The unit run printed
+// 203 of these; now any one fails the test that rendered the field.
+// oxlint-disable-next-line no-console -- the preload wraps console.warn on purpose.
+const realWarn = console.warn;
+// oxlint-disable-next-line no-console -- see above.
+console.warn = (...args: unknown[]) => {
+  const first = args[0];
+  if (typeof first === "string" && /^\[Kumo \w+\]: .* must have an accessible name/.test(first))
+    throw new Error(first.split("\n")[0]);
+  realWarn(...args);
+};
+
 // A failing matcher prints its values, and a happy-dom node reaches the whole window and React
 // fiber graph: one failed `expect(element).toBeNull()` printed gigabytes and got the desktop
 // killed (2026-09-30). So nodes print as a short tag, and the diff matchers, which ignore that
