@@ -32,3 +32,9 @@ and a page with only one published language shows nothing. Its **Label** names t
 screen readers (default "Languages").
 
 Theme parts (header, footer, popups) are shared by every language for now.
+
+## Right-to-left languages
+
+A page or element whose direction is right to left (the site's direction in Site styles, or an
+element's own **Direction** in Advanced) mirrors arrow, chevron, caret and angle icons that point
+left or right, so a "Next" arrow still points forward. Other icons stay as they are.

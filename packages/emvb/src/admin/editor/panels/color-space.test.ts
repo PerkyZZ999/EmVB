@@ -81,3 +81,33 @@ describe("CSS colour forms (W-540)", () => {
     expect(parseOklch("oklch(0.5 0.1 400deg)")).toEqual(parseOklch("oklch(0.5 0.1 40)"));
   });
 });
+
+describe("OKLCH outside sRGB is mapped by chroma, not clipped (W-1082)", () => {
+  const read = (text: string) => {
+    const out = readBack(toHex(must(parseOklch(text))));
+    return out;
+  };
+  const readBack = (hex: string) => {
+    const [l, c, h] = formatOklch(must(parseHex(hex)))
+      .split(", ")
+      .map(Number) as [number, number, number];
+    return { hex, l, c, h };
+  };
+
+  test("lightness and hue stay close; chroma gives way", () => {
+    // Per-channel clipping turned this violet into L 48, hue 315.7 (#8e00b5).
+    const violet = read("40, 0.35, 320");
+    expect(violet.hex).toBe("#75008c");
+    expect(Math.abs(violet.l - 40)).toBeLessThan(1.5);
+    expect(Math.abs(violet.h - 320)).toBeLessThan(1.5);
+    expect(violet.c).toBeLessThan(0.35);
+    // Clipping gave #1500ff, L 45.5.
+    expect(read("50, 0.4, 264").hex).toBe("#0033ff");
+  });
+
+  test("in-gamut colours, white and black are left alone", () => {
+    expect(read("62.796, 0.25768, 29.23").hex).toBe("#ff0000");
+    expect(read("100, 0.3, 40").hex).toBe("#ffffff");
+    expect(read("0, 0.3, 40").hex).toBe("#000000");
+  });
+});

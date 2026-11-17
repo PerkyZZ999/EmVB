@@ -438,7 +438,7 @@ describe("colour field: label, swatches and Custom color (W-136)", () => {
     await view.enter("OKLCH");
     expect(view.values).toEqual(["#ff0000"]);
     expect(hint()).toBe(
-      "Clipped to #ff0000: that OKLCH colour is outside sRGB, so its out-of-range channels were cut to fit.",
+      "Mapped to #ff0000: that OKLCH colour is outside sRGB, so it keeps its lightness and hue with less chroma.",
     );
     await view.type("OKLCH", "62.8, 0.1, 29");
     await view.enter("OKLCH");
@@ -478,7 +478,7 @@ describe("colour field: label, swatches and Custom color (W-136)", () => {
     });
     await settle();
     expect(host.querySelector("[data-emvb-clipped]")?.textContent ?? null).toStartWith(
-      "Clipped to #ff0000:",
+      "Mapped to #ff0000:",
     );
   });
 

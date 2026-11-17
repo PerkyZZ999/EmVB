@@ -113,15 +113,80 @@ function rgbaToOklch({ r, g, b, a }: Rgba): Oklch {
   return { l: L * 100, c, h: c < 0.0001 ? 0 : h, a };
 }
 
-/** Out-of-gamut channels are clipped into sRGB. */
-function oklchToRgba({ l, c, h, a }: Oklch): Rgba {
+const linearOf = ({ l, c, h }: Oklch): [number, number, number] => {
   const rad = (h * Math.PI) / 180;
-  const [lr, lg, lb] = oklabToLinearSrgb(l / 100, c * Math.cos(rad), c * Math.sin(rad));
+  return oklabToLinearSrgb(l / 100, c * Math.cos(rad), c * Math.sin(rad));
+};
+
+const inGamut = (linear: readonly number[]) => linear.every((v) => v >= -1e-6 && v <= 1 + 1e-6);
+
+/** Each linear channel clipped into sRGB, as an OKLCH colour again. */
+function clip(colour: Oklch): Oklch {
+  const [r, g, b] = linearOf(colour).map((v) => Math.min(1, Math.max(0, v))) as [
+    number,
+    number,
+    number,
+  ];
+  const [L, A, B] = linearSrgbToOklab(r, g, b);
+  return { l: L * 100, c: Math.hypot(A, B), h: (Math.atan2(B, A) * 180) / Math.PI, a: colour.a };
+}
+
+/** Distance in Oklab, with L on its 0–1 scale (deltaEOK). */
+function deltaEOK(x: Oklch, y: Oklch): number {
+  const lab = ({ l, c, h }: Oklch) => {
+    const rad = (h * Math.PI) / 180;
+    return [l / 100, c * Math.cos(rad), c * Math.sin(rad)];
+  };
+  const [l1 = 0, a1 = 0, b1 = 0] = lab(x);
+  const [l2 = 0, a2 = 0, b2 = 0] = lab(y);
+  return Math.hypot(l1 - l2, a1 - a2, b1 - b2);
+}
+
+/**
+ * W-1082: CSS Color 4's gamut mapping (binary search on chroma with a local MINDE). An OKLCH
+ * colour sRGB can't show keeps its lightness and hue and loses chroma until clipping it changes
+ * it by less than a just-noticeable difference, instead of clipping each channel, which shifted
+ * the hue.
+ */
+function mapIntoSrgb(origin: Oklch): Oklch {
+  if (origin.l >= 100) return { l: 100, c: 0, h: origin.h, a: origin.a };
+  if (origin.l <= 0) return { l: 0, c: 0, h: origin.h, a: origin.a };
+  if (inGamut(linearOf(origin))) return origin;
+  const JND = 0.02;
+  const EPSILON = 0.0001;
+  let clipped = clip(origin);
+  if (deltaEOK(clipped, origin) < JND) return clipped;
+  let min = 0;
+  let max = origin.c;
+  let minInGamut = true;
+  while (max - min > EPSILON) {
+    const chroma = (min + max) / 2;
+    const current = { ...origin, c: chroma };
+    if (minInGamut && inGamut(linearOf(current))) {
+      min = chroma;
+      continue;
+    }
+    clipped = clip(current);
+    const e = deltaEOK(clipped, current);
+    if (e < JND) {
+      if (JND - e < EPSILON) return clipped;
+      minInGamut = false;
+      min = chroma;
+    } else {
+      max = chroma;
+    }
+  }
+  return clipped;
+}
+
+/** Out-of-gamut colours are mapped into sRGB by reducing chroma (W-1082). */
+function oklchToRgba(colour: Oklch): Rgba {
+  const [lr, lg, lb] = linearOf(mapIntoSrgb(colour));
   return {
     r: channel(linearToSrgb(lr) * 255),
     g: channel(linearToSrgb(lg) * 255),
     b: channel(linearToSrgb(lb) * 255),
-    a,
+    a: colour.a,
   };
 }
 
@@ -154,8 +219,8 @@ export function parseOklch(text: string): Rgba | null {
 }
 
 /**
- * Whether a typed OKLCH colour lies outside sRGB, so saving it as hex clipped a channel (W-183).
- * The slack is half an 8-bit step, so a value EmVB formatted itself never counts as clipped.
+ * Whether a typed OKLCH colour lies outside sRGB, so saving it as hex mapped it in (W-183,
+ * W-1082). The slack is half an 8-bit step, so a value EmVB formatted itself never counts.
  */
 export function oklchClipped(text: string): boolean {
   const oklch = readOklch(text);

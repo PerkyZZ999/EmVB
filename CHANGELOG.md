@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- **Arrows on right-to-left pages (W-1079).** Arrow, chevron, caret and angle icons that point left or right are mirrored on right-to-left pages, so "next" still points forward.
+- **OKLCH colours outside sRGB (W-1082).** A typed OKLCH colour that a screen can't show is brought into range the way browsers do it (CSS Color 4): it keeps its lightness and hue and loses chroma, instead of each channel being cut, which shifted the colour. The note under the field now says "Mapped to".
+
 ### Fixed
 
 - **Publishing while a save is running no longer reports a conflict with yourself (W-1052).** Pressing Ctrl+S (or Undo then Ctrl+S) while Publish was still saving your changes could make Publish fail with "This page was changed somewhere else". The editor now sends its own saves, publishes and schedules one at a time, each with the revision the one before it left.
@@ -16,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Carousel autoplay (W-1058).** Hovering and keyboard focus now pause autoplay separately: moving the pointer away while focus is still in the carousel (or the reverse) no longer restarts it.
 - **Animated headline focus (W-1059).** When the rotation ends while its Pause button has focus, focus moves to what follows the heading instead of to the page.
 - **A Spacer in a row (W-1062).** A Spacer between items in a horizontal container added no gap, because it only had a height. It now makes a gap as wide as it is tall there; one you gave a width or flex basis keeps it.
+- **A menu used twice (W-1078).** When the same menu was in the header and the footer, opening a dropdown in one closed the open one in the other. Each copy now opens on its own.
 - **Countdown end (W-1060).** The live countdown showed its ended text up to a second before the deadline; it now ends at the deadline.
 
 ## [1.3.0] - 2026-11-14

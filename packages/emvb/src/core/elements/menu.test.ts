@@ -143,3 +143,20 @@ test("W-601 a non-item straight in a Menu (import, MCP) sits beside the list, no
   expect(html).toContain('<h2 class="emvb-heading">Hi</h2>');
   expect(html.match(/<ul class="emvb-menu__list">/g)?.length).toBe(2);
 });
+
+test("the same menu in a header and a footer opens its dropdowns separately (W-1078)", () => {
+  const menu: LayoutNode = {
+    id: "menu0009",
+    type: "menu",
+    props: { label: "Primary" },
+    children: [item("item0091", "Work", { children: [item("item0092", "One", { href: "/1" })] })],
+  };
+  const names = (html: string) => [...html.matchAll(/name="([^"]+)"/g)].map((m) => m[1]);
+  // A page keeps the plain name; each theme part's copy gets its own.
+  expect(names(renderPage(page(menu), design).html)).toEqual(["emvb-menu-menu0009"]);
+  const header = names(renderPage(page(menu), design, { scope: "head", partIds: true }).html);
+  const footer = names(renderPage(page(menu), design, { scope: "foot", partIds: true }).html);
+  expect(header[0]?.startsWith("emvb-menu-menu0009-t")).toBe(true);
+  expect(footer[0]?.startsWith("emvb-menu-menu0009-t")).toBe(true);
+  expect(header[0] === footer[0]).toBe(false);
+});

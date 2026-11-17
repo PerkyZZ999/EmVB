@@ -228,6 +228,27 @@ const baseCss = new Map(Object.entries(ELEMENTS).map(([type, def]) => [type, def
 baseCss.set("ext", EXTENSION_PLACEHOLDER_CSS);
 
 /**
+ * W-1078: a Menu's dropdowns share a `<details name>` group, so one opens at a time. The name was
+ * the menu's id, so the same menu twice (a synced header menu repeated in the footer) shared one
+ * group and opening a dropdown in one copy closed the other's. Each copy gets its own names.
+ */
+function uniqueMenuGroups(menu: VNode, uniqueId: (base: string) => string): VNode {
+  const renamed = new Map<string, string>();
+  const walk = (vnode: VNode): VNode => {
+    const name = vnode.tag === "details" ? vnode.attrs["name"] : undefined;
+    let attrs = vnode.attrs;
+    if (name?.startsWith("emvb-menu-")) {
+      const unique = renamed.get(name) ?? uniqueId(name);
+      renamed.set(name, unique);
+      attrs = { ...attrs, name: unique };
+    }
+    const children = vnode.children.map((c) => (typeof c === "string" ? c : walk(c)));
+    return { ...vnode, attrs, children };
+  };
+  return walk(menu);
+}
+
+/**
  * W-971: theme parts on one page (header, footer, popups, floats) each repeated the scope wrapper
  * rule, the print rules and the base rules of their element types. Given their sheets (each the
  * `css` of a scoped `renderPage`), this writes the wrapper and the union of base rules once, scoped
@@ -735,7 +756,8 @@ export function renderPage(
       }
     }
     if (isParentNode(node)) {
-      return finish(node, def.build(node as never, attrs, ctx.children(node.children, dynamic)));
+      const built = def.build(node as never, attrs, ctx.children(node.children, dynamic));
+      return finish(node, node.type === "menu" ? uniqueMenuGroups(built, ctx.uniqueId) : built);
     }
     if (mode === "editor" && node.type === "video") {
       const preview = videoPreview(node, attrs);

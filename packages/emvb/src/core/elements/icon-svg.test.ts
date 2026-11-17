@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { droppedNotice, prepareElement } from "../clipboard.ts";
 import { renderPage } from "../render/index.ts";
+import { isDirectionalIcon } from "./icon-svg.ts";
 import { emptyDesign } from "../schema/design.ts";
 import { ICON_SVG_MAX, type Layout, type LayoutNode } from "../schema/layout.ts";
 import { validateLayout } from "../validate.ts";
@@ -126,5 +127,39 @@ describe("library icons render their stored SVG (W-234)", () => {
     );
     expect((pixel.node.props as { iconSvg?: string }).iconSvg).not.toContain("t.example");
     expect(droppedNotice(pixel.dropped)).toBe("Left out 1 external image.");
+  });
+});
+
+describe("directional icons mirror on right-to-left pages (W-1079)", () => {
+  test("arrows, chevrons, carets and angles to the left or right are directional", () => {
+    for (const id of [
+      "arrow-right",
+      "fa-solid:arrow-left",
+      "chevron-right",
+      "lucide:chevrons-left",
+      "tabler:caret-right",
+      "fa-solid:angle-left",
+      "arrow-narrow-right",
+    ])
+      expect([id, isDirectionalIcon(id)]).toEqual([id, true]);
+    for (const id of ["arrow-up", "chevron-down", "star", "file:right-hand", "copyright"])
+      expect([id, isDirectionalIcon(id)]).toEqual([id, false]);
+  });
+
+  test("a directional icon's svg is marked; the base CSS mirrors it under :dir(rtl)", () => {
+    const iconNode = (id: string, iconId: string) =>
+      ({ id, type: "icon", props: { iconId, title: "Next" } }) as unknown as LayoutNode;
+    const layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [iconNode("icon0001", "arrow-right"), iconNode("icon0002", "star")],
+      },
+    } as Layout;
+    const out = renderPage(layout, emptyDesign());
+    expect(out.html.match(/emvb-icon-dir/g)?.length).toBe(1);
+    expect(out.css).toContain(".emvb-icon-dir:dir(rtl){transform:scaleX(-1)}");
   });
 });

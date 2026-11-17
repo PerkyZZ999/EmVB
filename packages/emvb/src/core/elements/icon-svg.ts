@@ -92,6 +92,18 @@ function pickedIconAttrs(attrs: Record<string, string>): Record<string, string> 
  * W-1020: an icon's `<svg>` at `size` px with `aria` (its name, or `aria-hidden`), or undefined
  * when the id is unknown and no SVG is stored.
  */
+/**
+ * W-1079: an icon that points along the reading direction (an arrow, chevron, caret or angle to
+ * the left or right). On a right-to-left page it is mirrored, so "next" still points forward.
+ */
+export function isDirectionalIcon(iconId: string): boolean {
+  const name = (iconId.split(":").pop() ?? "").toLowerCase();
+  return (
+    /(^|[-_])(arrows?|chevrons?|carets?|angles?|triangle)([-_]|$)/.test(name) &&
+    /(^|[-_])(left|right)([-_]|$)/.test(name)
+  );
+}
+
 export function iconGlyph(
   props: { iconId: string; iconSvg?: string | undefined; singleColor?: boolean | undefined },
   size: number,
@@ -129,6 +141,8 @@ export function iconGlyph(
         children: [],
       }));
   strokeClass(svgAttrs);
+  if (isDirectionalIcon(props.iconId))
+    svgAttrs.class = svgAttrs.class ? `${svgAttrs.class} emvb-icon-dir` : "emvb-icon-dir";
   const single = picked !== undefined && props.singleColor === true;
   if (single) monochromeRoot(svgAttrs);
   return { tag: "svg", attrs: svgAttrs, children: single ? monochrome(children) : children };

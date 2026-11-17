@@ -649,7 +649,7 @@ const icon: ElementDefinition<IconNode> = {
       (width) =>
         `.emvb-icon-sw${width.replace(".", "_")}{stroke-width:var(--emvb-icon-stroke,${width})}`,
     ).join("") +
-    "@keyframes emvb-icon-spin{to{transform:rotate(360deg)}}@keyframes emvb-icon-pulse{from{transform:scale(1)}to{transform:scale(1.15)}}@media (prefers-reduced-motion: reduce){.emvb-icon svg{animation:none}}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
+    "@keyframes emvb-icon-spin{to{transform:rotate(360deg)}}@keyframes emvb-icon-pulse{from{transform:scale(1)}to{transform:scale(1.15)}}@media (prefers-reduced-motion: reduce){.emvb-icon svg{animation:none}}.emvb-icon-dir:dir(rtl){transform:scaleX(-1)}.emvb-icon-missing{min-width:1em;min-height:1em;background:var(--color-kumo-tint,#eee)}",
   defaults: () => ({
     type: "icon",
     props: { iconId: "star", title: "Star", decorative: false, size: 24 },

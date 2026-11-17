@@ -338,8 +338,8 @@ function CustomColor({
       />
       {clipped !== null && clipped === draft && !error && (
         <p className="emvb-helper" role="status" data-emvb-clipped="">
-          Clipped to {clipped}: that OKLCH colour is outside sRGB, so its out-of-range channels were
-          cut to fit.
+          Mapped to {clipped}: that OKLCH colour is outside sRGB, so it keeps its lightness and hue
+          with less chroma.
         </p>
       )}
     </div>

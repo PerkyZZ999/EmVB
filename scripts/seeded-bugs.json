@@ -50693,6 +50693,107 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1078/menu-groups-shared",
+      "requirement": "W-1078",
+      "description": "Two copies of one menu share their dropdown group again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "node.type === \"menu\" ? uniqueMenuGroups(built, ctx.uniqueId) : built",
+          "replace": "built"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/menu.test.ts"],
+      "expect": "\\(fail\\).*opens its dropdowns separately"
+    },
+    {
+      "id": "W-1079/no-dir-class",
+      "requirement": "W-1079",
+      "description": "Directional icons aren't marked, so they never mirror.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
+          "search": "  if (isDirectionalIcon(props.iconId))\n",
+          "replace": "  if (props.iconId === \"\")\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\).*directional icon's svg is marked"
+    },
+    {
+      "id": "W-1079/arrows-not-directional",
+      "requirement": "W-1079",
+      "description": "Arrow icons aren't recognised as directional.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
+          "search": "    /(^|[-_])(arrows?|chevrons?|carets?|angles?|triangle)([-_]|$)/.test(name) &&",
+          "replace": "    /(^|[-_])(chevrons?|carets?|angles?|triangle)([-_]|$)/.test(name) &&"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\).*arrows, chevrons"
+    },
+    {
+      "id": "W-1079/rtl-rule-missing",
+      "requirement": "W-1079",
+      "description": "The mirror rule is missing from the Icon's CSS.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/index.ts",
+          "search": ".emvb-icon-dir:dir(rtl){transform:scaleX(-1)}",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/elements/icon-svg.test.ts"],
+      "expect": "\\(fail\\).*directional icon's svg is marked"
+    },
+    {
+      "id": "W-1079/no-dir-class-e2e",
+      "requirement": "W-1079",
+      "description": "An arrow icon on a right-to-left page isn't mirrored.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/elements/icon-svg.ts",
+          "search": "  if (isDirectionalIcon(props.iconId))\n",
+          "replace": "  if (props.iconId === \"\")\n"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1079"],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1082/clips-again",
+      "requirement": "W-1082",
+      "description": "An OKLCH colour outside sRGB is clipped per channel again.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/color-space.ts",
+          "search": "  if (inGamut(linearOf(origin))) return origin;\n",
+          "replace": "  return origin;\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-space.test.ts"],
+      "expect": "\\(fail\\).*lightness and hue stay close"
+    },
+    {
+      "id": "W-1082/no-white",
+      "requirement": "W-1082",
+      "description": "A full-lightness OKLCH colour isn't white.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/color-space.ts",
+          "search": "  if (origin.l >= 100) return { l: 100, c: 0, h: origin.h, a: origin.a };\n",
+          "replace": "  if (origin.l > 100) return { l: 100, c: 0, h: origin.h, a: origin.a };\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/color-space.test.ts"],
+      "expect": "\\(fail\\).*white and black are left alone"
     }
   ]
 }

@@ -386,7 +386,7 @@ const MEDIA_BOX_FIELDS = [
 ];
 
 export const iconBox: ElementDefinition<IconBoxNode> = {
-  baseCss: `${MEDIA_BOX_CSS}.emvb-icon-box .emvb-media-box-media svg{display:block;max-width:100%}`,
+  baseCss: `${MEDIA_BOX_CSS}.emvb-icon-box .emvb-media-box-media svg{display:block;max-width:100%}.emvb-icon-dir:dir(rtl){transform:scaleX(-1)}`,
   defaults: () => ({
     type: "icon-box",
     props: {

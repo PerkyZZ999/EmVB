@@ -133,3 +133,6 @@ to those brands.
 
 Remix Icon is pinned to 4.8.0: from 4.9.0 on it uses its own "Remix Icon License v1.0", which
 doesn't allow redistributing the icons as part of another icon library.
+
+Icons that point left or right (arrows, chevrons, carets and angles) are mirrored on right-to-left
+pages. To keep one as drawn, pick an icon whose name doesn't say left or right.
