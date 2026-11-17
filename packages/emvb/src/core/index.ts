@@ -373,6 +373,7 @@ export {
 export {
   TRIGGERS_SCHEMA_VERSION,
   MAX_POPUP_TRIGGERS,
+  PANEL_SIZES,
   defaultTriggers,
   validateTriggers,
   isSafeClickSelector,

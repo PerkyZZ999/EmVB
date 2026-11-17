@@ -96,10 +96,25 @@ const AdvancedRulesSchema = z
 
 export type PopupAdvancedRules = z.infer<typeof AdvancedRulesSchema>;
 
+/** W-1071: the edges an off-canvas panel slides in from, and its widths. */
+const PANEL_EDGES = ["left", "right"] as const;
+export const PANEL_SIZES = ["narrow", "medium", "wide"] as const;
+
+/**
+ * W-1071: shows the popup as an off-canvas panel: full height at the `edge`, sliding in (not for
+ * reduced motion), `size` narrow 20rem, medium 24rem (unset) or wide 32rem, never wider than the
+ * screen less 3rem. Unset: a centred popup.
+ */
+const PanelSchema = z.strictObject({
+  edge: z.enum(PANEL_EDGES),
+  size: z.enum(PANEL_SIZES).optional(),
+});
+
 const TriggersDocSchema = z.strictObject({
   schemaVersion: z.literal(TRIGGERS_SCHEMA_VERSION),
   open: boundedArray(PopupOpenTriggerSchema, MAX_POPUP_TRIGGERS, 1),
   advanced: AdvancedRulesSchema.default({}),
+  panel: PanelSchema.optional(),
 });
 
 export type TriggersDoc = z.infer<typeof TriggersDocSchema>;

@@ -168,3 +168,53 @@ test("a sticky header takes its scrolled background and hides while scrolling do
   await expect(header).not.toHaveAttribute("data-emvb-away");
   await expect(header).toBeInViewport();
 });
+
+test("a popup shown as a panel from the right opens at that edge at full height (W-1071)", async ({
+  page,
+  request,
+}) => {
+  const tag = unique();
+  const title = `Menu ${tag}`;
+  const panelId = await createThemePart(request, {
+    title,
+    partType: "popup",
+    slug: `panel-${tag}`,
+    triggers: {
+      schemaVersion: 1,
+      open: [{ type: "click", selector: `#open-${tag}` }],
+      advanced: {},
+      panel: { edge: "right", size: "narrow" },
+    },
+  });
+  try {
+    await publishThemePart(request, panelId);
+    const slug = `fixes-${unique()}`;
+    const layout = {
+      schemaVersion: 18,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          { id: "butn0001", type: "button", props: { text: "Menu" }, htmlId: `open-${tag}` },
+        ],
+      },
+    };
+    await publishPage(request, await createPage(request, "Panel page", layout, slug));
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`/${slug}`);
+    const dialog = page.getByRole("dialog", { name: title });
+    await expect(dialog).toBeHidden();
+    await page.getByRole("button", { name: "Menu" }).click();
+    await expect(dialog).toBeVisible();
+    const box = await dialog.boundingBox();
+    expect(Math.round((box?.x ?? 0) + (box?.width ?? 0))).toBe(1200);
+    expect(Math.round(box?.height ?? 0)).toBe(800);
+    expect(Math.round(box?.width ?? 0)).toBe(320);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+  } finally {
+    await api(request, "DELETE", `/_emdash/api/content/emvb_theme_parts/${panelId}`);
+  }
+});

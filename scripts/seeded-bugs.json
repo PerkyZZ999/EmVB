@@ -51175,6 +51175,83 @@
         "./packages/emvb/src/admin/editor/panels/settings/sticky-control.test.tsx"
       ],
       "expect": "\\(fail\\).*turning the last effect off clears it"
+    },
+    {
+      "id": "W-1071/panel-ignored",
+      "requirement": "W-1071",
+      "description": "A popup set as a panel still shows in the middle.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-markup.ts",
+          "search": "  const panel = triggers.panel;",
+          "replace": "  const panel = undefined as typeof triggers.panel;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/popup-markup.test.ts"],
+      "expect": "\\(fail\\).*same dialog with the edge and width"
+    },
+    {
+      "id": "W-1071/panel-ignored-e2e",
+      "requirement": "W-1071",
+      "description": "A published panel from the right opens in the middle.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-markup.ts",
+          "search": "  const panel = triggers.panel;",
+          "replace": "  const panel = undefined as typeof triggers.panel;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/fixes-1.4.e2e.ts", "--project=node", "-g", "W-1071"],
+      "expect": "✘.*\\[node\\]",
+      "env": {
+        "CI": "1"
+      }
+    },
+    {
+      "id": "W-1071/right-edge-css",
+      "requirement": "W-1071",
+      "description": "A right panel isn't laid out at the right edge.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/popup-markup.ts",
+          "search": ".emvb-popup--right{justify-content:flex-end}",
+          "replace": ".emvb-popup--right{justify-content:flex-start}"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/popup-markup.test.ts"],
+      "expect": "\\(fail\\).*lays panels out at the edge"
+    },
+    {
+      "id": "W-1071/schema-refuses",
+      "requirement": "W-1071",
+      "description": "A popup's triggers refuse a panel.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/triggers.ts",
+          "search": "  panel: PanelSchema.optional(),\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/theme/popup-markup.test.ts"],
+      "expect": "\\(fail\\).*accept a panel edge"
+    },
+    {
+      "id": "W-1071/editor-drops-panel",
+      "requirement": "W-1071",
+      "description": "Changing a device in the triggers panel drops the off-canvas setting.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/TriggersEditor.tsx",
+          "search": "                    ...doc,\n                    advanced: {",
+          "replace": "                    schemaVersion: 1,\n                    open: doc.open,\n                    advanced: {"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/panels/triggers-editor.test.tsx"
+      ],
+      "expect": "\\(fail\\).*keep the panel"
     }
   ]
 }

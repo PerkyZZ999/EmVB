@@ -145,3 +145,18 @@ describe("popup address rules and show dates (W-1081)", () => {
     expect(sent.length).toBe(before);
   });
 });
+
+describe("popup or off-canvas panel (W-1071)", () => {
+  test("other settings keep the panel; Popup in the middle drops it", async () => {
+    await show(doc([{ type: "click", selector: ".open-menu" }], {}));
+    // A panel set elsewhere (the stored doc) survives a device change in this editor.
+    await show({ ...doc([{ type: "click", selector: ".open-menu" }]), panel: { edge: "right" } });
+    const mobile = [...document.querySelectorAll<HTMLInputElement>("input[type=checkbox]")].find(
+      (el) => el.parentElement?.textContent?.includes("Mobile"),
+    );
+    await act(async () => mobile?.click());
+    expect(sent.at(-1)?.panel).toEqual({ edge: "right" });
+    expect(sent.at(-1)?.advanced).toEqual({ devices: ["mobile"] });
+    expect(document.body.textContent).toContain("Panel width");
+  });
+});

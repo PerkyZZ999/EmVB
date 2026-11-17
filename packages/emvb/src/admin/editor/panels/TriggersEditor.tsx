@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   defaultTriggers,
   MAX_POPUP_TRIGGERS,
+  PANEL_SIZES,
   type PopupOpenTrigger,
   type TriggersDoc,
   type UrlParamRule,
@@ -29,6 +30,19 @@ const TRIGGER_TYPES = [
 ] as const;
 
 type TriggerType = (typeof TRIGGER_TYPES)[number]["value"];
+
+/** W-1071: a centred popup, or an off-canvas panel at an edge. */
+const SHAPES = [
+  { value: "centre", label: "Popup in the middle" },
+  { value: "left", label: "Panel from the left" },
+  { value: "right", label: "Panel from the right" },
+] as const;
+
+const WIDTHS = [
+  { value: "narrow", label: "Narrow (20rem)" },
+  { value: "medium", label: "Medium (24rem)" },
+  { value: "wide", label: "Wide (32rem)" },
+] as const;
 
 function blankTrigger(type: TriggerType): PopupOpenTrigger {
   switch (type) {
@@ -184,7 +198,7 @@ function UrlRulesField({
 export function TriggersEditor({ triggers, onChange }: Props) {
   const doc = triggers ?? defaultTriggers();
   const setOpen = (open: PopupOpenTrigger[]) =>
-    onChange({ schemaVersion: 1, open, advanced: doc.advanced ?? {} });
+    onChange({ ...doc, open, advanced: doc.advanced ?? {} });
 
   const updateAt = (index: number, next: PopupOpenTrigger) => {
     setOpen(doc.open.map((t, i) => (i === index ? next : t)));
@@ -265,6 +279,56 @@ export function TriggersEditor({ triggers, onChange }: Props) {
         </p>
       )}
 
+      <h3 className="emvb-section-label">Show as</h3>
+      <Select
+        label="Shape"
+        className={FIELD}
+        value={doc.panel?.edge ?? "centre"}
+        onValueChange={(value) => {
+          const { panel: _old, ...rest } = doc;
+          if (value === "left" || value === "right")
+            onChange({ ...rest, panel: { ...doc.panel, edge: value } });
+          else onChange(rest);
+        }}
+        renderValue={(value: unknown) =>
+          SHAPES.find((o) => o.value === value)?.label ?? String(value)
+        }
+      >
+        {SHAPES.map((option) => (
+          <Select.Option key={option.value} value={option.value}>
+            {option.label}
+          </Select.Option>
+        ))}
+      </Select>
+      {doc.panel && (
+        <Select
+          label="Panel width"
+          className={FIELD}
+          value={doc.panel.size ?? "medium"}
+          onValueChange={(value) => {
+            const edge = doc.panel?.edge ?? "left";
+            const size = PANEL_SIZES.find((s) => s === value);
+            onChange({
+              ...doc,
+              panel: size && size !== "medium" ? { edge, size } : { edge },
+            });
+          }}
+          renderValue={(value: unknown) =>
+            WIDTHS.find((o) => o.value === value)?.label ?? String(value)
+          }
+        >
+          {WIDTHS.map((option) => (
+            <Select.Option key={option.value} value={option.value}>
+              {option.label}
+            </Select.Option>
+          ))}
+        </Select>
+      )}
+      <p className="emvb-helper">
+        A panel slides in from the edge and fills the screen's height: use it for a mobile menu,
+        filters or a cart, opened by a click trigger on a button.
+      </p>
+
       <h3 className="emvb-section-label">Advanced</h3>
       <p className="emvb-helper">
         Limit how often the popup shows, on which devices, on which addresses and when.
@@ -272,9 +336,7 @@ export function TriggersEditor({ triggers, onChange }: Props) {
       <ShowTimesField
         key={String(advanced.showTimes ?? "")}
         value={advanced.showTimes ?? null}
-        onCommit={(showTimes) =>
-          onChange({ schemaVersion: 1, open: doc.open, advanced: { ...advanced, showTimes } })
-        }
+        onCommit={(showTimes) => onChange({ ...doc, advanced: { ...advanced, showTimes } })}
       />
       <fieldset className="emvb-device-fieldset">
         <legend className="emvb-field-label">Devices</legend>
@@ -298,8 +360,7 @@ export function TriggersEditor({ triggers, onChange }: Props) {
                     ? [...selected.filter((d) => d !== value), value]
                     : selected.filter((d) => d !== value);
                   onChange({
-                    schemaVersion: 1,
-                    open: doc.open,
+                    ...doc,
                     advanced: {
                       ...advanced,
                       devices: next.length ? next : null,
@@ -315,25 +376,19 @@ export function TriggersEditor({ triggers, onChange }: Props) {
       <UrlRulesField
         key={formatUrlRules(advanced.urlParams)}
         value={advanced.urlParams ?? null}
-        onCommit={(urlParams) =>
-          onChange({ schemaVersion: 1, open: doc.open, advanced: { ...advanced, urlParams } })
-        }
+        onCommit={(urlParams) => onChange({ ...doc, advanced: { ...advanced, urlParams } })}
       />
       <ShowDateField
         key={`from:${advanced.from ?? ""}`}
         label="Show from"
         value={advanced.from ?? null}
-        onCommit={(from) =>
-          onChange({ schemaVersion: 1, open: doc.open, advanced: { ...advanced, from } })
-        }
+        onCommit={(from) => onChange({ ...doc, advanced: { ...advanced, from } })}
       />
       <ShowDateField
         key={`until:${advanced.until ?? ""}`}
         label="Show until"
         value={advanced.until ?? null}
-        onCommit={(until) =>
-          onChange({ schemaVersion: 1, open: doc.open, advanced: { ...advanced, until } })
-        }
+        onCommit={(until) => onChange({ ...doc, advanced: { ...advanced, until } })}
       />
     </div>
   );

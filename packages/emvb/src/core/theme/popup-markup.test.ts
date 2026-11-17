@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { defaultTriggers } from "./triggers.ts";
+import { defaultTriggers, validateTriggers } from "./triggers.ts";
 import { POPUP_CHROME_CSS, wrapPopupMarkup } from "./popup-markup.ts";
 
 describe("wrapPopupMarkup", () => {
@@ -53,4 +53,44 @@ test("W-758: the close button stays at the top of a long popup and doesn't cover
   expect(rule).toContain("top:-1rem");
   expect(rule).toContain("float:right");
   expect(rule).not.toContain("position:absolute");
+});
+
+describe("off-canvas panels (W-1071)", () => {
+  const triggers = (panel?: unknown) =>
+    ({
+      schemaVersion: 1,
+      open: [{ type: "page_load" }],
+      advanced: {},
+      ...(panel ? { panel } : {}),
+    }) as never;
+
+  test("a panel is the same dialog with the edge and width as classes", () => {
+    expect(wrapPopupMarkup("p1", "<p>x</p>", triggers({ edge: "right", size: "wide" }))).toContain(
+      'class="emvb-popup emvb-popup--panel emvb-popup--right emvb-popup--wide"',
+    );
+    expect(wrapPopupMarkup("p1", "<p>x</p>", triggers({ edge: "left" }))).toContain(
+      'class="emvb-popup emvb-popup--panel emvb-popup--left"',
+    );
+    const centred = wrapPopupMarkup("p1", "<p>x</p>", triggers());
+    expect(centred).toContain('class="emvb-popup"');
+    expect(centred).toContain('role="dialog" aria-modal="true"');
+  });
+
+  test("the chrome lays panels out at the edge and slides them in only without reduced motion", () => {
+    expect(POPUP_CHROME_CSS).toContain(".emvb-popup--right{justify-content:flex-end}");
+    expect(POPUP_CHROME_CSS).toContain(
+      "@media (prefers-reduced-motion:no-preference){.emvb-popup--left .emvb-popup__dialog{animation:emvb-panel-left",
+    );
+  });
+
+  test("triggers accept a panel edge and width, and refuse others", () => {
+    const at = (panel: unknown) =>
+      validateTriggers({ schemaVersion: 1, open: [{ type: "page_load" }], panel }).ok;
+    expect([at({ edge: "left" }), at({ edge: "right", size: "narrow" })]).toEqual([true, true]);
+    expect([at({ edge: "top" }), at({ edge: "left", size: "huge" }), at({})]).toEqual([
+      false,
+      false,
+      false,
+    ]);
+  });
 });

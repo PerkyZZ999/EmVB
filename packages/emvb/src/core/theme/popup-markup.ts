@@ -15,6 +15,14 @@ export const POPUP_CHROME_CSS = `
 .emvb-popup__close{position:sticky;top:-1rem;z-index:1;float:right;margin:-1rem -1rem 0 .5rem;width:2rem;height:2rem;border:0;border-radius:999px;background:inherit;color:inherit;font-size:1.5rem;line-height:1;cursor:pointer}
 .emvb-popup__close:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
 .emvb-popup__content{min-width:12rem}
+.emvb-popup--panel{padding:0;justify-content:flex-start}
+.emvb-popup--right{justify-content:flex-end}
+.emvb-popup--panel .emvb-popup__dialog{box-sizing:border-box;width:min(var(--emvb-panel-w,24rem),calc(100vw - 3rem));max-width:none;height:100%;max-height:none;border-radius:0}
+.emvb-popup--narrow{--emvb-panel-w:20rem}
+.emvb-popup--wide{--emvb-panel-w:32rem}
+@media (prefers-reduced-motion:no-preference){.emvb-popup--left .emvb-popup__dialog{animation:emvb-panel-left .25s ease-out}.emvb-popup--right .emvb-popup__dialog{animation:emvb-panel-right .25s ease-out}}
+@keyframes emvb-panel-left{from{translate:-100% 0}}
+@keyframes emvb-panel-right{from{translate:100% 0}}
 `
   .replace(/\n+/g, "")
   .trim();
@@ -46,8 +54,15 @@ export function wrapPopupMarkup(
   const configJson = escapeAttr(JSON.stringify(config));
   const safeId = escapeAttr(id);
   const titleId = `emvb-popup-title-${safeId}`;
+  // W-1071: an off-canvas panel is the same dialog, laid out at an edge.
+  const panel = triggers.panel;
+  const kind = panel
+    ? ` emvb-popup--panel emvb-popup--${panel.edge === "right" ? "right" : "left"}${
+        panel.size === "narrow" || panel.size === "wide" ? ` emvb-popup--${panel.size}` : ""
+      }`
+    : "";
   return [
-    `<div class="emvb-popup" id="emvb-popup-${safeId}" data-emvb-popup="${safeId}" data-emvb-popup-config="${configJson}" hidden>`,
+    `<div class="emvb-popup${kind}" id="emvb-popup-${safeId}" data-emvb-popup="${safeId}" data-emvb-popup-config="${configJson}" hidden>`,
     `<div class="emvb-popup__backdrop" data-emvb-popup-dismiss tabindex="-1"></div>`,
     // W-282: named "Popup" until the runtime points the name at the content's first heading;
     // naming it after the whole content read every word as the dialog's name.
