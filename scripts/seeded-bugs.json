@@ -1381,8 +1381,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "      matchesSearch(query, d.name, d.group),",
-          "replace": "      true,"
+          "search": "      matchesSearch(\n        query,\n        d.name,",
+          "replace": "      true ||\n      matchesSearch(\n        query,\n        d.name,"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/add-panel.test.tsx"],
@@ -2755,8 +2755,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) =>\n      d.type !== \"tab-panel\" &&\n      (formsAvailable || d.group !== \"form\") &&\n      matchesSearch(query, d.name, d.group),\n  );",
-          "replace": "  const matched = ELEMENT_DESCRIPTORS.filter(\n    (d) =>\n      d.type !== \"tab-panel\" &&\n      d.type !== \"flexbox\" && // seeded: hide flexbox\n      (formsAvailable || d.group !== \"form\") &&\n      matchesSearch(query, d.name, d.group),\n  );"
+          "search": "      (formsAvailable || d.group !== \"form\") &&\n      matchesSearch(\n        query,",
+          "replace": "      d.type !== \"flexbox\" && // seeded: hide flexbox\n      (formsAvailable || d.group !== \"form\") &&\n      matchesSearch(\n        query,"
         }
       ],
       "command": [
@@ -9996,13 +9996,13 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "  const matched = ELEMENT_DESCRIPTORS.filter(",
-          "replace": "  const found = ELEMENT_DESCRIPTORS.filter("
+          "search": "  const matched = [...ELEMENT_DESCRIPTORS, ...providerDescriptors].filter(",
+          "replace": "  const found = [...ELEMENT_DESCRIPTORS, ...providerDescriptors].filter("
         },
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "      matchesSearch(query, d.name, d.group),\n  );",
-          "replace": "      matchesSearch(query, d.name, d.group),\n  );\n  const pinned = ELEMENT_DESCRIPTORS.filter((d) => d.type === \"container\");\n  const matched = found.length > 0 ? [...new Set([...pinned, ...found])] : found;"
+          "search": "  const extensionElements = useExtensionElements()",
+          "replace": "  const pinned = ELEMENT_DESCRIPTORS.filter((d) => d.type === \"container\");\n  const matched = found.length > 0 ? [...new Set([...pinned, ...found])] : found;\n  const extensionElements = useExtensionElements()"
         }
       ],
       "command": [
@@ -19808,8 +19808,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "onClick={() => onAdd(tile.type as ElementType)}",
-          "replace": "onClick={() => onAdd(tile.type as ElementType)}\n                      onKeyDown={(event) => {\n                        if (event.key === \"Enter\") onAdd(tile.type as ElementType);\n                      }}"
+          "search": "                      onClick={() => onAdd(tile.type)}\n                    >\n                      <Icon size={20} aria-hidden=\"true\" />",
+          "replace": "                      onClick={() => onAdd(tile.type)}\n                      onKeyDown={(event) => {\n                        if (event.key === \"Enter\") onAdd(tile.type);\n                      }}\n                    >\n                      <Icon size={20} aria-hidden=\"true\" />"
         }
       ],
       "command": [
@@ -26770,8 +26770,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "matchesSearch(query, r.name, r.description, \"recipe section\")",
-          "replace": "!query.trim() && matchesSearch(query, r.name, r.description, \"recipe section\")"
+          "search": "matchesSearch(query, recipe.name, recipe.description, recipe.provider, \"recipe section\")",
+          "replace": "!query.trim() && matchesSearch(query, recipe.name, recipe.description, recipe.provider, \"recipe section\")"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/admin/editor/panels/recipes-panel.test.tsx"],
@@ -26896,8 +26896,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/arrange.ts",
-          "search": "    if (at.node.type === \"layout-section\") outer = at;",
-          "replace": "    if (at.node.type === \"no-such-type\") outer = at;"
+          "search": "    if (at.node.type === \"layout-section\" || at.node.type === \"provider\") outer = at;",
+          "replace": "    if (at.node.type === \"provider\") outer = at;"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/recipes/recipes.test.ts"],
@@ -31612,8 +31612,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "matchesSearch(query, d.name, d.group)",
-          "replace": "d.name.toLowerCase().includes(query.trim().toLowerCase())"
+          "search": "      matchesSearch(\n        query,\n        d.name,",
+          "replace": "      ((q: string, ...a: string[]) =>\n        a.some((s) => s.toLowerCase().includes(q.trim().toLowerCase())))(\n        query,\n        d.name,"
         }
       ],
       "command": [
@@ -31632,8 +31632,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
-          "search": "matchesSearch(query, r.name, r.description, \"recipe section\")",
-          "replace": "`${r.name} ${r.description} recipe section`.toLowerCase().includes(query.trim().toLowerCase())"
+          "search": "matchesSearch(query, recipe.name, recipe.description, recipe.provider, \"recipe section\")",
+          "replace": "`${recipe.name} ${recipe.description} ${recipe.provider} recipe section`.toLowerCase().includes(query.trim().toLowerCase())"
         }
       ],
       "command": [
@@ -50333,6 +50333,340 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "provider-api/assets-runtime-for-any-provider",
+      "requirement": "provider-api-pr",
+      "description": "runtime entries load for any provider node, ignoring needsRuntime",
+      "edits": [
+        {
+          "file": "packages/emvb-provider-api/src/assets.ts",
+          "search": "if (provider.needsRuntime?.(node))",
+          "replace": "if (provider.needsRuntime)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-provider-api/src/assets.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "provider-api/compat-children-not-walked",
+      "requirement": "provider-api-pr",
+      "description": "node diagnostics stop at the top level and skip nested provider nodes",
+      "edits": [
+        {
+          "file": "packages/emvb-provider-api/src/compatibility.ts",
+          "search": "      walk(node.children ?? []);",
+          "replace": "      walk([]);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-provider-api/src/compatibility.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "provider-api/health-nodes-in-use",
+      "requirement": "provider-api-pr",
+      "description": "health inventory reports zero nodes in use for every provider",
+      "edits": [
+        {
+          "file": "packages/emvb-provider-api/src/health.ts",
+          "search": "nodesInUse: counts.get(provider.id) ?? 0,",
+          "replace": "nodesInUse: 0,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-provider-api/src/health.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "provider-api/identifier-extra-segment",
+      "requirement": "provider-api-pr",
+      "description": "component identifiers with extra colon segments are accepted",
+      "edits": [
+        {
+          "file": "packages/emvb-provider-api/src/identifiers.ts",
+          "search": "if (parts.length !== 2) return undefined;",
+          "replace": "if (parts.length < 2) return undefined;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-provider-api/src/identifiers.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "provider-api/migration-drops-version-stamp",
+      "requirement": "provider-api-pr",
+      "description": "migrated nodes keep their old providerVersion after a migration runs",
+      "edits": [
+        {
+          "file": "packages/emvb-provider-api/src/migrations.ts",
+          "search": "    current = { ...current, providerVersion: toVersion };",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-provider-api/src/migrations.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "provider-api/registry-api-gate-open",
+      "requirement": "provider-api-pr",
+      "description": "providers built for another Provider API register without error",
+      "edits": [
+        {
+          "file": "packages/emvb-provider-api/src/registry.ts",
+          "search": "  if (incompatible) throw new Error(incompatible.message);",
+          "replace": "  void incompatible;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-provider-api/src/registry-compatibility.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "provider-api/registry-duplicate-id",
+      "requirement": "provider-api-pr",
+      "description": "a second provider with an already registered id silently replaces the first",
+      "edits": [
+        {
+          "file": "packages/emvb-provider-api/src/registry.ts",
+          "search": "if (current && current !== provider)",
+          "replace": "if (current && current !== provider && false)"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-provider-api/src/registry.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "provider-api/source-boundary-daisy-flag",
+      "requirement": "provider-api-pr",
+      "description": "active EmVB source reintroduces a provider-specific DaisyUI runtime flag",
+      "edits": [
+        {
+          "file": "packages/emvb/src/constants.ts",
+          "search": "export const PLUGIN_ID = \"emvb\";",
+          "replace": "export const PLUGIN_ID = \"emvb\";\nexport const needsDaisyRuntime = false;"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb-provider-api/src/source-boundary.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "core/provider-container-not-parent",
+      "requirement": "provider-api-pr",
+      "description": "provider nodes never count as containers, so children cannot be placed in them",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/schema/layout.ts",
+          "search": "(node.type === \"provider\" && providerAcceptsChildren(node));",
+          "replace": "(node.type === \"provider\" && false);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/provider-children.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "core/allowlist-drops-kbd",
+      "requirement": "provider-api-pr",
+      "description": "the output allowlist refuses the kbd tag that provider markup uses",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/vnode.ts",
+          "search": "  \"kbd\",",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/render/allowlist.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "core/contract-provider-props-stripped",
+      "requirement": "provider-api-pr",
+      "description": "the render-time contract strip drops every prop of open-record provider nodes",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/contract.ts",
+          "search": "if (propKeys && isRecord(out[\"props\"])) out[\"props\"] = known(out[\"props\"], propKeys);",
+          "replace": "if (isRecord(out[\"props\"])) out[\"props\"] = known(out[\"props\"], propKeys ?? new Set<string>());"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/contract.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "core/migrate-accepts-one-newer-version",
+      "requirement": "provider-api-pr",
+      "description": "documents one schema version newer than supported are upgraded instead of refused",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/migrate/index.ts",
+          "search": "if (from > current) return { ok: false, reason: \"newer-version\", version: from };",
+          "replace": "if (from > current + 1) return { ok: false, reason: \"newer-version\", version: from };"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/core/migrate/migrate.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "admin/new-element-provider-lookup-by-type",
+      "requirement": "provider-api-pr",
+      "description": "a dropped provider component id is looked up as the whole type string",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/dnd/new-element.ts",
+          "search": "const provider = componentProvider(providerComponent.providerId);",
+          "replace": "const provider = componentProvider(type);"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/dnd/provider-new-element.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "admin/provider-palette-verified-last",
+      "requirement": "provider-api-pr",
+      "description": "experimental provider components sort before verified ones in the palette",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/provider-palette.ts",
+          "search": "Number(right.verified) - Number(left.verified) ||",
+          "replace": "Number(left.verified) - Number(right.verified) ||"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/provider-palette.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "admin/recipe-palette-provider-label",
+      "requirement": "provider-api-pr",
+      "description": "the Add panel shows a provider's id in place of its label on recipe tiles",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "            provider: provider.label,",
+          "replace": "            provider: provider.id,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/recipe-palette.test.tsx"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "admin/recipes-search-ignored",
+      "requirement": "provider-api-pr",
+      "description": "the Add panel lists every section recipe whatever the search says",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "matchesSearch(query, recipe.name, recipe.description, recipe.provider, \"recipe section\"),",
+          "replace": "true,"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/recipes-panel.test.tsx"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "admin/add-panel-forms-shown-when-missing",
+      "requirement": "provider-api-pr",
+      "description": "the Form group stays in the Add panel when the forms plugin is missing",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/AddPanel.tsx",
+          "search": "(formsAvailable || d.group !== \"form\") &&",
+          "replace": "(formsAvailable || d.group !== \"x\") &&"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/admin/editor/panels/add-panel.test.tsx"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "admin/provider-number-saved-as-unit-object",
+      "requirement": "provider-api-pr",
+      "description": "a provider number field saves { value, unit } instead of a plain number",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "(field.kind === \"number\" ? asDecimal(field) : field)",
+          "replace": "field"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/provider-fields.test.tsx"
+      ],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "admin/provider-meta-empty-wrapper",
+      "requirement": "provider-api-pr",
+      "description": "a provider with no meta fields renders an empty meta wrapper",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/settings/ProviderMetaFields.tsx",
+          "search": "  if (fields.length === 0) return null;",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/provider-meta-fields.test.tsx"
+      ],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "admin/closed-section-count-off-by-one",
+      "requirement": "provider-api-pr",
+      "description": "closed style sections report one property fewer than are set",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/panels/ElementPanel.tsx",
+          "search": "style?.[key] !== undefined).length;",
+          "replace": "style?.[key] !== undefined).length - 1;"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "packages/emvb/src/admin/editor/panels/settings/element-panel-shapes.test.tsx"
+      ],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "astro/render-drops-text-direction",
+      "requirement": "provider-api-pr",
+      "description": "the stored-page render no longer reports the site text direction",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/render.ts",
+          "search": "...(runtimes.length > 0 ? { runtimes } : {}),\n    ...(design.direction ? { dir: design.direction } : {}),",
+          "replace": "...(runtimes.length > 0 ? { runtimes } : {}),"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/src/astro/render.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "compat/root-class-dropped",
+      "requirement": "provider-api-pr",
+      "description": "the root element of every page loses its emvb-root class",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "(isRoot ? [\"emvb-root\"] : [])",
+          "replace": "(isRoot ? [] : [])"
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/compat/compat.test.ts"],
+      "expect": " [1-9][0-9]* fail"
+    },
+    {
+      "id": "server/canvas-styles-unsafe-urls-kept",
+      "requirement": "provider-api-pr",
+      "description": "canvas stylesheet filter keeps javascript: and protocol-relative URLs",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/canvas-styles.ts",
+          "search": "if (!sitePath && !/^https?:\\/\\/[^/]/i.test(url)) continue;",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "test", "packages/emvb/test/server/canvas-styles-options.test.ts"],
+      "expect": " [1-9][0-9]* fail"
     }
   ]
 }
