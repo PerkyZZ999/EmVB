@@ -24,6 +24,20 @@ export type EmVBOptions = {
    */
   canvasCollections?: string[];
   /**
+   * External component providers (e.g. `"@example/emvb-provider"`) as module specifiers. On the
+   * SERVER (public render) EmVB imports each one so the provider's singleton is registered and
+   * `provider` nodes render. The editor is a browser bundle EmVB cannot add imports to, so to make
+   * the provider's elements appear in the Add panel the host must also point `adminEntry` at a
+   * wrapper that statically imports the provider and re-exports `@perkyzz/emvb/admin`.
+   */
+  providers?: string[];
+  /**
+   * Override the editor bundle module. Use with `providers`: a host wrapper that does
+   * `import "@example/emvb-provider"; export * from "@perkyzz/emvb/admin";` so the provider
+   * registers in the browser editor too. Defaults to `@perkyzz/emvb/admin`.
+   */
+  adminEntry?: string;
+  /**
    * Build-time Extensions API v1 packages (W-927, D-066). Only the site owner adds these.
    * Live render/resolve functions are kept in-process; a serializable manifest is what
    * EmDash passes into `createPlugin`.
@@ -48,16 +62,22 @@ export type EmVBOptions = {
 export function emvb(options: EmVBOptions = {}): PluginDescriptor {
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
+  const providers = providerSpecifiers(options.providers);
+  const adminEntry =
+    typeof options.adminEntry === "string" && options.adminEntry.trim()
+      ? options.adminEntry.trim()
+      : ADMIN_ENTRY;
   const extensions = rememberExtensions(options.extensions);
   return {
     id: PLUGIN_ID,
     version: PLUGIN_VERSION,
     format: "native",
     entrypoint: PACKAGE_NAME,
-    adminEntry: ADMIN_ENTRY,
+    adminEntry,
     options: {
       ...(canvasStyles.length > 0 ? { canvasStyles } : {}),
       ...(canvasCollections.length > 0 ? { canvasCollections } : {}),
+      ...(providers.length > 0 ? { providers } : {}),
       ...(extensions.length > 0 ? { extensions } : {}),
       ...(Array.isArray(options.loopCollections)
         ? { loopCollections: loopCollectionSlugs(options.loopCollections) ?? [] }
@@ -67,6 +87,19 @@ export function emvb(options: EmVBOptions = {}): PluginDescriptor {
         : {}),
     },
   };
+}
+
+/** Keep only plausible npm/module specifiers; never emit tenant/host junk into an import(). */
+function providerSpecifiers(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  for (const value of input) {
+    if (typeof value !== "string") continue;
+    const s = value.trim();
+    // A package name or scoped subpath: letters, digits, @, /, -, _, . — no spaces or protocol.
+    if (s && /^(@[a-z0-9][\w.-]*\/)?[a-z0-9][\w.-]*(\/[\w.-]+)*$/i.test(s)) seen.add(s);
+  }
+  return [...seen];
 }
 
 // EmDash imports `createPlugin` by name from the entrypoint (1.4 and 1.5). The default export

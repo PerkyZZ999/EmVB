@@ -11,6 +11,7 @@ import {
 import type { ThemePartType } from "../../../core/theme/part-types.ts";
 import { indexLayout } from "../../../core/tree-ops.ts";
 import { isSharedPart } from "../panels/settings/heading-warning.ts";
+import { componentProvider, parseProviderComponentId } from "@perkyzz/emvb-provider-api";
 
 const hasH1 = (node: LayoutNode): boolean =>
   ((node.type === "heading" || node.type === "post-title") &&
@@ -168,6 +169,13 @@ export function newElement(
   random?: () => number,
   extensionDefaults?: Record<string, unknown>,
 ): LayoutNode | null {
+  // Registered provider components use one toolkit-neutral identifier, `provider:<id>:<component>`.
+  const providerComponent = parseProviderComponentId(type);
+  if (providerComponent) {
+    const provider = componentProvider(providerComponent.providerId);
+    if (!provider?.components.has(providerComponent.componentId)) return null;
+    return provider.createNode(providerComponent.componentId, newNodeId(random)) as LayoutNode;
+  }
   // W-927: extension elements are stored as UnknownNodes with namespaced types.
   if (isExtensionType(type)) {
     return {

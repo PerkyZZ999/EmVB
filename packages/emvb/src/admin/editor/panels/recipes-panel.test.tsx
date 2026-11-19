@@ -13,9 +13,9 @@ describe("W-320 recipes in the Add panel and palette", () => {
     const root = await mount(<AddPanel onAdd={() => {}} onRecipe={(id) => added.push(id)} />);
     const tiles = root.querySelectorAll("[data-emvb-recipe]");
     expect(tiles.length).toBeGreaterThanOrEqual(6);
-    const hero = root.querySelector('[data-emvb-recipe="hero"]') as HTMLButtonElement;
+    const hero = root.querySelector('[data-emvb-recipe="native:hero"]') as HTMLButtonElement;
     await act(async () => hero.click());
-    expect(added).toEqual(["hero"]);
+    expect(added).toEqual(["native:hero"]);
   });
 
   test("W-320 search finds recipes by name, even with no element match", async () => {
@@ -24,6 +24,13 @@ describe("W-320 recipes in the Add panel and palette", () => {
     );
     expect(root.querySelectorAll("[data-emvb-recipe]").length).toBe(1);
     expect(root.textContent).not.toContain("No elements match");
+  });
+
+  test("sections come first in the Add panel, before the single parts", async () => {
+    const root = await mount(<AddPanel onAdd={() => {}} onRecipe={() => {}} />);
+    const headings = [...root.querySelectorAll(".emvb-add-group-title")].map((h) => h.textContent);
+    expect(headings[0]).toBe("Sections");
+    expect(headings.slice(1)).not.toContain("Sections");
   });
 
   test("W-320 no recipe handler, no recipes", async () => {

@@ -144,8 +144,55 @@ export const ELEMENT_ICONS: Record<string, Icon> = {
   loop: RepeatIcon,
   "loop-empty": SquareIcon,
   pagination: ArrowsLeftRightIcon,
+  provider: SquaresFourIcon,
 };
 
 export function elementIcon(type: string): Icon {
   return ELEMENT_ICONS[type] ?? SquaresFourIcon;
+}
+
+/** Allowlisted provider palette icons. Provider metadata carries only these stable string IDs. */
+const PROVIDER_ICONS: Record<string, Icon> = {
+  accordion: CaretCircleDoubleDownIcon,
+  alert: ArticleIcon,
+  avatar: UserIcon,
+  badge: CheckSquareIcon,
+  breadcrumbs: CaretRightIcon,
+  button: CursorClickIcon,
+  calendar: CalendarBlankIcon,
+  card: BrowserIcon,
+  carousel: ImageIcon,
+  chat: NotePencilIcon,
+  checkbox: CheckSquareIcon,
+  code: GraphIcon,
+  divider: MinusIcon,
+  drawer: ColumnsIcon,
+  dropdown: CaretCircleDownIcon,
+  form: ArticleIcon,
+  image: ImageIcon,
+  input: TextboxIcon,
+  layout: SquaresFourIcon,
+  link: LinkIcon,
+  list: ListBulletsIcon,
+  loading: RepeatIcon,
+  menu: ListIcon,
+  modal: BrowsersIcon,
+  navigation: ArrowsLeftRightIcon,
+  progress: ArrowsLeftRightIcon,
+  radio: RadioButtonIcon,
+  range: ArrowsLeftRightIcon,
+  rating: SmileyIcon,
+  select: CaretCircleDownIcon,
+  stack: StackIcon,
+  stats: GraphIcon,
+  table: GridFourIcon,
+  tabs: BrowsersIcon,
+  text: TextTIcon,
+  textarea: TextAaIcon,
+  toggle: RepeatIcon,
+  tooltip: NotePencilIcon,
+};
+
+export function providerIcon(id: string | undefined): Icon {
+  return (id && PROVIDER_ICONS[id]) || SquaresFourIcon;
 }

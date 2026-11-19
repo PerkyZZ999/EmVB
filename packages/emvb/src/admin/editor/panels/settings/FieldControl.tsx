@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Select } from "@cloudflare/kumo";
+import { Input, Select } from "@cloudflare/kumo";
 import type { FieldDescriptor, LayoutNode } from "../../../../core/index.ts";
 import type { Fetcher } from "../../../api.ts";
 import { FIELD } from "../../../ui.ts";
@@ -137,6 +137,20 @@ export function FieldControl({
         fetcher={fetcher}
         onChange={onChange}
         editable={node.type === "image"}
+      />
+    );
+  }
+
+  if (field.kind === "datetime") {
+    return (
+      <Input
+        key={field.key}
+        type="datetime-local"
+        label={field.label}
+        className={FIELD}
+        value={typeof raw === "string" ? raw.slice(0, 16) : ""}
+        data-emvb-field={field.key}
+        onChange={(event) => onChange(withProp(node, field.key, event.target.value || undefined))}
       />
     );
   }

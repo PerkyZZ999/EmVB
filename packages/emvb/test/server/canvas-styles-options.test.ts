@@ -23,12 +23,14 @@ describe("the editor/config route (W-327)", () => {
       canvasStyles: ["/a.css"],
       canvasCollections: [],
       extensions: [],
+      providers: [],
     });
     const none = createPlugin().routes["editor/config"] as typeof route;
     expect(await none.handler({} as never)).toEqual({
       canvasStyles: [],
       canvasCollections: [],
       extensions: [],
+      providers: [],
     });
   });
 });
@@ -45,6 +47,7 @@ describe("canvasCollections option (W-897)", () => {
       canvasStyles: [],
       canvasCollections: ["pages"],
       extensions: [],
+      providers: [],
     });
   });
 });

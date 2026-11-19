@@ -11,6 +11,7 @@ import {
 } from "../core/index.ts";
 import type { WidgetRuntime } from "../core/elements/widgets.ts";
 import { PLUGIN_ID } from "../constants.ts";
+import { componentProviders, providerAssetEntries } from "@perkyzz/emvb-provider-api";
 
 export type RenderedPage = {
   html: string;
@@ -18,6 +19,9 @@ export type RenderedPage = {
   needsFormsRuntime: boolean;
   needsTabsRuntime: boolean;
   needsMenuRuntime: boolean;
+  needsProviderStyles: boolean;
+  providerStyles: string[];
+  providerRuntimes: string[];
   /**
    * W-1025: the opt-in widget scripts this page needs (a dismissible Alert…). `EmVBPage` loads
    * them itself; set only when there is one.
@@ -89,9 +93,13 @@ export function renderStored(
     needsFormsRuntime: false,
     needsTabsRuntime: false,
     needsMenuRuntime: false,
+    needsProviderStyles: false,
+    providerStyles: [],
+    providerRuntimes: [],
     ...(design.direction ? { dir: design.direction } : {}),
   };
   let result: ReturnType<typeof renderPage>;
+  let providerAssets: ReturnType<typeof providerAssetEntries> = { styles: [], runtimes: [] };
   try {
     const { layout, problem } = inspectLayout(raw);
     if (!layout) {
@@ -110,6 +118,7 @@ export function renderStored(
       ...(partIds ? { partIds } : {}),
       ...(lang ? { lang } : {}),
     });
+    providerAssets = providerAssetEntries([layout.root] as never, componentProviders());
   } catch (error) {
     // S-02: a layout that can't render leaves the page empty instead of failing the request.
     // oxlint-disable-next-line no-console
@@ -126,9 +135,15 @@ export function renderStored(
     // oxlint-disable-next-line no-console
     console.error("emvb: an element could not render", { pageId, nodeId: warning.nodeId });
   }
+  const providerStyles = providerAssets.styles;
+  const providerRuntimes = providerAssets.runtimes;
+  const needsProviderStyles = providerStyles.length > 0;
   return {
     html,
     css,
+    needsProviderStyles,
+    providerStyles,
+    providerRuntimes,
     needsFormsRuntime,
     needsTabsRuntime,
     needsMenuRuntime,

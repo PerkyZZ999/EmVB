@@ -10,7 +10,12 @@ import {
 } from "../../src/core/arrange.ts";
 import { defaultElement } from "../../src/core/elements/index.ts";
 import { MAX_DEPTH, MAX_NODES } from "../../src/core/limits.ts";
-import { KNOWN_ELEMENT_TYPES, type Layout, type LayoutNode } from "../../src/core/schema/layout.ts";
+import {
+  KNOWN_ELEMENT_TYPES,
+  LAYOUT_SCHEMA_VERSION,
+  type Layout,
+  type LayoutNode,
+} from "../../src/core/schema/layout.ts";
 import { nodeChildren } from "../../src/core/tree-ops.ts";
 
 const el = (type: (typeof KNOWN_ELEMENT_TYPES)[number], id: string, children?: LayoutNode[]) =>
@@ -27,7 +32,7 @@ function chain(depth: number): LayoutNode {
 }
 
 const page = (children: LayoutNode[]): Layout => ({
-  schemaVersion: 18,
+  schemaVersion: LAYOUT_SCHEMA_VERSION,
   root: { id: "root0001", type: "container", props: {}, children },
 });
 

@@ -1,6 +1,8 @@
 import { Button, Input } from "@cloudflare/kumo";
 import * as React from "react";
-import { elementIcon } from "../element-chrome.ts";
+import { elementIcon, providerIcon } from "../element-chrome.ts";
+import { componentProviders } from "@perkyzz/emvb-provider-api";
+import { providerPaletteDescriptors, providerPaletteGroups } from "../provider-palette.ts";
 import {
   ELEMENT_DESCRIPTORS,
   SECTION_RECIPES,
@@ -47,17 +49,41 @@ export function AddPanel({
     setQuery("");
     searchRef.current?.focus();
   };
-  const matched = ELEMENT_DESCRIPTORS.filter(
+  const providerDescriptors = providerPaletteDescriptors(componentProviders());
+  const matched = [...ELEMENT_DESCRIPTORS, ...providerDescriptors].filter(
     (d) =>
       d.type !== "tab-panel" &&
       (formsAvailable || d.group !== "form") &&
-      matchesSearch(query, d.name, d.group),
+      matchesSearch(
+        query,
+        d.name,
+        d.group,
+        "category" in d ? d.category : "",
+        "keywords" in d ? d.keywords.join(" ") : "",
+      ),
   );
   const extensionElements = useExtensionElements().filter((el) =>
     matchesSearch(query, el.label, el.name, "extension"),
   );
   const recipes = onRecipe
-    ? SECTION_RECIPES.filter((r) => matchesSearch(query, r.name, r.description, "recipe section"))
+    ? [
+        ...SECTION_RECIPES.map((recipe) => ({
+          name: recipe.name,
+          description: recipe.description,
+          insertId: `native:${recipe.id}`,
+          provider: "EmVB",
+        })),
+        ...componentProviders().flatMap((provider) =>
+          (provider.recipes ?? []).map((recipe) => ({
+            name: recipe.name,
+            description: recipe.description,
+            insertId: `provider:${provider.id}:${recipe.id}`,
+            provider: provider.label,
+          })),
+        ),
+      ].filter((recipe) =>
+        matchesSearch(query, recipe.name, recipe.description, recipe.provider, "recipe section"),
+      )
     : [];
   return (
     <div className="emvb-panel-body" data-emvb-panel="add">
@@ -78,6 +104,28 @@ export function AddPanel({
         }}
         placeholder="Search elements…"
       />
+      {/* Sections first: site owners start from whole sections; single parts follow below. */}
+      {onRecipe && recipes.length > 0 && (
+        <div className="emvb-add-group" data-emvb-recipes="">
+          <h3 className="emvb-add-group-title">Sections</h3>
+          <p className="emvb-helper">Insert a whole section, then change its words.</p>
+          <div className="emvb-recipe-list" aria-label="Sections">
+            {recipes.map((recipe) => (
+              <button
+                key={recipe.insertId}
+                type="button"
+                className="emvb-recipe-tile"
+                data-emvb-recipe={recipe.insertId}
+                onClick={() => onRecipe(recipe.insertId)}
+              >
+                <span className="emvb-recipe-name">{recipe.name}</span>
+                <span className="emvb-recipe-provider">{recipe.provider}</span>
+                <span className="emvb-recipe-desc">{recipe.description}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {matched.length === 0 &&
       recipes.length === 0 &&
       (!saved || matchingSections(saved, query).length === 0) ? (
@@ -90,15 +138,18 @@ export function AddPanel({
           </Button>
         </div>
       ) : (
-        GROUPS.map((group) => {
-          const tiles = matched.filter((d) => d.group === group.id);
+        [...GROUPS, ...providerPaletteGroups(providerDescriptors)].map((group) => {
+          const tiles = matched.filter((descriptor) => descriptor.group === group.id);
           if (tiles.length === 0) return null;
           return (
             <div key={group.id} className="emvb-add-group">
               <h3 className="emvb-add-group-title">{group.label}</h3>
               <div className="emvb-add-tiles" aria-label={group.label}>
                 {tiles.map((tile) => {
-                  const Icon = elementIcon(tile.type);
+                  const Icon =
+                    tile.type.startsWith("provider:") && "icon" in tile
+                      ? providerIcon(tile.icon)
+                      : elementIcon(tile.type);
                   return (
                     <button
                       key={tile.type}
@@ -115,7 +166,7 @@ export function AddPanel({
                         event.dataTransfer.effectAllowed = "copy";
                         dragStash.new(tile.type);
                       }}
-                      onClick={() => onAdd(tile.type as ElementType)}
+                      onClick={() => onAdd(tile.type)}
                     >
                       <Icon size={20} aria-hidden="true" />
                       <span>{tile.name}</span>
@@ -156,28 +207,6 @@ export function AddPanel({
               >
                 <PuzzlePieceIcon size={20} aria-hidden="true" />
                 <span>{tile.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-      {onRecipe && recipes.length > 0 && (
-        <div className="emvb-add-group" data-emvb-recipes="">
-          <h3 className="emvb-add-group-title">Section recipes</h3>
-          <p className="emvb-helper">
-            Whole sections that use your Site styles colours, sizes and classes.
-          </p>
-          <div className="emvb-recipe-list" aria-label="Section recipes">
-            {recipes.map((recipe) => (
-              <button
-                key={recipe.id}
-                type="button"
-                className="emvb-recipe-tile"
-                data-emvb-recipe={recipe.id}
-                onClick={() => onRecipe(recipe.id)}
-              >
-                <span className="emvb-recipe-name">{recipe.name}</span>
-                <span className="emvb-recipe-desc">{recipe.description}</span>
               </button>
             ))}
           </div>

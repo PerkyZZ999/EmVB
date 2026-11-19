@@ -34,7 +34,9 @@ import {
   type Layout,
   type LayoutNode,
   type PaginationNode,
+  type ProviderNode,
 } from "../schema/layout.ts";
+import { componentProviders } from "@perkyzz/emvb-provider-api";
 import {
   cssLength,
   stateDeclarations,
@@ -784,6 +786,19 @@ export function renderPage(
     attrs: { class: "emvb-root" },
     children: [],
   };
+  const providerNodes: ProviderNode[] = [];
+  const collectProviders = (node: LayoutNode): void => {
+    // UnknownNode also has a string `type`; assert ProviderNode after the runtime check.
+    if (node.type === "provider") providerNodes.push(node as ProviderNode);
+    if ("children" in node && Array.isArray(node.children))
+      for (const child of node.children) collectProviders(child);
+  };
+  collectProviders(layout.root);
+  for (const provider of componentProviders()) {
+    const nodes = providerNodes.filter((node) => node.provider === provider.id);
+    if (nodes.length === 0) continue;
+    Object.assign(page.attrs, provider.rootAttributes?.(nodes as never, { mode }) ?? {});
+  }
   for (const toc of tocNodes) {
     toc.vnode.children = tocChildren(toc.node, renderedHeadings, mode);
     // W-430: with no headings the public page had an empty "Table of contents" navigation

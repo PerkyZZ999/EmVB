@@ -68,6 +68,7 @@ const ADDED_IN_1X: Record<string, string> = {
   "gallery-image": "1.2 (W-1019): src/core/elements/widgets.test.ts",
   carousel: "1.2 (W-1018): src/core/elements/widgets.test.ts",
   "carousel-slide": "1.2 (W-1018): src/core/elements/widgets.test.ts",
+  provider: "unreleased (provider API): src/core/render/provider-children.test.ts",
   counter: "1.3 (W-1038): src/core/elements/marketing.test.ts",
   progress: "1.3 (W-1039): src/core/elements/marketing.test.ts",
   countdown: "1.3 (W-1040): src/core/elements/marketing.test.ts",

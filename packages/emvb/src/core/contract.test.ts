@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { MAX_UNKNOWN_DEPTH, MAX_UNKNOWN_KEYS } from "./limits.ts";
 import { patchNestedStyle, upgradeLegacyNode } from "./migrate/v18.ts";
+import { renderableLayout } from "./contract.ts";
 import { renderPage } from "./render/index.ts";
 import { emptyDesign } from "./schema/design.ts";
 import { CONTRACT_VERSION, LAYOUT_SCHEMA_VERSION } from "./schema/layout.ts";
@@ -40,6 +41,38 @@ describe("contract version (W-925)", () => {
   test("the contract is 1.0 on layout schema 18", () => {
     expect(CONTRACT_VERSION).toBe("1.0");
     expect(LAYOUT_SCHEMA_VERSION).toBe(18);
+  });
+});
+
+describe("provider nodes keep their open props through the render-time strip", () => {
+  // Regression: the contract strip read a fixed key list per node type. A provider node's props
+  // are a z.record (open), so the list was empty and every authored prop was dropped, which made
+  // Provider components rendered their text as "undefined".
+  test("renderableLayout preserves a provider node's dynamic props", () => {
+    const layout = {
+      schemaVersion: LAYOUT_SCHEMA_VERSION,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          {
+            id: "hero0001",
+            type: "provider",
+            provider: "example-kit",
+            component: "hero",
+            props: { title: "Build beautiful pages", body: "Compose visually.", action: "Go" },
+          },
+        ],
+      },
+    };
+    const out = renderableLayout(layout);
+    const hero = (out.root as { children: { props: Record<string, unknown> }[] }).children[0];
+    expect(hero?.props).toEqual({
+      title: "Build beautiful pages",
+      body: "Compose visually.",
+      action: "Go",
+    });
   });
 });
 

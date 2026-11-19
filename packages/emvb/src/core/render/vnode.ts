@@ -41,6 +41,18 @@ const TAGS = new Set([
   "details",
   "summary",
   "time",
+  // Table markup and key hints. Inert: no script, no event handlers.
+  "table",
+  "caption",
+  "thead",
+  "tbody",
+  "tfoot",
+  "tr",
+  "th",
+  "td",
+  "kbd",
+  "pre",
+  "dialog",
   // Post Content formatting (W-328)
   "strong",
   "em",
@@ -78,8 +90,16 @@ const TAGS = new Set([
 const VOID = new Set(["hr", "img", "input", "br"]);
 // iframe/video are not void — they need closing tags.
 const ATTR_NAME =
-  /^(?:class|id|href|src|srcset|sizes|alt|width|height|loading|decoding|fetchpriority|dir|lang|hreflang|role|type|checked|target|rel|aria-[a-z][a-z0-9-]*|title|allow|referrerpolicy|preload|controls|allowfullscreen|sandbox|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|stroke-dasharray|stroke-opacity|fill-opacity|opacity|transform|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|xlink:href|preserveAspectRatio|gradientUnits|gradientTransform|offset|stop-color|stop-opacity|clipPathUnits|maskUnits|maskContentUnits|patternUnits|patternContentUnits|patternTransform|markerUnits|markerWidth|markerHeight|refX|refY|orient|font-size|font-family|font-weight|text-anchor|dominant-baseline|dx|dy|clip-path|mask|method|action|name|value|placeholder|for|tabindex|autocomplete|open|popover|popovertarget|popovertargetaction|datetime|muted|loop|playsinline|autoplay|required|novalidate|minlength|maxlength|min|max|pattern|step|start|data-[a-z][a-z0-9-]*)$/;
+  /^(?:class|id|href|src|srcset|sizes|alt|width|height|loading|decoding|fetchpriority|dir|lang|hreflang|role|type|checked|target|rel|aria-[a-z][a-z0-9-]*|title|allow|referrerpolicy|preload|controls|allowfullscreen|sandbox|xmlns|viewBox|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|stroke-dasharray|stroke-opacity|fill-opacity|opacity|transform|focusable|d|cx|cy|r|x|y|x1|y1|x2|y2|points|rx|ry|xlink:href|preserveAspectRatio|gradientUnits|gradientTransform|offset|stop-color|stop-opacity|clipPathUnits|maskUnits|maskContentUnits|patternUnits|patternContentUnits|patternTransform|markerUnits|markerWidth|markerHeight|refX|refY|orient|font-size|font-family|font-weight|text-anchor|dominant-baseline|dx|dy|clip-path|mask|method|action|name|value|placeholder|for|tabindex|rows|selected|accept|inputmode|scope|autocomplete|open|popover|popovertarget|popovertargetaction|datetime|muted|loop|playsinline|autoplay|required|novalidate|minlength|maxlength|min|max|pattern|step|start|data-[a-z][a-z0-9-]*)$/;
 
+/**
+ * Attributes whose value is checked, not just their name. `popovertarget` must be a plain element
+ * id, so the value cannot carry markup. `style` stays refused by name (W-091).
+ */
+const VALUE_RULES: Readonly<Record<string, RegExp>> = {
+  popovertarget: /^[A-Za-z][\w-]{0,63}$/,
+  popover: /^(?:auto|manual|hint)?$/,
+};
 export const isAllowedTag = (tag: string) => TAGS.has(tag);
 export const isAllowedAttr = (name: string) => ATTR_NAME.test(name);
 
@@ -98,7 +118,11 @@ function write(node: VNode | string, inner: (child: VNode | string) => string): 
   if (!TAGS.has(node.tag)) throw new RefusedMarkup(`EmVB: tag "${node.tag}" is not allowed`);
   let attrs = "";
   for (const [name, value] of Object.entries(node.attrs)) {
+    if (value === undefined) continue; // an absent attribute must not render as `="undefined"`
     if (!ATTR_NAME.test(name)) throw new RefusedMarkup(`EmVB: attribute "${name}" is not allowed`);
+    const rule = VALUE_RULES[name];
+    if (rule && !rule.test(String(value)))
+      throw new RefusedMarkup(`EmVB: value for "${name}" is not allowed`);
     attrs += ` ${name}="${escapeAttr(value)}"`;
   }
   if (VOID.has(node.tag)) return `<${node.tag}${attrs}>`;

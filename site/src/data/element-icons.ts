@@ -140,6 +140,7 @@ export const ELEMENT_ICONS: Record<string, ElementIconComponent> = {
   loop: RepeatIcon,
   "loop-empty": SquareIcon,
   pagination: ArrowsLeftRightIcon,
+  provider: SquaresFourIcon,
 };
 
 /** An element type's icon; the editor's fallback for a type it doesn't list. */

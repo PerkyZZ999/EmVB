@@ -1,3 +1,4 @@
+import { componentProvider } from "@perkyzz/emvb-provider-api";
 import { boundedArray } from "../bounded-array.ts";
 import { z } from "zod";
 import { LIST_MARKERS } from "../css-keywords.ts";
@@ -770,6 +771,7 @@ export const KNOWN_ELEMENT_TYPES = [
   "menu-item",
   "layout-section",
   "toc",
+  "provider",
   "language-switcher",
   "rating",
   "alert",
@@ -805,6 +807,32 @@ export const TocNode = leafNode(
     title: z.string().max(80).optional(),
   }),
 );
+
+/** A component supplied by a registered external provider. */
+export const ProviderNode = z.strictObject({
+  id: NodeId,
+  type: z.literal("provider"),
+  provider: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]*$/)
+    .max(64),
+  component: z
+    .string()
+    .regex(/^[a-z][a-z0-9-]*$/)
+    .max(64),
+  providerVersion: z.number().int().min(1).max(999).optional(),
+  props: z.record(
+    z.string().max(64),
+    z.union([z.string().max(4000), z.number().finite(), z.boolean()]),
+  ),
+  providerMeta: z
+    .record(z.string().max(64), z.union([z.string().max(4000), z.number().finite(), z.boolean()]))
+    .optional(),
+  ...sharedNodeFields,
+  get children(): z.ZodType<LayoutNode[] | undefined> {
+    return z.array(LayoutNode).optional();
+  },
+});
 
 /**
  * W-937: links to this page in its other published languages (EmDash translations), each with
@@ -1478,6 +1506,7 @@ const KnownLayoutNode = z.discriminatedUnion("type", [
   AccordionItemNode,
   MenuNode,
   MenuItemNode,
+  ProviderNode,
 ]);
 
 /** One strict schema per known element type, for the MCP element catalogue (W-453). */
@@ -1729,6 +1758,17 @@ export type AccordionItemNode = NodeEnvelope & {
   children: LayoutNode[];
 };
 
+/** Manual recursive type (W-022 pattern): avoids `z.infer` cycling through LayoutNode. */
+export type ProviderNode = NodeEnvelope & {
+  type: "provider";
+  provider: string;
+  component: string;
+  providerVersion?: number;
+  props: Record<string, string | number | boolean>;
+  providerMeta?: Record<string, string | number | boolean>;
+  children?: LayoutNode[];
+};
+
 export type LayoutNode =
   | ContainerNode
   | DivBlockNode
@@ -1798,6 +1838,7 @@ export type LayoutNode =
   | AccordionItemNode
   | MenuNode
   | MenuItemNode
+  | ProviderNode
   | UnknownNode;
 
 /** S-03: the issues one element reports before "…and N more". */
@@ -1962,11 +2003,31 @@ export const isLayoutParentNode = (
   node.type === "menu-item" ||
   node.type === "carousel-slide";
 
+/**
+ * A provider node is a parent when its registered component declares `container: true`. The
+ * registry is read here, so a provider that is not registered (or a leaf component) is not a parent.
+ */
+const providerAcceptsChildren = (node: unknown): boolean => {
+  const { provider, component } = node as { provider?: unknown; component?: unknown };
+  return (
+    typeof provider === "string" &&
+    typeof component === "string" &&
+    (() => {
+      const registered = componentProvider(provider);
+      return (
+        registered?.components.get(component)?.descriptor.container === true ||
+        registered?.acceptsChildren?.(node as never) === true
+      );
+    })()
+  );
+};
+
 /** Nodes that may hold children. */
 export const isParentNode = (
   node: LayoutNode,
 ): node is
   | ContainerNode
+  | (ProviderNode & { children: LayoutNode[] })
   | DivBlockNode
   | LayoutSectionNode
   | FlexboxNode
@@ -2009,7 +2070,8 @@ export const isParentNode = (
   node.type === "carousel-slide" ||
   node.type === "price-list" ||
   node.type === "share-buttons" ||
-  node.type === "hotspots";
+  node.type === "hotspots" ||
+  (node.type === "provider" && providerAcceptsChildren(node));
 
 export const isFormFieldType = (type: string): boolean =>
   (FORM_FIELD_TYPES as readonly string[]).includes(type);

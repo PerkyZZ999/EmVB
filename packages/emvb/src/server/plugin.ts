@@ -38,6 +38,25 @@ import { manifestsFromOptions } from "../core/extensions/index.ts";
 import { TOOLS } from "../mcp/tools.ts";
 import { mcpRoutes, mcpToolConfig } from "./mcp-routes.ts";
 
+/**
+ * Import each external provider module once so its registration side effect runs on the server.
+ * Failures are logged, not thrown: a bad specifier must not take the whole plugin (and its pages)
+ * down. The dynamic specifier is validated in `emvb()` before it reaches here.
+ */
+let serverProvidersStarted = false;
+function registerServerProviders(specifiers: readonly string[]): void {
+  if (serverProvidersStarted || specifiers.length === 0) return;
+  serverProvidersStarted = true;
+  for (const specifier of specifiers) {
+    import(/* @vite-ignore */ specifier).catch((error: unknown) => {
+      // A bad provider specifier must surface (it shows as "Unknown provider" on the page) but
+      // never throw and take the plugin down. Logging the cause is the only diagnostic here.
+      // eslint-disable-next-line no-console
+      console.error(`EmVB: failed to load provider "${specifier}":`, error);
+    });
+  }
+}
+
 /** W-1005: the name and description EmDash 1.5 shows for the plugin. */
 export const PLUGIN_META = {
   displayName: "EmVB",
@@ -48,6 +67,7 @@ export function createPlugin(
   options: {
     canvasStyles?: unknown;
     canvasCollections?: unknown;
+    providers?: unknown;
     extensions?: unknown;
     trustGeoHeaders?: unknown;
     loopCollections?: unknown;
@@ -58,6 +78,13 @@ export function createPlugin(
   setCanvasCollections(options.canvasCollections);
   const canvasStyles = canvasStyleUrls(options.canvasStyles);
   const canvasCollections = canvasCollectionSlugs(options.canvasCollections);
+  const providers = Array.isArray(options.providers)
+    ? options.providers.filter((p): p is string => typeof p === "string" && p.length > 0)
+    : [];
+  // Register external providers on the SERVER so `provider` nodes render on public pages.
+  // The provider module self-registers its singleton on import (idempotent). The editor (browser)
+  // registers separately via the host's `adminEntry` wrapper — see EmVBOptions.providers.
+  void registerServerProviders(providers);
   const extensions = manifestsFromOptions(options.extensions);
   return definePlugin({
     // W-1005: EmDash 1.5 shows these on its plugins screen; 1.4 ignores them. Spread from a
@@ -131,6 +158,7 @@ export function createPlugin(
           canvasStyles,
           canvasCollections,
           extensions,
+          providers,
         }),
       },
       design: designRoute,

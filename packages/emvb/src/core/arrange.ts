@@ -519,8 +519,9 @@ export function addNodeNear(
 }
 
 /**
- * Adds a whole section (a W-320 recipe): right after the outermost Section the selection is in,
- * so it never lands inside another Section; with no Section around the selection, like `addNodeNear`.
+ * Adds a whole section (a W-320 recipe): right after the outermost Section, or provider component
+ * (a provider container holds children, so a recipe must not nest in it), the selection is in; with
+ * neither around the selection, like `addNodeNear`.
  */
 export function addSectionNear(
   layout: Layout,
@@ -529,7 +530,7 @@ export function addSectionNear(
 ): Added | Refusal {
   let outer: Located | undefined;
   for (let at = selectedId ? locate(layout, selectedId) : undefined; at;) {
-    if (at.node.type === "layout-section") outer = at;
+    if (at.node.type === "layout-section" || at.node.type === "provider") outer = at;
     at = at.parent ? locate(layout, at.parent.id) : undefined;
   }
   const at = outer;

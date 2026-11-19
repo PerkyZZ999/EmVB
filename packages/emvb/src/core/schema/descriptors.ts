@@ -9,6 +9,8 @@ export type FieldKind =
   | "select"
   | "boolean"
   | "href"
+  /** A date and time picker; stores `YYYY-MM-DDTHH:mm` with no time zone. */
+  | "datetime"
   | "media"
   | "icon"
   | "list-items"

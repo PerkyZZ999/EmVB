@@ -64,7 +64,9 @@ async function panelFor(
 }
 
 describe("element panel markup (W-021, W-086 M16)", () => {
-  for (const type of Object.keys(ELEMENTS)) {
+  // `provider` has no fixed descriptor: its panel is resolved from the registered provider at
+  // runtime (no provider is registered here), so it is covered by the provider's own tests.
+  for (const type of Object.keys(ELEMENTS).filter((t) => t !== "provider")) {
     test(`${type} renders the same content and style tabs`, async () => {
       const node = newElement(type, seeded());
       expect(node).not.toBeNull();

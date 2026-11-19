@@ -8,6 +8,7 @@ import {
   WarningCircleIcon,
 } from "@phosphor-icons/react";
 import * as React from "react";
+import { componentProviders } from "@perkyzz/emvb-provider-api";
 import { ELEMENT_NAMES, elementIcon } from "../element-chrome.ts";
 import { indexLayout } from "../../../core/tree-ops.ts";
 import type { ThemePartType } from "../../../core/theme/part-types.ts";
@@ -52,6 +53,8 @@ import {
 } from "../../../core/index.ts";
 import { applyStylePatch } from "./style-target.ts";
 import { FieldControl } from "./settings/FieldControl.tsx";
+import { ProviderMetaFields } from "./settings/ProviderMetaFields.tsx";
+import { ProviderCollectionEditor } from "./settings/ProviderCollectionEditor.tsx";
 import { BindingsEditor } from "./settings/BindingsEditor.tsx";
 import { VariantEditor } from "./settings/VariantEditor.tsx";
 import { AudienceEditor } from "./settings/AudienceEditor.tsx";
@@ -358,9 +361,44 @@ function fieldShown(key: string, node: LayoutNode, device: Device = "desktop"): 
   return (props[parent] !== undefined && props[parent] !== "") || bound;
 }
 
+function providerDescriptor(node: LayoutNode): ElementDescriptor | undefined {
+  if (node.type !== "provider") return undefined;
+  const component = (node as LayoutNode & { component?: string }).component;
+  const providerId = (node as LayoutNode & { provider?: string }).provider;
+  const provider = componentProviders().find((candidate) => candidate.id === providerId);
+  const generated = component ? provider?.components.get(component) : undefined;
+  if (!generated) return undefined;
+  const compoundHidden: Record<string, ReadonlySet<string>> = {
+    accordion: new Set(["items", "open"]),
+    carousel: new Set(["slides", "current"]),
+    menu: new Set(["items"]),
+    tabs: new Set(["items", "active"]),
+    table: new Set(["headers", "rows"]),
+  };
+  const hidden = component ? compoundHidden[component] : undefined;
+  return {
+    type: "provider",
+    name: generated.descriptor.name,
+    group: "content",
+    defaultTab: "content",
+    // A provider's "number" is a plain number. The panel's own "number" kind saves a length
+    // object ({ value, unit }), which a provider node's props refuse, so the page cannot save.
+    fields: generated.descriptor.fields
+      .filter((field) => !hidden?.has(field.key))
+      .map((field) => (field.kind === "number" ? asDecimal(field) : field)),
+  };
+}
+
+/** A provider number field, saved as a plain decimal. */
+function asDecimal<F extends { kind: string }>(field: F): F & { kind: "decimal" } {
+  return { ...field, kind: "decimal" as const };
+}
 /** Right panel with an element selected (IA / W-021): descriptor Content + Style sections. */
 export function ElementPanel(props: Props) {
-  const builtIn = ELEMENT_DESCRIPTORS.find((d) => d.type === props.node.type);
+  const builtIn =
+    props.node.type === "provider"
+      ? providerDescriptor(props.node)
+      : ELEMENT_DESCRIPTORS.find((d) => d.type === props.node.type);
   const extension = useExtensionElement(props.node.type);
   const descriptor: ElementDescriptor | undefined = builtIn
     ? builtIn
@@ -644,6 +682,8 @@ function KnownElementPanel({
               );
             })
           )}
+          <ProviderMetaFields node={node} onChange={onChange} />
+          <ProviderCollectionEditor node={node} onChange={onChange} />
           {/* W-1024: an element with its own settings lists its items after them. */}
           {hasItemList(node.type) && descriptor.fields.length > 0 && (
             <ItemList node={node} onChange={onChange} onSelect={onSelect} actions={items} />

@@ -21,13 +21,34 @@ function shapeKeys(schema: unknown): Set<string> {
   return new Set(shape ? Object.keys(shape) : []);
 }
 
+/**
+ * A `z.record(...)` has no fixed `shape`: its keys are open (a provider node's `props`). Such a
+ * schema must keep every key, not be stripped to an empty allow-list, or dynamic props are lost.
+ */
+function isOpenRecordSchema(schema: unknown): boolean {
+  if (!schema || typeof schema !== "object") return false;
+  const s = schema as {
+    shape?: unknown;
+    keyType?: unknown;
+    valueType?: unknown;
+    def?: { typeName?: string };
+    _def?: { typeName?: string };
+  };
+  if (s.shape) return false;
+  if (s.keyType !== undefined && s.valueType !== undefined) return true;
+  const typeName = s.def?.typeName ?? s["_def"]?.typeName;
+  return typeName === "ZodRecord";
+}
+
 const NODE_KEYS = new Set<string>(["children"]);
-const PROP_KEYS = new Map<string, Set<string>>();
+// A value of `null` means the node's props are an open record (provider nodes): keep every key.
+const PROP_KEYS = new Map<string, Set<string> | null>();
 for (const schema of KNOWN_NODE_SCHEMAS) {
   const shape = (schema as unknown as { shape: Record<string, unknown> }).shape;
   for (const key of Object.keys(shape)) NODE_KEYS.add(key);
   const type = (shape["type"] as { value?: unknown }).value;
-  if (typeof type === "string") PROP_KEYS.set(type, shapeKeys(shape["props"]));
+  if (typeof type === "string")
+    PROP_KEYS.set(type, isOpenRecordSchema(shape["props"]) ? null : shapeKeys(shape["props"]));
 }
 const STYLE_KEYS = shapeKeys(StyleProps);
 /** W-959: an element's or class's own style also knows `wide`, whose record is open too. */
@@ -248,8 +269,10 @@ export function renderableNode<T>(input: T): T {
   if (!isRecord(input)) return input;
   const node: Record<string, unknown> = input;
   const type = typeof node["type"] === "string" ? node["type"] : "";
+  const isKnown = PROP_KEYS.has(type);
   const propKeys = PROP_KEYS.get(type);
-  const out: Record<string, unknown> = renderableStyles(propKeys ? known(node, NODE_KEYS) : node);
+  const out: Record<string, unknown> = renderableStyles(isKnown ? known(node, NODE_KEYS) : node);
+  // A `null` entry marks an open-record props (provider nodes): keep every prop key.
   if (propKeys && isRecord(out["props"])) out["props"] = known(out["props"], propKeys);
   const query = out["query"];
   if (isRecord(query) && "style" in query)

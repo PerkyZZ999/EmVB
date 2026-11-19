@@ -22,6 +22,7 @@ import type {
   SpacerNode,
   TextNode,
   VideoNode,
+  ProviderNode,
 } from "../schema/layout.ts";
 import { LIST_MARKERS, NUMBERED_MARKERS } from "../css-keywords.ts";
 import { CONTAINER_TAGS, TEXT_TAGS } from "../schema/layout.ts";
@@ -34,6 +35,7 @@ import { sanitizeMediaUrl } from "../sanitize/media-url.ts";
 import { getBundledIcon } from "../icons/catalog.ts";
 import { resolveEmbedUrl } from "../sanitize/embed-url.ts";
 import type { VNode } from "../render/vnode.ts";
+import { componentProvider } from "@perkyzz/emvb-provider-api";
 
 import type { ElementDefinition } from "./definition.ts";
 import { ICON_STROKE_WIDTHS, iconGlyph } from "./icon-svg.ts";
@@ -1107,6 +1109,55 @@ const toc: ElementDefinition<TocNode> = {
   }),
 };
 
+const providerElement: ElementDefinition<ProviderNode> = {
+  baseCss: "",
+  defaults: () => ({ type: "provider", provider: "unregistered", component: "unknown", props: {} }),
+  descriptor: {
+    type: "provider",
+    name: "Provider component",
+    group: "content",
+    defaultTab: "content",
+    fields: [],
+  },
+  build: (node, attrs, children) => {
+    try {
+      const provider = componentProvider(node.provider);
+      if (!provider) throw new Error(`Provider is not registered: ${node.provider}`);
+      const meta = node.providerMeta ?? {};
+      const theme = typeof meta.theme === "string" ? meta.theme : undefined;
+      // EmVB's ProviderNode is a superset of the provider contract's node; their child
+      // trees differ by design (EmVB children are rendered and passed as the 3rd arg,
+      // the provider never reads node.children). Narrow to the contract node here.
+      const contractNode = node as unknown as Parameters<typeof provider.render>[0];
+      const rendered = provider.render(
+        contractNode,
+        { ...attrs, ...(theme ? { "data-theme": theme } : {}) },
+        children,
+        { mode: "public" },
+      ) as VNode;
+      // A provider's build may drop the attributes it is given. The editor id
+      // must still reach the root, or clicking the element on the canvas selects its parent instead.
+      const editorId = attrs["data-emvb-id"];
+      if (editorId && !rendered.attrs["data-emvb-id"])
+        return { ...rendered, attrs: { ...rendered.attrs, "data-emvb-id": editorId } };
+      return rendered;
+    } catch {
+      return {
+        tag: "div",
+        attrs: {
+          ...attrs,
+          class: [attrs.class, "emvb-unknown"].filter(Boolean).join(" "),
+          "data-emvb-missing-provider": node.provider,
+          "data-emvb-missing-component": node.component,
+        },
+        children: [
+          `Unavailable provider component "${node.provider}:${node.component}". Saved data is preserved.`,
+        ],
+      };
+    }
+  },
+};
+
 const languageSwitcher: ElementDefinition<LanguageSwitcherNode> = {
   baseCss:
     ".emvb-language-switcher ul{display:flex;flex-wrap:wrap;gap:0.75em;margin:0;padding:0;list-style:none}.emvb-language-switcher a{color:inherit}.emvb-language-switcher a[aria-current]{font-weight:600;text-decoration:none}",
@@ -1127,6 +1178,7 @@ const languageSwitcher: ElementDefinition<LanguageSwitcherNode> = {
 
 export const ELEMENTS = {
   heading,
+  provider: providerElement,
   toc,
   "language-switcher": languageSwitcher,
   rating,
