@@ -1,0 +1,20 @@
+{
+  "name": "@perkyzz/emvb-provider-api",
+  "version": "0.2.0",
+  "description": "Framework-neutral external component provider contracts and registry for EmVB",
+  "license": "MIT",
+  "files": [
+    "README.md",
+    "src"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "test": "bun test src"
+  }
+}
