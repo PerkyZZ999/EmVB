@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Component providers.** A package can add its own components to the Add panel, the element settings and the public render through `@perkyzz/emvb-provider-api`, without any change to EmVB core. A provider registers itself with `registerComponentProvider`, and the host lists provider modules in the `providers` option (see the provider API README). Each provider element is stored as one generic `provider` node. Everything is additive: pages saved by 1.3 open and save unchanged.
+
+### Changed
+
+- Layout validation rejects absurdly deep or large input before running the size check and the migrations, so a hostile page is refused quickly.
+
 ## [1.3.0] - 2026-11-14
 
 The marketing widgets and the second part of the Elementor import. Everything is additive: new element types only, so pages saved by 1.2 open and save unchanged (layout schema 18, design schema 17), and an older EmVB keeps the new elements on save without showing them. Public pages still load no script unless an element opts in, and moving widgets respect reduced motion and can be paused. It installs on stock EmDash 1.4 with no change to your site and is tested on EmDash 1.4 and 1.5. If you already mount `<EmVBWidgetRuntimes names={theme.runtimes} />` for theme parts, the new widgets' scripts come through it too.
