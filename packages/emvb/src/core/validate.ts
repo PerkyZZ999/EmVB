@@ -164,6 +164,10 @@ export function validateLayout(
   input: unknown,
   migrations: Readonly<Record<number, Migration>> = LAYOUT_MIGRATIONS,
 ): LayoutValidation {
+  // Nesting and node limits only follow `children`, so reject absurd input here, before the size
+  // check and the migrations walk the whole tree. Running them first is too slow on deep input.
+  const rawStructure = checkStructure((input as { root?: unknown } | null)?.root);
+  if (rawStructure) return { ok: false, issues: [rawStructure] };
   const sizeIssue = checkSize(input, MAX_LAYOUT_BYTES, "page");
   if (sizeIssue) return { ok: false, issues: [sizeIssue] };
   const upgraded = upgradeLayout(input, migrations, LAYOUT_SCHEMA_VERSION);
