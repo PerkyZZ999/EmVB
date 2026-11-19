@@ -10,6 +10,8 @@
   ],
   "type": "module",
   "scripts": {
+    "postinstall": "bun scripts/link-workspaces.ts",
+    "link:workspaces": "bun scripts/link-workspaces.ts",
     "lint": "oxlint --deny-warnings",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",

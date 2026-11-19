@@ -68,6 +68,7 @@
       "version": "1.3.0",
       "dependencies": {
         "@perkyzz/emvb-icons": "1.3.0",
+        "@perkyzz/emvb-provider-api": "workspace:*",
         "photocn": "0.1.2",
         "zod": ">=4.5.4 <5",
       },
@@ -114,6 +115,10 @@
         "@perkyzz/emvb": "1.3.0",
         "zod": "~4.5.4",
       },
+    },
+    "packages/emvb-provider-api": {
+      "name": "@perkyzz/emvb-provider-api",
+      "version": "0.2.0",
     },
     "site": {
       "name": "@emvb/site",
@@ -657,6 +662,8 @@
     "@perkyzz/emvb-icons": ["@perkyzz/emvb-icons@workspace:packages/emvb-icons"],
 
     "@perkyzz/emvb-mcp": ["@perkyzz/emvb-mcp@workspace:packages/emvb-mcp"],
+
+    "@perkyzz/emvb-provider-api": ["@perkyzz/emvb-provider-api@workspace:packages/emvb-provider-api"],
 
     "@phosphor-icons/react": ["@phosphor-icons/react@2.1.10", "", { "peerDependencies": { "react": ">= 16.8", "react-dom": ">= 16.8" } }, "sha512-vt8Tvq8GLjheAZZYa+YG/pW7HDbov8El/MANW8pOAz4eGxrwhnbfrQZq0Cp4q8zBEu8NIhHdnr+r8thnfRSNYA=="],
 
