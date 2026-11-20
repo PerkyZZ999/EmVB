@@ -51376,6 +51376,34 @@
         "W-1067"
       ],
       "expect": "\\(fail\\).*W-1067"
+    },
+    {
+      "id": "W-1063/no-pr-smoke",
+      "requirement": "W-1063",
+      "description": "CI stops running the e2e smoke set on pull requests.",
+      "edits": [
+        {
+          "file": ".github/workflows/ci.yml",
+          "search": "      - run: bun run e2e:smoke\n",
+          "replace": "      - run: echo skipped\n"
+        }
+      ],
+      "command": ["bun", "test", "scripts/ci-e2e.test.ts"],
+      "expect": "\\(fail\\).*smoke set runs on pull requests"
+    },
+    {
+      "id": "W-1063/no-floor-e2e",
+      "requirement": "W-1063",
+      "description": "The release e2e run drops the EmDash 1.4 floor.",
+      "edits": [
+        {
+          "file": ".github/workflows/ci.yml",
+          "search": "        emdash: [\"1.4.0\", latest]\n",
+          "replace": "        emdash: [latest]\n"
+        }
+      ],
+      "command": ["bun", "test", "scripts/ci-e2e.test.ts"],
+      "expect": "\\(fail\\).*EmDash 1.4 and the latest"
     }
   ]
 }

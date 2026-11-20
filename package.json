@@ -33,6 +33,7 @@
     "test:astro": "bun run --cwd packages/emvb test:astro",
     "e2e": "playwright test",
     "e2e:prod": "playwright test -c playwright.prod.config.ts",
+    "e2e:smoke": "playwright test --project=node e2e/smoke.e2e.ts e2e/setup.e2e.ts e2e/editing.e2e.ts e2e/access.e2e.ts e2e/security.e2e.ts e2e/fixes-1.4.e2e.ts",
     "e2e:full": "bun scripts/e2e-full.ts",
     "seeded-bugs": "bun scripts/seeded-bug.ts",
     "bench:render": "bun scripts/bench-render.ts",

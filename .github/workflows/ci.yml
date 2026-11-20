@@ -3,7 +3,9 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -63,3 +65,64 @@ jobs:
           bun-version: 1.4.3
       - run: bun install --frozen-lockfile
       - run: bun audit --audit-level=high
+
+  e2e-smoke:
+    # W-1063: a Node-demo smoke set on every PR and main push (the whole suite takes ~17 min per
+    # platform, so it runs on release tags below). The runner image's Google Chrome stands in for
+    # the system Chromium (A-09: no browser download). Playwright and the dev servers need Node.
+    if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "1"
+      EMVB_CHROMIUM: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.3
+      - run: bun install --frozen-lockfile
+      - run: bun run e2e:smoke
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: e2e-smoke-results
+          path: test-results/
+          retention-days: 7
+
+  e2e-full:
+    # W-1063: the whole suite on both demos (node and Cloudflare, `e2e:full`) for release tags or
+    # by hand, on the EmDash 1.4 floor and on the development base (the latest EmDash).
+    if: ${{ startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        emdash: ["1.4.0", latest]
+    env:
+      CI: "1"
+      EMVB_CHROMIUM: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.3
+      - if: ${{ matrix.emdash != 'latest' }}
+        run: bun scripts/use-emdash.ts ${{ matrix.emdash }}
+      - run: bun install
+      - run: bun run e2e:full
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure()
+        with:
+          name: e2e-full-${{ matrix.emdash }}
+          path: |
+            test-results/
+            e2e/.results/
+          retention-days: 7
