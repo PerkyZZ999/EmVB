@@ -1,6 +1,6 @@
 # W-1015: weekly update PRs for the Bun workspace (root lockfile) and the pinned CI actions.
-# EmDash, Kumo and Astro are grouped so a host upgrade lands as one PR; CI's EmDash 1.4 and 1.5
-# jobs decide whether it is compatible. Dev tooling is grouped separately.
+# EmDash and Astro are grouped so a host upgrade lands as one PR; CI's EmDash 1.4 and 1.5 jobs
+# decide whether it is compatible. Dev tooling is grouped separately.
 version: 2
 updates:
   - package-ecosystem: bun
@@ -13,12 +13,15 @@ updates:
     ignore:
       - dependency-name: remixicon
         versions: [">=4.9.0"]
+      # W-1085: EmDash pins Kumo exactly and EmVB uses that same version (D-030), so Kumo moves by
+      # hand with an EmDash upgrade, never on its own (public PR #22 would have put two copies of
+      # Kumo in the admin).
+      - dependency-name: "@cloudflare/kumo"
     groups:
       emdash:
         patterns:
           - emdash
           - "@emdash-cms/*"
-          - "@cloudflare/kumo"
       astro:
         patterns:
           - astro

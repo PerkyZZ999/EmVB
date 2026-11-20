@@ -47498,18 +47498,18 @@
       "expect": "\\(fail\\).*watches the Bun workspace"
     },
     {
-      "id": "W-1015/kumo-ungrouped",
-      "requirement": "W-1015",
-      "description": "Kumo updates apart from EmDash.",
+      "id": "W-1085/kumo-not-ignored",
+      "requirement": "W-1085",
+      "description": "Dependabot is free to bump Kumo past EmDash's exact pin.",
       "edits": [
         {
           "file": ".github/dependabot.yml",
-          "search": "          - \"@cloudflare/kumo\"\n",
+          "search": "      - dependency-name: \"@cloudflare/kumo\"\n",
           "replace": ""
         }
       ],
       "command": ["bun", "test", "scripts/dependabot.test.ts"],
-      "expect": "\\(fail\\).*update as groups"
+      "expect": "\\(fail\\).*W-1085"
     },
     {
       "id": "W-1016/smoke-not-bumped",
