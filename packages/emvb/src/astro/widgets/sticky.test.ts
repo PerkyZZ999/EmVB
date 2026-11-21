@@ -103,4 +103,20 @@ describe("sticky script (W-1070)", () => {
     expect(el.style.translate).toBe("");
     expect(el.dataset["emvbAway"]).toBeUndefined();
   });
+
+  test("a sticky header part's wrapper hides for the box inside it (W-1097)", () => {
+    document.body.innerHTML =
+      '<header data-emvb-sticky-hide><div class="emvb-root"><div data-emvb-sticky-hide><a href="/">Home</a></div></div></header>';
+    const [wrapper, box] = [...document.querySelectorAll<HTMLElement>("[data-emvb-sticky-hide]")];
+    for (const el of [wrapper, box])
+      Object.defineProperty(el, "offsetHeight", { configurable: true, value: 60 });
+    initSticky(document);
+    scrollTo(200);
+    expect(wrapper?.style.translate).toBe("0 -100%");
+    // Only the wrapper moves: the box inside it moving too would slide twice as far.
+    expect(box?.style.translate).toBe("");
+    expect(box?.dataset["emvbReady"]).toBeUndefined();
+    scrollTo(100);
+    expect(wrapper?.style.translate).toBe("");
+  });
 });

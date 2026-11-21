@@ -2,7 +2,6 @@ import { emdashContent, type ContentPort } from "./content-port.ts";
 import { formIdsInLayouts } from "./forms-definitions.ts";
 import {
   collectLoopItemPartIds,
-  escapeAttr,
   collectSectionPartIds,
   contentPartTypeForContext,
   defaultConditions,
@@ -20,6 +19,7 @@ import {
   validateTriggers,
   wrapFloatMarkup,
   wrapPopupMarkup,
+  wrapThemePart,
   type ChromeLabels,
   type FloatSettings,
   type Layout,
@@ -46,12 +46,6 @@ import { bindingDataFor } from "./request-data.ts";
 import { decodePathSegment, themeContextFrom } from "./theme-context.ts";
 import { entryTimestamp, themePostFromEntry } from "./theme-posts.ts";
 import { probeCounter, totalPagesFor, type PostCounter } from "./page-count.ts";
-
-/** The landmark element for a part's wrapper (W-216); other parts get a plain div. */
-const WRAPPER_TAGS: Partial<Record<string, "header" | "footer">> = {
-  header: "header",
-  footer: "footer",
-};
 
 export type RenderedThemePart = {
   id: string;
@@ -559,6 +553,8 @@ export async function resolveThemePartsWith(
   const rendered: RenderedPage[] = [];
   // W-971: each part's scoped sheet, to write the shared rules once in `css`.
   const sheets = new Map<string, { css: string; scope: string; baseTypes: readonly string[] }>();
+  // W-1097: sticky header and footer wrappers' rules, after the parts' own sheets.
+  const wrapperCss: string[] = [];
   // W-307: bound fields in a part read site settings and URL parameters too.
   // W-312/W-313: synced sections and Loop items the part uses count too.
   const boundFor = (stored: StoredPart, referenced: ThemeDynamicData | undefined) =>
@@ -608,14 +604,14 @@ export async function resolveThemePartsWith(
     // straight in <body> instead of their own <header>/<footer>).
     // W-586: a part that already has its own header or footer box keeps that one as the landmark;
     // a second wrapper around it would nest <header> in <header> (invalid, two banners).
-    const ownLandmark = /<(?:header|footer)[\s>]/.test(page.html);
-    const tag = (!ownLandmark && WRAPPER_TAGS[stored.partType]) || "div";
-    const partId = escapeAttr(stored.id);
-    const html = page.html
-      ? `<${tag} class="emvb-theme-${stored.partType}" data-emvb-theme-part="${partId}">${page.html}</${tag}>`
-      : "";
+    // W-1097: a sticky top-level box makes the wrapper sticky (`wrapper.css`, else empty).
+    const wrapper = wrapThemePart(stored.partType, stored.id, page.html, page.stickyFrame);
+    if (wrapper.css) wrapperCss.push(wrapper.css);
     // W-1086: a part's own css stays whole; the shared `css` below writes extension sheets once.
-    return { html, css: page.css + extensionStylesheets(page.extensions ?? []) };
+    return {
+      html: wrapper.html,
+      css: page.css + extensionStylesheets(page.extensions ?? []) + wrapper.css,
+    };
   };
 
   /** Synced sections and loop items a part uses, for every part type (W-200). */
@@ -756,7 +752,7 @@ export async function resolveThemePartsWith(
     const sheet = part ? sheets.get(part.id) : undefined;
     return sheet ? [sheet] : [];
   });
-  const cssParts = [sharedPartCss(ordered)];
+  const cssParts = [sharedPartCss(ordered), ...wrapperCss];
   // W-1086: each extension stylesheet once for all the parts; the page in this response skips them.
   const extensionIds = [...new Set(rendered.flatMap((page) => page.extensions ?? []))].toSorted();
   cssParts.push(extensionStylesheets(extensionIds));

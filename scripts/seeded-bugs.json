@@ -21958,9 +21958,9 @@
       "description": "A header part renders in a plain div, so the page has no banner landmark.",
       "edits": [
         {
-          "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "  header: \"header\",\n",
-          "replace": ""
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "  const landmark = partType === \"header\" || partType === \"footer\";",
+          "replace": "  const landmark = partType === \"footer\";"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
@@ -21972,9 +21972,9 @@
       "description": "A footer part renders in a plain div, so the page has no contentinfo landmark.",
       "edits": [
         {
-          "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "  footer: \"footer\",\n",
-          "replace": ""
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "  const landmark = partType === \"header\" || partType === \"footer\";",
+          "replace": "  const landmark = partType === \"header\";"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
@@ -21986,9 +21986,9 @@
       "description": "The landmark wrapper closes with </div>.",
       "edits": [
         {
-          "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "${page.html}</${tag}>`",
-          "replace": "${page.html}</div>`"
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "${html}</${tag}>`",
+          "replace": "${html}</div>`"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
@@ -22627,8 +22627,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/render.ts",
-          "search": "    ...(extensions.length > 0 ? { extensions } : {}),\n    ...(design.direction ? { dir: design.direction } : {}),\n    baseTypes,\n  };",
-          "replace": "    ...(extensions.length > 0 ? { extensions } : {}),\n    baseTypes,\n  };"
+          "search": "    ...(extensions.length > 0 ? { extensions } : {}),\n    ...(design.direction ? { dir: design.direction } : {}),\n    baseTypes,\n",
+          "replace": "    ...(extensions.length > 0 ? { extensions } : {}),\n    baseTypes,\n"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/astro/render.test.ts"],
@@ -28163,9 +28163,9 @@
       "description": "a theme part id is written into the wrapper without escaping",
       "edits": [
         {
-          "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "    const partId = escapeAttr(stored.id);\n",
-          "replace": "    const partId = stored.id;\n"
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "data-emvb-theme-part=\"${escapeAttr(partId)}\"",
+          "replace": "data-emvb-theme-part=\"${partId}\""
         }
       ],
       "command": [
@@ -45681,8 +45681,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "  const cssParts = [sharedPartCss(ordered)];",
-          "replace": "  const cssParts = [ordered.map((s) => s.css).join(\"\\n\")];"
+          "search": "  const cssParts = [sharedPartCss(ordered), ...wrapperCss];",
+          "replace": "  const cssParts = [ordered.map((s) => s.css).join(\"\\n\"), ...wrapperCss];"
         }
       ],
       "command": ["bun", "test", "packages/emvb/src/astro/resolve-theme.test.ts"],
@@ -45880,9 +45880,9 @@
       "description": "A published theme part's wrapper leaks an editor data-emvb-id.",
       "edits": [
         {
-          "file": "packages/emvb/src/astro/resolve-theme.ts",
-          "search": "data-emvb-theme-part=\"${partId}\">${page.html}",
-          "replace": "data-emvb-theme-part=\"${partId}\" data-emvb-id=\"${partId}\">${page.html}"
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "\"${hide}>${html}",
+          "replace": "\" data-emvb-id=\"${escapeAttr(partId)}\"${hide}>${html}"
         }
       ],
       "command": [
@@ -56370,6 +56370,93 @@
         "CI": "1"
       },
       "expect": "✘.*\\[node\\].*W-735"
+    },
+    {
+      "id": "W-1097/header-wrapper-not-sticky",
+      "requirement": "W-1097",
+      "description": "A header part's sticky top box leaves its wrapper as it was, so the box can't stick past the header (#42).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "  const frame = landmark ? stickyFrame : undefined;",
+          "replace": "  const frame = landmark ? undefined : stickyFrame;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*W-1097"
+    },
+    {
+      "id": "W-1097/wrapper-desktop-only",
+      "requirement": "W-1097",
+      "description": "The sticky wrapper copies Desktop's placement only, so it still sticks on a device where its box doesn't.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "    if (own.length > 0) frame[device] = own;",
+          "replace": "    if (own.length > 0 && device === \"wide\") frame[device] = own;"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*W-1097"
+    },
+    {
+      "id": "W-1097/hide-stays-on-box",
+      "requirement": "W-1097",
+      "description": "Hide while scrolling down stays on the box inside a sticky header part, so the empty wrapper keeps covering the page.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "  const hide = frame?.hide ? ' data-emvb-sticky-hide=\"\"' : \"\";",
+          "replace": "  const hide = \"\";"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve-theme.test.ts"],
+      "expect": "\\(fail\\).*W-1097"
+    },
+    {
+      "id": "W-1097/runtime-moves-box-too",
+      "requirement": "W-1097",
+      "description": "The sticky script moves the box inside a hiding wrapper too, so it slides twice as far.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/widgets/sticky.ts",
+          "search": "      el.dataset[\"emvbReady\"] === undefined &&\n      !el.parentElement?.closest(\"[data-emvb-sticky-hide]\"),",
+          "replace": "      el.dataset[\"emvbReady\"] === undefined,"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/widgets/sticky.test.ts"],
+      "expect": "\\(fail\\).*W-1097"
+    },
+    {
+      "id": "W-1097/export-header-not-sticky",
+      "requirement": "W-1097",
+      "description": "The HTML export wraps a header part without its sticky placement.",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "    const wrapper = wrapThemePart(part.partType, part.id, result.html, result.stickyFrame);",
+          "replace": "    const wrapper = wrapThemePart(part.partType, part.id, result.html);"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/core/export/site.test.ts"],
+      "expect": "\\(fail\\).*W-1097"
+    },
+    {
+      "id": "W-1097/header-wrapper-not-sticky-e2e",
+      "requirement": "W-1097",
+      "description": "On the live site, a sticky box in a Header part scrolls away with the header (#42).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/theme/part-wrapper.ts",
+          "search": "  const frame = landmark ? stickyFrame : undefined;",
+          "replace": "  const frame = landmark ? undefined : stickyFrame;"
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/sticky-header-part.e2e.ts", "--project=node"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\].*W-1097"
     }
   ]
 }

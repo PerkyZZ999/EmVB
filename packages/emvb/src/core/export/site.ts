@@ -24,6 +24,7 @@ import {
   validateTriggers,
   wrapFloatMarkup,
   wrapPopupMarkup,
+  wrapThemePart,
   type ConditionsDoc,
   type DesignSystem,
   type FloatSettings,
@@ -365,17 +366,9 @@ export function buildSiteExport(input: {
       ...extensionOutputs,
     });
     if (scopeOnly) return result;
-    const ownLandmark = /<(?:header|footer)[\s>]/.test(result.html);
-    const tag =
-      !ownLandmark && (part.partType === "header" || part.partType === "footer")
-        ? part.partType
-        : "div";
-    return {
-      ...result,
-      html: result.html
-        ? `<${tag} class="emvb-theme-${part.partType}" data-emvb-theme-part="${escapeAttr(part.id)}">${result.html}</${tag}>`
-        : "",
-    };
+    // W-1097: the same wrapper as the live site, sticky when the part's top-level box is.
+    const wrapper = wrapThemePart(part.partType, part.id, result.html, result.stickyFrame);
+    return { ...result, html: wrapper.html, css: result.css + wrapper.css };
   };
 
   for (const page of input.pages) {

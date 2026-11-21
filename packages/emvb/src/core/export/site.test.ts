@@ -336,3 +336,34 @@ test("W-1018: a carousel with arrows links the carousel script; one without does
   expect(byPath.get("b/index.html")?.includes("emvb-carousel.js")).toBe(false);
   expect(byPath.get("assets/emvb-carousel.js")).toBe(EXPORT_RUNTIMES.carousel);
 });
+
+test("W-1097 (#42): a header part's sticky top box makes the exported header sticky", () => {
+  const bar = {
+    id: "navb0001",
+    type: "container",
+    props: {},
+    style: { position: "sticky", top: { value: 0, unit: "px" }, zIndex: 5 },
+    children: [heading("hhead001", "Site header", 2)],
+  } as unknown as LayoutNode;
+  const out = buildSiteExport({
+    design: emptyDesign(),
+    pages: [{ id: "p1", title: "Home", slug: "home", layout: layout([heading("head0009", "Hi")]) }],
+    parts: [
+      {
+        id: "hdr",
+        title: "Header",
+        partType: "header",
+        layout: layout([bar]),
+        conditions: entireSite,
+      },
+    ],
+    date: "2026-11-21",
+  });
+  const byPath = files(out);
+  expect(byPath.get("home/index.html")).toContain(
+    '<header class="emvb-theme-header emvb-theme-sticky" data-emvb-theme-part="hdr">',
+  );
+  expect(byPath.get("home/style.css")).toContain(
+    ".emvb-theme-header.emvb-theme-sticky{position:sticky;top:0px;z-index:5}",
+  );
+});

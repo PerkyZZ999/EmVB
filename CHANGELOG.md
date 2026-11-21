@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Fixed
+
+- **A sticky header part sticks (W-1097, #42).** In a Header theme part, a box set to Position Sticky (as the motion guide's "Sticky headers" describes) scrolled away with the page, with or without Hide while scrolling down: a sticky box can't leave the box around it, and the part's wrapper was only as tall as the header. When the part itself or a box right inside it is sticky, the part's `<header>` wrapper now takes the same Top (or Bottom), Z-index and device settings and stays at the top of the page, and Hide while scrolling down slides the whole header away and back. A Footer part held at the bottom works the same way, and the HTML export does too. Only pages whose header or footer part has such a box change output; the header stays a landmark for screen readers. See [Sticky headers](docs/guides/motion.md#sticky-headers).
+
 ## [1.4.1] - 2026-11-21
 
 A patch release that fixes the 16 issues reported on GitHub (#25 to #40). Everything is additive: one new optional `emvb()` option and new optional tool inputs, no new element types and no stored format change, so pages and designs open and save unchanged (layout schema 18, design schema 17). It installs on stock EmDash 1.4 with no change to your site and is tested on EmDash 1.4 and 1.5. The new `visitorCookie` option defaults to `"always"`, today's behaviour, so the returning-visitor cookie works as before until you set it. One public output change: an element whose extension isn't installed now renders nothing instead of a note. The `create_page`, `list_element_types` and `add_element` tools' schemas and descriptions changed, so after updating an admin approves EmVB's tools again on EmDash's Plugins screen; until then agents don't see them.

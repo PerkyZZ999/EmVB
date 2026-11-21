@@ -432,6 +432,8 @@ export {
   type PopupDevice,
 } from "./theme/popup-rules.ts";
 
+export { stickyFrameCss, wrapThemePart, type StickyFrame } from "./theme/part-wrapper.ts";
+
 export {
   POPUP_CHROME_CSS,
   wrapPopupMarkup,

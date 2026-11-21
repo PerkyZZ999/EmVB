@@ -46,8 +46,11 @@ function heldAtBottom(el: HTMLElement): boolean {
 }
 
 export function initSticky(root: ParentNode = document): void {
+  // W-1097: a sticky header or footer part's wrapper hides for its box; the box stays in it.
   const all = [...root.querySelectorAll<HTMLElement>("[data-emvb-sticky-hide]")].filter(
-    (el) => el.dataset["emvbReady"] === undefined,
+    (el) =>
+      el.dataset["emvbReady"] === undefined &&
+      !el.parentElement?.closest("[data-emvb-sticky-hide]"),
   );
   if (all.length === 0) return;
   const reduced = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;

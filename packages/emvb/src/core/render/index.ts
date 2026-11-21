@@ -51,6 +51,7 @@ import { sanitizeHref } from "../sanitize/href.ts";
 import { resolvePostForRender, type ThemeDynamicData } from "../theme/dynamic.ts";
 import type { FormDefinitions } from "../forms/definition.ts";
 import { DEVICES, type Device, type EditorDevice } from "../theme/popup-rules.ts";
+import { stickyFrameOf, type StickyFrame } from "../theme/part-wrapper.ts";
 import { hiddenOnEveryDevice } from "../design/devices.ts";
 import type { RenderContext, RenderMode } from "./context.ts";
 import { isDynamicPostNode, renderDynamicPost } from "./dynamic-post.ts";
@@ -113,6 +114,11 @@ export type RenderResult = {
    * stylesheets are not in `css`; write `extensionStylesheets(ids)` once per document instead.
    */
   extensions: string[];
+  /**
+   * W-1097: a theme part (`partIds`) whose root, or a box right inside it, is sticky: that box's
+   * placement, for the part's wrapper (`wrapThemePart`). Unset for pages and other parts.
+   */
+  stickyFrame?: StickyFrame;
 };
 
 const ID = /^[A-Za-z0-9_-]{4,24}$/;
@@ -416,6 +422,9 @@ export function renderPage(
   // W-1086: the extensions whose elements rendered, for their stylesheet and runtime.
   const extensionsUsed = new Set<string>();
   let sectionBudget = MAX_SECTION_ELEMENTS;
+  // W-1097: a theme part's top-level boxes (its root and the boxes right inside it).
+  const topLevel = opts.partIds ? new Set([layout.root, ...nodeChildren(layout.root)]) : undefined;
+  let stickyFrame: StickyFrame | undefined;
   const ctx: RenderContext = {
     takeSectionBudget: (nodes) => {
       if (nodes > sectionBudget) return false;
@@ -788,6 +797,11 @@ export function renderPage(
       attrs["data-emvb-sticky-hide"] = "";
       runtimes.add("sticky");
     }
+    // W-1097: the first sticky top-level box of a theme part gives its wrapper the same place.
+    if (!stickyFrame && ruleId && topLevel?.has(stored)) {
+      const rule = localRules.findLast((r) => r.id === ruleId);
+      if (rule) stickyFrame = stickyFrameOf(rule, hidesOnScroll(node as LayoutNode));
+    }
     // W-1067: the canvas runs no widget scripts, so a Theme toggle waiting for its own stayed
     // hidden there; the editor shows it as it looks once ready.
     if (mode === "editor" && type === "theme-toggle") attrs["data-emvb-ready"] = "";
@@ -977,6 +991,7 @@ export function renderPage(
     warnings,
     baseTypes: [...usedTypes],
     extensions,
+    ...(stickyFrame ? { stickyFrame } : {}),
   };
 }
 

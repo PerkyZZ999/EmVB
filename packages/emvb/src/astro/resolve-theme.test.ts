@@ -220,6 +220,88 @@ describe("resolveThemeParts (R-062)", () => {
     expect(resolved.footer?.html).toStartWith('<footer class="emvb-theme-footer"');
   });
 
+  test("a sticky box at the top of a header part makes its wrapper sticky (W-1097, #42)", async () => {
+    // The box can't leave its containing block (the part's root, as tall as the header), so the
+    // landmark wrapper, a child of <body>, takes its place on each device and sticks instead.
+    const bar = {
+      id: "navb0001",
+      type: "container",
+      props: {},
+      style: {
+        position: "sticky",
+        top: { value: 0, unit: "px" },
+        zIndex: 10,
+        stickyMotion: { hide: true, shadow: true },
+      },
+      devices: { mobile: { position: "relative" } },
+      children: [heading("head0001", "Site")],
+    } as unknown as LayoutNode;
+    const foot = {
+      id: "foot0001",
+      type: "container",
+      props: {},
+      style: { position: "sticky", bottom: { value: 8, unit: "px" } },
+      children: [heading("head0002", "Fine print")],
+    } as unknown as LayoutNode;
+    themeEntries = [part("HEADSTK1", "header", [bar]), part("FOOTSTK1", "footer", [foot])];
+    const resolved = await resolveThemeParts(astro("/about"));
+    const html = resolved.header?.html ?? "";
+    expect(html).toStartWith(
+      '<header class="emvb-theme-header emvb-theme-sticky" data-emvb-theme-part="HEADSTK1" data-emvb-sticky-hide="">',
+    );
+    // The box keeps its own rules (and its scroll-driven shadow) as before.
+    expect(html).toContain('class="emvb-container emvb-e-navb0001" data-emvb-sticky-hide=""');
+    const rule =
+      ".emvb-theme-header.emvb-theme-sticky{position:sticky;top:0px;z-index:10;--emvb-sticky-hide:1}";
+    const mobile =
+      "@media (max-width: 767.98px){.emvb-theme-header.emvb-theme-sticky{position:static}}";
+    for (const css of [resolved.css, resolved.header?.css ?? ""]) {
+      expect(css).toContain(rule + mobile);
+      expect(css).toContain("emvb-sticky-shadow");
+    }
+    expect(resolved.runtimes).toEqual(["sticky"]);
+    // A footer held at the bottom sticks the same way; it doesn't hide.
+    expect(resolved.footer?.html).toStartWith(
+      '<footer class="emvb-theme-footer emvb-theme-sticky" data-emvb-theme-part="FOOTSTK1">',
+    );
+    expect(resolved.css).toContain(
+      ".emvb-theme-footer.emvb-theme-sticky{position:sticky;bottom:8px}",
+    );
+  });
+
+  test("only a sticky top-level box changes the wrapper (W-1097, D-065)", async () => {
+    const deep = {
+      id: "wrap0001",
+      type: "container",
+      props: {},
+      children: [
+        {
+          id: "navb0002",
+          type: "container",
+          props: {},
+          style: { position: "sticky", top: { value: 0, unit: "px" } },
+          children: [heading("head0003", "Deep")],
+        },
+      ],
+    } as unknown as LayoutNode;
+    const fixed = {
+      id: "navb0003",
+      type: "container",
+      props: {},
+      style: { position: "fixed", top: { value: 0, unit: "px" } },
+      children: [heading("head0004", "Fixed")],
+    } as unknown as LayoutNode;
+    themeEntries = [part("HEADDEEP", "header", [deep]), part("FOOTFIX1", "footer", [fixed])];
+    const resolved = await resolveThemeParts(astro("/about"));
+    expect(resolved.header?.html).toStartWith(
+      '<header class="emvb-theme-header" data-emvb-theme-part="HEADDEEP">',
+    );
+    expect(resolved.footer?.html).toStartWith(
+      '<footer class="emvb-theme-footer" data-emvb-theme-part="FOOTFIX1">',
+    );
+    expect(resolved.css).not.toContain("emvb-theme-sticky");
+  });
+
   test("a theme part id is escaped in the wrapper", async () => {
     themeEntries = [
       part('HEAD"><img src=x onerror=alert(1)>', "header", [heading("head0001", "Hi")]),

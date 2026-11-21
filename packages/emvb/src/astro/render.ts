@@ -7,6 +7,7 @@ import {
   type DesignSystem,
   type FormDefinitions,
   type Layout,
+  type StickyFrame,
   type ThemeDynamicData,
 } from "../core/index.ts";
 import type { PageRuntime } from "../core/elements/widgets.ts";
@@ -32,6 +33,8 @@ export type RenderedPage = {
    * `EmVBPage` and the theme parts' `css` write each once per response.
    */
   extensions?: string[];
+  /** W-1097: a theme part's sticky top-level box, for its wrapper (`wrapThemePart`). */
+  stickyFrame?: StickyFrame;
 };
 
 /** The design document through the in-process public route (no HTTP round trip, D-013). */
@@ -140,6 +143,7 @@ export function renderStored(
     baseTypes,
     runtimes,
     extensions,
+    stickyFrame,
   } = result;
   for (const warning of result.warnings) {
     if (warning.code !== "refused-markup") continue;
@@ -156,5 +160,6 @@ export function renderStored(
     ...(extensions.length > 0 ? { extensions } : {}),
     ...(design.direction ? { dir: design.direction } : {}),
     baseTypes,
+    ...(stickyFrame ? { stickyFrame } : {}),
   };
 }
