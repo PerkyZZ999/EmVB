@@ -30,6 +30,7 @@ export {
   EXTENSION_PLACEHOLDER_CSS,
   extensionPlaceholderLabel,
   extensionPlaceholderVNode,
+  isExtensionPlaceholder,
 } from "./placeholder.ts";
 export { normalizeExtension } from "./normalize.ts";
 export {
@@ -48,6 +49,7 @@ export {
 export { safeExtensionOutput, extensionClassesOf, withExtensionClasses } from "./safe-nodes.ts";
 export {
   syncSourceValues,
+  resolveExtensionSource,
   renderExtensionNode,
   extensionOutputKey,
   liveExtensionOutput,

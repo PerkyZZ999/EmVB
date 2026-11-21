@@ -335,6 +335,17 @@ describe("design routes", () => {
     });
   });
 
+  test("editor/extensions/sources is for editors and above (W-1088)", async () => {
+    expect((await t.route("editor/extensions/sources")).status).toBe(401);
+    expect(
+      (await t.route("editor/extensions/sources", { user: userWithRole(ROLES.contributor) }))
+        .status,
+    ).toBe(403);
+    expect(
+      await t.route("editor/extensions/sources", { user: userWithRole(ROLES.editor) }),
+    ).toMatchObject({ status: 200, body: { data: { sources: [] } } });
+  });
+
   test("an editor can read editor/config (W-1001; it was admin-only)", async () => {
     expect((await t.route("editor/config", { user: userWithRole(ROLES.editor) })).status).toBe(200);
     expect((await t.route("editor/config", { user: userWithRole(ROLES.contributor) })).status).toBe(

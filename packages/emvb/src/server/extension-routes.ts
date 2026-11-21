@@ -4,7 +4,9 @@ import {
   extensionOutputKey,
   isExtensionType,
   liveExtensionOutput,
+  resolveExtensionSource,
   withExtensionClasses,
+  type ExtensionManifest,
 } from "../core/extensions/index.ts";
 import { MAX_DEPTH, MAX_LAYOUT_BYTES } from "../core/limits.ts";
 
@@ -71,3 +73,38 @@ export const extensionRenderRoute: PluginRoute<z.infer<typeof RenderInput>> = {
     }),
   }),
 };
+
+/** One source's values for the editor's panels; `values: null` when it can't be read here. */
+type ExtensionSourceValues = { id: string; values: Record<string, string> | null };
+
+/**
+ * W-1088 (#36): the values of every source an extension panel names, for the editor's left panel,
+ * which lists them read-only. Sources are read-only resolvers; their values are cleaned like bound
+ * values. `values: null` when the source's code isn't in this server (an extension without
+ * `module` on Workers or a production build), it throws, or it doesn't answer in time.
+ */
+export function extensionSourcesRoute(manifests: readonly ExtensionManifest[]): PluginRoute {
+  return {
+    permission: "content:edit_any",
+    handler: async () => {
+      const wanted = new Map<string, { pkg: string; name: string }>();
+      for (const manifest of manifests) {
+        for (const panel of manifest.panels) {
+          if (!panel.source) continue;
+          if (!manifest.sources.some((source) => source.name === panel.source)) continue;
+          wanted.set(`ext:${manifest.id}/${panel.source}`, {
+            pkg: manifest.id,
+            name: panel.source,
+          });
+        }
+      }
+      const sources: ExtensionSourceValues[] = await Promise.all(
+        [...wanted].map(async ([id, { pkg, name }]) => ({
+          id,
+          values: (await resolveExtensionSource(pkg, name)) ?? null,
+        })),
+      );
+      return { sources };
+    },
+  };
+}

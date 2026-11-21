@@ -25928,7 +25928,7 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/data/bindings.ts",
-          "search": "    if (out.length + kept.length > MAX_BOUND_LENGTH) break;\n",
+          "search": "    if (out.length + kept.length > max) break;\n",
           "replace": ""
         }
       ],
@@ -31090,8 +31090,8 @@
       "edits": [
         {
           "file": "packages/emvb/src/core/data/bindings.ts",
-          "search": "    if (out.length + kept.length > MAX_BOUND_LENGTH) break;\n    out += kept;",
-          "replace": "    out += kept;\n    if (out.length >= MAX_BOUND_LENGTH) { out = out.slice(0, MAX_BOUND_LENGTH); break; }"
+          "search": "    if (out.length + kept.length > max) break;\n    out += kept;",
+          "replace": "    out += kept;\n    if (out.length >= max) { out = out.slice(0, max); break; }"
         }
       ],
       "command": ["bun", "test", "./packages/emvb/src/core/data/bindings.test.ts"],
@@ -56120,6 +56120,216 @@
         "--project=node",
         "-g",
         "#40"
+      ],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1088/canvas-module-only",
+      "requirement": "W-1088",
+      "description": "The canvas render route answers only extensions that name their module, so a site extension registered without module shows \"Missing extension\" on the canvas (#35).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/extension-routes.ts",
+          "search": "      const nodes = liveExtensionOutput(node);\n",
+          "replace": "      const nodes = liveExtension(node.type.slice(4).split(\"/\")[0] ?? \"\")?.module\n        ? liveExtensionOutput(node)\n        : undefined;\n"
+        },
+        {
+          "file": "packages/emvb/src/server/extension-routes.ts",
+          "search": "  isExtensionType,\n",
+          "replace": "  isExtensionType,\n  liveExtension,\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/extension-render-route.test.ts",
+        "-t",
+        "W-1088"
+      ],
+      "expect": "\\(fail\\).*W-1088"
+    },
+    {
+      "id": "W-1088/missing-ext-visitor-note",
+      "requirement": "W-1088",
+      "description": "Public pages show \"This block needs an extension that is not installed.\" to visitors again for a removed extension (#37).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        if (mode === \"public\" && !opts.extensionPlaceholders && isExtensionPlaceholder(ext)) {\n          return undefined;\n        }\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/extensions/extensions.test.ts",
+        "-t",
+        "W-1088"
+      ],
+      "expect": "\\(fail\\).*W-1088"
+    },
+    {
+      "id": "W-1088/missing-ext-visitor-note-e2e",
+      "requirement": "W-1088",
+      "description": "A visitor sees the missing-extension note on a published page (#37).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/render/index.ts",
+          "search": "        if (mode === \"public\" && !opts.extensionPlaceholders && isExtensionPlaceholder(ext)) {\n          return undefined;\n        }\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/extensions.e2e.ts", "--project=node", "-g", "W-1088"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1088/export-missing-ext-note",
+      "requirement": "W-1088",
+      "description": "The HTML export, made for visitors, writes the missing-extension note into exported pages (#37).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/export/site.ts",
+          "search": "    separateExtensionCss: true,\n  };\n",
+          "replace": "    separateExtensionCss: true,\n    extensionPlaceholders: true,\n  };\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/extensions/classes-assets.test.ts",
+        "-t",
+        "W-1088"
+      ],
+      "expect": "\\(fail\\).*W-1088"
+    },
+    {
+      "id": "W-1088/draft-preview-hides-note",
+      "requirement": "W-1088",
+      "description": "An EmDash draft preview hides a missing extension like a visitor's page, so editors previewing the draft don't see that something is missing (#37).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/astro/resolve.ts",
+          "search": "      Boolean(found.isPreview),\n",
+          "replace": "      false,\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/src/astro/resolve.test.ts", "-t", "W-1088"],
+      "expect": "\\(fail\\).*W-1088"
+    },
+    {
+      "id": "W-1088/field-preview-hides-note",
+      "requirement": "W-1088",
+      "description": "Field mode's Preview hides a missing extension, so the editor can't tell something is missing (#37).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "      extensionPlaceholders: true,\n",
+          "replace": ""
+        }
+      ],
+      "command": ["bun", "run", "e2e", "e2e/extensions.e2e.ts", "--project=node", "-g", "W-1088"],
+      "env": {
+        "CI": "1"
+      },
+      "expect": "✘.*\\[node\\]"
+    },
+    {
+      "id": "W-1088/source-values-uncleaned",
+      "requirement": "W-1088",
+      "description": "Extension source values reach the panel and render() uncleaned: control characters and bidi overrides kept (#36).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/render-ext.ts",
+          "search": "    out[key] = cleanBoundText(value, MAX_SOURCE_VALUE);\n",
+          "replace": "    out[key] = value;\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/test/server/extension-render-route.test.ts",
+        "-t",
+        "W-1088"
+      ],
+      "expect": "\\(fail\\).*W-1088"
+    },
+    {
+      "id": "W-1088/source-never-times-out",
+      "requirement": "W-1088",
+      "description": "A source that never answers holds the editor's panel request forever (#36).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/core/extensions/render-ext.ts",
+          "search": "        timer = setTimeout(() => resolve(undefined), timeoutMs);\n",
+          "replace": "        timer = setTimeout(() => resolve(undefined), timeoutMs * 1000);\n"
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/core/extensions/extensions.test.ts",
+        "-t",
+        "W-1088"
+      ],
+      "expect": "\\(fail\\).*W-1088"
+    },
+    {
+      "id": "W-1088/sources-route-open",
+      "requirement": "W-1088",
+      "description": "The extension sources route has no permission, so EmDash serves it to admins only and editors' panels can't list source values (#36).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/server/extension-routes.ts",
+          "search": "  return {\n    permission: \"content:edit_any\",\n    handler: async () => {\n",
+          "replace": "  return {\n    handler: async () => {\n"
+        }
+      ],
+      "command": ["bun", "test", "./packages/emvb/test/server/plugin.test.ts", "-t", "W-1088"],
+      "expect": "\\(fail\\).*W-1088"
+    },
+    {
+      "id": "W-1088/panel-without-values",
+      "requirement": "W-1088",
+      "description": "An extension panel shows only its source's name, not its values (#36).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/extensions/ExtensionPanels.tsx",
+          "search": "          {panel.source ? <SourceValues ext={ext} name={panel.source} /> : null}\n",
+          "replace": ""
+        }
+      ],
+      "command": [
+        "bun",
+        "test",
+        "./packages/emvb/src/admin/editor/extensions/ExtensionPanels.test.tsx"
+      ],
+      "expect": "\\(fail\\).*W-1088"
+    },
+    {
+      "id": "W-1088/panel-values-not-loaded-e2e",
+      "requirement": "W-1088",
+      "description": "The editor never asks for the panels' source values, so the sample's panel stays on \"Loading values\" (#36).",
+      "edits": [
+        {
+          "file": "packages/emvb/src/admin/editor/Editor.tsx",
+          "search": "<ExtensionsProvider extensions={extensionManifests} sourceValues={extensionSources}>",
+          "replace": "<ExtensionsProvider extensions={extensionManifests}>"
+        }
+      ],
+      "command": [
+        "bun",
+        "run",
+        "e2e",
+        "e2e/extensions.e2e.ts",
+        "--project=node",
+        "-g",
+        "panel lists"
       ],
       "env": {
         "CI": "1"

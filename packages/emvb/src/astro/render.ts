@@ -87,6 +87,11 @@ export function renderStored(
   partIds = false,
   /** The page's language, e.g. "fr-CA", for Post Dates (W-688). */
   lang?: string,
+  /**
+   * W-1088 (#37): a draft preview shows the placeholder for an extension element that can't
+   * render; visitors get nothing in its place.
+   */
+  extensionPlaceholders = false,
 ): RenderedPage {
   const empty: RenderedPage = {
     html: "",
@@ -114,6 +119,7 @@ export function renderStored(
       scope: pageId,
       ...(partIds ? { partIds } : {}),
       ...(lang ? { lang } : {}),
+      ...(extensionPlaceholders ? { extensionPlaceholders } : {}),
       separateExtensionCss: true,
     });
   } catch (error) {

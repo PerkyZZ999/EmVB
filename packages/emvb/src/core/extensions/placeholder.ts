@@ -1,7 +1,7 @@
 /**
  * Placeholder for a missing, throwing or illegal extension element (W-927, D-066).
- * Visible in the editor and on the published page; never runs extension code;
- * never breaks siblings.
+ * Shown in the editor and in admin previews; visitors get nothing in its place (W-1088, #37).
+ * Never runs extension code; never breaks siblings.
  */
 
 import type { VNode } from "../render/vnode.ts";
@@ -33,6 +33,11 @@ export function extensionPlaceholderVNode(
     },
     children: [label],
   };
+}
+
+/** W-1088: true for the node `extensionPlaceholderVNode` builds. */
+export function isExtensionPlaceholder(node: VNode): boolean {
+  return node.tag === "div" && node.attrs?.["class"] === "emvb-ext-missing";
 }
 
 /** Minimal CSS so the placeholder is readable without any extension stylesheet. */

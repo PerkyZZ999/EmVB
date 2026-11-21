@@ -9,6 +9,7 @@ import { extensionNamespaceIssue, extensionType, parseExtensionType } from "./na
 import { validateExtensionProps } from "./schema.ts";
 import { safeExtensionOutput } from "./safe-nodes.ts";
 import { EXTENSION_PLACEHOLDER_TEXT, extensionPlaceholderLabel } from "./placeholder.ts";
+import { resolveExtensionSource, syncSourceValues } from "./render-ext.ts";
 
 const hello = () =>
   defineExtension({
@@ -110,13 +111,43 @@ describe("registration and render (W-927)", () => {
     const validated = validateLayout(stored);
     expect(validated.ok).toBe(true);
 
-    const publicPage = renderPage(stored, emptyDesign(), { mode: "public" });
-    expect(publicPage.html).toContain(EXTENSION_PLACEHOLDER_TEXT);
-    expect(publicPage.html).toContain("emvb-ext-missing");
-    expect(publicPage.html).not.toContain("Welcome");
+    // W-1088 (#37): admin previews of the public page keep the note.
+    const preview = renderPage(stored, emptyDesign(), {
+      mode: "public",
+      extensionPlaceholders: true,
+    });
+    expect(preview.html).toContain(EXTENSION_PLACEHOLDER_TEXT);
+    expect(preview.html).toContain("emvb-ext-missing");
+    expect(preview.html).not.toContain("Welcome");
 
     const editorPage = renderPage(stored, emptyDesign(), { mode: "editor" });
     expect(editorPage.html).toContain(extensionPlaceholderLabel("ext:emvb-ext-hello/greeting"));
+  });
+
+  test("W-1088 (#37): visitors see nothing for a missing extension; the data stays", () => {
+    const layout: Layout = {
+      schemaVersion: LAYOUT_SCHEMA_VERSION,
+      root: {
+        id: "root0001",
+        type: "container",
+        props: {},
+        children: [
+          { id: "head0001", type: "heading", props: { text: "Sibling", level: 2 } },
+          { id: "ext00001", type: "ext:emvb-ext-gone/notice", props: { text: "Kept" } },
+        ],
+      },
+    };
+    const visitor = renderPage(layout, emptyDesign(), { mode: "public" });
+    expect(visitor.html).toContain("Sibling");
+    expect(visitor.html).not.toContain(EXTENSION_PLACEHOLDER_TEXT);
+    expect(visitor.html).not.toContain("emvb-ext");
+    expect(visitor.html).not.toContain('role="note"');
+    // No placeholder rule in the page's CSS either.
+    expect(visitor.css).not.toContain(".emvb-ext-missing");
+    expect(visitor.extensions).toEqual([]);
+    // Nothing is dropped from the stored page: it renders again once the extension is back.
+    expect(validateLayout(layout).ok).toBe(true);
+    expect(JSON.stringify(layout)).toContain('"text":"Kept"');
   });
 
   test("a throwing render becomes the placeholder and leaves siblings alone", () => {
@@ -150,7 +181,18 @@ describe("registration and render (W-927)", () => {
     };
     const result = renderPage(layout, emptyDesign(), { mode: "public" });
     expect(result.html).toContain("Sibling");
-    expect(result.html).toContain(EXTENSION_PLACEHOLDER_TEXT);
+    // W-1088 (#37): visitors get nothing; the editor and admin previews get the placeholder.
+    expect(result.html).not.toContain(EXTENSION_PLACEHOLDER_TEXT);
+    expect(result.html).not.toContain("emvb-ext");
+    const preview = renderPage(layout, emptyDesign(), {
+      mode: "public",
+      extensionPlaceholders: true,
+    });
+    expect(preview.html).toContain("Sibling");
+    expect(preview.html).toContain(EXTENSION_PLACEHOLDER_TEXT);
+    expect(renderPage(layout, emptyDesign(), { mode: "editor" }).html).toContain(
+      "emvb-ext-missing",
+    );
   });
 });
 
@@ -172,6 +214,7 @@ describe("security: injection and size (W-927)", () => {
     ]);
     const result = renderPage(pageWith("ext:emvb-ext-hello/greeting"), emptyDesign(), {
       mode: "public",
+      extensionPlaceholders: true,
     });
     expect(result.html).not.toContain("<script>");
     expect(result.html).toContain(EXTENSION_PLACEHOLDER_TEXT);
@@ -229,10 +272,40 @@ describe("security: injection and size (W-927)", () => {
     expect(extensionNamespaceIssue("ext:../evil/x")).toBeDefined();
     const stored = pageWith("ext:../evil/x", { html: "<script>" });
     expect(validateLayout(stored).ok).toBe(true);
-    const result = renderPage(stored, emptyDesign(), { mode: "public" });
+    const result = renderPage(stored, emptyDesign(), {
+      mode: "public",
+      extensionPlaceholders: true,
+    });
     expect(result.html).not.toContain("<script>");
     expect(result.html).toContain(EXTENSION_PLACEHOLDER_TEXT);
     // Public copy does not echo the hostile type string.
     expect(result.html).not.toContain("../evil");
+  });
+});
+
+describe("source values (W-1088, #36)", () => {
+  const withSource = (resolve: () => unknown) =>
+    rememberExtensions([
+      defineExtension({
+        id: "emvb-ext-office",
+        sources: [
+          { name: "office", label: "Office", capabilities: ["text"], resolve: resolve as never },
+        ],
+      }),
+    ]);
+
+  test("a source that never answers gives up after the timeout", async () => {
+    withSource(() => new Promise(() => {}));
+    expect(await resolveExtensionSource("emvb-ext-office", "office", 10)).toBeUndefined();
+    expect(await resolveExtensionSource("emvb-ext-office", "missing", 10)).toBeUndefined();
+    expect(await resolveExtensionSource("emvb-ext-gone", "office", 10)).toBeUndefined();
+  });
+
+  test("render() gets values cleaned like bound values: no bidi overrides, capped length", () => {
+    withSource(() => ({ name: "\u202Egpj.exe", long: "x".repeat(5000), tab: "a\tb" }));
+    const values = syncSourceValues("emvb-ext-office")["office"];
+    expect(values?.["name"]).toBe("gpj.exe");
+    expect(values?.["long"]).toHaveLength(2000);
+    expect(values?.["tab"]).toBe("a b");
   });
 });

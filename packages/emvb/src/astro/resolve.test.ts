@@ -131,6 +131,18 @@ describe("resolveEmVBPage (W-091, R-030, R-052)", () => {
     ]);
   });
 
+  test("W-1088 (#37): a missing extension shows nothing to visitors, a note in a draft preview", async () => {
+    const missing = { id: "ext00001", type: "ext:emvb-ext-gone/notice", props: {} } as LayoutNode;
+    lookup = async () => page({ layout: layout(heading, missing) });
+    const visitor = await resolveEmVBPage(astro({ slug: "about" }));
+    expect(visitor?.html).toContain("Hello");
+    expect(visitor?.html).not.toContain("emvb-ext-missing");
+    lookup = async () => page({ layout: layout(heading, missing) }, true);
+    const preview = await resolveEmVBPage(astro({ slug: "about" }));
+    expect(preview?.html).toContain("emvb-ext-missing");
+    expect(preview?.html).toContain("This block needs an extension that is not installed.");
+  });
+
   test("forms on the page get their definitions; a page without forms asks for none", async () => {
     const form = {
       ...defaultElement("form", "form0001"),

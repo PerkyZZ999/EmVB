@@ -24,9 +24,9 @@ This guide explains how extensions work and walks through writing one. The
 - **Your look, from your stylesheet.** An extension can put its own CSS classes on the elements
   it returns, from a list it declares up front, and ship a stylesheet for them. It can also ship
   a small browser script. Both are added only to pages that show one of its elements.
-- **Pages never break.** If an extension is removed, or its `render()` throws, the element shows
-  a short placeholder and the rest of the page renders as usual. Put the extension back and the
-  element renders again, with its saved props.
+- **Pages never break.** If an extension is removed, or its `render()` throws, the element is
+  left out for visitors, shows a short placeholder in the editor, and the rest of the page
+  renders as usual. Put the extension back and the element renders again, with its saved props.
 - **Extension code runs in your site.** EmVB runs inside EmDash, so an extension's code is not
   sandboxed: install extensions you trust, as you would any npm package. What EmVB *does*
   guarantee is that stored data and rendered output are checked.
@@ -162,8 +162,8 @@ and its `props`, plus `children` for boxes. The types and their props are the on
   comes from your classes and stylesheet (step 3), or from the styles an editor gives the
   element itself.
 - At most 32 nodes, nested at most 8 deep.
-- If `render()` throws or returns something invalid, the element shows the placeholder; nothing
-  else on the page is affected.
+- If `render()` throws or returns something invalid, the element shows the placeholder in the
+  editor and is left out for visitors; nothing else on the page is affected.
 
 Editors style an extension element like any other: its own **Style** panel settings apply to
 the box around what `render()` returns.
@@ -281,7 +281,11 @@ without alt text or a link without a name is reported as usual.
 
 An extension can add a **panel** to the editor's left panel: a label, a short description and,
 optionally, a data source whose values it lists. Panels are declarative: EmVB draws them with
-its own controls, and an extension can't add CSS to the admin.
+its own controls, and an extension can't add CSS to the admin. A panel with
+`source: "site-info"` lists that source's values read-only (for the sample, `title: EmVB` and
+`tagline: Extensions API sample`), so editors can see the data your elements use. The server
+reads them when the editor opens; if a source throws or takes more than 5 seconds, the panel
+says its values couldn't be read.
 
 A **source** is a read-only function that returns text, link or image values from anywhere your
 server can reach, for example your product catalogue. Its values arrive in `render()` as
@@ -314,9 +318,17 @@ Sources are read-only. They are not a place to store content; use EmDash collect
 ## Remove an extension
 
 Remove it from `emvb({ extensions: [...] })` and restart or redeploy. Pages keep its elements
-and their props. Until it's back, they show a placeholder in the editor ("Missing extension")
-and a short note on the public page ("This block needs an extension that is not installed").
-Agents can't add or change an element whose extension isn't installed.
+and their props, and they render again when you put the extension back. Until then:
+
+- Visitors see nothing in their place, on the public page and in the HTML export. The rest of
+  the page renders as usual.
+- The editor canvas shows a placeholder ("Missing extension “ext:package/name”"), so editors can
+  see the element, select it, and move or delete it.
+- Field mode's **Preview** and EmDash's draft preview links show a short note ("This block needs
+  an extension that is not installed").
+
+Agents can't add or change an element whose extension isn't installed. An extension without
+`module` is treated as missing on Cloudflare Workers and in production builds.
 
 ## Stability
 

@@ -95,8 +95,11 @@ function postValue(post: ThemePostFields | undefined, key: string): string | und
   return scalar(fields[key]);
 }
 
-/** Text with control characters removed and its length capped. */
-function clean(value: string): string {
+/**
+ * Text with control characters removed and its length capped. W-1088: extension source values
+ * are cleaned with it too, with their own (longer) cap.
+ */
+export function cleanBoundText(value: string, max = MAX_BOUND_LENGTH): string {
   let out = "";
   for (const char of value) {
     const code = char.codePointAt(0) ?? 0;
@@ -109,7 +112,7 @@ function clean(value: string): string {
       (code >= 0x2066 && code <= 0x2069);
     const kept = code === 9 ? " " : code === 10 || (code >= 32 && !dropped) ? char : "";
     // W-502: cutting at a UTF-16 length split an emoji at the limit into a broken half.
-    if (out.length + kept.length > MAX_BOUND_LENGTH) break;
+    if (out.length + kept.length > max) break;
     out += kept;
   }
   return out.trim();
@@ -126,7 +129,7 @@ export function resolveBinding(binding: Binding, data: BindingData): string | un
       data.params && Object.hasOwn(data.params, binding.key) ? data.params[binding.key] : undefined;
   }
   if (raw === undefined) return undefined;
-  const value = clean(raw);
+  const value = cleanBoundText(raw);
   return value.length > 0 ? value : undefined;
 }
 

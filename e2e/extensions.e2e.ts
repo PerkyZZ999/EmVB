@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
-import { createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
-import { canvas, openEditor, unique } from "./support/helpers.ts";
+import { api, createPage, publishPage, setUpEmvbOnce } from "./support/api.ts";
+import { canvas, openEditor, overlay, unique } from "./support/helpers.ts";
 
 // W-1086: the sample extension emvb-ext-hello (registered in both demos) puts allowlisted
 // classes on its output and ships a stylesheet and a runtime. Both load only on pages that
@@ -94,4 +94,96 @@ test("the editor canvas shows the extension's output with its classes and styles
   expect(
     await page.evaluate(() => document.documentElement.outerHTML.includes(".hello-card")),
   ).toBe(false);
+});
+
+// W-1088 (#37): an element whose extension isn't installed (removed from astro.config) keeps its
+// data. Visitors see nothing in its place; the editor canvas and the field Preview keep the note.
+const GONE = "ext:emvb-ext-gone/notice";
+
+test("a missing extension shows nothing to visitors and a note in the editor and Preview (W-1088)", async ({
+  page,
+  request,
+}) => {
+  const { id, slug } = await publish(request, "Missing extension page", [
+    { id: "head0001", type: "heading", props: { text: "Missing extension page", level: 1 } },
+    { id: "gone0001", type: GONE, props: { text: "Kept for later" } },
+    { id: "text0001", type: "text", props: { text: "After the missing block" } },
+  ]);
+
+  await page.goto(`/${slug}`);
+  await expect(page.getByRole("heading", { name: "Missing extension page" })).toBeVisible();
+  await expect(page.getByText("After the missing block")).toBeVisible();
+  await expect(page.locator(".emvb-ext-missing, [data-emvb-ext]")).toHaveCount(0);
+  await expect(page.getByText("This block needs an extension that is not installed.")).toHaveCount(
+    0,
+  );
+
+  await openEditor(page, id, "Missing extension page");
+  const note = canvas(page).locator('[data-emvb-id="gone0001"].emvb-ext-missing');
+  await expect(note).toHaveText(`Missing extension “${GONE}”`);
+
+  // Field mode's Preview shows the public page as the editor has it, note included.
+  const schema = await api(
+    request,
+    "GET",
+    "/_emdash/api/schema/collections/pages?includeFields=true",
+  );
+  const fields = ((schema.json ?? {})["data"] as { item: { fields: { slug: string }[] } }).item
+    .fields;
+  if (!fields.some((f) => f.slug === "canvas")) {
+    const added = await api(request, "POST", "/_emdash/api/schema/collections/pages/fields", {
+      slug: "canvas",
+      label: "Canvas",
+      type: "json",
+      widget: "emvb:canvas",
+      validation: null,
+    });
+    expect(added.status).toBe(201);
+  }
+  const created = await api(request, "POST", "/_emdash/api/content/pages", {
+    data: {
+      title: "Missing extension field",
+      canvas: layoutWith([
+        { id: "head0001", type: "heading", props: { text: "Field page", level: 2 } },
+        { id: "gone0001", type: GONE, props: {} },
+      ]),
+    },
+    slug: `ext-field-${unique()}`,
+  });
+  expect(created.status).toBe(201);
+  const hostId = ((created.json ?? {})["data"] as { item: { id: string } }).item.id;
+  await page.goto(`/_emdash/admin/content/pages/${hostId}`);
+  await page
+    .locator('[data-emvb-widget="canvas"]')
+    .getByRole("button", { name: "Edit with EmVB" })
+    .click();
+  await expect(canvas(page).getByRole("heading", { name: "Field page" })).toBeVisible();
+  await overlay(page).getByRole("button", { name: "Preview", exact: true }).click();
+  const preview = page.frameLocator('[data-emvb-dialog="field-preview"] iframe');
+  await expect(preview.getByRole("heading", { name: "Field page" })).toBeVisible();
+  await expect(preview.locator(".emvb-ext-missing")).toHaveText(
+    "This block needs an extension that is not installed.",
+  );
+});
+
+// W-1088 (#36): the sample's "About Hello" panel names its "site-info" source; the editor lists
+// the source's values read-only (the server resolves them, on Node and on Workers).
+test("an extension panel lists its source's values read-only (W-1088)", async ({
+  page,
+  request,
+}) => {
+  const id = await createPage(
+    request,
+    "Extension panel",
+    layoutWith([{ id: "head0001", type: "heading", props: { text: "Extension panel", level: 1 } }]),
+    `ext-${unique()}`,
+  );
+  await openEditor(page, id, "Extension panel");
+  const panel = overlay(page).locator('[data-emvb-ext-panel="ext:emvb-ext-hello/about"]');
+  await panel.scrollIntoViewIfNeeded();
+  const values = panel.locator('dl[aria-label="Hello site info values"]');
+  await expect(values).toBeVisible();
+  await expect(values.locator("dt")).toHaveText(["title", "tagline"]);
+  await expect(values.locator("dd")).toHaveText(["EmVB", "Extensions API sample"]);
+  await expect(values.locator("input, textarea, [contenteditable]")).toHaveCount(0);
 });

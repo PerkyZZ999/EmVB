@@ -11,6 +11,7 @@ import { safeExtensionOutput } from "./safe-nodes.ts";
 import { extensionPlaceholderVNode } from "./placeholder.ts";
 import type { ExtensionRenderContext } from "./types.ts";
 import { parseExtensionType } from "./namespace.ts";
+import { cleanBoundText } from "../data/bindings.ts";
 
 export type ExtensionRenderMode = "public" | "editor";
 
@@ -18,23 +19,24 @@ function isThenable(value: unknown): value is Promise<unknown> {
   return !!value && typeof (value as { then?: unknown }).then === "function";
 }
 
-function cleanSourceRecord(raw: Readonly<Record<string, string>>): Record<string, string> {
+/** Longest source value kept, in UTF-16 code units. */
+const MAX_SOURCE_VALUE = 2000;
+/** Values kept per source. */
+const MAX_SOURCE_FIELDS = 32;
+
+/**
+ * A source's result with bad keys and non-string values dropped, and each value cleaned like a
+ * bound value (control characters and bidi overrides removed, length capped; W-1088).
+ */
+function cleanSourceRecord(raw: unknown): Record<string, string> {
   const out: Record<string, string> = {};
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return out;
   let n = 0;
-  for (const [key, value] of Object.entries(raw)) {
-    if (n >= 32) break;
-    if (typeof key !== "string" || !/^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$/.test(key)) continue;
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (n >= MAX_SOURCE_FIELDS) break;
+    if (!/^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$/.test(key)) continue;
     if (typeof value !== "string") continue;
-    let cleaned = "";
-    for (const char of value) {
-      const code = char.codePointAt(0) ?? 0;
-      if (code === 9) cleaned += " ";
-      else if (code === 10 || (code >= 32 && code !== 127 && !(code >= 0x80 && code <= 0x9f))) {
-        cleaned += char;
-      }
-      if (cleaned.length >= 2000) break;
-    }
-    out[key] = cleaned.trim();
+    out[key] = cleanBoundText(value, MAX_SOURCE_VALUE);
     n += 1;
   }
   return out;
@@ -52,7 +54,7 @@ export function syncSourceValues(pkg: string): Record<string, Record<string, str
     try {
       const result = source.resolve();
       if (result && typeof result === "object" && !Array.isArray(result) && !isThenable(result)) {
-        out[source.name] = cleanSourceRecord(result as Readonly<Record<string, string>>);
+        out[source.name] = cleanSourceRecord(result);
       } else {
         out[source.name] = {};
       }
@@ -61,6 +63,38 @@ export function syncSourceValues(pkg: string): Record<string, Record<string, str
     }
   }
   return out;
+}
+
+/** How long the editor waits for one source (W-1088). */
+const SOURCE_TIMEOUT_MS = 5000;
+
+/**
+ * W-1088 (#36): one source's values for the editor's extension panels, awaited (a source may be
+ * async), cleaned like bound values. Undefined when the extension or source isn't live here, the
+ * resolver throws, or it takes longer than `timeoutMs`.
+ */
+export async function resolveExtensionSource(
+  pkg: string,
+  name: string,
+  timeoutMs = SOURCE_TIMEOUT_MS,
+): Promise<Record<string, string> | undefined> {
+  const source = liveExtension(pkg)?.sources?.find((s) => s.name === name);
+  if (!source) return undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const result = await Promise.race([
+      Promise.resolve().then(() => source.resolve()),
+      new Promise<undefined>((resolve) => {
+        timer = setTimeout(() => resolve(undefined), timeoutMs);
+      }),
+    ]);
+    if (!result || typeof result !== "object" || Array.isArray(result)) return undefined;
+    return cleanSourceRecord(result);
+  } catch {
+    return undefined;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 export type VisitChildren = (nodes: LayoutNode[]) => VNode[];

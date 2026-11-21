@@ -69,6 +69,7 @@ import {
   extensionStylesheets,
   isExtensionType,
   renderExtensionNode,
+  isExtensionPlaceholder,
   EXTENSION_PLACEHOLDER_CSS,
   type ExtensionOutputs,
 } from "../extensions/index.ts";
@@ -351,6 +352,12 @@ export function renderPage(
      * `extensions`.
      */
     separateExtensionCss?: boolean;
+    /**
+     * W-1088 (#37): public renders show the placeholder for an extension element that can't
+     * render (missing, throwing or illegal output). For the admin's previews of the public page;
+     * visitors get nothing in its place. The editor always shows it.
+     */
+    extensionPlaceholders?: boolean;
   } = {},
 ): RenderResult {
   const mode = opts.mode ?? "public";
@@ -737,8 +744,7 @@ export function renderPage(
     if (!Object.hasOwn(ELEMENTS, type)) {
       // W-927: extension elements render via the Extensions API, or a placeholder when missing.
       if (isExtensionType(type)) {
-        usedTypes.add("ext");
-        return renderExtensionNode(
+        const ext = renderExtensionNode(
           node,
           mode === "editor" ? "editor" : "public",
           (nodes) =>
@@ -748,6 +754,13 @@ export function renderPage(
           opts.extensionOutputs,
           (pkg) => extensionsUsed.add(pkg),
         );
+        // W-1088 (#37): visitors get nothing for an extension element that can't render; the
+        // stored element is kept and renders again once its extension is back.
+        if (mode === "public" && !opts.extensionPlaceholders && isExtensionPlaceholder(ext)) {
+          return undefined;
+        }
+        usedTypes.add("ext");
+        return ext;
       }
       warnings.push({ nodeId, code: "unknown-type", detail: type });
       if (mode === "public") return undefined;

@@ -26,6 +26,11 @@ export const FEATURE_CSS = `
 .emvb-bind-row > .emvb-bind-label + .emvb-field:last-child { grid-column: 1 / -1; }
 .emvb-bind-live { grid-column: 1 / -1; margin: 0; font-size: 12px; color: var(--text-color-kumo-default); overflow-wrap: anywhere; }
 .emvb-bind-live > b { font-weight: 600; }
+/* W-1088: an extension panel's source values, read-only. */
+.emvb-ext-source { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr); gap: 2px 12px; margin: 4px 0 0; font-size: 12px; line-height: 16px; }
+.emvb-ext-source > div { display: contents; }
+.emvb-ext-source dt { font-weight: 600; color: var(--text-color-kumo-default); overflow-wrap: anywhere; }
+.emvb-ext-source dd { margin: 0; color: var(--text-color-kumo-default); overflow-wrap: anywhere; white-space: pre-line; }
 .emvb-bind-outside { grid-column: 1 / -1; display: grid; gap: 4px; }
 .emvb-bind-outside > label { display: flex; gap: 6px; align-items: center; font-size: 12px; }
 .emvb-bind-warning { margin: 0; padding: 6px 8px; border-radius: 6px; font-size: 12px; background: var(--color-kumo-warning-tint); color: var(--text-color-kumo-default); }

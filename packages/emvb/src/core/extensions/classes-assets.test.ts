@@ -421,3 +421,18 @@ describe("HTML export (W-1086)", () => {
     expect(files.get("about/style.css")).not.toContain(CSS);
   });
 });
+
+describe("HTML export of a missing extension (W-1088, #37)", () => {
+  test("an exported page, made for visitors, leaves the element out", () => {
+    // No live extension and no server output: the export can't render the element.
+    const out = buildSiteExport({
+      design: emptyDesign(),
+      parts: [],
+      pages: [{ id: "p1", title: "Shop", slug: "shop", layout: page(heading, button) }],
+    });
+    const html = out.files.find((f) => f.path === "shop/index.html")?.data;
+    expect(typeof html === "string" && html.includes("emvb-heading")).toBe(true);
+    expect(typeof html === "string" && html.includes("emvb-ext")).toBe(false);
+    expect(typeof html === "string" && html.includes("not installed")).toBe(false);
+  });
+});

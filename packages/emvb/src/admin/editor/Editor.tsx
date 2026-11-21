@@ -63,7 +63,7 @@ import {
 import { EDITOR_MIN_WIDTH_QUERY, useMediaQuery } from "./useMediaQuery.ts";
 import { partDraftLabel, usePartTemplates } from "./section-templates.ts";
 import { useCollectionPreviews, withPartLayouts } from "./collection-previews.ts";
-import { useExtensionOutputs } from "../extension-outputs.ts";
+import { useExtensionOutputs, useExtensionSourceValues } from "../extension-outputs.ts";
 import { useEditorPresence } from "./presence.ts";
 import { useCoDesign } from "./useCoDesign.ts";
 import { useRemoteChange } from "./remote-change.ts";
@@ -162,6 +162,8 @@ function EditorApp({
   const host = useEditorHost();
   const canvasStyles = useCanvasStyles(fetcher);
   const extensionManifests = useExtensionManifests(fetcher);
+  // W-1088 (#36): the values of the sources extension panels name, listed read-only.
+  const extensionSources = useExtensionSourceValues(fetcher, extensionManifests);
   const inlinedStyles = useInlinedStyles(canvasStyles);
   const { exit } = host;
   const saver = useSave(fetcher, state, dispatch, collection);
@@ -344,6 +346,9 @@ function EditorApp({
       },
       previewDevice,
       extensionOutputs,
+      // W-1088 (#37): visitors get nothing for an extension that can't render; this preview
+      // keeps the note so the editor knows something is missing.
+      extensionPlaceholders: true,
     });
     return previewDocument({
       html: result.html,
@@ -455,7 +460,7 @@ function EditorApp({
   })[0];
 
   return (
-    <ExtensionsProvider extensions={extensionManifests}>
+    <ExtensionsProvider extensions={extensionManifests} sourceValues={extensionSources}>
       <EditorOverlay
         label={`EmVB editor: ${state.page.title || "Untitled page"}`}
         dirty={dirty && !chrome.leaving}

@@ -37,7 +37,7 @@ import {
 import { canvasStyleUrls } from "../core/canvas-styles.ts";
 import { canvasCollectionSlugs, setCanvasCollections } from "../core/canvas-collections.ts";
 import { manifestsFromOptions } from "../core/extensions/index.ts";
-import { extensionRenderRoute } from "./extension-routes.ts";
+import { extensionRenderRoute, extensionSourcesRoute } from "./extension-routes.ts";
 import { TOOLS } from "../mcp/tools.ts";
 import { mcpRoutes, mcpToolConfig } from "./mcp-routes.ts";
 
@@ -142,6 +142,8 @@ export function createPlugin(
         }),
       },
       "editor/extensions/render": extensionRenderRoute,
+      // W-1088 (#36): the values of the sources the extension panels name.
+      "editor/extensions/sources": extensionSourcesRoute(extensions),
       design: designRoute,
       "design/draft": designDraftRoute,
       "design/save": designSaveRoute,

@@ -202,6 +202,8 @@ export async function resolveEmVBPageWith(
       Object.keys(dynamic).length > 0 ? dynamic : undefined,
       false,
       options.lang ?? found.fallbackLocale ?? locale,
+      // W-1088 (#37): a draft preview (editors) keeps the missing-extension note.
+      Boolean(found.isPreview),
     ),
     entry,
     collection: hosted ? (options.collection as string) : PAGES_COLLECTION,

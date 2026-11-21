@@ -177,3 +177,60 @@ export function useExtensionOutputs(
   }, [key, fetcher, retry]);
   return outputs;
 }
+
+/** W-1088: values of the sources extension panels name, by source id (`ext:<package>/<name>`). */
+export type ExtensionSourceValues = ReadonlyMap<string, Readonly<Record<string, string>> | null>;
+
+/**
+ * W-1088 (#36): asks the server for the values of every source an extension panel names. Values
+ * are plain strings (cleaned on the server); anything else in the answer is dropped. `null` for a
+ * source the server couldn't read; the whole map is empty when the request fails.
+ */
+export async function fetchExtensionSourceValues(fetcher: Fetcher): Promise<ExtensionSourceValues> {
+  const out = new Map<string, Readonly<Record<string, string>> | null>();
+  try {
+    const body = await requestJson<{ sources?: { id?: unknown; values?: unknown }[] }>(
+      fetcher,
+      `/_emdash/api/plugins/${PLUGIN_ID}/editor/extensions/sources`,
+    );
+    for (const item of Array.isArray(body?.sources) ? body.sources : []) {
+      if (typeof item?.id !== "string") continue;
+      const raw = item.values;
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+        out.set(item.id, null);
+        continue;
+      }
+      const values: Record<string, string> = {};
+      for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+        if (typeof value === "string") values[key] = value;
+      }
+      out.set(item.id, values);
+    }
+  } catch {
+    // The panels say the values couldn't be loaded.
+  }
+  return out;
+}
+
+/**
+ * W-1088 (#36): source values for the extension panels, loaded once the site's manifests are in
+ * when a panel names a source. Undefined while loading (or when no panel names one).
+ */
+export function useExtensionSourceValues(
+  fetcher: Fetcher,
+  manifests: readonly ExtensionManifest[],
+): ExtensionSourceValues | undefined {
+  const wanted = manifests.some((m) => m.panels?.some((panel) => panel.source));
+  const [values, setValues] = React.useState<ExtensionSourceValues | undefined>(undefined);
+  React.useEffect(() => {
+    if (!wanted) return;
+    let cancelled = false;
+    void fetchExtensionSourceValues(fetcher).then((found) => {
+      if (!cancelled) setValues(found);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetcher, wanted]);
+  return values;
+}

@@ -145,7 +145,7 @@ servers through the plugin options. The module must sit in a package whose `pack
   one of its theme parts, renders at least one of the extension's elements, and each **once per
   response**: a page with the element in its header, footer and body ships the stylesheet once
   (in the theme parts' `css` when a part uses it, else in `EmVBPage`'s style) and the runtime
-  once. A placeholder (missing extension, throwing render) emits
+  once. An element that can't render (missing extension, throwing render) emits
   neither. Pages without the extension's elements get no extra CSS and no extra script.
 - **Editor canvas:** the canvas iframe gets the stylesheet when it shows one of the extension's
   elements. The runtime never runs in the canvas (the canvas is sandboxed without scripts) or in
@@ -166,6 +166,11 @@ refuses props nested deeper than 24 levels or larger than 512 KB. The canvas ask
 pause (300 ms), asks again after a failed request (up to three times, then on the next change),
 and forgets the output of elements no longer on the page.
 
+The canvas shows what the public page would show: an extension without `module` renders on the
+canvas wherever it renders publicly (a Node dev server, where `astro.config` runs in the server's
+process). On Cloudflare Workers and production builds its code isn't in the server, so the canvas
+shows the placeholder (“Missing extension”) and visitors see nothing; set `module` to fix both.
+
 ### What the package is responsible for
 
 EmVB's accessibility check can't see inside extension markup or scripts. The package owns:
@@ -179,24 +184,43 @@ EmVB's accessibility check can't see inside extension markup or scripts. The pac
 
 Panels are **declarative**. EmVB renders them in a Kumo slot with EmVB tokens
 (D-067). An extension **must not** inject global CSS into the admin. A panel may
-point at a source name to label which read-only data it relates to.
+name one of its extension's sources (`source: "office"`); the panel then lists that
+source's values read-only, as label and value pairs in plain text (W-1088).
+
+The admin has no extension code, so the editor asks the server
+(`GET /_emdash/api/plugins/emvb/editor/extensions/sources`, editors and above) once
+it opens. The server resolves every source a panel names (async sources are awaited, for at
+most 5 seconds each) and cleans the values as for `render()`. A source that throws, doesn't
+answer in time, or whose code isn't in the server (an extension without `module` on
+Cloudflare Workers or a production build) shows “This source's values couldn't be read on
+this server.” Sources a panel doesn't name are never resolved by this route.
 
 ## Sources
 
 Sources are **read-only** resolvers with declared capabilities (`text`, `url`,
-`image`). Results are cleaned like bound values before anything uses them.
+`image`). Results are cleaned like bound values before anything uses them: keys
+must match `^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$`, non-string values are dropped, at most
+32 values are kept, and each value loses control characters and bidi overrides
+(W-1088) and is cut at 2,000 characters. `render()` gets synchronous sources only
+(`ctx.sources`); the editor's panels also show async ones.
 They are not writable and are not a substitute for EmDash collections.
 
 ## Missing extension
 
 Removing an extension (or shipping a page to a site that never had it) leaves
-the page **valid**. The element renders a placeholder:
+the page **valid** and keeps the element and its props. It renders again once the
+extension is back. Until then (W-1088):
 
-- Public: “This block needs an extension that is not installed.”
-- Editor: “Missing extension “ext:pkg/name””
+- Public pages and the HTML export: **nothing** in its place, so visitors never
+  see it. Its stylesheet and runtime are not written either.
+- Editor canvas: a placeholder, “Missing extension “ext:pkg/name””.
+- Admin previews of the public page (field mode's **Preview**) and EmDash draft
+  previews (`_preview` links): a placeholder, “This block needs an extension that is
+  not installed.” (`.emvb-ext-missing`, `role="note"`).
 
-A throwing or illegal `render` uses the same placeholder. Siblings keep
-rendering.
+A throwing or illegal `render` is treated the same way. Siblings keep
+rendering. Hosts calling `renderPage` with `mode: "public"` can pass
+`extensionPlaceholders: true` to get the placeholder in their own previews.
 
 ## Stability and deprecation (extensionApi 1.x)
 
